@@ -75,6 +75,7 @@ class TestWidgetsApp extends StatelessWidget {
     this.home,
     this.initialRoute,
     this.onGenerateRoute,
+    this.navigatorObservers = const <NavigatorObserver>[],
     this.routes = const <String, WidgetBuilder>{},
     this.color = const Color(0xFFFFFFFF),
     this.textStyle,
@@ -136,6 +137,15 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   ///  * [WidgetsApp.onGenerateRoute], the equivalent property in [WidgetsApp].
   final RouteFactory? onGenerateRoute;
+
+  /// A list of [NavigatorObserver] for the app's [Navigator].
+  ///
+  /// Defaults to an empty list.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.navigatorObservers], the equivalent property in [WidgetsApp].
+  final List<NavigatorObserver> navigatorObservers;
 
   /// The application's top-level routing table.
   ///
@@ -263,6 +273,7 @@ class TestWidgetsApp extends StatelessWidget {
       color: color,
       textStyle: textStyle,
       navigatorKey: navigatorKey,
+      navigatorObservers: navigatorObservers,
       home: home,
       initialRoute: initialRoute,
       onGenerateRoute: onGenerateRoute,

@@ -2,18 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'button_tester.dart';
 import 'clipboard_utils.dart';
 import 'editable_text_tester.dart';
 import 'keyboard_utils.dart';
 import 'process_text_utils.dart';
 import 'semantics_tester.dart';
+import 'test_page_tester.dart';
 import 'widgets_app_tester.dart';
 
 Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
@@ -26,6 +30,173 @@ Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
 
 Offset globalize(Offset point, RenderBox box) {
   return box.localToGlobal(point);
+}
+
+/// Text style matching MaterialApp's default [DefaultTextStyle].
+///
+/// This is needed for tests that depend on character widths for drag-based
+/// selection, because the drag distance must exceed the gesture recognizer's
+/// slop threshold.
+const TextStyle _materialDefaultTextStyle = TextStyle(
+  fontSize: 48.0,
+  fontFamily: 'monospace',
+  fontWeight: FontWeight.w900,
+);
+
+const double _kTestHandleSize = 22.0;
+
+/// Selection controls with non-zero handle size for tests that need handle
+/// dragging.
+///
+/// Does NOT mix in [TextSelectionHandleControls], so the toolbar goes through
+/// the deprecated [buildToolbar] path (matching how
+/// [materialTextSelectionControls] worked).
+class _TestDraggableSelectionControls extends TextSelectionControls {
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    final Widget handle = SizedBox.square(
+      dimension: _kTestHandleSize,
+      child: CustomPaint(
+        painter: _TestHandlePainter(),
+        child: GestureDetector(onTap: onTap, behavior: HitTestBehavior.translucent),
+      ),
+    );
+    return switch (type) {
+      TextSelectionHandleType.left => Transform.rotate(angle: math.pi / 2.0, child: handle),
+      TextSelectionHandleType.right => handle,
+      TextSelectionHandleType.collapsed => Transform.rotate(angle: math.pi / 4.0, child: handle),
+    };
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return switch (type) {
+      TextSelectionHandleType.collapsed => const Offset(_kTestHandleSize / 2, -4),
+      TextSelectionHandleType.left => const Offset(_kTestHandleSize, 0),
+      TextSelectionHandleType.right => Offset.zero,
+    };
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return const Size(_kTestHandleSize, _kTestHandleSize);
+  }
+
+  @Deprecated(
+    'Use contextMenuBuilder instead. '
+    'This feature was deprecated after v3.43.0-0.3.pre.',
+  )
+  @override
+  bool canSelectAll(TextSelectionDelegate delegate) {
+    final TextEditingValue value = delegate.textEditingValue;
+    return delegate.selectAllEnabled &&
+        value.text.isNotEmpty &&
+        !(value.selection.start == 0 && value.selection.end == value.text.length);
+  }
+
+  @Deprecated(
+    'Use contextMenuBuilder instead. '
+    'This feature was deprecated after v3.43.0-0.3.pre.',
+  )
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) => const SizedBox.shrink();
+}
+
+class _TestHandlePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFF000000));
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+final TextSelectionControls _testDraggableSelectionControls = _TestDraggableSelectionControls();
+
+/// Like [_TestDraggableSelectionControls] but builds a toolbar with
+/// "Copy" and "Select all" buttons so tests can interact with them.
+class _TestDraggableSelectionControlsWithToolbar extends _TestDraggableSelectionControls {
+  @Deprecated(
+    'Use contextMenuBuilder instead. '
+    'This feature was deprecated after v3.43.0-0.3.pre.',
+  )
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    final items = <Widget>[];
+    if (canCopy(delegate)) {
+      items.add(GestureDetector(onTap: () => handleCopy(delegate), child: const Text('Copy')));
+    }
+    if (canSelectAll(delegate)) {
+      items.add(
+        GestureDetector(onTap: () => handleSelectAll(delegate), child: const Text('Select all')),
+      );
+    }
+    return Column(mainAxisSize: MainAxisSize.min, children: items);
+  }
+}
+
+final TextSelectionControls _testDraggableSelectionControlsWithToolbar =
+    _TestDraggableSelectionControlsWithToolbar();
+
+/// Like [_TestDraggableSelectionControls] but mixes in [TextSelectionHandleControls]
+/// so the toolbar goes through the [SelectableRegion.contextMenuBuilder] path.
+class _TestDraggableSelectionHandleControls extends _TestDraggableSelectionControls
+    with TextSelectionHandleControls {}
+
+final TextSelectionControls _testDraggableSelectionHandleControls =
+    _TestDraggableSelectionHandleControls();
+
+/// Collapsed [SelectableRegionContextMenuBuilder] used by tests that don't
+/// care about toolbar content — suppresses the default context menu.
+Widget _emptyContextMenu(BuildContext context, SelectableRegionState state) =>
+    const SizedBox.shrink();
+
+/// [SelectableRegion] with the defaults most tests in this file use:
+/// [_emptyContextMenu] and [testTextSelectionHandleControls]. Other params
+/// are exposed as overrides. Pass `contextMenuBuilder: null` to explicitly
+/// opt out of a context menu (matches raw [SelectableRegion] default).
+SelectableRegion _selectableRegion({
+  Key? key,
+  required Widget child,
+  FocusNode? focusNode,
+  ValueChanged<SelectedContent?>? onSelectionChanged,
+  SelectableRegionContextMenuBuilder? contextMenuBuilder = _emptyContextMenu,
+  TextSelectionControls? selectionControls,
+  TextMagnifierConfiguration magnifierConfiguration = TextMagnifierConfiguration.disabled,
+}) {
+  return SelectableRegion(
+    key: key,
+    contextMenuBuilder: contextMenuBuilder,
+    selectionControls: selectionControls ?? testTextSelectionHandleControls,
+    focusNode: focusNode,
+    onSelectionChanged: onSelectionChanged,
+    magnifierConfiguration: magnifierConfiguration,
+    child: child,
+  );
 }
 
 void main() {
@@ -60,11 +231,8 @@ void main() {
     testWidgets('mouse selection single click sends correct events', (WidgetTester tester) async {
       final spy = UniqueKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: SelectionSpy(key: spy),
-          ),
+        TestWidgetsApp(
+          home: _selectableRegion(child: SelectionSpy(key: spy)),
         ),
       );
       await tester.pumpAndSettle();
@@ -103,11 +271,8 @@ void main() {
       final spy = UniqueKey();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: SelectionSpy(key: spy),
-          ),
+        TestWidgetsApp(
+          home: _selectableRegion(child: SelectionSpy(key: spy)),
         ),
       );
 
@@ -136,11 +301,8 @@ void main() {
       final spy = UniqueKey();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: SelectionSpy(key: spy),
-          ),
+        TestWidgetsApp(
+          home: _selectableRegion(child: SelectionSpy(key: spy)),
         ),
       );
 
@@ -165,22 +327,21 @@ void main() {
     testWidgets('Does not crash when using Navigator pages', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/119776
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: Navigator(
             pages: <Page<void>>[
-              MaterialPage<void>(
+              TestPage<void>(
                 child: Column(
                   children: <Widget>[
                     const Text('How are you?'),
-                    SelectableRegion(
-                      selectionControls: materialTextSelectionControls,
+                    _selectableRegion(
                       child: const SelectAllWidget(child: SizedBox(width: 100, height: 100)),
                     ),
                     const Text('Fine, thank you.'),
                   ],
                 ),
               ),
-              const MaterialPage<void>(child: Scaffold(body: Text('Foreground Page'))),
+              const TestPage<void>(child: Text('Foreground Page')),
             ],
             onPopPage: (_, _) => false,
           ),
@@ -194,12 +355,11 @@ void main() {
       final spy = UniqueKey();
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: Column(
             children: <Widget>[
               const Text('How are you?'),
-              SelectableRegion(
-                selectionControls: materialTextSelectionControls,
+              _selectableRegion(
                 child: SelectAllWidget(key: spy, child: const SizedBox(width: 100, height: 100)),
               ),
               const Text('Fine, thank you.'),
@@ -224,11 +384,8 @@ void main() {
       final spy = UniqueKey();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: SelectionSpy(key: spy),
-          ),
+        TestWidgetsApp(
+          home: _selectableRegion(child: SelectionSpy(key: spy)),
         ),
       );
 
@@ -250,15 +407,8 @@ void main() {
       (WidgetTester tester) async {
         const text = 'Hello world';
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: SelectableRegion(
-                  selectionControls: materialTextSelectionControls,
-                  child: const Text(text),
-                ),
-              ),
-            ),
+          TestWidgetsApp(
+            home: Center(child: _selectableRegion(child: const Text(text))),
           ),
         );
         // The selection only dismisses when unfocused if the app
@@ -299,19 +449,16 @@ void main() {
       final semantics = SemanticsTester(tester);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    const Text('Line one'),
-                    const Text('Line two'),
-                    ElevatedButton(onPressed: () {}, child: const Text('Button')),
-                  ],
-                ),
+        TestWidgetsApp(
+          home: _selectableRegion(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  const Text('Line one'),
+                  const Text('Line two'),
+                  TestButton(onPressed: () {}, child: const Text('Button')),
+                ],
               ),
             ),
           ),
@@ -328,18 +475,21 @@ void main() {
                 children: <TestSemantics>[
                   TestSemantics(
                     children: <TestSemantics>[
+                      TestSemantics(label: 'Line one', textDirection: TextDirection.ltr),
+                      TestSemantics(label: 'Line two', textDirection: TextDirection.ltr),
                       TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isButton,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
+                        ],
+                        actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                        label: 'button',
+                        textDirection: TextDirection.ltr,
                         children: <TestSemantics>[
-                          TestSemantics(label: 'Line one', textDirection: TextDirection.ltr),
-                          TestSemantics(label: 'Line two', textDirection: TextDirection.ltr),
                           TestSemantics(
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.isButton,
-                              SemanticsFlag.hasEnabledState,
-                              SemanticsFlag.isEnabled,
-                              SemanticsFlag.isFocusable,
-                            ],
+                            flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
                             actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                             label: 'Button',
                             textDirection: TextDirection.ltr,
@@ -369,16 +519,11 @@ void main() {
         addTearDown(pageController.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: PageView(
               controller: pageController,
               children: <Widget>[
-                Center(
-                  child: SelectableRegion(
-                    selectionControls: materialTextSelectionControls,
-                    child: const Text(testValue),
-                  ),
-                ),
+                Center(child: _selectableRegion(child: const Text(testValue))),
                 const SizedBox(height: 200.0, child: Center(child: Text('Page 2'))),
               ],
             ),
@@ -437,17 +582,12 @@ void main() {
         addTearDown(pageController.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: PageView(
               scrollDirection: Axis.vertical,
               controller: pageController,
               children: <Widget>[
-                Center(
-                  child: SelectableRegion(
-                    selectionControls: materialTextSelectionControls,
-                    child: const Text(testValue),
-                  ),
-                ),
+                Center(child: _selectableRegion(child: const Text(testValue))),
                 const SizedBox(height: 200.0, child: Center(child: Text('Page 2'))),
               ],
             ),
@@ -518,17 +658,12 @@ void main() {
         addTearDown(pageController.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: PageView(
               scrollDirection: Axis.vertical,
               controller: pageController,
               children: <Widget>[
-                Center(
-                  child: SelectableRegion(
-                    selectionControls: materialTextSelectionControls,
-                    child: const Text(testValue),
-                  ),
-                ),
+                Center(child: _selectableRegion(child: const Text(testValue))),
                 const SizedBox(height: 200.0, child: Center(child: Text('Page 2'))),
               ],
             ),
@@ -591,11 +726,8 @@ void main() {
       final spy = UniqueKey();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: SelectionSpy(key: spy),
-          ),
+        TestWidgetsApp(
+          home: _selectableRegion(child: SelectionSpy(key: spy)),
         ),
       );
       await tester.pumpAndSettle();
@@ -628,11 +760,8 @@ void main() {
       final spy = UniqueKey();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: SelectionSpy(key: spy),
-          ),
+        TestWidgetsApp(
+          home: _selectableRegion(child: SelectionSpy(key: spy)),
         ),
       );
       await tester.pumpAndSettle();
@@ -657,9 +786,10 @@ void main() {
         const text = 'Hello world, how are you today?';
         final toolbarKey = UniqueKey();
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
+            textStyle: _materialDefaultTextStyle,
             home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+              selectionControls: _testDraggableSelectionHandleControls,
               contextMenuBuilder:
                   (BuildContext context, SelectableRegionState selectableRegionState) {
                     return SizedBox(key: toolbarKey);
@@ -727,7 +857,10 @@ void main() {
         expect(paragraph.selections.length, 1);
         expect(paragraph.selections.first, const TextSelection(baseOffset: 1, extentOffset: 20));
       },
-      variant: TargetPlatformVariant.mobile(),
+      // Fuchsia is the only mobile platform where the browser context menu is
+      // enabled by default on web, so it is the only mobile platform where this
+      // scenario applies. See: https://github.com/flutter/flutter/pull/177122.
+      variant: TargetPlatformVariant.only(TargetPlatform.fuchsia),
       skip: !kIsWeb, // [intended] This test verifies mobile web behavior.
     );
 
@@ -735,11 +868,8 @@ void main() {
       final spy = UniqueKey();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: SelectionSpy(key: spy),
-          ),
+        TestWidgetsApp(
+          home: _selectableRegion(child: SelectionSpy(key: spy)),
         ),
       );
       await tester.pumpAndSettle();
@@ -772,11 +902,8 @@ void main() {
       final spy = UniqueKey();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: SelectionSpy(key: spy),
-          ),
+        TestWidgetsApp(
+          home: _selectableRegion(child: SelectionSpy(key: spy)),
         ),
       );
       await tester.pumpAndSettle();
@@ -804,16 +931,13 @@ void main() {
       final spy = UniqueKey();
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SizedBox(
             height: 750,
             child: SingleChildScrollView(
               child: SizedBox(
                 height: 2000,
-                child: SelectableRegion(
-                  selectionControls: materialTextSelectionControls,
-                  child: SelectionSpy(key: spy),
-                ),
+                child: _selectableRegion(child: SelectionSpy(key: spy)),
               ),
             ),
           ),
@@ -845,11 +969,8 @@ void main() {
       final spy = UniqueKey();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: SelectionSpy(key: spy),
-          ),
+        TestWidgetsApp(
+          home: _selectableRegion(child: SelectionSpy(key: spy)),
         ),
       );
       await tester.pumpAndSettle();
@@ -883,10 +1004,9 @@ void main() {
     addTearDown(selectionDelegate.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectableRegion(
+      TestWidgetsApp(
+        home: _selectableRegion(
           onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
-          selectionControls: materialTextSelectionControls,
           child: SelectionContainer(
             delegate: selectionDelegate,
             child: const Center(
@@ -939,9 +1059,10 @@ void main() {
       });
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
+          textStyle: _materialDefaultTextStyle,
           home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+            selectionControls: _testDraggableSelectionControls,
             child: const Text('How are you?'),
           ),
         ),
@@ -1001,11 +1122,10 @@ void main() {
         final GlobalKey selectableKey = GlobalKey();
         addTearDown(focusNode.dispose);
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
+          TestWidgetsApp(
+            home: _selectableRegion(
               key: selectableKey,
               focusNode: focusNode,
-              selectionControls: materialTextSelectionControls,
               child: const Center(child: Text('How are you')),
             ),
           ),
@@ -1048,9 +1168,10 @@ void main() {
       'touch can select word-by-word on double tap drag on mobile platforms',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
+            textStyle: _materialDefaultTextStyle,
             home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+              selectionControls: _testDraggableSelectionControls,
               child: const Center(child: Text('How are you')),
             ),
           ),
@@ -1123,9 +1244,8 @@ void main() {
       'touch can select multiple widgets on double tap drag on mobile platforms',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -1180,9 +1300,8 @@ void main() {
       'touch can select multiple widgets on double tap drag and return to origin word on mobile platforms',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -1249,9 +1368,8 @@ void main() {
       'touch can reverse selection across multiple widgets on double tap drag on mobile platforms',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -1312,11 +1430,8 @@ void main() {
             'of text all of it should be selected.';
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
-              child: const Center(child: Text(longText)),
-            ),
+          TestWidgetsApp(
+            home: _selectableRegion(child: const Center(child: Text(longText))),
           ),
         );
         final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
@@ -1427,11 +1542,8 @@ void main() {
       'touch cannot select word-by-word on double tap drag when on Android web',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
-              child: const Center(child: Text('How are you')),
-            ),
+          TestWidgetsApp(
+            home: _selectableRegion(child: const Center(child: Text('How are you'))),
           ),
         );
         final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
@@ -1478,11 +1590,9 @@ void main() {
       'touch can double tap + drag on iOS web',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
-              child: const Center(child: Text('How are you')),
-            ),
+          TestWidgetsApp(
+            textStyle: _materialDefaultTextStyle,
+            home: _selectableRegion(child: const Center(child: Text('How are you'))),
           ),
         );
         final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
@@ -1532,11 +1642,8 @@ void main() {
       'touch cannot double tap on iOS web',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
-              child: const Center(child: Text('How are you')),
-            ),
+          TestWidgetsApp(
+            home: _selectableRegion(child: const Center(child: Text('How are you'))),
           ),
         );
         final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
@@ -1569,11 +1676,8 @@ void main() {
         const testString = 'How are you doing today? Good, and you?';
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
-              child: const Center(child: Text(testString)),
-            ),
+          TestWidgetsApp(
+            home: _selectableRegion(child: const Center(child: Text(testString))),
           ),
         );
         final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
@@ -1631,12 +1735,9 @@ void main() {
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: Scaffold(
-              body: Center(child: Text('How are you doing today? Good, and you?', key: outerText)),
-            ),
+        TestWidgetsApp(
+          home: _selectableRegion(
+            child: Center(child: Text('How are you doing today? Good, and you?', key: outerText)),
           ),
         ),
       );
@@ -1688,11 +1789,8 @@ void main() {
 
     testWidgets('mouse can select single text on desktop platforms', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: const Center(child: Text('How are you')),
-          ),
+        TestWidgetsApp(
+          home: _selectableRegion(child: const Center(child: Text('How are you'))),
         ),
       );
       final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
@@ -1738,11 +1836,8 @@ void main() {
 
     testWidgets('mouse can select single text on mobile platforms', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: const Center(child: Text('How are you')),
-          ),
+        TestWidgetsApp(
+          home: _selectableRegion(child: const Center(child: Text('How are you'))),
         ),
       );
       final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
@@ -1792,9 +1887,8 @@ void main() {
       SelectableRegionSelectionStatus? selectionStatus;
       final GlobalKey textKey = GlobalKey();
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: _selectableRegion(
             child: Center(child: Text(key: textKey, 'How are you')),
           ),
         ),
@@ -1837,9 +1931,8 @@ void main() {
         SelectableRegionSelectionStatus? selectionStatus;
         final GlobalKey textKey = GlobalKey();
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: Center(child: Text(key: textKey, 'How are you')),
             ),
           ),
@@ -1876,11 +1969,8 @@ void main() {
 
     testWidgets('mouse can select word-by-word on double click drag', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: const Center(child: Text('How are you')),
-          ),
+        TestWidgetsApp(
+          home: _selectableRegion(child: const Center(child: Text('How are you'))),
         ),
       );
       final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
@@ -1950,9 +2040,8 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: _selectableRegion(
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -2006,9 +2095,8 @@ void main() {
       'mouse can select multiple widgets on double click drag and return to origin word',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -2075,9 +2163,8 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: _selectableRegion(
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -2137,11 +2224,8 @@ void main() {
           'of text all of it should be selected.';
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
-            child: const Center(child: Text(longText)),
-          ),
+        TestWidgetsApp(
+          home: _selectableRegion(child: const Center(child: Text(longText))),
         ),
       );
       final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
@@ -2213,9 +2297,8 @@ void main() {
       'mouse can select multiple widgets on triple click drag when selecting inside a WidgetSpan',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: const Text.rich(
                 WidgetSpan(
                   child: Column(
@@ -2286,9 +2369,8 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: _selectableRegion(
             child: const Column(
               children: <Widget>[
                 Text('How are you?\nThis is the first text widget.'),
@@ -2368,9 +2450,8 @@ void main() {
       'mouse can select multiple widgets on triple click drag and return to origin paragraph',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: const Column(
                 children: <Widget>[
                   Text('How are you?\nThis is the first text widget.'),
@@ -2461,9 +2542,8 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: _selectableRegion(
             child: const Column(
               children: <Widget>[
                 Text('How are you?\nThis is the first text widget.'),
@@ -2522,9 +2602,8 @@ void main() {
 
     testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: _selectableRegion(
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -2572,9 +2651,10 @@ void main() {
       'mouse shift + click holds the selection start in place and moves the end',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
+            textStyle: _materialDefaultTextStyle,
             home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+              selectionControls: _testDraggableSelectionControls,
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -2644,9 +2724,8 @@ void main() {
       'mouse shift + click collapses the selection when it has not been initialized',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -2687,9 +2766,10 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
+          textStyle: _materialDefaultTextStyle,
           home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+            selectionControls: _testDraggableSelectionControls,
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -2738,9 +2818,8 @@ void main() {
 
     testWidgets('mouse can work with disabled container', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: _selectableRegion(
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -2787,9 +2866,8 @@ void main() {
 
     testWidgets('mouse can reverse selection', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: _selectableRegion(
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -2842,9 +2920,9 @@ void main() {
         var buttonTypes = <ContextMenuButtonType>{};
         final toolbarKey = UniqueKey();
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SelectableRegion(
-              selectionControls: materialTextSelectionHandleControls,
+              selectionControls: testTextSelectionHandleControls,
               contextMenuBuilder:
                   (BuildContext context, SelectableRegionState selectableRegionState) {
                     buttonTypes = selectableRegionState.contextMenuButtonItems
@@ -2956,9 +3034,9 @@ void main() {
         final toolbarKey = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SelectableRegion(
-              selectionControls: materialTextSelectionHandleControls,
+              selectionControls: testTextSelectionHandleControls,
               contextMenuBuilder:
                   (BuildContext context, SelectableRegionState selectableRegionState) {
                     buttonTypes = selectableRegionState.contextMenuButtonItems
@@ -3029,9 +3107,9 @@ void main() {
         final toolbarKey = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SelectableRegion(
-              selectionControls: materialTextSelectionHandleControls,
+              selectionControls: testTextSelectionHandleControls,
               contextMenuBuilder:
                   (BuildContext context, SelectableRegionState selectableRegionState) {
                     buttonTypes = selectableRegionState.contextMenuButtonItems
@@ -3117,9 +3195,9 @@ void main() {
         final toolbarKey = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SelectableRegion(
-              selectionControls: materialTextSelectionHandleControls,
+              selectionControls: testTextSelectionHandleControls,
               contextMenuBuilder:
                   (BuildContext context, SelectableRegionState selectableRegionState) {
                     buttonTypes = selectableRegionState.contextMenuButtonItems
@@ -3202,9 +3280,9 @@ void main() {
         final toolbarKey = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SelectableRegion(
-              selectionControls: materialTextSelectionHandleControls,
+              selectionControls: testTextSelectionHandleControls,
               contextMenuBuilder:
                   (BuildContext context, SelectableRegionState selectableRegionState) {
                     buttonTypes = selectableRegionState.contextMenuButtonItems
@@ -3310,9 +3388,9 @@ void main() {
         final toolbarKey = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SelectableRegion(
-              selectionControls: materialTextSelectionHandleControls,
+              selectionControls: testTextSelectionHandleControls,
               contextMenuBuilder:
                   (BuildContext context, SelectableRegionState selectableRegionState) {
                     buttonTypes = selectableRegionState.contextMenuButtonItems
@@ -3438,9 +3516,9 @@ void main() {
         final toolbarKey = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SelectableRegion(
-              selectionControls: materialTextSelectionHandleControls,
+              selectionControls: testTextSelectionHandleControls,
               contextMenuBuilder:
                   (BuildContext context, SelectableRegionState selectableRegionState) {
                     buttonTypes = selectableRegionState.contextMenuButtonItems
@@ -3567,9 +3645,8 @@ void main() {
       'can copy a selection made with the mouse',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -3625,18 +3702,15 @@ void main() {
         addTearDown(textFieldFocus.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: SelectableRegion(
-                focusNode: selectableRegionFocus,
-                selectionControls: materialTextSelectionControls,
-                child: Column(
-                  children: <Widget>[
-                    const Text('How are you?'),
-                    const Text('Good, and you?'),
-                    TestTextField(controller: controller, focusNode: textFieldFocus),
-                  ],
-                ),
+          TestWidgetsApp(
+            home: _selectableRegion(
+              focusNode: selectableRegionFocus,
+              child: Column(
+                children: <Widget>[
+                  const Text('How are you?'),
+                  const Text('Good, and you?'),
+                  TestTextField(controller: controller, focusNode: textFieldFocus),
+                ],
               ),
             ),
           ),
@@ -3697,18 +3771,15 @@ void main() {
         addTearDown(textFieldFocus.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: SelectableRegion(
-                focusNode: selectableRegionFocus,
-                selectionControls: materialTextSelectionControls,
-                child: Column(
-                  children: <Widget>[
-                    const Text('How are you?'),
-                    const Text('Good, and you?'),
-                    TestTextField(controller: controller, focusNode: textFieldFocus),
-                  ],
-                ),
+          TestWidgetsApp(
+            home: _selectableRegion(
+              focusNode: selectableRegionFocus,
+              child: Column(
+                children: <Widget>[
+                  const Text('How are you?'),
+                  const Text('Good, and you?'),
+                  TestTextField(controller: controller, focusNode: textFieldFocus),
+                ],
               ),
             ),
           ),
@@ -3763,10 +3834,9 @@ void main() {
         addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
+          TestWidgetsApp(
+            home: _selectableRegion(
               focusNode: focusNode,
-              selectionControls: materialTextSelectionControls,
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -3813,9 +3883,8 @@ void main() {
         final outerText = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: Center(
                 child: Text.rich(
                   const TextSpan(
@@ -3865,9 +3934,8 @@ void main() {
         final outerText = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: Center(
                 child: Text.rich(
                   const TextSpan(
@@ -3923,9 +3991,8 @@ void main() {
         final innerText = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: Center(
                 child: Text.rich(
                   TextSpan(
@@ -3978,9 +4045,8 @@ void main() {
         final innerText = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: Center(
                 child: Text.rich(
                   TextSpan(
@@ -4027,22 +4093,19 @@ void main() {
         addTearDown(focusNode.dispose);
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
-              child: Scaffold(
-                body: Center(
-                  child: Text.rich(
-                    TextSpan(
-                      children: <InlineSpan>[
-                        const TextSpan(
-                          text:
-                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-                        ),
-                        WidgetSpan(child: FlutterLogo(key: flutterLogo)),
-                        const TextSpan(text: 'Hello, world.'),
-                      ],
-                    ),
+          TestWidgetsApp(
+            home: _selectableRegion(
+              child: Center(
+                child: Text.rich(
+                  TextSpan(
+                    children: <InlineSpan>[
+                      const TextSpan(
+                        text:
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                      ),
+                      WidgetSpan(child: FlutterLogo(key: flutterLogo)),
+                      const TextSpan(text: 'Hello, world.'),
+                    ],
                   ),
                 ),
               ),
@@ -4075,24 +4138,21 @@ void main() {
         final outerText = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
-              child: Scaffold(
-                body: Center(
-                  child: Text.rich(
-                    const TextSpan(
-                      children: <InlineSpan>[
-                        TextSpan(
-                          text:
-                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-                        ),
-                        WidgetSpan(child: Text('Some text in a WidgetSpan. ')),
-                        TextSpan(text: 'Hello, world.'),
-                      ],
-                    ),
-                    key: outerText,
+          TestWidgetsApp(
+            home: _selectableRegion(
+              child: Center(
+                child: Text.rich(
+                  const TextSpan(
+                    children: <InlineSpan>[
+                      TextSpan(
+                        text:
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                      ),
+                      WidgetSpan(child: Text('Some text in a WidgetSpan. ')),
+                      TextSpan(text: 'Hello, world.'),
+                    ],
                   ),
+                  key: outerText,
                 ),
               ),
             ),
@@ -4124,24 +4184,21 @@ void main() {
         final outerText = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
-              child: Scaffold(
-                body: Center(
-                  child: Text.rich(
-                    const TextSpan(
-                      children: <InlineSpan>[
-                        TextSpan(
-                          text:
-                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-                        ),
-                        WidgetSpan(child: SizedBox.shrink()),
-                        TextSpan(text: 'Hello, world.'),
-                      ],
-                    ),
-                    key: outerText,
+          TestWidgetsApp(
+            home: _selectableRegion(
+              child: Center(
+                child: Text.rich(
+                  const TextSpan(
+                    children: <InlineSpan>[
+                      TextSpan(
+                        text:
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                      ),
+                      WidgetSpan(child: SizedBox.shrink()),
+                      TextSpan(text: 'Hello, world.'),
+                    ],
                   ),
+                  key: outerText,
                 ),
               ),
             ),
@@ -4173,9 +4230,8 @@ void main() {
         final outerText = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: Center(
                 child: Text.rich(
                   const TextSpan(
@@ -4225,9 +4281,8 @@ void main() {
         final outerText = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: Center(
                 child: Text.rich(
                   const TextSpan(
@@ -4271,9 +4326,8 @@ void main() {
 
     testWidgets('mouse can select across bidi text', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: _selectableRegion(
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -4322,9 +4376,8 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: _selectableRegion(
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -4360,12 +4413,13 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/104620.
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
+          textStyle: _materialDefaultTextStyle,
           home: Column(
             children: <Widget>[
               const Text('How are you?'),
               SelectableRegion(
-                selectionControls: materialTextSelectionControls,
+                selectionControls: _testDraggableSelectionControls,
                 child: const Text('Good, and you?'),
               ),
               const Text('Fine, thank you.'),
@@ -4405,12 +4459,13 @@ void main() {
       // Regression test for https://github.com/flutter/flutter/issues/104620.
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
+          textStyle: _materialDefaultTextStyle,
           home: Column(
             children: <Widget>[
               const Text('How are you?'),
               SelectableRegion(
-                selectionControls: materialTextSelectionControls,
+                selectionControls: _testDraggableSelectionControls,
                 child: const Text('Good, and you?'),
               ),
               const Text('Fine, thank you.'),
@@ -4445,9 +4500,10 @@ void main() {
 
     testWidgets('can drag start selection handle', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
+          textStyle: _materialDefaultTextStyle,
           home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+            selectionControls: _testDraggableSelectionControls,
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -4500,9 +4556,10 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
+          textStyle: _materialDefaultTextStyle,
           home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+            selectionControls: _testDraggableSelectionControls,
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -4546,9 +4603,10 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
+          textStyle: _materialDefaultTextStyle,
           home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+            selectionControls: _testDraggableSelectionControls,
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -4590,9 +4648,10 @@ void main() {
 
     testWidgets('can select all from toolbar', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
+          textStyle: _materialDefaultTextStyle,
           home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+            selectionControls: _testDraggableSelectionControlsWithToolbar,
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -4633,9 +4692,10 @@ void main() {
 
     testWidgets('can copy from toolbar', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
+          textStyle: _materialDefaultTextStyle,
           home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+            selectionControls: _testDraggableSelectionControlsWithToolbar,
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -4682,9 +4742,8 @@ void main() {
       'can use keyboard to granularly extend selection - character',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -4757,9 +4816,8 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: _selectableRegion(
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -4895,9 +4953,8 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: _selectableRegion(
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -5006,9 +5063,8 @@ void main() {
       'should not throw range error when selecting previous paragraph',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -5092,9 +5148,8 @@ void main() {
       'can use keyboard to granularly extend selection - document',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionControls,
+          TestWidgetsApp(
+            home: _selectableRegion(
               child: const Column(
                 children: <Widget>[
                   Text('How are you?'),
@@ -5188,9 +5243,8 @@ void main() {
 
     testWidgets('can use keyboard to directionally extend selection', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+        TestWidgetsApp(
+          home: _selectableRegion(
             child: const Column(
               children: <Widget>[
                 Text('How are you?'),
@@ -5314,7 +5368,8 @@ void main() {
         const text = 'Monkeys and rabbits in my soup';
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
+            textStyle: _materialDefaultTextStyle,
             home: SelectableRegion(
               magnifierConfiguration: TextMagnifierConfiguration(
                 magnifierBuilder:
@@ -5327,7 +5382,7 @@ void main() {
                       return fakeMagnifier;
                     },
               ),
-              selectionControls: materialTextSelectionControls,
+              selectionControls: _testDraggableSelectionControls,
               child: const Text(text),
             ),
           ),
@@ -5381,9 +5436,10 @@ void main() {
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
+          textStyle: _materialDefaultTextStyle,
           home: SelectableRegion(
-            selectionControls: materialTextSelectionControls,
+            selectionControls: _testDraggableSelectionControlsWithToolbar,
             child: const Text('How are you?'),
           ),
         ),
@@ -5481,6 +5537,7 @@ void main() {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               SelectableRegion(
+                contextMenuBuilder: _emptyContextMenu,
                 selectionControls: emptyTextSelectionControls,
                 child: const Text('row 1'),
               ),
@@ -5510,6 +5567,7 @@ void main() {
             child: ConstrainedBox(
               constraints: const BoxConstraints(minWidth: 300.0, minHeight: 400.0),
               child: SelectableRegion(
+                contextMenuBuilder: _emptyContextMenu,
                 selectionControls: emptyTextSelectionControls,
                 child: Container(
                   key: const Key('container'),
@@ -5540,9 +5598,9 @@ void main() {
       var buttonItems = <ContextMenuButtonItem>[];
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SelectableRegion(
-            selectionControls: materialTextSelectionHandleControls,
+            selectionControls: testTextSelectionHandleControls,
             contextMenuBuilder:
                 (BuildContext context, SelectableRegionState selectableRegionState) {
                   buttonItems = selectableRegionState.contextMenuButtonItems;
@@ -5598,9 +5656,9 @@ void main() {
       var buttonItems = <ContextMenuButtonItem>[];
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SelectableRegion(
-            selectionControls: materialTextSelectionHandleControls,
+            selectionControls: testTextSelectionHandleControls,
             contextMenuBuilder:
                 (BuildContext context, SelectableRegionState selectableRegionState) {
                   buttonItems = selectableRegionState.contextMenuButtonItems;
@@ -5666,9 +5724,9 @@ void main() {
       var buttonItems = <ContextMenuButtonItem>[];
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SelectableRegion(
-            selectionControls: materialTextSelectionHandleControls,
+            selectionControls: testTextSelectionHandleControls,
             contextMenuBuilder:
                 (BuildContext context, SelectableRegionState selectableRegionState) {
                   buttonItems = selectableRegionState.contextMenuButtonItems;
@@ -5727,15 +5785,16 @@ void main() {
     'builds the correct button items',
     (WidgetTester tester) async {
       var buttonItems = <ContextMenuButtonItem>[];
+      final toolbarKey = UniqueKey();
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SelectableRegion(
-            selectionControls: materialTextSelectionHandleControls,
+            selectionControls: testTextSelectionHandleControls,
             contextMenuBuilder:
                 (BuildContext context, SelectableRegionState selectableRegionState) {
                   buttonItems = selectableRegionState.contextMenuButtonItems;
-                  return const SizedBox.shrink();
+                  return SizedBox.shrink(key: toolbarKey);
                 },
             child: const Text('How are you?'),
           ),
@@ -5743,7 +5802,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+      expect(find.byKey(toolbarKey), findsNothing);
 
       final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
         find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)),
@@ -5782,9 +5841,8 @@ void main() {
 
   testWidgets('can clear selection through SelectableRegionState', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectableRegion(
-          selectionControls: materialTextSelectionControls,
+      TestWidgetsApp(
+        home: _selectableRegion(
           child: const Column(
             children: <Widget>[
               Text('How are you?'),
@@ -5862,9 +5920,9 @@ void main() {
       var buttonLabels = <String?>{};
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SelectableRegion(
-            selectionControls: materialTextSelectionHandleControls,
+            selectionControls: testTextSelectionHandleControls,
             contextMenuBuilder:
                 (BuildContext context, SelectableRegionState selectableRegionState) {
                   buttonLabels = selectableRegionState.contextMenuButtonItems
@@ -5909,9 +5967,8 @@ void main() {
     addTearDown(selectionNotifier.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectableRegion(
-          selectionControls: materialTextSelectionControls,
+      TestWidgetsApp(
+        home: _selectableRegion(
           child: SelectionListener(
             selectionNotifier: selectionNotifier,
             child: Column(
@@ -6030,9 +6087,8 @@ void main() {
     addTearDown(selectionNotifier.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectableRegion(
-          selectionControls: materialTextSelectionControls,
+      TestWidgetsApp(
+        home: _selectableRegion(
           child: SelectionListener(
             selectionNotifier: selectionNotifier,
             child: Column(
@@ -6150,10 +6206,11 @@ void main() {
     SelectedContent? content;
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
+        textStyle: _materialDefaultTextStyle,
         home: SelectableRegion(
           onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
-          selectionControls: materialTextSelectionControls,
+          selectionControls: _testDraggableSelectionControls,
           child: const Center(child: Text('How are you')),
         ),
       ),
@@ -6293,10 +6350,9 @@ void main() {
     SelectedContent? content;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectableRegion(
+      TestWidgetsApp(
+        home: _selectableRegion(
           onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
-          selectionControls: materialTextSelectionControls,
           child: const Column(
             children: <Widget>[
               Text('How are you?'),
@@ -6490,10 +6546,10 @@ void main() {
       'web can show flutter context menu when the browser context menu is disabled',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SelectableRegion(
               onSelectionChanged: (SelectedContent? selectedContent) {},
-              selectionControls: materialTextSelectionControls,
+              selectionControls: _testDraggableSelectionControlsWithToolbar,
               child: const Center(child: Text('How are you')),
             ),
           ),
@@ -6522,9 +6578,9 @@ void main() {
         final contextMenu = UniqueKey();
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SelectableRegion(
-              selectionControls: materialTextSelectionHandleControls,
+              selectionControls: testTextSelectionHandleControls,
               contextMenuBuilder:
                   (BuildContext context, SelectableRegionState selectableRegionState) {
                     return SizedBox.shrink(key: contextMenu);
@@ -6575,24 +6631,21 @@ void main() {
     const textStyle = TextStyle(fontSize: 10);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectableRegion(
-          selectionControls: materialTextSelectionControls,
-          child: Scaffold(
-            body: Center(
-              child: Text.rich(
-                const TextSpan(
-                  children: <InlineSpan>[
-                    TextSpan(text: 'Hello my name is ', style: textStyle),
-                    WidgetSpan(
-                      child: Text('Dash', style: textStyle),
-                      alignment: PlaceholderAlignment.middle,
-                    ),
-                    TextSpan(text: '.', style: textStyle),
-                  ],
-                ),
-                key: outerText,
+      TestWidgetsApp(
+        home: _selectableRegion(
+          child: Center(
+            child: Text.rich(
+              const TextSpan(
+                children: <InlineSpan>[
+                  TextSpan(text: 'Hello my name is ', style: textStyle),
+                  WidgetSpan(
+                    child: Text('Dash', style: textStyle),
+                    alignment: PlaceholderAlignment.middle,
+                  ),
+                  TextSpan(text: '.', style: textStyle),
+                ],
               ),
+              key: outerText,
             ),
           ),
         ),
@@ -6634,6 +6687,7 @@ void main() {
               decoration: BoxDecoration(border: Border.all()),
               // Region 2 (SelectableRegion)
               child: SelectableRegion(
+                contextMenuBuilder: _emptyContextMenu,
                 selectionControls: emptyTextSelectionControls,
                 child: Padding(
                   padding: const EdgeInsets.all(40),
@@ -6702,6 +6756,7 @@ void main() {
     await tester.pumpWidget(
       TestWidgetsApp(
         home: SelectableRegion(
+          contextMenuBuilder: _emptyContextMenu,
           selectionControls: emptyTextSelectionControls,
           child: const Text(
             text,
@@ -6730,6 +6785,182 @@ void main() {
     await tester.pumpAndSettle();
     expect(paragraph.selections, isNotEmpty);
     expect(paragraph.selections.first, const TextSelection(baseOffset: 0, extentOffset: 12));
+  });
+
+  testWidgets(
+    'selects backwards across multiple Text widgets and WidgetSpans via mouse drag',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/166462.
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            selectionControls: emptyTextSelectionControls,
+            child: Column(
+              children: List<Widget>.generate(5, (int index) {
+                return Text.rich(
+                  TextSpan(
+                    children: <InlineSpan>[
+                      WidgetSpan(child: Text('${index + 1}. ')),
+                      TextSpan(text: 'Item ${index + 1}'),
+                    ],
+                  ),
+                  key: ValueKey<int>(index),
+                );
+              }),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Start at the bottom right of the last item.
+      final Offset dragStart = tester.getBottomRight(find.byKey(const ValueKey<int>(4)));
+      // End at the top left of the first item.
+      final Offset dragEnd = tester.getTopLeft(find.byKey(const ValueKey<int>(0)));
+
+      final TestGesture gesture = await tester.startGesture(
+        dragStart,
+        kind: PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      // Drag backwards up to the top left.
+      await gesture.moveTo(dragEnd);
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      for (var i = 0; i < 5; i += 1) {
+        final Iterable<RenderParagraph> paragraphs = tester.renderObjectList<RenderParagraph>(
+          find.descendant(of: find.byKey(ValueKey<int>(i)), matching: find.byType(RichText)),
+        );
+
+        // The inner widget (WidgetSpan) contains the index text.
+        final RenderParagraph innerParagraph = paragraphs.firstWhere(
+          (RenderParagraph p) => p.text.toPlainText().contains('${i + 1}. '),
+        );
+
+        // The outer widget contains the placeholder character and the item text.
+        final RenderParagraph outerParagraph = paragraphs.firstWhere(
+          (RenderParagraph p) => p.text.toPlainText().contains('Item ${i + 1}'),
+        );
+
+        // Check the WidgetSpan's inner text first.
+        expect(innerParagraph.selections, isNotEmpty);
+        expect(innerParagraph.selections.first.start, 0);
+        expect(innerParagraph.selections.first.end, innerParagraph.text.toPlainText().length);
+
+        // Then check the outer text.
+        expect(outerParagraph.selections, isNotEmpty);
+        expect(outerParagraph.selections.first.start, 1);
+        expect(outerParagraph.selections.first.end, outerParagraph.text.toPlainText().length);
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+  );
+
+  testWidgets('triple-click-drag backwards involving WidgetSpans', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: testTextSelectionHandleControls,
+          child: ListView(
+            children: const <Widget>[
+              Text.rich(
+                TextSpan(
+                  children: <InlineSpan>[
+                    WidgetSpan(child: Text('Text A.')),
+                    TextSpan(text: '\n'),
+                    WidgetSpan(child: Text('Text B.')),
+                    TextSpan(text: '\n'),
+                    WidgetSpan(child: Text('Text C.')),
+                  ],
+                ),
+                key: Key('rich1'),
+              ),
+              Text.rich(
+                TextSpan(
+                  children: <InlineSpan>[
+                    WidgetSpan(child: Text('Text D.')),
+                    TextSpan(text: '\n'),
+                    WidgetSpan(child: Text('Text E.')),
+                    TextSpan(text: '\n'),
+                    WidgetSpan(child: Text('Text F.')),
+                  ],
+                ),
+                key: Key('rich2'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final RenderParagraph paragraphE = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Text E.'), matching: find.byType(RichText)),
+    );
+    final RenderParagraph paragraphB = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Text B.'), matching: find.byType(RichText)),
+    );
+
+    // Triple-click on Text E.
+    final TestGesture gesture = await tester.startGesture(
+      textOffsetToPosition(paragraphE, 2),
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    await gesture.down(textOffsetToPosition(paragraphE, 2));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    await gesture.down(textOffsetToPosition(paragraphE, 2));
+    await tester.pumpAndSettle();
+
+    // Text E should be selected after triple-click.
+    expect(paragraphE.selections.isNotEmpty, isTrue);
+    expect(paragraphE.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+
+    // Drag backward to Text B.
+    await gesture.moveTo(textOffsetToPosition(paragraphB, 3));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph paragraphC = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Text C.'), matching: find.byType(RichText)),
+    );
+    final RenderParagraph paragraphD = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Text D.'), matching: find.byType(RichText)),
+    );
+
+    final RenderParagraph outerParagraph1 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.byKey(const Key('rich1')), matching: find.byType(RichText)).first,
+    );
+    final RenderParagraph outerParagraph2 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.byKey(const Key('rich2')), matching: find.byType(RichText)).first,
+    );
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // When dragging backward from Text E to Text B, all paragraphs between
+    // B and E should be fully selected in reverse.
+    expect(paragraphB.selections, isNotEmpty);
+    expect(paragraphC.selections, isNotEmpty);
+    expect(paragraphD.selections, isNotEmpty);
+    expect(paragraphE.selections, isNotEmpty);
+    expect(outerParagraph1.selections, isNotEmpty);
+    expect(outerParagraph2.selections, isNotEmpty);
+    expect(paragraphB.selections[0], const TextSelection(baseOffset: 7, extentOffset: 0));
+    expect(paragraphC.selections[0], const TextSelection(baseOffset: 7, extentOffset: 0));
+    expect(paragraphD.selections[0], const TextSelection(baseOffset: 7, extentOffset: 0));
+    expect(paragraphE.selections[0], const TextSelection(baseOffset: 7, extentOffset: 0));
+    expect(outerParagraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 3));
+    expect(outerParagraph2.selections[0], const TextSelection(baseOffset: 2, extentOffset: 1));
   });
 }
 

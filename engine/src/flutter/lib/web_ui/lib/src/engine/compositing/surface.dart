@@ -15,15 +15,18 @@ import 'rasterizer.dart';
 
 /// A class which provides and manages [Surface] objects.
 abstract class SurfaceProvider<C extends Surface, D extends CanvasProvider> {
-  SurfaceProvider(this._canvasProvider, this._surfaceCreateFn);
+  SurfaceProvider(this._canvasProvider, this.surfaceCreateFn);
 
   final D _canvasProvider;
-  final C Function(D) _surfaceCreateFn;
+
+  /// A function that creates a new surface of type [C] using a [CanvasProvider] of type [D].
+  @visibleForTesting
+  final C Function(D) surfaceCreateFn;
 
   final List<C> _createdSurfaces = <C>[];
 
   C createSurface() {
-    final C surface = _surfaceCreateFn(_canvasProvider);
+    final C surface = surfaceCreateFn(_canvasProvider);
     if (_resourceCacheMaxBytes != null) {
       surface.setSkiaResourceCacheMaxBytes(_resourceCacheMaxBytes!);
     }
