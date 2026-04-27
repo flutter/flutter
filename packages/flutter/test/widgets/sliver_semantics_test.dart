@@ -9,16 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  group('Sliver Semantics', () {
-    setUp(() {
-      debugResetSemanticsIdCounter();
-    });
-
-    _tests();
+  setUp(() {
+    debugResetSemanticsIdCounter();
   });
-}
 
-void _tests() {
   testWidgets('excludeFromScrollable works correctly', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
 
