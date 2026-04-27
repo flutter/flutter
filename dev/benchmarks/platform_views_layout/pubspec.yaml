@@ -29,8 +29,4 @@ flutter:
   assets:
     - packages/flutter_gallery_assets/people/square/ali.png
     - packages/flutter_gallery_assets/places/india_chettinad_silk_maker.png
-  config:
-    # This project uses "google_mobile_ads", which is not compatible with Swift Package Manager.
-    # Disable it until https://github.com/googleads/googleads-mobile-flutter/issues/1239 is resolved.
-    enable-swift-package-manager: false
 # PUBSPEC CHECKSUM: a4ttir
