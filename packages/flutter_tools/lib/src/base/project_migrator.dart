@@ -80,7 +80,7 @@ abstract class ProjectMigrator {
       try {
         file.writeAsStringSync(projectContentsWithMigratedContents);
       } on FileSystemException catch (e) {
-        logger.printError('Failed to process/migrate the $basename during migration: $e');
+        logger.printError('Failed to process/migrate $basename during migration: $e');
       }
     }
   }
