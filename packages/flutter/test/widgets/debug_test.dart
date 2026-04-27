@@ -327,4 +327,31 @@ void main() {
     renderObject = tester.firstRenderObject(find.byType(CompositedTransformFollower));
     expect(renderObject.debugLayer?.debugCreator, isNotNull);
   });
+
+  group('DebugNonlinearTextScaler', () {
+    test('scales with exact mapping', () {
+      final scaler = DebugNonlinearTextScaler(<double, double>{10: 12, 14: 18, 20: 24});
+      expect(scaler.scale(10), 12);
+      expect(scaler.scale(14), 18);
+      expect(scaler.scale(20), 24);
+    });
+
+    test('interpolates linearly between bounds', () {
+      final scaler = DebugNonlinearTextScaler(<double, double>{10: 12, 20: 24});
+      // Midpoint interpolation: x=15 -> y = 12 + (15-10)*(24-12)/(20-10) = 18
+      expect(scaler.scale(15), 18);
+    });
+
+    test('extrapolates below first bound', () {
+      final scaler = DebugNonlinearTextScaler(<double, double>{10: 12, 20: 24});
+      // Extrapolate to x=5 -> y = 12 + (5-10)*(24-12)/(20-10) = 12 - 5*1.2 = 6
+      expect(scaler.scale(5), 6);
+    });
+
+    test('extrapolates above last bound', () {
+      final scaler = DebugNonlinearTextScaler(<double, double>{10: 12, 20: 24});
+      // Extrapolate to x=25 -> y = 24 + (25-20)*(24-12)/(20-10) = 24 + 5*1.2 = 30
+      expect(scaler.scale(25), 30);
+    });
+  });
 }

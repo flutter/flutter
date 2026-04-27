@@ -17,6 +17,7 @@
 library;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:ui'
     show
@@ -791,6 +792,42 @@ mixin WidgetsBinding
             default:
               throw Exception('unknown type: $type');
           }
+        },
+      );
+
+      registerServiceExtension(
+        name: WidgetsServiceExtensions.fontScaler.name,
+        callback: (Map<String, String> parameters) async {
+          if (parameters.containsKey('value')) {
+            final String value = parameters['value']!;
+            if (value.isEmpty || value == 'null') {
+              debugTextScalerOverride = null;
+            } else {
+              try {
+                final decoded = json.decode(value) as Map<String, dynamic>;
+                final table = <double, double>{};
+                decoded.forEach((String k, dynamic v) {
+                  final double key = double.parse(k);
+                  final double val = v is num ? v.toDouble() : double.parse(v.toString());
+                  table[key] = val;
+                });
+                debugTextScalerOverride = DebugNonlinearTextScaler(table);
+              } catch (e) {
+                throw Exception('Invalid font scaler table format: $value');
+              }
+            }
+            await _forceRebuild();
+          }
+          final TextScaler? currentScaler = debugTextScalerOverride;
+          return <String, dynamic>{
+            'value': currentScaler is DebugNonlinearTextScaler
+                ? json.encode(
+                    currentScaler.table.map(
+                      (k, v) => MapEntry<String, String>(k.toString(), v.toString()),
+                    ),
+                  )
+                : 'null',
+          };
         },
       );
     }

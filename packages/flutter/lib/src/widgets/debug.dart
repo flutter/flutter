@@ -529,6 +529,10 @@ bool debugCheckHasOverlay(BuildContext context) {
   return true;
 }
 
+/// A setting that can be used to override the [TextScaler] exposed
+/// from [MediaQueryData.textScaler].
+TextScaler? debugTextScalerOverride;
+
 /// Returns true if none of the widget library debug variables have been changed.
 ///
 /// This function is used by the test framework to ensure that debug variables
@@ -543,10 +547,87 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
         debugPrintGlobalKeyedWidgetLifecycle ||
         debugProfileBuildsEnabled ||
         debugHighlightDeprecatedWidgets ||
-        debugProfileBuildsEnabledUserWidgets) {
+        debugProfileBuildsEnabledUserWidgets ||
+        debugTextScalerOverride != null) {
       throw FlutterError(reason);
     }
     return true;
   }());
   return true;
+}
+
+/// A [TextScaler] used for debugging that scales the incoming font size non-linearly
+/// based on the given lookup table.
+class DebugNonlinearTextScaler extends TextScaler {
+  /// Creates a new nonlinear text scaler for debugging purposes.
+  DebugNonlinearTextScaler(this.table) : assert(table.isNotEmpty);
+
+  /// The lookup table of unscaled font sizes to scaled font sizes.
+  final Map<double, double> table;
+
+  @override
+  double get textScaleFactor {
+    // 14.0 is the default font size used by the framework as a baseline
+    // for calculating the text scale factor estimate.
+    return scale(14.0) / 14.0;
+  }
+
+  @override
+  double scale(double fontSize) {
+    assert(fontSize >= 0);
+    assert(fontSize.isFinite);
+    if (table.length == 1) {
+      final MapEntry<double, double> entry = table.entries.first;
+      if (entry.key == 0.0) {
+        return fontSize;
+      }
+      return fontSize * (entry.value / entry.key);
+    }
+
+    final List<double> keys = table.keys.toList()..sort();
+    if (table.containsKey(fontSize)) {
+      return table[fontSize]!;
+    }
+
+    if (fontSize < keys.first) {
+      final double x1 = keys[0];
+      final double y1 = table[x1]!;
+      final double x2 = keys[1];
+      final double y2 = table[x2]!;
+      return y1 + (fontSize - x1) * (y2 - y1) / (x2 - x1);
+    }
+
+    if (fontSize > keys.last) {
+      final double x1 = keys[keys.length - 2];
+      final double y1 = table[x1]!;
+      final double x2 = keys[keys.length - 1];
+      final double y2 = table[x2]!;
+      return y1 + (fontSize - x1) * (y2 - y1) / (x2 - x1);
+    }
+
+    for (var i = 0; i < keys.length - 1; i++) {
+      if (fontSize >= keys[i] && fontSize <= keys[i + 1]) {
+        final double x1 = keys[i];
+        final double y1 = table[x1]!;
+        final double x2 = keys[i + 1];
+        final double y2 = table[x2]!;
+        return y1 + (fontSize - x1) * (y2 - y1) / (x2 - x1);
+      }
+    }
+    return fontSize;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    return other is DebugNonlinearTextScaler && mapEquals(other.table, table);
+  }
+
+  @override
+  int get hashCode => Object.hashAll(table.entries.map((e) => Object.hash(e.key, e.value)));
+
+  @override
+  String toString() => 'nonlinear text scaler ($table)';
 }

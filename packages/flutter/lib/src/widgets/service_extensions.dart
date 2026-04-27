@@ -122,6 +122,14 @@ enum WidgetsServiceExtensions {
   /// * [WidgetsBinding.initServiceExtensions], where the service extension is
   ///   registered.
   accessibilityEvaluations,
+
+  /// Name of service extension that, when called, will adjust the font scaler.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetsBinding.initServiceExtensions], where the service extension is
+  ///   registered.
+  fontScaler,
 }
 
 /// Service extension constants for the Widget Inspector.
