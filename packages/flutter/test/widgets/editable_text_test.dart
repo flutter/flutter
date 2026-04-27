@@ -19117,7 +19117,7 @@ void main() {
       expect(currentAction, equals(TextInputAction.done));
 
       // Type text: action changes to "send"
-      await tester.enterText(find.byType(TextField), 'hello');
+      await tester.enterText(find.byType(EditableText), 'hello');
       await tester.pumpAndSettle();
       expect(controller.text, equals('hello'));
       expect(currentAction, equals(TextInputAction.send));
