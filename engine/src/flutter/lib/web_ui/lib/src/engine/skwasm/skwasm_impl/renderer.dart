@@ -454,12 +454,14 @@ class SkwasmRenderer extends Renderer {
     required bool transferOwnership,
   }) async {
     if (!transferOwnership || (isMultiThreaded && !_isTransferable(textureSource))) {
-      textureSource = (await createImageBitmap(textureSource, (
+      textureSource = await createImageBitmap(
+        textureSource,
         x: 0,
         y: 0,
         width: width,
         height: height,
-      ))).toJSAnyShallow;
+      );
+
     }
     return SkwasmImage(
       imageCreateFromTextureSource(

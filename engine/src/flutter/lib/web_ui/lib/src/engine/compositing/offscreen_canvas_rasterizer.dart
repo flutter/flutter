@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
@@ -26,6 +28,25 @@ class OffscreenCanvasRasterizer extends Rasterizer {
   /// This is an SkSurface backed by an OffScreenCanvas. This single Surface is
   /// used to render to many RenderCanvases to produce the rendered scene.
   late final OffscreenSurface offscreenSurface = _surfaceProvider.createSurface();
+
+  /// A lock to ensure that only one view is using the [offscreenSurface] at a
+  /// time.
+  ///
+  /// Since the [offscreenSurface] is shared across all views, we must ensure
+  /// that we only render one view at a time.
+  Future<void> _lock = Future<void>.value();
+
+  Future<T> synchronized<T>(Future<T> Function() computation) async {
+    final Future<void> oldLock = _lock;
+    final Completer<void> completer = Completer<void>();
+    _lock = completer.future;
+    await oldLock;
+    try {
+      return await computation();
+    } finally {
+      completer.complete();
+    }
+  }
 
   @override
   OffscreenCanvasViewRasterizer createViewRasterizer(EngineFlutterView view) {
@@ -65,8 +86,13 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
   );
 
   @override
+  Future<void> draw(LayerTree layerTree, FrameTimingRecorder? recorder) {
+    return rasterizer.synchronized(() => super.draw(layerTree, recorder));
+  }
+
+  @override
   Future<void> prepareToDraw() async {
-    await rasterizer.offscreenSurface.setSize(currentFrameSize);
+    await rasterizer.offscreenSurface.setMinimumSize(currentFrameSize);
   }
 
   @override
@@ -81,7 +107,7 @@ class OffscreenCanvasViewRasterizer extends ViewRasterizer {
     recorder?.recordRasterStart();
     if (browserSupportsCreateImageBitmap) {
       final List<DomImageBitmap> bitmaps = await rasterizer.offscreenSurface
-          .rasterizeToImageBitmaps(pictures);
+          .rasterizeToImageBitmaps(pictures, size: currentFrameSize);
       for (var i = 0; i < displayCanvases.length; i++) {
         (displayCanvases[i] as RenderCanvas).render(bitmaps[i]);
       }

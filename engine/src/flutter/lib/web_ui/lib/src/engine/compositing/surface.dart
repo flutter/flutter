@@ -66,6 +66,13 @@ abstract class Surface {
   /// Sets the size of the underlying canvas.
   FutureOr<void> setSize(BitmapSize size);
 
+  /// Sets the minimum size of the underlying canvas.
+  ///
+  /// If the current size is already larger than or equal to [size], this method
+  /// does nothing. Otherwise, it resizes the canvas to be at least as large
+  /// as [size].
+  FutureOr<void> setMinimumSize(BitmapSize size);
+
   /// Converts a `ui.Image` into a `ByteData` object in the specified format.
   Future<ByteData?> rasterizeImage(ui.Image image, ui.ImageByteFormat format);
 
@@ -108,7 +115,12 @@ abstract class Surface {
 abstract class OffscreenSurface extends Surface {
   /// Rasterizes the given list of [pictures] into a list of `DomImageBitmap`
   /// objects.
-  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(List<ui.Picture> pictures);
+  ///
+  /// If [size] is provided, the returned bitmaps will be of that size.
+  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(
+    List<ui.Picture> pictures, {
+    BitmapSize? size,
+  });
 }
 
 /// A rendering surface that is also a `DisplayCanvas`.

@@ -234,12 +234,13 @@ class CanvasKitRenderer extends Renderer {
     required bool transferOwnership,
   }) async {
     if (!transferOwnership) {
-      final DomImageBitmap bitmap = await createImageBitmap(object, (
+      final DomImageBitmap bitmap = await createImageBitmap(
+        object,
         x: 0,
         y: 0,
         width: width,
         height: height,
-      ));
+      );
       return createImageFromImageBitmap(bitmap);
     }
     SkImage? skImage;

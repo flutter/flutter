@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -207,6 +208,18 @@ abstract class CkSurface extends Surface {
   }
 
   @override
+  void setMinimumSize(BitmapSize size) {
+    if (size.width <= _currentSize.width && size.height <= _currentSize.height) {
+      return;
+    }
+    final newSize = BitmapSize(
+      math.max(size.width, _currentSize.width),
+      math.max(size.height, _currentSize.height),
+    );
+    setSize(newSize);
+  }
+
+  @override
   Future<void> recreateContextForCanvas(DomEventTarget newCanvas) async {
     // The old Skia surface is now invalid and should be disposed.
     _skSurface?.dispose();
@@ -279,12 +292,25 @@ class CkOffscreenSurface extends CkSurface implements OffscreenSurface {
   }
 
   @override
-  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(List<ui.Picture> pictures) async {
+  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(
+    List<ui.Picture> pictures, {
+    BitmapSize? size,
+  }) async {
     await _initialized.future;
     final bitmaps = <DomImageBitmap>[];
     for (final picture in pictures) {
       await rasterizeToCanvas(picture);
-      bitmaps.add(await createImageBitmap(_canvas));
+      if (size != null) {
+        bitmaps.add(await createImageBitmap(
+          _canvas,
+          x: 0,
+          y: 0,
+          width: size.width,
+          height: size.height,
+        ));
+      } else {
+        bitmaps.add(await createImageBitmap(_canvas));
+      }
     }
     return bitmaps;
   }
