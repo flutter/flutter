@@ -568,10 +568,9 @@ class AndroidDevice extends Device {
 
     // Get additional flags from platform arguments and startApp parameters.
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
-    androidShellArguments.addAll(<String>[
-      if (traceStartup) ...<String>['--trace-startup'],
-      if (route != null) ...<String>['--route=$route'],
-    ]);
+    if (traceStartup) {
+      androidShellArguments.add('--trace-startup');
+    }
 
     // Determine if the APK needs to be rebuilt due to the flags specified on the
     // command line changing between invocations.
@@ -655,6 +654,7 @@ class AndroidDevice extends Device {
       '-a', 'android.intent.action.MAIN',
       '-c', 'android.intent.category.LAUNCHER',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
+      if (route != null) ...<String>['--route=$route'],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (userIdentifier != null) ...<String>['--user', userIdentifier],
       ],
