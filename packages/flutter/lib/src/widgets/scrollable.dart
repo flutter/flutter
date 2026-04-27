@@ -1298,18 +1298,9 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       return result;
     }
     if (_selectionStartsInScrollable) {
-      // In nested scrollables, a parent delegate may forward Offset.infinite
-      // (from _inferPositionRelatedToOrigin) as the globalPosition to signal
-      // "select everything below". The inner delegate may have
-      // _selectionStartsInScrollable=true from an earlier finite event. Skip
-      // auto-scrolling in this case because the infinite position would produce
-      // a non-finite drag target rect, which triggers an assertion failure in
-      // EdgeDraggingAutoScroller._scroll.
-      if (event.globalPosition.isFinite) {
-        _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
-        if (_autoScroller.scrolling) {
-          return SelectionResult.pending;
-        }
+      _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
+      if (_autoScroller.scrolling) {
+        return SelectionResult.pending;
       }
     }
     return result;
@@ -1514,6 +1505,20 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   Rect _dragTargetFromEvent(SelectionEdgeUpdateEvent event) {
+    if (!event.globalPosition.isFinite) {
+      // A parent delegate forwards Offset.infinite from
+      // _inferPositionRelatedToOrigin to signal that the drag has moved past
+      // the bottom-right of its scrollable. Anchor the drag target just past
+      // this scrollable's own bottom-right corner so EdgeDraggingAutoScroller
+      // scrolls toward maxScrollExtent without NaN propagating through the
+      // matrix transform inside _scroll.
+      final box = state.context.findRenderObject()! as RenderBox;
+      return Rect.fromCenter(
+        center: box.localToGlobal(box.size.bottomRight(Offset.zero) + const Offset(20, 20)),
+        width: _kDefaultDragTargetSize,
+        height: _kDefaultDragTargetSize,
+      );
+    }
     return Rect.fromCenter(
       center: event.globalPosition,
       width: _kDefaultDragTargetSize,

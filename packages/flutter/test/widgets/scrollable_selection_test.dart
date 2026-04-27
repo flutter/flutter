@@ -1747,10 +1747,14 @@ void main() {
       // origin as its first event). Before the fix, the inner delegate would
       // pass Offset.infinite to startAutoScrollIfNecessary via _dragTargetFromEvent,
       // producing a non-finite Rect that triggers an assertion failure in
-      // EdgeDraggingAutoScroller._scroll. The fix skips auto-scrolling when the
-      // event's globalPosition is non-finite.
+      // EdgeDraggingAutoScroller._scroll. The fix translates the non-finite
+      // globalPosition into a finite drag target anchored just past the
+      // scrollable's bottom-right so auto-scroll continues to fire toward
+      // maxScrollExtent without NaN propagation.
       final focusNode = FocusNode();
       addTearDown(focusNode.dispose);
+      final innerController = ScrollController();
+      addTearDown(innerController.dispose);
       await tester.pumpWidget(
         TestWidgetsApp(
           home: SelectableRegion(
@@ -1765,7 +1769,9 @@ void main() {
                       SizedBox(
                         height: 300,
                         child: ListView.builder(
-                          itemCount: 20,
+                          controller: innerController,
+                          itemCount: 50,
+                          itemExtent: 30,
                           itemBuilder: (BuildContext context, int index) {
                             return Text('Inner item $index');
                           },
@@ -1802,13 +1808,24 @@ void main() {
       // delegate, which is then forwarded to the inner delegate. Before the fix,
       // the inner delegate would pass Offset.infinite to startAutoScrollIfNecessary,
       // causing an assertion error in EdgeDraggingAutoScroller.
+      // Drag in two steps so the inner delegate first receives a finite
+      // remapped origin (sets _selectionStartsInScrollable=true), then the
+      // synthesized Offset.infinite from the outer delegate.
+      final Offset insideInner = tester.getCenter(find.text('Inner item 0'));
+      await gesture.moveTo(insideInner);
+      await tester.pump();
       final Offset pastBottom =
           tester.getBottomRight(find.byType(TestWidgetsApp)) + const Offset(0, 200);
       await gesture.moveTo(pastBottom);
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 1500));
 
       expect(tester.takeException(), isNull);
+      // The inner scrollable should auto-scroll toward its maxScrollExtent in
+      // response to the synthesized Offset.infinite event from the outer
+      // delegate, revealing more content for the "select all past boundary"
+      // semantic to cover.
+      expect(innerController.offset, greaterThan(0.0));
 
       await gesture.up();
       await tester.pumpAndSettle();
