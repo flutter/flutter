@@ -19123,7 +19123,7 @@ void main() {
       expect(currentAction, equals(TextInputAction.send));
 
       // Clear text: action changes back to "done"
-      await tester.enterText(find.byType(TextField), '');
+      await tester.enterText(find.byType(EditableText), '');
       await tester.pumpAndSettle();
       expect(controller.text, isEmpty);
       expect(currentAction, equals(TextInputAction.done));
