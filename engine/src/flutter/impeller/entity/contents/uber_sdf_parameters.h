@@ -28,6 +28,7 @@ struct UberSDFParameters {
     kRect,
     kOval,
     kRoundedRect,
+    kRoundedSuperellipse,
   };
 
   /// Creates UberSDFParameters for a rectangle.

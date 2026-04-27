@@ -33,6 +33,10 @@ out vec4 frag_color;
 
 highp in vec2 v_position;
 
+const float PI = 3.14159265;
+const float TWO_PI = 6.28318531;
+const float PI_OVER_FOUR = 0.78539816;
+
 float distanceFromCircle(vec2 p, float radius) {
   return length(p) - radius;
 }
@@ -285,7 +289,7 @@ float filledSDF(vec2 p) {
     return distanceFromRect(p, frag_info.size);
   } else if (frag_info.type < 2.5) {  // Oval
     return distanceFromOval(p, frag_info.size);
-  } else {  // Rounded Rect
+  } else if (frag_info.type < 3.5) {  // Rounded Rect
     return distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
   } else {
     return distanceFromRoundedSuperellipse(
@@ -324,7 +328,7 @@ float strokedSDF(vec2 p) {
     float outer = distanceFromOval(p, frag_info.size) - half_stroke;
     float inner = distanceFromOval(p, frag_info.size) + half_stroke;
     return max(outer, -inner);
-  } else {  // Rounded Rect
+  } else if (frag_info.type < 3.5) {  // Rounded Rect
     float d = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
     outer = d - half_stroke;
     inner = d + half_stroke;

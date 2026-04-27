@@ -30,6 +30,8 @@ Scalar ToShaderType(UberSDFParameters::Type type) {
       return 2.0f;
     case UberSDFParameters::Type::kRoundedRect:
       return 3.0f;
+    case UberSDFParameters::Type::kRoundedSuperellipse:
+      return 4.0f;
   }
 }
 

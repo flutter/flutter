@@ -76,7 +76,7 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
     std::optional<StrokeParameters> stroke) {
   Point size = Point(rect.GetSize() * 0.5f);
   return UberSDFParameters{
-      .type = Type::kRoundSuperellipse,
+      .type = Type::kRoundedSuperellipse,
       .color = color,
       .center = rect.GetCenter(),
       .size = size,
