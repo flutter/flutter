@@ -26,7 +26,8 @@ object BaseApplicationNameHandler {
             baseApplicationName = project.property(GRADLE_BASE_APPLICATION_NAME_PROPERTY).toString()
         }
 
-        androidComponentsExtension.defaultConfig.manifestPlaceholders["applicationName"] =
-            baseApplicationName
+        androidComponentsExtension.defaultConfig {
+            manifestPlaceholders["applicationName"] = baseApplicationName
+        }
     }
 }

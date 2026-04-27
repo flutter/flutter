@@ -42,9 +42,12 @@ tasks.test {
     useJUnitPlatform()
 }
 // https://stackoverflow.com/questions/55456176/unresolved-reference-compilekotlin-in-build-gradle-kts
+// https://youtrack.jetbrains.com/projects/KT/issues/KT-79851/Emit-an-actionable-warning-error-on-unsupported-AV-LV-configured-by-kotlin-dsl
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0)
+        languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0)
     }
 }
 
@@ -59,7 +62,7 @@ dependencies {
     // https://github.com/Kotlin/kotlinx.serialization/releases for kotlin version compatibility.
     // All kotlinx implementation dependencies must work with the oldest kotlin supported versions.
     // Defined in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
     // When bumping, also update:
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * ndkVersion constant in packages/flutter_tools/lib/src/android/gradle_utils.dart
