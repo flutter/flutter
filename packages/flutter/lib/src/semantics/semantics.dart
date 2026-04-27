@@ -5017,21 +5017,18 @@ class SemanticsOwner extends ChangeNotifier {
             updatedVisitedNodes.add(parentNode);
           }
         }
-
         if (isTraversalParent) {
           // If the node is a traversal parent, then its grafted traversal
           // children should also be sent for update.
-          final additionalTraversalChildren = <SemanticsNode>[];
           final Set<SemanticsNode>? traversalChildren =
               _traversalChildNodes[node.traversalParentIdentifier];
           if (traversalChildren != null) {
             for (final SemanticsNode child in traversalChildren) {
               if (child.attached && !child._dirty && !updatedVisitedNodes.contains(child)) {
-                additionalTraversalChildren.add(child);
+                updatedVisitedNodes.add(child);
               }
             }
           }
-          updatedVisitedNodes.addAll(additionalTraversalChildren);
         }
 
         updatedVisitedNodes.add(node);
