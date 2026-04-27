@@ -1015,63 +1015,76 @@ void main() {
     expect(controller.selection.baseOffset, 10);
   });
 
-  testWidgets('Stylus drag selects text', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/102928
-    final controller = TextEditingController(text: 'I love flutter!');
-    addTearDown(controller.dispose);
-    final editableTextKey = GlobalKey<EditableTextState>();
-    final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
-      editableTextKey: editableTextKey,
-      forcePressEnabled: false,
-      selectionEnabled: true,
-    );
-    final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
-    final focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
+  testWidgets(
+    'Stylus drag selects text',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/102928
+      final controller = TextEditingController(text: 'I love flutter!');
+      addTearDown(controller.dispose);
+      final editableTextKey = GlobalKey<EditableTextState>();
+      final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+        editableTextKey: editableTextKey,
+        forcePressEnabled: false,
+        selectionEnabled: true,
+      );
+      final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
 
-    await tester.pumpWidget(
-      TestWidgetsApp(
-        home: provider.buildGestureDetector(
-          behavior: HitTestBehavior.translucent,
-          child: EditableText(
-            key: editableTextKey,
-            controller: controller,
-            focusNode: focusNode,
-            backgroundCursorColor: _white,
-            cursorColor: _white,
-            style: const TextStyle(),
-            selectionControls: testTextSelectionHandleControls,
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: provider.buildGestureDetector(
+            behavior: HitTestBehavior.translucent,
+            child: EditableText(
+              key: editableTextKey,
+              controller: controller,
+              focusNode: focusNode,
+              backgroundCursorColor: _white,
+              cursorColor: _white,
+              style: const TextStyle(),
+              selectionControls: testTextSelectionHandleControls,
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, -1);
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, -1);
 
-    final Offset position = textOffsetToPosition(tester, 4);
+      final Offset position = textOffsetToPosition(tester, 4);
 
-    await tester.tapAt(position);
-    await tester.pump();
+      await tester.tapAt(position);
+      await tester.pump();
 
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 4);
 
-    final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.stylus);
-    addTearDown(gesture.removePointer);
-    await tester.pump();
-    await gesture.moveTo(textOffsetToPosition(tester, 7));
-    await tester.pump();
-    await gesture.moveTo(textOffsetToPosition(tester, 10));
-    await tester.pump();
-    await gesture.up();
-    await tester.pumpAndSettle();
+      final TestGesture gesture = await tester.startGesture(
+        position,
+        kind: PointerDeviceKind.stylus,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(textOffsetToPosition(tester, 7));
+      await tester.pump();
+      await gesture.moveTo(textOffsetToPosition(tester, 10));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
 
-    // On Android, stylus drag selects text (like mouse), not moves cursor.
-    expect(controller.selection.isCollapsed, isFalse);
-    expect(controller.selection.baseOffset, 4);
-    expect(controller.selection.extentOffset, 10);
-  });
+      // On Android, stylus drag selects text (like mouse), not moves cursor.
+      expect(controller.selection.isCollapsed, isFalse);
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 10);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
 
   testWidgets('Drag of unknown type moves the cursor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102928

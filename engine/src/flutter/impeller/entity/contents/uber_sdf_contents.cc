@@ -26,6 +26,10 @@ Scalar ToShaderType(UberSDFParameters::Type type) {
       return 0.0f;
     case UberSDFParameters::Type::kRect:
       return 1.0f;
+    case UberSDFParameters::Type::kOval:
+      return 2.0f;
+    case UberSDFParameters::Type::kRoundedRect:
+      return 3.0f;
   }
 }
 
@@ -67,6 +71,9 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       params_.color.WithAlpha(params_.color.alpha * GetOpacityFactor());
   frag_info.center = params_.center;
   frag_info.size = params_.size;
+  frag_info.radii =
+      Vector4(params_.radii.bottom_right.width, params_.radii.top_right.width,
+              params_.radii.bottom_left.width, params_.radii.top_left.width);
   frag_info.stroked = params_.stroke ? 1.0f : 0.0f;
   frag_info.stroke_width = params_.stroke ? params_.stroke->width : 0.0f;
   frag_info.stroke_join =

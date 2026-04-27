@@ -4,8 +4,8 @@
 
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -829,11 +829,9 @@ void _tests() {
             onCollapse: () => performedActions.add(SemanticsAction.collapse),
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Lorem Ipsum $index'),
-                  ),
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Lorem Ipsum $index'),
                 );
               }, childCount: 1),
             ),
@@ -883,9 +881,8 @@ void _tests() {
                     SemanticsAction.expand,
                     SemanticsAction.collapse,
                   ],
-                  children: <TestSemantics>[
-                    TestSemantics(label: 'Lorem Ipsum 0', textDirection: TextDirection.ltr),
-                  ],
+                  label: 'Lorem Ipsum 0',
+                  textDirection: TextDirection.ltr,
                 ),
               ],
             ),
@@ -980,11 +977,9 @@ void _tests() {
             isRequired: true,
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Lorem Ipsum $index'),
-                  ),
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Lorem Ipsum $index'),
                 );
               }, childCount: 1),
             ),
@@ -1010,11 +1005,7 @@ void _tests() {
                   tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                   flags: flags,
                   children: <TestSemantics>[
-                    TestSemantics(
-                      children: <TestSemantics>[
-                        TestSemantics(label: 'Lorem Ipsum 0', textDirection: TextDirection.ltr),
-                      ],
-                    ),
+                    TestSemantics(label: 'Lorem Ipsum 0', textDirection: TextDirection.ltr),
                   ],
                 ),
               ],
@@ -1037,11 +1028,9 @@ void _tests() {
             scopesRoute: false,
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Lorem Ipsum $index'),
-                  ),
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Lorem Ipsum $index'),
                 );
               }, childCount: 1),
             ),
@@ -1059,9 +1048,8 @@ void _tests() {
                 TestSemantics(
                   tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                   flags: <SemanticsFlag>[],
-                  children: <TestSemantics>[
-                    TestSemantics(label: 'Lorem Ipsum 0', textDirection: TextDirection.ltr),
-                  ],
+                  label: 'Lorem Ipsum 0',
+                  textDirection: TextDirection.ltr,
                 ),
               ],
             ),
@@ -1082,11 +1070,9 @@ void _tests() {
             toggled: true,
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Lorem Ipsum $index'),
-                  ),
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Lorem Ipsum $index'),
                 );
               }, childCount: 1),
             ),
@@ -1105,9 +1091,8 @@ void _tests() {
                 TestSemantics(
                   tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                   flags: <SemanticsFlag>[SemanticsFlag.hasToggledState, SemanticsFlag.isToggled],
-                  children: <TestSemantics>[
-                    TestSemantics(label: 'Lorem Ipsum 0', textDirection: TextDirection.ltr),
-                  ],
+                  label: 'Lorem Ipsum 0',
+                  textDirection: TextDirection.ltr,
                 ),
               ],
             ),
@@ -1153,11 +1138,9 @@ void _tests() {
             isRequired: true,
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Lorem Ipsum $index'),
-                  ),
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('Lorem Ipsum $index'),
                 );
               }, childCount: 1),
             ),
@@ -1180,11 +1163,7 @@ void _tests() {
                   tags: <SemanticsTag>[const SemanticsTag('RenderViewport.twoPane')],
                   flags: flags,
                   children: <TestSemantics>[
-                    TestSemantics(
-                      children: <TestSemantics>[
-                        TestSemantics(label: 'Lorem Ipsum 0', textDirection: TextDirection.ltr),
-                      ],
-                    ),
+                    TestSemantics(label: 'Lorem Ipsum 0', textDirection: TextDirection.ltr),
                   ],
                 ),
               ],

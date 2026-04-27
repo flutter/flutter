@@ -27,7 +27,7 @@ bool AllocatorGLES::IsValid() const {
 // |Allocator|
 std::shared_ptr<DeviceBuffer> AllocatorGLES::OnCreateBuffer(
     const DeviceBufferDescriptor& desc) {
-  auto backing_store = std::make_shared<Allocation>();
+  auto backing_store = std::make_unique<Allocation>();
   if (!backing_store->Truncate(Bytes{desc.size})) {
     return nullptr;
   }

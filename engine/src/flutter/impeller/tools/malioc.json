@@ -8680,7 +8680,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 54,
+          "fp16_arithmetic": 55,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -8688,10 +8688,10 @@
               "arith_fma"
             ],
             "longest_path_cycles": [
-              0.53125,
-              0.53125,
-              0.296875,
-              0.375,
+              2.625,
+              2.625,
+              0.5,
+              1.75,
               0.0,
               0.25,
               0.0
@@ -8710,10 +8710,10 @@
               "arith_fma"
             ],
             "shortest_path_cycles": [
-              0.390625,
-              0.390625,
-              0.0625,
-              0.3125,
+              0.4375,
+              0.4375,
+              0.109375,
+              0.375,
               0.0,
               0.25,
               0.0
@@ -8723,10 +8723,10 @@
               "arith_fma"
             ],
             "total_cycles": [
-              1.0750000476837158,
-              1.0750000476837158,
-              0.484375,
-              0.6875,
+              5.5625,
+              5.5625,
+              1.1124999523162842,
+              3.6875,
               0.0,
               0.25,
               0.0
@@ -8734,8 +8734,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 16,
-          "work_registers_used": 20
+          "uniform_registers_used": 22,
+          "work_registers_used": 32
         }
       }
     },
@@ -8752,9 +8752,9 @@
               "arithmetic"
             ],
             "longest_path_cycles": [
-              9.239999771118164,
+              25.40999984741211,
               1.0,
-              2.0
+              4.0
             ],
             "pipelines": [
               "arithmetic",
@@ -8765,7 +8765,7 @@
               "arithmetic"
             ],
             "shortest_path_cycles": [
-              4.619999885559082,
+              5.28000020980835,
               1.0,
               2.0
             ],
@@ -8773,9 +8773,9 @@
               "arithmetic"
             ],
             "total_cycles": [
-              16.33333396911621,
+              48.0,
               1.0,
-              2.0
+              8.0
             ]
           },
           "thread_occupancy": 100,
@@ -12088,7 +12088,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 56,
+          "fp16_arithmetic": 54,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -12096,10 +12096,10 @@
               "arith_fma"
             ],
             "longest_path_cycles": [
-              0.46875,
-              0.46875,
-              0.28125,
-              0.375,
+              2.5,
+              2.5,
+              0.484375,
+              1.75,
               0.0,
               0.25,
               0.0
@@ -12115,14 +12115,13 @@
             ],
             "shortest_path_bound_pipelines": [
               "arith_total",
-              "arith_fma",
               "arith_sfu"
             ],
             "shortest_path_cycles": [
-              0.3125,
-              0.3125,
-              0.078125,
-              0.3125,
+              0.375,
+              0.359375,
+              0.109375,
+              0.375,
               0.0,
               0.25,
               0.0
@@ -12132,10 +12131,10 @@
               "arith_fma"
             ],
             "total_cycles": [
-              1.0,
-              1.0,
-              0.46875,
-              0.6875,
+              5.324999809265137,
+              5.324999809265137,
+              1.1124999523162842,
+              3.6875,
               0.0,
               0.25,
               0.0
@@ -12143,8 +12142,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 16,
-          "work_registers_used": 6
+          "uniform_registers_used": 24,
+          "work_registers_used": 32
         }
       }
     }
