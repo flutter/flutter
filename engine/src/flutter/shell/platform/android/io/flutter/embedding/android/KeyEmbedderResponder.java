@@ -194,6 +194,9 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
       }
     }
 
+    // Virtual keyboards (like Gboard) often keep meta bits active without sending
+    // corresponding physical key events. For these, we trust the meta state
+    // and skip synthesizing physical modifier keys to avoid "stuck" modifiers.
     boolean isVirtualKeyboard =
         event.getDeviceId() == android.view.KeyCharacterMap.VIRTUAL_KEYBOARD;
 
@@ -204,9 +207,7 @@ public class KeyEmbedderResponder implements KeyboardManager.Responder {
         if (preEventStates[keyIdx] != null) {
           continue;
         }
-        if (postEventAnyPressed) {
-          preEventStates[keyIdx] = nowStates[keyIdx];
-        } else if (isVirtualKeyboard) {
+        if (postEventAnyPressed || isVirtualKeyboard) {
           preEventStates[keyIdx] = nowStates[keyIdx];
         } else {
           preEventStates[keyIdx] = true;
