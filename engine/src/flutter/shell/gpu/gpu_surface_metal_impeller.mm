@@ -71,12 +71,14 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const DlISiz
     return std::make_unique<SurfaceFrame>(
         nullptr, SurfaceFrame::FramebufferInfo(),
         [](const SurfaceFrame& surface_frame, DlCanvas* canvas) { return true; },
-        [context = aiks_context_->GetContext()](const SurfaceFrame& surface_frame) {
 #ifdef IMPELLER_DEBUG
+        [context = aiks_context_->GetContext()](const SurfaceFrame& surface_frame) {
           impeller::ContextMTL::Cast(*context).GetCaptureManager()->FinishCapture();
-#endif  // IMPELLER_DEBUG
           return true;
         },
+#else
+        [](const SurfaceFrame& surface_frame) { return true; },
+#endif  // IMPELLER_DEBUG
         frame_size);
   }
 
