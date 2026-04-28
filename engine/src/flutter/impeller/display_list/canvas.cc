@@ -837,7 +837,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      IsCompatibleWithSDFRendering(paint)) {
     auto params = UberSDFParameters::MakeRect(
         /*color=*/paint.color,
         /*rect=*/rect,
@@ -892,7 +892,7 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      IsCompatibleWithSDFRendering(paint)) {
     UberSDFParameters params;
 
     if (paint.style == Paint::Style::kStroke) {
@@ -976,7 +976,7 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   const RoundingRadii& radii = round_rect.GetRadii();
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value() && AreCornersCircular(radii)) {
+      IsCompatibleWithSDFRendering(paint) && AreCornersCircular(radii)) {
     auto params = UberSDFParameters::MakeRoundedRect(
         /*color=*/paint.color,
         /*rect=*/round_rect.GetBounds(),
@@ -1089,7 +1089,7 @@ void Canvas::DrawCircle(const Point& center,
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      IsCompatibleWithSDFRendering(paint)) {
     auto params = UberSDFParameters::MakeCircle(
         /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
         /*stroke=*/paint.GetStroke());
@@ -2448,6 +2448,47 @@ void Canvas::EndReplay() {
 
   Reset();
   Initialize(initial_cull_rect_);
+}
+
+bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
+  if (paint.mask_blur_descriptor.has_value()) {
+    return false;
+  }
+  switch (paint.blend_mode) {
+    // Incompatible blend modes:
+    case BlendMode::kClear:
+    case BlendMode::kSrc:
+    case BlendMode::kSrcIn:
+    case BlendMode::kDstIn:
+    case BlendMode::kSrcOut:
+    case BlendMode::kDstATop:
+    case BlendMode::kPlus:
+    case BlendMode::kModulate:
+      return false;
+    // Compatible blend modes:
+    case BlendMode::kDst:
+    case BlendMode::kSrcOver:
+    case BlendMode::kDstOver:
+    case BlendMode::kDstOut:
+    case BlendMode::kSrcATop:
+    case BlendMode::kXor:
+    case BlendMode::kScreen:
+    case BlendMode::kOverlay:
+    case BlendMode::kDarken:
+    case BlendMode::kLighten:
+    case BlendMode::kColorDodge:
+    case BlendMode::kColorBurn:
+    case BlendMode::kHardLight:
+    case BlendMode::kSoftLight:
+    case BlendMode::kDifference:
+    case BlendMode::kExclusion:
+    case BlendMode::kMultiply:
+    case BlendMode::kHue:
+    case BlendMode::kSaturation:
+    case BlendMode::kColor:
+    case BlendMode::kLuminosity:
+      return true;
+  }
 }
 
 LazyRenderingConfig::LazyRenderingConfig(
