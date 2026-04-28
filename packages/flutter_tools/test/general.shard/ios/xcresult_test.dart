@@ -14,6 +14,14 @@ import '../../src/fake_process_manager.dart';
 import 'xcresult_test_data.dart';
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
+
   // Creates a FakeCommand for the xcresult get call to build the app
   // in the given configuration.
   FakeCommand setUpFakeXCResultCommand({
@@ -77,8 +85,8 @@ void main() {
       ),
     );
     fakeProcessManager.addCommands(<FakeCommand>[
-      const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-      const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
+      kWhichSysctlCommand,
+      kx64CheckCommand,
       setUpFakeXCResultCommand(
         stdout: resultJson,
         tempResultPath: _tempResultPath,

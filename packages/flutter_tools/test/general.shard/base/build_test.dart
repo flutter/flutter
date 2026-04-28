@@ -13,6 +13,13 @@ import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
   group('GenSnapshot', () {
     late GenSnapshot genSnapshot;
     late Artifacts artifacts;
@@ -189,8 +196,8 @@ void main() {
             'main.dill',
           ],
         ),
-        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -249,8 +256,8 @@ void main() {
             'main.dill',
           ],
         ),
-        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -307,8 +314,8 @@ void main() {
             'main.dill',
           ],
         ),
-        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',

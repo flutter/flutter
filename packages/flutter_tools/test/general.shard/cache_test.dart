@@ -32,6 +32,13 @@ const unameCommandForX64 = FakeCommand(command: <String>['uname', '-m'], stdout:
 const unameCommandForArm64 = FakeCommand(command: <String>['uname', '-m'], stdout: 'aarch64');
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
   late FakeProcessManager fakeProcessManager;
 
   setUp(() {
@@ -1129,11 +1136,8 @@ void main() {
 
   testWithoutContext('FontSubset artifacts on macos', () {
     fakeProcessManager.addCommands(<FakeCommand>[
-      const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/sbin/sysctl'),
-      const FakeCommand(
-        command: <String>['sysctl', 'hw.optional.arm64'],
-        stdout: 'hw.optional.arm64: 0',
-      ),
+      kWhichSysctlCommand,
+      kx64CheckCommand,
     ]);
 
     final Cache cache = createCache(

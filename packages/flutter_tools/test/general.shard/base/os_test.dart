@@ -19,6 +19,20 @@ const kExecutable = 'foo';
 const kPath1 = '/bar/bin/$kExecutable';
 const kPath2 = '/another/bin/$kExecutable';
 
+const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+// x64 host.
+const kx64CheckCommand = FakeCommand(
+  command: <String>['sysctl', 'hw.optional.arm64'],
+  exitCode: 1,
+);
+
+// ARM host.
+const kARMCheckCommand = FakeCommand(
+  command: <String>['sysctl', 'hw.optional.arm64'],
+  stdout: 'hw.optional.arm64: 1',
+);
+
 void main() {
   late FakeProcessManager fakeProcessManager;
 
@@ -148,8 +162,8 @@ void main() {
 
     testWithoutContext('macOS x64', () async {
       fakeProcessManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
       ]);
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(operatingSystem: 'macos'),
@@ -160,11 +174,8 @@ void main() {
 
     testWithoutContext('macOS ARM64', () async {
       fakeProcessManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-        const FakeCommand(
-          command: <String>['sysctl', 'hw.optional.arm64'],
-          stdout: 'sysctl hw.optional.arm64: 1',
-        ),
+        kWhichSysctlCommand,
+        kARMCheckCommand,
       ]);
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(operatingSystem: 'macos'),
@@ -184,11 +195,8 @@ void main() {
         const FakeCommand(command: <String>['sw_vers', '-productVersion'], stdout: 'version'),
         const FakeCommand(command: <String>['sw_vers', '-buildVersion'], stdout: 'build'),
         const FakeCommand(command: <String>['uname', '-m'], stdout: 'arm64'),
-        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-        const FakeCommand(
-          command: <String>['sysctl', 'hw.optional.arm64'],
-          stdout: 'sysctl hw.optional.arm64: 1',
-        ),
+        kWhichSysctlCommand,
+        kARMCheckCommand,
       ]);
 
       final OperatingSystemUtils utils = createOSUtils(
@@ -207,11 +215,8 @@ void main() {
           command: <String>['uname', '-m'],
           stdout: 'x86_64', // Running on Rosetta
         ),
-        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-        const FakeCommand(
-          command: <String>['sysctl', 'hw.optional.arm64'],
-          stdout: 'sysctl hw.optional.arm64: 1',
-        ),
+        kWhichSysctlCommand,
+        kARMCheckCommand,
       ]);
 
       final OperatingSystemUtils utils = createOSUtils(
@@ -227,8 +232,8 @@ void main() {
         const FakeCommand(command: <String>['sw_vers', '-productVersion'], stdout: 'version'),
         const FakeCommand(command: <String>['sw_vers', '-buildVersion'], stdout: 'build'),
         const FakeCommand(command: <String>['uname', '-m'], stdout: 'x86_64'),
-        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
       ]);
 
       final OperatingSystemUtils utils = createOSUtils(

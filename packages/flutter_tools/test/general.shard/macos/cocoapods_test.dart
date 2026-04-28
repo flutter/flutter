@@ -30,6 +30,20 @@ import '../../src/throwing_pub.dart';
 enum _StdioStream { stdout, stderr }
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
+
+  // ARM host.
+  const kARMCheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    stdout: 'hw.optional.arm64: 1',
+  );
+
   late MemoryFileSystem fileSystem;
   late FakeProcessManager fakeProcessManager;
   late CocoaPods cocoaPodsUnderTest;
@@ -1229,11 +1243,8 @@ end''');
                 stdout: outputStream == _StdioStream.stdout ? cocoaPodsError : '',
                 stderr: outputStream == _StdioStream.stderr ? cocoaPodsError : '',
               ),
-              const FakeCommand(command: <String>['which', 'sysctl']),
-              const FakeCommand(
-                command: <String>['sysctl', 'hw.optional.arm64'],
-                stdout: 'hw.optional.arm64: 1',
-              ),
+              kWhichSysctlCommand,
+              kARMCheckCommand,
             ]);
 
             await expectToolExitLater(
@@ -1286,8 +1297,8 @@ end''');
           stderr:
               'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
         ),
-        const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
       ]);
 
       // Capture Usage.test() events.
