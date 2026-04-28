@@ -1024,6 +1024,48 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Single-row Table does not crash when a cell child paints below the row bottom', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/177038.
+    final semantics = SemanticsTester(tester);
+
+    // OverflowBox lets its child exceed the cell's vertical bounds, so the
+    // child's semantic rect extends below the table.
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Table(
+          children: const <TableRow>[
+            TableRow(
+              children: <Widget>[
+                SizedBox(
+                  height: 20,
+                  child: OverflowBox(
+                    maxHeight: double.infinity,
+                    alignment: Alignment.topLeft,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        SizedBox(height: 10, child: Text('A')),
+                        SizedBox(height: 10, child: Text('B')),
+                        // This Text's semantic rect top will be >= row's
+                        // bottom (20).
+                        SizedBox(height: 10, child: Text('C')),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    semantics.dispose();
+  });
+
   testWidgets('Table reuse the semantics nodes for cell wrappers', (WidgetTester tester) async {
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);

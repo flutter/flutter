@@ -439,8 +439,9 @@ TEST_F(WindowsTest, GetEngineGraphicsAdapter) {
   ASSERT_NE(controller, nullptr);
   auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
 
-  Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
-  dxgi_adapter = FlutterDesktopEngineGetGraphicsAdapter(engine);
+  // Can't use smart pointer because the result is not a real COM object.
+  IDXGIAdapter* dxgi_adapter;
+  ASSERT_TRUE(FlutterDesktopEngineGetGraphicsAdapter(engine, &dxgi_adapter));
   ASSERT_NE(dxgi_adapter, nullptr);
   DXGI_ADAPTER_DESC desc{};
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
@@ -504,8 +505,9 @@ TEST_F(WindowsTest, GetEngineGraphicsAdapterWithLowPowerPreference) {
   ASSERT_NE(controller, nullptr);
   auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
 
-  Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
-  dxgi_adapter = FlutterDesktopEngineGetGraphicsAdapter(engine);
+  // Can't use smart pointer because the result is not a real COM object.
+  IDXGIAdapter* dxgi_adapter;
+  ASSERT_TRUE(FlutterDesktopEngineGetGraphicsAdapter(engine, &dxgi_adapter));
   ASSERT_NE(dxgi_adapter, nullptr);
   DXGI_ADAPTER_DESC desc{};
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
@@ -527,8 +529,9 @@ TEST_F(WindowsTest, GetEngineGraphicsAdapterWithHighPerformancePreference) {
   ASSERT_NE(controller, nullptr);
   auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
 
-  Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
-  dxgi_adapter = FlutterDesktopEngineGetGraphicsAdapter(engine);
+  // Can't use smart pointer because the result is not a real COM object.
+  IDXGIAdapter* dxgi_adapter;
+  ASSERT_TRUE(FlutterDesktopEngineGetGraphicsAdapter(engine, &dxgi_adapter));
   ASSERT_NE(dxgi_adapter, nullptr);
   DXGI_ADAPTER_DESC desc{};
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));

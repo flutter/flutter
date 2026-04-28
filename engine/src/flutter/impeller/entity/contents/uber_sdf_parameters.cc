@@ -4,8 +4,6 @@
 
 #include "impeller/entity/contents/uber_sdf_parameters.h"
 
-#include "impeller/geometry/constants.h"
-
 namespace impeller {
 
 UberSDFParameters UberSDFParameters::MakeRect(
@@ -51,9 +49,7 @@ UberSDFParameters UberSDFParameters::MakeOval(
     Color color,
     const Rect& bounds,
     std::optional<StrokeParameters> stroke) {
-  // Size here refers to the extent of the oval along each axis from the center
-  Point size = Point(bounds.GetSize() * 0.5);
-
+  Point size = Point(bounds.GetSize() * 0.5f);
   return UberSDFParameters{.type = Type::kOval,
                            .color = color,
                            .center = bounds.GetCenter(),
@@ -73,6 +69,26 @@ UberSDFParameters UberSDFParameters::MakeRoundedRect(
                            .size = size,
                            .stroke = stroke,
                            .radii = radii};
+}
+
+UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
+    Color color,
+    const Rect& rect,
+    Scalar degree,
+    const RoundingRadii& radii,
+    Scalar corner_angle_span,
+    Point corner_circle_center,
+    std::optional<StrokeParameters> stroke) {
+  Point size = Point(rect.GetSize() * 0.5f);
+  return UberSDFParameters{.type = Type::kRoundSuperellipse,
+                           .color = color,
+                           .center = rect.GetCenter(),
+                           .size = size,
+                           .stroke = stroke,
+                           .radii = radii,
+                           .superellipse_degree = degree,
+                           .corner_angle_span = corner_angle_span,
+                           .corner_circle_center = corner_circle_center};
 }
 
 }  // namespace impeller
