@@ -64,7 +64,7 @@ void main() {
         platform: FakePlatform(),
         androidSdk: androidSdk,
       );
-      final File apkFile = fileSystem.file('app-debug.apk')..createSync();
+      final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
         id: 'FlutterApp',
         applicationPackage: apkFile,
@@ -89,7 +89,7 @@ void main() {
       );
       processManager.addCommand(
         const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-debug.apk'],
+          command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-release.apk'],
         ),
       );
       processManager.addCommand(kShaCommand);
@@ -108,9 +108,6 @@ void main() {
             'android.intent.category.LAUNCHER',
             '-f',
             '0x20000000',
-            '--ez',
-            'enable-dart-profiling',
-            'true',
             'FlutterActivity',
           ],
         ),
@@ -119,7 +116,7 @@ void main() {
       final LaunchResult launchResult = await device.startApp(
         apk,
         prebuiltApplication: true,
-        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
+        debuggingOptions: DebuggingOptions.disabled(BuildInfo.release, enableDartProfiling: false),
         platformArgs: <String, dynamic>{},
       );
 
@@ -140,7 +137,7 @@ void main() {
         platform: FakePlatform(),
         androidSdk: androidSdk,
       );
-      final File apkFile = fileSystem.file('app-debug.apk')..createSync();
+      final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
         id: 'FlutterApp',
         applicationPackage: apkFile,
@@ -163,7 +160,7 @@ void main() {
       );
       processManager.addCommand(
         const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-debug.apk'],
+          command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-release.apk'],
         ),
       );
       processManager.addCommand(kShaCommand);
@@ -183,9 +180,6 @@ void main() {
             '-f',
             '0x20000000',
             '--ez',
-            'enable-dart-profiling',
-            'true',
-            '--ez',
             'enable-impeller',
             'true',
             '--ez',
@@ -203,6 +197,7 @@ void main() {
           BuildInfo.release,
           enableImpeller: ImpellerStatus.enabled,
           enableHcpp: true,
+          enableDartProfiling: false,
         ),
         platformArgs: <String, dynamic>{},
       );
