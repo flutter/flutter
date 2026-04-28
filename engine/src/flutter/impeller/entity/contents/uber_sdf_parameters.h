@@ -10,7 +10,9 @@
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
+#include "impeller/geometry/round_rect.h"
 #include "impeller/geometry/stroke_parameters.h"
+#include "impeller/geometry/vector.h"
 
 namespace impeller {
 
@@ -25,6 +27,8 @@ struct UberSDFParameters {
     kCircle,
     kRect,
     kOval,
+    kRoundedRect,
+    kRoundSuperellipse,
   };
 
   /// Creates UberSDFParameters for a rectangle.
@@ -43,6 +47,23 @@ struct UberSDFParameters {
                                     const Rect& bounds,
                                     std::optional<StrokeParameters> stroke);
 
+  /// Creates UberSDFParameters for a rounded rectangle.
+  static UberSDFParameters MakeRoundedRect(
+      Color color,
+      const Rect& rect,
+      const RoundingRadii& radii,
+      std::optional<StrokeParameters> stroke);
+
+  /// Creates UberSDFParameters for a symmetric round superellipse.
+  static UberSDFParameters MakeRoundedSuperellipse(
+      Color color,
+      const Rect& bounds,
+      Scalar degree,
+      const RoundingRadii& radii,
+      Scalar corner_angle_span,
+      Point corner_circle_center,
+      std::optional<StrokeParameters> stroke);
+
   /// The type of shape to render.
   Type type;
 
@@ -59,6 +80,19 @@ struct UberSDFParameters {
 
   /// The stroke parameters. If std::nullopt, the shape is filled.
   std::optional<StrokeParameters> stroke;
+
+  /// The corner radii for a rounded shapes.
+  /// Used for kRoundedRectangle and kRoundSuperellipse.
+  RoundingRadii radii;
+
+  /// The degree of a RoundSuperellipse.
+  Scalar superellipse_degree;
+
+  /// The span of the circular arc in a RoundSuperellipse
+  Scalar corner_angle_span;
+
+  /// The center of the circular arc in a RoundSuperellipse
+  Point corner_circle_center;
 };
 
 }  // namespace impeller

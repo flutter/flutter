@@ -6,13 +6,15 @@
 #define FLUTTER_IMPELLER_DISPLAY_LIST_IMAGE_FILTER_H_
 
 #include "display_list/effects/dl_image_filter.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 
 namespace impeller {
 
 /// @brief  Generate a new FilterContents using this filter's configuration.
 ///
-std::shared_ptr<FilterContents> WrapInput(const flutter::DlImageFilter* filter,
+std::shared_ptr<FilterContents> WrapInput(const ContentContext& renderer,
+                                          const flutter::DlImageFilter* filter,
                                           const FilterInput::Ref& input);
 
 }  // namespace impeller

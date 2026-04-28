@@ -56,6 +56,8 @@ source_set("InternalFlutterSwift") {
   sources = [
     "framework/Source/AccessibilityFeatures.swift",
     "framework/Source/ConnectionCollection.swift",
+    "framework/Source/LaunchEngine.swift",
+    "framework/Source/SplashScreenManager.swift",
     "framework/Source/UIPressProxy.swift",
   ]
   public = _flutter_framework_headers + framework_common_headers
@@ -95,10 +97,10 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterHeadlessDartRunner.mm",
     "framework/Source/FlutterKeyPrimaryResponder.h",
     "framework/Source/FlutterKeySecondaryResponder.h",
+    "framework/Source/FlutterKeyboardInsetManager.h",
+    "framework/Source/FlutterKeyboardInsetManager.mm",
     "framework/Source/FlutterKeyboardManager.h",
     "framework/Source/FlutterKeyboardManager.mm",
-    "framework/Source/FlutterLaunchEngine.h",
-    "framework/Source/FlutterLaunchEngine.m",
     "framework/Source/FlutterMetalLayer.h",
     "framework/Source/FlutterMetalLayer.mm",
     "framework/Source/FlutterOverlayView.h",
@@ -222,6 +224,8 @@ if (enable_ios_unittests) {
       "framework/Source/AccessibilityFeaturesTests.swift",
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/FakeUIPressProxy.swift",
+      "framework/Source/LaunchEngineTest.swift",
+      "framework/Source/SplashScreenManagerTests.swift",
     ]
     frameworks = [ "XCTest.framework" ]
     deps = [ ":flutter_framework_source" ]
@@ -260,7 +264,6 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterFakeKeyEvents.h",
       "framework/Source/FlutterFakeKeyEvents.mm",
       "framework/Source/FlutterKeyboardManagerTest.mm",
-      "framework/Source/FlutterLaunchEngineTest.mm",
       "framework/Source/FlutterMetalLayerTest.mm",
       "framework/Source/FlutterPlatformPluginTest.mm",
       "framework/Source/FlutterPlatformViewsTest.mm",

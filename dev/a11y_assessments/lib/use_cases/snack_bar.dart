@@ -7,13 +7,16 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class SnackBarUseCase extends UseCase {
-  SnackBarUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  SnackBarUseCase();
 
   @override
   String get name => 'SnackBar';
 
   @override
   String get route => '/snack-bar';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const MainWidget();

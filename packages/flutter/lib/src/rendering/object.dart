@@ -2522,16 +2522,14 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// This is only set in debug mode. In general, render objects should not need
   /// to condition their runtime behavior on whether they are dirty or not,
   /// since they should only be marked dirty immediately prior to being laid
-  /// out and painted. In release builds, this throws.
+  /// out and painted. Always returns false in non-debug builds.
   ///
   /// It is intended to be used by tests and asserts.
   bool get debugNeedsLayout {
-    late bool result;
-    assert(() {
-      result = _needsLayout;
-      return true;
-    }());
-    return result;
+    if (!kDebugMode) {
+      return false;
+    }
+    return _needsLayout;
   }
 
   bool _needsLayout = true;
@@ -3264,7 +3262,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// This is only set in debug mode. In general, render objects should not need
   /// to condition their runtime behavior on whether they are dirty or not,
   /// since they should only be marked dirty immediately prior to being laid
-  /// out and painted. (In release builds, this throws.)
+  /// out and painted. Always returns false in non-debug builds.
   ///
   /// It is intended to be used by tests and asserts.
   ///
@@ -3274,12 +3272,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// [markNeedsPaint] method is implicitly called by the framework after a
   /// render object is laid out, prior to the paint phase.
   bool get debugNeedsPaint {
-    late bool result;
-    assert(() {
-      result = _needsPaint;
-      return true;
-    }());
-    return result;
+    if (!kDebugMode) {
+      return false;
+    }
+    return _needsPaint;
   }
 
   bool _needsPaint = true;
@@ -3289,16 +3285,14 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// This is only set in debug mode. In general, render objects should not need
   /// to condition their runtime behavior on whether they are dirty or not,
   /// since they should only be marked dirty immediately prior to being laid
-  /// out and painted. (In release builds, this throws.)
+  /// out and painted. Always returns false in non-debug builds.
   ///
   /// It is intended to be used by tests and asserts.
   bool get debugNeedsCompositedLayerUpdate {
-    late bool result;
-    assert(() {
-      result = _needsCompositedLayerUpdate;
-      return true;
-    }());
-    return result;
+    if (!kDebugMode) {
+      return false;
+    }
+    return _needsCompositedLayerUpdate;
   }
 
   bool _needsCompositedLayerUpdate = false;
@@ -4700,15 +4694,16 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
 
   bool _hasPendingSystemFontsDidChangeCallBack = false;
   void _scheduleSystemFontsUpdate() {
-    assert(
-      SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle,
-      '${objectRuntimeType(this, "RelayoutWhenSystemFontsChangeMixin")}._scheduleSystemFontsUpdate() '
-      'called during ${SchedulerBinding.instance.schedulerPhase}.',
-    );
     if (_hasPendingSystemFontsDidChangeCallBack) {
       return;
     }
     _hasPendingSystemFontsDidChangeCallBack = true;
+
+    // The system fonts notification can arrive during any scheduler phase
+    // (e.g. midFrameMicrotasks on web when fonts load asynchronously).
+    // scheduleFrameCallback is safe to call during any phase; if called
+    // mid-frame, the callback runs in the next frame's transient callback
+    // phase since handleBeginFrame snapshots and replaces _transientCallbacks.
     SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
       assert(_hasPendingSystemFontsDidChangeCallBack);
       _hasPendingSystemFontsDidChangeCallBack = false;

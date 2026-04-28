@@ -11,9 +11,26 @@
 namespace impeller {
 
 class AiksContext;
+class Context;
+class ContentContext;
 
-class DlImageImpeller final : public flutter::DlImage {
+class DlImageImpeller : public flutter::DlImage {
  public:
+  // |DlImage|
+  Type GetImageType() const override { return Type::kImpeller; }
+
+  // |DlImage|
+  const DlImageImpeller* asImpellerImage() const override { return this; }
+
+  // |DlImage|
+  bool isTextureBacked() const override { return true; }
+
+  virtual std::shared_ptr<Texture> GetImpellerTexture(
+      const std::shared_ptr<Context>& context) const = 0;
+
+  std::shared_ptr<Texture> GetCachedTexture(
+      const ContentContext& renderer) const;
+
   static sk_sp<DlImageImpeller> Make(
       std::shared_ptr<Texture> texture,
       OwningContext owning_context = OwningContext::kIO);
@@ -23,44 +40,32 @@ class DlImageImpeller final : public flutter::DlImage {
       std::shared_ptr<Texture> y_texture,
       std::shared_ptr<Texture> uv_texture,
       YUVColorSpace yuv_color_space);
+};
 
-  // |DlImage|
-  ~DlImageImpeller() override;
+class DlImageImpellerTexture final : public DlImageImpeller {
+ public:
+  DlImageImpellerTexture(std::shared_ptr<Texture> texture,
+                         OwningContext owning_context);
 
-  // |DlImage|
-  sk_sp<SkImage> skia_image() const override;
+  ~DlImageImpellerTexture() override;
 
-  // |DlImage|
-  std::shared_ptr<impeller::Texture> impeller_texture() const override;
+  // |DlImageImpeller|
+  std::shared_ptr<Texture> GetImpellerTexture(
+      const std::shared_ptr<Context>& context) const override;
 
-  // |DlImage|
+  flutter::DlColorSpace GetColorSpace() const override;
   bool isOpaque() const override;
-
-  // |DlImage|
-  bool isTextureBacked() const override;
-
-  // |DlImage|
   bool isUIThreadSafe() const override;
-
-  // |DlImage|
   flutter::DlISize GetSize() const override;
-
-  // |DlImage|
   size_t GetApproximateByteSize() const override;
-
-  // |DlImage|
   OwningContext owning_context() const override { return owning_context_; }
 
  private:
   std::shared_ptr<Texture> texture_;
   OwningContext owning_context_;
 
-  explicit DlImageImpeller(std::shared_ptr<Texture> texture,
-                           OwningContext owning_context = OwningContext::kIO);
-
-  DlImageImpeller(const DlImageImpeller&) = delete;
-
-  DlImageImpeller& operator=(const DlImageImpeller&) = delete;
+  DlImageImpellerTexture(const DlImageImpellerTexture&) = delete;
+  DlImageImpellerTexture& operator=(const DlImageImpellerTexture&) = delete;
 };
 
 }  // namespace impeller

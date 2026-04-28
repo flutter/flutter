@@ -1096,7 +1096,7 @@ void main() {
   });
 
   testWidgets('ImageInfo.isCloneOf returns false when scales differ', (WidgetTester tester) async {
-    final Image image = await createTestImage(width: 10, height: 10);
+    final Image image = image20x10.clone();
     addTearDown(image.dispose);
 
     final imageInfo1 = ImageInfo(image: image.clone());
@@ -1111,7 +1111,7 @@ void main() {
   testWidgets('ImageInfo.isCloneOf returns true when all properties match', (
     WidgetTester tester,
   ) async {
-    final Image image = await createTestImage(width: 10, height: 10);
+    final Image image = image20x10.clone();
     addTearDown(image.dispose);
 
     final imageInfo1 = ImageInfo(image: image.clone(), scale: 2.0);
