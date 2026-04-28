@@ -22,10 +22,7 @@ const kPath2 = '/another/bin/$kExecutable';
 const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
 
 // x64 host.
-const kx64CheckCommand = FakeCommand(
-  command: <String>['sysctl', 'hw.optional.arm64'],
-  exitCode: 1,
-);
+const kx64CheckCommand = FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1);
 
 // ARM host.
 const kARMCheckCommand = FakeCommand(
@@ -161,10 +158,7 @@ void main() {
     });
 
     testWithoutContext('macOS x64', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
-      ]);
+      fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kx64CheckCommand]);
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(operatingSystem: 'macos'),
         currentAbi: Abi.macosX64,
@@ -173,10 +167,7 @@ void main() {
     });
 
     testWithoutContext('macOS ARM64', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[
-        kWhichSysctlCommand,
-        kARMCheckCommand,
-      ]);
+      fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kARMCheckCommand]);
       final OperatingSystemUtils utils = createOSUtils(
         FakePlatform(operatingSystem: 'macos'),
         currentAbi: Abi.macosArm64,

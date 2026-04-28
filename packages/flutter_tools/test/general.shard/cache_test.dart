@@ -1135,10 +1135,7 @@ void main() {
   });
 
   testWithoutContext('FontSubset artifacts on macos', () {
-    fakeProcessManager.addCommands(<FakeCommand>[
-      kWhichSysctlCommand,
-      kx64CheckCommand,
-    ]);
+    fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kx64CheckCommand]);
 
     final Cache cache = createCache(
       FakePlatform(operatingSystem: 'macos'),
