@@ -13,6 +13,9 @@
 #
 # @param[required] metal_version  The Metal language version to compile for.
 #
+
+import("//flutter/impeller/tools/args.gni")
+
 template("metal_library") {
   assert(is_ios || is_mac)
   assert(defined(invoker.name), "Metal library name must be specified.")
@@ -33,7 +36,7 @@ template("metal_library") {
                              "args",
                            ])
 
-    inputs = invoker.sources
+    inputs = invoker.sources + [ "//flutter/impeller/tools/metal_library.py" ]
 
     metal_library_path = "$root_out_dir/shaders/$metal_library_name.metallib"
     metal_library_symbols_path =
@@ -55,6 +58,10 @@ template("metal_library") {
       rebase_path(depfile),
       "--metal-version=$metal_version",
     ]
+
+    if (impeller_debug) {
+      args += [ "--debug" ]
+    }
 
     if (is_ios) {
       if (use_ios_simulator) {
