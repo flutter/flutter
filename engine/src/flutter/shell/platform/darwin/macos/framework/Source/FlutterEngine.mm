@@ -748,8 +748,9 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     mergedPlatformUIThread = enableMergedPlatformUIThread.boolValue;
   }
 
-  if (mergedPlatformUIThread) {
-    NSLog(@"Running with merged UI and platform thread. Experimental.");
+  if (!mergedPlatformUIThread) {
+    NSLog(@"Running with unmerged UI and platform thread. "
+           "This will be removed in a future release.");
   }
 
   // The task description needs to be created separately for platform task
