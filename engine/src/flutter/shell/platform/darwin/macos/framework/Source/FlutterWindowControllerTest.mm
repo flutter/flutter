@@ -501,7 +501,8 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentResizable) {
 
   auto controller = [engine viewControllerForIdentifier:viewId];
   auto window = controller.view.window;
-  while (window.frame.size.width != 150) {
+  CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
+  while (window.frame.size.width != 150 && CFAbsoluteTimeGetCurrent() - startTime < 5) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
   }
 
@@ -556,7 +557,8 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContent) {
   auto controller = [engine viewControllerForIdentifier:viewId];
   auto window = controller.view.window;
 
-  while (window.frame.size.width != 150) {
+  CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
+  while (window.frame.size.width != 150 && CFAbsoluteTimeGetCurrent() - startTime < 5) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
   }
 
@@ -567,7 +569,8 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContent) {
 
   // Wait until the second frame is rendered, which should resize the window based
   // on new content.
-  while (window.frame.size.width == 150) {
+  startTime = CFAbsoluteTimeGetCurrent();
+  while (window.frame.size.width == 150 && CFAbsoluteTimeGetCurrent() - startTime < 5) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
   }
 
