@@ -5,49 +5,22 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'radio_group_tester.dart';
 import 'radio_tester.dart';
 import 'widgets_app_tester.dart';
-
-/// A stateful wrapper that hosts a [RadioGroup] with a mutable [groupValue],
-/// making it easy to pump and interact with [TestRadio] buttons in tests.
-class _TestRadioGroup<T> extends StatefulWidget {
-  const _TestRadioGroup({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  State<_TestRadioGroup<T>> createState() => _TestRadioGroupState<T>();
-}
-
-class _TestRadioGroupState<T> extends State<_TestRadioGroup<T>> {
-  T? groupValue;
-
-  @override
-  Widget build(BuildContext context) {
-    return RadioGroup<T>(
-      onChanged: (T? newValue) {
-        setState(() {
-          groupValue = newValue;
-        });
-      },
-      groupValue: groupValue,
-      child: widget.child,
-    );
-  }
-}
 
 void main() {
   testWidgets('TestRadio renders and can be selected', (WidgetTester tester) async {
     await tester.pumpWidget(
       const TestWidgetsApp(
-        home: _TestRadioGroup<int>(
+        home: TestRadioGroup<int>(
           child: Column(children: <Widget>[TestRadio<int>(value: 0), TestRadio<int>(value: 1)]),
         ),
       ),
     );
 
-    final _TestRadioGroupState<int> state = tester.state<_TestRadioGroupState<int>>(
-      find.byType(_TestRadioGroup<int>),
+    final TestRadioGroupState<int> state = tester.state<TestRadioGroupState<int>>(
+      find.byType(TestRadioGroup<int>),
     );
 
     expect(state.groupValue, isNull);
@@ -64,7 +37,7 @@ void main() {
   testWidgets('TestRadio disabled cannot be selected', (WidgetTester tester) async {
     await tester.pumpWidget(
       const TestWidgetsApp(
-        home: _TestRadioGroup<int>(
+        home: TestRadioGroup<int>(
           child: Column(
             children: <Widget>[TestRadio<int>(value: 0, enabled: false), TestRadio<int>(value: 1)],
           ),
@@ -72,8 +45,8 @@ void main() {
       ),
     );
 
-    final _TestRadioGroupState<int> state = tester.state<_TestRadioGroupState<int>>(
-      find.byType(_TestRadioGroup<int>),
+    final TestRadioGroupState<int> state = tester.state<TestRadioGroupState<int>>(
+      find.byType(TestRadioGroup<int>),
     );
 
     await tester.tap(find.byType(TestRadio<int>).first);
@@ -92,7 +65,7 @@ void main() {
 
     await tester.pumpWidget(
       TestWidgetsApp(
-        home: _TestRadioGroup<int>(
+        home: TestRadioGroup<int>(
           child: Column(
             children: <Widget>[
               TestRadio<int>(key: key0, value: 0),
@@ -130,7 +103,7 @@ void main() {
 
     await tester.pumpWidget(
       TestWidgetsApp(
-        home: _TestRadioGroup<int>(
+        home: TestRadioGroup<int>(
           child: Column(children: <Widget>[TestRadio<int>(key: key, value: 0, enabled: false)]),
         ),
       ),
@@ -145,7 +118,7 @@ void main() {
   testWidgets('TestRadio has correct size', (WidgetTester tester) async {
     await tester.pumpWidget(
       const TestWidgetsApp(
-        home: _TestRadioGroup<int>(child: Column(children: <Widget>[TestRadio<int>(value: 0)])),
+        home: TestRadioGroup<int>(child: Column(children: <Widget>[TestRadio<int>(value: 0)])),
       ),
     );
 
@@ -159,7 +132,7 @@ void main() {
 
     await tester.pumpWidget(
       TestWidgetsApp(
-        home: _TestRadioGroup<int>(
+        home: TestRadioGroup<int>(
           child: Column(children: <Widget>[TestRadio<int>(value: 0, focusNode: focusNode)]),
         ),
       ),

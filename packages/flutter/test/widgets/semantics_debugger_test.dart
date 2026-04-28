@@ -587,27 +587,6 @@ String _getMessageShownInSemanticsDebugger({
       as String;
 }
 
-/// A minimal slider widget for testing SemanticsDebugger interactions without
-/// depending on the Material library.
-class _TestSlider extends StatelessWidget {
-  const _TestSlider({required this.value, required this.onChanged});
-
-  final double value;
-  final ValueChanged<double> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      value: '${(value * 100).round()}%',
-      increasedValue: '${((value + 0.1).clamp(0.0, 1.0) * 100).round()}%',
-      decreasedValue: '${((value - 0.1).clamp(0.0, 1.0) * 100).round()}%',
-      onIncrease: () => onChanged((value + 0.1).clamp(0.0, 1.0)),
-      onDecrease: () => onChanged((value - 0.1).clamp(0.0, 1.0)),
-      child: const SizedBox(width: 200, height: 36),
-    );
-  }
-}
-
 dynamic _getSemanticsDebuggerPainter({required Key debuggerKey, required WidgetTester tester}) {
   final customPaint =
       tester

@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'checkbox_tester.dart';
 import 'editable_text_tester.dart';
+import 'radio_group_tester.dart';
 import 'radio_tester.dart';
 import 'widgets_app_tester.dart';
 
@@ -538,30 +539,4 @@ void main() {
     );
     expect(tester.getSize(find.byType(RadioGroup<int>)), Size.zero);
   });
-}
-
-class TestRadioGroup<T> extends StatefulWidget {
-  const TestRadioGroup({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  State<StatefulWidget> createState() => TestRadioGroupState<T>();
-}
-
-class TestRadioGroupState<T> extends State<TestRadioGroup<T>> {
-  T? groupValue;
-
-  @override
-  Widget build(BuildContext context) {
-    return RadioGroup<T>(
-      onChanged: (T? newValue) {
-        setState(() {
-          groupValue = newValue;
-        });
-      },
-      groupValue: groupValue,
-      child: widget.child,
-    );
-  }
 }
