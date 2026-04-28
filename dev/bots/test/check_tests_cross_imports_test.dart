@@ -95,17 +95,18 @@ void main() {
     ); // [intended]: No message is needed when there are no known cross imports.
 
     test('unknown $libraryName cross import of Material', () async {
-      final String extra = 'packages/$libraryName/foo_test.dart'.replaceAll(
-        '/',
-        Platform.pathSeparator,
-      );
+      final Set<String> extras = {
+        'packages/$libraryName/foo_test.dart'.replaceAll('/', Platform.pathSeparator),
+        'packages/$libraryName/foo_test_utils.dart'.replaceAll('/', Platform.pathSeparator),
+      };
+
       final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(
         libraryName,
         checker.testsDirectory,
       );
 
       buildKnownCrossImportTestFiles();
-      writeImportInFiles(<String>{extra}, inDirectory: testFilesDirectory);
+      writeImportInFiles(extras, inDirectory: testFilesDirectory);
 
       bool? success;
       final String result = await capture(() async {
@@ -115,7 +116,8 @@ void main() {
           <String>[
                 '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
                 '║ The following test in packages/$libraryName has a disallowed import of Material. Refactor it or move it to Material.',
-                '║   $extra',
+                '║   ${extras.first}',
+                '║   ${extras.last}',
                 '╚═══════════════════════════════════════════════════════════════════════════════',
               ]
               .map((String line) {
@@ -127,10 +129,10 @@ void main() {
     });
 
     test('unknown $libraryName cross import of Cupertino', () async {
-      final String extra = 'packages/$libraryName/foo_test.dart'.replaceAll(
-        '/',
-        Platform.pathSeparator,
-      );
+      final Set<String> extras = {
+        'packages/$libraryName/foo_test.dart'.replaceAll('/', Platform.pathSeparator),
+        'packages/$libraryName/foo_test_utils.dart'.replaceAll('/', Platform.pathSeparator),
+      };
       final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(
         libraryName,
         checker.testsDirectory,
@@ -138,7 +140,7 @@ void main() {
 
       buildKnownCrossImportTestFiles();
       writeImportInFiles(
-        <String>{extra},
+        extras,
         inDirectory: testFilesDirectory,
         importString: "import 'package:flutter/cupertino.dart';",
       );
@@ -151,7 +153,8 @@ void main() {
           <String>[
                 '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
                 '║ The following test in packages/$libraryName has a disallowed import of Cupertino. Refactor it or move it to Cupertino.',
-                '║   $extra',
+                '║   ${extras.first}',
+                '║   ${extras.last}',
                 '╚═══════════════════════════════════════════════════════════════════════════════',
               ]
               .map((String line) {
