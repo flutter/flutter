@@ -77,19 +77,6 @@ void vibrate(int durationMs) {
 external JSAny? get __imageDecoderConstructor;
 Object? get _imageDecoderConstructor => __imageDecoderConstructor?.toObjectShallow;
 
-/// Environment variable that allows the developer to opt out of using browser's
-/// `ImageDecoder` API, and use the WASM codecs bundled with CanvasKit.
-///
-/// While all reported severe issues with `ImageDecoder` have been fixed, this
-/// API remains relatively new. This option will allow developers to opt out of
-/// it, if they hit a severe bug that we did not anticipate.
-// TODO(yjbanov): remove this flag once we're fully confident in the new API.
-//                https://github.com/flutter/flutter/issues/95277
-const bool _browserImageDecodingEnabled = bool.fromEnvironment(
-  'BROWSER_IMAGE_DECODING_ENABLED',
-  defaultValue: true,
-);
-
 /// Whether the current browser supports `ImageDecoder`.
 bool browserSupportsImageDecoder = _defaultBrowserSupportsImageDecoder;
 
@@ -99,7 +86,6 @@ void debugResetBrowserSupportsImageDecoder() {
 }
 
 bool get _defaultBrowserSupportsImageDecoder =>
-    _browserImageDecodingEnabled &&
     _imageDecoderConstructor != null &&
     _isBrowserImageDecoderStable;
 
