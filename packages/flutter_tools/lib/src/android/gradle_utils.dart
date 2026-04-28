@@ -1113,7 +1113,7 @@ String getGradleVersionFor(String agpV) {
     GradleForAgp(agpMin: '8.11.0', agpMax: '8.11.99', minRequiredGradle: '8.13'),
     GradleForAgp(agpMin: '8.12.0', agpMax: '8.12.99', minRequiredGradle: '8.13'),
     GradleForAgp(agpMin: '8.13.0', agpMax: '8.13.99', minRequiredGradle: '8.13'),
-    GradleForAgp(agpMin: '9.0', agpMax: '9.0.99', minRequiredGradle: '9.0.0'),
+    GradleForAgp(agpMin: '9.0', agpMax: '9.0.99', minRequiredGradle: '9.1.0'),
     // Assume if AGP is newer than this code knows about return the highest gradle
     // version we know about.
     GradleForAgp(
