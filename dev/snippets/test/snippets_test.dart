@@ -95,9 +95,9 @@ On several lines.
         configuration.flutterRoot.path,
         'examples/api/widgets/foo/foo_example.0.dart',
       );
-      memoryFileSystem.file(examplePath)
-        ..create(recursive: true)
-        ..writeAsStringSync('''
+      final File exampleFile = memoryFileSystem.file(examplePath);
+      await exampleFile.create(recursive: true);
+      exampleFile.writeAsStringSync('''
 // Copyright
 
 // Flutter code sample for [MyElement].
@@ -201,9 +201,9 @@ On several lines.
         configuration.flutterRoot.path,
         'examples/api/widgets/foo/foo_example.0.dart',
       );
-      memoryFileSystem.file(examplePath)
-        ..create(recursive: true)
-        ..writeAsStringSync('''
+      final File exampleFile = memoryFileSystem.file(examplePath);
+      await exampleFile.create(recursive: true);
+      exampleFile.writeAsStringSync('''
 // Copyright
 
 // Flutter code sample for [MyElement].

@@ -149,19 +149,19 @@ class _StubPopupWindowController extends PopupWindowController {
   BaseWindowController get parent => _StubRegularWindowController(tester);
 
   @override
-  bool get isActivated => true;
-
-  @override
   Size get contentSize => Size.zero;
-
-  @override
-  void activate() {}
 
   @override
   void setConstraints(BoxConstraints constraints) {}
 
   @override
   void destroy() {}
+
+  @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {}
+
+  @override
+  Offset get offsetFromParent => Offset.zero;
 }
 
 class _StubSatelliteWindowController extends SatelliteWindowController {
@@ -217,7 +217,10 @@ void main() {
       test('default WindowingOwner throws when accessing createRegularWindowController', () {
         final WindowingOwner owner = createDefaultWindowingOwner();
         expect(
-          () => owner.createRegularWindowController(delegate: RegularWindowControllerDelegate()),
+          () => owner.createRegularWindowController(
+            delegate: RegularWindowControllerDelegate(),
+            resizable: true,
+          ),
           throwsUnsupportedError,
         );
       });
@@ -225,7 +228,10 @@ void main() {
       test('default WindowingOwner throws when accessing createDialogWindowController', () {
         final WindowingOwner owner = createDefaultWindowingOwner();
         expect(
-          () => owner.createDialogWindowController(delegate: DialogWindowControllerDelegate()),
+          () => owner.createDialogWindowController(
+            delegate: DialogWindowControllerDelegate(),
+            resizable: true,
+          ),
           throwsUnsupportedError,
         );
       });
@@ -1138,7 +1144,7 @@ void main() {
           ),
         );
 
-        expect(isActivated, equals(true));
+        expect(isActivated, isTrue);
       });
 
       testWidgets('Can access WindowScope.maybeIsActivatedOf for satellite windows', (

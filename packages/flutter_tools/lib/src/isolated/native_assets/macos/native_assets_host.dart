@@ -267,7 +267,10 @@ Uri frameworkUri(String fileName, Set<String> alreadyTakenNames) {
   if (isDylib && fileName.startsWith('lib')) {
     fileName = fileName.replaceFirst('lib', '');
   }
-  fileName = fileName.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '');
+  fileName = fileName.replaceAll(
+    RegExp(r'[^A-Za-z0-9._-]'),
+    '',
+  ); // Allow period chars in framework names, as per Apple's syntax rules (fixes issue https://github.com/dart-lang/native/issues/3268#issue-4152803855)
   if (alreadyTakenNames.contains(fileName)) {
     final prefixName = fileName;
     for (var i = 1; i < 1000; i++) {

@@ -18,6 +18,7 @@
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/canvas.h"
 #include "impeller/display_list/dl_atlas_geometry.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"
@@ -678,6 +679,14 @@ void DlDispatcherBase::drawPoints(flutter::DlPointMode mode,
   }
 }
 
+std::shared_ptr<Texture> DlDispatcherBase::GetTexture(
+    const sk_sp<flutter::DlImage>& image) {
+  if (!image) {
+    return nullptr;
+  }
+  return image->asImpellerImage()->GetCachedTexture(GetContentContext());
+}
+
 void DlDispatcherBase::drawVertices(
     const std::shared_ptr<flutter::DlVertices>& vertices,
     flutter::DlBlendMode dl_mode) {}
@@ -693,7 +702,7 @@ void DlDispatcherBase::drawImage(const sk_sp<flutter::DlImage> image,
     return;
   }
 
-  auto texture = image->impeller_texture();
+  auto texture = GetTexture(image);
   if (!texture) {
     return;
   }
@@ -722,7 +731,7 @@ void DlDispatcherBase::drawImageRect(const sk_sp<flutter::DlImage> image,
   AUTO_DEPTH_WATCHER(1u);
 
   GetCanvas().DrawImageRect(
-      image->impeller_texture(),                       // image
+      GetTexture(image),                               // image
       src,                                             // source rect
       dst,                                             // destination rect
       render_with_attributes ? paint_ : Paint(),       // paint
@@ -739,7 +748,7 @@ void DlDispatcherBase::drawImageNine(const sk_sp<flutter::DlImage> image,
   AUTO_DEPTH_WATCHER(9u);
 
   NinePatchConverter converter = {};
-  converter.DrawNinePatch(image->impeller_texture(),
+  converter.DrawNinePatch(GetTexture(image),
                           Rect::MakeLTRB(center.GetLeft(), center.GetTop(),
                                          center.GetRight(), center.GetBottom()),
                           dst, ToSamplerDescriptor(filter), &GetCanvas(),
@@ -759,7 +768,7 @@ void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
   AUTO_DEPTH_WATCHER(1u);
 
   auto geometry =
-      DlAtlasGeometry(atlas->impeller_texture(),                        //
+      DlAtlasGeometry(GetTexture(atlas),                                //
                       xform,                                            //
                       tex,                                              //
                       colors,                                           //
@@ -933,7 +942,8 @@ CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
                                        bool has_root_backdrop_filter,
                                        flutter::DlBlendMode max_root_blend_mode,
                                        IRect32 cull_rect)
-    : canvas_(renderer,
+    : DlDispatcherBase(),
+      canvas_(renderer,
               render_target,
               is_onscreen,
               has_root_backdrop_filter ||
@@ -943,6 +953,10 @@ CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
 
 Canvas& CanvasDlDispatcher::GetCanvas() {
   return canvas_;
+}
+
+const ContentContext& CanvasDlDispatcher::GetContentContext() const {
+  return renderer_;
 }
 
 void CanvasDlDispatcher::drawVertices(
@@ -1085,9 +1099,7 @@ void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
     return;
   }
 
-  if (paint_.style == Paint::Style::kStroke) {
-    properties.stroke = paint_.stroke;
-  }
+  properties.stroke = paint_.GetStroke();
 
   if (text_frame->HasColor()) {
     // Alpha is always applied when rendering, remove it here so

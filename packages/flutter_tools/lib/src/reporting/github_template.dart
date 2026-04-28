@@ -69,7 +69,7 @@ class GitHubTemplateCreator {
       return 'String: <${NumberFormat(null, 'en_US').format(error.length)} characters>';
     }
     // Exception, other.
-    return error.runtimeType.toString();
+    return error.runtimeType.toString(); // ignore: avoid_type_to_string
   }
 
   /// GitHub URL to present to the user containing encoded suggested template.

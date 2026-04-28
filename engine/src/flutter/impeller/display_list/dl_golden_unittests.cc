@@ -111,6 +111,30 @@ TEST_P(DlGoldenTest, Bug147807) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(DlGoldenTest, FractionalDilation) {
+  auto draw = [](DlCanvas* canvas) {
+    const DlRect rect = DlRect::MakeLTRB(32, 32, 382, 382);
+    DlPaint layer_paint;
+    layer_paint.setImageFilter(DlImageFilter::MakeDilate(3.95f, 3.95f));
+    canvas->SaveLayer(rect.Expand(8.0f), &layer_paint);
+    canvas->DrawRect(rect, DlPaint().setColor(DlColor::kRed()));
+    canvas->Restore();
+    canvas->DrawRect(rect, DlPaint().setColor(DlColor::kBlack()));
+  };
+
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  draw(&builder);
+
+  builder.Translate(440, 0);
+  builder.Scale(1.3f, 1.3f);
+  draw(&builder);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 namespace {
 void DrawBlurGrid(DlCanvas* canvas) {
   DlPaint paint;

@@ -86,6 +86,12 @@ class StubFlutterWindowsApi {
     return reinterpret_cast<IDXGIAdapter*>(2);
   }
 
+  // Called for FlutterDesktopEngineGetGraphicsAdapter.
+  virtual bool EngineGetGraphicsAdapter(IDXGIAdapter** adapter_out) {
+    *adapter_out = reinterpret_cast<IDXGIAdapter*>(3);
+    return true;
+  }
+
   // Called for FlutterDesktopPluginRegistrarGetView.
   virtual FlutterDesktopViewRef PluginRegistrarGetView() { return nullptr; }
 

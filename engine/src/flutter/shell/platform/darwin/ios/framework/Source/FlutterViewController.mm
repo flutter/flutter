@@ -22,8 +22,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardInsetManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterLaunchEngine.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
@@ -64,7 +64,9 @@ typedef struct MouseState {
 // This is left a FlutterBinaryMessenger privately for now to give people a chance to notice the
 // change. Unfortunately unless you have Werror turned on, incompatible pointers as arguments are
 // just a warning.
-@interface FlutterViewController () <FlutterBinaryMessenger, UIScrollViewDelegate>
+@interface FlutterViewController () <FlutterBinaryMessenger,
+                                     UIScrollViewDelegate,
+                                     FlutterKeyboardInsetManagerDelegate>
 // TODO(dkwingsmt): Make the view ID property public once the iOS shell
 // supports multiple views.
 // https://github.com/flutter/flutter/issues/138168
@@ -74,6 +76,8 @@ typedef struct MouseState {
 // set up a shell along with its platform view before the view has to appear.
 @property(nonatomic, strong) FlutterView* flutterView;
 @property(nonatomic, strong) void (^flutterViewRenderedCallback)(void);
+
+@property(nonatomic, strong) FlutterSplashScreenManager* splashScreenManager;
 
 @property(nonatomic, assign) UIInterfaceOrientationMask orientationPreferences;
 @property(nonatomic, assign) UIStatusBarStyle statusBarStyle;
@@ -94,8 +98,6 @@ typedef struct MouseState {
 // UIScrollView with height zero and a content offset so we can get those events. See also:
 // https://github.com/flutter/flutter/issues/35050
 @property(nonatomic, strong) UIScrollView* scrollView;
-@property(nonatomic, strong) UIView* keyboardAnimationView;
-@property(nonatomic, strong) SpringAnimation* keyboardSpringAnimation;
 
 /**
  * Whether we should ignore viewport metrics updates during rotation transition.
@@ -104,12 +106,6 @@ typedef struct MouseState {
 /**
  * Keyboard animation properties
  */
-@property(nonatomic, assign) CGFloat targetViewInsetBottom;
-@property(nonatomic, assign) CGFloat originalViewInsetBottom;
-@property(nonatomic, strong) VSyncClient* keyboardAnimationVSyncClient;
-@property(nonatomic, assign) BOOL keyboardAnimationIsShowing;
-@property(nonatomic, assign) fml::TimePoint keyboardAnimationStartTime;
-@property(nonatomic, assign) BOOL isKeyboardInOrTransitioningFromBackground;
 
 /// Timestamp after which a scroll inertia cancel event should be inferred.
 @property(nonatomic, assign) NSTimeInterval scrollInertiaEventStartline;
@@ -161,17 +157,25 @@ typedef struct MouseState {
 - (void)onFirstFrameRendered;
 
 /// Handles updating viewport metrics on keyboard animation.
-- (void)handleKeyboardAnimationCallbackWithTargetTime:(fml::TimePoint)targetTime;
+
 @end
 
 @implementation FlutterViewController {
   flutter::ViewportMetrics _viewportMetrics;
   MouseState _mouseState;
+  FlutterSplashScreenManager* _splashScreenManager;
 }
 
 // Synthesize properties with an overridden getter/setter.
 @synthesize viewOpaque = _viewOpaque;
 @synthesize displayingFlutterUI = _displayingFlutterUI;
+
+- (FlutterSplashScreenManager*)splashScreenManager {
+  if (!_splashScreenManager) {
+    _splashScreenManager = [[FlutterSplashScreenManager alloc] init];
+  }
+  return _splashScreenManager;
+}
 
 // TODO(dkwingsmt): https://github.com/flutter/flutter/issues/138168
 // No backing ivar is currently required; when multiple views are supported, we'll need to
@@ -333,7 +337,7 @@ typedef struct MouseState {
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
   // Eliminate method calls in initializers and dealloc.
-  [self loadDefaultSplashScreenView];
+  [self.splashScreenManager loadDefaultSplashScreenView];
   [self performCommonViewControllerInitialization];
 }
 
@@ -361,6 +365,7 @@ typedef struct MouseState {
   _statusBarStyle = UIStatusBarStyleDefault;
 
   _accessibilityFeatures = [[FlutterAccessibilityFeatures alloc] init];
+  _keyboardInsetManager = [[FlutterKeyboardInsetManager alloc] initWithDelegate:self];
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
   // Eliminate method calls in initializers and dealloc.
@@ -568,21 +573,20 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 #pragma mark - Managing launch views
 
 - (void)installSplashScreenViewIfNecessary {
-  // Show the launch screen view again on top of the FlutterView if available.
-  // This launch screen view will be removed once the first Flutter frame is rendered.
+  // The splash screen is automatically loaded during initialization (if configured), but should
+  // only be shown during the cold start of the application when we're the root view controller.
+  //
+  // If we are being presented modally or pushed onto a navigation controller later,
+  // remove the splash screen immediately to avoid a jarring visual transition.
   if (self.splashScreenView && (self.isBeingPresented || self.isMovingToParentViewController)) {
+    // Explicitly remove from superview to bypass the fade-out animation.
     [self.splashScreenView removeFromSuperview];
     self.splashScreenView = nil;
     return;
   }
 
-  // Use the property getter to initialize the default value.
-  UIView* splashScreenView = self.splashScreenView;
-  if (splashScreenView == nil) {
-    return;
-  }
-  splashScreenView.frame = self.view.bounds;
-  [self.view addSubview:splashScreenView];
+  // Cold start. Install the splash screen. It will removed in onFirstFrameRendered.
+  [self.splashScreenManager installSplashScreenViewAsSubviewOf:self.view];
 }
 
 + (BOOL)automaticallyNotifiesObserversOfDisplayingFlutterUI {
@@ -610,27 +614,10 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   }
 }
 
-- (void)removeSplashScreenWithCompletion:(dispatch_block_t _Nullable)onComplete {
-  NSAssert(self.splashScreenView, @"The splash screen view must not be nil");
-  UIView* splashScreen = self.splashScreenView;
-  // setSplashScreenView calls this method. Assign directly to ivar to avoid an infinite loop.
-  _splashScreenView = nil;
-  [UIView animateWithDuration:0.2
-      animations:^{
-        splashScreen.alpha = 0;
-      }
-      completion:^(BOOL finished) {
-        [splashScreen removeFromSuperview];
-        if (onComplete) {
-          onComplete();
-        }
-      }];
-}
-
 - (void)onFirstFrameRendered {
   if (self.splashScreenView) {
     __weak FlutterViewController* weakSelf = self;
-    [self removeSplashScreenWithCompletion:^{
+    [self.splashScreenManager removeSplashScreenWithCompletion:^{
       [weakSelf callViewRenderedCallback];
     }];
   } else {
@@ -657,66 +644,15 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 }
 
 - (BOOL)loadDefaultSplashScreenView {
-  NSString* launchscreenName =
-      [[[NSBundle mainBundle] infoDictionary] objectForKey:@"UILaunchStoryboardName"];
-  if (launchscreenName == nil) {
-    return NO;
-  }
-  UIView* splashView = [self splashScreenFromStoryboard:launchscreenName];
-  if (!splashView) {
-    splashView = [self splashScreenFromXib:launchscreenName];
-  }
-  if (!splashView) {
-    return NO;
-  }
-  self.splashScreenView = splashView;
-  return YES;
+  return [self.splashScreenManager loadDefaultSplashScreenView];
 }
 
-- (UIView*)splashScreenFromStoryboard:(NSString*)name {
-  UIStoryboard* storyboard = nil;
-  @try {
-    storyboard = [UIStoryboard storyboardWithName:name bundle:nil];
-  } @catch (NSException* exception) {
-    return nil;
-  }
-  if (storyboard) {
-    UIViewController* splashScreenViewController = [storyboard instantiateInitialViewController];
-    return splashScreenViewController.view;
-  }
-  return nil;
-}
-
-- (UIView*)splashScreenFromXib:(NSString*)name {
-  NSArray* objects = nil;
-  @try {
-    objects = [[NSBundle mainBundle] loadNibNamed:name owner:self options:nil];
-  } @catch (NSException* exception) {
-    return nil;
-  }
-  if ([objects count] != 0) {
-    UIView* view = [objects objectAtIndex:0];
-    return view;
-  }
-  return nil;
+- (UIView*)splashScreenView {
+  return self.splashScreenManager.splashScreenView;
 }
 
 - (void)setSplashScreenView:(UIView*)view {
-  if (view == _splashScreenView) {
-    return;
-  }
-
-  // Special case: user wants to remove the splash screen view.
-  if (!view) {
-    if (_splashScreenView) {
-      [self removeSplashScreenWithCompletion:nil];
-    }
-    return;
-  }
-
-  _splashScreenView = view;
-  _splashScreenView.autoresizingMask =
-      UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  self.splashScreenManager.splashScreenView = view;
 }
 
 - (void)setFlutterViewDidRenderCallback:(void (^)(void))callback {
@@ -910,8 +846,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 - (void)viewDidDisappear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewDidDisappear");
   if (self.engine.viewController == self) {
-    [self invalidateKeyboardAnimationVSyncClient];
-    [self ensureViewportMetricsIsCorrect];
+    [self.keyboardInsetManager hideKeyboardImmediately];
     [self surfaceUpdated:NO];
     [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.paused"];
     [self flushOngoingTouches];
@@ -1000,7 +935,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   [self removeInternalPlugins];
   [self deregisterNotifications];
 
-  [self invalidateKeyboardAnimationVSyncClient];
+  [self.keyboardInsetManager invalidate];
   [self invalidateTouchRateCorrectionVSyncClient];
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/156222
@@ -1068,7 +1003,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 #pragma mark - Lifecycle shared
 
 - (void)appOrSceneBecameActive {
-  self.isKeyboardInOrTransitioningFromBackground = NO;
+  self.keyboardInsetManager.isKeyboardInOrTransitioningFromBackground = NO;
   if (_viewportMetrics.physical_width) {
     [self surfaceUpdated:YES];
   }
@@ -1090,7 +1025,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 }
 
 - (void)appOrSceneDidEnterBackground {
-  self.isKeyboardInOrTransitioningFromBackground = YES;
+  self.keyboardInsetManager.isKeyboardInOrTransitioningFromBackground = YES;
   [self surfaceUpdated:NO];
   [self goToApplicationLifecycle:@"AppLifecycleState.paused"];
 }
@@ -1337,6 +1272,12 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self dispatchTouches:touches pointerDataChangeOverride:&cancel event:nullptr];
 }
 
+- (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(CGPoint)location {
+  flutter::PointData point{location.x, location.y};
+  return [self.engine platformViewShouldAcceptTouchAtTouchBeganLocation:point
+                                                                 viewId:self.viewIdentifier];
+}
+
 #pragma mark - Touch events rate correction
 
 - (void)createTouchRateCorrectionVSyncClientIfNeeded {
@@ -1572,7 +1513,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   // undocked/floating to docked, this notification is triggered. This notification also happens
   // when Minimized/Expanded Shortcuts bar is dropped after dragging (the keyboard's end frame will
   // be CGRectZero).
-  [self handleKeyboardNotification:notification];
+  [self.keyboardInsetManager handleKeyboardNotification:notification];
 }
 
 - (void)keyboardWillChangeFrame:(NSNotification*)notification {
@@ -1580,383 +1521,14 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   // Sometimes when the keyboard is being hidden or undocked, this notification's keyboard's end
   // frame is not yet entirely out of screen, which is why we also use
   // UIKeyboardWillHideNotification.
-  [self handleKeyboardNotification:notification];
+  [self.keyboardInsetManager handleKeyboardNotification:notification];
 }
 
 - (void)keyboardWillBeHidden:(NSNotification*)notification {
   // When keyboard is hidden or undocked, this notification will be triggered.
   // This notification might not occur when the keyboard is changed from docked to floating, which
   // is why we also use UIKeyboardWillChangeFrameNotification.
-  [self handleKeyboardNotification:notification];
-}
-
-- (void)handleKeyboardNotification:(NSNotification*)notification {
-  // See https://flutter.dev/go/ios-keyboard-calculating-inset for more details
-  // on why notifications are used and how things are calculated.
-  if ([self shouldIgnoreKeyboardNotification:notification]) {
-    return;
-  }
-
-  NSDictionary* info = notification.userInfo;
-  CGRect beginKeyboardFrame = [info[UIKeyboardFrameBeginUserInfoKey] CGRectValue];
-  CGRect keyboardFrame = [info[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-  FlutterKeyboardMode keyboardMode = [self calculateKeyboardAttachMode:notification];
-  CGFloat calculatedInset = [self calculateKeyboardInset:keyboardFrame keyboardMode:keyboardMode];
-  NSTimeInterval duration = [info[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-
-  // If the software keyboard is displayed before displaying the PasswordManager prompt,
-  // UIKeyboardWillHideNotification will occur immediately after UIKeyboardWillShowNotification.
-  // The duration of the animation will be 0.0, and the calculated inset will be 0.0.
-  // In this case, it is necessary to cancel the animation and hide the keyboard immediately.
-  // https://github.com/flutter/flutter/pull/164884
-  if (keyboardMode == FlutterKeyboardModeHidden && calculatedInset == 0.0 && duration == 0.0) {
-    [self hideKeyboardImmediately];
-    return;
-  }
-
-  // Avoid double triggering startKeyBoardAnimation.
-  if (self.targetViewInsetBottom == calculatedInset) {
-    return;
-  }
-
-  self.targetViewInsetBottom = calculatedInset;
-
-  // Flag for simultaneous compounding animation calls.
-  // This captures animation calls made while the keyboard animation is currently animating. If the
-  // new animation is in the same direction as the current animation, this flag lets the current
-  // animation continue with an updated targetViewInsetBottom instead of starting a new keyboard
-  // animation. This allows for smoother keyboard animation interpolation.
-  BOOL keyboardWillShow = beginKeyboardFrame.origin.y > keyboardFrame.origin.y;
-  BOOL keyboardAnimationIsCompounding =
-      self.keyboardAnimationIsShowing == keyboardWillShow && _keyboardAnimationVSyncClient != nil;
-
-  // Mark keyboard as showing or hiding.
-  self.keyboardAnimationIsShowing = keyboardWillShow;
-
-  if (!keyboardAnimationIsCompounding) {
-    [self startKeyBoardAnimation:duration];
-  } else if (self.keyboardSpringAnimation) {
-    self.keyboardSpringAnimation.toValue = self.targetViewInsetBottom;
-  }
-}
-
-- (BOOL)shouldIgnoreKeyboardNotification:(NSNotification*)notification {
-  // Don't ignore UIKeyboardWillHideNotification notifications.
-  // Even if the notification is triggered in the background or by a different app/view controller,
-  // we want to always handle this notification to avoid inaccurate inset when in a mulitasking mode
-  // or when switching between apps.
-  if (notification.name == UIKeyboardWillHideNotification) {
-    return NO;
-  }
-
-  // Ignore notification when keyboard's dimensions and position are all zeroes for
-  // UIKeyboardWillChangeFrameNotification. This happens when keyboard is dragged. Do not ignore if
-  // the notification is UIKeyboardWillShowNotification, as CGRectZero for that notfication only
-  // occurs when Minimized/Expanded Shortcuts Bar is dropped after dragging, which we later use to
-  // categorize it as floating.
-  NSDictionary* info = notification.userInfo;
-  CGRect keyboardFrame = [info[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-  if (notification.name == UIKeyboardWillChangeFrameNotification &&
-      CGRectEqualToRect(keyboardFrame, CGRectZero)) {
-    return YES;
-  }
-
-  // When keyboard's height or width is set to 0, don't ignore. This does not happen
-  // often but can happen sometimes when switching between multitasking modes.
-  if (CGRectIsEmpty(keyboardFrame)) {
-    return NO;
-  }
-
-  // Ignore keyboard notifications related to other apps or view controllers.
-  if ([self isKeyboardNotificationForDifferentView:notification]) {
-    return YES;
-  }
-  return NO;
-}
-
-- (BOOL)isKeyboardNotificationForDifferentView:(NSNotification*)notification {
-  NSDictionary* info = notification.userInfo;
-  // Keyboard notifications related to other apps.
-  // If the UIKeyboardIsLocalUserInfoKey key doesn't exist (this should not happen after iOS 8),
-  // proceed as if it was local so that the notification is not ignored.
-  id isLocal = info[UIKeyboardIsLocalUserInfoKey];
-  if (isLocal && ![isLocal boolValue]) {
-    return YES;
-  }
-  return self.engine.viewController != self;
-}
-
-- (FlutterKeyboardMode)calculateKeyboardAttachMode:(NSNotification*)notification {
-  // There are multiple types of keyboard: docked, undocked, split, split docked,
-  // floating, expanded shortcuts bar, minimized shortcuts bar. This function will categorize
-  // the keyboard as one of the following modes: docked, floating, or hidden.
-  // Docked mode includes docked, split docked, expanded shortcuts bar (when opening via click),
-  // and minimized shortcuts bar (when opened via click).
-  // Floating includes undocked, split, floating, expanded shortcuts bar (when dragged and dropped),
-  // and minimized shortcuts bar (when dragged and dropped).
-  NSDictionary* info = notification.userInfo;
-  CGRect keyboardFrame = [info[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-
-  if (notification.name == UIKeyboardWillHideNotification) {
-    return FlutterKeyboardModeHidden;
-  }
-
-  // If keyboard's dimensions and position are all zeroes, that means it's a Minimized/Expanded
-  // Shortcuts Bar that has been dropped after dragging, which we categorize as floating.
-  if (CGRectEqualToRect(keyboardFrame, CGRectZero)) {
-    return FlutterKeyboardModeFloating;
-  }
-  // If keyboard's width or height are 0, it's hidden.
-  if (CGRectIsEmpty(keyboardFrame)) {
-    return FlutterKeyboardModeHidden;
-  }
-
-  CGRect screenRect = self.flutterScreenIfViewLoaded.bounds;
-  CGRect adjustedKeyboardFrame = keyboardFrame;
-  adjustedKeyboardFrame.origin.y += [self calculateMultitaskingAdjustment:screenRect
-                                                            keyboardFrame:keyboardFrame];
-
-  // If the keyboard is partially or fully showing within the screen, it's either docked or
-  // floating. Sometimes with custom keyboard extensions, the keyboard's position may be off by a
-  // small decimal amount (which is why CGRectIntersectRect can't be used). Round to compare.
-  CGRect intersection = CGRectIntersection(adjustedKeyboardFrame, screenRect);
-  CGFloat intersectionHeight = CGRectGetHeight(intersection);
-  CGFloat intersectionWidth = CGRectGetWidth(intersection);
-  if (round(intersectionHeight) > 0 && intersectionWidth > 0) {
-    // If the keyboard is above the bottom of the screen, it's floating.
-    CGFloat screenHeight = CGRectGetHeight(screenRect);
-    CGFloat adjustedKeyboardBottom = CGRectGetMaxY(adjustedKeyboardFrame);
-    if (round(adjustedKeyboardBottom) < screenHeight) {
-      return FlutterKeyboardModeFloating;
-    }
-    return FlutterKeyboardModeDocked;
-  }
-  return FlutterKeyboardModeHidden;
-}
-
-- (CGFloat)calculateMultitaskingAdjustment:(CGRect)screenRect keyboardFrame:(CGRect)keyboardFrame {
-  // In Slide Over mode, the keyboard's frame does not include the space
-  // below the app, even though the keyboard may be at the bottom of the screen.
-  // To handle, shift the Y origin by the amount of space below the app.
-  if (self.viewIfLoaded.traitCollection.userInterfaceIdiom == UIUserInterfaceIdiomPad &&
-      self.viewIfLoaded.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassCompact &&
-      self.viewIfLoaded.traitCollection.verticalSizeClass == UIUserInterfaceSizeClassRegular) {
-    CGFloat screenHeight = CGRectGetHeight(screenRect);
-    CGFloat keyboardBottom = CGRectGetMaxY(keyboardFrame);
-
-    // Stage Manager mode will also meet the above parameters, but it does not handle
-    // the keyboard positioning the same way, so skip if keyboard is at bottom of page.
-    if (screenHeight == keyboardBottom) {
-      return 0;
-    }
-    CGRect viewRectRelativeToScreen =
-        [self.viewIfLoaded convertRect:self.viewIfLoaded.frame
-                     toCoordinateSpace:self.flutterScreenIfViewLoaded.coordinateSpace];
-    CGFloat viewBottom = CGRectGetMaxY(viewRectRelativeToScreen);
-    CGFloat offset = screenHeight - viewBottom;
-    if (offset > 0) {
-      return offset;
-    }
-  }
-  return 0;
-}
-
-- (CGFloat)calculateKeyboardInset:(CGRect)keyboardFrame keyboardMode:(NSInteger)keyboardMode {
-  // Only docked keyboards will have an inset.
-  if (keyboardMode == FlutterKeyboardModeDocked) {
-    // Calculate how much of the keyboard intersects with the view.
-    CGRect viewRectRelativeToScreen =
-        [self.viewIfLoaded convertRect:self.viewIfLoaded.frame
-                     toCoordinateSpace:self.flutterScreenIfViewLoaded.coordinateSpace];
-    CGRect intersection = CGRectIntersection(keyboardFrame, viewRectRelativeToScreen);
-    CGFloat portionOfKeyboardInView = CGRectGetHeight(intersection);
-
-    // The keyboard is treated as an inset since we want to effectively reduce the window size by
-    // the keyboard height. The Dart side will compute a value accounting for the keyboard-consuming
-    // bottom padding.
-    CGFloat scale = self.flutterScreenIfViewLoaded.scale;
-    return portionOfKeyboardInView * scale;
-  }
-  return 0;
-}
-
-- (void)startKeyBoardAnimation:(NSTimeInterval)duration {
-  // If current physical_view_inset_bottom == targetViewInsetBottom, do nothing.
-  if (_viewportMetrics.physical_view_inset_bottom == self.targetViewInsetBottom) {
-    return;
-  }
-
-  // When this method is called for the first time,
-  // initialize the keyboardAnimationView to get animation interpolation during animation.
-  if (!self.keyboardAnimationView) {
-    UIView* keyboardAnimationView = [[UIView alloc] init];
-    keyboardAnimationView.hidden = YES;
-    self.keyboardAnimationView = keyboardAnimationView;
-  }
-
-  if (!self.keyboardAnimationView.superview) {
-    [self.view addSubview:self.keyboardAnimationView];
-  }
-
-  // Remove running animation when start another animation.
-  [self.keyboardAnimationView.layer removeAllAnimations];
-
-  // Set animation begin value and DisplayLink tracking values.
-  self.keyboardAnimationView.frame =
-      CGRectMake(0, _viewportMetrics.physical_view_inset_bottom, 0, 0);
-  self.keyboardAnimationStartTime = fml::TimePoint().Now();
-  self.originalViewInsetBottom = _viewportMetrics.physical_view_inset_bottom;
-
-  // Invalidate old vsync client if old animation is not completed.
-  [self invalidateKeyboardAnimationVSyncClient];
-
-  __weak FlutterViewController* weakSelf = self;
-  [self setUpKeyboardAnimationVsyncClient:^(fml::TimePoint targetTime) {
-    [weakSelf handleKeyboardAnimationCallbackWithTargetTime:targetTime];
-  }];
-  VSyncClient* currentVsyncClient = _keyboardAnimationVSyncClient;
-
-  [UIView animateWithDuration:duration
-      animations:^{
-        FlutterViewController* strongSelf = weakSelf;
-        if (!strongSelf) {
-          return;
-        }
-
-        // Set end value.
-        strongSelf.keyboardAnimationView.frame = CGRectMake(0, self.targetViewInsetBottom, 0, 0);
-
-        // Setup keyboard animation interpolation.
-        CAAnimation* keyboardAnimation =
-            [strongSelf.keyboardAnimationView.layer animationForKey:@"position"];
-        [strongSelf setUpKeyboardSpringAnimationIfNeeded:keyboardAnimation];
-      }
-      completion:^(BOOL finished) {
-        if (_keyboardAnimationVSyncClient == currentVsyncClient) {
-          FlutterViewController* strongSelf = weakSelf;
-          if (!strongSelf) {
-            return;
-          }
-
-          // Indicates the vsync client captured by this block is the original one, which also
-          // indicates the animation has not been interrupted from its beginning. Moreover,
-          // indicates the animation is over and there is no more to execute.
-          [strongSelf invalidateKeyboardAnimationVSyncClient];
-          [strongSelf removeKeyboardAnimationView];
-          [strongSelf ensureViewportMetricsIsCorrect];
-        }
-      }];
-}
-
-- (void)hideKeyboardImmediately {
-  [self invalidateKeyboardAnimationVSyncClient];
-  if (self.keyboardAnimationView) {
-    [self.keyboardAnimationView.layer removeAllAnimations];
-    [self removeKeyboardAnimationView];
-    self.keyboardAnimationView = nil;
-  }
-  if (self.keyboardSpringAnimation) {
-    self.keyboardSpringAnimation = nil;
-  }
-  // Reset targetViewInsetBottom to 0.0.
-  self.targetViewInsetBottom = 0.0;
-  [self ensureViewportMetricsIsCorrect];
-}
-
-- (void)setUpKeyboardSpringAnimationIfNeeded:(CAAnimation*)keyboardAnimation {
-  // If keyboard animation is null or not a spring animation, fallback to DisplayLink tracking.
-  if (keyboardAnimation == nil || ![keyboardAnimation isKindOfClass:[CASpringAnimation class]]) {
-    _keyboardSpringAnimation = nil;
-    return;
-  }
-
-  // Setup keyboard spring animation details for spring curve animation calculation.
-  CASpringAnimation* keyboardCASpringAnimation = (CASpringAnimation*)keyboardAnimation;
-  _keyboardSpringAnimation =
-      [[SpringAnimation alloc] initWithStiffness:keyboardCASpringAnimation.stiffness
-                                         damping:keyboardCASpringAnimation.damping
-                                            mass:keyboardCASpringAnimation.mass
-                                 initialVelocity:keyboardCASpringAnimation.initialVelocity
-                                       fromValue:self.originalViewInsetBottom
-                                         toValue:self.targetViewInsetBottom];
-}
-
-- (void)handleKeyboardAnimationCallbackWithTargetTime:(fml::TimePoint)targetTime {
-  // If the view controller's view is not loaded, bail out.
-  if (!self.isViewLoaded) {
-    return;
-  }
-  // If the view for tracking keyboard animation is nil, means it is not
-  // created, bail out.
-  if (!self.keyboardAnimationView) {
-    return;
-  }
-  // If keyboardAnimationVSyncClient is nil, means the animation ends.
-  // And should bail out.
-  if (!self.keyboardAnimationVSyncClient) {
-    return;
-  }
-
-  if (!self.keyboardAnimationView.superview) {
-    // Ensure the keyboardAnimationView is in view hierarchy when animation running.
-    [self.view addSubview:self.keyboardAnimationView];
-  }
-
-  if (!self.keyboardSpringAnimation) {
-    if (self.keyboardAnimationView.layer.presentationLayer) {
-      self->_viewportMetrics.physical_view_inset_bottom =
-          self.keyboardAnimationView.layer.presentationLayer.frame.origin.y;
-      [self updateViewportMetricsIfNeeded];
-    }
-  } else {
-    fml::TimeDelta timeElapsed = targetTime - self.keyboardAnimationStartTime;
-    self->_viewportMetrics.physical_view_inset_bottom =
-        [self.keyboardSpringAnimation curveFunction:timeElapsed.ToSecondsF()];
-    [self updateViewportMetricsIfNeeded];
-  }
-}
-
-- (void)setUpKeyboardAnimationVsyncClient:
-    (FlutterKeyboardAnimationCallback)keyboardAnimationCallback {
-  if (!keyboardAnimationCallback) {
-    return;
-  }
-  NSAssert(_keyboardAnimationVSyncClient == nil,
-           @"_keyboardAnimationVSyncClient must be nil when setting up.");
-
-  // Make sure the new viewport metrics get sent after the begin frame event has processed.
-  FlutterKeyboardAnimationCallback animationCallback = [keyboardAnimationCallback copy];
-  auto uiCallback = [animationCallback](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
-    fml::TimeDelta frameInterval = recorder->GetVsyncTargetTime() - recorder->GetVsyncStartTime();
-    fml::TimePoint targetTime = recorder->GetVsyncTargetTime() + frameInterval;
-    dispatch_async(dispatch_get_main_queue(), ^(void) {
-      animationCallback(targetTime);
-    });
-  };
-
-  _keyboardAnimationVSyncClient = [[VSyncClient alloc] initWithTaskRunner:self.engine.uiTaskRunner
-                                                                 callback:uiCallback];
-  _keyboardAnimationVSyncClient.allowPauseAfterVsync = NO;
-  [_keyboardAnimationVSyncClient await];
-}
-
-- (void)invalidateKeyboardAnimationVSyncClient {
-  [_keyboardAnimationVSyncClient invalidate];
-  _keyboardAnimationVSyncClient = nil;
-}
-
-- (void)removeKeyboardAnimationView {
-  if (self.keyboardAnimationView.superview != nil) {
-    [self.keyboardAnimationView removeFromSuperview];
-  }
-}
-
-- (void)ensureViewportMetricsIsCorrect {
-  if (_viewportMetrics.physical_view_inset_bottom != self.targetViewInsetBottom) {
-    // Make sure the `physical_view_inset_bottom` is the target value.
-    _viewportMetrics.physical_view_inset_bottom = self.targetViewInsetBottom;
-    [self updateViewportMetricsIfNeeded];
-  }
+  [self.keyboardInsetManager handleKeyboardNotification:notification];
 }
 
 - (void)handlePressEvent:(FlutterUIPressProxy*)press
@@ -2704,6 +2276,31 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 - (FlutterTextInputPlugin*)textInputPlugin {
   return self.engine.textInputPlugin;
+}
+
+#pragma mark - FlutterKeyboardInsetManagerDelegate
+
+- (void)updateViewportMetricsWithInset:(CGFloat)inset {
+  _viewportMetrics.physical_view_inset_bottom = inset;
+  [self updateViewportMetricsIfNeeded];
+}
+
+- (CGFloat)physicalViewInsetBottom {
+  return _viewportMetrics.physical_view_inset_bottom;
+}
+
+- (BOOL)isPadInSlideOverOrStageManagerMode {
+  if (self.view.traitCollection.userInterfaceIdiom == UIUserInterfaceIdiomPad &&
+      self.view.traitCollection.horizontalSizeClass == UIUserInterfaceSizeClassCompact &&
+      self.view.traitCollection.verticalSizeClass == UIUserInterfaceSizeClassRegular) {
+    return YES;
+  }
+  return NO;
+}
+
+- (CGRect)convertViewRectToScreen:(CGRect)rect {
+  return [self.view convertRect:rect
+              toCoordinateSpace:self.flutterScreenIfViewLoaded.coordinateSpace];
 }
 
 @end

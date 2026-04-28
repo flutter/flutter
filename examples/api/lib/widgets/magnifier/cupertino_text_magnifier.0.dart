@@ -14,7 +14,7 @@ class CupertinoTextMagnifierApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: CupertinoTextMagnifierExampleApp(),
     );
   }
@@ -39,7 +39,7 @@ class _CupertinoTextMagnifierExampleAppState
         middle: Text('CupertinoTextMagnifier Sample'),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 48.0),
+        padding: const .symmetric(horizontal: 48.0),
         child: Center(
           child: CupertinoTextField(
             magnifierConfiguration: TextMagnifierConfiguration(
