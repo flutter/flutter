@@ -121,7 +121,7 @@ void testRenderSizedToContentResizable() {
 }
 
 @pragma('vm:entry-point')
-// Used in FlutterWindowControllerSizeTest.SizedToContent
+// Used in FlutterWindowControllerSizeTest.SizedToContentNotResizable
 void testRenderSizedToContent() {
   int frameCount = 0;
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
