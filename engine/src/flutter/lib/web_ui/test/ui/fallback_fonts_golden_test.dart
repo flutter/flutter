@@ -33,6 +33,7 @@ void testMain() {
     final downloadedFontFamilies = <String>[];
 
     setUp(() {
+      FallbackFontService.instance.debugReset();
       renderer.fontCollection.debugResetFallbackFonts();
       debugOverrideJsConfiguration(
         <String, Object?>{'fontFallbackBaseUrl': 'assets/fallback_fonts/'}.jsify()
@@ -44,7 +45,8 @@ void testMain() {
       savedCallback = ui.PlatformDispatcher.instance.onPlatformMessage;
     });
 
-    tearDown(() {
+    tearDown(() async {
+      await FallbackFontService.instance.waitForIdle();
       downloadedFontFamilies.clear();
       ui.PlatformDispatcher.instance.onPlatformMessage = savedCallback;
     });
@@ -72,7 +74,7 @@ void testMain() {
       pb.addText('مرحبا');
       pb.build().layout(const ui.ParagraphConstraints(width: 1000));
 
-      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+      await FallbackFontService.instance.waitForIdle();
 
       expect(
         renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
@@ -107,7 +109,7 @@ void testMain() {
       pb.addText('表紙がゆっくりと開き始める。ページの間から淡い光が漏れ出る、');
       pb.build().layout(const ui.ParagraphConstraints(width: 1000));
 
-      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+      await FallbackFontService.instance.waitForIdle();
 
       expect(
         renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
@@ -140,7 +142,7 @@ void testMain() {
       pb.addText('مرحبا');
       pb.build().layout(const ui.ParagraphConstraints(width: 1000));
 
-      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+      await FallbackFontService.instance.waitForIdle();
 
       expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>[
         'Roboto',
@@ -154,7 +156,7 @@ void testMain() {
       final ui.Paragraph paragraph = pb.build();
       paragraph.layout(const ui.ParagraphConstraints(width: 1000));
 
-      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+      await FallbackFontService.instance.waitForIdle();
 
       expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>[
         'Roboto',
@@ -172,7 +174,7 @@ void testMain() {
       pb.addText('Hello 😊');
       pb.build().layout(const ui.ParagraphConstraints(width: 1000));
 
-      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+      await FallbackFontService.instance.waitForIdle();
 
       expect(
         renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
@@ -209,7 +211,7 @@ void testMain() {
       pb.addText(text);
       pb.build().layout(const ui.ParagraphConstraints(width: 1000));
 
-      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+      await FallbackFontService.instance.waitForIdle();
       expect(downloadedFontFamilies, expectedFamilies);
 
       // Do the same thing but this time with loaded fonts.
@@ -218,7 +220,7 @@ void testMain() {
       pb.addText(text);
       pb.build().layout(const ui.ParagraphConstraints(width: 1000));
 
-      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+      await FallbackFontService.instance.waitForIdle();
       expect(downloadedFontFamilies, isEmpty);
     }
 
@@ -237,7 +239,7 @@ void testMain() {
       // renderer.fontCollection.debugResetFallbackFonts();
 
       final FontFallbackManager fallbackManager = renderer.fontCollection.fontFallbackManager!;
-      final String oldLanguage = fallbackManager.debugUserPreferredLanguage;
+      final String oldLanguage = fallbackManager.preferredLanguage;
       if (userPreferredLanguage != null) {
         fallbackManager.debugUserPreferredLanguage = userPreferredLanguage;
       }
@@ -247,7 +249,7 @@ void testMain() {
       pb.addText(String.fromCharCode(charCode));
       pb.build().layout(const ui.ParagraphConstraints(width: 1000));
 
-      await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+      await FallbackFontService.instance.waitForIdle();
       if (userPreferredLanguage != null) {
         fallbackManager.debugUserPreferredLanguage = oldLanguage;
       }
@@ -583,19 +585,6 @@ void testMain() {
           expect(fontsForPoint, isNotEmpty);
           fonts.addAll(fontsForPoint);
         }
-
-        try {
-          renderer.fontCollection.fontFallbackManager!.findFontsForMissingCodePoints(
-            codePoints.toList(),
-          );
-        } catch (e) {
-          print(
-            'findFontsForMissingCodePoints failed:\n'
-            '  Code points: ${codePoints.join(', ')}\n'
-            '  Fonts: ${fonts.map((NotoFont f) => f.name).join(', ')}',
-          );
-          rethrow;
-        }
       }
     });
 
@@ -618,7 +607,7 @@ void testMain() {
         pb.addText('Hello 😊');
         pb.build().layout(const ui.ParagraphConstraints(width: 1000));
 
-        await renderer.fontCollection.fontFallbackManager!.debugWhenIdle();
+        await FallbackFontService.instance.waitForIdle();
 
         // Make sure we didn't download the fallback font.
         expect(
