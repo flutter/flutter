@@ -45,5 +45,6 @@
   "expansionTileExpandedTapHint": "Згарнуць",
   "expansionTileCollapsedTapHint": "Разгарніце, каб даведацца больш",
   "expandedHint": "Згорнута",
-  "collapsedHint": "Разгорнута"
+  "collapsedHint": "Разгорнута",
+  "translateButtonLabel": "Translate"
 }

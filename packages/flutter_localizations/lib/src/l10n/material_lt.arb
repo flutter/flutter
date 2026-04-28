@@ -152,5 +152,6 @@
   "searchWebButtonLabel": "Ieškoti žiniatinklyje",
   "shareButtonLabel": "Bendrinti",
   "clearButtonTooltip": "Išvalyti tekstą",
-  "selectedDateLabel": "Pasirinkta"
+  "selectedDateLabel": "Pasirinkta",
+  "translateButtonLabel": "Translate"
 }

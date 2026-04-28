@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "ਸਮੇਟੋ",
   "expansionTileCollapsedTapHint": "ਹੋਰ ਵੇਰਵਿਆਂ ਲਈ ਵਿਸਤਾਰ ਕਰੋ",
   "expandedHint": "ਸਮੇਟਿਆ ਗਿਆ",
-  "collapsedHint": "ਵਿਸਤਾਰ ਕੀਤਾ ਗਿਆ"
+  "collapsedHint": "ਵਿਸਤਾਰ ਕੀਤਾ ਗਿਆ",
+  "translateButtonLabel": "Translate"
 }

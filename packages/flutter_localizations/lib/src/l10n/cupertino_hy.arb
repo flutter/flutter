@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Ծալել",
   "expansionTileCollapsedTapHint": "ծավալեք՝ մանրամասները տեսնելու համար",
   "expandedHint": "Ծալված է",
-  "collapsedHint": "Ծավալված է"
+  "collapsedHint": "Ծավալված է",
+  "translateButtonLabel": "Translate"
 }

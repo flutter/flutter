@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "انتخاب همه",
   "searchResultsFound": "نتایج جستجو پیدا شد",
   "noResultsFound": "نتیجه‌ای پیدا نشد",
-  "radioButtonUnselectedLabel": "انتخاب‌نشده"
+  "radioButtonUnselectedLabel": "انتخاب‌نشده",
+  "translateButtonLabel": "Translate"
 }

@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Velg alle",
   "searchResultsFound": "Søkeresultater ble funnet",
   "noResultsFound": "Fant ingen resultater",
-  "radioButtonUnselectedLabel": "Ikke valgt"
+  "radioButtonUnselectedLabel": "Ikke valgt",
+  "translateButtonLabel": "Translate"
 }

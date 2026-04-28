@@ -1153,6 +1153,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+       translateSelectedText:(NSString*)selectedText {
+  [self.platformPlugin showTranslateViewControllerForTerm:selectedText];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     performContextMenuCustomActionWithActionID:(NSString*)actionID
                                textInputClient:(int)client {
   [self.platformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"

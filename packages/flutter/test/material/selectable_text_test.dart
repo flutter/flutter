@@ -147,7 +147,7 @@ void main() {
     );
 
     if (defaultTargetPlatform == TargetPlatform.iOS) {
-      expect(find.byType(CupertinoButton), findsNWidgets(4));
+      expect(find.byType(CupertinoButton), findsNWidgets(5));
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Look Up'), findsOneWidget);
       expect(find.text('Search Web'), findsOneWidget);
@@ -3603,7 +3603,7 @@ void main() {
       // Move the cursor to the edge of the same word and toggle the toolbar.
       expect(controller.selection, const TextSelection(baseOffset: 0, extentOffset: 7));
 
-      expect(find.byType(CupertinoButton), findsNWidgets(4));
+      expect(find.byType(CupertinoButton), findsNWidgets(5));
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );

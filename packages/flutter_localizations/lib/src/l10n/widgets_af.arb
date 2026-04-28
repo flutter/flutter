@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Kies alles",
   "searchResultsFound": "Soekresultate gevind",
   "noResultsFound": "Geen resultate gekry nie",
-  "radioButtonUnselectedLabel": "Nie gekies nie"
+  "radioButtonUnselectedLabel": "Nie gekies nie",
+  "translateButtonLabel": "Translate"
 }

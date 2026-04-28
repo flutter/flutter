@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Yigʻish",
   "expansionTileCollapsedTapHint": "Batafsil koʻrish uchun yoying",
   "expandedHint": "Yigʻilgan",
-  "collapsedHint": "Yoyilgan"
+  "collapsedHint": "Yoyilgan",
+  "translateButtonLabel": "Translate"
 }

@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "ყველას არჩევა",
   "searchResultsFound": "ძიების შედეგები ნაპოვნია",
   "noResultsFound": "შედეგები ვერ მოიძებნა",
-  "radioButtonUnselectedLabel": "არ არის არჩეული"
+  "radioButtonUnselectedLabel": "არ არის არჩეული",
+  "translateButtonLabel": "Translate"
 }

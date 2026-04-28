@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Баарын тандоо",
   "searchResultsFound": "Изделген нерсе табылды",
   "noResultsFound": "Эч нерсе табылган жок",
-  "radioButtonUnselectedLabel": "Тандалган жок"
+  "radioButtonUnselectedLabel": "Тандалган жок",
+  "translateButtonLabel": "Translate"
 }

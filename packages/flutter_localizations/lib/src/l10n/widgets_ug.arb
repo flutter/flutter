@@ -14,5 +14,6 @@
   "shareButtonLabel": "ھەمبەھرلەش",
   "pasteButtonLabel": "چاپلاش",
   "selectAllButtonLabel": "ھەممىنى تاللاش",
-  "radioButtonUnselectedLabel": "تاللانمىدى"
+  "radioButtonUnselectedLabel": "تاللانمىدى",
+  "translateButtonLabel": "Translate"
 }

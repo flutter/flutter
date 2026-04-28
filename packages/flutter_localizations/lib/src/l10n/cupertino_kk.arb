@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Жию",
   "expansionTileCollapsedTapHint": "Толық мәлімет алу үшін жайыңыз.",
   "expandedHint": "Жиылды",
-  "collapsedHint": "Жайылды"
+  "collapsedHint": "Жайылды",
+  "translateButtonLabel": "Translate"
 }

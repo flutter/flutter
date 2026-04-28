@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Izberi vse",
   "searchResultsFound": "Najdeni so rezultati iskanja",
   "noResultsFound": "Ni rezultatov",
-  "radioButtonUnselectedLabel": "Ni izbrano"
+  "radioButtonUnselectedLabel": "Ni izbrano",
+  "translateButtonLabel": "Translate"
 }

@@ -14,5 +14,6 @@
   "shareButtonLabel": "Comhroinn",
   "pasteButtonLabel": "Greamaigh",
   "selectAllButtonLabel": "Roghnaigh gach rud",
-  "radioButtonUnselectedLabel": "Níor roghnaíodh é"
+  "radioButtonUnselectedLabel": "Níor roghnaíodh é",
+  "translateButtonLabel": "Translate"
 }

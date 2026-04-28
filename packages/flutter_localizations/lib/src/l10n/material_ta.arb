@@ -148,5 +148,6 @@
   "searchWebButtonLabel": "இணையத்தில் தேடு",
   "shareButtonLabel": "பகிர்",
   "clearButtonTooltip": "வார்த்தைகளை அழிக்கும்",
-  "selectedDateLabel": "தேர்ந்தெடுக்கப்பட்டது"
+  "selectedDateLabel": "தேர்ந்தெடுக்கப்பட்டது",
+  "translateButtonLabel": "Translate"
 }

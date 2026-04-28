@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Minimieren",
   "expansionTileCollapsedTapHint": "Für weitere Details maximieren",
   "expandedHint": "Minimiert",
-  "collapsedHint": "Maximiert"
+  "collapsedHint": "Maximiert",
+  "translateButtonLabel": "Translate"
 }

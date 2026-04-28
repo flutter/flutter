@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Feche",
   "expansionTileCollapsedTapHint": "Abra para mostrar mais detalhes",
   "expandedHint": "Fechado.",
-  "collapsedHint": "Aberto."
+  "collapsedHint": "Aberto.",
+  "translateButtonLabel": "Translate"
 }

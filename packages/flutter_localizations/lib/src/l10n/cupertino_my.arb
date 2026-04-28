@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "ခေါက်ရန်",
   "expansionTileCollapsedTapHint": "အသေးစိတ်အတွက် ဖြန့်ရန်",
   "expandedHint": "ခေါက်ထားသည်",
-  "collapsedHint": "ဖြန့်ထားသည်"
+  "collapsedHint": "ဖြန့်ထားသည်",
+  "translateButtonLabel": "Translate"
 }

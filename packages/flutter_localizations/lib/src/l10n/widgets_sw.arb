@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Chagua vyote",
   "searchResultsFound": "Matokeo ya utafutaji yamepatikana",
   "noResultsFound": "Hakuna matokeo yaliyopatikana",
-  "radioButtonUnselectedLabel": "Hayajachaguliwa"
+  "radioButtonUnselectedLabel": "Hayajachaguliwa",
+  "translateButtonLabel": "Translate"
 }

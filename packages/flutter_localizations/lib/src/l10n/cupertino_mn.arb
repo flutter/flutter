@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Хураах",
   "expansionTileCollapsedTapHint": "Илүү дэлгэрэнгүй авах бол дэлгэнэ үү",
   "expandedHint": "Хураасан",
-  "collapsedHint": "Дэлгэсэн"
+  "collapsedHint": "Дэлгэсэн",
+  "translateButtonLabel": "Translate"
 }

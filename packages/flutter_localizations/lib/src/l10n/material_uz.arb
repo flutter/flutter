@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "Internetdan qidirish",
   "shareButtonLabel": "Ulashish",
   "clearButtonTooltip": "Matnni tozalash",
-  "selectedDateLabel": "Tanlangan"
+  "selectedDateLabel": "Tanlangan",
+  "translateButtonLabel": "Translate"
 }

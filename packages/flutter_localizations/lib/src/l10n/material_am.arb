@@ -146,5 +146,6 @@
   "searchWebButtonLabel": "ድርን ፈልግ",
   "shareButtonLabel": "አጋራ",
   "clearButtonTooltip": "ጽሁፍን አጽዳ",
-  "selectedDateLabel": "ተመርጧል"
+  "selectedDateLabel": "ተመርጧል",
+  "translateButtonLabel": "Translate"
 }

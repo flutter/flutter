@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Επιλογή όλων",
   "searchResultsFound": "Βρέθηκαν αποτελέσματα αναζήτησης",
   "noResultsFound": "Δεν βρέθηκαν αποτελέσματα",
-  "radioButtonUnselectedLabel": "Δεν έχει επιλεγεί"
+  "radioButtonUnselectedLabel": "Δεν έχει επιλεγεί",
+  "translateButtonLabel": "Translate"
 }

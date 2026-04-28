@@ -149,5 +149,6 @@
   "searchWebButtonLabel": "Pretraži web",
   "shareButtonLabel": "Dijeli",
   "clearButtonTooltip": "Izbriši tekst",
-  "selectedDateLabel": "Odabrano"
+  "selectedDateLabel": "Odabrano",
+  "translateButtonLabel": "Translate"
 }

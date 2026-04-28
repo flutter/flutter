@@ -28,6 +28,29 @@ Future<void> tapCupertinoOverflowNextButton(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
+bool cupertinoToolbarHasText(String text) {
+  final Iterable<Element> elements = find.byType(CupertinoTextSelectionToolbar).evaluate();
+  if (elements.isEmpty) {
+    return false;
+  }
+  final toolbar = elements.first.widget as CupertinoTextSelectionToolbar;
+  for (final Widget child in toolbar.children) {
+    if (child is CupertinoTextSelectionToolbarButton) {
+      if (child.text == text || child.buttonItem?.label == text) {
+        return true;
+      }
+      final ContextMenuButtonType? type = child.buttonItem?.type;
+      if (text == 'Share...' && type == ContextMenuButtonType.share) {
+        return true;
+      }
+      if (text == 'Translate' && type == ContextMenuButtonType.translate) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 void expectNoCupertinoToolbar() {
   expect(find.byType(CupertinoButton), findsNothing);
 }
@@ -53,9 +76,13 @@ void expectCupertinoToolbarForPartialSelection() {
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsOneWidget);
-      expect(find.text('Share...'), findsOneWidget);
       expect(find.text('Look Up'), findsOneWidget);
       expect(find.text('Search Web'), findsOneWidget);
+
+      // Adding Translate pushes both Share and Translate to the next page
+      // So just check that they exist on the tool bar.
+      expect(cupertinoToolbarHasText('Share...'), isTrue);
+      expect(cupertinoToolbarHasText('Translate'), isTrue);
     case TargetPlatform.macOS:
       expect(find.byType(CupertinoButton), findsNWidgets(3));
       expect(find.text('Cut'), findsOneWidget);
@@ -92,9 +119,13 @@ void expectCupertinoToolbarForFullSelection() {
       expect(find.text('Cut'), findsOneWidget);
       expect(find.text('Copy'), findsOneWidget);
       expect(find.text('Paste'), findsOneWidget);
-      expect(find.text('Share...'), findsOneWidget);
       expect(find.text('Look Up'), findsOneWidget);
       expect(find.text('Search Web'), findsOneWidget);
+
+      // Adding Translate pushes both Share and Translate to the next page
+      // So just check that they exist on the tool bar.
+      expect(cupertinoToolbarHasText('Share...'), isTrue);
+      expect(cupertinoToolbarHasText('Translate'), isTrue);
     case TargetPlatform.fuchsia:
     case TargetPlatform.linux:
     case TargetPlatform.macOS:

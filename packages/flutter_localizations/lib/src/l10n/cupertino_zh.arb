@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "收起",
   "expansionTileCollapsedTapHint": "展开查看更多详情",
   "expandedHint": "已收起",
-  "collapsedHint": "已展开"
+  "collapsedHint": "已展开",
+  "translateButtonLabel": "Translate"
 }

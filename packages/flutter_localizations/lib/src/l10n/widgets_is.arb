@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Velja allt",
   "searchResultsFound": "Leitarniðurstöður fundust",
   "noResultsFound": "Engar niðurstöður fundust",
-  "radioButtonUnselectedLabel": "Ekki valið"
+  "radioButtonUnselectedLabel": "Ekki valið",
+  "translateButtonLabel": "Translate"
 }

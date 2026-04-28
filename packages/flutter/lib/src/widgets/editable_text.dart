@@ -2147,6 +2147,7 @@ class EditableText extends StatefulWidget {
     required final VoidCallback? onSelectAll,
     required final VoidCallback? onLookUp,
     required final VoidCallback? onSearchWeb,
+    required final VoidCallback? onTranslate,
     required final VoidCallback? onShare,
     required final VoidCallback? onLiveTextInput,
   }) {
@@ -2177,6 +2178,8 @@ class EditableText extends StatefulWidget {
           ContextMenuButtonItem(onPressed: onSearchWeb, type: ContextMenuButtonType.searchWeb),
         if (onShare != null && !showShareBeforeSelectAll)
           ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
+        if (onTranslate != null)
+          ContextMenuButtonItem(onPressed: onTranslate, type: ContextMenuButtonType.translate),
       ]);
     }
 
@@ -2736,6 +2739,17 @@ class EditableTextState extends State<EditableText>
         textEditingValue.selection.isCollapsed;
   }
 
+  @override
+  bool get translateEnabled {
+    if (defaultTargetPlatform != TargetPlatform.iOS) {
+      return false;
+    }
+
+    return !widget.obscureText &&
+        !textEditingValue.selection.isCollapsed &&
+        textEditingValue.selection.textInside(textEditingValue.text).trim() != '';
+  }
+
   void _onChangedClipboardStatus() {
     setState(() {
       // Inform the widget that the value of clipboardStatus has changed.
@@ -2981,6 +2995,22 @@ class EditableTextState extends State<EditableText>
     final String text = textEditingValue.selection.textInside(textEditingValue.text);
     if (text.isNotEmpty) {
       await SystemChannels.platform.invokeMethod('Share.invoke', text);
+    }
+  }
+
+  /// Launch a translation interface for the selected text.
+  ///
+  /// Currently this is only implemented for iOS.
+  ///
+  /// When 'obscureText' is true or the selection is empty, this function will not do anything.
+  Future<void> translateSelection(SelectionChangedCause cause) async {
+    if (widget.obscureText) {
+      return;
+    }
+
+    final String text = textEditingValue.selection.textInside(textEditingValue.text);
+    if (text.isNotEmpty) {
+      await SystemChannels.platform.invokeMethod('Translate.invoke', text);
     }
   }
 
@@ -3232,6 +3262,9 @@ class EditableTextState extends State<EditableText>
                 ? () => searchWebForSelection(SelectionChangedCause.toolbar)
                 : null,
             onShare: shareEnabled ? () => shareSelection(SelectionChangedCause.toolbar) : null,
+            onTranslate: translateEnabled
+                ? () => translateSelection(SelectionChangedCause.toolbar)
+                : null,
             onLiveTextInput: liveTextInputEnabled
                 ? () => _startLiveTextInput(SelectionChangedCause.toolbar)
                 : null,

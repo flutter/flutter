@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "ସଙ୍କୁଚିତ କରନ୍ତୁ",
   "expansionTileCollapsedTapHint": "ଅଧିକ ବିବରଣୀ ପାଇଁ ବିସ୍ତାର କରନ୍ତୁ",
   "expandedHint": "ସଙ୍କୁଚିତ କରାଯାଇଛି",
-  "collapsedHint": "ବିସ୍ତାର କରାଯାଇଛି"
+  "collapsedHint": "ବିସ୍ତାର କରାଯାଇଛି",
+  "translateButtonLabel": "Translate"
 }

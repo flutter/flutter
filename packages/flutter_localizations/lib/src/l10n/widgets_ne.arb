@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "सबै बटनहरू चयन गर्नुहोस्",
   "searchResultsFound": "खोज परिणाम भेटिएका छन्",
   "noResultsFound": "कुनै पनि परिणाम भेटिएन",
-  "radioButtonUnselectedLabel": "चयन गरिएको छैन"
+  "radioButtonUnselectedLabel": "चयन गरिएको छैन",
+  "translateButtonLabel": "Translate"
 }

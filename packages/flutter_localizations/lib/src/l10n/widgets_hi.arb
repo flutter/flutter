@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "सभी को चुनें",
   "searchResultsFound": "खोज के नतीजे मिले",
   "noResultsFound": "कोई नतीजा नहीं मिला",
-  "radioButtonUnselectedLabel": "नहीं चुना गया"
+  "radioButtonUnselectedLabel": "नहीं चुना गया",
+  "translateButtonLabel": "Translate"
 }

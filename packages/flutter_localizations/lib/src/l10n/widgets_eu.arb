@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Hautatu guztiak",
   "searchResultsFound": "Bilaketa-emaitzak aurkitu dira",
   "noResultsFound": "Ez da aurkitu emaitzarik",
-  "radioButtonUnselectedLabel": "Hautatu gabe"
+  "radioButtonUnselectedLabel": "Hautatu gabe",
+  "translateButtonLabel": "Translate"
 }

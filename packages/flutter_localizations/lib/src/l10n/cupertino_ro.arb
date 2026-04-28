@@ -40,5 +40,6 @@
   "expansionTileExpandedTapHint": "Restrângeți",
   "expansionTileCollapsedTapHint": "Extindeți pentru mai multe detalii",
   "expandedHint": "Restrâns",
-  "collapsedHint": "Extins"
+  "collapsedHint": "Extins",
+  "translateButtonLabel": "Translate"
 }

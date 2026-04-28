@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "అన్నింటినీ ఎంచుకోండి",
   "searchResultsFound": "సెర్చ్ ఫలితాలు కనుగొనబడ్డాయి",
   "noResultsFound": "ఫలితాలు ఏవీ కనుగొనబడలేదు",
-  "radioButtonUnselectedLabel": "ఎంచుకోబడలేదు"
+  "radioButtonUnselectedLabel": "ఎంచుకోబడలేదు",
+  "translateButtonLabel": "Translate"
 }

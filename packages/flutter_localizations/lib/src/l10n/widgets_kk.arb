@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Барлығын таңдау",
   "searchResultsFound": "Табылған нәтижелер",
   "noResultsFound": "Ешбір нәтиже табылмады",
-  "radioButtonUnselectedLabel": "Таңдалмады"
+  "radioButtonUnselectedLabel": "Таңдалмады",
+  "translateButtonLabel": "Translate"
 }

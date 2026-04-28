@@ -55,5 +55,6 @@
   "expansionTileExpandedTapHint": "تصغير",
   "expansionTileCollapsedTapHint": "وسِّع المربّع لعرض مزيد من التفاصيل.",
   "expandedHint": "مصغَّر",
-  "collapsedHint": "موسَّع"
+  "collapsedHint": "موسَّع",
+  "translateButtonLabel": "Translate"
 }

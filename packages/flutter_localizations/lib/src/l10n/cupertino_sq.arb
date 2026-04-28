@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "Palos",
   "expansionTileCollapsedTapHint": "Zgjero për më shumë detaje",
   "expandedHint": "U palos",
-  "collapsedHint": "U zgjerua"
+  "collapsedHint": "U zgjerua",
+  "translateButtonLabel": "Translate"
 }

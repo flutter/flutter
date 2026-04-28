@@ -35,5 +35,6 @@
   "expansionTileExpandedTapHint": "ചുരുക്കുക",
   "expansionTileCollapsedTapHint": "കൂടുതൽ വിശദാംശങ്ങൾക്ക് വികസിപ്പിക്കുക",
   "expandedHint": "ചുരുക്കി",
-  "collapsedHint": "വികസിപ്പിച്ചു"
+  "collapsedHint": "വികസിപ്പിച്ചു",
+  "translateButtonLabel": "Translate"
 }

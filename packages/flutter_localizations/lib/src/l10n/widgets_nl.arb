@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Alles selecteren",
   "searchResultsFound": "Zoekresultaten gevonden",
   "noResultsFound": "Geen resultaten gevonden",
-  "radioButtonUnselectedLabel": "Niet geselecteerd"
+  "radioButtonUnselectedLabel": "Niet geselecteerd",
+  "translateButtonLabel": "Translate"
 }

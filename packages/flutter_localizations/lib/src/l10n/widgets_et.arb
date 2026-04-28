@@ -14,5 +14,6 @@
   "selectAllButtonLabel": "Vali kõik",
   "searchResultsFound": "Leiti otsingutulemusi",
   "noResultsFound": "Tulemusi ei leitud",
-  "radioButtonUnselectedLabel": "Pole valitud"
+  "radioButtonUnselectedLabel": "Pole valitud",
+  "translateButtonLabel": "Translate"
 }

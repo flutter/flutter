@@ -152,5 +152,6 @@
   "searchWebButtonLabel": "Szukaj w internecie",
   "shareButtonLabel": "Udostępnij",
   "clearButtonTooltip": "Wyczyść tekst",
-  "selectedDateLabel": "Wybrano"
+  "selectedDateLabel": "Wybrano",
+  "translateButtonLabel": "Translate"
 }
