@@ -18,8 +18,8 @@
 @protocol FlutterViewContentDelegate <NSObject>
 
 /**
- * Called when the view's size changes. The container should update its
- * layout to accommodate the new size.
+ * Called when the view's content changes. If the size changed the container
+ * should update its layout to accommodate new size.
  */
 - (void)viewDidUpdateContents:(nonnull FlutterView*)view withSize:(NSSize)newSize;
 
