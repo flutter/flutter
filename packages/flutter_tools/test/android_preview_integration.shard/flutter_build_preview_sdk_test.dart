@@ -47,18 +47,15 @@ void main() {
         .childDirectory('android')
         .childDirectory('app')
         .childFile('build.gradle.kts');
-    // write a build.gradle.kts with compileSdkVersion as `android-UpsideDownCake` which is a string preview version
+    // write a build.gradle.kts with compileSdkVersion as `android-<api-version>` which is a string preview version
     buildGradleFile.writeAsStringSync(
       buildGradleFile.readAsStringSync().replaceFirst(
         compileSdkVersionMatch,
-        'compileSdkVersion = "android-UpsideDownCake"',
+        'compileSdkVersion = "android-36"',
       ),
       flush: true,
     );
-    expect(
-      buildGradleFile.readAsStringSync(),
-      contains('compileSdkVersion = "android-UpsideDownCake"'),
-    );
+    expect(buildGradleFile.readAsStringSync(), contains('compileSdkVersion = "android-36"'));
 
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -87,15 +84,15 @@ void main() {
         .childDirectory('android')
         .childDirectory('app')
         .childFile('build.gradle.kts');
-    // write a build.gradle.kts with compileSdkPreview as `UpsideDownCake` which is a string preview version
+    // write a build.gradle.kts with compileSdkPreview as `Baklava` which is a string preview version
     buildGradleFile.writeAsStringSync(
       buildGradleFile.readAsStringSync().replaceFirst(
         compileSdkVersionMatch,
-        'compileSdkPreview = "UpsideDownCake"',
+        'compileSdkPreview = "Baklava"',
       ),
       flush: true,
     );
-    expect(buildGradleFile.readAsStringSync(), contains('compileSdkPreview = "UpsideDownCake"'));
+    expect(buildGradleFile.readAsStringSync(), contains('compileSdkPreview = "Baklava"'));
 
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
@@ -124,15 +121,15 @@ void main() {
         .childDirectory('android')
         .childDirectory('app')
         .childFile('build.gradle.kts');
-    // write a build.gradle.kts with compileSdkPreview as `UpsideDownCake` which is a string preview version
+    // write a build.gradle.kts with compileSdkPreview as `Baklava` which is a string preview version
     appBuildGradleFile.writeAsStringSync(
       appBuildGradleFile.readAsStringSync().replaceFirst(
         compileSdkVersionMatch,
-        'compileSdkPreview = "UpsideDownCake"',
+        'compileSdkPreview = "Baklava"',
       ),
       flush: true,
     );
-    expect(appBuildGradleFile.readAsStringSync(), contains('compileSdkPreview = "UpsideDownCake"'));
+    expect(appBuildGradleFile.readAsStringSync(), contains('compileSdkPreview = "Baklava"'));
 
     final File pluginBuildGradleFile = pluginDir
         .childDirectory('android')
@@ -141,14 +138,11 @@ void main() {
     pluginBuildGradleFile.writeAsStringSync(
       pluginBuildGradleFile.readAsStringSync().replaceFirst(
         compileSdkVersionMatch,
-        'compileSdkPreview = "UpsideDownCake"',
+        'compileSdkPreview = "Baklava"',
       ),
       flush: true,
     );
-    expect(
-      pluginBuildGradleFile.readAsStringSync(),
-      contains('compileSdkPreview = "UpsideDownCake"'),
-    );
+    expect(pluginBuildGradleFile.readAsStringSync(), contains('compileSdkPreview = "Baklava"'));
 
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
