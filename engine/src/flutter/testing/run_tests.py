@@ -775,20 +775,21 @@ def gather_dart_test(
 def ensure_ios_tests_are_built(ios_out_dir: str) -> None:
   """Builds the engine variant and the test dylib containing the XCTests"""
   tmp_out_dir = os.path.join(OUT_DIR, ios_out_dir)
-  ios_test_lib_a = os.path.join(tmp_out_dir, "libios_test_flutter.a")
-  ios_test_lib_swift_a = os.path.join(tmp_out_dir, "libios_test_flutter_swift.a")
+  ios_xctest_lib = os.path.join(tmp_out_dir, "libios_test_flutter.dylib")
+  ios_swifttest_lib = os.path.join(tmp_out_dir, "obj", "flutter", "shell", "platform", "darwin", "ios", "libios_test_flutter_swift.a")
   message = []
   message.append("gn --ios --unoptimized --runtime-mode=debug --no-lto --simulator")
-  message.append(f"ninja -C {ios_out_dir} ios_test_flutter ios_test_flutter_swift")
+  message.append(f"ninja -C {ios_out_dir} ios_test_flutter")
   joined_message = "\n  ".join(message)
   final_message = (
-      f"{ios_out_dir} or test libraries don't exist.\n\n"
+      f"{ios_out_dir} or {ios_xctest_lib} or {ios_swifttest_lib} doesn't exist.\n\n"
       f"Please run the following commands:\n\n"
       f"  {joined_message}\n\n"
       f"Alternatively, use --ios-variant to specify a different build configuration."
   )
-  assert os.path.exists(tmp_out_dir) and os.path.exists(ios_test_lib_a) and os.path.exists(
-      ios_test_lib_swift_a
+  assert (
+      os.path.exists(tmp_out_dir) and os.path.exists(ios_xctest_lib) and
+      os.path.exists(ios_swifttest_lib)
   ), final_message
 
 

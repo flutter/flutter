@@ -216,6 +216,18 @@ source_set("flutter_framework_source") {
 }
 
 if (enable_ios_unittests) {
+  source_set("ios_test_flutter_swift_helpers") {
+    testonly = true
+    visibility = [ ":*" ]
+    module_name = "ios_test_flutter_swift"
+    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
+    sources = [
+      "framework/Source/FakeUIPressProxy.swift",
+    ]
+    deps = [
+      ":flutter_framework_source", ]
+  }
+
   static_library("ios_test_flutter_swift") {
     testonly = true
     visibility = [ ":*" ]
@@ -223,7 +235,6 @@ if (enable_ios_unittests) {
     sources = [
       "framework/Source/AccessibilityFeaturesTests.swift",
       "framework/Source/ConnectionCollectionTest.swift",
-      "framework/Source/FakeUIPressProxy.swift",
       "framework/Source/LaunchEngineTest.swift",
       "framework/Source/SplashScreenManagerTests.swift",
     ]
@@ -235,7 +246,7 @@ if (enable_ios_unittests) {
     deps = [ ":flutter_framework_source" ]
   }
 
-  static_library("ios_test_flutter") {
+  shared_library("ios_test_flutter") {
     testonly = true
     visibility = [ "*" ]
 
@@ -298,7 +309,7 @@ if (enable_ios_unittests) {
       ":flutter_framework",
       ":flutter_framework_source",
       ":ios_gpu_configuration",
-      ":ios_test_flutter_swift",
+      ":ios_test_flutter_swift_helpers",
       "//flutter/common",
       "//flutter/lib/ui",
       "//flutter/shell/platform/darwin/common:framework_common",
