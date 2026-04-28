@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 
+import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:xml/xml.dart';
@@ -132,13 +133,21 @@ class FlutterProject {
   final FlutterManifest _exampleManifest;
 
   /// List of [FlutterProject]s corresponding to the workspace entries.
-  List<FlutterProject> get workspaceProjects => manifest.workspace
-      .map(
-        (String entry) => FlutterProject.fromDirectory(
-          directory.childDirectory(directory.fileSystem.path.normalize(entry)),
-        ),
-      )
-      .toList();
+  List<FlutterProject> get workspaceProjects {
+    final result = <FlutterProject>[];
+    for (final String entry in manifest.workspace) {
+      final glob = Glob(entry);
+      for (final Directory globResult
+          in glob
+              .listFileSystemSync(directory.fileSystem, root: directory.path)
+              .whereType<Directory>()) {
+        if (globResult.childFile('pubspec.yaml').existsSync()) {
+          result.add(FlutterProject.fromDirectory(globResult));
+        }
+      }
+    }
+    return result;
+  }
 
   /// The set of organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
