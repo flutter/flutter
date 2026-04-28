@@ -2548,7 +2548,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildHourColumn(EdgeInsetsDirectional additionalPadding, Widget? selectionOverlay) {
-    final resolvedAdditionalPadding = EdgeInsetsDirectional.only(
+    additionalPadding = EdgeInsetsDirectional.only(
       start: math.max(additionalPadding.start, 0),
       end: math.max(additionalPadding.end, 0),
     );
@@ -2562,11 +2562,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             });
             return false;
           },
-          child: _buildHourPicker(resolvedAdditionalPadding, selectionOverlay),
+          child: _buildHourPicker(additionalPadding, selectionOverlay),
         ),
         _buildLabel(
           localizations.timerPickerHourLabel(lastSelectedHour ?? selectedHour!) ?? '',
-          resolvedAdditionalPadding,
+          additionalPadding,
         ),
       ],
     );
@@ -2621,7 +2621,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildMinuteColumn(EdgeInsetsDirectional additionalPadding, Widget? selectionOverlay) {
-    final resolvedAdditionalPadding = EdgeInsetsDirectional.only(
+    additionalPadding = EdgeInsetsDirectional.only(
       start: math.max(additionalPadding.start, 0),
       end: math.max(additionalPadding.end, 0),
     );
@@ -2635,11 +2635,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             });
             return false;
           },
-          child: _buildMinutePicker(resolvedAdditionalPadding, selectionOverlay),
+          child: _buildMinutePicker(additionalPadding, selectionOverlay),
         ),
         _buildLabel(
           localizations.timerPickerMinuteLabel(lastSelectedMinute ?? selectedMinute) ?? '',
-          resolvedAdditionalPadding,
+          additionalPadding,
         ),
       ],
     );
@@ -2690,7 +2690,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildSecondColumn(EdgeInsetsDirectional additionalPadding, Widget? selectionOverlay) {
-    final resolvedAdditionalPadding = EdgeInsetsDirectional.only(
+    additionalPadding = EdgeInsetsDirectional.only(
       start: math.max(additionalPadding.start, 0),
       end: math.max(additionalPadding.end, 0),
     );
@@ -2704,11 +2704,11 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             });
             return false;
           },
-          child: _buildSecondPicker(resolvedAdditionalPadding, selectionOverlay),
+          child: _buildSecondPicker(additionalPadding, selectionOverlay),
         ),
         _buildLabel(
           localizations.timerPickerSecondLabel(lastSelectedSecond ?? selectedSecond!) ?? '',
-          resolvedAdditionalPadding,
+          additionalPadding,
         ),
       ],
     );
