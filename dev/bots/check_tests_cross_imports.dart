@@ -211,8 +211,8 @@ class TestsCrossImportChecker {
     }).toSet();
   }
 
-  /// Get a list of all the filenames in the source directory that end in
-  /// "_test.dart".
+  /// Get a list of all the filenames in the source directory
+  /// that end in ".dart".
   static Set<File> _getTestFiles(Directory directory, _Library library) {
     return _getFiles(directory.childDirectory(library.directory), RegExp(r'\.dart$')).toSet();
   }
@@ -256,10 +256,9 @@ class TestsCrossImportChecker {
     return buffer.toString().trimRight();
   }
 
-  /// Returns the File's relative path.
-  String _getRelativePath(File file, [Directory? root]) {
-    root ??= flutterRoot;
-    return path.relative(file.absolute.path, from: root.absolute.path);
+  /// Returns the [file]'s relative path, relative to [flutterRoot].
+  String _getRelativePath(File file) {
+    return path.relative(file.absolute.path, from: flutterRoot.absolute.path);
   }
 
   /// Returns the import error for the `files` in `testLibrary` which import
