@@ -13,7 +13,7 @@ import 'widgets_app_tester.dart';
 
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
-const Color _amber = Color(0xFFFFC107);
+const Color _debugAmber = Color(0xFFFFC107);
 
 void main() {
   testWidgets('SliverMainAxisGroup is laid out properly', (WidgetTester tester) async {
@@ -787,19 +787,19 @@ void main() {
         slivers: <Widget>[
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 1000, decoration: const BoxDecoration(color: _amber)),
+            child: Container(height: 1000, decoration: const BoxDecoration(color: _debugAmber)),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 400, decoration: const BoxDecoration(color: _amber)),
+            child: Container(height: 400, decoration: const BoxDecoration(color: _debugAmber)),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 500, decoration: const BoxDecoration(color: _amber)),
+            child: Container(height: 500, decoration: const BoxDecoration(color: _debugAmber)),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 300, decoration: const BoxDecoration(color: _amber)),
+            child: Container(height: 300, decoration: const BoxDecoration(color: _debugAmber)),
           ),
         ],
       ),
