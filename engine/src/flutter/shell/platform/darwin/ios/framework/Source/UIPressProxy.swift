@@ -8,6 +8,7 @@ import UIKit
 /// overriding for testing purposes, since UIKit doesn't allow creation of
 /// UIEvent or UIPress directly.
 @available(iOS 13.4, *)
+@MainActor
 @objc(FlutterUIPressProxy)
 public class UIPressProxy: NSObject {
   private var press: UIPress?

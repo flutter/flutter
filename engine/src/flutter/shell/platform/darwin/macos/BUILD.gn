@@ -202,6 +202,11 @@ executable("flutter_desktop_darwin_swift_unittests") {
     "//flutter/shell/platform/darwin/common:swift_testing_config",
   ]
   sources = [ "framework/Source/ResizeSynchronizerTest.swift" ]
+  include_dirs = [
+    "//flutter/shell/platform/darwin/common/framework/Headers",
+    "//flutter/shell/platform/darwin/macos/framework/Headers",
+    "//flutter/shell/platform/darwin/macos/framework",  # For module.modulemap
+  ]
   deps = [
     ":flutter_framework_source",
     "//flutter/shell/platform/darwin/common:swift_testing_main",

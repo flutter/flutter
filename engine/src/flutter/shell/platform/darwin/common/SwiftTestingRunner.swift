@@ -61,13 +61,11 @@ private func resolveSwiftTestingEntrypoint() -> SwiftTestingEntryPointFunc {
 }
 
 /// A test runner for Swift Testing tests.
-public struct SwiftTestingRunner {
-  public init() {}
-
+@frozen public enum SwiftTestingRunner {
   /// Runs all Swift Testing tests (annotated with `@Test`) in the current executable.
   ///
   /// Returns 0 on pass, non-zero on failure.
-  public func run() async -> CInt {
+  public static func run() async -> CInt {
     let testRunnerEntryPoint = resolveSwiftTestingEntrypoint()
     do {
       let result = try await testRunnerEntryPoint(nil) { _ in
