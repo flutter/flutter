@@ -755,9 +755,9 @@ def ensure_ios_tests_are_built(ios_out_dir: str) -> None:
   joined_message = '\n  '.join(message)
   final_message = (
       f"{ios_out_dir} or {ios_xctest_lib} or {ios_swifttest_lib} doesn't exist.\n\n"
-      f"Please run the following commands:\n\n"
-      f"  {joined_message}\n\n"
-      f"Alternatively, use --ios-variant to specify a different build configuration."
+      f'Please run the following commands:\n\n'
+      f'  {joined_message}\n\n'
+      f'Alternatively, use --ios-variant to specify a different build configuration.'
   )
   assert (
       os.path.exists(tmp_out_dir) and os.path.exists(ios_xctest_lib) and
@@ -873,7 +873,7 @@ def run_objc_tests(
   run_cmd(create_simulator, shell=True)
 
   def run_xcodebuild(scheme, project_dir, result_bundle_name):
-    with tempfile.TemporaryDirectory(suffix="ios_embedding_xcresult") as result_bundle_temp:
+    with tempfile.TemporaryDirectory(suffix='ios_embedding_xcresult') as result_bundle_temp:
       result_bundle_path = os.path.join(result_bundle_temp, result_bundle_name)
       # Avoid using xcpretty unless the following can be addressed:
       # - Make sure all relevant failure output is printed on a failure.
@@ -882,7 +882,7 @@ def run_objc_tests(
       test_command = [
           'xcodebuild '
           '-sdk iphonesimulator '
-          f"-scheme {scheme} "
+          f'-scheme {scheme} '
           '-resultBundlePath ' + result_bundle_path + ' '
           '-destination name=' + new_simulator_name + ' '
           'test '
