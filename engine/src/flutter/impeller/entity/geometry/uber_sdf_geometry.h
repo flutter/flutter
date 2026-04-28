@@ -36,12 +36,15 @@ class UberSDFGeometry final : public Geometry {
   bool IsAxisAlignedRect() const override;
 
  private:
-  // The local bounds of the primitive based on the center and size.
-  // Takes into account stroke width if the primitive is stroked.
-  // Does not take AA padding into account.
-  Rect base_bounds_;
-
   UberSDFParameters params_;
+
+  // Returns the bounds rectangle of the SDF, expanded to account for stroke
+  // width and AA.
+  //
+  // The `transform` argument is used to determine the exact stroke width and AA
+  // padding to apply. But the returned rectangle is in local space;
+  // `transform` is not applied to the returned bounds rectangle.
+  Rect GetExpandedBounds(const Matrix& transform) const;
 };
 
 }  // namespace impeller
