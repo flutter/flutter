@@ -388,6 +388,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
     }
   }
 
+  FML_DCHECK(owner.onFirstFrame == nil);
   owner.onFirstFrame = ^{
     if (parent != nil) {
       dispatch_async(dispatch_get_main_queue(), ^{
@@ -455,6 +456,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   [parent addChildWindow:window ordered:NSWindowAbove];
   window.alphaValue = 0.0;
 
+  FML_DCHECK(owner.onFirstFrame == nil);
   owner.onFirstFrame = ^{
     window.alphaValue = 1.0;
   };
@@ -511,6 +513,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   [parent addChildWindow:window ordered:NSWindowAbove];
   window.alphaValue = 0.0;
 
+  FML_DCHECK(owner.onFirstFrame == nil);
   owner.onFirstFrame = ^{
     window.alphaValue = 1.0;
   };
@@ -557,6 +560,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
   window.delegate = owner;
   [_windows addObject:owner];
 
+  FML_DCHECK(owner.onFirstFrame == nil);
   owner.onFirstFrame = ^{
     [window setIsVisible:YES];
     [window makeKeyAndOrderFront:nil];
