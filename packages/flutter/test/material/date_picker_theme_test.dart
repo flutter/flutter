@@ -55,6 +55,7 @@ void main() {
     confirmButtonStyle: ButtonStyle(
       foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff7f)),
     ),
+    actionsPadding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
     locale: Locale('en'),
     subHeaderForegroundColor: Color(0xffffff8f),
     toggleButtonTextStyle: TextStyle(fontSize: 13),
@@ -142,6 +143,7 @@ void main() {
     expect(theme.inputDecorationTheme, null);
     expect(theme.cancelButtonStyle, null);
     expect(theme.confirmButtonStyle, null);
+    expect(theme.actionsPadding, null);
     expect(theme.locale, null);
     expect(theme.subHeaderForegroundColor, null);
     expect(theme.toggleButtonTextStyle, null);
@@ -533,6 +535,7 @@ void main() {
         'inputDecorationTheme: InputDecorationThemeData#00000(fillColor: ${const Color(0xffffff5f)}, border: UnderlineInputBorder())',
         'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff6f)}))',
         'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff7f)}))',
+        'actionsPadding: EdgeInsets(24.0, 16.0, 24.0, 16.0)',
         'locale: en',
         'toggleButtonTextStyle: TextStyle(inherit: true, size: 13.0)',
         'subHeaderForegroundColor: ${const Color(0xffffff8f)}',
@@ -674,6 +677,38 @@ void main() {
       confirmButtonStyle.toString(),
       equalsIgnoringHashCodes(datePickerTheme.confirmButtonStyle.toString()),
     );
+
+    final Padding actionsPadding = tester.widget<Padding>(
+      find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first,
+    );
+    expect(actionsPadding.padding, datePickerTheme.actionsPadding);
+  });
+
+  testWidgets('DatePickerDialog uses default actionsPadding when theme is null', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: DatePickerDialog(
+                initialDate: DateTime(2023, DateTime.january, 25),
+                firstDate: DateTime(2022),
+                lastDate: DateTime(2024, DateTime.december, 31),
+                currentDate: DateTime(2023, DateTime.january, 24),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Padding actionsPadding = tester.widget<Padding>(
+      find.ancestor(of: find.byType(OverflowBar), matching: find.byType(Padding)).first,
+    );
+    expect(actionsPadding.padding, const EdgeInsets.symmetric(horizontal: 8));
   });
 
   testWidgets('DatePickerDialog uses ThemeData datePicker theme (input mode)', (

@@ -84,6 +84,7 @@ class DatePickerThemeData with Diagnosticable {
     Object? inputDecorationTheme,
     this.cancelButtonStyle,
     this.confirmButtonStyle,
+    this.actionsPadding,
     this.locale,
     this.toggleButtonTextStyle,
     this.subHeaderForegroundColor,
@@ -439,6 +440,12 @@ class DatePickerThemeData with Diagnosticable {
   /// Overrides the default style of the confirm (OK) button of a [DatePickerDialog].
   final ButtonStyle? confirmButtonStyle;
 
+  /// Overrides the default padding around the action buttons (cancel and
+  /// confirm) of a [DatePickerDialog].
+  ///
+  /// If null, defaults to `EdgeInsets.symmetric(horizontal: 8)`.
+  final EdgeInsetsGeometry? actionsPadding;
+
   /// An optional [locale] argument can be used to set the locale for the date
   /// picker. It defaults to the ambient locale provided by [Localizations].
   final Locale? locale;
@@ -494,6 +501,7 @@ class DatePickerThemeData with Diagnosticable {
     InputDecorationTheme? inputDecorationTheme,
     ButtonStyle? cancelButtonStyle,
     ButtonStyle? confirmButtonStyle,
+    EdgeInsetsGeometry? actionsPadding,
     Locale? locale,
     TextStyle? toggleButtonTextStyle,
     Color? subHeaderForegroundColor,
@@ -541,6 +549,7 @@ class DatePickerThemeData with Diagnosticable {
       inputDecorationTheme: inputDecorationTheme ?? this.inputDecorationTheme,
       cancelButtonStyle: cancelButtonStyle ?? this.cancelButtonStyle,
       confirmButtonStyle: confirmButtonStyle ?? this.confirmButtonStyle,
+      actionsPadding: actionsPadding ?? this.actionsPadding,
       locale: locale ?? this.locale,
       toggleButtonTextStyle: toggleButtonTextStyle ?? this.toggleButtonTextStyle,
       subHeaderForegroundColor: subHeaderForegroundColor ?? this.subHeaderForegroundColor,
@@ -674,6 +683,7 @@ class DatePickerThemeData with Diagnosticable {
       inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
       cancelButtonStyle: ButtonStyle.lerp(a?.cancelButtonStyle, b?.cancelButtonStyle, t),
       confirmButtonStyle: ButtonStyle.lerp(a?.confirmButtonStyle, b?.confirmButtonStyle, t),
+      actionsPadding: EdgeInsetsGeometry.lerp(a?.actionsPadding, b?.actionsPadding, t),
       locale: t < 0.5 ? a?.locale : b?.locale,
       toggleButtonTextStyle: TextStyle.lerp(a?.toggleButtonTextStyle, b?.toggleButtonTextStyle, t),
       subHeaderForegroundColor: Color.lerp(
@@ -734,6 +744,7 @@ class DatePickerThemeData with Diagnosticable {
     inputDecorationTheme,
     cancelButtonStyle,
     confirmButtonStyle,
+    actionsPadding,
     locale,
     toggleButtonTextStyle,
     subHeaderForegroundColor,
@@ -783,6 +794,7 @@ class DatePickerThemeData with Diagnosticable {
         other.inputDecorationTheme == inputDecorationTheme &&
         other.cancelButtonStyle == cancelButtonStyle &&
         other.confirmButtonStyle == confirmButtonStyle &&
+        other.actionsPadding == actionsPadding &&
         other.locale == locale &&
         other.toggleButtonTextStyle == toggleButtonTextStyle &&
         other.subHeaderForegroundColor == subHeaderForegroundColor;
@@ -964,6 +976,9 @@ class DatePickerThemeData with Diagnosticable {
         confirmButtonStyle,
         defaultValue: null,
       ),
+    );
+    properties.add(
+      DiagnosticsProperty<EdgeInsetsGeometry>('actionsPadding', actionsPadding, defaultValue: null),
     );
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(

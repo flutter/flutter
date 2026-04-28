@@ -600,7 +600,10 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
       child: MediaQuery.withClampedTextScaling(
         maxScaleFactor: isLandscapeOrientation ? 1.6 : _kMaxTextScaleFactor,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding:
+              datePickerTheme.actionsPadding ??
+              defaults.actionsPadding ??
+              const EdgeInsets.symmetric(horizontal: 8),
           child: Align(
             alignment: AlignmentDirectional.centerEnd,
             child: OverflowBar(
@@ -3138,7 +3141,10 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     final Widget actions = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 52.0),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding:
+            datePickerTheme.actionsPadding ??
+            defaults.actionsPadding ??
+            const EdgeInsets.symmetric(horizontal: 8),
         child: Align(
           alignment: AlignmentDirectional.centerEnd,
           child: OverflowBar(
