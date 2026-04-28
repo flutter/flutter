@@ -103,6 +103,7 @@ void testWindowController() {
 void testWindowControllerRetainCycle() {}
 
 @pragma('vm:entry-point')
+// Used in FlutterWindowControllerSizeTest.SizedToContentResizable
 void testRenderSizedToContentResizable() {
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
     final baseRecorder = PictureRecorder();
@@ -120,6 +121,7 @@ void testRenderSizedToContentResizable() {
 }
 
 @pragma('vm:entry-point')
+// Used in FlutterWindowControllerSizeTest.SizedToContent
 void testRenderSizedToContent() {
   int frameCount = 0;
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
