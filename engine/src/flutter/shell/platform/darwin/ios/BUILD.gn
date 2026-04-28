@@ -216,7 +216,9 @@ source_set("flutter_framework_source") {
 }
 
 if (enable_ios_unittests) {
-  source_set("ios_test_flutter_swift_helpers") {
+  # This target exists because the FakeUIPressProxy test utility was migrated
+  # before the tests that use it.
+  source_set("ios_test_utils_swift") {
     testonly = true
     visibility = [ ":*" ]
     module_name = "ios_test_flutter_swift"
@@ -225,6 +227,10 @@ if (enable_ios_unittests) {
     deps = [ ":flutter_framework_source" ]
   }
 
+  # Swift testing tests.
+  # This has to be a static library likely because Swift Tesing test discovery
+  # relies on specific metadata inserted to the test binary:
+  # https://github.com/swiftlang/swift-testing/blob/main/Documentation/ABI/TestContent.md#basic-format
   static_library("ios_test_flutter_swift") {
     testonly = true
     visibility = [ ":*" ]
@@ -233,6 +239,7 @@ if (enable_ios_unittests) {
       "framework/Source/AccessibilityFeaturesTests.swift",
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/LaunchEngineTest.swift",
+      // TODO(LongCatIsLooong): migrate this test to Swift testing.
       "framework/Source/SplashScreenManagerTests.swift",
     ]
     include_dirs = [
@@ -307,7 +314,7 @@ if (enable_ios_unittests) {
       ":flutter_framework",
       ":flutter_framework_source",
       ":ios_gpu_configuration",
-      ":ios_test_flutter_swift_helpers",
+      ":ios_test_utils_swift",
       "//flutter/common",
       "//flutter/lib/ui",
       "//flutter/shell/platform/darwin/common:framework_common",
