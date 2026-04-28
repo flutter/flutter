@@ -216,7 +216,7 @@ source_set("flutter_framework_source") {
 }
 
 if (enable_ios_unittests) {
-  source_set("ios_test_flutter_swift") {
+  static_library("ios_test_flutter_swift") {
     testonly = true
     visibility = [ ":*" ]
     configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
@@ -227,11 +227,15 @@ if (enable_ios_unittests) {
       "framework/Source/LaunchEngineTest.swift",
       "framework/Source/SplashScreenManagerTests.swift",
     ]
-    frameworks = [ "XCTest.framework" ]
+    include_dirs = [
+      "//flutter/shell/platform/darwin/common/framework/Headers",
+      "//flutter/shell/platform/darwin/macos/framework/Headers",
+      "//flutter/shell/platform/darwin/macos/framework",  # For module.modulemap
+    ]
     deps = [ ":flutter_framework_source" ]
   }
 
-  shared_library("ios_test_flutter") {
+  static_library("ios_test_flutter") {
     testonly = true
     visibility = [ "*" ]
 
