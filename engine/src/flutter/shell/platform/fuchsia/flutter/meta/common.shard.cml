@@ -35,6 +35,7 @@
                 "fuchsia.feedback.CrashReporter",
                 "fuchsia.fonts.Provider",
                 "fuchsia.intl.PropertyProvider",
+                "fuchsia.kernel.VmexResource", // Also used in AOT for FFI callback thunks.
                 "fuchsia.media.ProfileProvider",
                 "fuchsia.memorypressure.Provider",
                 "fuchsia.scheduler.RoleManager",

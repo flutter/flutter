@@ -147,6 +147,14 @@ DisplayListBuilder::~DisplayListBuilder() {
   DisplayList::DisposeOps(storage_, offsets_);
 }
 
+size_t DisplayListBuilder::GetRecordCount() const {
+  return offsets_.size();
+}
+
+bool DisplayListBuilder::IsEmpty() const {
+  return offsets_.empty();
+}
+
 DlISize DisplayListBuilder::GetBaseLayerDimensions() const {
   return DlIRect::RoundOut(original_cull_rect_).GetSize();
 }
@@ -1197,8 +1205,7 @@ void DisplayListBuilder::drawCircle(const DlPoint& center, DlScalar radius) {
   DisplayListAttributeFlags flags = kDrawCircleFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect) {
-    DlRect bounds = DlRect::MakeLTRB(center.x - radius, center.y - radius,
-                                     center.x + radius, center.y + radius);
+    DlRect bounds = DlRect::MakeCircleBounds(center, radius);
     if (AccumulateOpBounds(bounds, flags)) {
       Push<DrawCircleOp>(0, center, radius);
       CheckLayerOpacityCompatibility();

@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/gestures/monodrag.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_tester.dart';
 import 'two_dimensional_utils.dart';
+import 'widgets_app_tester.dart';
 
 Widget? _testChildBuilder(BuildContext context, ChildVicinity vicinity) {
   return SizedBox.square(
@@ -32,7 +33,7 @@ void main() {
         late final TwoDimensionalChildBuilderDelegate delegate1;
         addTearDown(() => delegate1.dispose());
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SimpleBuilderTableView(
               delegate: delegate1 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
               horizontalDetails: const ScrollableDetails.vertical(),
@@ -45,7 +46,7 @@ void main() {
         late final TwoDimensionalChildBuilderDelegate delegate2;
         addTearDown(() => delegate2.dispose());
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SimpleBuilderTableView(
               delegate: delegate2 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
               verticalDetails: const ScrollableDetails.horizontal(),
@@ -58,7 +59,7 @@ void main() {
         late final TwoDimensionalChildBuilderDelegate delegate3;
         addTearDown(() => delegate3.dispose());
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SimpleBuilderTableView(
               delegate: delegate3 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
               verticalDetails: const ScrollableDetails.horizontal(),
@@ -88,7 +89,7 @@ void main() {
         addTearDown(() => delegate.dispose());
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SimpleBuilderTableView(
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
@@ -142,7 +143,7 @@ void main() {
           late final TwoDimensionalChildBuilderDelegate delegate;
           addTearDown(() => delegate.dispose());
 
-          return MaterialApp(
+          return TestWidgetsApp(
             home: PrimaryScrollController(
               controller: controller,
               child: SimpleBuilderTableView(
@@ -329,7 +330,7 @@ void main() {
         late final TwoDimensionalChildBuilderDelegate delegate1;
         addTearDown(() => delegate1.dispose());
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SimpleBuilderTableView(
               delegate: delegate1 = TwoDimensionalChildBuilderDelegate(
                 builder: (BuildContext context, ChildVicinity vicinity) {
@@ -351,7 +352,7 @@ void main() {
         late final TwoDimensionalChildBuilderDelegate delegate2;
         addTearDown(() => delegate2.dispose());
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SimpleBuilderTableView(
               verticalDetails: const ScrollableDetails.vertical(reverse: true),
               horizontalDetails: const ScrollableDetails.horizontal(reverse: true),
@@ -379,7 +380,7 @@ void main() {
         late final TwoDimensionalChildBuilderDelegate delegate;
         addTearDown(() => delegate.dispose());
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: Stack(
               children: <Widget>[
                 Positioned.fill(
@@ -948,15 +949,14 @@ void main() {
       WidgetTester tester,
     ) async {
       late final TwoDimensionalChildBuilderDelegate delegate;
-      final scaffoldKey = GlobalKey<ScaffoldState>();
+      final overlayKey = GlobalKey<_DrawerLikeContainerState>();
       addTearDown(() => delegate.dispose());
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            key: scaffoldKey,
-            drawer: Container(),
-            body: Column(
+        TestWidgetsApp(
+          home: _DrawerLikeContainer(
+            key: overlayKey,
+            child: Column(
               children: <Widget>[
                 const TestTextField(),
                 Expanded(
@@ -986,7 +986,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.testTextInput.isVisible, isFalse);
-      scaffoldKey.currentState!.openDrawer();
+      overlayKey.currentState!.showOverlay();
       await tester.pumpAndSettle();
 
       expect(tester.testTextInput.isVisible, isFalse);
@@ -996,7 +996,7 @@ void main() {
       late final TwoDimensionalChildBuilderDelegate delegate;
       addTearDown(() => delegate.dispose());
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SimpleBuilderTableView(
             cacheExtent: 1.0,
             cacheExtentStyle: CacheExtentStyle.viewport,
@@ -1017,4 +1017,36 @@ void main() {
       expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
     });
   });
+}
+
+/// A simple container that can show an overlay on top of its child,
+/// used to simulate the effect of opening a drawer without depending
+/// on [Scaffold] from the Material library.
+class _DrawerLikeContainer extends StatefulWidget {
+  const _DrawerLikeContainer({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<_DrawerLikeContainer> createState() => _DrawerLikeContainerState();
+}
+
+class _DrawerLikeContainerState extends State<_DrawerLikeContainer> {
+  bool _showOverlay = false;
+
+  void showOverlay() {
+    setState(() {
+      _showOverlay = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        widget.child,
+        if (_showOverlay) Positioned.fill(child: Container(color: const Color(0x88000000))),
+      ],
+    );
+  }
 }
