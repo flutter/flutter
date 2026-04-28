@@ -610,8 +610,6 @@ class _RenderSingleChildViewport extends RenderBox
     Rect? rect,
     Axis? axis,
   }) {
-
-
     final Rect effectiveRect = rect ?? target.paintBounds;
     if (target is! RenderBox) {
       return RevealedOffset(offset: offset.pixels, rect: effectiveRect);
