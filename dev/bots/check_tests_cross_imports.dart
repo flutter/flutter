@@ -172,13 +172,27 @@ class TestsCrossImportChecker {
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownFlutterSlashTestCrossImports = <String>{};
 
-  static final Set<String> _knownCrossImports = knownWidgetsCrossImports.union(
-    knownCupertinoCrossImports,
-  );
+  static final Set<String> _knownCrossImports = {
+    ...knownFlutterSlashTestCrossImports,
+    ...knownWidgetsCrossImports,
+    ...knownAnimationCrossImports,
+    ...knownCupertinoCrossImports,
+    ...knownDartCrossImports,
+    ...knownExamplesCrossImports,
+    ...knownFoundationCrossImports,
+    ...knownGesturesCrossImports,
+    ...knownHarnessCrossImports,
+    ...knownPaintingCrossImports,
+    ...knownPhysicsCrossImports,
+    ...knownRenderingCrossImports,
+    ...knownSchedulerCrossImports,
+    ...knownSemanticsCrossImports,
+    ...knownServicesCrossImports,
+  };
 
   static final RegExp _flutterTestPrefix = RegExp(r'packages[/\\]flutter[/\\]test');
 
-  /// Returns the Set of paths in `knownPaths` that are not in `files`.
+  /// Returns the [Set] of paths in [knownPaths] that are not in [files].
   static Set<String> _differencePaths(Set<String> knownPaths, Set<File> files) {
     final Set<String> testPaths = files.map((File file) {
       final int index = file.absolute.path.indexOf(_flutterTestPrefix);
