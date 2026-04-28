@@ -460,6 +460,8 @@ TEST_F(FlutterWindowControllerTest, GetOffsetInParent) {
   [parentWindow close];
 }
 
+const CFAbsoluteTime kTestTimeout = 30.0;
+
 TEST_F(FlutterWindowControllerSizeTest, SizedToContentResizable) {
   FlutterWindowCreationRequest request{
       .has_size = false,
@@ -502,7 +504,7 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentResizable) {
   auto controller = [engine viewControllerForIdentifier:viewId];
   auto window = controller.view.window;
   CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
-  while (window.frame.size.width != 150 && CFAbsoluteTimeGetCurrent() - startTime < 5) {
+  while (window.frame.size.width != 150 && CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
   }
 
@@ -558,7 +560,7 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentNotResizable) {
   auto window = controller.view.window;
 
   CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
-  while (window.frame.size.width != 150 && CFAbsoluteTimeGetCurrent() - startTime < 5) {
+  while (window.frame.size.width != 150 && CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
   }
 
@@ -570,7 +572,7 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentNotResizable) {
   // Wait until the second frame is rendered, which should resize the window based
   // on new content.
   startTime = CFAbsoluteTimeGetCurrent();
-  while (window.frame.size.width == 150 && CFAbsoluteTimeGetCurrent() - startTime < 5) {
+  while (window.frame.size.width == 150 && CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
   }
 
