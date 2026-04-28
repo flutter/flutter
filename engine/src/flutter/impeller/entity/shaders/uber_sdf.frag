@@ -112,33 +112,37 @@ float distanceFromRoundedSuperellipse(vec2 p,
                                       vec2 circle_center_right,
                                       float c,
                                       vec2 scale) {
+  // Do work in the first quadrant to simply things.
   p = abs(p);
+  // Map p in to a square.
   vec2 p_norm = p / scale;
 
-  float n, span, r, a, s;
-  vec2 circle_center, p_oct;
+  // Declare all RSE params for a single octant.
+  float se_degree, span, radius, axis_length;
+  vec2 circle_center;
+
+  // 'p' in the coordinate system of the octant.
+  vec2 p_oct;
 
   // We split the quadrant along the diagonal of the transition (p_norm.y + c ==
   // p_norm.x). This allows us to grab the correct set of parameters for the
   // "top" and "right" halves of the corner.
   if (p_norm.y + c > p_norm.x) {
     p_oct = p_norm + vec2(0.0, c);
-    n = degree.x;
+    se_degree = degree.x;
     span = angle_span.x;
-    r = radii_top.x;
+    radius = radii_top.x;
     circle_center = circle_center_top;
-    a = se_a.x;
-    s = scale.y;
+    axis_length = se_a.x;
   } else {
     // For the 'right' octant, we flip the point and shift it according to
     // the CPU's OctantContains/Flip logic.
     p_oct = p_norm.yx - vec2(0.0, c);
-    n = degree.y;
+    se_degree = degree.y;
     span = angle_span.y;
-    r = radii_right.x;
+    radius = radii_right.x;
     circle_center = circle_center_right;
-    a = se_a.y;
-    s = scale.x;
+    axis_length = se_a.y;
   }
 
   // Move the point to the corner circle's coordinate system.
@@ -157,9 +161,9 @@ float distanceFromRoundedSuperellipse(vec2 p,
   // agree at the transition angle, the total RSE curve is continuous and
   // the closest point on a continuous curve to a point lies along the normal.
   if (abs(d_theta) < abs(span)) {
-    return distanceFromCircle(p_rel, r);
+    return distanceFromCircle(p_rel, radius);
   }
-  return sdSuperellipse(p_oct / a, n) * a;
+  return sdSuperellipse(p_oct / axis_length, se_degree) * axis_length;
 }
 
 // Define an ellipse as q(w) = (a*cos(w), b*sin(w)), and p = (x, y) on the

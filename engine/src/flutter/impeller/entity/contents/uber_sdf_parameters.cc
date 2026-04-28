@@ -73,11 +73,11 @@ UberSDFParameters UberSDFParameters::MakeRoundedRect(
 
 UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
     Color color,
-    const Rect& rect,
-    const Point& superellipse_degree,
-    const Point& superellipse_a,
-    const RoundingRadii& radii,
-    const Point& corner_angle_span,
+    Rect rect,
+    Point superellipse_degree,
+    Point superellipse_a,
+    RoundingRadii radii,
+    Point corner_angle_span,
     Point corner_circle_center_top,
     Point corner_circle_center_right,
     Scalar superellipse_c,

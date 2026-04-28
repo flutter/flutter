@@ -57,11 +57,11 @@ struct UberSDFParameters {
   /// Creates UberSDFParameters for a symmetric round superellipse.
   static UberSDFParameters MakeRoundedSuperellipse(
       Color color,
-      const Rect& bounds,
-      const Point& superellipse_degree,
-      const Point& superellipse_a,
-      const RoundingRadii& radii,
-      const Point& corner_angle_span,
+      Rect bounds,
+      Point superellipse_degree,
+      Point superellipse_a,
+      RoundingRadii radii,
+      Point corner_angle_span,
       Point corner_circle_center_top,
       Point corner_circle_center_right,
       Scalar superellipse_c,
