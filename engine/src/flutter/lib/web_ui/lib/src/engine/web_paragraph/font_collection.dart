@@ -54,7 +54,8 @@ class WebFontCollection implements FlutterFontCollection {
   }
 
   @override
-  Null get fontFallbackManager => null;
+  FontFallbackManager get fontFallbackManager =>
+      throw UnimplementedError('fontFallbackManager is not supported in WebFontCollection as it uses the browser\'s native font fallback.');
 
   /// Unregister all fonts that have been registered.
   @override
