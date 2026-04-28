@@ -298,20 +298,20 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
 
     final int daysInMonth = widget.calendarDelegate.getDaysInMonth(value.year, value.month);
     final int preferredDay = math.min(_selectedDate?.day ?? 1, daysInMonth);
-    DateTime newDate = widget.calendarDelegate.getDay(value.year, value.month, preferredDay);
+    value = widget.calendarDelegate.getDay(value.year, value.month, preferredDay);
 
-    if (newDate.isBefore(widget.firstDate)) {
-      newDate = widget.firstDate;
-    } else if (newDate.isAfter(widget.lastDate)) {
-      newDate = widget.lastDate;
+    if (value.isBefore(widget.firstDate)) {
+      value = widget.firstDate;
+    } else if (value.isAfter(widget.lastDate)) {
+      value = widget.lastDate;
     }
 
     setState(() {
       _mode = DatePickerMode.day;
-      _handleMonthChanged(newDate);
+      _handleMonthChanged(value);
 
-      if (_isSelectable(newDate)) {
-        _selectedDate = newDate;
+      if (_isSelectable(value)) {
+        _selectedDate = value;
         widget.onDateChanged(_selectedDate!);
       }
     });
@@ -838,15 +838,14 @@ class _MonthPickerState extends State<_MonthPicker> {
 
   int _dayDirectionOffset(TraversalDirection traversalDirection, TextDirection textDirection) {
     // Swap left and right if the text direction if RTL
-    var effectiveTraversalDirection = traversalDirection;
     if (textDirection == TextDirection.rtl) {
-      if (effectiveTraversalDirection == TraversalDirection.left) {
-        effectiveTraversalDirection = TraversalDirection.right;
-      } else if (effectiveTraversalDirection == TraversalDirection.right) {
-        effectiveTraversalDirection = TraversalDirection.left;
+      if (traversalDirection == TraversalDirection.left) {
+        traversalDirection = TraversalDirection.right;
+      } else if (traversalDirection == TraversalDirection.right) {
+        traversalDirection = TraversalDirection.left;
       }
     }
-    return _directionOffset[effectiveTraversalDirection]!;
+    return _directionOffset[traversalDirection]!;
   }
 
   DateTime? _nextDateInDirection(DateTime date, TraversalDirection direction) {

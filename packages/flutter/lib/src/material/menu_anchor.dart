@@ -187,8 +187,8 @@ class _TweenCurve extends Curve {
 
   @override
   double transformInternal(double t) {
-    final double transformedT = curve.transform(t);
-    return ui.lerpDouble(begin, end, transformedT)!;
+    t = curve.transform(t);
+    return ui.lerpDouble(begin, end, t)!;
   }
 
   @override
@@ -2202,7 +2202,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             }
           }
 
-          Widget? wrappedChild = MergeSemantics(
+          child = MergeSemantics(
             child: Semantics(
               expanded: _enabled && _animationStatus.isForwardOrCompleted,
               child: TextButton(
@@ -2224,20 +2224,20 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           );
 
           if (!_enabled) {
-            return wrappedChild;
+            return child;
           }
 
-          wrappedChild = MouseRegion(onHover: handlePointerHover, onExit: handlePointerExit, child: wrappedChild);
+          child = MouseRegion(onHover: handlePointerHover, onExit: handlePointerExit, child: child);
 
           if (_platformSupportsAccelerators) {
             return MenuAcceleratorCallbackBinding(
               onInvoke: toggleShowMenu,
               hasSubmenu: true,
-              child: wrappedChild,
+              child: child,
             );
           }
 
-          return wrappedChild;
+          return child;
         },
         menuChildren: widget.menuChildren,
         child: widget.child,

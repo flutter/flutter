@@ -382,48 +382,42 @@ class ThemeData with Diagnosticable {
     Color? indicatorColor,
   }) {
     // GENERAL CONFIGURATION
-    final NoDefaultCupertinoThemeData? effectiveCupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
-    final Iterable<ThemeExtension<dynamic>> effectiveExtensions = extensions ?? <ThemeExtension<dynamic>>[];
-    final Iterable<Adaptation<Object>> effectiveAdaptations = adaptations ?? <Adaptation<Object>>[];
+    cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
+    extensions ??= <ThemeExtension<dynamic>>[];
+    adaptations ??= <Adaptation<Object>>[];
     // TODO(bleroux): Clean this up once the type of `inputDecorationTheme` is changed to `InputDecorationThemeData`
-    InputDecorationThemeData? effectiveInputDecorationTheme;
     if (inputDecorationTheme != null) {
       if (inputDecorationTheme is InputDecorationTheme) {
-        effectiveInputDecorationTheme = inputDecorationTheme.data;
-      } else if (inputDecorationTheme is InputDecorationThemeData) {
-        effectiveInputDecorationTheme = inputDecorationTheme;
-      } else {
+        inputDecorationTheme = inputDecorationTheme.data;
+      } else if (inputDecorationTheme is! InputDecorationThemeData) {
         throw ArgumentError(
           'inputDecorationTheme must be either a InputDecorationThemeData or a InputDecorationTheme',
         );
       }
     }
-    effectiveInputDecorationTheme ??= const InputDecorationThemeData();
-    final TargetPlatform effectivePlatform = platform ?? defaultTargetPlatform;
-    var effectiveMaterialTapTargetSize = materialTapTargetSize;
-    if (effectiveMaterialTapTargetSize == null) {
-      switch (effectivePlatform) {
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.iOS:
-          effectiveMaterialTapTargetSize = MaterialTapTargetSize.padded;
-        case TargetPlatform.linux:
-        case TargetPlatform.macOS:
-        case TargetPlatform.windows:
-          effectiveMaterialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
-      }
+    inputDecorationTheme ??= const InputDecorationThemeData();
+    platform ??= defaultTargetPlatform;
+    switch (platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+        materialTapTargetSize ??= MaterialTapTargetSize.padded;
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        materialTapTargetSize ??= MaterialTapTargetSize.shrinkWrap;
     }
-    final PageTransitionsTheme effectivePageTransitionsTheme = pageTransitionsTheme ?? const PageTransitionsTheme();
-    final ScrollbarThemeData effectiveScrollbarTheme = scrollbarTheme ?? const ScrollbarThemeData();
-    final VisualDensity effectiveVisualDensity = visualDensity ?? VisualDensity.defaultDensityForPlatform(effectivePlatform);
-    final bool effectiveUseMaterial3 = useMaterial3 ?? true;
-    final bool effectiveUseSystemColors = useSystemColors ?? false;
-    final bool useInkSparkle = effectivePlatform == TargetPlatform.android && !kIsWeb;
-    final InteractiveInkFeatureFactory effectiveSplashFactory = splashFactory ?? (effectiveUseMaterial3
+    pageTransitionsTheme ??= const PageTransitionsTheme();
+    scrollbarTheme ??= const ScrollbarThemeData();
+    visualDensity ??= VisualDensity.defaultDensityForPlatform(platform);
+    useMaterial3 ??= true;
+    useSystemColors ??= false;
+    final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
+    splashFactory ??= useMaterial3
         ? useInkSparkle
               ? InkSparkle.splashFactory
               : InkRipple.splashFactory
-        : InkSplash.splashFactory);
+        : InkSplash.splashFactory;
 
     // COLOR
     assert(
@@ -440,89 +434,79 @@ class ThemeData with Diagnosticable {
     final Brightness effectiveBrightness =
         brightness ?? colorScheme?.brightness ?? Brightness.light;
     final isDark = effectiveBrightness == Brightness.dark;
-    var effectiveColorScheme = colorScheme;
-    var effectivePrimaryColor = primaryColor;
-    var effectiveCanvasColor = canvasColor;
-    var effectiveScaffoldBackgroundColor = scaffoldBackgroundColor;
-    var effectiveCardColor = cardColor;
-    var effectiveDividerColor = dividerColor;
-    var effectiveDialogBackgroundColor = dialogBackgroundColor;
-    var effectiveIndicatorColor = indicatorColor;
-    var effectiveApplyElevationOverlayColor = applyElevationOverlayColor;
-
-    if (colorSchemeSeed != null || effectiveUseMaterial3) {
+    if (colorSchemeSeed != null || useMaterial3) {
       if (colorSchemeSeed != null) {
-        effectiveColorScheme = ColorScheme.fromSeed(
+        colorScheme = ColorScheme.fromSeed(
           seedColor: colorSchemeSeed,
           brightness: effectiveBrightness,
         );
       }
-      effectiveColorScheme ??= isDark ? _colorSchemeDarkM3 : _colorSchemeLightM3;
+      colorScheme ??= isDark ? _colorSchemeDarkM3 : _colorSchemeLightM3;
 
       // For surfaces that use primary color in light themes and surface color in dark
-      final Color primarySurfaceColor = isDark ? effectiveColorScheme.surface : effectiveColorScheme.primary;
-      final Color onPrimarySurfaceColor = isDark ? effectiveColorScheme.onSurface : effectiveColorScheme.onPrimary;
+      final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
+      final Color onPrimarySurfaceColor = isDark ? colorScheme.onSurface : colorScheme.onPrimary;
 
       // Default some of the color settings to values from the color scheme
-      effectivePrimaryColor ??= primarySurfaceColor;
-      effectiveCanvasColor ??= effectiveColorScheme.surface;
-      effectiveScaffoldBackgroundColor ??= effectiveColorScheme.surface;
-      effectiveCardColor ??= effectiveColorScheme.surface;
-      effectiveDividerColor ??= effectiveColorScheme.outline;
-      effectiveDialogBackgroundColor ??= effectiveColorScheme.surface;
-      effectiveIndicatorColor ??= onPrimarySurfaceColor;
-      effectiveApplyElevationOverlayColor ??= effectiveBrightness == Brightness.dark;
+      primaryColor ??= primarySurfaceColor;
+      canvasColor ??= colorScheme.surface;
+      scaffoldBackgroundColor ??= colorScheme.surface;
+      cardColor ??= colorScheme.surface;
+      dividerColor ??= colorScheme.outline;
+      dialogBackgroundColor ??= colorScheme.surface;
+      indicatorColor ??= onPrimarySurfaceColor;
+      applyElevationOverlayColor ??= brightness == Brightness.dark;
     }
-    effectiveApplyElevationOverlayColor ??= false;
-    final MaterialColor effectivePrimarySwatch = primarySwatch ?? Colors.blue;
-    effectivePrimaryColor ??= isDark ? Colors.grey[900]! : effectivePrimarySwatch;
-    final Brightness estimatedPrimaryColorBrightness = estimateBrightnessForColor(effectivePrimaryColor);
-    final Color effectivePrimaryColorLight = primaryColorLight ?? (isDark ? Colors.grey[500]! : effectivePrimarySwatch[100]!);
-    final Color effectivePrimaryColorDark = primaryColorDark ?? (isDark ? Colors.black : effectivePrimarySwatch[700]!);
+    applyElevationOverlayColor ??= false;
+    primarySwatch ??= Colors.blue;
+    primaryColor ??= isDark ? Colors.grey[900]! : primarySwatch;
+    final Brightness estimatedPrimaryColorBrightness = estimateBrightnessForColor(primaryColor);
+    primaryColorLight ??= isDark ? Colors.grey[500]! : primarySwatch[100]!;
+    primaryColorDark ??= isDark ? Colors.black : primarySwatch[700]!;
     final primaryIsDark = estimatedPrimaryColorBrightness == Brightness.dark;
-    final Color effectiveFocusColor = focusColor ?? (isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.12));
-    final Color effectiveHoverColor = hoverColor ?? (isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04));
-    final Color effectiveShadowColor = shadowColor ?? Colors.black;
-    effectiveCanvasColor ??= isDark ? Colors.grey[850]! : Colors.grey[50]!;
-    effectiveScaffoldBackgroundColor ??= effectiveCanvasColor;
-    effectiveCardColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    effectiveDividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
+    focusColor ??= isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.12);
+    hoverColor ??= isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04);
+    shadowColor ??= Colors.black;
+    canvasColor ??= isDark ? Colors.grey[850]! : Colors.grey[50]!;
+    scaffoldBackgroundColor ??= canvasColor;
+    cardColor ??= isDark ? Colors.grey[800]! : Colors.white;
+    dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
     // Create a ColorScheme that is backwards compatible as possible
     // with the existing default ThemeData color values.
-    effectiveColorScheme ??= ColorScheme.fromSwatch(
-      primarySwatch: effectivePrimarySwatch,
-      accentColor: isDark ? Colors.tealAccent[200]! : effectivePrimarySwatch[500]!,
-      cardColor: effectiveCardColor,
-      backgroundColor: isDark ? Colors.grey[700]! : effectivePrimarySwatch[200]!,
+    colorScheme ??= ColorScheme.fromSwatch(
+      primarySwatch: primarySwatch,
+      accentColor: isDark ? Colors.tealAccent[200]! : primarySwatch[500]!,
+      cardColor: cardColor,
+      backgroundColor: isDark ? Colors.grey[700]! : primarySwatch[200]!,
       errorColor: Colors.red[700],
       brightness: effectiveBrightness,
     );
-    final Color effectiveUnselectedWidgetColor = unselectedWidgetColor ?? (isDark ? Colors.white70 : Colors.black54);
+    unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
-    final Color effectiveSecondaryHeaderColor = secondaryHeaderColor ?? (isDark ? Colors.grey[700]! : effectivePrimarySwatch[50]!);
-    final Color effectiveHintColor = hintColor ?? (isDark ? Colors.white60 : Colors.black.withOpacity(0.6));
+    secondaryHeaderColor ??= isDark ? Colors.grey[700]! : primarySwatch[50]!;
+    hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
     // The default [buttonTheme] is here because it doesn't use the defaults for
     // [disabledColor], [highlightColor], and [splashColor].
-    final ButtonThemeData effectiveButtonTheme = buttonTheme ?? ButtonThemeData(
-      colorScheme: effectiveColorScheme,
-      buttonColor: isDark ? effectivePrimarySwatch[600]! : Colors.grey[300]!,
+    buttonTheme ??= ButtonThemeData(
+      colorScheme: colorScheme,
+      buttonColor: isDark ? primarySwatch[600]! : Colors.grey[300]!,
       disabledColor: disabledColor,
-      focusColor: effectiveFocusColor,
-      hoverColor: effectiveHoverColor,
+      focusColor: focusColor,
+      hoverColor: hoverColor,
       highlightColor: highlightColor,
       splashColor: splashColor,
-      materialTapTargetSize: effectiveMaterialTapTargetSize,
+      materialTapTargetSize: materialTapTargetSize,
     );
-    final Color effectiveDisabledColor = disabledColor ?? (isDark ? Colors.white38 : Colors.black38);
-    final Color effectiveHighlightColor = highlightColor ?? (isDark ? const Color(0x40CCCCCC) : const Color(0x66BCBCBC));
-    final Color effectiveSplashColor = splashColor ?? (isDark ? const Color(0x40CCCCCC) : const Color(0x66C8C8C8));
+    disabledColor ??= isDark ? Colors.white38 : Colors.black38;
+    highlightColor ??= isDark ? const Color(0x40CCCCCC) : const Color(0x66BCBCBC);
+    splashColor ??= isDark ? const Color(0x40CCCCCC) : const Color(0x66C8C8C8);
 
     // TYPOGRAPHY & ICONOGRAPHY
-    final Typography effectiveTypography = typography ?? (effectiveUseMaterial3
-        ? Typography.material2021(platform: effectivePlatform, colorScheme: effectiveColorScheme)
-        : Typography.material2014(platform: effectivePlatform));
-    TextTheme defaultTextTheme = isDark ? effectiveTypography.white : effectiveTypography.black;
-    TextTheme defaultPrimaryTextTheme = primaryIsDark ? effectiveTypography.white : effectiveTypography.black;
+    typography ??= useMaterial3
+        ? Typography.material2021(platform: platform, colorScheme: colorScheme)
+        : Typography.material2014(platform: platform);
+    TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
+    TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
     if (fontFamily != null) {
       defaultTextTheme = defaultTextTheme.apply(fontFamily: fontFamily);
       defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(fontFamily: fontFamily);
@@ -537,74 +521,71 @@ class ThemeData with Diagnosticable {
       defaultTextTheme = defaultTextTheme.apply(package: package);
       defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(package: package);
     }
-    final TextTheme effectiveTextTheme = defaultTextTheme.merge(textTheme);
-    final TextTheme effectivePrimaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
-    final IconThemeData effectiveIconTheme = iconTheme ?? (isDark
+    textTheme = defaultTextTheme.merge(textTheme);
+    primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
+    iconTheme ??= isDark
         ? IconThemeData(color: kDefaultIconLightColor)
-        : IconThemeData(color: kDefaultIconDarkColor));
-    final IconThemeData effectivePrimaryIconTheme = primaryIconTheme ?? (primaryIsDark
+        : IconThemeData(color: kDefaultIconDarkColor);
+    primaryIconTheme ??= primaryIsDark
         ? const IconThemeData(color: Colors.white)
-        : const IconThemeData(color: Colors.black));
+        : const IconThemeData(color: Colors.black);
 
     // COMPONENT THEMES
     // TODO(huycozy): Clean this up once the type of `appBarTheme` is changed to `appBarThemeData`
-    AppBarThemeData? effectiveAppBarTheme;
     if (appBarTheme != null) {
       if (appBarTheme is AppBarTheme) {
-        effectiveAppBarTheme = appBarTheme.data;
-      } else if (appBarTheme is AppBarThemeData) {
-        effectiveAppBarTheme = appBarTheme;
-      } else {
+        appBarTheme = appBarTheme.data;
+      } else if (appBarTheme is! AppBarThemeData) {
         throw ArgumentError('appBarTheme must be either a AppBarThemeData or a AppBarTheme');
       }
     }
-    final BadgeThemeData effectiveBadgeTheme = badgeTheme ?? const BadgeThemeData();
-    final MaterialBannerThemeData effectiveBannerTheme = bannerTheme ?? const MaterialBannerThemeData();
-    final BottomAppBarThemeData effectiveBottomAppBarTheme = bottomAppBarTheme ?? const BottomAppBarThemeData();
-    final BottomNavigationBarThemeData effectiveBottomNavigationBarTheme = bottomNavigationBarTheme ?? const BottomNavigationBarThemeData();
-    final BottomSheetThemeData effectiveBottomSheetTheme = bottomSheetTheme ?? const BottomSheetThemeData();
-    final CardThemeData effectiveCardTheme = cardTheme ?? const CardThemeData();
-    final CarouselViewThemeData effectiveCarouselViewTheme = carouselViewTheme ?? const CarouselViewThemeData();
-    final CheckboxThemeData effectiveCheckboxTheme = checkboxTheme ?? const CheckboxThemeData();
-    final ChipThemeData effectiveChipTheme = chipTheme ?? const ChipThemeData();
-    final DataTableThemeData effectiveDataTableTheme = dataTableTheme ?? const DataTableThemeData();
-    final DatePickerThemeData effectiveDatePickerTheme = datePickerTheme ?? const DatePickerThemeData();
-    final DialogThemeData effectiveDialogTheme = dialogTheme ?? const DialogThemeData();
-    final DividerThemeData effectiveDividerTheme = dividerTheme ?? const DividerThemeData();
-    final DrawerThemeData effectiveDrawerTheme = drawerTheme ?? const DrawerThemeData();
-    final DropdownMenuThemeData effectiveDropdownMenuTheme = dropdownMenuTheme ?? const DropdownMenuThemeData();
-    final ElevatedButtonThemeData effectiveElevatedButtonTheme = elevatedButtonTheme ?? const ElevatedButtonThemeData();
-    final ExpansionTileThemeData effectiveExpansionTileTheme = expansionTileTheme ?? const ExpansionTileThemeData();
-    final FilledButtonThemeData effectiveFilledButtonTheme = filledButtonTheme ?? const FilledButtonThemeData();
-    final FloatingActionButtonThemeData effectiveFloatingActionButtonTheme = floatingActionButtonTheme ?? const FloatingActionButtonThemeData();
-    final IconButtonThemeData effectiveIconButtonTheme = iconButtonTheme ?? const IconButtonThemeData();
-    final ListTileThemeData effectiveListTileTheme = listTileTheme ?? const ListTileThemeData();
-    final MenuBarThemeData effectiveMenuBarTheme = menuBarTheme ?? const MenuBarThemeData();
-    final MenuButtonThemeData effectiveMenuButtonTheme = menuButtonTheme ?? const MenuButtonThemeData();
-    final MenuThemeData effectiveMenuTheme = menuTheme ?? const MenuThemeData();
-    final NavigationBarThemeData effectiveNavigationBarTheme = navigationBarTheme ?? const NavigationBarThemeData();
-    final NavigationDrawerThemeData effectiveNavigationDrawerTheme = navigationDrawerTheme ?? const NavigationDrawerThemeData();
-    final NavigationRailThemeData effectiveNavigationRailTheme = navigationRailTheme ?? const NavigationRailThemeData();
-    final OutlinedButtonThemeData effectiveOutlinedButtonTheme = outlinedButtonTheme ?? const OutlinedButtonThemeData();
-    final PopupMenuThemeData effectivePopupMenuTheme = popupMenuTheme ?? const PopupMenuThemeData();
-    final ProgressIndicatorThemeData effectiveProgressIndicatorTheme = progressIndicatorTheme ?? const ProgressIndicatorThemeData();
-    final RadioThemeData effectiveRadioTheme = radioTheme ?? const RadioThemeData();
-    final SearchBarThemeData effectiveSearchBarTheme = searchBarTheme ?? const SearchBarThemeData();
-    final SearchViewThemeData effectiveSearchViewTheme = searchViewTheme ?? const SearchViewThemeData();
-    final SegmentedButtonThemeData effectiveSegmentedButtonTheme = segmentedButtonTheme ?? const SegmentedButtonThemeData();
-    final SliderThemeData effectiveSliderTheme = sliderTheme ?? const SliderThemeData();
-    final SnackBarThemeData effectiveSnackBarTheme = snackBarTheme ?? const SnackBarThemeData();
-    final SwitchThemeData effectiveSwitchTheme = switchTheme ?? const SwitchThemeData();
-    final TabBarThemeData effectiveTabBarTheme = tabBarTheme ?? const TabBarThemeData();
-    final TextButtonThemeData effectiveTextButtonTheme = textButtonTheme ?? const TextButtonThemeData();
-    final TextSelectionThemeData effectiveTextSelectionTheme = textSelectionTheme ?? const TextSelectionThemeData();
-    final TimePickerThemeData effectiveTimePickerTheme = timePickerTheme ?? const TimePickerThemeData();
-    final ToggleButtonsThemeData effectiveToggleButtonsTheme = toggleButtonsTheme ?? const ToggleButtonsThemeData();
-    final TooltipThemeData effectiveTooltipTheme = tooltipTheme ?? const TooltipThemeData();
+    badgeTheme ??= const BadgeThemeData();
+    bannerTheme ??= const MaterialBannerThemeData();
+    bottomAppBarTheme ??= const BottomAppBarThemeData();
+    bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
+    bottomSheetTheme ??= const BottomSheetThemeData();
+    cardTheme ??= const CardThemeData();
+    carouselViewTheme ??= const CarouselViewThemeData();
+    checkboxTheme ??= const CheckboxThemeData();
+    chipTheme ??= const ChipThemeData();
+    dataTableTheme ??= const DataTableThemeData();
+    datePickerTheme ??= const DatePickerThemeData();
+    dialogTheme ??= const DialogThemeData();
+    dividerTheme ??= const DividerThemeData();
+    drawerTheme ??= const DrawerThemeData();
+    dropdownMenuTheme ??= const DropdownMenuThemeData();
+    elevatedButtonTheme ??= const ElevatedButtonThemeData();
+    expansionTileTheme ??= const ExpansionTileThemeData();
+    filledButtonTheme ??= const FilledButtonThemeData();
+    floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
+    iconButtonTheme ??= const IconButtonThemeData();
+    listTileTheme ??= const ListTileThemeData();
+    menuBarTheme ??= const MenuBarThemeData();
+    menuButtonTheme ??= const MenuButtonThemeData();
+    menuTheme ??= const MenuThemeData();
+    navigationBarTheme ??= const NavigationBarThemeData();
+    navigationDrawerTheme ??= const NavigationDrawerThemeData();
+    navigationRailTheme ??= const NavigationRailThemeData();
+    outlinedButtonTheme ??= const OutlinedButtonThemeData();
+    popupMenuTheme ??= const PopupMenuThemeData();
+    progressIndicatorTheme ??= const ProgressIndicatorThemeData();
+    radioTheme ??= const RadioThemeData();
+    searchBarTheme ??= const SearchBarThemeData();
+    searchViewTheme ??= const SearchViewThemeData();
+    segmentedButtonTheme ??= const SegmentedButtonThemeData();
+    sliderTheme ??= const SliderThemeData();
+    snackBarTheme ??= const SnackBarThemeData();
+    switchTheme ??= const SwitchThemeData();
+    tabBarTheme ??= const TabBarThemeData();
+    textButtonTheme ??= const TextButtonThemeData();
+    textSelectionTheme ??= const TextSelectionThemeData();
+    timePickerTheme ??= const TimePickerThemeData();
+    toggleButtonsTheme ??= const ToggleButtonsThemeData();
+    tooltipTheme ??= const TooltipThemeData();
     // DEPRECATED (newest deprecations at the bottom)
-    final ButtonBarThemeData effectiveButtonBarTheme = buttonBarTheme ?? const ButtonBarThemeData();
-    effectiveDialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
-    effectiveIndicatorColor ??= effectiveColorScheme.secondary == effectivePrimaryColor ? Colors.white : effectiveColorScheme.secondary;
+    buttonBarTheme ??= const ButtonBarThemeData();
+    dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
+    indicatorColor ??= colorScheme.secondary == primaryColor ? Colors.white : colorScheme.secondary;
 
     var theme = ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
@@ -613,96 +594,97 @@ class ThemeData with Diagnosticable {
       // alphabetical by symbol name.
 
       // GENERAL CONFIGURATION
-      adaptationMap: _createAdaptationMap(effectiveAdaptations),
-      applyElevationOverlayColor: effectiveApplyElevationOverlayColor,
-      cupertinoOverrideTheme: effectiveCupertinoOverrideTheme,
-      extensions: _themeExtensionIterableToMap(effectiveExtensions),
-      inputDecorationTheme: effectiveInputDecorationTheme,
-      materialTapTargetSize: effectiveMaterialTapTargetSize,
-      pageTransitionsTheme: effectivePageTransitionsTheme,
-      platform: effectivePlatform,
-      scrollbarTheme: effectiveScrollbarTheme,
-      splashFactory: effectiveSplashFactory,
-      useMaterial3: effectiveUseMaterial3,
-      visualDensity: effectiveVisualDensity,
+      adaptationMap: _createAdaptationMap(adaptations),
+      applyElevationOverlayColor: applyElevationOverlayColor,
+      cupertinoOverrideTheme: cupertinoOverrideTheme,
+      extensions: _themeExtensionIterableToMap(extensions),
+      inputDecorationTheme: inputDecorationTheme as InputDecorationThemeData,
+      materialTapTargetSize: materialTapTargetSize,
+      pageTransitionsTheme: pageTransitionsTheme,
+      platform: platform,
+      scrollbarTheme: scrollbarTheme,
+      splashFactory: splashFactory,
+      useMaterial3: useMaterial3,
+      visualDensity: visualDensity,
       // COLOR
-      canvasColor: effectiveCanvasColor,
-      cardColor: effectiveCardColor,
-      colorScheme: effectiveColorScheme,
-      disabledColor: effectiveDisabledColor,
-      dividerColor: effectiveDividerColor,
-      focusColor: effectiveFocusColor,
-      highlightColor: effectiveHighlightColor,
-      hintColor: effectiveHintColor,
-      hoverColor: effectiveHoverColor,
-      primaryColor: effectivePrimaryColor,
-      primaryColorDark: effectivePrimaryColorDark,
-      primaryColorLight: effectivePrimaryColorLight,
-      scaffoldBackgroundColor: effectiveScaffoldBackgroundColor,
-      secondaryHeaderColor: effectiveSecondaryHeaderColor,
-      shadowColor: effectiveShadowColor,
-      splashColor: effectiveSplashColor,
-      unselectedWidgetColor: effectiveUnselectedWidgetColor,
+      canvasColor: canvasColor,
+      cardColor: cardColor,
+      colorScheme: colorScheme,
+      disabledColor: disabledColor,
+      dividerColor: dividerColor,
+      focusColor: focusColor,
+      highlightColor: highlightColor,
+      hintColor: hintColor,
+      hoverColor: hoverColor,
+      primaryColor: primaryColor,
+      primaryColorDark: primaryColorDark,
+      primaryColorLight: primaryColorLight,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
+      secondaryHeaderColor: secondaryHeaderColor,
+      shadowColor: shadowColor,
+      splashColor: splashColor,
+      unselectedWidgetColor: unselectedWidgetColor,
       // TYPOGRAPHY & ICONOGRAPHY
-      iconTheme: effectiveIconTheme,
-      primaryTextTheme: effectivePrimaryTextTheme,
-      textTheme: effectiveTextTheme,
-      typography: effectiveTypography,
-      primaryIconTheme: effectivePrimaryIconTheme,
+      iconTheme: iconTheme,
+      primaryTextTheme: primaryTextTheme,
+      textTheme: textTheme,
+      typography: typography,
+      primaryIconTheme: primaryIconTheme,
       // COMPONENT THEMES
       actionIconTheme: actionIconTheme,
-      appBarTheme: effectiveAppBarTheme ?? const AppBarThemeData(),
-      badgeTheme: effectiveBadgeTheme,
-      bannerTheme: effectiveBannerTheme,
-      bottomAppBarTheme: effectiveBottomAppBarTheme,
-      bottomNavigationBarTheme: effectiveBottomNavigationBarTheme,
-      bottomSheetTheme: effectiveBottomSheetTheme,
-      buttonTheme: effectiveButtonTheme,
-      cardTheme: effectiveCardTheme,
-      carouselViewTheme: effectiveCarouselViewTheme,
-      checkboxTheme: effectiveCheckboxTheme,
-      chipTheme: effectiveChipTheme,
-      dataTableTheme: effectiveDataTableTheme,
-      datePickerTheme: effectiveDatePickerTheme,
-      dialogTheme: effectiveDialogTheme,
-      dividerTheme: effectiveDividerTheme,
-      drawerTheme: effectiveDrawerTheme,
-      dropdownMenuTheme: effectiveDropdownMenuTheme,
-      elevatedButtonTheme: effectiveElevatedButtonTheme,
-      expansionTileTheme: effectiveExpansionTileTheme,
-      filledButtonTheme: effectiveFilledButtonTheme,
-      floatingActionButtonTheme: effectiveFloatingActionButtonTheme,
-      iconButtonTheme: effectiveIconButtonTheme,
-      listTileTheme: effectiveListTileTheme,
-      menuBarTheme: effectiveMenuBarTheme,
-      menuButtonTheme: effectiveMenuButtonTheme,
-      menuTheme: effectiveMenuTheme,
-      navigationBarTheme: effectiveNavigationBarTheme,
-      navigationDrawerTheme: effectiveNavigationDrawerTheme,
-      navigationRailTheme: effectiveNavigationRailTheme,
-      outlinedButtonTheme: effectiveOutlinedButtonTheme,
-      popupMenuTheme: effectivePopupMenuTheme,
-      progressIndicatorTheme: effectiveProgressIndicatorTheme,
-      radioTheme: effectiveRadioTheme,
-      searchBarTheme: effectiveSearchBarTheme,
-      searchViewTheme: effectiveSearchViewTheme,
-      segmentedButtonTheme: effectiveSegmentedButtonTheme,
-      sliderTheme: effectiveSliderTheme,
-      snackBarTheme: effectiveSnackBarTheme,
-      switchTheme: effectiveSwitchTheme,
-      tabBarTheme: effectiveTabBarTheme,
-      textButtonTheme: effectiveTextButtonTheme,
-      textSelectionTheme: effectiveTextSelectionTheme,
-      timePickerTheme: effectiveTimePickerTheme,
-      toggleButtonsTheme: effectiveToggleButtonsTheme,
-      tooltipTheme: effectiveTooltipTheme,
+      // TODO(huycozy): Remove this type cast when appBarTheme is explicitly set to appBarThemeData
+      appBarTheme: (appBarTheme as AppBarThemeData?) ?? const AppBarThemeData(),
+      badgeTheme: badgeTheme,
+      bannerTheme: bannerTheme,
+      bottomAppBarTheme: bottomAppBarTheme,
+      bottomNavigationBarTheme: bottomNavigationBarTheme,
+      bottomSheetTheme: bottomSheetTheme,
+      buttonTheme: buttonTheme,
+      cardTheme: cardTheme,
+      carouselViewTheme: carouselViewTheme,
+      checkboxTheme: checkboxTheme,
+      chipTheme: chipTheme,
+      dataTableTheme: dataTableTheme,
+      datePickerTheme: datePickerTheme,
+      dialogTheme: dialogTheme,
+      dividerTheme: dividerTheme,
+      drawerTheme: drawerTheme,
+      dropdownMenuTheme: dropdownMenuTheme,
+      elevatedButtonTheme: elevatedButtonTheme,
+      expansionTileTheme: expansionTileTheme,
+      filledButtonTheme: filledButtonTheme,
+      floatingActionButtonTheme: floatingActionButtonTheme,
+      iconButtonTheme: iconButtonTheme,
+      listTileTheme: listTileTheme,
+      menuBarTheme: menuBarTheme,
+      menuButtonTheme: menuButtonTheme,
+      menuTheme: menuTheme,
+      navigationBarTheme: navigationBarTheme,
+      navigationDrawerTheme: navigationDrawerTheme,
+      navigationRailTheme: navigationRailTheme,
+      outlinedButtonTheme: outlinedButtonTheme,
+      popupMenuTheme: popupMenuTheme,
+      progressIndicatorTheme: progressIndicatorTheme,
+      radioTheme: radioTheme,
+      searchBarTheme: searchBarTheme,
+      searchViewTheme: searchViewTheme,
+      segmentedButtonTheme: segmentedButtonTheme,
+      sliderTheme: sliderTheme,
+      snackBarTheme: snackBarTheme,
+      switchTheme: switchTheme,
+      tabBarTheme: tabBarTheme,
+      textButtonTheme: textButtonTheme,
+      textSelectionTheme: textSelectionTheme,
+      timePickerTheme: timePickerTheme,
+      toggleButtonsTheme: toggleButtonsTheme,
+      tooltipTheme: tooltipTheme,
       // DEPRECATED (newest deprecations at the bottom)
-      buttonBarTheme: effectiveButtonBarTheme,
-      dialogBackgroundColor: effectiveDialogBackgroundColor,
-      indicatorColor: effectiveIndicatorColor,
+      buttonBarTheme: buttonBarTheme,
+      dialogBackgroundColor: dialogBackgroundColor,
+      indicatorColor: indicatorColor,
     );
 
-    if (effectiveUseSystemColors) {
+    if (useSystemColors) {
       theme = theme._overrideWithSystemColors();
     }
     return theme;
@@ -1618,20 +1600,17 @@ class ThemeData with Diagnosticable {
     )
     Color? indicatorColor,
   }) {
-    final NoDefaultCupertinoThemeData? effectiveCupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
+    cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
 
-    final InputDecorationThemeData? effectiveInputDecorationTheme;
     // TODO(bleroux): Clean this up once the type of `inputDecorationTheme` is changed to `InputDecorationThemeData`
-    if (inputDecorationTheme == null) {
-      effectiveInputDecorationTheme = null;
-    } else if (inputDecorationTheme is InputDecorationTheme) {
-      effectiveInputDecorationTheme = inputDecorationTheme.data;
-    } else if (inputDecorationTheme is InputDecorationThemeData) {
-      effectiveInputDecorationTheme = inputDecorationTheme;
-    } else {
-      throw ArgumentError(
-        'inputDecorationTheme must be either a InputDecorationThemeData or a InputDecorationTheme',
-      );
+    if (inputDecorationTheme != null) {
+      if (inputDecorationTheme is InputDecorationTheme) {
+        inputDecorationTheme = inputDecorationTheme.data;
+      } else if (inputDecorationTheme is! InputDecorationThemeData) {
+        throw ArgumentError(
+          'inputDecorationTheme must be either a InputDecorationThemeData or a InputDecorationTheme',
+        );
+      }
     }
 
     return ThemeData.raw(
@@ -1643,10 +1622,10 @@ class ThemeData with Diagnosticable {
       // GENERAL CONFIGURATION
       adaptationMap: adaptations != null ? _createAdaptationMap(adaptations) : adaptationMap,
       applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
-      cupertinoOverrideTheme: effectiveCupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
+      cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
       extensions: (extensions != null) ? _themeExtensionIterableToMap(extensions) : this.extensions,
       inputDecorationTheme:
-          effectiveInputDecorationTheme ?? this.inputDecorationTheme,
+          inputDecorationTheme as InputDecorationThemeData? ?? this.inputDecorationTheme,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       platform: platform ?? this.platform,

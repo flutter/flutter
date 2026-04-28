@@ -891,7 +891,7 @@ class DataTable extends StatelessWidget {
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
-    Widget effectiveLabel = Semantics(
+    label = Semantics(
       role: SemanticsRole.columnHeader,
       child: Row(
         textDirection: numeric ? TextDirection.rtl : null,
@@ -922,7 +922,7 @@ class DataTable extends StatelessWidget {
         dataTableTheme.headingRowHeight ??
         themeData.dataTableTheme.headingRowHeight ??
         _headingRowHeight;
-    effectiveLabel = Container(
+    label = Container(
       padding: padding,
       height: effectiveHeadingRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
@@ -930,20 +930,20 @@ class DataTable extends StatelessWidget {
         style: DefaultTextStyle.of(context).style.merge(effectiveHeadingTextStyle),
         softWrap: false,
         duration: _sortArrowAnimationDuration,
-        child: effectiveLabel,
+        child: label,
       ),
     );
     if (tooltip != null) {
-      effectiveLabel = Tooltip(message: tooltip, child: effectiveLabel);
+      label = Tooltip(message: tooltip, child: label);
     }
 
-    effectiveLabel = InkWell(
+    label = InkWell(
       onTap: onSort,
       overlayColor: overlayColor,
       mouseCursor: mouseCursor,
-      child: effectiveLabel,
+      child: label,
     );
-    return effectiveLabel;
+    return label;
   }
 
   Widget _buildDataCell({
@@ -966,13 +966,12 @@ class DataTable extends StatelessWidget {
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
-    var effectiveLabel = label;
     if (showEditIcon) {
       const Widget icon = Icon(Icons.edit, size: 18.0);
-      effectiveLabel = Expanded(child: effectiveLabel);
-      effectiveLabel = Row(
+      label = Expanded(child: label);
+      label = Row(
         textDirection: numeric ? TextDirection.rtl : null,
-        children: <Widget>[effectiveLabel, icon],
+        children: <Widget>[label, icon],
       );
     }
 
@@ -991,7 +990,7 @@ class DataTable extends StatelessWidget {
         dataTableTheme.dataRowMaxHeight ??
         themeData.dataTableTheme.dataRowMaxHeight ??
         kMinInteractiveDimension;
-    effectiveLabel = Container(
+    label = Container(
       padding: padding,
       constraints: BoxConstraints(
         minHeight: effectiveDataRowMinHeight,
@@ -1002,7 +1001,7 @@ class DataTable extends StatelessWidget {
         style: DefaultTextStyle.of(context).style
             .merge(effectiveDataTextStyle)
             .copyWith(color: placeholder ? effectiveDataTextStyle.color!.withOpacity(0.6) : null),
-        child: DropdownButtonHideUnderline(child: effectiveLabel),
+        child: DropdownButtonHideUnderline(child: label),
       ),
     );
     if (onTap != null ||
@@ -1010,26 +1009,26 @@ class DataTable extends StatelessWidget {
         onLongPress != null ||
         onTapDown != null ||
         onTapCancel != null) {
-      effectiveLabel = InkWell(
+      label = InkWell(
         onTap: onTap,
         onDoubleTap: onDoubleTap,
         onLongPress: onLongPress,
         onTapCancel: onTapCancel,
         onTapDown: onTapDown,
         overlayColor: overlayColor,
-        child: effectiveLabel,
+        child: label,
       );
     } else if (onSelectChanged != null || onRowLongPress != null || onRowHover != null) {
-      effectiveLabel = TableRowInkWell(
+      label = TableRowInkWell(
         onTap: onSelectChanged,
         onLongPress: onRowLongPress,
         onHover: onRowHover,
         overlayColor: overlayColor,
         mouseCursor: mouseCursor,
-        child: effectiveLabel,
+        child: label,
       );
     }
-    return TableCell(child: effectiveLabel);
+    return TableCell(child: label);
   }
 
   @override

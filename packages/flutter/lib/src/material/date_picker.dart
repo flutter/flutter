@@ -224,31 +224,31 @@ Future<DateTime?> showDatePicker({
   final Icon? switchToCalendarEntryModeIcon,
   final CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
 }) async {
-  final DateTime? effectiveInitialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate);
-  final DateTime effectiveFirstDate = calendarDelegate.dateOnly(firstDate);
-  final DateTime effectiveLastDate = calendarDelegate.dateOnly(lastDate);
+  initialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate);
+  firstDate = calendarDelegate.dateOnly(firstDate);
+  lastDate = calendarDelegate.dateOnly(lastDate);
   assert(
-    !effectiveLastDate.isBefore(effectiveFirstDate),
-    'lastDate $effectiveLastDate must be on or after firstDate $effectiveFirstDate.',
+    !lastDate.isBefore(firstDate),
+    'lastDate $lastDate must be on or after firstDate $firstDate.',
   );
   assert(
-    effectiveInitialDate == null || !effectiveInitialDate.isBefore(effectiveFirstDate),
-    'initialDate $effectiveInitialDate must be on or after firstDate $effectiveFirstDate.',
+    initialDate == null || !initialDate.isBefore(firstDate),
+    'initialDate $initialDate must be on or after firstDate $firstDate.',
   );
   assert(
-    effectiveInitialDate == null || !effectiveInitialDate.isAfter(effectiveLastDate),
-    'initialDate $effectiveInitialDate must be on or before lastDate $effectiveLastDate.',
+    initialDate == null || !initialDate.isAfter(lastDate),
+    'initialDate $initialDate must be on or before lastDate $lastDate.',
   );
   assert(
-    selectableDayPredicate == null || effectiveInitialDate == null || selectableDayPredicate(effectiveInitialDate),
-    'Provided initialDate $effectiveInitialDate must satisfy provided selectableDayPredicate.',
+    selectableDayPredicate == null || initialDate == null || selectableDayPredicate(initialDate),
+    'Provided initialDate $initialDate must satisfy provided selectableDayPredicate.',
   );
   assert(debugCheckHasMaterialLocalizations(context));
 
   Widget dialog = DatePickerDialog(
-    initialDate: effectiveInitialDate,
-    firstDate: effectiveFirstDate,
-    lastDate: effectiveLastDate,
+    initialDate: initialDate,
+    firstDate: firstDate,
+    lastDate: lastDate,
     currentDate: currentDate,
     initialEntryMode: initialEntryMode,
     selectableDayPredicate: selectableDayPredicate,
@@ -1195,53 +1195,53 @@ Future<DateTimeRange?> showDateRangePicker({
   SelectableDayForRangePredicate? selectableDayPredicate,
   CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
 }) async {
-  final DateTimeRange? effectiveInitialDateRange = initialDateRange == null ? null : calendarDelegate.datesOnly(initialDateRange);
-  final DateTime effectiveFirstDate = calendarDelegate.dateOnly(firstDate);
-  final DateTime effectiveLastDate = calendarDelegate.dateOnly(lastDate);
+  initialDateRange = initialDateRange == null ? null : calendarDelegate.datesOnly(initialDateRange);
+  firstDate = calendarDelegate.dateOnly(firstDate);
+  lastDate = calendarDelegate.dateOnly(lastDate);
   assert(
-    !effectiveLastDate.isBefore(effectiveFirstDate),
-    'lastDate $effectiveLastDate must be on or after firstDate $effectiveFirstDate.',
+    !lastDate.isBefore(firstDate),
+    'lastDate $lastDate must be on or after firstDate $firstDate.',
   );
   assert(
-    effectiveInitialDateRange == null || !effectiveInitialDateRange.start.isBefore(effectiveFirstDate),
-    "initialDateRange's start date must be on or after firstDate $effectiveFirstDate.",
+    initialDateRange == null || !initialDateRange.start.isBefore(firstDate),
+    "initialDateRange's start date must be on or after firstDate $firstDate.",
   );
   assert(
-    effectiveInitialDateRange == null || !effectiveInitialDateRange.end.isBefore(effectiveFirstDate),
-    "initialDateRange's end date must be on or after firstDate $effectiveFirstDate.",
+    initialDateRange == null || !initialDateRange.end.isBefore(firstDate),
+    "initialDateRange's end date must be on or after firstDate $firstDate.",
   );
   assert(
-    effectiveInitialDateRange == null || !effectiveInitialDateRange.start.isAfter(effectiveLastDate),
-    "initialDateRange's start date must be on or before lastDate $effectiveLastDate.",
+    initialDateRange == null || !initialDateRange.start.isAfter(lastDate),
+    "initialDateRange's start date must be on or before lastDate $lastDate.",
   );
   assert(
-    effectiveInitialDateRange == null || !effectiveInitialDateRange.end.isAfter(effectiveLastDate),
-    "initialDateRange's end date must be on or before lastDate $effectiveLastDate.",
+    initialDateRange == null || !initialDateRange.end.isAfter(lastDate),
+    "initialDateRange's end date must be on or before lastDate $lastDate.",
   );
   assert(
-    effectiveInitialDateRange == null ||
+    initialDateRange == null ||
         selectableDayPredicate == null ||
         selectableDayPredicate(
-          effectiveInitialDateRange.start,
-          effectiveInitialDateRange.start,
-          effectiveInitialDateRange.end,
+          initialDateRange.start,
+          initialDateRange.start,
+          initialDateRange.end,
         ),
     "initialDateRange's start date must be selectable.",
   );
   assert(
-    effectiveInitialDateRange == null ||
+    initialDateRange == null ||
         selectableDayPredicate == null ||
-        selectableDayPredicate(effectiveInitialDateRange.end, effectiveInitialDateRange.start, effectiveInitialDateRange.end),
+        selectableDayPredicate(initialDateRange.end, initialDateRange.start, initialDateRange.end),
     "initialDateRange's end date must be selectable.",
   );
-  final DateTime effectiveCurrentDate = calendarDelegate.dateOnly(currentDate ?? calendarDelegate.now());
+  currentDate = calendarDelegate.dateOnly(currentDate ?? calendarDelegate.now());
   assert(debugCheckHasMaterialLocalizations(context));
 
   Widget dialog = DateRangePickerDialog(
-    initialDateRange: effectiveInitialDateRange,
-    firstDate: effectiveFirstDate,
-    lastDate: effectiveLastDate,
-    currentDate: effectiveCurrentDate,
+    initialDateRange: initialDateRange,
+    firstDate: firstDate,
+    lastDate: lastDate,
+    currentDate: currentDate,
     selectableDayPredicate: selectableDayPredicate,
     initialEntryMode: initialEntryMode,
     helpText: helpText,
@@ -2265,15 +2265,14 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
 
   int _dayDirectionOffset(TraversalDirection traversalDirection, TextDirection textDirection) {
     // Swap left and right if the text direction if RTL
-    var effectiveTraversalDirection = traversalDirection;
     if (textDirection == TextDirection.rtl) {
-      if (effectiveTraversalDirection == TraversalDirection.left) {
-        effectiveTraversalDirection = TraversalDirection.right;
-      } else if (effectiveTraversalDirection == TraversalDirection.right) {
-        effectiveTraversalDirection = TraversalDirection.left;
+      if (traversalDirection == TraversalDirection.left) {
+        traversalDirection = TraversalDirection.right;
+      } else if (traversalDirection == TraversalDirection.right) {
+        traversalDirection = TraversalDirection.left;
       }
     }
-    return _directionOffset[effectiveTraversalDirection]!;
+    return _directionOffset[traversalDirection]!;
   }
 
   DateTime? _nextDateInDirection(DateTime date, TraversalDirection direction) {

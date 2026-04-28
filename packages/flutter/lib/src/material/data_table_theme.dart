@@ -153,14 +153,14 @@ class DataTableThemeData with Diagnosticable {
       dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
       'dataRowHeight ($dataRowHeight) must not be set if dataRowMinHeight ($dataRowMinHeight) or dataRowMaxHeight ($dataRowMaxHeight) are set.',
     );
-    final double? effectiveDataRowMinHeight = dataRowHeight ?? dataRowMinHeight;
-    final double? effectiveDataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
+    dataRowMinHeight = dataRowHeight ?? dataRowMinHeight;
+    dataRowMaxHeight = dataRowHeight ?? dataRowMaxHeight;
 
     return DataTableThemeData(
       decoration: decoration ?? this.decoration,
       dataRowColor: dataRowColor ?? this.dataRowColor,
-      dataRowMinHeight: effectiveDataRowMinHeight ?? this.dataRowMinHeight,
-      dataRowMaxHeight: effectiveDataRowMaxHeight ?? this.dataRowMaxHeight,
+      dataRowMinHeight: dataRowMinHeight ?? this.dataRowMinHeight,
+      dataRowMaxHeight: dataRowMaxHeight ?? this.dataRowMaxHeight,
       dataTextStyle: dataTextStyle ?? this.dataTextStyle,
       headingRowColor: headingRowColor ?? this.headingRowColor,
       headingRowHeight: headingRowHeight ?? this.headingRowHeight,

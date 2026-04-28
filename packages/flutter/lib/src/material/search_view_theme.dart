@@ -228,18 +228,16 @@ class SearchViewThemeData with Diagnosticable {
     if (a == null && b == null) {
       return null;
     }
-    var effectiveA = a;
-    var effectiveB = b;
-    if (effectiveA is WidgetStateBorderSide) {
-      effectiveA = effectiveA.resolve(const <WidgetState>{});
+    if (a is WidgetStateBorderSide) {
+      a = a.resolve(const <WidgetState>{});
     }
-    if (effectiveB is WidgetStateBorderSide) {
-      effectiveB = effectiveB.resolve(const <WidgetState>{});
+    if (b is WidgetStateBorderSide) {
+      b = b.resolve(const <WidgetState>{});
     }
-    effectiveA ??= BorderSide(width: 0, color: effectiveB!.color.withAlpha(0));
-    effectiveB ??= BorderSide(width: 0, color: effectiveA.color.withAlpha(0));
+    a ??= BorderSide(width: 0, color: b!.color.withAlpha(0));
+    b ??= BorderSide(width: 0, color: a.color.withAlpha(0));
 
-    return BorderSide.lerp(effectiveA, effectiveB, t);
+    return BorderSide.lerp(a, b, t);
   }
 }
 
