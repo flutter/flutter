@@ -223,7 +223,7 @@ class TestsCrossImportChecker {
     return contents.contains(importString);
   }
 
-  /// Returns the error message for the given known paths that no longer have a
+  /// Returns the error message for the given [fixedPaths] that no longer have a
   /// cross import.
   ///
   /// The [library] must not be [_MaterialLibrary], because Material is allowed to
@@ -277,29 +277,26 @@ class TestsCrossImportChecker {
     return mapping;
   }
 
-  /// Returns the import error for the `files` in `testLibrary` which import
-  /// `importedLibrary`.
+  /// Returns the import error for the [files] in [testLibrary] which contain the given [importStatement].
   ///
-  /// Import errors only occur when Widgets imports Material or Cupertino, and
-  /// when Cupertino imports Material.
+  /// Import errors only occur when:
+  /// - any library that is not Material or Cupertino, imports Material or Cupertino
+  /// - Cupertino imports Material
   String _getImportError({
     required Set<File> files,
     required _Library testLibrary,
-    required _Library importedLibrary,
+    required _LibraryImportStatement importStatement,
   }) {
     assert(
-      switch ((testLibrary, importedLibrary)) {
-        (_Library.widgets, _Library.material) => true,
-        (_Library.widgets, _Library.cupertino) => true,
-        (_Library.cupertino, _Library.material) => true,
-        (_, _) => false,
-      },
+      !testLibrary.canImport(importStatement),
       'Import errors only occur when Widgets imports Material or Cupertino, and when Cupertino imports Material.',
     );
+
+    final String importedLibraryName = importStatement.readableName;
     final buffer = StringBuffer(
       files.length < 2
-          ? 'The following test in ${testLibrary.name} has a disallowed import of ${importedLibrary.name}. Refactor it or move it to ${importedLibrary.name}.\n'
-          : 'The following ${files.length} tests in ${testLibrary.name} have a disallowed import of ${importedLibrary.name}. Refactor them or move them to ${importedLibrary.name}.\n',
+          ? 'The following test in ${testLibrary.name} has a disallowed import of $importedLibraryName. Refactor it or move it to $importedLibraryName.\n'
+          : 'The following ${files.length} tests in ${testLibrary.name} have a disallowed import of $importedLibraryName. Refactor them or move them to $importedLibraryName.\n',
     );
     for (final file in files) {
       buffer.writeln('  ${_getRelativePath(file)}');
@@ -397,6 +394,16 @@ class TestsCrossImportChecker {
   }
 }
 
+enum _LibraryImportStatement {
+  material('Material', "import 'package:flutter/material.dart'"),
+  cupertino('Cupertino', "import 'package:flutter/cupertino.dart'");
+
+  const _LibraryImportStatement(this.readableName, this.importString);
+
+  final String readableName;
+  final String importString;
+}
+
 /// The libraries that we are concerned with cross importing.
 sealed class _Library {
   const _Library(this.name);
@@ -404,37 +411,32 @@ sealed class _Library {
   /// The short name of the library, for example `flutter/test/widgets`.
   final String name;
 
-  static const String cupertinoImport = "import 'package:flutter/cupertino.dart'";
-  static const String materialImport = "import 'package:flutter/material.dart'";
-
   /// The library for `flutter/test`.
   static const _OtherLibrary flutterSlashTest = _OtherLibrary(
     'flutter/test',
     'knownFlutterSlashTestCrossImports',
   );
 
-  /// Whether this library is allowed to import Cupertino.
-  bool get canImportCupertino;
-
-  /// Whether this library is allowed to import Material.
-  bool get canImportMaterial;
-
   /// The name of the variable in [TestsCrossImportChecker]
   /// that contains the list of known cross imports for this library.
   ///
   /// This is used for reporting mismatched cross imports.
   String get crossImportsListSymbolName;
+
+  /// Returns whether this library can contain the given [import].
+  bool canImport(_LibraryImportStatement import) {
+    return switch (this) {
+      _MaterialLibrary() =>
+        import == _LibraryImportStatement.material || import == _LibraryImportStatement.cupertino,
+      _CupertinoLibrary() => import == _LibraryImportStatement.cupertino,
+      _OtherLibrary() => false,
+    };
+  }
 }
 
 /// The Material library, also known as `flutter/material`.
 final class _MaterialLibrary extends _Library {
   const _MaterialLibrary() : super('flutter/test/material');
-
-  @override
-  bool get canImportCupertino => true;
-
-  @override
-  bool get canImportMaterial => true;
 
   @override
   String get crossImportsListSymbolName {
@@ -448,12 +450,6 @@ final class _CupertinoLibrary extends _Library {
 
   @override
   String get crossImportsListSymbolName => 'knownCupertinoCrossImports';
-
-  @override
-  bool get canImportCupertino => true;
-
-  @override
-  bool get canImportMaterial => false;
 }
 
 /// Any library that is not [_MaterialLibrary] or [_CupertinoLibrary],
@@ -463,10 +459,4 @@ final class _OtherLibrary extends _Library {
 
   @override
   final String crossImportsListSymbolName;
-
-  @override
-  bool get canImportCupertino => false;
-
-  @override
-  bool get canImportMaterial => false;
 }
