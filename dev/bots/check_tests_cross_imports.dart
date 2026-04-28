@@ -176,13 +176,14 @@ class TestsCrossImportChecker {
     knownCupertinoCrossImports,
   );
 
+  static final RegExp _flutterTestPrefix = RegExp(r'packages[/\\]flutter[/\\]test');
+
   /// Returns the Set of paths in `knownPaths` that are not in `files`.
   static Set<String> _differencePaths(Set<String> knownPaths, Set<File> files) {
     final Set<String> testPaths = files.map((File file) {
-      final prefix = RegExp(r'packages[/\\]flutter[/\\]test');
-      final int index = file.absolute.path.indexOf(prefix);
+      final int index = file.absolute.path.indexOf(_flutterTestPrefix);
       if (index < 0) {
-        throw ArgumentError('All files must include $prefix in their path.', 'files');
+        throw ArgumentError('All files must include $_flutterTestPrefix in their path.', 'files');
       }
       return file.absolute.path.substring(index).replaceAll(r'\', '/');
     }).toSet();
@@ -203,10 +204,9 @@ class TestsCrossImportChecker {
   /// Returns the Set of files that are not in knownPaths.
   static Set<File> _getUnknowns(Set<String> knownPaths, Set<File> files) {
     return files.where((File file) {
-      final prefix = RegExp(r'packages[/\\]flutter[/\\]test');
-      final int index = file.absolute.path.indexOf(prefix);
+      final int index = file.absolute.path.indexOf(_flutterTestPrefix);
       if (index < 0) {
-        throw ArgumentError('All files must include $prefix in their path.', 'files');
+        throw ArgumentError('All files must include $_flutterTestPrefix in their path.', 'files');
       }
       final String comparablePath = file.absolute.path.substring(index).replaceAll(r'\', '/');
       return !knownPaths.contains(comparablePath);
