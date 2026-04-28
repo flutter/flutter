@@ -193,12 +193,10 @@ class TestsCrossImportChecker {
   /// Returns a list of files in the given directory optionally matching the
   /// given filenamePattern.
   static List<File> _getFiles(Directory directory, [Pattern? filenamePattern]) {
-    return directory.listSync(recursive: true).whereType<File>().where((File file) {
-      if (filenamePattern == null) {
-        return true;
-      }
-      return file.absolute.path.contains(filenamePattern);
-    }).toList();
+    return [
+      for (final File file in directory.listSync(recursive: true).whereType<File>())
+        if (filenamePattern == null || file.absolute.path.contains(filenamePattern)) file,
+    ];
   }
 
   /// Returns the Set of files that are not in knownPaths.
@@ -216,7 +214,7 @@ class TestsCrossImportChecker {
   /// Get a list of all the filenames in the source directory that end in
   /// "_test.dart".
   static Set<File> _getTestFiles(Directory directory, _Library library) {
-    return _getFiles(directory.childDirectory(library.directory), RegExp(r'_test\.dart$')).toSet();
+    return _getFiles(directory.childDirectory(library.directory), RegExp(r'\.dart$')).toSet();
   }
 
   /// Returns true only if the file imports the given Library.
@@ -227,13 +225,10 @@ class TestsCrossImportChecker {
 
   /// Returns a Set of all Files that import the given Library.
   static Set<File> _getFilesWithImports(Set<File> testFiles, _Library library) {
-    final filesWithCrossImports = <File>{};
-    for (final testFile in testFiles) {
-      if (_containsImport(testFile, library)) {
-        filesWithCrossImports.add(testFile);
-      }
-    }
-    return filesWithCrossImports;
+    return {
+      for (final File testFile in testFiles)
+        if (_containsImport(testFile, library)) testFile,
+    };
   }
 
   /// Returns the error message for the given known paths that no longer have a
