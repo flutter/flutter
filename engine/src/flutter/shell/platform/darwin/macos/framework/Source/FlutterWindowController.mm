@@ -239,14 +239,16 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
     // the requested size needs to be passed through constraints.
     if (view.sizedToContents &&
         (positionRect.size.width < newSize.width || positionRect.size.height < newSize.height)) {
+      // Positioner disagreed with content size, tighten the constraints and regenerate
+      // the frame.
       _positionerSizeConstraints = positionRect.size;
       [view constraintsDidChange];
-    } else {
-      // Only show the window initially if positioner agrees with the size.
-      if (self.onFirstFrame) {
-        self.onFirstFrame();
-        self.onFirstFrame = nil;
-      }
+      return;
+    }
+
+    if (self.onFirstFrame) {
+      self.onFirstFrame();
+      self.onFirstFrame = nil;
     }
   }
 }
