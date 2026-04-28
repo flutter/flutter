@@ -515,7 +515,7 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentResizable) {
   [engine shutDownEngine];
 }
 
-TEST_F(FlutterWindowControllerSizeTest, SizedToContent) {
+TEST_F(FlutterWindowControllerSizeTest, SizedToContentNotResizable) {
   FlutterWindowCreationRequest request{
       .has_size = false,
       .has_constraints = true,
