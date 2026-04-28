@@ -4170,7 +4170,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "mac"]
-      task_name: hello_world_macos_impeller_macos_sdfs
+      task_name: hello_world_impeller_macos_sdfs
 
   - name: Mac integration_ui_test_test_macos
     recipe: devicelab/devicelab_drone
