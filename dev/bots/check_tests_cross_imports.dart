@@ -204,16 +204,7 @@ class TestsCrossImportChecker {
     return knownPaths.difference(testPaths);
   }
 
-  /// Returns a list of files in the given directory optionally matching the
-  /// given filenamePattern.
-  static List<File> _getFiles(Directory directory, [Pattern? filenamePattern]) {
-    return [
-      for (final File file in directory.listSync(recursive: true).whereType<File>())
-        if (filenamePattern == null || file.absolute.path.contains(filenamePattern)) file,
-    ];
-  }
-
-  /// Returns the Set of files that are not in knownPaths.
+  /// Returns the [Set] of files that are not in [knownPaths].
   static Set<File> _getUnknowns(Set<String> knownPaths, Set<File> files) {
     return files.where((File file) {
       final int index = file.absolute.path.indexOf(_flutterTestPrefix);
@@ -225,24 +216,11 @@ class TestsCrossImportChecker {
     }).toSet();
   }
 
-  /// Get a list of all the filenames in the source directory
-  /// that end in ".dart".
-  static Set<File> _getTestFiles(Directory directory, _Library library) {
-    return _getFiles(directory.childDirectory(library.directory), RegExp(r'\.dart$')).toSet();
-  }
+  /// Returns true only if [file] contains the given [importString].
+  static bool _containsImport(File file, {required String importString}) {
+    final String contents = file.readAsStringSync();
 
-  /// Returns true only if the file imports the given Library.
-  static bool _containsImport(File testFile, _Library library) {
-    final String contents = testFile.readAsStringSync();
-    return contents.contains(library.import);
-  }
-
-  /// Returns a Set of all Files that import the given Library.
-  static Set<File> _getFilesWithImports(Set<File> testFiles, _Library library) {
-    return {
-      for (final File testFile in testFiles)
-        if (_containsImport(testFile, library)) testFile,
-    };
+    return contents.contains(importString);
   }
 
   /// Returns the error message for the given known paths that no longer have a
@@ -272,6 +250,31 @@ class TestsCrossImportChecker {
   /// Returns the [file]'s relative path, relative to [flutterRoot].
   String _getRelativePath(File file) {
     return path.relative(file.absolute.path, from: flutterRoot.absolute.path);
+  }
+
+  /// Get a list of all the filenames that end in ".dart", grouped by library.
+  Map<_Library, Set<File>> _getTestFiles() {
+    final dartFilePattern = RegExp(r'\.dart$');
+    final Map<_Library, Set<File>> mapping = {_Library.flutterSlashTest: {}};
+
+    // List the files directly under `flutter/test` and then walk the subdirectories.
+    for (final FileSystemEntity fileOrDirectory in testsDirectory.listSync()) {
+      if (fileOrDirectory is File && fileOrDirectory.absolute.path.contains(dartFilePattern)) {
+        mapping[_Library.flutterSlashTest]?.add(fileOrDirectory);
+
+        continue;
+      }
+
+      if (fileOrDirectory is Directory) {
+        final _Library library = _Library.fromDirectory(fileOrDirectory, flutterRoot: flutterRoot);
+        mapping[library] = {
+          for (final File file in fileOrDirectory.listSync(recursive: true).whereType<File>())
+            if (file.absolute.path.contains(dartFilePattern)) file,
+        };
+      }
+    }
+
+    return mapping;
   }
 
   /// Returns the import error for the `files` in `testLibrary` which import
@@ -308,10 +311,7 @@ class TestsCrossImportChecker {
   bool check() {
     filesystem.currentDirectory = flutterRoot;
 
-    final filesByLibrary = <_Library, Set<File>>{};
-    for (final _Library library in _Library.values) {
-      filesByLibrary[library] = _getTestFiles(testsDirectory, library);
-    }
+    final Map<_Library, Set<File>> filesByLibrary = _getTestFiles();
 
     // Find all cross imports.
     final Set<File> widgetsTestsImportingMaterial = _getFilesWithImports(
@@ -406,6 +406,12 @@ sealed class _Library {
 
   static const String cupertinoImport = "import 'package:flutter/cupertino.dart'";
   static const String materialImport = "import 'package:flutter/material.dart'";
+
+  /// The library for `flutter/test`.
+  static const _OtherLibrary flutterSlashTest = _OtherLibrary(
+    'flutter/test',
+    'knownFlutterSlashTestCrossImports',
+  );
 
   /// Whether this library is allowed to import Cupertino.
   bool get canImportCupertino;
