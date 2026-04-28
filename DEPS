@@ -124,6 +124,9 @@ vars = {
   # the flutter engine to ensure that Dart gn has access to it as well.
   "checkout_llvm": False,
 
+  # Use prebuilt Dart DevTools sources.
+  'build_devtools_from_sources': False,
+
   # Setup Git hooks by default.
   'setup_githooks': True,
 
@@ -212,7 +215,8 @@ vars = {
 
 gclient_gn_args_file = 'engine/src/flutter/third_party/dart/build/config/gclient_args.gni'
 gclient_gn_args = [
-  'checkout_llvm'
+  'checkout_llvm',
+  'build_devtools_from_sources',
 ]
 
 # Only these hosts are allowed for dependencies in this DEPS file.
@@ -800,7 +804,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'i6d0NoDueUiXpePfXzF3Ii4JIdhpLTRoDUg_lZlzpJUC'
+        'version': 'nnv8-SSam6yE8dw4z7dXbyNTk3Y03qC4X8q5REtIL1IC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
