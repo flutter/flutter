@@ -5079,7 +5079,7 @@ class SemanticsOwner extends ChangeNotifier {
     Offset position,
     SemanticsAction action,
   ) {
-    Offset effectivePosition = position;
+    var effectivePosition = position;
     if (node.transform != null) {
       final inverse = Matrix4.identity();
       if (inverse.copyInverse(node.transform!) == 0.0) {
@@ -6927,7 +6927,7 @@ AttributedString _concatAttributedString({
   if (otherAttributedString.string.isEmpty) {
     return thisAttributedString;
   }
-  AttributedString effectiveOtherAttributedString = otherAttributedString;
+  var effectiveOtherAttributedString = otherAttributedString;
   if (thisTextDirection != otherTextDirection && otherTextDirection != null) {
     final AttributedString directionEmbedding = switch (otherTextDirection) {
       TextDirection.rtl => AttributedString(Unicode.RLE),

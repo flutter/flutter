@@ -791,7 +791,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     if (child == null) {
       return 0.0;
     }
-    double intrinsicHeight = height;
+    var intrinsicHeight = height;
     if (!intrinsicHeight.isFinite) {
       intrinsicHeight = child!.getMaxIntrinsicHeight(double.infinity);
     }
@@ -804,7 +804,7 @@ class RenderIntrinsicHeight extends RenderProxyBox {
     if (child == null) {
       return 0.0;
     }
-    double intrinsicHeight = height;
+    var intrinsicHeight = height;
     if (!intrinsicHeight.isFinite) {
       intrinsicHeight = child!.getMaxIntrinsicHeight(double.infinity);
     }

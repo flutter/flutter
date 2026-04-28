@@ -38,7 +38,7 @@ class Priority {
   ///
   /// The parameter [offset] is clamped to ±[kMaxOffset].
   Priority operator +(int offset) {
-    int effectiveOffset = offset;
+    var effectiveOffset = offset;
     if (effectiveOffset.abs() > kMaxOffset) {
       // Clamp the input offset.
       effectiveOffset = kMaxOffset * effectiveOffset.sign;

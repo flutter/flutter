@@ -2989,7 +2989,7 @@ class Navigator extends StatefulWidget {
     String initialRouteName,
   ) {
     final result = <Route<dynamic>?>[];
-    String parsedRouteName = initialRouteName;
+    var parsedRouteName = initialRouteName;
     if (parsedRouteName.startsWith('/') && parsedRouteName.length > 1) {
       parsedRouteName = parsedRouteName.substring(1); // strip leading '/'
       assert(Navigator.defaultRouteName == '/');
@@ -4645,7 +4645,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   int _getIndexBefore(int index, _RouteEntryPredicate predicate) {
-    int effectiveIndex = index;
+    var effectiveIndex = index;
     while (effectiveIndex >= 0 && !predicate(_history[effectiveIndex])) {
       effectiveIndex -= 1;
     }
@@ -4653,7 +4653,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   _RouteEntry? _getRouteAfter(int index, _RouteEntryPredicate predicate) {
-    int effectiveIndex = index;
+    var effectiveIndex = index;
     while (effectiveIndex < _history.length && !predicate(_history[effectiveIndex])) {
       effectiveIndex += 1;
     }

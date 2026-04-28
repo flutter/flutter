@@ -233,11 +233,11 @@ class CheckboxThemeData with Diagnosticable {
     if (a == null && b == null) {
       return null;
     }
-    BorderSide? effectiveA = a;
+    var effectiveA = a;
     if (effectiveA is WidgetStateBorderSide) {
       effectiveA = effectiveA.resolve(const <WidgetState>{});
     }
-    BorderSide? effectiveB = b;
+    var effectiveB = b;
     if (effectiveB is WidgetStateBorderSide) {
       effectiveB = effectiveB.resolve(const <WidgetState>{});
     }

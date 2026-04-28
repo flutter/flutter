@@ -377,7 +377,7 @@ class Scrollable extends StatefulWidget {
   /// * [Scrollable.of], which is similar to this method, but asserts
   ///   if no [Scrollable] ancestor is found.
   static ScrollableState? maybeOf(BuildContext context, {Axis? axis}) {
-    BuildContext currentContext = context;
+    var currentContext = context;
     // This is the context that will need to establish the dependency.
     final originalContext = currentContext;
     InheritedElement? element = currentContext.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
@@ -472,7 +472,7 @@ class Scrollable extends StatefulWidget {
   /// If there is no [Scrollable] in the widget tree above the [context], this
   /// method returns false.
   static bool recommendDeferredLoadingForContext(BuildContext context, {Axis? axis}) {
-    BuildContext currentContext = context;
+    var currentContext = context;
     _ScrollableScope? widget = currentContext.getInheritedWidgetOfExactType<_ScrollableScope>();
     while (widget != null) {
       if (axis == null || axisDirectionToAxis(widget.scrollable.axisDirection) == axis) {
@@ -497,7 +497,7 @@ class Scrollable extends StatefulWidget {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
   }) {
-    BuildContext currentContext = context;
+    var currentContext = context;
     final futures = <Future<void>>[];
 
     // The targetRenderObject is used to record the first target renderObject.

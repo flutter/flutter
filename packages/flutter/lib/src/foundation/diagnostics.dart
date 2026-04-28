@@ -1007,7 +1007,7 @@ class _PrefixedStringBuilder {
   }
 
   void _writeLine(String line, {required bool includeLineBreak, required bool firstLine}) {
-    final String prefixedLine = '${_getCurrentPrefix(firstLine)}$line';
+    final prefixedLine = '${_getCurrentPrefix(firstLine)}$line';
     _buffer.write(prefixedLine.trimRight());
     if (includeLineBreak) {
       _buffer.write('\n');
@@ -1151,7 +1151,7 @@ class TextTreeRenderer {
   }) {
     final bool isSingleLine =
         _isSingleLine(node.style) && parentConfiguration?.lineBreakProperties != true;
-    String effectivePrefixLineOne = prefixLineOne;
+    var effectivePrefixLineOne = prefixLineOne;
     String effectivePrefixOtherLines = prefixOtherLines ?? prefixLineOne;
     if (node.linePrefix != null) {
       effectivePrefixLineOne += node.linePrefix!;
@@ -2644,7 +2644,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final T? v = value;
     List<Map<String, Object?>>? properties;
-    DiagnosticsSerializationDelegate effectiveDelegate = delegate;
+    var effectiveDelegate = delegate;
     if (delegate.expandPropertyValues &&
         delegate.includeProperties &&
         v is Diagnosticable &&

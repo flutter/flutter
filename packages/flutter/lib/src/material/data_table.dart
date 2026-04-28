@@ -966,7 +966,7 @@ class DataTable extends StatelessWidget {
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
-    Widget effectiveLabel = label;
+    var effectiveLabel = label;
     if (showEditIcon) {
       const Widget icon = Icon(Icons.edit, size: 18.0);
       effectiveLabel = Expanded(child: effectiveLabel);

@@ -761,7 +761,7 @@ class RenderCustomPaint extends RenderProxyBox {
     assert(() {
       final Map<Key, int> keys = HashMap<Key, int>();
       final information = <DiagnosticsNode>[];
-      for (var i = 0; i < newChildSemantics!.length; i += 1) {
+      for (var i = 0; i < newChildSemantics.length; i += 1) {
         final CustomPainterSemantics child = newChildSemantics[i];
         if (child.key != null) {
           if (keys.containsKey(child.key)) {

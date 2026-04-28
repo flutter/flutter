@@ -473,7 +473,7 @@ class WindowPositioner {
       Offset result =
           _constrainTo(parentRect, parentAnchor._anchorPositionFor(anchorRect) + offset) +
           childAnchor._offsetFor(childSize);
-      Size effectiveChildSize = childSize;
+      var effectiveChildSize = childSize;
 
       if (constraintAdjustment.resizeX) {
         final double leftOverhang = result.dx - displayRect.left;

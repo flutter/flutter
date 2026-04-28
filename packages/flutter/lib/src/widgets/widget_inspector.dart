@@ -1738,7 +1738,7 @@ mixin WidgetInspectorService {
 
   List<Element> _getRawElementParentChain(Element element, {required int? numLocalParents}) {
     List<Element> elements = element.debugGetDiagnosticChain();
-    int? effectiveNumLocalParents = numLocalParents;
+    var effectiveNumLocalParents = numLocalParents;
     if (effectiveNumLocalParents != null) {
       for (var i = 0; i < elements.length; i += 1) {
         if (_isValueCreatedByLocalProject(elements[i])) {
@@ -1769,7 +1769,7 @@ mixin WidgetInspectorService {
     String groupName,
   ) {
     final chain = <RenderObject>[];
-    RenderObject? currentRenderObject = renderObject;
+    var currentRenderObject = renderObject;
     while (currentRenderObject != null) {
       chain.add(currentRenderObject);
       currentRenderObject = currentRenderObject.parent;
@@ -4473,7 +4473,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
 
   @override
   List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
-    List<DiagnosticsNode> effectiveNodes = nodes;
+    var effectiveNodes = nodes;
     if (maxDescendantsTruncatableNode >= 0 &&
         owner!.allowTruncate &&
         effectiveNodes.length > maxDescendantsTruncatableNode) {
@@ -4618,6 +4618,4 @@ class WeakMap<K, V> {
     _objects = Expando<Object>();
     _primitives.clear();
   }
-}
-}
 }

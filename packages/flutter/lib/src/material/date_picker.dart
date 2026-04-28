@@ -2265,7 +2265,7 @@ class _CalendarKeyboardNavigatorState extends State<_CalendarKeyboardNavigator> 
 
   int _dayDirectionOffset(TraversalDirection traversalDirection, TextDirection textDirection) {
     // Swap left and right if the text direction if RTL
-    TraversalDirection effectiveTraversalDirection = traversalDirection;
+    var effectiveTraversalDirection = traversalDirection;
     if (textDirection == TextDirection.rtl) {
       if (effectiveTraversalDirection == TraversalDirection.left) {
         effectiveTraversalDirection = TraversalDirection.right;

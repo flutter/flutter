@@ -2548,7 +2548,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildHourColumn(EdgeInsetsDirectional additionalPadding, Widget? selectionOverlay) {
-    final EdgeInsetsDirectional resolvedAdditionalPadding = EdgeInsetsDirectional.only(
+    final resolvedAdditionalPadding = EdgeInsetsDirectional.only(
       start: math.max(additionalPadding.start, 0),
       end: math.max(additionalPadding.end, 0),
     );
@@ -2621,7 +2621,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildMinuteColumn(EdgeInsetsDirectional additionalPadding, Widget? selectionOverlay) {
-    final EdgeInsetsDirectional resolvedAdditionalPadding = EdgeInsetsDirectional.only(
+    final resolvedAdditionalPadding = EdgeInsetsDirectional.only(
       start: math.max(additionalPadding.start, 0),
       end: math.max(additionalPadding.end, 0),
     );
@@ -2690,7 +2690,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   Widget _buildSecondColumn(EdgeInsetsDirectional additionalPadding, Widget? selectionOverlay) {
-    final EdgeInsetsDirectional resolvedAdditionalPadding = EdgeInsetsDirectional.only(
+    final resolvedAdditionalPadding = EdgeInsetsDirectional.only(
       start: math.max(additionalPadding.start, 0),
       end: math.max(additionalPadding.end, 0),
     );

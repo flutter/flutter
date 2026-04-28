@@ -54,7 +54,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
     BuildOwner owner, [
     RenderObjectToWidgetElement<T>? element,
   ]) {
-    RenderObjectToWidgetElement<T>? effectiveElement = element;
+    var effectiveElement = element;
     if (effectiveElement == null) {
       owner.lockState(() {
         effectiveElement = createElement();

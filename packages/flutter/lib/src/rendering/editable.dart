@@ -732,7 +732,7 @@ class RenderEditable extends RenderBox
   }
 
   void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
-    TextSelection effectiveNextSelection = nextSelection;
+    var effectiveNextSelection = nextSelection;
     if (effectiveNextSelection.isValid) {
       // The nextSelection is calculated based on plainText, which can be out
       // of sync with the textSelectionDelegate.textEditingValue by one frame.
@@ -1596,7 +1596,7 @@ class RenderEditable extends RenderBox
   }
 
   TextRange? _getNextWord(int offsetParam) {
-    int offset = offsetParam;
+    var offset = offsetParam;
     while (true) {
       final TextRange range = _textPainter.getWordBoundary(TextPosition(offset: offset));
       if (!range.isValid || range.isCollapsed) {
@@ -1610,7 +1610,7 @@ class RenderEditable extends RenderBox
   }
 
   TextRange? _getPreviousWord(int offset) {
-    int currentOffset = offset;
+    var currentOffset = offset;
     while (currentOffset >= 0) {
       final TextRange range = _textPainter.getWordBoundary(TextPosition(offset: currentOffset));
       if (!range.isValid || range.isCollapsed) {
@@ -3154,9 +3154,6 @@ class _CompositeRenderEditablePainter extends RenderEditablePainter {
       }
     }
 
-    return false;
-  }
-}
     return false;
   }
 }

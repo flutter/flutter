@@ -195,7 +195,7 @@ abstract interface class RenderAbstractViewport extends RenderObject {
   /// * [RenderAbstractViewport.of], which is similar to this method, but
   ///   asserts if no [RenderAbstractViewport] ancestor is found.
   static RenderAbstractViewport? maybeOf(RenderObject? object) {
-    RenderObject? current = object;
+    var current = object;
     while (current != null) {
       if (current is RenderAbstractViewport) {
         return current;
@@ -806,11 +806,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     double maxPaintOffset = layoutOffset + overlap;
     var precedingScrollExtent = 0.0;
 
-    RenderSliver? currentChild = child;
-    double currentScrollOffset = scrollOffset;
-    double currentLayoutOffset = layoutOffset;
-    double currentRemainingCacheExtent = remainingCacheExtent;
-    double currentCacheOrigin = cacheOrigin;
+    var currentChild = child;
+    var currentScrollOffset = scrollOffset;
+    var currentLayoutOffset = layoutOffset;
+    var currentRemainingCacheExtent = remainingCacheExtent;
+    var currentCacheOrigin = cacheOrigin;
 
     while (currentChild != null) {
       final sliverScrollOffset = currentScrollOffset <= 0.0 ? 0.0 : currentScrollOffset;

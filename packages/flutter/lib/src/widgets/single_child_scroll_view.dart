@@ -610,9 +610,7 @@ class _RenderSingleChildViewport extends RenderBox
     Rect? rect,
     Axis? axis,
   }) {
-    // One dimensional viewport has only one axis, override if it was
-    // provided/may be mismatched.
-    final Axis effectiveAxis = this.axis;
+
 
     final Rect effectiveRect = rect ?? target.paintBounds;
     if (target is! RenderBox) {

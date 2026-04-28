@@ -371,7 +371,7 @@ bool debugCheckHasDirectionality(
   assert(() {
     if (context.widget is! Directionality &&
         context.getElementForInheritedWidgetOfExactType<Directionality>() == null) {
-      final String effectiveWhy = why == null ? '' : ' $why';
+      final effectiveWhy = why == null ? '' : ' $why';
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Directionality widget found.'),
         ErrorDescription(

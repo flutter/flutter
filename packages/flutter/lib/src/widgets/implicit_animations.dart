@@ -425,7 +425,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
       dynamic targetValue,
       TweenConstructor<dynamic> constructor,
     ) {
-      Tween<dynamic>? effectiveTween = tween;
+      var effectiveTween = tween;
       if (targetValue != null) {
         effectiveTween ??= constructor(targetValue);
         if (targetValue != (effectiveTween.end ?? effectiveTween.begin)) {

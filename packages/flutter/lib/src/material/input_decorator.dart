@@ -1267,7 +1267,7 @@ class _RenderDecoration extends RenderBox
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    double availableWidth = width;
+    var availableWidth = width;
     final double iconHeight = _minHeight(icon, availableWidth);
     final double iconWidth = _minWidth(icon, iconHeight);
 

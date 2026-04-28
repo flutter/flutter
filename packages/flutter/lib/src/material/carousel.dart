@@ -600,7 +600,7 @@ class _CarouselViewState extends State<CarouselView> {
 
   Widget _buildCarouselItem(int index) {
     // For infinite scrolling, wrap the index to the actual children range.
-    int effectiveIndex = index;
+    var effectiveIndex = index;
     if (widget.infinite && widget.children.isNotEmpty) {
       effectiveIndex = effectiveIndex % widget.children.length;
     }
@@ -1974,7 +1974,7 @@ class CarouselController extends ScrollController {
     }
 
     final bool hasFlexWeights = _carouselState!._flexWeights?.isNotEmpty ?? false;
-    int effectiveIndex = index;
+    var effectiveIndex = index;
     if (_carouselState!.widget.itemBuilder != null) {
       final int? itemCount = _carouselState!.widget.itemCount;
       effectiveIndex = itemCount != null ? effectiveIndex.clamp(0, itemCount - 1) : 0;

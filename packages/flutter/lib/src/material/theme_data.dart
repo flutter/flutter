@@ -400,7 +400,7 @@ class ThemeData with Diagnosticable {
     }
     effectiveInputDecorationTheme ??= const InputDecorationThemeData();
     final TargetPlatform effectivePlatform = platform ?? defaultTargetPlatform;
-    MaterialTapTargetSize? effectiveMaterialTapTargetSize = materialTapTargetSize;
+    var effectiveMaterialTapTargetSize = materialTapTargetSize;
     if (effectiveMaterialTapTargetSize == null) {
       switch (effectivePlatform) {
         case TargetPlatform.android:
@@ -440,15 +440,15 @@ class ThemeData with Diagnosticable {
     final Brightness effectiveBrightness =
         brightness ?? colorScheme?.brightness ?? Brightness.light;
     final isDark = effectiveBrightness == Brightness.dark;
-    ColorScheme? effectiveColorScheme = colorScheme;
-    Color? effectivePrimaryColor = primaryColor;
-    Color? effectiveCanvasColor = canvasColor;
-    Color? effectiveScaffoldBackgroundColor = scaffoldBackgroundColor;
-    Color? effectiveCardColor = cardColor;
-    Color? effectiveDividerColor = dividerColor;
-    Color? effectiveDialogBackgroundColor = dialogBackgroundColor;
-    Color? effectiveIndicatorColor = indicatorColor;
-    bool? effectiveApplyElevationOverlayColor = applyElevationOverlayColor;
+    var effectiveColorScheme = colorScheme;
+    var effectivePrimaryColor = primaryColor;
+    var effectiveCanvasColor = canvasColor;
+    var effectiveScaffoldBackgroundColor = scaffoldBackgroundColor;
+    var effectiveCardColor = cardColor;
+    var effectiveDividerColor = dividerColor;
+    var effectiveDialogBackgroundColor = dialogBackgroundColor;
+    var effectiveIndicatorColor = indicatorColor;
+    var effectiveApplyElevationOverlayColor = applyElevationOverlayColor;
 
     if (colorSchemeSeed != null || effectiveUseMaterial3) {
       if (colorSchemeSeed != null) {

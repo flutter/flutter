@@ -1066,10 +1066,10 @@ class CatmullRomCurve extends Curve {
       return false;
     }
 
-    final List<Offset> pointsWithEnds = <Offset>[Offset.zero, ...controlPoints, const Offset(1.0, 1.0)];
+    final pointsWithEnds = <Offset>[Offset.zero, ...controlPoints, const Offset(1.0, 1.0)];
     final Offset startHandle = pointsWithEnds[0] * 2.0 - pointsWithEnds[1];
     final Offset endHandle = pointsWithEnds.last * 2.0 - pointsWithEnds[pointsWithEnds.length - 2];
-    final List<Offset> effectiveControlPoints = <Offset>[startHandle, ...pointsWithEnds, endHandle];
+    final effectiveControlPoints = <Offset>[startHandle, ...pointsWithEnds, endHandle];
     double lastX = -double.infinity;
     for (var i = 0; i < effectiveControlPoints.length; ++i) {
       if (i > 1 &&

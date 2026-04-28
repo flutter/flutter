@@ -1999,7 +1999,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     final double right = sizes.overall.width;
 
     Offset centerLayout(Size boxSize, double x) {
-      double layoutX = x;
+      var layoutX = x;
       assert(sizes.content >= boxSize.height);
       switch (textDirection) {
         case TextDirection.rtl:

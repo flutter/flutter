@@ -2739,7 +2739,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   //
   // This method adjusts the index to point to selectable with valid selection.
   int _adjustSelectionIndexBasedOnSelectionGeometry(int currentIndex, int towardIndex) {
-    int effectiveCurrentIndex = currentIndex;
+    var effectiveCurrentIndex = currentIndex;
     final bool forward = towardIndex > effectiveCurrentIndex;
     while (effectiveCurrentIndex != towardIndex &&
         selectables[effectiveCurrentIndex].value.status != SelectionStatus.uncollapsed) {

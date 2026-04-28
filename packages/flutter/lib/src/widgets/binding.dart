@@ -2003,7 +2003,7 @@ class RootWidget extends Widget {
   /// Used by [WidgetsBinding.attachToBuildOwner] (which is indirectly called by
   /// [runApp]) to bootstrap applications.
   RootElement attach(BuildOwner owner, [RootElement? element]) {
-    RootElement? effectiveElement = element;
+    var effectiveElement = element;
     if (effectiveElement == null) {
       owner.lockState(() {
         effectiveElement = createElement();

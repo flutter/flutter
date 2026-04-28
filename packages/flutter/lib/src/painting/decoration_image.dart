@@ -541,7 +541,7 @@ void paintImage({
   bool isAntiAlias = false,
   BlendMode blendMode = BlendMode.srcOver,
 }) {
-  var effectiveRepeat = effectiveRepeat;
+  var effectiveRepeat = repeat;
   assert(
     image.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
     'Cannot paint an image that is disposed.\n'
@@ -702,7 +702,8 @@ void paintImage({
     }
   }
 
-  final bool needSave = centerSlice != null || effectiveRepeat != ImageRepeat.noRepeat || flipHorizontally;
+  final bool needSave =
+      centerSlice != null || effectiveRepeat != ImageRepeat.noRepeat || flipHorizontally;
   if (needSave) {
     canvas.save();
   }
@@ -753,7 +754,11 @@ void paintImage({
   }
 }
 
-Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat effectiveRepeat) {
+Iterable<Rect> _generateImageTileRects(
+  Rect outputRect,
+  Rect fundamentalRect,
+  ImageRepeat effectiveRepeat,
+) {
   var startX = 0;
   var startY = 0;
   var stopX = 0;
@@ -761,12 +766,12 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
   final double strideX = fundamentalRect.width;
   final double strideY = fundamentalRect.height;
 
-  if (effectiveRepeat == ImageRepeat.effectiveRepeat || effectiveRepeat == ImageRepeat.repeatX) {
+  if (effectiveRepeat == ImageRepeat.repeat || effectiveRepeat == ImageRepeat.repeatX) {
     startX = ((outputRect.left - fundamentalRect.left) / strideX).floor();
     stopX = ((outputRect.right - fundamentalRect.right) / strideX).ceil();
   }
 
-  if (effectiveRepeat == ImageRepeat.effectiveRepeat || effectiveRepeat == ImageRepeat.repeatY) {
+  if (effectiveRepeat == ImageRepeat.repeat || effectiveRepeat == ImageRepeat.repeatY) {
     startY = ((outputRect.top - fundamentalRect.top) / strideY).floor();
     stopY = ((outputRect.bottom - fundamentalRect.bottom) / strideY).ceil();
   }
@@ -805,7 +810,7 @@ class _BlendedDecorationImage implements DecorationImage {
   @override
   Rect? get centerSlice => b?.centerSlice ?? a!.centerSlice;
   @override
-  ImageRepeat get effectiveRepeat => b?.effectiveRepeat ?? a!.effectiveRepeat;
+  ImageRepeat get repeat => b?.repeat ?? a!.repeat;
   @override
   bool get matchTextDirection => b?.matchTextDirection ?? a!.matchTextDirection;
   @override

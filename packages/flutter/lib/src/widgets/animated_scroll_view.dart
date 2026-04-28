@@ -839,7 +839,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   }
 
   Widget _wrap(Widget sliver, Axis direction) {
-    Widget effectiveSliver = sliver;
+    var effectiveSliver = sliver;
     EdgeInsetsGeometry? effectivePadding = widget.padding;
     if (widget.padding == null) {
       final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);

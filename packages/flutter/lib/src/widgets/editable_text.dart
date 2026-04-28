@@ -3586,7 +3586,7 @@ class EditableTextState extends State<EditableText>
       return;
     }
 
-    TextEditingValue effectiveValue = value;
+    var effectiveValue = value;
     if (_checkNeedsAdjustAffinity(effectiveValue)) {
       effectiveValue = effectiveValue.copyWith(
         selection: effectiveValue.selection.copyWith(affinity: _value.selection.affinity),
@@ -4626,7 +4626,8 @@ class EditableTextState extends State<EditableText>
     var effectiveValue = value;
     final TextEditingValue oldValue = _value;
     final textChanged = oldValue.text != effectiveValue.text;
-    final bool textCommitted = !oldValue.composing.isCollapsed && effectiveValue.composing.isCollapsed;
+    final bool textCommitted =
+        !oldValue.composing.isCollapsed && effectiveValue.composing.isCollapsed;
     final selectionChanged = oldValue.selection != effectiveValue.selection;
 
     if (textChanged || textCommitted) {
@@ -4647,7 +4648,9 @@ class EditableTextState extends State<EditableText>
             ) ??
             effectiveValue;
 
-        if (spellCheckEnabled && effectiveValue.text.isNotEmpty && _value.text != effectiveValue.text) {
+        if (spellCheckEnabled &&
+            effectiveValue.text.isNotEmpty &&
+            _value.text != effectiveValue.text) {
           _performSpellCheck(effectiveValue.text);
         }
       } catch (exception, stack) {
@@ -6879,10 +6882,6 @@ class _OverridingTextStyleTextSpanUtils {
       semanticsIdentifier: textSpan.semanticsIdentifier,
       locale: textSpan.locale,
       spellOut: textSpan.spellOut,
-    );
-  }
-}
-pan.spellOut,
     );
   }
 }

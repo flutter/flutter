@@ -1019,7 +1019,7 @@ class SliverReorderableListState extends State<SliverReorderableList>
       return;
     }
 
-    int effectiveNewIndex = newIndex;
+    var effectiveNewIndex = newIndex;
 
     // Removing an item at the old index shortens the list by one.
     if (effectiveNewIndex > oldIndex) {

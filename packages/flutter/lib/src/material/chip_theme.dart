@@ -566,8 +566,8 @@ class ChipThemeData with Diagnosticable {
     if (a == null && b == null) {
       return null;
     }
-    BorderSide? effectiveA = a;
-    BorderSide? effectiveB = b;
+    var effectiveA = a;
+    var effectiveB = b;
     if (effectiveA is WidgetStateBorderSide) {
       effectiveA = effectiveA.resolve(const <WidgetState>{});
     }

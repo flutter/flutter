@@ -273,7 +273,7 @@ class BoxConstraints extends Constraints {
   }
 
   Size _debugPropagateDebugSize(Size size, Size result) {
-    Size updatedResult = result;
+    var updatedResult = result;
     assert(() {
       if (size is _DebugSize) {
         updatedResult = _DebugSize(result, size._owner, size._canBeUsedByParent);
@@ -802,7 +802,7 @@ class BoxHitTestResult extends HitTestResult {
     required Offset position,
     required BoxHitTest hitTest,
   }) {
-    Matrix4? effectiveTransform = transform;
+    var effectiveTransform = transform;
     if (effectiveTransform != null) {
       effectiveTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(effectiveTransform));
       if (effectiveTransform == null) {
@@ -2357,7 +2357,7 @@ abstract class RenderBox extends RenderObject {
       }
       throw FlutterError.fromParts(information);
     }());
-    Size finalValue = value;
+    var finalValue = value;
     assert(() {
       finalValue = debugAdoptSize(value);
       return true;
