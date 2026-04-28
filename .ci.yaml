@@ -4162,6 +4162,16 @@ targets:
     properties:
       task_name: hello_world_macos__compile
 
+  - name: Mac hello_world_impeller_macos_sdfs
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "mac"]
+      task_name: hello_world_macos_impeller_macos_sdfs
+
   - name: Mac integration_ui_test_test_macos
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5208,6 +5218,16 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_defines_test
+
+  - name: Mac_ios hello_world_impeller_ios_sdfs
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: hello_world_impeller_ios_sdfs
 
   - name: Mac_ios ios_platform_view_tests
     recipe: devicelab/devicelab_drone

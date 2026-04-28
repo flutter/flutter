@@ -62,7 +62,7 @@ When closing an issue because it is a help request rather than an actionable iss
 
 #### Issues in other products.
 
-If an issue is in a product that is not part of the Flutter project, such as a third-party package, close the issue with a comment suggesting that the reporter file the issue with the authors of that product, and add `r: invalid`. However, if there's a reason to believe that an issue involving a third-party product is *caused* by Flutter (for exmaple, a tool or engine change that unexpectedly breaks a third-party plugin), don't close it, and triage it based on the potential Flutter cause.
+If an issue is in a product that is not part of the Flutter project, such as a third-party package, close the issue with a comment suggesting that the reporter file the issue with the authors of that product, and add `r: invalid`. However, if there's a reason to believe that an issue involving a third-party product is *caused* by Flutter (for example, a tool or engine change that unexpectedly breaks a third-party plugin), don't close it, and triage it based on the potential Flutter cause.
 
 ### Labels
 
@@ -230,7 +230,7 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-accessibility%2Cfyi-accessibility+-label%3Atriaged-accessibility+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-accessibility+label%3AP0+sort%3Aupdated-asc+)
-- [Package PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+accessibility%22+sort%3Aupdated-asc+-is%3Adraft+)
+- [Package PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+accessibility%22+sort%3Aupdated-asc+-is%3Adraft+-label%3A%22waiting+for+response%22)
 
 ### Android platform team (`team-android`)
 

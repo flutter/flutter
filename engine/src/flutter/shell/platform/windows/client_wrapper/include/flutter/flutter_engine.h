@@ -94,9 +94,12 @@ class FlutterEngine : public PluginRegistry {
                                                       WPARAM wparam,
                                                       LPARAM lparam);
 
-  // Returns the DXGI adapter used for rendering or nullptr in case of error.
-  IDXGIAdapter* GetGraphicsAdapter() {
-    return FlutterDesktopEngineGetGraphicsAdapter(engine_);
+  // Retrieves the DXGI adapter used for rendering. Returns true if the adapter
+  // was successfully retrieved, or false if an error occured.
+  // The caller must provide a valid pointer to an IDXGIAdapter* and is
+  // responsible for releasing the adapter.
+  bool GetGraphicsAdapter(IDXGIAdapter** adapter_out) {
+    return FlutterDesktopEngineGetGraphicsAdapter(engine_, adapter_out);
   }
 
  private:
