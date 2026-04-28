@@ -58,13 +58,11 @@ struct UberSDFParameters {
   static UberSDFParameters MakeRoundedSuperellipse(
       Color color,
       const Rect& bounds,
-      Scalar degree_top,
-      const RoundingRadii& radii_top,
-      Scalar corner_angle_span_top,
+      const Point& superellipse_degree,
+      const Point& superellipse_a,
+      const RoundingRadii& radii,
+      const Point& corner_angle_span,
       Point corner_circle_center_top,
-      Scalar degree_right,
-      const RoundingRadii& radii_right,
-      Scalar corner_angle_span_right,
       Point corner_circle_center_right,
       Scalar superellipse_c,
       Point superellipse_scale,
@@ -87,26 +85,23 @@ struct UberSDFParameters {
   /// The stroke parameters. If std::nullopt, the shape is filled.
   std::optional<StrokeParameters> stroke;
 
-  /// The corner radii for the top octants of a RoundSuperellipse.
+  /// The corner radii for a rounded shapes.
+  ///
+  /// For RoundSuperellipse, the 'width' component holds the top-octant radius
+  /// and the 'height' component holds the right-octant radius.
   RoundingRadii radii;
 
-  /// The corner radii for the right octants of a RoundSuperellipse.
-  RoundingRadii radii_right;
+  /// The degrees of the top (.x) and right (.y) octants of a RoundSuperellipse.
+  Point superellipse_degree;
 
-  /// The degree of the top octant of a RoundSuperellipse.
-  Scalar superellipse_degree_top;
+  /// The semi-axes of the top (.x) and right (.y) superellipse segments.
+  Point superellipse_a;
 
-  /// The span of the top circular arc in a RoundSuperellipse.
-  Scalar corner_angle_span_top;
+  /// The spans of the top (.x) and right (.y) circular arcs.
+  Point corner_angle_span;
 
   /// The center of the top circular arc in a RoundSuperellipse.
   Point corner_circle_center_top;
-
-  /// The degree of the right octant of a RoundSuperellipse.
-  Scalar superellipse_degree_right;
-
-  /// The span of the right circular arc in a RoundSuperellipse.
-  Scalar corner_angle_span_right;
 
   /// The center of the right circular arc in a RoundSuperellipse.
   Point corner_circle_center_right;

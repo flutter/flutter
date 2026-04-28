@@ -10,12 +10,22 @@ UberSDFParameters UberSDFParameters::MakeRect(
     Color color,
     const Rect& rect,
     std::optional<StrokeParameters> stroke) {
+  // Size is the x and y extents from the center of the rect.
   Point size = Point(rect.GetSize() * 0.5f);
+
+  // Stroke may be changed from miter to bevel joins depending on the miter
+  // limit.
+  std::optional<StrokeParameters> adjusted_stroke =
+      stroke && stroke->join == Join::kMiter && stroke->miter_limit < kSqrt2
+          ? std::make_optional(StrokeParameters(
+                {.width = stroke->width, .join = Join::kBevel}))
+          : stroke;
+
   return UberSDFParameters{.type = Type::kRect,
                            .color = color,
                            .center = rect.GetCenter(),
                            .size = size,
-                           .stroke = stroke};
+                           .stroke = adjusted_stroke};
 }
 
 UberSDFParameters UberSDFParameters::MakeCircle(
@@ -23,10 +33,15 @@ UberSDFParameters UberSDFParameters::MakeCircle(
     const Point& center,
     Scalar radius,
     std::optional<StrokeParameters> stroke) {
+  // Both size parameters are the same, but this allows us to treat this
+  // case as if it were an oval to share code down the line. We can also
+  // share bounds calculations without having to test for circle vs rect.
+  Point size = Point(radius, radius);
+
   return UberSDFParameters{.type = Type::kCircle,
                            .color = color,
                            .center = center,
-                           .size = Point(radius, radius),
+                           .size = size,
                            .stroke = stroke};
 }
 
@@ -59,13 +74,11 @@ UberSDFParameters UberSDFParameters::MakeRoundedRect(
 UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
     Color color,
     const Rect& rect,
-    Scalar degree_top,
-    const RoundingRadii& radii_top,
-    Scalar corner_angle_span_top,
+    const Point& superellipse_degree,
+    const Point& superellipse_a,
+    const RoundingRadii& radii,
+    const Point& corner_angle_span,
     Point corner_circle_center_top,
-    Scalar degree_right,
-    const RoundingRadii& radii_right,
-    Scalar corner_angle_span_right,
     Point corner_circle_center_right,
     Scalar superellipse_c,
     Point superellipse_scale,
@@ -77,13 +90,11 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
       .center = rect.GetCenter(),
       .size = size,
       .stroke = stroke,
-      .radii = radii_top,
-      .radii_right = radii_right,
-      .superellipse_degree_top = degree_top,
-      .corner_angle_span_top = corner_angle_span_top,
+      .radii = radii,
+      .superellipse_degree = superellipse_degree,
+      .superellipse_a = superellipse_a,
+      .corner_angle_span = corner_angle_span,
       .corner_circle_center_top = corner_circle_center_top,
-      .superellipse_degree_right = degree_right,
-      .corner_angle_span_right = corner_angle_span_right,
       .corner_circle_center_right = corner_circle_center_right,
       .superellipse_c = superellipse_c,
       .superellipse_scale = superellipse_scale};

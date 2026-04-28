@@ -18,11 +18,10 @@ uniform FragInfo {
   float type;
   vec4 radii;
   vec4 radii_right;
-  float superellipse_degree_top;
-  float corner_angle_span_top;
+  vec2 superellipse_degree;
+  vec2 superellipse_a;
+  vec2 corner_angle_span;
   vec2 corner_circle_center_top;
-  float superellipse_degree_right;
-  float corner_angle_span_right;
   vec2 corner_circle_center_right;
   float superellipse_c;
   vec2 superellipse_scale;
@@ -104,14 +103,12 @@ float sdSuperellipse(vec2 p, float n) {
 }
 
 float distanceFromRoundedSuperellipse(vec2 p,
-                                      vec2 ab,
-                                      float n_top,
+                                      vec2 degree,
+                                      vec2 se_a,
                                       vec4 radii_top,
-                                      float angle_span_top,
+                                      vec2 angle_span,
                                       vec2 circle_center_top,
-                                      float n_right,
                                       vec4 radii_right,
-                                      float angle_span_right,
                                       vec2 circle_center_right,
                                       float c,
                                       vec2 scale) {
@@ -122,24 +119,25 @@ float distanceFromRoundedSuperellipse(vec2 p,
   vec2 circle_center, p_oct;
 
   // We split the quadrant along the diagonal of the transition (p_norm.y + c ==
-  // p_norm.x).
+  // p_norm.x). This allows us to grab the correct set of parameters for the
+  // "top" and "right" halves of the corner.
   if (p_norm.y + c > p_norm.x) {
     p_oct = p_norm + vec2(0.0, c);
-    n = n_top;
-    span = angle_span_top;
+    n = degree.x;
+    span = angle_span.x;
     r = radii_top.x;
     circle_center = circle_center_top;
-    a = ab.x;
+    a = se_a.x;
     s = scale.y;
   } else {
     // For the 'right' octant, we flip the point and shift it according to
     // the CPU's OctantContains/Flip logic.
     p_oct = p_norm.yx - vec2(0.0, c);
-    n = n_right;
-    span = angle_span_right;
+    n = degree.y;
+    span = angle_span.y;
     r = radii_right.x;
     circle_center = circle_center_right;
-    a = ab.y;
+    a = se_a.y;
     s = scale.x;
   }
 
@@ -153,19 +151,15 @@ float distanceFromRoundedSuperellipse(vec2 p,
   float d_theta = theta - PI_OVER_FOUR;
   d_theta = mod(d_theta + PI, TWO_PI) - PI;
 
-  float d_norm;
   // If the point is within the span of the corner circle's arc,
   // use a circle SDF.
   // This works because the normals of the circular and superelliptical sections
   // agree at the transition angle, the total RSE curve is continuous and
   // the closest point on a continuous curve to a point lies along the normal.
   if (abs(d_theta) < abs(span)) {
-    d_norm = distanceFromCircle(p_rel, r);
-  } else {
-    d_norm = sdSuperellipse(p_oct / a, n) * a;
+    return distanceFromCircle(p_rel, r);
   }
-
-  return d_norm * s;
+  return sdSuperellipse(p_oct / a, n) * a;
 }
 
 // Define an ellipse as q(w) = (a*cos(w), b*sin(w)), and p = (x, y) on the
@@ -345,11 +339,11 @@ vec2 filledSDF(vec2 p) {
     sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
   } else {
     sdf = distanceFromRoundedSuperellipse(
-        p, frag_info.size, frag_info.superellipse_degree_top, frag_info.radii,
-        frag_info.corner_angle_span_top, frag_info.corner_circle_center_top,
-        frag_info.superellipse_degree_right, frag_info.radii_right,
-        frag_info.corner_angle_span_right, frag_info.corner_circle_center_right,
-        frag_info.superellipse_c, frag_info.superellipse_scale);
+        p, frag_info.superellipse_degree, frag_info.superellipse_a,
+        frag_info.radii, frag_info.corner_angle_span,
+        frag_info.corner_circle_center_top, frag_info.radii_right,
+        frag_info.corner_circle_center_right, frag_info.superellipse_c,
+        frag_info.superellipse_scale);
   }
   return vec2(sdf, pixelSize(sdf));
 }
