@@ -90,71 +90,76 @@ void main() {
 
   testWidgets('Card can take semantic text from multiple children', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: Card(
-              semanticContainer: false,
-              child: Column(
-                children: <Widget>[
-                  const Text('I am text!'),
-                  const Text('Moar text!!1'),
-                  ElevatedButton(onPressed: () {}, child: const Text('Button')),
-                ],
+    try {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: Card(
+                semanticContainer: false,
+                child: Column(
+                  children: <Widget>[
+                    const Text('I am text!'),
+                    const Text('Moar text!!1'),
+                    ElevatedButton(onPressed: () {}, child: const Text('Button')),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(
-      tester.getSemantics(find.text('I am text!')),
-      matchesSemantics(label: 'I am text!', textDirection: TextDirection.ltr),
-    );
-    expect(
-      tester.getSemantics(find.text('Moar text!!1')),
-      matchesSemantics(label: 'Moar text!!1', textDirection: TextDirection.ltr),
-    );
-    expect(
-      tester.getSemantics(find.widgetWithText(ElevatedButton, 'Button')),
-      matchesSemantics(
-        label: 'Button',
-        textDirection: TextDirection.ltr,
-        hasTapAction: true,
-        hasFocusAction: true,
-        hasEnabledState: true,
-        isButton: true,
-        isEnabled: true,
-        isFocusable: true,
-      ),
-    );
+      expect(
+        tester.getSemantics(find.text('I am text!')),
+        matchesSemantics(label: 'I am text!', textDirection: TextDirection.ltr),
+      );
+      expect(
+        tester.getSemantics(find.text('Moar text!!1')),
+        matchesSemantics(label: 'Moar text!!1', textDirection: TextDirection.ltr),
+      );
+      expect(
+        tester.getSemantics(find.widgetWithText(ElevatedButton, 'Button')),
+        matchesSemantics(
+          label: 'Button',
+          textDirection: TextDirection.ltr,
+          hasTapAction: true,
+          hasFocusAction: true,
+          hasEnabledState: true,
+          isButton: true,
+          isEnabled: true,
+          isFocusable: true,
+        ),
+      );
+    } finally {
+      handle.dispose();
+    }
   });
 
   testWidgets('Card merges children when it is a semanticContainer', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
-
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Material(
-          child: Center(
-            child: Card(
-              child: Column(children: <Widget>[Text('First child'), Text('Second child')]),
+    try {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: Card(
+                child: Column(children: <Widget>[Text('First child'), Text('Second child')]),
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(
-      tester.getSemantics(find.byType(Card)),
-      matchesSemantics(label: 'First child\nSecond child', textDirection: TextDirection.ltr),
-    );
+      expect(
+        tester.getSemantics(find.byType(Card)),
+        matchesSemantics(label: 'First child\nSecond child', textDirection: TextDirection.ltr),
+      );
+    } finally {
+      handle.dispose();
+    }
   });
 
   testWidgets('Card margin', (WidgetTester tester) async {
