@@ -93,7 +93,7 @@
 @property(readonly, nonatomic, nonnull) FlutterSurfaceManager* surfaceManager;
 
 /**
- * Optional content delegate. If set, the view will inform the delegate about content change;
+ * Optional content delegate. If set, the view will inform the delegate about content change.
  */
 @property(readwrite, nonatomic, weak, nullable) id<FlutterViewContentDelegate> contentDelegate;
 
