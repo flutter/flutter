@@ -776,7 +776,10 @@ def ensure_ios_tests_are_built(ios_out_dir: str) -> None:
   """Builds the engine variant and the test dylib containing the XCTests"""
   tmp_out_dir = os.path.join(OUT_DIR, ios_out_dir)
   ios_xctest_lib = os.path.join(tmp_out_dir, "libios_test_flutter.dylib")
-  ios_swifttest_lib = os.path.join(tmp_out_dir, "obj", "flutter", "shell", "platform", "darwin", "ios", "libios_test_flutter_swift.a")
+  ios_swifttest_lib = os.path.join(
+      tmp_out_dir, "obj", "flutter", "shell", "platform", "darwin", "ios",
+      "libios_test_flutter_swift.a"
+  )
   message = []
   message.append("gn --ios --unoptimized --runtime-mode=debug --no-lto --simulator")
   message.append(f"ninja -C {ios_out_dir} ios_test_flutter")

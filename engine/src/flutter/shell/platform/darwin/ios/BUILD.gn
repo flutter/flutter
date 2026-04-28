@@ -221,11 +221,8 @@ if (enable_ios_unittests) {
     visibility = [ ":*" ]
     module_name = "ios_test_flutter_swift"
     configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
-    sources = [
-      "framework/Source/FakeUIPressProxy.swift",
-    ]
-    deps = [
-      ":flutter_framework_source", ]
+    sources = [ "framework/Source/FakeUIPressProxy.swift" ]
+    deps = [ ":flutter_framework_source" ]
   }
 
   static_library("ios_test_flutter_swift") {
