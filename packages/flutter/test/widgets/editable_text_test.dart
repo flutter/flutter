@@ -19084,7 +19084,8 @@ void main() {
                 textInputAction: currentAction,
                 focusNode: focusNode,
                 style: const TextStyle(),
-                cursorColor: Colors.blue,
+                cursorColor: Color(0xFF0000FF),
+                backgroundCursorColor: Color(0xFF0A0A0A),
                 backgroundCursorColor: Colors.grey,
                 onChanged: (String value) {
                   setState(() {
