@@ -9,10 +9,12 @@ import '../base/logger.dart';
 import '../web/devfs_proxy.dart';
 
 const _kLogEntryPrefix = '[proxyMiddleware]';
-const String _kTokenChars =
-    r"!#$%&'*+\-.0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ^_`"
-    'abcdefghijklmnopqrstuvwxyz|~';
-final RegExp _kSetCookieSplitter = RegExp(r'[ \t]*,[ \t]*(?=[' + _kTokenChars + r']+=)');
+const String _kCookieNamePattern = r"[!#$%&'*+\-.0-9A-Z^_`a-z|~]+";
+
+// Matches the comma that separates merged Set-Cookie header fields. A cookie's
+// Expires attribute also contains a comma, so split only when the comma is
+// followed by a valid cookie name token and '='.
+final RegExp _kSetCookieHeaderSeparator = RegExp(r'[ \t]*,[ \t]*(?=' + _kCookieNamePattern + r'=)');
 
 /// Creates a new [shelf.Request] by proxying an [originalRequest] to a [finalTargetUrl].
 ///
@@ -34,9 +36,10 @@ shelf.Response _preserveSetCookieHeaders(shelf.Response response) {
     return response;
   }
 
-  // Split merged Set-Cookie header values back into individual headers so Shelf
-  // can write them separately for clients.
-  final List<String> setCookieHeaders = setCookieHeader.split(_kSetCookieSplitter);
+  // shelf_proxy can combine repeated Set-Cookie response headers into a single
+  // comma-separated string. Convert it back to a list so Shelf writes separate
+  // Set-Cookie header fields for clients.
+  final List<String> setCookieHeaders = setCookieHeader.split(_kSetCookieHeaderSeparator);
   if (setCookieHeaders.length < 2) {
     return response;
   }
