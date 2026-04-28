@@ -853,7 +853,7 @@ def run_android_tests(
 def run_objc_tests(
     ios_variant: str = 'ios_debug_sim_unopt', test_filter: typing.Optional[str] = None
 ) -> None:
-  """Runs Objective-C XCTest unit tests for the iOS embedding"""
+  """Runs Objective-C XCTest and Swift Testing unit tests for the iOS embedding"""
   assert_expected_xcode_version()
   ios_out_dir = os.path.join(OUT_DIR, ios_variant)
   ensure_ios_tests_are_built(ios_out_dir)

@@ -243,9 +243,10 @@ if (enable_ios_unittests) {
     deps = [ ":flutter_framework_source" ]
   }
 
-  shared_library("ios_test_flutter") {
+  shared_library("ios_test_flutter_xctest") {
     testonly = true
     visibility = [ "*" ]
+    output_name = "ios_test_flutter"
 
     cflags_objc = flutter_cflags_objc
     cflags_objcc = flutter_cflags_objcc
@@ -322,6 +323,15 @@ if (enable_ios_unittests) {
     public_configs = [
       ":ios_gpu_configuration_config",
       "//flutter:config",
+    ]
+  }
+
+  group("ios_test_flutter") {
+    testonly = true
+    visibility = [ "*" ]
+    public_deps = [
+      ":ios_test_flutter_swift",
+      ":ios_test_flutter_xctest",
     ]
   }
 }  # if (enable_ios_unittests)

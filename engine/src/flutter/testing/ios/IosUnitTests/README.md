@@ -42,6 +42,6 @@ If you modify the test or under-test files, you'll have to run [`run_tests.py`](
 
 ## Adding Tests
 
-When you add a new Objective-C unit test file, add a reference to that file in [`shell/platform/darwin/ios/BUILD.gn`](../../../shell/platform/darwin/ios/BUILD.gn), under the `sources` list of the `ios_test_flutter` target.
+When you add a new Objective-C unit test file, add a reference to that file in [`shell/platform/darwin/ios/BUILD.gn`](../../../shell/platform/darwin/ios/BUILD.gn), under the `sources` list of the `ios_test_flutter_xctest` target.
 
 When you add a new Swift unit test file, add it to the `sources` list of the `ios_test_flutter_swift` target instead.
