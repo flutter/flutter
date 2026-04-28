@@ -19069,18 +19069,20 @@ void main() {
   group('TextInputAction updates', () {
     testWidgets('EditableText updates textInputAction when text changes', (WidgetTester tester) async {
       final controller = TextEditingController();
+      final focusNode = FocusNode();
       addTearDown(controller.dispose);
+      addTearDown(focusNode.dispose);
 
       TextInputAction currentAction = TextInputAction.done;
 
-      await tester.pumpWidget(
+       await tester.pumpWidget(
         TestWidgetsApp(
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return EditableText(
                 controller: controller,
                 textInputAction: currentAction,
-                focusNode: FocusNode(),
+                focusNode: focusNode,
                 style: const TextStyle(),
                 cursorColor: Colors.blue,
                 backgroundCursorColor: Colors.grey,
@@ -19097,21 +19099,25 @@ void main() {
         ),
       );
 
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+
       // Initial: empty, "done"
       expect(controller.text, isEmpty);
-      expect(tester.testTextInput.configuration['inputAction'], equals(TextInputAction.done.toString()));
+      expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
 
       // Type text: action changes to "send"
       await tester.enterText(find.byType(EditableText), 'hello');
       await tester.pumpAndSettle();
       expect(controller.text, equals('hello'));
-      expect(tester.testTextInput.configuration['inputAction'], equals(TextInputAction.send.toString()));
+      expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.send'));
 
       // Clear text: action changes back to "done"
       await tester.enterText(find.byType(EditableText), '');
       await tester.pumpAndSettle();
       expect(controller.text, isEmpty);
-      expect(tester.testTextInput.configuration['inputAction'], equals(TextInputAction.done.toString()));
+      expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
     });
   });
 }
