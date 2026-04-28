@@ -1036,11 +1036,12 @@ void main() {
     void handleReorder(int fromIndex, int toIndex) {
       onReorderCallCount += 1;
 
-      if (fromIndex < toIndex) {
-        toIndex -= 1;
+      var effectiveToIndex = toIndex;
+      if (fromIndex < effectiveToIndex) {
+        effectiveToIndex -= 1;
       }
 
-      items.insert(toIndex, items.removeAt(fromIndex));
+      items.insert(effectiveToIndex, items.removeAt(fromIndex));
     }
 
     await tester.pumpWidget(
@@ -1184,11 +1185,12 @@ void main() {
     void handleReorder(int fromIndex, int toIndex) {
       onReorderCallCount += 1;
 
-      if (fromIndex < toIndex) {
-        toIndex -= 1;
+      var effectiveToIndex = toIndex;
+      if (fromIndex < effectiveToIndex) {
+        effectiveToIndex -= 1;
       }
 
-      items.insert(toIndex, items.removeAt(fromIndex));
+      items.insert(effectiveToIndex, items.removeAt(fromIndex));
     }
 
     await tester.pumpWidget(

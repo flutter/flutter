@@ -3507,6 +3507,7 @@ void main() {
       final themeData = ThemeData();
       final ColorScheme colors = themeData.colorScheme;
       Widget buildApp({bool enabled = true, bool value = true}) {
+        var localValue = value;
         return MaterialApp(
           theme: themeData,
           home: Material(
@@ -3514,11 +3515,11 @@ void main() {
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   return Switch(
-                    value: value,
+                    value: localValue,
                     onChanged: enabled
                         ? (bool newValue) {
                             setState(() {
-                              value = newValue;
+                              localValue = newValue;
                             });
                           }
                         : null,

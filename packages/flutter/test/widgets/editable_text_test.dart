@@ -10446,10 +10446,11 @@ void main() {
       TextEditingValue oldValue,
       TextEditingValue newValue,
     ) {
-      if (newValue.text == 'I will be modified by the formatter.') {
-        newValue = collapsedAtEnd('Flutter is the best!');
+      var effectiveNewValue = newValue;
+      if (effectiveNewValue.text == 'I will be modified by the formatter.') {
+        effectiveNewValue = collapsedAtEnd('Flutter is the best!');
       }
-      return newValue;
+      return effectiveNewValue;
     });
     late StateSetter setState;
 

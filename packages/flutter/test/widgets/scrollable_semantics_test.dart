@@ -833,7 +833,8 @@ Future<void> flingDown(WidgetTester tester, {int repetitions = 1}) =>
     fling(tester, const Offset(0.0, 200.0), repetitions);
 
 Future<void> fling(WidgetTester tester, Offset offset, int repetitions) async {
-  while (repetitions-- > 0) {
+  var remainingRepetitions = repetitions;
+  while (remainingRepetitions-- > 0) {
     await tester.fling(find.byType(ListView), offset, 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
