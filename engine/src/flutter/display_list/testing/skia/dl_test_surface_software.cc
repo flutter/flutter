@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/display_list/testing/dl_test_surface_software.h"
+#include "flutter/display_list/testing/skia/dl_test_surface_software.h"
+
+#include "flutter/display_list/testing/skia/dl_test_surface_instance_skia.h"
 
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -24,7 +26,7 @@ DlSoftwareSurfaceProvider::MakeOffscreenSurface(size_t width,
                                                 PixelFormat format) const {
   auto surface = SkSurfaces::Raster(MakeInfo(format, width, height));
   surface->getCanvas()->clear(SK_ColorTRANSPARENT);
-  return std::make_shared<DlSurfaceInstanceBase>(surface);
+  return std::make_shared<DlSurfaceInstanceSkia>(surface);
 }
 
 }  // namespace testing

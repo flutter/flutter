@@ -108,7 +108,35 @@ void testMain() {
       },
       skip: isFirefox || isSafari || !browserSupportsOffscreenCanvas,
     );
+
+    test(
+      'synchronous context loss during surface creation',
+      () async {
+        final Rasterizer rasterizer = renderer.rasterizer;
+        final surfaceProvider = rasterizer.surfaceProvider as OffscreenSurfaceProvider;
+        final mockCanvasProvider = MockOffscreenCanvasProvider();
+        mockCanvasProvider.shouldTriggerContextLost = true;
+
+        final Surface surface = surfaceProvider.surfaceCreateFn(mockCanvasProvider);
+        await surface.initialized;
+      },
+      skip: isFirefox || isSafari || !browserSupportsOffscreenCanvas,
+    );
   });
+}
+
+class MockOffscreenCanvasProvider extends OffscreenCanvasProvider {
+  bool shouldTriggerContextLost = false;
+
+  @override
+  DomOffscreenCanvas acquireCanvas(BitmapSize size, {required ui.VoidCallback onContextLost}) {
+    final DomOffscreenCanvas canvas = super.acquireCanvas(size, onContextLost: onContextLost);
+    if (shouldTriggerContextLost) {
+      shouldTriggerContextLost = false;
+      onContextLost();
+    }
+    return canvas;
+  }
 }
 
 ui.Picture drawPicture(void Function(ui.Canvas) drawCommands) {
