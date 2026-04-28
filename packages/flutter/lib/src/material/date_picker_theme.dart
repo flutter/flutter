@@ -1125,6 +1125,9 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
   }
 
   @override
+  EdgeInsetsGeometry get actionsPadding => const EdgeInsets.symmetric(horizontal: 8);
+
+  @override
   Color? get headerForegroundColor => _isDark ? _colors.onSurface : _colors.onPrimary;
 
   @override
@@ -1304,6 +1307,9 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
   ButtonStyle get confirmButtonStyle {
     return TextButton.styleFrom();
   }
+
+  @override
+  EdgeInsetsGeometry get actionsPadding => const EdgeInsets.symmetric(horizontal: 8);
 
   @override
   Color? get shadowColor => Colors.transparent;

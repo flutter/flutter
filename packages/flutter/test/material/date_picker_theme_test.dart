@@ -304,6 +304,7 @@ void main() {
       m3.confirmButtonStyle.toString(),
       equalsIgnoringHashCodes(TextButton.styleFrom().toString()),
     );
+    expect(m3.actionsPadding, const EdgeInsets.symmetric(horizontal: 8));
     expect(m3.locale, null);
     expect(m3.subHeaderForegroundColor, colorScheme.onSurface.withOpacity(0.60));
     expect(
@@ -463,6 +464,7 @@ void main() {
       m2.confirmButtonStyle.toString(),
       equalsIgnoringHashCodes(TextButton.styleFrom().toString()),
     );
+    expect(m2.actionsPadding, const EdgeInsets.symmetric(horizontal: 8));
     expect(m2.locale, null);
     expect(m2.yearShape?.resolve(<WidgetState>{}), const StadiumBorder());
     expect(m2.subHeaderForegroundColor, colorScheme.onSurface.withOpacity(0.60));
