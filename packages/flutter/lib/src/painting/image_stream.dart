@@ -172,12 +172,7 @@ class ImageInfo {
 @immutable
 class ImageStreamListener {
   /// Creates a new [ImageStreamListener].
-  const ImageStreamListener(
-    this.onImage, {
-    this.onChunk,
-    this.onError,
-    this.reportErrors = true,
-  });
+  const ImageStreamListener(this.onImage, {this.onChunk, this.onError, this.reportErrors = true});
 
   /// Callback for getting notified that an image is available.
   ///
@@ -783,7 +778,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// If no error listeners (listeners with an [ImageStreamListener.onError]
   /// specified) are attached, or if the handlers all rethrow the exception
   /// verbatim (with `throw exception`), a [FlutterError] will be reported using
-  /// [FlutterError.reportError]. This report is suppressed if 
+  /// [FlutterError.reportError]. This report is suppressed if
   /// [ImageStreamListener] whose [ImageStreamListener.reportErrors] is false has ever been registered on
   /// this completer.
   ///
