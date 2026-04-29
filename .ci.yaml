@@ -2968,7 +2968,6 @@ targets:
       task_name: native_assets_android
 
   - name: Linux_android_emu android_engine_flags_debug_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2977,7 +2976,6 @@ targets:
       task_name: android_engine_flags_debug_test
 
   - name: Linux_android_emu android_engine_flags_release_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3856,7 +3854,6 @@ targets:
   - name: Mac_benchmark complex_layout_macos_impeller__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4170,7 +4167,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "mac"]
-      task_name: hello_world_macos_impeller_macos_sdfs
+      task_name: hello_world_impeller_macos_sdfs
 
   - name: Mac integration_ui_test_test_macos
     recipe: devicelab/devicelab_drone
