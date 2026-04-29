@@ -204,6 +204,37 @@ class TestsCrossImportChecker {
     return knownPaths.difference(testPaths);
   }
 
+  /// Get the [Map] of files, per [_Library], of the files that have cross imports on Material and Cupertino.
+  static Map<_Library, _CrossImportingFiles> _getCrossImports(Map<_Library, Set<File>> libraries) {
+    final Map<_Library, _CrossImportingFiles> crossImports = {};
+
+    for (final MapEntry<_Library, Set<File>> entry in libraries.entries) {
+      final Set<File> cupertinoImports = {};
+      final Set<File> materialImports = {};
+
+      for (final File file in entry.value) {
+        final String contents = file.readAsStringSync();
+
+        if (!entry.key.canImport(_LibraryImportStatement.cupertino) &&
+            contents.contains(_LibraryImportStatement.cupertino.importString)) {
+          cupertinoImports.add(file);
+        }
+
+        if (!entry.key.canImport(_LibraryImportStatement.material) &&
+            contents.contains(_LibraryImportStatement.material.importString)) {
+          materialImports.add(file);
+        }
+      }
+
+      crossImports[entry.key] = (
+        cupertinoImports: cupertinoImports,
+        materialImports: materialImports,
+      );
+    }
+
+    return crossImports;
+  }
+
   /// Returns the [Set] of files that are not in [knownPaths].
   static Set<File> _getUnknowns(Set<String> knownPaths, Set<File> files) {
     return files.where((File file) {
@@ -214,13 +245,6 @@ class TestsCrossImportChecker {
       final String comparablePath = file.absolute.path.substring(index).replaceAll(r'\', '/');
       return !knownPaths.contains(comparablePath);
     }).toSet();
-  }
-
-  /// Returns true only if [file] contains the given [importString].
-  static bool _containsImport(File file, {required String importString}) {
-    final String contents = file.readAsStringSync();
-
-    return contents.contains(importString);
   }
 
   /// Returns the error message for the given [fixedPaths] that no longer have a
@@ -311,17 +335,8 @@ class TestsCrossImportChecker {
     final Map<_Library, Set<File>> filesByLibrary = _getTestFiles();
 
     // Find all cross imports.
-    final Set<File> widgetsTestsImportingMaterial = _getFilesWithImports(
-      filesByLibrary[_Library.widgets]!,
-      _Library.material,
-    );
-    final Set<File> widgetsTestsImportingCupertino = _getFilesWithImports(
-      filesByLibrary[_Library.widgets]!,
-      _Library.cupertino,
-    );
-    final Set<File> cupertinoTestsImportingMaterial = _getFilesWithImports(
-      filesByLibrary[_Library.cupertino]!,
-      _Library.material,
+    final Map<_Library, _CrossImportingFiles> crossImportsPerLibrary = _getCrossImports(
+      filesByLibrary,
     );
 
     // Find any cross imports that are not in the known list.
@@ -393,6 +408,9 @@ class TestsCrossImportChecker {
     return valid;
   }
 }
+
+/// The set of files that import Cupertino and Material for a given [_Library].
+typedef _CrossImportingFiles = ({Set<File> cupertinoImports, Set<File> materialImports});
 
 enum _LibraryImportStatement {
   material('Material', "import 'package:flutter/material.dart'"),
