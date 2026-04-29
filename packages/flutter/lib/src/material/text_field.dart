@@ -11,7 +11,7 @@ library;
 
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart';h
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -511,12 +511,12 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.maxLines}
   ///  * [expands], which determines whether the field should fill the height of
   ///    its parent.
-  final int? maxLines;
+  final double? maxLines;
 
   /// {@macro flutter.widgets.editableText.minLines}
   ///  * [expands], which determines whether the field should fill the height of
   ///    its parent.
-  final int? minLines;
+  final double? minLines;
 
   /// {@macro flutter.widgets.editableText.expands}
   final bool expands;
