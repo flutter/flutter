@@ -1007,14 +1007,14 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   };
 
   auto flush_task = [io_manager = io_manager_->GetWeakPtr()] {
-    if (io_manager && io_manager->GetImpellerContext()) {
-      auto impeller_context = io_manager->GetImpellerContext();
-      if (impeller_context && impeller_context->GetPipelineLibrary()) {
-        auto pipeline_compile_queue =
-            impeller_context->GetPipelineLibrary()->GetPipelineCompileQueue();
-        if (pipeline_compile_queue &&
-            pipeline_compile_queue->WaitUntilRendering()) {
-          pipeline_compile_queue->FlushPendingJobs();
+    if (io_manager) {
+      if (auto impeller_context = io_manager->GetImpellerContext()) {
+        if (auto pipeline_library = impeller_context->GetPipelineLibrary()) {
+          if (auto pipeline_compile_queue =
+                  pipeline_library->GetPipelineCompileQueue())
+            if (pipeline_compile_queue->WaitUntilRendering()) {
+              pipeline_compile_queue->FlushPendingJobs();
+            }
         }
       }
     }
@@ -1047,7 +1047,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
       fml::TaskRunner::RunNowOrPostTask(raster_task_runner, raster_task);
     }
 
-    // Step 3: Tell the IO thread that it could be start to link program.
+    // Step 3: Flush pending pipeline compilation jobs.
     fml::TaskRunner::RunNowOrPostTask(raster_task_runner, flush_task);
 
     latch.Signal();
