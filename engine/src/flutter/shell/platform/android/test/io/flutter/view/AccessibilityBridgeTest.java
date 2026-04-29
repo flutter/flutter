@@ -2120,11 +2120,6 @@ public class AccessibilityBridgeTest {
 
   @Test
   public void itDoesNotCrashWhenHitTestingChildWithUninitializedTransform() {
-        // Regression test for https://github.com/flutter/flutter/issues/184810.
-    // When an OverlayPortal grafts a semantics node as a traversal child of one parent
-    // and a hit-test child of another, the engine may create the node via
-    // getOrCreateSemanticsNode before its own updateWith() has been called, leaving
-    // hitTestTransform null. A subsequent hover event must not crash.
     AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
     AccessibilityManager mockManager = mock(AccessibilityManager.class);
     View mockRootView = mock(View.class);
@@ -2149,9 +2144,7 @@ public class AccessibilityBridgeTest {
     TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
     testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
 
-    // Fire a hover event within the root's bounds. Before the fix, this would crash
-    // with a NullPointerException in ensureInverseTransform because the phantom child's
-    // hitTestTransform was never initialized.
+    // Fire a hover event within the root's bounds.
     accessibilityBridge.onAccessibilityHoverEvent(MotionEvent.obtain(1, 1, 1, 10, 10, 0));
   }
 
