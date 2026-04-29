@@ -1122,7 +1122,7 @@ class DropdownButton<T> extends StatefulWidget {
 
   /// A preferred placeholder widget that is displayed when the dropdown is disabled.
   ///
-  /// If [value] is null, the dropdown is disabled ([items] or [onChanged] is null),
+  /// If the dropdown is disabled ([items] is null or empty, or [enabled] is false),
   /// this widget is displayed as a placeholder for the dropdown button's value.
   final Widget? disabledHint;
 
@@ -1131,7 +1131,7 @@ class DropdownButton<T> extends StatefulWidget {
   ///
   /// The dropdown button is enabled when [enabled] is true.
   ///
-  /// If [enabled] is false or the list of [DropdownButton.items] is null,
+  /// If [enabled] is false or the list of [DropdownButton.items] is null or empty,
   /// then the dropdown button will be disabled. When disabled, the arrow is
   /// displayed in grey and the button does not respond to input.
   ///
