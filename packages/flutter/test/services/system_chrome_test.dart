@@ -108,53 +108,86 @@ void main() {
     );
   });
 
-  test('preferredOrientations returns the latest set value', () async {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      (MethodCall methodCall) async => null,
-    );
+  group('preferredOrientations', () {
+    setUp(() {
+      // Reset cached state so each test starts from the "never set" state and
+      // mutations don't leak to other tests in the same process.
+      SystemChrome.debugResetPreferredOrientations();
+    });
 
-    await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+    tearDown(SystemChrome.debugResetPreferredOrientations);
 
-    expect(SystemChrome.preferredOrientations, <DeviceOrientation>[
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+    test('is null before setPreferredOrientations is ever called', () {
+      expect(SystemChrome.preferredOrientations, isNull);
+    });
 
-    // A second call replaces the cached value rather than appending.
-    await SystemChrome.setPreferredOrientations(<DeviceOrientation>[DeviceOrientation.landscapeLeft]);
-    expect(SystemChrome.preferredOrientations, <DeviceOrientation>[
-      DeviceOrientation.landscapeLeft,
-    ]);
+    test('returns the latest set value', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall methodCall) async => null,
+      );
 
-    // The empty list (defer to OS default) is preserved as an empty list, not null.
-    await SystemChrome.setPreferredOrientations(const <DeviceOrientation>[]);
-    expect(SystemChrome.preferredOrientations, isEmpty);
-    expect(SystemChrome.preferredOrientations, isNotNull);
-  });
+      await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
 
-  test('preferredOrientations returns an unmodifiable copy', () async {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      (MethodCall methodCall) async => null,
-    );
+      expect(SystemChrome.preferredOrientations, <DeviceOrientation>[
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
 
-    final source = <DeviceOrientation>[DeviceOrientation.portraitUp];
-    await SystemChrome.setPreferredOrientations(source);
+      // A second call replaces the cached value rather than appending.
+      await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+        DeviceOrientation.landscapeLeft,
+      ]);
+      expect(SystemChrome.preferredOrientations, <DeviceOrientation>[
+        DeviceOrientation.landscapeLeft,
+      ]);
 
-    // The returned list is detached from the caller's input — mutating the
-    // source after the call must not affect the cached list.
-    source.add(DeviceOrientation.landscapeLeft);
-    expect(SystemChrome.preferredOrientations, <DeviceOrientation>[DeviceOrientation.portraitUp]);
+      // The empty list (defer to OS default) is preserved as an empty list, not null.
+      await SystemChrome.setPreferredOrientations(const <DeviceOrientation>[]);
+      expect(SystemChrome.preferredOrientations, isEmpty);
+      expect(SystemChrome.preferredOrientations, isNotNull);
+    });
 
-    // The returned list itself is unmodifiable.
-    expect(
-      () => SystemChrome.preferredOrientations!.add(DeviceOrientation.landscapeRight),
-      throwsUnsupportedError,
-    );
+    test('returns an unmodifiable copy', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall methodCall) async => null,
+      );
+
+      final source = <DeviceOrientation>[DeviceOrientation.portraitUp];
+      await SystemChrome.setPreferredOrientations(source);
+
+      // The returned list is detached from the caller's input — mutating the
+      // source after the call must not affect the cached list.
+      source.add(DeviceOrientation.landscapeLeft);
+      expect(SystemChrome.preferredOrientations, <DeviceOrientation>[
+        DeviceOrientation.portraitUp,
+      ]);
+
+      // The returned list itself is unmodifiable.
+      expect(
+        () => SystemChrome.preferredOrientations!.add(DeviceOrientation.landscapeRight),
+        throwsUnsupportedError,
+      );
+    });
+
+    test('debugResetPreferredOrientations clears cached state', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall methodCall) async => null,
+      );
+
+      await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+        DeviceOrientation.portraitUp,
+      ]);
+      expect(SystemChrome.preferredOrientations, isNotNull);
+
+      SystemChrome.debugResetPreferredOrientations();
+      expect(SystemChrome.preferredOrientations, isNull);
+    });
   });
 
   test('setApplicationSwitcherDescription control test', () async {

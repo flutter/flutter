@@ -579,6 +579,15 @@ abstract final class SystemChrome {
   static List<DeviceOrientation>? get preferredOrientations => _preferredOrientations;
   static List<DeviceOrientation>? _preferredOrientations;
 
+  /// Resets [preferredOrientations] back to `null` (its "never set" state).
+  ///
+  /// Intended for tests that mutate global [SystemChrome] state and want to
+  /// avoid leaking that state into other tests in the same process.
+  @visibleForTesting
+  static void debugResetPreferredOrientations() {
+    _preferredOrientations = null;
+  }
+
   /// Specifies the description of the current state of the application as it
   /// pertains to the application switcher (also known as "recent tasks").
   ///
