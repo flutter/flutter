@@ -93,9 +93,8 @@ void main() {
     final Key key = UniqueKey();
     Future<void> pump(FloatingActionButtonLocation location) async {
       await tester.pumpWidget(
-        SizedBox(
-          width: 200,
-          height: 200,
+        SizedBox.square(
+          dimension: 200,
           child: RepaintBoundary(
             key: key,
             child: MaterialApp(
@@ -132,9 +131,8 @@ void main() {
     final Key key = UniqueKey();
     Future<void> pump(FloatingActionButtonLocation location) async {
       await tester.pumpWidget(
-        SizedBox(
-          width: 200,
-          height: 200,
+        SizedBox.square(
+          dimension: 200,
           child: RepaintBoundary(
             key: key,
             child: MaterialApp(

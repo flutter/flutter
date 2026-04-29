@@ -10,7 +10,7 @@ import android.content.pm.PackageManager;
 import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import io.flutter.embedding.engine.FlutterShellArgs;
+import io.flutter.embedding.engine.FlutterEngineFlags;
 import java.io.IOException;
 import org.json.JSONArray;
 import org.xmlpull.v1.XmlPullParserException;
@@ -162,14 +162,14 @@ public final class ApplicationInfoLoader {
     return new FlutterApplicationInfo(
         getStringWithFallback(
             appInfo.metaData,
-            FlutterShellArgs.DEPRECATED_AOT_SHARED_LIBRARY_NAME.metadataKey,
-            FlutterShellArgs.AOT_SHARED_LIBRARY_NAME.metadataKey),
-        getString(appInfo.metaData, FlutterShellArgs.VM_SNAPSHOT_DATA.metadataKey),
-        getString(appInfo.metaData, FlutterShellArgs.ISOLATE_SNAPSHOT_DATA.metadataKey),
+            FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.metadataKey,
+            FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME.metadataKey),
+        getString(appInfo.metaData, FlutterEngineFlags.VM_SNAPSHOT_DATA.metadataKey),
+        getString(appInfo.metaData, FlutterEngineFlags.ISOLATE_SNAPSHOT_DATA.metadataKey),
         getStringWithFallback(
             appInfo.metaData,
-            FlutterShellArgs.DEPRECATED_FLUTTER_ASSETS_DIR.metadataKey,
-            FlutterShellArgs.FLUTTER_ASSETS_DIR.metadataKey),
+            FlutterEngineFlags.FLUTTER_ASSETS_DIR.metadataKey,
+            FlutterEngineFlags.DEPRECATED_FLUTTER_ASSETS_DIR.metadataKey),
         getNetworkPolicy(appInfo, applicationContext),
         appInfo.nativeLibraryDir,
         getBoolean(appInfo.metaData, PUBLIC_AUTOMATICALLY_REGISTER_PLUGINS_METADATA_KEY, true));

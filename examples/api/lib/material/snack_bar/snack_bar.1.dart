@@ -41,13 +41,11 @@ class SnackBarExample extends StatelessWidget {
             content: const Text('Awesome SnackBar!'),
             duration: const Duration(milliseconds: 1500),
             width: 280.0, // Width of the SnackBar.
-            padding: const EdgeInsets.symmetric(
+            padding: const .symmetric(
               horizontal: 8.0, // Inner padding for SnackBar content.
             ),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0),
-            ),
+            behavior: .floating,
+            shape: RoundedRectangleBorder(borderRadius: .circular(10.0)),
           ),
         );
       },

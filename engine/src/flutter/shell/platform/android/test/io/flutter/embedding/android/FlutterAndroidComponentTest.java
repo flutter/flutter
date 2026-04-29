@@ -31,6 +31,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterJNI;
+import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
@@ -301,8 +302,11 @@ public class FlutterAndroidComponentTest {
 
     @NonNull
     @Override
-    public String[] getFlutterShellArgs() {
-      return new String[0];
+    // Annotation required because support for setting engine shell arguments via Intent will be
+    // removed; see https://github.com/flutter/flutter/issues/180686.
+    @SuppressWarnings("deprecation")
+    public FlutterShellArgs getFlutterShellArgs() {
+      return new FlutterShellArgs(new String[] {});
     }
 
     @Nullable

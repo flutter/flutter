@@ -59,6 +59,9 @@ abstract class FeatureFlags {
   /// Whether dart data assets building and bundling is enabled.
   bool get isDartDataAssetsEnabled => false;
 
+  /// Whether record use experiment is enabled.
+  bool get isRecordUseEnabled;
+
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled;
 
@@ -100,6 +103,7 @@ abstract class FeatureFlags {
     cliAnimation,
     nativeAssets,
     dartDataAssets,
+    recordUse,
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
@@ -211,14 +215,22 @@ const dartDataAssets = Feature(
   master: FeatureChannelSetting(available: true),
 );
 
+/// Enable record use experiment.
+const recordUse = Feature(
+  name: 'record use experiment',
+  configSetting: 'enable-record-use',
+  environmentOverride: 'FLUTTER_RECORD_USE',
+  master: FeatureChannelSetting(available: true),
+);
+
 /// Enable Swift Package Manager as a darwin dependency manager.
 const swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
-  master: FeatureChannelSetting(available: true),
-  beta: FeatureChannelSetting(available: true),
-  stable: FeatureChannelSetting(available: true),
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
 /// Whether to continue writing the `{FLUTTER_ROOT}/version` legacy file.

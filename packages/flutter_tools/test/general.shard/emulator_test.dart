@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
@@ -73,6 +74,36 @@ void main() {
 
       await expectLater(() async => emulatorManager.getAllAvailableEmulators(), returnsNormally);
     });
+
+    testUsingContext(
+      'getEmulators ignores info and warning messages in android emulator output',
+      () async {
+        final emulatorManager = EmulatorManager(
+          java: FakeJava(),
+          fileSystem: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['emulator', '-list-avds'],
+              stdout:
+                  'INFO    | Storing crashdata in: /tmp/some.db, detection is enabled for process: 95538\n'
+                  'WARNING | Crash annotation is very large (16415), only 16384 bytes will be recorded, 31 bytes are lost.\n'
+                  'Emulator_API_33\n'
+                  'pixel-4.api-30',
+            ),
+          ]),
+          androidSdk: sdk,
+          androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        );
+
+        final List<Emulator> emulators = await emulatorManager.getAllAvailableEmulators();
+        expect(emulators, hasLength(2));
+        expect(emulators.first.id, 'Emulator_API_33');
+        expect(emulators.last.id, 'pixel-4.api-30');
+      },
+      // Exclude the iOS emulator discovery.
+      overrides: <Type, Generator>{Platform: () => FakePlatform()},
+    );
 
     testUsingContext('printEmulators prints the emulators information with header', () {
       Emulator.printEmulators(emulators, testLogger);

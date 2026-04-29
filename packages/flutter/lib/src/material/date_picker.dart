@@ -219,10 +219,10 @@ Future<DateTime?> showDatePicker({
   String? fieldLabelText,
   TextInputType? keyboardType,
   Offset? anchorPoint,
-  final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange,
-  final Icon? switchToInputEntryModeIcon,
-  final Icon? switchToCalendarEntryModeIcon,
-  final CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
+  ValueChanged<DatePickerEntryMode>? onDatePickerModeChange,
+  Icon? switchToInputEntryModeIcon,
+  Icon? switchToCalendarEntryModeIcon,
+  CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
 }) async {
   initialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate);
   firstDate = calendarDelegate.dateOnly(firstDate);
@@ -1190,8 +1190,8 @@ Future<DateTimeRange?> showDateRangePicker({
   TransitionBuilder? builder,
   Offset? anchorPoint,
   TextInputType keyboardType = TextInputType.datetime,
-  final Icon? switchToInputEntryModeIcon,
-  final Icon? switchToCalendarEntryModeIcon,
+  Icon? switchToInputEntryModeIcon,
+  Icon? switchToCalendarEntryModeIcon,
   SelectableDayForRangePredicate? selectableDayPredicate,
   CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
 }) async {
@@ -2855,7 +2855,7 @@ class _DayItemState extends State<_DayItem> {
     final TextDirection textDirection = Directionality.of(context);
     final Color highlightColor = widget.highlightColor;
 
-    BoxDecoration? decoration;
+    ShapeDecoration? decoration;
     TextStyle? itemStyle = textTheme.bodyMedium;
 
     T? effectiveValue<T>(T? Function(DatePickerThemeData? theme) getProperty) {
@@ -2894,13 +2894,17 @@ class _DayItemState extends State<_DayItem> {
       ),
     );
 
+    final OutlinedBorder dayShape =
+        resolve<OutlinedBorder?>((DatePickerThemeData? theme) => theme?.dayShape, states) ??
+        const CircleBorder();
+
     _HighlightPainter? highlightPainter;
 
     if (widget.isSelectedDayStart || widget.isSelectedDayEnd) {
-      // The selected start and end dates gets a circle background
+      // The selected start and end dates get a custom shaped background
       // highlight, and a contrasting text color.
       itemStyle = itemStyle?.apply(color: dayForegroundColor);
-      decoration = BoxDecoration(color: dayBackgroundColor, shape: BoxShape.circle);
+      decoration = ShapeDecoration(color: dayBackgroundColor, shape: dayShape);
 
       if (widget.isRangeSelected && !widget.isOneDayRange) {
         final _HighlightPainterStyle style = widget.isSelectedDayStart
@@ -2925,13 +2929,13 @@ class _DayItemState extends State<_DayItem> {
     } else if (widget.isDisabled) {
       itemStyle = itemStyle?.apply(color: colorScheme.onSurface.withOpacity(0.38));
     } else if (widget.isToday) {
-      // The current day gets a different text color and a circle stroke
-      // border.
+      // The current day gets a different text color and a custom shape border.
       itemStyle = itemStyle?.apply(color: colorScheme.primary);
-      decoration = BoxDecoration(
-        border: Border.all(color: colorScheme.primary),
-        shape: BoxShape.circle,
+      final BorderSide todaySide = (datePickerTheme.todayBorder ?? defaults.todayBorder!).copyWith(
+        color: colorScheme.primary,
       );
+
+      decoration = ShapeDecoration(shape: dayShape.copyWith(side: todaySide));
     }
 
     final String dayText = localizations.formatDecimal(widget.day.day);
@@ -2969,7 +2973,8 @@ class _DayItemState extends State<_DayItem> {
       dayWidget = InkResponse(
         focusNode: widget.focusNode,
         onTap: () => widget.onChanged(widget.day),
-        radius: _monthItemRowHeight / 2 + 4,
+        customBorder: dayShape,
+        containedInkWell: true,
         statesController: _statesController,
         overlayColor: dayOverlayColor,
         onFocusChange: widget.onFocusChange,

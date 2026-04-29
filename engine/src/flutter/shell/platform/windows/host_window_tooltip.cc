@@ -12,7 +12,6 @@ HostWindowTooltip::HostWindowTooltip(
     WindowManager* window_manager,
     FlutterWindowsEngine* engine,
     const BoxConstraints& constraints,
-    bool is_sized_to_content,
     GetWindowPositionCallback get_position_callback,
     HWND parent)
     : HostWindow(window_manager, engine),
@@ -21,8 +20,7 @@ HostWindowTooltip::HostWindowTooltip(
       isolate_(Isolate::Current()),
       view_alive_(std::make_shared<int>(0)) {
   // Use minimum constraints as initial size to ensure the view can be created
-  // with valid metrics. If is_sized_to_content is true, the size will be
-  // updated when content is rendered.
+  // with valid metrics.
   auto const initial_width =
       static_cast<double>(constraints.smallest().width());
   auto const initial_height =
@@ -38,7 +36,7 @@ HostWindowTooltip::HostWindowTooltip(
       .owner_window = parent,
       .nCmdShow = SW_SHOWNOACTIVATE,
       .sizing_delegate = this,
-      .is_sized_to_content = is_sized_to_content});
+      .is_sized_to_content = true});
   SetWindowLongPtr(window_handle_, GWLP_HWNDPARENT,
                    reinterpret_cast<LONG_PTR>(parent_));
 }

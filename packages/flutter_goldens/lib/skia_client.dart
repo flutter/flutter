@@ -177,15 +177,6 @@ class SkiaGoldClient {
       '--passfail',
     ];
 
-    if (imgtestInitCommand.contains(null)) {
-      final buf = StringBuffer()
-        ..writeln('A null argument was provided for Skia Gold imgtest init.')
-        ..writeln('Please confirm the settings of your golden file test.')
-        ..writeln('Arguments provided:');
-      imgtestInitCommand.forEach(buf.writeln);
-      throw SkiaException(buf.toString());
-    }
-
     final io.ProcessResult result = await process.run(imgtestInitCommand);
 
     if (result.exitCode != 0) {
@@ -233,7 +224,7 @@ class SkiaGoldClient {
       // tree.
       String? resultContents;
       final File resultFile = workDirectory.childFile(fs.path.join('result-state.json'));
-      if (await resultFile.exists()) {
+      if (resultFile.existsSync()) {
         resultContents = await resultFile.readAsString();
       }
 
@@ -308,15 +299,6 @@ class SkiaGoldClient {
       ...getCIArguments(),
     ];
 
-    if (imgtestInitCommand.contains(null)) {
-      final buf = StringBuffer()
-        ..writeln('A null argument was provided for Skia Gold tryjob init.')
-        ..writeln('Please confirm the settings of your golden file test.')
-        ..writeln('Arguments provided:');
-      imgtestInitCommand.forEach(buf.writeln);
-      throw SkiaException(buf.toString());
-    }
-
     final io.ProcessResult result = await process.run(imgtestInitCommand);
 
     if (result.exitCode != 0) {
@@ -367,7 +349,7 @@ class SkiaGoldClient {
         !(resultStdout.contains('Untriaged') || resultStdout.contains('negative image'))) {
       String? resultContents;
       final File resultFile = workDirectory.childFile(fs.path.join('result-state.json'));
-      if (await resultFile.exists()) {
+      if (resultFile.existsSync()) {
         resultContents = await resultFile.readAsString();
       }
       final buf = StringBuffer()
@@ -482,7 +464,7 @@ class SkiaGoldClient {
   Future<bool> clientIsAuthorized() async {
     final File authFile = workDirectory.childFile(fs.path.join('temp', 'auth_opt.json'));
 
-    if (await authFile.exists()) {
+    if (authFile.existsSync()) {
       final String contents = await authFile.readAsString();
       final decoded = json.decode(contents) as Map<String, dynamic>;
       return !(decoded['GSUtil'] as bool);

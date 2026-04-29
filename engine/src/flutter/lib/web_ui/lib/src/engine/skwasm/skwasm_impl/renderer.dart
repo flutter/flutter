@@ -18,20 +18,11 @@ class SkwasmRenderer extends Renderer {
 
   bool get isWimp => skwasmIsWimp();
 
+  @override
   SkwasmPathConstructors pathConstructors = SkwasmPathConstructors();
 
   @override
   final SkwasmFontCollection fontCollection = SkwasmFontCollection();
-
-  @override
-  ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2) {
-    return LazyPath.combined(op, path1 as LazyPath, path2 as LazyPath);
-  }
-
-  @override
-  ui.Path copyPath(ui.Path src) {
-    return LazyPath.fromLazyPath(src as LazyPath);
-  }
 
   @override
   ui.Canvas createCanvas(ui.PictureRecorder recorder, [ui.Rect? cullRect]) {
@@ -155,9 +146,6 @@ class SkwasmRenderer extends Renderer {
     ellipsis: ellipsis,
     locale: locale,
   );
-
-  @override
-  ui.Path createPath() => LazyPath(pathConstructors);
 
   @override
   ui.PictureRecorder createPictureRecorder() => SkwasmPictureRecorder();
@@ -465,7 +453,7 @@ class SkwasmRenderer extends Renderer {
     required int height,
     required bool transferOwnership,
   }) async {
-    if (!transferOwnership) {
+    if (!transferOwnership || (isMultiThreaded && !_isTransferable(textureSource))) {
       textureSource = (await createImageBitmap(textureSource, (
         x: 0,
         y: 0,
@@ -482,6 +470,9 @@ class SkwasmRenderer extends Renderer {
       ),
     );
   }
+
+  bool _isTransferable(JSAny object) =>
+      object.isA<DomImageBitmap>() || object.isA<VideoFrame>() || object.isA<DomOffscreenCanvas>();
 
   @override
   void dumpDebugInfo() {

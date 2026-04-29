@@ -62,15 +62,15 @@ class _StarBorderExampleState extends State<StarBorderExample> {
         color: Colors.black,
         fontSize: 14.0,
         fontFamily: 'Roboto',
-        fontStyle: FontStyle.normal,
+        fontStyle: .normal,
       ),
       child: ListView(
         children: <Widget>[
           ColoredBox(color: Colors.grey.shade200, child: Options(_model)),
           Padding(
-            padding: const EdgeInsets.all(18.0),
+            padding: const .all(18.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: .spaceEvenly,
               children: <Widget>[
                 Expanded(
                   child: ExampleBorder(
@@ -102,21 +102,21 @@ class _StarBorderExampleState extends State<StarBorderExample> {
             ),
           ),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: <Widget>[
               Expanded(
                 child: Container(
                   color: Colors.black12,
-                  margin: const EdgeInsets.all(16.0),
-                  padding: const EdgeInsets.all(16.0),
+                  margin: const .all(16.0),
+                  padding: const .all(16.0),
                   child: SelectableText(_model.starCode),
                 ),
               ),
               Expanded(
                 child: Container(
                   color: Colors.black12,
-                  margin: const EdgeInsets.all(16.0),
-                  padding: const EdgeInsets.all(16.0),
+                  margin: const .all(16.0),
+                  padding: const .all(16.0),
                   child: SelectableText(_model.polygonCode),
                 ),
               ),
@@ -137,8 +137,8 @@ class ExampleBorder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      alignment: Alignment.center,
-      padding: const EdgeInsets.all(20),
+      alignment: .center,
+      padding: const .all(20),
       width: 150,
       height: 100,
       decoration: ShapeDecoration(color: Colors.blue.shade100, shape: border),
@@ -185,9 +185,9 @@ class _OptionsState extends State<Options> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(5.0, 0.0, 5.0, 10.0),
+      padding: const .fromLTRB(5.0, 0.0, 5.0, 10.0),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: <Widget>[
           Row(
             children: <Widget>[
@@ -255,7 +255,7 @@ class _OptionsState extends State<Options> {
                       message:
                           'Round the number of points to the nearest integer.',
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const .all(8.0),
                         child: OutlinedButton(
                           child: const Text('Nearest'),
                           onPressed: () {
@@ -413,11 +413,11 @@ class ControlSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(4.0),
+      padding: const .all(4.0),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: <Widget>[
-          Expanded(flex: 2, child: Text(label, textAlign: TextAlign.end)),
+          Expanded(flex: 2, child: Text(label, textAlign: .end)),
           Expanded(
             flex: 5,
             child: Slider(

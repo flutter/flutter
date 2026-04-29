@@ -1944,9 +1944,8 @@ void main() {
       MaterialApp(
         home: Material(
           child: Center(
-            child: SizedBox(
-              width: 200,
-              height: 200,
+            child: SizedBox.square(
+              dimension: 200.0,
               child: AnimatedBuilder(
                 animation: controller,
                 builder: (BuildContext context, Widget? child) {
@@ -2065,6 +2064,44 @@ void main() {
     expect(
       tester.getSemantics(find.byType(RefreshProgressIndicator)),
       matchesSemantics(value: '0', textDirection: TextDirection.ltr),
+    );
+
+    handle.dispose();
+  });
+
+  testWidgets('CircularProgressIndicator with non-numeric semanticsValue does not crash', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(body: CircularProgressIndicator(value: 0.5, semanticsValue: '50%')),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(CircularProgressIndicator)),
+      matchesSemantics(value: '50%', textDirection: TextDirection.ltr),
+    );
+
+    handle.dispose();
+  });
+
+  testWidgets('LinearProgressIndicator with non-numeric semanticsValue does not crash', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(body: LinearProgressIndicator(value: 0.5, semanticsValue: '50%')),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(LinearProgressIndicator)),
+      matchesSemantics(value: '50%', textDirection: TextDirection.ltr),
     );
 
     handle.dispose();
