@@ -155,16 +155,22 @@ public class FlutterLoader {
               try (TraceSection e = TraceSection.scoped("FlutterLoader initTask")) {
                 ResourceExtractor resourceExtractor = initResources(appContext);
 
-                // Use robust library loader with multiple fallback strategies for issue #151638
+                // Use robust library loader with multiple fallback strategies for issue #151638.
+                // RobustLibraryLoader cascades: FlutterJNI/ReLinker -> System.loadLibrary ->
+                // nativeLibraryDir -> base APK extract -> split APK extract -> ABI scan, and on
+                // total failure throws an UnsatisfiedLinkError whose message lists every attempted
+                // path, every error, and the contents of all relevant directories/APKs.
                 try {
                   RobustLibraryLoader robustLoader =
-                      new RobustLibraryLoader(appContext, flutterApplicationInfo);
+                      new RobustLibraryLoader(appContext, flutterJNI, flutterApplicationInfo);
                   robustLoader.loadLibrary();
                 } catch (UnsatisfiedLinkError unsatisfiedLinkError) {
+                  // Preserve the diagnostic message and cause chain — they are essential for
+                  // diagnosing #151638-style failures from a single crash report.
                   throw new RuntimeException(
-                      "Flutter engine library loading failed. "
-                          + "libflutter.so could not be loaded after trying multiple strategies. "
-                          + "See the detailed error for troubleshooting information.",
+                      "Flutter engine library loading failed. libflutter.so could not be loaded"
+                          + " after trying multiple strategies. See the cause for the full"
+                          + " diagnostic dump (paths searched, APK contents, device ABIs).",
                       unsatisfiedLinkError);
                 }
 

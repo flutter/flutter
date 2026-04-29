@@ -7,15 +7,19 @@ package io.flutter.embedding.engine.loader;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
-import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.getkeepsafe.relinker.ReLinker;
+import androidx.annotation.VisibleForTesting;
+import io.flutter.Log;
+import io.flutter.embedding.engine.FlutterJNI;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -24,292 +28,456 @@ import java.util.zip.ZipFile;
 /**
  * Robust native library loader with multiple fallback strategies.
  *
- * Attempts to load libflutter.so using cascading fallbacks:
- * 1. ReLinker (optimized path for standard APKs)
- * 2. Manual extraction from main APK
- * 3. Search split APK directories
- * 4. Scan APK for all available ABIs (not just Build.SUPPORTED_ABIS)
- * 5. Comprehensive failure with diagnostic information
+ * <p>Loads {@code libflutter.so} using a cascading sequence of strategies. Each strategy is tried
+ * in order; on success, loading completes. If all strategies fail, an {@link UnsatisfiedLinkError}
+ * is thrown that lists every path searched, every error encountered, and the relevant device/APK
+ * state — so the developer can diagnose why the library could not be located.
+ *
+ * <p>Strategies, in order:
+ *
+ * <ol>
+ *   <li>{@link FlutterJNI#loadLibrary(Context)} — the existing ReLinker-based path. This invokes
+ *       {@code ReLinker.loadLibrary(context, "flutter")} which itself first tries {@code
+ *       System.loadLibrary} and then a workaround that extracts the library from the base APK and
+ *       calls {@code System.load} on the extracted file. Calling FlutterJNI ensures the {@code
+ *       FlutterJNI.loadLibraryCalled} state flag is set on success.
+ *   <li>Direct {@code System.loadLibrary("flutter")} — bypasses ReLinker. ReLinker can fail in
+ *       cases where {@code System.loadLibrary} succeeds (rare but observed in practice when
+ *       ReLinker's APK-scanning logic is confused by app-bundle splits).
+ *   <li>Manual extraction from the device-installed native library directory ({@code
+ *       ApplicationInfo.nativeLibraryDir}). The OS normally extracts native libraries here at
+ *       install time; if the file exists, we attempt {@code System.load} on it directly.
+ *   <li>Manual extraction from the base APK ({@code ApplicationInfo.sourceDir}) for every supported
+ *       ABI on the device.
+ *   <li>Manual extraction from each split APK ({@code ApplicationInfo.splitSourceDirs}) — this is
+ *       the case that fails for app-bundle distributions where the native library lives in a split
+ *       rather than the base APK. See https://github.com/flutter/flutter/issues/151638.
+ *   <li>Scan all APKs (base + splits) for any ABI directory present, even ABIs not in {@link
+ *       Build#SUPPORTED_ABIS}, and try them. Catches mis-built APKs and devices reporting
+ *       unexpected ABI names.
+ * </ol>
+ *
+ * <p>Extracted libraries are written to the application's code cache directory, not the regular
+ * cache directory: the OS may evict regular cache entries at any time, but code cache is intended
+ * for executable artifacts and is more durable.
+ *
+ * <p>This class is package-private and used only by {@link FlutterLoader}.
  */
-public class RobustLibraryLoader {
+final class RobustLibraryLoader {
   private static final String TAG = "RobustLibraryLoader";
+
+  /** The library name as passed to {@code System.loadLibrary} (no {@code lib} prefix, no suffix). */
   private static final String LIBRARY_NAME = "flutter";
 
-  private final Context context;
-  private final FlutterApplicationInfo flutterApplicationInfo;
+  /** The library file name as it appears on disk and inside APKs ({@code libflutter.so}). */
+  private static final String LIBRARY_FILE_NAME = "lib" + LIBRARY_NAME + ".so";
 
-  public RobustLibraryLoader(
-      @NonNull Context context, @NonNull FlutterApplicationInfo flutterApplicationInfo) {
+  /** ZIP entries always use forward slashes regardless of host OS. */
+  private static final char ZIP_SEPARATOR = '/';
+
+  @NonNull private final Context context;
+  @NonNull private final FlutterJNI flutterJNI;
+  @NonNull private final FlutterApplicationInfo flutterApplicationInfo;
+
+  RobustLibraryLoader(
+      @NonNull Context context,
+      @NonNull FlutterJNI flutterJNI,
+      @NonNull FlutterApplicationInfo flutterApplicationInfo) {
     this.context = context;
+    this.flutterJNI = flutterJNI;
     this.flutterApplicationInfo = flutterApplicationInfo;
   }
 
   /**
-   * Load libflutter.so with multiple fallback strategies.
+   * Load {@code libflutter.so} using all available strategies.
    *
-   * @throws UnsatisfiedLinkError if all loading strategies fail
+   * @throws UnsatisfiedLinkError if every strategy fails. The error message details every path
+   *     attempted and the contents of the relevant directories so the failure can be diagnosed
+   *     from a single crash report.
    */
-  public void loadLibrary() throws UnsatisfiedLinkError {
-    List<LoadAttempt> attempts = new ArrayList<>();
+  void loadLibrary() {
+    final List<LoadAttempt> attempts = new ArrayList<>();
+    final ApplicationInfo appInfo = context.getApplicationInfo();
 
-    // Attempt 1: Standard ReLinker loading
+    // --- Strategy 1: existing FlutterJNI path (ReLinker) ---
     try {
-      Log.d(TAG, "Attempt 1: Loading via ReLinker");
-      ReLinker.log(msg -> Log.d(TAG, msg)).loadLibrary(context, LIBRARY_NAME);
-      Log.i(TAG, "Successfully loaded libflutter.so via ReLinker");
+      Log.d(TAG, "Strategy 1: FlutterJNI.loadLibrary (ReLinker)");
+      flutterJNI.loadLibrary(context);
+      Log.i(TAG, "Loaded libflutter.so via FlutterJNI/ReLinker");
       return;
     } catch (UnsatisfiedLinkError e) {
-      Log.w(TAG, "ReLinker loading failed: " + e.getMessage());
-      attempts.add(new LoadAttempt("ReLinker", e));
-    }
-
-    // Attempt 2: Manual extraction from main APK
-    try {
-      Log.d(TAG, "Attempt 2: Manual extraction from main APK");
-      loadFromAPK(context.getApplicationInfo().sourceDir);
-      Log.i(TAG, "Successfully loaded libflutter.so from main APK");
-      return;
+      Log.w(TAG, "FlutterJNI/ReLinker failed: " + e.getMessage());
+      attempts.add(new LoadAttempt("FlutterJNI/ReLinker", null, e));
     } catch (Throwable e) {
-      Log.w(TAG, "Main APK loading failed: " + e.getMessage());
-      attempts.add(new LoadAttempt("Main APK extraction", e));
+      // ReLinker can throw MissingLibraryException (a RuntimeException) — catch broadly.
+      Log.w(TAG, "FlutterJNI/ReLinker threw: " + e);
+      attempts.add(new LoadAttempt("FlutterJNI/ReLinker", null, e));
     }
 
-    // Attempt 3: Search split APKs explicitly
-    ApplicationInfo appInfo = context.getApplicationInfo();
-    if (appInfo.splitSourceDirs != null && appInfo.splitSourceDirs.length > 0) {
-      for (String splitDir : appInfo.splitSourceDirs) {
-        try {
-          Log.d(TAG, "Attempt 3: Searching split APK: " + splitDir);
-          loadFromAPK(splitDir);
-          Log.i(TAG, "Successfully loaded libflutter.so from split APK: " + splitDir);
-          return;
-        } catch (Throwable e) {
-          Log.w(TAG, "Split APK loading failed (" + splitDir + "): " + e.getMessage());
-          attempts.add(new LoadAttempt("Split APK: " + splitDir, e));
+    // --- Strategy 2: plain System.loadLibrary, bypassing ReLinker ---
+    try {
+      Log.d(TAG, "Strategy 2: System.loadLibrary(\"" + LIBRARY_NAME + "\")");
+      System.loadLibrary(LIBRARY_NAME);
+      // Mark as loaded so subsequent FlutterJNI calls don't try to load again.
+      markLoaded();
+      Log.i(TAG, "Loaded libflutter.so via System.loadLibrary");
+      return;
+    } catch (UnsatisfiedLinkError e) {
+      Log.w(TAG, "System.loadLibrary failed: " + e.getMessage());
+      attempts.add(new LoadAttempt("System.loadLibrary", null, e));
+    }
+
+    // --- Strategy 3: load directly from nativeLibraryDir, if the file is there ---
+    final String nativeLibraryDir = flutterApplicationInfo.nativeLibraryDir;
+    if (nativeLibraryDir != null) {
+      final File installed = new File(nativeLibraryDir, LIBRARY_FILE_NAME);
+      try {
+        Log.d(TAG, "Strategy 3: System.load(\"" + installed.getAbsolutePath() + "\")");
+        if (!installed.exists()) {
+          throw new UnsatisfiedLinkError("File does not exist: " + installed.getAbsolutePath());
+        }
+        if (!installed.canRead()) {
+          throw new UnsatisfiedLinkError(
+              "File is not readable (length=" + installed.length() + "): "
+                  + installed.getAbsolutePath());
+        }
+        System.load(installed.getAbsolutePath());
+        markLoaded();
+        Log.i(TAG, "Loaded libflutter.so from nativeLibraryDir");
+        return;
+      } catch (Throwable e) {
+        Log.w(TAG, "Loading from nativeLibraryDir failed: " + e.getMessage());
+        attempts.add(
+            new LoadAttempt("System.load(nativeLibraryDir)", installed.getAbsolutePath(), e));
+      }
+    }
+
+    // --- Strategy 4: extract from base APK for each supported ABI ---
+    final String baseApk = appInfo.sourceDir;
+    final String[] supportedAbis = (Build.SUPPORTED_ABIS != null) ? Build.SUPPORTED_ABIS : new String[0];
+
+    if (baseApk != null) {
+      for (String abi : supportedAbis) {
+        tryExtractAndLoad(baseApk, abi, "base APK", attempts);
+        if (loaded()) return;
+      }
+    }
+
+    // --- Strategy 5: extract from each split APK for each supported ABI ---
+    final String[] splits = appInfo.splitSourceDirs;
+    if (splits != null) {
+      for (String splitPath : splits) {
+        if (splitPath == null) continue;
+        for (String abi : supportedAbis) {
+          tryExtractAndLoad(splitPath, abi, "split APK", attempts);
+          if (loaded()) return;
         }
       }
     }
 
-    // Attempt 4: Scan APK for all available ABIs (not just Build.SUPPORTED_ABIS)
-    Set<String> availableABIs = scanAPKForABIs(context.getApplicationInfo().sourceDir);
-    for (String abi : availableABIs) {
-      // Skip ABIs already tried in previous attempts
-      if (Build.SUPPORTED_ABIS != null && contains(Build.SUPPORTED_ABIS, abi)) {
-        continue;
+    // --- Strategy 6: scan every APK for any ABI dir present (even unexpected ones) ---
+    final List<String> allApks = new ArrayList<>();
+    if (baseApk != null) allApks.add(baseApk);
+    if (splits != null) {
+      for (String s : splits) {
+        if (s != null) allApks.add(s);
       }
-      try {
-        Log.d(TAG, "Attempt 4: Trying available ABI not in Build.SUPPORTED_ABIS: " + abi);
-        loadFromAPKWithABI(context.getApplicationInfo().sourceDir, abi);
-        Log.i(TAG, "Successfully loaded libflutter.so using ABI: " + abi);
-        return;
-      } catch (Throwable e) {
-        Log.w(TAG, "ABI loading failed (" + abi + "): " + e.getMessage());
-        attempts.add(new LoadAttempt("ABI " + abi, e));
+    }
+    final Set<String> alreadyTried = new LinkedHashSet<>(Arrays.asList(supportedAbis));
+    for (String apk : allApks) {
+      for (String abi : scanApkForAbis(apk)) {
+        if (alreadyTried.contains(abi)) continue;
+        Log.d(TAG, "Strategy 6: trying unexpected ABI " + abi + " in " + apk);
+        tryExtractAndLoad(apk, abi, "ABI scan", attempts);
+        if (loaded()) return;
+        alreadyTried.add(abi);
       }
     }
 
-    // All attempts failed - throw comprehensive error
-    throw createComprehensiveError(attempts, appInfo);
+    // All strategies exhausted.
+    throw buildDiagnosticError(attempts, appInfo);
   }
 
   /**
-   * Attempt to load library from a specific APK file.
-   * Tries all supported ABIs.
+   * Try to extract and load the library from {@code apkPath} for the given {@code abi}. On
+   * success, {@link #loaded()} returns true. On failure, an entry is appended to {@code attempts}.
    */
-  private void loadFromAPK(@NonNull String apkPath) throws IOException, UnsatisfiedLinkError {
-    String[] abis = Build.SUPPORTED_ABIS;
-    if (abis == null || abis.length == 0) {
-      throw new UnsatisfiedLinkError("No supported ABIs available");
-    }
-
-    for (String abi : abis) {
-      try {
-        loadFromAPKWithABI(apkPath, abi);
-        return;
-      } catch (Throwable e) {
-        Log.d(TAG, "Failed to load from " + apkPath + " with ABI " + abi + ": " + e.getMessage());
-      }
-    }
-
-    throw new UnsatisfiedLinkError(
-        "Could not find libflutter.so in " + apkPath + " for any supported ABI");
-  }
-
-  /**
-   * Attempt to load library from a specific APK with a specific ABI.
-   */
-  private void loadFromAPKWithABI(@NonNull String apkPath, @NonNull String abi)
-      throws IOException, UnsatisfiedLinkError {
-    try (ZipFile zipFile = new ZipFile(apkPath)) {
-      String libPath = "lib" + File.separator + abi + File.separator + "lib" + LIBRARY_NAME + ".so";
-      ZipEntry entry = zipFile.getEntry(libPath);
-
-      if (entry == null) {
-        throw new UnsatisfiedLinkError("Library entry not found in APK: " + libPath);
-      }
-
-      // Extract to app's cache directory
-      File cacheDir = context.getCacheDir();
-      File libFile = new File(cacheDir, "lib" + LIBRARY_NAME + "_" + abi + ".so");
-
-      // Extract and load
-      extractZipEntry(zipFile, entry, libFile);
-      System.load(libFile.getAbsolutePath());
-
-      Log.d(TAG, "Successfully loaded " + libFile.getAbsolutePath());
+  private void tryExtractAndLoad(
+      @NonNull String apkPath,
+      @NonNull String abi,
+      @NonNull String label,
+      @NonNull List<LoadAttempt> attempts) {
+    final String entryName = "lib" + ZIP_SEPARATOR + abi + ZIP_SEPARATOR + LIBRARY_FILE_NAME;
+    final String description = label + " " + apkPath + "!" + entryName;
+    File extracted = null;
+    try {
+      extracted = extractFromApk(apkPath, abi, entryName);
+      System.load(extracted.getAbsolutePath());
+      markLoaded();
+      Log.i(TAG, "Loaded libflutter.so from " + description);
+    } catch (Throwable e) {
+      Log.w(TAG, "Failed to load from " + description + ": " + e.getMessage());
+      attempts.add(
+          new LoadAttempt(
+              "extract+load",
+              description + (extracted != null ? " -> " + extracted.getAbsolutePath() : ""),
+              e));
     }
   }
 
   /**
-   * Extract a ZipEntry to a file and verify it's valid.
-   */
-  private void extractZipEntry(
-      @NonNull ZipFile zipFile, @NonNull ZipEntry entry, @NonNull File outputFile)
-      throws IOException {
-    // Remove old version if it exists
-    if (outputFile.exists()) {
-      outputFile.delete();
-    }
-
-    byte[] buffer = new byte[8192];
-    try (java.io.InputStream input = zipFile.getInputStream(entry);
-        java.io.FileOutputStream output = new java.io.FileOutputStream(outputFile)) {
-      int len;
-      while ((len = input.read(buffer)) > 0) {
-        output.write(buffer, 0, len);
-      }
-    }
-
-    // Verify file exists and is readable
-    if (!outputFile.exists() || !outputFile.canRead()) {
-      throw new IOException("Extracted file is not readable: " + outputFile.getAbsolutePath());
-    }
-  }
-
-  /**
-   * Scan an APK file for all available ABIs (not just Build.SUPPORTED_ABIS).
-   * This catches cases where APK has architectures not reported by the device.
+   * Extract a single ZIP entry from an APK to a uniquely-named file in the code cache. Throws if
+   * the APK does not exist, is not readable, the entry is missing, or extraction fails.
+   *
+   * @return the extracted file, with execute permission set
    */
   @NonNull
-  private Set<String> scanAPKForABIs(@NonNull String apkPath) {
-    Set<String> abis = new HashSet<>();
-    try (ZipFile zipFile = new ZipFile(apkPath)) {
-      Enumeration<? extends ZipEntry> entries = zipFile.entries();
+  private File extractFromApk(@NonNull String apkPath, @NonNull String abi, @NonNull String entryName)
+      throws IOException {
+    final File apkFile = new File(apkPath);
+    if (!apkFile.exists()) {
+      throw new IOException("APK does not exist: " + apkPath);
+    }
+    if (!apkFile.canRead()) {
+      throw new IOException("APK is not readable: " + apkPath);
+    }
+
+    try (ZipFile zip = new ZipFile(apkFile)) {
+      final ZipEntry entry = zip.getEntry(entryName);
+      if (entry == null) {
+        throw new IOException(
+            "Entry not found: " + entryName + " in " + apkPath
+                + " (entries with prefix lib/: " + listLibEntries(zip) + ")");
+      }
+
+      final File outDir = getExtractionDir();
+      if (!outDir.exists() && !outDir.mkdirs()) {
+        throw new IOException("Could not create extraction dir: " + outDir.getAbsolutePath());
+      }
+      // Encode APK identity in filename to prevent collisions between base/split for the same ABI
+      // and to invalidate stale extractions when the APK is updated.
+      final File out =
+          new File(
+              outDir,
+              LIBRARY_FILE_NAME + "." + abi + "." + apkFile.getName() + "." + apkFile.lastModified());
+
+      // Reuse cached extraction if it matches in size; otherwise re-extract.
+      if (!out.exists() || out.length() != entry.getSize()) {
+        final File tmp = new File(out.getAbsolutePath() + ".tmp");
+        try (InputStream in = zip.getInputStream(entry);
+            FileOutputStream os = new FileOutputStream(tmp)) {
+          final byte[] buf = new byte[64 * 1024];
+          int n;
+          while ((n = in.read(buf)) > 0) {
+            os.write(buf, 0, n);
+          }
+        }
+        if (!tmp.renameTo(out)) {
+          // renameTo can fail across some filesystems; fall back to delete+rename
+          if (out.exists()) out.delete();
+          if (!tmp.renameTo(out)) {
+            throw new IOException(
+                "Could not move extracted file " + tmp.getAbsolutePath() + " -> "
+                    + out.getAbsolutePath());
+          }
+        }
+      }
+
+      // dlopen requires the file to be readable; some filesystems also require execute.
+      //noinspection ResultOfMethodCallIgnored
+      out.setReadable(true, /*ownerOnly=*/ false);
+      //noinspection ResultOfMethodCallIgnored
+      out.setExecutable(true, /*ownerOnly=*/ false);
+
+      if (!out.canRead()) {
+        throw new IOException("Extracted file is not readable: " + out.getAbsolutePath());
+      }
+      return out;
+    }
+  }
+
+  /**
+   * @return the directory in which extracted libraries are placed. Uses code cache (more durable
+   *     than regular cache) on API 21+, falling back to regular cache otherwise.
+   */
+  @NonNull
+  private File getExtractionDir() {
+    if (Build.VERSION.SDK_INT >= 21) {
+      final File codeCache = context.getCodeCacheDir();
+      if (codeCache != null) {
+        return new File(codeCache, "flutter-jni");
+      }
+    }
+    return new File(context.getCacheDir(), "flutter-jni");
+  }
+
+  /** Scan an APK and return every ABI directory that contains {@code libflutter.so}. */
+  @NonNull
+  private Set<String> scanApkForAbis(@NonNull String apkPath) {
+    final Set<String> abis = new LinkedHashSet<>();
+    final File apkFile = new File(apkPath);
+    if (!apkFile.exists() || !apkFile.canRead()) return abis;
+    try (ZipFile zip = new ZipFile(apkFile)) {
+      final Enumeration<? extends ZipEntry> entries = zip.entries();
       while (entries.hasMoreElements()) {
-        ZipEntry entry = entries.nextElement();
-        String name = entry.getName();
-        // Look for entries like "lib/arm64-v8a/libflutter.so"
-        if (name.startsWith("lib/") && name.endsWith("/lib" + LIBRARY_NAME + ".so")) {
-          String abi = name.substring(4, name.length() - ("lib" + LIBRARY_NAME + ".so").length() - 1);
-          abis.add(abi);
-          Log.d(TAG, "Found available ABI in APK: " + abi);
+        final String name = entries.nextElement().getName();
+        // Match exactly: lib/<abi>/libflutter.so (no nested directories).
+        if (name.startsWith("lib/") && name.endsWith("/" + LIBRARY_FILE_NAME)) {
+          final int abiStart = "lib/".length();
+          final int abiEnd = name.length() - ("/" + LIBRARY_FILE_NAME).length();
+          if (abiEnd > abiStart) {
+            final String abi = name.substring(abiStart, abiEnd);
+            // Reject if the "abi" itself contains a slash (nested dir).
+            if (abi.indexOf('/') < 0) abis.add(abi);
+          }
         }
       }
     } catch (IOException e) {
-      Log.w(TAG, "Error scanning APK for ABIs: " + e.getMessage());
+      Log.d(TAG, "Could not scan APK " + apkPath + ": " + e.getMessage());
     }
     return abis;
   }
 
+  /** Best-effort listing of all {@code lib/...} entries in an APK for diagnostic output. */
+  @NonNull
+  private List<String> listLibEntries(@NonNull ZipFile zip) {
+    final List<String> result = new ArrayList<>();
+    final Enumeration<? extends ZipEntry> entries = zip.entries();
+    while (entries.hasMoreElements()) {
+      final String name = entries.nextElement().getName();
+      if (name.startsWith("lib/")) result.add(name);
+    }
+    return result;
+  }
+
+  private void markLoaded() {
+    flutterJNI.setLoaded();
+  }
+
+  private boolean loaded() {
+    return flutterJNI.loadLibraryCalled();
+  }
+
   /**
-   * Create a comprehensive error message with all attempted paths and diagnostic info.
+   * Build a comprehensive {@link UnsatisfiedLinkError} describing every search path that was
+   * tried, every error encountered, and the relevant device/APK state.
    */
-  private UnsatisfiedLinkError createComprehensiveError(
+  @NonNull
+  private UnsatisfiedLinkError buildDiagnosticError(
       @NonNull List<LoadAttempt> attempts, @NonNull ApplicationInfo appInfo) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("Could not load libflutter.so. All loading strategies failed:\n\n");
+    final StringBuilder sb = new StringBuilder();
+    sb.append("Could not load libflutter.so. All loading strategies failed.\n\n");
 
-    // Device info
-    sb.append("=== DEVICE INFO ===\n");
-    sb.append("Supported ABIs: ");
-    if (Build.SUPPORTED_ABIS != null) {
-      for (String abi : Build.SUPPORTED_ABIS) {
-        sb.append(abi).append(" ");
-      }
-    }
-    sb.append("\nCPU Architecture: ").append(System.getProperty("os.arch")).append("\n");
-    sb.append("API Level: ").append(Build.VERSION.SDK_INT).append("\n\n");
+    // --- Device ---
+    sb.append("=== DEVICE ===\n");
+    sb.append("  os.arch=").append(System.getProperty("os.arch")).append("\n");
+    sb.append("  Build.SUPPORTED_ABIS=").append(Arrays.toString(Build.SUPPORTED_ABIS)).append("\n");
+    sb.append("  Build.CPU_ABI=").append(Build.CPU_ABI).append("\n");
+    sb.append("  Build.CPU_ABI2=").append(Build.CPU_ABI2).append("\n");
+    sb.append("  Build.VERSION.SDK_INT=").append(Build.VERSION.SDK_INT).append("\n");
+    sb.append("  Build.MANUFACTURER=").append(Build.MANUFACTURER).append("\n");
+    sb.append("  Build.MODEL=").append(Build.MODEL).append("\n");
 
-    // APK info
-    sb.append("=== APK INFO ===\n");
-    sb.append("Main APK: ").append(appInfo.sourceDir).append("\n");
-    File mainApkFile = new File(appInfo.sourceDir);
-    sb.append("Main APK exists: ").append(mainApkFile.exists()).append("\n");
-
-    if (appInfo.splitSourceDirs != null && appInfo.splitSourceDirs.length > 0) {
-      sb.append("Split APKs:\n");
-      for (String split : appInfo.splitSourceDirs) {
-        sb.append("  - ").append(split);
-        sb.append(" (exists: ").append(new File(split).exists()).append(")\n");
-      }
-    } else {
-      sb.append("No split APKs\n");
-    }
-
-    // Native library directory
-    sb.append("\n=== NATIVE LIBRARY DIR ===\n");
-    sb.append("Path: ").append(flutterApplicationInfo.nativeLibraryDir).append("\n");
-    File nativeLibDir = new File(flutterApplicationInfo.nativeLibraryDir);
-    sb.append("Exists: ").append(nativeLibDir.exists()).append("\n");
-    if (nativeLibDir.exists() && nativeLibDir.isDirectory()) {
-      File[] files = nativeLibDir.listFiles();
-      if (files != null && files.length > 0) {
-        sb.append("Contents:\n");
-        for (File f : files) {
-          sb.append("  - ").append(f.getName()).append("\n");
+    // --- nativeLibraryDir ---
+    sb.append("\n=== nativeLibraryDir ===\n");
+    final String nativeLibraryDir = flutterApplicationInfo.nativeLibraryDir;
+    sb.append("  path=").append(nativeLibraryDir).append("\n");
+    if (nativeLibraryDir != null) {
+      final File dir = new File(nativeLibraryDir);
+      sb.append("  exists=").append(dir.exists()).append("\n");
+      if (dir.exists()) {
+        sb.append("  isDirectory=").append(dir.isDirectory()).append("\n");
+        sb.append("  canRead=").append(dir.canRead()).append("\n");
+        final File[] files = dir.listFiles();
+        if (files == null) {
+          sb.append("  listFiles=null\n");
+        } else if (files.length == 0) {
+          sb.append("  contents=(empty)\n");
+        } else {
+          sb.append("  contents:\n");
+          for (File f : files) {
+            sb.append("    - ")
+                .append(f.getName())
+                .append(" (")
+                .append(f.length())
+                .append(" bytes, readable=")
+                .append(f.canRead())
+                .append(")\n");
+          }
         }
-      } else {
-        sb.append("Directory is empty\n");
       }
     }
 
-    // Scan for ABIs actually in APK
-    sb.append("\n=== AVAILABLE ABIs IN APK ===\n");
-    Set<String> availableABIs = scanAPKForABIs(appInfo.sourceDir);
-    if (availableABIs.isEmpty()) {
-      sb.append("No native libraries found in APK\n");
+    // --- APKs ---
+    sb.append("\n=== APKs ===\n");
+    appendApkInfo(sb, "base", appInfo.sourceDir);
+    if (appInfo.splitSourceDirs != null) {
+      for (int i = 0; i < appInfo.splitSourceDirs.length; i++) {
+        appendApkInfo(sb, "split[" + i + "]", appInfo.splitSourceDirs[i]);
+      }
     } else {
-      for (String abi : availableABIs) {
-        sb.append("  - ").append(abi).append("\n");
-      }
+      sb.append("  (no split APKs)\n");
     }
 
-    // Load attempts
-    sb.append("\n=== LOAD ATTEMPTS ===\n");
-    for (LoadAttempt attempt : attempts) {
-      sb.append(attempt.strategy).append(": ").append(attempt.error.getMessage()).append("\n");
+    // --- Attempts ---
+    sb.append("\n=== ATTEMPTS (").append(attempts.size()).append(") ===\n");
+    for (int i = 0; i < attempts.size(); i++) {
+      final LoadAttempt a = attempts.get(i);
+      sb.append("  [").append(i + 1).append("] strategy=").append(a.strategy);
+      if (a.target != null) sb.append(" target=").append(a.target);
+      sb.append("\n      error=")
+          .append(a.error.getClass().getName())
+          .append(": ")
+          .append(a.error.getMessage())
+          .append("\n");
     }
 
-    sb.append("\n=== RECOMMENDATION ===\n");
     sb.append(
-        "Check that your app is built for the correct architecture(s) "
-            + "and that the AAB includes native libraries for the device's ABI.\n");
-    sb.append("See: https://docs.flutter.dev/deployment/android#what-are-the-supported-target-architectures\n");
+        "\nSee https://docs.flutter.dev/deployment/android#what-are-the-supported-target-architectures"
+            + " — the most common cause is an APK that does not contain libflutter.so for this device's ABI.\n");
+    sb.append("Tracking issue: https://github.com/flutter/flutter/issues/151638\n");
 
-    return new UnsatisfiedLinkError(sb.toString());
+    final UnsatisfiedLinkError err = new UnsatisfiedLinkError(sb.toString());
+    if (!attempts.isEmpty()) {
+      err.initCause(attempts.get(0).error);
+    }
+    return err;
   }
 
-  /**
-   * Helper to check if array contains value.
-   */
-  private boolean contains(@NonNull String[] array, @NonNull String value) {
-    for (String item : array) {
-      if (item.equals(value)) {
-        return true;
+  private void appendApkInfo(@NonNull StringBuilder sb, @NonNull String label, @Nullable String path) {
+    sb.append("  ").append(label).append("=").append(path).append("\n");
+    if (path == null) return;
+    final File apk = new File(path);
+    sb.append("      exists=").append(apk.exists());
+    if (apk.exists()) {
+      sb.append(" size=").append(apk.length()).append(" canRead=").append(apk.canRead());
+    }
+    sb.append("\n");
+    if (apk.exists() && apk.canRead()) {
+      try (ZipFile zip = new ZipFile(apk)) {
+        final List<String> libs = listLibEntries(zip);
+        if (libs.isEmpty()) {
+          sb.append("      lib/ entries: (none)\n");
+        } else {
+          sb.append("      lib/ entries (").append(libs.size()).append("):\n");
+          for (String s : libs) sb.append("        - ").append(s).append("\n");
+        }
+      } catch (IOException e) {
+        sb.append("      (could not read APK: ").append(e.getMessage()).append(")\n");
       }
     }
-    return false;
   }
 
-  /**
-   * Record of a single load attempt for error reporting.
-   */
-  private static class LoadAttempt {
-    final String strategy;
-    final Throwable error;
+  /** A single load attempt, recorded for the eventual diagnostic error. */
+  @VisibleForTesting
+  static final class LoadAttempt {
+    @NonNull final String strategy;
+    @Nullable final String target;
+    @NonNull final Throwable error;
 
-    LoadAttempt(@NonNull String strategy, @NonNull Throwable error) {
+    LoadAttempt(@NonNull String strategy, @Nullable String target, @NonNull Throwable error) {
       this.strategy = strategy;
+      this.target = target;
       this.error = error;
     }
   }

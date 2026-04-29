@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
+import com.getkeepsafe.relinker.ReLinker;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.dart.PlatformMessageHandler;
@@ -144,10 +145,34 @@ public class FlutterJNI {
     if (FlutterJNI.loadLibraryCalled) {
       Log.w(TAG, "FlutterJNI.loadLibrary called more than once");
     }
-    // Robust library loading with fallbacks is handled by RobustLibraryLoader in FlutterLoader.
-    // This method is kept for backward compatibility and performs the standard system load.
-    System.loadLibrary("flutter");
+    // Use ReLinker for the primary load path: it first tries System.loadLibrary, and on failure
+    // falls back to extracting the library from the base APK and calling System.load on it. This
+    // preserves historical behavior for any direct caller of FlutterJNI.loadLibrary. Additional
+    // fallbacks (split APK extraction, ABI scanning, etc.) — needed for #151638 — are layered on
+    // top of this call by io.flutter.embedding.engine.loader.RobustLibraryLoader.
+    ReLinker.log(msg -> Log.d(TAG, msg)).loadLibrary(context, "flutter");
     FlutterJNI.loadLibraryCalled = true;
+  }
+
+  /**
+   * Marks the native library as loaded.
+   *
+   * <p>Used by {@link io.flutter.embedding.engine.loader.RobustLibraryLoader} when one of its
+   * fallback strategies (i.e. anything other than calling {@link #loadLibrary(Context)} directly)
+   * has successfully loaded {@code libflutter.so}. Setting this flag ensures the rest of the engine
+   * — which guards native calls on {@link #loadLibraryCalled()} — proceeds normally.
+   */
+  public void setLoaded() {
+    FlutterJNI.loadLibraryCalled = true;
+  }
+
+  /**
+   * Whether the native library has been loaded (via {@link #loadLibrary(Context)} or {@link
+   * #setLoaded()}). Used internally to guard JNI calls and to let fallback loaders short-circuit
+   * once any strategy has succeeded.
+   */
+  public boolean loadLibraryCalled() {
+    return FlutterJNI.loadLibraryCalled;
   }
 
   private static boolean loadLibraryCalled = false;
