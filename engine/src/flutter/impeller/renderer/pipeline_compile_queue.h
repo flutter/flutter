@@ -87,7 +87,7 @@ class PipelineCompileQueue
   void FlushPendingJobs();
 
  protected:
-  bool wait_until_rendering_ = false;
+  std::atomic<bool> wait_until_rendering_ = false;
 
  private:
   Mutex pending_jobs_mutex_;

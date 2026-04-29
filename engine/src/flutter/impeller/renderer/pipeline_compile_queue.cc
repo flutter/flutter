@@ -87,6 +87,7 @@ void PipelineCompileQueue::DoOneJob() {
 }
 
 void PipelineCompileQueue::FlushPendingJobs() {
+  wait_until_rendering_ = false;
   PostJob([weak_queue = weak_from_this()]() {
     if (auto queue = weak_queue.lock()) {
       queue->FinishAllJobs();
