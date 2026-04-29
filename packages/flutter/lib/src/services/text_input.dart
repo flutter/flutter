@@ -2896,11 +2896,17 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
   /// Indicates whether the system context menu managed by this controller is
   /// currently being displayed to the user.
   ///
-  /// This can be used to avoid redundant calls to [show] or [hide]. For
-  /// example, when reacting to layout changes (such as a stretchable text
-  /// field) the caller may want to skip calling [show] if the menu is already
-  /// visible at the desired target [Rect], to prevent the menu from briefly
-  /// flashing in and out.
+  /// This is a coarse visible/hidden flag — it does not record _where_ the
+  /// menu is currently anchored. Callers that need to compare the current
+  /// anchor to a new target [Rect] (for example, to avoid re-showing the menu
+  /// when only sub-pixel layout changes have occurred) must track the last
+  /// [Rect] passed to [show] themselves and combine that with [isVisible].
+  ///
+  /// This is useful for avoiding redundant calls to [show] or [hide]. For
+  /// example, when reacting to layout changes from a stretchable text field
+  /// the caller can skip calling [show] when the menu is already visible at
+  /// the same target rect, preventing the menu from briefly flashing in and
+  /// out.
   bool get isVisible => this == _lastShown && !_hiddenBySystem;
 
   /// After calling [dispose], this instance can no longer be used.
