@@ -134,12 +134,18 @@ class _DialogWindowRoute<T> extends Route<T> {
     super.settings,
     Size? preferredSize,
   }) : _registry = WindowRegistry.maybeOf(context) {
-    _controller = DialogWindowController(
-      parent: parentController,
-      title: 'Dialog',
-      delegate: _DialogWindowDelegate(this),
-      preferredSize: preferredSize,
-    );
+    _controller = preferredSize != null
+        ? DialogWindowController(
+            parent: parentController,
+            title: 'Dialog',
+            delegate: _DialogWindowDelegate(this),
+            preferredSize: preferredSize,
+          )
+        : DialogWindowController.sizedToContent(
+            parent: parentController,
+            title: 'Dialog',
+            delegate: _DialogWindowDelegate(this),
+          );
   }
 
   final WidgetBuilder builder;
