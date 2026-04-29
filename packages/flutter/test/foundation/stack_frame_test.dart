@@ -59,14 +59,38 @@ void main() {
   // stack overflow, but the browser cannot - running this test in a browser
   // will cause it to become unresponsive.
 
-  test('Traces from package:stack_trace throw assertion', () {
+  test('Traces from package:stack_trace parse without throwing', () {
+    // Regression test for https://github.com/flutter/flutter/issues/179018.
+    // package:stack_trace emits a literal `===== asynchronous gap ===` line
+    // between chained stacks; this parser used to assert on it. It is now
+    // treated as an asynchronous-suspension marker so callers like
+    // [debugPrintStack] do not crash on stacks that carry that format.
+    final List<StackFrame> frames = StackFrame.fromStackString(mangledStackString);
+    expect(frames, contains(StackFrame.asynchronousSuspension));
+    expect(frames, isNot(isEmpty));
+  });
+
+  test('Async-gap marker parses to asynchronousSuspension', () {
+    expect(
+      StackFrame.fromStackTraceLine('===== asynchronous gap ==========================='),
+      StackFrame.asynchronousSuspension,
+    );
+  });
+
+  test('debugPrintStack does not throw on a stack carrying an async-gap marker', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/179018.
+    final printed = <String?>[];
+    final DebugPrintCallback original = debugPrint;
+    debugPrint = (String? message, {int? wrapWidth}) => printed.add(message);
     try {
-      StackFrame.fromStackString(mangledStackString);
-      assert(false, 'StackFrame.fromStackString did not throw on a mangled stack trace');
-    } catch (e) {
-      expect(e, isA<AssertionError>());
-      expect('$e', contains('Got a stack frame from package:stack_trace'));
+      debugPrintStack(
+        label: 'ParallelWaitError-style stack',
+        stackTrace: StackTrace.fromString(mangledStackString),
+      );
+    } finally {
+      debugPrint = original;
     }
+    expect(printed, isNotEmpty);
   });
 
   test('Can parse web constructor invocation with unknown class name', () {
