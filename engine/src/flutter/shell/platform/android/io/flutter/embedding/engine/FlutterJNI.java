@@ -23,7 +23,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
-import com.getkeepsafe.relinker.ReLinker;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.dart.PlatformMessageHandler;
@@ -145,7 +144,9 @@ public class FlutterJNI {
     if (FlutterJNI.loadLibraryCalled) {
       Log.w(TAG, "FlutterJNI.loadLibrary called more than once");
     }
-    ReLinker.log(msg -> Log.d(TAG, msg)).loadLibrary(context, "flutter");
+    // Robust library loading with fallbacks is handled by RobustLibraryLoader in FlutterLoader.
+    // This method is kept for backward compatibility and performs the standard system load.
+    System.loadLibrary("flutter");
     FlutterJNI.loadLibraryCalled = true;
   }
 

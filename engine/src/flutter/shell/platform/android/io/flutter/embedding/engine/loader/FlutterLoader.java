@@ -155,74 +155,17 @@ public class FlutterLoader {
               try (TraceSection e = TraceSection.scoped("FlutterLoader initTask")) {
                 ResourceExtractor resourceExtractor = initResources(appContext);
 
+                // Use robust library loader with multiple fallback strategies for issue #151638
                 try {
-                  flutterJNI.loadLibrary(appContext);
+                  RobustLibraryLoader robustLoader =
+                      new RobustLibraryLoader(appContext, flutterApplicationInfo);
+                  robustLoader.loadLibrary();
                 } catch (UnsatisfiedLinkError unsatisfiedLinkError) {
-                  String couldntFindVersion = "couldn't find \"libflutter.so\"";
-                  String notFoundVersion = "dlopen failed: library \"libflutter.so\" not found";
-
-                  if (unsatisfiedLinkError.toString().contains(couldntFindVersion)
-                      || unsatisfiedLinkError.toString().contains(notFoundVersion)) {
-                    // To gather more information for
-                    // https://github.com/flutter/flutter/issues/144291,
-                    // log the contents of the native libraries directory as well as the
-                    // cpu architecture.
-
-                    String cpuArch = System.getProperty("os.arch");
-                    File nativeLibsDir = getFileFromPath(flutterApplicationInfo.nativeLibraryDir);
-                    String[] nativeLibsContents = nativeLibsDir.list();
-
-                    // To gather more information for
-                    // https://github.com/flutter/flutter/issues/151638,
-                    // log the contents of the split libraries directory as well.
-
-                    List<String> splitAndSourceDirs = new ArrayList<>();
-                    // Get supported ABI and prepare path suffix for lib directories
-                    String[] abis = Build.SUPPORTED_ABIS;
-                    for (String abi : abis) {
-                      String libPathSuffix = "!" + File.separator + "lib" + File.separator + abi;
-
-                      // Get split APK lib paths
-                      String[] splitSourceDirs = appContext.getApplicationInfo().splitSourceDirs;
-                      List<String> splitLibPaths = new ArrayList<>();
-                      if (splitSourceDirs != null) {
-                        for (String splitSourceDir : splitSourceDirs) {
-                          splitLibPaths.add(splitSourceDir + libPathSuffix);
-                        }
-                        splitAndSourceDirs.addAll(splitLibPaths);
-                      }
-
-                      String baseApkPath = appContext.getApplicationInfo().sourceDir;
-                      if (baseApkPath != null && !baseApkPath.isEmpty()) {
-                        String baseApkLibDir = baseApkPath + libPathSuffix;
-                        splitAndSourceDirs.add(baseApkLibDir);
-                      }
-                    }
-
-                    throw new UnsupportedOperationException(
-                        "Could not load libflutter.so this is possibly because the application"
-                            + " is running on an architecture that Flutter Android does not support (e.g. x86)"
-                            + " see https://docs.flutter.dev/deployment/android#what-are-the-supported-target-architectures"
-                            + " for more detail.\n"
-                            + "App is using cpu architecture: "
-                            + cpuArch
-                            + ", and the native libraries directory (with path "
-                            + nativeLibsDir.getAbsolutePath()
-                            + ") "
-                            + (nativeLibsDir.exists()
-                                ? "contains the following files: "
-                                    + Arrays.toString(nativeLibsContents)
-                                : "does not exist")
-                            + (splitAndSourceDirs.isEmpty()
-                                ? ""
-                                : ", and the split and source libraries directory (with path(s) "
-                                    + splitAndSourceDirs
-                                    + ")")
-                            + ".",
-                        unsatisfiedLinkError);
-                  }
-
-                  throw unsatisfiedLinkError;
+                  throw new RuntimeException(
+                      "Flutter engine library loading failed. "
+                          + "libflutter.so could not be loaded after trying multiple strategies. "
+                          + "See the detailed error for troubleshooting information.",
+                      unsatisfiedLinkError);
                 }
 
                 flutterJNI.updateRefreshRate();
