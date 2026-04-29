@@ -3293,6 +3293,13 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
           highestSupportedVersion: FlutterDarwinPlatform.ios.supportedPackagePlatform,
         );
 
+        final Directory scriptsDirectory = outputDirectory.childDirectory('Scripts');
+        expect(scriptsDirectory.childFile('FlutterAssembleInputs.xcfilelist'), exists);
+        expect(
+          scriptsDirectory.childFile('FlutterAssembleInputs.xcfilelist').readAsStringSync(),
+          contains(r'$(BUILT_PRODUCTS_DIR)/App.framework/App'),
+        );
+
         expect(flutterIntegrationPackage.childFile('Package.swift'), exists);
         expect(flutterIntegrationPackage.childFile('Package.swift').readAsStringSync(), '''
 // swift-tools-version: 5.9
@@ -3527,6 +3534,13 @@ let package = Package(
           outputDirectory: outputDirectory,
           flutterIntegrationPackage: flutterIntegrationPackage,
           highestSupportedVersion: FlutterDarwinPlatform.macos.supportedPackagePlatform,
+        );
+
+        final Directory scriptsDirectory = outputDirectory.childDirectory('Scripts');
+        expect(scriptsDirectory.childFile('FlutterAssembleInputs.xcfilelist'), exists);
+        expect(
+          scriptsDirectory.childFile('FlutterAssembleInputs.xcfilelist').readAsStringSync(),
+          contains(r'$(BUILT_PRODUCTS_DIR)/App.framework/Versions/A/App'),
         );
 
         expect(flutterIntegrationPackage.childFile('Package.swift'), exists);

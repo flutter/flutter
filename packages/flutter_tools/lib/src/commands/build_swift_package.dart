@@ -1960,6 +1960,9 @@ class FlutterNativeIntegrationSwiftPackage {
       'infoPlistPath': _targetPlatform == FlutterDarwinPlatform.macos
           ? 'Versions/A/Resources/Info.plist'
           : 'Info.plist',
+      'appFrameworkBinaryPath': _targetPlatform == FlutterDarwinPlatform.macos
+          ? 'Versions/A/App'
+          : 'App',
     }, printStatusWhenWriting: false);
   }
 
