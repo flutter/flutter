@@ -41,6 +41,22 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertNotNil(object);
 }
 
+- (void)testUIFocusSystemMethodsDoNotCrashWhenBridgeIsDead {
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge;
+  SemanticsObject* object;
+  {
+    auto mock_bridge = std::make_unique<flutter::testing::MockAccessibilityBridge>();
+    fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock_bridge.get());
+    bridge = factory.GetWeakPtr();
+    object = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  }
+  // Now bridge is nullptr.
+
+  XCTAssertNil([object parentFocusEnvironment]);
+  XCTAssertNil([object coordinateSpace]);
+  XCTAssertTrue(CGRectEqualToRect([object frame], CGRectZero));
+}
+
 - (void)testSetChildren {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridge());

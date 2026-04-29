@@ -779,7 +779,9 @@ if (target_cpu != "x86") {
       gen_snapshot_dest = "gen_snapshot.exe"
     }
 
-    if (host_os == "linux") {
+    if (host_os == "linux" && host_cpu == "arm64") {
+      output = "$android_zip_archive_dir/linux-arm64.zip"
+    } else if (host_os == "linux") {
       output = "$android_zip_archive_dir/linux-x64.zip"
     } else if (host_os == "mac") {
       output = "$android_zip_archive_dir/darwin-x64.zip"
@@ -821,7 +823,9 @@ if (host_os == "linux" &&
     analyze_snapshot_path =
         rebase_path("$analyze_snapshot_out_dir/$analyze_snapshot_bin")
 
-    if (host_os == "linux") {
+    if (host_os == "linux" && host_cpu == "arm64") {
+      output = "$android_zip_archive_dir/analyze-snapshot-linux-arm64.zip"
+    } else if (host_os == "linux") {
       output = "$android_zip_archive_dir/analyze-snapshot-linux-x64.zip"
     } else if (host_os == "mac") {
       output = "$android_zip_archive_dir/analyze-snapshot-darwin-x64.zip"
