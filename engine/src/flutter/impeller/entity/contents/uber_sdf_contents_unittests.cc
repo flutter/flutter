@@ -20,13 +20,13 @@ TEST(UberSDFContentsTest, ApplyColorFilter) {
   auto geometry = std::make_unique<UberSDFGeometry>(params);
   auto contents = UberSDFContents::Make(params, std::move(geometry));
 
-  ASSERT_EQ(contents->GetColor(), Color::Red());
+  EXPECT_EQ(contents->GetColor(), Color::Red());
 
   bool result =
       contents->ApplyColorFilter([](Color color) { return Color::Blue(); });
 
-  ASSERT_TRUE(result);
-  ASSERT_EQ(contents->GetColor(), Color::Blue());
+  EXPECT_TRUE(result);
+  EXPECT_EQ(contents->GetColor(), Color::Blue());
 }
 
 TEST(UberSDFContentsTest, AsBackgroundColor) {
@@ -40,15 +40,19 @@ TEST(UberSDFContentsTest, AsBackgroundColor) {
   entity.SetTransform(Matrix());
 
   auto bg_color = contents->AsBackgroundColor(entity, ISize(500, 500));
-  ASSERT_TRUE(bg_color.has_value());
-  ASSERT_EQ(bg_color.value(), Color::Red());
+  EXPECT_TRUE(bg_color.has_value());
+  if (bg_color.has_value()) {
+    EXPECT_EQ(bg_color.value(), Color::Red());
+  }
 
   auto small_bg_color = contents->AsBackgroundColor(entity, ISize(400, 400));
-  ASSERT_TRUE(small_bg_color.has_value());
-  ASSERT_EQ(small_bg_color.value(), Color::Red());
+  EXPECT_TRUE(small_bg_color.has_value());
+  if (small_bg_color.has_value()) {
+    EXPECT_EQ(small_bg_color.value(), Color::Red());
+  }
 
   auto huge_bg_color = contents->AsBackgroundColor(entity, ISize(600, 600));
-  ASSERT_FALSE(huge_bg_color.has_value());
+  EXPECT_FALSE(huge_bg_color.has_value());
 }
 
 TEST(UberSDFContentsTest, AsBackgroundColorExactSize) {
@@ -64,8 +68,10 @@ TEST(UberSDFContentsTest, AsBackgroundColorExactSize) {
   auto bg_color = contents->AsBackgroundColor(entity, ISize(500, 500));
   // The exact size now returns true because over-conservative AA insets are
   // removed
-  ASSERT_TRUE(bg_color.has_value());
-  ASSERT_EQ(bg_color.value(), Color::Red());
+  EXPECT_TRUE(bg_color.has_value());
+  if (bg_color.has_value()) {
+    EXPECT_EQ(bg_color.value(), Color::Red());
+  }
 }
 
 TEST(UberSDFContentsTest, AsBackgroundColorNonRect) {
@@ -81,7 +87,7 @@ TEST(UberSDFContentsTest, AsBackgroundColorNonRect) {
 
   auto circle_bg_color =
       circle_contents->AsBackgroundColor(entity, ISize(500, 500));
-  ASSERT_FALSE(circle_bg_color.has_value());
+  EXPECT_FALSE(circle_bg_color.has_value());
 }
 
 TEST(UberSDFContentsTest, AsBackgroundColorStrokedRect) {
@@ -95,7 +101,7 @@ TEST(UberSDFContentsTest, AsBackgroundColorStrokedRect) {
   entity.SetTransform(Matrix());
 
   auto bg_color = contents->AsBackgroundColor(entity, ISize(500, 500));
-  ASSERT_FALSE(bg_color.has_value());
+  EXPECT_FALSE(bg_color.has_value());
 }
 
 }  // namespace testing
