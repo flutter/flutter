@@ -4854,6 +4854,7 @@ class SemanticsOwner extends ChangeNotifier {
   final Set<SemanticsNode> _detachedNodes = <SemanticsNode>{};
   final Map<Object, SemanticsNode> _traversalParentNodes = <Object, SemanticsNode>{};
   final Map<Object, Set<SemanticsNode>> _traversalChildNodes = <Object, Set<SemanticsNode>>{};
+  final Map<Object, Set<SemanticsNode>> _forceToUpdateChildNodes = <Object, Set<SemanticsNode>>{};
 
   /// The root node of the semantics tree, if any.
   ///
@@ -4967,6 +4968,10 @@ class SemanticsOwner extends ChangeNotifier {
         for (final Set<SemanticsNode> childSet in _traversalChildNodes.values) {
           childSet.removeWhere((SemanticsNode oldNode) => node == oldNode);
         }
+        // Clean up _forceToUpdateChildNodes map
+        _forceToUpdateChildNodes.removeWhere(
+          (Object key, Set<SemanticsNode> nodeSet) => nodeSet.contains(node),
+        );
       }
     }
 
@@ -4974,6 +4979,21 @@ class SemanticsOwner extends ChangeNotifier {
     final SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
 
     final updatedVisitedNodes = <SemanticsNode>[];
+
+    // If the node is a traversal child and its traversal parent is not in the tree
+    // yet, store these children nodes and should be updated later when the traversal
+    // parent is added to the tree.
+    if (!kIsWeb) {
+      for (final node in visitedNodes) {
+        print('check force to update for node ${node.id}');
+        if (node._isTraversalChild &&
+            !_traversalParentNodes.containsKey(node.traversalChildIdentifier)) {
+          _forceToUpdateChildNodes[node.traversalChildIdentifier!] ??= <SemanticsNode>{};
+          _forceToUpdateChildNodes[node.traversalChildIdentifier!]!.add(node);
+          print('added ${node.id} to _forceToUpdateChildNodes');
+        }
+      }
+    }
 
     for (final node in visitedNodes) {
       final bool isTraversalParent = node._isTraversalParent;
@@ -5020,11 +5040,12 @@ class SemanticsOwner extends ChangeNotifier {
         if (isTraversalParent) {
           // If the node is a traversal parent, then its grafted traversal
           // children should also be sent for update.
-          final Set<SemanticsNode>? traversalChildren =
-              _traversalChildNodes[node.traversalParentIdentifier];
-          if (traversalChildren != null) {
-            for (final SemanticsNode child in traversalChildren) {
+          final Set<SemanticsNode>? forceUpdateNodes =
+              _forceToUpdateChildNodes[node.traversalParentIdentifier];
+          if (forceUpdateNodes != null) {
+            for (final SemanticsNode child in forceUpdateNodes) {
               if (child.attached && !child._dirty && !updatedVisitedNodes.contains(child)) {
+                child._markDirty();
                 updatedVisitedNodes.add(child);
               }
             }
@@ -5035,9 +5056,19 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
 
+    // print maps with key-value pairs
+    // print('_traversalParentNodes: ${_traversalParentNodes.map((k, v) => MapEntry(k, v.id))}');
+    // print(
+    //   '_traversalChildNodes: ${_traversalChildNodes.map((k, v) => MapEntry(k, v.map((e) => e.id)))}',
+    // );
+    print(
+      '_forceToUpdateChildNodes: ${_forceToUpdateChildNodes.map((k, v) => MapEntry(k, v.map((e) => e.id)))}',
+    );
+    print('updatedVisitedNodes: ${updatedVisitedNodes.map((e) => e.id).toList()}');
     for (final node in updatedVisitedNodes) {
       assert(
         node.parent?._dirty != true || node._isTraversalParent,
+        'node id: ${node.id}, parent id: ${node.parent?.id}, parent dirty: ${node.parent?._dirty}, isTraversalParent: ${node._isTraversalParent}, ',
       ); // could be null (no parent) or false (not dirty)
 
       // The traversalParentNode is added to updatedVisitedNodes for later
@@ -5059,6 +5090,7 @@ class SemanticsOwner extends ChangeNotifier {
       // which happens e.g. when the node is no longer contributing
       // semantics).
       if ((node._dirty || needUpdateTraversalParent || needUpdateTraversalChild) && node.attached) {
+        // print('node to update: ${node.id}');
         node._addToUpdate(builder, customSemanticsActionIds);
       }
     }
