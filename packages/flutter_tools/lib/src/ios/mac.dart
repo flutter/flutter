@@ -197,7 +197,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   await removeExtendedAttributes(
-    app.project.parent.directory,
+    app.project.hostAppRoot,
     globals.processUtils,
     globals.logger,
   );
