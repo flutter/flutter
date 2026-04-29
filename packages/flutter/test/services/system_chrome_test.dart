@@ -108,6 +108,55 @@ void main() {
     );
   });
 
+  test('preferredOrientations returns the latest set value', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (MethodCall methodCall) async => null,
+    );
+
+    await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
+    expect(SystemChrome.preferredOrientations, <DeviceOrientation>[
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
+    // A second call replaces the cached value rather than appending.
+    await SystemChrome.setPreferredOrientations(<DeviceOrientation>[DeviceOrientation.landscapeLeft]);
+    expect(SystemChrome.preferredOrientations, <DeviceOrientation>[
+      DeviceOrientation.landscapeLeft,
+    ]);
+
+    // The empty list (defer to OS default) is preserved as an empty list, not null.
+    await SystemChrome.setPreferredOrientations(const <DeviceOrientation>[]);
+    expect(SystemChrome.preferredOrientations, isEmpty);
+    expect(SystemChrome.preferredOrientations, isNotNull);
+  });
+
+  test('preferredOrientations returns an unmodifiable copy', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (MethodCall methodCall) async => null,
+    );
+
+    final source = <DeviceOrientation>[DeviceOrientation.portraitUp];
+    await SystemChrome.setPreferredOrientations(source);
+
+    // The returned list is detached from the caller's input — mutating the
+    // source after the call must not affect the cached list.
+    source.add(DeviceOrientation.landscapeLeft);
+    expect(SystemChrome.preferredOrientations, <DeviceOrientation>[DeviceOrientation.portraitUp]);
+
+    // The returned list itself is unmodifiable.
+    expect(
+      () => SystemChrome.preferredOrientations!.add(DeviceOrientation.landscapeRight),
+      throwsUnsupportedError,
+    );
+  });
+
   test('setApplicationSwitcherDescription control test', () async {
     final log = <MethodCall>[];
 

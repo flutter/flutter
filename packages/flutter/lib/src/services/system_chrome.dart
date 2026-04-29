@@ -545,11 +545,39 @@ abstract final class SystemChrome {
   /// Should you decide to opt out of multitasking you can do this by
   /// setting "Requires full screen" to true in the Xcode Deployment Info.
   static Future<void> setPreferredOrientations(List<DeviceOrientation> orientations) async {
+    _preferredOrientations = List<DeviceOrientation>.unmodifiable(orientations);
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setPreferredOrientations',
       _stringify(orientations),
     );
   }
+
+  /// The orientations most recently passed to [setPreferredOrientations], or
+  /// null if [setPreferredOrientations] has not yet been called during this
+  /// app session.
+  ///
+  /// This is useful for save/restore patterns: read the current preference,
+  /// apply a temporary preference (e.g. to lock a single screen to portrait),
+  /// and on dispose restore the previous list.
+  ///
+  /// {@tool snippet}
+  ///
+  /// ```dart
+  /// final List<DeviceOrientation>? saved = SystemChrome.preferredOrientations;
+  /// await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+  ///   DeviceOrientation.portraitUp,
+  /// ]);
+  /// // ... later, when the screen is dismissed ...
+  /// await SystemChrome.setPreferredOrientations(saved ?? const <DeviceOrientation>[]);
+  /// ```
+  /// {@end-tool}
+  ///
+  /// The returned list is unmodifiable. The value reflects what Flutter most
+  /// recently asked the operating system for; the OS may apply additional
+  /// constraints (for example on Android 16 large-screen devices, see the
+  /// [setPreferredOrientations] documentation).
+  static List<DeviceOrientation>? get preferredOrientations => _preferredOrientations;
+  static List<DeviceOrientation>? _preferredOrientations;
 
   /// Specifies the description of the current state of the application as it
   /// pertains to the application switcher (also known as "recent tasks").
