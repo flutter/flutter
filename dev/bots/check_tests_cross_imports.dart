@@ -235,33 +235,6 @@ class TestsCrossImportChecker {
     return crossImports;
   }
 
-  /// Get the list of known cross imports for the given [library].
-  static Set<String> _getKnownCrossImportsForLibrary(_Library library) {
-    // Material is allowed to cross import.
-    if (library is _MaterialLibrary) {
-      return const <String>{};
-    }
-
-    return switch (library.crossImportsListSymbolName) {
-      'knownFlutterSlashTestCrossImports' => knownFlutterSlashTestCrossImports,
-      'knownAnimationCrossImports' => knownAnimationCrossImports,
-      'knownCupertinoCrossImports' => knownCupertinoCrossImports,
-      'knownDartCrossImports' => knownDartCrossImports,
-      'knownExamplesCrossImports' => knownExamplesCrossImports,
-      'knownFoundationCrossImports' => knownFoundationCrossImports,
-      'knownGesturesCrossImports' => knownGesturesCrossImports,
-      'knownHarnessCrossImports' => knownHarnessCrossImports,
-      'knownPaintingCrossImports' => knownPaintingCrossImports,
-      'knownPhysicsCrossImports' => knownPhysicsCrossImports,
-      'knownRenderingCrossImports' => knownRenderingCrossImports,
-      'knownSchedulerCrossImports' => knownSchedulerCrossImports,
-      'knownSemanticsCrossImports' => knownSemanticsCrossImports,
-      'knownServicesCrossImports' => knownServicesCrossImports,
-      'knownWidgetsCrossImports' => knownWidgetsCrossImports,
-      _ => throw ArgumentError('Unknown library: ${library.name}', 'library'),
-    };
-  }
-
   /// Returns the [Set] of files that are not in [knownPaths].
   static Set<File> _getUnknowns(Set<String> knownPaths, Set<File> files) {
     return files.where((File file) {
@@ -407,7 +380,7 @@ class TestsCrossImportChecker {
       final Set<File> crossImportsForLibrary = entry.value.cupertinoImports.union(
         entry.value.materialImports,
       );
-      final Set<String> knownCrossImportsForLibrary = _getKnownCrossImportsForLibrary(entry.key);
+      final Set<String> knownCrossImportsForLibrary = entry.key.knownCrossImports;
       final Set<String> fixedCrossImports = _differencePaths(
         knownCrossImportsForLibrary,
         crossImportsForLibrary,
@@ -477,7 +450,7 @@ sealed class _Library {
       'packages/flutter/test/foundation' => 'knownFoundationCrossImports',
       'packages/flutter/test/gestures' => 'knownGesturesCrossImports',
       'packages/flutter/test/harness' => 'knownHarnessCrossImports',
-      'packages/flutter/test/material' => throw UnimplementedError(
+      'packages/flutter/test/material' => throw UnsupportedError(
         'Material is responsible for testing its interactions with Cupertino, so it is allowed to cross-import.',
       ),
       'packages/flutter/test/painting' => 'knownPaintingCrossImports',
@@ -487,6 +460,34 @@ sealed class _Library {
       'packages/flutter/test/semantics' => 'knownSemanticsCrossImports',
       'packages/flutter/test/services' => 'knownServicesCrossImports',
       'packages/flutter/test/widgets' => 'knownWidgetsCrossImports',
+      _ => throw UnimplementedError('Unknown library: $name'),
+    };
+  }
+
+  /// Get the list of known cross imports for this [_Library].
+  Set<String> get knownCrossImports {
+    // Material is allowed to cross import.
+    if (this is _MaterialLibrary) {
+      return const <String>{};
+    }
+
+    return switch (crossImportsListSymbolName) {
+      'knownFlutterSlashTestCrossImports' =>
+        TestsCrossImportChecker.knownFlutterSlashTestCrossImports,
+      'knownAnimationCrossImports' => TestsCrossImportChecker.knownAnimationCrossImports,
+      'knownCupertinoCrossImports' => TestsCrossImportChecker.knownCupertinoCrossImports,
+      'knownDartCrossImports' => TestsCrossImportChecker.knownDartCrossImports,
+      'knownExamplesCrossImports' => TestsCrossImportChecker.knownExamplesCrossImports,
+      'knownFoundationCrossImports' => TestsCrossImportChecker.knownFoundationCrossImports,
+      'knownGesturesCrossImports' => TestsCrossImportChecker.knownGesturesCrossImports,
+      'knownHarnessCrossImports' => TestsCrossImportChecker.knownHarnessCrossImports,
+      'knownPaintingCrossImports' => TestsCrossImportChecker.knownPaintingCrossImports,
+      'knownPhysicsCrossImports' => TestsCrossImportChecker.knownPhysicsCrossImports,
+      'knownRenderingCrossImports' => TestsCrossImportChecker.knownRenderingCrossImports,
+      'knownSchedulerCrossImports' => TestsCrossImportChecker.knownSchedulerCrossImports,
+      'knownSemanticsCrossImports' => TestsCrossImportChecker.knownSemanticsCrossImports,
+      'knownServicesCrossImports' => TestsCrossImportChecker.knownServicesCrossImports,
+      'knownWidgetsCrossImports' => TestsCrossImportChecker.knownWidgetsCrossImports,
       _ => throw UnimplementedError('Unknown library: $name'),
     };
   }
