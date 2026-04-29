@@ -153,7 +153,7 @@ void main() {
         platform: FakePlatform(),
         androidSdk: androidSdk,
       );
-      final File apkFile = fileSystem.file('app-debug.apk')..createSync();
+      final File apkFile = fileSystem.file('app-release.apk')..createSync();
       final apk = AndroidApk(
         id: 'FlutterApp',
         applicationPackage: apkFile,

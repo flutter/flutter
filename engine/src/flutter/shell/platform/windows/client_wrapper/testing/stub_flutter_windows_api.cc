@@ -217,6 +217,16 @@ FlutterDesktopViewRef FlutterDesktopPluginRegistrarGetViewById(
   return nullptr;
 }
 
+bool FlutterDesktopPluginRegistrarGetGraphicsAdapter(
+    FlutterDesktopPluginRegistrarRef registrar,
+    IDXGIAdapter** adapter_out) {
+  if (s_stub_implementation) {
+    return s_stub_implementation->PluginRegistrarGetGraphicsAdapter(
+        adapter_out);
+  }
+  return false;
+}
+
 void FlutterDesktopPluginRegistrarRegisterTopLevelWindowProcDelegate(
     FlutterDesktopPluginRegistrarRef registrar,
     FlutterDesktopWindowProcCallback delegate,
