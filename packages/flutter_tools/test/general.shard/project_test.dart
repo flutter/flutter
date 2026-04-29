@@ -1983,7 +1983,7 @@ resolution: workspace
         );
       });
 
-      _testInMemory('fails on invalid pubspec.yaml', () async {
+      _testInMemory('supports glob patterns in workspace entries', () async {
         final Directory directory = globals.fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
