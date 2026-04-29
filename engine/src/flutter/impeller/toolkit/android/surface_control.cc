@@ -10,9 +10,9 @@
 
 namespace impeller::android {
 
-std::shared_ptr<SurfaceControl> SurfaceControl::Create(ANativeWindow* window,
+std::unique_ptr<SurfaceControl> SurfaceControl::Create(ANativeWindow* window,
                                                        const char* debug_name) {
-  return std::shared_ptr<SurfaceControl>(
+  return std::unique_ptr<SurfaceControl>(
       new SurfaceControlImpl(window, debug_name));
 }
 

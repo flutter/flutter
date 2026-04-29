@@ -166,32 +166,46 @@ VkResult vkEnumerateInstanceExtensionProperties(
     VkExtensionProperties* pProperties) {
   if (!pProperties) {
     *pPropertyCount = GetMockVulkanState().instance_extensions.size();
+    return VK_SUCCESS;
   } else {
     uint32_t count = 0;
+    VkResult result = VK_SUCCESS;
     for (const std::string& ext : GetMockVulkanState().instance_extensions) {
-      strncpy(pProperties[count].extensionName, ext.c_str(),
-              sizeof(VkExtensionProperties::extensionName));
+      if (count >= *pPropertyCount) {
+        result = VK_INCOMPLETE;
+        break;
+      }
+      snprintf(pProperties[count].extensionName,
+               sizeof(pProperties[count].extensionName), "%s", ext.c_str());
       pProperties[count].specVersion = 0;
       count++;
     }
+    *pPropertyCount = count;
+    return result;
   }
-  return VK_SUCCESS;
 }
 
 VkResult vkEnumerateInstanceLayerProperties(uint32_t* pPropertyCount,
                                             VkLayerProperties* pProperties) {
   if (!pProperties) {
     *pPropertyCount = GetMockVulkanState().instance_layers.size();
+    return VK_SUCCESS;
   } else {
     uint32_t count = 0;
-    for (const std::string& layer : GetMockVulkanState().instance_layers) {
-      strncpy(pProperties[count].layerName, layer.c_str(),
-              sizeof(VkLayerProperties::layerName));
+    VkResult result = VK_SUCCESS;
+    for (const std::string& ext : GetMockVulkanState().instance_layers) {
+      if (count >= *pPropertyCount) {
+        result = VK_INCOMPLETE;
+        break;
+      }
+      snprintf(pProperties[count].layerName,
+               sizeof(pProperties[count].layerName), "%s", ext.c_str());
       pProperties[count].specVersion = 0;
       count++;
     }
+    *pPropertyCount = count;
+    return result;
   }
-  return VK_SUCCESS;
 }
 
 VkResult vkEnumeratePhysicalDevices(VkInstance instance,
@@ -248,16 +262,23 @@ VkResult vkEnumerateDeviceExtensionProperties(
     VkExtensionProperties* pProperties) {
   if (!pProperties) {
     *pPropertyCount = GetMockVulkanState().device_extensions.size();
+    return VK_SUCCESS;
   } else {
     uint32_t count = 0;
+    VkResult result = VK_SUCCESS;
     for (const std::string& ext : GetMockVulkanState().device_extensions) {
-      strncpy(pProperties[count].extensionName, ext.c_str(),
-              sizeof(VkExtensionProperties::extensionName));
+      if (count >= *pPropertyCount) {
+        result = VK_INCOMPLETE;
+        break;
+      }
+      snprintf(pProperties[count].extensionName,
+               sizeof(pProperties[count].extensionName), "%s", ext.c_str());
       pProperties[count].specVersion = 0;
       count++;
     }
+    *pPropertyCount = count;
+    return result;
   }
-  return VK_SUCCESS;
 }
 
 VkResult vkCreateDevice(VkPhysicalDevice physicalDevice,

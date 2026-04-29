@@ -38,7 +38,7 @@ class SurfaceControl {
   ///                         other control properties. If no debug name is
   ///                         specified, the value "Impeller Layer" is used.
   ///
-  static std::shared_ptr<SurfaceControl> Create(
+  static std::unique_ptr<SurfaceControl> Create(
       ANativeWindow* window,
       const char* debug_name = nullptr);
 
