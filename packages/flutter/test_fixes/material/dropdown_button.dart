@@ -31,4 +31,10 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/182419.
   DropdownButtonFormField(onChanged: null, enabled: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/182419.
+  DropdownButton(onChanged: null);
+
+  // Changes made in https://github.com/flutter/flutter/pull/182419.
+  DropdownButtonFormField(onChanged: null);
 }

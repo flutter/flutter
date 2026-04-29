@@ -38,10 +38,19 @@ transforms:
       constructor: ''
       inClass: "DropdownButton"
     oneOf:
-      - if: "onChanged == 'null' && enabled == 'false'"
+      - if: "onChanged == 'null' && enabled != ''"
         changes:
           - kind: "removeParameter"
             name: "onChanged"
+          - kind: "removeParameter"
+            name: "enabled"
+          - kind: "addParameter"
+            index: 0
+            name: "enabled"
+            style: "optional_named"
+            argumentValue:
+              expression: "false"
+              requiredIf: "onChanged == 'null'"
       - if: "onChanged == 'null' && enabled == ''"
         changes:
           - kind: "addParameter"
@@ -69,10 +78,19 @@ transforms:
       constructor: ''
       inClass: "DropdownButtonFormField"
     oneOf:
-      - if: "onChanged == 'null' && enabled == 'false'"
+      - if: "onChanged == 'null' && enabled != ''"
         changes:
           - kind: "removeParameter"
             name: "onChanged"
+          - kind: "removeParameter"
+            name: "enabled"
+          - kind: "addParameter"
+            index: 0
+            name: "enabled"
+            style: "optional_named"
+            argumentValue:
+              expression: "false"
+              requiredIf: "onChanged == 'null'"
       - if: "onChanged == 'null' && enabled == ''"
         changes:
           - kind: "addParameter"

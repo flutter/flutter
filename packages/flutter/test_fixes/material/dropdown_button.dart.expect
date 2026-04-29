@@ -21,10 +21,16 @@ void main() {
   DropdownButtonFormField(onChanged: (String? v) {});
 
   // Changes made in https://github.com/flutter/flutter/pull/182419.
-  DropdownButton(onChanged: null, enabled: true);
+  DropdownButton(enabled: false);
 
   // Changes made in https://github.com/flutter/flutter/pull/182419.
-  DropdownButtonFormField(onChanged: null, enabled: true);
+  DropdownButtonFormField(enabled: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/182419.
+  DropdownButton(enabled: false);
+
+  // Changes made in https://github.com/flutter/flutter/pull/182419.
+  DropdownButtonFormField(enabled: false);
 
   // Changes made in https://github.com/flutter/flutter/pull/182419.
   DropdownButton(enabled: false);
