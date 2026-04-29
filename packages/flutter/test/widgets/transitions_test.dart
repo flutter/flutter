@@ -915,14 +915,16 @@ void main() {
         value: 1,
         duration: const Duration(seconds: 2),
       );
+      final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
       addTearDown(tester.view.reset);
       addTearDown(controller.dispose);
+      addTearDown(curvedAnimation.dispose);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
             child: MatrixTransition(
-              animation: CurvedAnimation(parent: controller, curve: Curves.linear),
+              animation: curvedAnimation,
               onTransform: (_) => Matrix4.identity(),
               child: const Placeholder(),
             ),

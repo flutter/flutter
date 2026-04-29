@@ -60,10 +60,12 @@ void main() {
 
   testWidgets('ShrinkWrappingViewport does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
+    final offset = ViewportOffset.fixed(5);
     addTearDown(tester.view.reset);
+    addTearDown(offset.dispose);
     await tester.pumpWidget(
       TestWidgetsApp(
-        home: Center(child: ShrinkWrappingViewport(offset: ViewportOffset.fixed(5))),
+        home: Center(child: ShrinkWrappingViewport(offset: offset)),
       ),
     );
     expect(tester.getSize(find.byType(ShrinkWrappingViewport)), Size.zero);
