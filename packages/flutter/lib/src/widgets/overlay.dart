@@ -2573,7 +2573,17 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
 
   @override
   void redepthChildren() {
-    _layoutSurrogate.redepthChild(this);
+    // The layout surrogate may not be attached yet — e.g. when a parent like
+    // [Table] defers calling [adoptChild] on its [RenderObject] children until
+    // every row has been mounted, this deferred box is adopted by the theater
+    // (and gets an [owner]) before the surrogate has been adopted by its own
+    // parent. Calling [redepthChild] across that owner boundary trips the
+    // `child.owner == owner` assertion. The depth invariant is restored when
+    // the surrogate is finally attached: [_RenderLayoutSurrogateProxyBox]
+    // already redepths this box from its own [redepthChildren].
+    if (_layoutSurrogate.attached) {
+      _layoutSurrogate.redepthChild(this);
+    }
     super.redepthChildren();
   }
 
