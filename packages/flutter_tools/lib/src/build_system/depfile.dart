@@ -39,14 +39,15 @@ class DepfileService {
       return;
     }
     final buffer = StringBuffer();
-    final List<File> outputsToWrite = filterOutputs
-        ? depfile.outputs
-              .where(
-                (File file) =>
-                    !depfile.inputs.map((File f) => f.absolute.path).contains(file.absolute.path),
-              )
-              .toList()
-        : depfile.outputs;
+    final List<File> outputsToWrite;
+    if (filterOutputs) {
+      final Set<String> inputPaths = depfile.inputs.map((File f) => f.absolute.path).toSet();
+      outputsToWrite = depfile.outputs
+          .where((File file) => !inputPaths.contains(file.absolute.path))
+          .toList();
+    } else {
+      outputsToWrite = depfile.outputs;
+    }
     _writeFilesToBuffer(outputsToWrite, buffer);
     buffer.write(': ');
     _writeFilesToBuffer(depfile.inputs, buffer);
