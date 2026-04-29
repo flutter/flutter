@@ -1106,6 +1106,17 @@ void main() {
         );
       },
     );
+
+    testWithoutContext(
+      'getAndroidLaunchArguments sets --enable-hcpp-and-surface-control when debugging is disabled but enableHcpp is true',
+      () async {
+        final options = DebuggingOptions.disabled(BuildInfo.release, enableHcpp: true);
+        expect(
+          options.getAndroidLaunchArguments(),
+          contains('--enable-hcpp-and-surface-control'),
+        );
+      },
+    );
   });
 }
 

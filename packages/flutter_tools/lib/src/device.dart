@@ -1280,6 +1280,7 @@ class DebuggingOptions {
       if (enableImpeller == ImpellerStatus.disabled) ...<String>['--enable-impeller=false'],
       if (enableFlutterGpu) ...<String>['--enable-flutter-gpu'],
       if (enableVulkanValidation) ...<String>['--enable-vulkan-validation'],
+      if (enableHcpp) ...<String>['--enable-hcpp-and-surface-control'],
       if (debuggingEnabled) ...<String>[
         if (buildInfo.isDebug) ...<String>[
           ...<String>['--enable-checked-mode'],
@@ -1288,7 +1289,6 @@ class DebuggingOptions {
         if (startPaused) ...<String>['--start-paused'],
         if (disableServiceAuthCodes) ...<String>['--disable-service-auth-codes'],
         if (dartFlags.isNotEmpty) ...<String>['--dart-flags=$dartFlags'],
-        if (enableHcpp) ...<String>['--enable-hcpp-and-surface-control'],
         if (useTestFonts) ...<String>['--use-test-fonts'],
         if (verboseSystemLogs) ...<String>['--verbose-logging'],
       ],
