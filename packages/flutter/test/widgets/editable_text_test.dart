@@ -294,7 +294,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('EditableText uses tight selection width style by default for multiline', (
+  testWidgets('EditableText uses tight selection width style by default', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
