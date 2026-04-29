@@ -179,7 +179,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/painting/continuous_rectangle_border_test.dart',
     'packages/flutter/test/painting/colors_test.dart',
     'packages/flutter/test/painting/star_border_test.dart',
-    'packages/flutter/test/painting/system_fonts_test.dart',
   };
   static final Set<String> knownPhysicsCrossImports = <String>{};
   static final Set<String> knownRenderingCrossImports = <String>{
@@ -354,7 +353,8 @@ class TestsCrossImportChecker {
   }) {
     assert(
       !testLibrary.canImport(importStatement),
-      'Import errors only occur when Widgets imports Material or Cupertino, and when Cupertino imports Material.',
+      'any library that is not Material or Cupertino, imports Material or Cupertino, '
+      'and when Cupertino imports Material.',
     );
 
     final String importedLibraryName = importStatement.readableName;
