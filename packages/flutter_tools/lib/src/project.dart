@@ -522,6 +522,11 @@ class AndroidProject extends FlutterProjectPlatform {
   static final _applicationIdPattern = RegExp('^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
   static final _imperativeKotlinPluginPattern = RegExp(
     '^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$',
+    multiLine: true,
+  );
+
+  static final _kotlinCompilerOptionsPattern = RegExp(
+    r'kotlin\s*\{[\s\S]*?compilerOptions\s*\{[^}]*\}',
   );
 
   /// Examples of strings that this regex matches:
@@ -532,8 +537,8 @@ class AndroidProject extends FlutterProjectPlatform {
   /// - `id("org.jetbrains.kotlin.android")`
   /// - `id ( "org.jetbrains.kotlin.android" )`
   static final _declarativeKotlinPluginPatterns = <RegExp>[
-    RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?\\s*\$'),
-    RegExp('^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?\\s*\$'),
+    RegExp(r'''id\s*\(?\s*["']kotlin-android["']'''),
+    RegExp(r'''id\s*\(?\s*["']org\.jetbrains\.kotlin\.android["']'''),
   ];
 
   /// Pattern used to find the assignment of the "group" property in Gradle.
@@ -630,11 +635,30 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
-    final bool declarativeMatch = _declarativeKotlinPluginPatterns.any((RegExp pattern) {
-      return (firstMatchInFile(appGradleFile, pattern) != null);
-    });
-    return imperativeMatch || declarativeMatch;
+    if (appGradleFile.existsSync()) {
+      try {
+        final String content = appGradleFile.readAsStringSync();
+        if (_imperativeKotlinPluginPattern.hasMatch(content)) {
+          return true;
+        }
+        for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
+          if (pattern.hasMatch(content)) {
+            return true;
+          }
+        }
+        if (_kotlinCompilerOptionsPattern.hasMatch(content)) {
+          return true;
+        }
+      } on FileSystemException {
+        // Ignore and continue with other checks.
+      }
+    }
+    final Directory kotlinSrc = hostAppGradleRoot
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('kotlin');
+    return kotlinSrc.existsSync();
   }
 
   /// Gets top-level Gradle build file.
