@@ -488,6 +488,8 @@ ImpellerMetalCaptureManager::ImpellerMetalCaptureManager(id<MTLDevice> device) {
   current_capture_scope_ = [[MTLCaptureManager sharedCaptureManager]
       newCaptureScopeWithDevice:device];
   [current_capture_scope_ setLabel:@"Impeller Frame"];
+  [[MTLCaptureManager sharedCaptureManager]
+      setDefaultCaptureScope:current_capture_scope_];
 }
 
 bool ImpellerMetalCaptureManager::CaptureScopeActive() const {
