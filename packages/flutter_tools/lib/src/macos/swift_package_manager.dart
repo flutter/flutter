@@ -277,6 +277,7 @@ class SwiftPackageManager {
       '-8', // Avoid mangling filenames with encodings that do not match the current locale.
       '-av', // Archive mode and verbose: preserve permissions, ownership, timestamps, etc.
       '--delete', // Delete files in the destination that are not in the source.
+      '--exclude=/example/', // Don't copy the example directory as this can cause rsync to fail or be slow due to copying build directories and symlinks
       plugin.path,
       destination,
     ]);

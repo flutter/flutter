@@ -446,6 +446,7 @@ let package = Package(
                   '-8',
                   '-av',
                   '--delete',
+                  '--exclude=/example/',
                   validPlugin1.path,
                   '$buildSourcePackagesPath/valid_plugin_1-1.0.0',
                 ],
