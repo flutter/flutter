@@ -2092,5 +2092,7 @@ void main() {
     );
 
     expect(data.textScaler, const TextScaler.linear(2.5));
+
+    debugTextScalerOverride = null;
   });
 }

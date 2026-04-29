@@ -560,10 +560,14 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
 /// based on the given lookup table.
 class DebugNonlinearTextScaler extends TextScaler {
   /// Creates a new nonlinear text scaler for debugging purposes.
-  DebugNonlinearTextScaler(this.table) : assert(table.isNotEmpty);
+  DebugNonlinearTextScaler(this.table)
+    : _sortedKeys = table.keys.toList()..sort(),
+      assert(table.isNotEmpty);
 
   /// The lookup table of unscaled font sizes to scaled font sizes.
   final Map<double, double> table;
+
+  final List<double> _sortedKeys;
 
   @override
   double get textScaleFactor {
@@ -584,7 +588,7 @@ class DebugNonlinearTextScaler extends TextScaler {
       return fontSize * (entry.value / entry.key);
     }
 
-    final List<double> keys = table.keys.toList()..sort();
+    final List<double> keys = _sortedKeys;
     if (table.containsKey(fontSize)) {
       return table[fontSize]!;
     }
@@ -626,7 +630,7 @@ class DebugNonlinearTextScaler extends TextScaler {
   }
 
   @override
-  int get hashCode => Object.hashAll(table.entries.map((e) => Object.hash(e.key, e.value)));
+  int get hashCode => Object.hashAll(_sortedKeys.map((double key) => Object.hash(key, table[key])));
 
   @override
   String toString() => 'nonlinear text scaler ($table)';
