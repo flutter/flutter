@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:data_assets/data_assets.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -136,6 +137,74 @@ void main() {
         expect(iosEnvironment.buildDir.childFile(BuildHooks.depFilename), exists);
         expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.depFilename), exists);
         expect(iosEnvironment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
+      },
+    );
+  }
+
+  bool nativeAssetsLinkingEnabled(BuildMode buildMode) {
+    switch (buildMode) {
+      case BuildMode.debug:
+        return false;
+      case BuildMode.jitRelease:
+      case BuildMode.profile:
+      case BuildMode.release:
+        return true;
+    }
+  }
+
+  for (final buildMode in <BuildMode>[BuildMode.profile, BuildMode.debug]) {
+    final bool linkingEnabled = nativeAssetsLinkingEnabled(buildMode);
+    final testName = linkingEnabled ? 'enabled' : 'disabled';
+    testUsingContext(
+      'NativeAssets depfile filtering avoids circular cycles in Xcode when link hooks are $testName',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        FeatureFlags: () =>
+            TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
+      },
+      () async {
+        writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+
+        // Force environment to use specified build mode!
+        iosEnvironment.defines[kBuildMode] = buildMode.cliName;
+
+        final String sourceAssetPath = iosEnvironment.fileSystem
+            .file('assets/translations/en.json')
+            .path;
+        iosEnvironment.fileSystem.file(sourceAssetPath).createSync(recursive: true);
+
+        final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <String>['foo'],
+          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+            dependencies: <Uri>[Uri.file(sourceAssetPath)],
+            dataAssets: <DataAsset>[
+              DataAsset(file: Uri.file(sourceAssetPath), name: 'en.json', package: 'my_app'),
+            ],
+          ),
+          linkResult: linkingEnabled
+              ? FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                  dependencies: <Uri>[Uri.file(sourceAssetPath)],
+                )
+              : const FakeFlutterNativeAssetsBuilderResult(),
+        );
+
+        final dartBuildForNative = BuildHooks(buildRunner: buildRunner);
+        await dartBuildForNative.build(iosEnvironment);
+
+        final dartLinkForNative = LinkHooks(buildRunner: buildRunner);
+        await dartLinkForNative.build(iosEnvironment);
+
+        final File depfileFile = iosEnvironment.buildDir.childFile(LinkHooks.depFilename);
+        expect(depfileFile, exists);
+
+        final String contents = depfileFile.readAsStringSync();
+        final List<String> colonSeparated = contents.split(': ');
+        expect(colonSeparated.length, 2);
+
+        final List<String> linkOutputs = _resolvedOutputs(dartLinkForNative, iosEnvironment);
+        // Verify that full source path resolved resolves to empty list after fix!
+        expect(linkOutputs, isNot(contains(sourceAssetPath)));
       },
     );
   }
