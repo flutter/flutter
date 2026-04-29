@@ -10,7 +10,7 @@
 
 namespace impeller::android {
 
-class SurfaceControlImpl : public SurfaceControl {
+class SurfaceControlImpl final : public SurfaceControl {
  public:
   virtual ~SurfaceControlImpl();
 
