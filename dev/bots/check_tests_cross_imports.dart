@@ -235,6 +235,33 @@ class TestsCrossImportChecker {
     return crossImports;
   }
 
+  /// Get the list of known cross imports for the given [library].
+  static Set<String> _getKnownCrossImportsForLibrary(_Library library) {
+    // Material is allowed to cross import.
+    if (library is _MaterialLibrary) {
+      return const <String>{};
+    }
+
+    return switch (library.crossImportsListSymbolName) {
+      'knownFlutterSlashTestCrossImports' => knownFlutterSlashTestCrossImports,
+      'knownAnimationCrossImports' => knownAnimationCrossImports,
+      'knownCupertinoCrossImports' => knownCupertinoCrossImports,
+      'knownDartCrossImports' => knownDartCrossImports,
+      'knownExamplesCrossImports' => knownExamplesCrossImports,
+      'knownFoundationCrossImports' => knownFoundationCrossImports,
+      'knownGesturesCrossImports' => knownGesturesCrossImports,
+      'knownHarnessCrossImports' => knownHarnessCrossImports,
+      'knownPaintingCrossImports' => knownPaintingCrossImports,
+      'knownPhysicsCrossImports' => knownPhysicsCrossImports,
+      'knownRenderingCrossImports' => knownRenderingCrossImports,
+      'knownSchedulerCrossImports' => knownSchedulerCrossImports,
+      'knownSemanticsCrossImports' => knownSemanticsCrossImports,
+      'knownServicesCrossImports' => knownServicesCrossImports,
+      'knownWidgetsCrossImports' => knownWidgetsCrossImports,
+      _ => throw ArgumentError('Unknown library: ${library.name}', 'library'),
+    };
+  }
+
   /// Returns the [Set] of files that are not in [knownPaths].
   static Set<File> _getUnknowns(Set<String> knownPaths, Set<File> files) {
     return files.where((File file) {
@@ -339,9 +366,9 @@ class TestsCrossImportChecker {
       filesByLibrary,
     );
 
-    // Find any cross imports that are not in the known list.
     var valid = true;
 
+    // Find any cross imports that are not in the known list.
     for (final MapEntry<_Library, _CrossImportingFiles> entry in crossImportsPerLibrary.entries) {
       final Set<File> unknownCupertinoImports = _getUnknowns(
         _knownCrossImports,
@@ -379,21 +406,20 @@ class TestsCrossImportChecker {
     // TODO(justinmc): Remove this after all known cross imports have been
     // fixed.
     // See https://github.com/flutter/flutter/issues/177028.
-    final Set<String> fixedWidgetsCrossImports = _differencePaths(
-      knownWidgetsCrossImports,
-      widgetsTestsImportingMaterial.union(widgetsTestsImportingCupertino),
-    );
-    if (fixedWidgetsCrossImports.isNotEmpty) {
-      valid = false;
-      foundError(_getFixedImportError(fixedWidgetsCrossImports, _Library.widgets).split('\n'));
-    }
-    final Set<String> fixedCupertinoCrossImports = _differencePaths(
-      knownCupertinoCrossImports,
-      cupertinoTestsImportingMaterial,
-    );
-    if (fixedCupertinoCrossImports.isNotEmpty) {
-      valid = false;
-      foundError(_getFixedImportError(fixedCupertinoCrossImports, _Library.cupertino).split('\n'));
+    for (final MapEntry<_Library, _CrossImportingFiles> entry in crossImportsPerLibrary.entries) {
+      final Set<File> crossImportsForLibrary = entry.value.cupertinoImports.union(
+        entry.value.materialImports,
+      );
+      final Set<String> knownCrossImportsForLibrary = _getKnownCrossImportsForLibrary(entry.key);
+      final Set<String> fixedCrossImports = _differencePaths(
+        knownCrossImportsForLibrary,
+        crossImportsForLibrary,
+      );
+
+      if (fixedCrossImports.isNotEmpty) {
+        valid = false;
+        foundError(_getFixedImportError(fixedCrossImports, entry.key).split('\n'));
+      }
     }
 
     return valid;
