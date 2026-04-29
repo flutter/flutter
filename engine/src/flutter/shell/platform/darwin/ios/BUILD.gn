@@ -247,6 +247,7 @@ if (enable_ios_unittests) {
       "framework/Source/AccessibilityFeaturesTests.swift",
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/LaunchEngineTest.swift",
+
       # TODO(LongCatIsLooong): migrate this test to Swift testing.
       "framework/Source/SplashScreenManagerTests.swift",
     ]

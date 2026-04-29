@@ -905,14 +905,14 @@ def run_objc_tests(
         raise
 
   try:
-    # Run XCTest tests
-    ios_unit_test_dir = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'ios', 'IosUnitTests')
-    run_xcodebuild('IosUnitTests', ios_unit_test_dir, 'ios_embedding')
-
     # Run Swift Testing tests
     ios_swift_test_dir = os.path.join(
         BUILDROOT_DIR, 'flutter', 'testing', 'ios', 'IosSwiftTestingTests'
     )
+
+    # Run XCTest tests
+    ios_unit_test_dir = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'ios', 'IosUnitTests')
+    run_xcodebuild('IosUnitTests', ios_unit_test_dir, 'ios_embedding')
     run_xcodebuild('IosSwiftTestingTests', ios_swift_test_dir, 'ios_swift_testing')
 
   finally:
