@@ -343,7 +343,8 @@ void main() {
           ),
         );
 
-        // This command contains the user launch arguments.
+        // This command contains the user launch argument and the test route that is
+        // passed the embedding as an Intent extra (not via the manifest).
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -359,6 +360,7 @@ void main() {
               'android.intent.category.LAUNCHER',
               '-f',
               '0x20000000',
+              '--route=some/route',
               '--user',
               '10',
               apkLaunchActivity,
@@ -418,7 +420,6 @@ void main() {
           '--use-test-fonts',
           '--verbose-logging',
           '--trace-startup',
-          '--route=$testRoute',
         ];
 
         final LaunchResult launchResult = await device.startApp(
@@ -463,7 +464,6 @@ void main() {
           '--enable-checked-mode',
           '--verify-entry-points',
           '--verbose-logging',
-          '--route=$testRoute',
         };
         final apk = AndroidApk(
           id: 'FlutterApp',
@@ -510,7 +510,8 @@ void main() {
           ),
         );
 
-        // This command contains the user launch arguments.
+        // This command contains the user launch argument and the test route that is
+        // passed the embedding as an Intent extra (not via the manifest).
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -526,6 +527,7 @@ void main() {
               'android.intent.category.LAUNCHER',
               '-f',
               '0x20000000',
+              '--route=some/route',
               '--user',
               '10',
               apkLaunchActivity,
@@ -581,7 +583,6 @@ void main() {
           '--enable-checked-mode',
           '--verify-entry-points',
           '--verbose-logging',
-          '--route=$testRoute',
         };
         final apk = AndroidApk(
           id: 'FlutterApp',
@@ -628,7 +629,8 @@ void main() {
           ),
         );
 
-        // This command contains the user launch arguments.
+        // This command contains the user launch argument and the test route that is
+        // passed the embedding as an Intent extra (not via the manifest).
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -644,6 +646,7 @@ void main() {
               'android.intent.category.LAUNCHER',
               '-f',
               '0x20000000',
+              '--route=some/route',
               '--user',
               '10',
               apkLaunchActivity,
@@ -662,7 +665,6 @@ void main() {
           '--enable-checked-mode',
           '--verify-entry-points',
           '--verbose-logging',
-          '--route=$testRoute',
         ];
 
         final LaunchResult launchResult = await device.startApp(
@@ -742,7 +744,8 @@ void main() {
           ),
         );
 
-        // This command contains the user launch arguments.
+        // This command contains the user launch argument and the test route that is
+        // passed the embedding as an Intent extra (not via the manifest).
         processManager.addCommand(
           const FakeCommand(
             command: <String>[
@@ -758,6 +761,7 @@ void main() {
               'android.intent.category.LAUNCHER',
               '-f',
               '0x20000000',
+              '--route=some/route',
               '--user',
               '10',
               apkLaunchActivity,
@@ -776,7 +780,6 @@ void main() {
           '--enable-checked-mode',
           '--verify-entry-points',
           '--verbose-logging',
-          '--route=$testRoute',
         ];
 
         final LaunchResult launchResult = await device.startApp(
