@@ -61,10 +61,11 @@ void main() {
 
   test('Traces from package:stack_trace parse without throwing', () {
     // Regression test for https://github.com/flutter/flutter/issues/179018.
-    // package:stack_trace emits a literal `===== asynchronous gap ===` line
-    // between chained stacks; this parser used to assert on it. It is now
-    // treated as an asynchronous-suspension marker so callers like
-    // [debugPrintStack] do not crash on stacks that carry that format.
+    // package:stack_trace emits a literal
+    // '===== asynchronous gap ===========================' line between
+    // chained stacks; this parser used to assert on it. It is now treated as
+    // an asynchronous-suspension marker so callers like [debugPrintStack] do
+    // not crash on stacks that carry that format.
     final List<StackFrame> frames = StackFrame.fromStackString(mangledStackString);
     expect(frames, contains(StackFrame.asynchronousSuspension));
     expect(frames, isNot(isEmpty));
@@ -77,7 +78,7 @@ void main() {
     );
   });
 
-  test('debugPrintStack does not throw on a stack carrying an async-gap marker', () async {
+  test('debugPrintStack does not throw on a stack carrying an async-gap marker', () {
     // Regression test for https://github.com/flutter/flutter/issues/179018.
     final printed = <String?>[];
     final DebugPrintCallback original = debugPrint;
