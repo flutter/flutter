@@ -287,14 +287,10 @@ class TestsCrossImportChecker {
     for (final path in fixedPaths) {
       buffer.writeln('  $path');
     }
-    final String knownListName = switch (library) {
-      _CupertinoLibrary() || _OtherLibrary() => library.crossImportsListSymbolName,
-      _MaterialLibrary() => throw UnimplementedError(
-        'Material is responsible for testing its interactions with Cupertino, so it is allowed to cross-import.',
-      ),
-    };
     buffer.writeln('However, they now need to be removed from the');
-    buffer.write('$knownListName list in the script /dev/bots/check_tests_cross_imports.dart.');
+    buffer.write(
+      '${library.crossImportsListSymbolName} list in the script /dev/bots/check_tests_cross_imports.dart.',
+    );
     return buffer.toString().trimRight();
   }
 
@@ -472,22 +468,18 @@ sealed class _Library {
   ///
   /// This is used for reporting mismatched cross imports.
   String get crossImportsListSymbolName {
-    if (this is _MaterialLibrary) {
-      throw UnsupportedError('Material is allowed to cross-import.');
-    }
-
-    if (this is _CupertinoLibrary) {
-      return 'knownCupertinoCrossImports';
-    }
-
     return switch (name) {
       'packages/flutter/test' => 'knownFlutterSlashTestCrossImports',
       'packages/flutter/test/animation' => 'knownAnimationCrossImports',
+      'packages/flutter/test/cupertino' => 'knownCupertinoCrossImports',
       'packages/flutter/test/dart' => 'knownDartCrossImports',
       'packages/flutter/test/examples' => 'knownExamplesCrossImports',
       'packages/flutter/test/foundation' => 'knownFoundationCrossImports',
       'packages/flutter/test/gestures' => 'knownGesturesCrossImports',
       'packages/flutter/test/harness' => 'knownHarnessCrossImports',
+      'packages/flutter/test/material' => throw UnimplementedError(
+        'Material is responsible for testing its interactions with Cupertino, so it is allowed to cross-import.',
+      ),
       'packages/flutter/test/painting' => 'knownPaintingCrossImports',
       'packages/flutter/test/physics' => 'knownPhysicsCrossImports',
       'packages/flutter/test/rendering' => 'knownRenderingCrossImports',
