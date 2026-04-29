@@ -68,9 +68,12 @@ sealed class ProxyRule {
       final Object? name = item[_kName];
       final Object? value = item[_kValue];
       if (name is! String || name.isEmpty) {
+        final String found = name is String && name.isEmpty
+            ? 'an empty string'
+            : '${name.runtimeType}';
         logger.printError(
           '$_kLogEntryPrefix Each $_kHeaders entry must have a non-empty '
-          'string "$_kName" key. Found ${name.runtimeType}.',
+          'string "$_kName" key. Found $found.',
         );
         continue;
       }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:http_parser/http_parser.dart' show CaseInsensitiveMap;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf_proxy/shelf_proxy.dart';
 
@@ -16,14 +17,22 @@ const _kLogEntryPrefix = '[proxyMiddleware]';
 /// [originalRequest], but its URL will be set to [finalTargetUrl]. The
 /// original headers are kept; any entries in [extraHeaders] are merged on
 /// top, overriding the original on key collisions.
+///
+/// Header keys are merged case-insensitively (e.g. an extra header named
+/// `authorization` will replace an original `Authorization`), matching how
+/// HTTP/1.1 header names are defined as case-insensitive.
 shelf.Request proxyRequest(
   shelf.Request originalRequest,
   Uri finalTargetUrl, {
   Map<String, String> extraHeaders = const <String, String>{},
 }) {
-  final Map<String, String> mergedHeaders = extraHeaders.isEmpty
-      ? originalRequest.headers
-      : <String, String>{...originalRequest.headers, ...extraHeaders};
+  final Map<String, String> mergedHeaders;
+  if (extraHeaders.isEmpty) {
+    mergedHeaders = originalRequest.headers;
+  } else {
+    mergedHeaders = CaseInsensitiveMap<String>.from(originalRequest.headers);
+    mergedHeaders.addAll(extraHeaders);
+  }
   return shelf.Request(
     originalRequest.method,
     finalTargetUrl,

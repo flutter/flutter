@@ -357,6 +357,8 @@ headers:
       expect(rule, isNotNull);
       expect(rule!.headers, <String, String>{'Good': 'kept'});
       expect(logger.errorText, contains('non-empty'));
+      // Empty-string key reports "an empty string", not just "Found String".
+      expect(logger.errorText, contains('Found an empty string'));
       expect(logger.errorText, contains('must have a string'));
       expect(logger.errorText, contains('must be a map'));
     });
@@ -462,6 +464,26 @@ headers: "Authorization: Bearer token"
       expect(proxiedRequest.headers, containsPair('Content-Type', 'text/plain'));
       // Extra headers override conflicting originals.
       expect(proxiedRequest.headers, containsPair('X-Existing', 'override-value'));
+    });
+
+    test('extra headers override originals case-insensitively', () async {
+      final originalRequest = Request(
+        'GET',
+        Uri.parse('http://original.example.com/path'),
+        headers: <String, String>{'Authorization': 'original-token'},
+      );
+
+      final Request proxiedRequest = proxyRequest(
+        originalRequest,
+        Uri.parse('http://target.example.com/newpath'),
+        // Lowercase key in extras must override the title-case key in originals.
+        extraHeaders: <String, String>{'authorization': 'override-token'},
+      );
+
+      // shelf.Request normalizes header names to lowercase on read; both spellings
+      // resolve to the same single canonical value.
+      expect(proxiedRequest.headers['Authorization'], 'override-token');
+      expect(proxiedRequest.headers['authorization'], 'override-token');
     });
 
     test('should handle different HTTP methods', () async {
