@@ -951,12 +951,12 @@ TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
   int short_radius = 600;
   while (long_radius > 0 && short_radius > 0) {
     paint.setColor(colors[(c_index++) % color_count]);
-    builder.DrawOval(DlRect::MakeXYWH(10 - long_radius, 10 - short_radius,
-                                      long_radius * 2, short_radius * 2),
-                     paint);
-    builder.DrawOval(DlRect::MakeXYWH(1000 - short_radius, 750 - long_radius,
-                                      short_radius * 2, long_radius * 2),
-                     paint);
+    builder.DrawOval(
+        DlRect::MakeEllipseBounds({10, 10}, Size(long_radius, short_radius)),
+        paint);
+    builder.DrawOval(
+        DlRect::MakeEllipseBounds({1000, 750}, Size(short_radius, long_radius)),
+        paint);
     if (short_radius > 30) {
       short_radius -= 10;
       long_radius -= 5;
@@ -2472,6 +2472,162 @@ TEST_P(AiksTest, PerspectiveRectangle) {
     return builder.Build();
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, CanRenderFilledRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  // Square
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(50, 50, 100, 100), /*radius=*/20),
+      paint);
+  // Tall
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(200, 50, 60, 140), /*radius=*/20),
+      paint);
+  // Wide
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(310, 50, 140, 60), /*radius=*/20),
+      paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderStrokedRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(5.0f);
+
+  // Square
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(50, 50, 100, 100), /*radius=*/20),
+      paint);
+  // Tall
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(200, 50, 60, 140), /*radius=*/20),
+      paint);
+  // Wide
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(310, 50, 140, 60), /*radius=*/20),
+      paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderSmallRadiusRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  // Square
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(50, 50, 100, 100), /*radius=*/2),
+      paint);
+  // Tall
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(200, 50, 60, 140), /*radius=*/2),
+      paint);
+  // Wide
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(310, 50, 140, 60), /*radius=*/2),
+      paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderThickStrokedRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue().withAlphaF(0.5));
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(40.0f);
+
+  // Square
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(50, 50, 100, 100), /*radius=*/30),
+      paint);
+  // Tall
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(200, 50, 60, 140), /*radius=*/30),
+      paint);
+  // Wide
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(310, 50, 140, 60), /*radius=*/30),
+      paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderRoundSuperellipseGrid) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  DlScalar radii[] = {10.0f, 30.0f, 50.0f};
+
+  for (int row = 0; row < 3; row++) {
+    DlScalar y = 50.0f + row * 170.0f;
+    DlScalar radius = radii[row];
+
+    // Square
+    builder.DrawRoundSuperellipse(
+        DlRoundSuperellipse::MakeRectRadius(
+            /*rect=*/DlRect::MakeXYWH(50, y, 100, 100), /*radius=*/radius),
+        paint);
+    // Tall
+    builder.DrawRoundSuperellipse(
+        DlRoundSuperellipse::MakeRectRadius(
+            /*rect=*/DlRect::MakeXYWH(200, y, 60, 140), /*radius=*/radius),
+        paint);
+    // Wide
+    builder.DrawRoundSuperellipse(
+        DlRoundSuperellipse::MakeRectRadius(
+            /*rect=*/DlRect::MakeXYWH(310, y, 140, 60), /*radius=*/radius),
+        paint);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderTransformedRoundSuperellipse) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  builder.Save();
+  builder.Translate(200, 200);
+  builder.Rotate(45.0f);
+  builder.Scale(1.5f, 0.8f);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(-70, -30, 140, 60), /*radius=*/20),
+      paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 }  // namespace testing

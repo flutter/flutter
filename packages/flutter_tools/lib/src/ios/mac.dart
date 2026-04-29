@@ -301,15 +301,13 @@ Future<XcodeBuildResult> buildXcodeProject({
       : null;
   final bool incrementalBuild = targetBuildDir != null && targetBuildDir.existsSync();
 
-  final buildCommands = <String>[
-    ...(await globals.xcode!.xcodebuildProjectCommand(
-      app.project.hostAppRoot.path,
-      globals.fs.directory(buildDirectoryPath),
-      skipPackageResolution: false,
-    )),
-    '-configuration',
-    configuration,
-  ];
+  final List<String> xcodebuildCommandArgs = await globals.xcode!
+      .fetchDependenciesAndGenerateXcodebuildArgs(
+        app.project.hostAppRoot.path,
+        globals.fs.directory(buildDirectoryPath),
+        skipPackageUpdatesAndValidation: false,
+      );
+  final buildCommands = <String>[...xcodebuildCommandArgs, '-configuration', configuration];
 
   // Check the public headers before checking Xcode version so headers fingerprinter is created
   // regardless of Xcode version.

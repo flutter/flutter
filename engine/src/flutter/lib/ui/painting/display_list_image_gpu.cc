@@ -16,33 +16,20 @@ sk_sp<DlImageGPU> DlImageGPU::Make(SkiaGPUObject<SkImage> image) {
 }
 
 DlImageGPU::DlImageGPU(SkiaGPUObject<SkImage> image)
-    : image_(std::move(image)) {}
+    : DlImageSkia(nullptr), image_(std::move(image)) {}
 
 // |DlImage|
 DlImageGPU::~DlImageGPU() {}
 
-// |DlImage|
+// |DlImageSkia|
 sk_sp<SkImage> DlImageGPU::skia_image() const {
   return image_.skia_object();
 };
 
 // |DlImage|
-std::shared_ptr<impeller::Texture> DlImageGPU::impeller_texture() const {
-  return nullptr;
-}
-
-// |DlImage|
 bool DlImageGPU::isOpaque() const {
   if (auto image = skia_image()) {
     return image->isOpaque();
-  }
-  return false;
-}
-
-// |DlImage|
-bool DlImageGPU::isTextureBacked() const {
-  if (auto image = skia_image()) {
-    return image->isTextureBacked();
   }
   return false;
 }

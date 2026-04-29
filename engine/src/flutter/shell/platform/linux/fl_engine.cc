@@ -14,7 +14,6 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_accessibility_handler.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
-#include "flutter/shell/platform/linux/fl_dart_project_private.h"
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
@@ -1087,6 +1086,7 @@ void fl_engine_send_platform_message(FlEngine* self,
     if (self->engine == nullptr) {
       g_task_return_new_error(task, fl_engine_error_quark(),
                               FL_ENGINE_ERROR_FAILED, "No engine to send to");
+      g_object_unref(task);
       return;
     }
 

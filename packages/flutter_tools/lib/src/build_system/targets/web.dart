@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -224,9 +225,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     ]);
 
     final File resourcesFile = environment.buildDir.childFile('main.dart.js.resources.json');
-    final File recordedUsesFile = environment.buildDir.childFile(
-      DartBuildForWeb.recordedUsesJsFileName,
-    );
+    final File recordedUsesFile = environment.buildDir.childFile(LinkHooks.recordedUsesJsFileName);
     if (resourcesFile.existsSync()) {
       resourcesFile.renameSync(recordedUsesFile.path);
     } else if (featureFlags.isRecordUseEnabled) {
@@ -289,7 +288,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     'main.dart.js',
     'main.dart.js_*.part.js',
     if (compilerConfig.sourceMaps) ...<String>['main.dart.js.map', 'main.dart.js_*.part.js.map'],
-    if (featureFlags.isRecordUseEnabled) DartBuildForWeb.recordedUsesJsFileName,
+    if (featureFlags.isRecordUseEnabled) LinkHooks.recordedUsesJsFileName,
   ];
 }
 
@@ -365,7 +364,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       for (final String dartDefine in dartDefines) '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
       if (featureFlags.isRecordUseEnabled) ...<String>[
-        '--recorded-uses=${environment.buildDir.childFile(DartBuildForWeb.recordedUsesWasmFileName).path}',
+        '--recorded-uses=${environment.buildDir.childFile(LinkHooks.recordedUsesWasmFileName).path}',
         '--enable-experiment=record-use',
       ],
       ...compilerConfig.toCommandOptions(buildMode),
@@ -387,7 +386,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
       await _handleDryRunResult(environment, runResult);
     }
     final File recordedUsesFile = environment.buildDir.childFile(
-      DartBuildForWeb.recordedUsesWasmFileName,
+      LinkHooks.recordedUsesWasmFileName,
     );
     if (!recordedUsesFile.existsSync() && featureFlags.isRecordUseEnabled) {
       recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
@@ -431,7 +430,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
           'main.dart.wasm',
           'main.dart.mjs',
           if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
-          if (featureFlags.isRecordUseEnabled) DartBuildForWeb.recordedUsesWasmFileName,
+          if (featureFlags.isRecordUseEnabled) LinkHooks.recordedUsesWasmFileName,
         ];
 
   @visibleForTesting
@@ -567,57 +566,6 @@ class Dart2WasmTarget extends Dart2WebTarget {
   }
 }
 
-class DartBuildForWeb extends DartBuild {
-  const DartBuildForWeb({required this.compileTargets})
-    : super(specifiedTargetPlatform: TargetPlatform.web_javascript);
-
-  final List<Dart2WebTarget> compileTargets;
-
-  /// Target-specific filenames for recorded uses.
-  /// Both JS and Wasm targets are built in the same invocation when --wasm is used.
-  static const recordedUsesWasmFileName = 'recorded_uses_wasm.json';
-  static const recordedUsesJsFileName = 'recorded_uses_js.json';
-
-  @override
-  List<Target> get dependencies => <Target>[if (featureFlags.isRecordUseEnabled) ...compileTargets];
-
-  @override
-  List<Source> get inputs => <Source>[
-    ...super.inputs,
-    if (featureFlags.isRecordUseEnabled) ...<Source>[
-      const Source.pattern('{BUILD_DIR}/${DartBuildForWeb.recordedUsesJsFileName}'),
-      const Source.pattern('{BUILD_DIR}/${DartBuildForWeb.recordedUsesWasmFileName}'),
-    ],
-  ];
-
-  /// Returns the recorded uses file to pass to the link hooks.
-  ///
-  /// The contents of both files should be nearly identical (except for some
-  /// unreachable code not being found and loading units).
-  ///
-  /// Since WASM is the future, we prioritize that one if it exists and has data.
-  // TODO(dcharkes): We might want to invoke the link hooks twice if we actually
-  // have deferred loading enabled and deploy both WASM and JS with different
-  // deferred loading.
-  @override
-  File? getRecordedUsesFile(Environment environment, BuildMode buildMode) {
-    if (!featureFlags.isRecordUseEnabled) {
-      return null;
-    }
-    final File wasmFile = environment.buildDir.childFile(DartBuildForWeb.recordedUsesWasmFileName);
-    if (wasmFile.existsSync() &&
-        wasmFile.readAsStringSync() != KernelSnapshot.recordedUsesEmptyContent) {
-      return wasmFile;
-    }
-    final File jsFile = environment.buildDir.childFile(DartBuildForWeb.recordedUsesJsFileName);
-    if (jsFile.existsSync() &&
-        jsFile.readAsStringSync() != KernelSnapshot.recordedUsesEmptyContent) {
-      return jsFile;
-    }
-    return wasmFile.existsSync() ? wasmFile : null;
-  }
-}
-
 /// Unpacks the dart2js or dart2wasm compilation and resources to a given
 /// output directory.
 class WebReleaseBundle extends Target {
@@ -648,7 +596,7 @@ class WebReleaseBundle extends Target {
   List<Target> get dependencies => <Target>[
     ...compileTargets,
     templatedFilesTarget,
-    DartBuildForWeb(compileTargets: compileTargets),
+    LinkHooks(platform: HookPlatform.web, extraDependencies: compileTargets),
   ];
 
   Iterable<String> get buildPatternStems =>
@@ -657,7 +605,7 @@ class WebReleaseBundle extends Target {
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    const Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
+    const Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     ...buildPatternStems.map((String file) => Source.pattern('{BUILD_DIR}/$file')),
   ];
 
@@ -690,7 +638,7 @@ class WebReleaseBundle extends Target {
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
 
-    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
+    final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       environment.outputDir.childDirectory('assets'),
@@ -764,8 +712,46 @@ class WebTemplatedFiles extends Target {
   }
 
   String buildConfigString(Environment environment) {
+    // Calculate SHA-256 hashes for WASM assets to support Cross-Origin Storage
+    // (https://wicg.github.io/cross-origin-storage/). This assumes that the files will exist in
+    // the output directory at this point.
+    final wasmHashes = <String, String>{};
+    final String canvasKitPath = globals.artifacts!
+        .getHostArtifact(HostArtifact.flutterWebSdk)
+        .path;
+    final Directory canvasKitDirectory = globals.fs.directory(
+      globals.fs.path.join(canvasKitPath, 'canvaskit'),
+    );
+    if (canvasKitDirectory.existsSync()) {
+      for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
+        if (file.path.endsWith('.wasm')) {
+          final String relativePath = globals.fs.path
+              .relative(file.path, from: canvasKitDirectory.path)
+              .replaceAll(r'\', '/');
+          wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+        }
+      }
+    }
+
+    final Directory outputDirectory = environment.outputDir;
+    for (final File file in outputDirectory.listSync(recursive: true).whereType<File>()) {
+      if (file.path.endsWith('.wasm')) {
+        final String relativePath = globals.fs.path
+            .relative(file.path, from: outputDirectory.path)
+            .replaceAll(r'\', '/');
+        // Skip files under the canvaskit/ subdirectory — they are already
+        // covered by the canvasKit SDK directory scan above with keys that
+        // match what the JS lookup code actually uses.
+        if (relativePath.startsWith('canvaskit/')) {
+          continue;
+        }
+        wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+      }
+    }
+
     final buildConfig = <String, Object>{
       'engineRevision': globals.flutterVersion.engineRevision,
+      'wasmHashes': wasmHashes,
       'builds': buildDescriptions,
       if (environment.defines[kUseLocalCanvasKitFlag] == 'true') 'useLocalCanvasKit': true,
     };

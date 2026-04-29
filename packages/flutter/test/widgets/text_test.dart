@@ -1823,6 +1823,16 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Text does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: SizedBox.shrink(child: Text('X'))),
+      ),
+    );
+    expect(tester.getSize(find.byType(Text)), Size.zero);
+  });
 }
 
 Future<void> _pumpTextWidget({
