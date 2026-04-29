@@ -536,6 +536,6 @@ void main() {
         ),
       ),
     );
-    expect(tester.getSize(find.byType(RadioGroup<int>)), Size.zero);
+    expect(tester.getSize(find.byType(TestRadioGroup<int>)), Size.zero);
   });
 }
