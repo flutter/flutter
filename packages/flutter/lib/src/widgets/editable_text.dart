@@ -25,8 +25,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import '_web_browser_detection_io.dart'
-    if (dart.library.js_interop) '_web_browser_detection_web.dart';
 import 'actions.dart';
 import 'app_lifecycle_listener.dart';
 import 'autofill.dart';
@@ -971,10 +969,8 @@ class EditableText extends StatefulWidget {
              ]
            : inputFormatters,
        showCursor = showCursor ?? !readOnly,
-       selectionHeightStyle =
-           selectionHeightStyle ?? _selectionHeightStyleForMaxLines(maxLines: maxLines),
-       selectionWidthStyle =
-           selectionWidthStyle ?? _selectionWidthStyleForMaxLines(maxLines: maxLines);
+       selectionHeightStyle = selectionHeightStyle ?? defaultSelectionHeightStyle,
+       selectionWidthStyle = selectionWidthStyle ?? defaultSelectionWidthStyle;
 
   /// Controls the text being edited.
   final TextEditingController controller;
@@ -2093,42 +2089,8 @@ class EditableText extends StatefulWidget {
 
   /// The default value for [selectionWidthStyle].
   ///
-  /// On web platforms, this defaults to [ui.BoxWidthStyle.max] for Apple platforms running
-  /// Safari (webkit) based browsers and [ui.BoxWidthStyle.tight] for all others.
-  ///
-  /// On non-web platforms, this defaults to [ui.BoxWidthStyle.max].
+  /// This defaults to [ui.BoxWidthStyle.tight] on all platforms.
   static ui.BoxWidthStyle get defaultSelectionWidthStyle {
-    if (kIsWeb) {
-      if (defaultTargetPlatform == TargetPlatform.iOS || WebBrowserDetection.isSafari) {
-        // On macOS web, the selection width behavior differs when running on
-        // Chrom(e|ium) (blink) or Safari (webkit).
-        return ui.BoxWidthStyle.max;
-      }
-      return ui.BoxWidthStyle.tight;
-    }
-    return ui.BoxWidthStyle.max;
-  }
-
-  /// Returns the default [ui.BoxHeightStyle] to use for the given [maxLines].
-  ///
-  /// This currently matches [defaultSelectionHeightStyle] for both single-line
-  /// and multiline fields.
-  static ui.BoxHeightStyle _selectionHeightStyleForMaxLines({required int? maxLines}) {
-    return defaultSelectionHeightStyle;
-  }
-
-  /// Returns the default [ui.BoxWidthStyle] to use for the given [maxLines].
-  ///
-  /// For single-line fields ([maxLines] == 1), this matches
-  /// [defaultSelectionWidthStyle]. For multiline fields, this defaults to
-  /// [ui.BoxWidthStyle.tight] to avoid extending selection highlights to fill
-  /// the line width.
-  static ui.BoxWidthStyle _selectionWidthStyleForMaxLines({required int? maxLines}) {
-    if (maxLines == 1) {
-      return defaultSelectionWidthStyle;
-    }
-    // Multi-line selections should not be extended to match other lines'
-    // widths by default.
     return ui.BoxWidthStyle.tight;
   }
 
