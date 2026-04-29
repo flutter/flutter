@@ -7,6 +7,7 @@ package com.flutter.gradle
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
 import com.flutter.gradle.BaseApplicationNameHandler.GRADLE_BASE_APPLICATION_NAME_PROPERTY
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionContainer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -30,8 +31,23 @@ class BaseApplicationNameHandlerTest {
 
         Mockito.`when`(mockProject.extensions).thenReturn(mockExtensionContainer)
         Mockito.`when`(mockExtensionContainer.findByType(ApplicationExtension::class.java)).thenReturn(mockAndroidComponentsExtension)
-        Mockito.`when`(mockAndroidComponentsExtension.defaultConfig).thenReturn(mockDefaultConfig)
         Mockito.`when`(mockDefaultConfig.manifestPlaceholders).thenReturn(mockManifestPlaceholders)
+
+        // Mock the defaultConfig { ... } lambda invocation to execute against our mockDefaultConfig
+        Mockito
+            .doAnswer { invocation ->
+                val arg = invocation.arguments[0]
+                if (arg is Action<*>) {
+                    @Suppress("UNCHECKED_CAST")
+                    (arg as Action<ApplicationDefaultConfig>).execute(mockDefaultConfig)
+                } else {
+                    @Suppress("UNCHECKED_CAST")
+                    val action = arg as (ApplicationDefaultConfig) -> Unit
+                    action(mockDefaultConfig)
+                }
+                null
+            }.`when`(mockAndroidComponentsExtension)
+            .defaultConfig(any())
 
         // Call the base name handler.
         BaseApplicationNameHandler.setBaseName(mockProject)
@@ -53,13 +69,35 @@ class BaseApplicationNameHandlerTest {
 
         Mockito.`when`(mockProject.extensions).thenReturn(mockExtensionContainer)
         Mockito.`when`(mockExtensionContainer.findByType(ApplicationExtension::class.java)).thenReturn(mockAndroidComponentsExtension)
-        Mockito.`when`(mockAndroidComponentsExtension.defaultConfig).thenReturn(mockDefaultConfig)
         Mockito.`when`(mockDefaultConfig.manifestPlaceholders).thenReturn(mockManifestPlaceholders)
+
+        // Mock the defaultConfig { ... } lambda invocation to execute against our mockDefaultConfig
+        Mockito
+            .doAnswer { invocation ->
+                val arg = invocation.arguments[0]
+                if (arg is Action<*>) {
+                    @Suppress("UNCHECKED_CAST")
+                    (arg as Action<ApplicationDefaultConfig>).execute(mockDefaultConfig)
+                } else {
+                    @Suppress("UNCHECKED_CAST")
+                    val action = arg as (ApplicationDefaultConfig) -> Unit
+                    action(mockDefaultConfig)
+                }
+                null
+            }.`when`(mockAndroidComponentsExtension)
+            .defaultConfig(any())
 
         // Call the base name handler.
         BaseApplicationNameHandler.setBaseName(mockProject)
 
         // Make sure we default to the correct value.
         assertEquals(mockManifestPlaceholders["applicationName"], BaseApplicationNameHandler.DEFAULT_BASE_APPLICATION_NAME)
+    }
+
+    // Helper to avoid Kotlin NullPointerExceptions when using Mockito.any() with non-null parameters
+    @Suppress("UNCHECKED_CAST")
+    private fun <T> any(): T {
+        Mockito.any<T>()
+        return null as T
     }
 }
