@@ -909,11 +909,11 @@ def run_objc_tests(
     ios_swift_test_dir = os.path.join(
         BUILDROOT_DIR, 'flutter', 'testing', 'ios', 'IosSwiftTestingTests'
     )
+    run_xcodebuild('IosSwiftTestingTests', ios_swift_test_dir, 'ios_swift_testing')
 
     # Run XCTest tests
     ios_unit_test_dir = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'ios', 'IosUnitTests')
     run_xcodebuild('IosUnitTests', ios_unit_test_dir, 'ios_embedding')
-    run_xcodebuild('IosSwiftTestingTests', ios_swift_test_dir, 'ios_swift_testing')
 
   finally:
     delete_simulator(new_simulator_name)
