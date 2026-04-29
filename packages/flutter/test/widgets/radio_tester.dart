@@ -75,7 +75,7 @@ class TestRadioState<T> extends State<TestRadio<T>> {
 /// A minimal implementation of [RadioGroupRegistry] for widget tests.
 ///
 /// Useful when testing [RawRadio] in isolation, outside of a [RadioGroup].
-class TestRegistry<T> extends RadioGroupRegistry<T> {
+class TestRadioGroupRegistry<T> extends RadioGroupRegistry<T> {
   final Set<RadioClient<T>> clients = <RadioClient<T>>{};
 
   @override

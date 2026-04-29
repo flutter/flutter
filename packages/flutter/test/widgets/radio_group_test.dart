@@ -504,8 +504,7 @@ void main() {
       TestWidgetsApp(
         home: Center(
           child: SizedBox.shrink(
-            child: RadioGroup<int>(
-              onChanged: (_) {},
+            child: TestRadioGroup<int>(
               child: Column(
                 children: [
                   RawRadio<int>(
@@ -514,7 +513,7 @@ void main() {
                     toggleable: false,
                     focusNode: focusNode1,
                     autofocus: false,
-                    groupRegistry: TestRegistry<int>(),
+                    groupRegistry: TestRadioGroupRegistry<int>(),
                     enabled: true,
                     builder: (BuildContext context, ToggleableStateMixin<StatefulWidget> state) =>
                         const Text('X'),
@@ -525,7 +524,7 @@ void main() {
                     toggleable: false,
                     focusNode: focusNode2,
                     autofocus: false,
-                    groupRegistry: TestRegistry<int>(),
+                    groupRegistry: TestRadioGroupRegistry<int>(),
                     enabled: true,
                     builder: (BuildContext context, ToggleableStateMixin<StatefulWidget> state) =>
                         const Text('Y'),

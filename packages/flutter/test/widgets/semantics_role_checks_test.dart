@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'checkbox_tester.dart';
+import 'radio_group_tester.dart';
 import 'radio_tester.dart';
 
 void main() {
@@ -272,9 +273,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: RadioGroup<int>(
-            groupValue: 0,
-            onChanged: (int? value) {},
+          child: TestRadioGroup<int>(
             child: Column(
               children: <Widget>[
                 TestCheckbox(value: false, onChanged: (bool? value) {}),
@@ -290,20 +289,14 @@ void main() {
 
     testWidgets('success case, radio group can nest', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
-          child: RadioGroup<int>(
-            groupValue: 0,
-            onChanged: (int? value) {},
+          child: TestRadioGroup<int>(
             child: Column(
               children: <Widget>[
-                RadioGroup<String>(
-                  groupValue: 'string',
-                  onChanged: (String? value) {},
-                  child: const TestRadio<String>(value: 'string'),
-                ),
-                const TestRadio<int>(value: 0),
-                const TestRadio<int>(value: 1),
+                TestRadioGroup<String>(child: TestRadio<String>(value: 'string')),
+                TestRadio<int>(value: 0),
+                TestRadio<int>(value: 1),
               ],
             ),
           ),

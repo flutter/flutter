@@ -143,8 +143,8 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
   });
 
-  testWidgets('TestRegistry registers and unregisters clients', (WidgetTester tester) async {
-    final registry = TestRegistry<int>();
+  testWidgets('TestRadioGroupRegistry registers and unregisters clients', (WidgetTester tester) async {
+    final registry = TestRadioGroupRegistry<int>();
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
 
