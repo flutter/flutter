@@ -67,6 +67,26 @@ void main() {
     expect(success, isTrue);
   });
 
+  test('non-Dart files are ignored', () async {
+    buildKnownCrossImportTestFiles();
+
+    checker.testsDirectory.childFile('README.md')
+      ..createSync()
+      ..writeAsStringSync("import 'package:flutter/material.dart';");
+
+    expect(checker.check(), isTrue);
+  });
+
+  test('non-Dart files with .dart in the filename are ignored', () async {
+    buildKnownCrossImportTestFiles();
+
+    checker.testsDirectory.childFile('foo.dart.md')
+      ..createSync()
+      ..writeAsStringSync("import 'package:flutter/material.dart';");
+
+    expect(checker.check(), isTrue);
+  });
+
   for (final (String libraryName, String knownCrossImportsListName, Set<String> knownCrossImports)
       in crossImportsTestCases) {
     test(
