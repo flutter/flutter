@@ -101,6 +101,69 @@ void main() {
     );
 
     testUsingContext(
+      'hasUncommittedChanges ignores pubspec.lock on non-stable channel',
+      () async {
+        final flutterVersion = FakeFlutterVersion();
+
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['git', 'status', '-s'],
+            stdout: ' M pubspec.lock\n M packages/flutter_tools/pubspec.lock',
+          ),
+        );
+
+        final bool result = await realCommandRunner.hasUncommittedChanges(flutterVersion);
+        expect(result, false);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      },
+    );
+
+    testUsingContext(
+      'hasUncommittedChanges does not ignore pubspec.lock on stable channel',
+      () async {
+        final flutterVersion = FakeFlutterVersion(branch: 'stable');
+
+        processManager.addCommand(
+          const FakeCommand(command: <String>['git', 'status', '-s'], stdout: ' M pubspec.lock'),
+        );
+
+        final bool result = await realCommandRunner.hasUncommittedChanges(flutterVersion);
+        expect(result, true);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      },
+    );
+
+    testUsingContext(
+      'hasUncommittedChanges detects other changes on non-stable channel',
+      () async {
+        final flutterVersion = FakeFlutterVersion();
+
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['git', 'status', '-s'],
+            stdout: ' M pubspec.lock\n M lib/src/commands/upgrade.dart',
+          ),
+        );
+
+        final bool result = await realCommandRunner.hasUncommittedChanges(flutterVersion);
+        expect(result, true);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => processManager,
+        Platform: () => fakePlatform,
+      },
+    );
+
+    testUsingContext(
       "Doesn't continue on known tag, beta branch, no force, already up-to-date",
       () async {
         const revision = 'abc123';
@@ -830,7 +893,7 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   Future<FlutterVersion> fetchLatestVersion({FlutterVersion? localVersion}) async => remoteVersion;
 
   @override
-  Future<bool> hasUncommittedChanges() async => willHaveUncommittedChanges;
+  Future<bool> hasUncommittedChanges(FlutterVersion version) async => willHaveUncommittedChanges;
 
   @override
   Future<void> attemptReset(String newRevision) async {}

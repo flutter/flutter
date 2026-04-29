@@ -130,31 +130,109 @@ void main() {
       // Scaling a shadow doesn't change the color.
       expect(actualDecoration.boxShadow![0].color, const Color(0x66000000));
     });
+
+    testWidgets('does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      final controller = AnimationController(
+        vsync: const TestVSync(),
+        value: 1,
+        duration: const Duration(seconds: 2),
+      );
+      addTearDown(tester.view.reset);
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: DecoratedBoxTransition(
+              decoration: DecorationTween(
+                begin: const BoxDecoration(color: Color(0xFF000000)),
+                end: const BoxDecoration(color: Color(0xFFFFFFFF)),
+              ).animate(controller),
+              child: const Placeholder(),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(DecoratedBoxTransition)), Size.zero);
+    });
   });
 
-  testWidgets('AlignTransition animates', (WidgetTester tester) async {
-    final controller = AnimationController(vsync: const TestVSync());
-    addTearDown(controller.dispose);
-    final Animation<Alignment> alignmentTween = AlignmentTween(
-      begin: Alignment.centerLeft,
-      end: Alignment.bottomRight,
-    ).animate(controller);
-    final Widget widget = AlignTransition(
-      alignment: alignmentTween,
-      child: const Text('Ready', textDirection: TextDirection.ltr),
-    );
+  group('AlignTransition', () {
+    testWidgets('animates', (WidgetTester tester) async {
+      final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
+      final Animation<Alignment> alignmentTween = AlignmentTween(
+        begin: Alignment.centerLeft,
+        end: Alignment.bottomRight,
+      ).animate(controller);
+      final Widget widget = AlignTransition(
+        alignment: alignmentTween,
+        child: const Text('Ready', textDirection: TextDirection.ltr),
+      );
 
-    await tester.pumpWidget(widget);
+      await tester.pumpWidget(widget);
 
-    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+      final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
 
-    var actualAlignment = actualPositionedBox.alignment as Alignment;
-    expect(actualAlignment, Alignment.centerLeft);
+      var actualAlignment = actualPositionedBox.alignment as Alignment;
+      expect(actualAlignment, Alignment.centerLeft);
 
-    controller.value = 0.5;
-    await tester.pump();
-    actualAlignment = actualPositionedBox.alignment as Alignment;
-    expect(actualAlignment, const Alignment(0.0, 0.5));
+      controller.value = 0.5;
+      await tester.pump();
+      actualAlignment = actualPositionedBox.alignment as Alignment;
+      expect(actualAlignment, const Alignment(0.0, 0.5));
+    });
+
+    testWidgets('keeps width and height factors', (WidgetTester tester) async {
+      final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
+      final Animation<Alignment> alignmentTween = AlignmentTween(
+        begin: Alignment.centerLeft,
+        end: Alignment.bottomRight,
+      ).animate(controller);
+      final Widget widget = AlignTransition(
+        alignment: alignmentTween,
+        widthFactor: 0.3,
+        heightFactor: 0.4,
+        child: const Text('Ready', textDirection: TextDirection.ltr),
+      );
+
+      await tester.pumpWidget(widget);
+
+      final Align actualAlign = tester.widget(find.byType(Align));
+
+      expect(actualAlign.widthFactor, 0.3);
+      expect(actualAlign.heightFactor, 0.4);
+    });
+
+    testWidgets('does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      final controller = AnimationController(
+        vsync: const TestVSync(),
+        value: 1,
+        duration: const Duration(seconds: 2),
+      );
+      final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
+      addTearDown(tester.view.reset);
+      addTearDown(controller.dispose);
+      addTearDown(curvedAnimation.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: AlignTransition(
+              alignment: Tween<AlignmentGeometry>(
+                begin: Alignment.bottomCenter,
+                end: Alignment.bottomRight,
+              ).animate(curvedAnimation),
+              child: const Placeholder(),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(AlignTransition)), Size.zero);
+    });
   });
 
   testWidgets('RelativePositionedTransition animates', (WidgetTester tester) async {
@@ -204,125 +282,18 @@ void main() {
     expect(renderBox.size, equals(const Size(665, 420)));
   });
 
-  testWidgets('AlignTransition keeps width and height factors', (WidgetTester tester) async {
-    final controller = AnimationController(vsync: const TestVSync());
-    addTearDown(controller.dispose);
-    final Animation<Alignment> alignmentTween = AlignmentTween(
-      begin: Alignment.centerLeft,
-      end: Alignment.bottomRight,
-    ).animate(controller);
-    final Widget widget = AlignTransition(
-      alignment: alignmentTween,
-      widthFactor: 0.3,
-      heightFactor: 0.4,
-      child: const Text('Ready', textDirection: TextDirection.ltr),
-    );
-
-    await tester.pumpWidget(widget);
-
-    final Align actualAlign = tester.widget(find.byType(Align));
-
-    expect(actualAlign.widthFactor, 0.3);
-    expect(actualAlign.heightFactor, 0.4);
-  });
-
-  testWidgets('SizeTransition clamps negative size factors - vertical axis', (
-    WidgetTester tester,
-  ) async {
-    final controller = AnimationController(vsync: const TestVSync());
-    addTearDown(controller.dispose);
-    final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
-
-    final Widget widget = Directionality(
-      textDirection: TextDirection.ltr,
-      child: SizeTransition(
-        sizeFactor: animation,
-        fixedCrossAxisSizeFactor: 2.0,
-        child: const Text('Ready'),
-      ),
-    );
-
-    await tester.pumpWidget(widget);
-
-    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
-    expect(actualPositionedBox.heightFactor, 0.0);
-    expect(actualPositionedBox.widthFactor, 2.0);
-
-    controller.value = 0.0;
-    await tester.pump();
-    expect(actualPositionedBox.heightFactor, 0.0);
-    expect(actualPositionedBox.widthFactor, 2.0);
-
-    controller.value = 0.75;
-    await tester.pump();
-    expect(actualPositionedBox.heightFactor, 0.5);
-    expect(actualPositionedBox.widthFactor, 2.0);
-
-    controller.value = 1.0;
-    await tester.pump();
-    expect(actualPositionedBox.heightFactor, 1.0);
-    expect(actualPositionedBox.widthFactor, 2.0);
-  });
-
-  testWidgets('SizeTransition clamps negative size factors - horizontal axis', (
-    WidgetTester tester,
-  ) async {
-    final controller = AnimationController(vsync: const TestVSync());
-    addTearDown(controller.dispose);
-    final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
-
-    final Widget widget = Directionality(
-      textDirection: TextDirection.ltr,
-      child: SizeTransition(
-        axis: Axis.horizontal,
-        sizeFactor: animation,
-        fixedCrossAxisSizeFactor: 1.0,
-        child: const Text('Ready'),
-      ),
-    );
-
-    await tester.pumpWidget(widget);
-
-    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
-    expect(actualPositionedBox.widthFactor, 0.0);
-    expect(actualPositionedBox.heightFactor, 1.0);
-
-    controller.value = 0.0;
-    await tester.pump();
-    expect(actualPositionedBox.widthFactor, 0.0);
-    expect(actualPositionedBox.heightFactor, 1.0);
-
-    controller.value = 0.75;
-    await tester.pump();
-    expect(actualPositionedBox.widthFactor, 0.5);
-    expect(actualPositionedBox.heightFactor, 1.0);
-
-    controller.value = 1.0;
-    await tester.pump();
-    expect(actualPositionedBox.widthFactor, 1.0);
-    expect(actualPositionedBox.heightFactor, 1.0);
-  });
-
-  testWidgets(
-    'SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - vertical axis',
-    (WidgetTester tester) async {
+  group('SizeTransition', () {
+    testWidgets('clamps negative size factors - vertical axis', (WidgetTester tester) async {
       final controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
-      final Animation<double> animation = Tween<double>(begin: 0, end: 1.0).animate(controller);
-
-      const key = Key('key');
+      final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
       final Widget widget = Directionality(
         textDirection: TextDirection.ltr,
-        child: Center(
-          child: SizedBox(
-            key: key,
-            child: SizeTransition(
-              sizeFactor: animation,
-              fixedCrossAxisSizeFactor: 1.0,
-              child: const SizedBox.square(dimension: 100),
-            ),
-          ),
+        child: SizeTransition(
+          sizeFactor: animation,
+          fixedCrossAxisSizeFactor: 2.0,
+          child: const Text('Ready'),
         ),
       );
 
@@ -330,132 +301,240 @@ void main() {
 
       final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
       expect(actualPositionedBox.heightFactor, 0.0);
-      expect(actualPositionedBox.widthFactor, 1.0);
-      expect(tester.getSize(find.byKey(key)), const Size(100, 0));
+      expect(actualPositionedBox.widthFactor, 2.0);
 
       controller.value = 0.0;
       await tester.pump();
       expect(actualPositionedBox.heightFactor, 0.0);
-      expect(actualPositionedBox.widthFactor, 1.0);
-      expect(tester.getSize(find.byKey(key)), const Size(100, 0));
+      expect(actualPositionedBox.widthFactor, 2.0);
 
-      controller.value = 0.5;
+      controller.value = 0.75;
       await tester.pump();
       expect(actualPositionedBox.heightFactor, 0.5);
-      expect(actualPositionedBox.widthFactor, 1.0);
-      expect(tester.getSize(find.byKey(key)), const Size(100, 50));
+      expect(actualPositionedBox.widthFactor, 2.0);
 
       controller.value = 1.0;
       await tester.pump();
       expect(actualPositionedBox.heightFactor, 1.0);
-      expect(actualPositionedBox.widthFactor, 1.0);
-      expect(tester.getSize(find.byKey(key)), const Size.square(100));
+      expect(actualPositionedBox.widthFactor, 2.0);
+    });
 
-      controller.value = 0.5;
-      await tester.pump();
-      expect(actualPositionedBox.heightFactor, 0.5);
-      expect(actualPositionedBox.widthFactor, 1.0);
-      expect(tester.getSize(find.byKey(key)), const Size(100, 50));
+    testWidgets('clamps negative size factors - horizontal axis', (WidgetTester tester) async {
+      final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
+      final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
+
+      final Widget widget = Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizeTransition(
+          axis: Axis.horizontal,
+          sizeFactor: animation,
+          fixedCrossAxisSizeFactor: 1.0,
+          child: const Text('Ready'),
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+
+      final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+      expect(actualPositionedBox.widthFactor, 0.0);
+      expect(actualPositionedBox.heightFactor, 1.0);
 
       controller.value = 0.0;
       await tester.pump();
-      expect(actualPositionedBox.heightFactor, 0.0);
-      expect(actualPositionedBox.widthFactor, 1.0);
-      expect(tester.getSize(find.byKey(key)), const Size(100, 0));
-    },
-  );
+      expect(actualPositionedBox.widthFactor, 0.0);
+      expect(actualPositionedBox.heightFactor, 1.0);
 
-  testWidgets(
-    'SizeTransition with fixedCrossAxisSizeFactor should size its cross axis from its children - horizontal axis',
-    (WidgetTester tester) async {
+      controller.value = 0.75;
+      await tester.pump();
+      expect(actualPositionedBox.widthFactor, 0.5);
+      expect(actualPositionedBox.heightFactor, 1.0);
+
+      controller.value = 1.0;
+      await tester.pump();
+      expect(actualPositionedBox.widthFactor, 1.0);
+      expect(actualPositionedBox.heightFactor, 1.0);
+    });
+
+    testWidgets(
+      'with fixedCrossAxisSizeFactor should size its cross axis from its children - vertical axis',
+      (WidgetTester tester) async {
+        final controller = AnimationController(vsync: const TestVSync());
+        addTearDown(controller.dispose);
+        final Animation<double> animation = Tween<double>(begin: 0, end: 1.0).animate(controller);
+
+        const key = Key('key');
+
+        final Widget widget = Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              key: key,
+              child: SizeTransition(
+                sizeFactor: animation,
+                fixedCrossAxisSizeFactor: 1.0,
+                child: const SizedBox.square(dimension: 100),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpWidget(widget);
+
+        final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+        expect(actualPositionedBox.heightFactor, 0.0);
+        expect(actualPositionedBox.widthFactor, 1.0);
+        expect(tester.getSize(find.byKey(key)), const Size(100, 0));
+
+        controller.value = 0.0;
+        await tester.pump();
+        expect(actualPositionedBox.heightFactor, 0.0);
+        expect(actualPositionedBox.widthFactor, 1.0);
+        expect(tester.getSize(find.byKey(key)), const Size(100, 0));
+
+        controller.value = 0.5;
+        await tester.pump();
+        expect(actualPositionedBox.heightFactor, 0.5);
+        expect(actualPositionedBox.widthFactor, 1.0);
+        expect(tester.getSize(find.byKey(key)), const Size(100, 50));
+
+        controller.value = 1.0;
+        await tester.pump();
+        expect(actualPositionedBox.heightFactor, 1.0);
+        expect(actualPositionedBox.widthFactor, 1.0);
+        expect(tester.getSize(find.byKey(key)), const Size.square(100));
+
+        controller.value = 0.5;
+        await tester.pump();
+        expect(actualPositionedBox.heightFactor, 0.5);
+        expect(actualPositionedBox.widthFactor, 1.0);
+        expect(tester.getSize(find.byKey(key)), const Size(100, 50));
+
+        controller.value = 0.0;
+        await tester.pump();
+        expect(actualPositionedBox.heightFactor, 0.0);
+        expect(actualPositionedBox.widthFactor, 1.0);
+        expect(tester.getSize(find.byKey(key)), const Size(100, 0));
+      },
+    );
+
+    testWidgets(
+      'with fixedCrossAxisSizeFactor should size its cross axis from its children - horizontal axis',
+      (WidgetTester tester) async {
+        final controller = AnimationController(vsync: const TestVSync());
+        addTearDown(controller.dispose);
+        final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+
+        const key = Key('key');
+
+        final Widget widget = Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              key: key,
+              child: SizeTransition(
+                axis: Axis.horizontal,
+                sizeFactor: animation,
+                fixedCrossAxisSizeFactor: 1.0,
+                child: const SizedBox.square(dimension: 100),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpWidget(widget);
+
+        final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+        expect(actualPositionedBox.heightFactor, 1.0);
+        expect(actualPositionedBox.widthFactor, 0.0);
+        expect(tester.getSize(find.byKey(key)), const Size(0, 100));
+
+        controller.value = 0.0;
+        await tester.pump();
+        expect(actualPositionedBox.heightFactor, 1.0);
+        expect(actualPositionedBox.widthFactor, 0.0);
+        expect(tester.getSize(find.byKey(key)), const Size(0, 100));
+
+        controller.value = 0.5;
+        await tester.pump();
+        expect(actualPositionedBox.heightFactor, 1.0);
+        expect(actualPositionedBox.widthFactor, 0.5);
+        expect(tester.getSize(find.byKey(key)), const Size(50, 100));
+
+        controller.value = 1.0;
+        await tester.pump();
+        expect(actualPositionedBox.heightFactor, 1.0);
+        expect(actualPositionedBox.widthFactor, 1.0);
+        expect(tester.getSize(find.byKey(key)), const Size.square(100));
+
+        controller.value = 0.5;
+        await tester.pump();
+        expect(actualPositionedBox.heightFactor, 1.0);
+        expect(actualPositionedBox.widthFactor, 0.5);
+        expect(tester.getSize(find.byKey(key)), const Size(50, 100));
+
+        controller.value = 0.0;
+        await tester.pump();
+        expect(actualPositionedBox.heightFactor, 1.0);
+        expect(actualPositionedBox.widthFactor, 0.0);
+        expect(tester.getSize(find.byKey(key)), const Size(0, 100));
+      },
+    );
+
+    testWidgets('maintains chosen alignment during animation', (WidgetTester tester) async {
       final controller = AnimationController(vsync: const TestVSync());
       addTearDown(controller.dispose);
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
 
-      const key = Key('key');
-
-      final Widget widget = Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: SizedBox(
-            key: key,
-            child: SizeTransition(
-              axis: Axis.horizontal,
-              sizeFactor: animation,
-              fixedCrossAxisSizeFactor: 1.0,
-              child: const SizedBox.square(dimension: 100),
-            ),
-          ),
-        ),
+      final Widget widget = SizeTransition(
+        sizeFactor: animation,
+        alignment: Alignment.topLeft,
+        child: const SizedBox.shrink(),
       );
 
       await tester.pumpWidget(widget);
 
       final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
-      expect(actualPositionedBox.heightFactor, 1.0);
-      expect(actualPositionedBox.widthFactor, 0.0);
-      expect(tester.getSize(find.byKey(key)), const Size(0, 100));
+      var actualAlignment = actualPositionedBox.alignment as Alignment;
+      expect(actualAlignment, Alignment.topLeft);
 
       controller.value = 0.0;
       await tester.pump();
-      expect(actualPositionedBox.heightFactor, 1.0);
-      expect(actualPositionedBox.widthFactor, 0.0);
-      expect(tester.getSize(find.byKey(key)), const Size(0, 100));
-
-      controller.value = 0.5;
-      await tester.pump();
-      expect(actualPositionedBox.heightFactor, 1.0);
-      expect(actualPositionedBox.widthFactor, 0.5);
-      expect(tester.getSize(find.byKey(key)), const Size(50, 100));
+      actualAlignment = actualPositionedBox.alignment as Alignment;
+      expect(actualAlignment, Alignment.topLeft);
 
       controller.value = 1.0;
       await tester.pump();
-      expect(actualPositionedBox.heightFactor, 1.0);
-      expect(actualPositionedBox.widthFactor, 1.0);
-      expect(tester.getSize(find.byKey(key)), const Size.square(100));
+      actualAlignment = actualPositionedBox.alignment as Alignment;
+      expect(actualAlignment, Alignment.topLeft);
+    });
 
-      controller.value = 0.5;
-      await tester.pump();
-      expect(actualPositionedBox.heightFactor, 1.0);
-      expect(actualPositionedBox.widthFactor, 0.5);
-      expect(tester.getSize(find.byKey(key)), const Size(50, 100));
-
-      controller.value = 0.0;
-      await tester.pump();
-      expect(actualPositionedBox.heightFactor, 1.0);
-      expect(actualPositionedBox.widthFactor, 0.0);
-      expect(tester.getSize(find.byKey(key)), const Size(0, 100));
-    },
-  );
-
-  testWidgets('SizeTransition maintains chosen alignment during animation', (
-    WidgetTester tester,
-  ) async {
-    final controller = AnimationController(vsync: const TestVSync());
-    addTearDown(controller.dispose);
-    final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
-
-    final Widget widget = SizeTransition(
-      sizeFactor: animation,
-      alignment: Alignment.topLeft,
-      child: const SizedBox.shrink(),
-    );
-
-    await tester.pumpWidget(widget);
-
-    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
-    var actualAlignment = actualPositionedBox.alignment as Alignment;
-    expect(actualAlignment, Alignment.topLeft);
-
-    controller.value = 0.0;
-    await tester.pump();
-    actualAlignment = actualPositionedBox.alignment as Alignment;
-    expect(actualAlignment, Alignment.topLeft);
-
-    controller.value = 1.0;
-    await tester.pump();
-    actualAlignment = actualPositionedBox.alignment as Alignment;
-    expect(actualAlignment, Alignment.topLeft);
+    testWidgets('does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      final controller = AnimationController(
+        vsync: const TestVSync(),
+        value: 1,
+        duration: const Duration(seconds: 2),
+      );
+      final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
+      addTearDown(tester.view.reset);
+      addTearDown(controller.dispose);
+      addTearDown(curvedAnimation.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizeTransition(
+              sizeFactor: curvedAnimation,
+              axis: Axis.horizontal,
+              alignment: Alignment.topLeft,
+              child: const Placeholder(),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(SizeTransition)), Size.zero);
+    });
   });
 
   testWidgets('MatrixTransition animates', (WidgetTester tester) async {
@@ -550,98 +629,120 @@ void main() {
     expect(actualAlignment, Alignment.topRight);
   });
 
-  testWidgets('RotationTransition animates', (WidgetTester tester) async {
-    final controller = AnimationController(vsync: const TestVSync());
-    addTearDown(controller.dispose);
-    final Widget widget = RotationTransition(
-      alignment: Alignment.topRight,
-      turns: controller,
-      child: const Text('Rotation', textDirection: TextDirection.ltr),
-    );
+  group('RotationTransition', () {
+    testWidgets('animates', (WidgetTester tester) async {
+      final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
+      final Widget widget = RotationTransition(
+        alignment: Alignment.topRight,
+        turns: controller,
+        child: const Text('Rotation', textDirection: TextDirection.ltr),
+      );
 
-    await tester.pumpWidget(widget);
-    Transform actualRotatedBox = tester.widget(find.byType(Transform));
-    Matrix4 actualTurns = actualRotatedBox.transform;
-    expect(actualTurns, equals(Matrix4.rotationZ(0.0)));
+      await tester.pumpWidget(widget);
+      Transform actualRotatedBox = tester.widget(find.byType(Transform));
+      Matrix4 actualTurns = actualRotatedBox.transform;
+      expect(actualTurns, equals(Matrix4.rotationZ(0.0)));
 
-    controller.value = 0.5;
-    await tester.pump();
-    actualRotatedBox = tester.widget(find.byType(Transform));
-    actualTurns = actualRotatedBox.transform;
-    expect(
-      actualTurns,
-      matrixMoreOrLessEquals(
-        Matrix4.fromList(<double>[
-          -1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          -1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-        ])..transpose(),
-      ),
-    );
+      controller.value = 0.5;
+      await tester.pump();
+      actualRotatedBox = tester.widget(find.byType(Transform));
+      actualTurns = actualRotatedBox.transform;
+      expect(
+        actualTurns,
+        matrixMoreOrLessEquals(
+          Matrix4.fromList(<double>[
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+          ])..transpose(),
+        ),
+      );
 
-    controller.value = 0.75;
-    await tester.pump();
-    actualRotatedBox = tester.widget(find.byType(Transform));
-    actualTurns = actualRotatedBox.transform;
-    expect(
-      actualTurns,
-      matrixMoreOrLessEquals(
-        Matrix4.fromList(<double>[
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          -1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-        ])..transpose(),
-      ),
-    );
-  });
+      controller.value = 0.75;
+      await tester.pump();
+      actualRotatedBox = tester.widget(find.byType(Transform));
+      actualTurns = actualRotatedBox.transform;
+      expect(
+        actualTurns,
+        matrixMoreOrLessEquals(
+          Matrix4.fromList(<double>[
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            -1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+          ])..transpose(),
+        ),
+      );
+    });
 
-  testWidgets('RotationTransition maintains chosen alignment during animation', (
-    WidgetTester tester,
-  ) async {
-    final controller = AnimationController(vsync: const TestVSync());
-    addTearDown(controller.dispose);
-    final Widget widget = RotationTransition(
-      alignment: Alignment.topRight,
-      turns: controller,
-      child: const Text('Rotation', textDirection: TextDirection.ltr),
-    );
+    testWidgets('maintains chosen alignment during animation', (WidgetTester tester) async {
+      final controller = AnimationController(vsync: const TestVSync());
+      addTearDown(controller.dispose);
+      final Widget widget = RotationTransition(
+        alignment: Alignment.topRight,
+        turns: controller,
+        child: const Text('Rotation', textDirection: TextDirection.ltr),
+      );
 
-    await tester.pumpWidget(widget);
-    RotationTransition actualRotatedBox = tester.widget(find.byType(RotationTransition));
-    Alignment actualAlignment = actualRotatedBox.alignment;
-    expect(actualAlignment, Alignment.topRight);
+      await tester.pumpWidget(widget);
+      RotationTransition actualRotatedBox = tester.widget(find.byType(RotationTransition));
+      Alignment actualAlignment = actualRotatedBox.alignment;
+      expect(actualAlignment, Alignment.topRight);
 
-    controller.value = 0.5;
-    await tester.pump();
-    actualRotatedBox = tester.widget(find.byType(RotationTransition));
-    actualAlignment = actualRotatedBox.alignment;
-    expect(actualAlignment, Alignment.topRight);
+      controller.value = 0.5;
+      await tester.pump();
+      actualRotatedBox = tester.widget(find.byType(RotationTransition));
+      actualAlignment = actualRotatedBox.alignment;
+      expect(actualAlignment, Alignment.topRight);
+    });
+
+    testWidgets('does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      final controller = AnimationController(
+        vsync: const TestVSync(),
+        value: 1,
+        duration: const Duration(seconds: 2),
+      );
+      final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.elasticOut);
+      addTearDown(tester.view.reset);
+      addTearDown(controller.dispose);
+      addTearDown(curvedAnimation.dispose);
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: RotationTransition(turns: curvedAnimation, child: const Placeholder()),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(RotationTransition)), Size.zero);
+    });
   });
 
   group('FadeTransition', () {
@@ -951,137 +1052,212 @@ void main() {
   });
 
   group('Builders', () {
-    testWidgets('AnimatedBuilder rebuilds when changed', (WidgetTester tester) async {
-      final redrawKey = GlobalKey<RedrawCounterState>();
-      final notifier = ChangeNotifier();
-      addTearDown(notifier.dispose);
+    group('AnimatedBuilder', () {
+      testWidgets('rebuilds when changed', (WidgetTester tester) async {
+        final redrawKey = GlobalKey<RedrawCounterState>();
+        final notifier = ChangeNotifier();
+        addTearDown(notifier.dispose);
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: AnimatedBuilder(
-            animation: notifier,
-            builder: (BuildContext context, Widget? child) {
-              return RedrawCounter(key: redrawKey, child: child);
-            },
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: AnimatedBuilder(
+              animation: notifier,
+              builder: (BuildContext context, Widget? child) {
+                return RedrawCounter(key: redrawKey, child: child);
+              },
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(redrawKey.currentState!.redraws, equals(1));
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(1));
-      notifier.notifyListeners();
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(2));
+        expect(redrawKey.currentState!.redraws, equals(1));
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(1));
+        notifier.notifyListeners();
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(2));
 
-      // Pump a few more times to make sure that we don't rebuild unnecessarily.
-      await tester.pump();
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(2));
+        // Pump a few more times to make sure that we don't rebuild unnecessarily.
+        await tester.pump();
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(2));
+      });
+
+      testWidgets("doesn't rebuild the child", (WidgetTester tester) async {
+        final redrawKey = GlobalKey<RedrawCounterState>();
+        final redrawKeyChild = GlobalKey<RedrawCounterState>();
+        final notifier = ChangeNotifier();
+        addTearDown(notifier.dispose);
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: AnimatedBuilder(
+              animation: notifier,
+              builder: (BuildContext context, Widget? child) {
+                return RedrawCounter(key: redrawKey, child: child);
+              },
+              child: RedrawCounter(key: redrawKeyChild),
+            ),
+          ),
+        );
+
+        expect(redrawKey.currentState!.redraws, equals(1));
+        expect(redrawKeyChild.currentState!.redraws, equals(1));
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(1));
+        expect(redrawKeyChild.currentState!.redraws, equals(1));
+        notifier.notifyListeners();
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(2));
+        expect(redrawKeyChild.currentState!.redraws, equals(1));
+
+        // Pump a few more times to make sure that we don't rebuild unnecessarily.
+        await tester.pump();
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(2));
+        expect(redrawKeyChild.currentState!.redraws, equals(1));
+      });
+
+      testWidgets('does not crash at zero area', (WidgetTester tester) async {
+        tester.view.physicalSize = Size.zero;
+        final controller = AnimationController(
+          vsync: const TestVSync(),
+          value: 1,
+          duration: const Duration(seconds: 2),
+        );
+        addTearDown(tester.view.reset);
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: AnimatedBuilder(
+                animation: controller,
+                builder: (context, child) => const Text('X'),
+                child: const Placeholder(),
+              ),
+            ),
+          ),
+        );
+        expect(tester.getSize(find.byType(AnimatedBuilder)), Size.zero);
+      });
     });
 
-    testWidgets("AnimatedBuilder doesn't rebuild the child", (WidgetTester tester) async {
-      final redrawKey = GlobalKey<RedrawCounterState>();
-      final redrawKeyChild = GlobalKey<RedrawCounterState>();
-      final notifier = ChangeNotifier();
-      addTearDown(notifier.dispose);
+    group('ListenableBuilder', () {
+      testWidgets(' rebuilds when changed', (WidgetTester tester) async {
+        final redrawKey = GlobalKey<RedrawCounterState>();
+        final notifier = ChangeNotifier();
+        addTearDown(notifier.dispose);
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: AnimatedBuilder(
-            animation: notifier,
-            builder: (BuildContext context, Widget? child) {
-              return RedrawCounter(key: redrawKey, child: child);
-            },
-            child: RedrawCounter(key: redrawKeyChild),
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListenableBuilder(
+              listenable: notifier,
+              builder: (BuildContext context, Widget? child) {
+                return RedrawCounter(key: redrawKey, child: child);
+              },
+            ),
+          ),
+        );
+
+        expect(redrawKey.currentState!.redraws, equals(1));
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(1));
+        notifier.notifyListeners();
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(2));
+
+        // Pump a few more times to make sure that we don't rebuild unnecessarily.
+        await tester.pump();
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(2));
+      });
+
+      testWidgets("doesn't rebuild the child", (WidgetTester tester) async {
+        final redrawKey = GlobalKey<RedrawCounterState>();
+        final redrawKeyChild = GlobalKey<RedrawCounterState>();
+        final notifier = ChangeNotifier();
+        addTearDown(notifier.dispose);
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: ListenableBuilder(
+              listenable: notifier,
+              builder: (BuildContext context, Widget? child) {
+                return RedrawCounter(key: redrawKey, child: child);
+              },
+              child: RedrawCounter(key: redrawKeyChild),
+            ),
+          ),
+        );
+
+        expect(redrawKey.currentState!.redraws, equals(1));
+        expect(redrawKeyChild.currentState!.redraws, equals(1));
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(1));
+        expect(redrawKeyChild.currentState!.redraws, equals(1));
+        notifier.notifyListeners();
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(2));
+        expect(redrawKeyChild.currentState!.redraws, equals(1));
+
+        // Pump a few more times to make sure that we don't rebuild unnecessarily.
+        await tester.pump();
+        await tester.pump();
+        expect(redrawKey.currentState!.redraws, equals(2));
+        expect(redrawKeyChild.currentState!.redraws, equals(1));
+      });
+
+      testWidgets('does not crash at zero area', (WidgetTester tester) async {
+        tester.view.physicalSize = Size.zero;
+        final focusNode = FocusNode();
+        addTearDown(tester.view.reset);
+        addTearDown(focusNode.dispose);
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: ListenableBuilder(
+                listenable: focusNode,
+                builder: (_, _) => const Placeholder(),
+              ),
+            ),
+          ),
+        );
+        expect(tester.getSize(find.byType(ListenableBuilder)), Size.zero);
+      });
+    });
+  });
+
+  testWidgets('DefaultTextStyleTransition does not crash at zero area', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = AnimationController(
+      vsync: const TestVSync(),
+      value: 1,
+      duration: const Duration(seconds: 2),
+    );
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: DefaultTextStyleTransition(
+            style: TextStyleTween(
+              begin: const TextStyle(fontSize: 20),
+              end: const TextStyle(fontSize: 30),
+            ).animate(controller),
+            child: const Placeholder(),
           ),
         ),
-      );
-
-      expect(redrawKey.currentState!.redraws, equals(1));
-      expect(redrawKeyChild.currentState!.redraws, equals(1));
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(1));
-      expect(redrawKeyChild.currentState!.redraws, equals(1));
-      notifier.notifyListeners();
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(2));
-      expect(redrawKeyChild.currentState!.redraws, equals(1));
-
-      // Pump a few more times to make sure that we don't rebuild unnecessarily.
-      await tester.pump();
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(2));
-      expect(redrawKeyChild.currentState!.redraws, equals(1));
-    });
-
-    testWidgets('ListenableBuilder rebuilds when changed', (WidgetTester tester) async {
-      final redrawKey = GlobalKey<RedrawCounterState>();
-      final notifier = ChangeNotifier();
-      addTearDown(notifier.dispose);
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: ListenableBuilder(
-            listenable: notifier,
-            builder: (BuildContext context, Widget? child) {
-              return RedrawCounter(key: redrawKey, child: child);
-            },
-          ),
-        ),
-      );
-
-      expect(redrawKey.currentState!.redraws, equals(1));
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(1));
-      notifier.notifyListeners();
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(2));
-
-      // Pump a few more times to make sure that we don't rebuild unnecessarily.
-      await tester.pump();
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(2));
-    });
-
-    testWidgets("ListenableBuilder doesn't rebuild the child", (WidgetTester tester) async {
-      final redrawKey = GlobalKey<RedrawCounterState>();
-      final redrawKeyChild = GlobalKey<RedrawCounterState>();
-      final notifier = ChangeNotifier();
-      addTearDown(notifier.dispose);
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: ListenableBuilder(
-            listenable: notifier,
-            builder: (BuildContext context, Widget? child) {
-              return RedrawCounter(key: redrawKey, child: child);
-            },
-            child: RedrawCounter(key: redrawKeyChild),
-          ),
-        ),
-      );
-
-      expect(redrawKey.currentState!.redraws, equals(1));
-      expect(redrawKeyChild.currentState!.redraws, equals(1));
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(1));
-      expect(redrawKeyChild.currentState!.redraws, equals(1));
-      notifier.notifyListeners();
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(2));
-      expect(redrawKeyChild.currentState!.redraws, equals(1));
-
-      // Pump a few more times to make sure that we don't rebuild unnecessarily.
-      await tester.pump();
-      await tester.pump();
-      expect(redrawKey.currentState!.redraws, equals(2));
-      expect(redrawKeyChild.currentState!.redraws, equals(1));
-    });
+      ),
+    );
+    expect(tester.getSize(find.byType(DefaultTextStyleTransition)), Size.zero);
   });
 }
 
