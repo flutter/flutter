@@ -89,7 +89,9 @@ class FlutterProjectFactory {
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(this.directory, this._manifest, this._exampleManifest);
+  FlutterProject(this.directory, FlutterManifest manifest, this._exampleManifest) {
+    _setManifest(manifest);
+  }
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -133,8 +135,14 @@ class FlutterProject {
   final FlutterManifest _exampleManifest;
 
   /// List of [FlutterProject]s corresponding to the workspace entries.
-  List<FlutterProject> get workspaceProjects {
-    final result = <FlutterProject>[];
+  List<FlutterProject> get workspaceProjects => _workspaceProjects;
+  late List<FlutterProject> _workspaceProjects;
+
+  void _setManifest(FlutterManifest manifest) {
+    _manifest = manifest;
+
+    // Update the workspace projects based on the new manifest.
+    _workspaceProjects = <FlutterProject>[];
     for (final String entry in manifest.workspace) {
       final glob = Glob(entry);
       for (final Directory globResult
@@ -142,11 +150,10 @@ class FlutterProject {
               .listFileSystemSync(directory.fileSystem, root: directory.path)
               .whereType<Directory>()) {
         if (globResult.childFile('pubspec.yaml').existsSync()) {
-          result.add(FlutterProject.fromDirectory(globResult));
+          _workspaceProjects.add(FlutterProject.fromDirectory(globResult));
         }
       }
     }
-    return result;
   }
 
   /// The set of organization names found in this project as
@@ -346,7 +353,7 @@ class FlutterProject {
 
   /// Reloads the content of [pubspecFile] and updates the contents of [manifest].
   void reloadManifest({required Logger logger, required FileSystem fs}) {
-    _manifest = _readManifest(pubspecFile.path, logger: logger, fileSystem: fs);
+    _setManifest(_readManifest(pubspecFile.path, logger: logger, fileSystem: fs));
   }
 
   /// Returns the MD5 hash of the contents of [manifest], ensuring [manifest] is up to date before
@@ -361,7 +368,7 @@ class FlutterProject {
   void replacePubspec(FlutterManifest updated) {
     final YamlMap updatedPubspecContents = updated.toYaml();
     pubspecFile.writeAsStringSync(encodeYamlAsString(updatedPubspecContents));
-    _manifest = updated;
+    _setManifest(updated);
   }
 
   /// Reapplies template files and regenerates project files and plugin
