@@ -47,7 +47,7 @@ source_set("InternalFlutterSwift") {
   # header, but defined in the framework, while avoiding linking errors.
   visibility = [
     ":flutter_framework_source",
-    ":ios_test_flutter",
+    ":ios_test_flutter_xctest",
   ]
   configs += [ "//flutter/shell/platform/darwin/common:config" ]
   deps = [ ":flutter_engine_bindings" ]
