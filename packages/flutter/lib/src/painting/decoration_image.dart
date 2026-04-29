@@ -576,10 +576,11 @@ void paintImage({
     // as we apply a nine-patch stretch. A tolerance is used to absorb
     // floating-point rounding from the `inputSize / scale * scale` round trip
     // when the image's pixel dimensions are not evenly divisible by `scale`.
+    final sourceInputDelta = (sourceSize - inputSize) as Offset;
     assert(
       !sliceFits ||
-          ((sourceSize.width - inputSize.width).abs() <= precisionErrorTolerance &&
-              (sourceSize.height - inputSize.height).abs() <= precisionErrorTolerance),
+          (sourceInputDelta.dx.abs() <= precisionErrorTolerance &&
+              sourceInputDelta.dy.abs() <= precisionErrorTolerance),
       'centerSlice was used with a BoxFit that does not guarantee that the image is fully visible.',
     );
   }
