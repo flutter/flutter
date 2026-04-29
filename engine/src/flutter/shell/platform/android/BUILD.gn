@@ -277,6 +277,7 @@ android_java_sources = [
   "io/flutter/embedding/engine/loader/FlutterApplicationInfo.java",
   "io/flutter/embedding/engine/loader/FlutterLoader.java",
   "io/flutter/embedding/engine/loader/ResourceExtractor.java",
+  "io/flutter/embedding/engine/loader/RobustLibraryLoader.java",
   "io/flutter/embedding/engine/mutatorsstack/FlutterMutatorView.java",
   "io/flutter/embedding/engine/mutatorsstack/FlutterMutatorsStack.java",
   "io/flutter/embedding/engine/plugins/FlutterPlugin.java",

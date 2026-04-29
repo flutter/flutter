@@ -82,6 +82,10 @@ public class FlutterLoaderTest {
     Mockito.doThrow(new UnsatisfiedLinkError("couldn't find \"libflutter.so\""))
         .when(mockFlutterJNI)
         .loadLibrary(ctx);
+    // RobustLibraryLoader consults loadLibraryCalled() between strategies to short-circuit; in
+    // this test the mock should report the library as never having loaded so every strategy runs
+    // and the eventual diagnostic UnsatisfiedLinkError is thrown.
+    when(mockFlutterJNI.loadLibraryCalled()).thenReturn(false);
     try {
       flutterLoader.startInitialization(ctx);
       flutterLoader.ensureInitializationComplete(ctx, null);
@@ -91,10 +95,16 @@ public class FlutterLoaderTest {
       Throwable e = re.getCause();
       assertNotNull(e);
       assertNotNull(e.getMessage());
+      // The diagnostic error from RobustLibraryLoader includes a "nativeLibraryDir" section that
+      // names the path and its existence status — verify both are present.
       assertTrue(
-          e.getMessage()
-              .contains(
-                  "and the native libraries directory (with path " + path + ") does not exist"));
+          "diagnostic message should contain the missing nativeLibraryDir path; was: "
+              + e.getMessage(),
+          e.getMessage().contains(path));
+      assertTrue(
+          "diagnostic message should report exists=false for the missing path; was: "
+              + e.getMessage(),
+          e.getMessage().contains("exists=false"));
     }
   }
 
@@ -109,6 +119,7 @@ public class FlutterLoaderTest {
     Mockito.doThrow(new UnsatisfiedLinkError("couldn't find \"libflutter.so\""))
         .when(mockFlutterJNI)
         .loadLibrary(ctx);
+    when(mockFlutterJNI.loadLibraryCalled()).thenReturn(false);
     try {
       flutterLoader.startInitialization(ctx);
       flutterLoader.ensureInitializationComplete(ctx, null);
@@ -118,7 +129,10 @@ public class FlutterLoaderTest {
       Throwable e = re.getCause();
       assertNotNull(e);
       assertNotNull(e.getMessage());
-      assertTrue(e.getMessage().contains(splitDir));
+      // The diagnostic message lists every split APK; verify the split path appears.
+      assertTrue(
+          "diagnostic message should mention split APK path; was: " + e.getMessage(),
+          e.getMessage().contains(splitDir));
     }
   }
 
