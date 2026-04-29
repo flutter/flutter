@@ -16,6 +16,11 @@
 - (instancetype)initWithTaskRunnerPtr:(fml::RefPtr<fml::TaskRunner>)task_runner
                              callback:(flutter::VsyncWaiter::Callback)callback;
 
+- (instancetype)initWithTaskRunnerPtr:(fml::RefPtr<fml::TaskRunner>)task_runner
+         isVariableRefreshRateEnabled:(BOOL)isVariableRefreshRateEnabled
+                       maxRefreshRate:(double)maxRefreshRate
+                             callback:(flutter::VsyncWaiter::Callback)callback;
+
 @end
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERVSYNCCLIENT_FML_H_

@@ -69,6 +69,12 @@ NS_SWIFT_NAME(VSyncClient)
                           callback:(void (^)(CFTimeInterval startTime,
                                              CFTimeInterval targetTime))callback;
 
+- (instancetype)initWithTaskRunner:(FlutterFMLTaskRunner*)taskRunner
+      isVariableRefreshRateEnabled:(BOOL)isVariableRefreshRateEnabled
+                    maxRefreshRate:(double)maxRefreshRate
+                          callback:(void (^)(CFTimeInterval startTime,
+                                             CFTimeInterval targetTime))callback;
+
 - (void)await;
 
 - (void)pause;
