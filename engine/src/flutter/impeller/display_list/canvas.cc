@@ -1058,7 +1058,7 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
 
     auto params = UberSDFParameters::MakeRoundedSuperellipse(
         /*color=*/paint.color,
-        /*rect=*/round_superellipse.GetBounds(),
+        /*bounds=*/round_superellipse.GetBounds(),
         /*superellipse_degree=*/Point(octant_top.se_n, octant_right.se_n),
         /*superellipse_a=*/Point(octant_top.se_a, octant_right.se_a),
         /*radii=*/adjusted_radii,
