@@ -83,7 +83,9 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
   std::unique_ptr<flutter::FrameTimingsRecorder> recorder =
       std::make_unique<flutter::FrameTimingsRecorder>();
 
-  _refreshRate = round(1 / (frame_target_time - frame_start_time).ToSecondsF());
+  if (duration > 0) {
+    _refreshRate = round(1 / duration);
+  }
 
   recorder->RecordVsync(frame_start_time, frame_target_time);
 
