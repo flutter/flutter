@@ -81,10 +81,8 @@ export 'package:flutter/services.dart'
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
-typedef SelectionChangedCallback = void Function(
-  TextSelection selection,
-  SelectionChangedCause? cause,
-);
+typedef SelectionChangedCallback =
+    void Function(TextSelection selection, SelectionChangedCause? cause);
 
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
@@ -96,10 +94,8 @@ typedef AppPrivateCommandCallback = void Function(String action, Map<String, dyn
 ///
 ///  * [SelectableRegionContextMenuBuilder], which performs the same role for
 ///    [SelectableRegion].
-typedef EditableTextContextMenuBuilder = Widget Function(
-  BuildContext context,
-  EditableTextState editableTextState,
-);
+typedef EditableTextContextMenuBuilder =
+    Widget Function(BuildContext context, EditableTextState editableTextState);
 
 // Signature for a function that determines the target location of the given
 // [TextPosition] after applying the given [TextBoundary].
@@ -973,10 +969,8 @@ class EditableText extends StatefulWidget {
              ]
            : inputFormatters,
        showCursor = showCursor ?? !readOnly,
-       selectionHeightStyle =
-           selectionHeightStyle ?? _selectionHeightStyleForMaxLines(maxLines: maxLines),
-       selectionWidthStyle =
-           selectionWidthStyle ?? _selectionWidthStyleForMaxLines(maxLines: maxLines);
+       selectionHeightStyle = selectionHeightStyle ?? defaultSelectionHeightStyle,
+       selectionWidthStyle = selectionWidthStyle ?? defaultSelectionWidthStyle;
 
   /// Controls the text being edited.
   final TextEditingController controller;
@@ -2095,29 +2089,8 @@ class EditableText extends StatefulWidget {
 
   /// The default value for [selectionWidthStyle].
   ///
-  /// Returns [ui.BoxWidthStyle.tight] on all platforms.
-  static const ui.BoxWidthStyle defaultSelectionWidthStyle = ui.BoxWidthStyle.tight;
-
-  /// Returns the default [ui.BoxHeightStyle] to use for the given [maxLines].
-  ///
-  /// This currently matches [defaultSelectionHeightStyle] for both single-line
-  /// and multiline fields.
-  static ui.BoxHeightStyle _selectionHeightStyleForMaxLines({required int? maxLines}) {
-    return defaultSelectionHeightStyle;
-  }
-
-  /// Returns the default [ui.BoxWidthStyle] to use for the given [maxLines].
-  ///
-  /// For single-line fields ([maxLines] == 1), this matches
-  /// [defaultSelectionWidthStyle]. For multiline fields, this defaults to
-  /// [ui.BoxWidthStyle.tight] to avoid extending selection highlights to fill
-  /// the line width.
-  static ui.BoxWidthStyle _selectionWidthStyleForMaxLines({required int? maxLines}) {
-    if (maxLines == 1) {
-      return defaultSelectionWidthStyle;
-    }
-    // Multi-line selections should not be extended to match other lines'
-    // widths by default.
+  /// This defaults to [ui.BoxWidthStyle.tight] on all platforms.
+  static ui.BoxWidthStyle get defaultSelectionWidthStyle {
     return ui.BoxWidthStyle.tight;
   }
 
