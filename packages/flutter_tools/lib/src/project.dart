@@ -523,6 +523,7 @@ class AndroidProject extends FlutterProjectPlatform {
   static final _imperativeKotlinPluginPattern = RegExp(
     '^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$',
   );
+  static final _kotlinBlockPattern = RegExp(r'^\s*kotlin\s*\{', multiLine: true);
 
   /// Examples of strings that this regex matches:
   /// - `id "kotlin-android"`
@@ -532,8 +533,8 @@ class AndroidProject extends FlutterProjectPlatform {
   /// - `id("org.jetbrains.kotlin.android")`
   /// - `id ( "org.jetbrains.kotlin.android" )`
   static final _declarativeKotlinPluginPatterns = <RegExp>[
-    RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?\\s*\$'),
-    RegExp('^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?\\s*\$'),
+    RegExp(r'''id\s*\(?\s*["']kotlin-android["']'''),
+    RegExp(r'''id\s*\(?\s*["']org\.jetbrains\.kotlin\.android["']'''),
   ];
 
   /// Pattern used to find the assignment of the "group" property in Gradle.
@@ -567,6 +568,32 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True if the Flutter project is using the AndroidX support library.
   bool get usesAndroidX => parent.usesAndroidX;
+
+  /// True if the project is using Built-in Kotlin support.
+  ///
+  /// This is enabled by setting `android.builtInKotlin=true` in `gradle.properties`.
+  ///
+  /// If the flag is missing, it defaults to true if the AGP version is 9.0.0 or higher.
+  bool get builtInKotlinEnabled {
+    final String? agpVersion = gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
+    final bool isAgp9OrHigher = agpVersion != null && isWithinVersionRange(agpVersion, min: '9.0.0', max: '100.0.0');
+
+    final File propertiesFile = hostAppGradleRoot.childFile('gradle.properties');
+    if (!propertiesFile.existsSync()) {
+      return isAgp9OrHigher;
+    }
+    try {
+      final String content = propertiesFile.readAsStringSync();
+      final bool explicitlyDisabled = RegExp(r'^\s*android\.builtInKotlin\s*=\s*false', multiLine: true).hasMatch(content);
+      if (explicitlyDisabled) {
+        return false;
+      }
+      final bool explicitlyEnabled = RegExp(r'^\s*android\.builtInKotlin\s*=\s*true', multiLine: true).hasMatch(content);
+      return explicitlyEnabled || isAgp9OrHigher;
+    } on FileSystemException {
+      return isAgp9OrHigher;
+    }
+  }
 
   /// Returns true if the current version of the Gradle plugin is supported.
   late final bool isSupportedVersion = _computeSupportedVersion();
@@ -630,11 +657,36 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
-    final bool declarativeMatch = _declarativeKotlinPluginPatterns.any((RegExp pattern) {
-      return (firstMatchInFile(appGradleFile, pattern) != null);
-    });
-    return imperativeMatch || declarativeMatch;
+    if (builtInKotlinEnabled) {
+      return true;
+    }
+    final filesToCheck = <File>[
+      appGradleFile,
+      settingsGradleFile,
+      hostAppGradleFile,
+    ];
+    for (final file in filesToCheck) {
+      if (!file.existsSync()) {
+        continue;
+      }
+      if (firstMatchInFile(file, _imperativeKotlinPluginPattern) != null) {
+        return true;
+      }
+      for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
+        if (firstMatchInFile(file, pattern) != null) {
+          return true;
+        }
+      }
+      if (firstMatchInFile(file, _kotlinBlockPattern) != null) {
+        return true;
+      }
+    }
+    final Directory kotlinSrc = hostAppGradleRoot
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('kotlin');
+    return kotlinSrc.existsSync();
   }
 
   /// Gets top-level Gradle build file.

@@ -222,9 +222,9 @@ class GradleUtils {
     required Cache cache,
     required OperatingSystemUtils operatingSystemUtils,
   }) : _platform = platform,
-       _logger = logger,
-       _cache = cache,
-       _operatingSystemUtils = operatingSystemUtils;
+        _logger = logger,
+        _cache = cache,
+        _operatingSystemUtils = operatingSystemUtils;
 
   final Cache _cache;
   final Platform _platform;
@@ -248,7 +248,7 @@ class GradleUtils {
     }
     throwToolExit(
       'Unable to locate gradlew script. Please check that ${gradle.path} '
-      'exists or that ${gradle.dirname} can be read.',
+          'exists or that ${gradle.dirname} can be read.',
     );
   }
 
@@ -277,7 +277,7 @@ class GradleUtils {
     propertiesDirectory.createSync(recursive: true);
     final String gradleVersion = getGradleVersionForAndroidPlugin(directory, _logger);
     final propertyContents =
-        '''
+    '''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
@@ -336,10 +336,10 @@ String? parseGradleVersionFromDistributionUrl(String? distributionUrl) {
 /// If gradle version is not found null is returned.
 /// [directory] should be an android directory with a build.gradle file.
 Future<String?> getGradleVersion(
-  Directory directory,
-  Logger logger,
-  ProcessManager processManager,
-) async {
+    Directory directory,
+    Logger logger,
+    ProcessManager processManager,
+    ) async {
   final File propertiesFile = getGradleWrapperFile(directory);
 
   if (propertiesFile.existsSync()) {
@@ -368,7 +368,7 @@ Future<String?> getGradleVersion(
   // TODO(reidbaker): Modify this gradle execution to use gradlew.
   if (processManager.canRun('gradle')) {
     final gradleVersionsVerbose =
-        (await processManager.run(<String>['gradle', gradleVersionsFlag])).stdout as String;
+    (await processManager.run(<String>['gradle', gradleVersionsFlag])).stdout as String;
     // Expected format:
     /*
 
@@ -407,10 +407,10 @@ OS:           Mac OS X 13.2.1 aarch64
 /// depends on if found, `null` otherwise.
 /// [androidDirectory] should be an android directory with a `build.gradle` file.
 Future<String?> getKgpVersion(
-  Directory androidDirectory,
-  Logger logger,
-  ProcessManager processManager,
-) async {
+    Directory androidDirectory,
+    Logger logger,
+    ProcessManager processManager,
+    ) async {
   // Maintainers of the kotlin dsl and the kotlin gradle plugin are different.
   //
   // Android Docs refer to the kotlin gradle plugin with either the full name or KGP.
@@ -549,7 +549,15 @@ String _formatParseWarning(String content, {required String type}) {
 //
 // Source of truth found here:
 // https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
-bool validateGradleAndKGP(Logger logger, {required String? kgpV, required String? gradleV}) {
+bool validateGradleAndKGP(
+    Logger logger, {
+      required String? kgpV,
+      required String? gradleV,
+      bool isBuiltInKotlin = false,
+    }) {
+  if (isBuiltInKotlin && kgpV == null) {
+    return true;
+  }
   if (gradleV == null || kgpV == null || gradleV.isEmpty || kgpV.isEmpty) {
     logger.printTrace('Gradle or KGP version unknown ($gradleV, $kgpV).');
     return false;
@@ -570,7 +578,7 @@ bool validateGradleAndKGP(Logger logger, {required String? kgpV, required String
   )) {
     logger.printTrace(
       'Newer than known KGP version ($kgpV), gradle ($gradleV).'
-      '\n Treating as valid configuration.',
+          '\n Treating as valid configuration.',
     );
     return true;
   }
@@ -584,8 +592,8 @@ bool validateGradleAndKGP(Logger logger, {required String? kgpV, required String
 
   // Documented max is 2.3.10, using 2.3.29 covers patch versions.
   if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.29')) {
-    // Documented max is 9.0.0, using 9.0.99 non inclusive covers patch versions.
-    return isWithinVersionRange(gradleV, min: '7.6.3', max: '9.0.99', inclusiveMax: false);
+    // Documented max is 9.0.0, using 9.3.99 non inclusive covers patch versions.
+    return isWithinVersionRange(gradleV, min: '7.6.3', max: '9.3.99', inclusiveMax: false);
   }
   // Documented max is 2.2.21, using 2.3.0 covers patch versions.
   if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.3.0')) {
@@ -658,7 +666,15 @@ bool validateGradleAndKGP(Logger logger, {required String? kgpV, required String
 //
 // Source of truth found here:
 // https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
-bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? agpV}) {
+bool validateAgpAndKgp(
+    Logger logger, {
+      required String? kgpV,
+      required String? agpV,
+      bool isBuiltInKotlin = false,
+    }) {
+  if (isBuiltInKotlin && kgpV == null) {
+    return true;
+  }
   if (agpV == null || kgpV == null || agpV.isEmpty || kgpV.isEmpty) {
     logger.printTrace('KGP or AGP version unknown ($kgpV, $agpV).');
     return false;
@@ -671,11 +687,11 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
   }
 
   if (isWithinVersionRange(
-        kgpV,
-        min: maxKnownAndSupportedKgpVersion,
-        max: '100.100',
-        inclusiveMin: false,
-      ) ||
+    kgpV,
+    min: maxKnownAndSupportedKgpVersion,
+    max: '100.100',
+    inclusiveMin: false,
+  ) ||
       isWithinVersionRange(
         agpV,
         min: maxKnownAgpVersionWithFullKotlinSupport,
@@ -684,7 +700,7 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
       )) {
     logger.printTrace(
       'Newer than known KGP version ($kgpV), AGP ($agpV).'
-      '\n Treating as valid configuration.',
+          '\n Treating as valid configuration.',
     );
     return true;
   }
@@ -699,7 +715,7 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
   // Documented max is 2.3.10
   if (isWithinVersionRange(kgpV, min: '2.3.10', max: '2.3.29')) {
     // Documented max is 9.0.0
-    return isWithinVersionRange(agpV, min: '8.2.2', max: '9.0.99', inclusiveMax: false);
+    return isWithinVersionRange(agpV, min: '8.2.2', max: '9.1.99', inclusiveMax: false);
   }
   // Documented max is 2.3.0
   if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.10', inclusiveMax: false)) {
@@ -808,7 +824,7 @@ bool validateGradleAndAgp(Logger logger, {required String? gradleV, required Str
     final bool validGradle = isWithinVersionRange(gradleV, min: '9.1.0', max: '100.00');
     logger.printTrace(
       'Newer than known AGP version ($agpV), gradle ($gradleV).'
-      '\n Treating as valid configuration.',
+          '\n Treating as valid configuration.',
     );
     return validGradle;
   }
@@ -901,10 +917,10 @@ bool validateGradleAndAgp(Logger logger, {required String? gradleV, required Str
 /// Source of truth:
 /// https://docs.gradle.org/current/userguide/compatibility.html#java
 bool validateJavaAndGradle(
-  Logger logger, {
-  required String? javaVersion,
-  required String? gradleVersion,
-}) {
+    Logger logger, {
+      required String? javaVersion,
+      required String? gradleVersion,
+    }) {
   // https://docs.gradle.org/current/userguide/compatibility.html#java
   const oldestConsideredJavaVersion = '1.8';
   const oldestDocumentedJavaGradleCompatibility = '2.0';
@@ -947,7 +963,7 @@ bool validateJavaAndGradle(
     );
     logger.printWarning(
       'Newer than known valid Java version ($javaVersion), gradle ($gradleVersion).'
-      '\n Treating as valid configuration.',
+          '\n Treating as valid configuration.',
     );
     return validGradle;
   }
@@ -1218,7 +1234,7 @@ void exitWithNoSdkMessage() {
   );
   throwToolExit(
     '${globals.logger.terminal.warningMark} No Android SDK found. '
-    'Try setting the ANDROID_HOME environment variable.',
+        'Try setting the ANDROID_HOME environment variable.',
   );
 }
 
@@ -1244,10 +1260,10 @@ class JavaGradleCompat {
   @override
   bool operator ==(Object other) =>
       other is JavaGradleCompat &&
-      other.javaMin == javaMin &&
-      other.javaMax == javaMax &&
-      other.gradleMin == gradleMin &&
-      other.gradleMax == gradleMax;
+          other.javaMin == javaMin &&
+          other.javaMax == javaMax &&
+          other.gradleMin == gradleMin &&
+          other.gradleMax == gradleMax;
 
   @override
   int get hashCode => Object.hash(javaMin, javaMax, gradleMin, gradleMax);
@@ -1279,10 +1295,10 @@ class JavaAgpCompat {
   @override
   bool operator ==(Object other) =>
       other is JavaAgpCompat &&
-      other.javaMin == javaMin &&
-      other.javaDefault == javaDefault &&
-      other.agpMin == agpMin &&
-      other.agpMax == agpMax;
+          other.javaMin == javaMin &&
+          other.javaDefault == javaDefault &&
+          other.agpMin == agpMin &&
+          other.agpMax == agpMax;
 
   @override
   int get hashCode => Object.hash(javaMin, javaDefault, agpMin, agpMax);
