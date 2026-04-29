@@ -341,47 +341,38 @@ class TestsCrossImportChecker {
 
     // Find any cross imports that are not in the known list.
     var valid = true;
-    final Set<File> unknownWidgetsTestsImportingMaterial = _getUnknowns(
-      _knownCrossImports,
-      widgetsTestsImportingMaterial,
-    );
-    if (unknownWidgetsTestsImportingMaterial.isNotEmpty) {
-      valid = false;
-      foundError(
-        _getImportError(
-          files: unknownWidgetsTestsImportingMaterial,
-          testLibrary: _Library.widgets,
-          importedLibrary: _Library.material,
-        ).split('\n'),
+
+    for (final MapEntry<_Library, _CrossImportingFiles> entry in crossImportsPerLibrary.entries) {
+      final Set<File> unknownCupertinoImports = _getUnknowns(
+        _knownCrossImports,
+        entry.value.cupertinoImports,
       );
-    }
-    final Set<File> unknownWidgetsTestsImportingCupertino = _getUnknowns(
-      _knownCrossImports,
-      widgetsTestsImportingCupertino,
-    );
-    if (unknownWidgetsTestsImportingCupertino.isNotEmpty) {
-      valid = false;
-      foundError(
-        _getImportError(
-          files: unknownWidgetsTestsImportingCupertino,
-          testLibrary: _Library.widgets,
-          importedLibrary: _Library.cupertino,
-        ).split('\n'),
+      final Set<File> unknownMaterialImports = _getUnknowns(
+        _knownCrossImports,
+        entry.value.materialImports,
       );
-    }
-    final Set<File> unknownCupertinoTestsImportingMaterial = _getUnknowns(
-      _knownCrossImports,
-      cupertinoTestsImportingMaterial,
-    );
-    if (unknownCupertinoTestsImportingMaterial.isNotEmpty) {
-      valid = false;
-      foundError(
-        _getImportError(
-          files: unknownCupertinoTestsImportingMaterial,
-          testLibrary: _Library.cupertino,
-          importedLibrary: _Library.material,
-        ).split('\n'),
-      );
+
+      if (unknownMaterialImports.isNotEmpty) {
+        valid = false;
+        foundError(
+          _getImportError(
+            files: unknownMaterialImports,
+            testLibrary: entry.key,
+            importStatement: _LibraryImportStatement.material,
+          ).split('\n'),
+        );
+      }
+
+      if (unknownCupertinoImports.isNotEmpty) {
+        valid = false;
+        foundError(
+          _getImportError(
+            files: unknownCupertinoImports,
+            testLibrary: entry.key,
+            importStatement: _LibraryImportStatement.cupertino,
+          ).split('\n'),
+        );
+      }
     }
 
     // Find any known cross imports that weren't found, and are therefore fixed.
