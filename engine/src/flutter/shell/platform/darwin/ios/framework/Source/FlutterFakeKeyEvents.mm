@@ -7,7 +7,7 @@
 #include "flutter/fml/logging.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/KeyCodeMap_Internal.h"
-#import "flutter/shell/platform/darwin/ios/ios_test_flutter_swift/ios_test_flutter_swift.h"
+#import "flutter/shell/platform/darwin/ios/ios_test_utils_swift/ios_test_utils_swift.h"
 
 FLUTTER_ASSERT_ARC;
 

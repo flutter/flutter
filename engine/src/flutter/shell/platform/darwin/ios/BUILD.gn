@@ -217,11 +217,19 @@ source_set("flutter_framework_source") {
 
 if (enable_ios_unittests) {
   # This target exists because the FakeUIPressProxy test utility was migrated
-  # before the tests that use it.
+  # before the tests that use it. It can be moved to ":ios_test_flutter_swift"
+  # once all tests depending on this util are in ":ios_test_flutter_swift".
   source_set("ios_test_utils_swift") {
     testonly = true
     visibility = [ ":*" ]
-    module_name = "ios_test_flutter_swift"
+
+    bridge_header = "InternalFlutterSwift-Bridging-Header.h"
+    include_dirs = [
+      "//flutter/shell/platform/darwin/common/framework/Headers",
+      "//flutter/shell/platform/darwin/ios/framework/Headers",
+      "//flutter/shell/platform/darwin/ios/framework",  # For module.modulemap
+    ]
+
     configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
     sources = [ "framework/Source/FakeUIPressProxy.swift" ]
     deps = [ ":flutter_framework_source" ]
@@ -239,7 +247,7 @@ if (enable_ios_unittests) {
       "framework/Source/AccessibilityFeaturesTests.swift",
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/LaunchEngineTest.swift",
-      // TODO(LongCatIsLooong): migrate this test to Swift testing.
+      # TODO(LongCatIsLooong): migrate this test to Swift testing.
       "framework/Source/SplashScreenManagerTests.swift",
     ]
     include_dirs = [
