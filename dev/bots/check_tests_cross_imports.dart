@@ -306,18 +306,19 @@ class TestsCrossImportChecker {
   /// Get a list of all the filenames that end in ".dart", grouped by library.
   Map<_Library, Set<File>> _getTestFiles() {
     final dartFilePattern = RegExp(r'\.dart$');
-    final Map<_Library, Set<File>> mapping = {_Library.flutterSlashTest: {}};
+    const _Library flutterTest = _OtherLibrary('packages/flutter/test');
+    final Map<_Library, Set<File>> mapping = {flutterTest: {}};
 
-    // List the files directly under `flutter/test` and then walk the subdirectories.
+    // List the files directly under `packages/flutter/test` and then walk the subdirectories.
     for (final FileSystemEntity fileOrDirectory in testsDirectory.listSync()) {
       if (fileOrDirectory is File && fileOrDirectory.absolute.path.contains(dartFilePattern)) {
-        mapping[_Library.flutterSlashTest]?.add(fileOrDirectory);
+        mapping[flutterTest]?.add(fileOrDirectory);
 
         continue;
       }
 
       if (fileOrDirectory is Directory) {
-        final _Library library = _Library.fromDirectory(fileOrDirectory, flutterRoot: flutterRoot);
+        final library = _Library.fromDirectory(fileOrDirectory, flutterRoot: flutterRoot);
         mapping[library] = {
           for (final File file in fileOrDirectory.listSync(recursive: true).whereType<File>())
             if (file.absolute.path.contains(dartFilePattern)) file,
@@ -443,20 +444,60 @@ enum _LibraryImportStatement {
 sealed class _Library {
   const _Library(this.name);
 
-  /// The short name of the library, for example `flutter/test/widgets`.
-  final String name;
+  /// Construct a [_Library] from a given [directory].
+  ///
+  /// The [directory] must be inside the [flutterRoot].
+  factory _Library.fromDirectory(Directory directory, {required Directory flutterRoot}) {
+    if (!directory.absolute.path.startsWith(flutterRoot.absolute.path)) {
+      throw ArgumentError('Directory must be inside ${flutterRoot.absolute.path}.', 'directory');
+    }
 
-  /// The library for `flutter/test`.
-  static const _OtherLibrary flutterSlashTest = _OtherLibrary(
-    'flutter/test',
-    'knownFlutterSlashTestCrossImports',
-  );
+    final String relativePath = path.relative(
+      directory.absolute.path,
+      from: flutterRoot.absolute.path,
+    );
+
+    return switch (relativePath) {
+      'packages/flutter/test/material' => const _MaterialLibrary(),
+      'packages/flutter/test/cupertino' => const _CupertinoLibrary(),
+      _ => _OtherLibrary(relativePath),
+    };
+  }
+
+  /// The short name of the library, for example `packages/flutter/test/widgets`.
+  final String name;
 
   /// The name of the variable in [TestsCrossImportChecker]
   /// that contains the list of known cross imports for this library.
   ///
   /// This is used for reporting mismatched cross imports.
-  String get crossImportsListSymbolName;
+  String get crossImportsListSymbolName {
+    if (this is _MaterialLibrary) {
+      throw UnsupportedError('Material is allowed to cross-import.');
+    }
+
+    if (this is _CupertinoLibrary) {
+      return 'knownCupertinoCrossImports';
+    }
+
+    return switch (name) {
+      'packages/flutter/test' => 'knownFlutterSlashTestCrossImports',
+      'packages/flutter/test/animation' => 'knownAnimationCrossImports',
+      'packages/flutter/test/dart' => 'knownDartCrossImports',
+      'packages/flutter/test/examples' => 'knownExamplesCrossImports',
+      'packages/flutter/test/foundation' => 'knownFoundationCrossImports',
+      'packages/flutter/test/gestures' => 'knownGesturesCrossImports',
+      'packages/flutter/test/harness' => 'knownHarnessCrossImports',
+      'packages/flutter/test/painting' => 'knownPaintingCrossImports',
+      'packages/flutter/test/physics' => 'knownPhysicsCrossImports',
+      'packages/flutter/test/rendering' => 'knownRenderingCrossImports',
+      'packages/flutter/test/scheduler' => 'knownSchedulerCrossImports',
+      'packages/flutter/test/semantics' => 'knownSemanticsCrossImports',
+      'packages/flutter/test/services' => 'knownServicesCrossImports',
+      'packages/flutter/test/widgets' => 'knownWidgetsCrossImports',
+      _ => throw UnimplementedError('Unknown library: $name'),
+    };
+  }
 
   /// Returns whether this library can contain the given [import].
   bool canImport(_LibraryImportStatement import) {
@@ -469,29 +510,18 @@ sealed class _Library {
   }
 }
 
-/// The Material library, also known as `flutter/material`.
+/// The Material library, also known as `packages/flutter/test/material`.
 final class _MaterialLibrary extends _Library {
-  const _MaterialLibrary() : super('flutter/test/material');
-
-  @override
-  String get crossImportsListSymbolName {
-    throw UnsupportedError('Material is allowed to cross-import.');
-  }
+  const _MaterialLibrary() : super('packages/flutter/test/material');
 }
 
-/// The Cupertino library, also known as `flutter/cupertino`.
+/// The Cupertino library, also known as `packages/flutter/test/cupertino`.
 final class _CupertinoLibrary extends _Library {
-  const _CupertinoLibrary() : super('flutter/test/cupertino');
-
-  @override
-  String get crossImportsListSymbolName => 'knownCupertinoCrossImports';
+  const _CupertinoLibrary() : super('packages/flutter/test/cupertino');
 }
 
 /// Any library that is not [_MaterialLibrary] or [_CupertinoLibrary],
-/// such as `flutter/widgets` or `flutter/services`.
+/// such as `packages/flutter/test/widgets` or `packages/flutter/test/services`.
 final class _OtherLibrary extends _Library {
-  const _OtherLibrary(super.name, this.crossImportsListSymbolName);
-
-  @override
-  final String crossImportsListSymbolName;
+  const _OtherLibrary(super.name);
 }
