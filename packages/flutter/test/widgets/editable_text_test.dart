@@ -294,7 +294,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('EditableText uses tight selection width style by default for multiline', (
+  testWidgets('EditableText uses tight selection width style by default', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -312,7 +312,7 @@ void main() {
     );
 
     RenderEditable renderEditable = findRenderEditable(tester);
-    expect(renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+    expect(renderEditable.selectionWidthStyle, EditableText.defaultSelectionWidthStyle);
 
     await tester.pumpWidget(
       Directionality(
