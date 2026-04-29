@@ -954,6 +954,18 @@ void main() {
 
     expect(tappedRed, isTrue, reason: 'Transform.flip cannot flipX and flipY together');
   });
+
+  testWidgets('Transform does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Transform.flip(flipY: true, child: const Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(Transform)), Size.zero);
+  });
 }
 
 class TestRectPainter extends CustomPainter {
