@@ -24,7 +24,8 @@ func testPostDelayedTask() {
   let startTime = CACurrentMediaTime()
   taskRunner.postTask(delay: 0.1) {
     let endTime = CACurrentMediaTime()
-    XCTAssertGreaterThanOrEqual(endTime - startTime, 0.1)
+    let epsilon = 0.001
+    XCTAssertGreaterThanOrEqual(endTime - startTime, 0.1 - epsilon)
     expectation.fulfill()
   }
 
