@@ -17,7 +17,7 @@ import 'diagnostics.dart';
 ///
 /// If no key is provided, the default value is `null`, meaning the widget is
 /// considered unkeyed. In this case, Flutter matches widgets based on their
-/// runtimeType and position in the tree during rebuilds.
+/// [Widget.runtimeType] and position in the tree during rebuilds.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=kn0EOS-ZiIc}
 ///
@@ -32,8 +32,8 @@ import 'diagnostics.dart';
 ///
 /// Without keys, Flutter has no way to distinguish between a change in the data
 /// of an existing widget and a structural change in the list. As a result,
-/// widgets may be incorrectly updated, and state held by stateful widgets can
-/// be reused for a different piece of data.
+/// widgets may be incorrectly updated, and state held by [StatefulWidget] widgets
+/// can be reused for a different piece of data.
 ///
 /// Assigning a key ties the widget subtree to a specific piece of data, allowing
 /// Flutter to correctly match old and new widgets and preserve state as expected.
