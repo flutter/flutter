@@ -553,10 +553,16 @@ void paintImage({
   Size outputSize = rect.size;
   var inputSize = Size(image.width.toDouble(), image.height.toDouble());
   Offset? sliceBorder;
+  // Tracks whether the destination rect is large enough to fit the
+  // centerSlice's outer borders. When it is not, [applyBoxFit] is called with
+  // a non-positive size and degenerates to [Size.zero], which would otherwise
+  // trip the source/input-size assertion below for an unrelated reason.
+  var sliceFits = true;
   if (centerSlice != null) {
     sliceBorder = inputSize / scale - centerSlice.size as Offset;
     outputSize = outputSize - sliceBorder as Size;
     inputSize = inputSize - sliceBorder * scale as Size;
+    sliceFits = outputSize.width > 0.0 && outputSize.height > 0.0;
   }
   fit ??= centerSlice == null ? BoxFit.scaleDown : BoxFit.fill;
   assert(centerSlice == null || (fit != BoxFit.none && fit != BoxFit.cover));
@@ -567,9 +573,13 @@ void paintImage({
     outputSize += sliceBorder!;
     destinationSize += sliceBorder;
     // We don't have the ability to draw a subset of the image at the same time
-    // as we apply a nine-patch stretch.
+    // as we apply a nine-patch stretch. A tolerance is used to absorb
+    // floating-point rounding from the `inputSize / scale * scale` round trip
+    // when the image's pixel dimensions are not evenly divisible by `scale`.
     assert(
-      sourceSize == inputSize,
+      !sliceFits ||
+          ((sourceSize.width - inputSize.width).abs() <= precisionErrorTolerance &&
+              (sourceSize.height - inputSize.height).abs() <= precisionErrorTolerance),
       'centerSlice was used with a BoxFit that does not guarantee that the image is fully visible.',
     );
   }

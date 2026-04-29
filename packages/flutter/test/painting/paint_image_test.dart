@@ -20,10 +20,12 @@ class TestCanvas implements Canvas {
 void main() {
   late ui.Image image300x300;
   late ui.Image image300x200;
+  late ui.Image image208x142;
 
   setUpAll(() async {
     image300x300 = await createTestImage(width: 300, height: 300, cache: false);
     image300x200 = await createTestImage(width: 300, height: 200, cache: false);
+    image208x142 = await createTestImage(width: 208, height: 142, cache: false);
   });
 
   setUp(() {
@@ -178,6 +180,48 @@ void main() {
     expect(command.positionalArguments[0], equals(image300x300));
     expect(command.positionalArguments[1], equals(const Rect.fromLTRB(100.0, 80.0, 500.0, 520.0)));
     expect(command.positionalArguments[2], equals(const Rect.fromLTRB(20.0, 40.0, 860.0, 840.0)));
+  });
+
+  test('centerSlice tolerates floating-point rounding when scale divides unevenly', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/27827.
+    // With image=208x142, scale=3 and a centerSlice large enough that the
+    // destination rect still encloses the borders, `inputSize / scale * scale`
+    // does not exactly round-trip through floating-point. The strict-equality
+    // assertion that used to live here would fail by a few ULPs.
+    final canvas = TestCanvas();
+    paintImage(
+      canvas: canvas,
+      rect: const Rect.fromLTWH(0.0, 0.0, 200.0, 100.0),
+      image: image208x142,
+      scale: 3.0,
+      centerSlice: const Rect.fromLTRB(15.0, 15.0, 17.0, 17.0),
+    );
+
+    final Invocation command = canvas.invocations.firstWhere((Invocation invocation) {
+      return invocation.memberName == #drawImageNine;
+    });
+    expect(command.positionalArguments[0], equals(image208x142));
+  });
+
+  test('centerSlice does not throw when the destination rect is smaller than the slice borders', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/27827.
+    // With a 100x46 rect and a 208x142 image at scale 3, subtracting the
+    // slice borders from `outputSize` makes it non-positive. `applyBoxFit`
+    // then degenerates to `Size.zero` and the legacy strict-equality
+    // assertion fired against the inner-input size for that unrelated reason.
+    final canvas = TestCanvas();
+    paintImage(
+      canvas: canvas,
+      rect: const Rect.fromLTWH(0.0, 0.0, 100.0, 46.0),
+      image: image208x142,
+      scale: 3.0,
+      centerSlice: const Rect.fromLTRB(15.5, 15.5, 16.5, 16.5),
+    );
+
+    final Invocation command = canvas.invocations.firstWhere((Invocation invocation) {
+      return invocation.memberName == #drawImageNine;
+    });
+    expect(command.positionalArguments[0], equals(image208x142));
   });
 
   testWidgets('Reports Image painting', (WidgetTester tester) async {
