@@ -1279,6 +1279,58 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/179029.
+  testWidgets(
+    'AnimatedList.separated does not throw when removing then re-inserting the last item before the removal animation completes',
+    (WidgetTester tester) async {
+      final listKey = GlobalKey<AnimatedListState>();
+      const initialItemCount = 2;
+
+      Widget itemBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 40.0, child: Text('item $index'));
+      }
+
+      Widget separatorBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 8.0, child: Text('sep $index'));
+      }
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: AnimatedList.separated(
+            key: listKey,
+            initialItemCount: initialItemCount,
+            itemBuilder: itemBuilder,
+            separatorBuilder: separatorBuilder,
+            removedSeparatorBuilder: separatorBuilder,
+          ),
+        ),
+      );
+
+      listKey.currentState!.removeItem(
+        initialItemCount - 1,
+        (BuildContext context, Animation<double> animation) =>
+            const SizedBox(height: 40.0, child: Text('removed')),
+        duration: const Duration(milliseconds: 100),
+      );
+      listKey.currentState!.insertItem(
+        initialItemCount - 1,
+        duration: const Duration(milliseconds: 100),
+      );
+
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      final List<String> visible = tester
+          .widgetList<Text>(
+            find.descendant(of: find.byType(SliverAnimatedList), matching: find.byType(Text)),
+          )
+          .map((Text text) => text.data!)
+          .toList();
+      expect(visible, <String>['item 0', 'sep 0', 'item 1']);
+    },
+  );
+
   testWidgets('AnimatedList does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     final controller = ScrollController();

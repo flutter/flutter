@@ -828,16 +828,25 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
 
   int get _itemsCount => _sliverAnimatedMultiBoxKey.currentState!._itemsCount;
 
-  int get _outgoingItemsCount => _sliverAnimatedMultiBoxKey.currentState!._outgoingItems.length;
+  /// The number of underlying entries that are still live (not currently
+  /// animating out). The sliver-level [_SliverAnimatedMultiBoxAdaptorState.insertItem]
+  /// and [_SliverAnimatedMultiBoxAdaptorState.removeItem] APIs are documented
+  /// to operate in this space (the comment on
+  /// [_SliverAnimatedMultiBoxAdaptorState._indexToItemIndex] notes that index
+  /// parameters are defined as if the remove operation removed the
+  /// corresponding entry immediately), so separator-aware index translation
+  /// must also be computed against it.
+  int get _visibleItemsCount =>
+      _itemsCount - _sliverAnimatedMultiBoxKey.currentState!._outgoingItems.length;
 
   // Helper method to compute the index for the item to insert or remove considering the separators in between.
   int _computeItemIndex(int index) {
     if (index == 0) {
       return index;
     }
-    final int itemsAndSeparatorsCount = _itemsCount;
+    final int itemsAndSeparatorsCount = _visibleItemsCount;
     final int separatorsCount = itemsAndSeparatorsCount ~/ 2;
-    final int separatedItemsCount = _itemsCount - separatorsCount;
+    final int separatedItemsCount = itemsAndSeparatorsCount - separatorsCount;
 
     final isNewLastIndex = index == separatedItemsCount;
     final int indexAdjustedForSeparators = index * 2;
