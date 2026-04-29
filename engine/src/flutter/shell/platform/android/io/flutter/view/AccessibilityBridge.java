@@ -3060,6 +3060,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (inverseTransform == null) {
         inverseTransform = new float[16];
       }
+      if (hitTestTransform == null) {
+        hitTestTransform = new float[16];
+        Matrix.setIdentityM(hitTestTransform, 0);
+      }
       if (!Matrix.invertM(inverseTransform, 0, hitTestTransform, 0)) {
         Arrays.fill(inverseTransform, 0);
       }
