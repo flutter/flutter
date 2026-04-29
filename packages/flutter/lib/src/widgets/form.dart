@@ -829,6 +829,18 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     super.dispose();
   }
 
+  /// The [SemanticsValidationResult] published by [wrapWithSemantics] for this
+  /// field's current state.
+  SemanticsValidationResult get _semanticsValidationResult =>
+      hasError ? SemanticsValidationResult.invalid : SemanticsValidationResult.valid;
+
+  /// Whether [wrapWithFocus]'s [Focus] should add its own [Semantics] node.
+  ///
+  /// Subclasses whose [wrapWithSemantics] uses [SliverSemantics] override this
+  /// to `false`, since the box-typed semantics node added by [Focus] would
+  /// otherwise crash on a sliver child.
+  bool get _focusIncludesSemantics => true;
+
   /// Wraps the result of [FormField.builder] with a [Semantics] node that
   /// publishes the field's [SemanticsValidationResult].
   ///
@@ -837,24 +849,20 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// is a render-box widget and would crash when given a sliver child.
   @protected
   Widget wrapWithSemantics(Widget child) {
-    return Semantics(
-      validationResult: hasError
-          ? SemanticsValidationResult.invalid
-          : SemanticsValidationResult.valid,
-      child: child,
-    );
+    return Semantics(validationResult: _semanticsValidationResult, child: child);
   }
 
   /// Wraps [child] with the [Focus] node used to drive
   /// [AutovalidateMode.onUnfocus] validation.
   ///
-  /// Subclasses whose builder returns a sliver override this to disable
-  /// [Focus]'s own [Semantics] wrapper, which is a render-box widget.
+  /// Subclasses whose builder returns a sliver override [_focusIncludesSemantics]
+  /// to disable [Focus]'s own [Semantics] wrapper, which is a render-box widget.
   @protected
   Widget wrapWithFocus(Widget child) {
     return Focus(
       canRequestFocus: false,
       skipTraversal: true,
+      includeSemantics: _focusIncludesSemantics,
       onFocusChange: (bool value) {
         if (!value) {
           setState(_validate);
@@ -930,34 +938,16 @@ class SliverFormField<T> extends FormField<T> {
 
 /// The current state of a [SliverFormField].
 class SliverFormFieldState<T> extends FormFieldState<T> {
+  // [Focus] adds its own [Semantics] wrapper around its child, which is a
+  // render-box widget and would crash on a sliver child. The [SliverSemantics]
+  // wrapper from [wrapWithSemantics] already publishes the field's semantics,
+  // so [Focus.includeSemantics] can safely be disabled.
   @override
-  Widget wrapWithSemantics(Widget child) {
-    return SliverSemantics(
-      validationResult: hasError
-          ? SemanticsValidationResult.invalid
-          : SemanticsValidationResult.valid,
-      sliver: child,
-    );
-  }
+  bool get _focusIncludesSemantics => false;
 
   @override
-  Widget wrapWithFocus(Widget child) {
-    // [Focus] adds its own [Semantics] wrapper around its child, which is a
-    // render-box widget and would crash on a sliver child. The
-    // [SliverSemantics] wrapper from [wrapWithSemantics] already publishes the
-    // field's semantics, so [Focus.includeSemantics] can safely be disabled.
-    return Focus(
-      canRequestFocus: false,
-      skipTraversal: true,
-      includeSemantics: false,
-      onFocusChange: (bool value) {
-        if (!value) {
-          setState(_validate);
-        }
-      },
-      focusNode: _focusNode,
-      child: child,
-    );
+  Widget wrapWithSemantics(Widget child) {
+    return SliverSemantics(validationResult: _semanticsValidationResult, sliver: child);
   }
 }
 
