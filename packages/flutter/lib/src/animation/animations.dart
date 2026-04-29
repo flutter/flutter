@@ -268,8 +268,8 @@ class ProxyAnimation extends Animation<double>
 ///
 ///  * [Curve.flipped] and [FlippedCurve], which provide a similar effect but on
 ///    [Curve]s.
-///  * [CurvedAnimation], which can take separate curves for when the animation
-///    is going forward than for when it is going in reverse.
+///  * [AsymmetricCurvedAnimation], which can take separate curves for when
+///    the animation is going forward or in reverse.
 class ReverseAnimation extends Animation<double>
     with AnimationLazyListenerMixin, AnimationLocalStatusListenersMixin {
   /// Creates a reverse animation.
@@ -328,8 +328,9 @@ class ReverseAnimation extends Animation<double>
 /// An animation that applies a curve to another animation.
 ///
 /// [CurvedAnimation] is useful when you want to apply a non-linear [Curve] to
-/// an animation object, especially if you want different curves when the
-/// animation is going forward vs when it is going backward.
+/// an animation object.
+/// If you want different curves when the animation is going forward vs when it
+/// is going backward, use [AsymmetricCurvedAnimation] instead.
 ///
 /// Depending on the given curve, the output of the [CurvedAnimation] could have
 /// a wider range than its input. For example, elastic curves such as
@@ -346,6 +347,10 @@ class ReverseAnimation extends Animation<double>
 /// not needed, prefer `parent.drive(CurveTween(curve: curve))` which does not
 /// require separate disposal.
 ///
+/// In a future Flutter release, the deprecated [reverseCurve] parameter will
+/// be removed and you will no longer need to call [dispose] on the
+/// [CurvedAnimation].
+///
 /// {@tool snippet}
 ///
 /// The following code snippet shows how you can apply a curve to a linear
@@ -358,46 +363,28 @@ class ReverseAnimation extends Animation<double>
 /// );
 /// ```
 /// {@end-tool}
-/// {@tool snippet}
-///
-/// This second code snippet shows how to apply a different curve in the forward
-/// direction than in the reverse direction. This can't be done using a
-/// [CurveTween] (since [Tween]s are not aware of the animation direction when
-/// they are applied).
-///
-/// ```dart
-/// final Animation<double> animation = CurvedAnimation(
-///   parent: controller,
-///   curve: Curves.easeIn,
-///   reverseCurve: Curves.easeOut,
-/// );
-/// ```
-/// {@end-tool}
-///
-/// By default, the [reverseCurve] matches the forward [curve].
 ///
 /// See also:
 ///
-///  * [CurveTween], for an alternative way of expressing the first sample
-///    above.
+///  * [CurveTween], for an alternative way of expressing the sample above.
+///  * [AsymmetricCurvedAnimation], for an alternative that supports different
+///    curves for forward and reverse directions.
 ///  * [AnimationController], for examples of creating and disposing of an
 ///    [AnimationController].
 ///  * [Curve.flipped] and [FlippedCurve], which provide the reverse of a
 ///    [Curve].
-class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
+class CurvedAnimation extends AsymmetricCurvedAnimation {
   /// Creates a curved animation.
-  CurvedAnimation({required this.parent, required this.curve, this.reverseCurve}) {
-    assert(debugMaybeDispatchCreated('animation', 'CurvedAnimation', this));
-    _updateCurveDirection(parent.status);
-    parent.addStatusListener(_updateCurveDirection);
-  }
-
-  /// The animation to which this animation applies a curve.
-  @override
-  final Animation<double> parent;
-
-  /// The curve to use in the forward direction.
-  Curve curve;
+  CurvedAnimation({
+    required super.parent,
+    required super.curve,
+    @Deprecated(
+      'Switch to AsymmetricCurvedAnimation if you need different forward & backward animations. '
+      'In the future, CurvedAnimation will only support a single curve for improved memory efficiency. '
+      'This feature was deprecated after v3.44.0-0.2.pre.',
+    )
+    super.reverseCurve,
+  });
 
   /// The curve to use in the reverse direction.
   ///
@@ -414,6 +401,86 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   /// disposal.
   ///
   /// If this field is null, uses [curve] in both directions.
+  @override
+  @Deprecated(
+    'Switch to AsymmetricCurvedAnimation if you need different forward & backward animations. '
+    'In the future, CurvedAnimation will only support a single curve for improved memory efficiency. '
+    'This feature was deprecated after v3.44.0-0.2.pre.',
+  )
+  Curve? get reverseCurve => super.reverseCurve;
+}
+
+/// An animation that applies different curves to its [parent] animation
+/// depending on whether it's going forwards or backwards.
+///
+/// [AsymmetricCurvedAnimation] operates by adding listeners to its [parent].
+/// Therefore, you shouldn't re-instantiate it every build to avoid unnecessary
+/// listener additions and potential memory leaks. Remember to dispose it
+/// (or its [parent]) when it's no longer needed.
+///
+/// Depending on the given curve, the output of this animation could have
+/// a wider range than its input. For example, elastic curves such as
+/// [Curves.elasticIn] will significantly overshoot or undershoot the default
+/// range of 0.0 to 1.0.
+///
+/// {@tool snippet}
+///
+/// This code snippet shows how to apply a different curve in the forward
+/// direction than in the reverse direction. This can't be done using a
+/// [CurveTween] (since [Tween]s are not aware of the animation direction when
+/// they are applied).
+///
+/// ```dart
+/// final Animation<double> animation = AsymmetricCurvedAnimation(
+///   parent: controller,
+///   curve: Curves.easeIn,
+///   reverseCurve: Curves.easeOut,
+/// );
+/// ```
+/// {@end-tool}
+///
+/// If [reverseCurve] is null, [curve] will be used in both directions.
+/// If you don't need [reverseCurve] at all, consider using [CurvedAnimation]
+/// instead.
+///
+/// See also:
+///
+///  * [CurvedAnimation], for a single-direction curved animation.
+///  * [AnimationController], for examples of creating and disposing of an
+///    [AnimationController].
+///  * [Curve.flipped] and [FlippedCurve], which provide the reverse of a
+///    [Curve].
+class AsymmetricCurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
+  /// Creates an asymmetric curved animation.
+  AsymmetricCurvedAnimation({required this.parent, required this.curve, this.reverseCurve}) {
+    assert(debugMaybeDispatchCreated('animation', 'AsymmetricCurvedAnimation', this));
+    _updateCurveDirection(parent.status);
+    parent.addStatusListener(_updateCurveDirection);
+  }
+
+  /// The animation to which this animation applies a curve.
+  @override
+  final Animation<double> parent;
+
+  /// The curve to use in the forward direction.
+  Curve curve;
+
+  /// The curve to use in the reverse direction.
+  ///
+  /// If the parent animation changes direction without first reaching the
+  /// [AnimationStatus.completed] or [AnimationStatus.dismissed] status, the
+  /// [AsymmetricCurvedAnimation] stays on the same curve (albeit in the
+  /// opposite direction) to avoid visual discontinuities.
+  ///
+  /// Because [AsymmetricCurvedAnimation] adds listeners to its parent, it must
+  /// be created once (for example, in [State.initState]) and disposed in
+  /// [State.dispose]. Do not recreate it on every build as it would leak any
+  /// added listeners on every rebuild.
+  ///
+  /// If [reverseCurve] is not needed, prefer [CurvedAnimation] over
+  /// [AsymmetricCurvedAnimation] for memory efficiency.
+  ///
+  /// If this field is null, uses [curve] in both directions.
   Curve? reverseCurve;
 
   /// The direction used to select the current curve.
@@ -423,7 +490,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   /// animation is used to animate.
   AnimationStatus? _curveDirection;
 
-  /// True if this CurvedAnimation has been disposed.
+  /// True if this AsymmetricCurvedAnimation has been disposed.
   bool isDisposed = false;
 
   void _updateCurveDirection(AnimationStatus status) {
@@ -434,7 +501,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
     return reverseCurve == null || (_curveDirection ?? parent.status) != AnimationStatus.reverse;
   }
 
-  /// Cleans up any listeners added by this CurvedAnimation.
+  /// Cleans up any listeners added by this AsymmetricCurvedAnimation.
   void dispose() {
     assert(debugMaybeDispatchDisposed(this));
     isDisposed = true;
