@@ -279,11 +279,6 @@ if (enable_ios_unittests) {
       "framework/Source/SplashScreenManagerTests.swift",
       "framework/Source/TaskRunnerTests.swift",
     ]
-    include_dirs = [
-      "//flutter/shell/platform/darwin/common/framework/Headers",
-      "//flutter/shell/platform/darwin/macos/framework/Headers",
-      "//flutter/shell/platform/darwin/macos/framework",  # For module.modulemap
-    ]
     frameworks = [ "XCTest.framework" ]
     deps = [
       ":flutter_engine_bindings",
