@@ -21,7 +21,10 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../flutter_plugins.dart';
 import '../macos/swift_package_manager.dart';
+import '../plugins.dart';
+import '../project.dart';
 import '../reporting/reporting.dart';
 
 final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
@@ -474,9 +477,18 @@ class XcodeProjectInterpreter {
       });
       if (exitCode != 0) {
         final stderrString = stderrBuffer.toString();
-        final String? swiftPackageManagerError = SwiftPackageManager.parseError(stderrString);
+
+        final FlutterProject project = FlutterProject.fromDirectory(
+          _fileSystem.directory(projectPath).parent,
+        );
+        final List<Plugin> plugins = await findPlugins(project);
+        final String? swiftPackageManagerError = SwiftPackageManager.parseError(
+          stderrString,
+          pluginNames: plugins.map((p) => p.name).toList(),
+        );
 
         if (swiftPackageManagerError != null) {
+          _logger.printError(stderrString);
           throwToolExit(swiftPackageManagerError);
         }
         throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrBuffer');

@@ -408,21 +408,36 @@ class SwiftPackageManager {
     _SwiftPMErrorMatcher(
       pattern: RegExp(r"target '([^']+)' in package '[^']+' is outside the package root"),
       message: (RegExpMatch match) =>
-          'Flutter plugin "${match.group(1)}" is not formatted correctly.\n'
-          'Its target path is outside the package root, which is not supported by Swift Package Manager.\n'
-          'Please contact the plugin author.',
+          'Flutter plugin "${match.group(1)}" has an incorrectly configured Package.swift file.\n'
+          'Please contact the plugin maintainers for assistance.',
+    ),
+    _SwiftPMErrorMatcher(
+      pattern: RegExp(r'([^\/]+)\/Package\.swift:\d+:\d+: error:'),
+      message: (RegExpMatch match) =>
+          'Flutter plugin "${match.group(1)}" has an incorrectly configured Package.swift file.\n'
+          'Please contact the plugin maintainers for assistance.',
+    ),
+    _SwiftPMErrorMatcher(
+      pattern: RegExp(r"unknown package '[^']+' in dependencies of target '([^']+)'"),
+      message: (RegExpMatch match) =>
+          'Flutter plugin "${match.group(1)}" has an incorrectly configured Package.swift file.\n'
+          'Please contact the plugin maintainers for assistance.',
     ),
   ];
 
   /// Parses a Swift Package Manager error message and returns a guided error
   /// message if the error matches a known pattern.
-  static String? parseError(String? message) {
+  static String? parseError(String? message, {required List<String> pluginNames}) {
     if (message == null || message.isEmpty) {
       return null;
     }
     for (final _SwiftPMErrorMatcher matcher in _errorMatchers) {
       final RegExpMatch? match = matcher.pattern.firstMatch(message);
       if (match != null) {
+        final String packageName = match.group(1)!;
+        if (!pluginNames.contains(packageName)) {
+          continue;
+        }
         return matcher.message(match);
       }
     }

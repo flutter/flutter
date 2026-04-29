@@ -169,6 +169,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     Status? migrationStatus;
     SchemeInfo? schemeInfo;
     var optionalOnly = false;
+    final List<Plugin> plugins = await _xcodeProject.getPlugins();
     try {
       if (!_xcodeProjectInfoFile.existsSync()) {
         throw Exception('Xcode project not found.');
@@ -179,6 +180,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         fileSystem: _fileSystem,
         logger: logger,
         platform: _platform,
+        plugins: plugins,
       );
 
       schemeInfo = await _getSchemeFile();
@@ -237,7 +239,11 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);
       final errorString = e.toString();
-      final String? swiftPackageManagerError = SwiftPackageManager.parseError(errorString);
+      final List<String> pluginNames = plugins.map((Plugin p) => p.name).toList();
+      final String? swiftPackageManagerError = SwiftPackageManager.parseError(
+        errorString,
+        pluginNames: pluginNames,
+      );
 
       if (swiftPackageManagerError != null) {
         throwToolExit(swiftPackageManagerError);
@@ -1235,6 +1241,7 @@ $newContent
     required FileSystem fileSystem,
     required Logger logger,
     required FlutterDarwinPlatform platform,
+    required List<Plugin> plugins,
   }) async {
     try {
       final FlutterProject flutterProject = xcodeProject.parent;
@@ -1245,7 +1252,7 @@ $newContent
         );
         if (parentProject.isPlugin && parentProject.hasExampleApp) {
           final String pluginName = parentProject.manifest.appName;
-          final List<Plugin> plugins = await xcodeProject.getPlugins();
+
           final String? absolutePath = plugins
               .where((plugin) => plugin.name == pluginName)
               .firstOrNull

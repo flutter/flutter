@@ -1122,11 +1122,13 @@ Future<bool> _handleIssues(
   }
 
   final XcodeBasedProject xcodeProject = platform.xcodeProject(project);
+  final List<Plugin> plugins = await xcodeProject.getPlugins();
+  final List<String> pluginNames = plugins.map((Plugin p) => p.name).toList();
   final String? swiftPackageManagerMinPlatformMismatchMessage =
       _swiftPackageManagerMinPlatformMismatchMessageFromStdout(result.stdout);
   final String? swiftPackageManagerError =
-      SwiftPackageManager.parseError(result.stdout) ??
-      SwiftPackageManager.parseError(result.stderr);
+      SwiftPackageManager.parseError(result.stdout, pluginNames: pluginNames) ??
+      SwiftPackageManager.parseError(result.stderr, pluginNames: pluginNames);
 
   if (requiresProvisioningProfile) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
