@@ -554,9 +554,11 @@ class FlutterPlugin : Plugin<Project> {
             extension: ApplicationExtension
         ) {
             if (!FlutterPluginUtils.shouldProjectDisableAbiFiltering(projectToAddTasksTo)) {
-                extension.defaultConfig.ndk {
-                    abiFilters.clear()
-                    abiFilters.addAll(PLATFORM_ABI_LIST)
+                extension.defaultConfig {
+                    ndk {
+                        abiFilters.clear()
+                        abiFilters.addAll(PLATFORM_ABI_LIST)
+                    }
                 }
             }
         }
