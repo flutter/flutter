@@ -32,6 +32,22 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 ## Flutter 3.41 Changes
 
+### [3.41.8](https://github.com/flutter/flutter/releases/tag/3.41.8)
+- [flutter/185150](https://github.com/flutter/flutter/issues/185150) When using profile mode on a physical iOS device, the app may fail to connect to the Dart VM.
+
+### [3.41.7](https://github.com/flutter/flutter/releases/tag/3.41.7)
+- [flutter/184376](https://github.com/flutter/flutter/issues/184376) When building an iOS or macOS app, the build may fail due to git multi-pack-index error.
+- [flutter/184254](https://github.com/flutter/flutter/issues/184254) When debugging on physical iOS devices and Xcode 26.4+, app often crashes.
+- [flutter/184689](https://github.com/flutter/flutter/issues/184689) When using an ffi Windows package, don't require a plugin class.
+
+### [3.41.6](https://github.com/flutter/flutter/releases/tag/3.41.6)
+- [flutter/184025](https://github.com/flutter/flutter/pull/184025) Include a fix from Skia that ensures that the correct atlas for the glyph mask format is used consistently.
+- [flutter/182708](https://github.com/flutter/flutter/issues/182708) Visual issues with circles appearing jagged. Especially on thin stroked circles and circles with small radii.
+- [flutter/183887](https://github.com/flutter/flutter/issues/183887) During SCREEN_OFF event a deadlock preventing new frames causing an ANR can occur on android devices running the Android 16 March Security update.
+
+### [3.41.5](https://github.com/flutter/flutter/releases/tag/3.41.5)
+- [flutter/182708](https://github.com/flutter/flutter/issues/182708) When using Impeller on any platform, bur artifacts in circles rendering at 45 degree angles.
+
 ### [3.41.4](https://github.com/flutter/flutter/releases/tag/3.41.4)
 - [flutter/182748](https://github.com/flutter/flutter/issues/182748) When building for an iOS simulator with Xcode 26, the build will fail when there is a CocoaPod dependency that does not support arm.
 - [flutter/182361](https://github.com/flutter/flutter/issues/182361) When iOS plugins register to receive lifecycle events during an event, a crash may occur.

@@ -389,6 +389,14 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.platformView->DispatchPointerDataPacket(std::move(packet));
 }
 
+- (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(flutter::PointData)location
+                                                   viewId:(uint64_t)viewId {
+  if (!self.platformView) {
+    return NO;
+  }
+  return self.platformView->HitTest(viewId, location).has_platform_view;
+}
+
 - (void)installFirstFrameCallback:(void (^)(void))block {
   if (!self.platformView) {
     return;
@@ -1741,6 +1749,10 @@ static BOOL FLTFlutterPluginRespondsToLegacyAppLifecycleSelectors(
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package {
   return [self.flutterEngine lookupKeyForAsset:asset fromPackage:package];
+}
+
+- (nullable NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
+  return [self.flutterEngine valuePublishedByPlugin:pluginKey];
 }
 
 @end

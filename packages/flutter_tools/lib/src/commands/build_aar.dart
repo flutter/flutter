@@ -87,6 +87,7 @@ class BuildAarCommand extends BuildSubCommand {
       commandHasTerminal: hasTerminal,
       buildAarProjectType: projectType,
       buildAarTargetPlatform: stringsArg('target-platform').join(','),
+      // TODO(gmackall): Consider collecting hcpp analytics, see https://github.com/flutter/flutter/issues/184541.
     );
   }
 
@@ -156,9 +157,6 @@ class BuildAarCommand extends BuildSubCommand {
       buildNumber: buildNumber,
     );
 
-    // When an aar is successfully built, record to analytics whether Impeller
-    // is enabled or disabled. Note that 'computeImpellerEnabled' will default
-    // to false if not enabled explicitly in the manifest.
     final bool impellerEnabled = project.android.computeImpellerEnabled();
     final buildLabel = impellerEnabled
         ? 'manifest-aar-impeller-enabled'

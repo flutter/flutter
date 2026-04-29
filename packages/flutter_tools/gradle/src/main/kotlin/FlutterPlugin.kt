@@ -5,6 +5,7 @@
 package com.flutter.gradle
 
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.BuildType
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryExtension
@@ -153,7 +154,7 @@ class FlutterPlugin : Plugin<Project> {
 
         FlutterPluginUtils.getTargetPlatforms(project).forEach { targetArch ->
             val abiValue: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]
-            val androidExtension: BaseExtension = FlutterPluginUtils.getAndroidExtension(project)
+            val androidExtension: BaseExtension = FlutterPluginUtils.getLegacyAndroidExtension(project)
             androidExtension.splits.abi.include(abiValue!!)
         }
 
@@ -190,7 +191,7 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         BaseApplicationNameHandler.setBaseName(project)
-        val flutterProguardRules: String =
+        val flutterProguardRules =
             Paths
                 .get(
                     flutterRoot!!.absolutePath,
@@ -198,40 +199,29 @@ class FlutterPlugin : Plugin<Project> {
                     "flutter_tools",
                     "gradle",
                     "flutter_proguard_rules.pro"
-                ).toString()
+                ).toFile()
         // TODO(gmackall): reconsider getting the android extension every time
-        FlutterPluginUtils.getAndroidExtension(project).buildTypes {
-            // Add profile build type.
-            create("profile") {
-                initWith(getByName("debug"))
+        val debugBuildType: BuildType = FlutterPluginUtils.getAndroidExtension(project).buildTypes.getByName("debug")
+        FlutterPluginUtils.getAndroidExtension(project).buildTypes.create(
+            "profile",
+            {
+                initWith(debugBuildType)
                 // TODO(gmackall): do we need to clear?
                 this.matchingFallbacks.clear()
                 this.matchingFallbacks.addAll(listOf("debug", "release"))
             }
-
-            // TODO(garyq): Shrinking is only false for multi apk split aot builds, where shrinking is not allowed yet.
-            // This limitation has been removed experimentally in gradle plugin version 4.2, so we can remove
-            // this check when we upgrade to 4.2+ gradle. Currently, deferred components apps may see
-            // increased app size due to this.
-            if (FlutterPluginUtils.shouldShrinkResources(project)) {
-                getByName("release") {
-                    isMinifyEnabled = true
-                    // Enables resource shrinking, which is performed by the Android Gradle plugin.
-                    // The resource shrinker can't be used for libraries.
-                    isShrinkResources = FlutterPluginUtils.isBuiltAsApp(project)
-                    proguardFiles(
-                        FlutterPluginUtils
-                            .getAndroidExtension(project)
-                            .getDefaultProguardFile("proguard-android-optimize.txt"),
-                        flutterProguardRules
-                    )
-
-                    // Optionally adds custom Proguard rules as needed from `android/app/proguard-rules.pro`.
-                    // Starting AGP 9.0 Proguard files must exist to be added to the configuration.
-                    if (File("${project.projectDir}/proguard-rules.pro").exists()) {
-                        proguardFile("proguard-rules.pro")
-                    }
-                }
+        )
+        if (FlutterPluginUtils.shouldShrinkResources(project)) {
+            val releaseBuildType: BuildType = FlutterPluginUtils.getAndroidExtension(project).buildTypes.getByName("release")
+            releaseBuildType.isMinifyEnabled = true
+            releaseBuildType.isShrinkResources = FlutterPluginUtils.isBuiltAsApp(project)
+            releaseBuildType.proguardFiles.add(
+                FlutterPluginUtils.getAndroidExtension(project).getDefaultProguardFile("proguard-android-optimize.txt")
+            )
+            releaseBuildType.proguardFiles.add(flutterProguardRules)
+            val proguardRulesPro = File("${project.projectDir}/proguard-rules.pro")
+            if (proguardRulesPro.exists()) {
+                releaseBuildType.proguardFiles.add(proguardRulesPro)
             }
         }
 
@@ -254,7 +244,7 @@ class FlutterPlugin : Plugin<Project> {
             }
             localEngineHost = engineHostOut.name
         }
-        FlutterPluginUtils.getAndroidExtension(project).buildTypes.all {
+        FlutterPluginUtils.getLegacyAndroidExtension(project).buildTypes.all {
             addFlutterDependencies(this)
         }
     }
@@ -316,7 +306,7 @@ class FlutterPlugin : Plugin<Project> {
             FlutterPluginUtils.getTargetPlatforms(projectToAddTasksTo)
 
         // TODO(reidbaker): Migrate to getAndroidApplicationExtension and getAndroidLibraryExtension.
-        val androidExtension = FlutterPluginUtils.getAndroidExtension(projectToAddTasksTo)
+        val androidExtension = FlutterPluginUtils.getLegacyAndroidExtension(projectToAddTasksTo)
         androidExtension.sourceSets.all {
             val sourceSet = this
             val jniLibsDir =
@@ -406,6 +396,9 @@ class FlutterPlugin : Plugin<Project> {
                 projectToAddTasksTo,
                 getPluginHandler(projectToAddTasksTo).getPluginList()
             )
+            FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
+                projectToAddTasksTo
+            )
             return
         }
         // Flutter host module project (Add-to-app).
@@ -484,6 +477,9 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
             getPluginHandler(projectToAddTasksTo).getPluginList()
+        )
+        FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
+            projectToAddTasksTo
         )
     }
 

@@ -1600,7 +1600,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       for (final RenderObject node in nodesToProcess.reversed) {
         node._semantics.computeAncestorInfo(treeShapeToken);
         final targets = <_RenderObjectSemantics>[];
-        if (node._semantics.geometry == null) {
+        if (node._semantics.geometryDirty) {
           if (node._semantics.firstAncestorNodeWithCleanGeometry != null) {
             targets.add(node._semantics.firstAncestorNodeWithCleanGeometry!);
           }
@@ -1609,10 +1609,21 @@ base class PipelineOwner with DiagnosticableTreeMixin {
           // geometry becomes invisible after the ensureGeometry call above,
           // the parent of this node will have to update its semantics subtree to remove
           // this node from its children.
-          if (!node._semantics.geometry!.isVisible &&
-              !node._semantics.isRoot &&
-              node._semantics.parentInSemanticsTree != null) {
-            targets.add(node._semantics.parentInSemanticsTree!);
+          if (!node._semantics.geometry!.isVisible && !node._semantics.isRoot) {
+            final _RenderObjectSemantics? parentInSemanticsTree =
+                node._semantics.parentInSemanticsTree;
+            if (parentInSemanticsTree != null) {
+              if (!parentInSemanticsTree.geometryDirty) {
+                targets.add(parentInSemanticsTree);
+              } else {
+                final _RenderObjectSemantics? firstAncestorNodeWithCleanGeometry =
+                    parentInSemanticsTree.firstAncestorNodeWithCleanGeometry;
+                // firstAncestorNodeWithCleanGeometry can be null if this is a blocked branch.
+                if (firstAncestorNodeWithCleanGeometry != null) {
+                  targets.add(firstAncestorNodeWithCleanGeometry);
+                }
+              }
+            }
           }
           targets.add(node._semantics);
         }
@@ -2511,16 +2522,14 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// This is only set in debug mode. In general, render objects should not need
   /// to condition their runtime behavior on whether they are dirty or not,
   /// since they should only be marked dirty immediately prior to being laid
-  /// out and painted. In release builds, this throws.
+  /// out and painted. Always returns false in non-debug builds.
   ///
   /// It is intended to be used by tests and asserts.
   bool get debugNeedsLayout {
-    late bool result;
-    assert(() {
-      result = _needsLayout;
-      return true;
-    }());
-    return result;
+    if (!kDebugMode) {
+      return false;
+    }
+    return _needsLayout;
   }
 
   bool _needsLayout = true;
@@ -3253,7 +3262,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// This is only set in debug mode. In general, render objects should not need
   /// to condition their runtime behavior on whether they are dirty or not,
   /// since they should only be marked dirty immediately prior to being laid
-  /// out and painted. (In release builds, this throws.)
+  /// out and painted. Always returns false in non-debug builds.
   ///
   /// It is intended to be used by tests and asserts.
   ///
@@ -3263,12 +3272,10 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// [markNeedsPaint] method is implicitly called by the framework after a
   /// render object is laid out, prior to the paint phase.
   bool get debugNeedsPaint {
-    late bool result;
-    assert(() {
-      result = _needsPaint;
-      return true;
-    }());
-    return result;
+    if (!kDebugMode) {
+      return false;
+    }
+    return _needsPaint;
   }
 
   bool _needsPaint = true;
@@ -3278,16 +3285,14 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// This is only set in debug mode. In general, render objects should not need
   /// to condition their runtime behavior on whether they are dirty or not,
   /// since they should only be marked dirty immediately prior to being laid
-  /// out and painted. (In release builds, this throws.)
+  /// out and painted. Always returns false in non-debug builds.
   ///
   /// It is intended to be used by tests and asserts.
   bool get debugNeedsCompositedLayerUpdate {
-    late bool result;
-    assert(() {
-      result = _needsCompositedLayerUpdate;
-      return true;
-    }());
-    return result;
+    if (!kDebugMode) {
+      return false;
+    }
+    return _needsCompositedLayerUpdate;
   }
 
   bool _needsCompositedLayerUpdate = false;
@@ -3937,7 +3942,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     SemanticsConfiguration config,
     Iterable<SemanticsNode> children,
   ) {
-    assert(node == _semantics.cachedSemanticsNode);
     // TODO(a14n): remove the following cast by updating type of parameter in either updateWith or assembleSemanticsNode
     node.updateWith(config: config, childrenInInversePaintOrder: children as List<SemanticsNode>);
   }
@@ -4689,15 +4693,16 @@ mixin RelayoutWhenSystemFontsChangeMixin on RenderObject {
 
   bool _hasPendingSystemFontsDidChangeCallBack = false;
   void _scheduleSystemFontsUpdate() {
-    assert(
-      SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle,
-      '${objectRuntimeType(this, "RelayoutWhenSystemFontsChangeMixin")}._scheduleSystemFontsUpdate() '
-      'called during ${SchedulerBinding.instance.schedulerPhase}.',
-    );
     if (_hasPendingSystemFontsDidChangeCallBack) {
       return;
     }
     _hasPendingSystemFontsDidChangeCallBack = true;
+
+    // The system fonts notification can arrive during any scheduler phase
+    // (e.g. midFrameMicrotasks on web when fonts load asynchronously).
+    // scheduleFrameCallback is safe to call during any phase; if called
+    // mid-frame, the callback runs in the next frame's transient callback
+    // phase since handleBeginFrame snapshots and replaces _transientCallbacks.
     SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
       assert(_hasPendingSystemFontsDidChangeCallBack);
       _hasPendingSystemFontsDidChangeCallBack = false;
@@ -5648,8 +5653,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     if (next == null) {
       return;
     }
-    next.computeAncestorInfo(treeShapeToken);
-    firstAncestorNodeWithCleanGeometry ??= next.firstAncestorNodeWithCleanGeometry;
+
+    if (firstAncestorNodeWithCleanGeometry == null) {
+      next.computeAncestorInfo(treeShapeToken);
+      firstAncestorNodeWithCleanGeometry = next.firstAncestorNodeWithCleanGeometry;
+    }
   }
 
   /// If this forms a semantics node, all of the properties in config are
@@ -5666,6 +5674,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   }
 
   bool get isRoot => parent == null;
+
+  bool get _needsMergingSiblingNodesIntoSelf {
+    return configProvider.effective.isMergingSemanticsOfDescendants &&
+        _producedSiblingNodesAndOwners.isNotEmpty;
+  }
 
   bool get shouldFormSemanticsNode {
     if (configProvider.effective.isSemanticBoundary) {
@@ -6186,8 +6199,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       }
     }
     if (!built) {
-      semanticsNodes.clear();
-      _producedSiblingNodesAndOwners.clear();
       _produceSemanticsNode(usedSemanticsIds: usedSemanticsIds);
     }
     assert(built);
@@ -6239,16 +6250,40 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       });
     }
     if (configProvider.effective.isSemanticBoundary) {
-      renderObject.assembleSemanticsNode(node, configProvider.effective, children);
+      if (_needsMergingSiblingNodesIntoSelf) {
+        // This node needs to merge the sibling nodes in the sub tree.
+        //
+        // Create an inner node to hold the configuration and children, and the cachedSemanticsNode will
+        // hold the inner node and the sibling nodes so that all of them can be merged together.
+        final innerNode = SemanticsNode(showOnScreen: renderObject.showOnScreen);
+        renderObject.assembleSemanticsNode(innerNode, configProvider.effective, children);
+
+        final config = SemanticsConfiguration()
+          ..isSemanticBoundary = true
+          ..isMergingSemanticsOfDescendants = true;
+
+        node.updateWith(
+          config: config,
+          childrenInInversePaintOrder: <SemanticsNode>[
+            innerNode,
+            ..._producedSiblingNodesAndOwners.keys,
+          ],
+        );
+      } else {
+        renderObject.assembleSemanticsNode(node, configProvider.effective, children);
+      }
     } else {
+      assert(!configProvider.effective.isMergingSemanticsOfDescendants);
       node.updateWith(config: configProvider.effective, childrenInInversePaintOrder: children);
     }
   }
 
   void _produceSemanticsNode({required Set<int> usedSemanticsIds}) {
     assert(!built);
+    semanticsNodes.clear();
+    _producedSiblingNodesAndOwners.clear();
+
     final SemanticsNode node = cachedSemanticsNode ??= _createSemanticsNode();
-    semanticsNodes.add(node);
     node
       ..isMergedIntoParent = (parentData?.mergeIntoParent ?? false)
       ..tags = parentData?.tagsForChildren;
@@ -6256,6 +6291,14 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
     _mergeSiblingGroup(usedSemanticsIds);
     _buildSemanticsSubtree(usedSemanticsIds: usedSemanticsIds);
+
+    // At this point, the cachedSemanticsNode should be latest semantics node
+    // representing this render object and _producedSiblingNodesAndOwners contains the latest
+    // sibling nodes.
+    semanticsNodes.add(node);
+    if (!_needsMergingSiblingNodesIntoSelf) {
+      semanticsNodes.addAll(_producedSiblingNodesAndOwners.keys);
+    }
     built = true;
   }
 
@@ -6309,7 +6352,6 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         }
         node.updateWith(config: configuration, childrenInInversePaintOrder: childrenNodes);
         _producedSiblingNodesAndOwners[node] = group;
-        semanticsNodes.add(node);
 
         final Set<SemanticsTag> tags = group
             .map<Set<SemanticsTag>?>(

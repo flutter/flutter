@@ -104,7 +104,7 @@ class Chrome {
     final withDebugging = options.debugPort != null;
     final args = <String>[
       if (options.userDataDirectory != null) '--user-data-dir=${options.userDataDirectory}',
-      if (options.url != null) options.url!,
+      ?options.url,
       if (io.Platform.environment['CHROME_NO_SANDBOX'] == 'true') '--no-sandbox',
       if (options.headless ?? false) '--headless',
       if (withDebugging) '--remote-debugging-port=${options.debugPort}',
@@ -287,11 +287,16 @@ String _findSystemChromeExecutable() {
 Future<WipConnection> _connectToChromeDebugPort(int port, String? tabUrl) async {
   final Uri devtoolsUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
   print('Connecting to DevTools: $devtoolsUri');
+
+  final String url = tabUrl ?? 'http://localhost';
   final chromeConnection = ChromeConnection('localhost', port);
-  final Iterable<ChromeTab> tabs = (await chromeConnection.getTabs()).where((ChromeTab tab) {
-    return tab.url.startsWith(tabUrl ?? 'http://localhost');
-  });
-  final ChromeTab tab = tabs.single;
+  final ChromeTab? tab = await chromeConnection.getTab(
+    (ChromeTab tab) => tab.url.startsWith(url),
+    retryFor: const Duration(seconds: 5),
+  );
+  if (tab == null) {
+    throw Exception('Chrome failed to open a tab for $url');
+  }
   final WipConnection debugConnection = await tab.connect();
   print('Connected to Chrome tab: ${tab.title} (${tab.url})');
   return debugConnection;

@@ -8,34 +8,82 @@ import 'dart:typed_data';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
-abstract class DisposablePath implements LayerPath {
-  @override
-  DisposablePathMetrics computeMetrics({bool forceClosed = false});
+abstract class DisposablePath {
+  ui.PathFillType get fillType;
+  bool contains(ui.Offset point);
+  ui.Rect getBounds();
+  DisposablePathMetricIterator getMetricsIterator({bool forceClosed = false});
+  void dispose();
 
+  // In order to properly clip platform views with paths, we need to be able to get a
+  // string representation of them.
+  String toSvgString();
+}
+
+abstract class DisposablePathBuilder {
+  ui.PathFillType get fillType;
+  set fillType(ui.PathFillType value);
+  void moveTo(double x, double y);
+  void relativeMoveTo(double dx, double dy);
+  void lineTo(double x, double y);
+  void relativeLineTo(double dx, double dy);
+  void quadraticBezierTo(double x1, double y1, double x2, double y2);
+  void relativeQuadraticBezierTo(double x1, double y1, double x2, double y2);
+  void cubicTo(double x1, double y1, double x2, double y2, double x3, double y3);
+  void relativeCubicTo(double x1, double y1, double x2, double y2, double x3, double y3);
+  void conicTo(double x1, double y1, double x2, double y2, double w);
+  void relativeConicTo(double x1, double y1, double x2, double y2, double w);
+  void arcTo(ui.Rect rect, double startAngle, double sweepAngle, bool forceMoveTo);
+  void arcToPoint(
+    ui.Offset arcEnd, {
+    ui.Radius radius = ui.Radius.zero,
+    double rotation = 0.0,
+    bool largeArc = false,
+    bool clockwise = true,
+  });
+  void relativeArcToPoint(
+    ui.Offset arcEndDelta, {
+    ui.Radius radius = ui.Radius.zero,
+    double rotation = 0.0,
+    bool largeArc = false,
+    bool clockwise = true,
+  });
+  void addRect(ui.Rect rect);
+  void addOval(ui.Rect oval);
+  void addArc(ui.Rect oval, double startAngle, double sweepAngle);
+  void addPolygon(List<ui.Offset> points, bool close);
+  void addRRect(ui.RRect rrect);
+  void addRSuperellipse(ui.RSuperellipse rsuperellipse);
+  void shiftInPlace(ui.Offset offset);
+  void transformInPlace(Float64List matrix4);
+  void addPath(DisposablePath path, ui.Offset offset, {Float64List? matrix4});
+  void extendWithPath(DisposablePath path, ui.Offset offset, {Float64List? matrix4});
+  void close();
+  void reset();
+  bool contains(ui.Offset point);
+  ui.Rect getBounds();
+
+  DisposablePath build();
   void dispose();
 }
 
-abstract class DisposablePathMetricIterator implements Iterator<ui.PathMetric> {
+abstract class DisposablePathMetricIterator implements Iterator<DisposablePathMetric> {
   @override
   DisposablePathMetric get current;
 
   void dispose();
 }
 
-abstract class DisposablePathMetrics implements ui.PathMetrics {
-  @override
-  DisposablePathMetricIterator get iterator;
-}
-
-abstract class DisposablePathMetric implements ui.PathMetric {
-  @override
-  DisposablePath extractPath(double start, double end, {bool startWithMoveTo = true});
-
+abstract class DisposablePathMetric {
+  DisposablePathBuilder extractPath(double start, double end, {bool startWithMoveTo = true});
+  ui.Tangent getTangentForOffset(double distance);
+  bool get isClosed;
+  double get length;
   void dispose();
 }
 
 sealed class PathCommand {
-  void apply(DisposablePath path);
+  void apply(DisposablePathBuilder path);
 }
 
 final class MoveToCommand implements PathCommand {
@@ -45,8 +93,8 @@ final class MoveToCommand implements PathCommand {
   final double y;
 
   @override
-  void apply(DisposablePath path) {
-    path.moveTo(x, y);
+  void apply(DisposablePathBuilder builder) {
+    builder.moveTo(x, y);
   }
 }
 
@@ -57,8 +105,8 @@ final class RelativeMoveToCommand implements PathCommand {
   final double dy;
 
   @override
-  void apply(DisposablePath path) {
-    path.relativeMoveTo(dx, dy);
+  void apply(DisposablePathBuilder builder) {
+    builder.relativeMoveTo(dx, dy);
   }
 }
 
@@ -69,8 +117,8 @@ final class LineToCommand implements PathCommand {
   final double y;
 
   @override
-  void apply(DisposablePath path) {
-    path.lineTo(x, y);
+  void apply(DisposablePathBuilder builder) {
+    builder.lineTo(x, y);
   }
 }
 
@@ -81,8 +129,8 @@ final class RelativeLineToCommand implements PathCommand {
   final double dy;
 
   @override
-  void apply(DisposablePath path) {
-    path.relativeLineTo(dx, dy);
+  void apply(DisposablePathBuilder builder) {
+    builder.relativeLineTo(dx, dy);
   }
 }
 
@@ -95,8 +143,8 @@ final class QuadraticBezierToCommand implements PathCommand {
   final double y2;
 
   @override
-  void apply(DisposablePath path) {
-    path.quadraticBezierTo(x1, y1, x2, y2);
+  void apply(DisposablePathBuilder builder) {
+    builder.quadraticBezierTo(x1, y1, x2, y2);
   }
 }
 
@@ -109,8 +157,8 @@ final class RelativeQuadraticBezierToCommand implements PathCommand {
   final double y2;
 
   @override
-  void apply(DisposablePath path) {
-    path.relativeQuadraticBezierTo(x1, y1, x2, y2);
+  void apply(DisposablePathBuilder builder) {
+    builder.relativeQuadraticBezierTo(x1, y1, x2, y2);
   }
 }
 
@@ -125,8 +173,8 @@ final class CubicToCommand implements PathCommand {
   final double y3;
 
   @override
-  void apply(DisposablePath path) {
-    path.cubicTo(x1, y1, x2, y2, x3, y3);
+  void apply(DisposablePathBuilder builder) {
+    builder.cubicTo(x1, y1, x2, y2, x3, y3);
   }
 }
 
@@ -141,8 +189,8 @@ final class RelativeCubicToCommand implements PathCommand {
   final double y3;
 
   @override
-  void apply(DisposablePath path) {
-    path.relativeCubicTo(x1, y1, x2, y2, x3, y3);
+  void apply(DisposablePathBuilder builder) {
+    builder.relativeCubicTo(x1, y1, x2, y2, x3, y3);
   }
 }
 
@@ -156,8 +204,8 @@ final class ConicToCommand implements PathCommand {
   final double w;
 
   @override
-  void apply(DisposablePath path) {
-    path.conicTo(x1, y1, x2, y2, w);
+  void apply(DisposablePathBuilder builder) {
+    builder.conicTo(x1, y1, x2, y2, w);
   }
 }
 
@@ -171,8 +219,8 @@ final class RelativeConicToCommand implements PathCommand {
   final double w;
 
   @override
-  void apply(DisposablePath path) {
-    path.relativeConicTo(x1, y1, x2, y2, w);
+  void apply(DisposablePathBuilder builder) {
+    builder.relativeConicTo(x1, y1, x2, y2, w);
   }
 }
 
@@ -185,8 +233,8 @@ final class ArcToCommand implements PathCommand {
   bool forceMoveTo;
 
   @override
-  void apply(DisposablePath path) {
-    path.arcTo(rect, startAngle, sweepAngle, forceMoveTo);
+  void apply(DisposablePathBuilder builder) {
+    builder.arcTo(rect, startAngle, sweepAngle, forceMoveTo);
   }
 }
 
@@ -206,8 +254,8 @@ final class ArcToPointCommand implements PathCommand {
   bool clockwise;
 
   @override
-  void apply(DisposablePath path) {
-    path.arcToPoint(
+  void apply(DisposablePathBuilder builder) {
+    builder.arcToPoint(
       arcEnd,
       radius: radius,
       rotation: rotation,
@@ -233,8 +281,8 @@ final class RelativeArcToPointCommand implements PathCommand {
   bool clockwise;
 
   @override
-  void apply(DisposablePath path) {
-    path.relativeArcToPoint(
+  void apply(DisposablePathBuilder builder) {
+    builder.relativeArcToPoint(
       arcEndDelta,
       radius: radius,
       rotation: rotation,
@@ -250,8 +298,8 @@ final class AddRectCommand implements PathCommand {
   final ui.Rect rect;
 
   @override
-  void apply(DisposablePath path) {
-    path.addRect(rect);
+  void apply(DisposablePathBuilder builder) {
+    builder.addRect(rect);
   }
 }
 
@@ -261,8 +309,8 @@ final class AddOvalCommand implements PathCommand {
   final ui.Rect oval;
 
   @override
-  void apply(DisposablePath path) {
-    path.addOval(oval);
+  void apply(DisposablePathBuilder builder) {
+    builder.addOval(oval);
   }
 }
 
@@ -274,8 +322,8 @@ final class AddArcCommand implements PathCommand {
   final double sweepAngle;
 
   @override
-  void apply(DisposablePath path) {
-    path.addArc(oval, startAngle, sweepAngle);
+  void apply(DisposablePathBuilder builder) {
+    builder.addArc(oval, startAngle, sweepAngle);
   }
 }
 
@@ -286,8 +334,8 @@ final class AddPolygonCommand implements PathCommand {
   final bool close;
 
   @override
-  void apply(DisposablePath path) {
-    path.addPolygon(points, close);
+  void apply(DisposablePathBuilder builder) {
+    builder.addPolygon(points, close);
   }
 }
 
@@ -297,8 +345,8 @@ final class AddRRectCommand implements PathCommand {
   final ui.RRect rrect;
 
   @override
-  void apply(DisposablePath path) {
-    path.addRRect(rrect);
+  void apply(DisposablePathBuilder builder) {
+    builder.addRRect(rrect);
   }
 }
 
@@ -308,8 +356,30 @@ final class AddRSuperellipseCommand implements PathCommand {
   final ui.RSuperellipse rSuperellipse;
 
   @override
-  void apply(DisposablePath path) {
-    path.addRSuperellipse(rSuperellipse);
+  void apply(DisposablePathBuilder builder) {
+    builder.addRSuperellipse(rSuperellipse);
+  }
+}
+
+final class ShiftInPlaceCommand implements PathCommand {
+  ShiftInPlaceCommand(this.offset);
+
+  final ui.Offset offset;
+
+  @override
+  void apply(DisposablePathBuilder builder) {
+    builder.shiftInPlace(offset);
+  }
+}
+
+final class TransformInPlaceCommand implements PathCommand {
+  TransformInPlaceCommand(this.matrix4);
+
+  final Float64List matrix4;
+
+  @override
+  void apply(DisposablePathBuilder builder) {
+    builder.transformInPlace(matrix4);
   }
 }
 
@@ -321,8 +391,8 @@ final class AddPathCommand implements PathCommand {
   final Float64List? matrix4;
 
   @override
-  void apply(DisposablePath p) {
-    p.addPath(path.builtPath, offset, matrix4: matrix4);
+  void apply(DisposablePathBuilder builder) {
+    builder.addPath(path.builtPath, offset, matrix4: matrix4);
   }
 }
 
@@ -334,77 +404,74 @@ final class ExtendWithPathCommand implements PathCommand {
   final Float64List? matrix4;
 
   @override
-  void apply(DisposablePath p) {
-    p.extendWithPath(path.builtPath, offset, matrix4: matrix4);
+  void apply(DisposablePathBuilder builder) {
+    builder.extendWithPath(path.builtPath, offset, matrix4: matrix4);
   }
 }
 
 final class ClosePathCommand implements PathCommand {
   @override
-  void apply(DisposablePath path) {
-    path.close();
+  void apply(DisposablePathBuilder builder) {
+    builder.close();
   }
 }
 
+typedef PathCombineSource = (ui.PathOperation, LazyPath, LazyPath);
+typedef PathExtractSource = (LazyPathMetric metric, double start, double end, bool startWithMoveTo);
+
 abstract class DisposablePathConstructors {
-  DisposablePath createNew();
-  DisposablePath combinePaths(
+  DisposablePathBuilder createNew();
+  DisposablePathBuilder fromPath(DisposablePath path);
+  DisposablePathBuilder combinePaths(
     ui.PathOperation operation,
     DisposablePath path1,
     DisposablePath path2,
   );
 }
 
-class LazyPath implements LayerPath, Collectable {
+class LazyPath implements ui.Path, Collectable {
   factory LazyPath(DisposablePathConstructors constructors) =>
-      LazyPath._(constructors, ui.PathFillType.nonZero, () => constructors.createNew());
-  LazyPath._(this.constructors, this._fillType, this.initializer) : _commands = [];
+      LazyPath._(constructors, ui.PathFillType.nonZero, []);
+  LazyPath._(
+    this.constructors,
+    this._fillType,
+    this._commands, {
+    PathCombineSource? combineSource,
+    PathExtractSource? extractSource,
+  }) : _combineSource = combineSource,
+       _extractSource = extractSource;
   LazyPath.fromLazyPath(LazyPath other)
     : _fillType = other._fillType,
       constructors = other.constructors,
-      initializer = other.initializer,
+      _combineSource = other._combineSource,
+      _extractSource = other._extractSource,
       _commands = List.from(other._commands);
-  factory LazyPath.shifted(LazyPath basePath, ui.Offset offset) {
-    final pathCopy = LazyPath.fromLazyPath(basePath);
-    return LazyPath._(
-      pathCopy.constructors,
-      pathCopy._fillType,
-      () => pathCopy.builtPath.shift(offset) as DisposablePath,
-    );
-  }
-  factory LazyPath.transformed(LazyPath basePath, Float64List matrix4) {
-    final pathCopy = LazyPath.fromLazyPath(basePath);
-    return LazyPath._(
-      pathCopy.constructors,
-      pathCopy._fillType,
-      () => pathCopy.builtPath.transform(matrix4) as DisposablePath,
-    );
-  }
   factory LazyPath.combined(ui.PathOperation operation, LazyPath path1, LazyPath path2) {
     final pathCopy1 = LazyPath.fromLazyPath(path1);
     final pathCopy2 = LazyPath.fromLazyPath(path2);
     return LazyPath._(
       pathCopy1.constructors,
       pathCopy1._fillType,
-      () =>
-          pathCopy1.constructors.combinePaths(operation, pathCopy1.builtPath, pathCopy2.builtPath),
+      [],
+      combineSource: (operation, pathCopy1, pathCopy2),
     );
   }
-  LazyPath extracted(
-    LazyPathMetric pathMetric,
+  factory LazyPath.extracted(
+    LazyPath path,
+    LazyPathMetric metric,
     double start,
     double end, {
     bool startWithMoveTo = true,
   }) {
     return LazyPath._(
-      constructors,
-      pathMetric.iterator.path._fillType,
-      () => pathMetric.buildExtractedPath(start, end, startWithMoveTo: startWithMoveTo),
+      path.constructors,
+      path._fillType,
+      [],
+      extractSource: (metric, start, end, startWithMoveTo),
     );
   }
 
   DisposablePathConstructors constructors;
-  DisposablePath Function() initializer;
 
   ui.PathFillType _fillType;
 
@@ -414,32 +481,65 @@ class LazyPath implements LayerPath, Collectable {
   @override
   set fillType(ui.PathFillType fillType) {
     _fillType = fillType;
-    _cachedPath?.fillType = fillType;
+    _cachedBuilder?.fillType = fillType;
+    _invalidateCachedPath();
   }
 
+  PathCombineSource? _combineSource;
+  PathExtractSource? _extractSource;
+
   DisposablePath? _cachedPath;
+  DisposablePathBuilder? _cachedBuilder;
   final List<PathCommand> _commands;
 
-  DisposablePath get builtPath {
-    if (_cachedPath != null) {
-      return _cachedPath!;
-    }
-    final DisposablePath path = initializer();
-    path.fillType = _fillType;
-    for (final PathCommand command in _commands) {
-      command.apply(path);
+  DisposablePathBuilder get _builtPathBuilder {
+    assert(
+      _combineSource == null || _extractSource == null,
+      'A LazyPath cannot have both a combine source and an extract source.',
+    );
+
+    if (_cachedBuilder != null) {
+      return _cachedBuilder!;
     }
 
-    _cachedPath = path;
+    final DisposablePathBuilder builder;
+    if (_combineSource != null) {
+      final (ui.PathOperation op, LazyPath path1, LazyPath path2) = _combineSource!;
+      builder = constructors.combinePaths(op, path1.builtPath, path2.builtPath);
+    } else if (_extractSource != null) {
+      final (LazyPathMetric metric, double start, double end, bool startWithMoveTo) =
+          _extractSource!;
+      builder = metric.buildExtractedPath(start, end, startWithMoveTo: startWithMoveTo);
+    } else {
+      builder = constructors.createNew();
+    }
+
+    builder.fillType = _fillType;
+    for (final PathCommand command in _commands) {
+      command.apply(builder);
+    }
+
+    _cachedBuilder = builder;
     EnginePlatformDispatcher.instance.frameArena.add(this);
-    return path;
+    return builder;
+  }
+
+  DisposablePath get builtPath {
+    _cachedPath ??= _builtPathBuilder.build();
+    return _cachedPath!;
+  }
+
+  void _invalidateCachedPath() {
+    _cachedPath?.dispose();
+    _cachedPath = null;
   }
 
   void _addCommand(PathCommand command) {
     _commands.add(command);
-    if (_cachedPath != null) {
-      command.apply(_cachedPath!);
+    if (_cachedBuilder != null) {
+      command.apply(_cachedBuilder!);
     }
+    _invalidateCachedPath();
   }
 
   @override
@@ -567,12 +667,14 @@ class LazyPath implements LayerPath, Collectable {
 
   @override
   void addPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
-    _addCommand(AddPathCommand(path as LazyPath, offset, matrix4: matrix4));
+    _addCommand(AddPathCommand(LazyPath.fromLazyPath(path as LazyPath), offset, matrix4: matrix4));
   }
 
   @override
   void extendWithPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) {
-    _addCommand(ExtendWithPathCommand(path as LazyPath, offset, matrix4: matrix4));
+    _addCommand(
+      ExtendWithPathCommand(LazyPath.fromLazyPath(path as LazyPath), offset, matrix4: matrix4),
+    );
   }
 
   @override
@@ -584,45 +686,54 @@ class LazyPath implements LayerPath, Collectable {
   void reset() {
     _commands.clear();
     _fillType = ui.PathFillType.nonZero;
-    _cachedPath?.dispose();
-    _cachedPath = null;
-    initializer = constructors.createNew;
+    _combineSource = null;
+    collect();
   }
 
   @override
   bool contains(ui.Offset point) {
-    return builtPath.contains(point);
+    return _builtPathBuilder.contains(point);
   }
 
   @override
-  ui.Path shift(ui.Offset offset) {
-    return LazyPath.shifted(this, offset);
+  LazyPath shift(ui.Offset offset) {
+    return LazyPath.fromLazyPath(this).._shiftInPlace(offset);
+  }
+
+  void _shiftInPlace(ui.Offset offset) {
+    _addCommand(ShiftInPlaceCommand(offset));
   }
 
   @override
   ui.Path transform(Float64List matrix4) {
-    return LazyPath.transformed(this, matrix4);
+    return LazyPath.fromLazyPath(this).._transformInPlace(matrix4);
+  }
+
+  void _transformInPlace(Float64List matrix4) {
+    _addCommand(TransformInPlaceCommand(matrix4));
   }
 
   @override
   ui.Rect getBounds() {
-    return builtPath.getBounds();
+    return _builtPathBuilder.getBounds();
   }
 
   @override
   LazyPathMetrics computeMetrics({bool forceClosed = false}) {
-    return LazyPathMetrics(path: this, forceClosed: forceClosed);
+    return LazyPathMetrics(path: LazyPath.fromLazyPath(this), forceClosed: forceClosed);
   }
 
   @override
   void collect() {
     _cachedPath?.dispose();
+    if (!identical(_cachedBuilder, _cachedPath)) {
+      // In some implementations (*cough* skwasm *cough*), the built path and the builder might be the same
+      // object. In that case, disposing the path is sufficient.
+      // TODO(mdebbar): https://github.com/flutter/flutter/issues/184840
+      _cachedBuilder?.dispose();
+    }
     _cachedPath = null;
-  }
-
-  @override
-  String toSvgString() {
-    return builtPath.toSvgString();
+    _cachedBuilder = null;
   }
 }
 
@@ -689,7 +800,7 @@ class LazyPathMetricIterator implements Iterator<ui.PathMetric>, Collectable {
     if (_cachedIterator != null) {
       return;
     }
-    _cachedIterator = path.builtPath.computeMetrics(forceClosed: forceClosed).iterator;
+    _cachedIterator = path.builtPath.getMetricsIterator(forceClosed: forceClosed);
     for (var i = 0; i < _nextIndex; i++) {
       if (_cachedIterator!.moveNext()) {
         _metrics.add(_cachedIterator!.current);
@@ -718,10 +829,14 @@ class LazyPathMetric implements ui.PathMetric {
 
   @override
   ui.Path extractPath(double start, double end, {bool startWithMoveTo = true}) {
-    return iterator.path.extracted(this, start, end, startWithMoveTo: startWithMoveTo);
+    return LazyPath.extracted(iterator.path, this, start, end, startWithMoveTo: startWithMoveTo);
   }
 
-  DisposablePath buildExtractedPath(double start, double end, {required bool startWithMoveTo}) {
+  DisposablePathBuilder buildExtractedPath(
+    double start,
+    double end, {
+    required bool startWithMoveTo,
+  }) {
     return builtMetric.extractPath(start, end, startWithMoveTo: startWithMoveTo);
   }
 

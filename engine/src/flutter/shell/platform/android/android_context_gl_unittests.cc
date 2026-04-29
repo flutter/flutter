@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 #include "impeller/core/runtime_types.h"
 #include "shell/platform/android/context/android_context.h"
+#include "third_party/skia/include/gpu/ganesh/mock/GrMockTypes.h"
 
 namespace flutter {
 namespace testing {
@@ -82,6 +83,10 @@ class TestImpellerContext : public impeller::Context {
   std::shared_ptr<impeller::CommandQueue> GetCommandQueue() const override {
     FML_UNREACHABLE();
   }
+
+  // A stub returning false is allowed from implementations that are not
+  // planned to be used in benchmarking situations.
+  bool FinishQueue() override { return false; }
 
   void Shutdown() override { did_shutdown = true; }
 

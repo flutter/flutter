@@ -10,7 +10,10 @@ import androidx.annotation.NonNull;
 import java.util.*;
 
 /**
- * Arguments that can be delivered to the Flutter shell when it is created.
+ * DEPRECATED. Please see {@link FlutterEngineFlags} for the list of arguments to use or update if
+ * you are adding a new flag.
+ *
+ * <p>Arguments that can be delivered to the Flutter shell when it is created.
  *
  * <p>The term "shell" refers to the native code that adapts Flutter to different platforms.
  * Flutter's Android Java code initializes a native "shell" and passes these arguments to that
@@ -18,7 +21,10 @@ import java.util.*;
  * io.flutter.embedding.engine.loader.FlutterLoader#ensureInitializationComplete(Context, String[])}
  * for more information.
  */
+// TODO(camsim99): Delete this class when support for setting engine shell arguments via Intent
+// is no longer supported. See https://github.com/flutter/flutter/issues/180686.
 @SuppressWarnings({"WeakerAccess", "unused"})
+@Deprecated
 public class FlutterShellArgs {
   public static final String ARG_KEY_TRACE_STARTUP = "trace-startup";
   public static final String ARG_TRACE_STARTUP = "--trace-startup";
@@ -73,6 +79,8 @@ public class FlutterShellArgs {
   public static final String ARG_VM_SERVICE_PORT = "--vm-service-port=";
   public static final String ARG_KEY_DART_FLAGS = "dart-flags";
   public static final String ARG_DART_FLAGS = "--dart-flags";
+  private static final String ARG_KEY_TEST_FLAG = "test-flag";
+  private static final String ARG_TEST_FLAG = "--test-flag";
 
   @NonNull
   public static FlutterShellArgs fromIntent(@NonNull Intent intent) {
@@ -157,6 +165,9 @@ public class FlutterShellArgs {
     }
     if (intent.getBooleanExtra(ARG_KEY_VERBOSE_LOGGING, false)) {
       args.add(ARG_VERBOSE_LOGGING);
+    }
+    if (intent.getBooleanExtra(ARG_KEY_TEST_FLAG, false)) {
+      args.add(ARG_TEST_FLAG);
     }
 
     // NOTE: all flags provided with this argument are subject to filtering

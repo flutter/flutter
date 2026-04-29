@@ -14,7 +14,7 @@ class DatePickerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: DatePickerExample(),
     );
   }
@@ -39,12 +39,10 @@ class _DatePickerExampleState extends State<DatePickerExample> {
       context: context,
       builder: (BuildContext context) => Container(
         height: 216,
-        padding: const EdgeInsets.only(top: 6.0),
+        padding: const .only(top: 6.0),
         // The Bottom margin is provided to align the popup above the system
         // navigation bar.
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
+        margin: .only(bottom: MediaQuery.of(context).viewInsets.bottom),
         // Provide a background color for the popup.
         color: CupertinoColors.systemBackground.resolveFrom(context),
         // Use a SafeArea widget to avoid system overlaps.
@@ -66,7 +64,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
         ),
         child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: .center,
             children: <Widget>[
               _DatePickerItem(
                 children: <Widget>[
@@ -76,7 +74,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                     onPressed: () => _showDialog(
                       CupertinoDatePicker(
                         initialDateTime: date,
-                        mode: CupertinoDatePickerMode.date,
+                        mode: .date,
                         use24hFormat: true,
                         // This shows day of week alongside day of month
                         showDayOfWeek: true,
@@ -104,7 +102,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                     onPressed: () => _showDialog(
                       CupertinoDatePicker(
                         initialDateTime: time,
-                        mode: CupertinoDatePickerMode.time,
+                        mode: .time,
                         use24hFormat: true,
                         // This is called when the user changes the time.
                         onDateTimeChanged: (DateTime newTime) {
@@ -171,11 +169,8 @@ class _DatePickerItem extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: children,
-        ),
+        padding: const .symmetric(horizontal: 16.0),
+        child: Row(mainAxisAlignment: .spaceBetween, children: children),
       ),
     );
   }

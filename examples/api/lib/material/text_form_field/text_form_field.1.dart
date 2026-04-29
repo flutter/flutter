@@ -37,14 +37,14 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
           },
           child: FocusTraversalGroup(
             child: Form(
-              autovalidateMode: AutovalidateMode.always,
+              autovalidateMode: .always,
               onChanged: () {
                 Form.of(primaryFocus!.context!).save();
               },
               child: Wrap(
                 children: List<Widget>.generate(5, (int index) {
                   return Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const .all(8.0),
                     child: ConstrainedBox(
                       constraints: BoxConstraints.tight(const Size(200, 50)),
                       child: TextFormField(
