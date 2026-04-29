@@ -158,6 +158,36 @@ void main() {
       expect(success, isFalse);
     });
 
+    test('unknown $libraryName cross import of Material in non-test file', () async {
+      final String extra = '$libraryName/foo_utils.dart'.replaceAll('/', Platform.pathSeparator);
+
+      final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(
+        libraryName,
+        checker.testsDirectory,
+      );
+
+      buildKnownCrossImportTestFiles();
+      writeImportInFiles(<String>{extra}, inDirectory: testFilesDirectory);
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines =
+          <String>[
+                '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+                '║ The following test in $libraryName has a disallowed import of Material. Refactor it or move it to Material.',
+                '║   $extra',
+                '╚═══════════════════════════════════════════════════════════════════════════════',
+              ]
+              .map((String line) {
+                return line.replaceAll('/', Platform.pathSeparator);
+              })
+              .join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
     test(
       'unknown $libraryName cross import of Cupertino',
       () async {
@@ -224,6 +254,43 @@ void main() {
                   '║ The following 2 tests in $libraryName have a disallowed import of Cupertino. Refactor them or move them to Cupertino.',
                   '║   ${extras.first}',
                   '║   ${extras.last}',
+                  '╚═══════════════════════════════════════════════════════════════════════════════',
+                ]
+                .map((String line) {
+                  return line.replaceAll('/', Platform.pathSeparator);
+                })
+                .join('\n');
+        expect(result, equals('$lines\n'));
+        expect(success, isFalse);
+      },
+      skip: libraryName == 'packages/flutter/test/cupertino',
+    ); // [intended]: Cupertino can import itself
+
+    test(
+      'unknown $libraryName cross import of Cupertino in non-test file',
+      () async {
+        final String extra = '$libraryName/foo_utils.dart'.replaceAll('/', Platform.pathSeparator);
+        final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(
+          libraryName,
+          checker.testsDirectory,
+        );
+
+        buildKnownCrossImportTestFiles();
+        writeImportInFiles(
+          <String>{extra},
+          inDirectory: testFilesDirectory,
+          importString: "import 'package:flutter/cupertino.dart';",
+        );
+
+        bool? success;
+        final String result = await capture(() async {
+          success = checker.check();
+        }, shouldHaveErrors: true);
+        final String lines =
+            <String>[
+                  '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+                  '║ The following test in $libraryName has a disallowed import of Cupertino. Refactor it or move it to Cupertino.',
+                  '║   $extra',
                   '╚═══════════════════════════════════════════════════════════════════════════════',
                 ]
                 .map((String line) {
