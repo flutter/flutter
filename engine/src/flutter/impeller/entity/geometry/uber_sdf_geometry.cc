@@ -37,14 +37,9 @@ bool UberSDFGeometry::CoversArea(const Matrix& transform,
   if (params_.type == UberSDFParameters::Type::kRect && !params_.stroke &&
       transform.IsTranslationScaleOnly()) {
     // The SDF is a filled axis-aligned rectangle. It covers the input rect if
-    // the SDF's transformed bounds rect covers the input rect, subtracting
-    // the AA padding from the SDF rect.
-    return GetExpandedBounds(transform)
-        .TransformAndClipBounds(transform)
-        // Subtract twice the AA padding. This subtracts the AA padding added
-        // by GetExpandedBounds, and also insets the quad by another AA padding
-        // amount to account for AA fading into the interior of the shape.
-        .Expand(-2.0f * UberSDFParameters::kAntialiasPixels)
+    // the SDF's transformed bounds rect covers the input rect.
+    return Rect::MakeEllipseBounds(params_.center, params_.size)
+        .TransformBounds(transform)
         .Contains(rect);
   }
 
