@@ -147,6 +147,14 @@ DisplayListBuilder::~DisplayListBuilder() {
   DisplayList::DisposeOps(storage_, offsets_);
 }
 
+size_t DisplayListBuilder::GetRecordCount() const {
+  return offsets_.size();
+}
+
+bool DisplayListBuilder::IsEmpty() const {
+  return offsets_.empty();
+}
+
 DlISize DisplayListBuilder::GetBaseLayerDimensions() const {
   return DlIRect::RoundOut(original_cull_rect_).GetSize();
 }

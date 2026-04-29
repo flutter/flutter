@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/flow/testing/mock_texture.h"
+
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/testing/display_list_testing.h"
 
@@ -26,7 +28,7 @@ sk_sp<DlImage> MockTexture::MakeTestTexture(int w, int h, int checker_size) {
                        cellp);
     }
   }
-  return DlImage::Make(surface->makeImageSnapshot());
+  return DlImageSkia::Make(surface->makeImageSnapshot());
 }
 
 MockTexture::MockTexture(int64_t textureId, const sk_sp<DlImage>& texture)

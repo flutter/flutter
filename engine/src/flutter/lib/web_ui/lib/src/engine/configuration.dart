@@ -361,6 +361,12 @@ class FlutterConfiguration {
   String get fontFallbackBaseUrl =>
       _configuration?.fontFallbackBaseUrl ?? 'https://fonts.gstatic.com/s/';
 
+  /// If set to true, the engine will skip the 1 second delay between font
+  /// download retries.
+  ///
+  /// This is used for testing.
+  bool get debugSkipFontRetryDelay => _configuration?.debugSkipFontRetryDelay ?? false;
+
   bool get forceSingleThreadedSkwasm => _configuration?.forceSingleThreadedSkwasm ?? false;
 }
 
@@ -382,6 +388,7 @@ extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
     String? nonce,
     String? renderer,
     String? fontFallbackBaseUrl,
+    bool? debugSkipFontRetryDelay,
     bool? forceSingleThreadedSkwasm,
   });
 
@@ -397,6 +404,7 @@ extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
   external String? get nonce;
   external String? get renderer;
   external String? get fontFallbackBaseUrl;
+  external bool? get debugSkipFontRetryDelay;
   external bool? get forceSingleThreadedSkwasm;
 }
 
