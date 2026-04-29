@@ -34,12 +34,11 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
 
     // Capture a weak reference to self to ensure we don't add the display link
     // to the run loop if the client has already been deallocated.
-    CADisplayLink* localDisplayLink = _displayLink;
     __weak FlutterVSyncClient* weakSelf = self;
-    task_runner->PostTask([localDisplayLink, weakSelf]() {
+    task_runner->PostTask([weakSelf]() {
       FlutterVSyncClient* strongSelf = weakSelf;
       if (strongSelf) {
-        [localDisplayLink addToRunLoop:NSRunLoop.currentRunLoop forMode:NSRunLoopCommonModes];
+        [strongSelf.displayLink addToRunLoop:NSRunLoop.currentRunLoop forMode:NSRunLoopCommonModes];
       }
     });
   }
@@ -113,6 +112,30 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
 @implementation FlutterDisplayLinkManager
 
 + (double)displayRefreshRate {
+  // TODO(cbracken): This code is incorrect. https://github.com/flutter/flutter/issues/185759
+  //
+  // We create a new CADisplayLink, call `preferredFramesPerSecond` on it, then immediately throw it
+  // away. As noted below, the default value for `preferredFramesPerSecond` is zero, in which case,
+  // we just return UIScreen.mainScreen.maximumFramesPerSecond in all cases; everything before that
+  // line can be deleted.
+  //
+  // If we intend to support configurable preferred FPS, then we should provide API for it. We
+  // should delete this code either way.
+
+  CADisplayLink* displayLink = [CADisplayLink displayLinkWithTarget:[[[self class] alloc] init]
+                                                           selector:@selector(onDisplayLink:)];
+  displayLink.paused = YES;
+  auto preferredFPS = displayLink.preferredFramesPerSecond;
+
+  // From Docs:
+  // The default value for preferredFramesPerSecond is 0. When this value is 0, the preferred
+  // frame rate is equal to the maximum refresh rate of the display, as indicated by the
+  // maximumFramesPerSecond property.
+
+  if (preferredFPS != 0) {
+    return preferredFPS;
+  }
+
   return UIScreen.mainScreen.maximumFramesPerSecond;
 }
 
