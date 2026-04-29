@@ -4987,6 +4987,11 @@ class SemanticsOwner extends ChangeNotifier {
       for (final node in visitedNodes) {
         if (node._isTraversalChild &&
             !_traversalParentNodes.containsKey(node.traversalChildIdentifier)) {
+          if (node.parent == null ||
+              node.traversalParent == null ||
+              node.parent == node.traversalParent) {
+            continue;
+          }
           _forceToUpdateChildNodes[node.traversalChildIdentifier!] ??= <SemanticsNode>{};
           _forceToUpdateChildNodes[node.traversalChildIdentifier!]!.add(node);
         }
