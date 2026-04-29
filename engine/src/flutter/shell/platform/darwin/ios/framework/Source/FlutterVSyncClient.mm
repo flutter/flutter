@@ -88,9 +88,13 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
   _callback(std::move(recorder));
 }
 
+- (void)dealloc {
+  [self invalidate];
+}
+
 - (void)invalidate {
   [_displayLink invalidate];
-  _displayLink = nil;  // Break retain cycle.
+  _displayLink = nil;
 }
 
 - (CADisplayLink*)displayLink {
