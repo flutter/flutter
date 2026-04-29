@@ -5,11 +5,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
-
-import '../dom.dart';
-import '../fonts.dart';
-import '../util.dart';
 
 /// This class is responsible for registering and loading fonts.
 ///
@@ -45,7 +42,7 @@ class WebFontCollection implements FlutterFontCollection {
   }
 
   @override
-  Future<bool> loadFontFromList(Uint8List list, {String? fontFamily}) async {
+  Future<bool> loadFontFromBytes(Uint8List list, {String? fontFamily}) async {
     if (fontFamily == null) {
       printWarning('Font family must be provided to WebFontCollection.');
       return false;
@@ -54,8 +51,19 @@ class WebFontCollection implements FlutterFontCollection {
   }
 
   @override
-  FontFallbackManager get fontFallbackManager =>
+  FontFallbackManager? get fontFallbackManager => 
       throw UnimplementedError('fontFallbackManager is not supported in WebFontCollection as it uses the browser\'s native font fallback.');
+
+  @override
+  set fontFallbackManager(FontFallbackManager? value) {
+    throw UnimplementedError('fontFallbackManager is not supported in WebFontCollection as it uses the browser\'s native font fallback.');
+  }
+
+  @override
+  FallbackFontRegistry? get fallbackFontRegistry => null;
+
+  @override
+  set fallbackFontRegistry(FallbackFontRegistry? value) {}
 
   /// Unregister all fonts that have been registered.
   @override

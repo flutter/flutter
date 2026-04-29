@@ -214,7 +214,7 @@ Future<void> _downloadAssetFonts() async {
   if (ui_web.TestEnvironment.instance.forceTestFonts) {
     // Load the embedded test font before loading fonts from the assets so that
     // the embedded test font is the default (first) font.
-    await renderer.fontCollection.loadFontFromList(
+    await renderer.fontCollection.loadFontFromBytes(
       EmbeddedTestFont.flutterTest.data,
       fontFamily: EmbeddedTestFont.flutterTest.fontFamily,
     );
