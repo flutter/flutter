@@ -655,9 +655,6 @@ final missingNdkSourcePropertiesFile = GradleHandledError(
     ${globals.logger.terminal.warningMark} This is likely due to a malformed download of the NDK.
     This can be fixed by deleting the local NDK copy at: $path
     and allowing the Android Gradle Plugin to automatically re-download it.
-
-    If this keeps happening after a clean retry, Flutter's tool-side Android NDK provisioning
-    may have failed or been skipped before Gradle fell back to AGP's automatic download path.
     ''', title: _boxTitle);
         return GradleBuildStatus.exit;
       },

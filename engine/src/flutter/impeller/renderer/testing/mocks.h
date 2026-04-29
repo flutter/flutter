@@ -212,6 +212,8 @@ class MockImpellerContext : public Context {
               GetRuntimeStageBackend,
               (),
               (const, override));
+
+  MOCK_METHOD(bool, FinishQueue, (), (override));
 };
 
 class MockTexture : public Texture {

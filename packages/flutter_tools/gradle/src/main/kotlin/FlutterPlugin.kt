@@ -299,7 +299,6 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.addTaskForKGPVersion(projectToAddTasksTo)
         if (FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)) {
             FlutterPluginUtils.addTaskForPrintBuildVariants(projectToAddTasksTo)
-            FlutterPluginUtils.addTaskForPrintNdkVersion(projectToAddTasksTo)
             FlutterPluginUtils.addTasksForOutputsAppLinkSettings(projectToAddTasksTo)
         }
 

@@ -51,10 +51,10 @@ class AnimationStyle with Diagnosticable {
   /// Creates a new [AnimationStyle] based on the current selection, with the
   /// provided parameters overridden.
   AnimationStyle copyWith({
-    final Curve? curve,
-    final Duration? duration,
-    final Curve? reverseCurve,
-    final Duration? reverseDuration,
+    Curve? curve,
+    Duration? duration,
+    Curve? reverseCurve,
+    Duration? reverseDuration,
   }) {
     return AnimationStyle(
       curve: curve ?? this.curve,

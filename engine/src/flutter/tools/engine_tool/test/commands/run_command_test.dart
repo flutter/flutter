@@ -369,6 +369,23 @@ void main() {
       );
     });
 
+    test('delegates to `flutter run` with --flutter-flags', () async {
+      await et.run([
+        'run',
+        '--config=android_debug_arm64',
+        '--flutter-flags=--foo',
+        '--flutter-flags=--bar=baz,foobar',
+        '--flutter-flags=--flag1 --flag2',
+      ]);
+
+      expect(
+        commandsRun,
+        containsAllInOrder([
+          containsAllInOrder(['flutter', 'run', '--foo', '--bar=baz,foobar', '--flag1', '--flag2']),
+        ]),
+      );
+    });
+
     group('delegates to `flutter run` in mode', () {
       for (final mode in const ['debug', 'profile', 'release']) {
         test('$mode mode', () async {
