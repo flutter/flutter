@@ -177,7 +177,7 @@ class XcodeProjectInterpreter {
     return xcrunCommand;
   }
 
-  /// Prefetches SwiftPM dependencies needed for `xcodebuild` command and then returns a list of
+  /// Prefetches Swift package dependencies for the project and then returns a list of
   /// required arguments for the `xcodebuild` Xcode project command.
   ///
   /// This is not required when running commands that don't require a project (e.g.
@@ -185,14 +185,10 @@ class XcodeProjectInterpreter {
   ///
   /// Using this method when running `xcodebuild` commands ensures that `xcrun` is used properly
   /// and that the Swift package cache is properly configured.
-  ///
-  /// When [skipPackageResolution] is true, it uses arguments to attempt skipping any Swift package
-  /// resolution or updates. This should be false when running [prefetchSwiftPackages], so packages
-  /// should already be resolved, downloaded, and updated on subsquent `xcodebuild` commands.
-  Future<List<String>> xcodebuildProjectCommand(
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     String projectPath,
     Directory buildDirectory, {
-    bool skipPackageResolution = true,
+    bool skipPackageUpdatesAndValidation = true,
   }) async {
     // All `xcodebuild` project commands will download and resolve Swift packages.
     // We should always prefetch Swift packages before running any `xcodebuild` project command
@@ -201,13 +197,17 @@ class XcodeProjectInterpreter {
 
     return _xcodebuildProjectCommandArguments(
       buildDirectory,
-      skipPackageResolution: skipPackageResolution,
+      skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
     );
   }
 
+  /// Returns a list of required arguments for the `xcodebuild` Xcode project command.
+  ///
+  /// When [skipPackageUpdatesAndValidation] is true, it uses arguments to attempt skipping any
+  /// Swift package updates and validation.
   List<String> _xcodebuildProjectCommandArguments(
     Directory buildDirectory, {
-    bool skipPackageResolution = true,
+    bool skipPackageUpdatesAndValidation = true,
   }) {
     final String cachePath = buildDirectory
         .childDirectory(kSwiftPackageCacheDirectoryName)
@@ -218,8 +218,7 @@ class XcodeProjectInterpreter {
       'xcodebuild',
       '-clonedSourcePackagesDirPath',
       cachePath,
-      if (skipPackageResolution) ...<String>[
-        '-disableAutomaticPackageResolution',
+      if (skipPackageUpdatesAndValidation) ...<String>[
         '-skipPackageUpdates',
         '-skipPackagePluginValidation',
         '-skipPackageSignatureValidation',
@@ -247,8 +246,12 @@ class XcodeProjectInterpreter {
       XcodeSdk.IPhoneOS || XcodeSdk.IPhoneSimulator => getIosBuildDirectory(),
       XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
     };
+    final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
+      projectPath,
+      _fileSystem.directory(buildDir),
+    );
     final showBuildSettingsCommand = <String>[
-      ...(await xcodebuildProjectCommand(projectPath, _fileSystem.directory(buildDir))),
+      ...xcodebuildCommandArgs,
       '-project',
       _fileSystem.path.absolute(projectPath),
       if (scheme != null) ...<String>['-scheme', scheme],
@@ -363,8 +366,12 @@ class XcodeProjectInterpreter {
     bool verbose = false,
   }) async {
     final String projectPath = _fileSystem.currentDirectory.path;
+    final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
+      projectPath,
+      buildDirectory,
+    );
     await _processUtils.run(<String>[
-      ...(await xcodebuildProjectCommand(projectPath, buildDirectory)),
+      ...xcodebuildCommandArgs,
       '-workspace',
       workspacePath,
       '-scheme',
@@ -401,7 +408,12 @@ class XcodeProjectInterpreter {
     Status? status;
     try {
       final command = <String>[
-        ..._xcodebuildProjectCommandArguments(buildDirectory, skipPackageResolution: false),
+        ..._xcodebuildProjectCommandArguments(
+          buildDirectory,
+          // skipPackageUpdatesAndValidation should be false so that when subsequent xcodebuild
+          // commands run, packages should already be resolved, downloaded, updated, and validated.
+          skipPackageUpdatesAndValidation: false,
+        ),
         '-resolvePackageDependencies',
       ];
       if (_swiftPackageFetchProcess == null) {
@@ -479,9 +491,13 @@ class XcodeProjectInterpreter {
     // The exit code returned by 'xcodebuild -list' when the project is corrupted.
     const corruptedProjectExitCode = 74;
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
+    final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
+      projectPath,
+      buildDirectory,
+    );
     final RunResult result = await _processUtils.run(
       <String>[
-        ...(await xcodebuildProjectCommand(projectPath, buildDirectory)),
+        ...xcodebuildCommandArgs,
         '-list',
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],
