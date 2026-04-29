@@ -305,26 +305,41 @@ template("jit_runner") {
   fuchsia_archive(target_name) {
     snapshot_label = "kernel:kernel_core_snapshot${product_suffix}"
     snapshot_gen_dir = get_label_info(snapshot_label, "target_gen_dir")
+    stub_label = "kernel:ffi_callback_stub${product_suffix}"
+    stub_gen_dir = get_label_info(stub_label, "target_gen_dir")
 
     deps = [
       ":jit${product_suffix}",
       snapshot_label,
+      stub_label,
     ]
-
-    if (!product) {
-      deps += [ "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:flutter_jit_runner" ]
-    }
 
     binary = "flutter_jit${product_suffix}_runner"
 
     resources = [
       {
         path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
-        dest = "icudtl.dat"
+        dest = "data/icudtl.dat"
+      },
+      {
+        path = rebase_path(
+                "$snapshot_gen_dir/vm_isolate_snapshot${product_suffix}.bin")
+        dest = "data/vm_snapshot_data.bin"
+      },
+      {
+        path = rebase_path(
+                "$snapshot_gen_dir/isolate_snapshot${product_suffix}.bin")
+        dest = "data/isolate_core_snapshot_data.bin"
+      },
+      {
+        path =
+            rebase_path("$stub_gen_dir/ffi_callback_stub${product_suffix}.bin")
+        dest = "lib/ffi_callback_stub.bin"
       },
     ]
 
     if (!product) {
+      deps += [ "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:flutter_jit_runner" ]
       resources += [
         {
           path = rebase_path(
@@ -332,23 +347,10 @@ template("jit_runner") {
                       "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:flutter_jit_runner",
                       "target_gen_dir") +
                   "/flutter_jit_runner.dartprofilersymbols")
-          dest = "flutter_jit_runner.dartprofilersymbols"
+          dest = "data/flutter_jit_runner.dartprofilersymbols"
         },
       ]
     }
-
-    resources += [
-      {
-        path = rebase_path(
-                "$snapshot_gen_dir/vm_isolate_snapshot${product_suffix}.bin")
-        dest = "vm_snapshot_data.bin"
-      },
-      {
-        path = rebase_path(
-                "$snapshot_gen_dir/isolate_snapshot${product_suffix}.bin")
-        dest = "isolate_core_snapshot_data.bin"
-      },
-    ]
 
     _vulkan_icds = []
     _libs = common_libs
@@ -371,22 +373,30 @@ template("aot_runner") {
   }
 
   fuchsia_archive(target_name) {
-    deps = [ ":aot${product_suffix}" ]
+    stub_label = "kernel:ffi_callback_stub${product_suffix}"
+    stub_gen_dir = get_label_info(stub_label, "target_gen_dir")
 
-    if (!product) {
-      deps += [ "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:flutter_aot_runner" ]
-    }
+    deps = [
+      ":aot${product_suffix}",
+      stub_label,
+    ]
 
     binary = "flutter_aot${product_suffix}_runner"
 
     resources = [
       {
         path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
-        dest = "icudtl.dat"
+        dest = "data/icudtl.dat"
+      },
+      {
+        path =
+            rebase_path("$stub_gen_dir/ffi_callback_stub${product_suffix}.bin")
+        dest = "lib/ffi_callback_stub.bin"
       },
     ]
 
     if (!product) {
+      deps += [ "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:flutter_aot_runner" ]
       resources += [
         {
           path = rebase_path(
@@ -394,7 +404,7 @@ template("aot_runner") {
                       "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:flutter_aot_runner",
                       "target_gen_dir") +
                   "/flutter_aot_runner.dartprofilersymbols")
-          dest = "flutter_aot_runner.dartprofilersymbols"
+          dest = "data/flutter_aot_runner.dartprofilersymbols"
         },
       ]
     }
@@ -576,7 +586,7 @@ if (enable_unittests) {
     resources = [
       {
         path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
-        dest = "icudtl.dat"
+        dest = "data/icudtl.dat"
       },
     ]
   }
@@ -587,22 +597,22 @@ if (enable_unittests) {
     resources = [
       {
         path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
-        dest = "icudtl.dat"
+        dest = "data/icudtl.dat"
       },
       {
         path = rebase_path(
                 "//flutter/shell/platform/fuchsia/flutter/tests/tzdata/2019a/44/le/metaZones.res")
-        dest = "tzdata/metaZones.res"
+        dest = "data/tzdata/metaZones.res"
       },
       {
         path = rebase_path(
                 "//flutter/shell/platform/fuchsia/flutter/tests/tzdata/2019a/44/le/timezoneTypes.res")
-        dest = "tzdata/timezoneTypes.res"
+        dest = "data/tzdata/timezoneTypes.res"
       },
       {
         path = rebase_path(
                 "//flutter/shell/platform/fuchsia/flutter/tests/tzdata/2019a/44/le/zoneinfo64.res")
-        dest = "tzdata/zoneinfo64.res"
+        dest = "data/tzdata/zoneinfo64.res"
       },
     ]
   }
@@ -613,7 +623,7 @@ if (enable_unittests) {
     resources = [
       {
         path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
-        dest = "icudtl.dat"
+        dest = "data/icudtl.dat"
       },
     ]
   }
@@ -631,7 +641,7 @@ if (enable_unittests) {
     resources = [
       {
         path = rebase_path("//flutter/txt/third_party/fonts/Roboto-Regular.ttf")
-        dest = "assets/Roboto-Regular.ttf"
+        dest = "data/assets/Roboto-Regular.ttf"
       },
     ]
   }
@@ -643,7 +653,7 @@ if (enable_unittests) {
     resources = [
       {
         path = rebase_path("//flutter/txt/third_party/fonts/Roboto-Regular.ttf")
-        dest = "assets/Roboto-Regular.ttf"
+        dest = "data/assets/Roboto-Regular.ttf"
       },
     ]
   }
@@ -656,21 +666,24 @@ if (enable_unittests) {
       {
         path = rebase_path(
                 "//flutter/testing/resources/performance_overlay_gold_60fps.png")
-        dest = "flutter/testing/resources/performance_overlay_gold_60fps.png"
+        dest =
+            "data/flutter/testing/resources/performance_overlay_gold_60fps.png"
       },
       {
         path = rebase_path(
                 "//flutter/testing/resources/performance_overlay_gold_90fps.png")
-        dest = "flutter/testing/resources/performance_overlay_gold_90fps.png"
+        dest =
+            "data/flutter/testing/resources/performance_overlay_gold_90fps.png"
       },
       {
         path = rebase_path(
                 "//flutter/testing/resources/performance_overlay_gold_120fps.png")
-        dest = "flutter/testing/resources/performance_overlay_gold_120fps.png"
+        dest =
+            "data/flutter/testing/resources/performance_overlay_gold_120fps.png"
       },
       {
         path = rebase_path("//flutter/txt/third_party/fonts/Roboto-Regular.ttf")
-        dest = "assets/Roboto-Regular.ttf"
+        dest = "data/assets/Roboto-Regular.ttf"
       },
     ]
   }
@@ -689,7 +702,7 @@ if (enable_unittests) {
     resources = [
       {
         path = "$root_gen_dir/flutter/runtime/assets/kernel_blob.bin"
-        dest = "assets/kernel_blob.bin"
+        dest = "data/assets/kernel_blob.bin"
       },
     ]
   }
@@ -708,16 +721,16 @@ if (enable_unittests) {
     resources = [
       {
         path = "$root_gen_dir/flutter/shell/common/assets/kernel_blob.bin"
-        dest = "assets/kernel_blob.bin"
+        dest = "data/assets/kernel_blob.bin"
       },
       {
         path =
             "$root_gen_dir/flutter/shell/common/assets/shelltest_screenshot.png"
-        dest = "assets/shelltest_screenshot.png"
+        dest = "data/assets/shelltest_screenshot.png"
       },
       {
         path = rebase_path("//flutter/txt/third_party/fonts/Roboto-Regular.ttf")
-        dest = "assets/Roboto-Regular.ttf"
+        dest = "data/assets/Roboto-Regular.ttf"
       },
     ]
 
@@ -733,11 +746,11 @@ if (enable_unittests) {
     resources = [
       {
         path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
-        dest = "icudtl.dat"
+        dest = "data/icudtl.dat"
       },
       {
         path = rebase_path("//flutter/third_party/icu/common/icudtl.dat")
-        dest = "icudtl2.dat"
+        dest = "data/icudtl2.dat"
       },
     ]
   }
@@ -756,27 +769,27 @@ if (enable_unittests) {
     resources = [
       {
         path = "$root_gen_dir/flutter/lib/ui/assets/kernel_blob.bin"
-        dest = "assets/kernel_blob.bin"
+        dest = "data/assets/kernel_blob.bin"
       },
       {
         path = "$root_gen_dir/flutter/lib/ui/assets/DashInNooglerHat.jpg"
-        dest = "assets/DashInNooglerHat.jpg"
+        dest = "data/assets/DashInNooglerHat.jpg"
       },
       {
         path = "$root_gen_dir/flutter/lib/ui/assets/Horizontal.jpg"
-        dest = "assets/Horizontal.jpg"
+        dest = "data/assets/Horizontal.jpg"
       },
       {
         path = "$root_gen_dir/flutter/lib/ui/assets/Horizontal.png"
-        dest = "assets/Horizontal.png"
+        dest = "data/assets/Horizontal.png"
       },
       {
         path = "$root_gen_dir/flutter/lib/ui/assets/hello_loop_2.gif"
-        dest = "assets/hello_loop_2.gif"
+        dest = "data/assets/hello_loop_2.gif"
       },
       {
         path = "$root_gen_dir/flutter/lib/ui/assets/hello_loop_2.webp"
-        dest = "assets/hello_loop_2.webp"
+        dest = "data/assets/hello_loop_2.webp"
       },
     ]
 
@@ -798,69 +811,69 @@ if (enable_unittests) {
     resources = [
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/kernel_blob.bin"
-        dest = "assets/kernel_blob.bin"
+        dest = "data/assets/kernel_blob.bin"
       },
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/arc_end_caps.png"
-        dest = "assets/arc_end_caps.png"
+        dest = "data/assets/arc_end_caps.png"
       },
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/compositor.png"
-        dest = "assets/compositor.png"
+        dest = "data/assets/compositor.png"
       },
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/compositor_root_surface_xformation.png"
-        dest = "assets/compositor_root_surface_xformation.png"
+        dest = "data/assets/compositor_root_surface_xformation.png"
       },
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/compositor_software.png"
-        dest = "assets/compositor_software.png"
+        dest = "data/assets/compositor_software.png"
       },
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/compositor_with_platform_layer_on_bottom.png"
-        dest = "assets/compositor_with_platform_layer_on_bottom.png"
+        dest = "data/assets/compositor_with_platform_layer_on_bottom.png"
       },
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/compositor_with_root_layer_only.png"
-        dest = "assets/compositor_with_root_layer_only.png"
+        dest = "data/assets/compositor_with_root_layer_only.png"
       },
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/dpr_noxform.png"
-        dest = "assets/dpr_noxform.png"
+        dest = "data/assets/dpr_noxform.png"
       },
       {
         path =
             "$root_gen_dir/flutter/shell/platform/embedder/assets/dpr_xform.png"
-        dest = "assets/dpr_xform.png"
+        dest = "data/assets/dpr_xform.png"
       },
       {
         path =
             "$root_gen_dir/flutter/shell/platform/embedder/assets/gradient.png"
-        dest = "assets/gradient.png"
+        dest = "data/assets/gradient.png"
       },
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/gradient_xform.png"
-        dest = "assets/gradient_xform.png"
+        dest = "data/assets/gradient_xform.png"
       },
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/scene_without_custom_compositor.png"
-        dest = "assets/scene_without_custom_compositor.png"
+        dest = "data/assets/scene_without_custom_compositor.png"
       },
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/scene_without_custom_compositor_with_xform.png"
-        dest = "assets/scene_without_custom_compositor_with_xform.png"
+        dest = "data/assets/scene_without_custom_compositor_with_xform.png"
       },
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/snapshot_large_scene.png"
-        dest = "assets/snapshot_large_scene.png"
+        dest = "data/assets/snapshot_large_scene.png"
       },
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/verifyb143464703.png"
-        dest = "assets/verifyb143464703.png"
+        dest = "data/assets/verifyb143464703.png"
       },
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/verifyb143464703_soft_noxform.png"
-        dest = "assets/verifyb143464703_soft_noxform.png"
+        dest = "data/assets/verifyb143464703_soft_noxform.png"
       },
     ]
   }
@@ -911,14 +924,14 @@ if (enable_unittests) {
     resources = [
       {
         path = "$root_gen_dir/flutter/runtime/assets/plugin_registrant_kernel_blob.bin"
-        dest = "assets/plugin_registrant_kernel_blob.bin"
+        dest = "data/assets/plugin_registrant_kernel_blob.bin"
       },
     ]
     if (is_aot_test) {
       resources += [
         {
           path = "$root_gen_dir/flutter/runtime/assets/plugin_registrant_app_elf_snapshot.so"
-          dest = "assets/plugin_registrant_app_elf_snapshot.so"
+          dest = "data/assets/plugin_registrant_app_elf_snapshot.so"
         },
       ]
     }
@@ -938,14 +951,14 @@ if (enable_unittests) {
     resources = [
       {
         path = "$root_gen_dir/flutter/runtime/assets/no_plugin_registrant_kernel_blob.bin"
-        dest = "assets/no_plugin_registrant_kernel_blob.bin"
+        dest = "data/assets/no_plugin_registrant_kernel_blob.bin"
       },
     ]
     if (is_aot_test) {
       resources += [
         {
           path = "$root_gen_dir/flutter/runtime/assets/no_plugin_registrant_app_elf_snapshot.so"
-          dest = "assets/no_plugin_registrant_app_elf_snapshot.so"
+          dest = "data/assets/no_plugin_registrant_app_elf_snapshot.so"
         },
       ]
     }
@@ -965,14 +978,14 @@ if (enable_unittests) {
     resources = [
       {
         path = "$root_gen_dir/flutter/shell/platform/embedder/assets/kernel_blob.bin"
-        dest = "assets/kernel_blob.bin"
+        dest = "data/assets/kernel_blob.bin"
       },
     ]
     if (is_aot_test) {
       resources += [
         {
           path = "$root_gen_dir/flutter/shell/platform/embedder/assets/app_elf_snapshot.so"
-          dest = "assets/app_elf_snapshot.so"
+          dest = "data/assets/app_elf_snapshot.so"
         },
       ]
     }
@@ -1004,14 +1017,14 @@ if (enable_unittests) {
     resources = [
       {
         path = "$root_gen_dir/flutter/third_party/tonic/tests/assets/kernel_blob.bin"
-        dest = "assets/kernel_blob.bin"
+        dest = "data/assets/kernel_blob.bin"
       },
     ]
     if (is_aot_test) {
       resources += [
         {
           path = "$root_gen_dir/flutter/third_party/tonic/tests/assets/app_elf_snapshot.so"
-          dest = "assets/app_elf_snapshot.so"
+          dest = "data/assets/app_elf_snapshot.so"
         },
       ]
     }

@@ -1510,11 +1510,11 @@ class _SelectableFragment
     final int selectionEnd = _textSelectionEnd!.offset;
     final bool isReversed = selectionStart > selectionEnd;
     final Offset startOffsetInParagraphCoordinates = paragraph._getOffsetForPosition(
-      TextPosition(offset: selectionStart),
+      _textSelectionStart!,
     );
     final Offset endOffsetInParagraphCoordinates = selectionStart == selectionEnd
         ? startOffsetInParagraphCoordinates
-        : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
+        : paragraph._getOffsetForPosition(_textSelectionEnd!);
     final flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
     final selection = TextSelection(baseOffset: selectionStart, extentOffset: selectionEnd);
     final selectionRects = <Rect>[];
@@ -1860,7 +1860,14 @@ class _SelectableFragment
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
     if (_rect.isEmpty) {
-      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      final SelectionResult result = SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      _setSelectionPosition(
+        result == SelectionResult.next
+            ? TextPosition(offset: range.end)
+            : TextPosition(offset: range.start, affinity: TextAffinity.upstream),
+        isEnd: isEnd,
+      );
+      return result;
     }
     final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
       _rect,
@@ -1926,7 +1933,14 @@ class _SelectableFragment
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
     if (_rect.isEmpty) {
-      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      final SelectionResult result = SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      _setSelectionPosition(
+        result == SelectionResult.next
+            ? TextPosition(offset: range.end)
+            : TextPosition(offset: range.start, affinity: TextAffinity.upstream),
+        isEnd: isEnd,
+      );
+      return result;
     }
     final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
       _rect,
@@ -2834,7 +2848,14 @@ class _SelectableFragment
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
     if (_rect.isEmpty) {
-      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      final SelectionResult result = SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      _setSelectionPosition(
+        result == SelectionResult.next
+            ? TextPosition(offset: range.end)
+            : TextPosition(offset: range.start, affinity: TextAffinity.upstream),
+        isEnd: isEnd,
+      );
+      return result;
     }
     final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
       _rect,

@@ -15,11 +15,11 @@ import 'package:integration_test/integration_test.dart';
 /// Generates the [PointerEvent] to simulate a drag operation from
 /// `center - totalMove/2` to `center + totalMove/2`.
 Iterable<PointerEvent> dragInputEvents(
-  final Duration epoch,
-  final Offset center, {
-  final Offset totalMove = const Offset(0, -400),
-  final Duration totalTime = const Duration(milliseconds: 2000),
-  final double frequency = 90,
+  Duration epoch,
+  Offset center, {
+  Offset totalMove = const Offset(0, -400),
+  Duration totalTime = const Duration(milliseconds: 2000),
+  double frequency = 90,
 }) sync* {
   final Offset startLocation = center - totalMove / 2;
   // The issue is about 120Hz input on 90Hz refresh rate device.
