@@ -950,8 +950,10 @@ void main() {
                       children: <Widget>[
                         OverlayPortal(
                           controller: controller,
-                          overlayChildBuilder: (BuildContext context) =>
-                              const SizedBox(key: overlayKey, width: 10, height: 10),
+                          overlayChildBuilder: (BuildContext context) => const Align(
+                            alignment: Alignment.topLeft,
+                            child: SizedBox(key: overlayKey, width: 10, height: 10),
+                          ),
                           child: const SizedBox(width: 10, height: 10),
                         ),
                       ],
@@ -966,6 +968,9 @@ void main() {
     );
     expect(tester.takeException(), isNull);
     expect(find.byKey(overlayKey), findsOneWidget);
+    // Confirm the overlay child actually completed layout — the depth-invariant
+    // restoration must hold for the deferred-layout box to be laid out.
+    expect(tester.getSize(find.byKey(overlayKey)), const Size(10, 10));
   });
 
   testWidgets('Set defaultVerticalAlignment to intrinsic height and check their heights', (
