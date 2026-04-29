@@ -12,13 +12,22 @@ const _kLogEntryPrefix = '[proxyMiddleware]';
 
 /// Creates a new [shelf.Request] by proxying an [originalRequest] to a [finalTargetUrl].
 ///
-/// The new request will have the same method, headers, body, and context as the
-/// [originalRequest], but its URL will be set to [finalTargetUrl].
-shelf.Request proxyRequest(shelf.Request originalRequest, Uri finalTargetUrl) {
+/// The new request will have the same method, body, and context as the
+/// [originalRequest], but its URL will be set to [finalTargetUrl]. The
+/// original headers are kept; any entries in [extraHeaders] are merged on
+/// top, overriding the original on key collisions.
+shelf.Request proxyRequest(
+  shelf.Request originalRequest,
+  Uri finalTargetUrl, {
+  Map<String, String> extraHeaders = const <String, String>{},
+}) {
+  final Map<String, String> mergedHeaders = extraHeaders.isEmpty
+      ? originalRequest.headers
+      : <String, String>{...originalRequest.headers, ...extraHeaders};
   return shelf.Request(
     originalRequest.method,
     finalTargetUrl,
-    headers: originalRequest.headers,
+    headers: mergedHeaders,
     body: originalRequest.read(),
     context: originalRequest.context,
   );
@@ -43,7 +52,11 @@ Future<shelf.Response> _applyProxyRules(
     final shelf.Handler handler = proxyHandler(rule.targetUri, proxyName: 'flutter_tools');
     final Uri finalTargetUrl = rule.finalTargetUri(request.requestedUri);
     try {
-      final shelf.Request proxyBackendRequest = proxyRequest(request, finalTargetUrl);
+      final shelf.Request proxyBackendRequest = proxyRequest(
+        request,
+        finalTargetUrl,
+        extraHeaders: rule.headers,
+      );
       final shelf.Response proxyResponse = await handler(proxyBackendRequest);
       logger.printStatus('$_kLogEntryPrefix Matched "$requestPath". Requesting "$finalTargetUrl"');
       logger.printTrace('$_kLogEntryPrefix Matched with proxy rule: $rule');

@@ -7,13 +7,17 @@ import '../base/logger.dart';
 
 /// Represents a rule for proxying requests based on a specific pattern.
 ///
-/// Subclasses must implement the [matches], [replace], and [targetUri] members.
+/// Subclasses must implement the [matches], [replace], [targetUri], and
+/// [headers] members.
 sealed class ProxyRule {
   static const _kLogEntryPrefix = '[ProxyRule]';
   static const _kTarget = 'target';
   static const _kRegex = 'regex';
   static const _kPrefix = 'prefix';
   static const _kReplace = 'replace';
+  static const _kHeaders = 'headers';
+  static const _kName = 'name';
+  static const _kValue = 'value';
 
   /// Checks if the given [path] matches the rule's pattern.
   bool matches(String path);
@@ -24,6 +28,63 @@ sealed class ProxyRule {
 
   /// Returns the target URI to which the request should be proxied.
   Uri get targetUri;
+
+  /// Headers to inject on each proxied request that matches this rule.
+  ///
+  /// Values defined here are merged with the headers from the original
+  /// request, with rule-defined headers taking precedence on key collisions.
+  /// This is useful for injecting authorization tokens or other request
+  /// metadata that is not provided by the browser during local development.
+  ///
+  /// Defaults to an empty map (no extra headers injected).
+  Map<String, String> get headers;
+
+  /// Parses the optional `headers` list from a proxy rule [yaml] map.
+  ///
+  /// Each entry in the list must be a YamlMap with `name` and `value` string
+  /// keys. Any malformed entry is logged via [logger] and skipped. Returns an
+  /// empty map when the `headers` key is absent.
+  static Map<String, String> parseHeaders(YamlMap yaml, Logger logger) {
+    final Object? rawHeaders = yaml[_kHeaders];
+    if (rawHeaders == null) {
+      return const <String, String>{};
+    }
+    if (rawHeaders is! YamlList) {
+      logger.printError(
+        '$_kLogEntryPrefix Invalid $_kHeaders entry in proxy rule YAML: '
+        'expected a list, found ${rawHeaders.runtimeType}.',
+      );
+      return const <String, String>{};
+    }
+    final headers = <String, String>{};
+    for (final Object? item in rawHeaders) {
+      if (item is! YamlMap) {
+        logger.printError(
+          '$_kLogEntryPrefix Each $_kHeaders entry must be a map. '
+          'Found ${item.runtimeType}.',
+        );
+        continue;
+      }
+      final Object? name = item[_kName];
+      final Object? value = item[_kValue];
+      if (name is! String || name.isEmpty) {
+        logger.printError(
+          '$_kLogEntryPrefix Each $_kHeaders entry must have a non-empty '
+          'string "$_kName" key. Found ${name.runtimeType}.',
+        );
+        continue;
+      }
+      if (value is! String) {
+        logger.printError(
+          '$_kLogEntryPrefix Each $_kHeaders entry must have a string '
+          '"$_kValue" key. Found ${value.runtimeType}.',
+        );
+        continue;
+      }
+      headers[name] = value;
+    }
+    return headers;
+  }
 
   /// If both or neither 'prefix' and 'regex' are defined, it logs an error and returns null.
   /// Otherwise, it tries to create a [PrefixProxyRule] or [RegexProxyRule] based on the [yaml] keys.
@@ -65,16 +126,27 @@ sealed class ProxyRule {
 class RegexProxyRule extends ProxyRule {
   /// Creates a [RegexProxyRule] with the given regular expression [pattern],
   /// [target] URI base, and optional [replacement] string.
-  RegexProxyRule({required RegExp pattern, required String target, String? replacement})
-    : targetUri = Uri.parse(target),
-      _pattern = pattern,
-      _replacement = replacement;
+  ///
+  /// The optional [headers] map is injected onto each request matched by this
+  /// rule (see [ProxyRule.headers]).
+  RegexProxyRule({
+    required RegExp pattern,
+    required String target,
+    String? replacement,
+    Map<String, String>? headers,
+  }) : targetUri = Uri.parse(target),
+       _pattern = pattern,
+       _replacement = replacement,
+       headers = Map<String, String>.unmodifiable(headers ?? const <String, String>{});
 
   final RegExp _pattern;
   final String? _replacement;
   @override
   /// The target URI to which the request should be proxied.
   final Uri targetUri;
+
+  @override
+  final Map<String, String> headers;
 
   @override
   bool matches(String path) {
@@ -97,7 +169,7 @@ class RegexProxyRule extends ProxyRule {
 
   @override
   String toString() {
-    return '{${ProxyRule._kRegex}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $targetUri, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}}';
+    return '{${ProxyRule._kRegex}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $targetUri, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}, ${ProxyRule._kHeaders}: $headers}';
   }
 
   /// Checks if the given [yaml] can be handled by this rule.
@@ -135,7 +207,12 @@ class RegexProxyRule extends ProxyRule {
         'Treating $regex as string. Error: $e',
       );
     }
-    return RegexProxyRule(pattern: pattern, target: target, replacement: replacement?.trim());
+    return RegexProxyRule(
+      pattern: pattern,
+      target: target,
+      replacement: replacement?.trim(),
+      headers: ProxyRule.parseHeaders(yaml, effectiveLogger),
+    );
   }
 }
 
@@ -143,14 +220,21 @@ class RegexProxyRule extends ProxyRule {
 ///
 /// If a [_replacement] string is provided, it replaces the prefix in the matched path.
 class PrefixProxyRule extends RegexProxyRule {
-  /// Creates a [PrefixProxyRule] with the given [prefix] prefix, [target] URI base,
-  /// and optional [replacement] string.
-  PrefixProxyRule({required String prefix, required super.target, super.replacement})
-    : super(pattern: RegExp('^${RegExp.escape(prefix)}'));
+  /// Creates a [PrefixProxyRule] with the given [prefix] prefix, [target] URI
+  /// base, and optional [replacement] string.
+  ///
+  /// The optional [headers] map is injected onto each request matched by this
+  /// rule (see [ProxyRule.headers]).
+  PrefixProxyRule({
+    required String prefix,
+    required super.target,
+    super.replacement,
+    super.headers,
+  }) : super(pattern: RegExp('^${RegExp.escape(prefix)}'));
 
   @override
   String toString() {
-    return '{${ProxyRule._kPrefix}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $targetUri, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}}';
+    return '{${ProxyRule._kPrefix}: ${_pattern.pattern}, ${ProxyRule._kTarget}: $targetUri, ${ProxyRule._kReplace}: ${_replacement ?? 'null'}, ${ProxyRule._kHeaders}: $headers}';
   }
 
   /// Checks if the given [yaml] can be handled by this rule.
@@ -177,6 +261,11 @@ class PrefixProxyRule extends RegexProxyRule {
       );
       return null;
     }
-    return PrefixProxyRule(prefix: prefix, target: target, replacement: replacement?.trim());
+    return PrefixProxyRule(
+      prefix: prefix,
+      target: target,
+      replacement: replacement?.trim(),
+      headers: ProxyRule.parseHeaders(yaml, effectiveLogger),
+    );
   }
 }

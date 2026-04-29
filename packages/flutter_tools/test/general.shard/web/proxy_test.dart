@@ -72,7 +72,10 @@ void main() {
       });
       final RegexProxyRule? rule = RegexProxyRule.fromYaml(yaml, logger);
       expect(rule, isNotNull);
-      expect(rule.toString(), r'{regex: ^/api/(.*), target: http://localhost:8080, replace: /$1}');
+      expect(
+        rule.toString(),
+        r'{regex: ^/api/(.*), target: http://localhost:8080, replace: /$1, headers: {}}',
+      );
     });
 
     test('fromYaml logs warning for invalid regex format', () {
@@ -83,7 +86,10 @@ void main() {
       final RegexProxyRule? rule = RegexProxyRule.fromYaml(yaml, logger);
       expect(rule, isNotNull);
       expect(logger.warningText, contains('Invalid regex pattern'));
-      expect(rule.toString(), r'{regex: \[invalid, target: http://localhost:8080, replace: null}');
+      expect(
+        rule.toString(),
+        r'{regex: \[invalid, target: http://localhost:8080, replace: null, headers: {}}',
+      );
     });
 
     test('fromYaml returns null if target is missing', () {
@@ -210,7 +216,7 @@ void main() {
       expect(rule, isNotNull);
       expect(
         rule.toString(),
-        '{prefix: ^/old_path, target: http://localhost:8080/new_path, replace: /new_prefix}',
+        '{prefix: ^/old_path, target: http://localhost:8080/new_path, replace: /new_prefix, headers: {}}',
       );
     });
 
@@ -293,6 +299,90 @@ void main() {
     });
   });
 
+  group('ProxyRule.headers', () {
+    test('defaults to an empty map when no headers key is present', () {
+      final yaml = YamlMap.wrap(<String, String>{
+        'prefix': '/api',
+        'target': 'http://localhost:8080',
+      });
+      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNotNull);
+      expect(rule!.headers, isEmpty);
+    });
+
+    test('parses header entries from YAML', () {
+      final yaml = loadYaml('''
+prefix: /api
+target: http://localhost:8080
+headers:
+  - name: Authorization
+    value: "Bearer token-123"
+  - name: X-Custom
+    value: hello
+''') as YamlMap;
+      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNotNull);
+      expect(rule!.headers, <String, String>{
+        'Authorization': 'Bearer token-123',
+        'X-Custom': 'hello',
+      });
+    });
+
+    test('parses header entries on a regex rule', () {
+      final yaml = loadYaml('''
+regex: ^/api/(.*)
+target: http://localhost:8080
+headers:
+  - name: X-Auth
+    value: token
+''') as YamlMap;
+      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger);
+      expect(rule, isA<RegexProxyRule>());
+      expect(rule!.headers, <String, String>{'X-Auth': 'token'});
+    });
+
+    test('logs an error and skips malformed entries', () {
+      final yaml = loadYaml('''
+prefix: /api
+target: http://localhost:8080
+headers:
+  - name: Good
+    value: kept
+  - name: ""
+    value: empty-name-skipped
+  - name: NoValue
+  - notAMap
+''') as YamlMap;
+      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNotNull);
+      expect(rule!.headers, <String, String>{'Good': 'kept'});
+      expect(logger.errorText, contains('non-empty'));
+      expect(logger.errorText, contains('must have a string'));
+      expect(logger.errorText, contains('must be a map'));
+    });
+
+    test('logs an error when the headers field is not a list', () {
+      final yaml = loadYaml('''
+prefix: /api
+target: http://localhost:8080
+headers: "Authorization: Bearer token"
+''') as YamlMap;
+      final ProxyRule? rule = ProxyRule.fromYaml(yaml, logger);
+      expect(rule, isNotNull);
+      expect(rule!.headers, isEmpty);
+      expect(logger.errorText, contains('expected a list'));
+    });
+
+    test('headers map is unmodifiable', () {
+      final rule = PrefixProxyRule(
+        prefix: '/api',
+        target: 'http://localhost:8080',
+        headers: <String, String>{'X': '1'},
+      );
+      expect(() => rule.headers['Y'] = '2', throwsUnsupportedError);
+    });
+  });
+
   group('proxyRequest', () {
     test('should correctly proxy all request elements', () async {
       final Uri originalUrl = Uri.parse('http://original.example.com/path');
@@ -343,6 +433,35 @@ void main() {
       expect(proxiedRequest.method, 'GET');
       expect(proxiedRequest.url.toString(), 'empty-new');
       expect(await proxiedRequest.readAsString(), '');
+    });
+
+    test('should inject extra headers and override conflicting originals', () async {
+      final Uri originalUrl = Uri.parse('http://original.example.com/path');
+      final Uri finalTargetUrl = Uri.parse('http://target.example.com/newpath');
+      final originalHeaders = <String, String>{
+        'Content-Type': 'text/plain',
+        'X-Existing': 'original-value',
+      };
+
+      final originalRequest = Request(
+        'GET',
+        originalUrl,
+        headers: originalHeaders,
+      );
+
+      final Request proxiedRequest = proxyRequest(
+        originalRequest,
+        finalTargetUrl,
+        extraHeaders: <String, String>{
+          'Authorization': 'Bearer abc',
+          'X-Existing': 'override-value',
+        },
+      );
+
+      expect(proxiedRequest.headers, containsPair('Authorization', 'Bearer abc'));
+      expect(proxiedRequest.headers, containsPair('Content-Type', 'text/plain'));
+      // Extra headers override conflicting originals.
+      expect(proxiedRequest.headers, containsPair('X-Existing', 'override-value'));
     });
 
     test('should handle different HTTP methods', () async {
@@ -404,6 +523,53 @@ void main() {
       expect(innerHandlerCalled, isTrue);
       expect(response.statusCode, 200);
       expect(await response.readAsString(), 'Inner Handler Response');
+    });
+
+    test('should inject rule headers into proxied request', () async {
+      HttpServer? mockServer;
+      try {
+        String? receivedAuth;
+        String? receivedExisting;
+        mockServer = await shelf_io.serve(
+          (Request request) {
+            receivedAuth = request.headers['authorization'];
+            receivedExisting = request.headers['x-existing'];
+            return Response.ok('ok');
+          },
+          'localhost',
+          0,
+        );
+        final int port = mockServer.port;
+
+        final rules = <ProxyRule>[
+          PrefixProxyRule(
+            prefix: '/api/',
+            target: 'http://localhost:$port/',
+            headers: <String, String>{
+              'Authorization': 'Bearer token-123',
+              'X-Existing': 'overridden',
+            },
+          ),
+        ];
+
+        final Middleware middleware = proxyMiddleware(rules, logger);
+        FutureOr<Response> innerHandler(Request request) => Response.ok('inner');
+
+        final request = Request(
+          'GET',
+          Uri.parse('http://localhost:8080/api/users'),
+          headers: <String, String>{'X-Existing': 'original'},
+        );
+        final Response response = await middleware(innerHandler)(request);
+
+        expect(response.statusCode, 200);
+        expect(await response.readAsString(), 'ok');
+        expect(receivedAuth, 'Bearer token-123');
+        // Rule headers must override conflicting originals.
+        expect(receivedExisting, 'overridden');
+      } finally {
+        await mockServer?.close();
+      }
     });
 
     test(
