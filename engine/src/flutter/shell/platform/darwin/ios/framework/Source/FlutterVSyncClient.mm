@@ -32,10 +32,15 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
 
     [self setMaxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate];
 
-    // Strongly retain the the captured link until it is added to the runloop.
+    // Capture a weak reference to self to ensure we don't add the display link
+    // to the run loop if the client has already been deallocated.
     CADisplayLink* localDisplayLink = _displayLink;
-    task_runner->PostTask([localDisplayLink]() {
-      [localDisplayLink addToRunLoop:NSRunLoop.currentRunLoop forMode:NSRunLoopCommonModes];
+    __weak FlutterVSyncClient* weakSelf = self;
+    task_runner->PostTask([localDisplayLink, weakSelf]() {
+      FlutterVSyncClient* strongSelf = weakSelf;
+      if (strongSelf) {
+        [localDisplayLink addToRunLoop:NSRunLoop.currentRunLoop forMode:NSRunLoopCommonModes];
+      }
     });
   }
 
