@@ -113,20 +113,6 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
 @implementation FlutterDisplayLinkManager
 
 + (double)displayRefreshRate {
-  CADisplayLink* displayLink = [CADisplayLink displayLinkWithTarget:[[[self class] alloc] init]
-                                                           selector:@selector(onDisplayLink:)];
-  displayLink.paused = YES;
-  auto preferredFPS = displayLink.preferredFramesPerSecond;
-
-  // From Docs:
-  // The default value for preferredFramesPerSecond is 0. When this value is 0, the preferred
-  // frame rate is equal to the maximum refresh rate of the display, as indicated by the
-  // maximumFramesPerSecond property.
-
-  if (preferredFPS != 0) {
-    return preferredFPS;
-  }
-
   return UIScreen.mainScreen.maximumFramesPerSecond;
 }
 
