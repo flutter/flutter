@@ -32,8 +32,6 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.PluginManager
-import org.gradle.internal.impldep.junit.framework.TestCase.assertFalse
-import org.gradle.internal.impldep.junit.framework.TestCase.assertTrue
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
@@ -46,6 +44,7 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class FlutterPluginUtilsTest {
     companion object {
