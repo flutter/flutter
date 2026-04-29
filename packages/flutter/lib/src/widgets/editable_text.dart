@@ -5199,9 +5199,7 @@ class EditableTextState extends State<EditableText>
     // grapheme-cluster indices (bullet positions). Convert back to the
     // code-unit offsets used by the rest of the text editing system.
     if (widget.obscureText && cause != SelectionChangedCause.keyboard) {
-      value = value.copyWith(
-        selection: _mapSelectionFromObscured(value.text, value.selection),
-      );
+      value = value.copyWith(selection: _mapSelectionFromObscured(value.text, value.selection));
     }
 
     // Compare the current TextEditingValue with the pre-format new
@@ -6267,7 +6265,9 @@ class _Editable extends MultiChildRenderObjectWidget {
       textAlign: textAlign,
       textDirection: textDirection,
       locale: locale ?? Localizations.maybeLocaleOf(context),
-      selection: obscureText ? _mapSelectionToObscured(value.text, value.selection) : value.selection,
+      selection: obscureText
+          ? _mapSelectionToObscured(value.text, value.selection)
+          : value.selection,
       offset: offset,
       ignorePointer: rendererIgnoresPointer,
       obscuringCharacter: obscuringCharacter,
@@ -6311,7 +6311,9 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..textAlign = textAlign
       ..textDirection = textDirection
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
-      ..selection = obscureText ? _mapSelectionToObscured(value.text, value.selection) : value.selection
+      ..selection = obscureText
+          ? _mapSelectionToObscured(value.text, value.selection)
+          : value.selection
       ..offset = offset
       ..ignorePointer = rendererIgnoresPointer
       ..textHeightBehavior = textHeightBehavior
