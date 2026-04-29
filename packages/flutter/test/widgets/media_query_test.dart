@@ -2058,4 +2058,39 @@ void main() {
     expect(widthBuildCount, 2);
     expect(heightBuildCount, 2);
   });
+
+  testWidgets('MediaQuery.fromView respects debugTextScalerOverride', (WidgetTester tester) async {
+    addTearDown(() => debugTextScalerOverride = null);
+    expect(debugTextScalerOverride, isNull);
+
+    late MediaQueryData data;
+    await tester.pumpWidget(
+      MediaQuery.fromView(
+        view: tester.view,
+        child: Builder(
+          builder: (BuildContext context) {
+            data = MediaQuery.of(context);
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    expect(data.textScaler, isSystemTextScaler(withScaleFactor: 1.0));
+
+    debugTextScalerOverride = const TextScaler.linear(2.5);
+    await tester.pumpWidget(
+      MediaQuery.fromView(
+        view: tester.view,
+        child: Builder(
+          builder: (BuildContext context) {
+            data = MediaQuery.of(context);
+            return const Placeholder();
+          },
+        ),
+      ),
+    );
+
+    expect(data.textScaler, const TextScaler.linear(2.5));
+  });
 }

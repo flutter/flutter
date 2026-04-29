@@ -203,7 +203,7 @@ void main() {
     // framework, excluding any that are for the widget inspector (see
     // widget_inspector_test.dart for tests of the ext.flutter.inspector service
     // extensions). Any test counted here must be tested in this file!
-    const serviceExtensionCount = 31;
+    const serviceExtensionCount = 32;
 
     // The tests are in the widgets/accessibility_evaluations_service_extension_test.dart
     // They can't be moved here because they need to run in a WidgetTester environment.
@@ -1448,5 +1448,64 @@ void main() {
     expect(serverAddress, 'http://127.0.0.1:54000/kMUMseKAnog=/');
 
     testedExtensions.add(FoundationServiceExtensions.connectedVmServiceUri.name);
+  });
+
+  test('Service extensions - fontScaler', () async {
+    addTearDown(() => debugTextScalerOverride = null);
+    Map<String, dynamic> result;
+
+    expect(debugTextScalerOverride, isNull);
+
+    result = await binding.testExtension(
+      WidgetsServiceExtensions.fontScaler.name,
+      <String, String>{},
+    );
+    expect(result, <String, String>{'value': 'null'});
+    expect(debugTextScalerOverride, isNull);
+
+    result = await binding.testExtension(WidgetsServiceExtensions.fontScaler.name, <String, String>{
+      'value': '{"1.0":1.0,"2.0":2.5}',
+    });
+    expect(result, <String, String>{'value': '{"1.0":"1.0","2.0":"2.5"}'});
+    expect(debugTextScalerOverride, isA<DebugNonlinearTextScaler>());
+    expect((debugTextScalerOverride! as DebugNonlinearTextScaler).table, <double, double>{
+      1.0: 1.0,
+      2.0: 2.5,
+    });
+    expect(debugTextScalerOverride!.scale(1.0), 1.0);
+    expect(debugTextScalerOverride!.scale(2.0), 2.5);
+
+    result = await binding.testExtension(
+      WidgetsServiceExtensions.fontScaler.name,
+      <String, String>{},
+    );
+    expect(result, <String, String>{'value': '{"1.0":"1.0","2.0":"2.5"}'});
+
+    result = await binding.testExtension(WidgetsServiceExtensions.fontScaler.name, <String, String>{
+      'value': 'null',
+    });
+    expect(result, <String, String>{'value': 'null'});
+    expect(debugTextScalerOverride, isNull);
+
+    result = await binding.testExtension(WidgetsServiceExtensions.fontScaler.name, <String, String>{
+      'value': '{"1.0":1.0}',
+    });
+    expect(result, <String, String>{'value': '{"1.0":"1.0"}'});
+    expect(debugTextScalerOverride, isNotNull);
+
+    result = await binding.testExtension(WidgetsServiceExtensions.fontScaler.name, <String, String>{
+      'value': '',
+    });
+    expect(result, <String, String>{'value': 'null'});
+    expect(debugTextScalerOverride, isNull);
+
+    expect(
+      () => binding.testExtension(WidgetsServiceExtensions.fontScaler.name, <String, String>{
+        'value': 'invalid',
+      }),
+      throwsA(isA<Exception>()),
+    );
+
+    testedExtensions.add(WidgetsServiceExtensions.fontScaler.name);
   });
 }
