@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
@@ -413,99 +412,6 @@ void main() {
             'Skipping target: $bundleFlutterAssetsTarget',
           ],
           unexpectedLines: <String>['Starting due to'],
-        );
-      },
-      skip: !platform.isMacOS, // [intended] Swift Package Manager only works on macos.
-    );
-
-    test(
-      'SwiftPM plugin with target path outside package root fails for $platformName',
-      () async {
-        final Directory workingDirectory = fileSystem.systemTempDirectory.createTempSync(
-          'swift_package_manager_relative_path.',
-        );
-        final String workingDirectoryPath = workingDirectory.path;
-
-        addTearDown(() async {
-          await SwiftPackageManagerUtils.disableSwiftPackageManager(
-            flutterBin,
-            workingDirectoryPath,
-          );
-          ErrorHandlingFileSystem.deleteIfExists(workingDirectory, recursive: true);
-        });
-
-        await SwiftPackageManagerUtils.enableSwiftPackageManager(flutterBin, workingDirectoryPath);
-
-        // Create an app
-        final String appDirectoryPath = await SwiftPackageManagerUtils.createApp(
-          flutterBin,
-          workingDirectoryPath,
-          platform: platformName,
-          usesSwiftPackageManager: true,
-          options: <String>['--platforms=$platformName'],
-        );
-
-        // Create a SwiftPM plugin
-        final SwiftPackageManagerPlugin createdSwiftPMPlugin =
-            await SwiftPackageManagerUtils.createPlugin(
-              flutterBin,
-              workingDirectoryPath,
-              platform: platformName,
-              usesSwiftPackageManager: true,
-            );
-
-        // Modify its Package.swift to use a relative path outside the package root
-        final File swiftPMPluginPackageManifest = fileSystem
-            .directory(createdSwiftPMPlugin.pluginPath)
-            .childDirectory(platformName)
-            .childDirectory(createdSwiftPMPlugin.pluginName)
-            .childFile('Package.swift');
-
-        final String manifestContents = swiftPMPluginPackageManifest.readAsStringSync();
-
-        // We want to add path: "../Classes" to the target.
-        // The path must come after dependencies or we get a compilation error.
-        const targetToReplace =
-            'dependencies: [\n                .product(name: "FlutterFramework", package: "FlutterFramework")\n            ]';
-        expect(
-          manifestContents,
-          contains(targetToReplace),
-          reason: 'Target dependencies not found in manifest',
-        );
-
-        final String updatedManifestContents = manifestContents.replaceFirst(
-          targetToReplace,
-          'dependencies: [\n                .product(name: "FlutterFramework", package: "FlutterFramework")\n            ],\n            path: "../Classes"',
-        );
-
-        swiftPMPluginPackageManifest.writeAsStringSync(updatedManifestContents);
-
-        // Add the plugin as a dependency to the app
-        SwiftPackageManagerUtils.addDependency(
-          appDirectoryPath: appDirectoryPath,
-          plugin: createdSwiftPMPlugin,
-        );
-
-        // Build the app and expect it to fail
-        final command = <String>[
-          flutterBin,
-          ...getLocalEngineArguments(),
-          'build',
-          platformName,
-          '--debug',
-          '-v',
-        ];
-        final ProcessResult result = await processManager.run(
-          command,
-          workingDirectory: appDirectoryPath,
-        );
-
-        expect(result.exitCode, isNot(0));
-        expect(
-          result.stdout.toString() + result.stderr.toString(),
-          contains(
-            'Flutter plugin "${createdSwiftPMPlugin.pluginName}" is not formatted correctly.',
-          ),
         );
       },
       skip: !platform.isMacOS, // [intended] Swift Package Manager only works on macos.

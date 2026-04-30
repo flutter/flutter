@@ -406,18 +406,21 @@ class SwiftPackageManager {
 
   static final List<_SwiftPMErrorMatcher> _errorMatchers = <_SwiftPMErrorMatcher>[
     _SwiftPMErrorMatcher(
+      // Example: target 'plugin_a' in package 'plugin_a' is outside the package root
       pattern: RegExp(r"target '([^']+)' in package '[^']+' is outside the package root"),
       message: (RegExpMatch match) =>
           'Flutter plugin "${match.group(1)}" has an incorrectly configured Package.swift file.\n'
           'Please contact the plugin maintainers for assistance.',
     ),
     _SwiftPMErrorMatcher(
+      // Example: /path/to/plugin_a/Package.swift:25:17: error: expected ',' separator
       pattern: RegExp(r'([^\/]+)\/Package\.swift:\d+:\d+: error:'),
       message: (RegExpMatch match) =>
           'Flutter plugin "${match.group(1)}" has an incorrectly configured Package.swift file.\n'
           'Please contact the plugin maintainers for assistance.',
     ),
     _SwiftPMErrorMatcher(
+      // Example: unknown package 'some-package' in dependencies of target 'plugin_a'
       pattern: RegExp(r"unknown package '[^']+' in dependencies of target '([^']+)'"),
       message: (RegExpMatch match) =>
           'Flutter plugin "${match.group(1)}" has an incorrectly configured Package.swift file.\n'
