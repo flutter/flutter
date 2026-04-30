@@ -13,7 +13,8 @@ namespace {
 
 class DlImpellerPixelData : public flutter::testing::DlPixelData {
  public:
-  DlImpellerPixelData(std::unique_ptr<impeller::testing::Screenshot> screenshot)
+  explicit DlImpellerPixelData(
+      std::unique_ptr<impeller::testing::Screenshot> screenshot)
       : screenshot_(std::move(screenshot)) {}
   ~DlImpellerPixelData() override = default;
 
@@ -23,11 +24,11 @@ class DlImpellerPixelData : public flutter::testing::DlPixelData {
     }
     fml::SafeMath safe_math;
     size_t offset = safe_math.mul(screenshot_->GetBytesPerRow(), y);
+    offset += safe_math.mul(x, 4u);
     if (safe_math.overflow_detected()) {
       return nullptr;
     }
-    return reinterpret_cast<const uint32_t*>(
-        screenshot_->GetBytes() + offset + x);
+    return reinterpret_cast<const uint32_t*>(screenshot_->GetBytes() + offset);
   }
 
   virtual size_t width() const override { return screenshot_->GetWidth(); }
@@ -119,8 +120,8 @@ void DlSurfaceInstanceImpeller::DoRenderDisplayList(
                            display_list, cull_rect, false, false);
 }
 
-std::shared_ptr<DlPixelData>
-DlSurfaceInstanceImpeller::SnapshotToPixelData() const {
+std::shared_ptr<DlPixelData> DlSurfaceInstanceImpeller::SnapshotToPixelData()
+    const {
   std::unique_ptr<impeller::testing::Screenshot> snapshot =
       snapshotter_.MakeScreenshot(aiks_context_,
                                   GetRenderTarget().GetRenderTargetTexture());

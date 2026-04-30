@@ -113,7 +113,7 @@ class DlSurfaceProvider {
     FML_DCHECK(false);
   }
 
-  static std::optional<BackendType> NameToBackend(std::string name);
+  static std::optional<BackendType> NameToBackend(const std::string& name);
   static std::string BackendName(BackendType type);
   static std::unique_ptr<DlSurfaceProvider> Create(BackendType backend_type);
 

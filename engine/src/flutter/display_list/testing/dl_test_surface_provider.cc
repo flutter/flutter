@@ -6,14 +6,14 @@
 
 namespace flutter::testing {
 
-std::optional<DlSurfaceProvider::BackendType>
-DlSurfaceProvider::NameToBackend(std::string name) {
-#define PROCESS_BACKEND(name, BACKEND)                              \
-  {                                                                 \
-    BackendType type = BackendType::k##BACKEND;                     \
-    if (name.compare(DlSurfaceProvider::BackendName(type)) == 0) {  \
-      return type;                                                  \
-    }                                                               \
+std::optional<DlSurfaceProvider::BackendType> DlSurfaceProvider::NameToBackend(
+    const std::string& name) {
+#define PROCESS_BACKEND(name, BACKEND)                             \
+  {                                                                \
+    BackendType type = BackendType::k##BACKEND;                    \
+    if (name.compare(DlSurfaceProvider::BackendName(type)) == 0) { \
+      return type;                                                 \
+    }                                                              \
   }
 
   PROCESS_BACKEND(name, SkiaSoftware);

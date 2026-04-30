@@ -15,8 +15,7 @@ namespace testing {
 
 class DlSurfaceProviderSkiaMetal : public DlSurfaceProvider {
  public:
-  explicit DlSurfaceProviderSkiaMetal()
-      : DlSurfaceProvider() {}
+  explicit DlSurfaceProviderSkiaMetal() : DlSurfaceProvider() {}
   virtual ~DlSurfaceProviderSkiaMetal() = default;
 
   bool InitializeSurface(size_t width,

@@ -14,7 +14,7 @@ namespace {
 
 class DlSkiaPixelData : public flutter::testing::DlPixelData {
  public:
-  DlSkiaPixelData(sk_sp<SkImage> raster_image) {
+  explicit DlSkiaPixelData(const sk_sp<SkImage>& raster_image) {
     SkImageInfo info = raster_image->imageInfo();
     info = SkImageInfo::MakeN32Premul(info.dimensions());
     if (info.bytesPerPixel() == 4) {
@@ -123,8 +123,8 @@ bool DlSurfaceInstanceSkiaBase::SnapshotToFile(std::string& filename) const {
   return WriteAtomically(OpenFixturesDirectory(), filename.c_str(), mapping);
 }
 
-std::shared_ptr<DlPixelData>
-DlSurfaceInstanceSkiaBase::SnapshotToPixelData() const {
+std::shared_ptr<DlPixelData> DlSurfaceInstanceSkiaBase::SnapshotToPixelData()
+    const {
   sk_sp<SkImage> raster = GetRasterImage();
   if (!raster) {
     return nullptr;
