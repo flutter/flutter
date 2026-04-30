@@ -4045,7 +4045,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   }
 
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
-    assert(_dirty || _isTraversalParent || _isTraversalChild);
+    assert(_dirty || _isTraversalParent);
     final SemanticsData data = getSemanticsData();
     assert(() {
       final FlutterError? error = _DebugSemanticsRoleChecks._checkSemanticsData(this);
@@ -4987,23 +4987,6 @@ class SemanticsOwner extends ChangeNotifier {
           continue;
         }
 
-        // Update traversal relationship maps.
-        // If the node is a traversal parent, then add it to the
-        // _traversalParentNodes map for later grafting. Similarly, add the node
-        // to the _traversalChildNodes map if it is a traversal child.
-        if (isTraversalParent) {
-          assert(
-            !_traversalParentNodes.containsKey(node._traversalParentIdentifier) ||
-                _traversalParentNodes[node.traversalParentIdentifier!] == node,
-            'The traversalParentIdentifier must be unique. No two semantics nodes can share the same traversalParentIdentifier.',
-          );
-          _traversalParentNodes[node.traversalParentIdentifier!] = node;
-        }
-        if (isTraversalChild) {
-          _traversalChildNodes[node.traversalChildIdentifier!] ??= <SemanticsNode>{};
-          _traversalChildNodes[node.traversalChildIdentifier!]!.add(node);
-        }
-
         if (isTraversalChild) {
           // If the node has a non-null `_traversalChildIdentifier`, it indicates
           // that its hit-test parent and traversal parent are different, and
@@ -5017,21 +5000,23 @@ class SemanticsOwner extends ChangeNotifier {
             updatedVisitedNodes.add(parentNode);
           }
         }
-        if (isTraversalParent) {
-          // If the node is a traversal parent, then its grafted traversal
-          // children should also be sent for update.
-          final Set<SemanticsNode>? forceUpdateNodes =
-              _traversalChildNodes[node.traversalParentIdentifier];
-          if (forceUpdateNodes != null) {
-            for (final SemanticsNode child in forceUpdateNodes) {
-              if (child.attached && !child._dirty && !updatedVisitedNodes.contains(child)) {
-                updatedVisitedNodes.add(child);
-              }
-            }
-          }
-        }
 
         updatedVisitedNodes.add(node);
+      }
+
+      // If the node is a traversal parent, then add it to the
+      // _traversalParentNodes map for later grafting. Similarly, add the node
+      // to the _traversalChildNodes map if it is a traversal child.
+      if (isTraversalParent) {
+        assert(
+          !_traversalParentNodes.containsKey(node._traversalParentIdentifier) ||
+              _traversalParentNodes[node.traversalParentIdentifier!] == node,
+          'The traversalParentIdentifier must be unique. No two semantics nodes can share the same traversalParentIdentifier.',
+        );
+        _traversalParentNodes[node.traversalParentIdentifier!] = node;
+      } else if (isTraversalChild) {
+        _traversalChildNodes[node.traversalChildIdentifier!] ??= <SemanticsNode>{};
+        _traversalChildNodes[node.traversalChildIdentifier!]!.add(node);
       }
     }
 
@@ -5045,9 +5030,6 @@ class SemanticsOwner extends ChangeNotifier {
       // the traversal order. This grafting process is skipped on web because
       // the traversal order will be handled in the web engine.
       final bool needUpdateTraversalParent = !kIsWeb && node._isTraversalParent;
-      // The traversalChildNode grafted from hit test parent should also be sent
-      // for update.
-      final bool needUpdateTraversalChild = !kIsWeb && node._isTraversalChild;
       // The _serialize() method marks the node as not dirty, and
       // recurses through the tree to do a deep serialization of all
       // contiguous dirty nodes. This means that when we return here,
@@ -5058,7 +5040,7 @@ class SemanticsOwner extends ChangeNotifier {
       // calls reset() on its SemanticsNode if onlyChanges isn't set,
       // which happens e.g. when the node is no longer contributing
       // semantics).
-      if ((node._dirty || needUpdateTraversalParent || needUpdateTraversalChild) && node.attached) {
+      if ((node._dirty || needUpdateTraversalParent) && node.attached) {
         node._addToUpdate(builder, customSemanticsActionIds);
       }
     }
