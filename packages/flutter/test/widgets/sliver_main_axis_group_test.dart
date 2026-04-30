@@ -1288,6 +1288,68 @@ void main() {
       });
     },
   );
+
+  // Regression test for an inaccurate-scroll-offset bug exposed by
+  // SliverList rebuilding with different child sizes. Uses fixed-size
+  // SizedBoxes (no Material widgets) so the test does not depend on
+  // Material's Card/ListTile sizing rules.
+  testWidgets(
+    'With SliverList can handle inaccurate scroll offset due to changes in children list',
+    (WidgetTester tester) async {
+      const double itemHeight = 200;
+      var skip = true;
+
+      Widget buildItem(BuildContext context, int index) {
+        return !skip || index.isEven
+            ? SizedBox(
+                key: ValueKey<int>(index),
+                height: itemHeight,
+                child: DefaultTextStyle(
+                  style: const TextStyle(fontSize: 14, color: Color(0xFF000000)),
+                  child: Text('item$index'),
+                ),
+              )
+            : const SizedBox.shrink();
+      }
+
+      Widget buildFrame() {
+        return _wrap(
+          CustomScrollView(
+            slivers: <Widget>[
+              SliverMainAxisGroup(
+                slivers: <Widget>[
+                  SliverList.builder(itemCount: 30, itemBuilder: buildItem),
+                ],
+              ),
+            ],
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame());
+      // skip=true: only even items have non-zero height (item 0 visible at top).
+      expect(find.text('item0'), findsOneWidget);
+
+      // Drag a known amount so a different range of items is rendered.
+      await tester.drag(find.byType(CustomScrollView), const Offset(0.0, -800.0));
+      await tester.pump();
+      expect(find.text('item0'), findsNothing);
+
+      // Switch to skip=false — every index now has full height. The total
+      // content extent doubles. SliverList must keep its offset valid
+      // even though the rendered children's collective heights have
+      // changed. The pump must not throw.
+      skip = false;
+      await tester.pumpWidget(buildFrame());
+
+      // After the rebuild, some range of items must still render.
+      final visibleAfterRebuild = <int>[
+        for (int i = 0; i < 30; i++)
+          if (find.text('item$i').evaluate().isNotEmpty) i,
+      ];
+      expect(visibleAfterRebuild, isNotEmpty);
+    },
+  );
 }
 
 Widget _buildSliverList({
