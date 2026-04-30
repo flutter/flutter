@@ -1647,12 +1647,27 @@ class SliverConstrainedCrossAxis extends StatelessWidget {
   /// Creates a sliver that constrains the cross axis extent of its sliver child.
   ///
   /// The [maxExtent] parameter is required and must be nonnegative.
-  const SliverConstrainedCrossAxis({super.key, required this.maxExtent, required this.sliver});
+  const SliverConstrainedCrossAxis({
+    super.key,
+    required this.maxExtent,
+    this.alignment,
+    required this.sliver,
+  }) : assert(maxExtent >= 0.0);
 
   /// The cross axis extent to apply to the sliver child.
   ///
   /// This value must be nonnegative.
   final double maxExtent;
+
+  /// How to align the sliver within the cross axis.
+  ///
+  /// For example, if the [alignment] is [Alignment.center], the [sliver] will
+  /// be centered within the [SliverConstraints.crossAxisExtent].
+  ///
+  /// If this is null, the sliver is positioned at the start of the cross axis
+  /// (0.0). If the sliver consumes the full cross axis extent, the alignment
+  /// has no effect.
+  final AlignmentGeometry? alignment;
 
   /// The widget below this widget in the tree.
   ///
@@ -1662,7 +1677,21 @@ class SliverConstrainedCrossAxis extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SliverZeroFlexParentDataWidget(
-      sliver: _SliverConstrainedCrossAxis(maxExtent: maxExtent, sliver: sliver),
+      sliver: _SliverConstrainedCrossAxis(
+        maxExtent: maxExtent,
+        alignment: alignment,
+        textDirection: alignment != null ? Directionality.maybeOf(context) : null,
+        sliver: sliver,
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('maxExtent', maxExtent));
+    properties.add(
+      DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null),
     );
   }
 }
@@ -1690,23 +1719,40 @@ class _SliverZeroFlexParentDataWidget extends ParentDataWidget<SliverPhysicalPar
 }
 
 class _SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
-  const _SliverConstrainedCrossAxis({required this.maxExtent, required Widget sliver})
-    : assert(maxExtent >= 0.0),
-      super(child: sliver);
+  const _SliverConstrainedCrossAxis({
+    required this.maxExtent,
+    this.alignment,
+    this.textDirection,
+    required Widget sliver,
+  }) : assert(maxExtent >= 0.0),
+       super(child: sliver);
 
   /// The cross axis extent to apply to the sliver child.
   ///
   /// This value must be nonnegative.
   final double maxExtent;
 
+  /// How to align the child within the cross axis.
+  final AlignmentGeometry? alignment;
+
+  /// The direction in which text flows, used to resolve [alignment].
+  final TextDirection? textDirection;
+
   @override
   RenderSliverConstrainedCrossAxis createRenderObject(BuildContext context) {
-    return RenderSliverConstrainedCrossAxis(maxExtent: maxExtent);
+    return RenderSliverConstrainedCrossAxis(
+      maxExtent: maxExtent,
+      alignment: alignment,
+      textDirection: textDirection,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverConstrainedCrossAxis renderObject) {
-    renderObject.maxExtent = maxExtent;
+    renderObject
+      ..maxExtent = maxExtent
+      ..alignment = alignment
+      ..textDirection = textDirection;
   }
 }
 
