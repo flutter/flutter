@@ -57,7 +57,7 @@ void main() {
   ];
 
   const kFindProcessResolvePackagesCommand = FakeCommand(
-    command: <String>['pgrep', '-n', ...kResolvePackagesCommandList],
+    command: <String>['pgrep', '-n', '-f', ...kResolvePackagesCommandList],
   );
 
   const kResolvePackagesCommand = FakeCommand(command: kResolvePackagesCommandList);
@@ -282,7 +282,6 @@ void main() {
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
             '/build/ios/SourcePackages',
-            '-disableAutomaticPackageResolution',
             '-skipPackageUpdates',
             '-skipPackagePluginValidation',
             '-skipPackageSignatureValidation',
@@ -330,7 +329,6 @@ void main() {
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
             '/build/ios/SourcePackages',
-            '-disableAutomaticPackageResolution',
             '-skipPackageUpdates',
             '-skipPackagePluginValidation',
             '-skipPackageSignatureValidation',
@@ -378,7 +376,6 @@ void main() {
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
             '/build/ios/SourcePackages',
-            '-disableAutomaticPackageResolution',
             '-skipPackageUpdates',
             '-skipPackagePluginValidation',
             '-skipPackageSignatureValidation',
@@ -426,7 +423,6 @@ void main() {
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
             '/build/ios/SourcePackages',
-            '-disableAutomaticPackageResolution',
             '-skipPackageUpdates',
             '-skipPackagePluginValidation',
             '-skipPackageSignatureValidation',
@@ -474,7 +470,6 @@ void main() {
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
             '/build/ios/SourcePackages',
-            '-disableAutomaticPackageResolution',
             '-skipPackageUpdates',
             '-skipPackagePluginValidation',
             '-skipPackageSignatureValidation',
@@ -520,7 +515,6 @@ void main() {
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
             '/build/ios/SourcePackages',
-            '-disableAutomaticPackageResolution',
             '-skipPackageUpdates',
             '-skipPackagePluginValidation',
             '-skipPackageSignatureValidation',
@@ -562,6 +556,7 @@ void main() {
           command: <String>[
             'pgrep',
             '-n',
+            '-f',
             'xcrun',
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
@@ -584,7 +579,6 @@ void main() {
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
             '/build/macos/SourcePackages',
-            '-disableAutomaticPackageResolution',
             '-skipPackageUpdates',
             '-skipPackagePluginValidation',
             '-skipPackageSignatureValidation',
@@ -632,7 +626,6 @@ void main() {
           'xcodebuild',
           '-clonedSourcePackagesDirPath',
           '/build/ios/SourcePackages',
-          '-disableAutomaticPackageResolution',
           '-skipPackageUpdates',
           '-skipPackagePluginValidation',
           '-skipPackageSignatureValidation',
@@ -672,7 +665,6 @@ void main() {
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
             '/build/ios/SourcePackages',
-            '-disableAutomaticPackageResolution',
             '-skipPackageUpdates',
             '-skipPackagePluginValidation',
             '-skipPackageSignatureValidation',
@@ -715,7 +707,6 @@ void main() {
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
             '/build/ios/SourcePackages',
-            '-disableAutomaticPackageResolution',
             '-skipPackageUpdates',
             '-skipPackagePluginValidation',
             '-skipPackageSignatureValidation',
@@ -760,7 +751,6 @@ void main() {
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
             '/build/ios/SourcePackages',
-            '-disableAutomaticPackageResolution',
             '-skipPackageUpdates',
             '-skipPackagePluginValidation',
             '-skipPackageSignatureValidation',
@@ -1178,6 +1168,69 @@ Information about project "Runner":
     },
   );
 
+  testWithoutContext(
+    'build configuration for flavored project falls back to BuildMode when flavor match is unavailable',
+    () {
+      final info = XcodeProjectInfo(
+        <String>['Runner'],
+        <String>['Debug', 'Profile', 'Release'],
+        <String>['Banana'],
+        logger,
+      );
+
+      expect(
+        info.buildConfigurationFor(
+          const BuildInfo(
+            BuildMode.debug,
+            'banana',
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          'Banana',
+        ),
+        'Debug',
+      );
+
+      expect(
+        info.buildConfigurationFor(
+          const BuildInfo(
+            BuildMode.release,
+            'banana',
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          'Banana',
+        ),
+        'Release',
+      );
+    },
+  );
+
+  testWithoutContext(
+    "build configuration doesn't fall back when multiple matches for mode and flavor are available",
+    () {
+      final info = XcodeProjectInfo(
+        <String>['Runner'],
+        <String>['Debug', 'Profile', 'Release', 'DebugBanana', 'banana debug'],
+        <String>['Banana'],
+        logger,
+      );
+
+      expect(
+        info.buildConfigurationFor(
+          const BuildInfo(
+            BuildMode.debug,
+            'banana',
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          'Banana',
+        ),
+        null,
+      );
+    },
+  );
+
   testWithoutContext('build configuration for project with inconsistent naming is null', () {
     final info = XcodeProjectInfo(
       <String>['Runner'],
@@ -1565,9 +1618,14 @@ Build settings for action build and target good_plugin:
           );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+          final String configContents = config.readAsStringSync();
           expect(logger.warningText, isEmpty);
-          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'));
-          expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
+          expect(configContents, contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386'));
+          expect(
+            configContents,
+            isNot(contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386 arm64')),
+          );
+          expect(configContents, contains('EXCLUDED_ARCHS[sdk=iphoneos*]=armv7'));
           expect(fakeProcessManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
@@ -2440,6 +2498,7 @@ flutter:
           command: <String>[
             'pgrep',
             '-n',
+            '-f',
             'xcrun',
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
@@ -2519,6 +2578,7 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
         command: <String>[
           'pgrep',
           '-n',
+          '-f',
           'xcrun',
           'xcodebuild',
           '-clonedSourcePackagesDirPath',
@@ -2576,6 +2636,7 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
         command: <String>[
           'pgrep',
           '-n',
+          '-f',
           'xcrun',
           'xcodebuild',
           '-clonedSourcePackagesDirPath',
@@ -2648,6 +2709,7 @@ Resolved source packages:
           command: <String>[
             'pgrep',
             '-n',
+            '-f',
             'xcrun',
             'xcodebuild',
             '-clonedSourcePackagesDirPath',
@@ -2722,6 +2784,7 @@ Resolved source packages:
         command: <String>[
           'pgrep',
           '-n',
+          '-f',
           'xcrun',
           'xcodebuild',
           '-clonedSourcePackagesDirPath',

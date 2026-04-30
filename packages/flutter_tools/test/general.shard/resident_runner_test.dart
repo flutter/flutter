@@ -424,12 +424,7 @@ void main() {
           listViews,
           listViews,
           listViews,
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{
-              'isolates': <Object>[fakeUnpausedIsolate.toJson()],
-            })!.toJson(),
-          ),
+          getVm([fakeUnpausedIsolate]),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
             args: <String, Object>{
@@ -482,12 +477,7 @@ void main() {
           listViews,
           listViews,
           listViews,
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{
-              'isolates': <Object>[fakeUnpausedIsolate.toJson()],
-            })!.toJson(),
-          ),
+          getVm([fakeUnpausedIsolate]),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
             args: <String, Object>{
@@ -547,12 +537,7 @@ void main() {
           listViews,
           listViews,
           listViews,
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{
-              'isolates': <Object>[fakeUnpausedIsolate.toJson()],
-            })!.toJson(),
-          ),
+          getVm([fakeUnpausedIsolate]),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
             args: <String, Object>{
@@ -703,10 +688,7 @@ void main() {
             },
             jsonResponse: vm_service.Success().toJson(),
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -786,10 +768,7 @@ void main() {
             method: 'resume',
             args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -846,10 +825,7 @@ void main() {
             },
             jsonResponse: vm_service.Success().toJson(),
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -881,10 +857,7 @@ void main() {
             },
             jsonResponse: vm_service.Success().toJson(),
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -916,10 +889,7 @@ void main() {
             },
             jsonResponse: vm_service.Success().toJson(),
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',

@@ -45,6 +45,7 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
       fileSystem: environment.fileSystem,
       buildCodeAssets: null,
       buildDataAssets: true,
+      recordedUsesFile: null,
     );
 
     final FlutterHookResult flutterHookResult = dartHooksResult.asFlutterResult;
