@@ -1115,6 +1115,43 @@ void main() {
   );
 
   group('SelectionArea integration', () {
+    // Regression test for https://github.com/flutter/flutter/issues/124078.
+    testWidgets('SelectableRegion does not crash when selected list content scrolls out of view', (
+      WidgetTester tester,
+    ) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: _selectableRegion(
+            child: ListView.builder(
+              controller: controller,
+              itemExtent: 100.0,
+              itemCount: 20,
+              itemBuilder: (BuildContext context, int index) {
+                return Center(child: Text('Item $index'));
+              },
+            ),
+          ),
+        ),
+      );
+
+      final SelectableRegionState state = tester.state<SelectableRegionState>(
+        find.byType(SelectableRegion),
+      );
+      state.selectAll(SelectionChangedCause.toolbar);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+
+      controller.jumpTo(1000.0);
+      await tester.pump();
+
+      expect(() => state.contextMenuAnchors, returnsNormally);
+      expect(tester.takeException(), isNull);
+      expect(find.text('Item 10'), findsOneWidget);
+    });
+
     testWidgets(
       'selection is not cleared when app loses focus on desktop',
       (WidgetTester tester) async {

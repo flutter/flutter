@@ -66,45 +66,6 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/124078.
-  testWidgets('SelectionArea does not crash when selected list content scrolls out of view', (
-    WidgetTester tester,
-  ) async {
-    final controller = ScrollController();
-    addTearDown(controller.dispose);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SelectionArea(
-            child: ListView.builder(
-              controller: controller,
-              itemExtent: 100.0,
-              itemCount: 20,
-              itemBuilder: (BuildContext context, int index) {
-                return Center(child: Text('Item $index'));
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final SelectableRegionState state = tester.state<SelectableRegionState>(
-      find.byType(SelectableRegion),
-    );
-    state.selectAll(SelectionChangedCause.toolbar);
-    await tester.pump();
-    expect(tester.takeException(), isNull);
-
-    controller.jumpTo(1000.0);
-    await tester.pump();
-
-    expect(() => state.contextMenuAnchors, returnsNormally);
-    expect(tester.takeException(), isNull);
-    expect(find.text('Item 10'), findsOneWidget);
-  });
-
   // Regression test for https://github.com/flutter/flutter/issues/111370
   testWidgets(
     'Handle is correctly transformed when the text is inside of a FittedBox ',
