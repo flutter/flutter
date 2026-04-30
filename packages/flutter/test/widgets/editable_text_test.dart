@@ -4124,6 +4124,49 @@ void main() {
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
 
+  testWidgets('Mouse drag selection from bottom to top does not snap to extent', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(text: 'Line 1\n' * 100);
+    final scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextField(
+            controller: controller,
+            scrollController: scrollController,
+            maxLines: null,
+          ),
+        ),
+      ),
+    );
+
+    // Scroll to the bottom of the long text.
+    scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    await tester.pumpAndSettle();
+
+    final Finder textField = find.byType(TextField);
+
+    // Simulate clicking and holding the mouse at the bottom left of the text field.
+    final TestGesture gesture = await tester.startGesture(
+      tester.getBottomLeft(textField) + const Offset(10, -10),
+      kind: PointerDeviceKind.mouse,
+    );
+    await tester.pump();
+
+    // Drag the mouse upwards to the top left of the text field to select text.
+    await gesture.moveTo(tester.getTopLeft(textField) + const Offset(10, 10));
+    await tester.pumpAndSettle();
+
+    // The viewport should follow the mouse upwards (offset decreases).
+    // It should not snap back to the bottom (maxScrollExtent).
+    expect(scrollController.offset, lessThan(scrollController.position.maxScrollExtent));
+
+    // Release the mouse click.
+    await gesture.up();
+  });
+
   testWidgets(
     'finalizeEditing should reset the input connection when shouldUnfocus is true but the unfocus is cancelled',
     (WidgetTester tester) async {
