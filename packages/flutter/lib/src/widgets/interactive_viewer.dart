@@ -848,6 +848,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           details.velocity.pixelsPerSecond.distance,
           widget.interactionEndFrictionCoefficient,
         );
+        _animation?.removeListener(_handleInertiaAnimation);
         _animation = Tween<Offset>(
           begin: translation,
           end: Offset(frictionSimulationX.finalX, frictionSimulationY.finalX),
@@ -871,6 +872,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           widget.interactionEndFrictionCoefficient,
           effectivelyMotionless: 0.1,
         );
+        _scaleAnimation?.removeListener(_handleScaleAnimation);
         _scaleAnimation = Tween<double>(
           begin: scale,
           end: frictionSimulation.x(tFinal),
