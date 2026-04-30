@@ -560,8 +560,12 @@ class RenderEnvironment {
   std::shared_ptr<DlText> MakeTestText() const {
     sk_sp<SkTextBlob> blob = MakeTextBlob("Testing", kRenderHeight * 0.33f);
     if (provider_->TargetsImpeller()) {
+#ifdef IMPELLER_SUPPORTS_RENDERING
       auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
       return DlTextImpeller::Make(frame);
+#else  // IMPELLER_SUPPORTS_RENDERING
+      return nullptr;
+#endif  // IMPELLER_SUPPORTS_RENDERING
     } else {
       return DlTextSkia::Make(blob);
     }
