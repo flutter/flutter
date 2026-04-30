@@ -151,6 +151,30 @@ struct TRect {
     return TRect(0.0, 0.0, size.width, size.height);
   }
 
+  /// Construct the rectangular bounds of a circle with the supplied
+  /// center point and uniform radius.
+  constexpr static TRect MakeCircleBounds(const TPoint<Type>& center,
+                                          Type radius) {
+    return MakeLTRB(center.x - radius, center.y - radius,  //
+                    center.x + radius, center.y + radius);
+  }
+
+  /// Construct the rectangular bounds of a circle with the supplied
+  /// center point and non-uniform horizontal and vertical radii.
+  constexpr static TRect MakeEllipseBounds(const TPoint<Type>& center,
+                                           const TSize<Type>& radii) {
+    return MakeLTRB(center.x - radii.width, center.y - radii.height,  //
+                    center.x + radii.width, center.y + radii.height);
+  }
+
+  /// Construct the rectangular bounds of a circle with the supplied
+  /// center point and non-uniform horizontal and vertical radii.
+  constexpr static TRect MakeEllipseBounds(const TPoint<Type>& center,
+                                           const TPoint<Type>& radii) {
+    return MakeLTRB(center.x - radii.x, center.y - radii.y,  //
+                    center.x + radii.x, center.y + radii.y);
+  }
+
   /// Construct a floating point rect |Rect| from another Rect of a
   /// potentially different storage type (eg. |IRect|).
   template <class U, class FT = T>

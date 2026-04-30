@@ -76,8 +76,9 @@ or
     'bin',
     if (Platform.isWindows) 'flutter.bat' else 'flutter',
   ]);
-  final bundlePlatform = targetPlatform;
-  final target = '${buildMode}_bundle_${bundlePlatform}_assets';
+  final target = targetPlatform.startsWith('darwin')
+      ? '${buildMode}_macos_bundle_flutter_assets'
+      : '${buildMode}_bundle_${targetPlatform}_assets';
   final Process assembleProcess = await Process.start(flutterExecutable, <String>[
     if (verbose) '--verbose',
     if (prefixedErrors) '--prefixed-errors',
@@ -91,7 +92,7 @@ or
     '-dTrackWidgetCreation=$trackWidgetCreation',
     '-dBuildMode=$buildMode',
     '-dTargetFile=$flutterTarget',
-    '-dTreeShakeIcons="$treeShakeIcons"',
+    '-dTreeShakeIcons=$treeShakeIcons',
     '-dDartObfuscation=$dartObfuscation',
     if (codeSizeDirectory != null) '-dCodeSizeDirectory=$codeSizeDirectory',
     if (splitDebugInfo != null) '-dSplitDebugInfo=$splitDebugInfo',

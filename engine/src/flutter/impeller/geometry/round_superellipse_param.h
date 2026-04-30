@@ -49,6 +49,8 @@ struct RoundSuperellipseParam {
     Point circle_center;
     // The angular span of the circular arc, measured in radians.
     Radians circle_max_angle;
+
+    Scalar circle_radius;
   };
 
   // Parameters for drawing a rounded superellipse with equal radius size for

@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
@@ -124,7 +125,7 @@ class AssetFontsResult {
 
 abstract class FlutterFontCollection {
   /// Loads a font directly from font data.
-  Future<bool> loadFontFromList(Uint8List list, {String? fontFamily});
+  Future<bool> loadFontFromBytes(Uint8List list, {String? fontFamily});
 
   /// Completes when fonts from FontManifest.json have been loaded.
   Future<AssetFontsResult> loadAssetFonts(FontManifest manifest);
@@ -134,7 +135,17 @@ abstract class FlutterFontCollection {
   // properly.
   FontFallbackManager? get fontFallbackManager;
 
+  @visibleForTesting
+  set fontFallbackManager(FontFallbackManager? value);
+
+  /// The font fallback registry for this font collection.
+  FallbackFontRegistry? get fallbackFontRegistry;
+
+  @visibleForTesting
+  set fallbackFontRegistry(FallbackFontRegistry? value);
+
   // Reset the state of font fallbacks. Only to be used in testing.
+  @visibleForTesting
   void debugResetFallbackFonts();
 
   // Unregisters all fonts.

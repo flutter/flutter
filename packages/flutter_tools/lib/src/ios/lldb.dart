@@ -11,22 +11,19 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
-import '../base/version.dart';
-import '../macos/xcode.dart';
+import '../build_info.dart';
 
 /// LLDB is the default debugger in Xcode on macOS. Once the application has
 /// launched on a physical iOS device, you can attach to it using LLDB.
 ///
 /// See `xcrun devicectl device process launch --help` for more information.
 class LLDB {
-  LLDB({required Logger logger, required ProcessUtils processUtils, required Xcode xcode})
-    : _xcode = xcode,
-      _logger = logger,
+  LLDB({required Logger logger, required ProcessUtils processUtils})
+    : _logger = logger,
       _processUtils = processUtils;
 
   final Logger _logger;
   final ProcessUtils _processUtils;
-  final Xcode _xcode;
 
   _LLDBProcess? _lldbProcess;
 
@@ -50,6 +47,11 @@ class LLDB {
   ///
   /// Example: (lldb) Process 6152 resuming
   static final _lldbProcessResuming = RegExp(r'Process \d+ resuming');
+
+  /// Pattern of lldb log when the process has started and the breakpoint is added.
+  ///
+  /// Example: (lldb) 1 location added to breakpoint 1
+  static final _lldbBreakpointAdded = RegExp(r'location added to breakpoint');
 
   /// Pattern of lldb log when the breakpoint is added.
   ///
@@ -78,6 +80,9 @@ frame.GetThread().GetProcess().WriteMemory(base, data, error)
 if not error.Success():
     print(f'Failed to write into {base}[+{page_len}]', error)
     return
+
+# If the returned value is False, that tells LLDB not to stop at the breakpoint
+return False
 ''';
 
   /// Starts an LLDB process and inputs commands to start debugging the [appProcessId].
@@ -89,6 +94,7 @@ if not error.Success():
     required String deviceId,
     required int appProcessId,
     required LLDBLogForwarder lldbLogForwarder,
+    required BuildMode mode,
   }) async {
     Timer? timer;
     try {
@@ -112,9 +118,11 @@ if not error.Success():
         return false;
       }
       await _selectDevice(deviceId);
-      await _setBreakpoint();
+      if (mode == BuildMode.debug) {
+        await _setBreakpoint();
+      }
       await _attachToAppProcess(appProcessId);
-      await _resumeProcess();
+      await _resumeProcess(mode);
       _isAttached = true;
     } on _LLDBError catch (e) {
       _logger.printTrace('lldb failed with error: ${e.message}');
@@ -147,51 +155,19 @@ if not error.Success():
         appProcessId: appProcessId,
         logger: _logger,
       );
+      final StreamSubscription<String> stdoutSubscription = _lldbProcess!.stdout
+          .transform(utf8LineDecoder)
+          .listen((String line) {
+            if (_isAttached && !_ignoreLog(line)) {
+              // Only forwards logs after LLDB is attached. All logs before then are part of the
+              // attach process.
 
-      void printLine(String line) {
-        if (_isAttached && !_ignoreLog(line)) {
-          // Only forwards logs after LLDB is attached. All logs before then are part of the
-          // attach process.
-
-          lldbLogForwarder.addLog(line);
-        } else {
-          _logger.printTrace('[lldb]: $line');
-          _logCompleter?.checkForMatch(line);
-        }
-      }
-
-      String? processStopLine;
-      var suppressLogs = false;
-
-      final StreamSubscription<String>
-      stdoutSubscription = _lldbProcess!.stdout.transform(utf8LineDecoder).listen((String line) {
-        // Skip all logs between process stop and process resume if the stop was caused by a breakpoint
-        if (line.contains(_lldbProcessStopped)) {
-          processStopLine = line;
-          return;
-        }
-        // If the last log was a proces stop log, check if it was caused by a breakpoint.
-        if (processStopLine != null) {
-          if (line.contains('stop reason = breakpoint')) {
-            // When we stop due to a breakpoint, supress all logs until we resume.
-            _lldbProcess?.stdinWriteln('process continue');
-            suppressLogs = true;
-          } else {
-            // Otherwise, print the process stop log.
-            printLine(processStopLine!);
-          }
-          processStopLine = null;
-        }
-        if (suppressLogs) {
-          if (line.contains(_lldbProcessResuming)) {
-            // After resuming, stop supressing logs.
-            suppressLogs = false;
-          }
-          return;
-        }
-
-        printLine(line);
-      });
+              lldbLogForwarder.addLog(line);
+            } else {
+              _logger.printTrace('[lldb]: $line');
+              _logCompleter?.checkForMatch(line);
+            }
+          });
 
       final StreamSubscription<String> stderrSubscription = _lldbProcess!.stderr
           .transform(utf8LineDecoder)
@@ -257,12 +233,9 @@ if not error.Success():
       _breakpointPattern,
     ).then((value) => value, onError: _handleAsyncError);
 
-    final Version? xcodeVersion = _xcode.currentVersion;
-    final bool useManualContinue = xcodeVersion != null && (xcodeVersion >= Version(26, 4, 0));
-    final breakpointSetCommand = useManualContinue
-        ? r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'"
-        : r"breakpoint set --auto-continue true --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'";
-    await _lldbProcess?.stdinWriteln(breakpointSetCommand);
+    await _lldbProcess?.stdinWriteln(
+      r"breakpoint set --func-regex '^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$'",
+    );
     final String log = await futureLog;
     final Match? match = _breakpointPattern.firstMatch(log);
     final String? breakpointId = match?.group(1);
@@ -275,12 +248,20 @@ if not error.Success():
     await _lldbProcess?.stdinWriteln('breakpoint command add --script-type python $breakpointId');
     await _lldbProcess?.stdinWriteln(_pythonScript);
     await _lldbProcess?.stdinWriteln('DONE');
+
+    // Disable asynchronous mode to workaround issues with rearming of breakpoints.
+    // See https://github.com/flutter/flutter/issues/184254 and upstream issue
+    // https://github.com/llvm/llvm-project/issues/190956.
+    await _lldbProcess?.stdinWriteln('script lldb.debugger.SetAsync(False)');
   }
 
   /// Resume the stopped process.
-  Future<void> _resumeProcess() async {
+  Future<void> _resumeProcess(BuildMode mode) async {
     final Future<String> futureLog = _startWaitingForLog(
-      _lldbProcessResuming,
+      // When using debug mode, a breakpoint is added once the process resumes and no resume log
+      // is shown. Instead we match on the breakpoint added log. In profile mode, a resume log is
+      // shown once the process resumes and no breakpoint log is shown.
+      mode == BuildMode.debug ? _lldbBreakpointAdded : _lldbProcessResuming,
     ).then((value) => value, onError: _handleAsyncError);
 
     await _lldbProcess?.stdinWriteln('process continue');

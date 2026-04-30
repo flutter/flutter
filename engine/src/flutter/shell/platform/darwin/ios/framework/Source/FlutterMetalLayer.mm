@@ -14,7 +14,7 @@
 
 FLUTTER_ASSERT_ARC
 
-@interface DisplayLinkManager : NSObject
+@interface FlutterDisplayLinkManager : NSObject
 @property(class, nonatomic, readonly) BOOL maxRefreshRateEnabledOnIPhone;
 + (double)displayRefreshRate;
 @end
@@ -189,7 +189,7 @@ extern CFTimeInterval display_link_target;
     FlutterMetalLayerDisplayLinkProxy* proxy =
         [[FlutterMetalLayerDisplayLinkProxy alloc] initWithLayer:self];
     _displayLink = [CADisplayLink displayLinkWithTarget:proxy selector:@selector(onDisplayLink:)];
-    [self setMaxRefreshRate:DisplayLinkManager.displayRefreshRate forceMax:NO];
+    [self setMaxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate forceMax:NO];
     [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground:)
@@ -209,7 +209,7 @@ extern CFTimeInterval display_link_target;
   // thread which does not trigger actual core animation frame. As a workaround FlutterMetalLayer
   // has it's own displaylink scheduled on main thread, which is used to trigger core animation
   // frame allowing for 120hz updates.
-  if (!DisplayLinkManager.maxRefreshRateEnabledOnIPhone) {
+  if (!FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone) {
     return;
   }
   double maxFrameRate = fmax(refreshRate, 60);
@@ -228,7 +228,7 @@ extern CFTimeInterval display_link_target;
   if (_displayLinkPauseCountdown == 3) {
     _displayLink.paused = YES;
     if (_displayLinkForcedMaxRate) {
-      [self setMaxRefreshRate:DisplayLinkManager.displayRefreshRate forceMax:NO];
+      [self setMaxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate forceMax:NO];
       _displayLinkForcedMaxRate = NO;
     }
   } else {
@@ -426,7 +426,7 @@ extern CFTimeInterval display_link_target;
     _didSetContentsDuringThisDisplayLinkPeriod = YES;
   } else if (!_displayLinkForcedMaxRate) {
     _displayLinkForcedMaxRate = YES;
-    [self setMaxRefreshRate:DisplayLinkManager.displayRefreshRate forceMax:YES];
+    [self setMaxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate forceMax:YES];
   }
 }
 

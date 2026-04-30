@@ -10,13 +10,29 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  group('Home Page accessibility guidelines', () {
+    testWidgets('with filter closed', (WidgetTester tester) async {
+      await tester.pumpWidget(const App(initialTags: <Tag>{}));
+      await tester.pumpAndSettle();
+
+      await _expectMeetsGuidelines(tester);
+    });
+
+    testWidgets('with filter open', (WidgetTester tester) async {
+      await tester.pumpWidget(const App(initialTags: <Tag>{}));
+      await tester.pumpAndSettle();
+
+      // Open the filter menu.
+      await tester.tap(find.byTooltip('Filter by tags'));
+      await tester.pumpAndSettle();
+
+      await _expectMeetsGuidelines(tester);
+    });
+  });
+
   for (final UseCase useCase in useCases) {
     testWidgets('testing accessibility guideline for ${useCase.name}', (WidgetTester tester) async {
-      await tester.pumpWidget(const App());
-
-      // Tap on the switch to show all use-cases, not just the core ones.
-      await tester.tap(find.byTooltip('Show additional use cases'));
-      await tester.pumpAndSettle();
+      await tester.pumpWidget(const App(initialTags: <Tag>{}));
 
       final ScrollController controller = tester
           .state<HomePageState>(find.byType(HomePage))
@@ -28,10 +44,7 @@ void main() {
       await tester.tap(find.byKey(Key(useCase.name)));
       await tester.pumpAndSettle();
 
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
-      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
-      await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
-      await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
+      await _expectMeetsGuidelines(tester);
 
       // After checking the guideline for the main page,
       // iterate through all tappable semantic nodes on the current screen.
@@ -46,24 +59,31 @@ void main() {
         final FinderBase<SemanticsNode> tappable = tappables.at(i);
         final SemanticsNode node = tappable.evaluate().first;
 
-        // We do not want to tap the back button, as that will pop the page
+        // We do not want to tap the back button or close button, as that will pop the page
         // and disrupt the current test flow.
-        if (node.tooltip == 'Back') {
+        if (node.tooltip == 'Back' || node.label == 'Close') {
           continue;
         }
         tester.semantics.tap(tappable);
         await tester.pumpAndSettle();
 
         // Re-check the accessibility guidelines after the tap action.
-        await expectLater(tester, meetsGuideline(textContrastGuideline));
         // The DatePicker use case has known issues with tap target sizes
         // So we skip these checks for this use case .
-        if (useCase.name != DatePickerUseCase().name) {
-          await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
-          await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
-          await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
-        }
+        await _expectMeetsGuidelines(
+          tester,
+          skipTapTarget: useCase.name == DatePickerUseCase().name,
+        );
       }
     });
+  }
+}
+
+Future<void> _expectMeetsGuidelines(WidgetTester tester, {bool skipTapTarget = false}) async {
+  await expectLater(tester, meetsGuideline(textContrastGuideline));
+  if (!skipTapTarget) {
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
+    await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
   }
 }
