@@ -93,13 +93,13 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
             Iterable<User> options,
           ) {
             return Align(
-              alignment: Alignment.topLeft,
+              alignment: .topLeft,
               child: Material(
                 elevation: 4.0,
                 child: SizedBox(
                   height: 200.0,
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const .all(8.0),
                     itemCount: options.length,
                     itemBuilder: (BuildContext context, int index) {
                       final User option = options.elementAt(index);

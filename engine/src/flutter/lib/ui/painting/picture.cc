@@ -12,7 +12,8 @@
 #include "flutter/lib/ui/painting/display_list_deferred_image_gpu_skia.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #if IMPELLER_SUPPORTS_RENDERING
-#include "flutter/lib/ui/painting/display_list_deferred_image_gpu_impeller.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"  // nogncheck
+#include "flutter/lib/ui/painting/display_list_deferred_image_gpu_impeller.h"  // nogncheck
 #endif  // IMPELLER_SUPPORTS_RENDERING
 #include "flutter/lib/ui/painting/display_list_image_gpu.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -139,6 +140,17 @@ size_t Picture::GetAllocationSize() const {
   }
 }
 
+#if IMPELLER_SUPPORTS_RENDERING
+static sk_sp<DlImage> MakeImpellerImage(
+    const std::shared_ptr<impeller::Texture>& texture) {
+  if (texture) {
+    return impeller::DlImageImpeller::Make(texture,
+                                           DlImage::OwningContext::kRaster);
+  }
+  return nullptr;
+}
+#endif  // IMPELLER_SUPPORTS_RENDERING
+
 Dart_Handle Picture::RasterizeToImage(const sk_sp<DisplayList>& display_list,
                                       uint32_t width,
                                       uint32_t height,
@@ -179,6 +191,11 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
   auto ui_task_runner = dart_state->GetTaskRunners().GetUITaskRunner();
   auto raster_task_runner = dart_state->GetTaskRunners().GetRasterTaskRunner();
   auto snapshot_delegate = dart_state->GetSnapshotDelegate();
+#if IMPELLER_SUPPORTS_RENDERING
+  auto is_impeller_enabled = dart_state->IsImpellerEnabled();
+#else
+  auto is_impeller_enabled = false;
+#endif  // IMPELLER_SUPPORTS_RENDERING
 
   // We can't create an image on this task runner because we don't have a
   // graphics context. Even if we did, it would be slow anyway. Also, this
@@ -204,9 +221,11 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
 
         if (!image->isUIThreadSafe()) {
           // All images with impeller textures should already be safe.
-          FML_DCHECK(image->impeller_texture() == nullptr);
+          FML_DCHECK(image->GetImageType() == DlImage::Type::kSkia);
+          auto skia_image = image->asSkiaImage();
           image =
-              DlImageGPU::Make({image->skia_image(), std::move(unref_queue)});
+              DlImageGPU::Make({skia_image ? skia_image->skia_image() : nullptr,
+                                std::move(unref_queue)});
         }
 
         auto dart_image = CanvasImage::Create();
@@ -226,7 +245,7 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
   fml::TaskRunner::RunNowOrPostTask(
       raster_task_runner,
       fml::MakeCopyable([ui_task_runner, snapshot_delegate, display_list, width,
-                         height, ui_task,
+                         height, ui_task, is_impeller_enabled,
                          layer_tree = std::move(layer_tree)]() mutable {
         auto picture_bounds = DlISize(width, height);
         sk_sp<DisplayList> snapshot_display_list = display_list;
@@ -237,13 +256,34 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
                                   snapshot_delegate->GetTextureRegistry(),
                                   snapshot_delegate->GetGrContext());
         }
-        snapshot_delegate->MakeRasterSnapshot(
-            snapshot_display_list, picture_bounds,
-            [ui_task_runner, ui_task](const sk_sp<DlImage>& image) {
-              fml::TaskRunner::RunNowOrPostTask(
-                  ui_task_runner, [ui_task, image]() { ui_task(image); });
-            },
-            SnapshotPixelFormat::kDontCare);
+        if (is_impeller_enabled) {
+#if IMPELLER_SUPPORTS_RENDERING
+          snapshot_delegate->MakeImpellerSnapshot(
+              snapshot_display_list, picture_bounds,
+              [ui_task_runner,
+               ui_task](const std::shared_ptr<impeller::Texture>& texture) {
+                fml::TaskRunner::RunNowOrPostTask(
+                    ui_task_runner, [ui_task, texture]() {
+                      ui_task(MakeImpellerImage(texture));
+                    });
+              },
+              SnapshotPixelFormat::kDontCare);
+#endif  // IMPELLER_SUPPORTS_RENDERING
+        } else {
+          snapshot_delegate->MakeSkiaSnapshot(
+              snapshot_display_list, picture_bounds,
+              [ui_task_runner, ui_task](const sk_sp<SkImage>& sk_image) {
+                fml::TaskRunner::RunNowOrPostTask(
+                    ui_task_runner, [ui_task, sk_image]() {
+                      sk_sp<DlImage> image;
+                      if (sk_image) {
+                        image = DlImageSkia::Make(sk_image);
+                      }
+                      ui_task(std::move(image));
+                    });
+              },
+              SnapshotPixelFormat::kDontCare);
+        }
       }));
 
   return Dart_Null();

@@ -249,7 +249,7 @@ abstract class TextSelectionControls {
     'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
-    delegate.pasteText(SelectionChangedCause.toolbar);
+    await delegate.pasteText(SelectionChangedCause.toolbar);
   }
 
   /// Call [TextSelectionDelegate.selectAll] to set the current selection to
@@ -1636,7 +1636,7 @@ class SelectionOverlay {
         this.context,
         rootOverlay: true,
         debugRequiredFor: debugRequiredFor,
-      ).insert(_toolbar!);
+      ).insert(_toolbar!, above: _handles?.end);
       return;
     }
 

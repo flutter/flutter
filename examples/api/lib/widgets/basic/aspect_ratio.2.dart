@@ -29,7 +29,7 @@ class AspectRatioExample extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.blue,
-      alignment: Alignment.center,
+      alignment: .center,
       width: 100.0,
       height: 100.0,
       child: AspectRatio(
