@@ -148,6 +148,55 @@ void main() {
         expect(resizedImageSize, const Size(25, 25));
       });
 
+      test('produces equal keys when effective dimensions match across configurations', () async {
+        final bytes = Uint8List.fromList(kBlueSquarePng);
+        const config = ImageConfiguration(devicePixelRatio: 2.0);
+        final ResizeImageKey logicalKey = await ResizeImage(
+          MemoryImage(bytes),
+          width: 25,
+          height: 25,
+          useLogicalPixels: true,
+        ).obtainKey(config);
+        final ResizeImageKey physicalKey = await ResizeImage(
+          MemoryImage(bytes),
+          width: 50,
+          height: 50,
+        ).obtainKey(config);
+        expect(logicalKey, physicalKey);
+        expect(logicalKey.hashCode, physicalKey.hashCode);
+      });
+
+      test('produces different keys when devicePixelRatio differs', () async {
+        final bytes = Uint8List.fromList(kBlueSquarePng);
+        final resizedImage = ResizeImage(
+          MemoryImage(bytes),
+          width: 25,
+          height: 25,
+          useLogicalPixels: true,
+        );
+        final ResizeImageKey at1x = await resizedImage.obtainKey(
+          const ImageConfiguration(devicePixelRatio: 1.0),
+        );
+        final ResizeImageKey at2x = await resizedImage.obtainKey(
+          const ImageConfiguration(devicePixelRatio: 2.0),
+        );
+        expect(at1x, isNot(at2x));
+      });
+
+      test('useLogicalPixels with policy=fit constrains by effective dimensions', () async {
+        final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+        final resizedImage = ResizeImage(
+          rawImage,
+          width: 12,
+          height: 25,
+          policy: ResizeImagePolicy.fit,
+          useLogicalPixels: true,
+        );
+        const config = ImageConfiguration(devicePixelRatio: 2.0);
+        final Size resizedImageSize = await _resolveAndGetSize(resizedImage, configuration: config);
+        expect(resizedImageSize, const Size(24, 24));
+      });
+
       test('refuses upscaling when allowUpscaling=false', () async {
         final bytes = Uint8List.fromList(kTransparentImage);
         final imageProvider = MemoryImage(bytes);

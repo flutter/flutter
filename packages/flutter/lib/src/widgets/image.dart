@@ -406,9 +406,8 @@ class Image extends StatefulWidget {
   /// These parameters are primarily intended to reduce the memory usage of
   /// [ImageCache].
   ///
-  /// If `useLogicalCacheSize` is true, `cacheWidth` and `cacheHeight` are
-  /// treated as logical pixels and multiplied by the device's pixel ratio
-  /// at decode time.
+  /// If [useLogicalCacheSize] is true, [cacheWidth] and [cacheHeight] are
+  /// interpreted as logical pixels instead of physical pixels.
   ///
   /// In the case where the network image is on the Web platform, the [cacheWidth]
   /// and [cacheHeight] parameters are ignored as the web engine delegates
@@ -513,9 +512,8 @@ class Image extends StatefulWidget {
   /// These parameters are primarily intended to reduce the memory usage of
   /// [ImageCache].
   ///
-  /// If `useLogicalCacheSize` is true, `cacheWidth` and `cacheHeight` are
-  /// treated as logical pixels and multiplied by the device's pixel ratio
-  /// at decode time.
+  /// If [useLogicalCacheSize] is true, [cacheWidth] and [cacheHeight] are
+  /// interpreted as logical pixels instead of physical pixels.
   ///
   /// Loading an image from a file creates an in memory copy of the file,
   /// which is retained in the [ImageCache]. The underlying file is not
@@ -604,9 +602,8 @@ class Image extends StatefulWidget {
   /// These parameters are primarily intended to reduce the memory usage of
   /// [ImageCache].
   ///
-  /// If `useLogicalCacheSize` is true, `cacheWidth` and `cacheHeight` are
-  /// treated as logical pixels and multiplied by the device's pixel ratio
-  /// at decode time.
+  /// If [useLogicalCacheSize] is true, [cacheWidth] and [cacheHeight] are
+  /// interpreted as logical pixels instead of physical pixels.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -765,9 +762,8 @@ class Image extends StatefulWidget {
   /// These parameters are primarily intended to reduce the memory usage of
   /// [ImageCache].
   ///
-  /// If `useLogicalCacheSize` is true, `cacheWidth` and `cacheHeight` are
-  /// treated as logical pixels and multiplied by the device's pixel ratio
-  /// at decode time.
+  /// If [useLogicalCacheSize] is true, [cacheWidth] and [cacheHeight] are
+  /// interpreted as logical pixels instead of physical pixels.
   Image.memory(
     Uint8List bytes, {
     super.key,

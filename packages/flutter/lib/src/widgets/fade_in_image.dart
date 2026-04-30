@@ -116,6 +116,10 @@ class FadeInImage extends StatefulWidget {
   /// and [height] regardless of these parameters. These parameters are primarily
   /// intended to reduce the memory usage of [ImageCache].
   ///
+  /// If [useLogicalCacheSize] is true, the cache dimensions are interpreted
+  /// as logical pixels instead of physical pixels. The flag applies to both
+  /// the placeholder and the image.
+  ///
   /// The [placeholder], [image], [placeholderScale], [imageScale],
   /// [fadeOutDuration], [fadeOutCurve], [fadeInDuration], [fadeInCurve],
   /// [alignment], [repeat], and [matchTextDirection] arguments must not be
@@ -158,15 +162,18 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
+    bool useLogicalCacheSize = false,
   }) : placeholder = ResizeImage.resizeIfNeeded(
          placeholderCacheWidth,
          placeholderCacheHeight,
          MemoryImage(placeholder, scale: placeholderScale),
+         useLogicalPixels: useLogicalCacheSize,
        ),
        image = ResizeImage.resizeIfNeeded(
          imageCacheWidth,
          imageCacheHeight,
          NetworkImage(image, scale: imageScale),
+         useLogicalPixels: useLogicalCacheSize,
        );
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
@@ -189,6 +196,10 @@ class FadeInImage extends StatefulWidget {
   /// The image will be rendered to the constraints of the layout or [width]
   /// and [height] regardless of these parameters. These parameters are primarily
   /// intended to reduce the memory usage of [ImageCache].
+  ///
+  /// If [useLogicalCacheSize] is true, the cache dimensions are interpreted
+  /// as logical pixels instead of physical pixels. The flag applies to both
+  /// the placeholder and the image.
   ///
   /// See also:
   ///
@@ -228,21 +239,25 @@ class FadeInImage extends StatefulWidget {
     int? placeholderCacheHeight,
     int? imageCacheWidth,
     int? imageCacheHeight,
+    bool useLogicalCacheSize = false,
   }) : placeholder = placeholderScale != null
            ? ResizeImage.resizeIfNeeded(
                placeholderCacheWidth,
                placeholderCacheHeight,
                ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale),
+               useLogicalPixels: useLogicalCacheSize,
              )
            : ResizeImage.resizeIfNeeded(
                placeholderCacheWidth,
                placeholderCacheHeight,
                AssetImage(placeholder, bundle: bundle),
+               useLogicalPixels: useLogicalCacheSize,
              ),
        image = ResizeImage.resizeIfNeeded(
          imageCacheWidth,
          imageCacheHeight,
          NetworkImage(image, scale: imageScale),
+         useLogicalPixels: useLogicalCacheSize,
        );
 
   /// Image displayed while the target [image] is loading.
