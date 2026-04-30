@@ -816,6 +816,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
     _animation?.removeListener(_handleInertiaAnimation);
     _scaleAnimation?.removeListener(_handleScaleAnimation);
+    _animation = null;
+    _scaleAnimation = null;
     _controller.reset();
     _scaleController.reset();
 
