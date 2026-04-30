@@ -30,6 +30,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient+FML.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
@@ -118,13 +120,13 @@ typedef struct MouseState {
 /// cancellation.
 @property(nonatomic, assign) NSTimeInterval scrollInertiaEventAppKitDeadline;
 
-/// VSyncClient for touch events delivery frame rate correction.
+/// FlutterVSyncClient for touch events delivery frame rate correction.
 ///
 /// On promotion devices(eg: iPhone13 Pro), the delivery frame rate of touch events is 60HZ
 /// but the frame rate of rendering is 120HZ, which is different and will leads jitter and laggy.
-/// With this VSyncClient, it can correct the delivery frame rate of touch events to let it keep
-/// the same with frame rate of rendering.
-@property(nonatomic, strong) VSyncClient* touchRateCorrectionVSyncClient;
+/// With this FlutterVSyncClient, it can correct the delivery frame rate of touch events to let it
+/// keep the same with frame rate of rendering.
+@property(nonatomic, strong) FlutterVSyncClient* touchRateCorrectionVSyncClient;
 
 /// The size of the FlutterView's frame, as determined by auto-layout,
 /// before Flutter's custom auto-resizing constraints are applied.
@@ -1285,7 +1287,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
 
-  double displayRefreshRate = DisplayLinkManager.displayRefreshRate;
+  double displayRefreshRate = FlutterDisplayLinkManager.displayRefreshRate;
   const double epsilon = 0.1;
   if (displayRefreshRate < 60.0 + epsilon) {  // displayRefreshRate <= 60.0
 
@@ -1299,7 +1301,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     // Do nothing in this block. Just trigger system to callback touch events with correct rate.
   };
   _touchRateCorrectionVSyncClient =
-      [[VSyncClient alloc] initWithTaskRunner:self.engine.platformTaskRunner callback:callback];
+      [[FlutterVSyncClient alloc] initWithTaskRunner:self.engine.platformTaskRunner
+                                            callback:callback];
   _touchRateCorrectionVSyncClient.allowPauseAfterVsync = NO;
 }
 
