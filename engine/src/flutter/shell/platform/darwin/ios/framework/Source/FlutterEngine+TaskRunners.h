@@ -11,8 +11,19 @@
 
 @interface FlutterEngine (TaskRunners)
 
+/**
+ * The task runner for the platform thread (iOS main thread).
+ */
 - (nullable FlutterFMLTaskRunner*)platformTaskRunner;
+
+/**
+ * The task runner for the UI thread, where framework code runs.
+ */
 - (nullable FlutterFMLTaskRunner*)uiTaskRunner;
+
+/**
+ * The task runner for the raster thread, where GPU rasterisation commands are issued.
+ */
 - (nullable FlutterFMLTaskRunner*)rasterTaskRunner;
 
 @end

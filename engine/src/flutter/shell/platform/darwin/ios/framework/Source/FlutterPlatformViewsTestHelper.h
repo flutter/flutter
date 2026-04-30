@@ -12,9 +12,22 @@
 
 namespace flutter {
 namespace testing {
+
+/**
+ * Returns a task runner mapped to the current message loop on this thread.
+ */
 FlutterFMLTaskRunner* GetDefaultTaskRunner();
+
+/**
+ * Returns a task runners wrapper where all task runners map to the default test thread runner.
+ */
 FlutterFMLTaskRunners* CreateTestTaskRunners(NSString* label);
+
+/**
+ * Returns a FlutterPlatformViewsController pre-configured for testing with the default task runner.
+ */
 FlutterPlatformViewsController* CreateTestPlatformViewsController(NSString* label);
+
 }  // namespace testing
 }  // namespace flutter
 
