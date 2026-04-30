@@ -1776,12 +1776,16 @@ class SelectableRegionState extends State<SelectableRegion>
 
   /// The line height at the start of the current selection.
   double get startGlyphHeight {
-    return _selectionDelegate.value.startSelectionPoint!.lineHeight;
+    return _selectionDelegate.value.startSelectionPoint?.lineHeight ??
+        _selectionDelegate.value.endSelectionPoint?.lineHeight ??
+        0.0;
   }
 
   /// The line height at the end of the current selection.
   double get endGlyphHeight {
-    return _selectionDelegate.value.endSelectionPoint!.lineHeight;
+    return _selectionDelegate.value.endSelectionPoint?.lineHeight ??
+        _selectionDelegate.value.startSelectionPoint?.lineHeight ??
+        0.0;
   }
 
   /// Returns the local coordinates of the endpoints of the current selection.
@@ -1789,8 +1793,8 @@ class SelectableRegionState extends State<SelectableRegion>
     final SelectionPoint? start = _selectionDelegate.value.startSelectionPoint;
     final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
     late List<TextSelectionPoint> points;
-    final Offset startLocalPosition = start?.localPosition ?? end!.localPosition;
-    final Offset endLocalPosition = end?.localPosition ?? start!.localPosition;
+    final Offset startLocalPosition = start?.localPosition ?? end?.localPosition ?? Offset.zero;
+    final Offset endLocalPosition = end?.localPosition ?? start?.localPosition ?? Offset.zero;
     if (startLocalPosition.dy > endLocalPosition.dy) {
       points = <TextSelectionPoint>[
         TextSelectionPoint(endLocalPosition, TextDirection.ltr),
@@ -2179,30 +2183,34 @@ class StaticSelectionContainerDelegate extends MultiSelectableSelectionContainer
     if (currentSelectionStartIndex != -1 &&
         selectables[currentSelectionStartIndex].value.hasSelection) {
       final Selectable start = selectables[currentSelectionStartIndex];
-      final Offset localStartEdge =
-          start.value.startSelectionPoint!.localPosition +
-          Offset(0, -start.value.startSelectionPoint!.lineHeight / 2);
-      updateLastSelectionEdgeLocation(
-        globalSelectionEdgeLocation: MatrixUtils.transformPoint(
-          start.getTransformTo(null),
-          localStartEdge,
-        ),
-        forEnd: false,
-      );
+      final SelectionPoint? startSelectionPoint = start.value.startSelectionPoint;
+      if (startSelectionPoint != null) {
+        final Offset localStartEdge =
+            startSelectionPoint.localPosition + Offset(0, -startSelectionPoint.lineHeight / 2);
+        updateLastSelectionEdgeLocation(
+          globalSelectionEdgeLocation: MatrixUtils.transformPoint(
+            start.getTransformTo(null),
+            localStartEdge,
+          ),
+          forEnd: false,
+        );
+      }
     }
     if (currentSelectionEndIndex != -1 &&
         selectables[currentSelectionEndIndex].value.hasSelection) {
       final Selectable end = selectables[currentSelectionEndIndex];
-      final Offset localEndEdge =
-          end.value.endSelectionPoint!.localPosition +
-          Offset(0, -end.value.endSelectionPoint!.lineHeight / 2);
-      updateLastSelectionEdgeLocation(
-        globalSelectionEdgeLocation: MatrixUtils.transformPoint(
-          end.getTransformTo(null),
-          localEndEdge,
-        ),
-        forEnd: true,
-      );
+      final SelectionPoint? endSelectionPoint = end.value.endSelectionPoint;
+      if (endSelectionPoint != null) {
+        final Offset localEndEdge =
+            endSelectionPoint.localPosition + Offset(0, -endSelectionPoint.lineHeight / 2);
+        updateLastSelectionEdgeLocation(
+          globalSelectionEdgeLocation: MatrixUtils.transformPoint(
+            end.getTransformTo(null),
+            localEndEdge,
+          ),
+          forEnd: true,
+        );
+      }
     }
   }
 
