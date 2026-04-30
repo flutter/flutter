@@ -26,7 +26,13 @@ export const loadCanvasKit = (deps, config, browserEnvironment, canvasKitBaseUrl
     if (deps.flutterTT.policy) {
       canvasKitUrl = deps.flutterTT.policy.createScriptURL(canvasKitUrl);
     }
-    const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, "canvaskit.wasm"));
+    let filename = "canvaskit.wasm";
+    if (config.canvasKitVariant == "experimentalWebParagraph") {
+      filename = "experimental_webparagraph/canvaskit.wasm";
+    } else if (useChromiumCanvasKit) {
+      filename = "chromium/canvaskit.wasm";
+    }
+    const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, "canvaskit.wasm"), filename);
     const canvasKitModule = await import(canvasKitUrl);
     window.flutterCanvasKit = await canvasKitModule.default({
       instantiateWasm: wasmInstantiator,

@@ -1086,6 +1086,7 @@ void fl_engine_send_platform_message(FlEngine* self,
     if (self->engine == nullptr) {
       g_task_return_new_error(task, fl_engine_error_quark(),
                               FL_ENGINE_ERROR_FAILED, "No engine to send to");
+      g_object_unref(task);
       return;
     }
 

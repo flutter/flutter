@@ -32,6 +32,7 @@ export interface BuildConfig {
   engineRevision: string;
   useLocalCanvasKit?: boolean;
   builds: ApplicationBuild[];
+  wasmHashes?: { [key: string]: string };
 }
 
 export interface BrowserEnvironment {
