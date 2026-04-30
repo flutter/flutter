@@ -39,11 +39,7 @@ TEST(UberSDFContentsTest, AsBackgroundColor) {
   Entity entity;
   entity.SetTransform(Matrix());
 
-  auto bg_color = contents->AsBackgroundColor(entity, ISize(500, 500));
-  EXPECT_TRUE(bg_color.has_value());
-  if (bg_color.has_value()) {
-    EXPECT_EQ(bg_color.value(), Color::Red());
-  }
+  EXPECT_EQ(contents->AsBackgroundColor(entity, ISize(500, 500)), Color::Red());
 
   auto small_bg_color = contents->AsBackgroundColor(entity, ISize(400, 400));
   EXPECT_TRUE(small_bg_color.has_value());
