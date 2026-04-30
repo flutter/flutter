@@ -248,7 +248,7 @@ std::optional<Snapshot> TiledTextureContents::RenderToSnapshot(
 
   return Contents::RenderToSnapshot(
       renderer, entity,
-      {.coverage_limit = options.coverage_limit,
+      {.coverage_limit = std::nullopt,
        .sampler_descriptor =
            options.sampler_descriptor.value_or(sampler_descriptor_),
        .msaa_enabled = true,
