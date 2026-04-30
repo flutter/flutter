@@ -12,6 +12,7 @@ import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../macos/xcode.dart';
+import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
@@ -122,7 +123,23 @@ class CleanCommand extends FlutterCommand {
           buildDirectory: globals.fs.directory(xcodeProject.darwinPlatform.buildDirectory()),
         );
       } else {
+        final plugins = <Plugin>[];
+        try {
+          plugins.addAll(await xcodeProject.getPlugins());
+        } on Object catch (error) {
+          globals.printTrace('Failed to get plugins during xcode clean: $error');
+        }
+
+        final ignoredSchemes = <String>{
+          'FlutterGeneratedPluginSwiftPackage',
+          'FlutterFramework',
+          for (final plugin in plugins) ...<String>[plugin.name, plugin.name.replaceAll('_', '-')],
+        };
+
         for (final String scheme in projectInfo.schemes) {
+          if (ignoredSchemes.contains(scheme)) {
+            continue;
+          }
           await xcodeProjectInterpreter.cleanWorkspace(
             xcodeWorkspace.path,
             scheme,

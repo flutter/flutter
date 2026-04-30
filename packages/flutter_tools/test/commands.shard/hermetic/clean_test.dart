@@ -441,6 +441,8 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
     return XcodeProjectInfo(const <String>[], const <String>[], <String>[
       'Runner',
       'custom-scheme',
+      'FlutterGeneratedPluginSwiftPackage',
+      'FlutterFramework',
     ], BufferLogger.test());
   }
 
