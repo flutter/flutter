@@ -139,12 +139,16 @@ using namespace flutter::testing;
   _didCallNotifyLowMemory = YES;
 }
 
-- (nullable FlutterFMLTaskRunner*)uiTaskRunner {
-  if (_uiTaskRunner == nil) {
+- (instancetype)init {
+  if (self = [super init]) {
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     _uiTaskRunner = [[FlutterFMLTaskRunner alloc]
         initWithTaskRunner:fml::MessageLoop::GetCurrent().GetTaskRunner()];
   }
+  return self;
+}
+
+- (nullable FlutterFMLTaskRunner*)uiTaskRunner {
   return _uiTaskRunner;
 }
 

@@ -452,35 +452,14 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 }
 
 - (FlutterFMLTaskRunner*)platformTaskRunner {
-  if (!_shell) {
-    return nil;
-  }
-  if (!_platformTaskRunnerWrapper) {
-    _platformTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
-        initWithTaskRunner:_shell->GetTaskRunners().GetPlatformTaskRunner()];
-  }
   return _platformTaskRunnerWrapper;
 }
 
 - (FlutterFMLTaskRunner*)uiTaskRunner {
-  if (!_shell) {
-    return nil;
-  }
-  if (!_uiTaskRunnerWrapper) {
-    _uiTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
-        initWithTaskRunner:_shell->GetTaskRunners().GetUITaskRunner()];
-  }
   return _uiTaskRunnerWrapper;
 }
 
 - (FlutterFMLTaskRunner*)rasterTaskRunner {
-  if (!_shell) {
-    return nil;
-  }
-  if (!_rasterTaskRunnerWrapper) {
-    _rasterTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
-        initWithTaskRunner:_shell->GetTaskRunners().GetRasterTaskRunner()];
-  }
   return _rasterTaskRunnerWrapper;
 }
 
@@ -818,6 +797,13 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 - (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
     withVMServicePublication:(BOOL)doesVMServicePublication {
   _shell = std::move(shell);
+  _platformTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
+      initWithTaskRunner:_shell->GetTaskRunners().GetPlatformTaskRunner()];
+  _uiTaskRunnerWrapper =
+      [[FlutterFMLTaskRunner alloc] initWithTaskRunner:_shell->GetTaskRunners().GetUITaskRunner()];
+  _rasterTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
+      initWithTaskRunner:_shell->GetTaskRunners().GetRasterTaskRunner()];
+
   [self setUpChannels];
   [self onLocaleUpdated:nil];
   [self updateDisplays];

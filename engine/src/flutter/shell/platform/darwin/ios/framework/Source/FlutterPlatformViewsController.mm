@@ -728,8 +728,9 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   // Reset will only be called from the raster thread or a merged raster/platform thread.
   // _platformViews must only be modified on the platform thread, and any operations that
   // read or modify platform views should occur there.
+  std::vector<int64_t> compositionOrder = self.compositionOrder;
   [self.taskRunner runNowOrPostTask:^{
-    for (int64_t viewId : self.compositionOrder) {
+    for (int64_t viewId : compositionOrder) {
       [self.platformViews[viewId].root_view removeFromSuperview];
     }
     self.platformViews.clear();
@@ -753,12 +754,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     // No platform views to render but the FlutterView may need to be resized.
     __weak FlutterPlatformViewsController* weakSelf = self;
     if (self.flutterView != nil) {
+      const flutter::DlISize frameSize = self.frameSize;
       [self.taskRunner runNowOrPostTask:^{
         FlutterPlatformViewsController* strongSelf = weakSelf;
         if (!strongSelf) {
           return;
         }
-        [strongSelf performResize:strongSelf.frameSize];
+        [strongSelf performResize:frameSize];
       }];
     }
 
@@ -847,20 +849,20 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::vector<std::shared_ptr<flutter::OverlayLayer>> unusedLayers =
       self.layerPool->RemoveUnusedLayers();
   self.layerPool->RecycleLayers();
-  __block auto task = [self,                                                      //
-                       platformViewLayers = std::move(platformViewLayers),        //
-                       currentCompositionParams = self.currentCompositionParams,  //
-                       viewsToRecomposite = self.viewsToRecomposite,              //
-                       compositionOrder = self.compositionOrder,                  //
-                       unusedLayers = std::move(unusedLayers),                    //
-                       surfaceFrames = std::move(surfaceFrames)]() mutable {
+  auto task = fml::MakeCopyable([self,                                                      //
+                                 platformViewLayers = std::move(platformViewLayers),        //
+                                 currentCompositionParams = self.currentCompositionParams,  //
+                                 viewsToRecomposite = self.viewsToRecomposite,              //
+                                 compositionOrder = self.compositionOrder,                  //
+                                 unusedLayers = std::move(unusedLayers),                    //
+                                 surfaceFrames = std::move(surfaceFrames)]() mutable {
     [self performSubmit:platformViewLayers
         currentCompositionParams:currentCompositionParams
               viewsToRecomposite:viewsToRecomposite
                 compositionOrder:compositionOrder
                     unusedLayers:unusedLayers
                    surfaceFrames:surfaceFrames];
-  };
+  });
 
   [self.taskRunner runNowOrPostTask:^{
     task();
