@@ -42,20 +42,26 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  test('build succeeds targeting string compileSdkVersion', () async {
+  test('build succeeds targeting string compileSdk', () async {
     final File buildGradleFile = exampleAppDir
         .childDirectory('android')
         .childDirectory('app')
         .childFile('build.gradle.kts');
-    // write a build.gradle.kts with compileSdkVersion as `android-<api-version>` which is a string preview version
+    // write a build.gradle.kts with compileSdk as preview("Baklava") which computes the preview compile sdk version
     buildGradleFile.writeAsStringSync(
-      buildGradleFile.readAsStringSync().replaceFirst(
-        compileSdkVersionMatch,
-        'compileSdkVersion = "android-36"',
-      ),
+      buildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, '''
+compileSdk { 
+  version = preview("Baklava") 
+}'''),
       flush: true,
     );
-    expect(buildGradleFile.readAsStringSync(), contains('compileSdkVersion = "android-36"'));
+    expect(
+      buildGradleFile.readAsStringSync(),
+      contains('''
+compileSdk { 
+  version = preview("Baklava") 
+}'''),
+    );
 
     final ProcessResult result = await processManager.run(<String>[
       flutterBin,
