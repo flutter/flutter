@@ -1022,4 +1022,299 @@ void main() {
     expect(tappedInside, isEmpty);
   });
 
+  // Helper for the navigation regression tests below: tap on a known
+  // outside-of-region location.
+  Future<void> _tapOutside(WidgetTester tester) async {
+    // The tests below place each route's TapRegion at the center of an
+    // 800x600 test surface. (200, 200) is reliably outside any 100x100
+    // region centered in that surface.
+    await tester.tapAt(const Offset(200, 200));
+    await tester.pump();
+  }
+
+  // Helper that builds a Navigator-based widget tree using only widgets
+  // (no Material). Equivalent to wrapping the home/page widgets in
+  // MaterialApp + Scaffold but with no Material dependency.
+  Widget _navigatorAppWith({
+    required Widget home,
+    GlobalKey<NavigatorState>? navigatorKey,
+  }) {
+    return WidgetsApp(
+      navigatorKey: navigatorKey,
+      color: const Color(0xFFFFFFFF),
+      onGenerateRoute: (RouteSettings settings) {
+        return PageRouteBuilder<void>(
+          settings: settings,
+          pageBuilder:
+              (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) {
+                return home;
+              },
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        );
+      },
+    );
+  }
+
+  // Regression test for https://github.com/flutter/flutter/issues/153093.
+  testWidgets('TapRegion onTapOutside should only trigger on the current route during navigation', (
+    WidgetTester tester,
+  ) async {
+    const tapRegion1Key = ValueKey<String>('TapRegion');
+    const tapRegion2Key = ValueKey<String>('TapRegion2');
+    const triggerKey = ValueKey<String>('navigate-trigger');
+
+    var count1 = 0;
+    var count2 = 0;
+
+    final tapRegion1 = TapRegion(
+      key: tapRegion1Key,
+      onTapOutside: (PointerEvent event) {
+        count1 += 1;
+      },
+      behavior: HitTestBehavior.opaque,
+      child: const SizedBox.square(dimension: 100),
+    );
+
+    final tapRegion2 = TapRegion(
+      key: tapRegion2Key,
+      onTapOutside: (PointerEvent event) {
+        count2 += 1;
+      },
+      behavior: HitTestBehavior.opaque,
+      child: const SizedBox.square(dimension: 100),
+    );
+
+    final navigatorKey = GlobalKey<NavigatorState>();
+
+    await tester.pumpWidget(
+      _navigatorAppWith(
+        navigatorKey: navigatorKey,
+        home: Stack(
+          children: <Widget>[
+            Center(child: tapRegion1),
+            Positioned(
+              right: 16,
+              bottom: 16,
+              child: GestureDetector(
+                key: triggerKey,
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  navigatorKey.currentState!.push(
+                    PageRouteBuilder<void>(
+                      pageBuilder:
+                          (
+                            BuildContext context,
+                            Animation<double> animation,
+                            Animation<double> secondaryAnimation,
+                          ) {
+                            return Center(child: tapRegion2);
+                          },
+                      transitionDuration: Duration.zero,
+                      reverseTransitionDuration: Duration.zero,
+                    ),
+                  );
+                },
+                child: const SizedBox.square(dimension: 56),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Tap outside the first TapRegion to trigger onTapOutside.
+    await _tapOutside(tester);
+    expect(count1, 1);
+    expect(count2, 0);
+
+    await tester.tap(find.byKey(triggerKey));
+    await tester.pumpAndSettle();
+
+    // Tap outside the second TapRegion to trigger onTapOutside
+    await _tapOutside(tester);
+    expect(count1, 2); // When the trigger is pressed, the first TapRegion is still active.
+    expect(count2, 1);
+
+    // Back to the first page.
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+
+    // Tap outside the first TapRegion to trigger onTapOutside
+    await _tapOutside(tester);
+    expect(count1, 3);
+    expect(count2, 1);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/153093.
+  testWidgets('TapRegion on non-current routes should not respond to onTapOutside events', (
+    WidgetTester tester,
+  ) async {
+    const tapRegion1Key = ValueKey<String>('TapRegion1');
+    const tapRegion2Key = ValueKey<String>('TapRegion2');
+
+    var count1 = 0;
+    var count2 = 0;
+
+    final tapRegion1 = TapRegion(
+      key: tapRegion1Key,
+      onTapOutside: (PointerEvent event) {
+        count1 += 1;
+      },
+      behavior: HitTestBehavior.opaque,
+      child: const SizedBox.square(dimension: 100),
+    );
+
+    final tapRegion2 = TapRegion(
+      key: tapRegion2Key,
+      onTapOutside: (PointerEvent event) {
+        count2 += 1;
+      },
+      behavior: HitTestBehavior.opaque,
+      child: const SizedBox.square(dimension: 100),
+    );
+
+    final navigatorKey = GlobalKey<NavigatorState>();
+
+    await tester.pumpWidget(
+      WidgetsApp(
+        navigatorKey: navigatorKey,
+        color: const Color(0xFFFFFFFF),
+        initialRoute: '/',
+        onGenerateInitialRoutes: (String initialRouteName) {
+          return <Route<void>>[
+            PageRouteBuilder<void>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return Center(child: tapRegion1);
+                  },
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+            ),
+            PageRouteBuilder<void>(
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return Center(child: tapRegion2);
+                  },
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+            ),
+          ];
+        },
+        onGenerateRoute: (RouteSettings settings) => PageRouteBuilder<void>(
+          settings: settings,
+          pageBuilder:
+              (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) =>
+              const SizedBox.shrink(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // At this point, tapRegion2 is on top of tapRegion1.
+    // Tap outside tapRegion2.
+    await _tapOutside(tester);
+    expect(count1, 0); // tapRegion1 should not respond.
+    expect(count2, 1); // tapRegion2 should respond.
+
+    // Now pop the top route to reveal tapRegion1.
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+
+    // Tap outside tapRegion1.
+    await _tapOutside(tester);
+    expect(count1, 1); // tapRegion1 should respond.
+    expect(count2, 1); // tapRegion2 should not respond anymore.
+  });
+
+  // Regression test for the consumeOutsideTaps issue when navigating between pages.
+  testWidgets('TapRegion with consumeOutsideTaps should not consume taps after navigation', (
+    WidgetTester tester,
+  ) async {
+    const tapRegionKey = ValueKey<String>('TapRegion');
+    const buttonKey = ValueKey<String>('Button');
+
+    var buttonTapped = false;
+    final navigatorKey = GlobalKey<NavigatorState>();
+
+    await tester.pumpWidget(
+      _navigatorAppWith(
+        navigatorKey: navigatorKey,
+        home: Center(
+          child: TapRegion(
+            key: tapRegionKey,
+            consumeOutsideTaps: true,
+            onTapOutside: (PointerEvent event) {},
+            behavior: HitTestBehavior.opaque,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                navigatorKey.currentState!.push(
+                  PageRouteBuilder<void>(
+                    pageBuilder:
+                        (
+                          BuildContext context,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation,
+                        ) {
+                          return Center(
+                            child: GestureDetector(
+                              key: buttonKey,
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {
+                                buttonTapped = true;
+                              },
+                              child: const SizedBox.square(dimension: 200),
+                            ),
+                          );
+                        },
+                    transitionDuration: Duration.zero,
+                    reverseTransitionDuration: Duration.zero,
+                  ),
+                );
+              },
+              child: const SizedBox.square(dimension: 250),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Navigate to the second page
+    await tester.tap(find.byKey(tapRegionKey));
+    await tester.pumpAndSettle();
+
+    // Verify that the button on the second page can be tapped.
+    // If consumeOutsideTaps is still active from the first page's TapRegion,
+    // this tap would be consumed and buttonTapped would remain false.
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+
+    expect(
+      buttonTapped,
+      true,
+      reason: 'Button tap was not consumed by a TapRegion on a non-current route',
+    );
+  });
 }
