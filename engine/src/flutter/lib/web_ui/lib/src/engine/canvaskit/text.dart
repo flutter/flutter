@@ -807,6 +807,8 @@ class CkParagraph implements ui.Paragraph {
   /// is deleted.
   double _lastLayoutConstraints = double.negativeInfinity;
 
+  bool _hasCheckedForMissingCodePoints = false;
+
   /// The paragraph style used to build this paragraph.
   ///
   /// This is used to resurrect the paragraph if the initial paragraph
@@ -949,6 +951,15 @@ class CkParagraph implements ui.Paragraph {
       _minIntrinsicWidth = paragraph.getMinIntrinsicWidth();
       _width = paragraph.getMaxWidth();
       _boxesForPlaceholders = skRectsToTextBoxes(paragraph.getRectsForPlaceholders());
+
+      if (!ui_web.TestEnvironment.instance.disableFontFallbacks &&
+          !_hasCheckedForMissingCodePoints) {
+        _hasCheckedForMissingCodePoints = true;
+        final List<int> unresolvedCodePoints = paragraph.getUnresolvedCodePoints();
+        if (unresolvedCodePoints.isNotEmpty) {
+          FallbackFontService.instance.addMissingCodePoints(unresolvedCodePoints);
+        }
+      }
     } catch (e) {
       printWarning(
         'CanvasKit threw an exception while laying '
@@ -1139,15 +1150,6 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void addText(String text) {
-    final fontFamilies = <String>[];
-    final CkTextStyle style = _peekStyle();
-    if (style.effectiveFontFamily != null) {
-      fontFamilies.add(style.effectiveFontFamily!);
-    }
-    if (style.effectiveFontFamilyFallback != null) {
-      fontFamilies.addAll(style.effectiveFontFamilyFallback!);
-    }
-    renderer.fontCollection.fontFallbackManager!.ensureFontsSupportText(text, fontFamilies);
     _paragraphBuilder.addText(text);
   }
 

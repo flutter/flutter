@@ -166,11 +166,11 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5|Mac-15.7
+      os: Mac-15.7
       device_type: none
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_arm64:
@@ -183,12 +183,12 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5|Mac-15.7
+      os: Mac-15.7
       device_type: none
       cpu: arm64
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_benchmark:
@@ -203,12 +203,12 @@ platform_properties:
         ]
       device_type: none
       mac_model: "Macmini8,1"
-      os: Mac-15.5|Mac-15.7
+      os: Mac-15.7
       tags: >
         ["devicelab", "hostonly", "mac"]
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_x64:
@@ -221,12 +221,12 @@ platform_properties:
         [
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5|Mac-15.7
+      os: Mac-15.7
       device_type: none
       cpu: x86
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_build_test:
@@ -240,12 +240,12 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.5|Mac-15.7
+      os: Mac-15.7
       device_type: none
       cpu: x86
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_mokey:
@@ -256,7 +256,7 @@ platform_properties:
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
+      os: Mac-15.7
       cpu: x86
       device_type: "mokey"
 
@@ -267,7 +267,7 @@ platform_properties:
           {"dependency": "android_sdk", "version": "version:36v8unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
+      os: Mac-15.7
       cpu: arm64
       device_type: "mokey"
 
@@ -282,11 +282,11 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
+      os: Mac-15.7
       device_os: iOS-18
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_x64_ios:
@@ -300,12 +300,12 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "version:to_2026"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
+      os: Mac-15.7
       cpu: x86
       device_os: iOS-18
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   mac_arm64_ios:
@@ -319,12 +319,12 @@ platform_properties:
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "apple_signing", "version": "none"}
         ]
-      os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
+      os: Mac-15.7
       cpu: arm64
       device_os: iOS-18
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "16c5032a"
+          "sdk_version": "17c52"
         }
 
   windows:
@@ -2968,7 +2968,6 @@ targets:
       task_name: native_assets_android
 
   - name: Linux_android_emu android_engine_flags_debug_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -2977,7 +2976,6 @@ targets:
       task_name: android_engine_flags_debug_test
 
   - name: Linux_android_emu android_engine_flags_release_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -3856,7 +3854,6 @@ targets:
   - name: Mac_benchmark complex_layout_macos_impeller__start_up
     presubmit: false
     recipe: devicelab/devicelab_drone
-    bringup: true
     timeout: 60
     properties:
       dependencies: >-
@@ -4161,6 +4158,16 @@ targets:
     timeout: 60
     properties:
       task_name: hello_world_macos__compile
+
+  - name: Mac hello_world_impeller_macos_sdfs
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "mac"]
+      task_name: hello_world_impeller_macos_sdfs
 
   - name: Mac integration_ui_test_test_macos
     recipe: devicelab/devicelab_drone
@@ -5209,6 +5216,16 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: ios_defines_test
 
+  - name: Mac_ios hello_world_impeller_ios_sdfs
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    bringup: true
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: hello_world_impeller_ios_sdfs
+
   - name: Mac_ios ios_platform_view_tests
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -5477,10 +5494,10 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: ios_debug_workflow
-      os: Mac-15.5|Mac-15.7
+      os: Mac-15.7
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "17a5295f"
+          "sdk_version": "17c52"
         }
 
   - name: Mac_ios fullscreen_textfield_perf_ios__e2e_summary
@@ -5519,7 +5536,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-18","os=Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7", "cpu=x86"]
+        ["device_os=iOS-18","os=Mac-15.7", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone

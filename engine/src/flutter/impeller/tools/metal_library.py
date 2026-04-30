@@ -42,6 +42,7 @@ def main():
   parser.add_argument(
       '--metal-version', required=True, help='The language standard version to compile for.'
   )
+  parser.add_argument('--debug', action='store_true', help='Generate debugging information.')
 
   args = parser.parse_args()
 
@@ -86,6 +87,12 @@ def main():
       '-o',
       args.output,
   ]
+
+  if args.debug:
+    command += [
+        '-g',
+        '-frecord-sources',
+    ]
 
   # Select the Metal standard and the minimum supported OS versions.
   # The Metal standard must match the specification in impellerc.
