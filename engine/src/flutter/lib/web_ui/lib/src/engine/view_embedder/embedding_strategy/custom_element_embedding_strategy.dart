@@ -50,4 +50,16 @@ class CustomElementEmbeddingStrategy implements EmbeddingStrategy {
     registerElementForCleanup(rootElement);
     _rootElement = rootElement;
   }
+
+  @override
+  bool get supportsBrowserScrolling => false;
+
+  @override
+  void enableBrowserScrolling(DomElement rootElement) {}
+
+  @override
+  void disableBrowserScrolling(DomElement rootElement) {}
+
+  @override
+  void updateScrollContentHeight(double height) {}
 }

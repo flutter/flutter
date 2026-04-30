@@ -55,6 +55,7 @@ class WebTestsSuite {
       // VM-specific functionality.
       'test/services/message_codecs_vm_test.dart',
       'test/examples/sector_layout_test.dart',
+      'test/widgets/browser_scroll_test.dart',
 
       // These tests are broken and need to be fixed.
       // TODO(yjbanov): https://github.com/flutter/flutter/issues/71604
@@ -70,6 +71,7 @@ class WebTestsSuite {
       // VM-specific functionality.
       'test/services/message_codecs_vm_test.dart',
       'test/examples/sector_layout_test.dart',
+      'test/widgets/browser_scroll_test.dart',
 
       // These tests are broken and need to be fixed.
       // TODO(jacksongardner): https://github.com/flutter/flutter/issues/71604

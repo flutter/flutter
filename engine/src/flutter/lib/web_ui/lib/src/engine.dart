@@ -19,6 +19,7 @@ export 'engine/alarm_clock.dart';
 export 'engine/app_bootstrap.dart';
 export 'engine/arena.dart';
 export 'engine/browser_detection.dart';
+export 'engine/browser_scroll_controller.dart';
 export 'engine/canvaskit/canvas.dart';
 export 'engine/canvaskit/canvaskit_api.dart';
 export 'engine/canvaskit/color_filter.dart';

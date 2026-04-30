@@ -9,6 +9,7 @@
 /// @docImport 'viewport.dart';
 library;
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -16,12 +17,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 
+import '_browser_scroll_view_io.dart' if (dart.library.js_interop) '_browser_scroll_view_web.dart';
 import 'basic.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
+import 'scrollable.dart';
 
 /// A scroll position that manages scroll activities for a single
 /// [ScrollContext].
@@ -78,6 +81,32 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// transfer to a next activity.
   double _heldPreviousVelocity = 0.0;
 
+  // Tracks the in-flight browser smooth scroll started by [animateTo]. The
+  // completer resolves when the browser reports (via forcePixels) that the
+  // scroll position has reached the requested target, or when superseded by
+  // a later [animateTo]/[jumpTo], or when the safety timeout fires.
+  Completer<void>? _pendingBrowserSmoothScrollCompleter;
+  double? _pendingBrowserSmoothScrollTarget;
+  // Absolute safety ceiling for the Future. Runs from animateTo start.
+  Timer? _pendingBrowserSmoothScrollTimer;
+  // Resets on every forcePixels tick; fires when the browser stops reporting
+  // updates, meaning the scroll has settled at a clamped or interrupted
+  // position without reaching the requested target.
+  Timer? _pendingBrowserSmoothScrollIdleTimer;
+
+  void _completePendingBrowserSmoothScroll() {
+    _pendingBrowserSmoothScrollTimer?.cancel();
+    _pendingBrowserSmoothScrollTimer = null;
+    _pendingBrowserSmoothScrollIdleTimer?.cancel();
+    _pendingBrowserSmoothScrollIdleTimer = null;
+    final Completer<void>? completer = _pendingBrowserSmoothScrollCompleter;
+    _pendingBrowserSmoothScrollCompleter = null;
+    _pendingBrowserSmoothScrollTarget = null;
+    if (completer != null && !completer.isCompleted) {
+      completer.complete();
+    }
+  }
+
   @override
   AxisDirection get axisDirection => context.axisDirection;
 
@@ -85,6 +114,27 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   double setPixels(double newPixels) {
     assert(activity!.isScrolling);
     return super.setPixels(newPixels);
+  }
+
+  @override
+  void forcePixels(double value) {
+    super.forcePixels(value);
+    final double? target = _pendingBrowserSmoothScrollTarget;
+    if (target == null) {
+      return;
+    }
+    // Exact-hit: browser's smooth scroll reached the requested target.
+    if ((value - target).abs() < 1.0) {
+      _completePendingBrowserSmoothScroll();
+      return;
+    }
+    // Scroll is progressing but hasn't hit the target. Reset an idle timer
+    // that fires once the browser stops reporting new positions, meaning it
+    // settled at a clamped or interrupted offset.
+    _pendingBrowserSmoothScrollIdleTimer?.cancel();
+    _pendingBrowserSmoothScrollIdleTimer = Timer(const Duration(milliseconds: 100), () {
+      _completePendingBrowserSmoothScroll();
+    });
   }
 
   @override
@@ -128,7 +178,44 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   @override
   void applyUserOffset(double delta) {
     updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
-    setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta));
+
+    final BrowserScrollViewBinding? binding = ScrollableState.browserScrollViewBinding;
+    final double proposed = pixels - physics.applyPhysicsToUserOffset(this, delta);
+
+    // Manual boundary forwarding only applies to inner scrollables with
+    // normal physics. The outer scrollable runs BrowserScrollPhysics, which
+    // returns the entire delta as overscroll. setPixels would emit an
+    // OverscrollNotification that BrowserScrollable forwards to the browser
+    // already; doing it manually here would double-forward at the boundary.
+    if (binding != null && physics is! BrowserScrollPhysics) {
+      // When browser scrolling is active for an inner scrollable, clamp
+      // pixels at each boundary and forward the excess to the browser so
+      // the outer page scrolls.
+      //
+      // At maxScrollExtent (bottom): clamping prevents the inner list from
+      // rubber-band bouncing while the parent simultaneously scrolls.
+      //
+      // At minScrollExtent (top): clamping keeps pixels at the boundary
+      // while didOverscrollBy dispatches an OverscrollNotification, which
+      // RefreshIndicator needs to reveal itself. This mirrors how
+      // RefreshIndicator works with ClampingScrollPhysics on Android: the
+      // indicator accumulates the overscroll amount from the notification,
+      // not from pixels going negative.
+      if (proposed > maxScrollExtent) {
+        final double excess = proposed - maxScrollExtent;
+        setPixels(maxScrollExtent);
+        binding.browserScrollBy(excess);
+      } else if (proposed < minScrollExtent) {
+        final double excess = proposed - minScrollExtent;
+        setPixels(minScrollExtent);
+        didOverscrollBy(excess);
+        binding.browserScrollBy(excess);
+      } else {
+        setPixels(proposed);
+      }
+    } else {
+      setPixels(proposed);
+    }
   }
 
   @override
@@ -175,6 +262,43 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
   @override
   Future<void> animateTo(double to, {required Duration duration, required Curve curve}) {
+    // When browser scrolling is active on the outermost scrollable, pixels
+    // never moves through normal Dart physics (BrowserScrollPhysics returns
+    // the entire delta as overscroll). Delegate to the browser's smooth scroll
+    // so the developer's controller.animateTo() call works transparently.
+    final BrowserScrollViewBinding? binding = ScrollableState.browserScrollViewBinding;
+    if (binding != null && physics is BrowserScrollPhysics) {
+      // A new animateTo supersedes any still-pending smooth scroll.
+      _completePendingBrowserSmoothScroll();
+
+      if (nearEqual(to, pixels, physics.toleranceFor(this).distance)) {
+        // Already at target; skip the browser animation entirely.
+        return Future<void>.value();
+      }
+
+      final completer = Completer<void>();
+      _pendingBrowserSmoothScrollCompleter = completer;
+      _pendingBrowserSmoothScrollTarget = to;
+
+      // Grow the browser's scroll placeholder if [to] is past the revealed
+      // content. Without this, the browser clamps the smooth scroll at the
+      // current scrollHeight and the animation settles short of the target.
+      ScrollableState.prepareActiveBrowserScrollForTarget(to);
+      binding.browserSmoothScrollTo(to);
+
+      // Absolute safety ceiling. The browser can clamp targets past
+      // scrollHeight or be interrupted by user input. Idle detection in
+      // forcePixels usually resolves first; this is the backstop when
+      // onBrowserScroll never fires at all.
+      _pendingBrowserSmoothScrollTimer = Timer(const Duration(seconds: 1), () {
+        if (_pendingBrowserSmoothScrollCompleter == completer) {
+          _completePendingBrowserSmoothScroll();
+        }
+      });
+
+      return completer.future;
+    }
+
     if (nearEqual(to, pixels, physics.toleranceFor(this).distance)) {
       // Skip the animation, go straight to the position as we are already close.
       jumpTo(to);
@@ -195,6 +319,17 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
   @override
   void jumpTo(double value) {
+    // When browser scrolling is active on the outermost scrollable, delegate
+    // to the browser's instant scroll so controller.jumpTo() works transparently.
+    final BrowserScrollViewBinding? binding = ScrollableState.browserScrollViewBinding;
+    if (binding != null && physics is BrowserScrollPhysics) {
+      // jumpTo supersedes any pending animateTo; complete its future.
+      _completePendingBrowserSmoothScroll();
+      ScrollableState.prepareActiveBrowserScrollForTarget(value);
+      binding.browserScrollTo(value);
+      return;
+    }
+
     goIdle();
     if (pixels != value) {
       final double oldPixels = pixels;
@@ -277,6 +412,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
   @override
   void dispose() {
+    _completePendingBrowserSmoothScroll();
     _currentDrag?.dispose();
     _currentDrag = null;
     super.dispose();

@@ -28,9 +28,6 @@ const bool _debugLogPointerEvents = false;
 /// Set this to true to log all the events sent to the Flutter framework.
 const bool _debugLogFlutterEvents = false;
 
-// Note: debugResetIframeDetectionCache() and debugSetIframeEmbeddingForTests()
-// are now in dom.dart as shared utilities.
-
 /// Resets full-page app detection override for tests.
 @visibleForTesting
 void debugResetFullPageAppCache() {
@@ -562,13 +559,11 @@ abstract class _BaseAdapter {
   DomWheelEvent? _lastWheelEvent;
   bool _lastWheelEventWasTrackpad = false;
 
-  /// Two flags to track scroll handling for the two-flag system:
-  /// 1. _lastWheelEventAllowedDefault: true if a scrollable is at boundary
-  /// 2. _lastWheelEventHandledByWidget: true if a scrollable consumed the event
-  ///
-  /// This enables proper handling of nested scrollables:
-  /// - If inner scrollable handles the event, don't scroll parent page
-  /// - If all scrollables are at boundary, scroll parent page
+  // Two flags to disambiguate nested scrollable wheel handling:
+  // _lastWheelEventAllowedDefault: set when a scrollable is at boundary.
+  // _lastWheelEventHandledByWidget: set when a scrollable consumed the event.
+  // If inner scrollable handles the event, don't scroll parent page.
+  // If all scrollables are at boundary, allow parent page to scroll.
   bool _lastWheelEventAllowedDefault = false;
   bool _lastWheelEventHandledByWidget = false;
 
@@ -788,12 +783,9 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
         scrollDeltaX: deltaX,
         scrollDeltaY: deltaY,
         onRespond: ({bool allowPlatformDefault = false}) {
-          // Track both: platform default and widget handling
           if (allowPlatformDefault) {
-            // Widget is at boundary, wants platform to handle
             _lastWheelEventAllowedDefault = true;
           } else {
-            // Widget explicitly handled this event
             _lastWheelEventHandledByWidget = true;
           }
         },
@@ -823,39 +815,40 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
       print(event.type);
     }
 
-    // Reset flags before dispatching to framework
-    _lastWheelEventAllowedDefault = false;
-    _lastWheelEventHandledByWidget = false;
-
     final wheelEvent = event as DomWheelEvent;
 
-    // Dispatch to framework (this triggers onRespond callbacks synchronously)
+    _lastWheelEventAllowedDefault = false;
+    _lastWheelEventHandledByWidget = false;
     _callback(event, _convertWheelEventToPointerData(wheelEvent));
 
-    // Determine if we should prevent default
+    if (_view.browserScrollController.enabled) {
+      // If a nested Flutter scrollable consumed this wheel event, block the
+      // browser from also scrolling <flutter-view>.
+      // Otherwise (outermost BrowserScrollPhysics declined, or no scrollable
+      // at target), skip preventDefault so the browser handles the wheel
+      // natively via overflow: auto on <flutter-view>. This delivers real
+      // browser-native wheel physics and lets the browser chain the scroll
+      // to a parent document when <flutter-view> hits its boundary.
+      if (_lastWheelEventHandledByWidget) {
+        event.preventDefault();
+      }
+      return;
+    }
+
     final bool isInIframe = isEmbeddedInIframe();
 
-    // Special handling only for full-page Flutter apps running inside an iframe.
-    // Custom element apps (Flutter embedded as a component) should let the
-    // browser handle normal scroll flow.
+    // Full-page app in an iframe: skip preventDefault when all scrollables
+    // are at boundary so the browser bubbles scroll to the parent window.
+    // Fixes GitHub issue #156985
     if (isInIframe && _isFullPageApp) {
-      // Full-page app in an iframe: only preventDefault when Flutter handles
-      // the scroll. When scrollables are at boundary, skip preventDefault to
-      // let the browser naturally bubble the scroll to the parent window.
-      //
-      // Fixes GitHub issue #156985
       final bool shouldScrollParent =
           _lastWheelEventAllowedDefault && !_lastWheelEventHandledByWidget;
       if (!shouldScrollParent) {
         event.preventDefault();
       }
     } else {
-      // Original behavior for:
-      // 1. Apps NOT in an iframe (normal page)
-      // 2. Multi-view mode inside an iframe
-      //
-      // Only preventDefault when a scrollable widget handles the event.
-      // This preserves native scroll behavior when Flutter can't scroll.
+      // Non-iframe or custom-element: only preventDefault when a widget
+      // handled the event, preserving native scroll at boundaries.
       if (!_lastWheelEventAllowedDefault) {
         event.preventDefault();
       }

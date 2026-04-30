@@ -12,6 +12,8 @@ library foundation;
 export 'package:meta/meta.dart'
     show
         awaitNotRequired,
+        // ignore: experimental_member_use
+        experimental,
         factory,
         immutable,
         internal,

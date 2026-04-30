@@ -528,6 +528,13 @@ extension type DomElement._(JSObject _) implements DomNode {
   external double scrollLeft;
   external DomTokenList get classList;
 
+  @JS('scrollTo')
+  external void _scrollTo([JSAny? options]);
+
+  void scrollTo({required double top, String behavior = 'auto'}) {
+    _scrollTo(<String, dynamic>{'top': top, 'behavior': behavior}.toJSAnyDeep);
+  }
+
   /// Scrolls the element into the visible area of the browser window.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView

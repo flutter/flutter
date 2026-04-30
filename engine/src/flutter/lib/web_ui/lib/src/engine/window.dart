@@ -11,6 +11,7 @@ import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../engine.dart' show DimensionsProvider, registerHotRestartListener, renderer;
 import 'browser_detection.dart';
+import 'browser_scroll_controller.dart';
 import 'display.dart';
 import 'dom.dart';
 import 'initialization.dart';
@@ -110,6 +111,7 @@ class EngineFlutterView implements ui.FlutterView {
     _resizeSubscription.cancel();
     dimensionsProvider.close();
     pointerBinding.dispose();
+    browserScrollController.dispose();
     dom.rootElement.remove();
     // TODO(harryterkelsen): What should we do about this in multi-view?
     renderer.clearFragmentProgramCache();
@@ -164,6 +166,42 @@ class EngineFlutterView implements ui.FlutterView {
   final JsViewConstraints? _jsViewConstraints;
 
   late final EngineSemanticsOwner semantics = EngineSemanticsOwner(viewId, dom.semanticsHost);
+
+  late final BrowserScrollController browserScrollController = BrowserScrollController(this);
+
+  // Browser-driven scrolling API (dart:ui surface)
+
+  @override
+  bool get supportsBrowserScrolling => embeddingStrategy.supportsBrowserScrolling;
+
+  @override
+  void enableBrowserScrolling() => browserScrollController.enable();
+
+  @override
+  void disableBrowserScrolling() => browserScrollController.disable();
+
+  @override
+  void browserScrollTo(double offset) => browserScrollController.scrollTo(offset);
+
+  @override
+  void browserSmoothScrollTo(double offset) => browserScrollController.smoothScrollTo(offset);
+
+  @override
+  void browserScrollBy(double delta) => browserScrollController.scrollBy(delta);
+
+  @override
+  void updateBrowserScrollContentHeight(double height) =>
+      browserScrollController.updateContentHeight(height);
+
+  ui.BrowserScrollCallback? _onBrowserScroll;
+
+  @override
+  ui.BrowserScrollCallback? get onBrowserScroll => _onBrowserScroll;
+
+  @override
+  set onBrowserScroll(ui.BrowserScrollCallback? callback) {
+    _onBrowserScroll = callback;
+  }
 
   @override
   ui.Size get physicalSize {

@@ -233,6 +233,21 @@ class _TestFlutterView implements FlutterView {
 
   @override
   void updateSemantics(ui.SemanticsUpdate update) {}
+
+  // Browser-driven scrolling APIs. These are declared on FlutterView in the
+  // web dart:ui but not on the native dart:ui, so we cannot annotate them with
+  // @override (it would fail the native analyzer). They are no-ops in tests
+  // because the engine-side implementation lives in the web embedder. Tests
+  // interact with browser scrolling via
+  // ScrollableState.browserScrollViewBinding instead.
+  bool get supportsBrowserScrolling => false;
+  void enableBrowserScrolling() {}
+  void disableBrowserScrolling() {}
+  void browserScrollTo(double offset) {}
+  void browserSmoothScrollTo(double offset) {}
+  void browserScrollBy(double delta) {}
+  void updateBrowserScrollContentHeight(double height) {}
+  void Function(double offset)? onBrowserScroll;
 }
 
 mixin _ChildWindowHierarchyMixin {

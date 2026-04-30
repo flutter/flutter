@@ -27,6 +27,18 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
   DomEventTarget get globalEventTarget => domWindow;
 
   @override
+  bool get supportsBrowserScrolling => true;
+
+  DomElement? _scrollHeightPlaceholder;
+
+  // Per-child inline style snapshot taken on enable so disable can restore
+  // the exact pre-enable state. Needed because some engine-managed children
+  // such as <flt-semantics-host> carry inline `position: absolute` that
+  // otherwise falls through to `static` when we clear the style.
+  final Map<DomElement, Map<String, String>> _savedChildStyles =
+      <DomElement, Map<String, String>>{};
+
+  @override
   void setLocale(ui.Locale locale) {
     domDocument.documentElement!.setAttribute('lang', locale.toLanguageTag());
   }
@@ -44,6 +56,111 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
     hostElement.append(rootElement);
 
     registerElementForCleanup(rootElement);
+  }
+
+  @override
+  void enableBrowserScrolling(DomElement rootElement) {
+    setElementStyle(hostElement, 'position', 'static');
+    setElementStyle(hostElement, 'overflow', 'hidden');
+    setElementStyle(hostElement, 'padding', '0');
+    setElementStyle(hostElement, 'margin', '0');
+    setElementStyle(hostElement, 'width', '100%');
+    setElementStyle(hostElement, 'height', '100%');
+
+    // Override body's touch-action from 'none' to 'pan-y'. The browser
+    // computes effective touch-action as the intersection of an element
+    // and all its ancestors. If body keeps 'none', no descendant can
+    // touch-scroll regardless of its own touch-action value.
+    setElementStyle(hostElement, 'touch-action', 'pan-y');
+
+    // Make <flutter-view> the scrollable element. This is critical: the
+    // flutter-view must be the scrollable so that wheel events, which land
+    // on it, trigger native scrolling. If we made the body scrollable but
+    // flutter-view was fixed on top, wheel events would go to flutter-view
+    // and the body would never scroll.
+    rootElement.style
+      ..position = 'fixed'
+      ..top = '0'
+      ..right = '0'
+      ..bottom = '0'
+      ..left = '0'
+      ..overflow = 'auto';
+
+    // Allow the browser to handle vertical touch-drag as native scroll.
+    // Horizontal and other gestures still flow to Flutter as pointer events.
+    setElementStyle(rootElement, 'touch-action', 'pan-y');
+
+    // Make all existing children of flutter-view sticky so they stay
+    // visible at the top of the viewport while the element scrolls.
+    // This includes <flt-glass-pane>, <flt-text-editing-host>, and
+    // <flt-semantics-host>.
+    //
+    // Snapshot each child's inline position/top/left first so disable can
+    // restore them. <flt-semantics-host> in particular ships with inline
+    // `position: absolute` set by StyleManager; clearing to empty would
+    // drop it through to `static` and break its transform scaling.
+    for (final DomElement child in rootElement.children) {
+      _savedChildStyles[child] = <String, String>{
+        'position': child.style.position,
+        'top': child.style.top,
+        'left': child.style.left,
+      };
+      child.style
+        ..position = 'sticky'
+        ..top = '0'
+        ..left = '0';
+    }
+
+    // Create a placeholder element inside flutter-view that sets the
+    // scroll height. This gives flutter-view real content to scroll against.
+    // It must be positioned absolutely so it doesn't push the sticky
+    // children down, and its height defines the total scrollable area.
+    _scrollHeightPlaceholder = domDocument.createElement('div');
+    _scrollHeightPlaceholder!.setAttribute('flt-scroll-placeholder', '');
+    _scrollHeightPlaceholder!.style
+      ..width = '1px'
+      ..pointerEvents = 'none'
+      ..position = 'absolute'
+      ..top = '0'
+      ..left = '0';
+
+    rootElement.append(_scrollHeightPlaceholder!);
+
+    registerElementForCleanup(_scrollHeightPlaceholder!);
+  }
+
+  @override
+  void disableBrowserScrolling(DomElement rootElement) {
+    _setHostStyles();
+
+    rootElement.style
+      ..position = 'absolute'
+      ..top = '0'
+      ..right = '0'
+      ..bottom = '0'
+      ..left = '0'
+      ..overflow = '';
+
+    setElementStyle(rootElement, 'touch-action', '');
+
+    for (final DomElement child in rootElement.children) {
+      final Map<String, String>? saved = _savedChildStyles[child];
+      child.style
+        ..position = saved?['position'] ?? ''
+        ..top = saved?['top'] ?? ''
+        ..left = saved?['left'] ?? '';
+    }
+    _savedChildStyles.clear();
+
+    _scrollHeightPlaceholder?.remove();
+    _scrollHeightPlaceholder = null;
+  }
+
+  @override
+  void updateScrollContentHeight(double height) {
+    if (_scrollHeightPlaceholder != null) {
+      _scrollHeightPlaceholder!.style.height = '${height}px';
+    }
   }
 
   // Sets the global styles for a flutter app.
