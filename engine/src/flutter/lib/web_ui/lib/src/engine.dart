@@ -55,6 +55,7 @@ export 'engine/display.dart';
 export 'engine/dom.dart';
 export 'engine/font_change_util.dart';
 export 'engine/font_fallback_data.dart';
+export 'engine/font_fallback_service.dart';
 export 'engine/font_fallbacks.dart';
 export 'engine/fonts.dart';
 export 'engine/frame_service.dart';
