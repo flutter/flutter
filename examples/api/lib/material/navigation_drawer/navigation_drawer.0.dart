@@ -79,7 +79,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: .spaceEvenly,
           children: <Widget>[Text('Page Index = $screenIndex')],
         ),
       ),
@@ -111,7 +111,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
         child: Row(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5),
+              padding: const .symmetric(horizontal: 5),
               child: NavigationRail(
                 minWidth: 50,
                 destinations: destinations.map((
@@ -135,7 +135,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
             const VerticalDivider(thickness: 1, width: 1),
             Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: .spaceEvenly,
                 children: <Widget>[
                   Text('Page Index = $screenIndex'),
                   ElevatedButton(
@@ -153,7 +153,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
         selectedIndex: screenIndex,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.fromLTRB(28, 16, 16, 10),
+            padding: const .fromLTRB(28, 16, 16, 10),
             child: Text(
               'Header',
               style: Theme.of(context).textTheme.titleSmall,
@@ -166,10 +166,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
               selectedIcon: destination.selectedIcon,
             );
           }),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(28, 16, 28, 10),
-            child: Divider(),
-          ),
+          const Padding(padding: .fromLTRB(28, 16, 28, 10), child: Divider()),
         ],
       ),
     );
@@ -178,7 +175,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    showNavigationDrawer = MediaQuery.of(context).size.width >= 450;
+    showNavigationDrawer = MediaQuery.widthOf(context) >= 450;
   }
 
   @override

@@ -89,6 +89,12 @@ class MockVulkanContextBuilder {
     return *this;
   }
 
+  MockVulkanContextBuilder& SetDeviceExtensions(
+      const std::vector<std::string>& device_extensions) {
+    device_extensions_ = device_extensions;
+    return *this;
+  }
+
   /// Set the behavior of vkGetPhysicalDeviceFormatProperties, which needs to
   /// respond differently for different formats.
   MockVulkanContextBuilder& SetPhysicalDeviceFormatPropertiesCallback(
@@ -114,10 +120,25 @@ class MockVulkanContextBuilder {
     return *this;
   }
 
+  MockVulkanContextBuilder SetAcquireNextImageCallback(
+      std::function<std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
+          acquire_next_image_callback) {
+    acquire_next_image_callback_ = std::move(acquire_next_image_callback);
+    return *this;
+  }
+
+  MockVulkanContextBuilder SetWaitForFencesCallback(
+      std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
+          wait_for_fences_callback) {
+    wait_for_fences_callback_ = std::move(wait_for_fences_callback);
+    return *this;
+  }
+
  private:
   std::function<void(ContextVK::Settings&)> settings_callback_;
   std::vector<std::string> instance_extensions_;
   std::vector<std::string> instance_layers_;
+  std::vector<std::string> device_extensions_;
   std::optional<ContextVK::EmbedderData> embedder_data_;
   std::function<void(VkPhysicalDevice physicalDevice,
                      VkFormat format,
@@ -126,6 +147,10 @@ class MockVulkanContextBuilder {
   std::function<void(VkPhysicalDevice device,
                      VkPhysicalDeviceProperties* physicalProperties)>
       physical_properties_callback_;
+  std::function<std::remove_pointer_t<PFN_vkAcquireNextImageKHR>>
+      acquire_next_image_callback_;
+  std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
+      wait_for_fences_callback_;
 };
 
 /// @brief Override the image size returned by all swapchain images.

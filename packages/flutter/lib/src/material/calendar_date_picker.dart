@@ -201,6 +201,7 @@ class CalendarDatePicker extends StatefulWidget {
 
 class _CalendarDatePickerState extends State<CalendarDatePicker> {
   bool _announcedInitialDate = false;
+  String _announcementText = '';
   late DatePickerMode _mode;
   late DateTime _currentDisplayedMonthDate;
   DateTime? _selectedDate;
@@ -236,11 +237,22 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
       _announcedInitialDate = true;
       final bool isToday = widget.calendarDelegate.isSameDay(widget.currentDate, _selectedDate);
       final semanticLabelSuffix = isToday ? ', ${_localizations.currentDateLabel}' : '';
+      _announce('${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix');
+    }
+  }
+
+  // Auxiliary method for handling the difference between platforms
+  void _announce(String message) {
+    if (MediaQuery.maybeSupportsAnnounceOf(context) ?? false) {
       SemanticsService.sendAnnouncement(
         View.of(context),
-        '${_localizations.formatFullDate(_selectedDate!)}$semanticLabelSuffix',
-        _textDirection,
-      );
+        message,
+        Directionality.of(context),
+      ).catchError(_reportAnnouncementError);
+    } else {
+      // If SemanticsService.sendAnnouncement is not supported,
+      // we use live region to achieve the announcement effect instead.
+      _announcementText = message;
     }
   }
 
@@ -266,7 +278,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
           DatePickerMode.day => widget.calendarDelegate.formatMonthYear(selected, _localizations),
           DatePickerMode.year => widget.calendarDelegate.formatYear(selected.year, _localizations),
         };
-        SemanticsService.sendAnnouncement(View.of(context), message, _textDirection);
+        _announce(message);
       }
     });
   }
@@ -320,7 +332,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
             View.of(context),
             '${_localizations.selectedDateLabel} ${widget.calendarDelegate.formatFullDate(_selectedDate!, _localizations)}$semanticLabelSuffix',
             _textDirection,
-          );
+          ).catchError(_reportAnnouncementError);
         case TargetPlatform.android:
         case TargetPlatform.iOS:
         case TargetPlatform.fuchsia:
@@ -389,9 +401,23 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
     final double scaledMaxDayPickerHeight = textScaleFactor > 1.3
         ? maxDayPickerHeight + ((_maxDayPickerRowCount + 1) * ((textScaleFactor - 1) * 8))
         : maxDayPickerHeight;
+    final picker = SizedBox(
+      height: _subHeaderHeight + scaledMaxDayPickerHeight,
+      child: _buildPicker(),
+    );
     return Stack(
       children: <Widget>[
-        SizedBox(height: _subHeaderHeight + scaledMaxDayPickerHeight, child: _buildPicker()),
+        if (MediaQuery.maybeSupportsAnnounceOf(context) ?? false)
+          picker
+        else
+          Semantics(
+            container: true,
+            liveRegion: true,
+            accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+            label: _announcementText,
+            child: picker,
+          ),
+
         // Put the mode toggle button on top so that it won't be covered up by the _MonthPicker
         MediaQuery.withClampedTextScaling(
           maxScaleFactor: _kModeToggleButtonMaxScaleFactor,
@@ -594,10 +620,10 @@ class _MonthPicker extends StatefulWidget {
 
 class _MonthPickerState extends State<_MonthPicker> {
   final GlobalKey _pageViewKey = GlobalKey();
+  String _announcementText = '';
   late DateTime _currentMonth;
   late PageController _pageController;
   late MaterialLocalizations _localizations;
-  late TextDirection _textDirection;
   Map<ShortcutActivator, Intent>? _shortcutMap;
   Map<Type, Action<Intent>>? _actionMap;
   late FocusNode _dayGridFocus;
@@ -636,7 +662,6 @@ class _MonthPickerState extends State<_MonthPicker> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _localizations = MaterialLocalizations.of(context);
-    _textDirection = Directionality.of(context);
   }
 
   @override
@@ -649,6 +674,21 @@ class _MonthPickerState extends State<_MonthPicker> {
   void _handleDateSelected(DateTime selectedDate) {
     _focusedDay = selectedDate;
     widget.onChanged(selectedDate);
+  }
+
+  // Auxiliary method for handling the difference between platforms
+  void _announce(String message) {
+    if (MediaQuery.maybeSupportsAnnounceOf(context) ?? false) {
+      SemanticsService.sendAnnouncement(
+        View.of(context),
+        message,
+        Directionality.of(context),
+      ).catchError(_reportAnnouncementError);
+    } else {
+      // If SemanticsService.sendAnnouncement is not supported,
+      // we use live region to achieve the announcement effect instead.
+      _announcementText = message;
+    }
   }
 
   void _handleMonthPageChanged(int monthPage) {
@@ -667,11 +707,7 @@ class _MonthPickerState extends State<_MonthPicker> {
           // the same day of the month.
           _focusedDay = _focusableDayForMonth(_currentMonth, _focusedDay!.day);
         }
-        SemanticsService.sendAnnouncement(
-          View.of(context),
-          widget.calendarDelegate.formatMonthYear(_currentMonth, _localizations),
-          _textDirection,
-        );
+        _announce(widget.calendarDelegate.formatMonthYear(_currentMonth, _localizations));
       }
     });
   }
@@ -855,9 +891,15 @@ class _MonthPickerState extends State<_MonthPicker> {
         DatePickerTheme.of(context).subHeaderForegroundColor ??
         DatePickerTheme.defaults(context).subHeaderForegroundColor;
 
+    final bool supportsAnnounce = MediaQuery.maybeSupportsAnnounceOf(context) ?? false;
     return Semantics(
       container: true,
       explicitChildNodes: true,
+      liveRegion: !supportsAnnounce,
+      accessibilityFocusBlockType: !supportsAnnounce
+          ? AccessibilityFocusBlockType.blockNode
+          : AccessibilityFocusBlockType.none,
+      label: !supportsAnnounce ? _announcementText : null,
       child: Column(
         children: <Widget>[
           SizedBox(
@@ -1600,4 +1642,15 @@ class _YearPickerGridDelegate extends SliverGridDelegate {
 
   @override
   bool shouldRelayout(_YearPickerGridDelegate oldDelegate) => false;
+}
+
+void _reportAnnouncementError(Object exception, StackTrace stack) {
+  FlutterError.reportError(
+    FlutterErrorDetails(
+      exception: exception,
+      stack: stack,
+      library: 'material library',
+      context: ErrorDescription('while sending semantics announcement'),
+    ),
+  );
 }

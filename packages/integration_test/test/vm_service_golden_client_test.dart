@@ -77,6 +77,7 @@ void main() {
     test('"id" must match a pending request (already occurred)', () async {
       // This is based on an implementation detail of knowing how IDs are generated.
       const nextId = 1;
+      // ignore: unawaited_futures
       goldenFileComparator.update(Uri(path: 'some-file'), Uint8List(0));
 
       dev.ServiceExtensionResponse response;
@@ -113,9 +114,34 @@ void main() {
       expect(response.result, '{}');
     });
 
+    test('"id" must match a pending request (failed previously)', () async {
+      // This is based on an implementation detail of knowing how IDs are generated.
+      const nextId = 1;
+
+      expect(
+        goldenFileComparator.compare(Uint8List(0), Uri(path: 'some-file')),
+        throwsA(contains('We did a bad')),
+      );
+
+      dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
+        <String, String>{'id': '$nextId', 'error': 'We did a bad'},
+      );
+      expect(response.errorDetail, isNull);
+
+      response = await goldenFileComparator.handleEvent(<String, String>{
+        'id': '$nextId',
+        'result': 'true',
+      });
+      expect(
+        response.errorDetail,
+        stringContainsInOrder(<String>['No pending request with method ID', '1']),
+      );
+    });
+
     test('requests that do not contain "error" return an empty response', () async {
       // This is based on an implementation detail of knowing how IDs are generated.
       const nextId = 1;
+      // ignore: unawaited_futures
       goldenFileComparator.update(Uri(path: 'some-file'), Uint8List(0));
 
       final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
@@ -128,6 +154,7 @@ void main() {
     test('"result" must be provided if "error" is omitted', () async {
       // This is based on an implementation detail of knowing how IDs are generated.
       const nextId = 1;
+      // ignore: unawaited_futures
       goldenFileComparator.update(Uri(path: 'some-file'), Uint8List(0));
 
       final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(
@@ -139,6 +166,7 @@ void main() {
     test('"result" must be a boolean', () async {
       // This is based on an implementation detail of knowing how IDs are generated.
       const nextId = 1;
+      // ignore: unawaited_futures
       goldenFileComparator.update(Uri(path: 'some-file'), Uint8List(0));
 
       final dev.ServiceExtensionResponse response = await goldenFileComparator.handleEvent(

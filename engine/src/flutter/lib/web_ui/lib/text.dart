@@ -225,7 +225,7 @@ enum TextAlign { left, right, center, justify, start, end }
 
 enum TextBaseline { alphabetic, ideographic }
 
-class TextDecoration {
+final class TextDecoration {
   const TextDecoration._(this._mask);
   factory TextDecoration.combine(List<TextDecoration> decorations) {
     var mask = 0;
@@ -684,6 +684,6 @@ abstract class ParagraphBuilder {
 }
 
 Future<void> loadFontFromList(Uint8List list, {String? fontFamily}) async {
-  await engine.renderer.fontCollection.loadFontFromList(list, fontFamily: fontFamily);
+  await engine.renderer.fontCollection.loadFontFromBytes(list, fontFamily: fontFamily);
   engine.sendFontChangeMessage();
 }

@@ -1431,20 +1431,24 @@ void main() {
   ) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: Tooltip(message: tooltipText, child: Text(tooltipText)),
+        home: Tooltip(message: '', child: Text(tooltipText)),
       ),
     );
     expect(find.text(tooltipText), findsOneWidget);
+    expect(find.byType(Tooltip), findsOneWidget);
+
+    await tester.longPress(find.text(tooltipText));
+    expect(find.byType(Tooltip), findsOneWidget);
+    expect(find.byType(RawTooltip), findsNothing);
   });
 
   testWidgets('Tooltip should not be shown with empty message (without child)', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: Tooltip(message: tooltipText)));
-    expect(find.text(tooltipText), findsNothing);
-    if (tooltipText.isEmpty) {
-      expect(find.byType(SizedBox), findsOneWidget);
-    }
+    await tester.pumpWidget(const MaterialApp(home: Tooltip(message: '')));
+    expect(find.byType(Tooltip), findsOneWidget);
+    expect(find.byType(SizedBox), findsOneWidget);
+    expect(find.byType(RawTooltip), findsNothing);
   });
 
   testWidgets('Tooltip should not ignore users tap on richMessage', (WidgetTester tester) async {

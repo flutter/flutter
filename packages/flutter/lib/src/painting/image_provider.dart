@@ -475,13 +475,17 @@ abstract class ImageProvider<T extends Object> {
   ) {
     T? obtainedKey;
     var didError = false;
+    // `handleError` does not need to be awaited because `errorCallback` will
+    // always eventually set the stream.completer, and external callers care only about
+    // when the stream completes.
+    @awaitNotRequired
     Future<void> handleError(Object exception, StackTrace? stack) async {
       if (didError) {
         return;
       }
       if (!didError) {
         didError = true;
-        errorCallback(obtainedKey, exception, stack);
+        await errorCallback(obtainedKey, exception, stack);
       }
     }
 

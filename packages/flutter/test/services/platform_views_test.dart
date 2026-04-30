@@ -466,7 +466,7 @@ void main() {
           timeStamp: const Duration(milliseconds: 1),
           pointer: i,
         );
-        viewController.dispatchPointerEvent(event);
+        await viewController.dispatchPointerEvent(event);
       }
 
       // Pointer event platform data constant from _AndroidMotionEventConverter
@@ -478,7 +478,7 @@ void main() {
           pointer: i,
           platformData: kPointerDataFlagMultiple | (pointerCount << 8),
         );
-        viewController.dispatchPointerEvent(event);
+        await viewController.dispatchPointerEvent(event);
       }
 
       // Indexes in the list returned by AndroidMotionEvent._asList
@@ -565,7 +565,7 @@ void main() {
         layoutDirection: TextDirection.ltr,
       );
 
-      viewController.dispose();
+      await viewController.dispose();
       expect(
         viewsController.views,
         unorderedEquals(<FakeUiKitView>[const FakeUiKitView(0, 'webview')]),

@@ -531,6 +531,7 @@ class IOSDevice extends Device {
           logger: globals.logger,
           platform: FlutterDarwinPlatform.ios,
           project: package.project.parent,
+          device: this,
         );
         _logger.printError('');
         return LaunchResult.failed();
@@ -1076,6 +1077,7 @@ class IOSDevice extends Device {
         bundleId: package.id,
         launchArguments: launchArguments,
         shutdownHooks: globals.shutdownHooks,
+        mode: debuggingOptions.buildInfo.mode,
       );
 
       // If it succeeds to launch with LLDB, return, otherwise continue on to

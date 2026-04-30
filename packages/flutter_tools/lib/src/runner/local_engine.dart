@@ -42,6 +42,32 @@ class LocalEngineLocator {
   final String _flutterRoot;
   final UserMessages _userMessages;
 
+  String _runnerNoEngineBuild(String engineBuildPath) =>
+      'No Flutter engine build found at $engineBuildPath.';
+
+  String get _runnerHostEngineRequiresLocalEngine =>
+      'You must specify --local-engine if you are using --local-engine-host.';
+
+  String _runnerNoWebSdk(String webSdkPath) => 'No Flutter web sdk found at $webSdkPath.';
+
+  String get _runnerLocalEngineRequiresHostEngine =>
+      'You are using a locally built engine (--local-engine) but have not specified --local-engine-host.\n'
+      'You may be building with a different engine than the one you are running with. '
+      'See https://github.com/flutter/flutter/issues/132245 for details.';
+
+  String _runnerNoEngineBuildDirInPath(String engineSourcePath) =>
+      'No Flutter engine build directory found at: $engineSourcePath.\n'
+      '\n'
+      'To fix this:\n'
+      "1. Ensure '$engineSourcePath' is a valid Flutter engine 'src' directory.\n"
+      "2. Verify the engine is compiled in that directory, which should produce an 'out' directory.\n"
+      '\n'
+      'Alternatively, specify a different engine source path using the '
+      '--local-engine-src-path flag or the FLUTTER_ENGINE environment variable.';
+
+  String get _runnerLocalEngineOrWebSdkRequired =>
+      'You must specify --local-engine or --local-web-sdk if you are using a locally built engine or web sdk.';
+
   /// Returns the engine build path of a local engine if one is located, otherwise `null`.
   Future<EngineBuildPaths?> findEnginePath({
     String? engineSourcePath,
@@ -51,7 +77,7 @@ class LocalEngineLocator {
     String? packagePath,
   }) async {
     if (localHostEngine != null && localEngine == null) {
-      throwToolExit(_userMessages.runnerHostEngineRequiresLocalEngine, exitCode: 2);
+      throwToolExit(_runnerHostEngineRequiresLocalEngine, exitCode: 2);
     }
 
     engineSourcePath ??= _platform.environment[kFlutterEngineEnvironmentVariableName];
@@ -83,7 +109,7 @@ class LocalEngineLocator {
     }
 
     if (engineSourcePath != null && _tryEnginePath(engineSourcePath) == null) {
-      throwToolExit(_userMessages.runnerNoEngineBuildDirInPath(engineSourcePath), exitCode: 2);
+      throwToolExit(_runnerNoEngineBuildDirInPath(engineSourcePath), exitCode: 2);
     }
 
     if (engineSourcePath != null) {
@@ -185,7 +211,7 @@ class LocalEngineLocator {
     String? localHostEngine,
   }) {
     if (localEngine == null && localWebSdk == null) {
-      throwToolExit(_userMessages.runnerLocalEngineOrWebSdkRequired, exitCode: 2);
+      throwToolExit(_runnerLocalEngineOrWebSdkRequired, exitCode: 2);
     }
 
     String? engineBuildPath;
@@ -195,17 +221,17 @@ class LocalEngineLocator {
         _fileSystem.path.join(engineSourcePath, 'out', localEngine),
       );
       if (!_fileSystem.isDirectorySync(engineBuildPath)) {
-        throwToolExit(_userMessages.runnerNoEngineBuild(engineBuildPath), exitCode: 2);
+        throwToolExit(_runnerNoEngineBuild(engineBuildPath), exitCode: 2);
       }
 
       if (localHostEngine == null) {
-        throwToolExit(_userMessages.runnerLocalEngineRequiresHostEngine);
+        throwToolExit(_runnerLocalEngineRequiresHostEngine);
       }
       engineHostBuildPath = _fileSystem.path.normalize(
         _fileSystem.path.join(_fileSystem.path.dirname(engineBuildPath), localHostEngine),
       );
       if (!_fileSystem.isDirectorySync(engineHostBuildPath)) {
-        throwToolExit(_userMessages.runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
+        throwToolExit(_runnerNoEngineBuild(engineHostBuildPath), exitCode: 2);
       }
     }
 
@@ -215,7 +241,7 @@ class LocalEngineLocator {
         _fileSystem.path.join(engineSourcePath, 'out', localWebSdk),
       );
       if (!_fileSystem.isDirectorySync(webSdkPath)) {
-        throwToolExit(_userMessages.runnerNoWebSdk(webSdkPath), exitCode: 2);
+        throwToolExit(_runnerNoWebSdk(webSdkPath), exitCode: 2);
       }
     }
 

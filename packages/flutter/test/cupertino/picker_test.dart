@@ -8,8 +8,24 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/rendering_tester.dart';
 import '../widgets/semantics_tester.dart';
+
+/// A [CustomPainter] that calls a callback when it paints.
+class TestCallbackPainter extends CustomPainter {
+  /// Creates a [TestCallbackPainter] that calls [onPaint] when it paints.
+  const TestCallbackPainter({required this.onPaint});
+
+  /// The callback called when the painter paints.
+  final VoidCallback onPaint;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    onPaint();
+  }
+
+  @override
+  bool shouldRepaint(covariant TestCallbackPainter oldDelegate) => true;
+}
 
 class SpyFixedExtentScrollController extends FixedExtentScrollController {
   /// Override for test visibility only.
@@ -23,9 +39,8 @@ void main() {
       CupertinoApp(
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300.0,
-            width: 300.0,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: CupertinoPicker(
               itemExtent: 50.0,
               onSelectedItemChanged: (_) {},
@@ -59,9 +74,8 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        home: SizedBox(
-          height: 300.0,
-          width: 300.0,
+        home: SizedBox.square(
+          dimension: 300.0,
           child: CupertinoPicker(
             itemExtent: 50.0,
             onSelectedItemChanged: (_) {},
@@ -110,9 +124,8 @@ void main() {
 
     await tester.pumpWidget(
       CupertinoApp(
-        home: SizedBox(
-          height: 300.0,
-          width: 300.0,
+        home: SizedBox.square(
+          dimension: 300.0,
           child: CupertinoPicker(
             scrollController: controller,
             itemExtent: 50.0,
@@ -201,9 +214,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Align(
             alignment: Alignment.topLeft,
-            child: SizedBox(
-              height: 300.0,
-              width: 300.0,
+            child: SizedBox.square(
+              dimension: 300.0,
               child: CupertinoPicker(
                 scrollController: controller,
                 itemExtent: 50.0,
@@ -236,9 +248,8 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.light),
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300.0,
-            width: 300.0,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: CupertinoPicker(
               backgroundColor: const CupertinoDynamicColor.withBrightness(
                 color: Color(
@@ -266,9 +277,8 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300.0,
-            width: 300.0,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: CupertinoPicker(
               backgroundColor: const CupertinoDynamicColor.withBrightness(
                 color: Color(0xFF123456),
@@ -296,9 +306,8 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.light),
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300.0,
-            width: 300.0,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: CupertinoPicker(
               itemExtent: 15.0,
               onSelectedItemChanged: (int i) {},
@@ -321,9 +330,8 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.light),
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300.0,
-            width: 300.0,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: CupertinoPicker(
               itemExtent: 15.0,
               onSelectedItemChanged: (int i) {},
@@ -702,9 +710,8 @@ void main() {
         theme: CupertinoThemeData(brightness: brightness),
         home: Align(
           alignment: Alignment.topLeft,
-          child: SizedBox(
-            height: 300.0,
-            width: 300.0,
+          child: SizedBox.square(
+            dimension: 300.0,
             child: CupertinoPicker(
               itemExtent: 50.0,
               onSelectedItemChanged: (_) {},
@@ -824,9 +831,8 @@ void main() {
                         onTap: () {
                           tappedChildren.add(index);
                         },
-                        child: SizedBox(
-                          width: 55,
-                          height: 55,
+                        child: SizedBox.square(
+                          dimension: 55,
                           child: CustomPaint(
                             painter: TestCallbackPainter(
                               onPaint: () {

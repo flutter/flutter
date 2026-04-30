@@ -168,6 +168,14 @@ IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(FlutterDesktopViewRef view) {
   return nullptr;
 }
 
+bool FlutterDesktopEngineGetGraphicsAdapter(FlutterDesktopEngineRef engine,
+                                            IDXGIAdapter** adapter_out) {
+  if (s_stub_implementation) {
+    return s_stub_implementation->EngineGetGraphicsAdapter(adapter_out);
+  }
+  return false;
+}
+
 bool FlutterDesktopEngineProcessExternalWindowMessage(
     FlutterDesktopEngineRef engine,
     HWND hwnd,
@@ -207,6 +215,16 @@ FlutterDesktopViewRef FlutterDesktopPluginRegistrarGetViewById(
     return s_stub_implementation->PluginRegistrarGetViewById(view_id);
   }
   return nullptr;
+}
+
+bool FlutterDesktopPluginRegistrarGetGraphicsAdapter(
+    FlutterDesktopPluginRegistrarRef registrar,
+    IDXGIAdapter** adapter_out) {
+  if (s_stub_implementation) {
+    return s_stub_implementation->PluginRegistrarGetGraphicsAdapter(
+        adapter_out);
+  }
+  return false;
 }
 
 void FlutterDesktopPluginRegistrarRegisterTopLevelWindowProcDelegate(

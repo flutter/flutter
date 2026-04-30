@@ -21,10 +21,11 @@ DART_SDK_PATH_OLD="$DART_SDK_PATH.old"
 ENGINE_STAMP="$FLUTTER_ROOT/bin/cache/engine-dart-sdk.stamp"
 OS="$(uname -s)"
 
-ENGINE_VERSION=$(cat "$FLUTTER_ROOT/bin/cache/engine.stamp")
-ENGINE_REALM=$(cat "$FLUTTER_ROOT/bin/cache/engine.realm" | tr -d '[:space:]')
+ENGINE_VERSION=$(< "$FLUTTER_ROOT/bin/cache/engine.stamp")
+ENGINE_REALM=$(< "$FLUTTER_ROOT/bin/cache/engine.realm")
+ENGINE_REALM="${ENGINE_REALM//[[:space:]]/}"
 
-if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; then
+if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != "$(< "$ENGINE_STAMP")" ]; then
   command -v curl > /dev/null 2>&1 || {
     >&2 echo
     >&2 echo 'Missing "curl" tool. Unable to download Dart SDK.'
@@ -157,8 +158,8 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     #
     # 33  HTTP range error. The range "command" didn't work.
     # https://man7.org/linux/man-pages/man1/curl.1.html#EXIT_CODES
-    if [ $curlExitCode != 33 ]; then
-      return $curlExitCode
+    if [ "$curlExitCode" -ne 33 ]; then
+      exit "$curlExitCode"
     fi
     curl ${verbose_curl} --retry 3 --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1
   } || {
@@ -180,8 +181,8 @@ if [ ! -f "$ENGINE_STAMP" ] || [ "$ENGINE_VERSION" != `cat "$ENGINE_STAMP"` ]; t
     exit 1
   }
   rm -f -- "$DART_SDK_ZIP"
-  $FIND "$DART_SDK_PATH" -type d -exec chmod 755 {} \;
-  $FIND "$DART_SDK_PATH" -type f $IS_USER_EXECUTABLE -exec chmod a+x,a+r {} \;
+  $FIND "$DART_SDK_PATH" -type d -exec chmod 755 {} +
+  $FIND "$DART_SDK_PATH" -type f $IS_USER_EXECUTABLE -exec chmod a+x,a+r {} +
   echo "$ENGINE_VERSION" > "$ENGINE_STAMP"
 
   # delete any temporary sdk path

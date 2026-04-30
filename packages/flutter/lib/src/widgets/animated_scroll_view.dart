@@ -7,6 +7,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -87,6 +88,7 @@ class AnimatedList extends _AnimatedScrollView {
     super.shrinkWrap = false,
     super.padding,
     super.clipBehavior = Clip.hardEdge,
+    super.scrollCacheExtent,
   }) : assert(initialItemCount >= 0);
 
   /// A scrolling container that animates items with separators when they are inserted or removed.
@@ -163,6 +165,7 @@ class AnimatedList extends _AnimatedScrollView {
     super.shrinkWrap = false,
     super.padding,
     super.clipBehavior = Clip.hardEdge,
+    super.scrollCacheExtent,
   }) : assert(initialItemCount >= 0),
        super(
          initialItemCount: _computeChildCountWithSeparators(initialItemCount),
@@ -386,6 +389,7 @@ class AnimatedGrid extends _AnimatedScrollView {
     super.physics,
     super.padding,
     super.clipBehavior = Clip.hardEdge,
+    super.scrollCacheExtent,
   }) : assert(initialItemCount >= 0);
 
   /// {@template flutter.widgets.AnimatedGrid.gridDelegate}
@@ -543,6 +547,7 @@ abstract class _AnimatedScrollView extends StatefulWidget {
     this.shrinkWrap = false,
     this.padding,
     this.clipBehavior = Clip.hardEdge,
+    this.scrollCacheExtent,
   }) : assert(initialItemCount >= 0);
 
   /// {@template flutter.widgets.AnimatedScrollView.itemBuilder}
@@ -660,6 +665,9 @@ abstract class _AnimatedScrollView extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// {@macro flutter.rendering.RenderViewportBase.scrollCacheExtent}
+  final ScrollCacheExtent? scrollCacheExtent;
 }
 
 abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends State<T>
@@ -871,6 +879,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
       physics: widget.physics,
       clipBehavior: widget.clipBehavior,
       shrinkWrap: widget.shrinkWrap,
+      scrollCacheExtent: widget.scrollCacheExtent,
       slivers: <Widget>[sliver],
     );
   }

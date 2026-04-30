@@ -10,8 +10,10 @@
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
+#include "flutter/fml/logging.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
+#import "flutter/shell/platform/darwin/common/InternalFlutterSwiftCommon/InternalFlutterSwiftCommon.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
@@ -23,6 +25,11 @@ using flutter::DlRect;
 using flutter::DlRoundRect;
 
 static constexpr NSUInteger kFlutterClippingMaskViewPoolCapacity = 5;
+
+static NSString* const kGestureBlockingPolicyEagerValue = @"eager";
+static NSString* const kGestureBlockingPolicyWaitUntilTouchesEndedValue = @"waitUntilTouchesEnded";
+static NSString* const kGestureBlockingPolicyDoNotBlockGesture = @"doNotBlockGesture";
+static NSString* const kGestureBlockingPolicyFallbackToPluginDefault = @"fallbackToPluginDefault";
 
 struct LayerData {
   DlRect rect;
@@ -103,7 +110,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 // The FlutterPlatformViewGestureRecognizersBlockingPolicy for each type of platform view.
 @property(nonatomic, readonly)
     std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>&
-        gestureRecognizersBlockingPolicies;
+        gestureRecognizersBlockingPoliciesByType;
 
 /// The size of the current onscreen surface in physical pixels.
 @property(nonatomic, assign) DlISize frameSize;
@@ -140,11 +147,6 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 ///
 /// This state is only modified on the raster thread.
 @property(nonatomic, readonly) std::unordered_set<int64_t>& viewsToRecomposite;
-
-/// @brief The composition order from the previous thread.
-///
-/// Only accessed from the platform thread.
-@property(nonatomic, readonly) std::vector<int64_t>& previousCompositionOrder;
 
 /// Whether the previous frame had any platform views in active composition order.
 ///
@@ -238,7 +240,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::unordered_map<int64_t, std::unique_ptr<flutter::EmbedderViewSlice>> _slices;
   std::unordered_map<std::string, NSObject<FlutterPlatformViewFactory>*> _factories;
   std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>
-      _gestureRecognizersBlockingPolicies;
+      _gestureRecognizersBlockingPoliciesByType;
   fml::RefPtr<fml::TaskRunner> _platformTaskRunner;
   std::unordered_map<int64_t, PlatformViewData> _platformViews;
   std::unordered_map<int64_t, flutter::EmbeddedViewParams> _currentCompositionParams;
@@ -329,10 +331,31 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   // Set a unique view identifier, so the platform view can be identified in unit tests.
   platformView.accessibilityIdentifier = [NSString stringWithFormat:@"platform_view[%lld]", viewId];
 
-  FlutterTouchInterceptingView* touchInterceptor = [[FlutterTouchInterceptingView alloc]
-                  initWithEmbeddedView:platformView
-               platformViewsController:self
-      gestureRecognizersBlockingPolicy:self.gestureRecognizersBlockingPolicies[viewType]];
+  NSString* gestureBlockingPolicyValue = args[@"gestureBlockingPolicy"];
+  FlutterPlatformViewGestureRecognizersBlockingPolicy gestureBlockingPolicy;
+  if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyDoNotBlockGesture]) {
+    gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture;
+  } else if ([gestureBlockingPolicyValue isEqualToString:kGestureBlockingPolicyEagerValue]) {
+    gestureBlockingPolicy = FlutterPlatformViewGestureRecognizersBlockingPolicyEager;
+  } else if ([gestureBlockingPolicyValue
+                 isEqualToString:kGestureBlockingPolicyWaitUntilTouchesEndedValue]) {
+    gestureBlockingPolicy =
+        FlutterPlatformViewGestureRecognizersBlockingPolicyWaitUntilTouchesEnded;
+  } else if ([gestureBlockingPolicyValue
+                 isEqualToString:kGestureBlockingPolicyFallbackToPluginDefault]) {
+    gestureBlockingPolicy = self.gestureRecognizersBlockingPoliciesByType[viewType];
+  } else {
+    result([FlutterError
+        errorWithCode:@"unknown_gesture_blocking_policy"
+              message:@"Trying to create a platform view with an unknown gesture blocking policy"
+              details:[NSString stringWithFormat:@"view id: '%lld'", viewId]]);
+    return;
+  }
+
+  FlutterTouchInterceptingView* touchInterceptor =
+      [[FlutterTouchInterceptingView alloc] initWithEmbeddedView:platformView
+                                         platformViewsController:self
+                                gestureRecognizersBlockingPolicy:gestureBlockingPolicy];
 
   ChildClippingView* clippingView = [[ChildClippingView alloc] initWithFrame:CGRectZero];
   [clippingView addSubview:touchInterceptor];
@@ -402,7 +425,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::string idString([factoryId UTF8String]);
   FML_CHECK(self.factories.count(idString) == 0);
   self.factories[idString] = factory;
-  self.gestureRecognizersBlockingPolicies[idString] = gestureRecognizerBlockingPolicy;
+  self.gestureRecognizersBlockingPoliciesByType[idString] = gestureRecognizerBlockingPolicy;
 }
 
 - (void)beginFrameWithSize:(DlISize)frameSize {
@@ -583,16 +606,25 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
         // TODO(https://github.com/flutter/flutter/issues/179126)
         CGFloat cornerRadius = 0.0;
+        BOOL isRoundedSuperellipse = NO;
+        // If there's multiple clips, this uses the innermost to decide if its
+        // rse or not. The assumption being the innermost will be the tightest
         if ([pendingClipRRects count] > 0) {
-          cornerRadius = pendingClipRRects[0].topLeftRadius;
+          cornerRadius = pendingClipRRects.lastObject.topLeftRadius;
+          isRoundedSuperellipse = pendingClipRRects.lastObject.isRoundedSuperellipse;
           [pendingClipRRects removeAllObjects];
         }
         visualEffectView.layer.cornerRadius = cornerRadius;
+        if (@available(iOS 13.0, *)) {
+          visualEffectView.layer.cornerCurve =
+              isRoundedSuperellipse ? kCACornerCurveContinuous : kCACornerCurveCircular;
+        }
         visualEffectView.clipsToBounds = YES;
 
         PlatformViewFilter* filter = [[PlatformViewFilter alloc] initWithFrame:frameInClipView
                                                                     blurRadius:blurRadius
                                                                   cornerRadius:cornerRadius
+                                                         isRoundedSuperellipse:isRoundedSuperellipse
                                                               visualEffectView:visualEffectView];
         if (!filter) {
           self.canApplyBlurBackdrop = NO;
@@ -620,7 +652,17 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
         break;
       }
       case flutter::MutatorType::kBackdropClipRSuperellipse: {
-        // TODO(https://github.com/flutter/flutter/issues/179125)
+        PendingRRectClip* clip = [[PendingRRectClip alloc] init];
+        flutter::DlRoundSuperellipse rse = (*iter)->GetBackdropClipRSuperellipse().rse;
+
+        clip.rect = boundingRect;
+        impeller::RoundingRadii radii = rse.GetRadii();
+        clip.topLeftRadius = radii.top_left.width;
+        clip.topRightRadius = radii.top_right.width;
+        clip.bottomLeftRadius = radii.bottom_left.width;
+        clip.bottomRightRadius = radii.bottom_right.width;
+        clip.isRoundedSuperellipse = YES;
+        [pendingClipRRects addObject:clip];
         break;
       }
       case flutter::MutatorType::kBackdropClipPath: {
@@ -691,7 +733,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       [self.platformViews[viewId].root_view removeFromSuperview];
     }
     self.platformViews.clear();
-    self.previousCompositionOrder.clear();
+    _previousCompositionOrder.clear();
   });
 
   self.compositionOrder.clear();
@@ -914,10 +956,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   FML_DCHECK(self.flutterView);
   UIView* flutterView = self.flutterView;
 
-  self.previousCompositionOrder.clear();
+  _previousCompositionOrder.clear();
   NSMutableArray* desiredPlatformSubviews = [NSMutableArray array];
   for (int64_t platformViewId : compositionOrder) {
-    self.previousCompositionOrder.push_back(platformViewId);
+    _previousCompositionOrder.push_back(platformViewId);
     UIView* platformViewRoot = self.platformViews[platformViewId].root_view;
     if (platformViewRoot != nil) {
       [desiredPlatformSubviews addObject:platformViewRoot];
@@ -971,7 +1013,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     compositionOrderSet.insert(viewId);
   }
   // Remove unused platform views.
-  for (int64_t viewId : self.previousCompositionOrder) {
+  for (int64_t viewId : _previousCompositionOrder) {
     if (compositionOrderSet.find(viewId) == compositionOrderSet.end()) {
       UIView* platformViewRoot = self.platformViews[viewId].root_view;
       [platformViewRoot removeFromSuperview];
@@ -1062,9 +1104,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (std::unordered_map<std::string, NSObject<FlutterPlatformViewFactory>*>&)factories {
   return _factories;
 }
+
 - (std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>&)
-    gestureRecognizersBlockingPolicies {
-  return _gestureRecognizersBlockingPolicies;
+    gestureRecognizersBlockingPoliciesByType {
+  return _gestureRecognizersBlockingPoliciesByType;
 }
 
 - (std::unordered_map<int64_t, PlatformViewData>&)platformViews {
@@ -1091,8 +1134,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   return _viewsToRecomposite;
 }
 
-- (std::vector<int64_t>&)previousCompositionOrder {
-  return _previousCompositionOrder;
+- (NSArray<NSNumber*>*)previousCompositionOrder {
+  // TODO(cbracken): Migrate to Obj-C types. https://github.com/flutter/flutter/issues/185139
+  NSMutableArray* array = [NSMutableArray arrayWithCapacity:_previousCompositionOrder.size()];
+  for (int64_t viewId : _previousCompositionOrder) {
+    [array addObject:@(viewId)];
+  }
+  return array;
 }
 
 @end

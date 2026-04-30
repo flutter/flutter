@@ -86,6 +86,12 @@ class StubFlutterWindowsApi {
     return reinterpret_cast<IDXGIAdapter*>(2);
   }
 
+  // Called for FlutterDesktopEngineGetGraphicsAdapter.
+  virtual bool EngineGetGraphicsAdapter(IDXGIAdapter** adapter_out) {
+    *adapter_out = reinterpret_cast<IDXGIAdapter*>(3);
+    return true;
+  }
+
   // Called for FlutterDesktopPluginRegistrarGetView.
   virtual FlutterDesktopViewRef PluginRegistrarGetView() { return nullptr; }
 
@@ -104,6 +110,11 @@ class StubFlutterWindowsApi {
   // FlutterDesktopPluginRegistrarUnregisterTopLevelWindowProcDelegate.
   virtual void PluginRegistrarUnregisterTopLevelWindowProcDelegate(
       FlutterDesktopWindowProcCallback delegate) {}
+
+  // Called for FlutterDesktopPluginRegistrarGetGraphicsAdapter.
+  virtual bool PluginRegistrarGetGraphicsAdapter(IDXGIAdapter** adapter_out) {
+    return false;
+  }
 
   // Called for FlutterDesktopEngineProcessExternalWindowMessage.
   virtual bool EngineProcessExternalWindowMessage(

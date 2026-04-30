@@ -31,9 +31,8 @@ Widget buildMaterial({
   Color color = const Color(0xFF0000FF),
 }) {
   return Center(
-    child: SizedBox(
-      height: 100.0,
-      width: 100.0,
+    child: SizedBox.square(
+      dimension: 100.0,
       child: Material(
         color: color,
         shadowColor: shadowColor,
@@ -148,9 +147,8 @@ void main() {
                         ],
                       ),
                     ),
-                    SizedBox(
-                      width: 100.0,
-                      height: 100.0,
+                    SizedBox.square(
+                      dimension: 100.0,
                       child: CustomPaint(painter: PaintRecorder(log)),
                     ),
                   ],
@@ -176,9 +174,8 @@ void main() {
   testWidgets('Shadow color defaults', (WidgetTester tester) async {
     Widget buildWithShadow(Color? shadowColor) {
       return Center(
-        child: SizedBox(
-          height: 100.0,
-          width: 100.0,
+        child: SizedBox.square(
+          dimension: 100.0,
           child: Material(shadowColor: shadowColor, elevation: 10, shape: const CircleBorder()),
         ),
       );

@@ -67,7 +67,7 @@ void main() {
     );
 
     final Material material = tester.widget<Material>(searchBarMaterial);
-    checkSearchBarDefaults(tester, colorScheme, material);
+    await checkSearchBarDefaults(tester, colorScheme, material);
   });
 
   testWidgets('SearchBar respects controller property', (WidgetTester tester) async {
@@ -1668,7 +1668,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       getSearchViewMaterial(tester).shape,
-      RoundedRectangleBorder(side: side, borderRadius: BorderRadius.circular(28.0)),
+      const RoundedRectangleBorder(
+        side: side,
+        borderRadius: BorderRadius.all(Radius.circular(28.0)),
+      ),
     );
   });
 
@@ -2931,7 +2934,7 @@ void main() {
       );
 
       final Material material = tester.widget<Material>(searchBarMaterial);
-      checkSearchBarDefaults(tester, theme.colorScheme, material);
+      await checkSearchBarDefaults(tester, theme.colorScheme, material);
     });
 
     testWidgets('Overall InputDecorationThemeData does not override text field style'

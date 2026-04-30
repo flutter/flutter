@@ -11,9 +11,12 @@ library foundation;
 
 export 'package:meta/meta.dart'
     show
+        awaitNotRequired,
         factory,
         immutable,
         internal,
+        // ignore: experimental_member_use
+        mustBeConst,
         mustCallSuper,
         nonVirtual,
         optionalTypeArgs,

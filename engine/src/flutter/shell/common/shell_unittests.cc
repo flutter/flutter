@@ -50,6 +50,7 @@
 #include "lib/ui/semantics/semantics_node.h"
 #include "third_party/rapidjson/include/rapidjson/writer.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
+#include "third_party/skia/include/gpu/ganesh/mock/GrMockTypes.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
 #ifdef SHELL_ENABLE_VULKAN
@@ -140,6 +141,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
   MOCK_METHOD(void,
               OnPlatformViewDispatchPointerDataPacket,
               (std::unique_ptr<PointerDataPacket> packet),
+              (override));
+
+  MOCK_METHOD(HitTestResponse,
+              OnPlatformViewHitTest,
+              (int64_t view_id, const flutter::PointData offset),
               (override));
 
   MOCK_METHOD(void,
@@ -590,6 +596,74 @@ TEST_F(ShellTest, FixturesAreFunctional) {
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
   DestroyShell(std::move(shell));
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(ShellTest, HitTestInsidePlatformViewIsFunctional) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  auto task_runner = CreateNewThread();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  auto shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(ValidateShell(shell.get()));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  ASSERT_TRUE(configuration.IsValid());
+
+  configuration.SetEntrypoint("hitTestInsidePlatformViewMain");
+  RunEngine(shell.get(), std::move(configuration));
+
+  fml::AutoResetWaitableEvent latch;
+
+  task_runner->PostTask([&shell, &latch]() {
+    flutter::ViewportMetrics metrics;
+    metrics.physical_width = 100;
+    metrics.physical_height = 100;
+    metrics.device_pixel_ratio = 1.0;
+    shell->GetEngine()->SetViewportMetrics(0, metrics);
+
+    HitTestResponse response = shell->GetPlatformView()->HitTest(0, {0.0, 0.0});
+    EXPECT_TRUE(response.has_platform_view);
+    latch.Signal();
+  });
+
+  latch.Wait();
+  DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, HitTestOutsidePlatformViewIsFunctional) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  auto task_runner = CreateNewThread();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  auto shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(ValidateShell(shell.get()));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  ASSERT_TRUE(configuration.IsValid());
+
+  configuration.SetEntrypoint("hitTestOutsidePlatformViewMain");
+  RunEngine(shell.get(), std::move(configuration));
+
+  fml::AutoResetWaitableEvent latch;
+
+  task_runner->PostTask([&shell, &latch]() {
+    flutter::ViewportMetrics metrics;
+    metrics.physical_width = 100;
+    metrics.physical_height = 100;
+    metrics.device_pixel_ratio = 1.0;
+    shell->GetEngine()->SetViewportMetrics(0, metrics);
+
+    HitTestResponse response = shell->GetPlatformView()->HitTest(0, {0.0, 0.0});
+    EXPECT_FALSE(response.has_platform_view);
+    latch.Signal();
+  });
+
+  latch.Wait();
+  DestroyShell(std::move(shell), task_runners);
 }
 
 TEST_F(ShellTest, SecondaryIsolateBindingsAreSetupViaShellSettings) {
@@ -1725,17 +1799,16 @@ TEST_F(ShellTest, MultipleFluttersSetResourceCacheBytes) {
       [task_runners, main_context](flutter::Shell& shell) {
         auto result = std::make_unique<TestPlatformView>(shell, task_runners);
         ON_CALL(*result, CreateRenderingSurface())
-            .WillByDefault(::testing::Invoke([main_context] {
+            .WillByDefault([main_context] {
               auto surface = std::make_unique<MockSurface>();
               ON_CALL(*surface, GetContext())
                   .WillByDefault(Return(main_context.get()));
               ON_CALL(*surface, IsValid()).WillByDefault(Return(true));
-              ON_CALL(*surface, MakeRenderContextCurrent())
-                  .WillByDefault(::testing::Invoke([] {
-                    return std::make_unique<GLContextDefaultResult>(true);
-                  }));
+              ON_CALL(*surface, MakeRenderContextCurrent()).WillByDefault([] {
+                return std::make_unique<GLContextDefaultResult>(true);
+              });
               return surface;
-            }));
+            });
         return result;
       };
 
@@ -2466,7 +2539,7 @@ TEST_F(ShellTest, RasterizerScreenshot) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(ShellTest, RasterizerMakeRasterSnapshot) {
+TEST_F(ShellTest, RasterizerMakeSkiaSnapshot) {
   Settings settings = CreateSettingsForFixture();
   auto configuration = RunConfiguration::InferFromSettings(settings);
   auto task_runner = CreateNewThread();
@@ -2487,7 +2560,7 @@ TEST_F(ShellTest, RasterizerMakeRasterSnapshot) {
       shell->GetTaskRunners().GetRasterTaskRunner(), [&shell, &latch]() {
         SnapshotDelegate* delegate =
             reinterpret_cast<Rasterizer*>(shell->GetRasterizer().get());
-        sk_sp<DlImage> image = delegate->MakeRasterSnapshotSync(
+        sk_sp<SkImage> image = delegate->MakeSkiaSnapshotSync(
             MakeSizedDisplayList(50, 50), DlISize(50, 50),
             SnapshotPixelFormat::kDontCare);
         EXPECT_NE(image, nullptr);
@@ -3133,9 +3206,9 @@ TEST_F(ShellTest, Spawn) {
             [&platform_view_delegate](Shell& shell) {
               auto result = std::make_unique<MockPlatformView>(
                   platform_view_delegate, shell.GetTaskRunners());
-              ON_CALL(*result, CreateRenderingSurface())
-                  .WillByDefault(::testing::Invoke(
-                      [] { return std::make_unique<MockSurface>(); }));
+              ON_CALL(*result, CreateRenderingSurface()).WillByDefault([] {
+                return std::make_unique<MockSurface>();
+              });
               return result;
             },
             [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
@@ -3245,9 +3318,9 @@ TEST_F(ShellTest, SpawnWithDartEntrypointArgs) {
             [&platform_view_delegate](Shell& shell) {
               auto result = std::make_unique<MockPlatformView>(
                   platform_view_delegate, shell.GetTaskRunners());
-              ON_CALL(*result, CreateRenderingSurface())
-                  .WillByDefault(::testing::Invoke(
-                      [] { return std::make_unique<MockSurface>(); }));
+              ON_CALL(*result, CreateRenderingSurface()).WillByDefault([] {
+                return std::make_unique<MockSurface>();
+              });
               return result;
             },
             [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
@@ -3308,9 +3381,9 @@ TEST_F(ShellTest, IOManagerIsSharedBetweenParentAndSpawnedShell) {
         [&platform_view_delegate](Shell& shell) {
           auto result = std::make_unique<MockPlatformView>(
               platform_view_delegate, shell.GetTaskRunners());
-          ON_CALL(*result, CreateRenderingSurface())
-              .WillByDefault(::testing::Invoke(
-                  [] { return std::make_unique<MockSurface>(); }));
+          ON_CALL(*result, CreateRenderingSurface()).WillByDefault([] {
+            return std::make_unique<MockSurface>();
+          });
           return result;
         },
         [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
@@ -3362,9 +3435,9 @@ TEST_F(ShellTest, IOManagerInSpawnedShellIsNotNullAfterParentShellDestroyed) {
         [&platform_view_delegate](Shell& shell) {
           auto result = std::make_unique<MockPlatformView>(
               platform_view_delegate, shell.GetTaskRunners());
-          ON_CALL(*result, CreateRenderingSurface())
-              .WillByDefault(::testing::Invoke(
-                  [] { return std::make_unique<MockSurface>(); }));
+          ON_CALL(*result, CreateRenderingSurface()).WillByDefault([] {
+            return std::make_unique<MockSurface>();
+          });
           return result;
         },
         [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
@@ -3410,9 +3483,9 @@ TEST_F(ShellTest, ImageGeneratorRegistryNotNullAfterParentShellDestroyed) {
         [&platform_view_delegate](Shell& shell) {
           auto result = std::make_unique<MockPlatformView>(
               platform_view_delegate, shell.GetTaskRunners());
-          ON_CALL(*result, CreateRenderingSurface())
-              .WillByDefault(::testing::Invoke(
-                  [] { return std::make_unique<MockSurface>(); }));
+          ON_CALL(*result, CreateRenderingSurface()).WillByDefault([] {
+            return std::make_unique<MockSurface>();
+          });
           return result;
         },
         [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });
@@ -3903,10 +3976,9 @@ TEST_F(ShellTest, SpawnWorksWithOnError) {
               auto result =
                   std::make_unique<::testing::NiceMock<MockPlatformView>>(
                       platform_view_delegate, shell.GetTaskRunners());
-              ON_CALL(*result, CreateRenderingSurface())
-                  .WillByDefault(::testing::Invoke([] {
-                    return std::make_unique<::testing::NiceMock<MockSurface>>();
-                  }));
+              ON_CALL(*result, CreateRenderingSurface()).WillByDefault([] {
+                return std::make_unique<::testing::NiceMock<MockSurface>>();
+              });
               return result;
             },
             [](Shell& shell) { return std::make_unique<Rasterizer>(shell); });

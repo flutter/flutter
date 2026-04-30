@@ -88,7 +88,7 @@ void main() {
       binding.elapseBlocking(const Duration(seconds: 1));
 
       expect(timerCalled, false);
-      binding.idle();
+      await binding.idle();
     });
 
     testWidgets('can use to simulate slow build', (WidgetTester tester) async {
@@ -114,7 +114,7 @@ void main() {
       );
 
       expect(binding.clock.now(), beforeTime.add(const Duration(seconds: 1)));
-      binding.idle();
+      await binding.idle();
     });
   });
 
@@ -123,6 +123,7 @@ void main() {
   ) async {
     var responded = false;
     // The particular asset does not matter, as long as it exists.
+    // ignore: unawaited_futures
     rootBundle.load('AssetManifest.bin').then((ByteData data) {
       responded = true;
     });

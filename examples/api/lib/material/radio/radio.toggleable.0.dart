@@ -52,7 +52,7 @@ class _ToggleableExampleState extends State<ToggleableExample> {
         child: ListView.builder(
           itemBuilder: (BuildContext context, int index) {
             return Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisSize: .min,
               children: <Widget>[
                 Radio<int>(
                   value: index,

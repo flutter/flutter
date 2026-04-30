@@ -600,10 +600,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.genSnapshotX64:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
 
-        // TODO(cbracken): Build Android gen_snapshot as Arm64 binary to run
-        // natively on Apple Silicon. See:
-        // https://github.com/flutter/flutter/issues/152281
-        HostPlatform hostPlatform = getCurrentHostPlatform();
+        // macOS gen_snapshot ships as a universal binary under the darwin-x64
+        // directory name, so remap darwin-arm64 to darwin-x64 for path resolution.
+        HostPlatform hostPlatform = _operatingSystemUtils.hostPlatform;
         if (hostPlatform == HostPlatform.darwin_arm64) {
           hostPlatform = HostPlatform.darwin_x64;
         }
@@ -964,6 +963,9 @@ Directory _getIosFlutterFrameworkPlatformDirectory(
       'No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter precache --ios".',
     );
   }
+
+  // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+  // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
   for (final Directory platformDirectory
       in xcframeworkDirectory.listSync().whereType<Directory>()) {
     if (!platformDirectory.basename.startsWith('ios-')) {
@@ -1036,6 +1038,8 @@ Directory _getMacOSFrameworkPlatformDirectory(
       'No xcframework found at ${xcframeworkDirectory.path}. Try running "flutter precache --macos".',
     );
   }
+  // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+  // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
   final Directory? platformDirectory = xcframeworkDirectory
       .listSync()
       .whereType<Directory>()

@@ -7,9 +7,12 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestIcon extends StatefulWidget {
@@ -702,6 +705,74 @@ void main() {
     expect(getTextColor(), textColor);
   });
 
+  testWidgets('ExpansionTile shows hover color with opaque backgroundColor', (
+    WidgetTester tester,
+  ) async {
+    const Color hoverColor = Colors.green; // Green
+    const Color backgroundColor = Colors.blue; // Blue
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(hoverColor: hoverColor),
+        home: const Material(
+          child: ExpansionTile(title: Text('Title'), collapsedBackgroundColor: backgroundColor),
+        ),
+      ),
+    );
+
+    final Finder materialFinder = find.descendant(
+      of: find.byType(ExpansionTile),
+      matching: find.byType(Material),
+    );
+
+    // Hover the tile.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(find.text('Title')));
+    await tester.pumpAndSettle();
+
+    expect(
+      materialFinder,
+      paints
+        ..rect(color: Colors.transparent)
+        ..rect(color: hoverColor),
+    );
+  });
+
+  testWidgets('ExpansionTile shows focus color with opaque backgroundColor', (
+    WidgetTester tester,
+  ) async {
+    const Color focusColor = Colors.pink; // Green
+    const Color backgroundColor = Colors.amber; // Blue
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(focusColor: focusColor),
+        home: const Material(
+          child: ExpansionTile(title: Text('Title'), collapsedBackgroundColor: backgroundColor),
+        ),
+      ),
+    );
+
+    final Finder materialFinder = find.descendant(
+      of: find.byType(ExpansionTile),
+      matching: find.byType(Material),
+    );
+
+    // Focus the tile.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+
+    expect(
+      materialFinder,
+      paints
+        ..rect(color: Colors.transparent)
+        ..rect(color: focusColor),
+    );
+  });
+
   testWidgets('ExpansionTile Border', (WidgetTester tester) async {
     const Key expansionTileKey = PageStorageKey<String>('expansionTile');
 
@@ -918,6 +989,69 @@ void main() {
         defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.android,
   );
+
+  testWidgets('ExpansionTile reports error when SemanticsService.sendAnnouncement fails', (
+    WidgetTester tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    try {
+      final errors = <FlutterErrorDetails>[];
+      final void Function(FlutterErrorDetails)? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        final String contextStr = details.context?.toString() ?? '';
+        if (contextStr.contains('while sending semantics announcement')) {
+          errors.add(details);
+          return;
+        }
+        originalOnError?.call(details);
+      };
+      addTearDown(() {
+        FlutterError.onError = originalOnError;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+          SystemChannels.accessibility.name,
+          null,
+        );
+      });
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+        SystemChannels.accessibility.name,
+        (ByteData? message) async {
+          const codec = StandardMessageCodec();
+          final Object? decoded = codec.decodeMessage(message);
+          if (decoded is Map && decoded['type'] == 'announce') {
+            final data = ByteData(1);
+            data.setUint8(0, 255); // Invalid type byte
+            return data;
+          }
+          return null; // Success for other events
+        },
+      );
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: ExpansionTile(
+              title: Text('Title'),
+              children: <Widget>[SizedBox(height: 100, width: 100)],
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Title'));
+      await tester.pump();
+
+      expect(errors, isNotEmpty);
+      final bool hasAnnouncementError = errors.any(
+        (e) =>
+            e.exception.toString().contains('FormatException') &&
+            e.context.toString().contains('while sending semantics announcement'),
+      );
+      expect(hasAnnouncementError, isTrue);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
+  });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/132264.
   testWidgets(
@@ -2157,5 +2291,32 @@ void main() {
       },
       variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
     );
+  });
+
+  testWidgets('ExpansionTile forwards statesController to ListTile', (tester) async {
+    final controller = WidgetStatesController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: ExpansionTile(title: const Text('Tile'), statesController: controller),
+        ),
+      ),
+    );
+
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
+    expect(listTile.statesController, controller);
+  });
+
+  testWidgets('ExpansionTile forwards null statesController to ListTile', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(child: ExpansionTile(title: Text('Tile'))),
+      ),
+    );
+
+    final ListTile listTile = tester.widget<ListTile>(find.byType(ListTile));
+    expect(listTile.statesController, isNull);
   });
 }

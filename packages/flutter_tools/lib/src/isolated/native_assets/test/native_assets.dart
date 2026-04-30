@@ -77,8 +77,12 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
     fileSystem: globals.fs,
-    buildCodeAssets: true,
+    buildCodeAssets: const BuildCodeAssetsOptions(
+      // We're in tests, so there is no app build directory
+      appBuildDirectory: null,
+    ),
     buildDataAssets: true,
+    recordedUsesFile: null,
   );
 
   // Then "install" the code assets so they can be used at runtime.
@@ -91,7 +95,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     nativeAssetsFileUri: nativeAssetsFileUri,
     targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/$osName/'),
   );
-  assert(await globals.fs.file(nativeAssetsFileUri).exists());
+  assert(globals.fs.file(nativeAssetsFileUri).existsSync());
 
   return nativeAssetsFileUri;
 }

@@ -680,6 +680,21 @@ void main() {
     // TODO(nate-thegrate): add every class!
   });
 
+  testWidgets('AnimatedSlide does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: AnimatedSlide(offset: Offset(100, 0), duration: Duration(milliseconds: 300)),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(AnimatedSlide)), Size.zero);
+  });
+
   testWidgets('AnimatedScale does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(

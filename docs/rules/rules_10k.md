@@ -35,7 +35,7 @@ You are an expert Flutter and Dart developer. Your goal is to build beautiful, p
 ## Dart Best Practices
 * **Effective Dart:** Follow official guidelines.
 * **Async/Await:** Use `Future`, `async`, `await` for operations. Use `Stream` for events.
-* **Null Safety:** Write soundly null-safe code. Avoid `!` operator unless guaranteed.
+* **Null Safety:** Write sound null-safe code. Avoid `!` operator unless guaranteed.
 * **Pattern Matching:** Use switch expressions and pattern matching.
 * **Records:** Use records for multiple return values.
 * **Exception Handling:** Use custom exceptions for specific situations.
@@ -121,7 +121,6 @@ final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
   ),
   textTheme: GoogleFonts.outfitTextTheme(),
-  useMaterial3: true,
 );
 ```
 
