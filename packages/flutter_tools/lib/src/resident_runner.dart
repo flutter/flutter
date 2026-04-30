@@ -819,6 +819,13 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
+    if (flutterDevices.isEmpty || flutterDevices.first?.vmService == null) {
+      logger.printStatus(
+        'Platform toggle is not supported for this device.',
+        emphasis: true,
+      );
+      return false;
+    }
     final List<FlutterView> views = await flutterDevices.first!.vmService!.getFlutterViews();
     final String from = await flutterDevices.first!.vmService!.flutterPlatformOverride(
       isolateId: views.first.uiIsolate!.id!,
