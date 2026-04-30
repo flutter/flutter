@@ -30,6 +30,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface FlutterEngine () <FlutterViewEngineDelegate>
@@ -41,10 +43,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 - (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(flutter::PointData)location
                                                    viewId:(uint64_t)viewId;
-
-- (nullable FlutterFMLTaskRunner*)platformTaskRunner;
-- (nullable FlutterFMLTaskRunner*)uiTaskRunner;
-- (nullable FlutterFMLTaskRunner*)rasterTaskRunner;
 
 - (void)installFirstFrameCallback:(void (^)(void))block;
 - (void)enableSemantics:(BOOL)enabled withFlags:(int64_t)flags;
