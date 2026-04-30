@@ -94,7 +94,7 @@ def main():
   else:
     command += [
         # Record symbols in a separate *.metallibsym file.
-        '-frecord-sources=flat'
+        '-frecord-sources=flat',
     ]
 
   # Select the Metal standard and the minimum supported OS versions.
