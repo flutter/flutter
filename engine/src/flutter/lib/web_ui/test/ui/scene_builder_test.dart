@@ -663,7 +663,7 @@ ui.Picture drawPicture(void Function(ui.Canvas) drawCommands) {
   return recorder.endRecording();
 }
 
-ui.Scene backdropBlurWithTileMode(ui.TileMode? tileMode, final double rectSize, final int count) {
+ui.Scene backdropBlurWithTileMode(ui.TileMode? tileMode, double rectSize, int count) {
   final double imgSize = rectSize * count;
 
   const white = ui.Color(0xFFFFFFFF);

@@ -269,23 +269,13 @@ class _MyPageScaffold extends StatelessWidget {
 
 // A Page that applies a _VerticalPageTransition.
 class _VerticalTransitionPage<T> extends Page<T> {
-  const _VerticalTransitionPage({
-    required this.child,
-    this.maintainState = true,
-    this.fullscreenDialog = false,
-    super.key,
-    super.canPop,
-    super.onPopInvoked,
-    super.name,
-    super.arguments,
-    super.restorationId,
-  });
+  const _VerticalTransitionPage({required this.child, super.restorationId});
 
   final Widget child;
 
-  final bool maintainState;
+  final bool maintainState = true;
 
-  final bool fullscreenDialog;
+  final bool fullscreenDialog = false;
 
   final bool allowSnapshotting;
 

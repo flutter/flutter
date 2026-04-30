@@ -83,3 +83,51 @@ create_kernel_core_snapshot("kernel_core_snapshot") {
 create_kernel_core_snapshot("kernel_core_snapshot_product") {
   product = true
 }
+
+template("create_ffi_callback_stub") {
+  assert(defined(invoker.product), "The parameter 'product' must be defined")
+  product_suffix = ""
+  if (invoker.product) {
+    product_suffix = "_product"
+  }
+
+  compiled_action(target_name) {
+    deps = [ ":kernel_platform_files" ]
+
+    platform_dill = "$root_out_dir/dart_runner_patched_sdk/platform_strong.dill"
+    inputs = [ platform_dill ]
+
+    ffi_callback_stub = "$target_gen_dir/ffi_callback_stub${product_suffix}.bin"
+    outputs = [ ffi_callback_stub ]
+
+    gen_snapshot_to_use = gen_snapshot
+    if (invoker.product) {
+      gen_snapshot_to_use = gen_snapshot_product
+    }
+
+    tool = gen_snapshot_to_use
+
+    args = [
+      "--enable_mirrors=false",
+      "--deterministic",
+      "--snapshot_kind=ffi-callback-stub",
+      "--ffi_callback_stub=" + rebase_path(ffi_callback_stub, root_build_dir),
+    ]
+
+    # No asserts in debug or release product.
+    # No asserts in release with flutter_profile=true (non-product)
+    # Yes asserts in non-product debug.
+    if (!invoker.product && (is_debug || flutter_runtime_mode == "debug")) {
+      args += [ "--enable_asserts" ]
+    }
+    args += [ rebase_path(platform_dill) ]
+  }
+}
+
+create_ffi_callback_stub("ffi_callback_stub") {
+  product = false
+}
+
+create_ffi_callback_stub("ffi_callback_stub_product") {
+  product = true
+}
