@@ -1105,5 +1105,35 @@ TEST_F(WindowManagerTest,
   EXPECT_EQ(style & WS_THICKFRAME, 0L);
 }
 
+TEST_F(WindowManagerTest, UpdateTooltipPositionWithNullHandleDoesNotCrash) {
+  IsolateScope isolate_scope(isolate());
+
+  InternalFlutterWindows_WindowManager_UpdateTooltipPosition(nullptr);
+}
+
+TEST_F(WindowManagerTest, UpdatePopupPositionWithNullHandleDoesNotCrash) {
+  IsolateScope isolate_scope(isolate());
+
+  InternalFlutterWindows_WindowManager_UpdatePopupPosition(nullptr);
+}
+
+TEST_F(WindowManagerTest, UpdateTooltipPositionWithNonFlutterHandleDoesNotCrash) {
+  IsolateScope isolate_scope(isolate());
+
+  // A handle that is valid but not a Flutter HostWindow (e.g., the desktop
+  // window) causes GetThisFromHandle to return nullptr because the class name
+  // does not match. The call must not dereference the null result.
+  InternalFlutterWindows_WindowManager_UpdateTooltipPosition(GetDesktopWindow());
+}
+
+TEST_F(WindowManagerTest, UpdatePopupPositionWithNonFlutterHandleDoesNotCrash) {
+  IsolateScope isolate_scope(isolate());
+
+  // A handle that is valid but not a Flutter HostWindow (e.g., the desktop
+  // window) causes GetThisFromHandle to return nullptr because the class name
+  // does not match. The call must not dereference the null result.
+  InternalFlutterWindows_WindowManager_UpdatePopupPosition(GetDesktopWindow());
+}
+
 }  // namespace testing
 }  // namespace flutter

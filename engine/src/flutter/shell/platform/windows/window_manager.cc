@@ -268,15 +268,19 @@ bool InternalFlutterWindows_WindowManager_GetFullscreen(HWND hwnd) {
 FLUTTER_EXPORT
 void InternalFlutterWindows_WindowManager_UpdateTooltipPosition(HWND hwnd) {
   flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
-  flutter::HostWindowTooltip* tooltip_window =
-      reinterpret_cast<flutter::HostWindowTooltip*>(window);
-  tooltip_window->UpdatePosition();
+  if (window) {
+    flutter::HostWindowTooltip* tooltip_window =
+        reinterpret_cast<flutter::HostWindowTooltip*>(window);
+    tooltip_window->UpdatePosition();
+  }
 }
 
 FLUTTER_EXPORT
 void InternalFlutterWindows_WindowManager_UpdatePopupPosition(HWND hwnd) {
   flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
-  flutter::HostWindowPopup* popup_window =
-      reinterpret_cast<flutter::HostWindowPopup*>(window);
-  popup_window->UpdatePosition();
+  if (window) {
+    flutter::HostWindowPopup* popup_window =
+        reinterpret_cast<flutter::HostWindowPopup*>(window);
+    popup_window->UpdatePosition();
+  }
 }
