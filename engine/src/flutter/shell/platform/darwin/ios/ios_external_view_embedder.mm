@@ -94,6 +94,15 @@ void IOSExternalViewEmbedder::SubmitFlutterView(
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::SubmitFlutterView");
   FML_CHECK(platform_views_controller_);
 
+#ifdef IMPELLER_DEBUG
+  SurfaceFrame::SubmitInfo pending_submit_info = frame->submit_info();
+  // The rasterizer-owned frame ends the Impeller capture scope in debug builds. The pending frame
+  // contains the rendered pixels for this FlutterView, so it must present first without ending that
+  // capture scope. See https://github.com/flutter/flutter/pull/185656.
+  pending_submit_info.frame_boundary = false;
+  pending_frame_->set_submit_info(pending_submit_info);
+#endif  // IMPELLER_DEBUG
+
   [platform_views_controller_ submitFrame:std::move(pending_frame_)
                            withIosContext:ios_context_
                         withFlutterViewId:flutter_view_id];

@@ -941,6 +941,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   background_frame->set_submit_info({
       .frame_damage = previousSubmitInfo.frame_damage,
       .buffer_damage = previousSubmitInfo.buffer_damage,
+      .frame_boundary = previousSubmitInfo.frame_boundary,
       .present_with_transaction = true,
   });
   background_frame->Encode();

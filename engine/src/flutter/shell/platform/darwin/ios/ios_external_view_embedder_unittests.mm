@@ -27,6 +27,7 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
   int submitFrameCalls_;
   uintptr_t lastSubmittedFrameAddress_;
   int64_t lastSubmittedViewId_;
+  bool lastSubmittedFrameBoundary_;
 
   int collectViewCalls_;
   int64_t lastCollectedViewId_;
@@ -47,6 +48,7 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
   submitFrameCalls_++;
   lastSubmittedFrameAddress_ = reinterpret_cast<uintptr_t>(frame.get());
   lastSubmittedViewId_ = flutterViewId;
+  lastSubmittedFrameBoundary_ = frame->submit_info().frame_boundary;
   return YES;
 }
 
@@ -144,6 +146,7 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
       /*frame_size=*/frameSize,
       /*context_result=*/nullptr,
       /*display_list_fallback=*/true);
+  frame->set_submit_info({.frame_boundary = true});
 
   embedder_ref.SubmitFlutterView(/*flutter_view_id=*/kTertiaryFlutterViewId,
                                  /*context=*/nullptr,
@@ -152,6 +155,11 @@ constexpr int64_t kTertiaryFlutterViewId = flutter::kFlutterImplicitViewId + 2;
   XCTAssertEqual(controller->submitFrameCalls_, 1);
   XCTAssertEqual(controller->lastSubmittedViewId_, kTertiaryFlutterViewId);
   XCTAssertEqual(controller->lastSubmittedFrameAddress_, pendingFrameAddress);
+#ifdef IMPELLER_DEBUG
+  XCTAssertFalse(controller->lastSubmittedFrameBoundary_);
+#else
+  XCTAssertTrue(controller->lastSubmittedFrameBoundary_);
+#endif  // IMPELLER_DEBUG
   XCTAssertTrue(frameWasSubmitted);
 }
 

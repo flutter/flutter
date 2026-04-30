@@ -535,7 +535,8 @@ static BOOL _preparedOnce = NO;
     self.multipleTouchEnabled = YES;
     _embeddedView = embeddedView;
     _platformViewsController = platformViewsController;
-    _flutterViewController = platformViewsController.flutterViewController;
+    _flutterViewController =
+        [platformViewsController flutterViewControllerForIdentifier:flutterViewId];
     embeddedView.autoresizingMask =
         (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
 
@@ -627,10 +628,12 @@ static BOOL _preparedOnce = NO;
 }
 
 - (UIView*)hitTest:(CGPoint)point withEvent:(UIEvent*)event {
-  // In release mode, FlutterTouchInterceptingView's init is called before flutterViewController
-  // is set on platformViewsController.
-  if (self.flutterViewController == nil) {
-    _flutterViewController = self.platformViewsController.flutterViewController;
+  // The platform view can be created before its FlutterViewController is attached, and controllers
+  // can be replaced after creation. Resolve from the view id at the start of hit testing.
+  _flutterViewController =
+      [self.platformViewsController flutterViewControllerForIdentifier:self.flutterViewId];
+  if (_flutterViewController == nil) {
+    return self;
   }
   CGPoint pointInFlutterView = [self convertPoint:point toView:self.flutterViewController.view];
   // Consult the framework on if the touch should be handled by the platform view.
