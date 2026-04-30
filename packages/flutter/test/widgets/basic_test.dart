@@ -325,6 +325,19 @@ void main() {
         ),
       );
     });
+
+    testWidgets('FractionalTranslation does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      const offset = Offset(0.4, 0.4);
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(child: FractionalTranslation(translation: offset)),
+        ),
+      );
+      expect(tester.getSize(find.byType(FractionalTranslation)), Size.zero);
+    });
   });
 
   group('Semantics', () {
