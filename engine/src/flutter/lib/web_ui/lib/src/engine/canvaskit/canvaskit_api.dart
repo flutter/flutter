@@ -492,6 +492,16 @@ SkFillType toSkFillType(ui.PathFillType fillType) {
   return _skFillTypes[fillType.index];
 }
 
+ui.PathFillType fromSkFillType(SkFillType fillType) {
+  if (fillType == canvasKit.FillType.Winding) {
+    return ui.PathFillType.nonZero;
+  }
+  if (fillType == canvasKit.FillType.EvenOdd) {
+    return ui.PathFillType.evenOdd;
+  }
+  throw UnimplementedError('Unsupported SkFillType: $fillType');
+}
+
 extension type SkPathOpEnum(JSObject _) implements JSObject {
   external SkPathOp get Difference;
   external SkPathOp get Intersect;
@@ -1301,6 +1311,7 @@ final SkFloat32List _sharedSkColor3 = mallocFloat32List(4);
 
 @JS('window.flutterCanvasKit.Path')
 extension type SkPath._(JSObject _) implements JSObject {
+  external SkFillType getFillType();
   external void setFillType(SkFillType fillType);
 
   @JS('getBounds')
@@ -2253,6 +2264,13 @@ extension type SkParagraph(JSObject _) implements JSObject {
   external SkGlyphClusterInfo? _getClosestGlyphInfoAtCoordinate(double x, double y);
   ui.GlyphInfo? getClosestGlyphInfoAt(double x, double y) =>
       _getClosestGlyphInfoAtCoordinate(x, y)?._glyphInfo;
+
+  @JS('unresolvedCodepoints')
+  external JSArray<JSNumber> _getUnresolvedCodePoints();
+  List<int> getUnresolvedCodePoints() {
+    final List<JSNumber> jsNumbers = _getUnresolvedCodePoints().toDart;
+    return List<int>.generate(jsNumbers.length, (int i) => jsNumbers[i].toDartInt);
+  }
 
   external SkTextRange getWordBoundary(double position);
   external void layout(double width);

@@ -55,10 +55,10 @@ std::shared_ptr<DeviceBufferGLES> CreateBuffer(
   DeviceBufferDescriptor buffer_desc;
   buffer_desc.size = 10 * 10 * 4;
   buffer_desc.storage_mode = StorageMode::kHostVisible;
-  auto allocation = std::make_shared<Allocation>();
+  auto allocation = std::make_unique<Allocation>();
   FML_CHECK(allocation->Truncate(Bytes(buffer_desc.size)));
-  auto buffer =
-      std::make_shared<DeviceBufferGLES>(buffer_desc, reactor, allocation);
+  auto buffer = std::make_shared<DeviceBufferGLES>(buffer_desc, reactor,
+                                                   std::move(allocation));
   return buffer;
 }
 

@@ -18,6 +18,8 @@
 
 - (void)closeAllWindows;
 
+- (void)fixMoveRunLoopModeIfNeeded;
+
 @end
 
 struct FlutterWindowRect {

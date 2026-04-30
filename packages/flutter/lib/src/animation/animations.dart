@@ -338,6 +338,14 @@ class ReverseAnimation extends Animation<double>
 ///
 /// If you want to apply a [Curve] to a [Tween], consider using [CurveTween].
 ///
+/// A [CurvedAnimation] should be disposed when no longer needed to clean up
+/// any listeners that it may have added. Disposing the
+/// parent animation (typically the [AnimationController]) will also clean up
+/// this object. Do not create a [CurvedAnimation] inside a `build` method
+/// because it would leak any added listeners on every rebuild. If [reverseCurve] is
+/// not needed, prefer `parent.drive(CurveTween(curve: curve))` which does not
+/// require separate disposal.
+///
 /// {@tool snippet}
 ///
 /// The following code snippet shows how you can apply a curve to a linear
@@ -398,10 +406,12 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   /// [CurvedAnimation] stays on the same curve (albeit in the opposite
   /// direction) to avoid visual discontinuities.
   ///
-  /// If you use a non-null [reverseCurve], you might want to hold this object
-  /// in a [State] object rather than recreating it each time your widget builds
-  /// in order to take advantage of the state in this object that avoids visual
-  /// discontinuities.
+  /// Because [CurvedAnimation] may add listeners to its parent, it must be
+  /// created once (for example in [State.initState]) and disposed in
+  /// [State.dispose]. Do not recreate it on every build as it would leak any
+  /// added listeners on every rebuild. If [reverseCurve] is not needed, prefer
+  /// `parent.drive(CurveTween(curve: curve))` which does not require separate
+  /// disposal.
   ///
   /// If this field is null, uses [curve] in both directions.
   Curve? reverseCurve;
