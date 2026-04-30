@@ -126,7 +126,10 @@ void main() {
         final LaunchResult launchResult = await device.startApp(
           apk,
           prebuiltApplication: true,
-          debuggingOptions: DebuggingOptions.disabled(BuildInfo.release, enableDartProfiling: false),
+          debuggingOptions: DebuggingOptions.disabled(
+            BuildInfo.release,
+            enableDartProfiling: false,
+          ),
           platformArgs: <String, dynamic>{},
         );
 
@@ -344,7 +347,10 @@ void main() {
 
       expect(launchResult.started, true);
       expect(processManager, hasNoRemainingExpectations);
-      expect(fakeAndroidBuilder.capturedAndroidShellArgs, contains('--enable-hcpp-and-surface-control'));
+      expect(
+        fakeAndroidBuilder.capturedAndroidShellArgs,
+        contains('--enable-hcpp-and-surface-control'),
+      );
     },
     overrides: <Type, Generator>{
       AndroidBuilder: () => fakeAndroidBuilder,
