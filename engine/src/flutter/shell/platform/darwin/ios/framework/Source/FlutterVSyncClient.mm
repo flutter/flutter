@@ -48,11 +48,13 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
 }
 
 - (instancetype)initWithTaskRunner:(FlutterFMLTaskRunner*)taskRunner
-                          callback:(void (^)(CFTimeInterval targetTime))callback {
+                          callback:(void (^)(CFTimeInterval startTime,
+                                             CFTimeInterval targetTime))callback {
   fml::RefPtr<fml::TaskRunner> runner = taskRunner.taskRunner;
   auto cpp_callback = [callback](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
+    double start_time_seconds = recorder->GetVsyncStartTime().ToEpochDelta().ToSecondsF();
     double target_time_seconds = recorder->GetVsyncTargetTime().ToEpochDelta().ToSecondsF();
-    callback(target_time_seconds);
+    callback(start_time_seconds, target_time_seconds);
   };
   return [self initWithTaskRunnerPtr:runner callback:cpp_callback];
 }

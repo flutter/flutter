@@ -41,9 +41,9 @@
 #import "flutter/shell/platform/embedder/embedder.h"
 #import "flutter/third_party/spring_animation/spring_animation.h"
 
-FLUTTER_ASSERT_ARC
+        FLUTTER_ASSERT_ARC
 
-static constexpr int kMicrosecondsPerSecond = 1000 * 1000;
+    static constexpr int kMicrosecondsPerSecond = 1000 * 1000;
 static constexpr CGFloat kScrollViewContentSize = 2.0;
 
 static NSString* const kFlutterRestorationStateAppData = @"FlutterRestorationStateAppData";
@@ -1298,9 +1298,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
 
-  void (^callback)(CFTimeInterval) = ^(CFTimeInterval targetTime) {
-    // Do nothing in this block. Just trigger system to callback touch events with correct rate.
-  };
+  void (^callback)(CFTimeInterval, CFTimeInterval) =
+      ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+        // Do nothing in this block. Just trigger system to callback touch events with correct rate.
+      };
   _touchRateCorrectionVSyncClient =
       [[FlutterVSyncClient alloc] initWithTaskRunner:self.engine.platformTaskRunner
                                             callback:callback];

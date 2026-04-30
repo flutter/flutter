@@ -395,9 +395,11 @@
   FlutterKeyboardAnimationCallback animationCallback = [keyboardAnimationCallback copy];
 
   id<FlutterKeyboardInsetManagerDelegate> delegate = self.delegate;
-  auto vsyncCallback = ^(CFTimeInterval targetTime) {
+  auto vsyncCallback = ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+    CFTimeInterval frameInterval = targetTime - startTime;
+    CFTimeInterval projectedTargetTime = targetTime + frameInterval;
     dispatch_async(dispatch_get_main_queue(), ^(void) {
-      animationCallback(targetTime);
+      animationCallback(projectedTargetTime);
     });
   };
   _keyboardAnimationVSyncClient =

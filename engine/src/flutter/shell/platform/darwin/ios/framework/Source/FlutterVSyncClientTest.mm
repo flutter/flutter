@@ -32,10 +32,10 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testSetAllowPauseAfterVsyncCorrect {
-  FlutterVSyncClient* vsyncClient =
-      [[FlutterVSyncClient alloc] initWithTaskRunner:self.threadTaskRunner
-                                            callback:^(CFTimeInterval targetTime){
-                                            }];
+  FlutterVSyncClient* vsyncClient = [[FlutterVSyncClient alloc]
+      initWithTaskRunner:self.threadTaskRunner
+                callback:^(CFTimeInterval startTime, CFTimeInterval targetTime){
+                }];
   CADisplayLink* link = vsyncClient.displayLink;
   vsyncClient.allowPauseAfterVsync = NO;
   [vsyncClient await];
@@ -49,8 +49,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testSetCorrectVariableRefreshRates {
-  void (^callback)(CFTimeInterval) = ^(CFTimeInterval targetTime) {
-  };
+  void (^callback)(CFTimeInterval, CFTimeInterval) =
+      ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+      };
   id bundleMock = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([bundleMock objectForInfoDictionaryKey:kCADisableMinimumFrameDurationOnPhoneKey])
       .andReturn(@YES);
@@ -71,8 +72,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testDoNotSetVariableRefreshRatesIfCADisableMinimumFrameDurationOnPhoneIsNotOn {
-  void (^callback)(CFTimeInterval) = ^(CFTimeInterval targetTime) {
-  };
+  void (^callback)(CFTimeInterval, CFTimeInterval) =
+      ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+      };
   id bundleMock = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([bundleMock objectForInfoDictionaryKey:kCADisableMinimumFrameDurationOnPhoneKey])
       .andReturn(@NO);
@@ -93,8 +95,9 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testDoNotSetVariableRefreshRatesIfCADisableMinimumFrameDurationOnPhoneIsNotSet {
-  void (^callback)(CFTimeInterval) = ^(CFTimeInterval targetTime) {
-  };
+  void (^callback)(CFTimeInterval, CFTimeInterval) =
+      ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+      };
   id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;
   [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
@@ -111,10 +114,10 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)testAwaitAndPauseWillWorkCorrectly {
-  FlutterVSyncClient* vsyncClient =
-      [[FlutterVSyncClient alloc] initWithTaskRunner:self.threadTaskRunner
-                                            callback:^(CFTimeInterval targetTime){
-                                            }];
+  FlutterVSyncClient* vsyncClient = [[FlutterVSyncClient alloc]
+      initWithTaskRunner:self.threadTaskRunner
+                callback:^(CFTimeInterval startTime, CFTimeInterval targetTime){
+                }];
 
   CADisplayLink* link = vsyncClient.displayLink;
   XCTAssertTrue(link.isPaused);
@@ -135,11 +138,11 @@ FLUTTER_ASSERT_ARC
   @autoreleasepool {
     XCTestExpectation* vsyncExpectation = [self expectationWithDescription:@"vsync"];
 
-    FlutterVSyncClient* client =
-        [[FlutterVSyncClient alloc] initWithTaskRunner:threadTaskRunner
-                                              callback:^(CFTimeInterval targetTime) {
-                                                [vsyncExpectation fulfill];
-                                              }];
+    FlutterVSyncClient* client = [[FlutterVSyncClient alloc]
+        initWithTaskRunner:threadTaskRunner
+                  callback:^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+                    [vsyncExpectation fulfill];
+                  }];
     weakClient = client;
 
     [threadTaskRunner postTask:^{

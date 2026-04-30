@@ -66,7 +66,8 @@ NS_SWIFT_NAME(VSyncClient)
 @property(nonatomic, assign) BOOL allowPauseAfterVsync;
 
 - (instancetype)initWithTaskRunner:(FlutterFMLTaskRunner*)taskRunner
-                          callback:(void (^)(CFTimeInterval targetTime))callback;
+                          callback:(void (^)(CFTimeInterval startTime,
+                                             CFTimeInterval targetTime))callback;
 
 - (void)await;
 
