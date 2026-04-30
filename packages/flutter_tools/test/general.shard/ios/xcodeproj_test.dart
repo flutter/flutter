@@ -2506,7 +2506,9 @@ flutter:
             'xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
           ],
           stdout:
-              '12345 xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
+              '12345 /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild '
+              '-clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages '
+              '-resolvePackageDependencies',
         ),
         const FakeCommand(command: <String>['kill', '12345']),
         FakeCommand(
@@ -2583,7 +2585,9 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
           'xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
         ],
         stdout:
-            'abc xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
+            'abc /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild '
+            '-clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages '
+            '-resolvePackageDependencies',
       ),
       FakeCommand(
         command: <String>[
@@ -2806,7 +2810,9 @@ Resolved source packages:
             'xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
           ],
           stdout:
-              '12345 xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
+              '12345 /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild '
+              '-clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages '
+              '-resolvePackageDependencies',
         ),
         const FakeCommand(command: <String>['kill', '12345']),
         FakeCommand(
