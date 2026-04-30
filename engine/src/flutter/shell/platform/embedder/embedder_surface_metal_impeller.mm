@@ -49,7 +49,11 @@ EmbedderSurfaceMetalImpeller::EmbedderSurfaceMetalImpeller(
       std::make_shared<fml::SyncSwitch>(false),     // is_gpu_disabled_sync_switch
       "Impeller Library"                            // library_label
   );
-  FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Metal).";
+  if (impeller_flags.use_sdfs) {
+    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (MetalSDF).";
+  } else {
+    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Metal).";
+  }
 
   valid_ = !!context_;
 }

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -309,6 +310,105 @@ void main() {
       FileSystem: () => fileSystem,
       FlutterVersion: () => FakeFlutterVersion(
         branch: 'beta',
+        frameworkVersion: startingTag,
+        engineRevision: 'engine',
+      ),
+      Logger: () => logger,
+      ProcessManager: () => processManager,
+    },
+  );
+  testUsingContext(
+    'allows upgrading if the only local modifications are pubspec.lock files',
+    () async {
+      final reEntryCompleter = Completer<void>();
+
+      Future<void> reEnterTool(List<String> args) async {
+        reEntryCompleter.complete();
+      }
+
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['git', 'tag', '--points-at', 'HEAD'],
+          stdout: startingTag,
+        ),
+        const FakeCommand(command: <String>['git', 'fetch', '--tags']),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
+          stdout: upstreamHeadRevision,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'tag', '--points-at', upstreamHeadRevision],
+          stdout: latestUpstreamTag,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'status', '-s'],
+          stdout: ' M packages/flutter/pubspec.lock\n M packages/flutter_tools/pubspec.lock\n',
+        ),
+        const FakeCommand(command: <String>['git', 'reset', '--hard', upstreamHeadRevision]),
+        FakeCommand(
+          command: const <String>[
+            'bin/flutter',
+            'upgrade',
+            '--continue',
+            '--continue-started-at',
+            '2026-01-01T00:00:00.000Z',
+            '--no-version-check',
+          ],
+          onRun: reEnterTool,
+          completer: reEntryCompleter,
+        ),
+      ]);
+
+      await runner.run(<String>['upgrade']);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FlutterVersion: () =>
+          FakeFlutterVersion(frameworkVersion: startingTag, engineRevision: 'engine'),
+      Logger: () => logger,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'fails upgrading on stable if pubspec.lock files are modified',
+    () async {
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['git', 'tag', '--points-at', 'HEAD'],
+          stdout: startingTag,
+        ),
+        const FakeCommand(command: <String>['git', 'fetch', '--tags']),
+        const FakeCommand(
+          command: <String>['git', 'rev-parse', '--verify', '@{upstream}'],
+          stdout: upstreamHeadRevision,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'tag', '--points-at', upstreamHeadRevision],
+          stdout: latestUpstreamTag,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'status', '-s'],
+          stdout: ' M packages/flutter/pubspec.lock\n',
+        ),
+      ]);
+
+      expect(
+        () => runner.run(<String>['upgrade']),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.message,
+            'message',
+            contains('Your flutter checkout has local changes'),
+          ),
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FlutterVersion: () => FakeFlutterVersion(
+        branch: 'stable',
         frameworkVersion: startingTag,
         engineRevision: 'engine',
       ),
