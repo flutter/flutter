@@ -815,6 +815,9 @@ abstract class ResidentHandlers {
   }
 
   /// Rotate the application through different `defaultTargetPlatform` values.
+  ///
+  /// Returns false and logs a message if the device does not support
+  /// platform toggling (e.g. web-server devices where [vmService] is null).
   Future<bool> debugTogglePlatform() async {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
