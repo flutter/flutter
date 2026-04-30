@@ -99,6 +99,8 @@ class Geometry {
 
   virtual GeometryResult::Mode GetResultMode() const;
 
+  /// @brief The coverage rectangle of this geometry, transformed by the
+  ///        `transform` argument.
   virtual std::optional<Rect> GetCoverage(const Matrix& transform) const = 0;
 
   /// @brief Compute an alpha value to simulate lower coverage of fractional

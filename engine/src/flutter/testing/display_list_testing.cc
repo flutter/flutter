@@ -11,6 +11,8 @@
 #include "flutter/display_list/dl_canvas.h"
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_sources.h"
+#include "flutter/display_list/image/dl_image_skia.h"
+
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/impeller/typographer/text_frame.h"
 
@@ -329,13 +331,11 @@ std::ostream& operator<<(std::ostream& os, const DlImage* image) {
     return os << "null image";
   }
   os << "&DlImage(" << image->width() << " x " << image->height() << ", ";
-  if (image->skia_image()) {
-    os << "skia(" << image->skia_image().get() << "), ";
+  auto skia_image = image->asSkiaImage();
+  if (skia_image && skia_image->skia_image()) {
+    os << "skia(" << skia_image->skia_image().get() << "), ";
   }
-  if (image->impeller_texture()) {
-    os << "impeller(" << image->impeller_texture().get() << "), ";
-  }
-  return os << "isTextureBacked: " << image->isTextureBacked() << ")";
+  return os << "type: " << (image->GetImageType() == DlImage::Type::kSkia ? "Skia" : "Impeller") << ")";
 }
 
 std::ostream& operator<<(std::ostream& os,

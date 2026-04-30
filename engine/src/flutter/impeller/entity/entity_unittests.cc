@@ -35,6 +35,7 @@
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/tiled_texture_contents.h"
 #include "impeller/entity/contents/uber_sdf_contents.h"
+#include "impeller/entity/contents/uber_sdf_parameters.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_playground.h"
 #include "impeller/entity/geometry/geometry.h"
@@ -42,6 +43,7 @@
 #include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/entity/geometry/superellipse_geometry.h"
+#include "impeller/entity/geometry/uber_sdf_geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/geometry/point.h"
@@ -66,10 +68,6 @@ namespace testing {
 
 using EntityTest = EntityPlayground;
 INSTANTIATE_PLAYGROUND_SUITE(EntityTest);
-
-Rect RectMakeCenterSize(Point center, Size size) {
-  return Rect::MakeSize(size).Shift(center - size / 2);
-}
 
 TEST_P(EntityTest, CanCreateEntity) {
   Entity entity;
@@ -1232,11 +1230,12 @@ TEST_P(EntityTest, ContentsGetBoundsForEmptyPathReturnsNullopt) {
   ASSERT_FALSE(entity.GetCoverage().has_value());
 }
 
-TEST(EntityTest, UberSDFContentsCoverage) {
+TEST(EntityTest, UberSDFContentsCoverageFillRect) {
   auto rect = Rect::MakeXYWH(100, 100, 200, 200);
-  FillRectGeometry geometry(rect.Expand(1.0f));
-  auto contents = UberSDFContents::MakeRect(Color::Red(), 0.0f, Join::kMiter,
-                                            false, &geometry);
+  auto params =
+      UberSDFParameters::MakeRect(Color::Red(), rect, /*stroke=*/std::nullopt);
+  auto geometry = std::make_unique<UberSDFGeometry>(params);
+  auto contents = UberSDFContents::Make(params, std::move(geometry));
 
   Entity entity;
   auto coverage = contents->GetCoverage(entity);
@@ -1244,6 +1243,51 @@ TEST(EntityTest, UberSDFContentsCoverage) {
   ASSERT_RECT_NEAR(
       coverage.value(),
       Rect::MakeXYWH(100, 100, 200, 200).Expand(1.0f));  // expanded by AA
+}
+
+TEST(EntityTest, UberSDFContentsCoverageStrokeRect) {
+  auto rect = Rect::MakeXYWH(100, 100, 200, 200);
+  auto params = UberSDFParameters::MakeRect(Color::Red(), rect,
+                                            StrokeParameters{.width = 4.0f});
+  auto geometry = std::make_unique<UberSDFGeometry>(params);
+  auto contents = UberSDFContents::Make(params, std::move(geometry));
+
+  Entity entity;
+  auto coverage = contents->GetCoverage(entity);
+  ASSERT_TRUE(coverage.has_value());
+  ASSERT_RECT_NEAR(coverage.value(),
+                   Rect::MakeXYWH(100, 100, 200, 200)
+                       .Expand(3.0f));  // expanded by half stroke width + AA
+}
+
+TEST(EntityTest, UberSDFContentsCoverageFillCircle) {
+  auto params =
+      UberSDFParameters::MakeCircle(Color::Red(), /*center=*/{50, 50},
+                                    /*radius=*/10.0f, /*stroke=*/std::nullopt);
+  auto geometry = std::make_unique<UberSDFGeometry>(params);
+  auto contents = UberSDFContents::Make(params, std::move(geometry));
+
+  Entity entity;
+  auto coverage = contents->GetCoverage(entity);
+  ASSERT_TRUE(coverage.has_value());
+  ASSERT_RECT_NEAR(
+      coverage.value(),
+      Rect::MakeXYWH(40, 40, 20, 20).Expand(1.0f));  // expanded by AA
+}
+
+TEST(EntityTest, UberSDFContentsCoverageStrokeCircle) {
+  auto params = UberSDFParameters::MakeCircle(Color::Red(), /*center=*/{50, 50},
+                                              /*radius=*/10.0f,
+                                              StrokeParameters{.width = 4.0f});
+  auto geometry = std::make_unique<UberSDFGeometry>(params);
+  auto contents = UberSDFContents::Make(params, std::move(geometry));
+
+  Entity entity;
+  auto coverage = contents->GetCoverage(entity);
+  ASSERT_TRUE(coverage.has_value());
+  ASSERT_RECT_NEAR(coverage.value(),
+                   Rect::MakeXYWH(40, 40, 20, 20)
+                       .Expand(3.0f));  // expanded by half stroke width + AA
 }
 
 TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
@@ -2479,8 +2523,8 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     // UI state.
     static int style_index = 0;
-    static float center[2] = {830, 830};
-    static float size[2] = {600, 600};
+    static Point center = {830, 830};
+    static Point size = {600, 600};
     static bool horizontal_symmetry = true;
     static bool vertical_symmetry = true;
     static bool corner_symmetry = true;
@@ -2524,8 +2568,8 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
     {
       ImGui::Combo("Style", &style_index, style_options,
                    sizeof(style_options) / sizeof(char*));
-      ImGui::SliderFloat2("Center", center, 0, 1000);
-      ImGui::SliderFloat2("Size", size, 0, 1000);
+      ImGui::SliderFloat2("Center", &center.x, 0, 1000);
+      ImGui::SliderFloat2("Size", &size.x, 0, 1000);
       ImGui::Checkbox("Symmetry: Horizontal", &horizontal_symmetry);
       ImGui::Checkbox("Symmetry: Vertical", &vertical_symmetry);
       ImGui::Checkbox("Symmetry: Corners", &corner_symmetry);
@@ -2561,14 +2605,13 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
     };
 
     auto rse = RoundSuperellipse::MakeRectRadii(
-        RectMakeCenterSize({center[0], center[1]}, {size[0], size[1]}), radii);
+        Rect::MakeEllipseBounds(center, size * 0.5f), radii);
 
     flutter::DlPath path;
     std::unique_ptr<Geometry> geom;
     if (style_index == 0) {
       geom = std::make_unique<RoundSuperellipseGeometry>(
-          RectMakeCenterSize({center[0], center[1]}, {size[0], size[1]}),
-          radii);
+          Rect::MakeEllipseBounds(center, size * 0.5f), radii);
     } else {
       path = flutter::DlPath::MakeRoundSuperellipse(rse);
       geom = Geometry::MakeStrokePath(path, {.width = 2.0f});

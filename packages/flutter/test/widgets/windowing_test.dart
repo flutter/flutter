@@ -217,7 +217,10 @@ void main() {
       test('default WindowingOwner throws when accessing createRegularWindowController', () {
         final WindowingOwner owner = createDefaultWindowingOwner();
         expect(
-          () => owner.createRegularWindowController(delegate: RegularWindowControllerDelegate()),
+          () => owner.createRegularWindowController(
+            delegate: RegularWindowControllerDelegate(),
+            resizable: true,
+          ),
           throwsUnsupportedError,
         );
       });
@@ -225,7 +228,10 @@ void main() {
       test('default WindowingOwner throws when accessing createDialogWindowController', () {
         final WindowingOwner owner = createDefaultWindowingOwner();
         expect(
-          () => owner.createDialogWindowController(delegate: DialogWindowControllerDelegate()),
+          () => owner.createDialogWindowController(
+            delegate: DialogWindowControllerDelegate(),
+            resizable: true,
+          ),
           throwsUnsupportedError,
         );
       });

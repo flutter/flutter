@@ -21,6 +21,8 @@
 		E09898DE2853DBE800064317 /* ViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = E09898DD2853DBE800064317 /* ViewFactory.m */; };
 		E09898E12853DC3C00064317 /* TextFieldFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = E09898E02853DC3C00064317 /* TextFieldFactory.m */; };
 		E09898E92853E9F000064317 /* PlatformViewUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = E09898E82853E9F000064317 /* PlatformViewUITests.m */; };
+		E0DC4BCE2F69D8FA00CBE9CF /* drawing_website.html in Resources */ = {isa = PBXBuildFile; fileRef = E0DC4BCD2F69D8FA00CBE9CF /* drawing_website.html */; };
+		E0DC4BD12F69D91800CBE9CF /* DrawingWebViewFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = E0DC4BD02F69D91800CBE9CF /* DrawingWebViewFactory.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,6 +77,9 @@
 		E09898E02853DC3C00064317 /* TextFieldFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextFieldFactory.m; sourceTree = "<group>"; };
 		E09898E62853E9F000064317 /* PlatformViewUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PlatformViewUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E09898E82853E9F000064317 /* PlatformViewUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PlatformViewUITests.m; sourceTree = "<group>"; };
+		E0DC4BCD2F69D8FA00CBE9CF /* drawing_website.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = drawing_website.html; sourceTree = "<group>"; };
+		E0DC4BCF2F69D90D00CBE9CF /* DrawingWebViewFactory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DrawingWebViewFactory.h; sourceTree = "<group>"; };
+		E0DC4BD02F69D91800CBE9CF /* DrawingWebViewFactory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DrawingWebViewFactory.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,10 +143,13 @@
 				E09898DD2853DBE800064317 /* ViewFactory.m */,
 				E090076F2F3A6FE400B349AE /* WebViewFactory.h */,
 				E09007702F3A6FE400B349AE /* WebViewFactory.m */,
+				E0DC4BCF2F69D90D00CBE9CF /* DrawingWebViewFactory.h */,
+				E0DC4BD02F69D91800CBE9CF /* DrawingWebViewFactory.m */,
 				E090082E2F47BE8500B349AE /* LinkNavigationWebView.h */,
 				E090082F2F47BE8500B349AE /* LinkNavigationWebView.m */,
 				E09008282F47BAFB00B349AE /* FakeAdMobBannerFactory.h */,
 				E09008292F47BAFB00B349AE /* FakeAdMobBannerFactory.m */,
+				E0DC4BCD2F69D8FA00CBE9CF /* drawing_website.html */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
@@ -252,6 +260,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E0DC4BCE2F69D8FA00CBE9CF /* drawing_website.html in Resources */,
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
@@ -314,6 +323,7 @@
 				E090082A2F47BAFB00B349AE /* FakeAdMobBannerFactory.m in Sources */,
 				E0440002299C782300D02513 /* ButtonFactory.m in Sources */,
 				E09898E12853DC3C00064317 /* TextFieldFactory.m in Sources */,
+				E0DC4BD12F69D91800CBE9CF /* DrawingWebViewFactory.m in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				E09898DE2853DBE800064317 /* ViewFactory.m in Sources */,
 			);

@@ -38,11 +38,11 @@ class TestTimeRecorder {
   }
 
   @visibleForTesting
-  Stopwatch getPhaseWallClockStopwatchForTesting(final TestTimePhases phase) {
+  Stopwatch getPhaseWallClockStopwatchForTesting(TestTimePhases phase) {
     return _phaseRecords[phase.index]._wallClockRuntime;
   }
 
-  String _getPrintStringForPhase(final TestTimePhases phase) {
+  String _getPrintStringForPhase(TestTimePhases phase) {
     assert(_phaseRecords[phase.index].isDone());
     return 'Runtime for phase ${phase.name}: ${_phaseRecords[phase.index]}';
   }
