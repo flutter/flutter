@@ -199,7 +199,6 @@ struct Vector3 {
         aScale * a.z + bScale * b.z,  //
     };
   }
-
 };
 
 // RHS algebraic operations with arithmetic types.
