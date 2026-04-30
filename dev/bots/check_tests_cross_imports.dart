@@ -465,10 +465,9 @@ sealed class _Library {
       throw ArgumentError('Directory must be inside ${flutterRoot.absolute.path}.', 'directory');
     }
 
-    final String relativePath = path.relative(
-      directory.absolute.path,
-      from: flutterRoot.absolute.path,
-    );
+    final String relativePath = path
+        .relative(directory.absolute.path, from: flutterRoot.absolute.path)
+        .replaceAll(Platform.pathSeparator, '/');
 
     return switch (relativePath) {
       'packages/flutter/test/material' => const _MaterialLibrary(),
