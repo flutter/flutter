@@ -25,7 +25,7 @@ class DlSurfaceProviderImpeller : public DlSurfaceProvider {
       size_t height,
       PixelFormat format) const override;
   bool SupportsPixelFormat(PixelFormat format) const override;
-  bool SupportsImpeller() const override;
+  bool TargetsImpeller() const override;
 
  protected:
   DlSurfaceProviderImpeller();
@@ -33,7 +33,8 @@ class DlSurfaceProviderImpeller : public DlSurfaceProvider {
   virtual impeller::PlaygroundImpl* GetPlayground() const = 0;
 
   static std::unique_ptr<impeller::PlaygroundImpl> MakePlayground(
-      impeller::PlaygroundBackend backend);
+      impeller::PlaygroundBackend backend,
+      const impeller::PlaygroundSwitches& switches);
 
  private:
   std::shared_ptr<DlSurfaceInstance> primary_;

@@ -4,9 +4,68 @@
 
 #include "flutter/display_list/testing/skia/dl_test_surface_instance_skia.h"
 
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
+#include "flutter/fml/safe_math.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
+
+namespace {
+
+class DlSkiaPixelData : public flutter::testing::DlPixelData {
+ public:
+  DlSkiaPixelData(sk_sp<SkImage> raster_image) {
+    SkImageInfo info = raster_image->imageInfo();
+    info = SkImageInfo::MakeN32Premul(info.dimensions());
+    if (info.bytesPerPixel() == 4) {
+      fml::SafeMath safe_math;
+      size_t byte_count =
+          safe_math.mul(info.computeMinByteSize(), info.height());
+      if (!safe_math.overflow_detected()) {
+        pixels_.reset(static_cast<uint8_t*>(std::malloc(byte_count)));
+        if (pixels_.get()) {
+          pixmap_.reset(info, pixels_.get(), info.minRowBytes());
+          if (raster_image->readPixels(pixmap_, 0, 0)) {
+            is_valid_ = true;
+          }
+        }
+      }
+    }
+  }
+
+  ~DlSkiaPixelData() override = default;
+
+  const uint32_t* addr32(uint32_t x, uint32_t y) const override {
+    return static_cast<const uint32_t*>(pixmap_.addr(x, y));
+  }
+
+  size_t width() const override { return pixmap_.info().width(); }
+  size_t height() const override { return pixmap_.info().height(); }
+
+  virtual bool write(const std::string& path) const override {
+    sk_sp<SkData> data = SkPngEncoder::Encode(pixmap_, {});
+    if (!data) {
+      return false;
+    }
+    fml::NonOwnedMapping mapping(static_cast<const uint8_t*>(data->data()),
+                                 data->size());
+    return WriteAtomically(flutter::testing::OpenFixturesDirectory(),
+                           path.c_str(), mapping);
+  }
+
+  bool IsValid() { return is_valid_; }
+
+ private:
+  SkPixmap pixmap_;
+  bool is_valid_ = false;
+
+  struct FreeDeleter {
+    void operator()(uint8_t* p) { std::free(p); }
+  };
+  std::unique_ptr<uint8_t, FreeDeleter> pixels_;
+};
+
+}  // namespace
 
 namespace flutter {
 namespace testing {
@@ -27,6 +86,7 @@ void DlSurfaceInstanceSkiaBase::Clear(const DlColor& color) {
 DlCanvas* DlSurfaceInstanceSkiaBase::GetCanvas() {
   if (adapter_.canvas() == nullptr) {
     adapter_.set_canvas(GetSurface()->getCanvas());
+    adapter_.canvas()->save();
   }
   return &adapter_;
 }
@@ -45,19 +105,16 @@ void DlSurfaceInstanceSkiaBase::FlushSubmitCpuSync() {
           GrAsDirectContext(surface->recordingContext())) {
     dContext->flushAndSubmit(surface.get(), GrSyncCpu::kYes);
   }
+  adapter_.canvas()->restoreToCount(0);
+  adapter_.canvas()->save();
 }
 
 bool DlSurfaceInstanceSkiaBase::SnapshotToFile(std::string& filename) const {
-  auto surface = GetSurface();
-  auto image = surface->makeImageSnapshot();
-  if (!image) {
-    return false;
-  }
-  auto raster = image->makeRasterImage(nullptr);
+  sk_sp<SkImage> raster = GetRasterImage();
   if (!raster) {
     return false;
   }
-  auto data = SkPngEncoder::Encode(nullptr, raster.get(), {});
+  sk_sp<SkData> data = SkPngEncoder::Encode(nullptr, raster.get(), {});
   if (!data) {
     return false;
   }
@@ -66,12 +123,41 @@ bool DlSurfaceInstanceSkiaBase::SnapshotToFile(std::string& filename) const {
   return WriteAtomically(OpenFixturesDirectory(), filename.c_str(), mapping);
 }
 
+std::shared_ptr<DlPixelData>
+DlSurfaceInstanceSkiaBase::SnapshotToPixelData() const {
+  sk_sp<SkImage> raster = GetRasterImage();
+  if (!raster) {
+    return nullptr;
+  }
+
+  std::shared_ptr<DlSkiaPixelData> snapshot =
+      std::make_shared<DlSkiaPixelData>(raster);
+  if (!snapshot->IsValid()) {
+    return nullptr;
+  }
+
+  return snapshot;
+}
+
+sk_sp<DlImage> DlSurfaceInstanceSkiaBase::SnapshotToImage() const {
+  return DlImageSkia::Make(GetRasterImage());
+}
+
 int DlSurfaceInstanceSkiaBase::width() const {
   return GetSurface()->width();
 }
 
 int DlSurfaceInstanceSkiaBase::height() const {
   return GetSurface()->height();
+}
+
+sk_sp<SkImage> DlSurfaceInstanceSkiaBase::GetRasterImage() const {
+  auto surface = GetSurface();
+  auto image = surface->makeImageSnapshot();
+  if (!image) {
+    return nullptr;
+  }
+  return image->makeRasterImage(nullptr);
 }
 
 sk_sp<SkSurface> DlSurfaceInstanceSkia::GetSurface() const {

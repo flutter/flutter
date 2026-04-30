@@ -30,6 +30,7 @@ class DlSoftwareSurfaceProvider : public DlSurfaceProvider {
     return BackendType::kSkiaSoftware;
   }
   bool SupportsPixelFormat(PixelFormat format) const override { return true; }
+  bool TargetsImpeller() const override { return false; }
 
  private:
   std::shared_ptr<DlSurfaceInstance> primary_;

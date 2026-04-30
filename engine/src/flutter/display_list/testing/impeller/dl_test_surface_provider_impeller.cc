@@ -10,8 +10,9 @@ namespace testing {
 DlSurfaceProviderImpeller::DlSurfaceProviderImpeller() : DlSurfaceProvider() {}
 
 std::unique_ptr<impeller::PlaygroundImpl>
-DlSurfaceProviderImpeller::MakePlayground(impeller::PlaygroundBackend backend) {
-  impeller::PlaygroundSwitches switches;
+DlSurfaceProviderImpeller::MakePlayground(
+    impeller::PlaygroundBackend backend,
+    const impeller::PlaygroundSwitches& switches) {
   return impeller::PlaygroundImpl::Create(backend, switches);
 }
 
@@ -79,7 +80,7 @@ bool DlSurfaceProviderImpeller::SupportsPixelFormat(PixelFormat format) const {
   return format == kN32Premul;
 }
 
-bool DlSurfaceProviderImpeller::SupportsImpeller() const {
+bool DlSurfaceProviderImpeller::TargetsImpeller() const {
   return true;
 }
 
