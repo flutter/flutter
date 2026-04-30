@@ -24,9 +24,9 @@ void main() {
   });
 
   testWithoutContext(
-    'Decode a malformed string prints a warning but returns the decoded string',
+    'Decode a malformed string without throwing',
     () async {
-      expect(decoder.convert(nonpassString.codeUnits), nonpassString);
+      expect(utf8AllowMalformed.decode(nonpassString.codeUnits), nonpassString);
     },
   );
 
@@ -91,7 +91,7 @@ void main() {
     ];
 
     // Should not throw, should return the decoded string
-    final String result = decoder.convert(bytes);
+    final String result = utf8AllowMalformed.decode(bytes);
     expect(result, isA<String>());
     expect(result, contains('\u{FFFD}'));
   });
@@ -115,7 +115,7 @@ void main() {
   testWithoutContext('Decode multiple replacement characters', () async {
     // Multiple invalid byte sequences
     final bytes = <int>[239, 191, 189, 65, 239, 191, 189];
-    final String result = decoder.convert(bytes);
+    final String result = utf8AllowMalformed.decode(bytes);
     expect(result, contains('\u{FFFD}'));
     expect(result, contains('A'));
   });
