@@ -92,7 +92,8 @@ static SkImageInfo GetImageInfo(const GlyphAtlas& atlas, Size size) {
       return SkImageInfo::MakeA8(SkISize{static_cast<int32_t>(size.width),
                                          static_cast<int32_t>(size.height)});
     case GlyphAtlas::Type::kColorBitmap:
-      return SkImageInfo::MakeN32Premul(size.width, size.height);
+      return SkImageInfo::Make(size.width, size.height, kRGBA_8888_SkColorType,
+                               kPremul_SkAlphaType);
   }
   FML_UNREACHABLE();
 }
