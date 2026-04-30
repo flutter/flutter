@@ -3238,7 +3238,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
 
       int previousNodeId = -1;
-      for (SemanticsNode child : childrenInTraversalOrder) {
+      List<SemanticsNode> children = childrenInHitTestOrder.length > childrenInTraversalOrder.length ? childrenInHitTestOrder : childrenInTraversalOrder;
+      for (SemanticsNode child : children) {
         child.previousNodeId = previousNodeId;
         previousNodeId = child.id;
         child.updateRecursively(globalTransform, visitedObjects, forceUpdate);
