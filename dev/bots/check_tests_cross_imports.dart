@@ -242,7 +242,7 @@ class TestsCrossImportChecker {
       if (index < 0) {
         throw ArgumentError('All files must include $_flutterTestPrefix in their path.', 'files');
       }
-      return file.absolute.path.substring(index).replaceAll(r'\', '/');
+      return file.absolute.path.substring(index).replaceAll(Platform.pathSeparator, '/');
     }).toSet();
     return knownPaths.difference(testPaths);
   }
@@ -285,7 +285,9 @@ class TestsCrossImportChecker {
       if (index < 0) {
         throw ArgumentError('All files must include $_flutterTestPrefix in their path.', 'files');
       }
-      final String comparablePath = file.absolute.path.substring(index).replaceAll(r'\', '/');
+      final String comparablePath = file.absolute.path
+          .substring(index)
+          .replaceAll(Platform.pathSeparator, '/');
       return !knownPaths.contains(comparablePath);
     }).toSet();
   }
@@ -364,7 +366,7 @@ class TestsCrossImportChecker {
           : 'The following ${files.length} tests in ${testLibrary.name} have a disallowed import of $importedLibraryName. Refactor them or move them to $importedLibraryName.\n',
     );
     for (final file in files) {
-      buffer.writeln('  ${_getRelativePath(file)}');
+      buffer.writeln('  ${_getRelativePath(file).replaceAll(Platform.pathSeparator, '/')}');
     }
     return buffer.toString().trimRight();
   }
