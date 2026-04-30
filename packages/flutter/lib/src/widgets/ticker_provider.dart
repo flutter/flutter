@@ -173,10 +173,18 @@ class TickerMode extends StatefulWidget {
   /// [ValueListenable], whose [ValueListenable.value] is
   /// [TickerModeData.fallback].
   static ValueListenable<TickerModeData> getValuesNotifier(BuildContext context) {
+    const fallback = _ConstantTickerModeDataListenable(TickerModeData.fallback);
+
+    // The getInheritedWidgetOfExactType() method throws an assertion error if called during
+    // State.dispose(), which becomes a problem when an animation controller is set as a
+    // late final class member and isn't referenced until then.
+    if (!context.mounted) {
+      return fallback;
+    }
+
     final _EffectiveTickerMode? widget = context
         .getInheritedWidgetOfExactType<_EffectiveTickerMode>();
-    return widget?.valuesNotifier ??
-        const _ConstantTickerModeDataListenable(TickerModeData.fallback);
+    return widget?.valuesNotifier ?? fallback;
   }
 
   /// Creates a [TickerMode] that overrides the ambient ticker mode values.

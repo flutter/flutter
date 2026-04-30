@@ -5221,7 +5221,7 @@ void main() {
   testWidgets('Multiline hint text will wrap up to maxLines', (WidgetTester tester) async {
     final Key textFieldKey = UniqueKey();
 
-    Widget builder(int? maxLines, final String hintMsg) {
+    Widget builder(int? maxLines, String hintMsg) {
       return boilerplate(
         child: TextField(
           key: textFieldKey,

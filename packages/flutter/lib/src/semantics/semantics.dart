@@ -3355,7 +3355,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _traversalChildIdentifier != config._traversalChildIdentifier ||
         _traversalParentIdentifier != config._traversalParentIdentifier ||
         _minValue != config._minValue ||
-        _maxValue != config._maxValue;
+        _maxValue != config._maxValue ||
+        !mapEquals<CustomSemanticsAction, VoidCallback>(
+          _customSemanticsActions,
+          config._customSemanticsActions,
+        );
   }
 
   // TAGS, LABELS, ACTIONS

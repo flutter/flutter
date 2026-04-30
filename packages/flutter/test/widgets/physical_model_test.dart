@@ -117,4 +117,33 @@ void main() {
     expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
     await expectLater(find.byKey(key), matchesGoldenFile('physical_model_overflow.png'));
   });
+
+  testWidgets('PhysicalModel does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: PhysicalModel(color: Color(0xAABBCC00))),
+      ),
+    );
+    expect(tester.getSize(find.byType(PhysicalModel)), Size.zero);
+  });
+
+  testWidgets('PhysicalShape does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: PhysicalShape(
+            color: Color(0xAABBCC00),
+            clipper: ShapeBorderClipper(shape: CircleBorder()),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(PhysicalShape)), Size.zero);
+  });
 }

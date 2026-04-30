@@ -122,7 +122,6 @@ class FlutterPluginTest {
         verify { project.tasks.register("generateLockfiles", any()) }
         verify { project.tasks.register("javaVersion", any()) }
         verify { project.tasks.register("printBuildVariants", any()) }
-        verify { project.tasks.register("printNdkVersion", any()) }
     }
 
     @Test
