@@ -563,7 +563,7 @@ class RenderEnvironment {
 #ifdef IMPELLER_SUPPORTS_RENDERING
       auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
       return DlTextImpeller::Make(frame);
-#else  // IMPELLER_SUPPORTS_RENDERING
+#else   // IMPELLER_SUPPORTS_RENDERING
       return nullptr;
 #endif  // IMPELLER_SUPPORTS_RENDERING
     } else {
