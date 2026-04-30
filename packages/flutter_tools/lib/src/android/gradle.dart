@@ -802,7 +802,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       _gradleUtils.getExecutable(project),
       '-I=$initScript',
       '-Pflutter-root=$flutterRoot',
-      '-Poutput-dir=${outputDirectory.path}',
+      '-Poutput-dir=${outputDirectory.uri.path}',
       '-Pis-plugin=${manifest.isPlugin}',
       '-PbuildNumber=$buildNumber',
     ];
@@ -839,7 +839,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         'Using local engine: ${localEngineInfo.targetOutPath}\n'
         'Local Maven repo: ${localEngineRepo.path}',
       );
-      command.add('-Plocal-engine-repo=${localEngineRepo.path}');
+      command.add('-Plocal-engine-repo=${localEngineRepo.uri.path}');
       command.add('-Plocal-engine-build-mode=${buildInfo.modeName}');
       command.add('-Plocal-engine-out=${localEngineInfo.targetOutPath}');
       command.add('-Plocal-engine-host-out=${localEngineInfo.hostOutPath}');
