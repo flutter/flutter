@@ -424,7 +424,7 @@ class XcodeProjectInterpreter {
         if (xcodebuildIndex == -1) {
           // This should never happen. The _xcodebuildProjectCommandArguments always includes
           // xcodebuild.
-          throwToolExit('Command "${command.join(' ')}" is expected to contain `xcodebuild`.');
+          throw StateError('Command "${command.join(' ')}" is expected to contain `xcodebuild`.');
         }
         final String commandToMatch = command.sublist(xcodebuildIndex).join(' ');
 
