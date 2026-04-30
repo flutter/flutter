@@ -1794,7 +1794,7 @@ class SelectableRegionState extends State<SelectableRegion>
     final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
     late List<TextSelectionPoint> points;
     final Offset startLocalPosition = start?.localPosition ?? end?.localPosition ?? Offset.zero;
-    final Offset endLocalPosition = end?.localPosition ?? start?.localPosition ?? Offset.zero;
+    final Offset endLocalPosition = end?.localPosition ?? startLocalPosition;
     if (startLocalPosition.dy > endLocalPosition.dy) {
       points = <TextSelectionPoint>[
         TextSelectionPoint(endLocalPosition, TextDirection.ltr),
