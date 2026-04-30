@@ -177,7 +177,7 @@ class XcodeProjectInterpreter {
     return xcrunCommand;
   }
 
-  /// Prefetches SwiftPM dependencies needed for `xcodebuild` command and then returns a list of
+  /// Prefetches Swift package dependencies for the project and then returns a list of
   /// required arguments for the `xcodebuild` Xcode project command.
   ///
   /// This is not required when running commands that don't require a project (e.g.
@@ -185,14 +185,10 @@ class XcodeProjectInterpreter {
   ///
   /// Using this method when running `xcodebuild` commands ensures that `xcrun` is used properly
   /// and that the Swift package cache is properly configured.
-  ///
-  /// When [skipPackageResolution] is true, it uses arguments to attempt skipping any Swift package
-  /// resolution or updates. This should be false when running [prefetchSwiftPackages], so packages
-  /// should already be resolved, downloaded, and updated on subsquent `xcodebuild` commands.
-  Future<List<String>> xcodebuildProjectCommand(
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     String projectPath,
     Directory buildDirectory, {
-    bool skipPackageResolution = true,
+    bool skipPackageUpdatesAndValidation = true,
   }) async {
     // All `xcodebuild` project commands will download and resolve Swift packages.
     // We should always prefetch Swift packages before running any `xcodebuild` project command
@@ -201,13 +197,17 @@ class XcodeProjectInterpreter {
 
     return _xcodebuildProjectCommandArguments(
       buildDirectory,
-      skipPackageResolution: skipPackageResolution,
+      skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
     );
   }
 
+  /// Returns a list of required arguments for the `xcodebuild` Xcode project command.
+  ///
+  /// When [skipPackageUpdatesAndValidation] is true, it uses arguments to attempt skipping any
+  /// Swift package updates and validation.
   List<String> _xcodebuildProjectCommandArguments(
     Directory buildDirectory, {
-    bool skipPackageResolution = true,
+    bool skipPackageUpdatesAndValidation = true,
   }) {
     final String cachePath = buildDirectory
         .childDirectory(kSwiftPackageCacheDirectoryName)
@@ -218,8 +218,7 @@ class XcodeProjectInterpreter {
       'xcodebuild',
       '-clonedSourcePackagesDirPath',
       cachePath,
-      if (skipPackageResolution) ...<String>[
-        '-disableAutomaticPackageResolution',
+      if (skipPackageUpdatesAndValidation) ...<String>[
         '-skipPackageUpdates',
         '-skipPackagePluginValidation',
         '-skipPackageSignatureValidation',
@@ -247,8 +246,12 @@ class XcodeProjectInterpreter {
       XcodeSdk.IPhoneOS || XcodeSdk.IPhoneSimulator => getIosBuildDirectory(),
       XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
     };
+    final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
+      projectPath,
+      _fileSystem.directory(buildDir),
+    );
     final showBuildSettingsCommand = <String>[
-      ...(await xcodebuildProjectCommand(projectPath, _fileSystem.directory(buildDir))),
+      ...xcodebuildCommandArgs,
       '-project',
       _fileSystem.path.absolute(projectPath),
       if (scheme != null) ...<String>['-scheme', scheme],
@@ -363,8 +366,12 @@ class XcodeProjectInterpreter {
     bool verbose = false,
   }) async {
     final String projectPath = _fileSystem.currentDirectory.path;
+    final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
+      projectPath,
+      buildDirectory,
+    );
     await _processUtils.run(<String>[
-      ...(await xcodebuildProjectCommand(projectPath, buildDirectory)),
+      ...xcodebuildCommandArgs,
       '-workspace',
       workspacePath,
       '-scheme',
@@ -401,14 +408,24 @@ class XcodeProjectInterpreter {
     Status? status;
     try {
       final command = <String>[
-        ..._xcodebuildProjectCommandArguments(buildDirectory, skipPackageResolution: false),
+        ..._xcodebuildProjectCommandArguments(
+          buildDirectory,
+          // skipPackageUpdatesAndValidation should be false so that when subsequent xcodebuild
+          // commands run, packages should already be resolved, downloaded, updated, and validated.
+          skipPackageUpdatesAndValidation: false,
+        ),
         '-resolvePackageDependencies',
       ];
       if (_swiftPackageFetchProcess == null) {
         // Check if process is already running from a previous Flutter command. If it is, kill it
         // so we don't have the process running twice. When this process is run twice, it'll cause
         // one to error. The new process will pick up where the old one left off.
-        final RunResult result = await _processUtils.run(['pgrep', '-n', ...command]);
+        final RunResult result = await _processUtils.run([
+          'pgrep',
+          '-n', // Select only the newest
+          '-f', // Match against full argument lists
+          ...command,
+        ]);
         if (result.exitCode == 0) {
           final int? pid = int.tryParse(result.stdout.trim());
           if (pid != null) {
@@ -474,9 +491,13 @@ class XcodeProjectInterpreter {
     // The exit code returned by 'xcodebuild -list' when the project is corrupted.
     const corruptedProjectExitCode = 74;
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
+    final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
+      projectPath,
+      buildDirectory,
+    );
     final RunResult result = await _processUtils.run(
       <String>[
-        ...(await xcodebuildProjectCommand(projectPath, buildDirectory)),
+        ...xcodebuildCommandArgs,
         '-list',
         if (projectFilename != null) ...<String>['-project', projectFilename],
       ],
@@ -654,13 +675,13 @@ class XcodeProjectInfo {
     return '$baseConfiguration-$scheme';
   }
 
-  /// Checks whether the [buildConfigurations] contains the specified string, without
-  /// regard to case.
-  String? _existingBuildConfigurationForBuildMode(String buildMode) {
-    buildMode = buildMode.toLowerCase();
-    for (final String name in buildConfigurations) {
-      if (name.toLowerCase() == buildMode) {
-        return name;
+  /// Finds a build configuration matching [name], ignoring case,
+  /// and returns it, or null if there is no match.
+  String? _existingBuildConfigurationWithName(String name) {
+    name = name.toLowerCase();
+    for (final String configName in buildConfigurations) {
+      if (configName.toLowerCase() == name) {
+        return configName;
       }
     }
     return null;
@@ -690,28 +711,34 @@ class XcodeProjectInfo {
     }
   }
 
-  /// Returns unique build configuration matching [buildInfo] and [scheme], or
-  /// null, if there is no unique best match.
+  /// Returns unique build configuration matching [buildInfo] and [scheme],
+  /// falling back to the base configuration, or null, if there is no unique best match.
   String? buildConfigurationFor(BuildInfo? buildInfo, String scheme) {
     if (buildInfo == null) {
       return null;
     }
     final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
-    final String? buildConfigurationForBuildMode = _existingBuildConfigurationForBuildMode(
-      expectedConfiguration,
-    );
-    if (buildConfigurationForBuildMode != null) {
-      return buildConfigurationForBuildMode;
+    // Check for an exact match, e.g. "Debug-MyFlavor" if using a flavor or "Debug" if not.
+    final String? exactMatch = _existingBuildConfigurationWithName(expectedConfiguration);
+    if (exactMatch != null || buildInfo.flavor == null) {
+      return exactMatch;
     }
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
-    return _uniqueMatch(buildConfigurations, (String candidate) {
+    // Check for fuzzy matches for build mode and flavor, e.g. "debug myflavor".
+    final List<String> matchesForBuildModeAndFlavor = buildConfigurations.where((String candidate) {
       candidate = candidate.toLowerCase();
-      if (buildInfo.flavor == null) {
-        return candidate == expectedConfiguration.toLowerCase();
-      }
       return candidate.contains(baseConfiguration.toLowerCase()) &&
           candidate.contains(scheme.toLowerCase());
-    });
+    }).toList();
+    // If there is exactly one match for build mode and flavor, return it.
+    // If there are multiple, the user most likely has a misconfigured project.
+    if (matchesForBuildModeAndFlavor.length == 1) {
+      return matchesForBuildModeAndFlavor.first;
+    } else if (matchesForBuildModeAndFlavor.length > 1) {
+      return null;
+    }
+    // Fall back to the base configuration if no match is found.
+    return _existingBuildConfigurationWithName(baseConfiguration);
   }
 
   static String _baseConfigurationFor(BuildInfo buildInfo) {

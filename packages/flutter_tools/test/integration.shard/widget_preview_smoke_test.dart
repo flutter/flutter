@@ -160,7 +160,7 @@ void main() {
     });
 
     testUsingContext("doesn't crash on flutter clean", () async {
-      // Regression test for https://github.com/flutter/flutter/issues/175058.\
+      // Regression test for https://github.com/flutter/flutter/issues/175058.
       dtdLauncher = DtdLauncher(
         logger: logger!,
         artifacts: globals.artifacts!,
@@ -171,9 +171,6 @@ void main() {
       final Uri dtdUri = await dtdLauncher!.launch();
 
       // Connect to it and listen to the WidgetPreviewScaffold stream.
-      //
-      // The preview scaffold will send a 'Connected' event on this stream once it has initialized
-      // and is ready.
       final DartToolingDaemon dtdConnection = await DartToolingDaemon.connect(dtdUri);
       final completer = Completer<void>();
       var firstConnection = true;
@@ -185,26 +182,46 @@ void main() {
         if (firstConnection) {
           firstConnection = false;
           runFlutterClean(tempDir);
+          // Restore dependencies so the Analysis Server and Dwds can resolve packages during Hot Restart.
+          // Add --offline flag to prevent attempts to reach the network during CI.
+          processManager.runSync(<String>[
+            flutterBin,
+            'pub',
+            'get',
+            '--offline',
+          ], workingDirectory: tempDir.path);
           dtdConnection.call(
             WidgetPreviewDtdServices.kWidgetPreviewServiceRoot,
             WidgetPreviewDtdServices.kHotRestartPreviewer,
           );
           return;
         }
-        // The second `Connected` event should come after the previewer is hot restarted after
-        // we perform the `flutter clean`. This event won't be sent again if the previewer has
-        // crashed.
+        // The second `Connected` event should come after the previewer is hot restarted successfully.
         completer.complete();
       });
       await dtdConnection.streamListen(WidgetPreviewDtdServices.kWidgetPreviewScaffoldStreamRoot);
 
       // Start the widget preview and wait for the 'Connected' event.
-      await runWidgetPreview(
+      final Stream<String> stdoutStream = await runWidgetPreview(
         tempDir: tempDir,
         expectedMessages: firstLaunchMessagesWeb,
         dtdUri: dtdUri,
       );
-      await completer.future;
+
+      final processExitCompleter = Completer<void>();
+      final StreamSubscription<String> subscription = stdoutStream.listen(
+        null,
+        onDone: () => processExitCompleter.complete(),
+      );
+
+      // Race the connection completer against process exit for clearer failure messages.
+      await Future.any(<Future<void>>[completer.future, processExitCompleter.future]);
+      expect(
+        processExitCompleter.isCompleted,
+        isFalse,
+        reason: 'Widget preview process exited unexpectedly after flutter clean.',
+      );
+      await subscription.cancel();
     });
   });
 }

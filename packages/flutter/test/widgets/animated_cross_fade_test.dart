@@ -553,6 +553,53 @@ void main() {
     await tester.pumpAndSettle();
     expect(onEndCallCount, 3);
   });
+
+  testWidgets('AnimatedCrossFade clipBehavior defaults to hardEdge', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: AnimatedCrossFade(
+            firstChild: SizedBox(width: 100.0, height: 100.0),
+            secondChild: SizedBox(width: 200.0, height: 200.0),
+            duration: Duration(milliseconds: 200),
+            crossFadeState: CrossFadeState.showFirst,
+          ),
+        ),
+      ),
+    );
+
+    final ClipRect clipRectWidget = tester.widget(find.byType(ClipRect));
+    expect(clipRectWidget.clipBehavior, equals(Clip.hardEdge));
+
+    final AnimatedSize animatedSizeWidget = tester.widget(find.byType(AnimatedSize));
+    expect(animatedSizeWidget.clipBehavior, equals(Clip.hardEdge));
+  });
+
+  testWidgets('AnimatedCrossFade clipBehavior is forwarded to ClipRect and AnimatedSize', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: AnimatedCrossFade(
+            firstChild: SizedBox(width: 100.0, height: 100.0),
+            secondChild: SizedBox(width: 200.0, height: 200.0),
+            duration: Duration(milliseconds: 200),
+            crossFadeState: CrossFadeState.showFirst,
+            clipBehavior: Clip.none,
+          ),
+        ),
+      ),
+    );
+
+    final ClipRect clipRectWidget = tester.widget(find.byType(ClipRect));
+    expect(clipRectWidget.clipBehavior, equals(Clip.none));
+
+    final AnimatedSize animatedSizeWidget = tester.widget(find.byType(AnimatedSize));
+    expect(animatedSizeWidget.clipBehavior, equals(Clip.none));
+  });
 }
 
 class _TickerWatchingWidget extends StatefulWidget {

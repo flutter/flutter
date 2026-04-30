@@ -810,6 +810,9 @@ class FakeFlutterFeatures extends FeatureFlags {
   bool get isRiscv64SupportEnabled => _enabled;
 
   @override
+  bool get isRecordUseEnabled => _enabled;
+
+  @override
   final List<Feature> allFeatures;
 
   @override

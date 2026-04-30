@@ -1636,7 +1636,7 @@ class SelectionOverlay {
         this.context,
         rootOverlay: true,
         debugRequiredFor: debugRequiredFor,
-      ).insert(_toolbar!);
+      ).insert(_toolbar!, above: _handles?.end);
       return;
     }
 
