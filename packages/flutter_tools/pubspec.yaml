@@ -14,11 +14,7 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dds: 5.3.0
-  dwds:
-    git:
-      url: https://github.com/dart-lang/webdev.git
-      ref: e43744b235531f409ab5e2f1271178943569697a
-      path: dwds
+  dwds: 27.1.1
   code_builder: 4.11.1
   collection: 1.19.1
   completion: 1.0.2
@@ -133,7 +129,11 @@ dartdoc:
   nodoc: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 # PUBSPEC CHECKSUM: 3bm17u
 =======
 # PUBSPEC CHECKSUM: lim8o
 >>>>>>> 578994cc647 (use update-packages to update the pubspec.lock)
+=======
+# PUBSPEC CHECKSUM: k2fl4e
+>>>>>>> 28251fdf0d2 (update to published v27.1.1)
