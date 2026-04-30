@@ -420,7 +420,7 @@ class XcodeProjectInterpreter {
         // Remove the `xcrun` prefixes from the command before comparing because the process name
         // will resolve to the actual xcodebuild path, such as this:
         // /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild
-        final List<String> commandToMatch = command.sublist(command.indexOf('xcodebuild'));
+        final String commandToMatch = command.sublist(command.indexOf('xcodebuild')).join(' ');
 
         // Check if process is already running from a previous Flutter command. If it is, kill it
         // so we don't have the process running twice. When this process is run twice, it'll cause
@@ -430,14 +430,14 @@ class XcodeProjectInterpreter {
           '-n', // Select only the newest
           '-f', // Match against full argument lists
           '-l', // Print the process name and process ID
-          ...commandToMatch,
+          commandToMatch, // command must be a string rather than a list so it matches on all of it
         ]);
         if (result.exitCode == 0) {
           final String processOutput = result.stdout.trim();
           // Process output is formatted like this:
           // 89012 /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -clonedSourcePackagesDirPath...
           final int? pid = int.tryParse(processOutput.split(' ').firstOrNull ?? '');
-          if (pid != null && processOutput.endsWith(commandToMatch.join(' '))) {
+          if (pid != null && processOutput.endsWith(commandToMatch)) {
             _logger.printTrace(
               'Swift Package Manager dependencies are already being fetched by PID $pid',
             );
