@@ -111,8 +111,8 @@ void main() {
         expect(result, equals('$lines\n'));
         expect(success, isFalse);
       },
-      skip: knownCrossImports.isEmpty,
-    ); // [intended]: No message is needed when there are no known cross imports.
+      skip: knownCrossImports.isEmpty, // [intended]: Nothing to log if there are no known imports
+    );
 
     test('unknown $libraryName cross import of Material', () async {
       final String extra = '$libraryName/foo_test.dart'.replaceAll('/', Platform.pathSeparator);
@@ -242,8 +242,8 @@ void main() {
         expect(result, equals('$lines\n'));
         expect(success, isFalse);
       },
-      skip: libraryName == 'packages/flutter/test/cupertino',
-    ); // [intended]: Cupertino can import itself
+      skip: isCupertino(libraryName), // [intended]: Cupertino can import itself
+    );
 
     test(
       'multiple unknown $libraryName cross imports of Cupertino',
@@ -283,8 +283,8 @@ void main() {
         expect(result, equals('$lines\n'));
         expect(success, isFalse);
       },
-      skip: libraryName == 'packages/flutter/test/cupertino',
-    ); // [intended]: Cupertino can import itself
+      skip: isCupertino(libraryName), // [intended]: Cupertino can import itself
+    );
 
     test(
       'unknown $libraryName cross import of Cupertino in non-test file',
@@ -320,8 +320,8 @@ void main() {
         expect(result, equals('$lines\n'));
         expect(success, isFalse);
       },
-      skip: libraryName == 'packages/flutter/test/cupertino',
-    ); // [intended]: Cupertino can import itself
+      skip: isCupertino(libraryName), // [intended]: Cupertino can import itself
+    );
   }
 }
 
@@ -355,6 +355,9 @@ Future<String> capture(AsyncVoidCallback callback, {bool shouldHaveErrors = fals
     return buffer.toString();
   }
 }
+
+/// Returns whether the given [libraryName] matches the Cupertino library under `flutter/test`.
+bool isCupertino(String libraryName) => libraryName == 'packages/flutter/test/cupertino';
 
 File getFile(String filepath, Directory directory) {
   final String platformFilepath = filepath.replaceAll('/', Platform.pathSeparator);
