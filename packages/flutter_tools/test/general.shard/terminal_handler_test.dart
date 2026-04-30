@@ -496,17 +496,19 @@ void main() {
     });
 
     testWithoutContext('o,O - debugTogglePlatform with null vmService does not crash', () async {
-      final TerminalHandler terminalHandler = setUpTerminalHandler(
-        <FakeVmServiceRequest>[],
-        nullVmService: true,
-      );
-      await terminalHandler.processTerminalInput('o');
-      await terminalHandler.processTerminalInput('O');
+      for (final String key in <String>['o', 'O']) {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(
+          <FakeVmServiceRequest>[],
+          nullVmService: true,
+        );
+        await terminalHandler.processTerminalInput(key);
 
-      expect(
-        terminalHandler.logger.statusText,
-        contains('Platform toggle is not supported for this device.'),
-      );
+        expect(
+          terminalHandler.logger.statusText,
+          contains('Platform toggle is not supported for this device.'),
+          reason: 'Expected message when pressing "$key"',
+        );
+      }
     });
 
     testWithoutContext('p - debugToggleDebugPaintSizeEnabled', () async {
