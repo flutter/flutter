@@ -47,7 +47,8 @@ source_set("InternalFlutterSwift") {
   # header, but defined in the framework, while avoiding linking errors.
   visibility = [
     ":flutter_framework_source",
-    ":ios_test_flutter_xctest",
+    ":ios_test_flutter",
+    ":ios_test_flutter_swift",
   ]
   configs += [ "//flutter/shell/platform/darwin/common:config" ]
   deps = [ ":flutter_engine_bindings" ]
@@ -223,6 +224,15 @@ source_set("flutter_framework_source") {
 }
 
 if (enable_ios_unittests) {
+  config("ios16_config") {
+    swiftflags = [
+      "-target",
+      "arm64-apple-ios16.0-simulator",
+    ]
+    cflags = [ "-mios-simulator-version-min=16.0" ]
+    ldflags = [ "-mios-simulator-version-min=16.0" ]
+  }
+
   source_set("flutter_engine_bindings_test_helpers") {
     testonly = true
     visibility = [ ":*" ]
@@ -237,33 +247,14 @@ if (enable_ios_unittests) {
     ]
   }
 
-  # This target exists because the FakeUIPressProxy test utility was migrated
-  # before the tests that use it. It can be moved to ":ios_test_flutter_swift"
-  # once all tests depending on this util are in ":ios_test_flutter_swift".
-  source_set("ios_test_utils_swift") {
-    testonly = true
-    visibility = [ ":*" ]
-
-    bridge_header = "InternalFlutterSwift-Bridging-Header.h"
-    include_dirs = [
-      "//flutter/shell/platform/darwin/common/framework/Headers",
-      "//flutter/shell/platform/darwin/ios/framework/Headers",
-      "//flutter/shell/platform/darwin/ios/framework",  # For module.modulemap
-    ]
-
-    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
-    sources = [ "framework/Source/FakeUIPressProxy.swift" ]
-    deps = [ ":flutter_framework_source" ]
-  }
-
   # Swift testing tests.
-  # This has to be a static library likely because Swift Tesing test discovery
-  # relies on specific metadata inserted to the test binary:
-  # https://github.com/swiftlang/swift-testing/blob/main/Documentation/ABI/TestContent.md#basic-format
-  static_library("ios_test_flutter_swift") {
+  source_set("ios_test_flutter_swift") {
     testonly = true
     visibility = [ ":*" ]
-    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
+    configs += [
+      "//flutter/shell/platform/darwin/common:test_config",
+      ":ios16_config",
+    ]
     include_dirs = [
       "//flutter/shell/platform/darwin/common/framework/Headers",
       "//flutter/shell/platform/darwin/ios/framework/Headers",
@@ -273,39 +264,39 @@ if (enable_ios_unittests) {
     sources = [
       "framework/Source/AccessibilityFeaturesTests.swift",
       "framework/Source/ConnectionCollectionTest.swift",
+      "framework/Source/FakeUIPressProxy.swift",
       "framework/Source/LaunchEngineTest.swift",
-
-      # TODO(LongCatIsLooong): migrate this test to Swift testing.
       "framework/Source/SplashScreenManagerTests.swift",
       "framework/Source/TaskRunnerTests.swift",
     ]
-    frameworks = [ "XCTest.framework" ]
+    frameworks = [ "Testing.framework" ]
     deps = [
+      ":InternalFlutterSwift",
       ":flutter_engine_bindings",
       ":flutter_engine_bindings_test_helpers",
       ":flutter_framework_source",
       "//flutter/fml",
     ]
+
   }
 
-  shared_library("ios_test_flutter_xctest") {
+  shared_library("ios_test_flutter") {
     testonly = true
     visibility = [ "*" ]
-    output_name = "ios_test_flutter"
 
     cflags_objc = flutter_cflags_objc
     cflags_objcc = flutter_cflags_objcc
-    cflags = [
-      "-fvisibility=default",
-      "-mios-simulator-version-min=$ios_testing_deployment_target",
-    ]
+    cflags = [ "-fvisibility=default" ]
 
     ldflags =
         [ "-Wl,-install_name,@rpath/Frameworks/libios_test_flutter.dylib" ]
     frameworks = [ "XCTest.framework" ]
     include_dirs = [ target_gen_dir ]
 
-    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
+    configs += [
+      "//flutter/shell/platform/darwin/common:test_config",
+      ":ios16_config",
+    ]
     configs -= [
       "//build/config/gcc:symbol_visibility_hidden",
       "//build/config:symbol_visibility_hidden",
@@ -354,7 +345,7 @@ if (enable_ios_unittests) {
       ":flutter_framework",
       ":flutter_framework_source",
       ":ios_gpu_configuration",
-      ":ios_test_utils_swift",
+      ":ios_test_flutter_swift",
       "//flutter/common",
       "//flutter/lib/ui",
       "//flutter/shell/platform/darwin/common:framework_common",
@@ -370,15 +361,6 @@ if (enable_ios_unittests) {
     public_configs = [
       ":ios_gpu_configuration_config",
       "//flutter:config",
-    ]
-  }
-
-  group("ios_test_flutter") {
-    testonly = true
-    visibility = [ "*" ]
-    public_deps = [
-      ":ios_test_flutter_swift",
-      ":ios_test_flutter_xctest",
     ]
   }
 }  # if (enable_ios_unittests)
