@@ -815,18 +815,12 @@ abstract class ResidentHandlers {
   }
 
   /// Rotate the application through different `defaultTargetPlatform` values.
-  ///
-  /// Returns false and logs a message if the device does not support
-  /// platform toggling (e.g. web-server devices where [vmService] is null).
   Future<bool> debugTogglePlatform() async {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
     if (flutterDevices.isEmpty || flutterDevices.first?.vmService == null) {
-      logger.printStatus(
-        'Platform toggle is not supported for this device.',
-        emphasis: true,
-      );
+      logger.printStatus('Platform toggle is not supported for this device.', emphasis: true);
       return false;
     }
     final List<FlutterView> views = await flutterDevices.first!.vmService!.getFlutterViews();
