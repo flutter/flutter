@@ -273,7 +273,6 @@ class _VerticalTransitionPage<T> extends Page<T> {
     required this.child,
     this.maintainState = true,
     this.fullscreenDialog = false,
-    this.allowSnapshotting = true,
     super.key,
     super.canPop,
     super.onPopInvoked,
@@ -299,7 +298,6 @@ class _VerticalTransitionPage<T> extends Page<T> {
 class _PageBasedVerticalPageRoute<T> extends PageRoute<T> {
   _PageBasedVerticalPageRoute({
     required _VerticalTransitionPage<T> page,
-    super.allowSnapshotting,
   }) : super(settings: page);
 
   _VerticalTransitionPage<T> get _page =>
