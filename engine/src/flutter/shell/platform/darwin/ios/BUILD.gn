@@ -224,13 +224,13 @@ source_set("flutter_framework_source") {
 }
 
 if (enable_ios_unittests) {
-  config("ios16_config") {
+  config("ios_test_config") {
     swiftflags = [
-      "-target",
-      "arm64-apple-ios16.0-simulator",
+      "--deployment-target",
+      ios_testing_deployment_target,
     ]
-    cflags = [ "-mios-simulator-version-min=16.0" ]
-    ldflags = [ "-mios-simulator-version-min=16.0" ]
+    cflags = [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
+    ldflags = [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
   }
 
   source_set("flutter_engine_bindings_test_helpers") {
@@ -253,7 +253,7 @@ if (enable_ios_unittests) {
     visibility = [ ":*" ]
     configs += [
       "//flutter/shell/platform/darwin/common:test_config",
-      ":ios16_config",
+      ":ios_test_config",
     ]
     include_dirs = [
       "//flutter/shell/platform/darwin/common/framework/Headers",
@@ -277,7 +277,6 @@ if (enable_ios_unittests) {
       ":flutter_framework_source",
       "//flutter/fml",
     ]
-
   }
 
   shared_library("ios_test_flutter") {
@@ -295,11 +294,7 @@ if (enable_ios_unittests) {
 
     configs += [
       "//flutter/shell/platform/darwin/common:test_config",
-      ":ios16_config",
-    ]
-    configs -= [
-      "//build/config/gcc:symbol_visibility_hidden",
-      "//build/config:symbol_visibility_hidden",
+      ":ios_test_config",
     ]
 
     sources = [

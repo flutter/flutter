@@ -605,11 +605,22 @@ def main(args):
                       action='store_true',
                       help='enable whole module optimisation')
 
-  # Required arguments (forwarded to the Swift compiler).
-  parser.add_argument('-target',
+  parser.add_argument('--target-cpu',
                       required=True,
-                      dest='target_triple',
-                      help='generate code for the given target')
+                      help='target CPU architecture (e.g. "arm64", "x64")')
+
+  parser.add_argument('--target-os',
+                      required=True,
+                      help='target OS name (e.g. "apple-ios", "apple-macos")')
+
+  parser.add_argument('--deployment-target',
+                      required=True,
+                      help='target deployment version (e.g. "13.0", "15.6")')
+
+  parser.add_argument('--use-simulator',
+                      default=False,
+                      action='store_true',
+                      help='targeting the simulator')
 
   parser.add_argument('-sdk',
                       required=True,
@@ -656,6 +667,11 @@ def main(args):
                       help='Swift source files to compile')
 
   parsed, extras = parser.parse_known_args(args)
+
+  cpu = 'x86_64' if parsed.target_cpu == 'x64' else parsed.target_cpu
+  env = '-simulator' if parsed.use_simulator else ''
+  parsed.target_triple = f'{cpu}-{parsed.target_os}{parsed.deployment_target}{env}'
+
   compile_module(parsed, extras, build_signature(os.environ, args))
 
 
