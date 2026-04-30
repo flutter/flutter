@@ -157,7 +157,7 @@ void main() {
     testWithoutContext('Decode base64-encoded invalid UTF-8 from VM Service event', () async {
       // Simulate VM Service event with base64-encoded app log containing invalid UTF-8
       // This is raw bytes that would come from a VM Service event: "App log with error: [invalid byte]"
-      final List<int> rawBytes = <int>[
+      final rawBytes = <int>[
         65, 112, 112, 32, 108, 111, 103, 32, 119, 105, 116, 104, 32, 101, 114, 114, 111, 114, 58, 32, 239, 191, 189
       ];
       final String base64Encoded = cnv.base64.encode(rawBytes);
