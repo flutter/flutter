@@ -3239,7 +3239,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
       int previousNodeId = -1;
       List<SemanticsNode> children =
-          childrenInHitTestOrder.length > childrenInTraversalOrder.length
+          childrenInHitTestOrder.size() > childrenInTraversalOrder.size()
               ? childrenInHitTestOrder
               : childrenInTraversalOrder;
       for (SemanticsNode child : children) {
