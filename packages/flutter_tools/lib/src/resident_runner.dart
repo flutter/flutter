@@ -819,7 +819,7 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
-    if (flutterDevices.isEmpty || flutterDevices.first?.vmService == null) {
+    if (flutterDevices.firstOrNull?.vmService == null) {
       logger.printStatus('Platform toggle is not supported for this device.', emphasis: true);
       return false;
     }
