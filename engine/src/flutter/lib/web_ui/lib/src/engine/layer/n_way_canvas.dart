@@ -24,7 +24,7 @@ class NWayCanvas {
   }
 
   /// Calls [saveLayer] on all canvases.
-  void saveLayer(ui.Rect bounds, ui.Paint? paint) {
+  void saveLayer(ui.Rect? bounds, ui.Paint? paint) {
     paint ??= ui.Paint();
     for (var i = 0; i < _canvases.length; i++) {
       _canvases[i].saveLayer(bounds, paint);

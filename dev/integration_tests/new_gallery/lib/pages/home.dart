@@ -697,7 +697,7 @@ class _MobileCarouselState extends State<_MobileCarousel>
     super.didChangeDependencies();
     // The viewPortFraction is calculated as the width of the device minus the
     // padding.
-    final double width = MediaQuery.of(context).size.width;
+    final double width = MediaQuery.widthOf(context);
     const double padding = _carouselItemMobileMargin * 2;
     _controller = PageController(
       initialPage: _currentPage.value,
@@ -814,6 +814,7 @@ class _DesktopCarouselState extends State<_DesktopCarousel> {
         child: Stack(
           children: <Widget>[
             ListView.builder(
+              key: const ValueKey<String>('studyDemoList'),
               padding: EdgeInsets.symmetric(
                 horizontal: isDesktop
                     ? _horizontalDesktopPadding - _carouselItemDesktopMargin

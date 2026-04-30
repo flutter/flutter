@@ -14,7 +14,7 @@ class ContextMenuApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: Brightness.light),
+      theme: CupertinoThemeData(brightness: .light),
       home: ContextMenuExample(),
     );
   }
@@ -30,9 +30,8 @@ class ContextMenuExample extends StatelessWidget {
         middle: Text('CupertinoContextMenu Sample'),
       ),
       child: Center(
-        child: SizedBox(
-          width: 100,
-          height: 100,
+        child: SizedBox.square(
+          dimension: 100,
           child: CupertinoContextMenu(
             actions: <Widget>[
               CupertinoContextMenuAction(

@@ -70,7 +70,7 @@ export 'package:test_api/scaffolding.dart'
         spawnHybridUri;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
-typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
+typedef WidgetTesterCallback = Future<void> Function(WidgetTester tester);
 
 // Return the last element that satisfies `test`, or return null if not found.
 E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {

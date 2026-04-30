@@ -193,6 +193,7 @@ class RadioListTile<T> extends StatefulWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.focusNode,
+    this.statesController,
     this.onFocusChange,
     this.enableFeedback,
     this.horizontalTitleGap,
@@ -251,6 +252,7 @@ class RadioListTile<T> extends StatefulWidget {
     this.selectedTileColor,
     this.visualDensity,
     this.focusNode,
+    this.statesController,
     this.onFocusChange,
     this.enableFeedback,
     this.horizontalTitleGap,
@@ -469,6 +471,9 @@ class RadioListTile<T> extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
+
+  /// Controls the interactive states of the backing [ListTile].
+  final WidgetStatesController? statesController;
 
   /// {@macro flutter.material.inkwell.onFocusChange}
   final ValueChanged<bool>? onFocusChange;
@@ -741,6 +746,7 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
         contentPadding: widget.contentPadding,
         visualDensity: widget.visualDensity,
         focusNode: focusNode,
+        statesController: widget.statesController,
         onFocusChange: widget.onFocusChange,
         enableFeedback: widget.enableFeedback,
         horizontalTitleGap: widget.horizontalTitleGap,

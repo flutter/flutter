@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "component_v2.h"
+#include "flutter/shell/platform/fuchsia/flutter/component_v2.h"
 
 #include <dlfcn.h>
 #include <fuchsia/mem/cpp/fidl.h>
@@ -25,7 +25,6 @@
 #include <regex>
 #include <sstream>
 
-#include "file_in_namespace_buffer.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/platform/fuchsia/task_observers.h"
@@ -33,11 +32,12 @@
 #include "flutter/fml/unique_fd.h"
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/shell/common/switches.h"
-#include "runtime/dart/utils/files.h"
-#include "runtime/dart/utils/handle_exception.h"
-#include "runtime/dart/utils/mapped_resource.h"
-#include "runtime/dart/utils/tempfs.h"
-#include "runtime/dart/utils/vmo.h"
+#include "flutter/shell/platform/fuchsia/flutter/file_in_namespace_buffer.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/files.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/handle_exception.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/mapped_resource.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/tempfs.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/vmo.h"
 
 namespace flutter_runner {
 namespace {

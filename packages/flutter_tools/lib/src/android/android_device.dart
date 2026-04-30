@@ -671,6 +671,11 @@ class AndroidDevice extends Device {
         'enable-vulkan-validation',
         'true',
       ],
+      if (debuggingOptions.enableHcpp) ...<String>[
+        '--ez',
+        'enable-hcpp-and-surface-control',
+        'true',
+      ],
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.buildInfo.isDebug) ...<String>[
           ...<String>['--ez', 'enable-checked-mode', 'true'],
@@ -689,6 +694,7 @@ class AndroidDevice extends Device {
         ],
         if (debuggingOptions.useTestFonts) ...<String>['--ez', 'use-test-fonts', 'true'],
         if (debuggingOptions.verboseSystemLogs) ...<String>['--ez', 'verbose-logging', 'true'],
+        if (debuggingOptions.testFlag) ...<String>['--ez', 'test-flag', 'true'],
         if (userIdentifier != null) ...<String>['--user', userIdentifier],
       ],
       builtPackage.launchActivity,

@@ -135,6 +135,8 @@ class AnimatedCrossFade extends StatefulWidget {
     this.reverseDuration,
     this.layoutBuilder = defaultLayoutBuilder,
     this.excludeBottomFocus = true,
+    this.clipBehavior = Clip.hardEdge,
+    this.onEnd,
   });
 
   /// The child that is visible when [crossFadeState] is
@@ -211,6 +213,25 @@ class AnimatedCrossFade extends StatefulWidget {
   /// cross-fade animation.
   final bool excludeBottomFocus;
 
+  /// Controls whether the content is clipped during the cross-fade transition.
+  ///
+  /// During the size transition between [firstChild] and [secondChild],
+  /// the content is clipped by default to prevent it from overflowing the
+  /// bounding box of the animating widget.
+  ///
+  /// Set this to [Clip.none] to disable clipping entirely. This can be
+  /// useful for widgets with shadows or visual effects that extend beyond
+  /// their bounds.
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
+  /// Called every time an animation completes.
+  ///
+  /// This can be useful to trigger additional actions (e.g. another animation)
+  /// at the end of the current animation.
+  final VoidCallback? onEnd;
+
   /// The default layout algorithm used by [AnimatedCrossFade].
   ///
   /// The top child is placed in a stack that sizes itself to match the top
@@ -284,6 +305,9 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         // Trigger a rebuild because it depends on _isTransitioning, which
         // changes its value together with animation status.
       });
+      if (status == AnimationStatus.completed || status == AnimationStatus.dismissed) {
+        widget.onEnd?.call();
+      }
     });
   }
 
@@ -380,11 +404,13 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       ),
     );
     return ClipRect(
+      clipBehavior: widget.clipBehavior,
       child: AnimatedSize(
         alignment: widget.alignment,
         duration: widget.duration,
         reverseDuration: widget.reverseDuration,
         curve: widget.sizeCurve,
+        clipBehavior: widget.clipBehavior,
         child: widget.layoutBuilder(topChild, topKey, bottomChild, bottomKey),
       ),
     );
@@ -403,6 +429,9 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
         widget.alignment,
         defaultValue: Alignment.topCenter,
       ),
+    );
+    description.add(
+      EnumProperty<Clip>('clipBehavior', widget.clipBehavior, defaultValue: Clip.hardEdge),
     );
   }
 }

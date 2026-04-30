@@ -101,7 +101,7 @@ class SkwasmSurface implements OffscreenSurface {
   double _currentDevicePixelRatio = -1;
   BitmapSize _currentSize = const BitmapSize(1, 1);
   Completer<void> _initializedCompleter;
-  late Completer<void>? _handledContextLostEvent;
+  Completer<void>? _handledContextLostEvent;
 
   /// Handles the context lost event by acquiring a new canvas and recreating the
   /// context.
@@ -172,25 +172,26 @@ class SkwasmSurface implements OffscreenSurface {
   }
 
   @override
-  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(List<ui.Picture> pictures) =>
-      withStackScope((StackScope scope) async {
-        await initialized;
-        final Pointer<PictureHandle> pictureHandles = scope
-            .allocPointerArray(pictures.length)
-            .cast<PictureHandle>();
-        for (var i = 0; i < pictures.length; i++) {
-          pictureHandles[i] = (pictures[i] as SkwasmPicture).handle;
-        }
-        final int callbackId = surfaceRenderPictures(handle, pictureHandles, pictures.length);
-        final rasterResult =
-            (await SkwasmCallbackHandler.instance.registerCallback(callbackId)) as RasterResult;
-        final RenderResult result = (
-          imageBitmaps: rasterResult.imageBitmaps.toDart.cast<DomImageBitmap>(),
-          rasterStartMicros: (rasterResult.rasterStartMilliseconds * 1000).toInt(),
-          rasterEndMicros: (rasterResult.rasterEndMilliseconds * 1000).toInt(),
-        );
-        return result.imageBitmaps;
-      });
+  Future<List<DomImageBitmap>> rasterizeToImageBitmaps(List<ui.Picture> pictures) async {
+    await initialized;
+    final int callbackId = withStackScope((StackScope scope) {
+      final Pointer<PictureHandle> pictureHandles = scope
+          .allocPointerArray(pictures.length)
+          .cast<PictureHandle>();
+      for (var i = 0; i < pictures.length; i++) {
+        pictureHandles[i] = (pictures[i] as SkwasmPicture).handle;
+      }
+      return surfaceRenderPictures(handle, pictureHandles, pictures.length);
+    });
+    final rasterResult =
+        (await SkwasmCallbackHandler.instance.registerCallback(callbackId)) as RasterResult;
+    final RenderResult result = (
+      imageBitmaps: rasterResult.imageBitmaps.toDart.cast<DomImageBitmap>(),
+      rasterStartMicros: (rasterResult.rasterStartMilliseconds * 1000).toInt(),
+      rasterEndMicros: (rasterResult.rasterEndMilliseconds * 1000).toInt(),
+    );
+    return result.imageBitmaps;
+  }
 
   @override
   Future<void> recreateContextForCanvas(DomEventTarget newCanvas) async {

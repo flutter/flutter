@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/foundation/diagnostics.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
+
+import 'widgets_app_tester.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -50,34 +50,29 @@ void main() {
     group('basic menu structure is transmitted to platform', () {
       testWidgets('using onSelected', (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: PlatformMenuBar(
-                menus: _createTestMenus(
-                  onSelected: onSelected,
-                  onOpen: onOpen,
-                  onClose: onClose,
-                  shortcuts: <String, MenuSerializableShortcut>{
-                    _subSubMenu10[0].label: const SingleActivator(
-                      LogicalKeyboardKey.keyA,
-                      control: true,
-                    ),
-                    _subSubMenu10[1].label: const SingleActivator(
-                      LogicalKeyboardKey.keyB,
-                      shift: true,
-                    ),
-                    _subSubMenu10[2].label: const SingleActivator(
-                      LogicalKeyboardKey.keyC,
-                      alt: true,
-                    ),
-                    _subSubMenu10[3].label: const SingleActivator(
-                      LogicalKeyboardKey.keyD,
-                      meta: true,
-                    ),
-                  },
-                ),
-                child: const Center(child: Text('Body')),
+          TestWidgetsApp(
+            home: PlatformMenuBar(
+              menus: _createTestMenus(
+                onSelected: onSelected,
+                onOpen: onOpen,
+                onClose: onClose,
+                shortcuts: <String, MenuSerializableShortcut>{
+                  _subSubMenu10[0].label: const SingleActivator(
+                    LogicalKeyboardKey.keyA,
+                    control: true,
+                  ),
+                  _subSubMenu10[1].label: const SingleActivator(
+                    LogicalKeyboardKey.keyB,
+                    shift: true,
+                  ),
+                  _subSubMenu10[2].label: const SingleActivator(LogicalKeyboardKey.keyC, alt: true),
+                  _subSubMenu10[3].label: const SingleActivator(
+                    LogicalKeyboardKey.keyD,
+                    meta: true,
+                  ),
+                },
               ),
+              child: const Center(child: Text('Body')),
             ),
           ),
         );
@@ -88,34 +83,29 @@ void main() {
 
       testWidgets('using onSelectedIntent', (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Material(
-              child: PlatformMenuBar(
-                menus: _createTestMenus(
-                  onSelectedIntent: const DoNothingIntent(),
-                  onOpen: onOpen,
-                  onClose: onClose,
-                  shortcuts: <String, MenuSerializableShortcut>{
-                    _subSubMenu10[0].label: const SingleActivator(
-                      LogicalKeyboardKey.keyA,
-                      control: true,
-                    ),
-                    _subSubMenu10[1].label: const SingleActivator(
-                      LogicalKeyboardKey.keyB,
-                      shift: true,
-                    ),
-                    _subSubMenu10[2].label: const SingleActivator(
-                      LogicalKeyboardKey.keyC,
-                      alt: true,
-                    ),
-                    _subSubMenu10[3].label: const SingleActivator(
-                      LogicalKeyboardKey.keyD,
-                      meta: true,
-                    ),
-                  },
-                ),
-                child: const Center(child: Text('Body')),
+          TestWidgetsApp(
+            home: PlatformMenuBar(
+              menus: _createTestMenus(
+                onSelectedIntent: const DoNothingIntent(),
+                onOpen: onOpen,
+                onClose: onClose,
+                shortcuts: <String, MenuSerializableShortcut>{
+                  _subSubMenu10[0].label: const SingleActivator(
+                    LogicalKeyboardKey.keyA,
+                    control: true,
+                  ),
+                  _subSubMenu10[1].label: const SingleActivator(
+                    LogicalKeyboardKey.keyB,
+                    shift: true,
+                  ),
+                  _subSubMenu10[2].label: const SingleActivator(LogicalKeyboardKey.keyC, alt: true),
+                  _subSubMenu10[3].label: const SingleActivator(
+                    LogicalKeyboardKey.keyD,
+                    meta: true,
+                  ),
+                },
               ),
+              child: const Center(child: Text('Body')),
             ),
           ),
         );
@@ -131,12 +121,10 @@ void main() {
           .withIgnoredAll(), // leaking by design because of exception
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          const MaterialApp(
-            home: Material(
-              child: PlatformMenuBar(
-                menus: <PlatformMenuItem>[],
-                child: PlatformMenuBar(menus: <PlatformMenuItem>[], child: SizedBox()),
-              ),
+          const TestWidgetsApp(
+            home: PlatformMenuBar(
+              menus: <PlatformMenuItem>[],
+              child: PlatformMenuBar(menus: <PlatformMenuItem>[], child: SizedBox()),
             ),
           ),
         );
@@ -152,7 +140,7 @@ void main() {
       );
       const menuBar = PlatformMenuBar(menus: <PlatformMenuItem>[item], child: SizedBox());
 
-      await tester.pumpWidget(const MaterialApp(home: Material(child: menuBar)));
+      await tester.pumpWidget(const TestWidgetsApp(home: menuBar));
       await tester.pump();
 
       expect(
@@ -166,6 +154,48 @@ void main() {
           '     DISABLED\n',
         ),
       );
+    });
+
+    testWidgets('reports error when DefaultPlatformMenuDelegate.setMenus fails', (
+      WidgetTester tester,
+    ) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? originalOnError = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errors.add(details);
+      };
+
+      try {
+        fakeMenuChannel.outgoing = (MethodCall call) async {
+          if (call.method == 'Menu.setMenus') {
+            throw 'Failed to set menu';
+          }
+        };
+
+        await tester.pumpWidget(
+          const TestWidgetsApp(
+            home: PlatformMenuBar(menus: <PlatformMenuItem>[], child: SizedBox()),
+          ),
+        );
+        await tester.pump(); // Allow future to complete
+
+        // setMenus is called twice: once for clearMenus (in initState), and once for _updateMenu.
+        expect(errors, hasLength(2));
+        expect(errors[0].exception, equals('Failed to set menu'));
+        expect(errors[0].context.toString(), contains('while setting the platform menu'));
+        expect(errors[1].exception, equals('Failed to set menu'));
+        expect(errors[1].context.toString(), contains('while setting the platform menu'));
+
+        // Trigger dispose, which calls clearMenus again.
+        await tester.pumpWidget(const Placeholder());
+        await tester.pump();
+
+        expect(errors, hasLength(3));
+        expect(errors[2].exception, equals('Failed to set menu'));
+        expect(errors[2].context.toString(), contains('while setting the platform menu'));
+      } finally {
+        FlutterError.onError = originalOnError;
+      }
     });
   });
 

@@ -8,10 +8,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'app/models.dart';
-import 'app/window_content.dart';
-import 'app/main_window.dart';
 import 'package:flutter/src/widgets/_window.dart';
+
+import 'app/main_window.dart';
+import 'app/models.dart';
 
 class MainControllerWindowDelegate with RegularWindowControllerDelegate {
   @override
@@ -23,7 +23,7 @@ class MainControllerWindowDelegate with RegularWindowControllerDelegate {
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runWidget(MultiWindowApp());
+  runWidget(const MultiWindowApp());
 }
 
 class MultiWindowApp extends StatefulWidget {
@@ -40,21 +40,6 @@ class _MultiWindowAppState extends State<MultiWindowApp> {
     delegate: MainControllerWindowDelegate(),
   );
   final WindowSettings settings = WindowSettings();
-  late final WindowManager windowManager;
-
-  @override
-  void initState() {
-    super.initState();
-    windowManager = WindowManager(
-      initialWindows: <KeyedWindow>[
-        KeyedWindow(
-          isMainWindow: true,
-          key: UniqueKey(),
-          controller: controller,
-        ),
-      ],
-    );
-  }
 
   @override
   void dispose() {
@@ -64,38 +49,11 @@ class _MultiWindowAppState extends State<MultiWindowApp> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget mainWindowWidget = RegularWindow(
-      controller: controller,
-      child: MaterialApp(home: MainWindow()),
-    );
-    return WindowManagerAccessor(
-      windowManager: windowManager,
-      child: WindowSettingsAccessor(
-        windowSettings: settings,
-        child: ListenableBuilder(
-          listenable: windowManager,
-          builder: (BuildContext context, Widget? child) {
-            final List<Widget> childViews = <Widget>[mainWindowWidget];
-            for (final KeyedWindow window in windowManager.windows) {
-              // This check renders windows that are not nested below another window as
-              // a child window (e.g. a popup as a child of another window) in addition
-              // to the main window, which is special as it is the one that is currently
-              // being rendered.
-              if (window.parent == null && !window.isMainWindow) {
-                childViews.add(
-                  WindowContent(
-                    controller: window.controller,
-                    windowKey: window.key,
-                    onDestroyed: () => windowManager.remove(window.key),
-                    onError: () => windowManager.remove(window.key),
-                  ),
-                );
-              }
-            }
-
-            return ViewCollection(views: childViews);
-          },
-        ),
+    return WindowSettingsAccessor(
+      windowSettings: settings,
+      child: RegularWindow(
+        controller: controller,
+        child: MaterialApp(home: MainWindow(controller: controller)),
       ),
     );
   }

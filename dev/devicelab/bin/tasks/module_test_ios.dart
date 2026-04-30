@@ -511,9 +511,9 @@ dependencies:
           path.join(archivedAppPath, 'Frameworks', '$ffiPackageName.framework', ffiPackageName),
         );
 
-        // The host app example builds plugins statically, url_launcher_ios.framework
-        // should not exist.
-        checkDirectoryNotExists(
+        // With use_frameworks! in the Podfile (required for Xcode 26+ Swift compatibility),
+        // plugins are built as dynamic frameworks. Verify url_launcher_ios.framework exists.
+        checkDirectoryExists(
           path.join(archivedAppPath, 'Frameworks', 'url_launcher_ios.framework'),
         );
 
@@ -603,9 +603,7 @@ dependencies:
       if (!xcodebuildOutput.contains(
             RegExp('flutter.*--local-engine-src-path=bogus assemble'),
           ) || // Verbose output
-          !xcodebuildOutput.contains(
-            'Unable to detect a Flutter engine build directory in bogus',
-          )) {
+          !xcodebuildOutput.contains('No Flutter engine build directory found at: bogus')) {
         return TaskResult.failure(
           'Host Objective-C app build succeeded though flutter script failed',
         );

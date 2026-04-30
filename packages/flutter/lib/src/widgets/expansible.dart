@@ -126,6 +126,21 @@ class ExpansibleController extends ChangeNotifier {
     _setExpansionState(false);
   }
 
+  /// Convenience method for toggling the current [isExpanded] status.
+  ///
+  /// Calling this method may cause the [Expansible] to rebuild, so it may not
+  /// be called from a build method.
+  ///
+  /// Calling this method will notify registered listeners of this controller
+  /// that the expansion state has changed.
+  ///
+  /// See also:
+  ///
+  ///  * [expand], which expands the [Expansible].
+  ///  * [collapse], which collapses the [Expansible].
+  ///  * [isExpanded] to check whether the [Expansible] is expanded.
+  void toggle() => isExpanded ? collapse() : expand();
+
   /// Finds the [ExpansibleController] for the closest [Expansible] instance
   /// that encloses the given context.
   ///

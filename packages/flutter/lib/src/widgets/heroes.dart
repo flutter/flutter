@@ -178,6 +178,8 @@ class Hero extends StatefulWidget {
     this.flightShuttleBuilder,
     this.placeholderBuilder,
     this.transitionOnUserGestures = false,
+    this.curve = Curves.fastOutSlowIn,
+    this.reverseCurve,
     required this.child,
   });
 
@@ -260,6 +262,16 @@ class Hero extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool transitionOnUserGestures;
+
+  /// The curve to use in the forward direction.
+  ///
+  /// Defaults to [Curves.fastOutSlowIn].
+  final Curve curve;
+
+  /// The curve to use in the reverse direction.
+  ///
+  /// If this property is null, [Hero.curve].flipped is used.
+  final Curve? reverseCurve;
 
   // Returns a map of all of the heroes in `context` indexed by hero tag that
   // should be considered for animation when `navigator` transitions from one
@@ -459,10 +471,23 @@ class _HeroFlightManifest {
   CurvedAnimation? _animation;
 
   Animation<double> get animation {
+    final Curve curve, reverseCurve;
+    final Animation<double> parent;
+    switch (type) {
+      case HeroFlightDirection.push:
+        parent = toRoute.animation!;
+        curve = toHero.widget.curve;
+        reverseCurve = toHero.widget.reverseCurve ?? curve.flipped;
+      case HeroFlightDirection.pop:
+        parent = fromRoute.animation!;
+        curve = fromHero.widget.curve;
+        reverseCurve = fromHero.widget.reverseCurve ?? curve.flipped;
+    }
+
     return _animation ??= CurvedAnimation(
-      parent: (type == HeroFlightDirection.push) ? toRoute.animation! : fromRoute.animation!,
-      curve: Curves.fastOutSlowIn,
-      reverseCurve: isDiverted ? null : Curves.fastOutSlowIn.flipped,
+      parent: parent,
+      curve: curve,
+      reverseCurve: isDiverted ? null : reverseCurve,
     );
   }
 

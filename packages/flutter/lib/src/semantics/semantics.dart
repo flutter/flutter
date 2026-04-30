@@ -119,7 +119,7 @@ typedef ChildSemanticsConfigurationsDelegate =
 ///
 /// This is typically used to prevent screen readers
 /// from focusing on parts of the UI.
-enum AccessiblityFocusBlockType {
+enum AccessibilityFocusBlockType {
   /// Accessibility focus is **not blocked**.
   none,
 
@@ -130,22 +130,22 @@ enum AccessiblityFocusBlockType {
   /// may still be focusable.
   blockNode;
 
-  /// The AccessiblityFocusBlockType when two nodes get merged.
-  AccessiblityFocusBlockType _merge(AccessiblityFocusBlockType other) {
+  /// The AccessibilityFocusBlockType when two nodes get merged.
+  AccessibilityFocusBlockType _merge(AccessibilityFocusBlockType other) {
     // 1. If either is blockSubtree, the result is blockSubtree.
-    if (this == AccessiblityFocusBlockType.blockSubtree ||
-        other == AccessiblityFocusBlockType.blockSubtree) {
-      return AccessiblityFocusBlockType.blockSubtree;
+    if (this == AccessibilityFocusBlockType.blockSubtree ||
+        other == AccessibilityFocusBlockType.blockSubtree) {
+      return AccessibilityFocusBlockType.blockSubtree;
     }
 
     // 2. If either is blockNode, the result is blockNode
-    if (this == AccessiblityFocusBlockType.blockNode ||
-        other == AccessiblityFocusBlockType.blockNode) {
-      return AccessiblityFocusBlockType.blockNode;
+    if (this == AccessibilityFocusBlockType.blockNode ||
+        other == AccessibilityFocusBlockType.blockNode) {
+      return AccessibilityFocusBlockType.blockNode;
     }
 
     // 3. If neither is blockSubtree nor blockNode, both must be none.
-    return AccessiblityFocusBlockType.none;
+    return AccessibilityFocusBlockType.none;
   }
 }
 
@@ -210,38 +210,48 @@ sealed class _DebugSemanticsRoleChecks {
     final SemanticsData data = node.getSemanticsData();
 
     // Check if value is present
-    if (data.value.isEmpty) {
-      return FlutterError('A progress bar must have a value');
+    if (data.value.isEmpty ||
+        (data.minValue?.isEmpty ?? true) ||
+        (data.maxValue?.isEmpty ?? true)) {
+      return FlutterError('A progress bar must have a value, a minValue, a maxValue.');
     }
 
-    // Check if minValue and maxValue are present
-    if (data.minValue?.isEmpty ?? true) {
-      return FlutterError('A progress bar must have a minValue');
-    }
+    final double? minVal = double.tryParse(data.minValue!);
+    final double? maxVal = double.tryParse(data.maxValue!);
+    // The value can either be a direct number fall within the min and max range
+    // or a percentage number between 0% and 100%
+    final double? currentValue = double.tryParse(data.value);
+    final double? percentValue = data.value.endsWith('%')
+        ? double.tryParse(data.value.substring(0, data.value.length - 1))
+        : null;
 
-    if (data.maxValue?.isEmpty ?? true) {
-      return FlutterError('A progress bar must have a maxValue');
-    }
-
-    // Validate that value is within min and max range
-    try {
-      final double currentValue = double.parse(data.value);
-      final double minVal = double.parse(data.minValue!);
-      final double maxVal = double.parse(data.maxValue!);
-
-      if (currentValue < minVal || currentValue > maxVal) {
-        return FlutterError(
-          'Progress bar value ($currentValue) must be between minValue ($minVal) and maxValue ($maxVal)',
-        );
-      }
-
-      if (minVal >= maxVal) {
-        return FlutterError('Progress bar minValue ($minVal) must be less than maxValue ($maxVal)');
-      }
-    } catch (e) {
+    if (minVal == null || maxVal == null || (currentValue == null && percentValue == null)) {
       return FlutterError(
         'Progress bar value, minValue, and maxValue must be valid numbers. '
         'value: "${data.value}", minValue: "${data.minValue}", maxValue: "${data.maxValue}"',
+      );
+    }
+
+    // Validate min/max relation since both are guaranteed to be valid numbers.
+    if (minVal >= maxVal) {
+      return FlutterError(
+        'Progress bar minValue (${data.minValue}) must be less than maxValue (${data.maxValue})',
+      );
+    }
+    // If the value is a number, it must be between min and max.
+    if (currentValue != null) {
+      if (currentValue < minVal || currentValue > maxVal) {
+        return FlutterError(
+          'Progress bar value (${data.value}) must be between minValue (${data.minValue}) and maxValue (${data.maxValue})',
+        );
+      }
+      return null;
+    }
+
+    // If the value is a percentage string (e.g., "50%"), it must be between 0% and 100%.
+    if (percentValue != null && (percentValue < 0 || percentValue > 100)) {
+      return FlutterError(
+        'Progress bar percentage value (${data.value}) must be between 0% and 100%',
       );
     }
 
@@ -1642,7 +1652,7 @@ class SemanticsProperties extends DiagnosticableTree {
     )
     this.focusable,
     this.focused,
-    this.accessiblityFocusBlockType,
+    this.accessibilityFocusBlockType,
     this.inMutuallyExclusiveGroup,
     this.hidden,
     this.obscured,
@@ -1797,9 +1807,8 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, indicates that this subtree represents a header.
   ///
-  /// A header divides into sections. For example, an address book application
-  /// might define headers A, B, C, etc. to divide the list of alphabetically
-  /// sorted contacts into sections.
+  /// A header is typically the top element of a page or section, such as a
+  /// page title or app bar title.
   final bool? header;
 
   /// If non-null, indicates that this subtree represents a text field.
@@ -1857,7 +1866,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This is for accessibility focus, which is the focus used by screen readers
   /// like TalkBack and VoiceOver. It is different from input focus, which is
   /// usually held by the element that currently responds to keyboard inputs.
-  final AccessiblityFocusBlockType? accessiblityFocusBlockType;
+  final AccessibilityFocusBlockType? accessibilityFocusBlockType;
 
   /// If non-null, whether a semantic node is in a mutually exclusive group.
   ///
@@ -1989,6 +1998,11 @@ class SemanticsProperties extends DiagnosticableTree {
   /// It's usually used for UI testing with tools that work by querying the
   /// native accessibility, like UIAutomator, XCUITest, or Appium. It can be
   /// matched with [CommonFinders.bySemanticsIdentifier].
+  ///
+  /// When set, this property implicitly forces the creation of a new
+  /// [SemanticsNode] (equivalent to setting `container` to true in
+  /// [Semantics]). This ensures the identifier is always attached to its
+  /// own node and is not merged into an ancestor.
   ///
   /// On Android, this is used for `AccessibilityNodeInfo.setViewIdResourceName`.
   /// It'll be appear in accessibility hierarchy as `resource-id`.
@@ -2220,7 +2234,11 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// The heading level in the document structure.
   ///
-  /// Screen readers will use this value to determine which part of the page
+  /// A heading divides content into sections. For example, an address book
+  /// application might define headings A, B, C, etc. to divide the list of
+  /// alphabetically sorted contacts into sections.
+  ///
+  /// Screen readers use this value to determine which part of the page
   /// structure this heading represents. A level 1 heading usually indicates
   /// the main heading of a page, a level 2 heading the first subsection,
   /// a level 3 is a subsection of that, and so on.
@@ -3337,7 +3355,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _traversalChildIdentifier != config._traversalChildIdentifier ||
         _traversalParentIdentifier != config._traversalParentIdentifier ||
         _minValue != config._minValue ||
-        _maxValue != config._maxValue;
+        _maxValue != config._maxValue ||
+        !mapEquals<CustomSemanticsAction, VoidCallback>(
+          _customSemanticsActions,
+          config._customSemanticsActions,
+        );
   }
 
   // TAGS, LABELS, ACTIONS
@@ -4267,7 +4289,25 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (!attached) {
       return;
     }
-    SystemChannels.accessibility.send(event.toMap(nodeId: id));
+    SystemChannels.accessibility
+        .send(event.toMap(nodeId: id))
+        .then(
+          (dynamic _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'semantics library',
+                context: ErrorDescription('while sending accessibility event'),
+                informationCollector: () => <DiagnosticsNode>[
+                  DiagnosticsProperty<SemanticsEvent>('event', event),
+                  DiagnosticsProperty<SemanticsNode>('node', this),
+                ],
+              ),
+            );
+          },
+        );
   }
 
   bool _debugIsActionBlocked(SemanticsAction action) {
@@ -6306,14 +6346,16 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  AccessiblityFocusBlockType _accessiblityFocusBlockType = AccessiblityFocusBlockType.none;
+  AccessibilityFocusBlockType _accessibilityFocusBlockType = AccessibilityFocusBlockType.none;
 
   /// Whether the owning [RenderObject] and its subtree
   /// is blocked in the a11y focus (different from input focus).
-  AccessiblityFocusBlockType get accessiblityFocusBlockType => _accessiblityFocusBlockType;
-  set accessiblityFocusBlockType(AccessiblityFocusBlockType value) {
-    _accessiblityFocusBlockType = value;
-    _flags = _flags.copyWith(isAccessibilityFocusBlocked: value != AccessiblityFocusBlockType.none);
+  AccessibilityFocusBlockType get accessibilityFocusBlockType => _accessibilityFocusBlockType;
+  set accessibilityFocusBlockType(AccessibilityFocusBlockType value) {
+    _accessibilityFocusBlockType = value;
+    _flags = _flags.copyWith(
+      isAccessibilityFocusBlocked: value != AccessibilityFocusBlockType.none,
+    );
     _hasBeenAnnotated = true;
   }
 
@@ -6797,8 +6839,8 @@ class SemanticsConfiguration {
         _validationResult = child._validationResult;
       }
     }
-    _accessiblityFocusBlockType = _accessiblityFocusBlockType._merge(
-      child._accessiblityFocusBlockType,
+    _accessibilityFocusBlockType = _accessibilityFocusBlockType._merge(
+      child._accessibilityFocusBlockType,
     );
     _minValue ??= child._minValue;
     _maxValue ??= child._maxValue;
@@ -6829,7 +6871,7 @@ class SemanticsConfiguration {
       .._attributedValue = _attributedValue
       .._attributedDecreasedValue = _attributedDecreasedValue
       .._attributedHint = _attributedHint
-      .._accessiblityFocusBlockType = _accessiblityFocusBlockType
+      .._accessibilityFocusBlockType = _accessibilityFocusBlockType
       .._hintOverrides = _hintOverrides
       .._tooltip = _tooltip
       .._flags = _flags

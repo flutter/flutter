@@ -31,7 +31,7 @@ GeometryResult FillRectGeometry::GetPositionBuffer(
 
 std::optional<Rect> FillRectGeometry::GetCoverage(
     const Matrix& transform) const {
-  return rect_.TransformBounds(transform);
+  return rect_.TransformAndClipBounds(transform);
 }
 
 bool FillRectGeometry::CoversArea(const Matrix& transform,

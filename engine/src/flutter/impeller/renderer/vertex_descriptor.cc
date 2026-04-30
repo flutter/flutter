@@ -74,7 +74,7 @@ VertexDescriptor::GetDescriptorSetLayouts() const {
   return desc_set_layouts_;
 }
 
-bool VertexDescriptor::UsesInputAttacments() const {
+bool VertexDescriptor::UsesInputAttachments() const {
   return uses_input_attachments_;
 }
 

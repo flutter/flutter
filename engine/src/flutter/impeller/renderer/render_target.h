@@ -114,7 +114,7 @@ class RenderTarget final {
   RenderTarget& SetStencilAttachment(
       std::optional<StencilAttachment> attachment);
 
-  size_t GetMaxColorAttacmentBindIndex() const;
+  size_t GetMaxColorAttachmentBindIndex() const;
 
   const std::optional<DepthAttachment>& GetDepthAttachment() const;
 

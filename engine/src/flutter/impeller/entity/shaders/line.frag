@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// For information on the implementation of this shader, see the design doc:
+// https://docs.google.com/document/d/19I6ToHCMlSgSava-niFWzMLGJEAd-rYiBQEGOMu8IJg/edit?tab=t.0#heading=h.icnmwum4oznc
+
 precision mediump float;
 
 #include <impeller/color.glsl>
@@ -9,6 +12,7 @@ precision mediump float;
 
 uniform FragInfo {
   vec4 color;
+  float cap_type;  // 0.0 for butt/square, 1.0 for round
 }
 frag_info;
 
@@ -36,7 +40,16 @@ float CalculateLine() {
     return 0.0;
   }
 
-  return lookup(min(d.x, d.z)) * lookup(min(d.y, d.w));
+  if (frag_info.cap_type == 1.0) {
+    if (min(d.y, d.w) < 1.0) {
+      float R = distance(vec2(min(d.x, d.z), min(d.y, d.w)), vec2(1.0));
+      return lookup(clamp(1.0 - R, 0.0, 1.0));
+    } else {
+      return lookup(min(d.x, d.z));
+    }
+  } else {
+    return lookup(min(d.x, d.z)) * lookup(min(d.y, d.w));
+  }
 }
 
 void main() {

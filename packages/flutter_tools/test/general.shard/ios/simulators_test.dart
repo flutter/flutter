@@ -477,7 +477,8 @@ void main() {
         const expectedPredicate =
             'eventType = logEvent AND '
             'processImagePath ENDSWITH "My Super Awesome App" AND '
-            '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
+            '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID '
+            'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") AND '
             'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
             'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
             'NOT(eventMessage CONTAINS " libxpc.dylib ")';
@@ -519,7 +520,8 @@ void main() {
         );
         const expectedPredicate =
             'eventType = logEvent AND '
-            '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID) AND '
+            '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" OR processImageUUID == senderImageUUID '
+            'OR eventMessage CONTAINS "`UIScene` lifecycle will soon be required" OR eventMessage CONTAINS "This process does not adopt UIScene lifecycle.") AND '
             'NOT(eventMessage CONTAINS ": could not find icon for representation -> com.apple.") AND '
             'NOT(eventMessage BEGINSWITH "assertion failed: ") AND '
             'NOT(eventMessage CONTAINS " libxpc.dylib ")';
@@ -734,7 +736,9 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           const logPredicate =
               'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
               'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
-              'OR processImageUUID == senderImageUUID) AND NOT(eventMessage CONTAINS ": could not find icon '
+              'OR processImageUUID == senderImageUUID OR eventMessage CONTAINS "`UIScene` lifecycle'
+              ' will soon be required" OR eventMessage CONTAINS "This process does not adopt UIScene '
+              'lifecycle.") AND NOT(eventMessage CONTAINS ": could not find icon '
               'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
               'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
           fakeProcessManager.addCommand(
@@ -799,7 +803,9 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           const logPredicate =
               'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
               'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
-              'OR processImageUUID == senderImageUUID) AND NOT(eventMessage CONTAINS ": could not find icon '
+              'OR processImageUUID == senderImageUUID OR eventMessage CONTAINS "`UIScene` lifecycle '
+              'will soon be required" OR eventMessage CONTAINS "This process does not adopt UIScene '
+              'lifecycle.") AND NOT(eventMessage CONTAINS ": could not find icon '
               'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
               'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
           fakeProcessManager.addCommand(

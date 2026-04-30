@@ -59,6 +59,9 @@ abstract class FeatureFlags {
   /// Whether dart data assets building and bundling is enabled.
   bool get isDartDataAssetsEnabled => false;
 
+  /// Whether record use experiment is enabled.
+  bool get isRecordUseEnabled;
+
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled;
 
@@ -69,6 +72,9 @@ abstract class FeatureFlags {
 
   /// Whether desktop windowing is enabled.
   bool get isWindowingEnabled;
+
+  /// Whether accessibility evaluations is enabled.
+  bool get isAccessibilityEvaluationsEnabled;
 
   /// Whether physical iOS devices are debugging with LLDB.
   bool get isLLDBDebuggingEnabled;
@@ -97,9 +103,11 @@ abstract class FeatureFlags {
     cliAnimation,
     nativeAssets,
     dartDataAssets,
+    recordUse,
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
+    accessibilityEvaluationsFeature,
     lldbDebugging,
     uiSceneMigration,
     riscv64,
@@ -207,14 +215,22 @@ const dartDataAssets = Feature(
   master: FeatureChannelSetting(available: true),
 );
 
+/// Enable record use experiment.
+const recordUse = Feature(
+  name: 'record use experiment',
+  configSetting: 'enable-record-use',
+  environmentOverride: 'FLUTTER_RECORD_USE',
+  master: FeatureChannelSetting(available: true),
+);
+
 /// Enable Swift Package Manager as a darwin dependency manager.
 const swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
   configSetting: 'enable-swift-package-manager',
   environmentOverride: 'FLUTTER_SWIFT_PACKAGE_MANAGER',
-  master: FeatureChannelSetting(available: true),
-  beta: FeatureChannelSetting(available: true),
-  stable: FeatureChannelSetting(available: true),
+  master: FeatureChannelSetting(available: true, enabledByDefault: true),
+  beta: FeatureChannelSetting(available: true, enabledByDefault: true),
+  stable: FeatureChannelSetting(available: true, enabledByDefault: true),
 );
 
 /// Whether to continue writing the `{FLUTTER_ROOT}/version` legacy file.
@@ -237,6 +253,15 @@ const windowingFeature = Feature(
   configSetting: 'enable-windowing',
   environmentOverride: 'FLUTTER_WINDOWING',
   runtimeId: 'windowing',
+  master: FeatureChannelSetting(available: true),
+);
+
+/// Whether accessibility evaluations is enabled.
+const accessibilityEvaluationsFeature = Feature(
+  name: 'support for accessibility evaluations',
+  configSetting: 'enable-accessibility-evaluations',
+  environmentOverride: 'FLUTTER_ACCESSIBILITY_EVALUATIONS',
+  runtimeId: 'accessibility_evaluations',
   master: FeatureChannelSetting(available: true),
 );
 

@@ -22,6 +22,7 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.BuildConfig;
 import io.flutter.FlutterInjector;
 import io.flutter.Log;
+import io.flutter.embedding.engine.FlutterEngineFlags;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.util.HandlerCompat;
 import io.flutter.util.PathUtils;
@@ -38,49 +39,10 @@ import java.util.concurrent.Future;
 public class FlutterLoader {
   private static final String TAG = "FlutterLoader";
 
-  private static final String OLD_GEN_HEAP_SIZE_META_DATA_KEY =
-      "io.flutter.embedding.android.OldGenHeapSize";
-  private static final String ENABLE_IMPELLER_META_DATA_KEY =
-      "io.flutter.embedding.android.EnableImpeller";
-  private static final String ENABLE_VULKAN_VALIDATION_META_DATA_KEY =
-      "io.flutter.embedding.android.EnableVulkanValidation";
-  private static final String IMPELLER_BACKEND_META_DATA_KEY =
-      "io.flutter.embedding.android.ImpellerBackend";
-  private static final String IMPELLER_OPENGL_GPU_TRACING_DATA_KEY =
-      "io.flutter.embedding.android.EnableOpenGLGPUTracing";
-  private static final String IMPELLER_VULKAN_GPU_TRACING_DATA_KEY =
-      "io.flutter.embedding.android.EnableVulkanGPUTracing";
-  private static final String DISABLE_MERGED_PLATFORM_UI_THREAD_KEY =
-      "io.flutter.embedding.android.DisableMergedPlatformUIThread";
-  private static final String ENABLE_SURFACE_CONTROL =
-      "io.flutter.embedding.android.EnableSurfaceControl";
-  private static final String ENABLE_FLUTTER_GPU = "io.flutter.embedding.android.EnableFlutterGPU";
-  private static final String IMPELLER_LAZY_SHADER_MODE =
-      "io.flutter.embedding.android.ImpellerLazyShaderInitialization";
-  private static final String IMPELLER_ANTIALIAS_LINES =
-      "io.flutter.embedding.android.ImpellerAntialiasLines";
-
-  /**
-   * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
-   * meta-data in <application /> in AndroidManifest.xml. Set it to true in to leave the Dart VM,
-   * set it to false to destroy VM.
-   *
-   * <p>If your want to let your app destroy the last shell and re-create shells more quickly, set
-   * it to true, otherwise if you want to clean up the memory of the leak VM, set it to false.
-   *
-   * <p>TODO(eggfly): Should it be set to false by default?
-   * https://github.com/flutter/flutter/issues/96843
-   */
-  private static final String LEAK_VM_META_DATA_KEY = "io.flutter.embedding.android.LeakVM";
-
-  // Must match values in flutter::switches
-  static final String AOT_SHARED_LIBRARY_NAME = "aot-shared-library-name";
-  static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME = "aot-vmservice-shared-library-name";
-  static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
-  static final String VM_SNAPSHOT_DATA_KEY = "vm-snapshot-data";
-  static final String ISOLATE_SNAPSHOT_DATA_KEY = "isolate-snapshot-data";
-  static final String FLUTTER_ASSETS_DIR_KEY = "flutter-assets-dir";
-  static final String AUTOMATICALLY_REGISTER_PLUGINS_KEY = "automatically-register-plugins";
+  // Flags to only be set internally by default. Match values in flutter::switches.
+  private static final String SNAPSHOT_ASSET_PATH_KEY = "snapshot-asset-path";
+  private static final String AOT_VMSERVICE_SHARED_LIBRARY_NAME =
+      "aot-vmservice-shared-library-name";
 
   // Resource names used for components of the precompiled snapshot.
   private static final String DEFAULT_LIBRARY = "libflutter.so";
@@ -89,8 +51,7 @@ public class FlutterLoader {
 
   private static FlutterLoader instance;
 
-  @VisibleForTesting
-  static final String aotSharedLibraryNameFlag = "--" + AOT_SHARED_LIBRARY_NAME + "=";
+  private boolean enableSoftwareRendering = false;
 
   /**
    * Creates a {@code FlutterLoader} that uses a default constructed {@link FlutterJNI} and {@link
@@ -295,6 +256,21 @@ public class FlutterLoader {
    */
   public void ensureInitializationComplete(
       @NonNull Context applicationContext, @Nullable String[] args) {
+    ensureInitializationComplete(applicationContext, args, BuildConfig.RELEASE);
+  }
+
+  /**
+   * Blocks until initialization of the native system has completed.
+   *
+   * <p>Calling this method multiple times has no effect.
+   *
+   * @param applicationContext The Android application context.
+   * @param args Flags sent to the Flutter runtime.
+   * @param isRelease Whether or not the Flutter component is running in release mode.
+   */
+  @VisibleForTesting
+  void ensureInitializationComplete(
+      @NonNull Context applicationContext, @Nullable String[] args, @NonNull boolean isRelease) {
     if (initialized) {
       return;
     }
@@ -311,40 +287,163 @@ public class FlutterLoader {
       InitResult result = initResultFuture.get();
 
       List<String> shellArgs = new ArrayList<>();
-      shellArgs.add("--icu-symbol-prefix=_binary_icudtl_dat");
 
+      // Add engine flags for which defaults set internally take precedent.
+      shellArgs.add("--icu-symbol-prefix=_binary_icudtl_dat");
       shellArgs.add(
           "--icu-native-lib-path="
               + flutterApplicationInfo.nativeLibraryDir
               + File.separator
               + DEFAULT_LIBRARY);
 
-      if (args != null) {
-        for (String arg : args) {
-          // Perform security check for path containing application's compiled Dart code and
-          // potentially user-provided compiled native code.
-          if (arg.startsWith(aotSharedLibraryNameFlag)) {
-            String safeAotSharedLibraryNameFlag =
-                getSafeAotSharedLibraryNameFlag(applicationContext, arg);
-            if (safeAotSharedLibraryNameFlag != null) {
-              arg = safeAotSharedLibraryNameFlag;
-            } else {
-              // If the library path is not safe, we will skip adding this argument.
-              Log.w(
-                  TAG,
-                  "Skipping unsafe AOT shared library name flag: "
-                      + arg
-                      + ". Please ensure that the library is vetted and placed in your application's internal storage.");
-              continue;
-            }
+      // Add engine flags provided by metadata in the application manifest. These settings will take
+      // precedent over any defaults set below, but will be overridden if additionally set by the
+      // command line.
+      ApplicationInfo applicationInfo =
+          applicationContext
+              .getPackageManager()
+              .getApplicationInfo(
+                  applicationContext.getPackageName(), PackageManager.GET_META_DATA);
+      Bundle applicationMetaData = applicationInfo.metaData;
+      boolean oldGenHeapSizeSet = false;
+      boolean isLeakVMSet = false;
+
+      if (applicationMetaData != null) {
+        for (FlutterEngineFlags.Flag flag : FlutterEngineFlags.ALL_FLAGS) {
+          String metadataKey = flag.metadataKey;
+          if (!applicationMetaData.containsKey(metadataKey)) {
+            continue;
           }
 
-          // TODO(camsim99): This is a dangerous pattern that blindly allows potentially malicious
-          // arguments to be used for engine initialization and should be fixed. See
-          // https://github.com/flutter/flutter/issues/172553.
+          // Check if flag is valid:
+
+          if (flag == FlutterEngineFlags.TEST_FLAG) {
+            Log.w(
+                TAG,
+                "For testing purposes only: test flag specified in the manifest was loaded by the FlutterLoader.");
+            continue;
+          } else if (FlutterEngineFlags.isDisabled(flag)) {
+            // Do not allow disabled flags.
+            throw new IllegalArgumentException(
+                metadataKey
+                    + " is disabled and no longer allowed. Please remove this flag from your application manifest.");
+          } else if (FlutterEngineFlags.getReplacementFlagIfDeprecated(flag) != null) {
+            Log.w(
+                TAG,
+                "If you are trying to specify "
+                    + metadataKey
+                    + " in your application manifest, please make sure to use the new metadata key name: "
+                    + FlutterEngineFlags.getReplacementFlagIfDeprecated(flag).metadataKey);
+          } else if (!flag.allowedInRelease && isRelease) {
+            // Manifest flag is not allowed in release builds.
+            Log.e(
+                TAG,
+                "Flag with metadata key "
+                    + metadataKey
+                    + " is not allowed in release builds and will be ignored if specified in the application manifest or via the command line.");
+            continue;
+          }
+
+          // Handle special cases for specific flags:
+
+          if (flag == FlutterEngineFlags.OLD_GEN_HEAP_SIZE) {
+            // Mark if old gen heap size is set to track whether or not to set default
+            // internally.
+            oldGenHeapSizeSet = true;
+          } else if (flag == FlutterEngineFlags.LEAK_VM) {
+            // Mark if leak VM is set to track whether or not to set default internally.
+            isLeakVMSet = true;
+          } else if (flag == FlutterEngineFlags.ENABLE_SOFTWARE_RENDERING) {
+            // Enabling software rendering impacts platform views, so save this value
+            // so that the PlatformViewsController can be properly configured.
+            enableSoftwareRendering =
+                applicationMetaData.getBoolean(
+                    FlutterEngineFlags.ENABLE_SOFTWARE_RENDERING.metadataKey, false);
+          } else if (flag == FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME
+              || flag == FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME) {
+            // Perform security check for path containing application's compiled Dart
+            // code and potentially user-provided compiled native code.
+            String aotSharedLibraryPath = applicationMetaData.getString(metadataKey);
+            if (aotSharedLibraryPath == null) {
+              Log.e(
+                  TAG,
+                  "Flag "
+                      + metadataKey
+                      + " was specified with an empty path. Please specify a path to the desired AOT shared library.");
+            } else {
+              maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
+            }
+            continue;
+          }
+
+          // Add flag to shell args.
+          String arg = flag.engineArgument;
+
+          // Handle case where flag takes a value.
+          if (flag.hasCommandLineValue()) {
+            Object valueObj = applicationMetaData.get(metadataKey);
+            String value = valueObj != null ? valueObj.toString() : null;
+            if (value == null) {
+              Log.e(
+                  TAG,
+                  "Flag with metadata key "
+                      + metadataKey
+                      + " requires a value, but no value was found. Please specify a value.");
+              continue;
+            }
+            shellArgs.add(arg + value);
+            continue;
+          }
+
+          // Check if a boolean value is specified and if so, use it to determine if the
+          // flags should be added. If the value is missing or unparseable, default to
+          // false (disabled) to ensure flags are only enabled when explicitly requested.
+          if (applicationMetaData.getBoolean(metadataKey, false)) {
+            shellArgs.add(arg);
+          }
+        }
+      }
+
+      // Add any remaining engine flags provided by the command line. These settings will take
+      // precedent over any flag settings specified by application manifest
+      // metadata and any defaults set below.
+      if (args != null) {
+        for (String arg : args) {
+          FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagByEngineArgument(arg);
+          if (flag == null) {
+            // TODO(camsim99): Reject unknown flags specified on the command line:
+            // https://github.com/flutter/flutter/issues/182557.
+            shellArgs.add(arg);
+            continue;
+          } else if (flag.equals(FlutterEngineFlags.TEST_FLAG)) {
+            Log.w(
+                TAG,
+                "For testing purposes only: test flag specified on the command line was loaded by the FlutterLoader.");
+            continue;
+          } else if (flag.equals(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME)
+              || flag.equals(FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME)) {
+            // Perform security check for path containing application's compiled Dart
+            // code and potentially user-provided compiled native code.
+            String aotSharedLibraryPath =
+                arg.substring(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument.length());
+            maybeAddAotSharedLibraryNameArg(applicationContext, aotSharedLibraryPath, shellArgs);
+            continue;
+          } else if (!flag.allowedInRelease && isRelease) {
+            // Flag is not allowed in release builds.
+            Log.e(
+                TAG,
+                "Command line argument "
+                    + arg
+                    + " is not allowed in release builds and will be ignored if specified in the application manifest or via the command line.");
+            continue;
+          }
+
           shellArgs.add(arg);
         }
       }
+
+      // Add engine flags set by default internally. Some of these settings can be overridden
+      // by command line args or application manifest metadata.
 
       String kernelPath = null;
       if (BuildConfig.DEBUG || BuildConfig.JIT_RELEASE) {
@@ -352,18 +451,25 @@ public class FlutterLoader {
             result.dataDirPath + File.separator + flutterApplicationInfo.flutterAssetsDir;
         kernelPath = snapshotAssetPath + File.separator + DEFAULT_KERNEL_BLOB;
         shellArgs.add("--" + SNAPSHOT_ASSET_PATH_KEY + "=" + snapshotAssetPath);
-        shellArgs.add("--" + VM_SNAPSHOT_DATA_KEY + "=" + flutterApplicationInfo.vmSnapshotData);
         shellArgs.add(
-            "--" + ISOLATE_SNAPSHOT_DATA_KEY + "=" + flutterApplicationInfo.isolateSnapshotData);
+            FlutterEngineFlags.VM_SNAPSHOT_DATA.engineArgument
+                + flutterApplicationInfo.vmSnapshotData);
+        shellArgs.add(
+            FlutterEngineFlags.ISOLATE_SNAPSHOT_DATA.engineArgument
+                + flutterApplicationInfo.isolateSnapshotData);
       } else {
-        // Add default AOT shared library name arg.
-        shellArgs.add(aotSharedLibraryNameFlag + flutterApplicationInfo.aotSharedLibraryName);
+        // Add default AOT shared library name arg. Note that if a different library
+        // is set in the manifest, that value will take precendence and the default
+        // libraries will be used as fallbacks in the order that they are added.
+        shellArgs.add(
+            FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument
+                + flutterApplicationInfo.aotSharedLibraryName);
 
         // Some devices cannot load the an AOT shared library based on the library name
         // with no directory path. So, we provide a fully qualified path to the default library
         // as a workaround for devices where that fails.
         shellArgs.add(
-            aotSharedLibraryNameFlag
+            FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument
                 + flutterApplicationInfo.nativeLibraryDir
                 + File.separator
                 + flutterApplicationInfo.aotSharedLibraryName);
@@ -384,23 +490,17 @@ public class FlutterLoader {
         shellArgs.add("--log-tag=" + settings.getLogTag());
       }
 
-      ApplicationInfo applicationInfo =
-          applicationContext
-              .getPackageManager()
-              .getApplicationInfo(
-                  applicationContext.getPackageName(), PackageManager.GET_META_DATA);
-      Bundle metaData = applicationInfo.metaData;
-      int oldGenHeapSizeMegaBytes =
-          metaData != null ? metaData.getInt(OLD_GEN_HEAP_SIZE_META_DATA_KEY) : 0;
-      if (oldGenHeapSizeMegaBytes == 0) {
-        // default to half of total memory.
+      if (!oldGenHeapSizeSet) {
+        // Default to half of total memory.
         ActivityManager activityManager =
             (ActivityManager) applicationContext.getSystemService(Context.ACTIVITY_SERVICE);
         ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
         activityManager.getMemoryInfo(memInfo);
-        oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
+        int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
+        shellArgs.add(
+            FlutterEngineFlags.OLD_GEN_HEAP_SIZE.engineArgument
+                + String.valueOf(oldGenHeapSizeMegaBytes));
       }
-      shellArgs.add("--old-gen-heap-size=" + oldGenHeapSizeMegaBytes);
 
       DisplayMetrics displayMetrics = applicationContext.getResources().getDisplayMetrics();
       int screenWidth = displayMetrics.widthPixels;
@@ -412,48 +512,9 @@ public class FlutterLoader {
 
       shellArgs.add("--prefetched-default-font-manager");
 
-      if (metaData != null) {
-        if (metaData.containsKey(ENABLE_IMPELLER_META_DATA_KEY)) {
-          if (metaData.getBoolean(ENABLE_IMPELLER_META_DATA_KEY)) {
-            shellArgs.add("--enable-impeller=true");
-          } else {
-            shellArgs.add("--enable-impeller=false");
-          }
-        }
-        if (metaData.getBoolean(ENABLE_VULKAN_VALIDATION_META_DATA_KEY, false)) {
-          shellArgs.add("--enable-vulkan-validation");
-        }
-        if (metaData.getBoolean(IMPELLER_OPENGL_GPU_TRACING_DATA_KEY, false)) {
-          shellArgs.add("--enable-opengl-gpu-tracing");
-        }
-        if (metaData.getBoolean(IMPELLER_VULKAN_GPU_TRACING_DATA_KEY, false)) {
-          shellArgs.add("--enable-vulkan-gpu-tracing");
-        }
-        if (metaData.getBoolean(DISABLE_MERGED_PLATFORM_UI_THREAD_KEY, false)) {
-          throw new IllegalArgumentException(
-              DISABLE_MERGED_PLATFORM_UI_THREAD_KEY + " is no longer allowed.");
-        }
-        if (metaData.getBoolean(ENABLE_FLUTTER_GPU, false)) {
-          shellArgs.add("--enable-flutter-gpu");
-        }
-        if (metaData.getBoolean(ENABLE_SURFACE_CONTROL, false)) {
-          shellArgs.add("--enable-surface-control");
-        }
-
-        String backend = metaData.getString(IMPELLER_BACKEND_META_DATA_KEY);
-        if (backend != null) {
-          shellArgs.add("--impeller-backend=" + backend);
-        }
-        if (metaData.getBoolean(IMPELLER_LAZY_SHADER_MODE)) {
-          shellArgs.add("--impeller-lazy-shader-mode");
-        }
-        if (metaData.getBoolean(IMPELLER_ANTIALIAS_LINES)) {
-          shellArgs.add("--impeller-antialias-lines");
-        }
+      if (!isLeakVMSet) {
+        shellArgs.add(FlutterEngineFlags.LEAK_VM.engineArgument + "true");
       }
-
-      final String leakVM = isLeakVM(metaData) ? "true" : "false";
-      shellArgs.add("--leak-vm=" + leakVM);
 
       long initTimeMillis = SystemClock.uptimeMillis() - initStartTimestampMillis;
 
@@ -474,9 +535,54 @@ public class FlutterLoader {
   }
 
   /**
-   * Returns the AOT shared library name flag with the canonical path to the library that the engine
-   * will use to load application's Dart code if it lives within a path we consider safe, which is a
-   * path within the application's internal storage. Otherwise, returns null.
+   * Adds the AOT shared library name argument to the shell args if the provided path is safe.
+   *
+   * <p>If the path is safe, it will be added to the beginning of the arguments list of arguments.
+   * The earlier specified path takes precedence over any later specified paths for the AOT shared
+   * library name argument.
+   */
+  private void maybeAddAotSharedLibraryNameArg(
+      @NonNull Context applicationContext,
+      @NonNull String aotSharedLibraryPath,
+      @NonNull List<String> shellArgs) {
+    String safeAotSharedLibraryName = null;
+    try {
+      safeAotSharedLibraryName =
+          getSafeAotSharedLibraryName(applicationContext, aotSharedLibraryPath);
+    } catch (IOException exception) {
+      Log.e(
+          TAG,
+          "Error while validating AOT shared library name flag: " + aotSharedLibraryPath,
+          exception);
+    }
+
+    if (safeAotSharedLibraryName != null) {
+      shellArgs.add(
+          0, FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument + safeAotSharedLibraryName);
+    } else {
+      // If the library path is not safe, we will skip adding this argument.
+      Log.e(
+          TAG,
+          "Skipping unsafe AOT shared library name flag: "
+              + aotSharedLibraryPath
+              + ". Please ensure that the library is vetted and placed in your application's internal storage.");
+    }
+  }
+
+  /**
+   * Returns whether software rendering is enabled.
+   *
+   * <p>{@link #ensureInitializationComplete} must be called first in order to retrieve this value.
+   * Otherwise, this will return false.
+   */
+  public boolean getSofwareRenderingEnabledViaManifest() {
+    return enableSoftwareRendering;
+  }
+
+  /**
+   * Returns the canonical path to the AOT shared library that the engine will use to load the
+   * application's Dart code if it lives within a path we consider safe, which is a path within the
+   * application's internal storage. Otherwise, returns null.
    *
    * <p>If the library lives within the application's internal storage, this means that the
    * application developer either explicitly placed the library there or set the Android Gradle
@@ -484,17 +590,9 @@ public class FlutterLoader {
    * https://developer.android.com/build/releases/past-releases/agp-4-2-0-release-notes#compress-native-libs-dsl
    * for more information.
    */
-  private String getSafeAotSharedLibraryNameFlag(
-      @NonNull Context applicationContext, @NonNull String aotSharedLibraryNameArg)
+  private String getSafeAotSharedLibraryName(
+      @NonNull Context applicationContext, @NonNull String aotSharedLibraryPath)
       throws IOException {
-    // Isolate AOT shared library path.
-    if (!aotSharedLibraryNameArg.startsWith(aotSharedLibraryNameFlag)) {
-      throw new IllegalArgumentException(
-          "AOT shared library name flag was not specified correctly; please use --aot-shared-library-name=<path>.");
-    }
-    String aotSharedLibraryPath =
-        aotSharedLibraryNameArg.substring(aotSharedLibraryNameFlag.length());
-
     // Canocalize path for safety analysis.
     File aotSharedLibraryFile = getFileFromPath(aotSharedLibraryPath);
 
@@ -519,7 +617,7 @@ public class FlutterLoader {
     boolean isSoFile = aotSharedLibraryPathCanonicalPath.endsWith(".so");
 
     if (livesWithinInternalStorage && isSoFile) {
-      return aotSharedLibraryNameFlag + aotSharedLibraryPathCanonicalPath;
+      return aotSharedLibraryPathCanonicalPath;
     }
     // If the library does not live within the application's internal storage, we will not use it.
     Log.e(
@@ -533,14 +631,6 @@ public class FlutterLoader {
   @VisibleForTesting
   File getFileFromPath(String path) {
     return new File(path);
-  }
-
-  private static boolean isLeakVM(@Nullable Bundle metaData) {
-    final boolean leakVMDefaultValue = true;
-    if (metaData == null) {
-      return leakVMDefaultValue;
-    }
-    return metaData.getBoolean(LEAK_VM_META_DATA_KEY, leakVMDefaultValue);
   }
 
   /**

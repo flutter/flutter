@@ -488,6 +488,7 @@ class Scrollable extends StatefulWidget {
   /// If a [Scrollable] enclosing the provided [BuildContext] is a
   /// [TwoDimensionalScrollable], both vertical and horizontal axes will ensure
   /// the target is made visible.
+  @awaitNotRequired
   static Future<void> ensureVisible(
     BuildContext context, {
     double alignment = 0.0,
@@ -953,9 +954,6 @@ class ScrollableState extends State<Scrollable>
   void _receivedPointerSignal(PointerSignalEvent event) {
     if (event is PointerScrollEvent && _position != null) {
       if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
-        // The handler won't use the `event`, so allow the platform to trigger
-        // any default native actions.
-        event.respond(allowPlatformDefault: true);
         return;
       }
       final double delta = _pointerSignalEventDelta(event);
@@ -965,9 +963,6 @@ class ScrollableState extends State<Scrollable>
         GestureBinding.instance.pointerSignalResolver.register(event, _handlePointerScroll);
         return;
       }
-      // The `event` won't result in a scroll, so allow the platform to trigger
-      // any default native actions.
-      event.respond(allowPlatformDefault: true);
     } else if (event is PointerScrollInertiaCancelEvent) {
       position.pointerScroll(0);
       // Don't use the pointer signal resolver, all hit-tested scrollables should stop.
@@ -976,10 +971,14 @@ class ScrollableState extends State<Scrollable>
 
   void _handlePointerScroll(PointerEvent event) {
     assert(event is PointerScrollEvent);
-    final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
+    final scrollEvent = event as PointerScrollEvent;
+    final double delta = _pointerSignalEventDelta(scrollEvent);
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
     if (delta != 0.0 && targetScrollOffset != position.pixels) {
       position.pointerScroll(delta);
+      // Tell engine this scrollable handled the event.
+      // This prevents parent page from scrolling when nested scrollables exist.
+      scrollEvent.respond(allowPlatformDefault: false);
     }
   }
 

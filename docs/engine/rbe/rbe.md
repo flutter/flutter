@@ -167,7 +167,7 @@ ninja: fatal: pipe: Too many open files
 ```
 
 Increase the maximum number of open files on your machine with the instructions
-[here](go/building-chrome-mac#configure-your-mac-for-remote-execution).
+[here](https://goto.google.com/building-chrome-mac#configure-your-mac-for-remote-execution).
 
 ### Slow builds
 
@@ -192,7 +192,7 @@ to various background and monitoring processes running. See
 [here](https://buganizer.corp.google.com/issues/324404733#comment16) for how to
 disable some of them. You should also disable Spotlight scanning of the engine
 source directory as described
-[here](go/building-chrome-mac#add-the-source-directory-to-the-spotlight-privacy-list).
+[here](https://goto.google.com/building-chrome-mac#add-the-source-directory-to-the-spotlight-privacy-list).
 
 When RBE builds are slow, non-RBE builds may be faster, especially incremental
 builds. You can disable remote builds without invalidating your existing build
@@ -244,11 +244,11 @@ This can be debugged by doing a local build with RBE turned off.
   [this GitHub repository](https://github.com/bazelbuild/reclient). The tools are not
   well-documented, so the source code is the source of truth for the command
   line flags that they accept, for example.
-* Internal-facing RBE migration guide is [here](go/reclient-migration-guide).
+* Internal-facing RBE migration guide is [here](https://goto.google.com/reclient-migration-guide).
   (Mostly focused on Chrome and Android, so not all parts are relevant to
   Flutter.)
 * The version of RBE for local development is set in the DEPS file
-  [here](https://github.com/flutter/engine/blob/8578edf9c9393471ca9eab18e9154f0e6066dcb6/DEPS#L53).
+  [here](https://github.com/flutter/flutter/blob/e3852df571a4e313bdab85777ac13affcd089d8c/DEPS#L48).
   It needs to be manually rolled occasionally.
 * The version of RBE used by CI is set in a LUCI recipe
   [here](https://flutter.googlesource.com/recipes/+/be12675150183af68223f5fbc6e0f888a1139e79/recipe_modules/rbe/api.py#16).

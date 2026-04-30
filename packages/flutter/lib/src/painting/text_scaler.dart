@@ -132,9 +132,19 @@ final class _ClampedTextScaler implements TextScaler {
 
   @override
   TextScaler clamp({double minScaleFactor = 0, double maxScaleFactor = double.infinity}) {
-    return minScaleFactor == maxScaleFactor
-        ? _LinearTextScaler(minScaleFactor)
-        : _ClampedTextScaler(scaler, max(minScaleFactor, minScale), min(maxScaleFactor, maxScale));
+    assert(maxScaleFactor >= minScaleFactor);
+    assert(!maxScaleFactor.isNaN);
+    assert(minScaleFactor.isFinite);
+    assert(minScaleFactor >= 0);
+
+    final double newMinScale = max(minScale, minScaleFactor);
+    final double newMaxScale = min(maxScale, maxScaleFactor);
+
+    if (newMaxScale <= newMinScale) {
+      // Ranges don't overlap or collapse to a single point.
+      return TextScaler.linear(clampDouble(minScale, minScaleFactor, maxScaleFactor));
+    }
+    return _ClampedTextScaler(scaler, newMinScale, newMaxScale);
   }
 
   @override

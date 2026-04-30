@@ -145,6 +145,9 @@ class HotRunner extends ResidentRunner {
   @override
   bool get supportsDetach => stopAppDuringCleanup;
 
+  @override
+  bool get reloadIsRestart => false;
+
   Future<void> _calculateTargetPlatform() async {
     if (_targetPlatformName != null) {
       return;
@@ -1599,6 +1602,8 @@ class ProjectFileInvalidator {
             // uri.toFilePath() does not work with MultiRootFileSystem.
             () =>
                 (uri.hasScheme && uri.scheme != 'file'
+                        // TODO(srawlins): Switch from using `stat` to using `statSync`.
+                        // ignore: avoid_slow_async_io
                         ? _fileSystem.file(uri).stat()
                         : _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows)))
                     .then((FileStat stat) {

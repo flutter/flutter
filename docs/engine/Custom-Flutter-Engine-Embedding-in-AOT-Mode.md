@@ -1,4 +1,4 @@
-This document is intended for developers of third party embedders who wish to package and ship their Flutter applications for AOT mode operation. A third party embedder uses [the stable C embedder API](https://github.com/flutter/engine/blob/869d9f528503778be1e5ab27ba53502f0cb20de2/shell/platform/embedder/embedder.h) to embed Flutter applications on their platform.
+This document is intended for developers of third party embedders who wish to package and ship their Flutter applications for AOT mode operation. A third party embedder uses [the stable C embedder API](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/embedder/embedder.h) to embed Flutter applications on their platform.
 
 ## Building an AOT Flutter Engine
 

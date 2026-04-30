@@ -437,7 +437,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   void _updateOptionsViewVisibility() {
     if (_canShowOptionsView) {
       _optionsViewController.show();
-    } else {
+    } else if (_optionsViewController.isShowing) {
       _optionsViewController.hide();
     }
   }
@@ -450,7 +450,20 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final String optionsHint = resultsAvailable
         ? localizations.searchResultsFound
         : localizations.noResultsFound;
-    SemanticsService.sendAnnouncement(View.of(context), optionsHint, localizations.textDirection);
+    SemanticsService.sendAnnouncement(
+      View.of(context),
+      optionsHint,
+      localizations.textDirection,
+    ).catchError((Object exception, StackTrace stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'widgets library',
+          context: ErrorDescription('while sending semantics announcement'),
+        ),
+      );
+    });
   }
 
   // Assigning an ID to every call of _onChangedField is necessary to avoid a
@@ -516,6 +529,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       selection: TextSelection.collapsed(offset: selectionString.length),
       text: selectionString,
     );
+    _lastFieldText = selectionString;
     widget.onSelected?.call(nextSelection);
     if (_optionsViewController.isShowing) {
       _optionsViewController.hide(); // Close the options view after a selection is made.
@@ -584,13 +598,17 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     final Size fieldSize = layoutInfo.childSize;
     final Matrix4 invertTransform = layoutInfo.childPaintTransform.clone()..invert();
 
+    final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
+    final EdgeInsets viewInsets = MediaQuery.viewInsetsOf(context);
+
+    final Rect overlayRect = mediaQueryPadding.deflateRect(
+      viewInsets.deflateRect(Offset.zero & layoutInfo.overlaySize),
+    );
+
     // This may not work well if the paint transform has rotation in it.
     // MatrixUtils.transformRect returns the bounding rect of the rotated overlay
     // rect.
-    final Rect overlayRectInField = MatrixUtils.transformRect(
-      invertTransform,
-      Offset.zero & layoutInfo.overlaySize,
-    );
+    final Rect overlayRectInField = MatrixUtils.transformRect(invertTransform, overlayRect);
 
     final double spaceAbove = -overlayRectInField.top;
     final double spaceBelow = overlayRectInField.bottom - fieldSize.height;

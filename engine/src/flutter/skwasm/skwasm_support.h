@@ -22,6 +22,7 @@ class DisplayList;
 
 extern "C" {
 extern bool skwasm_isSingleThreaded();
+extern bool skwasm_isWimp();
 extern void skwasm_setAssociatedObjectOnThread(unsigned long thread_id,
                                                void* pointer,
                                                SkwasmObject object);
@@ -35,6 +36,7 @@ extern void skwasm_dispatchRenderPictures(unsigned long thread_id,
                                           int count,
                                           uint32_t callback_id);
 extern uint32_t skwasm_getGlContextForCanvas(SkwasmObject canvas,
+                                             bool antialias,
                                              Skwasm::Surface* surface);
 extern void skwasm_reportInitialized(Skwasm::Surface* surface,
                                      uint32_t callback_id,
@@ -47,6 +49,8 @@ extern void skwasm_dispatchResizeSurface(unsigned long thread_id,
                                          int height,
                                          uint32_t callback_id);
 extern void skwasm_resizeCanvas(uint32_t contextHandle, int width, int height);
+extern void skwasm_dispatchDisposeDlImage(unsigned long thread_id,
+                                          void* pointer);
 extern SkwasmObject skwasm_captureImageBitmap(uint32_t context_handle,
                                               SkwasmObject image_bitmaps);
 extern void skwasm_resolveAndPostImages(Skwasm::Surface* surface,
