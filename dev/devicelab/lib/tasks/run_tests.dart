@@ -160,23 +160,10 @@ class AndroidRunOutputTest extends RunOutputTask {
     // error and the build completes successfully.
     //
     // See https://github.com/flutter/flutter/issues/177371
-    final exactMatches = <String>{
+    return {
       'e: The daemon has terminated unexpectedly on startup attempt #1 with error code: 0. The daemon process output:',
       '1. Kotlin compile daemon is ready',
-    };
-
-    if (exactMatches.contains(line.trim())) {
-      return true;
-    }
-
-    // Checks multi-line migrate to built-in Kotlin warning. This is not an
-    // actual error and the build completes successfully.
-    //
-    // See https://github.com/flutter/flutter/issues/183909
-    return line.contains('Your Android app project: app located at:') ||
-        line.contains('applies the Kotlin Gradle Plugin') ||
-        line.contains('Please migrate your app to Built-in Kotlin') ||
-        line.trim().isEmpty;
+    }.contains(line.trim());
   }
 }
 
