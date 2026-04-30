@@ -420,7 +420,13 @@ class XcodeProjectInterpreter {
         // Remove the `xcrun` prefixes from the command before comparing because the process name
         // will resolve to the actual xcodebuild path, such as this:
         // /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild
-        final String commandToMatch = command.sublist(command.indexOf('xcodebuild')).join(' ');
+        final int xcodebuildIndex = command.indexOf('xcodebuild');
+        if (xcodebuildIndex == -1) {
+          // This should never happen. The _xcodebuildProjectCommandArguments always includes
+          // xcodebuild.
+          throwToolExit('Command "${command.join(' ')}" is expected to contain `xcodebuild`.');
+        }
+        final String commandToMatch = command.sublist(xcodebuildIndex).join(' ');
 
         // Check if process is already running from a previous Flutter command. If it is, kill it
         // so we don't have the process running twice. When this process is run twice, it'll cause
