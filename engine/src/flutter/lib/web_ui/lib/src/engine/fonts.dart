@@ -137,7 +137,7 @@ abstract class FlutterFontCollection {
   FontFallbackManager get fontFallbackManager;
 
   @visibleForTesting
-  set fontFallbackManager(FontFallbackManager? value);
+  set fontFallbackManager(FontFallbackManager value);
 
   /// The font fallback registry for this font collection.
   FallbackFontRegistry? get fallbackFontRegistry;
