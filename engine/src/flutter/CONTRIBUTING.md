@@ -260,7 +260,7 @@ $ ./run_tests.py --variant=host_debug_unopt_arm64 --type=engine
 | impeller_golden_tests                    | engine(mac)         | Generates golden images for impeller (vulkan, metal, opengles). |
 | impeller_unittests                       | engine              | impeller unit tests and interactive tests                       |
 | ios_scenario_app                         | android             | Integration and golden tests for iOS.                           |
-| ios_test_flutter_xctest                     | objc                | dynamic library of objc tests to be run with XCTest             |
+| ios_test_flutter                         | objc                | dynamic library of objc tests to be run with XCTest             |
 | jni_unittests                            | engine(not windows) |                                                                 |
 | no_dart_plugin_registrant_unittests      | engine              |                                                                 |
 | platform_view_android_delegate_unittests | engine(not windows) |                                                                 |

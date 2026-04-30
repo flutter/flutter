@@ -744,25 +744,18 @@ def gather_dart_test(
 def ensure_ios_tests_are_built(ios_out_dir: str) -> None:
   """Builds the engine variant and the test dylib containing the XCTests"""
   tmp_out_dir = os.path.join(OUT_DIR, ios_out_dir)
-  ios_xctest_lib = os.path.join(tmp_out_dir, 'libios_test_flutter.dylib')
-  ios_swifttest_lib = os.path.join(
-      tmp_out_dir, 'obj', 'flutter', 'shell', 'platform', 'darwin', 'ios',
-      'libios_test_flutter_swift.a'
-  )
+  ios_test_lib = os.path.join(tmp_out_dir, 'libios_test_flutter.dylib')
   message = []
   message.append('gn --ios --unoptimized --runtime-mode=debug --no-lto --simulator')
   message.append(f'ninja -C {ios_out_dir} ios_test_flutter')
   joined_message = '\n  '.join(message)
   final_message = (
-      f"{ios_out_dir} or {ios_xctest_lib} or {ios_swifttest_lib} doesn't exist.\n\n"
+      f"{ios_out_dir} or {ios_test_lib} doesn't exist.\n\n"
       f'Please run the following commands:\n\n'
       f'  {joined_message}\n\n'
       f'Alternatively, use --ios-variant to specify a different build configuration.'
   )
-  assert (
-      os.path.exists(tmp_out_dir) and os.path.exists(ios_xctest_lib) and
-      os.path.exists(ios_swifttest_lib)
-  ), final_message
+  assert os.path.exists(tmp_out_dir) and os.path.exists(ios_test_lib), final_message
 
 
 def assert_expected_xcode_version() -> None:
@@ -853,7 +846,7 @@ def run_android_tests(
 def run_objc_tests(
     ios_variant: str = 'ios_debug_sim_unopt', test_filter: typing.Optional[str] = None
 ) -> None:
-  """Runs Objective-C XCTest and Swift Testing unit tests for the iOS embedding"""
+  """Runs Objective-C XCTest unit tests for the iOS embedding"""
   assert_expected_xcode_version()
   ios_out_dir = os.path.join(OUT_DIR, ios_variant)
   ensure_ios_tests_are_built(ios_out_dir)
@@ -872,9 +865,12 @@ def run_objc_tests(
   ]
   run_cmd(create_simulator, shell=True)
 
-  def run_xcodebuild(scheme, project_dir, result_bundle_name):
+  try:
+    ios_unit_test_dir = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'ios', 'IosUnitTests')
+
     with tempfile.TemporaryDirectory(suffix='ios_embedding_xcresult') as result_bundle_temp:
-      result_bundle_path = os.path.join(result_bundle_temp, result_bundle_name)
+      result_bundle_path = os.path.join(result_bundle_temp, 'ios_embedding')
+
       # Avoid using xcpretty unless the following can be addressed:
       # - Make sure all relevant failure output is printed on a failure.
       # - Make sure that a failing exit code is set for CI.
@@ -882,7 +878,7 @@ def run_objc_tests(
       test_command = [
           'xcodebuild '
           '-sdk iphonesimulator '
-          f'-scheme {scheme} '
+          '-scheme IosUnitTests '
           '-resultBundlePath ' + result_bundle_path + ' '
           '-destination name=' + new_simulator_name + ' '
           'test '
@@ -891,29 +887,19 @@ def run_objc_tests(
       if test_filter is not None:
         test_command[0] = test_command[0] + f' -only-testing:{test_filter}'
       try:
-        run_cmd(test_command, cwd=project_dir, shell=True)
+        run_cmd(test_command, cwd=ios_unit_test_dir, shell=True)
+
       except:
         # The LUCI environment may provide a variable containing a directory path
         # for additional output files that will be uploaded to cloud storage.
         # Upload the xcresult when the tests fail.
         luci_test_outputs_path = os.environ.get('FLUTTER_TEST_OUTPUTS_DIR')
-        xcresult_bundle = os.path.join(result_bundle_temp, f'{result_bundle_name}.xcresult')
+        xcresult_bundle = os.path.join(result_bundle_temp, 'ios_embedding.xcresult')
         if luci_test_outputs_path and os.path.exists(xcresult_bundle):
-          dump_path = os.path.join(luci_test_outputs_path, f'{result_bundle_name}.xcresult')
+          dump_path = os.path.join(luci_test_outputs_path, 'ios_embedding.xcresult')
           # xcresults contain many little files. Archive the bundle before upload.
           shutil.make_archive(dump_path, 'zip', root_dir=xcresult_bundle)
         raise
-
-  try:
-    # Run Swift Testing tests
-    ios_swift_test_dir = os.path.join(
-        BUILDROOT_DIR, 'flutter', 'testing', 'ios', 'IosSwiftTestingTests'
-    )
-    run_xcodebuild('IosSwiftTestingTests', ios_swift_test_dir, 'ios_swift_testing')
-
-    # Run XCTest tests
-    ios_unit_test_dir = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'ios', 'IosUnitTests')
-    run_xcodebuild('IosUnitTests', ios_unit_test_dir, 'ios_embedding')
 
   finally:
     delete_simulator(new_simulator_name)
