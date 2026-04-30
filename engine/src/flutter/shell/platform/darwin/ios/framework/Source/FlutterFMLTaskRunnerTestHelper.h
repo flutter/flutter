@@ -12,6 +12,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(TaskRunnerTestHelper)
 @interface FlutterFMLTaskRunnerTestHelper : NSObject
 
 /**
