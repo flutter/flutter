@@ -537,8 +537,11 @@ class AndroidProject extends FlutterProjectPlatform {
   /// - `id("org.jetbrains.kotlin.android")`
   /// - `id ( "org.jetbrains.kotlin.android" )`
   static final _declarativeKotlinPluginPatterns = <RegExp>[
-    RegExp(r'''id\s*\(?\s*["']kotlin-android["']'''),
-    RegExp(r'''id\s*\(?\s*["']org\.jetbrains\.kotlin\.android["']'''),
+    RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?\\s*\$', multiLine: true),
+    RegExp(
+      '^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?\\s*\$',
+      multiLine: true,
+    ),
   ];
 
   /// Pattern used to find the assignment of the "group" property in Gradle.
