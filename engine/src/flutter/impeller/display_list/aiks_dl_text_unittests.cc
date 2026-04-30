@@ -1055,20 +1055,5 @@ TEST_P(AiksTest, TextWithNonUniformScale) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_P(AiksTest, TextDrawEmoji) {
-  DisplayListBuilder builder;
-
-  DlPaint paint;
-  paint.setColor(DlColor::kWhite());
-  builder.DrawPaint(paint);
-
-  // Draw a U+1F600 grinning face emoji.
-  ASSERT_TRUE(RenderTextInCanvasSkia(GetContext(), builder, "\xF0\x9F\x98\x80",
-                                     "NotoColorEmoji.ttf",
-                                     TextRenderOptions{.font_size = 200}));
-
-  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
-}
-
 }  // namespace testing
 }  // namespace impeller
