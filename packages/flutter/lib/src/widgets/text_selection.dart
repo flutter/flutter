@@ -689,11 +689,11 @@ class TextSelectionOverlay {
   }
 
   // The contact position of the gesture at the current end handle location, in
-  // global coordinates. Updated when the handle moves.
+  // RenderEditable local coordinates. Updated when the handle moves.
   late double _endHandleDragPosition;
 
   // The distance from _endHandleDragPosition to the center of the line that it
-  // corresponds to, in global coordinates.
+  // corresponds to, in RenderEditable local coordinates.
   late double _endHandleDragTarget;
 
   // The initial selection when a selection handle drag has started.
@@ -714,20 +714,19 @@ class TextSelectionOverlay {
       return;
     }
 
-    _endHandleDragPosition = details.globalPosition.dy;
+    _endHandleDragPosition = renderObject.globalToLocal(details.globalPosition).dy;
 
     // Use local coordinates when dealing with line height. because in case of a
     // scale transformation, the line height will also be scaled.
     final double centerOfLineLocal =
         _selectionOverlay.selectionEndpoints.last.point.dy - renderObject.preferredLineHeight / 2;
-    final double centerOfLineGlobal = renderObject.localToGlobal(Offset(0.0, centerOfLineLocal)).dy;
-    _endHandleDragTarget = centerOfLineGlobal - details.globalPosition.dy;
+    _endHandleDragTarget = centerOfLineLocal - _endHandleDragPosition;
     // Instead of finding the TextPosition at the handle's location directly,
     // use the vertical center of the line that it points to. This is because
     // selection handles typically hang above or below the line that they point
     // to.
     final TextPosition position = renderObject.getPositionForPoint(
-      Offset(details.globalPosition.dx, centerOfLineGlobal),
+      renderObject.localToGlobal(Offset(0.0, centerOfLineLocal)),
     );
 
     // The drag start selection is only utilized on Apple platforms.
@@ -781,18 +780,28 @@ class TextSelectionOverlay {
 
     final double nextEndHandleDragPositionLocal = _getHandleDy(
       localPosition.dy,
-      renderObject.globalToLocal(Offset(0.0, _endHandleDragPosition)).dy,
+      _endHandleDragPosition,
     );
-    _endHandleDragPosition = renderObject
-        .localToGlobal(Offset(0.0, nextEndHandleDragPositionLocal))
-        .dy;
+    _endHandleDragPosition = nextEndHandleDragPositionLocal;
 
-    final handleTargetGlobal = Offset(
-      details.globalPosition.dx,
-      _endHandleDragPosition + _endHandleDragTarget,
+    final Offset handleTargetGlobal = renderObject.localToGlobal(
+      Offset(localPosition.dx, _endHandleDragPosition + _endHandleDragTarget),
     );
 
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
+    if ((defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.macOS) &&
+        ((details.delta.dy < 0.0 && position.offset > _selection.extentOffset) ||
+            (details.delta.dy > 0.0 && position.offset < _selection.extentOffset))) {
+      return;
+    }
+    final double currentCenterOfLineLocal =
+        _selectionOverlay.selectionEndpoints.last.point.dy - renderObject.preferredLineHeight / 2;
+    final double candidateCenterOfLineLocal = renderObject.getLocalRectForCaret(position).center.dy;
+    if ((details.delta.dy < 0.0 && candidateCenterOfLineLocal > currentCenterOfLineLocal) ||
+        (details.delta.dy > 0.0 && candidateCenterOfLineLocal < currentCenterOfLineLocal)) {
+      return;
+    }
 
     final TextSelection newSelection;
     switch (defaultTargetPlatform) {
@@ -861,11 +870,11 @@ class TextSelectionOverlay {
   }
 
   // The contact position of the gesture at the current start handle location,
-  // in global coordinates. Updated when the handle moves.
+  // in RenderEditable local coordinates. Updated when the handle moves.
   late double _startHandleDragPosition;
 
   // The distance from _startHandleDragPosition to the center of the line that
-  // it corresponds to, in global coordinates.
+  // it corresponds to, in RenderEditable local coordinates.
   late double _startHandleDragTarget;
 
   void _handleSelectionStartHandleDragStart(DragStartDetails details) {
@@ -873,20 +882,19 @@ class TextSelectionOverlay {
       return;
     }
 
-    _startHandleDragPosition = details.globalPosition.dy;
+    _startHandleDragPosition = renderObject.globalToLocal(details.globalPosition).dy;
 
     // Use local coordinates when dealing with line height. because in case of a
     // scale transformation, the line height will also be scaled.
     final double centerOfLineLocal =
         _selectionOverlay.selectionEndpoints.first.point.dy - renderObject.preferredLineHeight / 2;
-    final double centerOfLineGlobal = renderObject.localToGlobal(Offset(0.0, centerOfLineLocal)).dy;
-    _startHandleDragTarget = centerOfLineGlobal - details.globalPosition.dy;
+    _startHandleDragTarget = centerOfLineLocal - _startHandleDragPosition;
     // Instead of finding the TextPosition at the handle's location directly,
     // use the vertical center of the line that it points to. This is because
     // selection handles typically hang above or below the line that they point
     // to.
     final TextPosition position = renderObject.getPositionForPoint(
-      Offset(details.globalPosition.dx, centerOfLineGlobal),
+      renderObject.localToGlobal(Offset(0.0, centerOfLineLocal)),
     );
 
     // The drag start selection is only utilized on Apple platforms.
@@ -914,16 +922,26 @@ class TextSelectionOverlay {
     final Offset localPosition = renderObject.globalToLocal(details.globalPosition);
     final double nextStartHandleDragPositionLocal = _getHandleDy(
       localPosition.dy,
-      renderObject.globalToLocal(Offset(0.0, _startHandleDragPosition)).dy,
+      _startHandleDragPosition,
     );
-    _startHandleDragPosition = renderObject
-        .localToGlobal(Offset(0.0, nextStartHandleDragPositionLocal))
-        .dy;
-    final handleTargetGlobal = Offset(
-      details.globalPosition.dx,
-      _startHandleDragPosition + _startHandleDragTarget,
+    _startHandleDragPosition = nextStartHandleDragPositionLocal;
+    final Offset handleTargetGlobal = renderObject.localToGlobal(
+      Offset(localPosition.dx, _startHandleDragPosition + _startHandleDragTarget),
     );
     final TextPosition position = renderObject.getPositionForPoint(handleTargetGlobal);
+    if ((defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.macOS) &&
+        ((details.delta.dy < 0.0 && position.offset > _selection.extentOffset) ||
+            (details.delta.dy > 0.0 && position.offset < _selection.extentOffset))) {
+      return;
+    }
+    final double currentCenterOfLineLocal =
+        _selectionOverlay.selectionEndpoints.first.point.dy - renderObject.preferredLineHeight / 2;
+    final double candidateCenterOfLineLocal = renderObject.getLocalRectForCaret(position).center.dy;
+    if ((details.delta.dy < 0.0 && candidateCenterOfLineLocal > currentCenterOfLineLocal) ||
+        (details.delta.dy > 0.0 && candidateCenterOfLineLocal < currentCenterOfLineLocal)) {
+      return;
+    }
 
     final TextSelection newSelection;
     switch (defaultTargetPlatform) {

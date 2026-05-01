@@ -62,6 +62,43 @@ enum HandlePositionInViewport { leftEdge, rightEdge, within }
 
 typedef _VoidFutureCallback = Future<void> Function();
 
+class _VisibleTextSelectionHandleControls extends TextSelectionControls
+    with TextSelectionHandleControls {
+  _VisibleTextSelectionHandleControls();
+
+  final Key leftHandleKey = UniqueKey();
+  final Key rightHandleKey = UniqueKey();
+  final Key collapsedHandleKey = UniqueKey();
+
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    return ColoredBox(
+      key: switch (type) {
+        TextSelectionHandleType.left => leftHandleKey,
+        TextSelectionHandleType.right => rightHandleKey,
+        TextSelectionHandleType.collapsed => collapsedHandleKey,
+      },
+      color: const Color(0x01000000),
+      child: const SizedBox.square(dimension: 20.0),
+    );
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return const Size.square(20.0);
+  }
+}
+
 TextEditingValue collapsedAtEnd(String text) {
   return TextEditingValue(
     text: text,
@@ -9233,6 +9270,78 @@ void main() {
       expect(controller.value.selection.baseOffset, 0);
     },
     skip: kIsWeb, // [intended] on web these keys are handled by the browser.
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets(
+    'dragging selection handle upward scrolls multiline field steadily on Apple platforms',
+    (WidgetTester tester) async {
+      controller.text = List<String>.filled(80, 'line of editable text').join('\n');
+      final scrollController = ScrollController();
+      final selectionControls = _VisibleTextSelectionHandleControls();
+      addTearDown(scrollController.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 240,
+              child: EditableText(
+                maxLines: 6,
+                controller: controller,
+                scrollController: scrollController,
+                showSelectionHandles: true,
+                autofocus: true,
+                focusNode: focusNode,
+                style: Typography.material2018(platform: defaultTargetPlatform).black.titleMedium!,
+                cursorColor: Colors.blue,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: selectionControls,
+                keyboardType: TextInputType.multiline,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final EditableTextState state = tester.state(find.byType(EditableText));
+      const selectedWordStart = 1339;
+      const selectedWordEnd = 1343;
+      state.userUpdateTextEditingValue(
+        controller.value.copyWith(
+          selection: const TextSelection(
+            baseOffset: selectedWordStart,
+            extentOffset: selectedWordEnd,
+          ),
+        ),
+        SelectionChangedCause.longPress,
+      );
+      await tester.pump();
+
+      expect(find.byKey(selectionControls.leftHandleKey), findsOneWidget);
+      final TestGesture gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(selectionControls.leftHandleKey)),
+      );
+      addTearDown(gesture.removePointer);
+
+      final offsets = <double>[scrollController.offset];
+      for (var index = 0; index < 8; index += 1) {
+        await gesture.moveBy(const Offset(0.0, -18.0));
+        await tester.pump();
+        offsets.add(scrollController.offset);
+      }
+      await gesture.up();
+
+      for (var index = 1; index < offsets.length; index += 1) {
+        expect(offsets[index], lessThanOrEqualTo(offsets[index - 1]));
+      }
+    },
+    skip: kIsWeb, // [intended] on web these selection handles are handled by the browser.
     variant: const TargetPlatformVariant(<TargetPlatform>{
       TargetPlatform.iOS,
       TargetPlatform.macOS,
