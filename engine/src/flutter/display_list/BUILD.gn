@@ -318,10 +318,7 @@ if (enable_unittests) {
       "benchmarking/dl_benchmarks.h",
     ]
 
-    if (!defined(defines)) {
-      defines = []
-    }
-    defines += [ "DISPLAY_LIST_BENCHMARK_ALL_OPS" ]
+    defines = [ "DISPLAY_LIST_BENCHMARK_ALL_OPS" ]
     deps = [ ":display_list_benchmarks_source" ]
   }
 
