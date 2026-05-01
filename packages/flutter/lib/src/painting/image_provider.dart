@@ -803,15 +803,15 @@ class ResizeImageKey {
   const ResizeImageKey._(
     this._providerCacheKey,
     this._policy,
-    this._effectiveWidth,
-    this._effectiveHeight,
+    this._width,
+    this._height,
     this._allowUpscaling,
   );
 
   final Object _providerCacheKey;
   final ResizeImagePolicy _policy;
-  final int? _effectiveWidth;
-  final int? _effectiveHeight;
+  final int? _width;
+  final int? _height;
   final bool _allowUpscaling;
 
   @override
@@ -822,14 +822,13 @@ class ResizeImageKey {
     return other is ResizeImageKey &&
         other._providerCacheKey == _providerCacheKey &&
         other._policy == _policy &&
-        other._effectiveWidth == _effectiveWidth &&
-        other._effectiveHeight == _effectiveHeight &&
+        other._width == _width &&
+        other._height == _height &&
         other._allowUpscaling == _allowUpscaling;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(_providerCacheKey, _policy, _effectiveWidth, _effectiveHeight, _allowUpscaling);
+  int get hashCode => Object.hash(_providerCacheKey, _policy, _width, _height, _allowUpscaling);
 }
 
 /// Configures the behavior for [ResizeImage].
@@ -1349,8 +1348,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
       );
       return decode(
         buffer,
-        cacheWidth: key._effectiveWidth,
-        cacheHeight: key._effectiveHeight,
+        cacheWidth: key._width,
+        cacheHeight: key._height,
         allowUpscaling: this.allowUpscaling,
       );
     }
@@ -1360,8 +1359,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
       decodeResize,
     );
     if (!kReleaseMode) {
-      completer.debugLabel =
-          '${completer.debugLabel} - Resized(${key._effectiveWidth}×${key._effectiveHeight})';
+      completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
     _configureErrorListener(completer, key);
     return completer;
@@ -1369,8 +1367,8 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
   @override
   ImageStreamCompleter loadImage(ResizeImageKey key, ImageDecoderCallback decode) {
-    final int? effectiveWidth = key._effectiveWidth;
-    final int? effectiveHeight = key._effectiveHeight;
+    final int? effectiveWidth = key._width;
+    final int? effectiveHeight = key._height;
 
     Future<ui.Codec> decodeResize(
       ui.ImmutableBuffer buffer, {
@@ -1443,8 +1441,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
       decodeResize,
     );
     if (!kReleaseMode) {
-      completer.debugLabel =
-          '${completer.debugLabel} - Resized(${key._effectiveWidth}×${key._effectiveHeight})';
+      completer.debugLabel = '${completer.debugLabel} - Resized(${key._width}×${key._height})';
     }
     _configureErrorListener(completer, key);
     return completer;
