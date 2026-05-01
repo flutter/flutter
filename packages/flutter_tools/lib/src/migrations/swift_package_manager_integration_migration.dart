@@ -249,8 +249,13 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
           _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
         ),
       );
-    } on _PrefetchSwiftPackageException {
-      rethrow;
+    } on _PrefetchSwiftPackageException catch (e) {
+      restoreFromBackup(schemeInfo);
+      throwToolExit(
+          'An error occurred when adding Swift Package Manager integration:\n'
+          '  ${e.message}\n\n'
+          '$kDisableSwiftPMInstructions'
+      );
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);
       if (optionalOnly) {

@@ -3535,7 +3535,7 @@ void main() {
             isA<Exception>().having(
               (Exception e) => e.toString(),
               'toString()',
-              'Exception: Failed to prefetch Swift packages',
+              contains('Exception: Failed to prefetch Swift packages'),
             ),
           ),
         );
