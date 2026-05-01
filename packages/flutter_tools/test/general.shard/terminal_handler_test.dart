@@ -496,7 +496,7 @@ void main() {
     });
 
     testWithoutContext('o,O - debugTogglePlatform with null vmService does not crash', () async {
-      for (final String key in <String>['o', 'O']) {
+      for (final key in <String>['o', 'O']) {
         final TerminalHandler terminalHandler = setUpTerminalHandler(
           <FakeVmServiceRequest>[],
           nullVmService: true,
