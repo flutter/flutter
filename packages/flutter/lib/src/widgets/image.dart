@@ -400,11 +400,10 @@ class Image extends StatefulWidget {
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
   /// If `cacheWidth` or `cacheHeight` are provided, they indicate to the
-  /// engine that the image should be decoded at the specified size, in
-  /// physical pixels. The image will be rendered to the constraints of
-  /// the layout or [width] and [height] regardless of these parameters.
-  /// These parameters are primarily intended to reduce the memory usage of
-  /// [ImageCache].
+  /// engine that the image should be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   ///
   /// If [useLogicalCacheSize] is true, [cacheWidth] and [cacheHeight] are
   /// interpreted as logical pixels instead of physical pixels.
@@ -506,11 +505,10 @@ class Image extends StatefulWidget {
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
   /// If `cacheWidth` or `cacheHeight` are provided, they indicate to the
-  /// engine that the image must be decoded at the specified size, in
-  /// physical pixels. The image will be rendered to the constraints of
-  /// the layout or [width] and [height] regardless of these parameters.
-  /// These parameters are primarily intended to reduce the memory usage of
-  /// [ImageCache].
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   ///
   /// If [useLogicalCacheSize] is true, [cacheWidth] and [cacheHeight] are
   /// interpreted as logical pixels instead of physical pixels.
@@ -596,11 +594,10 @@ class Image extends StatefulWidget {
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
   /// If `cacheWidth` or `cacheHeight` are provided, they indicate to the
-  /// engine that the image must be decoded at the specified size, in
-  /// physical pixels. The image will be rendered to the constraints of
-  /// the layout or [width] and [height] regardless of these parameters.
-  /// These parameters are primarily intended to reduce the memory usage of
-  /// [ImageCache].
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   ///
   /// If [useLogicalCacheSize] is true, [cacheWidth] and [cacheHeight] are
   /// interpreted as logical pixels instead of physical pixels.
@@ -756,11 +753,10 @@ class Image extends StatefulWidget {
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
   /// If `cacheWidth` or `cacheHeight` are provided, they indicate to the
-  /// engine that the image must be decoded at the specified size, in
-  /// physical pixels. The image will be rendered to the constraints of
-  /// the layout or [width] and [height] regardless of these parameters.
-  /// These parameters are primarily intended to reduce the memory usage of
-  /// [ImageCache].
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   ///
   /// If [useLogicalCacheSize] is true, [cacheWidth] and [cacheHeight] are
   /// interpreted as logical pixels instead of physical pixels.
