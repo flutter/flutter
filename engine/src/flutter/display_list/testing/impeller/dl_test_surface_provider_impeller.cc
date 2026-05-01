@@ -36,6 +36,16 @@ std::shared_ptr<DlSurfaceInstance>
 DlSurfaceProviderImpeller::MakeOffscreenSurface(size_t width,
                                                 size_t height,
                                                 PixelFormat format) const {
+  return MakeOffscreenSurface(GetPlayground()->GetContext(), width, height,
+                              format);
+}
+
+std::shared_ptr<DlSurfaceInstanceImpeller>
+DlSurfaceProviderImpeller::MakeOffscreenSurface(
+    std::shared_ptr<impeller::Context> context,
+    size_t width,
+    size_t height,
+    PixelFormat format) {
   if (format != kN32Premul) {
     // The caller didn't check our supported formats.
     return nullptr;
@@ -43,8 +53,6 @@ DlSurfaceProviderImpeller::MakeOffscreenSurface(size_t width,
   impeller::ISize size(width, height);
   int mip_count = 1;
 
-  impeller::PlaygroundImpl* playground = GetPlayground();
-  std::shared_ptr<impeller::Context> context = playground->GetContext();
   impeller::RenderTargetAllocator render_target_allocator =
       impeller::RenderTargetAllocator(context->GetResourceAllocator());
   std::shared_ptr<impeller::RenderTarget> target;

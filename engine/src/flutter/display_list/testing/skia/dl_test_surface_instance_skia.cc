@@ -18,10 +18,8 @@ class DlSkiaPixelData : public flutter::testing::DlPixelData {
     SkImageInfo info = raster_image->imageInfo();
     info = SkImageInfo::MakeN32Premul(info.dimensions());
     if (info.bytesPerPixel() == 4) {
-      fml::SafeMath safe_math;
-      size_t byte_count =
-          safe_math.mul(info.computeMinByteSize(), info.height());
-      if (!safe_math.overflow_detected()) {
+      size_t byte_count = info.computeMinByteSize();
+      if (byte_count < std::numeric_limits<size_t>::max()) {
         pixels_.reset(static_cast<uint8_t*>(std::malloc(byte_count)));
         if (pixels_.get()) {
           pixmap_.reset(info, pixels_.get(), info.minRowBytes());
@@ -36,6 +34,9 @@ class DlSkiaPixelData : public flutter::testing::DlPixelData {
   ~DlSkiaPixelData() override = default;
 
   const uint32_t* addr32(uint32_t x, uint32_t y) const override {
+    if (x >= width() || y >= height()) {
+      return nullptr;
+    }
     return static_cast<const uint32_t*>(pixmap_.addr(x, y));
   }
 

@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/testing/impeller/dl_test_surface_instance_impeller.h"
 
+#include "flutter/display_list/testing/impeller/dl_test_surface_provider_impeller.h"
 #include "flutter/fml/safe_math.h"
 #include "flutter/impeller/display_list/dl_dispatcher.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
@@ -19,7 +20,7 @@ class DlImpellerPixelData : public flutter::testing::DlPixelData {
   ~DlImpellerPixelData() override = default;
 
   virtual const uint32_t* addr32(uint32_t x, uint32_t y) const override {
-    if (x > width() || y > height()) {
+    if (x >= width() || y >= height()) {
       return nullptr;
     }
     fml::SafeMath safe_math;
@@ -125,13 +126,31 @@ std::shared_ptr<DlPixelData> DlSurfaceInstanceImpeller::SnapshotToPixelData()
   std::unique_ptr<impeller::testing::Screenshot> snapshot =
       snapshotter_.MakeScreenshot(aiks_context_,
                                   GetRenderTarget().GetRenderTargetTexture());
-  return std::make_shared<DlImpellerPixelData>(std::move(snapshot));
+  return snapshot ? std::make_shared<DlImpellerPixelData>(std::move(snapshot))
+                  : nullptr;
 }
 
 sk_sp<DlImage> DlSurfaceInstanceImpeller::SnapshotToImage() const {
-  // REMIND: This is not a snapshot...
+  auto texture = GetRenderTarget().GetRenderTargetTexture();
+  // temp_image will not be a snapshot, so we must make a copy of it to
+  // satisfy the demands of the "SnapshotToImage" API.
+  auto temp_image = impeller::DlImageImpeller::Make(texture);
+
+  // Make a temporary "image surface" into which we can copy our current
+  // texture so that we can return a stable snapshot DlImage from the copy.
+  auto image_surface = DlSurfaceProviderImpeller::MakeOffscreenSurface(
+      context_, temp_image->width(), temp_image->height(),
+      DlSurfaceProvider::PixelFormat::kN32Premul);
+
+  // Copy the temp_image made from our texture into the image surface.
+  image_surface->GetCanvas()->DrawImage(temp_image, DlPoint(0, 0),
+                                        DlImageSampling::kNearestNeighbor);
+  image_surface->FlushSubmitCpuSync();
+
+  // Return an image based on the temporary, but stable, image_surface's
+  // texture.
   return impeller::DlImageImpeller::Make(
-      GetRenderTarget().GetRenderTargetTexture());
+      image_surface->GetRenderTarget().GetRenderTargetTexture());
 }
 
 bool DlSurfaceInstanceImpeller::SnapshotToFile(std::string& filename) const {
