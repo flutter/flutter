@@ -1559,6 +1559,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
     required Directory buildDirectory,
     bool quiet = true,
     bool waitForCompletion = true,
+    bool force = false,
   }) async {}
 }
 
