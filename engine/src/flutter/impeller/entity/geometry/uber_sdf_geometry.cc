@@ -47,9 +47,9 @@ bool UberSDFGeometry::CoversArea(const Matrix& transform,
     // at least half a pixel on each side of the pixel centers inside it and
     // that it encloses every MSAA sample location within those pixels. This
     // means that the integer rect already meets all of the above criteria (as
-    // long as kAntialiasPixels is >= 1.0), so if the transformed geometry
+    // long as kAntialiasPixels is <= 1.0), so if the transformed geometry
     // contains the integer input rect, all pixels will be fully rendered.
-    static_assert(UberSDFParameters::kAntialiasPixels >= 1.0);
+    static_assert(UberSDFParameters::kAntialiasPixels <= 1.0);
     return Rect::MakeEllipseBounds(params_.center, params_.size)
         .TransformBounds(transform)
         .Contains(rect);
