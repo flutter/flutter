@@ -16,9 +16,12 @@ import 'dart:convert';
 import 'dart:io' hide Platform;
 
 import 'package:args/args.dart';
+import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' show LocalPlatform, Platform;
 import 'package:process/process.dart';
+
+import 'prepare_package/transactional_update.dart';
 
 const String gsBase = 'gs://flutter_infra_release';
 const String releaseFolder = '/releases';
@@ -36,6 +39,7 @@ class UnpublishException implements Exception {
 
   @override
   String toString() {
+    // ignore: avoid_type_to_string
     var output = runtimeType.toString();
     output += ': $message';
     final String stderr = result?.stderr as String? ?? '';
@@ -212,44 +216,78 @@ class ArchiveUnpublisher {
 
   /// Remove the archive from Google Storage.
   Future<void> unpublishArchive() async {
-    final Map<String, dynamic> jsonData = await _loadMetadata();
-    final List<Map<String, String>> releases = (jsonData['releases'] as List<dynamic>)
-        .map<Map<String, String>>((dynamic entry) {
-          final mapEntry = entry as Map<String, dynamic>;
+    // 1. Load metadata to find paths to remove.
+    final Map<String, Object?> initialJsonData = await _loadMetadata();
+    final List<Map<String, String>> initialReleases =
+        (initialJsonData['releases']! as List<Object?>).map<Map<String, String>>((Object? entry) {
+          final mapEntry = entry! as Map<String, Object?>;
           return mapEntry.cast<String, String>();
-        })
-        .toList();
-    final Map<Channel, Map<String, String>> paths = await _getArchivePaths(releases);
-    releases.removeWhere(
-      (Map<String, String> value) =>
-          revisionsBeingRemoved.contains(value['hash']) &&
-          channels.contains(fromChannelName(value['channel'])),
-    );
-    releases.sort((Map<String, String> a, Map<String, String> b) {
-      final DateTime aDate = DateTime.parse(a['release_date']!);
-      final DateTime bDate = DateTime.parse(b['release_date']!);
-      return bDate.compareTo(aDate);
-    });
-    jsonData['releases'] = releases;
-    for (final Channel channel in channels) {
-      if (!revisionsBeingRemoved.contains(
-        (jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)],
-      )) {
-        // Don't replace the current release if it's not one of the revisions we're removing.
-        continue;
-      }
-      final Map<String, String> replacementRelease = releases.firstWhere(
-        (Map<String, String> value) => value['channel'] == getChannelName(channel),
-      );
-      (jsonData['current_release'] as Map<String, dynamic>)[getChannelName(channel)] =
-          replacementRelease['hash'];
-      print(
-        '${confirmed ? 'Reverting' : 'Would revert'} current ${getChannelName(channel)} '
-        '${getPublishedPlatform(platform)} release to ${replacementRelease['hash']} (version ${replacementRelease['version']}).',
-      );
-    }
+        }).toList();
+    final Map<Channel, Map<String, String>> paths = await _getArchivePaths(initialReleases);
+
+    // 2. Remove archives first.
     await _cloudRemoveArchive(paths);
-    await _updateMetadata(jsonData);
+
+    // 3. Transactional update of metadata.
+    final metadataGsPath = '$gsReleaseFolder/${getMetadataFilename(platform)}';
+    await transactionalUpdate(
+      gsPath: metadataGsPath,
+      fs: const LocalFileSystem(),
+      dryRun: !confirmed,
+      runGsUtil: (List<String> args) => _runGsUtil(args, confirm: confirmed),
+      callback: (String currentContents) async {
+        if (currentContents.isEmpty) {
+          return '';
+        }
+        Map<String, Object?> jsonData;
+        try {
+          jsonData = json.decode(currentContents) as Map<String, Object?>;
+        } on FormatException catch (e) {
+          throw Exception('Unable to parse JSON metadata received from cloud: $e');
+        }
+
+        final List<Map<String, String>> releases = (jsonData['releases']! as List<Object?>)
+            .map<Map<String, String>>((Object? entry) {
+              final mapEntry = entry! as Map<String, Object?>;
+              return mapEntry.cast<String, String>();
+            })
+            .toList();
+
+        releases.removeWhere(
+          (Map<String, String> value) =>
+              revisionsBeingRemoved.contains(value['hash']) &&
+              channels.contains(fromChannelName(value['channel'])),
+        );
+
+        releases.sort((Map<String, String> a, Map<String, String> b) {
+          final DateTime aDate = DateTime.parse(a['release_date']!);
+          final DateTime bDate = DateTime.parse(b['release_date']!);
+          return bDate.compareTo(aDate);
+        });
+
+        jsonData['releases'] = releases;
+
+        for (final Channel channel in channels) {
+          if (!revisionsBeingRemoved.contains(
+            (jsonData['current_release']! as Map<String, Object?>)[getChannelName(channel)],
+          )) {
+            continue;
+          }
+          final Map<String, String> replacementRelease = releases.firstWhere(
+            (Map<String, String> value) => value['channel'] == getChannelName(channel),
+          );
+          (jsonData['current_release']! as Map<String, Object?>)[getChannelName(channel)] =
+              replacementRelease['hash'];
+          print(
+            '${confirmed ? 'Reverting' : 'Would revert'} current ${getChannelName(channel)} '
+            '${getPublishedPlatform(platform)} release to ${replacementRelease['hash']} (version ${replacementRelease['version']}).',
+          );
+        }
+
+        const encoder = JsonEncoder.withIndent('  ');
+        return encoder.convert(jsonData);
+      },
+    );
   }
 
   Future<Map<Channel, Map<String, String>>> _getArchivePaths(
@@ -278,7 +316,7 @@ class ArchiveUnpublisher {
     return paths;
   }
 
-  Future<Map<String, dynamic>> _loadMetadata() async {
+  Future<Map<String, Object?>> _loadMetadata() async {
     final metadataFile = File(path.join(tempDir.absolute.path, getMetadataFilename(platform)));
     // Always run this, even in dry runs.
     await _runGsUtil(<String>['cp', metadataGsPath, metadataFile.absolute.path], confirm: true);
@@ -287,28 +325,14 @@ class ArchiveUnpublisher {
       throw UnpublishException('Empty metadata received from server');
     }
 
-    Map<String, dynamic> jsonData;
+    Map<String, Object?> jsonData;
     try {
-      jsonData = json.decode(currentMetadata) as Map<String, dynamic>;
+      jsonData = json.decode(currentMetadata) as Map<String, Object?>;
     } on FormatException catch (e) {
       throw UnpublishException('Unable to parse JSON metadata received from cloud: $e');
     }
 
     return jsonData;
-  }
-
-  Future<void> _updateMetadata(Map<String, dynamic> jsonData) async {
-    // We can't just cat the metadata from the server with 'gsutil cat', because
-    // Windows wants to echo the commands that execute in gsutil.bat to the
-    // stdout when we do that. So, we copy the file locally and then read it
-    // back in.
-    final metadataFile = File(path.join(tempDir.absolute.path, getMetadataFilename(platform)));
-    const encoder = JsonEncoder.withIndent('  ');
-    metadataFile.writeAsStringSync(encoder.convert(jsonData));
-    print(
-      '${confirmed ? 'Overwriting' : 'Would overwrite'} $metadataGsPath with contents of ${metadataFile.absolute.path}',
-    );
-    await _cloudReplaceDest(metadataFile.absolute.path, metadataGsPath);
   }
 
   Future<String> _runGsUtil(
@@ -338,31 +362,6 @@ class ArchiveUnpublisher {
       }
     }
     await _runGsUtil(<String>['rm', ...files], failOk: true, confirm: confirmed);
-  }
-
-  Future<String> _cloudReplaceDest(String src, String dest) async {
-    assert(dest.startsWith('gs:'), '_cloudReplaceDest must have a destination in cloud storage.');
-    assert(!src.startsWith('gs:'), '_cloudReplaceDest must have a local source file.');
-    // We often don't have permission to overwrite, but
-    // we have permission to remove, so that's what we do first.
-    await _runGsUtil(<String>['rm', dest], failOk: true, confirm: confirmed);
-    String? mimeType;
-    if (dest.endsWith('.tar.xz')) {
-      mimeType = 'application/x-gtar';
-    }
-    if (dest.endsWith('.zip')) {
-      mimeType = 'application/zip';
-    }
-    if (dest.endsWith('.json')) {
-      mimeType = 'application/json';
-    }
-    final args = <String>[
-      // Use our preferred MIME type for the files we care about
-      // and let gsutil figure it out for anything else.
-      if (mimeType != null) ...<String>['-h', 'Content-Type:$mimeType'],
-      ...<String>['cp', src, dest],
-    ];
-    return _runGsUtil(args, confirm: confirmed);
   }
 }
 

@@ -42,7 +42,8 @@ sk_sp<DlDeferredImageGPUSkia> DlDeferredImageGPUSkia::MakeFromLayerTree(
 DlDeferredImageGPUSkia::DlDeferredImageGPUSkia(
     std::shared_ptr<ImageWrapper> image_wrapper,
     fml::RefPtr<fml::TaskRunner> raster_task_runner)
-    : image_wrapper_(std::move(image_wrapper)),
+    : DlImageSkia(nullptr),
+      image_wrapper_(std::move(image_wrapper)),
       raster_task_runner_(std::move(raster_task_runner)) {}
 
 // |DlImage|
@@ -57,25 +58,14 @@ DlDeferredImageGPUSkia::~DlDeferredImageGPUSkia() {
                                     });
 }
 
-// |DlImage|
+// |DlImageSkia|
 sk_sp<SkImage> DlDeferredImageGPUSkia::skia_image() const {
   return image_wrapper_ ? image_wrapper_->CreateSkiaImage() : nullptr;
 };
 
 // |DlImage|
-std::shared_ptr<impeller::Texture> DlDeferredImageGPUSkia::impeller_texture()
-    const {
-  return nullptr;
-}
-
-// |DlImage|
 bool DlDeferredImageGPUSkia::isOpaque() const {
   return image_wrapper_ ? image_wrapper_->image_info().isOpaque() : false;
-}
-
-// |DlImage|
-bool DlDeferredImageGPUSkia::isTextureBacked() const {
-  return image_wrapper_ ? image_wrapper_->isTextureBacked() : false;
 }
 
 // |DlImage|
@@ -160,10 +150,6 @@ sk_sp<SkImage> DlDeferredImageGPUSkia::ImageWrapper::CreateSkiaImage() const {
         image_info_.refColorSpace());
   }
   return image_;
-}
-
-bool DlDeferredImageGPUSkia::ImageWrapper::isTextureBacked() const {
-  return texture_.isValid();
 }
 
 void DlDeferredImageGPUSkia::ImageWrapper::SnapshotDisplayList(

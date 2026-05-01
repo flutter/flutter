@@ -74,7 +74,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
   /// Compute accessibility features based on the current value of high contrast flag
   static EngineAccessibilityFeatures computeAccessibilityFeatures() {
-    final builder = EngineAccessibilityFeaturesBuilder(0);
+    final builder = EngineAccessibilityFeaturesBuilder();
     if (_isHighContrastEnabled) {
       builder.highContrast = true;
     }
@@ -1379,6 +1379,13 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _onSemanticsActionEventZone = Zone.current;
   }
 
+  /// A callback invoked when the platform wants to hit test a [FlutterView].
+  ///
+  /// For example, this is used by iOS to determine if a gesture hits a
+  /// [UIKitView].
+  @override
+  ui.HitTestCallback? onHitTest;
+
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnSemanticsAction(int viewId, int nodeId, ui.SemanticsAction action, ByteData? args) {
@@ -1832,7 +1839,7 @@ class ViewConfiguration {
 
 class PlatformConfiguration {
   const PlatformConfiguration({
-    this.accessibilityFeatures = const EngineAccessibilityFeatures(0),
+    this.accessibilityFeatures = EngineAccessibilityFeatures.defaultFeatures,
     this.alwaysUse24HourFormat = false,
     this.semanticsEnabled = false,
     this.platformBrightness = ui.Brightness.light,

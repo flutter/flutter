@@ -794,10 +794,10 @@ SkFontStyle toSkFontStyle(ui.FontWeight? fontWeight, ui.FontStyle? fontStyle) {
 /// The CanvasKit implementation of [ui.Paragraph].
 class CkParagraph implements ui.Paragraph {
   CkParagraph(SkParagraph skParagraph, this._paragraphStyle) {
-    _ref = UniqueRef<SkParagraph>(this, skParagraph, 'Paragraph');
+    _ref = CkUniqueRef<SkParagraph>(this, skParagraph, 'Paragraph');
   }
 
-  late final UniqueRef<SkParagraph> _ref;
+  late final CkUniqueRef<SkParagraph> _ref;
 
   SkParagraph get skiaObject => _ref.nativeObject;
 
@@ -806,6 +806,8 @@ class CkParagraph implements ui.Paragraph {
   /// This is used to resurrect the paragraph if the initial paragraph
   /// is deleted.
   double _lastLayoutConstraints = double.negativeInfinity;
+
+  bool _hasCheckedForMissingCodePoints = false;
 
   /// The paragraph style used to build this paragraph.
   ///
@@ -949,6 +951,15 @@ class CkParagraph implements ui.Paragraph {
       _minIntrinsicWidth = paragraph.getMinIntrinsicWidth();
       _width = paragraph.getMaxWidth();
       _boxesForPlaceholders = skRectsToTextBoxes(paragraph.getRectsForPlaceholders());
+
+      if (!ui_web.TestEnvironment.instance.disableFontFallbacks &&
+          !_hasCheckedForMissingCodePoints) {
+        _hasCheckedForMissingCodePoints = true;
+        final List<int> unresolvedCodePoints = paragraph.getUnresolvedCodePoints();
+        if (unresolvedCodePoints.isNotEmpty) {
+          FallbackFontService.instance.addMissingCodePoints(unresolvedCodePoints);
+        }
+      }
     } catch (e) {
       printWarning(
         'CanvasKit threw an exception while laying '
@@ -1139,15 +1150,6 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
 
   @override
   void addText(String text) {
-    final fontFamilies = <String>[];
-    final CkTextStyle style = _peekStyle();
-    if (style.effectiveFontFamily != null) {
-      fontFamilies.add(style.effectiveFontFamily!);
-    }
-    if (style.effectiveFontFamilyFallback != null) {
-      fontFamilies.addAll(style.effectiveFontFamilyFallback!);
-    }
-    renderer.fontCollection.fontFallbackManager!.ensureFontsSupportText(text, fontFamilies);
     _paragraphBuilder.addText(text);
   }
 
