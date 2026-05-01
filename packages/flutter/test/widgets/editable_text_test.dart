@@ -4072,22 +4072,15 @@ void main() {
     'Dragging selection base handle upwards scrolls the viewport',
     (WidgetTester tester) async {
       final controller = TextEditingController(text: 'Line 1\n' * 100);
-      final scrollController = ScrollController();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TextField(
-              controller: controller,
-              scrollController: scrollController,
-              maxLines: null,
-            ),
-          ),
-        ),
+        TestWidgetsApp(home: TestTextField(controller: controller, maxLines: null)),
       );
 
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+
       // Populate the viewport and scroll to the bottom to prepare for an upward drag.
-      scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
       await tester.pumpAndSettle();
 
       // Establish an initial selection at the end of the text.
@@ -4095,7 +4088,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Capture the offset after the selection is established but before the drag.
-      final double offsetBeforeDrag = scrollController.offset;
+      final double offsetBeforeDrag = scrollable.position.pixels;
 
       final EditableTextState state = tester.state(find.byType(EditableText));
 
@@ -4115,7 +4108,7 @@ void main() {
       // scrolling is disabled. This prevents the viewport from snapping to
       // the selection extent.
       expect(
-        scrollController.offset,
+        scrollable.position.pixels,
         lessThan(offsetBeforeDrag),
         reason:
             'The viewport should follow the base handle upwards instead of snapping to the extent.',
@@ -4128,25 +4121,18 @@ void main() {
     WidgetTester tester,
   ) async {
     final controller = TextEditingController(text: 'Line 1\n' * 100);
-    final scrollController = ScrollController();
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: TextField(
-            controller: controller,
-            scrollController: scrollController,
-            maxLines: null,
-          ),
-        ),
-      ),
+      TestWidgetsApp(home: TestTextField(controller: controller, maxLines: null)),
     );
 
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+
     // Scroll to the bottom of the long text.
-    scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
     await tester.pumpAndSettle();
 
-    final Finder textField = find.byType(TextField);
+    final Finder textField = find.byType(TestTextField);
 
     // Simulate clicking and holding the mouse at the bottom left of the text field.
     final TestGesture gesture = await tester.startGesture(
@@ -4161,7 +4147,7 @@ void main() {
 
     // The viewport should follow the mouse upwards (offset decreases).
     // It should not snap back to the bottom (maxScrollExtent).
-    expect(scrollController.offset, lessThan(scrollController.position.maxScrollExtent));
+    expect(scrollable.position.pixels, lessThan(scrollable.position.maxScrollExtent));
 
     // Release the mouse click.
     await gesture.up();
