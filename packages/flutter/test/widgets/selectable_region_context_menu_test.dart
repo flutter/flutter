@@ -14,6 +14,7 @@ import 'package:web/web.dart' as web;
 
 import 'selectable_region_test.dart' show textOffsetToPosition;
 import 'web_platform_view_registry_utils.dart';
+import 'widgets_app_tester.dart';
 
 extension on web.HTMLCollection {
   Iterable<web.Element?> get iterable =>
@@ -53,7 +54,7 @@ void main() {
     final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: SelectableRegion(
           selectionControls: EmptyTextSelectionControls(),
           child: const Placeholder(),
@@ -74,7 +75,7 @@ void main() {
 
   testWidgets('only one <style> is inserted into the DOM', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: ListView(
           children: <Widget>[
             SelectableRegion(
@@ -107,10 +108,10 @@ void main() {
     addTearDown(focusNode.dispose);
     final spy = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: SelectableRegion(
           focusNode: focusNode,
-          selectionControls: materialTextSelectionControls,
+          selectionControls: emptyTextSelectionControls,
           child: SelectionSpy(key: spy),
         ),
       ),
@@ -148,7 +149,7 @@ void main() {
     final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: SelectableRegion(
           selectionControls: emptyTextSelectionControls,
           child: const SizedBox.shrink(),
@@ -179,7 +180,7 @@ void main() {
     final focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Column(
           children: [
             SelectableRegion(

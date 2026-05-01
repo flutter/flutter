@@ -29,7 +29,7 @@ const String _kClassRule =
 ''';
 const int _kRightClickButton = 2;
 
-typedef _WebSelectionCallBack = void Function(web.HTMLElement, [web.MouseEvent]);
+typedef _WebSelectionCallBack = void Function(web.HTMLElement, web.MouseEvent?);
 
 /// Function signature for `ui_web.platformViewRegistry.registerViewFactory`.
 @visibleForTesting
@@ -86,9 +86,12 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   static void _register() {
     assert(_registeredViewType == null);
     _registeredViewType = _registerWebSelectionCallback((
-      web.HTMLElement element, [
+      web.HTMLElement element,
+      // event will be the mouse event if the callback was triggered by
+      // right-clicking and `null` if triggered another way (such as a `copy`
+      // event).
       web.MouseEvent? event,
-    ]) {
+    ) {
       final SelectionContainerDelegate? client = _activeClient;
       if (client != null) {
         // If we were triggered by a right click, select the word
@@ -98,18 +101,18 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
           final Matrix4 transform = client.getTransformTo(null);
           final Offset globalOffset = MatrixUtils.transformPoint(transform, localOffset);
           client.dispatchSelectionEvent(SelectWordSelectionEvent(globalPosition: globalOffset));
+
+          // Programmatically select the dom element in browser.
+          final web.Range range = web.document.createRange()..selectNode(element);
+
+          web.window.getSelection()
+            ?..removeAllRanges()
+            ..addRange(range);
         }
 
         // The innerText must contain the text in order to be selected by
         // the browser.
         element.innerText = client.getSelectedContent()?.plainText ?? '';
-
-        // Programmatically select the dom element in browser.
-        final web.Range range = web.document.createRange()..selectNode(element);
-
-        web.window.getSelection()
-          ?..removeAllRanges()
-          ..addRange(range);
       }
     });
   }
@@ -140,12 +143,14 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
           callback(htmlElement, mouseEvent);
         }.toJS,
       );
-      // TODO(dantup): Should we be doing this here? When is it unregistered?
-      //  What when there are multiple?
+      // TODO(dantup): Using htmlElement doesn't seem to work, but body does?
+      //   is it ebcause at this point there isn't a real selection/focus for
+      //   the browser to know to target it?
+      // htmlElement.addEventListener(
       web.document.body?.addEventListener(
         'copy',
         (web.Event event) {
-          callback(htmlElement);
+          callback(htmlElement, null);
         }.toJS,
       );
       return htmlElement;
