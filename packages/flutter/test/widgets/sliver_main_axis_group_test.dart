@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -11,6 +12,7 @@ import 'sliver_utils.dart';
 
 const double VIEWPORT_HEIGHT = 600;
 const double VIEWPORT_WIDTH = 300;
+const Color _kAmberColor = Color(0xFFFFC107);
 
 // Wraps [child] with the minimal ancestors required by widgets that read
 // Directionality or MediaQuery (e.g. CustomScrollView).
@@ -673,19 +675,19 @@ void main() {
         slivers: <Widget>[
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 1000, decoration: const BoxDecoration(color: const Color(0xFFFFC107))),
+            child: Container(height: 1000, decoration: const BoxDecoration(color: _kAmberColor)),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 400, decoration: const BoxDecoration(color: const Color(0xFFFFC107))),
+            child: Container(height: 400, decoration: const BoxDecoration(color: _kAmberColor)),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 500, decoration: const BoxDecoration(color: const Color(0xFFFFC107))),
+            child: Container(height: 500, decoration: const BoxDecoration(color: _kAmberColor)),
           ),
           MockSliverToBoxAdapter(
             incrementCounter: incrementCounter,
-            child: Container(height: 300, decoration: const BoxDecoration(color: const Color(0xFFFFC107))),
+            child: Container(height: 300, decoration: const BoxDecoration(color: _kAmberColor)),
           ),
         ],
       ),
@@ -1350,6 +1352,232 @@ void main() {
       expect(visibleAfterRebuild, isNotEmpty);
     },
   );
+
+  // The following four tests originally lived in SliverAppBar/TextField-
+  // specific files and were rewritten in terms of the underlying widget-
+  // layer primitives (SliverPersistentHeader, EditableText) so they can
+  // exercise SliverMainAxisGroup behavior without depending on Material.
+  Widget _persistentHeaderHarness({
+    required ScrollController controller,
+    required SliverPersistentHeaderDelegate delegate,
+    bool pinned = false,
+    bool floating = false,
+  }) {
+    return _wrap(
+      CustomScrollView(
+        controller: controller,
+        slivers: <Widget>[
+          SliverMainAxisGroup(
+            slivers: <Widget>[
+              SliverPersistentHeader(delegate: delegate, pinned: pinned, floating: floating),
+              const SliverToBoxAdapter(child: SizedBox(height: 600)),
+            ],
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 2400)),
+        ],
+      ),
+    );
+  }
+
+  testWidgets(
+    'SliverPersistentHeader (scrolling) is painted within bounds of SliverMainAxisGroup',
+    (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        _persistentHeaderHarness(
+          controller: controller,
+          delegate: TestDelegate(minExtent: 30, maxExtent: 60),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final renderGroup =
+          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+      expect(renderGroup.geometry!.scrollExtent, equals(660));
+
+      controller.jumpTo(660);
+      await tester.pumpAndSettle();
+      controller.jumpTo(630);
+      await tester.pumpAndSettle();
+
+      // At a scroll offset of 630, a normal scrolling header is out of view.
+      final renderHeader =
+          tester.renderObject(find.byType(SliverPersistentHeader, skipOffstage: false))
+              as RenderSliverPersistentHeader;
+      expect(renderHeader.constraints.scrollOffset, equals(630));
+      expect(renderHeader.geometry!.layoutExtent, equals(0.0));
+    },
+  );
+
+  testWidgets(
+    'SliverPersistentHeader (floating, snap) is painted within bounds of SliverMainAxisGroup',
+    (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        _persistentHeaderHarness(
+          controller: controller,
+          delegate: TestDelegate(minExtent: 30, maxExtent: 60, snap: true),
+          floating: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final renderGroup =
+          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+      final renderHeader =
+          tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+      expect(renderGroup.geometry!.scrollExtent, equals(660));
+
+      controller.jumpTo(660);
+      await tester.pumpAndSettle();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
+      await gesture.moveBy(const Offset(0.0, 10));
+      await tester.pump();
+
+      // The snap animation does not run until the gesture is released.
+      expect(renderHeader.geometry!.paintExtent, equals(10));
+      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(0.0));
+
+      // Once released, the header's paint extent becomes the maximum and the
+      // group sets an offset of -50.0.
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(renderHeader.geometry!.paintExtent, equals(60));
+      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
+    },
+  );
+
+  testWidgets(
+    'SliverPersistentHeader (floating, pinned, snap) is painted within bounds of SliverMainAxisGroup',
+    (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        _persistentHeaderHarness(
+          controller: controller,
+          delegate: TestDelegate(minExtent: 30, maxExtent: 60, snap: true),
+          pinned: true,
+          floating: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final renderGroup =
+          tester.renderObject(find.byType(SliverMainAxisGroup)) as RenderSliverMainAxisGroup;
+      final renderHeader =
+          tester.renderObject(find.byType(SliverPersistentHeader)) as RenderSliverPersistentHeader;
+      expect(renderGroup.geometry!.scrollExtent, equals(660));
+
+      controller.jumpTo(660);
+      await tester.pumpAndSettle();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(150.0, 300.0));
+      await gesture.moveBy(const Offset(0.0, 10));
+      await tester.pump();
+
+      expect(renderHeader.geometry!.paintExtent, equals(30.0));
+      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-20.0));
+
+      // Once we lift the gesture, the animation finishes.
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(renderHeader.geometry!.paintExtent, equals(60.0));
+      expect((renderHeader.parentData! as SliverPhysicalParentData).paintOffset.dy, equals(-50.0));
+    },
+  );
+
+  // Regression test for https://github.com/flutter/flutter/issues/167801
+  testWidgets(
+    'Nesting SliverMainAxisGroups does not break ShowCaretOnScreen for focused EditableText inside nested SliverMainAxisGroup',
+    (WidgetTester tester) async {
+      // The number of groups and items per group needs to be high enough to
+      // reproduce the bug.
+      const sliverGroupsCount = 3;
+      const sliverGroupItemsCount = 60;
+      const itemHeight = 72.0;
+
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+
+      // EditableText is the widgets-layer primitive that fires
+      // ShowCaretOnScreen on focus. Each list item is a focusable
+      // EditableText so we can exercise the same code path Material's
+      // TextField goes through (TextField wraps EditableText).
+      final controllers = <int, TextEditingController>{};
+      final focusNodes = <int, FocusNode>{};
+      addTearDown(() {
+        for (final c in controllers.values) {
+          c.dispose();
+        }
+        for (final n in focusNodes.values) {
+          n.dispose();
+        }
+      });
+
+      Widget buildField(int groupIndex, int itemIndex) {
+        final id = groupIndex * 1000 + itemIndex;
+        final label = 'Field $groupIndex.${itemIndex + 1}';
+        final ctrl = controllers.putIfAbsent(id, TextEditingController.new);
+        final focus = focusNodes.putIfAbsent(id, FocusNode.new);
+        return SizedBox(
+          height: itemHeight,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: EditableText(
+              key: ValueKey<String>(label),
+              controller: ctrl,
+              focusNode: focus,
+              style: const TextStyle(fontSize: 14, color: Color(0xFF000000)),
+              cursorColor: const Color(0xFF000000),
+              backgroundCursorColor: const Color(0xFFCCCCCC),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(
+        _wrap(
+          CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              SliverMainAxisGroup(
+                slivers: <Widget>[
+                  for (int i = 1; i <= sliverGroupsCount; i++)
+                    SliverMainAxisGroup(
+                      slivers: <Widget>[
+                        SliverList.builder(
+                          itemCount: sliverGroupItemsCount,
+                          itemBuilder: (_, int index) => buildField(i, index),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Scroll so the first field of the second group is at the top of the screen.
+      const double offset = sliverGroupItemsCount * itemHeight;
+      scrollController.jumpTo(offset);
+      await tester.pumpAndSettle();
+
+      // Tap the field — focus triggers the scrollable to scroll it into view.
+      // Since the field is already at the top of the screen the scroll position
+      // must not jump significantly. The bug exercised in #167801 was that
+      // ShowCaretOnScreen on a deeply-nested SliverMainAxisGroup descendant
+      // produced an arbitrary, far-away offset; here we only allow a small
+      // adjustment for the EditableText's internal padding.
+      await tester.tap(find.byKey(const ValueKey<String>('Field 2.1')));
+      await tester.pumpAndSettle();
+
+      expect((scrollController.offset - offset).abs(), lessThanOrEqualTo(itemHeight));
+    },
+  );
 }
 
 Widget _buildSliverList({
@@ -1419,13 +1647,27 @@ Widget _buildSliverMainAxisGroup({
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
-  TestDelegate({this.maxExtent = 60.0, this.minExtent = 60.0});
+  TestDelegate({this.maxExtent = 60.0, this.minExtent = 60.0, this.snap = false});
 
   @override
   final double maxExtent;
 
   @override
   final double minExtent;
+
+  /// When true, this delegate exposes a [FloatingHeaderSnapConfiguration]
+  /// so that a floating [SliverPersistentHeader] driven by this delegate
+  /// will snap into or out of view as the user scrolls. A [TestVSync] is
+  /// supplied so the snap animation has a TickerProvider to drive itself.
+  final bool snap;
+
+  @override
+  TickerProvider? get vsync => snap ? const TestVSync() : null;
+
+  @override
+  FloatingHeaderSnapConfiguration? get snapConfiguration => snap
+      ? FloatingHeaderSnapConfiguration(duration: const Duration(milliseconds: 300))
+      : null;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
