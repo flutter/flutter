@@ -42,7 +42,7 @@ For simpler use cases or raw pixel data, the following APIs are used:
 
 ### Rendering Entrypoints
 
-Once an image is decoded into a `ui.Image object`, it is displayed using the `Canvas` API:
+Once an image is decoded into a `ui.Image` object, it is displayed using the `Canvas` API:
 
 *   **`Canvas.drawImage(ui.Image image, Offset p, Paint paint)`**: Draws the entire image at a specific point.
 *   **`Canvas.drawImageRect(ui.Image image, Rect src, Rect dst, Paint paint)`**: Draws a sub-region of the image into a target rectangle on the canvas. This is where the engine's **Iterative Downscaling** logic is often triggered if the destination rectangle is significantly smaller than the source.
