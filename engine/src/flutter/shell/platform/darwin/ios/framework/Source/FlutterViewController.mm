@@ -1302,9 +1302,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
         // Do nothing in this block. Just trigger system to callback touch events with correct rate.
       };
-  _touchRateCorrectionVSyncClient =
-      [[FlutterVSyncClient alloc] initWithTaskRunner:self.engine.platformTaskRunner
-                                            callback:callback];
+  _touchRateCorrectionVSyncClient = [[FlutterVSyncClient alloc]
+                initWithTaskRunner:self.engine.platformTaskRunner
+      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+                          callback:callback];
   _touchRateCorrectionVSyncClient.allowPauseAfterVsync = NO;
 }
 
