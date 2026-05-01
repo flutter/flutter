@@ -1122,13 +1122,8 @@ Future<bool> _handleIssues(
   }
 
   final XcodeBasedProject xcodeProject = platform.xcodeProject(project);
-  final List<Plugin> plugins = await xcodeProject.getPlugins();
-  final List<String> pluginNames = plugins.map((Plugin p) => p.name).toList();
   final String? swiftPackageManagerMinPlatformMismatchMessage =
       _swiftPackageManagerMinPlatformMismatchMessageFromStdout(result.stdout);
-  final String? swiftPackageManagerError =
-      SwiftPackageManager.parsePluginError(result.stdout, pluginNames: pluginNames) ??
-      SwiftPackageManager.parsePluginError(result.stderr, pluginNames: pluginNames);
 
   if (requiresProvisioningProfile) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
@@ -1161,10 +1156,6 @@ Future<bool> _handleIssues(
     logger.printError(missingPlatformInstructions(missingPlatform), emphasis: true);
   } else if (swiftPackageManagerMinPlatformMismatchMessage != null) {
     logger.printError(swiftPackageManagerMinPlatformMismatchMessage, emphasis: true);
-    issueDetected = true;
-  } else if (swiftPackageManagerError != null) {
-    print("HELLO 1");
-    logger.printError(swiftPackageManagerError, emphasis: true);
     issueDetected = true;
   } else if (duplicateModules.isNotEmpty) {
     final bool usesCocoapods = xcodeProject.podfile.existsSync();

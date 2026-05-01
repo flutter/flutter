@@ -505,7 +505,6 @@ class XcodeProjectInterpreter {
         );
 
         if (swiftPackageManagerError != null) {
-          print("HELLO 2");
           _logger.printError(stderrString);
           throwToolExit(swiftPackageManagerError);
         }
