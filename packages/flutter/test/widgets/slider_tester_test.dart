@@ -35,7 +35,7 @@ void main() {
   });
 
   testWidgets('TestSlider increase action increments value by 10%', (WidgetTester tester) async {
-    double value = 0.5;
+    var value = 0.5;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -65,7 +65,7 @@ void main() {
   });
 
   testWidgets('TestSlider decrease action decrements value by 10%', (WidgetTester tester) async {
-    double value = 0.5;
+    var value = 0.5;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -95,7 +95,7 @@ void main() {
   });
 
   testWidgets('TestSlider clamps value at maximum of 1.0', (WidgetTester tester) async {
-    double value = 0.95;
+    var value = 0.95;
 
     await tester.pumpWidget(
       StatefulBuilder(
@@ -125,7 +125,7 @@ void main() {
   });
 
   testWidgets('TestSlider clamps value at minimum of 0.0', (WidgetTester tester) async {
-    double value = 0.05;
+    var value = 0.05;
 
     await tester.pumpWidget(
       StatefulBuilder(

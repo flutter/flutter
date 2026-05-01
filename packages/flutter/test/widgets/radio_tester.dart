@@ -9,12 +9,7 @@ import 'package:flutter/widgets.dart';
 ///
 /// See https://github.com/flutter/flutter/issues/177028.
 class TestRadio<T> extends StatefulWidget {
-  const TestRadio({
-    super.key,
-    required this.value,
-    this.focusNode,
-    this.enabled = true,
-  });
+  const TestRadio({super.key, required this.value, this.focusNode, this.enabled = true});
 
   /// The value represented by this radio button.
   final T value;
@@ -82,7 +77,8 @@ class TestRadioGroupRegistry<T> extends RadioGroupRegistry<T> {
   T? groupValue;
 
   @override
-  ValueChanged<T?> get onChanged => (T? newValue) => groupValue = newValue;
+  ValueChanged<T?> get onChanged =>
+      (T? newValue) => groupValue = newValue;
 
   @override
   void registerClient(RadioClient<T> radio) => clients.add(radio);

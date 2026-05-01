@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'widgets_app_tester.dart';
 
 class TestOverlayRoute extends OverlayRoute<void> {
   TestOverlayRoute({super.settings});
@@ -24,7 +22,7 @@ void main() {
       '/settings': (_) => Container(key: containerKey2, child: const Text('Settings')),
     };
 
-    await tester.pumpWidget(TestWidgetsApp(routes: routes));
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
     expect(find.text('Home'), isOnstage);
     expect(find.text('Settings'), findsNothing);
@@ -122,7 +120,7 @@ void main() {
         ),
       };
 
-      await tester.pumpWidget(TestWidgetsApp(routes: routes));
+      await tester.pumpWidget(MaterialApp(routes: routes));
 
       Navigator.pushNamed(containerKey1.currentContext!, '/settings');
 
@@ -178,7 +176,7 @@ void main() {
         '/settings': (_) => SizedBox(key: containerKey2, child: const Text('Settings')),
       };
 
-      await tester.pumpWidget(TestWidgetsApp(routes: routes));
+      await tester.pumpWidget(MaterialApp(routes: routes));
 
       Navigator.pushNamed(containerKey1.currentContext!, '/settings');
 
@@ -224,7 +222,7 @@ void main() {
       '/next': (_) => const Center(child: Text('next')),
     };
 
-    await tester.pumpWidget(TestWidgetsApp(routes: routes));
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
     final PageRoute<void> route = PageRouteBuilder<void>(
       settings: const RouteSettings(name: '/page'),
