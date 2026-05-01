@@ -522,7 +522,6 @@ class AndroidProject extends FlutterProjectPlatform {
   static final _applicationIdPattern = RegExp('^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
   static final _imperativeKotlinPluginPattern = RegExp(
     '^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$',
-    multiLine: true,
   );
 
   static final _kotlinCompilerOptionsPattern = RegExp(
@@ -537,11 +536,8 @@ class AndroidProject extends FlutterProjectPlatform {
   /// - `id("org.jetbrains.kotlin.android")`
   /// - `id ( "org.jetbrains.kotlin.android" )`
   static final _declarativeKotlinPluginPatterns = <RegExp>[
-    RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?\\s*\$', multiLine: true),
-    RegExp(
-      '^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?\\s*\$',
-      multiLine: true,
-    ),
+    RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?\\s*\$'),
+    RegExp('^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?\\s*\$'),
   ];
 
   /// Pattern used to find the assignment of the "group" property in Gradle.
@@ -639,16 +635,16 @@ class AndroidProject extends FlutterProjectPlatform {
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
     if (appGradleFile.existsSync()) {
-      try {
-        final String content = appGradleFile.readAsStringSync();
-        if (_imperativeKotlinPluginPattern.hasMatch(content)) {
+      if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+        return true;
+      }
+      for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
+        if (firstMatchInFile(appGradleFile, pattern) != null) {
           return true;
         }
-        for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
-          if (pattern.hasMatch(content)) {
-            return true;
-          }
-        }
+      }
+      try {
+        final String content = appGradleFile.readAsStringSync();
         if (_kotlinCompilerOptionsPattern.hasMatch(content)) {
           return true;
         }
