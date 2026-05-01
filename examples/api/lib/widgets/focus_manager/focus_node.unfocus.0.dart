@@ -76,9 +76,7 @@ class _UnfocusExampleState extends State<UnfocusExample> {
                   OutlinedButton(
                     child: const Text('UNFOCUS'),
                     onPressed: () {
-                      setState(() {
-                        primaryFocus!.unfocus(disposition: disposition);
-                      });
+                      primaryFocus!.unfocus(disposition: disposition);
                     },
                   ),
                 ],
