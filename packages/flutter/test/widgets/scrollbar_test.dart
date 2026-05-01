@@ -3803,106 +3803,104 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     },
   );
 
-  testWidgets(
-    'RawScrollbar.mouseCursor only applies while the pointer is over the scrollbar',
-    (WidgetTester tester) async {
-      final controller = ScrollController();
-      addTearDown(controller.dispose);
+  testWidgets('RawScrollbar.mouseCursor only applies while the pointer is over the scrollbar', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: MouseRegion(
-              cursor: SystemMouseCursors.text,
-              child: RawScrollbar(
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.text,
+            child: RawScrollbar(
+              controller: controller,
+              thumbVisibility: true,
+              mouseCursor: const WidgetStatePropertyAll<MouseCursor?>(SystemMouseCursors.basic),
+              child: SingleChildScrollView(
                 controller: controller,
-                thumbVisibility: true,
-                mouseCursor: const WidgetStatePropertyAll<MouseCursor?>(SystemMouseCursors.basic),
-                child: SingleChildScrollView(
-                  controller: controller,
-                  child: const SizedBox(width: 4000.0, height: 4000.0),
-                ),
+                child: const SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final TestGesture gesture = await tester.createGesture(
-        kind: ui.PointerDeviceKind.mouse,
-        pointer: 1,
-      );
-      addTearDown(gesture.removePointer);
+    final TestGesture gesture = await tester.createGesture(
+      kind: ui.PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    addTearDown(gesture.removePointer);
 
-      // Pointer enters over the scrollable content (not over the scrollbar):
-      // the override should not apply, leaving the parent's I-beam cursor.
-      await gesture.addPointer(location: const Offset(100.0, 100.0));
-      await tester.pump();
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.text,
-      );
+    // Pointer enters over the scrollable content (not over the scrollbar):
+    // the override should not apply, leaving the parent's I-beam cursor.
+    await gesture.addPointer(location: const Offset(100.0, 100.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
 
-      // Move over the painted scrollbar thumb (right edge of the viewport).
-      await gesture.moveTo(const Offset(796.0, 5.0));
-      await tester.pump();
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.basic,
-      );
+    // Move over the painted scrollbar thumb (right edge of the viewport).
+    await gesture.moveTo(const Offset(796.0, 5.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.basic,
+    );
 
-      // Move back to the content area: the override should yield again.
-      await gesture.moveTo(const Offset(100.0, 100.0));
-      await tester.pump();
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.text,
-      );
-    },
-  );
+    // Move back to the content area: the override should yield again.
+    await gesture.moveTo(const Offset(100.0, 100.0));
+    await tester.pump();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+  });
 
-  testWidgets(
-    'RawScrollbar without mouseCursor preserves the ancestor cursor over the scrollbar',
-    (WidgetTester tester) async {
-      final controller = ScrollController();
-      addTearDown(controller.dispose);
+  testWidgets('RawScrollbar without mouseCursor preserves the ancestor cursor over the scrollbar', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
 
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: MouseRegion(
-              cursor: SystemMouseCursors.text,
-              child: RawScrollbar(
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.text,
+            child: RawScrollbar(
+              controller: controller,
+              thumbVisibility: true,
+              child: SingleChildScrollView(
                 controller: controller,
-                thumbVisibility: true,
-                child: SingleChildScrollView(
-                  controller: controller,
-                  child: const SizedBox(width: 4000.0, height: 4000.0),
-                ),
+                child: const SizedBox(width: 4000.0, height: 4000.0),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final TestGesture gesture = await tester.createGesture(
-        kind: ui.PointerDeviceKind.mouse,
-        pointer: 1,
-      );
-      addTearDown(gesture.removePointer);
-      await gesture.addPointer(location: const Offset(796.0, 5.0));
-      await tester.pump();
-      // No override: the ancestor's I-beam cursor wins, even over the scrollbar.
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.text,
-      );
-    },
-  );
+    final TestGesture gesture = await tester.createGesture(
+      kind: ui.PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer(location: const Offset(796.0, 5.0));
+    await tester.pump();
+    // No override: the ancestor's I-beam cursor wins, even over the scrollbar.
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.text,
+    );
+  });
 
   testWidgets('RawScrollbar.mouseCursor updates when the property changes while hovered', (
     WidgetTester tester,
@@ -3989,8 +3987,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
         final Finder finder = find.descendant(
           of: find.byType(RawScrollbar),
           matching: find.byWidgetPredicate(
-            (Widget widget) =>
-                widget is MouseRegion && widget.cursor != MouseCursor.defer,
+            (Widget widget) => widget is MouseRegion && widget.cursor != MouseCursor.defer,
           ),
         );
         if (finder.evaluate().isEmpty) {
@@ -4014,7 +4011,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
 
       // Start a touch drag on the thumb so the scrollbar enters the dragged
       // state without ending the mouse hover.
-      final TestGesture touch = await tester.startGesture(const Offset(796.0, 6.0));
+      final TestGesture touch = await tester.startGesture(const Offset(796.0, 6.0), pointer: 2);
       addTearDown(() async {
         await touch.up();
       });
@@ -4030,4 +4027,67 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       expect(scrollbarCursor(), SystemMouseCursors.grabbing);
     },
   );
+
+  testWidgets('RawScrollbar.mouseCursor clears dragged state when thumb drag is cancelled', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            controller: controller,
+            thumbVisibility: true,
+            mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>(
+              (Set<WidgetState> states) => states.contains(WidgetState.dragged)
+                  ? SystemMouseCursors.grabbing
+                  : SystemMouseCursors.grab,
+            ),
+            child: SingleChildScrollView(
+              controller: controller,
+              child: const SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    MouseCursor scrollbarCursor() {
+      final Finder finder = find.descendant(
+        of: find.byType(RawScrollbar),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is MouseRegion && widget.cursor != MouseCursor.defer,
+        ),
+      );
+      if (finder.evaluate().isEmpty) {
+        return MouseCursor.defer;
+      }
+      return tester.widget<MouseRegion>(finder).cursor;
+    }
+
+    await tester.pumpAndSettle();
+
+    final TestGesture mouse = await tester.createGesture(
+      kind: ui.PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    addTearDown(mouse.removePointer);
+    await mouse.addPointer(location: const Offset(100.0, 100.0));
+    await mouse.moveTo(const Offset(796.0, 5.0));
+    await tester.pump();
+    expect(scrollbarCursor(), SystemMouseCursors.grab);
+
+    final TestGesture touch = await tester.startGesture(const Offset(796.0, 6.0), pointer: 2);
+    await touch.moveBy(const Offset(0.0, 5.0));
+    await tester.pump();
+    expect(scrollbarCursor(), SystemMouseCursors.grabbing);
+
+    await touch.cancel();
+    await tester.pump();
+    expect(scrollbarCursor(), SystemMouseCursors.grab);
+  });
 }
