@@ -9,6 +9,7 @@
 
 #include "flutter/fml/trace_event.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -19,8 +20,8 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
   CADisplayLink* _displayLink;
 }
 
-- (instancetype)initWithTaskRunner:(fml::RefPtr<fml::TaskRunner>)task_runner
-                          callback:(flutter::VsyncWaiter::Callback)callback {
+- (instancetype)initWithTaskRunnerPtr:(fml::RefPtr<fml::TaskRunner>)task_runner
+                             callback:(flutter::VsyncWaiter::Callback)callback {
   FML_DCHECK(task_runner);
 
   if (self = [super init]) {
@@ -44,6 +45,18 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
   }
 
   return self;
+}
+
+- (instancetype)initWithTaskRunner:(FlutterFMLTaskRunner*)taskRunner
+                          callback:(void (^)(CFTimeInterval startTime,
+                                             CFTimeInterval targetTime))callback {
+  fml::RefPtr<fml::TaskRunner> runner = taskRunner.taskRunner;
+  auto cpp_callback = [callback](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
+    double start_time_seconds = recorder->GetVsyncStartTime().ToEpochDelta().ToSecondsF();
+    double target_time_seconds = recorder->GetVsyncTargetTime().ToEpochDelta().ToSecondsF();
+    callback(start_time_seconds, target_time_seconds);
+  };
+  return [self initWithTaskRunnerPtr:runner callback:cpp_callback];
 }
 
 - (void)setMaxRefreshRate:(double)refreshRate {

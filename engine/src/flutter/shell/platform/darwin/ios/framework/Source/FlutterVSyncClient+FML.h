@@ -13,8 +13,8 @@
 
 @interface FlutterVSyncClient ()
 
-- (instancetype)initWithTaskRunner:(fml::RefPtr<fml::TaskRunner>)task_runner
-                          callback:(flutter::VsyncWaiter::Callback)callback;
+- (instancetype)initWithTaskRunnerPtr:(fml::RefPtr<fml::TaskRunner>)task_runner
+                             callback:(flutter::VsyncWaiter::Callback)callback;
 
 @end
 
