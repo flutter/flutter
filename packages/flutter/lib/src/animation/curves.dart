@@ -401,6 +401,12 @@ class Cubic extends Curve {
 
   @override
   double transformInternal(double t) {
+    if (t <= 0.0) {
+      return 0.0;
+    }
+    if (t >= 1.0) {
+      return 1.0;
+    }
     var start = 0.0;
     var end = 1.0;
     while (true) {
