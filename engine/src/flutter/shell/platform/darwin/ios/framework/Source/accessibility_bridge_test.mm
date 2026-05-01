@@ -709,7 +709,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                  UIAccessibilityScreenChangedNotification);
 }
 
-- (void)testDoesNotAnnounceUnnamedRouteChanges {
+- (void)testTabSwitchDoesNotPostScreenChange {
   flutter::MockDelegate mock_delegate;
   auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
   flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
@@ -748,54 +748,128 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
   flutter::CustomAccessibilityActionUpdates actions;
 
-  // Build the first tree: unnamed route + one focusable item.
   flutter::SemanticsNodeUpdates first_nodes;
-
   flutter::SemanticsNode first_route;
   first_route.id = 1;
   first_route.flags.scopesRoute = true;
   first_nodes[first_route.id] = first_route;
-
   flutter::SemanticsNode focused_node;
   focused_node.id = 10;
   focused_node.label = "Item";
   focused_node.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
   first_nodes[focused_node.id] = focused_node;
-
   flutter::SemanticsNode first_root;
   first_root.id = kRootNodeId;
   first_root.flags.scopesRoute = true;
   first_root.childrenInTraversalOrder = {1, 10};
   first_root.childrenInHitTestOrder = {1, 10};
   first_nodes[first_root.id] = first_root;
-
   bridge->UpdateSemantics(/*nodes=*/first_nodes, /*actions=*/actions);
-
   bridge->AccessibilityObjectDidBecomeFocused(10);
   [accessibility_notifications removeAllObjects];
 
-  // Replace only the route (still unnamed), keep focus on the same item.
   flutter::SemanticsNodeUpdates second_nodes;
-
   flutter::SemanticsNode second_route;
   second_route.id = 2;
   second_route.flags.scopesRoute = true;
   second_nodes[second_route.id] = second_route;
-
   second_nodes[focused_node.id] = focused_node;
-
   flutter::SemanticsNode second_root;
   second_root.id = kRootNodeId;
   second_root.flags.scopesRoute = true;
   second_root.childrenInTraversalOrder = {2, 10};
   second_root.childrenInHitTestOrder = {2, 10};
   second_nodes[second_root.id] = second_root;
-
   bridge->UpdateSemantics(/*nodes=*/second_nodes, /*actions=*/actions);
 
   XCTAssertEqual([accessibility_notifications count], 1ul);
-  XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], [NSNull null]);
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
+                 UIAccessibilityLayoutChangedNotification);
+  XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], [NSNull null]);
+}
+
+- (void)testUnnamedPushTransitionPostsScreenChangeWithNilRouteName {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+
+  NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
+      [[NSMutableArray alloc] init];
+  auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
+  ios_delegate->on_PostAccessibilityNotification_ =
+      [accessibility_notifications](UIAccessibilityNotifications notification, id argument) {
+        [accessibility_notifications addObject:@{
+          @"notification" : @(notification),
+          @"argument" : argument ? argument : [NSNull null],
+        }];
+      };
+  __block auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil,
+                                                     /*ios_delegate=*/std::move(ios_delegate));
+
+  flutter::CustomAccessibilityActionUpdates actions;
+
+  flutter::SemanticsNodeUpdates first_nodes;
+  flutter::SemanticsNode first_route;
+  first_route.id = 1;
+  first_route.flags.scopesRoute = true;
+  first_nodes[first_route.id] = first_route;
+  flutter::SemanticsNode first_item;
+  first_item.id = 10;
+  first_item.label = "First";
+  first_item.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  first_nodes[first_item.id] = first_item;
+  flutter::SemanticsNode first_root;
+  first_root.id = kRootNodeId;
+  first_root.flags.scopesRoute = true;
+  first_root.childrenInTraversalOrder = {1, 10};
+  first_root.childrenInHitTestOrder = {1, 10};
+  first_nodes[first_root.id] = first_root;
+  bridge->UpdateSemantics(/*nodes=*/first_nodes, /*actions=*/actions);
+  bridge->AccessibilityObjectDidBecomeFocused(10);
+  [accessibility_notifications removeAllObjects];
+
+  flutter::SemanticsNodeUpdates second_nodes;
+  flutter::SemanticsNode second_route;
+  second_route.id = 2;
+  second_route.flags.scopesRoute = true;
+  second_nodes[second_route.id] = second_route;
+  flutter::SemanticsNode second_item;
+  second_item.id = 20;
+  second_item.label = "Second";
+  second_item.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  second_nodes[second_item.id] = second_item;
+  flutter::SemanticsNode second_root;
+  second_root.id = kRootNodeId;
+  second_root.flags.scopesRoute = true;
+  second_root.childrenInTraversalOrder = {2, 20};
+  second_root.childrenInHitTestOrder = {2, 20};
+  second_nodes[second_root.id] = second_root;
+  bridge->UpdateSemantics(/*nodes=*/second_nodes, /*actions=*/actions);
+
+  XCTAssertEqual([accessibility_notifications count], 2ul);
+  XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
+                 UIAccessibilityScreenChangedNotification);
+  XCTAssertEqualObjects(accessibility_notifications[0][@"argument"], [NSNull null]);
+  XCTAssertEqual([accessibility_notifications[1][@"notification"] unsignedIntValue],
                  UIAccessibilityLayoutChangedNotification);
 }
 

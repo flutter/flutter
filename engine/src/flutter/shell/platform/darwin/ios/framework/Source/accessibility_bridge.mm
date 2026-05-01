@@ -155,7 +155,6 @@ void AccessibilityBridge::UpdateSemantics(
   SemanticsObject* root = objects_[@(kRootNodeId)];
 
   bool routeChanged = false;
-  NSString* routeName = nil;
   SemanticsObject* lastAdded = nil;
 
   if (root) {
@@ -188,7 +187,6 @@ void AccessibilityBridge::UpdateSemantics(
         ([lastAdded uid] != previous_route_id_ || [newRoutes count] != previous_routes_.size())) {
       previous_route_id_ = [lastAdded uid];
       routeChanged = true;
-      routeName = [lastAdded routeName];
     }
     previous_routes_.clear();
     for (SemanticsObject* route in newRoutes) {
@@ -211,22 +209,25 @@ void AccessibilityBridge::UpdateSemantics(
   if (!ios_delegate_->IsFlutterViewControllerPresentingModalViewController(view_controller_)) {
     layoutChanged = layoutChanged || [doomed_uids count] > 0;
 
-    const bool shouldAnnounceRoute = routeChanged && routeName.length > 0;
+    NSString* routeName = routeChanged ? [lastAdded routeName] : nil;
+    SemanticsObject* next = FindNextFocusableIfNecessary();
+    SemanticsObject* lastFocused = [objects_ objectForKey:@(last_focused_semantics_object_id_)];
 
-    if (shouldAnnounceRoute) {
+    const bool focusPreserved = lastFocused != nil && lastFocused == next;
+    const bool announceRoute = routeChanged && (routeName.length > 0 || !focusPreserved);
+
+    if (announceRoute) {
       ios_delegate_->PostAccessibilityNotification(UIAccessibilityScreenChangedNotification,
                                                    routeName);
     }
 
     if (layoutChanged) {
-      SemanticsObject* next = FindNextFocusableIfNecessary();
-      SemanticsObject* lastFocused = [objects_ objectForKey:@(last_focused_semantics_object_id_)];
       // Only specify the focus item if the new focus is different, avoiding double focuses on the
-      // same item. See: https://github.com/flutter/flutter/issues/104176. If there is a named
-      // route announcement, we always refocus.
+      // same item. See: https://github.com/flutter/flutter/issues/104176. If there is a route
+      // announcement, we always refocus.
       ios_delegate_->PostAccessibilityNotification(
           UIAccessibilityLayoutChangedNotification,
-          (shouldAnnounceRoute || next != lastFocused) ? next.nativeAccessibility : NULL);
+          (announceRoute || next != lastFocused) ? next.nativeAccessibility : NULL);
     } else if (scrollOccured) {
       // TODO(chunhtai): figure out what string to use for notification. At this
       // point, it is guarantee the previous focused object is still in the tree
