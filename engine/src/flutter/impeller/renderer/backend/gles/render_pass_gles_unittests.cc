@@ -350,5 +350,29 @@ TEST_F(RenderPassGLESViewportTest,
   EXPECT_TRUE(reactor->React());
 }
 
+// Sibling regression guard for the bug fixed alongside this test on the
+// Vulkan backend. The GLES backend has always honored the X offset; this
+// asserts that explicitly so a future change can't silently regress it.
+TEST_F(RenderPassGLESViewportTest, ViewportWithNonZeroXOffsetReachesGL) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(1);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  render_pass->SetViewport(
+      Viewport{Rect::MakeXYWH(25, 0, 50, 100), DepthRange{0.0f, 1.0f}});
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(_, _, _, _)).Times(0);
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(25, 0, 50, 100)).Times(1);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
 }  // namespace testing
 }  // namespace impeller
