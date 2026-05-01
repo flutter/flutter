@@ -331,15 +331,18 @@ void main() async {
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Texture.fullMipCount', () async {
+    // Matches Impeller's `ISize::MipCount`: `floor(log2(min(w, h)))`,
+    // clamped to a minimum of 1.
     expect(gpu.Texture.fullMipCount(1, 1), 1);
-    expect(gpu.Texture.fullMipCount(2, 1), 2);
-    expect(gpu.Texture.fullMipCount(2, 2), 2);
-    expect(gpu.Texture.fullMipCount(4, 4), 3);
-    expect(gpu.Texture.fullMipCount(100, 100), 7);
-    expect(gpu.Texture.fullMipCount(1024, 1024), 11);
-    // Non-square: count uses the larger dimension.
-    expect(gpu.Texture.fullMipCount(1024, 1), 11);
-    expect(gpu.Texture.fullMipCount(1, 256), 9);
+    expect(gpu.Texture.fullMipCount(2, 1), 1);
+    expect(gpu.Texture.fullMipCount(2, 2), 1);
+    expect(gpu.Texture.fullMipCount(4, 4), 2);
+    expect(gpu.Texture.fullMipCount(8, 8), 3);
+    expect(gpu.Texture.fullMipCount(100, 100), 6);
+    expect(gpu.Texture.fullMipCount(1024, 1024), 10);
+    // Non-square: count uses the smaller dimension.
+    expect(gpu.Texture.fullMipCount(1024, 1), 1);
+    expect(gpu.Texture.fullMipCount(1, 256), 1);
   });
 
   test(
@@ -347,15 +350,15 @@ void main() async {
     () async {
       final gpu.Texture texture = gpu.gpuContext.createTexture(
         gpu.StorageMode.hostVisible,
-        4,
-        4,
+        8,
+        8,
         mipLevelCount: 3,
       );
       expect(texture.mipLevelCount, 3);
-      // Per-level sizes: 4*4*4=64, 2*2*4=16, 1*1*4=4.
-      expect(texture.getMipLevelSizeInBytes(0), 64);
-      expect(texture.getMipLevelSizeInBytes(1), 16);
-      expect(texture.getMipLevelSizeInBytes(2), 4);
+      // Per-level sizes: 8*8*4=256, 4*4*4=64, 2*2*4=16.
+      expect(texture.getMipLevelSizeInBytes(0), 256);
+      expect(texture.getMipLevelSizeInBytes(1), 64);
+      expect(texture.getMipLevelSizeInBytes(2), 16);
     },
     skip: !(impellerEnabled && flutterGpuEnabled),
   );
@@ -364,14 +367,14 @@ void main() async {
     'GpuContext.createTexture rejects out-of-range mipLevelCount',
     () async {
       try {
-        gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 4, 4, mipLevelCount: 0);
+        gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 8, 8, mipLevelCount: 0);
         fail('Exception not thrown for mipLevelCount=0.');
       } catch (e) {
         expect(e.toString(), contains('mipLevelCount'));
       }
       try {
-        // Max for 4x4 is 3.
-        gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 4, 4, mipLevelCount: 4);
+        // Max for 8x8 is 3.
+        gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 8, 8, mipLevelCount: 4);
         fail('Exception not thrown for mipLevelCount above the maximum.');
       } catch (e) {
         expect(e.toString(), contains('mipLevelCount'));
@@ -431,25 +434,28 @@ void main() async {
   test('Texture.overwrite writes to a non-zero mip level', () async {
     final gpu.Texture texture = gpu.gpuContext.createTexture(
       gpu.StorageMode.hostVisible,
-      4,
-      4,
+      8,
+      8,
       mipLevelCount: 3,
     );
     const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
     const blue = ui.Color.fromARGB(0xFF, 0, 0, 0xFF);
 
-    // Mip 0: 4x4 = 16 texels.
+    // Mip 0: 8x8 = 64 texels.
     texture.overwrite(
-      Int32List.fromList(List<int>.filled(16, red.value)).buffer.asByteData(),
+      Int32List.fromList(List<int>.filled(64, red.value)).buffer.asByteData(),
       mipLevel: 0,
     );
-    // Mip 1: 2x2 = 4 texels.
+    // Mip 1: 4x4 = 16 texels.
     texture.overwrite(
-      Int32List.fromList(List<int>.filled(4, blue.value)).buffer.asByteData(),
+      Int32List.fromList(List<int>.filled(16, blue.value)).buffer.asByteData(),
       mipLevel: 1,
     );
-    // Mip 2: 1x1 = 1 texel.
-    texture.overwrite(Int32List.fromList(<int>[red.value]).buffer.asByteData(), mipLevel: 2);
+    // Mip 2: 2x2 = 4 texels.
+    texture.overwrite(
+      Int32List.fromList(List<int>.filled(4, red.value)).buffer.asByteData(),
+      mipLevel: 2,
+    );
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test(

@@ -12,19 +12,23 @@ base class Texture extends NativeFieldWrapperClass1 {
     return _valid;
   }
 
-  /// Returns the number of mip levels in a complete chain for a 2D texture
-  /// with the given [width] and [height], i.e. `floor(log2(max(w, h))) + 1`.
+  /// Returns the maximum number of mip levels the underlying HAL will
+  /// allocate for a texture of the given [width] and [height].
+  ///
+  /// This currently matches `impeller::ISize::MipCount`, which uses
+  /// `floor(log2(min(w, h)))` and clamps at 1. Note that this is one less
+  /// than the canonical `floor(log2(max(w, h))) + 1` used by Vulkan and
+  /// OpenGL, and uses the smaller dimension instead of the larger; the HAL
+  /// may eventually relax this. Users should treat this as the upper bound
+  /// for the `mipLevelCount` argument to `GpuContext.createTexture` rather
+  /// than as a fixed mathematical formula.
   static int fullMipCount(int width, int height) {
     if (width < 1 || height < 1) {
       return 1;
     }
-    int largest = width > height ? width : height;
-    int count = 1;
-    while (largest > 1) {
-      largest >>= 1;
-      count += 1;
-    }
-    return count;
+    final int smallest = width < height ? width : height;
+    final int count = smallest.bitLength - 1;
+    return count > 0 ? count : 1;
   }
 
   /// Creates a new Texture.
