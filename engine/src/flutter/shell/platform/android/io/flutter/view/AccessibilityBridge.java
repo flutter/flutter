@@ -3238,14 +3238,17 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       }
 
       int previousNodeId = -1;
-      List<SemanticsNode> children =
-          childrenInHitTestOrder.size() > childrenInTraversalOrder.size()
-              ? childrenInHitTestOrder
-              : childrenInTraversalOrder;
-      for (SemanticsNode child : children) {
+      for (SemanticsNode child : childrenInTraversalOrder) {
         child.previousNodeId = previousNodeId;
         previousNodeId = child.id;
         child.updateRecursively(globalTransform, visitedObjects, forceUpdate);
+      }
+
+      for (SemanticsNode child : childrenInHitTestOrder) {
+        if (!visitedObjects.contains(child)) {
+          // Pass false to avoid forcing incorrect geometry updates
+          child.updateRecursively(globalTransform, visitedObjects, false);
+        }
       }
     }
 
