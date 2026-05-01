@@ -2876,7 +2876,7 @@ abstract class RenderBox extends RenderObject {
       ErrorDescription(explanation),
       ErrorHint(
         'If you are not writing your own RenderBox subclass, then this is an issue in the framework. '
-        'Contact support: https://github.com/flutter/flutter/issues/new',
+        'Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
       ),
       DiagnosticsStackTrace('Stack trace', stack),
     ]);
@@ -2899,7 +2899,7 @@ abstract class RenderBox extends RenderObject {
       ),
       ErrorHint(
         'If you are not writing your own RenderBox subclass, then this is an issue in the framework. '
-        'Contact support: https://github.com/flutter/flutter/issues/new',
+        'Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
       ),
     ]);
   }
