@@ -1127,8 +1127,8 @@ Future<bool> _handleIssues(
   final String? swiftPackageManagerMinPlatformMismatchMessage =
       _swiftPackageManagerMinPlatformMismatchMessageFromStdout(result.stdout);
   final String? swiftPackageManagerError =
-      SwiftPackageManager.parseError(result.stdout, pluginNames: pluginNames) ??
-      SwiftPackageManager.parseError(result.stderr, pluginNames: pluginNames);
+      SwiftPackageManager.parsePluginError(result.stdout, pluginNames: pluginNames) ??
+      SwiftPackageManager.parsePluginError(result.stderr, pluginNames: pluginNames);
 
   if (requiresProvisioningProfile) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);
@@ -1163,6 +1163,7 @@ Future<bool> _handleIssues(
     logger.printError(swiftPackageManagerMinPlatformMismatchMessage, emphasis: true);
     issueDetected = true;
   } else if (swiftPackageManagerError != null) {
+    print("HELLO 1");
     logger.printError(swiftPackageManagerError, emphasis: true);
     issueDetected = true;
   } else if (duplicateModules.isNotEmpty) {

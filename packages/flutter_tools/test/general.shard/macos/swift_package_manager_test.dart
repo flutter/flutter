@@ -565,13 +565,13 @@ let package = Package(
 
     group('parseError', () {
       testWithoutContext('returns null for empty or null message', () {
-        expect(SwiftPackageManager.parseError(null, pluginNames: <String>[]), isNull);
-        expect(SwiftPackageManager.parseError('', pluginNames: <String>[]), isNull);
+        expect(SwiftPackageManager.parsePluginError(null, pluginNames: <String>[]), isNull);
+        expect(SwiftPackageManager.parsePluginError('', pluginNames: <String>[]), isNull);
       });
 
       testWithoutContext('returns null for unknown error', () {
         expect(
-          SwiftPackageManager.parseError('some random error', pluginNames: <String>[]),
+          SwiftPackageManager.parsePluginError('some random error', pluginNames: <String>[]),
           isNull,
         );
       });
@@ -584,7 +584,7 @@ let package = Package(
             'Flutter plugin "plugin_1" has an incorrectly configured Package.swift file.\n'
             'Please contact the plugin maintainers for assistance.';
         expect(
-          SwiftPackageManager.parseError(message, pluginNames: <String>['plugin_1']),
+          SwiftPackageManager.parsePluginError(message, pluginNames: <String>['plugin_1']),
           expected,
         );
       });
@@ -595,7 +595,7 @@ let package = Package(
             'Flutter plugin "plugin_1" has an incorrectly configured Package.swift file.\n'
             'Please contact the plugin maintainers for assistance.';
         expect(
-          SwiftPackageManager.parseError(message, pluginNames: <String>['plugin_1']),
+          SwiftPackageManager.parsePluginError(message, pluginNames: <String>['plugin_1']),
           expected,
         );
       });
@@ -606,7 +606,7 @@ let package = Package(
             'Flutter plugin "plugin_1" has an incorrectly configured Package.swift file.\n'
             'Please contact the plugin maintainers for assistance.';
         expect(
-          SwiftPackageManager.parseError(message, pluginNames: <String>['plugin_1']),
+          SwiftPackageManager.parsePluginError(message, pluginNames: <String>['plugin_1']),
           expected,
         );
       });
@@ -614,7 +614,7 @@ let package = Package(
       testWithoutContext('returns null if error matches but plugin is not in pluginNames', () {
         const message = "unknown package 'some_package' in dependencies of target 'plugin_1'";
         expect(
-          SwiftPackageManager.parseError(message, pluginNames: <String>['other_plugin']),
+          SwiftPackageManager.parsePluginError(message, pluginNames: <String>['other_plugin']),
           isNull,
         );
       });

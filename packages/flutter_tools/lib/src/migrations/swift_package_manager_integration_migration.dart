@@ -169,7 +169,6 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     Status? migrationStatus;
     SchemeInfo? schemeInfo;
     var optionalOnly = false;
-    final List<Plugin> plugins = await _xcodeProject.getPlugins();
     try {
       if (!_xcodeProjectInfoFile.existsSync()) {
         throw Exception('Xcode project not found.');
@@ -180,7 +179,6 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         fileSystem: _fileSystem,
         logger: logger,
         platform: _platform,
-        plugins: plugins,
       );
 
       schemeInfo = await _getSchemeFile();
@@ -229,6 +227,21 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         }
       }
 
+      try {
+        // When migrating for the first time, this will be the first time packages are downloaded
+        // and may take a while.
+        await _xcodeProjectInterpreter.prefetchSwiftPackages(
+          _xcodeProject.hostAppRoot.path,
+          buildDirectory: _fileSystem.directory(
+            _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
+          ),
+          quiet: false,
+          force: true,
+        );
+      } on Exception catch (e) {
+        throw _PrefetchSwiftPackageException(e.toString());
+      }
+
       // Get the project info to make sure it compiles with xcodebuild
       await _xcodeProjectInterpreter.getInfo(
         _xcodeProject.hostAppRoot.path,
@@ -236,19 +249,10 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
           _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
         ),
       );
+    } on _PrefetchSwiftPackageException {
+      rethrow;
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);
-      final errorString = e.toString();
-      final List<String> pluginNames = plugins.map((Plugin p) => p.name).toList();
-      final String? swiftPackageManagerError = SwiftPackageManager.parseError(
-        errorString,
-        pluginNames: pluginNames,
-      );
-
-      if (swiftPackageManagerError != null) {
-        throwToolExit(swiftPackageManagerError);
-      }
-
       if (optionalOnly) {
         // This part of the migration is optional. We'll log this for debugging sake but don't
         // really expect the user to see it.
@@ -261,8 +265,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         throwToolExit(
           'An error occurred when adding Swift Package Manager integration:\n'
           '  $e\n\n'
-          'Swift Package Manager is currently an experimental feature, please file a bug at\n'
-          '  https://github.com/flutter/flutter/issues/new?template=01_activation.yml \n'
+          'Please file a bug at https://github.com/flutter/flutter/issues/new?template=01_activation.yml \n'
           'Consider including a copy of the following files in your bug report:\n'
           '  ${_platform.name}/Runner.xcodeproj/project.pbxproj\n'
           '  ${_platform.name}/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme '
@@ -1241,7 +1244,6 @@ $newContent
     required FileSystem fileSystem,
     required Logger logger,
     required FlutterDarwinPlatform platform,
-    required List<Plugin> plugins,
   }) async {
     try {
       final FlutterProject flutterProject = xcodeProject.parent;
@@ -1252,7 +1254,7 @@ $newContent
         );
         if (parentProject.isPlugin && parentProject.hasExampleApp) {
           final String pluginName = parentProject.manifest.appName;
-
+          final List<Plugin> plugins = await xcodeProject.getPlugins();
           final String? absolutePath = plugins
               .where((plugin) => plugin.name == pluginName)
               .firstOrNull
@@ -1443,4 +1445,13 @@ class ParsedProject {
   final Map<String, Object?> data;
   final String identifier;
   final List<String>? packageReferences;
+}
+
+class _PrefetchSwiftPackageException implements Exception {
+  _PrefetchSwiftPackageException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
 }

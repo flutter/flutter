@@ -540,11 +540,12 @@ void main() {
             project.xcodeProjectInfoFile.writeAsStringSync(
               _projectSettings(_allSectionsMigrated(platform)),
             );
+            final fakeXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
             final projectMigration = SwiftPackageManagerIntegrationMigration(
               project,
               platform,
               BuildInfo.debug,
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              xcodeProjectInterpreter: fakeXcodeProjectInterpreter,
               logger: testLogger,
               fileSystem: memoryFileSystem,
               plistParser: plistParser,
@@ -556,6 +557,7 @@ void main() {
               project.xcodeProjectSchemeFile().readAsStringSync(),
               _validBuildActions(platform, hasFrameworkScript: true, hasBuildEntries: false),
             );
+            expect(fakeXcodeProjectInterpreter.prefetchSwiftPackagesCalled, isTrue);
           });
 
           testWithoutContext('successfully updates scheme with preexisting PreActions', () async {
@@ -3498,6 +3500,47 @@ void main() {
         );
       });
 
+      testWithoutContext('throw if prefetch Swift packages fails', () async {
+        final memoryFileSystem = MemoryFileSystem();
+        final testLogger = BufferLogger.test();
+        const FlutterDarwinPlatform platform = FlutterDarwinPlatform.ios;
+        final project = FakeXcodeProject(
+          platform: platform.name,
+          fileSystem: memoryFileSystem,
+          logger: testLogger,
+        );
+        _createProjectFiles(project, platform);
+        project.xcodeProjectInfoFile.writeAsStringSync(
+          _projectSettings(_allSectionsUnmigrated(platform)),
+        );
+
+        final plistParser = FakePlistParser.multiple(<String>[
+          _plutilOutput(_allSectionsUnmigratedAsJson(platform)),
+          _plutilOutput(_allSectionsMigratedAsJson(platform)),
+        ]);
+
+        final projectMigration = SwiftPackageManagerIntegrationMigration(
+          project,
+          platform,
+          BuildInfo.debug,
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(throwErrorOnPrefetch: true),
+          logger: testLogger,
+          fileSystem: memoryFileSystem,
+          plistParser: plistParser,
+          config: FakeConfig(),
+        );
+        await expectLater(
+          () => projectMigration.migrate(),
+          throwsA(
+            isA<Exception>().having(
+              (Exception e) => e.toString(),
+              'toString()',
+              'Exception: Failed to prefetch Swift packages',
+            ),
+          ),
+        );
+      });
+
       testWithoutContext('restore project settings from backup on failure', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
@@ -4507,7 +4550,10 @@ const migratedSwiftPackageProductDependencySectionAsJson = '''
     }''';
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter({this.throwErrorOnGetInfo = false});
+  FakeXcodeProjectInterpreter({
+    this.throwErrorOnGetInfo = false,
+    this.throwErrorOnPrefetch = false,
+  });
 
   @override
   bool isInstalled = false;
@@ -4516,6 +4562,22 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   List<String> xcrunCommand() => <String>['xcrun'];
 
   final bool throwErrorOnGetInfo;
+  final bool throwErrorOnPrefetch;
+  bool prefetchSwiftPackagesCalled = false;
+
+  @override
+  Future<void> prefetchSwiftPackages(
+    String projectPath, {
+    required Directory buildDirectory,
+    bool quiet = false,
+    bool force = false,
+    bool waitForCompletion = false,
+  }) async {
+    prefetchSwiftPackagesCalled = true;
+    if (throwErrorOnPrefetch) {
+      throw Exception('Failed to prefetch Swift packages');
+    }
+  }
 
   @override
   Future<XcodeProjectInfo?> getInfo(

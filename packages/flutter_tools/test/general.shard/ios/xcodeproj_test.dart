@@ -2837,7 +2837,7 @@ Resolved source packages:
     );
 
     testUsingContext(
-      'throws guided message when it matches a _SwiftPMErrorMatcher',
+      'throws guided message when it matches a _SwiftPMPluginErrorMatcher',
       () async {
         final platform = FakePlatform(operatingSystem: 'macos');
         const projectPath = 'path/to/project';

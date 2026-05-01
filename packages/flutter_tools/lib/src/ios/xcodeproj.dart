@@ -395,6 +395,17 @@ class XcodeProjectInterpreter {
   /// The stderr subscription for the Swift package fetch process.
   StreamSubscription<String>? _swiftPackageFetchStderrSubscription;
 
+  /// Resets the Swift package fetch process by killing it if it's running and clearing the
+  /// process and subscriptions.
+  Future<void> _resetSwiftPackageFetchProcess() async {
+    _swiftPackageFetchProcess?.kill();
+    _swiftPackageFetchProcess = null;
+    await _swiftPackageFetchStdoutSubscription?.cancel();
+    await _swiftPackageFetchStderrSubscription?.cancel();
+    _swiftPackageFetchStdoutSubscription = null;
+    _swiftPackageFetchStderrSubscription = null;
+  }
+
   /// Prefetches Swift packages for the given Xcode project.
   ///
   /// If a process is already running from a previous Flutter command, kill it before starting
@@ -403,11 +414,14 @@ class XcodeProjectInterpreter {
   ///
   /// If [quiet] is false, it will print a spinner while the command is running and print logs of
   /// what Swift packages are being fetched.
+  ///
+  /// If [force] is true, it will run the process even if it's already been run before.
   Future<void> prefetchSwiftPackages(
     String projectPath, {
     required Directory buildDirectory,
     bool quiet = true,
     bool waitForCompletion = true,
+    bool force = false,
   }) async {
     Status? status;
     try {
@@ -420,6 +434,9 @@ class XcodeProjectInterpreter {
         ),
         '-resolvePackageDependencies',
       ];
+      if (force) {
+        await _resetSwiftPackageFetchProcess();
+      }
       if (_swiftPackageFetchProcess == null) {
         // Check if process is already running from a previous Flutter command. If it is, kill it
         // so we don't have the process running twice. When this process is run twice, it'll cause
@@ -482,12 +499,13 @@ class XcodeProjectInterpreter {
           _fileSystem.directory(projectPath).parent,
         );
         final List<Plugin> plugins = await findPlugins(project);
-        final String? swiftPackageManagerError = SwiftPackageManager.parseError(
+        final String? swiftPackageManagerError = SwiftPackageManager.parsePluginError(
           stderrString,
           pluginNames: plugins.map((p) => p.name).toList(),
         );
 
         if (swiftPackageManagerError != null) {
+          print("HELLO 2");
           _logger.printError(stderrString);
           throwToolExit(swiftPackageManagerError);
         }

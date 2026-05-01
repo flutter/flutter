@@ -409,6 +409,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
     String projectPath, {
     required Directory buildDirectory,
     bool quiet = true,
+    bool force = false,
     bool waitForCompletion = true,
   }) async {}
 
