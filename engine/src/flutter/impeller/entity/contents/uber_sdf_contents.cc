@@ -30,7 +30,7 @@ Scalar ToShaderType(UberSDFParameters::Type type) {
       return 2.0f;
     case UberSDFParameters::Type::kRoundedRect:
       return 3.0f;
-    case UberSDFParameters::Type::kRoundSuperellipse:
+    case UberSDFParameters::Type::kRoundedSuperellipse:
       return 4.0f;
   }
 }
@@ -76,14 +76,21 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.radii =
       Vector4(params_.radii.bottom_right.width, params_.radii.top_right.width,
               params_.radii.bottom_left.width, params_.radii.top_left.width);
+  frag_info.radii_right =
+      Vector4(params_.radii.bottom_right.height, params_.radii.top_right.height,
+              params_.radii.bottom_left.height, params_.radii.top_left.height);
   frag_info.stroked = params_.stroke ? 1.0f : 0.0f;
   frag_info.stroke_width = params_.stroke ? params_.stroke->width : 0.0f;
   frag_info.stroke_join =
       params_.stroke ? ToShaderStrokeJoin(params_.stroke->join) : 0.0f;
   frag_info.aa_pixels = UberSDFParameters::kAntialiasPixels;
   frag_info.superellipse_degree = params_.superellipse_degree;
+  frag_info.superellipse_a = params_.superellipse_a;
   frag_info.corner_angle_span = params_.corner_angle_span;
-  frag_info.corner_circle_center = params_.corner_circle_center;
+  frag_info.corner_circle_center_top = params_.corner_circle_center_top;
+  frag_info.corner_circle_center_right = params_.corner_circle_center_right;
+  frag_info.superellipse_c = params_.superellipse_c;
+  frag_info.superellipse_scale = params_.superellipse_scale;
 
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);

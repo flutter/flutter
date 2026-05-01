@@ -59,7 +59,7 @@ template("fuchsia_archive") {
         resources += [
           {
             path = resource.path
-            dest = "data/${resource.dest}"
+            dest = resource.dest
           },
         ]
       }

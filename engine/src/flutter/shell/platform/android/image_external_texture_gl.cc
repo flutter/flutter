@@ -72,6 +72,9 @@ void ImageExternalTextureGL::ProcessFrame(PaintContext& context,
     return;
   }
   JavaLocalRef hardware_buffer = HardwareBufferFor(image);
+  if (hardware_buffer.is_null()) {
+    return;
+  }
   UpdateImage(hardware_buffer, bounds, context);
   CloseHardwareBuffer(hardware_buffer);
 }

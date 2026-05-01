@@ -28,9 +28,9 @@ void main() {
       maintainState: true,
       opaque: true,
       builder: (BuildContext context) {
-        return ListView(
+        return const SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          children: const <Widget>[Text('Main')],
+          child: Row(children: <Widget>[Text('Main')]),
         );
       },
     );
@@ -51,8 +51,9 @@ void main() {
     });
 
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: Overlay(initialEntries: <OverlayEntry>[entry1, entry2]),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(initialEntries: <OverlayEntry>[entry1, entry2]),
       ),
     );
 
