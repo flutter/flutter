@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../rendering/sliver_utils.dart';
+import 'sliver_utils.dart';
 import 'widgets_app_tester.dart';
 
 const double VIEWPORT_HEIGHT = 600;

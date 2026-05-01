@@ -296,10 +296,10 @@ class SelectableRegion extends StatefulWidget {
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
   ///   Widgets for the current platform given [ContextMenuButtonItem]s.
   static List<ContextMenuButtonItem> getSelectableButtonItems({
-    required final SelectionGeometry selectionGeometry,
-    required final VoidCallback onCopy,
-    required final VoidCallback onSelectAll,
-    required final VoidCallback? onShare,
+    required SelectionGeometry selectionGeometry,
+    required VoidCallback onCopy,
+    required VoidCallback onSelectAll,
+    required VoidCallback? onShare,
   }) {
     final canCopy = selectionGeometry.status == SelectionStatus.uncollapsed;
     final bool canSelectAll = selectionGeometry.hasContent;
@@ -1022,10 +1022,10 @@ class SelectableRegionState extends State<SelectableRegion>
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
     _finalizeSelectableRegionStatus();
-    _showToolbar();
     if (defaultTargetPlatform == TargetPlatform.android) {
       _showHandles();
     }
+    _showToolbar();
   }
 
   bool _positionIsOnActiveSelection({required Offset globalPosition}) {
@@ -1845,8 +1845,8 @@ class SelectableRegionState extends State<SelectableRegion>
     clearSelection();
     _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
     if (cause == SelectionChangedCause.toolbar) {
-      _showToolbar();
       _showHandles();
+      _showToolbar();
     }
     _updateSelectedContentIfNeeded();
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
@@ -3256,11 +3256,24 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
     var newIndex = -1;
     var hasFoundEdgeIndex = false;
     SelectionResult? result;
-    for (var index = 0; index < selectables.length && !hasFoundEdgeIndex; index += 1) {
+    bool? forward;
+    // If we already have an opposite edge initialized, start our sweep from there
+    // to ensure all items between the two edges are properly visited.
+    final int oppositeEdgeIndex = isEnd ? currentSelectionStartIndex : currentSelectionEndIndex;
+    int index = max(oppositeEdgeIndex, 0);
+
+    while (index >= 0 && index < selectables.length) {
       final Selectable child = selectables[index];
       final SelectionResult childResult = dispatchSelectionEventToChild(child, event);
       switch (childResult) {
         case SelectionResult.next:
+          if (forward == false) {
+            hasFoundEdgeIndex = true;
+            result = SelectionResult.end;
+          } else {
+            forward = true;
+            newIndex = index;
+          }
         case SelectionResult.none:
           newIndex = index;
         case SelectionResult.end:
@@ -3268,17 +3281,28 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
           result = SelectionResult.end;
           hasFoundEdgeIndex = true;
         case SelectionResult.previous:
-          hasFoundEdgeIndex = true;
           if (index == 0) {
+            hasFoundEdgeIndex = true;
             newIndex = 0;
             result = SelectionResult.previous;
+            break;
           }
-          result ??= SelectionResult.end;
+          if (forward ?? false) {
+            hasFoundEdgeIndex = true;
+            result = SelectionResult.end;
+          } else {
+            forward = false;
+            newIndex = index;
+          }
         case SelectionResult.pending:
           newIndex = index;
           result = SelectionResult.pending;
           hasFoundEdgeIndex = true;
       }
+      if (hasFoundEdgeIndex) {
+        break;
+      }
+      index += (forward ?? true) ? 1 : -1;
     }
 
     if (newIndex == -1) {
