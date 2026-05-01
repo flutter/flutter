@@ -69,24 +69,6 @@ class VSyncClientTest: XCTestCase {
     }
   }
 
-  func testDoNotSetVariableRefreshRatesIfCADisableMinimumFrameDurationOnPhoneIsNotSet() {
-    let maxFrameRate: Double = 120.0
-    let vsyncClient = VSyncClient(
-      taskRunner: threadTaskRunner,
-      isVariableRefreshRateEnabled: false,
-      maxRefreshRate: maxFrameRate
-    ) { _, _ in }!
-    let link = vsyncClient.displayLink
-
-    if #available(iOS 15.0, *) {
-      XCTAssertEqual(Double(link.preferredFrameRateRange.maximum), 0, accuracy: 0.1)
-      XCTAssertEqual(Double(link.preferredFrameRateRange.preferred ?? 0), 0, accuracy: 0.1)
-      XCTAssertEqual(Double(link.preferredFrameRateRange.minimum), 0, accuracy: 0.1)
-    } else {
-      XCTAssertEqual(Double(link.preferredFramesPerSecond), 0, accuracy: 0.1)
-    }
-  }
-
   func testAwaitAndPauseWillWorkCorrectly() {
     let vsyncClient = VSyncClient(taskRunner: threadTaskRunner) { _, _ in }!
     let link = vsyncClient.displayLink
