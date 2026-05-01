@@ -8,6 +8,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'widgets_app_tester.dart';
+
 void main() {
   testWidgets('TapRegionSurface detects outside tap down events', (WidgetTester tester) async {
     final tappedOutside = <String>{};
@@ -1032,34 +1034,6 @@ void main() {
     await tester.pump();
   }
 
-  // Helper that builds a Navigator-based widget tree using only widgets
-  // (no Material). Equivalent to wrapping the home/page widgets in
-  // MaterialApp + Scaffold but with no Material dependency.
-  Widget _navigatorAppWith({
-    required Widget home,
-    GlobalKey<NavigatorState>? navigatorKey,
-  }) {
-    return WidgetsApp(
-      navigatorKey: navigatorKey,
-      color: const Color(0xFFFFFFFF),
-      onGenerateRoute: (RouteSettings settings) {
-        return PageRouteBuilder<void>(
-          settings: settings,
-          pageBuilder:
-              (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) {
-                return home;
-              },
-          transitionDuration: Duration.zero,
-          reverseTransitionDuration: Duration.zero,
-        );
-      },
-    );
-  }
-
   // Regression test for https://github.com/flutter/flutter/issues/153093.
   testWidgets('TapRegion onTapOutside should only trigger on the current route during navigation', (
     WidgetTester tester,
@@ -1092,7 +1066,7 @@ void main() {
     final navigatorKey = GlobalKey<NavigatorState>();
 
     await tester.pumpWidget(
-      _navigatorAppWith(
+      TestWidgetsApp(
         navigatorKey: navigatorKey,
         home: Stack(
           children: <Widget>[
@@ -1182,52 +1156,25 @@ void main() {
 
     final navigatorKey = GlobalKey<NavigatorState>();
 
+    // Start with tapRegion1 as the home page; push tapRegion2 on top to
+    // exercise the "non-current routes" condition.
     await tester.pumpWidget(
-      WidgetsApp(
-        navigatorKey: navigatorKey,
-        color: const Color(0xFFFFFFFF),
-        initialRoute: '/',
-        onGenerateInitialRoutes: (String initialRouteName) {
-          return <Route<void>>[
-            PageRouteBuilder<void>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) {
-                    return Center(child: tapRegion1);
-                  },
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
-            ),
-            PageRouteBuilder<void>(
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) {
-                    return Center(child: tapRegion2);
-                  },
-              transitionDuration: Duration.zero,
-              reverseTransitionDuration: Duration.zero,
-            ),
-          ];
-        },
-        onGenerateRoute: (RouteSettings settings) => PageRouteBuilder<void>(
-          settings: settings,
-          pageBuilder:
-              (
-                BuildContext context,
-                Animation<double> animation,
-                Animation<double> secondaryAnimation,
-              ) =>
-              const SizedBox.shrink(),
-        ),
+      TestWidgetsApp(navigatorKey: navigatorKey, home: Center(child: tapRegion1)),
+    );
+    navigatorKey.currentState!.push(
+      PageRouteBuilder<void>(
+        pageBuilder:
+            (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) {
+              return Center(child: tapRegion2);
+            },
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
       ),
     );
-
     await tester.pumpAndSettle();
 
     // At this point, tapRegion2 is on top of tapRegion1.
@@ -1257,7 +1204,7 @@ void main() {
     final navigatorKey = GlobalKey<NavigatorState>();
 
     await tester.pumpWidget(
-      _navigatorAppWith(
+      TestWidgetsApp(
         navigatorKey: navigatorKey,
         home: Center(
           child: TapRegion(
