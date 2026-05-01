@@ -1302,6 +1302,9 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
   /// Whether [width] and [height] are interpreted as logical pixels rather
   /// than physical pixels.
+  ///
+  /// Set this to true when [width] and [height] describe the image's on-screen
+  /// size in logical pixels.
   final bool useLogicalPixels;
 
   /// Composes the `provider` in a [ResizeImage] only when `cacheWidth` and

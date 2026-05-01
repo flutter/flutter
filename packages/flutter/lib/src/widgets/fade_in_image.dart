@@ -117,8 +117,9 @@ class FadeInImage extends StatefulWidget {
   /// intended to reduce the memory usage of [ImageCache].
   ///
   /// If [useLogicalCacheSize] is true, the cache dimensions are interpreted
-  /// as logical pixels instead of physical pixels. The flag applies to both
-  /// the placeholder and the image.
+  /// as logical pixels instead of physical pixels. Set this to true when
+  /// the cache dimensions describe the image's on-screen size in logical
+  /// pixels. The flag applies to both the placeholder and the image.
   ///
   /// The [placeholder], [image], [placeholderScale], [imageScale],
   /// [fadeOutDuration], [fadeOutCurve], [fadeInDuration], [fadeInCurve],
@@ -198,8 +199,9 @@ class FadeInImage extends StatefulWidget {
   /// intended to reduce the memory usage of [ImageCache].
   ///
   /// If [useLogicalCacheSize] is true, the cache dimensions are interpreted
-  /// as logical pixels instead of physical pixels. The flag applies to both
-  /// the placeholder and the image.
+  /// as logical pixels instead of physical pixels. Set this to true when
+  /// the cache dimensions describe the image's on-screen size in logical
+  /// pixels. The flag applies to both the placeholder and the image.
   ///
   /// See also:
   ///

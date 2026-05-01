@@ -406,7 +406,9 @@ class Image extends StatefulWidget {
   /// to reduce the memory usage of [ImageCache].
   ///
   /// If [useLogicalCacheSize] is true, [cacheWidth] and [cacheHeight] are
-  /// interpreted as logical pixels instead of physical pixels.
+  /// interpreted as logical pixels instead of physical pixels. Set this to
+  /// true when [cacheWidth] and [cacheHeight] describe the image's on-screen
+  /// size in logical pixels.
   ///
   /// In the case where the network image is on the Web platform, the [cacheWidth]
   /// and [cacheHeight] parameters are ignored as the web engine delegates
@@ -511,7 +513,9 @@ class Image extends StatefulWidget {
   /// to reduce the memory usage of [ImageCache].
   ///
   /// If [useLogicalCacheSize] is true, [cacheWidth] and [cacheHeight] are
-  /// interpreted as logical pixels instead of physical pixels.
+  /// interpreted as logical pixels instead of physical pixels. Set this to
+  /// true when [cacheWidth] and [cacheHeight] describe the image's on-screen
+  /// size in logical pixels.
   ///
   /// Loading an image from a file creates an in memory copy of the file,
   /// which is retained in the [ImageCache]. The underlying file is not
@@ -600,7 +604,9 @@ class Image extends StatefulWidget {
   /// to reduce the memory usage of [ImageCache].
   ///
   /// If [useLogicalCacheSize] is true, [cacheWidth] and [cacheHeight] are
-  /// interpreted as logical pixels instead of physical pixels.
+  /// interpreted as logical pixels instead of physical pixels. Set this to
+  /// true when [cacheWidth] and [cacheHeight] describe the image's on-screen
+  /// size in logical pixels.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -759,7 +765,9 @@ class Image extends StatefulWidget {
   /// to reduce the memory usage of [ImageCache].
   ///
   /// If [useLogicalCacheSize] is true, [cacheWidth] and [cacheHeight] are
-  /// interpreted as logical pixels instead of physical pixels.
+  /// interpreted as logical pixels instead of physical pixels. Set this to
+  /// true when [cacheWidth] and [cacheHeight] describe the image's on-screen
+  /// size in logical pixels.
   Image.memory(
     Uint8List bytes, {
     super.key,
