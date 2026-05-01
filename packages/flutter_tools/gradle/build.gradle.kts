@@ -64,10 +64,10 @@ dependencies {
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * ndkVersion constant in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
-    compileOnly("com.android.tools.build:gradle:9.0.0")
+    compileOnly("com.android.tools.build:gradle:9.0.1")
 
     testImplementation(kotlin("test"))
-    testImplementation("com.android.tools.build:gradle:9.0.0")
+    testImplementation("com.android.tools.build:gradle:9.0.1")
     testImplementation("org.mockito:mockito-core:5.8.0")
     testImplementation("io.mockk:mockk:1.13.16")
     testImplementation("junit:junit:4.13.2")

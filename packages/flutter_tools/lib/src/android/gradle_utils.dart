@@ -40,8 +40,8 @@ const templateDefaultGradleVersion = '9.1.0';
 //  * AGP warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
 //  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
-const templateAndroidGradlePluginVersion = '9.0.0';
-const templateAndroidGradlePluginVersionForModule = '9.0.0';
+const templateAndroidGradlePluginVersion = '9.0.1';
+const templateAndroidGradlePluginVersionForModule = '9.0.1';
 
 // When bumping, also update:
 //  * KGP version constants in packages/flutter_tools/gradle/build.gradle.kts
@@ -81,7 +81,7 @@ const oneMajorVersionHigherJavaVersion = '26';
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAndSupportedGradleVersion = '9.3.0';
+const maxKnownAndSupportedGradleVersion = '9.3.1';
 
 // Update this with new KGP versions come out including minor versions.
 //
@@ -100,7 +100,7 @@ const maxKnownAndSupportedAgpVersion = '9.1';
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAgpVersionWithFullKotlinSupport = '9.0.0';
+const maxKnownAgpVersionWithFullKotlinSupport = '9.0.1';
 
 // Update this when new versions of AGP come out.
 const maxKnownAgpVersion = '9.1';
