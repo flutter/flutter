@@ -4927,6 +4927,10 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "16c5032a"
+        }
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: animation_with_microtasks_perf_ios__timeline_summary
