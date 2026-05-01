@@ -18,6 +18,7 @@
 #include "display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/color_filter.h"
@@ -1043,30 +1044,39 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value() &&
-      // TODO(https://github.com/flutter/flutter/issues/185421): SDF
-      // RoundSuperellipse (RSE) only works for square-like RSEs with circular
-      // corners.
-      round_superellipse.GetBounds().IsSquare() &&
-      round_superellipse.GetRadii().AreAllCornersSame() &&
-      AreCornersCircular(round_superellipse.GetRadii())) {
-    auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadius(
-        round_superellipse.GetBounds(),
-        round_superellipse.GetRadii().bottom_left.height);
+      round_superellipse.GetRadii().AreAllCornersSame()) {
+    auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
+        round_superellipse.GetBounds(), round_superellipse.GetRadii());
 
-    RoundSuperellipseParam::Octant octant =
+    RoundSuperellipseParam::Octant octant_top =
         round_superellipse_params.top_right.top;
+    RoundSuperellipseParam::Octant octant_right =
+        round_superellipse_params.top_right.right;
 
-    auto adjusted_radii = RoundingRadii::MakeRadius(octant.circle_radius);
+    auto adjusted_radii = RoundingRadii::MakeRadii(
+        Size(octant_top.circle_radius, octant_right.circle_radius));
 
     auto params = UberSDFParameters::MakeRoundedSuperellipse(
-        paint.color, round_superellipse.GetBounds(), octant.se_n,
-        adjusted_radii, octant.circle_max_angle.radians, octant.circle_center,
-        paint.GetStroke());
+        /*color=*/paint.color,
+        /*bounds=*/round_superellipse.GetBounds(),
+        /*superellipse_degree=*/Point(octant_top.se_n, octant_right.se_n),
+        /*superellipse_a=*/Point(octant_top.se_a, octant_right.se_a),
+        /*radii=*/adjusted_radii,
+        /*corner_angle_span=*/
+        Point(octant_top.circle_max_angle.radians,
+              octant_right.circle_max_angle.radians),
+        /*corner_circle_center_top=*/octant_top.circle_center,
+        /*corner_circle_center_right=*/octant_right.circle_center,
+        /*superellipse_c=*/octant_top.se_a - octant_right.se_a,
+        /*superellipse_scale=*/
+        Point(round_superellipse_params.top_right.signed_scale.Abs()),
+        /*stroke=*/paint.GetStroke());
 
     AddRenderSDFEntityToCurrentPass(paint, params);
 
     return;
   }
+
   if (paint.style == Paint::Style::kFill) {
     RoundSuperellipseGeometry geom(round_superellipse.GetBounds(),
                                    round_superellipse.GetRadii());

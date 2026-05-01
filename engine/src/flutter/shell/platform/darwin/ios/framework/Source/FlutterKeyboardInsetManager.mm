@@ -4,8 +4,8 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardInsetManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient+FML.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 #import "flutter/third_party/spring_animation/spring_animation.h"
 
@@ -20,7 +20,7 @@
 @property(nonatomic, weak) id<FlutterKeyboardInsetManagerDelegate> delegate;
 @property(nonatomic, assign, readwrite) CGFloat targetViewInsetBottom;
 @property(nonatomic, assign) CGFloat originalViewInsetBottom;
-@property(nonatomic, strong) VSyncClient* keyboardAnimationVSyncClient;
+@property(nonatomic, strong) FlutterVSyncClient* keyboardAnimationVSyncClient;
 @property(nonatomic, assign) BOOL keyboardAnimationIsShowing;
 @property(nonatomic, assign) NSTimeInterval keyboardAnimationStartTime;
 @property(nonatomic, strong) UIView* keyboardAnimationView;
@@ -283,7 +283,7 @@
   [self setUpKeyboardAnimationVsyncClient:^(NSTimeInterval targetTime) {
     [weakSelf handleKeyboardAnimationCallbackWithTargetTime:targetTime];
   }];
-  VSyncClient* currentVsyncClient = _keyboardAnimationVSyncClient;
+  FlutterVSyncClient* currentVsyncClient = _keyboardAnimationVSyncClient;
 
   [UIView animateWithDuration:duration
       animations:^{
@@ -393,17 +393,18 @@
 
   // Make sure the new viewport metrics get sent after the begin frame event has processed.
   FlutterKeyboardAnimationCallback animationCallback = [keyboardAnimationCallback copy];
-  auto uiCallback = [animationCallback](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
-    fml::TimeDelta frameInterval = recorder->GetVsyncTargetTime() - recorder->GetVsyncStartTime();
-    fml::TimePoint targetTime = recorder->GetVsyncTargetTime() + frameInterval;
-    dispatch_async(dispatch_get_main_queue(), ^(void) {
-      animationCallback(targetTime.ToEpochDelta().ToSeconds());
-    });
-  };
 
   id<FlutterKeyboardInsetManagerDelegate> delegate = self.delegate;
+  auto vsyncCallback = ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+    CFTimeInterval frameInterval = targetTime - startTime;
+    CFTimeInterval projectedTargetTime = targetTime + frameInterval;
+    dispatch_async(dispatch_get_main_queue(), ^(void) {
+      animationCallback(projectedTargetTime);
+    });
+  };
   _keyboardAnimationVSyncClient =
-      [[VSyncClient alloc] initWithTaskRunner:delegate.engine.uiTaskRunner callback:uiCallback];
+      [[FlutterVSyncClient alloc] initWithTaskRunner:delegate.engine.uiTaskRunner
+                                            callback:vsyncCallback];
   _keyboardAnimationVSyncClient.allowPauseAfterVsync = NO;
   [_keyboardAnimationVSyncClient await];
 }
