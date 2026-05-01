@@ -7,8 +7,6 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient.h"
 
-#import <QuartzCore/QuartzCore.h>
-
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/shell/common/vsync_waiter.h"

@@ -660,7 +660,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   NSTimeInterval epsilon = 0.005;
   XCTAssertGreaterThanOrEqual(fulfillTime - startTime, delayTime - epsilon);
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
-  [(id)mockCADisplayLink stopMocking];
+  [mockCADisplayLink stopMocking];
 }
 
 - (void)testCalculateKeyboardAttachMode {

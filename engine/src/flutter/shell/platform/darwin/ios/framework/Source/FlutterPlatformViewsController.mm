@@ -754,6 +754,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     // No platform views to render but the FlutterView may need to be resized.
     __weak FlutterPlatformViewsController* weakSelf = self;
     if (self.flutterView != nil) {
+      // Pass frameSize by value since self.frameSize is mutated both here (on the platform
+      // thread) and in beginFrameWithSize: (on the raster thread).
       const flutter::DlISize frameSize = self.frameSize;
       [self.taskRunner runNowOrPostTask:^{
         FlutterPlatformViewsController* strongSelf = weakSelf;
@@ -880,7 +882,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   auto missingLayerCount = requiredOverlayLayers - self.layerPool->size();
 
   // If the raster thread isn't merged, create layers on the platform thread and block until
-  // complete.
+  // complete. The self-capture here is fine since this is effectively synchronous (we block on the
+  // latch right below).
   auto latch = std::make_shared<fml::CountDownLatch>(1u);
   [self.taskRunner runNowOrPostTask:^{
     for (auto i = 0u; i < missingLayerCount; i++) {

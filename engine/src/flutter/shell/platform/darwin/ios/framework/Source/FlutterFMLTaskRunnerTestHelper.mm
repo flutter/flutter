@@ -9,10 +9,10 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
 
 // A FlutterFMLTaskRunner that owns the fml::Thread it runs on.
-@interface FlutterOwnedThreadTaskRunner : FlutterFMLTaskRunner
+@interface FlutterFMLThreadTaskRunner : FlutterFMLTaskRunner
 @end
 
-@implementation FlutterOwnedThreadTaskRunner {
+@implementation FlutterFMLThreadTaskRunner {
   std::unique_ptr<fml::Thread> _thread;
 }
 
@@ -33,7 +33,7 @@
 }
 
 + (FlutterFMLTaskRunner*)makeTaskRunnerWithLabel:(NSString*)label {
-  return [[FlutterOwnedThreadTaskRunner alloc] initWithLabel:label];
+  return [[FlutterFMLThreadTaskRunner alloc] initWithLabel:label];
 }
 
 + (FlutterFMLTaskRunners*)makeTaskRunnersWithLabel:(NSString*)label

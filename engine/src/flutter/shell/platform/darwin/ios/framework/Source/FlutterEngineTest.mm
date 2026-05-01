@@ -101,6 +101,9 @@ FLUTTER_ASSERT_ARC
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   [engine run];
+
+  // Since the taskRunners are wrappers, ensure that we generate them once and they keep the same
+  // identity over time. This makes identity checks on the runners safe/possible.
   XCTAssertNotNil(engine.platformTaskRunner);
   XCTAssertEqual(engine.platformTaskRunner, engine.platformTaskRunner);
   XCTAssertNotNil(engine.uiTaskRunner);
