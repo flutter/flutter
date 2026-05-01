@@ -4,12 +4,15 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Signature for a function that logs a message from a caller.
+/// A function that logs a string.
 typedef Logger = void Function(String caller);
 
+/// A [ShapeBorder] for testing that logs its method calls.
 class TestBorder extends ShapeBorder {
+  /// Creates a [TestBorder] that logs to [onLog].
   const TestBorder(this.onLog);
 
+  /// The callback that is called when a method on this border is called.
   final Logger onLog;
 
   @override
