@@ -180,6 +180,12 @@ void main() {
     expect(test.transform(0.166666), equals(0.4));
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/171364.
+  test('Cubic transformInternal throws for values outside the unit interval', () {
+    expect(() => Curves.easeOut.transformInternal(2.0), throwsA(isA<ArgumentError>()));
+    expect(() => Curves.easeOut.transformInternal(-1.0), throwsA(isA<ArgumentError>()));
+  });
+
   test('Invalid transform parameter should assert', () {
     expect(() => const SawTooth(2).transform(-0.0001), throwsAssertionError);
     expect(() => const SawTooth(2).transform(1.0001), throwsAssertionError);

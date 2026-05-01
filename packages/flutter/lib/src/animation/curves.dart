@@ -401,6 +401,9 @@ class Cubic extends Curve {
 
   @override
   double transformInternal(double t) {
+    if (t < 0.0 || t > 1.0) {
+      throw ArgumentError.value(t, 't', 'Cubic curve input is outside the [0, 1] range.');
+    }
     var start = 0.0;
     var end = 1.0;
     while (true) {
