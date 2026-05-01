@@ -271,7 +271,9 @@ void main() {
     expect(tester.getTopLeft(find.byType(SizedBox)), scrollViewOffset + const Offset(350, 0));
   });
 
-  testWidgets('SliverConstrainedCrossAxis alignment inside SliverCrossAxisGroup', (WidgetTester tester) async {
+  testWidgets('SliverConstrainedCrossAxis alignment inside SliverCrossAxisGroup', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
