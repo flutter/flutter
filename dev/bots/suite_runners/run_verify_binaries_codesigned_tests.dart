@@ -352,7 +352,7 @@ Future<void> verifyFatBinaries(
     final io.ProcessResult result = await processManager.run(<String>['file', binaryPath]);
 
     if (result.exitCode != 0) {
-      print('Failed to run file command on $binaryPath');
+      print('Failed to run file command on $binaryPath: \n${result.stderr}');
       failedBinaries.add(binaryPath);
       continue;
     }
