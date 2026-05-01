@@ -2770,55 +2770,177 @@ Resolved source packages:
     },
   );
 
-  testWithoutContext('prefetchSwiftPackages throws exception when resolving fails', () async {
-    final fs = MemoryFileSystem.test();
-    final testLogger = BufferLogger.test();
-    final platform = FakePlatform(operatingSystem: 'macos');
-    const projectPath = 'path/to/project';
-    final Directory buildDirectory = fileSystem.directory('$projectPath/build/ios');
-    final fakeProcessManager = FakeProcessManager.empty();
-    fakeProcessManager.addCommands(<FakeCommand>[
-      kWhichSysctlCommand,
-      kx64CheckCommand,
-      FakeCommand(
-        command: <String>[
-          'pgrep',
-          '-n',
-          '-f',
-          'xcrun',
-          'xcodebuild',
-          '-clonedSourcePackagesDirPath',
-          '/${buildDirectory.path}/SourcePackages',
-          '-resolvePackageDependencies',
-        ],
-      ),
-      FakeCommand(
-        command: <String>[
-          'xcrun',
-          'xcodebuild',
-          '-clonedSourcePackagesDirPath',
-          '/${buildDirectory.path}/SourcePackages',
-          '-resolvePackageDependencies',
-        ],
-        exitCode: 1,
-        stderr: 'error: some error',
-      ),
-    ]);
+  group('prefetchSwiftPackages', () {
+    late MemoryFileSystem fs;
+    late BufferLogger testLogger;
 
-    final xcodeProjectInterpreter = XcodeProjectInterpreter(
-      logger: testLogger,
-      fileSystem: fs,
-      platform: platform,
-      processManager: fakeProcessManager,
-      analytics: const NoOpAnalytics(),
+    setUp(() {
+      fs = MemoryFileSystem.test();
+      testLogger = BufferLogger.test();
+    });
+
+    testUsingContext(
+      'throws exception when resolving fails',
+      () async {
+        final platform = FakePlatform(operatingSystem: 'macos');
+        const projectPath = 'path/to/project';
+        final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+        final fakeProcessManager = FakeProcessManager.empty();
+        fakeProcessManager.addCommands(<FakeCommand>[
+          kWhichSysctlCommand,
+          kx64CheckCommand,
+          FakeCommand(
+            command: <String>[
+              'pgrep',
+              '-n',
+              '-f',
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${buildDirectory.path}/SourcePackages',
+              '-resolvePackageDependencies',
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${buildDirectory.path}/SourcePackages',
+              '-resolvePackageDependencies',
+            ],
+            exitCode: 1,
+            stderr: 'error: some error',
+          ),
+        ]);
+
+        final xcodeProjectInterpreter = XcodeProjectInterpreter(
+          logger: testLogger,
+          fileSystem: fs,
+          platform: platform,
+          processManager: fakeProcessManager,
+          analytics: const NoOpAnalytics(),
+        );
+        await expectLater(
+          xcodeProjectInterpreter.prefetchSwiftPackages(
+            projectPath,
+            buildDirectory: buildDirectory,
+            quiet: false,
+          ),
+          throwsToolExit(),
+        );
+      },
+      overrides: <Type, Generator>{
+        FlutterProjectFactory: () => FlutterProjectFactory(logger: testLogger, fileSystem: fs),
+        Logger: () => testLogger,
+      },
     );
-    await expectLater(
-      xcodeProjectInterpreter.prefetchSwiftPackages(
-        projectPath,
-        buildDirectory: buildDirectory,
-        quiet: false,
-      ),
-      throwsToolExit(),
+
+    testUsingContext(
+      'throws guided message when it matches a _SwiftPMErrorMatcher',
+      () async {
+        final platform = FakePlatform(operatingSystem: 'macos');
+        const projectPath = 'path/to/project';
+        final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+        final fakeProcessManager = FakeProcessManager.empty();
+
+        final File packageConfigFile = fs.file('$projectPath/.dart_tool/package_config.json');
+        packageConfigFile.createSync(recursive: true);
+        packageConfigFile.writeAsStringSync('''
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "plugin_a",
+      "rootUri": "file:///plugin_a",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    }
+  ],
+  "generated": "some-time"
+}
+''');
+
+        final File packageGraphFile = fs.file('$projectPath/.dart_tool/package_graph.json');
+        packageGraphFile.createSync(recursive: true);
+        packageGraphFile.writeAsStringSync('''
+{
+  "configVersion": 1,
+  "packages": [],
+  "dependencies": {
+    "my_app": []
+  }
+}
+''');
+
+        final File pubspecFile = fs.file('$projectPath/pubspec.yaml');
+        pubspecFile.createSync(recursive: true);
+        pubspecFile.writeAsStringSync('''
+name: my_app
+dependencies:
+  plugin_a: any
+''');
+
+        final File pluginPubspec = fs.file('/plugin_a/pubspec.yaml');
+        pluginPubspec.createSync(recursive: true);
+        pluginPubspec.writeAsStringSync('''
+name: plugin_a
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: PluginA
+''');
+
+        fakeProcessManager.addCommands(<FakeCommand>[
+          kWhichSysctlCommand,
+          kx64CheckCommand,
+          FakeCommand(
+            command: <String>[
+              'pgrep',
+              '-n',
+              '-f',
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${buildDirectory.path}/SourcePackages',
+              '-resolvePackageDependencies',
+            ],
+          ),
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${buildDirectory.path}/SourcePackages',
+              '-resolvePackageDependencies',
+            ],
+            exitCode: 1,
+            stderr: "target 'plugin_a' in package 'plugin_a' is outside the package root",
+          ),
+        ]);
+
+        final xcodeProjectInterpreter = XcodeProjectInterpreter(
+          logger: testLogger,
+          fileSystem: fs,
+          platform: platform,
+          processManager: fakeProcessManager,
+          analytics: const NoOpAnalytics(),
+        );
+
+        await expectLater(
+          xcodeProjectInterpreter.prefetchSwiftPackages(
+            projectPath,
+            buildDirectory: buildDirectory,
+            quiet: false,
+          ),
+          throwsToolExit(message: 'Flutter plugin "plugin_a" has an incorrectly configured Package.swift file.'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FlutterProjectFactory: () => FlutterProjectFactory(logger: testLogger, fileSystem: fs),
+        Logger: () => testLogger,
+      },
     );
   });
 }

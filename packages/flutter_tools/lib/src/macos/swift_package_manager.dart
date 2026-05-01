@@ -435,13 +435,11 @@ class SwiftPackageManager {
       return null;
     }
     for (final _SwiftPMErrorMatcher matcher in _errorMatchers) {
-      final RegExpMatch? match = matcher.pattern.firstMatch(message);
-      if (match != null) {
-        final String packageName = match.group(1)!;
-        if (!pluginNames.contains(packageName)) {
-          continue;
+      for (final RegExpMatch match in matcher.pattern.allMatches(message)) {
+        final String? packageName = match.group(1);
+        if (packageName != null && pluginNames.contains(packageName)) {
+          return matcher.message(match);
         }
-        return matcher.message(match);
       }
     }
     return null;
