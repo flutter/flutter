@@ -1115,7 +1115,7 @@ std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
   return mock_command_buffer->image_memory_barriers_;
 }
 
-std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer) {
+const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer) {
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(buffer);
   return mock_command_buffer->recorded_viewports_;

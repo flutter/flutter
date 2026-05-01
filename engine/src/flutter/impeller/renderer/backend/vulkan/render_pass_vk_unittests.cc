@@ -69,7 +69,8 @@ TEST(RenderPassVK, SetViewportPropagatesAllUserSuppliedFields) {
   // we can isolate the call under test.
   VkCommandBuffer raw_cmd_buffer =
       CommandBufferVK::Cast(*cmd_buffer).GetCommandBuffer();
-  std::vector<VkViewport>& recorded = GetRecordedViewports(raw_cmd_buffer);
+  const std::vector<VkViewport>& recorded =
+      GetRecordedViewports(raw_cmd_buffer);
   ASSERT_EQ(recorded.size(), 1u);  // Initial full-target viewport.
 
   render_pass->SetViewport(Viewport{
