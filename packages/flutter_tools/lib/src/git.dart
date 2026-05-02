@@ -60,7 +60,8 @@ interface class Git {
       allowedFailures: allowedFailures,
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: _environment(environment),
+      includeParentEnvironment: false,
       timeout: timeout,
       timeoutRetries: timeoutRetries,
     );
@@ -90,7 +91,8 @@ interface class Git {
       allowedFailures: allowedFailures,
       hideStdout: hideStdout,
       workingDirectory: workingDirectory,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: _environment(environment),
+      includeParentEnvironment: false,
       allowReentrantFlutter: allowReentrantFlutter,
       encoding: encoding,
     );
@@ -123,9 +125,41 @@ interface class Git {
       filter: filter,
       stdoutErrorMatcher: stdoutErrorMatcher,
       mapFunction: mapFunction,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: _environment(environment),
+      includeParentEnvironment: false,
     );
   }
+
+  Map<String, String> _environment(Map<String, String>? environment) {
+    return <String, String>{
+      ..._platform.environment,
+      if (_platform.isWindows) ..._useNoGlobCygwinGit,
+      ...?environment,
+    }..removeWhere(
+      (String key, _) => _repositoryLocalEnvironmentVariables.contains(key.toUpperCase()),
+    );
+  }
+
+  // Repository-local Git environment variables can be exported by Git hooks.
+  // Flutter's internal git commands operate on explicit working directories
+  // and must not inherit another repository's git context.
+  static const _repositoryLocalEnvironmentVariables = <String>{
+    'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+    'GIT_CONFIG',
+    'GIT_CONFIG_PARAMETERS',
+    'GIT_CONFIG_COUNT',
+    'GIT_OBJECT_DIRECTORY',
+    'GIT_DIR',
+    'GIT_WORK_TREE',
+    'GIT_IMPLICIT_WORK_TREE',
+    'GIT_GRAFT_FILE',
+    'GIT_INDEX_FILE',
+    'GIT_NO_REPLACE_OBJECTS',
+    'GIT_REPLACE_REF_BASE',
+    'GIT_PREFIX',
+    'GIT_SHALLOW_FILE',
+    'GIT_COMMON_DIR',
+  };
 
   static const _useNoGlobCygwinGit = {'MSYS': 'noglob', 'CYGWIN': 'noglob'};
 }

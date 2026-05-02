@@ -65,6 +65,7 @@ void main() {
     required String headRef,
     required String ancestorRef,
     required int commitsBetweenRefs,
+    Map<String, String>? environment,
   }) {
     return [
       FakeCommand(
@@ -76,11 +77,17 @@ void main() {
           '--format=%(refname:short)',
           'refs/tags/[0-9]*.*.*',
         ],
+        environment: environment,
         stdout: latestTag,
       ),
-      FakeCommand(command: ['git', 'merge-base', headRef, latestTag], stdout: ancestorRef),
+      FakeCommand(
+        command: ['git', 'merge-base', headRef, latestTag],
+        environment: environment,
+        stdout: ancestorRef,
+      ),
       FakeCommand(
         command: ['git', 'rev-list', '--count', '$ancestorRef..$headRef'],
+        environment: environment,
         stdout: '$commitsBetweenRefs',
       ),
     ];
@@ -901,6 +908,84 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{ProcessManager: () => processManager, Cache: () => cache},
+  );
+
+  testUsingContext(
+    'version does not pass repository-local Git environment variables to git',
+    () async {
+      const expectedGitEnvironment = <String, String>{'PATH': '/usr/bin', 'CUSTOM_ENV': 'keep'};
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'git',
+            '-c',
+            'log.showSignature=false',
+            'log',
+            '-n',
+            '1',
+            '--pretty=format:%H',
+          ],
+          environment: expectedGitEnvironment,
+          stdout: '1234abcd',
+        ),
+        const FakeCommand(
+          command: <String>['git', 'tag', '--points-at', '1234abcd'],
+          environment: expectedGitEnvironment,
+        ),
+        ...mockGitTagHistory(
+          latestTag: '0.1.2-3',
+          headRef: '1234abcd',
+          ancestorRef: 'abcd1234',
+          commitsBetweenRefs: 170,
+          environment: expectedGitEnvironment,
+        ),
+        const FakeCommand(
+          command: <String>['git', 'symbolic-ref', '--short', 'HEAD'],
+          environment: expectedGitEnvironment,
+          stdout: 'feature-branch',
+        ),
+      ]);
+
+      final contaminatedGitEnvironment = <String, String>{
+        'PATH': '/usr/bin',
+        'CUSTOM_ENV': 'keep',
+        'GIT_ALTERNATE_OBJECT_DIRECTORIES': '/wrong/objects',
+        'GIT_CONFIG': '/wrong/config',
+        'git_config_parameters': "'user.name=wrong'",
+        'GIT_CONFIG_COUNT': '1',
+        'GIT_OBJECT_DIRECTORY': '/wrong/object-directory',
+        'GIT_DIR': '/wrong/git-dir',
+        'Git_Work_Tree': '/wrong/work-tree',
+        'GIT_IMPLICIT_WORK_TREE': '0',
+        'GIT_GRAFT_FILE': '/wrong/grafts',
+        'git_index_file': '/wrong/index',
+        'GIT_NO_REPLACE_OBJECTS': '1',
+        'GIT_REPLACE_REF_BASE': 'refs/wrong',
+        'GIT_PREFIX': 'wrong-prefix',
+        'GIT_SHALLOW_FILE': '/wrong/shallow',
+        'GIT_COMMON_DIR': '/wrong/common-dir',
+      };
+      git = Git(
+        currentPlatform: FakePlatform(environment: contaminatedGitEnvironment),
+        runProcessWith: ProcessUtils(processManager: processManager, logger: testLogger),
+      );
+
+      final fs = MemoryFileSystem.test();
+      final flutterVersion = FlutterVersion(
+        clock: _testClock,
+        fs: fs,
+        flutterRoot: '/path/to/flutter',
+        git: git,
+      );
+
+      expect(flutterVersion.getVersionString(), 'feature-branch/1234abcd');
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Cache: () => cache,
+      Git: () => git,
+    },
   );
 
   testUsingContext(

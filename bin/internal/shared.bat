@@ -35,6 +35,25 @@ SET engine_stamp=%cache_dir%\engine-dart-sdk.stamp
 SET engine_version_path=%cache_dir%\engine.stamp
 SET dart=%dart_sdk_path%\bin\dart.exe
 
+REM Git hooks export repository-local GIT_* variables. The Flutter SDK is a
+REM separate git checkout, so these variables must not affect git commands that
+REM operate on FLUTTER_ROOT.
+SET GIT_ALTERNATE_OBJECT_DIRECTORIES=
+SET GIT_CONFIG=
+SET GIT_CONFIG_PARAMETERS=
+SET GIT_CONFIG_COUNT=
+SET GIT_OBJECT_DIRECTORY=
+SET GIT_DIR=
+SET GIT_WORK_TREE=
+SET GIT_IMPLICIT_WORK_TREE=
+SET GIT_GRAFT_FILE=
+SET GIT_INDEX_FILE=
+SET GIT_NO_REPLACE_OBJECTS=
+SET GIT_REPLACE_REF_BASE=
+SET GIT_PREFIX=
+SET GIT_SHALLOW_FILE=
+SET GIT_COMMON_DIR=
+
 REM Ensure that bin/cache exists.
 IF NOT EXIST "%cache_dir%" MKDIR "%cache_dir%"
 

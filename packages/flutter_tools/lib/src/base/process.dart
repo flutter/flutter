@@ -178,6 +178,9 @@ abstract class ProcessUtils {
   /// When [environment] is supplied, it is used as the environment for the child
   /// process.
   ///
+  /// When [includeParentEnvironment] is false, only [environment] is passed to
+  /// the child process.
+  ///
   /// When [timeout] is supplied, kills the child process and
   /// throws a [ProcessException] when it doesn't finish in time.
   ///
@@ -190,6 +193,7 @@ abstract class ProcessUtils {
     String? workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String>? environment,
+    bool includeParentEnvironment = true,
     Duration? timeout,
     int timeoutRetries = 0,
   });
@@ -203,6 +207,7 @@ abstract class ProcessUtils {
     bool hideStdout = false,
     String? workingDirectory,
     Map<String, String>? environment,
+    bool includeParentEnvironment = true,
     bool allowReentrantFlutter = false,
     Encoding encoding = systemEncoding,
   });
@@ -214,6 +219,7 @@ abstract class ProcessUtils {
     String? workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String>? environment,
+    bool includeParentEnvironment = true,
     ProcessStartMode mode = ProcessStartMode.normal,
   });
 
@@ -238,6 +244,7 @@ abstract class ProcessUtils {
     RegExp? stdoutErrorMatcher,
     StringConverter? mapFunction,
     Map<String, String>? environment,
+    bool includeParentEnvironment = true,
   });
 
   bool exitsHappySync(List<String> cli, {Map<String, String>? environment});
@@ -352,6 +359,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     String? workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String>? environment,
+    bool includeParentEnvironment = true,
     Duration? timeout,
     int timeoutRetries = 0,
   }) async {
@@ -370,6 +378,7 @@ class _DefaultProcessUtils implements ProcessUtils {
         cmd,
         workingDirectory: workingDirectory,
         environment: _environment(allowReentrantFlutter, environment),
+        includeParentEnvironment: includeParentEnvironment,
       );
       final runResult = RunResult(results, cmd);
       _logger.printTrace(runResult.toString());
@@ -394,6 +403,7 @@ class _DefaultProcessUtils implements ProcessUtils {
         workingDirectory: workingDirectory,
         allowReentrantFlutter: allowReentrantFlutter,
         environment: environment,
+        includeParentEnvironment: includeParentEnvironment,
       );
 
       final stdoutBuffer = StringBuffer();
@@ -477,6 +487,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     bool hideStdout = false,
     String? workingDirectory,
     Map<String, String>? environment,
+    bool includeParentEnvironment = true,
     bool allowReentrantFlutter = false,
     Encoding encoding = systemEncoding,
   }) {
@@ -485,6 +496,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       cmd,
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
+      includeParentEnvironment: includeParentEnvironment,
       stderrEncoding: encoding,
       stdoutEncoding: encoding,
     );
@@ -532,6 +544,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     String? workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String>? environment,
+    bool includeParentEnvironment = true,
     ProcessStartMode mode = ProcessStartMode.normal,
   }) {
     _traceCommand(cmd, workingDirectory: workingDirectory);
@@ -539,6 +552,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       cmd,
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
+      includeParentEnvironment: includeParentEnvironment,
       mode: mode,
     );
   }
@@ -554,12 +568,14 @@ class _DefaultProcessUtils implements ProcessUtils {
     RegExp? stdoutErrorMatcher,
     StringConverter? mapFunction,
     Map<String, String>? environment,
+    bool includeParentEnvironment = true,
   }) async {
     final Process process = await start(
       cmd,
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
       environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
     );
     final StreamSubscription<String> stdoutSubscription = process.stdout
         .transform(utf8LineDecoder)

@@ -38,6 +38,27 @@ function pub_upgrade_with_retry {
   return 0
 }
 
+function unset_repository_local_git_environment() {
+  # Git hooks export repository-local GIT_* variables. The Flutter SDK is a
+  # separate git checkout, so these variables must not affect git commands that
+  # operate on FLUTTER_ROOT.
+  unset GIT_ALTERNATE_OBJECT_DIRECTORIES
+  unset GIT_CONFIG
+  unset GIT_CONFIG_PARAMETERS
+  unset GIT_CONFIG_COUNT
+  unset GIT_OBJECT_DIRECTORY
+  unset GIT_DIR
+  unset GIT_WORK_TREE
+  unset GIT_IMPLICIT_WORK_TREE
+  unset GIT_GRAFT_FILE
+  unset GIT_INDEX_FILE
+  unset GIT_NO_REPLACE_OBJECTS
+  unset GIT_REPLACE_REF_BASE
+  unset GIT_PREFIX
+  unset GIT_SHALLOW_FILE
+  unset GIT_COMMON_DIR
+}
+
 # Trap function for removing any remaining lock file at exit.
 function _rmlock () {
   [ -n "$FLUTTER_UPGRADE_LOCK" ] && rm -rf -- "$FLUTTER_UPGRADE_LOCK"
@@ -195,6 +216,7 @@ function upgrade_flutter () (
 # entrypoints.
 function shared::execute() {
   export FLUTTER_ROOT="$(cd "${BIN_DIR}/.." ; pwd -P)"
+  unset_repository_local_git_environment
 
   # If present, run the bootstrap script first
   BOOTSTRAP_PATH="$FLUTTER_ROOT/bin/internal/bootstrap.sh"
