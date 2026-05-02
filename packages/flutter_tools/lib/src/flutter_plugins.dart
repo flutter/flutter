@@ -1458,9 +1458,7 @@ Future<void> injectPlugins(
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,
-          logger: globals.logger,
           analytics: globals.analytics,
-          platform: globals.platform,
           xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
           config: globals.config,
         );
