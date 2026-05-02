@@ -54,10 +54,7 @@ void main() {
 
     final SemanticsHandle handle = tester.ensureSemantics();
     final SemanticsNode node = tester.getSemantics(find.byType(TestSlider));
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(
-      node.id,
-      SemanticsAction.increase,
-    );
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.increase);
     await tester.pump();
 
     expect(value, closeTo(0.6, 0.001));
@@ -84,10 +81,7 @@ void main() {
 
     final SemanticsHandle handle = tester.ensureSemantics();
     final SemanticsNode node = tester.getSemantics(find.byType(TestSlider));
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(
-      node.id,
-      SemanticsAction.decrease,
-    );
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.decrease);
     await tester.pump();
 
     expect(value, closeTo(0.4, 0.001));
@@ -114,10 +108,7 @@ void main() {
 
     final SemanticsHandle handle = tester.ensureSemantics();
     final SemanticsNode node = tester.getSemantics(find.byType(TestSlider));
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(
-      node.id,
-      SemanticsAction.increase,
-    );
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.increase);
     await tester.pump();
 
     expect(value, 1.0);
@@ -144,17 +135,16 @@ void main() {
 
     final SemanticsHandle handle = tester.ensureSemantics();
     final SemanticsNode node = tester.getSemantics(find.byType(TestSlider));
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(
-      node.id,
-      SemanticsAction.decrease,
-    );
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.decrease);
     await tester.pump();
 
     expect(value, 0.0);
     handle.dispose();
   });
 
-  testWidgets('TestSlider semantics reflect boundary values correctly', (WidgetTester tester) async {
+  testWidgets('TestSlider semantics reflect boundary values correctly', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(_buildSlider(value: 0.0, onChanged: (_) {}));
 
     final SemanticsNode nodeAtMin = tester.getSemantics(find.byType(TestSlider));
