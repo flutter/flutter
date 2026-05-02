@@ -35,15 +35,22 @@ std::vector<StopData> CreateGradientColors(const std::vector<Color>& colors,
                                            const std::vector<Scalar>& stops) {
   FML_DCHECK(stops.size() == colors.size());
 
+  // For an N-stop gradient we emit N entries. Entry `i` carries the affine
+  // (`scale`, `bias`) for the segment from `stops[i]` to `stops[i + 1]`
+  // See Skia gradient shaders for more details.
   std::vector<StopData> result;
   result.reserve(stops.size());
-  Scalar last_stop = 0;
-  for (auto i = 0u; i < stops.size(); i++) {
-    Scalar delta = stops[i] - last_stop;
-    Scalar inverse_delta = delta == 0.0f ? 0.0 : 1.0 / delta;
-    result.emplace_back(StopData{
-        .color = colors[i], .stop = stops[i], .inverse_delta = inverse_delta});
-    last_stop = stops[i];
+  for (size_t i = 0; i < stops.size(); i++) {
+    Vector4 scale;
+    Vector4 bias = colors[i];
+    if (i + 1 < stops.size()) {
+      Scalar delta = stops[i + 1] - stops[i];
+      Scalar inverse_delta = delta == 0.0f ? 0.0f : 1.0f / delta;
+      scale = (Vector4{colors[i + 1]} - Vector4{colors[i]}) * inverse_delta;
+      bias = Vector4{colors[i]} - scale * stops[i];
+    }
+    result.emplace_back(
+        StopData{.scale = scale, .bias = bias, .threshold = stops[i]});
   }
   return result;
 }

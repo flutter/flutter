@@ -10,6 +10,10 @@
 /// The dithering rate, which is 1.0 / 64.0, or 0.015625.
 const float kDitherRate = 1.0 / 64.0;
 
+/// Pre-folded coefficients for the Bayer 8x8 dither offset.
+const float kBayerScale = (2.0 / 128.0) * kDitherRate;    // == 1/4096
+const float kBayerOffset = (63.0 / 128.0) * kDitherRate;  // == 63/8192
+
 /// Returns the closest color to the input color using 8x8 ordered dithering.
 ///
 /// Ordered dithering divides the output into a grid of cells, and then assigns
@@ -37,13 +41,29 @@ vec4 IPOrderedDither8x8(vec4 color, vec2 dest) {
            (y & 4) >> 1 |  //
            (x & 4) >> 2;   //
 
-  // Scale that dither to [0,1), then (-0.5,+0.5), here using 63/128 = 0.4921875
-  // as 0.5-epsilon. We want to make sure our dither is less than 0.5 in either
-  // direction to keep exact values like 0 and 1 unchanged after rounding.
-  float dither = float(m) * (2.0 / 128.0) - (63.0 / 128.0);
+  // Single mad per channel: dither offset is in [-kBayerOffset, +kBayerOffset]
+  // (~ ±0.0077), comfortably less than 0.5 / 64 so exact 0 and 1 round-trip
+  // through the 8-bit framebuffer unchanged.
+  color.rgb += float(m) * kBayerScale - kBayerOffset;
 
-  // Apply the dither to the color.
-  color.rgb += dither * kDitherRate;
+  return color;
+}
+
+/// Half-precision variant of IPOrderedDither8x8.
+f16vec4 IPHalfOrderedDither8x8(f16vec4 color, vec2 dest) {
+  uint x = uint(dest.x) % 8;
+  uint y = uint(dest.y);
+  y ^= x;
+
+  uint m = (y & 1) << 5 |  //
+           (x & 1) << 4 |  //
+           (y & 2) << 2 |  //
+           (x & 2) << 1 |  //
+           (y & 4) >> 1 |  //
+           (x & 4) >> 2;   //
+
+  float16_t dither = float16_t(float(m) * kBayerScale - kBayerOffset);
+  color.rgb += dither;
 
   return color;
 }
