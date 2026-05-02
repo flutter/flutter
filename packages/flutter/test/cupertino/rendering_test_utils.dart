@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 class TestCallbackPainter extends CustomPainter {
   const TestCallbackPainter({required this.onPaint});
 
+  /// The callback to invoke during [paint].
   final VoidCallback onPaint;
 
   @override
