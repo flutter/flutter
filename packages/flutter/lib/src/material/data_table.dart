@@ -1382,7 +1382,6 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     if (status.isCompleted) {
       assert(_orientationAnimation.value == math.pi);
       _orientationOffset += math.pi;
-      _orientationController.value = 0.0; // TODO(ianh): This triggers a pointless rebuild.
     }
   }
 
