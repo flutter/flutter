@@ -988,6 +988,24 @@ void main() {
     painter.dispose();
   });
 
+  test('TextPainter paints ellipsis before an overflowing hard line break', () {
+    final painter = TextPainter(
+      text: const TextSpan(text: 'AAA\nBBB', style: TextStyle(fontSize: 10.0)),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+      ellipsis: '\u2026',
+    )..layout(maxWidth: 100.0);
+
+    expect(painter.didExceedMaxLines, isTrue);
+    expect(painter.computeLineMetrics().single.width, 40.0);
+    expect(
+      painter.getBoxesForSelection(const TextSelection(baseOffset: 3, extentOffset: 4)).single,
+      const TextBox.fromLTRBD(30.0, 0.0, 40.0, 10.0, TextDirection.ltr),
+    );
+
+    painter.dispose();
+  });
+
   test('TextPainter intrinsic dimensions', () {
     const style = TextStyle(inherit: false, fontSize: 10.0);
     TextPainter painter;

@@ -429,6 +429,7 @@ class _TextPainterLayoutCacheWithOffset {
     this.textAlignment,
     this.layoutMaxWidth,
     this.contentWidth,
+    this.insertedEllipsisAt,
   ) : assert(textAlignment >= 0.0 && textAlignment <= 1.0),
       assert(!layoutMaxWidth.isNaN),
       assert(!contentWidth.isNaN);
@@ -437,6 +438,11 @@ class _TextPainterLayoutCacheWithOffset {
 
   // The input width used to lay out the paragraph.
   final double layoutMaxWidth;
+
+  // The offset of the truncating hard line break preceded by the configured
+  // ellipsis, if any.
+  final int? insertedEllipsisAt;
+  bool get hasInsertedEllipsis => insertedEllipsisAt != null;
 
   // The content width the text painter should report in TextPainter.width.
   // This is also used to compute `paintOffset`.
@@ -471,6 +477,9 @@ class _TextPainterLayoutCacheWithOffset {
   bool _resizeToFit(double minWidth, double maxWidth, TextWidthBasis widthBasis) {
     assert(layout.maxIntrinsicLineExtent.isFinite);
     assert(minWidth <= maxWidth);
+    if (hasInsertedEllipsis && maxWidth != layoutMaxWidth) {
+      return false;
+    }
     // The assumption here is that if a Paragraph's width is already >= its
     // maxIntrinsicWidth, further increasing the input width does not change its
     // layout (but may change the paint offset if it's not left-aligned). This is
@@ -1198,15 +1207,103 @@ class TextPainter {
 
   // Creates a ui.Paragraph using the current configurations in this class and
   // assign it to _paragraph.
-  ui.Paragraph _createParagraph(InlineSpan text) {
+  ui.Paragraph _createParagraph(InlineSpan text, {int? insertEllipsisBeforeNewlineAt}) {
     final builder = ui.ParagraphBuilder(_createParagraphStyle());
-    text.build(builder, textScaler: textScaler, dimensions: _placeholderDimensions);
+    final InlineSpan textToBuild = insertEllipsisBeforeNewlineAt == null
+        ? text
+        : _insertEllipsisBeforeNewline(text, insertEllipsisBeforeNewlineAt);
+    textToBuild.build(builder, textScaler: textScaler, dimensions: _placeholderDimensions);
     assert(() {
       _debugMarkNeedsLayoutCallStack = null;
       return true;
     }());
     _rebuildParagraphForPaint = false;
     return builder.build();
+  }
+
+  InlineSpan _insertEllipsisBeforeNewline(InlineSpan text, int newlineOffset) {
+    final String ellipsis = _ellipsis!;
+    final Accumulator offset = Accumulator();
+
+    InlineSpan replace(InlineSpan span) {
+      if (span is! TextSpan) {
+        offset.increment(span.toPlainText(includeSemanticsLabels: false).length);
+        return span;
+      }
+
+      bool changed = false;
+      final String? spanText = span.text;
+      String? replacedText = spanText;
+      if (spanText != null) {
+        final int spanStart = offset.value;
+        final int localOffset = newlineOffset - spanStart;
+        offset.increment(spanText.length);
+        if (localOffset >= 0 && localOffset < spanText.length) {
+          assert(WordBoundary._isNewline(spanText.codeUnitAt(localOffset)));
+          replacedText = spanText.replaceRange(localOffset, localOffset, ellipsis);
+          changed = true;
+        }
+      }
+
+      final List<InlineSpan>? children = span.children;
+      List<InlineSpan>? replacedChildren;
+      if (children != null) {
+        replacedChildren = <InlineSpan>[];
+        for (final InlineSpan child in children) {
+          final InlineSpan replacedChild = replace(child);
+          changed = changed || !identical(child, replacedChild);
+          replacedChildren.add(replacedChild);
+        }
+      }
+
+      return changed
+          ? TextSpan(
+              text: replacedText,
+              children: replacedChildren,
+              style: span.style,
+              recognizer: span.recognizer,
+              mouseCursor: span.mouseCursor,
+              onEnter: span.onEnter,
+              onExit: span.onExit,
+              semanticsLabel: span.semanticsLabel,
+              semanticsIdentifier: span.semanticsIdentifier,
+              locale: span.locale,
+              spellOut: span.spellOut,
+            )
+          : span;
+    }
+
+    return replace(text);
+  }
+
+  int? _truncatingNewlineOffset(_TextLayout layout) {
+    final ui.Paragraph paragraph = layout._paragraph;
+    if (_maxLines == null || _ellipsis == null || !paragraph.didExceedMaxLines) {
+      return null;
+    }
+
+    // SkParagraph omits later lines for maxLines, but a hard break at the end
+    // of the last visible line does not leave an overflowing glyph to ellipsize.
+    final List<ui.LineMetrics> lineMetrics = paragraph.computeLineMetrics();
+    if (lineMetrics.isEmpty || !lineMetrics.last.hardBreak) {
+      return null;
+    }
+
+    final String text = plainText;
+    int lineStart = 0;
+    for (int lineNumber = 0; lineNumber < lineMetrics.length; lineNumber += 1) {
+      final TextRange line = paragraph.getLineBoundary(TextPosition(offset: lineStart));
+      if (lineNumber == lineMetrics.length - 1) {
+        return line.end < text.length && WordBoundary._isNewline(text.codeUnitAt(line.end))
+            ? line.end
+            : null;
+      }
+      if (line.end >= text.length) {
+        return null;
+      }
+      lineStart = WordBoundary._isNewline(text.codeUnitAt(line.end)) ? line.end + 1 : line.end;
+    }
+    return null;
   }
 
   /// Computes the visual position of the glyphs for painting the text.
@@ -1249,9 +1346,13 @@ class TextPainter {
     // when the text is not left-aligned, so we don't have to deal with an
     // infinite paint offset.
     final bool adjustMaxWidth = !maxWidth.isFinite && paintOffsetAlignment != 0;
+    final bool canUseCachedIntrinsicWidth =
+        cachedLayout != null && !cachedLayout.hasInsertedEllipsis;
     final double? adjustedMaxWidth = !adjustMaxWidth
         ? maxWidth
-        : cachedLayout?.layout.maxIntrinsicLineExtent;
+        : canUseCachedIntrinsicWidth
+        ? cachedLayout.layout.maxIntrinsicLineExtent
+        : null;
     final double layoutMaxWidth = adjustedMaxWidth ?? maxWidth;
 
     // Only rebuild the paragraph when there're layout changes, even when
@@ -1261,9 +1362,25 @@ class TextPainter {
     //    the paragraph rebuilds is unnecessary)
     // 2. the user could be measuring the text layout so `paint` will never be
     //    called.
-    final ui.Paragraph paragraph = (cachedLayout?.paragraph ?? _createParagraph(text))
-      ..layout(ui.ParagraphConstraints(width: layoutMaxWidth));
-    final layout = _TextLayout._(paragraph, textDirection, this);
+    final bool canReuseCachedParagraph = canUseCachedIntrinsicWidth;
+    ui.Paragraph paragraph = canReuseCachedParagraph
+        ? cachedLayout.paragraph
+        : _createParagraph(text);
+    if (!canReuseCachedParagraph) {
+      cachedLayout?.paragraph.dispose();
+    }
+    paragraph.layout(ui.ParagraphConstraints(width: layoutMaxWidth));
+    _TextLayout layout = _TextLayout._(paragraph, textDirection, this);
+    final int? insertedEllipsisAt = _truncatingNewlineOffset(layout);
+    if (insertedEllipsisAt != null) {
+      final ui.Paragraph replacementParagraph = _createParagraph(
+        text,
+        insertEllipsisBeforeNewlineAt: insertedEllipsisAt,
+      )..layout(ui.ParagraphConstraints(width: layoutMaxWidth));
+      paragraph.dispose();
+      paragraph = replacementParagraph;
+      layout = _TextLayout._(paragraph, textDirection, this);
+    }
     final double contentWidth = layout._contentWidthFor(minWidth, maxWidth, textWidthBasis);
 
     final _TextPainterLayoutCacheWithOffset newLayoutCache;
@@ -1279,6 +1396,7 @@ class TextPainter {
         paintOffsetAlignment,
         newInputWidth,
         contentWidth,
+        insertedEllipsisAt,
       );
     } else {
       newLayoutCache = _TextPainterLayoutCacheWithOffset(
@@ -1286,6 +1404,7 @@ class TextPainter {
         paintOffsetAlignment,
         layoutMaxWidth,
         contentWidth,
+        insertedEllipsisAt,
       );
     }
     _layoutCache = newLayoutCache;
@@ -1344,8 +1463,10 @@ class TextPainter {
       // no API to only make those updates so the paragraph has to be recreated
       // and re-laid out.
       assert(!layoutCache.layoutMaxWidth.isNaN);
-      layoutCache.layout._paragraph = _createParagraph(text!)
-        ..layout(ui.ParagraphConstraints(width: layoutCache.layoutMaxWidth));
+      layoutCache.layout._paragraph = _createParagraph(
+        text!,
+        insertEllipsisBeforeNewlineAt: layoutCache.insertedEllipsisAt,
+      )..layout(ui.ParagraphConstraints(width: layoutCache.layoutMaxWidth));
       assert(paragraph.width == layoutCache.layout._paragraph.width);
       paragraph.dispose();
       assert(debugSize == size);
