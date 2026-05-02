@@ -369,7 +369,6 @@ source_set("flutter_engine_bindings") {
     "framework/Source/FlutterFMLTaskRunner.mm",
     "framework/Source/FlutterFMLTaskRunners.h",
     "framework/Source/FlutterFMLTaskRunners.mm",
-    "framework/Source/FlutterVSyncClient+FML.h",
     "framework/Source/FlutterVSyncClient.h",
     "framework/Source/FlutterVSyncClient.mm",
     "framework/Source/vsync_waiter_ios.h",
