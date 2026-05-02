@@ -508,7 +508,7 @@ class TestSemantics {
       );
     }
 
-    if (controlsNodes != controlsNodes && !setEquals(controlsNodes, node.controlsNodes)) {
+    if (controlsNodes != node.controlsNode && !setEquals(controlsNodes, node.controlsNodes)) {
       return fail(
         'expected node id $id to controls nodes $controlsNodes but found controlling nodes ${node.controlsNodes}',
       );
@@ -716,7 +716,7 @@ class SemanticsTester {
           (second[i] is! LocaleStringAttribute ||
               second[i].range != first[i].range ||
               (second[i] as LocaleStringAttribute).locale !=
-                  (second[i] as LocaleStringAttribute).locale)) {
+                  (first[i] as LocaleStringAttribute).locale)) {
         return false;
       }
     }
@@ -1167,22 +1167,22 @@ class _IncludesNodeWith extends Matcher {
     this.minValue,
     this.maxValue,
   }) : assert(
-         label != null ||
-             value != null ||
-             actions != null ||
-             flags != null ||
-             flagsCollection != null ||
-             tags != null ||
-             increasedValue != null ||
-             decreasedValue != null ||
-             scrollPosition != null ||
-             scrollExtentMax != null ||
-             scrollExtentMin != null ||
-             maxValueLength != null ||
-             currentValueLength != null ||
-             inputType != null,
-         minValue != null || maxValue != null,
-       );
+  (label != null ||
+      value != null ||
+      actions != null ||
+      flags != null ||
+      flagsCollection != null ||
+      tags != null ||
+      increasedValue != null ||
+      decreasedValue != null ||
+      scrollPosition != null ||
+      scrollExtentMax != null ||
+      scrollExtentMin != null ||
+      maxValueLength != null ||
+      currentValueLength != null ||
+      inputType != null) &&
+  (minValue != null || maxValue != null),
+);
   final AttributedString? attributedLabel;
   final AttributedString? attributedValue;
   final AttributedString? attributedHint;
