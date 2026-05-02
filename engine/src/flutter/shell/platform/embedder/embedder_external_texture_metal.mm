@@ -53,6 +53,11 @@ void EmbedderExternalTextureMetal::Paint(PaintContext& context,
       canvas->DrawImage(last_image_, DlPoint(bounds.GetX(), bounds.GetY()), sampling, paint);
     }
   }
+
+  if (last_image_->GetFence()) {
+    // Don't cache image if it has fence attached.
+    last_image_.reset();
+  }
 }
 
 sk_sp<DlImage> EmbedderExternalTextureMetal::ResolveTexture(int64_t texture_id,
@@ -132,7 +137,12 @@ sk_sp<DlImage> EmbedderExternalTextureMetal::ResolveTexture(int64_t texture_id,
   }
 
   // This image should not escape local use by EmbedderExternalTextureMetal
-  return DlImageSkia::Make(std::move(image));
+  auto dl_image = DlImageSkia::Make(std::move(image));
+  if (texture->event) {
+    auto fence = DlFence::MakeFromMetalEvent(texture->event, texture->event_value);
+    dl_image->SetFence(std::move(fence));
+  }
+  return dl_image;
 }
 
 // |flutter::Texture|

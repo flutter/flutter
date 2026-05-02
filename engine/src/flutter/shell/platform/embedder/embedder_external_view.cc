@@ -16,6 +16,70 @@
 
 namespace flutter {
 
+namespace {
+class RetrieveFences : public virtual DlOpReceiver,
+                       private IgnoreAttributeDispatchHelper,
+                       private IgnoreClipDispatchHelper,
+                       private IgnoreTransformDispatchHelper,
+                       private IgnoreDrawDispatchHelper {
+ public:
+  std::vector<sk_sp<DlFence>> GetFences() { return std::move(fences_); }
+
+ private:
+  void drawImage(const sk_sp<DlImage> image,
+                 const DlPoint& point,
+                 DlImageSampling sampling,
+                 bool render_with_attributes) override {
+    auto fence = image->GetFence();
+    if (fence) {
+      fences_.push_back(std::move(fence));
+    }
+  }
+  void drawImageRect(const sk_sp<DlImage> image,
+                     const DlRect& src,
+                     const DlRect& dst,
+                     DlImageSampling sampling,
+                     bool render_with_attributes,
+                     DlSrcRectConstraint constraint) override {
+    auto fence = image->GetFence();
+    if (fence) {
+      fences_.push_back(std::move(fence));
+    }
+  }
+  void drawImageNine(const sk_sp<DlImage> image,
+                     const DlIRect& center,
+                     const DlRect& dst,
+                     DlFilterMode filter,
+                     bool render_with_attributes) override {
+    auto fence = image->GetFence();
+    if (fence) {
+      fences_.push_back(std::move(fence));
+    }
+  }
+  void drawAtlas(const sk_sp<DlImage> atlas,
+                 const DlRSTransform xform[],
+                 const DlRect tex[],
+                 const DlColor colors[],
+                 int count,
+                 DlBlendMode mode,
+                 DlImageSampling sampling,
+                 const DlRect* cull_rect,
+                 bool render_with_attributes) override {
+    auto fence = atlas->GetFence();
+    if (fence) {
+      fences_.push_back(std::move(fence));
+    }
+  }
+
+  void drawDisplayList(const sk_sp<DisplayList> display_lis,
+                       DlScalar opacity) override {
+    display_lis->Dispatch(*this);
+  }
+
+  std::vector<sk_sp<DlFence>> fences_;
+};
+}  // namespace
+
 static DlISize TransformedSurfaceSize(const DlISize& size,
                                       const DlMatrix& transformation) {
   const auto source_rect = DlRect::MakeSize(size);
@@ -111,6 +175,12 @@ static void InvalidateApiState(SkSurface& skia_surface) {
 }
 #endif
 
+std::vector<sk_sp<DlFence>> EmbedderExternalView::GetFences() const {
+  RetrieveFences retrieve_fences;
+  slice_->dispatch(retrieve_fences);
+  return retrieve_fences.GetFences();
+}
+
 bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
                                   bool clear_surface) {
   TRACE_EVENT0("flutter", "EmbedderExternalView::Render");
@@ -187,7 +257,6 @@ bool EmbedderExternalView::Render(const EmbedderRenderTarget& render_target,
   }
   slice_->render_into(&dl_canvas);
   dl_canvas.RestoreToCount(restore_count);
-  dl_canvas.Flush();
 #endif  //  !SLIMPELLER
 
   return true;

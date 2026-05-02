@@ -102,6 +102,8 @@ class EmbedderExternalView {
 
   DlISize GetRenderSurfaceSize() const;
 
+  std::vector<sk_sp<DlFence>> GetFences() const;
+
   bool Render(const EmbedderRenderTarget& render_target,
               bool clear_surface = true);
 

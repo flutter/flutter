@@ -10,6 +10,7 @@
 #include <string>
 
 #include "flutter/display_list/dl_color.h"
+#include "flutter/display_list/fence/dl_fence.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/macros.h"
@@ -22,6 +23,7 @@ class DlImageImpeller;
 
 namespace flutter {
 class DlImageSkia;
+class DlFence;
 
 //------------------------------------------------------------------------------
 /// @brief      Represents an image whose allocation is (usually) resident on
@@ -148,8 +150,14 @@ class DlImage : public SkRefCnt {
     return Equals(other.get());
   }
 
+  void SetFence(sk_sp<DlFence> fence) { fence_ = std::move(fence); }
+  sk_sp<DlFence> GetFence() const { return fence_; }
+
  protected:
   DlImage();
+
+ private:
+  sk_sp<DlFence> fence_;
 };
 
 }  // namespace flutter

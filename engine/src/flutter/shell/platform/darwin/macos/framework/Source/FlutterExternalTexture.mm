@@ -39,6 +39,15 @@
     return NO;
   }
 
+  if ([_texture respondsToSelector:@selector(copyEventWithValue:)]) {
+    uint64_t eventValue = 0;
+    id<MTLEvent> event = [_texture copyEventWithValue:&eventValue];
+    if (event) {
+      textureOut->event = (__bridge FlutterMetalEventHandle)event;
+      textureOut->event_value = eventValue;
+    }
+  }
+
   OSType pixel_format = CVPixelBufferGetPixelFormatType(pixelBuffer);
   if (pixel_format == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange ||
       pixel_format == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) {

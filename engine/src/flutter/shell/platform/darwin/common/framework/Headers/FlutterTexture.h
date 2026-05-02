@@ -10,6 +10,8 @@
 
 #import "FlutterMacros.h"
 
+@protocol MTLEvent;
+
 NS_ASSUME_NONNULL_BEGIN
 
 FLUTTER_DARWIN_EXPORT
@@ -35,6 +37,20 @@ FLUTTER_DARWIN_EXPORT
  * Called on the raster thread.
  */
 @optional
+
+/**
+ * Optional MTLEvent to synchronize the texture with Flutter rendering.
+ * When provided, raster thread will wait for the event to be signalled
+ * to provided value before using the texture.
+ * After the raster thread is done with the texture, the event will be
+ * signalled to value + 1.
+ *
+ * When MTLEvent is provided, the pixel buffer and event are requested
+ * on subsequent frame, even if [FlutterTextureRegistry textureFrameAvailable]
+ * is not called before.
+ */
+- (id<MTLEvent> _Nullable)copyEventWithValue:(uint64_t*)value;
+
 - (void)onTextureUnregistered:(NSObject<FlutterTexture>*)texture;
 @end
 

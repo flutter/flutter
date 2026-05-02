@@ -257,11 +257,67 @@ class Layer {
   void RenderFlutterContents() {
     FML_DCHECK(has_flutter_contents());
     if (render_target_) {
+#if !SLIMPELLER
+      auto skia_surface = render_target_->GetSkiaSurface();
+      struct SemaphoreContext {
+        std::vector<sk_sp<DlFence>> fences;
+        std::vector<GrBackendSemaphore> semaphores;
+      };
+      auto context = std::make_unique<SemaphoreContext>();
+      if (skia_surface) {
+        for (auto c : flutter_contents_) {
+          auto view_fences = c->GetFences();
+          for (auto& fence : view_fences) {
+            context->fences.push_back(fence);
+            context->semaphores.push_back(fence->CreateGrBackendSemaphore(0));
+          }
+        }
+        if (!context->semaphores.empty()) {
+          if (!skia_surface->wait(context->semaphores.size(),
+                                  context->semaphores.data(), true)) {
+            FML_LOG(ERROR)
+                << "Failed to wait on fences for rendering external view.";
+            for (size_t i = 0; i < context->fences.size(); ++i) {
+              context->fences[i]->FreeBackendSemaphore(context->semaphores[i]);
+            }
+          }
+          for (size_t i = 0; i < context->fences.size(); ++i) {
+            context->semaphores[i] =
+                context->fences[i]->CreateGrBackendSemaphore(1);
+          }
+        }
+      }
+#endif
       bool clear_surface = true;
       for (auto c : flutter_contents_) {
         c->Render(*render_target_, clear_surface);
         clear_surface = false;
       }
+#if !SLIMPELLER
+      if (skia_surface) {
+        auto dContext = GrAsDirectContext(skia_surface->recordingContext());
+        if (dContext) {
+          GrFlushInfo flush_info;
+          flush_info.fNumSemaphores = context->semaphores.size();
+          flush_info.fSignalSemaphores = context->semaphores.data();
+          flush_info.fFinishedContext = context.release();
+          flush_info.fFinishedProc = [](void* context_) {
+            std::unique_ptr<SemaphoreContext> context(
+                static_cast<SemaphoreContext*>(context_));
+            for (size_t i = 0; i < context->fences.size(); ++i) {
+              // Contrary to what documentation implies the underlying
+              // semaphores are being destroyed by skia.
+              // context->fences[i]->FreeBackendSemaphore(context->semaphores[i]);
+            }
+          };
+          auto submitted = dContext->flush(flush_info);
+          if (submitted != GrSemaphoresSubmitted::kYes) {
+            FML_LOG(ERROR)
+                << "Failed to submit semaphores for rendering external view.";
+          }
+        }
+      }
+#endif
     }
   }
 
@@ -286,11 +342,12 @@ class Layer {
 };
 
 /// A layout builder is responsible for building an optimized list of Layers
-/// from a list of `EmbedderExternalView`s. Single EmbedderExternalView contains
-/// at most one platform view and at most one layer of Flutter contents
-/// ('slice'). LayerBuilder is responsible for producing as few Layers from the
-/// list of EmbedderExternalViews as possible while maintaining identical visual
-/// result.
+/// from a list of `EmbedderExternalView`s. Single EmbedderExternalView
+/// contains at most one platform view and at most one layer of Flutter
+/// contents
+/// ('slice'). LayerBuilder is responsible for producing as few Layers from
+/// the list of EmbedderExternalViews as possible while maintaining identical
+/// visual result.
 ///
 /// Implements https://flutter.dev/go/optimized-platform-view-layers
 class LayerBuilder {
@@ -384,7 +441,8 @@ class LayerBuilder {
   /// - First layer from back that has platform view that intersects with this
   ///   view
   /// - Very last layer from back that has surface that doesn't intersect with
-  ///   this. That is because layer content renders on top of the platform view.
+  ///   this. That is because layer content renders on top of the platform
+  ///   view.
   Layer& GetLayerForPlatformView(PlatformView view) {
     for (auto iter = layers_.rbegin(); iter != layers_.rend(); ++iter) {
       // This layer has surface that intersects with this view. That means we

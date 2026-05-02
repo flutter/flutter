@@ -812,6 +812,9 @@ typedef const void* FlutterMetalCommandQueueHandle;
 /// Alias for id<MTLTexture>.
 typedef const void* FlutterMetalTextureHandle;
 
+/// Alias for id<MTLEvent>.
+typedef const void* FlutterMetalEventHandle;
+
 /// Pixel format for the external texture.
 typedef enum {
   kYUVA,
@@ -846,6 +849,15 @@ typedef struct {
   FlutterMetalTextureHandle* textures;
   /// The YUV color space of the YUV external texture.
   FlutterMetalExternalTextureYUVColorSpace yuv_color_space;
+
+  /// Optional event that will be waited on before reading from the texture and
+  /// will be signalled after the engine is done with the texture.
+  FlutterMetalEventHandle event;
+
+  /// Value for which the render thread will wait on the event.
+  /// After rendering the event value will be incremented by one.
+  int64_t event_value;
+
 } FlutterMetalExternalTexture;
 
 /// Callback to provide an external texture for a given texture_id.
