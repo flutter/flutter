@@ -40,6 +40,19 @@ export 'package:flutter/services.dart' show TextRange, TextSelection;
 /// LibTxt's text_style.h, paragraph_style.h).
 const double kDefaultFontSize = 14.0;
 
+bool _isNewline(int codePoint) {
+  // Carriage Return is not treated as a hard line break.
+  return switch (codePoint) {
+    0x000A || // Line Feed
+    0x0085 || // New Line
+    0x000B || // Form Feed
+    0x000C || // Vertical Feed
+    0x2028 || // Line Separator
+    0x2029 => true, // Paragraph Separator
+    _ => false,
+  };
+}
+
 /// How overflowing text should be handled.
 ///
 /// A [TextOverflow] can be passed to [Text] and [RichText] via their
@@ -210,19 +223,6 @@ class WordBoundary extends TextBoundary {
       0xD800 => _codePointFromSurrogates(codeUnitAtIndex, _text.codeUnitAt(index + 1)!),
       0xDC00 => _codePointFromSurrogates(_text.codeUnitAt(index - 1)!, codeUnitAtIndex),
       _ => codeUnitAtIndex,
-    };
-  }
-
-  static bool _isNewline(int codePoint) {
-    // Carriage Return is not treated as a hard line break.
-    return switch (codePoint) {
-      0x000A || // Line Feed
-      0x0085 || // New Line
-      0x000B || // Form Feed
-      0x000C || // Vertical Feed
-      0x2028 || // Line Separator
-      0x2029 => true, // Paragraph Separator
-      _ => false,
     };
   }
 
@@ -1226,7 +1226,7 @@ class TextPainter {
     final Accumulator offset = Accumulator();
 
     InlineSpan replace(InlineSpan span) {
-      if (span is! TextSpan) {
+      if (span is! TextSpan || span.runtimeType != TextSpan) {
         offset.increment(span.toPlainText(includeSemanticsLabels: false).length);
         return span;
       }
@@ -1239,7 +1239,7 @@ class TextPainter {
         final int localOffset = newlineOffset - spanStart;
         offset.increment(spanText.length);
         if (localOffset >= 0 && localOffset < spanText.length) {
-          assert(WordBoundary._isNewline(spanText.codeUnitAt(localOffset)));
+          assert(_isNewline(spanText.codeUnitAt(localOffset)));
           replacedText = spanText.replaceRange(localOffset, localOffset, ellipsis);
           changed = true;
         }
@@ -1257,6 +1257,9 @@ class TextPainter {
       }
 
       return changed
+          // TODO(https://github.com/flutter/flutter/issues/50168): Replace this
+          // manual copy if TextSpan gains a copying API that can preserve future
+          // TextSpan properties while modifying text and children.
           ? TextSpan(
               text: replacedText,
               children: replacedChildren,
@@ -1294,14 +1297,12 @@ class TextPainter {
     for (int lineNumber = 0; lineNumber < lineMetrics.length; lineNumber += 1) {
       final TextRange line = paragraph.getLineBoundary(TextPosition(offset: lineStart));
       if (lineNumber == lineMetrics.length - 1) {
-        return line.end < text.length && WordBoundary._isNewline(text.codeUnitAt(line.end))
-            ? line.end
-            : null;
+        return line.end < text.length && _isNewline(text.codeUnitAt(line.end)) ? line.end : null;
       }
       if (line.end >= text.length) {
         return null;
       }
-      lineStart = WordBoundary._isNewline(text.codeUnitAt(line.end)) ? line.end + 1 : line.end;
+      lineStart = _isNewline(text.codeUnitAt(line.end)) ? line.end + 1 : line.end;
     }
     return null;
   }
@@ -1628,9 +1629,7 @@ class TextPainter {
   }
 
   bool _isNewlineAtOffset(int offset) =>
-      0 <= offset &&
-      offset < plainText.length &&
-      WordBoundary._isNewline(plainText.codeUnitAt(offset));
+      0 <= offset && offset < plainText.length && _isNewline(plainText.codeUnitAt(offset));
 
   // Cached caret metrics. This allows multiple invokes of [getOffsetForCaret] and
   // [getFullHeightForCaret] in a row without performing redundant and expensive
