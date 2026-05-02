@@ -10,16 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
-void main() {
-  group('SliverSemantics', () {
-    setUp(() {
-      debugResetSemanticsIdCounter();
-    });
-
-    _tests();
-  });
-}
-
 Widget boilerPlate({required List<Widget> slivers, bool wrapWithDirectionality = true}) {
   Widget child = MediaQuery(
     data: const MediaQueryData(),
@@ -31,7 +21,11 @@ Widget boilerPlate({required List<Widget> slivers, bool wrapWithDirectionality =
   return child;
 }
 
-void _tests() {
+void main() {
+  setUp(() {
+    debugResetSemanticsIdCounter();
+  });
+
   testWidgets('Semantics shutdown and restart', (WidgetTester tester) async {
     SemanticsTester? semantics = SemanticsTester(tester);
 
