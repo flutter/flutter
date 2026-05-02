@@ -270,6 +270,10 @@ void main() {
     testWidgets('success case, radio group can have checkbox children', (
       WidgetTester tester,
     ) async {
+      final node0 = FocusNode();
+      addTearDown(node0.dispose);
+      final node1 = FocusNode();
+      addTearDown(node1.dispose);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -288,6 +292,12 @@ void main() {
     });
 
     testWidgets('success case, radio group can nest', (WidgetTester tester) async {
+      final stringNode = FocusNode();
+      addTearDown(stringNode.dispose);
+      final node0 = FocusNode();
+      addTearDown(node0.dispose);
+      final node1 = FocusNode();
+      addTearDown(node1.dispose);
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,

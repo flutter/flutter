@@ -114,6 +114,7 @@ using namespace flutter::testing;
 @property(nonatomic, weak) FlutterViewController* viewController;
 @property(nonatomic, strong) FlutterTextInputPlugin* textInputPlugin;
 @property(nonatomic, assign) BOOL didCallNotifyLowMemory;
+@property(nonatomic, strong) FlutterFMLTaskRunner* uiTaskRunner;
 
 - (FlutterTextInputPlugin*)textInputPlugin;
 
@@ -121,7 +122,7 @@ using namespace flutter::testing;
             callback:(nullable FlutterKeyEventCallback)callback
             userData:(nullable void*)userData;
 
-- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner;
+- (nullable FlutterFMLTaskRunner*)uiTaskRunner;
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint;
 - (void)attachView;
 @end
@@ -138,9 +139,17 @@ using namespace flutter::testing;
   _didCallNotifyLowMemory = YES;
 }
 
-- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner {
-  fml::MessageLoop::EnsureInitializedForCurrentThread();
-  return fml::MessageLoop::GetCurrent().GetTaskRunner();
+- (instancetype)init {
+  if (self = [super init]) {
+    fml::MessageLoop::EnsureInitializedForCurrentThread();
+    _uiTaskRunner = [[FlutterFMLTaskRunner alloc]
+        initWithTaskRunner:fml::MessageLoop::GetCurrent().GetTaskRunner()];
+  }
+  return self;
+}
+
+- (nullable FlutterFMLTaskRunner*)uiTaskRunner {
+  return _uiTaskRunner;
 }
 
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint {
@@ -616,7 +625,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   // We need to make sure the new viewport metrics get sent after the
   // begin frame event has processed. And this test is to expect that the callback
   // will sync with UI thread. So just simulate a lot of works on UI thread and
-  // test the keyboard animation callback will execute until UI task completed.
+  // test the keyboard animation callback will not execute until UI task completed.
   // Related issue: https://github.com/flutter/flutter/issues/120555.
 
   FlutterEngine* engine = [[FlutterEngine alloc] init];
@@ -626,28 +635,32 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   // Post a task to UI thread to block the thread.
   const int delayTime = 1;
-  [engine uiTaskRunner]->PostTask([] { sleep(delayTime); });
-  XCTestExpectation* expectation = [self expectationWithDescription:@"keyboard animation callback"];
+  [[engine uiTaskRunner] postTask:^{
+    sleep(delayTime);
+  }];
 
   id mockCADisplayLink = OCMClassMock([CADisplayLink class]);
   OCMStub(
       ClassMethod([mockCADisplayLink displayLinkWithTarget:[OCMArg any]
                                                   selector:sel_registerName("onDisplayLink:")]));
 
-  __block CFTimeInterval fulfillTime;
-  FlutterKeyboardAnimationCallback callback = ^(NSTimeInterval targetTime) {
-    fulfillTime = CACurrentMediaTime();
-    [expectation fulfill];
-  };
+  XCTestExpectation* expectation = [self expectationWithDescription:@"keyboard animation callback"];
+  __block CFTimeInterval fulfillTime = 0;
   CFTimeInterval startTime = CACurrentMediaTime();
-  [viewController.keyboardInsetManager setUpKeyboardAnimationVsyncClient:callback];
+  [viewController.keyboardInsetManager
+      setUpKeyboardAnimationVsyncClient:^(NSTimeInterval targetTime) {
+        fulfillTime = CACurrentMediaTime();
+        [expectation fulfill];
+      }];
 
   FlutterVSyncClient* client = viewController.keyboardInsetManager.keyboardAnimationVSyncClient;
   [client onDisplayLink:client.displayLink];
 
   [self waitForExpectationsWithTimeout:5.0 handler:nil];
-  XCTAssertTrue(fulfillTime - startTime > delayTime);
+  NSTimeInterval epsilon = 0.005;
+  XCTAssertGreaterThanOrEqual(fulfillTime - startTime, delayTime - epsilon);
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  [mockCADisplayLink stopMocking];
 }
 
 - (void)testCalculateKeyboardAttachMode {
@@ -2581,6 +2594,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   XCTAssertNotNil(manager.keyboardAnimationVSyncClient);
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  [manager invalidate];
   [mockDisplayLink stopMocking];
 }
 
