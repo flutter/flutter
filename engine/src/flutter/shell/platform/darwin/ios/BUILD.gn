@@ -50,7 +50,10 @@ source_set("InternalFlutterSwift") {
     ":ios_test_flutter",
   ]
   configs += [ "//flutter/shell/platform/darwin/common:config" ]
-  deps = [ ":flutter_engine_bindings" ]
+  deps = [
+    ":flutter_engine_bindings",
+    "//flutter/shell/platform/darwin/common:framework_common",
+  ]
   include_dirs = [
     "//flutter/shell/platform/darwin/common/framework/Headers",
     "//flutter/shell/platform/darwin/ios/framework/Headers",
