@@ -20,7 +20,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient+Testing.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
@@ -2437,11 +2436,11 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)testSetupKeyboardAnimationVsyncClientWillCreateNewVsyncClientForFlutterViewController {
   id bundleMock = OCMPartialMock([NSBundle mainBundle]);
-  OCMStub([bundleMock objectForInfoDictionaryKey:kCADisableMinimumFrameDurationOnPhoneKey])
+  OCMStub([bundleMock objectForInfoDictionaryKey:@"CADisableMinimumFrameDurationOnPhone"])
       .andReturn(@YES);
   id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -2473,7 +2472,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
     testCreateTouchRateCorrectionVSyncClientWillCreateVsyncClientWhenRefreshRateIsLargerThan60HZ {
   id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -2486,7 +2485,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateNewVSyncClientWhenClientAlreadyExists {
   id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
 
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
@@ -2507,7 +2506,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateVsyncClientWhenRefreshRateIs60HZ {
   id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 60;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -2520,7 +2519,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)testTriggerTouchRateCorrectionVSyncClientCorrectly {
   id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine

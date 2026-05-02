@@ -5,8 +5,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient.h"
 
 FLUTTER_ASSERT_ARC
 

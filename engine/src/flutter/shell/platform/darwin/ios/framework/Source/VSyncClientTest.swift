@@ -4,6 +4,8 @@
 
 import XCTest
 
+@testable import InternalFlutterSwift
+
 class VSyncClientTest: XCTestCase {
   var threadTaskRunner: TaskRunner!
 
@@ -22,8 +24,8 @@ class VSyncClientTest: XCTestCase {
       taskRunner: threadTaskRunner,
       isVariableRefreshRateEnabled: false,
       maxRefreshRate: 60.0
-    ) { _, _ in }!
-    let link = vsyncClient.displayLink
+    ) { _, _ in }
+    let link = vsyncClient.displayLink!
 
     vsyncClient.allowPauseAfterVsync = false
     vsyncClient.await()
@@ -42,8 +44,8 @@ class VSyncClientTest: XCTestCase {
       taskRunner: threadTaskRunner,
       isVariableRefreshRateEnabled: true,
       maxRefreshRate: maxFrameRate
-    ) { _, _ in }!
-    let link = vsyncClient.displayLink
+    ) { _, _ in }
+    let link = vsyncClient.displayLink!
 
     if #available(iOS 15.0, *) {
       XCTAssertEqual(Double(link.preferredFrameRateRange.maximum), maxFrameRate, accuracy: 0.1)
@@ -61,8 +63,8 @@ class VSyncClientTest: XCTestCase {
       taskRunner: threadTaskRunner,
       isVariableRefreshRateEnabled: false,
       maxRefreshRate: maxFrameRate
-    ) { _, _ in }!
-    let link = vsyncClient.displayLink
+    ) { _, _ in }
+    let link = vsyncClient.displayLink!
 
     if #available(iOS 15.0, *) {
       XCTAssertEqual(Double(link.preferredFrameRateRange.maximum), 0, accuracy: 0.1)
@@ -78,8 +80,8 @@ class VSyncClientTest: XCTestCase {
       taskRunner: threadTaskRunner,
       isVariableRefreshRateEnabled: false,
       maxRefreshRate: 60.0
-    ) { _, _ in }!
-    let link = vsyncClient.displayLink
+    ) { _, _ in }
+    let link = vsyncClient.displayLink!
 
     XCTAssertTrue(link.isPaused)
     vsyncClient.await()
@@ -100,7 +102,7 @@ class VSyncClientTest: XCTestCase {
         maxRefreshRate: 60.0
       ) { _, _ in
         vsyncExpectation.fulfill()
-      }!
+      }
       weakClient = client
 
       threadTaskRunner.postTask {

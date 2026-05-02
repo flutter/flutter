@@ -8,12 +8,12 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/variable_refresh_rate_reporter.h"
 #include "flutter/shell/common/vsync_waiter.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient.h"
+
+@class FlutterVSyncClient;
 
 namespace flutter {
 
-class VsyncWaiterIOS final : public VsyncWaiter,
-                             public VariableRefreshRateReporter {
+class VsyncWaiterIOS final : public VsyncWaiter, public VariableRefreshRateReporter {
  public:
   explicit VsyncWaiterIOS(const flutter::TaskRunners& task_runners);
 
