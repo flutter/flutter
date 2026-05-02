@@ -149,4 +149,34 @@ void main() {
     );
     semantics.dispose();
   });
+
+  testWidgets('TestSemantics detects different locales correctly', (WidgetTester tester) async {
+  final first = TestSemantics(
+    id: 1,
+    label: 'Hello',
+    locale: const Locale('en'),
+  );
+
+  final second = TestSemantics(
+    id: 1,
+    label: 'Hello',
+    locale: const Locale('fr'),
+  );
+
+  expect(first, isNot(equals(second)));
+});
+
+  testWidgets('TestSemantics detects different controlNodes correctly', (WidgetTester tester) async {
+  final first = TestSemantics(
+    id: 1,
+    controlsNodes: <String>{'1', '2'},
+  );
+
+  final second = TestSemantics(
+    id: 1,
+    controlsNodes: <String>{'3', '4'},
+  );
+
+  expect(first, isNot(equals(second)));
+});
 }

@@ -508,7 +508,7 @@ class TestSemantics {
       );
     }
 
-    if (controlsNodes != node.controlsNode && !setEquals(controlsNodes, node.controlsNodes)) {
+    if (controlsNodes != node.controlsNodes && !setEquals(controlsNodes, node.controlsNodes)) {
       return fail(
         'expected node id $id to controls nodes $controlsNodes but found controlling nodes ${node.controlsNodes}',
       );
