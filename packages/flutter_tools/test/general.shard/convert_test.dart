@@ -161,7 +161,7 @@ void main() {
         65, 112, 112, 32, 108, 111, 103, 32, 119, 105, 116, 104, 32, 101, 114, 114, 111, 114, 58, 32, 239, 191, 189
       ];
       final String base64Encoded = cnv.base64.encode(rawBytes);
-      
+
       // This simulates what processVmServiceMessage does
       final String decoded = utf8AllowMalformed.decode(cnv.base64.decode(base64Encoded));
       expect(decoded, contains('App log'));
@@ -180,7 +180,7 @@ void main() {
         32,
         66, // 'B'
       ];
-      
+
       final String decoded = utf8AllowMalformed.decode(bytes);
       // Should not crash, should contain replacement characters for invalid sequences
       expect(decoded, isA<String>());
