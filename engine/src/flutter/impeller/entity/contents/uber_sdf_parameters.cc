@@ -73,22 +73,31 @@ UberSDFParameters UberSDFParameters::MakeRoundedRect(
 
 UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
     Color color,
-    const Rect& rect,
-    Scalar degree,
-    const RoundingRadii& radii,
-    Scalar corner_angle_span,
-    Point corner_circle_center,
+    Rect rect,
+    Point superellipse_degree,
+    Point superellipse_a,
+    RoundingRadii radii,
+    Point corner_angle_span,
+    Point corner_circle_center_top,
+    Point corner_circle_center_right,
+    Scalar superellipse_c,
+    Point superellipse_scale,
     std::optional<StrokeParameters> stroke) {
   Point size = Point(rect.GetSize() * 0.5f);
-  return UberSDFParameters{.type = Type::kRoundSuperellipse,
-                           .color = color,
-                           .center = rect.GetCenter(),
-                           .size = size,
-                           .stroke = stroke,
-                           .radii = radii,
-                           .superellipse_degree = degree,
-                           .corner_angle_span = corner_angle_span,
-                           .corner_circle_center = corner_circle_center};
+  return UberSDFParameters{
+      .type = Type::kRoundedSuperellipse,
+      .color = color,
+      .center = rect.GetCenter(),
+      .size = size,
+      .stroke = stroke,
+      .radii = radii,
+      .superellipse_degree = superellipse_degree,
+      .superellipse_a = superellipse_a,
+      .corner_angle_span = corner_angle_span,
+      .corner_circle_center_top = corner_circle_center_top,
+      .corner_circle_center_right = corner_circle_center_right,
+      .superellipse_c = superellipse_c,
+      .superellipse_scale = superellipse_scale};
 }
 
 }  // namespace impeller
