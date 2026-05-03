@@ -406,6 +406,14 @@ class CurvedAnimation extends AsymmetricCurvedAnimation {
     'This feature was deprecated after v3.44.0-0.2.pre.',
   )
   Curve? get reverseCurve => super.reverseCurve;
+
+  @override
+  @Deprecated(
+    'Switch to AsymmetricCurvedAnimation if you need different forward & backward animations. '
+    'In the future, CurvedAnimation will only support a single curve for improved memory efficiency. '
+    'This feature was deprecated after v3.44.0-0.2.pre.',
+  )
+  set reverseCurve(Curve? value) => super.reverseCurve = value;
 }
 
 /// An animation that applies different curves to its [parent] animation
