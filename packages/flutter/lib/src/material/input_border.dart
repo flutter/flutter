@@ -434,7 +434,13 @@ class OutlineInputBorder extends InputBorder {
   @override
   bool get preferPaintInterior => true;
 
-  Path _gapBorderPath(Canvas canvas, RRect scaledRRect, double start, double extent) {
+  Path _gapBorderPath(
+    Canvas canvas,
+    RRect scaledRRect,
+    double start,
+    double extent,
+    double outerWidth,
+  ) {
     final double tlRadiusX = scaledRRect.tlRadiusX;
     final double trRadiusX = scaledRRect.trRadiusX;
     final tlCorner = Rect.fromLTWH(
@@ -495,14 +501,14 @@ class OutlineInputBorder extends InputBorder {
       if (scaledRRect.trRadius != Radius.zero) {
         path.addArc(trCorner, trCornerArcStart, cornerArcSweep);
       }
-    } else if (gapEnd < scaledRRect.width - trRadiusX) {
+    } else if (gapEnd < outerWidth - trRadiusX) {
       path.moveTo(gapEnd, scaledRRect.top);
       path.lineTo(scaledRRect.right - trRadiusX, scaledRRect.top);
       if (scaledRRect.trRadius != Radius.zero) {
         path.addArc(trCorner, trCornerArcStart, cornerArcSweep);
       }
-    } else if (gapEnd < scaledRRect.width) {
-      final double dx = scaledRRect.width - gapEnd;
+    } else if (gapEnd < outerWidth) {
+      final double dx = outerWidth - gapEnd;
       final double sweep = math.asin(clampDouble(1 - dx / trRadiusX, 0.0, 1.0));
       path.addArc(trCorner, trCornerArcStart + sweep, cornerArcSweep - sweep);
     }
@@ -563,7 +569,7 @@ class OutlineInputBorder extends InputBorder {
         TextDirection.rtl => gapStart + gapPadding - extent,
         TextDirection.ltr => gapStart - gapPadding,
       };
-      final Path path = _gapBorderPath(canvas, scaledRRect, start, extent);
+      final Path path = _gapBorderPath(canvas, scaledRRect, start, extent, outer.width);
       canvas.drawPath(path, paint);
     }
   }

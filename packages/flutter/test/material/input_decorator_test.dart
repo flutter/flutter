@@ -1811,12 +1811,22 @@ void main() {
 
       expect(find.text(labelText), findsOneWidget);
       expect(findBorderPainter(), findsOneWidget);
-      // Verify fill then stroke path (border with gap for floating label).
+      // Verify fill via paintInterior (drawRRect), then stroke path (outline with label gap).
+      const double inputDecoratorWidth = 800.0;
+      const double inputDecoratorHeight = 56.0;
       expect(
         findBorderPainter(),
         paints
-          ..path(style: PaintingStyle.fill)
-          ..path(style: PaintingStyle.stroke),
+          ..save()
+          ..rrect(
+            style: PaintingStyle.fill,
+            color: const Color(0xFF00FF00),
+            rrect: BorderRadius.circular(borderRadius).toRRect(
+              const Rect.fromLTWH(0, 0, inputDecoratorWidth, inputDecoratorHeight),
+            ),
+          )
+          ..path(style: PaintingStyle.stroke)
+          ..restore(),
       );
     }, skip: isBrowser);
 
