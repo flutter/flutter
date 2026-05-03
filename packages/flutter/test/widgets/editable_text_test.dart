@@ -19067,7 +19067,9 @@ void main() {
     skip: kIsWeb,
   );
   group('TextInputAction updates', () {
-    testWidgets('EditableText updates textInputAction when text changes', (WidgetTester tester) async {
+    testWidgets('EditableText updates textInputAction when text changes', (
+      WidgetTester tester,
+    ) async {
       final controller = TextEditingController();
       final focusNode = FocusNode();
       addTearDown(controller.dispose);
@@ -19075,7 +19077,7 @@ void main() {
 
       TextInputAction currentAction = TextInputAction.done;
 
-       await tester.pumpWidget(
+      await tester.pumpWidget(
         TestWidgetsApp(
           home: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
@@ -19084,14 +19086,11 @@ void main() {
                 textInputAction: currentAction,
                 focusNode: focusNode,
                 style: const TextStyle(),
-                cursorColor: Color(0xFF0000FF),
-                backgroundCursorColor: Color(0xFF0A0A0A),
-                backgroundCursorColor: Colors.grey,
+                cursorColor: const Color(0xFF0000FF),
+                backgroundCursorColor: const Color(0xFF0A0A0A),
                 onChanged: (String value) {
                   setState(() {
-                    currentAction = value.isNotEmpty
-                        ? TextInputAction.send
-                        : TextInputAction.done;
+                    currentAction = value.isNotEmpty ? TextInputAction.send : TextInputAction.done;
                   });
                 },
               );
@@ -19101,7 +19100,6 @@ void main() {
       );
 
       await tester.tap(find.byType(EditableText));
-      await tester.showKeyboard(find.byType(EditableText));
       await tester.idle();
 
       // Initial: empty, "done"
