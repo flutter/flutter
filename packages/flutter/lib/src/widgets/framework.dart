@@ -1474,6 +1474,9 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// this method because they need to do some expensive work (e.g., network
   /// fetches) when their dependencies change, and that work would be too
   /// expensive to do for every build.
+  ///
+  /// Implementations of this method should start with a call to the inherited
+  /// method, as in `super.didChangeDependencies()`.
   @protected
   @mustCallSuper
   void didChangeDependencies() {}
