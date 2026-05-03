@@ -1024,13 +1024,17 @@ void main() {
     expect(tappedInside, isEmpty);
   });
 
-  // Helper for the navigation regression tests below: tap on a known
-  // outside-of-region location.
-  Future<void> _tapOutside(WidgetTester tester) async {
-    // The tests below place each route's TapRegion at the center of an
-    // 800x600 test surface. (200, 200) is reliably outside any 100x100
-    // region centered in that surface.
-    await tester.tapAt(const Offset(200, 200));
+  // Helper for the navigation regression tests below: find the currently
+  // visible TapRegion identified by [regionKey] and tap at a point that is
+  // outside its bounds in global coordinates. This mirrors how the original
+  // material/-based helper found the region's RenderBox dynamically rather
+  // than assuming a fixed test-surface size.
+  Future<void> _tapOutside(WidgetTester tester, Key regionKey) async {
+    final RenderBox renderBox =
+        tester.renderObject<RenderBox>(find.byKey(regionKey));
+    final Offset outsidePoint =
+        renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
+    await tester.tapAt(outsidePoint);
     await tester.pump();
   }
 
@@ -1104,15 +1108,15 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap outside the first TapRegion to trigger onTapOutside.
-    await _tapOutside(tester);
+    await _tapOutside(tester, tapRegion1Key);
     expect(count1, 1);
     expect(count2, 0);
 
     await tester.tap(find.byKey(triggerKey));
     await tester.pumpAndSettle();
 
-    // Tap outside the second TapRegion to trigger onTapOutside
-    await _tapOutside(tester);
+    // Tap outside the second TapRegion to trigger onTapOutside.
+    await _tapOutside(tester, tapRegion2Key);
     expect(count1, 2); // When the trigger is pressed, the first TapRegion is still active.
     expect(count2, 1);
 
@@ -1120,8 +1124,8 @@ void main() {
     navigatorKey.currentState!.pop();
     await tester.pumpAndSettle();
 
-    // Tap outside the first TapRegion to trigger onTapOutside
-    await _tapOutside(tester);
+    // Tap outside the first TapRegion to trigger onTapOutside.
+    await _tapOutside(tester, tapRegion1Key);
     expect(count1, 3);
     expect(count2, 1);
   });
@@ -1179,7 +1183,7 @@ void main() {
 
     // At this point, tapRegion2 is on top of tapRegion1.
     // Tap outside tapRegion2.
-    await _tapOutside(tester);
+    await _tapOutside(tester, tapRegion2Key);
     expect(count1, 0); // tapRegion1 should not respond.
     expect(count2, 1); // tapRegion2 should respond.
 
@@ -1188,7 +1192,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap outside tapRegion1.
-    await _tapOutside(tester);
+    await _tapOutside(tester, tapRegion1Key);
     expect(count1, 1); // tapRegion1 should respond.
     expect(count2, 1); // tapRegion2 should not respond anymore.
   });
