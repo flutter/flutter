@@ -951,13 +951,13 @@ class _RenderDecoration extends RenderBox
     // Use the real descent and make sure the subtext line box is tall enough for both children.
     // See https://github.com/flutter/flutter/issues/13715
 
-    // topPadding and bottomPadding control the vertical padding of the row containing [helper, error, counter] widgets
-    // in case of null values it will fallback to the legacy code to avoid breaking any established codebase
+    // The vertical padding around the row containing the helper, error, and counter widgets.
+    // Defaults to `subtextGap` at the top and 0.0 at the bottom when `supportingTextPadding` is null.
     final double topPadding = supportingTextPadding?.top ?? subtextGap;
     final double bottomPadding = supportingTextPadding?.bottom ?? 0.0;
     final double ascent =
         math.max(counterAscent, getBaseline(helperError, helperErrorConstraints)) + topPadding;
-    final double bottomHeight = math.max(counterAscent, helperErrorHeight) + bottomPadding;
+    final double bottomHeight = math.max(counterAscent, helperErrorHeight) + (topPadding+bottomPadding);
     final double subtextHeight = math.max(counterSize.height, helperErrorHeight) + (topPadding+bottomPadding);
     return (ascent: ascent, bottomHeight: bottomHeight, subtextHeight: subtextHeight);
   }
@@ -1301,7 +1301,9 @@ class _RenderDecoration extends RenderBox
     final double helperErrorHeight = _minHeight(helperError, helperErrorAvailableWidth);
     double subtextHeight = math.max(counterHeight, helperErrorHeight);
     if (subtextHeight > 0.0) {
-      subtextHeight += subtextGap;
+      final double topPadding = supportingTextPadding?.top ?? subtextGap;
+      final double bottomPadding = supportingTextPadding?.bottom ?? 0.0;
+      subtextHeight += topPadding + bottomPadding;
     }
 
     final double prefixHeight = _minHeight(prefix, width);
@@ -1442,7 +1444,6 @@ class _RenderDecoration extends RenderBox
     final double counterBaseline = counter?.getDistanceToBaseline(TextBaseline.alphabetic)! ?? 0.0;
 
     double start, end, startSupporting , endSupporting;
-    // double start, end, startError, endError;
     switch (textDirection) {
       case TextDirection.ltr:
         start = contentPadding.start + _boxSize(icon).width;
@@ -1456,7 +1457,6 @@ class _RenderDecoration extends RenderBox
         if (counter != null) {
           _boxParentData(counter).offset = Offset(
             endSupporting - counter.size.width - decoration.inputGap,
-            // endSupporting - counter.size.width - decoration.inputGap,
             subtextBaseline - counterBaseline,
           );
         }
@@ -3940,8 +3940,11 @@ class InputDecoration {
   /// The padding applied to the supporting text row.
   ///
   /// This padding is applied specifically to supporting text and is independent of [contentPadding].
-  ///  if [supportingTextPadding] is null, the value of [contentPadding] will be used for both supporting text widgets [InputDecoration.helper] , [InputDecoration.counter]
-  ///  and [InputDecoration.error].
+  /// If [supportingTextPadding] is null, the value of [contentPadding] will be used
+  /// for all supporting text widgets including [InputDecoration.helper], [InputDecoration.counter]
+  /// and [InputDecoration.error].
+  /// When non-null, it completely overrides the default behavior, including the default
+  /// vertical gap (`subtextGap`) between the input container and the supporting text row.
   final EdgeInsetsGeometry? supportingTextPadding;
 
   /// Creates a copy of this input decoration with the given fields replaced
@@ -5427,9 +5430,14 @@ class InputDecorationThemeData with Diagnosticable {
   /// {@macro flutter.material.inputDecoration.visualDensity}
   final VisualDensity? visualDensity;
 
-  /// The padding for the supporting text row which contains [InputDecoration.errorText] , [InputDecoration.counter] and [InputDecoration.helper].
+  /// The padding applied to the supporting text row.
   ///
-  /// If [supportingTextPadding] is null, [contentPadding] will be used for padding for both supporting text row and input text.
+  /// This padding is applied specifically to supporting text and is independent of [contentPadding].
+  /// If [supportingTextPadding] is null, the value of [contentPadding] will be used
+  /// for all supporting text widgets including [InputDecoration.helper], [InputDecoration.counter]
+  /// and [InputDecoration.error].
+  /// When non-null, it completely overrides the default behavior, including the default
+  /// vertical gap (`subtextGap`) between the input container and the supporting text row.
   final EdgeInsetsGeometry? supportingTextPadding;
 
   /// Creates a copy of this object but with the given fields replaced with the
