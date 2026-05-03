@@ -481,7 +481,7 @@ HitTestResponse Engine::HitTest(int64_t view_id,
   if (runtime_controller_) {
     return runtime_controller_->HitTest(view_id, offset);
   }
-  return {.is_platform_view = false};
+  return {.has_platform_view = false};
 }
 
 void Engine::DispatchSemanticsAction(int64_t view_id,

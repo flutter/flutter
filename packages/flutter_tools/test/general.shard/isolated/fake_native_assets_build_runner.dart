@@ -149,6 +149,17 @@ final class FakeFlutterNativeAssetsBuilderResult implements BuildResult, LinkRes
   }
 
   @override
+  Map<String, Object?> toJson() => <String, Object?>{
+    'encodedAssets': encodedAssets.map((e) => e.toJson()).toList(),
+    'encodedAssetsForLinking': Map.fromEntries(
+      encodedAssetsForLinking.entries.map(
+        (e) => MapEntry(e.key, e.value.map((a) => a.toJson()).toList()),
+      ),
+    ),
+    'dependencies': dependencies.map((e) => e.toString()).toList(),
+  };
+
+  @override
   final List<EncodedAsset> encodedAssets;
 
   @override

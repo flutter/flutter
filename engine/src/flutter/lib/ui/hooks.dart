@@ -376,10 +376,10 @@ void _dispatchPointerDataPacket(ByteData packet) {
 
 @pragma('vm:entry-point')
 class _HitTestResponse {
-  _HitTestResponse({required this.isPlatformView});
+  _HitTestResponse({required this.hasPlatformView});
 
   @pragma('vm:entry-point')
-  final bool isPlatformView;
+  final bool hasPlatformView;
 }
 
 @pragma('vm:entry-point')
@@ -389,7 +389,7 @@ _HitTestResponse _hitTest(int viewId, double x, double y) {
   final offset = Offset(x, y);
   final request = HitTestRequest(view: view, offset: offset);
   final HitTestResponse response = PlatformDispatcher.instance._hitTest(request);
-  return _HitTestResponse(isPlatformView: response.isPlatformView);
+  return _HitTestResponse(hasPlatformView: response.hasPlatformView);
 }
 
 @pragma('vm:entry-point')

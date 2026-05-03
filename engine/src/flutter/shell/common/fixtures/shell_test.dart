@@ -645,7 +645,7 @@ void providesEngineId() {
 @pragma('vm:entry-point')
 void hitTestInsidePlatformViewMain() {
   PlatformDispatcher.instance.onHitTest = (HitTestRequest request) {
-    return const HitTestResponse(isPlatformView: true);
+    return const HitTestResponse(hasPlatformView: true);
   };
 }
 

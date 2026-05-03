@@ -657,7 +657,7 @@ class HitTestRequest {
 }
 
 class HitTestResponse {
-  const HitTestResponse({required this.isPlatformView});
-  static const HitTestResponse empty = HitTestResponse(isPlatformView: false);
-  final bool isPlatformView;
+  const HitTestResponse({required this.hasPlatformView});
+  static const HitTestResponse empty = HitTestResponse(hasPlatformView: false);
+  final bool hasPlatformView;
 }

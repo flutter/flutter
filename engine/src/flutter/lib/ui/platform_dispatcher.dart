@@ -3308,19 +3308,16 @@ class HitTestRequest {
 /// * [HitTestRequest], the request to hit test a view at a specific position.
 class HitTestResponse {
   /// Creates a hit test response.
-  const HitTestResponse({required this.isPlatformView});
+  const HitTestResponse({required this.hasPlatformView});
 
   /// A response with no hit entries.
-  static const HitTestResponse empty = HitTestResponse(isPlatformView: false);
+  static const HitTestResponse empty = HitTestResponse(hasPlatformView: false);
 
-  /// Whether the first hit test entry is a platform view.
-  ///
-  /// The first hit test entry is typically the child that is
-  /// visually "on top" (i.e., paints later).
+  /// Whether the hit test result contains a platform view.
   ///
   /// See also:
   ///
   /// * [NativeHitTestTarget], the Flutter framework mixin that represents a hit test target
   ///   backed by a platform view.
-  final bool isPlatformView;
+  final bool hasPlatformView;
 }

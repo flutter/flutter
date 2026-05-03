@@ -624,7 +624,7 @@ TEST_F(ShellTest, HitTestInsidePlatformViewIsFunctional) {
     shell->GetEngine()->SetViewportMetrics(0, metrics);
 
     HitTestResponse response = shell->GetPlatformView()->HitTest(0, {0.0, 0.0});
-    EXPECT_TRUE(response.is_platform_view);
+    EXPECT_TRUE(response.has_platform_view);
     latch.Signal();
   });
 
@@ -658,7 +658,7 @@ TEST_F(ShellTest, HitTestOutsidePlatformViewIsFunctional) {
     shell->GetEngine()->SetViewportMetrics(0, metrics);
 
     HitTestResponse response = shell->GetPlatformView()->HitTest(0, {0.0, 0.0});
-    EXPECT_FALSE(response.is_platform_view);
+    EXPECT_FALSE(response.has_platform_view);
     latch.Signal();
   });
 
@@ -2539,7 +2539,7 @@ TEST_F(ShellTest, RasterizerScreenshot) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(ShellTest, RasterizerMakeRasterSnapshot) {
+TEST_F(ShellTest, RasterizerMakeSkiaSnapshot) {
   Settings settings = CreateSettingsForFixture();
   auto configuration = RunConfiguration::InferFromSettings(settings);
   auto task_runner = CreateNewThread();
@@ -2560,7 +2560,7 @@ TEST_F(ShellTest, RasterizerMakeRasterSnapshot) {
       shell->GetTaskRunners().GetRasterTaskRunner(), [&shell, &latch]() {
         SnapshotDelegate* delegate =
             reinterpret_cast<Rasterizer*>(shell->GetRasterizer().get());
-        sk_sp<DlImage> image = delegate->MakeRasterSnapshotSync(
+        sk_sp<SkImage> image = delegate->MakeSkiaSnapshotSync(
             MakeSizedDisplayList(50, 50), DlISize(50, 50),
             SnapshotPixelFormat::kDontCare);
         EXPECT_NE(image, nullptr);
