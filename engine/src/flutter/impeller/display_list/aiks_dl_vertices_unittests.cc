@@ -53,7 +53,7 @@ TEST_P(AiksTest, VerticesGeometryUVPositionData) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->impeller_texture()->GetSize();
+  auto size = image->GetImpellerTexture(GetContext())->GetSize();
 
   paint.setColorSource(
       DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
@@ -76,7 +76,7 @@ TEST_P(AiksTest, VerticesGeometryUVPositionDataWithTranslate) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->impeller_texture()->GetSize();
+  auto size = image->GetImpellerTexture(GetContext())->GetSize();
 
   DlMatrix matrix = DlMatrix::MakeTranslation({100, 100});
   paint.setColorSource(
@@ -101,7 +101,7 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionData) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->impeller_texture()->GetSize();
+  auto size = image->GetImpellerTexture(GetContext())->GetSize();
 
   paint.setColorSource(
       DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
@@ -129,7 +129,7 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionDataAdvancedBlend) {
   DlPaint paint;
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
-  auto size = image->impeller_texture()->GetSize();
+  auto size = image->GetImpellerTexture(GetContext())->GetSize();
 
   paint.setColorSource(
       DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
@@ -482,8 +482,7 @@ TEST_P(AiksTest, DrawVerticesTextureCoordinatesWithFragmentShader) {
       OpenAssetAsRuntimeStage("runtime_stage_simple.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
 
   auto runtime_effect = DlRuntimeEffectImpeller::Make(runtime_stage);
@@ -532,8 +531,7 @@ TEST_P(AiksTest,
       OpenAssetAsRuntimeStage("runtime_stage_position.frag.iplr");
   ABSL_ASSERT_OK(runtime_stages_result);
   std::shared_ptr<RuntimeStage> runtime_stage =
-      runtime_stages_result
-          .value()[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
 
   auto runtime_effect = DlRuntimeEffectImpeller::Make(runtime_stage);

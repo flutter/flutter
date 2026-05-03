@@ -3,12 +3,32 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../system_context_menu_utils.dart';
 import 'editable_text_tester.dart';
+import 'widgets_app_tester.dart';
+
+Widget _buildSystemContextMenuTestApp({
+  required Widget child,
+  bool supportsShowingSystemContextMenu = false,
+}) {
+  return TestWidgetsApp(
+    home: child,
+    builder: (BuildContext context, Widget? appChild) {
+      final MediaQueryData mediaQueryData =
+          MediaQuery.maybeOf(context) ?? MediaQueryData.fromView(View.of(context));
+      return MediaQuery(
+        data: mediaQueryData.copyWith(
+          supportsShowingSystemContextMenu: supportsShowingSystemContextMenu,
+        ),
+        child: appChild ?? const SizedBox.shrink(),
+      );
+    },
+  );
+}
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -20,15 +40,13 @@ void main() {
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         // By default, MediaQueryData.supportsShowingSystemContextMenu is false.
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: TestTextField(
-                controller: controller,
-                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-                  return SystemContextMenu.editableText(editableTextState: editableTextState);
-                },
-              ),
+        _buildSystemContextMenuTestApp(
+          child: Center(
+            child: TestTextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(editableTextState: editableTextState);
+              },
             ),
           ),
         ),
@@ -70,15 +88,13 @@ void main() {
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         // By default, MediaQueryData.supportsShowingSystemContextMenu is false.
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: TestTextField(
-                controller: controller,
-                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-                  return SystemContextMenu.editableText(editableTextState: editableTextState);
-                },
-              ),
+        _buildSystemContextMenuTestApp(
+          child: Center(
+            child: TestTextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(editableTextState: editableTextState);
+              },
             ),
           ),
         ),
@@ -101,28 +117,16 @@ void main() {
       final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Center(
-                    child: TestTextField(
-                      controller: controller,
-                      contextMenuBuilder:
-                          (BuildContext context, EditableTextState editableTextState) {
-                            return SystemContextMenu.editableText(
-                              editableTextState: editableTextState,
-                            );
-                          },
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+        _buildSystemContextMenuTestApp(
+          supportsShowingSystemContextMenu: true,
+          child: Center(
+            child: TestTextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(editableTextState: editableTextState);
+              },
+            ),
+          ),
         ),
       );
 
@@ -179,29 +183,19 @@ void main() {
       final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Center(
-                    child: TestTextField(
-                      controller: controller,
-                      contextMenuBuilder:
-                          (BuildContext context, EditableTextState editableTextState) {
-                            return SystemContextMenu.editableText(
-                              editableTextState: editableTextState,
-                              items: items1,
-                            );
-                          },
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+        _buildSystemContextMenuTestApp(
+          supportsShowingSystemContextMenu: true,
+          child: Center(
+            child: TestTextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(
+                  editableTextState: editableTextState,
+                  items: items1,
+                );
+              },
+            ),
+          ),
         ),
       );
 
@@ -264,29 +258,19 @@ void main() {
       final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Center(
-                    child: TestTextField(
-                      controller: controller,
-                      contextMenuBuilder:
-                          (BuildContext context, EditableTextState editableTextState) {
-                            return SystemContextMenu.editableText(
-                              editableTextState: editableTextState,
-                              items: items1,
-                            );
-                          },
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+        _buildSystemContextMenuTestApp(
+          supportsShowingSystemContextMenu: true,
+          child: Center(
+            child: TestTextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(
+                  editableTextState: editableTextState,
+                  items: items1,
+                );
+              },
+            ),
+          ),
         ),
       );
 
@@ -347,29 +331,19 @@ void main() {
       final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Center(
-                    child: TestTextField(
-                      controller: controller,
-                      contextMenuBuilder:
-                          (BuildContext context, EditableTextState editableTextState) {
-                            return SystemContextMenu.editableText(
-                              editableTextState: editableTextState,
-                              items: items1,
-                            );
-                          },
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+        _buildSystemContextMenuTestApp(
+          supportsShowingSystemContextMenu: true,
+          child: Center(
+            child: TestTextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(
+                  editableTextState: editableTextState,
+                  items: items1,
+                );
+              },
+            ),
+          ),
         ),
       );
 
@@ -430,28 +404,16 @@ void main() {
       final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Center(
-                    child: TestTextField(
-                      controller: controller,
-                      contextMenuBuilder:
-                          (BuildContext context, EditableTextState editableTextState) {
-                            return SystemContextMenu.editableText(
-                              editableTextState: editableTextState,
-                            );
-                          },
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+        _buildSystemContextMenuTestApp(
+          supportsShowingSystemContextMenu: true,
+          child: Center(
+            child: TestTextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(editableTextState: editableTextState);
+              },
+            ),
+          ),
         ),
       );
 
@@ -482,33 +444,21 @@ void main() {
       addTearDown(controller.dispose);
       late StateSetter setState;
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Center(
-                    child: StatefulBuilder(
-                      builder: (BuildContext context, StateSetter localSetState) {
-                        setState = localSetState;
-                        return TestTextField(
-                          controller: controller,
-                          contextMenuBuilder:
-                              (BuildContext context, EditableTextState editableTextState) {
-                                return SystemContextMenu.editableText(
-                                  editableTextState: editableTextState,
-                                );
-                              },
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+        _buildSystemContextMenuTestApp(
+          supportsShowingSystemContextMenu: true,
+          child: Center(
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter localSetState) {
+                setState = localSetState;
+                return TestTextField(
+                  controller: controller,
+                  contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                    return SystemContextMenu.editableText(editableTextState: editableTextState);
+                  },
+                );
+              },
+            ),
+          ),
         ),
       );
 
@@ -538,45 +488,34 @@ void main() {
       final GlobalKey menu1Key = GlobalKey();
       final GlobalKey menu2Key = GlobalKey();
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Center(
-                    child: Column(
-                      children: <Widget>[
-                        TestTextField(
-                          key: field1Key,
-                          controller: controller1,
-                          contextMenuBuilder:
-                              (BuildContext context, EditableTextState editableTextState) {
-                                return SystemContextMenu.editableText(
-                                  key: menu1Key,
-                                  editableTextState: editableTextState,
-                                );
-                              },
-                        ),
-                        TestTextField(
-                          key: field2Key,
-                          controller: controller2,
-                          contextMenuBuilder:
-                              (BuildContext context, EditableTextState editableTextState) {
-                                return SystemContextMenu.editableText(
-                                  key: menu2Key,
-                                  editableTextState: editableTextState,
-                                );
-                              },
-                        ),
-                      ],
-                    ),
-                  ),
+        _buildSystemContextMenuTestApp(
+          supportsShowingSystemContextMenu: true,
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                TestTextField(
+                  key: field1Key,
+                  controller: controller1,
+                  contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                    return SystemContextMenu.editableText(
+                      key: menu1Key,
+                      editableTextState: editableTextState,
+                    );
+                  },
                 ),
-              ),
-            );
-          },
+                TestTextField(
+                  key: field2Key,
+                  controller: controller2,
+                  contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                    return SystemContextMenu.editableText(
+                      key: menu2Key,
+                      editableTextState: editableTextState,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
         ),
       );
 
@@ -742,31 +681,18 @@ void main() {
       addTearDown(controller.dispose);
       late BuildContext buildContext;
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: false),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Builder(
-                    builder: (BuildContext context) {
-                      buildContext = context;
-                      return TestTextField(
-                        controller: controller,
-                        contextMenuBuilder:
-                            (BuildContext context, EditableTextState editableTextState) {
-                              return SystemContextMenu.editableText(
-                                editableTextState: editableTextState,
-                              );
-                            },
-                      );
-                    },
-                  ),
-                ),
-              ),
-            );
-          },
+        _buildSystemContextMenuTestApp(
+          child: Builder(
+            builder: (BuildContext context) {
+              buildContext = context;
+              return TestTextField(
+                controller: controller,
+                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                  return SystemContextMenu.editableText(editableTextState: editableTextState);
+                },
+              );
+            },
+          ),
         ),
       );
 
@@ -783,31 +709,19 @@ void main() {
       addTearDown(controller.dispose);
       late BuildContext buildContext;
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Builder(
-                    builder: (BuildContext context) {
-                      buildContext = context;
-                      return TestTextField(
-                        controller: controller,
-                        contextMenuBuilder:
-                            (BuildContext context, EditableTextState editableTextState) {
-                              return SystemContextMenu.editableText(
-                                editableTextState: editableTextState,
-                              );
-                            },
-                      );
-                    },
-                  ),
-                ),
-              ),
-            );
-          },
+        _buildSystemContextMenuTestApp(
+          supportsShowingSystemContextMenu: true,
+          child: Builder(
+            builder: (BuildContext context) {
+              buildContext = context;
+              return TestTextField(
+                controller: controller,
+                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                  return SystemContextMenu.editableText(editableTextState: editableTextState);
+                },
+              );
+            },
+          ),
         ),
       );
 
@@ -825,16 +739,9 @@ void main() {
       'read only fields do not support the system context menu',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          Builder(
-            builder: (BuildContext context) {
-              final MediaQueryData mediaQueryData = MediaQuery.of(context);
-              return MediaQuery(
-                data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-                child: MaterialApp(
-                  home: Scaffold(body: TestTextField(readOnly: readOnly)),
-                ),
-              );
-            },
+          _buildSystemContextMenuTestApp(
+            supportsShowingSystemContextMenu: true,
+            child: TestTextField(readOnly: readOnly),
           ),
         );
 
@@ -856,28 +763,15 @@ void main() {
       final controller = TextEditingController(text: 'one two three');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: false),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Center(
-                    child: TestTextField(
-                      controller: controller,
-                      contextMenuBuilder:
-                          (BuildContext context, EditableTextState editableTextState) {
-                            return SystemContextMenu.editableText(
-                              editableTextState: editableTextState,
-                            );
-                          },
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+        _buildSystemContextMenuTestApp(
+          child: Center(
+            child: TestTextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(editableTextState: editableTextState);
+              },
+            ),
+          ),
         ),
       );
 
@@ -945,29 +839,19 @@ void main() {
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Center(
-                    child: TestTextField(
-                      controller: controller,
-                      contextMenuBuilder:
-                          (BuildContext context, EditableTextState editableTextState) {
-                            return SystemContextMenu.editableText(
-                              editableTextState: editableTextState,
-                              items: items,
-                            );
-                          },
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+        _buildSystemContextMenuTestApp(
+          supportsShowingSystemContextMenu: true,
+          child: Center(
+            child: TestTextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(
+                  editableTextState: editableTextState,
+                  items: items,
+                );
+              },
+            ),
+          ),
         ),
       );
 
@@ -1038,36 +922,26 @@ void main() {
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Center(
-                    child: TestTextField(
-                      controller: controller,
-                      contextMenuBuilder:
-                          (BuildContext context, EditableTextState editableTextState) {
-                            return SystemContextMenu.editableText(
-                              editableTextState: editableTextState,
-                              items: <IOSSystemContextMenuItem>[
-                                IOSSystemContextMenuItemCustom(
-                                  title: 'Test Action',
-                                  onPressed: () {
-                                    customActionCalled = true;
-                                  },
-                                ),
-                              ],
-                            );
-                          },
+        _buildSystemContextMenuTestApp(
+          supportsShowingSystemContextMenu: true,
+          child: Center(
+            child: TestTextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(
+                  editableTextState: editableTextState,
+                  items: <IOSSystemContextMenuItem>[
+                    IOSSystemContextMenuItemCustom(
+                      title: 'Test Action',
+                      onPressed: () {
+                        customActionCalled = true;
+                      },
                     ),
-                  ),
-                ),
-              ),
-            );
-          },
+                  ],
+                );
+              },
+            ),
+          ),
         ),
       );
 
@@ -1130,29 +1004,19 @@ void main() {
       ];
 
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Center(
-                    child: TestTextField(
-                      controller: controller,
-                      contextMenuBuilder:
-                          (BuildContext context, EditableTextState editableTextState) {
-                            return SystemContextMenu.editableText(
-                              editableTextState: editableTextState,
-                              items: items,
-                            );
-                          },
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+        _buildSystemContextMenuTestApp(
+          supportsShowingSystemContextMenu: true,
+          child: Center(
+            child: TestTextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(
+                  editableTextState: editableTextState,
+                  items: items,
+                );
+              },
+            ),
+          ),
         ),
       );
 
@@ -1211,55 +1075,44 @@ void main() {
       });
 
       await tester.pumpWidget(
-        Builder(
-          builder: (BuildContext context) {
-            final MediaQueryData mediaQueryData = MediaQuery.of(context);
-            return MediaQuery(
-              data: mediaQueryData.copyWith(supportsShowingSystemContextMenu: true),
-              child: MaterialApp(
-                home: Scaffold(
-                  body: Column(
-                    children: <Widget>[
-                      TestTextField(
-                        controller: controller1,
-                        contextMenuBuilder:
-                            (BuildContext context, EditableTextState editableTextState) {
-                              return SystemContextMenu.editableText(
-                                editableTextState: editableTextState,
-                                items: <IOSSystemContextMenuItem>[
-                                  IOSSystemContextMenuItemCustom(
-                                    title: 'Field 1 Action',
-                                    onPressed: () {
-                                      field1ActionCalled = true;
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
-                      ),
-                      TestTextField(
-                        controller: controller2,
-                        contextMenuBuilder:
-                            (BuildContext context, EditableTextState editableTextState) {
-                              return SystemContextMenu.editableText(
-                                editableTextState: editableTextState,
-                                items: <IOSSystemContextMenuItem>[
-                                  IOSSystemContextMenuItemCustom(
-                                    title: 'Field 2 Action',
-                                    onPressed: () {
-                                      field2ActionCalled = true;
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
+        _buildSystemContextMenuTestApp(
+          supportsShowingSystemContextMenu: true,
+          child: Column(
+            children: <Widget>[
+              TestTextField(
+                controller: controller1,
+                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                  return SystemContextMenu.editableText(
+                    editableTextState: editableTextState,
+                    items: <IOSSystemContextMenuItem>[
+                      IOSSystemContextMenuItemCustom(
+                        title: 'Field 1 Action',
+                        onPressed: () {
+                          field1ActionCalled = true;
+                        },
                       ),
                     ],
-                  ),
-                ),
+                  );
+                },
               ),
-            );
-          },
+              TestTextField(
+                controller: controller2,
+                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                  return SystemContextMenu.editableText(
+                    editableTextState: editableTextState,
+                    items: <IOSSystemContextMenuItem>[
+                      IOSSystemContextMenuItemCustom(
+                        title: 'Field 2 Action',
+                        onPressed: () {
+                          field2ActionCalled = true;
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       );
 
@@ -1362,25 +1215,21 @@ void main() {
       final controller = TextEditingController(text: 'Hello world');
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(supportsShowingSystemContextMenu: true),
-          child: MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: TextField(
-                  controller: controller,
-                  contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
-                    return SystemContextMenu.editableText(editableTextState: editableTextState);
-                  },
-                ),
-              ),
+        _buildSystemContextMenuTestApp(
+          supportsShowingSystemContextMenu: true,
+          child: Center(
+            child: TestTextField(
+              controller: controller,
+              contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                return SystemContextMenu.editableText(editableTextState: editableTextState);
+              },
             ),
           ),
         ),
       );
 
       // Focus the field first (this establishes the TextInputConnection).
-      await tester.tap(find.byType(TextField));
+      await tester.tap(find.byType(TestTextField));
       await tester.pump();
       final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
 

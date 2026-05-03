@@ -201,6 +201,10 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 
   FlutterBinaryMessengerRelay* _binaryMessenger;
   FlutterTextureRegistryRelay* _textureRegistry;
+
+  FlutterFMLTaskRunner* _platformTaskRunnerWrapper;
+  FlutterFMLTaskRunner* _uiTaskRunnerWrapper;
+  FlutterFMLTaskRunner* _rasterTaskRunnerWrapper;
 }
 
 - (int64_t)engineIdentifier {
@@ -389,6 +393,14 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.platformView->DispatchPointerDataPacket(std::move(packet));
 }
 
+- (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(flutter::PointData)location
+                                                   viewId:(uint64_t)viewId {
+  if (!self.platformView) {
+    return NO;
+  }
+  return self.platformView->HitTest(viewId, location).has_platform_view;
+}
+
 - (void)installFirstFrameCallback:(void (^)(void))block {
   if (!self.platformView) {
     return;
@@ -402,9 +414,11 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
     }
     FML_DCHECK(strongSelf.platformTaskRunner);
     FML_DCHECK(strongSelf.rasterTaskRunner);
-    FML_DCHECK(strongSelf.rasterTaskRunner->RunsTasksOnCurrentThread());
+    FML_DCHECK([strongSelf.rasterTaskRunner runsTasksOnCurrentThread]);
     // Get callback on raster thread and jump back to platform thread.
-    strongSelf.platformTaskRunner->PostTask([block]() { block(); });
+    [strongSelf.platformTaskRunner postTask:^{
+      block();
+    }];
   });
 }
 
@@ -437,25 +451,16 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   return static_cast<flutter::PlatformViewIOS*>(_shell->GetPlatformView().get());
 }
 
-- (fml::RefPtr<fml::TaskRunner>)platformTaskRunner {
-  if (!_shell) {
-    return {};
-  }
-  return _shell->GetTaskRunners().GetPlatformTaskRunner();
+- (FlutterFMLTaskRunner*)platformTaskRunner {
+  return _platformTaskRunnerWrapper;
 }
 
-- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner {
-  if (!_shell) {
-    return {};
-  }
-  return _shell->GetTaskRunners().GetUITaskRunner();
+- (FlutterFMLTaskRunner*)uiTaskRunner {
+  return _uiTaskRunnerWrapper;
 }
 
-- (fml::RefPtr<fml::TaskRunner>)rasterTaskRunner {
-  if (!_shell) {
-    return {};
-  }
-  return _shell->GetTaskRunners().GetRasterTaskRunner();
+- (FlutterFMLTaskRunner*)rasterTaskRunner {
+  return _rasterTaskRunnerWrapper;
 }
 
 - (void)sendKeyEvent:(const FlutterKeyEvent&)event
@@ -569,6 +574,9 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   _profiler.reset();
   _threadHost.reset();
   _platformViewsController = nil;
+  _platformTaskRunnerWrapper = nil;
+  _uiTaskRunnerWrapper = nil;
+  _rasterTaskRunnerWrapper = nil;
 }
 
 - (NSURL*)vmServiceUrl {
@@ -789,6 +797,13 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
 - (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
     withVMServicePublication:(BOOL)doesVMServicePublication {
   _shell = std::move(shell);
+  _platformTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
+      initWithTaskRunner:_shell->GetTaskRunners().GetPlatformTaskRunner()];
+  _uiTaskRunnerWrapper =
+      [[FlutterFMLTaskRunner alloc] initWithTaskRunner:_shell->GetTaskRunners().GetUITaskRunner()];
+  _rasterTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
+      initWithTaskRunner:_shell->GetTaskRunners().GetRasterTaskRunner()];
+
   [self setUpChannels];
   [self onLocaleUpdated:nil];
   [self updateDisplays];
@@ -895,8 +910,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
           return std::unique_ptr<flutter::PlatformViewIOS>();
         }
         [strongSelf recreatePlatformViewsController];
-        strongSelf.platformViewsController.taskRunner =
-            shell.GetTaskRunners().GetPlatformTaskRunner();
+        strongSelf.platformViewsController.taskRunner = [[FlutterFMLTaskRunner alloc]
+            initWithTaskRunner:shell.GetTaskRunners().GetPlatformTaskRunner()];
         return std::make_unique<flutter::PlatformViewIOS>(
             shell, strongSelf->_renderingApi, strongSelf.platformViewsController,
             shell.GetTaskRunners(), shell.GetConcurrentWorkerTaskRunner(),
@@ -1572,7 +1587,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   flutter::Shell::CreateCallback<flutter::PlatformView> on_create_platform_view =
       [result, context](flutter::Shell& shell) {
         [result recreatePlatformViewsController];
-        result.platformViewsController.taskRunner = shell.GetTaskRunners().GetPlatformTaskRunner();
+        result.platformViewsController.taskRunner = [[FlutterFMLTaskRunner alloc]
+            initWithTaskRunner:shell.GetTaskRunners().GetPlatformTaskRunner()];
         return std::make_unique<flutter::PlatformViewIOS>(
             shell, context, result.platformViewsController, shell.GetTaskRunners());
       };
@@ -1741,6 +1757,10 @@ static BOOL FLTFlutterPluginRespondsToLegacyAppLifecycleSelectors(
 
 - (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package {
   return [self.flutterEngine lookupKeyForAsset:asset fromPackage:package];
+}
+
+- (nullable NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
+  return [self.flutterEngine valuePublishedByPlugin:pluginKey];
 }
 
 @end

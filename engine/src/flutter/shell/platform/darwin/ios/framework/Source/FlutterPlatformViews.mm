@@ -517,8 +517,9 @@ static BOOL _preparedOnce = NO;
 
 @interface FlutterTouchInterceptingView ()
 @property(nonatomic, weak, readonly) UIView* embeddedView;
+@property(nonatomic, weak, readonly) UIViewController<FlutterViewResponder>* flutterViewController;
+@property(nonatomic, weak, readonly) FlutterPlatformViewsController* platformViewsController;
 @property(nonatomic, readonly) FlutterDelayingGestureRecognizer* delayingRecognizer;
-@property(nonatomic, readonly) FlutterPlatformViewGestureRecognizersBlockingPolicy blockingPolicy;
 @end
 
 @implementation FlutterTouchInterceptingView
@@ -530,6 +531,8 @@ static BOOL _preparedOnce = NO;
   if (self) {
     self.multipleTouchEnabled = YES;
     _embeddedView = embeddedView;
+    _platformViewsController = platformViewsController;
+    _flutterViewController = platformViewsController.flutterViewController;
     embeddedView.autoresizingMask =
         (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
 
@@ -545,7 +548,12 @@ static BOOL _preparedOnce = NO;
                                             forwardingRecognizer:forwardingRecognizer];
     _blockingPolicy = blockingPolicy;
 
-    [self addGestureRecognizer:_delayingRecognizer];
+    // For hit test, don't block gestures using delaying recognizer. However, we still
+    // forward touches so Flutter can process it in its gesture arena (e.g. dismiss a
+    // drop-down menu when tapping outside of the menu but inside the platform view).
+    if (blockingPolicy != FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture) {
+      [self addGestureRecognizer:_delayingRecognizer];
+    }
     [self addGestureRecognizer:forwardingRecognizer];
   }
   return self;
@@ -569,15 +577,12 @@ static BOOL _preparedOnce = NO;
   self.delayingRecognizer.state = UIGestureRecognizerStateFailed;
 }
 
-- (BOOL)containsWebView:(UIView*)view remainingSubviewDepth:(int)remainingSubviewDepth {
-  if (remainingSubviewDepth < 0) {
-    return NO;
-  }
+- (BOOL)containsWebView:(UIView*)view {
   if ([view isKindOfClass:[WKWebView class]]) {
     return YES;
   }
   for (UIView* subview in view.subviews) {
-    if ([self containsWebView:subview remainingSubviewDepth:remainingSubviewDepth - 1]) {
+    if ([self containsWebView:subview]) {
       return YES;
     }
   }
@@ -617,8 +622,30 @@ static BOOL _preparedOnce = NO;
   }
 }
 
+- (UIView*)hitTest:(CGPoint)point withEvent:(UIEvent*)event {
+  // In release mode, FlutterTouchInterceptingView's init is called before flutterViewController
+  // is set on platformViewsController.
+  if (self.flutterViewController == nil) {
+    _flutterViewController = self.platformViewsController.flutterViewController;
+  }
+  CGPoint pointInFlutterView = [self convertPoint:point toView:self.flutterViewController.view];
+  // Consult the framework on if the touch should be handled by the platform view.
+  // If NO, the touch is handled by a Flutter widget and should be blocked (by returning self).
+  // If YES, the touch should continue to the standard hit-testing (through super), allowing the
+  // touch to be delivered to the underlying native platform view or one of its subviews.
+  if (![self.flutterViewController
+          platformViewShouldAcceptTouchAtTouchBeganLocation:pointInFlutterView]) {
+    return self;
+  }
+
+  return [super hitTest:point withEvent:event];
+}
+
 - (void)blockGesture {
   switch (_blockingPolicy) {
+    case FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture:
+      // No-op. Handled by hit test.
+      break;
     case FlutterPlatformViewGestureRecognizersBlockingPolicyEager:
       // We block all other gesture recognizers immediately in this policy.
       self.delayingRecognizer.state = UIGestureRecognizerStateEnded;
@@ -642,13 +669,10 @@ static BOOL _preparedOnce = NO;
           [self searchAndFixWebView:self.embeddedView];
         }
       } else if (@available(iOS 18.2, *)) {
-        // This workaround is designed for WKWebView only. The 1P web view plugin provides a
-        // WKWebView itself as the platform view. However, some 3P plugins provide wrappers of
-        // WKWebView instead. So we perform DFS to search the view hierarchy (with a depth limit).
-        // Passing a limit of 0 means only searching for platform view itself; Pass 1 to include its
-        // children as well, and so on. We should be conservative and start with a small number. The
-        // AdMob banner has a WKWebView at depth 7.
-        if ([self containsWebView:self.embeddedView remainingSubviewDepth:1]) {
+        // The 1P web view plugin provides a WKWebView itself as the platform view. However, some 3P
+        // plugins provide wrappers of WKWebView instead, and AdMob banner has a WKWebView at
+        // depth 7. So we perform DFS to search the view hierarchy.
+        if ([self containsWebView:self.embeddedView]) {
           [self removeGestureRecognizer:self.delayingRecognizer];
           [self addGestureRecognizer:self.delayingRecognizer];
         }
@@ -781,6 +805,13 @@ static BOOL _preparedOnce = NO;
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
   FML_DCHECK(_currentTouchPointersCount >= 0);
   if (_currentTouchPointersCount == 0) {
+    // TODO(hellohuanlin): the following comment is likely incorrect and very misleading.
+    // The actual reason is a race condition when platform view is created before
+    // flutterViewController is set in platformViewsController in debug mode. We should clean up the
+    // code, either fix the race condition, or make flutterViewController a computed property rather
+    // than a stored property.
+    // See: https://github.com/flutter/flutter/issues/184354.
+    //
     // At the start of each gesture sequence, we reset the `_flutterViewController`,
     // so that all the touch events in the same sequence are forwarded to the same
     // `_flutterViewController`.

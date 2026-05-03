@@ -5,11 +5,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
-
-import '../dom.dart';
-import '../fonts.dart';
-import '../util.dart';
 
 /// This class is responsible for registering and loading fonts.
 ///
@@ -45,7 +42,7 @@ class WebFontCollection implements FlutterFontCollection {
   }
 
   @override
-  Future<bool> loadFontFromList(Uint8List list, {String? fontFamily}) async {
+  Future<bool> loadFontFromBytes(Uint8List list, {String? fontFamily}) async {
     if (fontFamily == null) {
       printWarning('Font family must be provided to WebFontCollection.');
       return false;
@@ -54,7 +51,16 @@ class WebFontCollection implements FlutterFontCollection {
   }
 
   @override
-  Null get fontFallbackManager => null;
+  FontFallbackManager? get fontFallbackManager => null;
+
+  @override
+  set fontFallbackManager(FontFallbackManager? value) {}
+
+  @override
+  FallbackFontRegistry? get fallbackFontRegistry => null;
+
+  @override
+  set fallbackFontRegistry(FallbackFontRegistry? value) {}
 
   /// Unregister all fonts that have been registered.
   @override
@@ -125,7 +131,7 @@ class WebFontCollection implements FlutterFontCollection {
       // There might be paragraph measurements for this new font before it is
       // loaded. They were measured using fallback fonts, so we should clear the
       // cache.
-      // TODO(rusino): https://github.com/flutter/flutter/issues/168001
+      // TODO(jlavrova): https://github.com/flutter/flutter/issues/168001
     } catch (e) {
       // Failures here will throw a DomException. Return false.
       printWarning('Failed to load font "$family" from bytes: $e');

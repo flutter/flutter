@@ -3014,7 +3014,10 @@ abstract class Path {
   /// angles going clockwise around the oval.
   ///
   /// The line segment added if `forceMoveTo` is false starts at the
-  /// current point and ends at the start of the arc.
+  /// current point and ends at the start of the arc. Note that this
+  /// method does not draw anything if the [sweepAngle] is a multiple
+  /// of $2\pi$ (e.g., $2\pi$, $4\pi$). If you need to draw a full
+  /// circle or an overlapping arc, use [addArc] as a workaround.
   void arcTo(Rect rect, double startAngle, double sweepAngle, bool forceMoveTo);
 
   /// Appends up to four conic curves weighted to describe an oval of `radius`
@@ -7287,6 +7290,11 @@ abstract class Canvas {
   /// Whether this shape is filled or stroked (or both) is controlled by
   /// [Paint.style]. If the path is filled, then sub-paths within it are
   /// implicitly closed (see [Path.close]).
+  ///
+  /// When drawing simple shapes (such as rectangles, ovals, or rounded
+  /// rectangles), prefer using methods such as [drawRect], [drawOval], or
+  /// [drawRRect] over [drawPath]. Methods that draw simple shapes are generally
+  /// more efficient than drawing a [Path].
   void drawPath(Path path, Paint paint);
 
   /// Draws the given [Image] into the canvas with its top-left corner at the

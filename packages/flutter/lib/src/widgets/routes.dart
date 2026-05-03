@@ -2525,8 +2525,24 @@ abstract mixin class RouteAware {
   /// Called when the current route has been popped off.
   void didPop() {}
 
-  /// Called when a new route has been pushed, and the current route is no
-  /// longer visible.
+  /// Called when a new route has been pushed on top of this route, temporarily
+  /// obscuring it.
+  ///
+  /// This method is called synchronously during the push operation, before the
+  /// transition animation completes. The current route may still be partially
+  /// visible as it animates out. To perform actions after the route is fully
+  /// obscured, consider using [ModalRoute.secondaryAnimation] to listen for
+  /// animation completion, for example:
+  ///
+  /// {@tool snippet}
+  /// ```dart
+  /// ModalRoute.of(context)?.secondaryAnimation?.addStatusListener((AnimationStatus status) {
+  ///   if (status == AnimationStatus.completed) {
+  ///     // This route is now fully obscured by the new route.
+  ///   }
+  /// });
+  /// ```
+  /// {@end-tool}
   void didPushNext() {}
 }
 
@@ -2740,6 +2756,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
+@awaitNotRequired
 Future<T?> showGeneralDialog<T extends Object?>({
   required BuildContext context,
   required RoutePageBuilder pageBuilder,

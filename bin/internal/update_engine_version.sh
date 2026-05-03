@@ -64,7 +64,12 @@ else
 fi
 
 # Write the engine version out so downstream tools know what to look for.
-echo "$ENGINE_VERSION" >"$FLUTTER_ROOT/bin/cache/engine.stamp"
+# Use a temporary file and atomic mv to prevent race conditions during parallel flutter executions.
+pid=$$
+es_tmp="$FLUTTER_ROOT/bin/cache/engine.stamp.tmp.$pid"
+trap 'rm -f "$es_tmp"' EXIT
+echo "$ENGINE_VERSION" >"$es_tmp" && mv "$es_tmp" "$FLUTTER_ROOT/bin/cache/engine.stamp"
+trap - EXIT
 
 # The realm on CI is passed in.
 if [ -n "${FLUTTER_REALM}" ]; then

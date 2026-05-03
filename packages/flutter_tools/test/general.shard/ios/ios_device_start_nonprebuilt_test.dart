@@ -1554,8 +1554,20 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async =>
-      projectInfo;
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    String projectPath,
+    Directory buildDirectory, {
+    bool skipPackageUpdatesAndValidation = true,
+  }) async {
+    return <String>['xcrun', 'xcodebuild'];
+  }
+
+  @override
+  Future<XcodeProjectInfo?> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async => projectInfo;
 
   @override
   Future<Map<String, String>> getBuildSettings(
@@ -1735,6 +1747,7 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
     required String bundlePath,
     required String bundleId,
     required List<String> launchArguments,
+    required BuildMode mode,
     required ShutdownHooks shutdownHooks,
   }) async {
     return true;
