@@ -804,7 +804,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'WyTD9K86zyMe-FSg0ETbvstslxVxpQBXzXXkCfOO3nEC'
+        'version': 'a5ZuqjESM0SZ6PWk_s_EdTYd_JyBpWNslNCL3MzlgvEC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
