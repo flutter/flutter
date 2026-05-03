@@ -343,9 +343,7 @@ class ReverseAnimation extends Animation<double>
 /// any listeners that it may have added. Disposing the
 /// parent animation (typically the [AnimationController]) will also clean up
 /// this object. Do not create a [CurvedAnimation] inside a `build` method
-/// because it would leak any added listeners on every rebuild. If [reverseCurve] is
-/// not needed, prefer `parent.drive(CurveTween(curve: curve))` which does not
-/// require separate disposal.
+/// because it would leak any added listeners on every rebuild.
 ///
 /// In a future Flutter release, the deprecated [reverseCurve] parameter will
 /// be removed and you will no longer need to call [dispose] on the
@@ -478,7 +476,8 @@ class AsymmetricCurvedAnimation extends Animation<double> with AnimationWithPare
   /// added listeners on every rebuild.
   ///
   /// If [reverseCurve] is not needed, prefer [CurvedAnimation] over
-  /// [AsymmetricCurvedAnimation] for memory efficiency.
+  /// [AsymmetricCurvedAnimation] for memory efficiency improvements
+  /// coming in future Flutter releases.
   ///
   /// If this field is null, uses [curve] in both directions.
   Curve? reverseCurve;
