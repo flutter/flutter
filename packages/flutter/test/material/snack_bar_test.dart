@@ -4487,6 +4487,44 @@ void main() {
     // Verify that the top padding is also correctly applied above the content.
     expect(contentTopLeft.dy - snackBarTopLeft.dy, customTopPadding);
   });
+
+  testWidgets('SnackBar aligns content correctly with asymmetric vertical padding', (
+    WidgetTester tester,
+  ) async {
+    const customTopPadding = 40.0;
+    const customBottomPadding = 10.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Content'),
+                      padding: EdgeInsets.only(top: customTopPadding, bottom: customBottomPadding),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final Offset snackBarTopLeft = tester.getTopLeft(find.byType(SnackBar));
+    final Offset contentTopLeft = tester.getTopLeft(find.text('Content'));
+
+    expect(contentTopLeft.dy - snackBarTopLeft.dy, customTopPadding);
+  });
 }
 
 /// Start test for "SnackBar dismiss test".
