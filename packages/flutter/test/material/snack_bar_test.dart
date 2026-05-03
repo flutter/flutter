@@ -4438,6 +4438,55 @@ void main() {
     );
     expect(find.text('Hello'), findsOneWidget);
   });
+
+  testWidgets('SnackBar includes top and bottom padding when action overflows', (
+    WidgetTester tester,
+  ) async {
+    const customTopPadding = 15.0;
+    const customBottomPadding = 30.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Short content'),
+                      action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                      actionOverflowThreshold: 0.0,
+                      padding: const EdgeInsets.only(
+                        top: customTopPadding,
+                        bottom: customBottomPadding,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
+    final Offset actionBottomRight = tester.getBottomRight(find.byType(SnackBarAction));
+    final Offset snackBarTopLeft = tester.getTopLeft(find.byType(SnackBar));
+    final Offset contentTopLeft = tester.getTopLeft(find.text('Short content'));
+
+    // Verify that the distance between the bottom of the action button
+    // and the bottom of the SnackBar is exactly the customBottomPadding.
+    expect(snackBarBottomRight.dy - actionBottomRight.dy, customBottomPadding);
+
+    // Verify that the top padding is also correctly applied above the content.
+    expect(contentTopLeft.dy - snackBarTopLeft.dy, customTopPadding);
+  });
 }
 
 /// Start test for "SnackBar dismiss test".

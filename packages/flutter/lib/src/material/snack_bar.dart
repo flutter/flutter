@@ -1072,7 +1072,7 @@ class _RenderSnackBarLayout extends RenderBox
     final double totalHeight = !hasButtons
         ? naturalHeight
         : (willOverflow
-              ? contentSize.height + maxButtonHeight + resolvedPadding.bottom
+              ? naturalHeight + maxButtonHeight
               : math.max(naturalHeight, maxButtonHeight));
     final double actualWidth = availableWidth.isFinite
         ? availableWidth
