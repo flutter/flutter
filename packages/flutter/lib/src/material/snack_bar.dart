@@ -1089,7 +1089,7 @@ class _RenderSnackBarLayout extends RenderBox
         ? resolvedPadding.left
         : actualWidth - resolvedPadding.left - contentSize.width;
     final double contentY = (!hasButtons || !willOverflow)
-        ? (totalHeight - contentSize.height) / 2
+        ? resolvedPadding.top + ((totalHeight - naturalHeight) / 2)
         : resolvedPadding.top;
 
     (content.parentData! as BoxParentData).offset = Offset(contentX, contentY);
@@ -1118,7 +1118,11 @@ class _RenderSnackBarLayout extends RenderBox
       currentX = isLtr ? x - horizontalMargin : x + childSize.width + horizontalMargin;
     }
 
-    final double buttonYBase = willOverflow ? actionRowTop : (totalHeight - maxButtonHeight) / 2;
+    final double buttonYBase = willOverflow
+        ? actionRowTop
+        : resolvedPadding.top +
+              ((totalHeight - naturalHeight) / 2) +
+              ((contentSize.height - maxButtonHeight) / 2);
 
     if (hasCloseIcon) {
       positionButton(closeIcon, closeIconSize, iconHorizontalMargin, buttonYBase);
