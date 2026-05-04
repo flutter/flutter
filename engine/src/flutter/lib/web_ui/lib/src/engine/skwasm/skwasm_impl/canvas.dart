@@ -379,8 +379,48 @@ class SkwasmCanvas implements LayerCanvas {
     paintDispose(paintHandle);
   }
 
+  // Maximum number of entries we forward to a single `canvasDrawAtlas` call.
+  // The native conversion helpers write into the wasm stack via
+  // `withStackScope` / `_emscripten_stack_alloc`, whose total budget is the
+  // Emscripten default 64 KiB. Each entry costs up to
+  // 16 (RSTransform) + 16 (Rect) + 4 (Color) = 36 bytes, so beyond ~1800
+  // entries the conversion overflows the wasm stack into the heap and the
+  // next `malloc` traps with `RuntimeError: memory access out of bounds`
+  // (typically surfacing inside `paint_create` immediately after the
+  // conversions, see https://github.com/flutter/flutter/issues/185995).
+  // 1024 keeps every batch comfortably below 36 KiB.
+  static const int _drawAtlasMaxBatchSize = 1024;
+
   @override
   void drawAtlas(
+    ui.Image atlas,
+    List<ui.RSTransform> transforms,
+    List<ui.Rect> rects,
+    List<ui.Color>? colors,
+    ui.BlendMode? blendMode,
+    ui.Rect? cullRect,
+    ui.Paint paint,
+  ) {
+    final int n = transforms.length;
+    if (n <= _drawAtlasMaxBatchSize) {
+      _drawAtlasBatch(atlas, transforms, rects, colors, blendMode, cullRect, paint);
+      return;
+    }
+    for (int i = 0; i < n; i += _drawAtlasMaxBatchSize) {
+      final int end = i + _drawAtlasMaxBatchSize < n ? i + _drawAtlasMaxBatchSize : n;
+      _drawAtlasBatch(
+        atlas,
+        transforms.sublist(i, end),
+        rects.sublist(i, end),
+        colors?.sublist(i, end),
+        blendMode,
+        cullRect,
+        paint,
+      );
+    }
+  }
+
+  void _drawAtlasBatch(
     ui.Image atlas,
     List<ui.RSTransform> transforms,
     List<ui.Rect> rects,
@@ -414,6 +454,34 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawRawAtlas(
+    ui.Image atlas,
+    Float32List rstTransforms,
+    Float32List rects,
+    Int32List? colors,
+    ui.BlendMode? blendMode,
+    ui.Rect? cullRect,
+    ui.Paint paint,
+  ) {
+    final int n = rstTransforms.length ~/ 4;
+    if (n <= _drawAtlasMaxBatchSize) {
+      _drawRawAtlasBatch(atlas, rstTransforms, rects, colors, blendMode, cullRect, paint);
+      return;
+    }
+    for (int i = 0; i < n; i += _drawAtlasMaxBatchSize) {
+      final int end = i + _drawAtlasMaxBatchSize < n ? i + _drawAtlasMaxBatchSize : n;
+      _drawRawAtlasBatch(
+        atlas,
+        rstTransforms.sublist(i * 4, end * 4),
+        rects.sublist(i * 4, end * 4),
+        colors == null ? null : colors.sublist(i, end),
+        blendMode,
+        cullRect,
+        paint,
+      );
+    }
+  }
+
+  void _drawRawAtlasBatch(
     ui.Image atlas,
     Float32List rstTransforms,
     Float32List rects,
