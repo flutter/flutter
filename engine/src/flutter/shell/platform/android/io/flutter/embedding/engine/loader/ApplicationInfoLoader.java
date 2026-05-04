@@ -74,9 +74,6 @@ public final class ApplicationInfoLoader {
         getStringWithFallback(
             appInfo.metaData,
             FlutterEngineFlags.FLUTTER_ASSETS_DIR.metadataKey,
-            FlutterEngineFlags.DEPRECATED_FLUTTER_ASSETS_DIR.metadataKey),
-        "",
-        appInfo.nativeLibraryDir,
-        true);
+        appInfo.nativeLibraryDir);
   }
 }
