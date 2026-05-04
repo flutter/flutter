@@ -103,6 +103,19 @@ class _MyHomePageState extends State<MyHomePage> {
             },
           ),
           TextButton(
+            key: const ValueKey<String>('drawing_web_view_behind_context_menu_test'),
+            child: const Text('drawing web view behind context menu test'),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<DrawingWebViewBehindContextMenuTestPage>(
+                  builder: (BuildContext context) =>
+                      const DrawingWebViewBehindContextMenuTestPage(),
+                ),
+              );
+            },
+          ),
+          TextButton(
             key: const ValueKey<String>('admob_banner_in_scrollable_list_test'),
             child: const Text('admob banner in scrollable list test'),
             onPressed: () {
@@ -274,6 +287,52 @@ class _WebViewBehindContextMenuTestPageState extends State<WebViewBehindContextM
           dimension: 500.0,
           child: UiKitView(
             viewType: 'platform_web_view',
+            creationParamsCodec: StandardMessageCodec(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A page to test a web view with drawing website cannot be drawn when a context menu is shown.
+/// See [this issue](https://github.com/flutter/flutter/issues/179916).
+class DrawingWebViewBehindContextMenuTestPage extends StatefulWidget {
+  const DrawingWebViewBehindContextMenuTestPage({super.key});
+
+  @override
+  State<DrawingWebViewBehindContextMenuTestPage> createState() =>
+      _DrawingWebViewBehindContextMenuTestPageState();
+}
+
+class _DrawingWebViewBehindContextMenuTestPageState
+    extends State<DrawingWebViewBehindContextMenuTestPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Drawing web view behind context menu test'),
+        actions: <Widget>[
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (String value) {},
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(value: 'button 1', child: Text('menu button 1')),
+                const PopupMenuItem<String>(value: 'button 2', child: Text('menu button 2')),
+                const PopupMenuItem<String>(value: 'button 3', child: Text('menu button 3')),
+                const PopupMenuItem<String>(value: 'button 4', child: Text('menu button 4')),
+                const PopupMenuItem<String>(value: 'button 5', child: Text('menu button 5')),
+              ];
+            },
+          ),
+        ],
+      ),
+      body: const Center(
+        child: SizedBox.square(
+          dimension: 500.0,
+          child: UiKitView(
+            viewType: 'platform_drawing_web_view',
             creationParamsCodec: StandardMessageCodec(),
           ),
         ),

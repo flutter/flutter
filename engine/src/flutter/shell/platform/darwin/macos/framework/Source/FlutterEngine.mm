@@ -677,8 +677,11 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
       std::find(switches.begin(), switches.end(), "--enable-impeller=true") != switches.end()) {
     switches.push_back("--enable-impeller=true");
   }
-  switches.push_back(_project.enableSDFs ? "--impeller-use-sdfs=true"
-                                         : "--impeller-use-sdfs=false");
+
+  if (_project.enableSDFs ||
+      std::find(switches.begin(), switches.end(), "--impeller-use-sdfs=true") != switches.end()) {
+    switches.push_back("--impeller-use-sdfs=true");
+  }
 
   if (_project.enableFlutterGPU ||
       std::find(switches.begin(), switches.end(), "--enable-flutter-gpu=true") != switches.end()) {
