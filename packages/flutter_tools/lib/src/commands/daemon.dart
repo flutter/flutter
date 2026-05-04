@@ -243,6 +243,17 @@ class Daemon {
       return;
     }
 
+    // Verify shared secret to prevent unauthorized local processes from
+    // invoking daemon methods. Clients must supply the same value that was
+    // set in the FLUTTER_DAEMON_SECRET environment variable.
+    final String? requiredSecret = globals.platform.environment['FLUTTER_DAEMON_SECRET'];
+    if (requiredSecret != null && requiredSecret.isNotEmpty) {
+      if (request.data['secret'] != requiredSecret) {
+        connection.sendErrorResponse(id, 'authentication required', StackTrace.current);
+        return;
+      }
+    }
+
     try {
       final method = request.data['method']! as String;
       if (!method.contains('.')) {
