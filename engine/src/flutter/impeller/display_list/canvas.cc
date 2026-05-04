@@ -791,9 +791,10 @@ void Canvas::DrawLine(const Point& p0,
   auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke);
 
   if ((renderer_.GetContext()->GetFlags().antialiased_lines ||
-       renderer_.GetContext()->GetFlags().use_sdfs) &&
+       (renderer_.GetContext()->GetFlags().use_sdfs &&
+        IsCompatibleWithSDFRendering(paint))) &&
       !paint.color_filter && !paint.invert_colors && !paint.image_filter &&
-      !paint.mask_blur_descriptor.has_value() && !paint.color_source) {
+      !paint.color_source) {
     auto contents = LineContents::Make(std::move(geometry), paint.color);
     entity.SetContents(std::move(contents));
     AddRenderEntityToCurrentPass(entity, reuse_depth);
@@ -1043,7 +1044,7 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value() &&
+      IsCompatibleWithSDFRendering(paint) &&
       round_superellipse.GetRadii().AreAllCornersSame()) {
     auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
         round_superellipse.GetBounds(), round_superellipse.GetRadii());
@@ -2461,6 +2462,9 @@ void Canvas::EndReplay() {
 }
 
 bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
+  if (!paint.anti_alias) {
+    return false;
+  }
   if (paint.mask_blur_descriptor.has_value()) {
     return false;
   }

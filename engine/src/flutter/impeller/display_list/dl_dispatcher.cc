@@ -149,7 +149,7 @@ static std::optional<const Rect> ToOptRect(const flutter::DlRect* rect) {
 void DlDispatcherBase::setAntiAlias(bool aa) {
   AUTO_DEPTH_WATCHER(0u);
 
-  // Nothing to do because AA is implicit.
+  paint_.anti_alias = aa;
 }
 
 static Paint::Style ToStyle(flutter::DlDrawStyle style) {
