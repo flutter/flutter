@@ -2369,6 +2369,50 @@ resolution: workspace
           FlutterProjectFactory: () => flutterProjectFactory,
         },
       );
+
+      testUsingContext(
+        'finds watch companion scheme shared at the workspace level',
+        () async {
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          // Watch scheme is shared on Runner.xcworkspace, not Runner.xcodeproj.
+          project.ios.hostAppRoot
+              .childDirectory('Runner.xcworkspace')
+              .childDirectory('xcshareddata')
+              .childDirectory('xcschemes')
+              .childFile('WatchScheme.xcscheme')
+              .createSync(recursive: true);
+          project.ios.xcodeProjectInfoFile.writeAsStringSync('''
+        Build settings for action build and target "WatchTarget":
+            INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.flutter.someProject
+''');
+
+          const watchBuildContext = XcodeProjectBuildContext(
+            scheme: 'WatchScheme',
+            sdk: XcodeSdk.WatchOS,
+          );
+          mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
+              <String, String>{
+                'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': 'io.flutter.someProject',
+              };
+
+          expect(
+            await project.ios.containsWatchCompanion(
+              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+              buildInfo: BuildInfo.debug,
+              deviceId: '123',
+            ),
+            isTrue,
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          PlistParser: () => testPlistParser,
+          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
     });
   });
 }
