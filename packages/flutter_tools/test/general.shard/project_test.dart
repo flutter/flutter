@@ -2224,6 +2224,11 @@ resolution: workspace
         () async {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
+          project.ios.xcodeProject
+              .childDirectory('xcshareddata')
+              .childDirectory('xcschemes')
+              .childFile('WatchScheme.xcscheme')
+              .createSync(recursive: true);
           project.ios.xcodeProjectInfoFile.writeAsStringSync('''
         Build settings for action build and target "WatchTarget":
             INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.flutter.someProject
@@ -2261,6 +2266,11 @@ resolution: workspace
         () async {
           final FlutterProject project = await someProject();
           project.ios.xcodeProject.createSync();
+          project.ios.xcodeProject
+              .childDirectory('xcshareddata')
+              .childDirectory('xcschemes')
+              .childFile('WatchScheme.xcscheme')
+              .createSync(recursive: true);
           project.ios.xcodeProjectInfoFile.writeAsStringSync(r'''
         Build settings for action build and target "WatchTarget":
             INFOPLIST_KEY_WKCompanionAppBundleIdentifier = $(PRODUCT_BUNDLE_IDENTIFIER)
@@ -2284,6 +2294,72 @@ resolution: workspace
             ),
             isTrue,
           );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          PlistParser: () => testPlistParser,
+          XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'skips schemes without an .xcscheme file in the host project (e.g. SwiftPM package schemes)',
+        () async {
+          mockXcodeProjectInterpreter.xcodeProjectInfo = XcodeProjectInfo(
+            <String>['Runner', 'WatchTarget'],
+            <String>[],
+            // Many SwiftPM-style package schemes precede the real watch scheme.
+            <String>[
+              'Runner',
+              'advertising-id',
+              'amplitude-flutter',
+              'cloud-firestore',
+              'WatchScheme',
+            ],
+            logger,
+          );
+          final FlutterProject project = await someProject();
+          project.ios.xcodeProject.createSync();
+          // Only the host project's WatchScheme has an .xcscheme file. The
+          // SwiftPM package schemes do not.
+          project.ios.xcodeProject
+              .childDirectory('xcshareddata')
+              .childDirectory('xcschemes')
+              .childFile('WatchScheme.xcscheme')
+              .createSync(recursive: true);
+          project.ios.xcodeProjectInfoFile.writeAsStringSync('''
+        Build settings for action build and target "WatchTarget":
+            INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.flutter.someProject
+''');
+
+          const watchBuildContext = XcodeProjectBuildContext(
+            scheme: 'WatchScheme',
+            sdk: XcodeSdk.WatchOS,
+          );
+          mockXcodeProjectInterpreter.buildSettingsByBuildContext[watchBuildContext] =
+              <String, String>{
+                'INFOPLIST_KEY_WKCompanionAppBundleIdentifier': 'io.flutter.someProject',
+              };
+
+          expect(
+            await project.ios.containsWatchCompanion(
+              projectInfo: mockXcodeProjectInterpreter.xcodeProjectInfo,
+              buildInfo: BuildInfo.debug,
+              deviceId: '123',
+            ),
+            isTrue,
+          );
+
+          // Only the watch scheme should have been probed for watch build
+          // settings; the SwiftPM package schemes must be skipped.
+          final List<String?> watchProbedSchemes = mockXcodeProjectInterpreter
+              .getBuildSettingsCalls
+              .where((XcodeProjectBuildContext? c) => c?.sdk == XcodeSdk.WatchOS)
+              .map((XcodeProjectBuildContext? c) => c?.scheme)
+              .toList();
+          expect(watchProbedSchemes, <String>['WatchScheme']);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -2668,6 +2744,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   FakeXcodeProjectInterpreter({this.version});
 
   final buildSettingsByBuildContext = <XcodeProjectBuildContext, Map<String, String>>{};
+  final getBuildSettingsCalls = <XcodeProjectBuildContext?>[];
   late XcodeProjectInfo xcodeProjectInfo;
 
   @override
@@ -2676,6 +2753,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
     XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
+    getBuildSettingsCalls.add(buildContext);
     if (buildSettingsByBuildContext[buildContext] == null) {
       return <String, String>{};
     }
