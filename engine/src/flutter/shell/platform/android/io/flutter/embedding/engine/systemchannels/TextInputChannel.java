@@ -379,10 +379,16 @@ public class TextInputChannel {
   }
 
   public interface TextInputMethodHandler {
-    // TODO(mattcarroll): javadoc
+    /**
+     * Requests that the software keyboard (IME) be displayed on screen for the active text input
+     * client.
+     */
     void show();
 
-    // TODO(mattcarroll): javadoc
+    /**
+     * Requests that the software keyboard (IME) be hidden from screen, dismissing the current text
+     * input view.
+     */
     void hide();
 
     /**
@@ -405,7 +411,13 @@ public class TextInputChannel {
      */
     void finishAutofillContext(boolean shouldSave);
 
-    // TODO(mattcarroll): javadoc
+    /**
+     * Sets the active text input client identifier along with its input text configurations (e.g.,
+     * text capitalization rules, obscure text flags, and input actions such as done, go, or next).
+     *
+     * @param textInputClientId The unique ID of the text input client sent by the Dart framework.
+     * @param configuration The text editing configuration containing layout and behavior options.
+     */
     void setClient(int textInputClientId, @NonNull Configuration configuration);
 
     /**
@@ -430,10 +442,15 @@ public class TextInputChannel {
      */
     void setEditableSizeAndTransform(double width, double height, @NonNull double[] transform);
 
-    // TODO(mattcarroll): javadoc
+    /**
+     * Sets the current text selection, composing ranges, and raw string contents for the active
+     * text input client.
+     *
+     * @param editingState The text state model containing selections and composing offsets.
+     */
     void setEditingState(@NonNull TextEditState editingState);
 
-    // TODO(mattcarroll): javadoc
+    /** Clears the active text input client and tears down the text editing connection. */
     void clearClient();
 
     /**
