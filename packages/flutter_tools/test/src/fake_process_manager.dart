@@ -591,8 +591,6 @@ class _UnorderedProcessManager extends FakeProcessManager {
     Encoding? encoding,
     io.ProcessStartMode? mode,
   ) {
-    // ignore: avoid_print
-    print(command);
     expect(
       _commands,
       isNotEmpty,

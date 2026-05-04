@@ -762,11 +762,13 @@ Future<void> removeExtendedAttributesForProject({
 
   // Remove for all files from the project (except the build directory).
   final Directory buildDir = fileSystem.directory(getBuildDirectory(config, fileSystem));
-  for (final FileSystemEntity entity in projectDirectory.listSync()) {
-    if (entity.absolute.path == buildDir.absolute.path) {
-      continue;
+  if (projectDirectory.existsSync()) {
+    for (final FileSystemEntity entity in projectDirectory.listSync()) {
+      if (entity.absolute.path == buildDir.absolute.path) {
+        continue;
+      }
+      futures.add(removeExtendedAttributes(entity, processUtils, logger));
     }
-    futures.add(removeExtendedAttributes(entity, processUtils, logger));
   }
 
   // Remove for all files from the iOS build directory (except the Swift package cache).
@@ -776,11 +778,13 @@ Future<void> removeExtendedAttributesForProject({
     getIosBuildDirectory(config: config, fileSystem: fileSystem),
   );
   final String swiftPackageCachePath = xcodeProjectInterpreter.swiftPackageCachePath(iosBuildDir);
-  for (final FileSystemEntity entity in iosBuildDir.listSync()) {
-    if (entity.absolute.path == swiftPackageCachePath) {
-      continue;
+  if (iosBuildDir.existsSync()) {
+    for (final FileSystemEntity entity in iosBuildDir.listSync()) {
+      if (entity.absolute.path == swiftPackageCachePath) {
+        continue;
+      }
+      futures.add(removeExtendedAttributes(entity, processUtils, logger));
     }
-    futures.add(removeExtendedAttributes(entity, processUtils, logger));
   }
   await Future.wait(futures);
 }
