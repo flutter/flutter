@@ -4815,7 +4815,7 @@ To keep the default AGP version $templateAndroidGradlePluginVersion, download a 
     overrides: {
       Java: () => FakeJava(
         version: const software.Version.withText(1, 8, 0, '1.8.0'),
-      ), // Too high a version for template Gradle versions.
+      ), // Too low a version for template Gradle versions.
       Logger: () => logger,
     },
   );
