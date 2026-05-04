@@ -9448,42 +9448,40 @@ void main() {
     }),
   );
 
-  testWidgets(
-    'single-line field cannot be scrolled with touch on iOS',
-    (WidgetTester tester) async {
-      controller.text = 'This is a long string that should overflow the TextField.';
+  testWidgets('single-line field cannot be scrolled with touch on iOS', (
+    WidgetTester tester,
+  ) async {
+    controller.text = 'This is a long string that should overflow the TextField.';
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Align(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 100,
-              child: EditableText(
-                showSelectionHandles: true,
-                controller: controller,
-                focusNode: focusNode,
-                style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
-                selectionControls: materialTextSelectionControls,
-                keyboardType: TextInputType.text,
-              ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            child: EditableText(
+              showSelectionHandles: true,
+              controller: controller,
+              focusNode: focusNode,
+              style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
-      final double initialScrollOffset = scrollable.controller!.position.pixels;
+    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+    final double initialScrollOffset = scrollable.controller!.position.pixels;
 
-      await tester.drag(find.byType(EditableText), const Offset(-100.0, 0.0));
-      await tester.pumpAndSettle();
+    await tester.drag(find.byType(EditableText), const Offset(-100.0, 0.0));
+    await tester.pumpAndSettle();
 
-      expect(scrollable.controller!.position.pixels, initialScrollOffset);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    expect(scrollable.controller!.position.pixels, initialScrollOffset);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('default text selection height style', (WidgetTester tester) async {
     controller.text = 'a b c d e f g';
@@ -9524,44 +9522,40 @@ void main() {
     );
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets(
-    'multi-line field can scroll with touch on iOS',
-    (WidgetTester tester) async {
-      // 3 lines of text, where the last line overflows and requires scrolling.
-      controller.text = 'XXXXX\nXXXXX\nXXXXX';
+  testWidgets('multi-line field can scroll with touch on iOS', (WidgetTester tester) async {
+    // 3 lines of text, where the last line overflows and requires scrolling.
+    controller.text = 'XXXXX\nXXXXX\nXXXXX';
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Align(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 100,
-              child: EditableText(
-                maxLines: 2,
-                showSelectionHandles: true,
-                controller: controller,
-                focusNode: focusNode,
-                style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
-                selectionControls: materialTextSelectionControls,
-                keyboardType: TextInputType.text,
-              ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            child: EditableText(
+              maxLines: 2,
+              showSelectionHandles: true,
+              controller: controller,
+              focusNode: focusNode,
+              style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
-      final double initialScrollOffset = scrollable.controller!.position.pixels;
+    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+    final double initialScrollOffset = scrollable.controller!.position.pixels;
 
-      await tester.drag(find.byType(EditableText), const Offset(0.0, -100.0));
-      await tester.pumpAndSettle();
+    await tester.drag(find.byType(EditableText), const Offset(0.0, -100.0));
+    await tester.pumpAndSettle();
 
-      expect(scrollable.controller!.position.pixels, isNot(initialScrollOffset));
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    expect(scrollable.controller!.position.pixels, isNot(initialScrollOffset));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets("scrolling doesn't bounce", (WidgetTester tester) async {
     // 3 lines of text, where the last line overflows and requires scrolling.
@@ -17178,71 +17172,69 @@ void main() {
       expect(controller.selection, collapsedAtEnd('Flutter!').selection);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets(
-      'moving focus after the app resumed should select all the content on desktop',
-      (WidgetTester tester) async {
-        final controller1 = TextEditingController.fromValue(collapsedAtEnd('Flutter!'));
-        addTearDown(controller1.dispose);
-        final controller2 = TextEditingController.fromValue(collapsedAtEnd('Dart!'));
-        addTearDown(controller2.dispose);
-        final focusNode1 = FocusNode();
-        addTearDown(focusNode1.dispose);
-        final focusNode2 = FocusNode();
-        addTearDown(focusNode2.dispose);
+    testWidgets('moving focus after the app resumed should select all the content on desktop', (
+      WidgetTester tester,
+    ) async {
+      final controller1 = TextEditingController.fromValue(collapsedAtEnd('Flutter!'));
+      addTearDown(controller1.dispose);
+      final controller2 = TextEditingController.fromValue(collapsedAtEnd('Dart!'));
+      addTearDown(controller2.dispose);
+      final focusNode1 = FocusNode();
+      addTearDown(focusNode1.dispose);
+      final focusNode2 = FocusNode();
+      addTearDown(focusNode2.dispose);
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Center(
-              child: Column(
-                children: <Widget>[
-                  EditableText(
-                    key: ValueKey<String>(controller1.text),
-                    controller: controller1,
-                    focusNode: focusNode1,
-                    autofocus: true,
-                    style: Typography.material2018().black.titleMedium!,
-                    cursorColor: Colors.blue,
-                    backgroundCursorColor: Colors.grey,
-                  ),
-                  EditableText(
-                    key: ValueKey<String>(controller2.text),
-                    controller: controller2,
-                    focusNode: focusNode2,
-                    style: Typography.material2018().black.titleMedium!,
-                    cursorColor: Colors.blue,
-                    backgroundCursorColor: Colors.grey,
-                  ),
-                ],
-              ),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                EditableText(
+                  key: ValueKey<String>(controller1.text),
+                  controller: controller1,
+                  focusNode: focusNode1,
+                  autofocus: true,
+                  style: Typography.material2018().black.titleMedium!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                ),
+                EditableText(
+                  key: ValueKey<String>(controller2.text),
+                  controller: controller2,
+                  focusNode: focusNode2,
+                  style: Typography.material2018().black.titleMedium!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                ),
+              ],
             ),
           ),
-        );
+        ),
+      );
 
-        expect(focusNode1.hasFocus, true);
-        expect(focusNode2.hasFocus, false);
-        expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
-        expect(controller2.selection, collapsedAtEnd('Dart!').selection);
+      expect(focusNode1.hasFocus, true);
+      expect(focusNode2.hasFocus, false);
+      expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
+      expect(controller2.selection, collapsedAtEnd('Dart!').selection);
 
-        // Pause and resume the application.
-        await setAppLifecycleState(AppLifecycleState.inactive);
-        await setAppLifecycleState(AppLifecycleState.resumed);
+      // Pause and resume the application.
+      await setAppLifecycleState(AppLifecycleState.inactive);
+      await setAppLifecycleState(AppLifecycleState.resumed);
 
-        // Change focus to the second EditableText.
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.pumpAndSettle();
+      // Change focus to the second EditableText.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
 
-        expect(focusNode1.hasFocus, false);
-        expect(focusNode2.hasFocus, true);
-        expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
+      expect(focusNode1.hasFocus, false);
+      expect(focusNode2.hasFocus, true);
+      expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
 
-        // The text of the second EditableText should be entirely selected.
-        expect(
-          controller2.selection,
-          TextSelection(baseOffset: 0, extentOffset: controller2.text.length),
-        );
-      },
-      variant: TargetPlatformVariant.desktop(),
-    );
+      // The text of the second EditableText should be entirely selected.
+      expect(
+        controller2.selection,
+        TextSelection(baseOffset: 0, extentOffset: controller2.text.length),
+      );
+    }, variant: TargetPlatformVariant.desktop());
   });
 
   testWidgets('EditableText respects MediaQuery.boldText', (WidgetTester tester) async {
