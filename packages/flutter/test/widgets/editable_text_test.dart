@@ -631,6 +631,93 @@ void main() {
     expect(render.backgroundCursorColor, Colors.green);
   });
 
+  group('unfocusedSelectionColor', () {
+    const focusedColor = Color(0xFF112233);
+    const unfocusedColor = Color(0xFF445566);
+
+    Widget buildEditable({Color? unfocusedSelectionColor}) {
+      return MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: EditableText(
+            controller: controller,
+            backgroundCursorColor: Colors.grey,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionColor: focusedColor,
+            unfocusedSelectionColor: unfocusedSelectionColor,
+          ),
+        ),
+      );
+    }
+
+    void dispatchViewFocus(WidgetTester tester, {required ViewFocusState state, int? viewId}) {
+      WidgetsBinding.instance.handleViewFocusChanged(
+        ViewFocusEvent(
+          viewId: viewId ?? tester.view.viewId,
+          state: state,
+          direction: ViewFocusDirection.undefined,
+        ),
+      );
+    }
+
+    testWidgets('uses unfocusedSelectionColor when the view loses focus', (
+      WidgetTester tester,
+    ) async {
+      controller.text = 'hello world';
+      await tester.pumpWidget(buildEditable(unfocusedSelectionColor: unfocusedColor));
+      focusNode.requestFocus();
+      await tester.pump();
+
+      final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
+      expect(render.selectionColor, focusedColor);
+
+      dispatchViewFocus(tester, state: ViewFocusState.unfocused);
+      await tester.pump();
+      expect(render.selectionColor, unfocusedColor);
+
+      dispatchViewFocus(tester, state: ViewFocusState.focused);
+      await tester.pump();
+      expect(render.selectionColor, focusedColor);
+    });
+
+    testWidgets('keeps selectionColor when unfocusedSelectionColor is null', (
+      WidgetTester tester,
+    ) async {
+      controller.text = 'hello world';
+      await tester.pumpWidget(buildEditable());
+      focusNode.requestFocus();
+      await tester.pump();
+
+      final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
+      expect(render.selectionColor, focusedColor);
+
+      dispatchViewFocus(tester, state: ViewFocusState.unfocused);
+      await tester.pump();
+      expect(render.selectionColor, focusedColor);
+    });
+
+    testWidgets('ignores ViewFocusEvent for a different viewId', (WidgetTester tester) async {
+      controller.text = 'hello world';
+      await tester.pumpWidget(buildEditable(unfocusedSelectionColor: unfocusedColor));
+      focusNode.requestFocus();
+      await tester.pump();
+
+      final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
+      expect(render.selectionColor, focusedColor);
+
+      dispatchViewFocus(
+        tester,
+        state: ViewFocusState.unfocused,
+        viewId: tester.view.viewId + 1,
+      );
+      await tester.pump();
+      expect(render.selectionColor, focusedColor);
+    });
+  });
+
   testWidgets('text keyboard is requested when maxLines is default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(

@@ -861,6 +861,7 @@ class EditableText extends StatefulWidget {
     bool? showCursor,
     this.showSelectionHandles = false,
     this.selectionColor,
+    this.unfocusedSelectionColor,
     this.selectionControls,
     TextInputType? keyboardType,
     this.textInputAction,
@@ -1371,6 +1372,28 @@ class EditableText extends StatefulWidget {
   /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
   /// value is set to the ambient [TextSelectionThemeData.selectionColor].
   final Color? selectionColor;
+
+  /// The color to use when painting the selection while the
+  /// [FlutterView] containing this widget does not have window focus.
+  ///
+  /// On desktop platforms, native text fields typically render their selection
+  /// in a desaturated color (often a neutral grey) when their window loses
+  /// focus, indicating that the selection is "inactive". Setting this property
+  /// allows a Flutter [EditableText] to follow that convention.
+  ///
+  /// If this property is null, the [selectionColor] is used regardless of the
+  /// view's focus state, preserving the previous behavior.
+  ///
+  /// View focus changes are observed via
+  /// [WidgetsBindingObserver.didChangeViewFocus]; this widget assumes the
+  /// view is focused at startup, so the unfocused color only takes effect
+  /// after the framework has dispatched at least one view focus event.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver.didChangeViewFocus], which delivers the focus
+  ///    state changes.
+  final Color? unfocusedSelectionColor;
 
   /// {@template flutter.widgets.editableText.selectionControls}
   /// Optional delegate for building the text selection handles.
@@ -2487,6 +2510,21 @@ class EditableText extends StatefulWidget {
   }
 }
 
+// A lightweight [WidgetsBindingObserver] that only relays
+// [didChangeViewFocus] events to a callback. Used by [EditableTextState] to
+// observe view focus independently of the conditional observer registration
+// in [EditableTextState._handleFocusChanged].
+class _ViewFocusObserver with WidgetsBindingObserver {
+  _ViewFocusObserver(this._onViewFocusChanged);
+
+  final ValueChanged<ui.ViewFocusEvent> _onViewFocusChanged;
+
+  @override
+  void didChangeViewFocus(ui.ViewFocusEvent event) {
+    _onViewFocusChanged(event);
+  }
+}
+
 /// State for an [EditableText].
 class EditableTextState extends State<EditableText>
     with
@@ -3287,6 +3325,7 @@ class EditableTextState extends State<EditableText>
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
     _appLifecycleListener = AppLifecycleListener(onResume: _onResume);
     _initProcessTextActions();
+    WidgetsBinding.instance.addObserver(_viewFocusObserver);
   }
 
   void _onResume() {
@@ -3545,6 +3584,7 @@ class EditableTextState extends State<EditableText>
     _selectionOverlay = null;
     widget.focusNode.removeListener(_handleFocusChanged);
     WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(_viewFocusObserver);
     _liveTextInputStatus?.removeListener(_onChangedLiveTextInputStatus);
     _liveTextInputStatus?.dispose();
     clipboardStatus.removeListener(_onChangedClipboardStatus);
@@ -4554,6 +4594,35 @@ class EditableTextState extends State<EditableText>
   }
 
   late double _lastBottomViewInset;
+
+  // Tracks whether the [FlutterView] containing this widget currently has
+  // window focus. Updated via [_ViewFocusObserver]; consumed by [build] when
+  // [EditableText.unfocusedSelectionColor] is provided. Defaults to `true`
+  // because there is no synchronous way to query the initial focus state
+  // and the overwhelmingly common case is that the view starts focused.
+  bool _viewFocused = true;
+
+  // Always-registered observer dedicated to tracking view focus. It cannot be
+  // [this] because [_handleFocusChanged] toggles [WidgetsBinding] observation
+  // based on the [TextField]'s own focus state, which can desync the
+  // EditableText from view focus events triggered while the field is parked.
+  late final _ViewFocusObserver _viewFocusObserver = _ViewFocusObserver(_handleViewFocusChanged);
+
+  void _handleViewFocusChanged(ui.ViewFocusEvent event) {
+    if (!mounted) {
+      return;
+    }
+    final int currentViewId = View.of(context).viewId;
+    if (event.viewId != currentViewId) {
+      return;
+    }
+    final nextFocused = event.state == ui.ViewFocusState.focused;
+    if (_viewFocused != nextFocused) {
+      setState(() {
+        _viewFocused = nextFocused;
+      });
+    }
+  }
 
   @override
   void didChangeMetrics() {
@@ -5895,7 +5964,10 @@ class EditableTextState extends State<EditableText>
                                         _selectionOverlay?.spellCheckToolbarIsVisible ?? false
                                         ? _spellCheckConfiguration.misspelledSelectionColor ??
                                               widget.selectionColor
-                                        : widget.selectionColor,
+                                        : (_viewFocused
+                                              ? widget.selectionColor
+                                              : (widget.unfocusedSelectionColor ??
+                                                    widget.selectionColor)),
                                     textScaler: effectiveTextScaler,
                                     textAlign: widget.textAlign,
                                     textDirection: _textDirection,
