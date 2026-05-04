@@ -9,6 +9,7 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../base/io.dart';
@@ -196,10 +197,13 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-  await removeExtendedAttributes(
-    app.project.parent.directory,
-    globals.processUtils,
-    globals.logger,
+  await removeExtendedAttributesForProject(
+    xcodeProject: app.project,
+    processUtils: globals.processUtils,
+    logger: globals.logger,
+    fileSystem: globals.fs,
+    config: globals.config,
+    xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
   );
 
   final XcodeProjectInfo? projectInfo = await app.project.projectInfo();
@@ -738,6 +742,47 @@ bool publicHeadersChanged({
     fingerprinter.writeFingerprint();
   }
   return headersChanged;
+}
+
+/// Remove extended attributes from all files in the Flutter project, except the Swift package
+/// cache in the build directory.
+///
+/// Attributes must be removed from the entire project rather than just the iOS directory due to
+/// user reports. See https://github.com/flutter/flutter/pull/81435.
+Future<void> removeExtendedAttributesForProject({
+  required XcodeBasedProject xcodeProject,
+  required ProcessUtils processUtils,
+  required Logger logger,
+  required FileSystem fileSystem,
+  required Config config,
+  required XcodeProjectInterpreter xcodeProjectInterpreter,
+}) async {
+  final Directory projectDirectory = xcodeProject.parent.directory;
+  final futures = <Future<void>>[];
+
+  // Remove for all files from the project (except the build directory).
+  final Directory buildDir = fileSystem.directory(getBuildDirectory(config, fileSystem));
+  for (final FileSystemEntity entity in projectDirectory.listSync()) {
+    if (entity.absolute.path == buildDir.absolute.path) {
+      continue;
+    }
+    futures.add(removeExtendedAttributes(entity, processUtils, logger));
+  }
+
+  // Remove for all files from the iOS build directory (except the Swift package cache).
+  // We don't remove from other directories in the build directory since they should be unrelated
+  // to the iOS build.
+  final Directory iosBuildDir = fileSystem.directory(
+    getIosBuildDirectory(config: config, fileSystem: fileSystem),
+  );
+  final String swiftPackageCachePath = xcodeProjectInterpreter.swiftPackageCachePath(iosBuildDir);
+  for (final FileSystemEntity entity in iosBuildDir.listSync()) {
+    if (entity.absolute.path == swiftPackageCachePath) {
+      continue;
+    }
+    futures.add(removeExtendedAttributes(entity, processUtils, logger));
+  }
+  await Future.wait(futures);
 }
 
 /// Extended attributes can cause code signing errors. Remove them.

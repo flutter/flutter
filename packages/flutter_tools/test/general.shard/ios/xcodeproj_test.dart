@@ -2914,4 +2914,20 @@ Resolved source packages:
       throwsToolExit(),
     );
   });
+
+  testWithoutContext('swiftPackageCachePath returns the correct cache path', () {
+    final fs = MemoryFileSystem.test();
+    final Directory buildDirectory = fs.directory('/build/ios');
+    final xcodeProjectInterpreter = XcodeProjectInterpreter(
+      logger: logger,
+      fileSystem: fs,
+      platform: platform,
+      processManager: fakeProcessManager,
+      analytics: const NoOpAnalytics(),
+    );
+    expect(
+      xcodeProjectInterpreter.swiftPackageCachePath(buildDirectory),
+      '/build/ios/SourcePackages',
+    );
+  });
 }
