@@ -14,206 +14,201 @@ void main() {
     const PredictiveBackPageTransitionsBuilder(),
     const PredictiveBackFullscreenPageTransitionsBuilder(),
   ]) {
-    testWidgets(
-      'PredictiveBackPageTransitionsBuilder supports predictive back on Android',
-      (WidgetTester tester) async {
-        final routes = <String, WidgetBuilder>{
-          '/': (BuildContext context) => Material(
-            child: TextButton(
-              child: const Text('push'),
-              onPressed: () {
-                Navigator.of(context).pushNamed('/b');
+    testWidgets('PredictiveBackPageTransitionsBuilder supports predictive back on Android', (
+      WidgetTester tester,
+    ) async {
+      final routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
+        '/b': (BuildContext context) => const Text('page b'),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                for (final TargetPlatform platform in TargetPlatform.values)
+                  platform: pageTransitionsBuilder,
               },
             ),
           ),
-          '/b': (BuildContext context) => const Text('page b'),
-        };
+          routes: routes,
+        ),
+      );
 
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: ThemeData(
-              pageTransitionsTheme: PageTransitionsTheme(
-                builders: <TargetPlatform, PageTransitionsBuilder>{
-                  for (final TargetPlatform platform in TargetPlatform.values)
-                    platform: pageTransitionsBuilder,
-                },
-              ),
-            ),
-            routes: routes,
+      expect(find.text('push'), findsOneWidget);
+      expect(find.text('page b'), findsNothing);
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
+
+      await tester.tap(find.text('push'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('push'), findsNothing);
+      expect(find.text('page b'), findsOneWidget);
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
+
+      // Only Android supports backGesture channel methods. Other platforms will
+      // do nothing.
+      if (defaultTargetPlatform != TargetPlatform.android) {
+        return;
+      }
+
+      // Start a system pop gesture, which will switch to using
+      // _PredictiveBackSharedElementPageTransition for the page transition.
+      final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+        MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': const <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': SwipeEdge.left.index,
+        }),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        startMessage,
+        (ByteData? _) {},
+      );
+      await tester.pump();
+
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsOneWidget);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
+      final Offset startPageBOffset = tester.getTopLeft(find.text('page b'));
+      expect(startPageBOffset.dx, 0.0);
+
+      // Drag the system back gesture far enough to commit.
+      final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
+        MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'touchOffset': const <double>[100.0, 300.0],
+          'progress': 0.35,
+          'swipeEdge': SwipeEdge.left.index,
+        }),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        updateMessage,
+        (ByteData? _) {},
+      );
+      await tester.pumpAndSettle();
+
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(2));
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
+
+      final Offset updatePageBOffset = tester.getTopLeft(find.text('page b'));
+      expect(updatePageBOffset.dx, greaterThan(startPageBOffset.dx));
+
+      // Commit the system back gesture.
+      final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('commitBackGesture'),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        commitMessage,
+        (ByteData? _) {},
+      );
+      await tester.pumpAndSettle();
+
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
+      expect(find.text('push'), findsOneWidget);
+      expect(find.text('page b'), findsNothing);
+    }, variant: TargetPlatformVariant.all());
+
+    testWidgets('Predictive back transitions support predictive back when swipeEdge is edgeNone', (
+      WidgetTester tester,
+    ) async {
+      final routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
           ),
-        );
+        ),
+        '/b': (BuildContext context) => const Text('page b'),
+      };
 
-        expect(find.text('push'), findsOneWidget);
-        expect(find.text('page b'), findsNothing);
-        expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
-        await tester.tap(find.text('push'));
-        await tester.pumpAndSettle();
-
-        expect(find.text('push'), findsNothing);
-        expect(find.text('page b'), findsOneWidget);
-        expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
-
-        // Only Android supports backGesture channel methods. Other platforms will
-        // do nothing.
-        if (defaultTargetPlatform != TargetPlatform.android) {
-          return;
-        }
-
-        // Start a system pop gesture, which will switch to using
-        // _PredictiveBackSharedElementPageTransition for the page transition.
-        final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
-          MethodCall('startBackGesture', <String, dynamic>{
-            'touchOffset': const <double>[5.0, 300.0],
-            'progress': 0.0,
-            'swipeEdge': SwipeEdge.left.index,
-          }),
-        );
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'flutter/backgesture',
-          startMessage,
-          (ByteData? _) {},
-        );
-        await tester.pump();
-
-        expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsOneWidget);
-        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
-        final Offset startPageBOffset = tester.getTopLeft(find.text('page b'));
-        expect(startPageBOffset.dx, 0.0);
-
-        // Drag the system back gesture far enough to commit.
-        final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
-          MethodCall('updateBackGestureProgress', <String, dynamic>{
-            'touchOffset': const <double>[100.0, 300.0],
-            'progress': 0.35,
-            'swipeEdge': SwipeEdge.left.index,
-          }),
-        );
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'flutter/backgesture',
-          updateMessage,
-          (ByteData? _) {},
-        );
-        await tester.pumpAndSettle();
-
-        expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(2));
-        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsNothing);
-
-        final Offset updatePageBOffset = tester.getTopLeft(find.text('page b'));
-        expect(updatePageBOffset.dx, greaterThan(startPageBOffset.dx));
-
-        // Commit the system back gesture.
-        final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
-          const MethodCall('commitBackGesture'),
-        );
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'flutter/backgesture',
-          commitMessage,
-          (ByteData? _) {},
-        );
-        await tester.pumpAndSettle();
-
-        expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-        expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
-        expect(find.text('push'), findsOneWidget);
-        expect(find.text('page b'), findsNothing);
-      },
-      variant: TargetPlatformVariant.all(),
-    );
-
-    testWidgets(
-      'Predictive back transitions support predictive back when swipeEdge is edgeNone',
-      (WidgetTester tester) async {
-
-        final routes = <String, WidgetBuilder>{
-          '/': (BuildContext context) => Material(
-            child: TextButton(
-              child: const Text('push'),
-              onPressed: () {
-                Navigator.of(context).pushNamed('/b');
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                for (final TargetPlatform platform in TargetPlatform.values)
+                  platform: pageTransitionsBuilder,
               },
             ),
           ),
-          '/b': (BuildContext context) => const Text('page b'),
-        };
+          routes: routes,
+        ),
+      );
 
-        final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+      await tester.tap(find.text('push'));
+      await tester.pumpAndSettle();
 
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: ThemeData(
-              pageTransitionsTheme: PageTransitionsTheme(
-                builders: <TargetPlatform, PageTransitionsBuilder>{
-                  for (final TargetPlatform platform in TargetPlatform.values)
-                    platform: pageTransitionsBuilder,
-                },
-              ),
-            ),
-            routes: routes,
-          ),
-        );
+      if (defaultTargetPlatform != TargetPlatform.android) {
+        return;
+      }
 
-        await tester.tap(find.text('push'));
-        await tester.pumpAndSettle();
+      // Start predictive back with EDGE_NONE (3-button navigation)
+      final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+        MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': const <double>[0.0, 0.0],
+          'progress': 0.0,
+          'swipeEdge': SwipeEdge.edgeNone.index,
+        }),
+      );
 
-        if (defaultTargetPlatform != TargetPlatform.android) {
-          return;
-        }
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        startMessage,
+        (ByteData? _) {},
+      );
 
-        // Start predictive back with EDGE_NONE (3-button navigation)
-        final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
-          MethodCall('startBackGesture', <String, dynamic>{
-            'touchOffset': const <double>[0.0, 0.0],
-            'progress': 0.0,
-            'swipeEdge': SwipeEdge.edgeNone.index,
-          }),
-        );
+      await tester.pump();
 
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'flutter/backgesture',
-          startMessage,
-          (ByteData? _) {},
-        );
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
-        await tester.pump();
+      final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
+        MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'touchOffset': const <double>[0.0, 0.0],
+          'progress': 0.3,
+          'swipeEdge': SwipeEdge.edgeNone.index,
+        }),
+      );
 
-        expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsOneWidget);
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        updateMessage,
+        (ByteData? _) {},
+      );
 
-        final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
-          MethodCall('updateBackGestureProgress', <String, dynamic>{
-            'touchOffset': const <double>[0.0, 0.0],
-            'progress': 0.3,
-            'swipeEdge': SwipeEdge.edgeNone.index,
-          }),
-        );
+      await tester.pump();
 
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'flutter/backgesture',
-          updateMessage,
-          (ByteData? _) {},
-        );
+      final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('commitBackGesture'),
+      );
 
-        await tester.pump();
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        commitMessage,
+        (ByteData? _) {},
+      );
 
-        final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
-          const MethodCall('commitBackGesture'),
-        );
+      await tester.pumpAndSettle();
 
-        await binding.defaultBinaryMessenger.handlePlatformMessage(
-          'flutter/backgesture',
-          commitMessage,
-          (ByteData? _) {},
-        );
-
-        await tester.pumpAndSettle();
-
-        expect(find.text('push'), findsOneWidget);
-        expect(find.text('page b'), findsNothing);
-      },
-      variant: TargetPlatformVariant.all(),
-    );
+      expect(find.text('push'), findsOneWidget);
+      expect(find.text('page b'), findsNothing);
+    }, variant: TargetPlatformVariant.all());
 
     testWidgets(
       'PredictiveBackPageTransitionsBuilder supports canceling a predictive back gesture',
@@ -814,58 +809,56 @@ void main() {
     await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets(
-    'PredictiveBackFullscreenPageTransitionsBuilder uses fallbackColor',
-    (WidgetTester tester) async {
-      const PageTransitionsBuilder pageTransitionsBuilder =
-          PredictiveBackFullscreenPageTransitionsBuilder(fallbackColor: Colors.black);
-      final routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => Material(
-          child: TextButton(
-            child: const Text('push'),
-            onPressed: () {
-              Navigator.of(context).pushNamed('/b');
+  testWidgets('PredictiveBackFullscreenPageTransitionsBuilder uses fallbackColor', (
+    WidgetTester tester,
+  ) async {
+    const PageTransitionsBuilder pageTransitionsBuilder =
+        PredictiveBackFullscreenPageTransitionsBuilder(fallbackColor: Colors.black);
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () {
+            Navigator.of(context).pushNamed('/b');
+          },
+        ),
+      ),
+      '/b': (BuildContext context) => const Text('page b'),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              for (final TargetPlatform platform in TargetPlatform.values)
+                platform: pageTransitionsBuilder,
             },
           ),
         ),
-        '/b': (BuildContext context) => const Text('page b'),
-      };
+        routes: routes,
+      ),
+    );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            pageTransitionsTheme: PageTransitionsTheme(
-              builders: <TargetPlatform, PageTransitionsBuilder>{
-                for (final TargetPlatform platform in TargetPlatform.values)
-                  platform: pageTransitionsBuilder,
-              },
-            ),
-          ),
-          routes: routes,
-        ),
-      );
+    expect(find.text('push'), findsOneWidget);
+    expect(find.text('page b'), findsNothing);
+    expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+    expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
 
-      expect(find.text('push'), findsOneWidget);
-      expect(find.text('page b'), findsNothing);
-      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
-      expect(_findFallbackPageTransition(pageTransitionsBuilder), findsOneWidget);
+    // Pump till animation is half-way through.
+    await tester.tap(find.text('push'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 125));
 
-      // Pump till animation is half-way through.
-      await tester.tap(find.text('push'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 125));
+    // Verify that the render box is painting the right color.
+    final RenderBox nonScaffoldedRenderBox = tester.firstRenderObject<RenderBox>(
+      find.byType(MaterialApp),
+    );
+    // Expect the color to be at exactly 59.6% opacity at this time.
+    expect(nonScaffoldedRenderBox, paints..rect(color: Colors.black.withOpacity(0.596)));
 
-      // Verify that the render box is painting the right color.
-      final RenderBox nonScaffoldedRenderBox = tester.firstRenderObject<RenderBox>(
-        find.byType(MaterialApp),
-      );
-      // Expect the color to be at exactly 59.6% opacity at this time.
-      expect(nonScaffoldedRenderBox, paints..rect(color: Colors.black.withOpacity(0.596)));
-
-      await tester.pumpAndSettle();
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    await tester.pumpAndSettle();
+  }, variant: TargetPlatformVariant.all());
 }
 
 String _getTransitionsString(PageTransitionsBuilder pageTransitionsBuilder) {

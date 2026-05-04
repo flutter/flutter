@@ -18,6 +18,7 @@ enum SwipeEdge {
   right,
 
   /// Indicates that the back event was not triggered by an edge swipe back gesture.
+  ///
   /// This applies to cases like using the back button in 3-button navigation or pressing a hardware back button.
   edgeNone,
 }
@@ -49,7 +50,7 @@ final class PredictiveBackEvent {
   }
 
   /// The global position of the touch point as an `Offset`, or `null` if the
-  /// event is triggered by a button press.
+  /// event is triggered by a legacy non-predictive button press.
   ///
   /// This represents the touch location that initiates or interacts with the
   /// back gesture. When `null`, it indicates the gesture was not started by a
