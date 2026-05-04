@@ -1183,6 +1183,11 @@ class _IncludesNodeWith extends Matcher {
              inputType != null ||
              minValue != null ||
              maxValue != null,
+         'At least one matcher field must be non-null so the matcher checks for at least one '
+         'property of a semantics node. Pass any of `label`, `value`, `actions`, `flags`, '
+         '`flagsCollection`, `tags`, `increasedValue`, `decreasedValue`, `scrollPosition`, '
+         '`scrollExtentMax`, `scrollExtentMin`, `maxValueLength`, `currentValueLength`, '
+         '`inputType`, `minValue`, or `maxValue`.',
        );
   final AttributedString? attributedLabel;
   final AttributedString? attributedValue;
