@@ -2250,6 +2250,7 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     required analytics.Analytics analytics,
     required FileSystem fileSystem,
     required FlutterProject flutterProject,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
     required Logger logger,
     required OutputPreferences outputPreferences,
     required Platform platform,
