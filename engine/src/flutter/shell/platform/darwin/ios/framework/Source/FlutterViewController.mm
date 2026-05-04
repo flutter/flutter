@@ -165,7 +165,6 @@ typedef struct MouseState {
   flutter::ViewportMetrics _viewportMetrics;
   MouseState _mouseState;
   FlutterSplashScreenManager* _splashScreenManager;
-  CGFloat _statusBarHeightBeforeHiding;
 }
 
 // Synthesize properties with an overridden getter/setter.
