@@ -1622,6 +1622,7 @@ class FlutterPluginUtilsTest {
                 .externalNativeBuild.cmake
         } returns mockCmakeOptions
         every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig } returns mockDefaultConfig
+        every { project.findProperty(any()) } returns null
 
         every { mockCmakeOptions.path } returns fakeCmakeFile
 
@@ -1647,6 +1648,7 @@ class FlutterPluginUtilsTest {
                 .externalNativeBuild.cmake
         } returns mockCmakeOptions
         every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig } returns mockDefaultConfig
+        every { project.findProperty(any()) } returns null
 
         val basePath = "/base/path"
         val fakeBuildPath = "/randomapp/build/app/"

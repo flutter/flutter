@@ -30,6 +30,7 @@ import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import 'android_builder.dart';
+import 'android_sdk.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
@@ -568,6 +569,25 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (androidBuildInfo.splitPerAbi) {
       options.add('-Psplit-per-abi=true');
     }
+
+    final AndroidSdk? androidSdk = globals.androidSdk;
+    if (androidSdk != null && androidSdk.directory.existsSync()) {
+      final String? sdkManagerPath = androidSdk.sdkManagerPath;
+      if (sdkManagerPath != null &&
+          androidSdk.cmdlineToolsAvailable &&
+          androidSdk.licensesAvailable) {
+        options.add('-Pflutter.sdkManagerPath=$sdkManagerPath');
+        final Directory ndkDir = androidSdk.directory.childDirectory('ndk');
+        final ndkDirs = <String>[];
+        if (ndkDir.existsSync()) {
+          ndkDirs.addAll(
+            ndkDir.listSync().whereType<Directory>().map((Directory dir) => dir.basename),
+          );
+        }
+        options.add('-Pflutter.installedNdkVersions=${ndkDirs.join(',')}');
+      }
+    }
+
     late Stopwatch sw;
     final int exitCode = await _runGradleTask(
       assembleTask,

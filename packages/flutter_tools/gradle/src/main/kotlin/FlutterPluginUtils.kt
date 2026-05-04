@@ -787,6 +787,30 @@ object FlutterPluginUtils {
         gradleProject: Project,
         flutterSdkRootPath: String
     ) {
+        val sdkManagerPath = gradleProject.findProperty("flutter.sdkManagerPath")?.toString()
+        val installedNdkVersionsStr = gradleProject.findProperty("flutter.installedNdkVersions")?.toString()
+
+        if (sdkManagerPath != null && installedNdkVersionsStr != null) {
+            // We use afterEvaluate because if called immediately we are too early in the lifecycle
+            // for AGP to have parsed the actual NDK version from the gradle files.
+            gradleProject.afterEvaluate {
+                val installedNdkVersions = installedNdkVersionsStr.split(",")
+                val requiredNdkVersion = getLegacyAndroidExtension(gradleProject).ndkVersion ?: FlutterExtension().ndkVersion
+
+                if (requiredNdkVersion != null && !installedNdkVersions.contains(requiredNdkVersion)) {
+                    gradleProject.logger.lifecycle("Ensuring Android NDK '$requiredNdkVersion' is installed...")
+                    try {
+                        gradleProject.exec {
+                            commandLine(sdkManagerPath, "--install", "ndk;$requiredNdkVersion")
+                        }
+                    } catch (e: Exception) {
+                        gradleProject.logger.error("Failed to install NDK $requiredNdkVersion using sdkmanager", e)
+                    }
+                }
+            }
+            return
+        }
+
         // If the project is already configuring a native build, we don't need to do anything.
         val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
         val forcingNotRequired: Boolean =
