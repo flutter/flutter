@@ -45,8 +45,12 @@ source_set("InternalFlutterSwift") {
   # Targets should only ever depend on the framework target.
   # This allows code in this target to use types declared in the bridging
   # header, but defined in the framework, while avoiding linking errors.
-  visibility = [ ":flutter_framework_source" ]
+  visibility = [
+    ":flutter_framework_source",
+    ":ios_test_flutter",
+  ]
   configs += [ "//flutter/shell/platform/darwin/common:config" ]
+  deps = [ ":flutter_engine_bindings" ]
   include_dirs = [
     "//flutter/shell/platform/darwin/common/framework/Headers",
     "//flutter/shell/platform/darwin/ios/framework/Headers",
@@ -91,12 +95,15 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterDartVMServicePublisher.mm",
     "framework/Source/FlutterEmbedderKeyResponder.h",
     "framework/Source/FlutterEmbedderKeyResponder.mm",
+    "framework/Source/FlutterEngine+TaskRunners.h",
     "framework/Source/FlutterEngine.mm",
     "framework/Source/FlutterEngineGroup.mm",
     "framework/Source/FlutterEngine_Internal.h",
     "framework/Source/FlutterHeadlessDartRunner.mm",
     "framework/Source/FlutterKeyPrimaryResponder.h",
     "framework/Source/FlutterKeySecondaryResponder.h",
+    "framework/Source/FlutterKeyboardInsetManager.h",
+    "framework/Source/FlutterKeyboardInsetManager.mm",
     "framework/Source/FlutterKeyboardManager.h",
     "framework/Source/FlutterKeyboardManager.mm",
     "framework/Source/FlutterMetalLayer.h",
@@ -151,8 +158,6 @@ source_set("flutter_framework_source") {
     "framework/Source/platform_message_response_darwin.mm",
     "framework/Source/profiler_metrics_ios.h",
     "framework/Source/profiler_metrics_ios.mm",
-    "framework/Source/vsync_waiter_ios.h",
-    "framework/Source/vsync_waiter_ios.mm",
     "ios_context.h",
     "ios_context.mm",
     "ios_context_metal_impeller.h",
@@ -210,23 +215,54 @@ source_set("flutter_framework_source") {
     "//flutter/third_party/icu",
     "//flutter/third_party/spring_animation",
   ]
-  public_deps = [ ":InternalFlutterSwift" ]
+  public_deps = [
+    ":InternalFlutterSwift",
+    ":flutter_engine_bindings",
+  ]
 }
 
 if (enable_ios_unittests) {
+  source_set("flutter_engine_bindings_test_helpers") {
+    testonly = true
+    visibility = [ ":*" ]
+    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
+    sources = [
+      "framework/Source/FlutterFMLTaskRunnerTestHelper.h",
+      "framework/Source/FlutterFMLTaskRunnerTestHelper.mm",
+      "framework/Source/FlutterVSyncClient+Testing.h",
+    ]
+    deps = [
+      ":flutter_engine_bindings",
+      "//flutter/fml",
+    ]
+  }
+
   source_set("ios_test_flutter_swift") {
     testonly = true
     visibility = [ ":*" ]
     configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
+    include_dirs = [
+      "//flutter/shell/platform/darwin/common/framework/Headers",
+      "//flutter/shell/platform/darwin/ios/framework/Headers",
+      "//flutter/shell/platform/darwin/ios/framework",
+    ]
+    bridge_header = "FlutterTests-Bridging-Header.h"
     sources = [
       "framework/Source/AccessibilityFeaturesTests.swift",
       "framework/Source/ConnectionCollectionTest.swift",
       "framework/Source/FakeUIPressProxy.swift",
       "framework/Source/LaunchEngineTest.swift",
       "framework/Source/SplashScreenManagerTests.swift",
+      "framework/Source/TaskRunnerTests.swift",
+      "framework/Source/VSyncClientTest.swift",
     ]
     frameworks = [ "XCTest.framework" ]
-    deps = [ ":flutter_framework_source" ]
+    deps = [
+      ":flutter_engine_bindings",
+      ":flutter_engine_bindings_test_helpers",
+      ":flutter_framework_source",
+      "//flutter/fml",
+    ]
   }
 
   shared_library("ios_test_flutter") {
@@ -265,6 +301,8 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterMetalLayerTest.mm",
       "framework/Source/FlutterPlatformPluginTest.mm",
       "framework/Source/FlutterPlatformViewsTest.mm",
+      "framework/Source/FlutterPlatformViewsTestHelper.h",
+      "framework/Source/FlutterPlatformViewsTestHelper.mm",
       "framework/Source/FlutterPluginAppLifeCycleDelegateTest.mm",
       "framework/Source/FlutterRestorationPluginTest.mm",
       "framework/Source/FlutterSceneDelegateTest.m",
@@ -280,7 +318,6 @@ if (enable_ios_unittests) {
       "framework/Source/SemanticsObjectTest.mm",
       "framework/Source/SemanticsObjectTestMocks.h",
       "framework/Source/UIViewController_FlutterScreenAndSceneIfLoadedTest.mm",
-      "framework/Source/VsyncWaiterIosTest.mm",
       "framework/Source/accessibility_bridge_test.mm",
       "framework/Source/availability_version_check_test.mm",
       "ios_context_noop_unittests.mm",
@@ -289,6 +326,8 @@ if (enable_ios_unittests) {
       "platform_view_ios_test.mm",
     ]
     deps = [
+      ":InternalFlutterSwift",
+      ":flutter_engine_bindings_test_helpers",
       ":flutter_framework",
       ":flutter_framework_source",
       ":ios_gpu_configuration",
@@ -311,6 +350,39 @@ if (enable_ios_unittests) {
     ]
   }
 }  # if (enable_ios_unittests)
+
+source_set("flutter_engine_bindings") {
+  visibility = [ ":*" ]
+  cflags_objc = flutter_cflags_objc
+  cflags_objcc = flutter_cflags_objcc
+
+  defines = [ "FLUTTER_FRAMEWORK=1" ]
+  configs += [ "//flutter/shell/platform/darwin/common:config" ]
+  include_dirs = [
+    "//flutter/shell/platform/darwin/common/framework/Headers",
+    "//flutter/shell/platform/darwin/ios/framework/Headers",
+    "//flutter/shell/platform/darwin/ios/framework",  # For module.modulemap
+  ]
+  sources = [
+    "framework/Source/FlutterFMLTaskRunner+FML.h",
+    "framework/Source/FlutterFMLTaskRunner.h",
+    "framework/Source/FlutterFMLTaskRunner.mm",
+    "framework/Source/FlutterFMLTaskRunners.h",
+    "framework/Source/FlutterFMLTaskRunners.mm",
+    "framework/Source/FlutterVSyncClient+FML.h",
+    "framework/Source/FlutterVSyncClient.h",
+    "framework/Source/FlutterVSyncClient.mm",
+    "framework/Source/vsync_waiter_ios.h",
+    "framework/Source/vsync_waiter_ios.mm",
+  ]
+  deps = [
+    "//flutter/common",
+    "//flutter/fml",
+    "//flutter/shell/common",
+    "//flutter/shell/platform/darwin/common:framework_common",
+  ]
+  public_deps = [ "//flutter/third_party/spring_animation" ]
+}
 
 shared_library("create_flutter_framework_dylib") {
   visibility = [ ":*" ]

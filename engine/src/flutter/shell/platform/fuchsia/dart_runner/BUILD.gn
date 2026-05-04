@@ -164,20 +164,29 @@ template("aot_runner_package") {
     product_suffix = "_product"
   }
   fuchsia_archive(target_name) {
-    deps = [ ":dart_aot${product_suffix}_runner_bin" ]
-    if (!invoker.product) {
-      deps += [
-        "vmservice:vmservice_snapshot",
-        "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_aot_runner",
-      ]
-    }
+    deps = [
+      ":dart_aot${product_suffix}_runner_bin",
+      "kernel:ffi_callback_stub${product_suffix}",
+    ]
 
     binary = "dart_aot${product_suffix}_runner"
 
     libraries = common_libs
 
-    resources = []
+    resources = [
+      {
+        path = rebase_path(
+                "$target_gen_dir/kernel/ffi_callback_stub${product_suffix}.bin")
+        dest = "lib/ffi_callback_stub.bin"
+      },
+    ]
+
     if (!invoker.product) {
+      deps += [
+        "vmservice:vmservice_snapshot",
+        "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_aot_runner",
+      ]
+
       vmservice_snapshot = rebase_path(
               get_label_info("vmservice:vmservice_snapshot", "target_gen_dir") +
               "/vmservice_snapshot.so")
@@ -189,11 +198,11 @@ template("aot_runner_package") {
       resources += [
         {
           path = vmservice_snapshot
-          dest = "vmservice_snapshot.so"
+          dest = "data/vmservice_snapshot.so"
         },
         {
           path = dart_profiler_symbols
-          dest = "dart_aot_runner.dartprofilersymbols"
+          dest = "data/dart_aot_runner.dartprofilersymbols"
         },
       ]
     }
@@ -210,12 +219,9 @@ template("jit_runner_package") {
   fuchsia_archive(target_name) {
     deps = [
       ":dart_jit${product_suffix}_runner_bin",
+      "kernel:ffi_callback_stub${product_suffix}",
       "kernel:kernel_core_snapshot${product_suffix}",
     ]
-
-    if (!invoker.product) {
-      deps += [ "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_jit_runner" ]
-    }
 
     binary = "dart_jit${product_suffix}_runner"
 
@@ -225,23 +231,29 @@ template("jit_runner_package") {
       {
         path =
             rebase_path("$target_gen_dir/kernel/vm_data${product_suffix}.bin")
-        dest = "vm_snapshot_data.bin"
+        dest = "data/vm_snapshot_data.bin"
       },
       {
         path = rebase_path(
                 "$target_gen_dir/kernel/isolate_data${product_suffix}.bin")
-        dest = "isolate_core_snapshot_data.bin"
+        dest = "data/isolate_core_snapshot_data.bin"
+      },
+      {
+        path = rebase_path(
+                "$target_gen_dir/kernel/ffi_callback_stub${product_suffix}.bin")
+        dest = "lib/ffi_callback_stub.bin"
       },
     ]
 
     if (!invoker.product) {
+      deps += [ "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_jit_runner" ]
       resources += [
         {
           path = rebase_path(
                   get_label_info(
                       "//flutter/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_jit_runner",
                       "target_gen_dir") + "/dart_jit_runner.dartprofilersymbols")
-          dest = "dart_jit_runner.dartprofilersymbols"
+          dest = "data/dart_jit_runner.dartprofilersymbols"
         },
       ]
     }

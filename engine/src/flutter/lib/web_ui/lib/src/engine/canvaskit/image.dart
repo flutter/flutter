@@ -405,7 +405,10 @@ class CkImage implements ui.Image, StackTraceDebugger {
       skImage,
       this,
       'SkImage',
-      onDisposed: (CkImage image) => ui.Image.onDispose?.call(image),
+      onDisposed: (CkImage image) {
+        ui.Image.onDispose?.call(image);
+        DownscaledImageCache.instance.disposeForBox(image.box);
+      },
     );
     _init();
     ui.Image.onCreate?.call(this);

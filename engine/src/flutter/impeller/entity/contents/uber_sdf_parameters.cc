@@ -4,8 +4,6 @@
 
 #include "impeller/entity/contents/uber_sdf_parameters.h"
 
-#include "impeller/geometry/constants.h"
-
 namespace impeller {
 
 UberSDFParameters UberSDFParameters::MakeRect(
@@ -51,9 +49,7 @@ UberSDFParameters UberSDFParameters::MakeOval(
     Color color,
     const Rect& bounds,
     std::optional<StrokeParameters> stroke) {
-  // Size here refers to the extent of the oval along each axis from the center
-  Point size = Point(bounds.GetSize() * 0.5);
-
+  Point size = Point(bounds.GetSize() * 0.5f);
   return UberSDFParameters{.type = Type::kOval,
                            .color = color,
                            .center = bounds.GetCenter(),
@@ -73,6 +69,35 @@ UberSDFParameters UberSDFParameters::MakeRoundedRect(
                            .size = size,
                            .stroke = stroke,
                            .radii = radii};
+}
+
+UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
+    Color color,
+    Rect rect,
+    Point superellipse_degree,
+    Point superellipse_a,
+    RoundingRadii radii,
+    Point corner_angle_span,
+    Point corner_circle_center_top,
+    Point corner_circle_center_right,
+    Scalar superellipse_c,
+    Point superellipse_scale,
+    std::optional<StrokeParameters> stroke) {
+  Point size = Point(rect.GetSize() * 0.5f);
+  return UberSDFParameters{
+      .type = Type::kRoundedSuperellipse,
+      .color = color,
+      .center = rect.GetCenter(),
+      .size = size,
+      .stroke = stroke,
+      .radii = radii,
+      .superellipse_degree = superellipse_degree,
+      .superellipse_a = superellipse_a,
+      .corner_angle_span = corner_angle_span,
+      .corner_circle_center_top = corner_circle_center_top,
+      .corner_circle_center_right = corner_circle_center_right,
+      .superellipse_c = superellipse_c,
+      .superellipse_scale = superellipse_scale};
 }
 
 }  // namespace impeller
