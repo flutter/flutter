@@ -72,8 +72,9 @@ class DependencyVersionCheckerTest {
 
         DependencyVersionChecker.checkDependencyVersions(mockProject)
 
-        // Verify that no error messages were logged.
+        // Verify that no error or warning messages were logged.
         verify(exactly = 0) { mockLogger.error(any()) }
+        verify(exactly = 0) { mockLogger.warn(any()) }
         // Verify that the project was not marked as being out of support range.
         verify { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) }
     }
