@@ -13,7 +13,31 @@
 
 @interface FlutterVSyncClient ()
 
+//------------------------------------------------------------------------------
+/// @brief      Initializes the vsync client with a C++ task runner and task callback.
+///             Refresh rate will default to the system settings.
+///             This is for backward-compatibility and should not be used in new code.
+///
+/// @param      task_runner The C++ task runner to use for posting tasks.
+/// @param      callback    The C++ callback to invoke when a vsync signal is received.
+///
 - (instancetype)initWithTaskRunnerPtr:(fml::RefPtr<fml::TaskRunner>)task_runner
+                             callback:(flutter::VsyncWaiter::Callback)callback;
+
+//------------------------------------------------------------------------------
+/// @brief      Initializes the vsync client with a C++ task runner and task callback.
+///             This is for backward-compatibility and should not be used in new code.
+///
+/// @param      task_runner                  The C++ task runner to use for posting tasks.
+/// @param      isVariableRefreshRateEnabled Whether variable refresh rate should be enabled.
+/// @param      maxRefreshRate               The maximum refresh rate to configure the display link
+///                                          with.
+/// @param      callback                     The C++ callback to invoke when a vsync signal is
+/// received.
+///
+- (instancetype)initWithTaskRunnerPtr:(fml::RefPtr<fml::TaskRunner>)task_runner
+         isVariableRefreshRateEnabled:(BOOL)isVariableRefreshRateEnabled
+                       maxRefreshRate:(double)maxRefreshRate
                              callback:(flutter::VsyncWaiter::Callback)callback;
 
 @end

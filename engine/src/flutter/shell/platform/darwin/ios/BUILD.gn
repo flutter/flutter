@@ -229,6 +229,7 @@ if (enable_ios_unittests) {
     sources = [
       "framework/Source/FlutterFMLTaskRunnerTestHelper.h",
       "framework/Source/FlutterFMLTaskRunnerTestHelper.mm",
+      "framework/Source/FlutterVSyncClient+Testing.h",
     ]
     deps = [
       ":flutter_engine_bindings",
@@ -253,6 +254,7 @@ if (enable_ios_unittests) {
       "framework/Source/LaunchEngineTest.swift",
       "framework/Source/SplashScreenManagerTests.swift",
       "framework/Source/TaskRunnerTests.swift",
+      "framework/Source/VSyncClientTest.swift",
     ]
     frameworks = [ "XCTest.framework" ]
     deps = [
@@ -311,8 +313,6 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterTextureRegistryRelayTest.mm",
       "framework/Source/FlutterTouchInterceptingView_Test.h",
       "framework/Source/FlutterUndoManagerPluginTest.mm",
-      "framework/Source/FlutterVSyncClient+Testing.h",
-      "framework/Source/FlutterVSyncClientTest.mm",
       "framework/Source/FlutterViewControllerTest.mm",
       "framework/Source/FlutterViewTest.mm",
       "framework/Source/SemanticsObjectTest.mm",

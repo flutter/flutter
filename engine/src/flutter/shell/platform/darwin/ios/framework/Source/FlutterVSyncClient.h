@@ -65,7 +65,28 @@ NS_SWIFT_NAME(VSyncClient)
 ///
 @property(nonatomic, assign) BOOL allowPauseAfterVsync;
 
+//------------------------------------------------------------------------------
+/// @brief      Initializes the vsync client. Refresh rate will default to the system settings.
+///
+/// @param      taskRunner The task runner to use for posting tasks.
+/// @param      callback   The callback to invoke when a vsync signal is received.
+///
 - (instancetype)initWithTaskRunner:(FlutterFMLTaskRunner*)taskRunner
+                          callback:(void (^)(CFTimeInterval startTime,
+                                             CFTimeInterval targetTime))callback;
+
+//------------------------------------------------------------------------------
+/// @brief      Initializes the vsync client.
+///
+/// @param      taskRunner                   The task runner to use for posting tasks.
+/// @param      isVariableRefreshRateEnabled Whether variable refresh rate should be enabled.
+/// @param      maxRefreshRate               The maximum refresh rate to configure the display link
+///                                          with.
+/// @param      callback                     The callback to invoke when a vsync signal is received.
+///
+- (instancetype)initWithTaskRunner:(FlutterFMLTaskRunner*)taskRunner
+      isVariableRefreshRateEnabled:(BOOL)isVariableRefreshRateEnabled
+                    maxRefreshRate:(double)maxRefreshRate
                           callback:(void (^)(CFTimeInterval startTime,
                                              CFTimeInterval targetTime))callback;
 
