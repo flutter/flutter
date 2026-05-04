@@ -417,6 +417,17 @@ class XcodeProjectInterpreter {
         '-resolvePackageDependencies',
       ];
       if (_swiftPackageFetchProcess == null) {
+        // Remove the `xcrun` prefixes from the command before comparing because the process name
+        // will resolve to the actual xcodebuild path, such as this:
+        // /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild
+        final int xcodebuildIndex = command.indexOf('xcodebuild');
+        if (xcodebuildIndex == -1) {
+          // This should never happen. The _xcodebuildProjectCommandArguments always includes
+          // xcodebuild.
+          throw StateError('Command "${command.join(' ')}" is expected to contain `xcodebuild`.');
+        }
+        final String commandToMatch = command.sublist(xcodebuildIndex).join(' ');
+
         // Check if process is already running from a previous Flutter command. If it is, kill it
         // so we don't have the process running twice. When this process is run twice, it'll cause
         // one to error. The new process will pick up where the old one left off.
@@ -424,11 +435,15 @@ class XcodeProjectInterpreter {
           'pgrep',
           '-n', // Select only the newest
           '-f', // Match against full argument lists
-          ...command,
+          '-l', // Print the process name and process ID
+          commandToMatch, // command must be a string rather than a list so it matches on all of it
         ]);
         if (result.exitCode == 0) {
-          final int? pid = int.tryParse(result.stdout.trim());
-          if (pid != null) {
+          final String processOutput = result.stdout.trim();
+          // Process output is formatted like this:
+          // 89012 /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -clonedSourcePackagesDirPath...
+          final int? pid = int.tryParse(processOutput.split(' ').firstOrNull ?? '');
+          if (pid != null && processOutput.endsWith(commandToMatch)) {
             _logger.printTrace(
               'Swift Package Manager dependencies are already being fetched by PID $pid',
             );
