@@ -716,6 +716,36 @@ void main() {
       await tester.pump();
       expect(render.selectionColor, focusedColor);
     });
+
+    testWidgets('starts observing view focus when unfocusedSelectionColor becomes non-null', (
+      WidgetTester tester,
+    ) async {
+      controller.text = 'hello world';
+      // Start without the feature opted-in: no observer is registered, so
+      // view focus events should be ignored.
+      await tester.pumpWidget(buildEditable());
+      focusNode.requestFocus();
+      await tester.pump();
+
+      final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
+      dispatchViewFocus(tester, state: ViewFocusState.unfocused);
+      await tester.pump();
+      expect(render.selectionColor, focusedColor);
+
+      // Opt in via didUpdateWidget; the observer should now be registered.
+      await tester.pumpWidget(buildEditable(unfocusedSelectionColor: unfocusedColor));
+      dispatchViewFocus(tester, state: ViewFocusState.unfocused);
+      await tester.pump();
+      expect(render.selectionColor, unfocusedColor);
+
+      // Opt back out; the observer should be removed and selection color
+      // should reset to the focused color regardless of subsequent events.
+      await tester.pumpWidget(buildEditable());
+      expect(render.selectionColor, focusedColor);
+      dispatchViewFocus(tester, state: ViewFocusState.unfocused);
+      await tester.pump();
+      expect(render.selectionColor, focusedColor);
+    });
   });
 
   testWidgets('text keyboard is requested when maxLines is default', (WidgetTester tester) async {

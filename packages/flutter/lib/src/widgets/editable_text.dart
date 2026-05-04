@@ -3325,7 +3325,10 @@ class EditableTextState extends State<EditableText>
     _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
     _appLifecycleListener = AppLifecycleListener(onResume: _onResume);
     _initProcessTextActions();
-    WidgetsBinding.instance.addObserver(_viewFocusObserver);
+    if (widget.unfocusedSelectionColor != null) {
+      WidgetsBinding.instance.addObserver(_viewFocusObserver);
+      _viewFocusObserverRegistered = true;
+    }
   }
 
   void _onResume() {
@@ -3477,6 +3480,19 @@ class EditableTextState extends State<EditableText>
       _currentAutofillScope?.register(_effectiveAutofillClient);
     }
 
+    final wantsViewFocusObserver = widget.unfocusedSelectionColor != null;
+    if (wantsViewFocusObserver != _viewFocusObserverRegistered) {
+      if (wantsViewFocusObserver) {
+        WidgetsBinding.instance.addObserver(_viewFocusObserver);
+      } else {
+        WidgetsBinding.instance.removeObserver(_viewFocusObserver);
+        // Reset to the default so the next time the feature is enabled, the
+        // view is assumed focused until we hear otherwise.
+        _viewFocused = true;
+      }
+      _viewFocusObserverRegistered = wantsViewFocusObserver;
+    }
+
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
       widget.focusNode.addListener(_handleFocusChanged);
@@ -3584,7 +3600,9 @@ class EditableTextState extends State<EditableText>
     _selectionOverlay = null;
     widget.focusNode.removeListener(_handleFocusChanged);
     WidgetsBinding.instance.removeObserver(this);
-    WidgetsBinding.instance.removeObserver(_viewFocusObserver);
+    if (_viewFocusObserverRegistered) {
+      WidgetsBinding.instance.removeObserver(_viewFocusObserver);
+    }
     _liveTextInputStatus?.removeListener(_onChangedLiveTextInputStatus);
     _liveTextInputStatus?.dispose();
     clipboardStatus.removeListener(_onChangedClipboardStatus);
@@ -4602,11 +4620,14 @@ class EditableTextState extends State<EditableText>
   // and the overwhelmingly common case is that the view starts focused.
   bool _viewFocused = true;
 
-  // Always-registered observer dedicated to tracking view focus. It cannot be
-  // [this] because [_handleFocusChanged] toggles [WidgetsBinding] observation
-  // based on the [TextField]'s own focus state, which can desync the
-  // EditableText from view focus events triggered while the field is parked.
+  // Observer dedicated to tracking view focus. It cannot be [this] because
+  // [_handleFocusChanged] toggles [WidgetsBinding] observation based on the
+  // [TextField]'s own focus state, which can desync the EditableText from
+  // view focus events triggered while the field is parked. Lazily created
+  // and only registered while [EditableText.unfocusedSelectionColor] is
+  // non-null, so apps that don't use the feature pay no cost.
   late final _ViewFocusObserver _viewFocusObserver = _ViewFocusObserver(_handleViewFocusChanged);
+  bool _viewFocusObserverRegistered = false;
 
   void _handleViewFocusChanged(ui.ViewFocusEvent event) {
     if (!mounted) {
@@ -5965,9 +5986,9 @@ class EditableTextState extends State<EditableText>
                                         ? _spellCheckConfiguration.misspelledSelectionColor ??
                                               widget.selectionColor
                                         : (_viewFocused
-                                              ? widget.selectionColor
-                                              : (widget.unfocusedSelectionColor ??
-                                                    widget.selectionColor)),
+                                                  ? null
+                                                  : widget.unfocusedSelectionColor) ??
+                                              widget.selectionColor,
                                     textScaler: effectiveTextScaler,
                                     textAlign: widget.textAlign,
                                     textDirection: _textDirection,
