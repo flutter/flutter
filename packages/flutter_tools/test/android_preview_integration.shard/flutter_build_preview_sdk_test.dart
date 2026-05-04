@@ -50,16 +50,16 @@ void main() {
     // write a build.gradle.kts with compileSdk as preview("Baklava") which computes the preview compile sdk version
     buildGradleFile.writeAsStringSync(
       buildGradleFile.readAsStringSync().replaceFirst(compileSdkVersionMatch, '''
-compileSdk { 
-  version = preview("Baklava") 
+compileSdk {
+  version = preview("Baklava")
 }'''),
       flush: true,
     );
     expect(
       buildGradleFile.readAsStringSync(),
       contains('''
-compileSdk { 
-  version = preview("Baklava") 
+compileSdk {
+  version = preview("Baklava")
 }'''),
     );
 
