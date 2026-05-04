@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/semantics_tester.dart';
-
 class User {
   const User({required this.email, required this.name});
 
@@ -821,7 +819,7 @@ void main() {
   testWidgets('Autocomplete suggestions are hit-tested before ListTiles', (
     WidgetTester tester,
   ) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -853,7 +851,7 @@ void main() {
     await tester.pump();
 
     expect(find.widgetWithText(TextField, 'Cherry'), findsOneWidget);
-    semantics.dispose();
+    handle.dispose();
   });
 
   testWidgets('Autocomplete renders at zero area', (WidgetTester tester) async {
