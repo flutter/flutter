@@ -175,6 +175,18 @@ using namespace flutter::testing;
 }
 @end
 
+@interface FlutterEngineForPaddingTest : FlutterEnginePartialMock
+@property(nonatomic, assign) double capturedPhysicalPaddingTop;
+@property(nonatomic, assign) BOOL didCallUpdateViewportMetrics;
+@end
+
+@implementation FlutterEngineForPaddingTest
+- (void)updateViewportMetrics:(flutter::ViewportMetrics)metrics {
+  _capturedPhysicalPaddingTop = metrics.physical_padding_top;
+  _didCallUpdateViewportMetrics = YES;
+}
+@end
+
 @interface FlutterEngine ()
 - (BOOL)createShell:(NSString*)entrypoint
          libraryURI:(NSString*)libraryURI
@@ -231,7 +243,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 @property(nonatomic, strong) FlutterVSyncClient* keyboardAnimationVSyncClient;
 @property(nonatomic, strong) FlutterVSyncClient* touchRateCorrectionVSyncClient;
 @property(nonatomic, assign) BOOL awokenFromNib;
+@property(nonatomic, assign) BOOL flutterPrefersStatusBarHidden;
 
+- (void)setViewportMetricsPaddings;
 - (void)createTouchRateCorrectionVSyncClientIfNeeded;
 - (void)surfaceUpdated:(BOOL)appeared;
 - (void)performOrientationUpdate:(UIInterfaceOrientationMask)new_preferences;
@@ -2951,6 +2965,74 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   XCTAssertNotNil(flutterViewController.engine);
   XCTAssertNotEqual(flutterViewController.engine, self.mockEngine);
   [appDelegate setMockLaunchEngine:nil];
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/175520.
+- (void)testSetViewportMetricsPaddings_subtractsStatusBarHeightOnNonNotchDevice {
+  if (!@available(iOS 26.0, *)) {
+    XCTSkip(@"iOS 26+ specific behavior: UIKit stale safeAreaInsets.top fix not needed on "
+            @"earlier OS versions.");
+  }
+  FlutterEngineForPaddingTest* testEngine = [[FlutterEngineForPaddingTest alloc] init];
+  [testEngine runWithEntrypoint:nil];
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:testEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  // Partial-mock viewController; do NOT reassign testEngine.viewController -> the engine retains
+  // viewController, and updateViewportMetricsIfNeeded guards on (self.engine.viewController ==
+  // self).
+  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+
+  UIScreen* mockScreen = [self setUpMockScreen];
+  OCMStub([viewControllerMock flutterScreenIfViewLoaded]).andReturn(mockScreen);
+
+  // Non-notch device (e.g. iPad): status bar was 32pt; on iOS 26 safeAreaInsets.top stays
+  // stale at 32pt after hiding.
+  UIView* view = [[UIView alloc] init];
+  UIView* viewMock = OCMPartialMock(view);
+  UIEdgeInsets staleInsets = UIEdgeInsetsMake(32, 0, 0, 0);
+  OCMStub([viewMock safeAreaInsets]).andReturn(staleInsets);
+  OCMStub([viewControllerMock view]).andReturn(viewMock);
+
+  viewController.flutterPrefersStatusBarHidden = YES;
+  viewController.statusBarHeightBeforeHiding = 32;
+
+  [viewController setViewportMetricsPaddings];
+  [viewController updateViewportMetricsIfNeeded];
+
+  XCTAssertTrue(testEngine.didCallUpdateViewportMetrics);
+  XCTAssertEqual(testEngine.capturedPhysicalPaddingTop, 0.0);
+}
+
+// Regression test for https://github.com/flutter/flutter/issues/175520.
+- (void)testSetViewportMetricsPaddings_preservesStatusBarPaddingOnNotchDevice {
+  FlutterEngineForPaddingTest* testEngine = [[FlutterEngineForPaddingTest alloc] init];
+  [testEngine runWithEntrypoint:nil];
+
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:testEngine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+
+  UIScreen* mockScreen = [self setUpMockScreen];
+  OCMStub([viewControllerMock flutterScreenIfViewLoaded]).andReturn(mockScreen);
+
+  // Notch / Dynamic Island device: status bar is 47pt.
+  UIView* view = [[UIView alloc] init];
+  UIView* viewMock = OCMPartialMock(view);
+  UIEdgeInsets notchInsets = UIEdgeInsetsMake(47, 0, 0, 0);
+  OCMStub([viewMock safeAreaInsets]).andReturn(notchInsets);
+  OCMStub([viewControllerMock view]).andReturn(viewMock);
+
+  viewController.flutterPrefersStatusBarHidden = YES;
+  viewController.statusBarHeightBeforeHiding = 47;
+
+  [viewController setViewportMetricsPaddings];
+  [viewController updateViewportMetricsIfNeeded];
+
+  XCTAssertTrue(testEngine.didCallUpdateViewportMetrics);
+  XCTAssertEqual(testEngine.capturedPhysicalPaddingTop, 47.0);
 }
 
 @end

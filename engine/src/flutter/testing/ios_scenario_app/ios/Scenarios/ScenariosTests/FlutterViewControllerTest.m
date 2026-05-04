@@ -9,6 +9,35 @@
 
 FLUTTER_ASSERT_ARC
 
+// Expose the internal prefersStatusBarHidden property so tests can set it directly.
+@interface FlutterViewController ()
+@property(nonatomic, assign, readwrite) BOOL prefersStatusBarHidden;
+@end
+
+// FlutterViewController subclass that calls a block whenever either
+// viewSafeAreaInsetsDidChange or viewDidLayoutSubviews fires.
+// Used by testSetPrefersStatusBarHiddenUpdatesSafeArea to observe both
+// safe-area-update paths: the iOS 18 UIKit path (viewSafeAreaInsetsDidChange)
+// and the iOS 26 fix path (viewDidLayoutSubviews via setNeedsLayout).
+@interface FlutterViewControllerWithSafeAreaObserver : FlutterViewController
+@property(nonatomic, copy) void (^onSafeAreaUpdate)(void);
+@end
+
+@implementation FlutterViewControllerWithSafeAreaObserver
+- (void)viewSafeAreaInsetsDidChange {
+  [super viewSafeAreaInsetsDidChange];
+  if (self.onSafeAreaUpdate) {
+    self.onSafeAreaUpdate();
+  }
+}
+- (void)viewDidLayoutSubviews {
+  [super viewDidLayoutSubviews];
+  if (self.onSafeAreaUpdate) {
+    self.onSafeAreaUpdate();
+  }
+}
+@end
+
 @interface FlutterViewControllerTest : XCTestCase
 @property(nonatomic, strong) FlutterViewController* flutterViewController;
 @end
@@ -108,6 +137,47 @@ FLUTTER_ASSERT_ARC
   [self waitForExpectationsWithTimeout:30.0 handler:nil];
 
   CGColorSpaceRelease(color_space);
+}
+
+- (void)testSetPrefersStatusBarHiddenUpdatesSafeArea {
+  // Regression test for https://github.com/flutter/flutter/issues/175520.
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  [engine runWithEntrypoint:nil];
+
+  FlutterViewControllerWithSafeAreaObserver* vc =
+      [[FlutterViewControllerWithSafeAreaObserver alloc] initWithEngine:engine
+                                                                nibName:nil
+                                                                 bundle:nil];
+
+  XCTestExpectation* firstFrame = [self expectationWithDescription:@"firstFrame"];
+  [vc setFlutterViewDidRenderCallback:^{
+    [firstFrame fulfill];
+  }];
+
+  // Install as the window's root view controller so it receives a real non-zero
+  // safe area. Modal presentation gives safeAreaInsets.top == 0 on iOS 18,
+  // so hiding the status bar has nothing to change and the callbacks never fire.
+  AppDelegate* appDelegate = (AppDelegate*)UIApplication.sharedApplication.delegate;
+  UIWindow* window = appDelegate.window;
+  UIViewController* originalRootVC = window.rootViewController;
+  [self addTeardownBlock:^{
+    window.rootViewController = originalRootVC;
+  }];
+  window.rootViewController = vc;
+  // Prevent tearDown from attempting a modal dismiss on a root VC.
+  self.flutterViewController = nil;
+
+  [self waitForExpectationsWithTimeout:30.0 handler:nil];
+
+  XCTestExpectation* safeAreaExpectation =
+      [self expectationWithDescription:@"safe area update fires after status bar change"];
+  safeAreaExpectation.assertForOverFulfill = NO;
+  vc.onSafeAreaUpdate = ^{
+    [safeAreaExpectation fulfill];
+  };
+  vc.prefersStatusBarHidden = YES;
+
+  [self waitForExpectationsWithTimeout:5.0 handler:nil];
 }
 
 @end

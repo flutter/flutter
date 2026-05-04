@@ -59,6 +59,15 @@ typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval);
  */
 @property(nonatomic, assign, readwrite) BOOL prefersStatusBarHidden;
 
+/**
+ * @brief Status bar height captured just before hiding on iOS 26+.
+ *
+ *        On iOS 26+, UIKit no longer reduces safeAreaInsets.top when the status bar
+ *        is hidden. setViewportMetricsPaddings subtracts this value to correct the
+ *        stale inset on non-notch devices. Exposed for unit testing.
+ */
+@property(nonatomic, assign, readwrite) CGFloat statusBarHeightBeforeHiding;
+
 @property(nonatomic, readonly) FlutterPlatformViewsController* platformViewsController;
 
 @property(nonatomic, strong) FlutterAccessibilityFeatures* accessibilityFeatures;
