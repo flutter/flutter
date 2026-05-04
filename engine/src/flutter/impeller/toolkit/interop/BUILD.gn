@@ -203,7 +203,7 @@ zip_bundle("sdk") {
     ":shared_library",
     ":static_library",
   ]
-  if (is_linux || is_mac || is_linux) {
+  if (is_linux || is_mac || is_win) {
     deps += [ "//flutter/impeller/compiler:impellerc" ]
   }
 
