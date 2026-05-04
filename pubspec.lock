@@ -311,10 +311,10 @@ packages:
     dependency: transitive
     description:
       name: dwds
-      sha256: "37829d11cc9ef3fe4cd8c6263873b4e8b640a8862d4d741b8fa58dd1eeadfb48"
+      sha256: d2fe0b3608330627871d7b0e070ffb4f356087a3e19fea64fa58f95a2c2871d6
       url: "https://pub.dev"
     source: hosted
-    version: "26.2.5"
+    version: "27.1.1"
   extension_discovery:
     dependency: transitive
     description:
@@ -1376,5 +1376,5 @@ packages:
     source: hosted
     version: "2.2.4"
 sdks:
-  dart: ">=3.11.0 <4.0.0"
+  dart: ">=3.12.0-307.0.dev <4.0.0"
   flutter: ">=3.38.4"
