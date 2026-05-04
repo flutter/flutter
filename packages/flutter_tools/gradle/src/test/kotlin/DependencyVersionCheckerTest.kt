@@ -68,6 +68,7 @@ class DependencyVersionCheckerTest {
         every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
         val mockLogger = mockProject.logger
         every { mockLogger.error(any()) } returns Unit
+        every { mockLogger.warn(any()) } returns Unit
 
         DependencyVersionChecker.checkDependencyVersions(mockProject)
 
