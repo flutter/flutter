@@ -35,12 +35,17 @@ final class PredictiveBackEvent {
   /// data received from a platform channel.
   factory PredictiveBackEvent.fromMap(Map<String?, Object?> map) {
     final touchOffset = map['touchOffset'] as List<Object?>?;
+    final double progress = map['progress'] == null ? 0.0 : (map['progress']! as num).toDouble();
+    final swipeEdgeIndex = map['swipeEdge'] == null ? 0 : (map['swipeEdge']! as int);
     return PredictiveBackEvent._(
-      touchOffset: touchOffset == null
+      touchOffset: touchOffset == null || touchOffset.length < 2
           ? null
           : Offset((touchOffset[0]! as num).toDouble(), (touchOffset[1]! as num).toDouble()),
-      progress: (map['progress']! as num).toDouble(),
-      swipeEdge: SwipeEdge.values[map['swipeEdge']! as int],
+      progress: progress,
+      swipeEdge:
+          SwipeEdge.values[swipeEdgeIndex >= 0 && swipeEdgeIndex < SwipeEdge.values.length
+              ? swipeEdgeIndex
+              : 0],
     );
   }
 
