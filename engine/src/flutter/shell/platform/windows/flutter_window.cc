@@ -545,10 +545,10 @@ FlutterWindow::HandleMessage(UINT const message,
     case WM_POINTERUPDATE:
     case WM_POINTERUP:
     case WM_POINTERLEAVE: {
-      x_pos = GET_X_LPARAM(lparam);
-      y_pos = GET_Y_LPARAM(lparam);
-      auto const x = static_cast<double>(x_pos);
-      auto const y = static_cast<double>(y_pos);
+      POINT pt = {GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
+      ScreenToClient(window_handle_, &pt);
+      auto const x = static_cast<double>(pt.x);
+      auto const y = static_cast<double>(pt.y);
       auto const pointerId = GET_POINTERID_WPARAM(wparam);
       POINTER_INFO pointerInfo;
       if (windows_proc_table_->GetPointerInfo(pointerId, &pointerInfo)) {
