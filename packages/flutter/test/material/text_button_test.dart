@@ -8,8 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/semantics_tester.dart';
-
 void main() {
   TextStyle iconStyle(WidgetTester tester, IconData icon) {
     final RichText iconRichText = tester.widget<RichText>(
@@ -732,7 +730,7 @@ void main() {
   });
 
   testWidgets('Does TextButton contribute semantics', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -740,8 +738,8 @@ void main() {
           child: TextButton(
             style: const ButtonStyle(
               // Specifying minimumSize to mimic the original minimumSize for
-              // RaisedButton so that the semantics tree's rect and transform
-              // match the original version of this test.
+              // RaisedButton so that the corresponding button size matches the
+              // original version of this test.
               minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
             ),
             onPressed: () {},
@@ -752,29 +750,20 @@ void main() {
     );
 
     expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics.rootChild(
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              label: 'ABC',
-              rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-              transform: Matrix4.translationValues(356.0, 276.0, 0.0),
-              flags: <SemanticsFlag>[
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isButton,
-                SemanticsFlag.isEnabled,
-                SemanticsFlag.isFocusable,
-              ],
-            ),
-          ],
-        ),
-        ignoreId: true,
+      tester.getSemantics(find.byType(TextButton)),
+      matchesSemantics(
+        label: 'ABC',
+        hasTapAction: true,
+        hasFocusAction: true,
+        hasEnabledState: true,
+        isButton: true,
+        isEnabled: true,
+        isFocusable: true,
+        size: const Size(88.0, 48.0),
       ),
     );
 
-    semantics.dispose();
+    handle.dispose();
   });
 
   testWidgets('Does TextButton scale with font scale changes', (WidgetTester tester) async {
