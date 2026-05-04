@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:crypto/crypto.dart' as crypto;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -711,8 +712,46 @@ class WebTemplatedFiles extends Target {
   }
 
   String buildConfigString(Environment environment) {
+    // Calculate SHA-256 hashes for WASM assets to support Cross-Origin Storage
+    // (https://wicg.github.io/cross-origin-storage/). This assumes that the files will exist in
+    // the output directory at this point.
+    final wasmHashes = <String, String>{};
+    final String canvasKitPath = globals.artifacts!
+        .getHostArtifact(HostArtifact.flutterWebSdk)
+        .path;
+    final Directory canvasKitDirectory = globals.fs.directory(
+      globals.fs.path.join(canvasKitPath, 'canvaskit'),
+    );
+    if (canvasKitDirectory.existsSync()) {
+      for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
+        if (file.path.endsWith('.wasm')) {
+          final String relativePath = globals.fs.path
+              .relative(file.path, from: canvasKitDirectory.path)
+              .replaceAll(r'\', '/');
+          wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+        }
+      }
+    }
+
+    final Directory outputDirectory = environment.outputDir;
+    for (final File file in outputDirectory.listSync(recursive: true).whereType<File>()) {
+      if (file.path.endsWith('.wasm')) {
+        final String relativePath = globals.fs.path
+            .relative(file.path, from: outputDirectory.path)
+            .replaceAll(r'\', '/');
+        // Skip files under the canvaskit/ subdirectory — they are already
+        // covered by the canvasKit SDK directory scan above with keys that
+        // match what the JS lookup code actually uses.
+        if (relativePath.startsWith('canvaskit/')) {
+          continue;
+        }
+        wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+      }
+    }
+
     final buildConfig = <String, Object>{
       'engineRevision': globals.flutterVersion.engineRevision,
+      'wasmHashes': wasmHashes,
       'builds': buildDescriptions,
       if (environment.defines[kUseLocalCanvasKitFlag] == 'true') 'useLocalCanvasKit': true,
     };

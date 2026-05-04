@@ -190,10 +190,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
       return nullptr;
     }
 
-    if (transients_ == nullptr) {
+    impeller::ISize frame_size{size.width, size.height};
+    if (transients_ == nullptr || transients_size_ != frame_size) {
       transients_ = std::make_shared<impeller::SwapchainTransientsVK>(
           impeller_context_, desc,
           /*enable_msaa=*/true);
+      transients_size_ = frame_size;
     }
 
     auto wrapped_onscreen = std::make_shared<WrappedTextureSourceVK>(
