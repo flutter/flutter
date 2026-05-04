@@ -86,8 +86,7 @@ void debugResetBrowserSupportsImageDecoder() {
 }
 
 bool get _defaultBrowserSupportsImageDecoder =>
-    _imageDecoderConstructor != null &&
-    _isBrowserImageDecoderStable;
+    _imageDecoderConstructor != null && _isBrowserImageDecoderStable;
 
 // TODO(yjbanov): https://github.com/flutter/flutter/issues/122761
 // Frequently, when a browser launches an API that other browsers already
