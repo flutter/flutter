@@ -10,8 +10,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/semantics_tester.dart';
-
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/105833
   testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
@@ -3074,7 +3072,7 @@ void main() {
   testWidgets('Semantic nodes do not throw an error after clearSemantics', (
     WidgetTester tester,
   ) async {
-    var semantics = SemanticsTester(tester);
+    SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
       Directionality(
@@ -3092,18 +3090,18 @@ void main() {
     );
 
     // Dispose the semantics to trigger clearSemantics.
-    semantics.dispose();
+    handle.dispose();
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
 
     // Initialize the semantics again.
-    semantics = SemanticsTester(tester);
+    handle = tester.ensureSemantics();
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
 
-    semantics.dispose();
+    handle.dispose();
   }, semanticsEnabled: false);
 
   testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
