@@ -38,10 +38,12 @@ class TextLayout {
   int? _ellipsisBidiLevel;
 
   void performLayout(double width) {
-    // TODO(jlavrova): I suggest with go with the general code flow for an empty text
+    // TODO(jlavrova): IMPLEMENT:
+    // I suggest with go with the general code flow for an empty text
     /*
     if (paragraph.text.isEmpty) {
-      // TODO(mdebbar): We need to populate at least `height` here.
+      // TODO(mdebbar): IMPLEMENT:
+      // We need to populate at least `height` here.
       // I think we may need to ensure there's at least one span. The span's style should match the
       // last effective style when `build()` is called.
       //
@@ -50,8 +52,10 @@ class TextLayout {
       return;
     }
     */
-    // TODO(jlavrova): Skip layout if `width` is the same as the last layout.
-    // TODO(jlavrova): Skip layout if `width` is greater than `maxIntrinsicWidth`.
+    // TODO(jlavrova): IMPLEMENT:
+    // Skip layout if `width` is the same as the last layout.
+    // TODO(jlavrova): IMPLEMENT:
+    // Skip layout if `width` is greater than `maxIntrinsicWidth`.
 
     // Some things are only computed once, and reused in future layouts.
     if (_isFirstLayout) {
@@ -99,7 +103,7 @@ class TextLayout {
     }
 
     // One more dummy element in the end to avoid extra checks
-    // TODO(jlavrova): for empty space we need to keep this empty span -
+    // For empty space we need to keep this empty span -
     // it has some metrics (like ascent/descent) that we need to keep
     final emptySpan = TextSpan(
       start: paragraph.text.length,
@@ -174,7 +178,7 @@ class TextLayout {
       paragraph.longestLine = double.negativeInfinity;
       paragraph.maxLineWidthWithTrailingSpaces = double.negativeInfinity;
       paragraph.height = _mapping._clusters.last.advance.height;
-      // TODO(jlavrova): This is not 100% correct but we have no text to measure the baselines from
+      // This is not 100% correct but we have no text to measure the baselines from
       paragraph.alphabeticBaseline = _mapping._clusters.first.advance.height;
       paragraph.ideographicBaseline = _mapping._clusters.first.advance.height;
       return;
@@ -188,7 +192,7 @@ class TextLayout {
     paragraph.longestLine = wrapper.longestLine;
     paragraph.maxLineWidthWithTrailingSpaces = wrapper.maxLineWidthWithTrailingSpaces;
     paragraph.height = wrapper.height;
-    // TODO(jlavrova): Discuss it with Mouad - it's exactly how it's implemented in SkParagraph
+    // It's exactly how it's implemented in SkParagraph
     // but it only makes sense if we have one line
     paragraph.alphabeticBaseline = lines.first.fontBoundingBoxAscent;
     paragraph.ideographicBaseline =
@@ -232,7 +236,7 @@ class TextLayout {
     final allTextRange = ui.TextRange(start: contentTextRange.start, end: whitespaceTextRange.end);
     assert(contentTextRange.end == whitespaceTextRange.start);
 
-    // TODO(mdebbar): Move this line creation to the end of the method when all info is available.
+    // TODO(jlavrova): Should we use a TextLineBuilder pattern instead?
     final line = TextLine(
       contentRange,
       whitespaceRange,
@@ -265,11 +269,14 @@ class TextLayout {
       }
     }
 
+    if (overlapStart == -1) {
+      // The overlap starts from the beginning of the text.
+      overlapStart = 0;
+    }
     if (overlapEnd == -1) {
       // The overlap continued until the end of text.
       overlapEnd = bidiRuns.length;
     }
-
     final Iterable<BidiRun> lineVisualRuns = bidiRuns.inVisualOrder(overlapStart, overlapEnd);
 
     // We need to take the VISUALLY first cluster on the line (in case of LTR/RTL it could be anywhere)
@@ -282,26 +289,21 @@ class TextLayout {
         ? ellipsisBlock.advance.width
         : 0.0;
     for (final bidiRun in lineVisualRuns) {
-      // TODO(jlavrova): we (almost always true) assume that trailing whitespaces do not affect the line height
+      // We (almost always true) assume that trailing whitespaces do not affect the line height.
+      // Let's keep it as is.
       final ClusterRange textIntersection = bidiRun.clusterRange.intersect(contentRange);
       final ClusterRange whitespacesIntersection = bidiRun.clusterRange.intersect(whitespaceRange);
 
       assert(() {
         final ClusterRange whitespaceIntersection = bidiRun.clusterRange.intersect(whitespaceRange);
-        // One of the intersections must be non-empty, or we did something wrong.
-        return textIntersection.isNotEmpty || whitespaceIntersection.isNotEmpty;
+        // One of the intersections must be non-empty, or we have a special case when there is \n at the end of the paragraph
+        // and this is the line AFTER that last \n.
+        return (textIntersection.isNotEmpty || whitespaceIntersection.isNotEmpty) ||
+            ((contentRange.start == allClusters.length - 1) &&
+                (whitespaceRange.start == allClusters.length - 1));
       }());
 
-      /*
-      // We ignore whitespaces because for now we only use these textStyles for decoration
-      // (and we do not decorate trailing whitespaces)
-      if (textIntersection.isEmpty) {
-        // TODO(jlavrova): what to do with trailing whitespaces? (After implementing queries)
-        continue;
-      }
-*/
       // We cannot ignore whitespaces because they are expected to be counted in some query apis (getBoxesForRange)
-      assert(contentRange.isNotEmpty || whitespaceRange.isNotEmpty);
       final ClusterRange fullIntersection = textIntersection.merge(whitespacesIntersection);
 
       // This is the part of the line that intersects with the `bidiRun` being processed now.
@@ -318,8 +320,6 @@ class TextLayout {
         );
       }
 
-      // TODO(jlavrova): This loop seems excessive. We are iterating over all spans of the
-      //                 paragraph. Can we try to iterate less?
       for (final ParagraphSpan span in paragraph.spans) {
         final bool isOverlapping = bidiLineTextRange.overlapsWith(span.start, span.end);
 
@@ -426,7 +426,6 @@ class TextLayout {
       }
       block.calculatePlaceholderTop(line.fontBoundingBoxAscent, line.fontBoundingBoxDescent);
       // Line always counts multipled metrics (no need for the others)
-      // TODO(jlavrova): sort our alphabetic/ideographic baseline and how it affects ascent & descent
       line.fontBoundingBoxAscent = math.max(line.fontBoundingBoxAscent, block.ascent);
       line.fontBoundingBoxDescent = math.max(line.fontBoundingBoxDescent, block.descent);
     }
@@ -446,8 +445,7 @@ class TextLayout {
   }
 
   void formatLines(double width) {
-    // TODO(jlavrova): there is a special case in cpp SkParagraph; we need to decide if we keep it
-    // Special case: clean all text in case of maxWidth == INF & align != left
+    // Special case similar to SkParagraph: clean all text in case of maxWidth == INF & align != left
     // We had to go through shaping though because we need all the measurement numbers
     final ui.TextAlign effectiveAlign = paragraph.paragraphStyle.effectiveAlign();
     if (width == double.infinity && effectiveAlign != ui.TextAlign.left) {
@@ -466,7 +464,7 @@ class TextLayout {
       if (delta > 0) {
         // We do nothing for left align
         if (effectiveAlign == ui.TextAlign.justify) {
-          // TODO(jlavrova): implement justification
+          // TODO(jlavrova): Implement justification
         } else if (effectiveAlign == ui.TextAlign.right) {
           // When we paint we exclude whitespaces but the advances still remain
           // so we need to take them into account
@@ -491,7 +489,6 @@ class TextLayout {
   ) {
     final textRange = ui.TextRange(start: start, end: end);
     final result = <ui.TextBox>[];
-    // TODO(mdebbar): Instead of nested loops, make them two consecutive loops.
     for (var lineIndex = 0; lineIndex < lines.length; ++lineIndex) {
       final TextLine line = lines[lineIndex];
       if (WebParagraphDebug.logging) {
@@ -939,12 +936,13 @@ abstract class WebCluster {
 
   int get endInSpan;
 
-  // TODO(mdebbar): Cluster's `bounds` and `advance` are relative to the span, which isn't very useful
-  //                most of the time. Should we hide those and only show `width`/`height` since those
-  //                are still useful?
-  //                Callsites that need `bounds` and `advance` are usually performing some kind of
-  //                coordinate conversion to make them relative to the line, for example. We should
-  //                encapsulate that logic here and make it convenient to use.
+  // TODO(mdebbar): DISCUSS:
+  // Cluster's `bounds` and `advance` are relative to the span, which isn't very useful
+  // most of the time. Should we hide those and only show `width`/`height` since those
+  // are still useful?
+  // Callsites that need `bounds` and `advance` are usually performing some kind of
+  // coordinate conversion to make them relative to the line, for example. We should
+  // encapsulate that logic here and make it convenient to use.
   ui.Rect get bounds;
 
   ui.Rect get advance;
@@ -990,7 +988,7 @@ class TextCluster extends WebCluster {
       _cluster,
       /*left:*/ 0,
       /*top:*/ span.fontBoundingBoxAscent,
-      // TODO(mdebbar): Use proper TextClusterOptions.
+      // TODO(mdebbar): Create a JS TextClusterOptions object instead of a Dart Map
       <String, double>{'x': x, 'y': y},
     );
   }
@@ -1077,14 +1075,7 @@ class PlaceholderCluster extends WebCluster {
 
 // This is the minimal range of cluster that belongs to the same bidi run and to the same style block
 abstract class LineBlock {
-  LineBlock(
-    this.span,
-    this._bidiLevel,
-    // TODO(mdebbar): Do we actually need both `clusterRange` and `textRange`?
-    this.clusterRange,
-    this.textRange,
-    this.shiftFromLineStart,
-  );
+  LineBlock(this.span, this._bidiLevel, this.clusterRange, this.textRange, this.shiftFromLineStart);
 
   double get _heightMultiplier;
 
@@ -1217,7 +1208,7 @@ class PlaceholderBlock extends LineBlock {
     switch (span.alignment) {
       case ui.PlaceholderAlignment.baseline:
         // Matches the baseline of the placeholder with the text baseline. You'll need to specify the TextBaseline to use
-        // TODO(jlavrova): the code in this case does not make sense but this is what we have in SkParagraph
+        // The code in this case does not make sense but this is what we have in SkParagraph
         ascent = 0 - baselineAdjustment + offset;
         descent = baselineAdjustment + height - offset;
 
@@ -1271,7 +1262,6 @@ class EllipsisBlock extends TextBlock {
 
 class TextLine {
   TextLine(
-    // TODO(mdebbar): Do we really need all of these cluster and text ranges?
     this.textClusterRange,
     this.whitespacesClusterRange,
     this.hardLineBreak,
@@ -1286,7 +1276,7 @@ class TextLine {
       hardBreak: hardLineBreak,
       ascent: fontBoundingBoxAscent,
       descent: fontBoundingBoxDescent,
-      // TODO(jlavrova): it was not implemented in SkParagraph either; kept it as is
+      // It was not implemented in SkParagraph either; kept it as is
       unscaledAscent: fontBoundingBoxAscent,
       height: advance.height,
       width: advance.width,
@@ -1306,14 +1296,12 @@ class TextLine {
   final bool hardLineBreak;
   final int lineNumber;
 
-  // TODO(mdebbar): What's the difference between this `advance` and `formattingShift`?
   ui.Rect advance = ui.Rect.zero;
   double fontBoundingBoxAscent = 0.0;
   double fontBoundingBoxDescent = 0.0;
   double formattingShift = 0.0; // For centered or right aligned text
   double trailingSpacesWidth = 0.0;
 
-  // TODO(mdebbar): Do we need blocks ordered visually?
   List<LineBlock> visualBlocks = <LineBlock>[];
 }
 
