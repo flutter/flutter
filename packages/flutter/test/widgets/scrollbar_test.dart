@@ -5,8 +5,8 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const Color _kScrollbarColor = Color(0xFF123456);
