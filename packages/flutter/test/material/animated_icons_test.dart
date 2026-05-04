@@ -9,7 +9,6 @@ import 'dart:math' as math show pi;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../widgets/semantics_tester.dart';
 
 class MockCanvas extends Fake implements Canvas {
   late Path capturedPath;
@@ -196,7 +195,7 @@ void main() {
   });
 
   testWidgets('Semantic label', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
       const Directionality(
@@ -210,9 +209,9 @@ void main() {
       ),
     );
 
-    expect(semantics, includesNodeWith(label: 'a label'));
+    expect(find.bySemanticsLabel('a label'), findsOneWidget);
 
-    semantics.dispose();
+    handle.dispose();
   });
 
   testWidgets('Inherited text direction rtl', (WidgetTester tester) async {
