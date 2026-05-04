@@ -1476,7 +1476,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// expensive to do for every build.
   ///
   /// Implementations of this method should start with a call to the inherited
-  /// method, as in `super.didChangeDependencies()`.
+  /// method, as in [super.didChangeDependencies].
   @protected
   @mustCallSuper
   void didChangeDependencies() {}
