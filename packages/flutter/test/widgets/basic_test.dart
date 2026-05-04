@@ -1812,6 +1812,20 @@ void main() {
     expect(aPos.dy, 0.0);
     expect(bPos.dy, 0.0);
   });
+
+  testWidgets('Padding does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Padding(padding: EdgeInsets.all(5), child: Placeholder()),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Padding)), Size.zero);
+  });
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
