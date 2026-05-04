@@ -18,6 +18,7 @@
 #include "display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/color_filter.h"
@@ -58,7 +59,10 @@
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
+#include "impeller/geometry/round_superellipse_param.h"
+#include "impeller/geometry/rounding_radii.h"
 #include "impeller/geometry/rstransform.h"
+#include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/command_buffer.h"
 
@@ -834,7 +838,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      IsCompatibleWithSDFRendering(paint)) {
     auto params = UberSDFParameters::MakeRect(
         /*color=*/paint.color,
         /*rect=*/rect,
@@ -889,7 +893,7 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      IsCompatibleWithSDFRendering(paint)) {
     UberSDFParameters params;
 
     if (paint.style == Paint::Style::kStroke) {
@@ -973,7 +977,7 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   const RoundingRadii& radii = round_rect.GetRadii();
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value() && AreCornersCircular(radii)) {
+      IsCompatibleWithSDFRendering(paint) && AreCornersCircular(radii)) {
     auto params = UberSDFParameters::MakeRoundedRect(
         /*color=*/paint.color,
         /*rect=*/round_rect.GetBounds(),
@@ -1038,6 +1042,41 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
+  if (renderer_.GetContext()->GetFlags().use_sdfs &&
+      !paint.mask_blur_descriptor.has_value() &&
+      round_superellipse.GetRadii().AreAllCornersSame()) {
+    auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
+        round_superellipse.GetBounds(), round_superellipse.GetRadii());
+
+    RoundSuperellipseParam::Octant octant_top =
+        round_superellipse_params.top_right.top;
+    RoundSuperellipseParam::Octant octant_right =
+        round_superellipse_params.top_right.right;
+
+    auto adjusted_radii = RoundingRadii::MakeRadii(
+        Size(octant_top.circle_radius, octant_right.circle_radius));
+
+    auto params = UberSDFParameters::MakeRoundedSuperellipse(
+        /*color=*/paint.color,
+        /*bounds=*/round_superellipse.GetBounds(),
+        /*superellipse_degree=*/Point(octant_top.se_n, octant_right.se_n),
+        /*superellipse_a=*/Point(octant_top.se_a, octant_right.se_a),
+        /*radii=*/adjusted_radii,
+        /*corner_angle_span=*/
+        Point(octant_top.circle_max_angle.radians,
+              octant_right.circle_max_angle.radians),
+        /*corner_circle_center_top=*/octant_top.circle_center,
+        /*corner_circle_center_right=*/octant_right.circle_center,
+        /*superellipse_c=*/octant_top.se_a - octant_right.se_a,
+        /*superellipse_scale=*/
+        Point(round_superellipse_params.top_right.signed_scale.Abs()),
+        /*stroke=*/paint.GetStroke());
+
+    AddRenderSDFEntityToCurrentPass(paint, params);
+
+    return;
+  }
+
   if (paint.style == Paint::Style::kFill) {
     RoundSuperellipseGeometry geom(round_superellipse.GetBounds(),
                                    round_superellipse.GetRadii());
@@ -1060,7 +1099,7 @@ void Canvas::DrawCircle(const Point& center,
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      IsCompatibleWithSDFRendering(paint)) {
     auto params = UberSDFParameters::MakeCircle(
         /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
         /*stroke=*/paint.GetStroke());
@@ -2419,6 +2458,47 @@ void Canvas::EndReplay() {
 
   Reset();
   Initialize(initial_cull_rect_);
+}
+
+bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
+  if (paint.mask_blur_descriptor.has_value()) {
+    return false;
+  }
+  switch (paint.blend_mode) {
+    // Incompatible blend modes:
+    case BlendMode::kClear:
+    case BlendMode::kSrc:
+    case BlendMode::kSrcIn:
+    case BlendMode::kDstIn:
+    case BlendMode::kSrcOut:
+    case BlendMode::kDstATop:
+    case BlendMode::kPlus:
+    case BlendMode::kModulate:
+      return false;
+    // Compatible blend modes:
+    case BlendMode::kDst:
+    case BlendMode::kSrcOver:
+    case BlendMode::kDstOver:
+    case BlendMode::kDstOut:
+    case BlendMode::kSrcATop:
+    case BlendMode::kXor:
+    case BlendMode::kScreen:
+    case BlendMode::kOverlay:
+    case BlendMode::kDarken:
+    case BlendMode::kLighten:
+    case BlendMode::kColorDodge:
+    case BlendMode::kColorBurn:
+    case BlendMode::kHardLight:
+    case BlendMode::kSoftLight:
+    case BlendMode::kDifference:
+    case BlendMode::kExclusion:
+    case BlendMode::kMultiply:
+    case BlendMode::kHue:
+    case BlendMode::kSaturation:
+    case BlendMode::kColor:
+    case BlendMode::kLuminosity:
+      return true;
+  }
 }
 
 LazyRenderingConfig::LazyRenderingConfig(

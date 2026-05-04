@@ -84,7 +84,7 @@ class BuildHooks extends Target {
     if (!outputDepfile.parent.existsSync()) {
       outputDepfile.parent.createSync(recursive: true);
     }
-    environment.depFileService.writeToFile(depfile, outputDepfile);
+    environment.depFileService.writeToFile(depfile, outputDepfile, filterOutputs: true);
   }
 
   @override
@@ -236,7 +236,7 @@ class LinkHooks extends Target {
     if (!outputDepfile.parent.existsSync()) {
       outputDepfile.parent.createSync(recursive: true);
     }
-    environment.depFileService.writeToFile(depfile, outputDepfile);
+    environment.depFileService.writeToFile(depfile, outputDepfile, filterOutputs: true);
   }
 
   @override
