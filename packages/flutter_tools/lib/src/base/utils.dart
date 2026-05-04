@@ -618,7 +618,8 @@ final utf8LineDecoder = StreamTransformer<List<int>, String>.fromBind(
 /// UTF-8 is expected from external sources. Invalid UTF-8 sequences are decoded
 /// to replacement characters (U+FFFD) without warnings.
 final utf8AllowMalformedLineDecoder = StreamTransformer<List<int>, String>.fromBind(
-  (stream) => stream.transformWithCallSite(utf8AllowMalformed.decoder).transform(const LineSplitter()),
+  (stream) =>
+      stream.transformWithCallSite(utf8AllowMalformed.decoder).transform(const LineSplitter()),
 );
 
 /// Formats a list of rows into a table with aligned columns.

@@ -23,12 +23,9 @@ void main() {
     expect(decoder.convert(passedString.codeUnits), passedString);
   });
 
-  testWithoutContext(
-    'Decode a malformed string without throwing',
-    () async {
-      expect(utf8AllowMalformed.decode(nonpassString.codeUnits), nonpassString);
-    },
-  );
+  testWithoutContext('Decode a malformed string without throwing', () async {
+    expect(utf8AllowMalformed.decode(nonpassString.codeUnits), nonpassString);
+  });
 
   testWithoutContext('Decode invalid UTF-8 bytes from external source', () async {
     final bytes = <int>[
@@ -158,7 +155,29 @@ void main() {
       // Simulate VM Service event with base64-encoded app log containing invalid UTF-8
       // This is raw bytes that would come from a VM Service event: "App log with error: [invalid byte]"
       final rawBytes = <int>[
-        65, 112, 112, 32, 108, 111, 103, 32, 119, 105, 116, 104, 32, 101, 114, 114, 111, 114, 58, 32, 239, 191, 189
+        65,
+        112,
+        112,
+        32,
+        108,
+        111,
+        103,
+        32,
+        119,
+        105,
+        116,
+        104,
+        32,
+        101,
+        114,
+        114,
+        111,
+        114,
+        58,
+        32,
+        239,
+        191,
+        189,
       ];
       final String base64Encoded = cnv.base64.encode(rawBytes);
 
