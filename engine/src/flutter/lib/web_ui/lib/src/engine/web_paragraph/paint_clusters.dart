@@ -64,7 +64,7 @@ class PaintClusters extends TextPaint {
             sourceRect.height,
           );
           fillDecorations(block, sourceRect);
-          painter.drawDecorations(canvas, sourceRect, targetRect);
+          painter.drawDecorations(canvas, block, sourceRect, targetRect);
         case StyleElements.text:
           throw Exception('Text should be drawn by clusters, not blocks');
         case StyleElements.shadows:

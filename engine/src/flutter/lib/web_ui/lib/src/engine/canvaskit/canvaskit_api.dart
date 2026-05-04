@@ -987,6 +987,33 @@ extension type SkPaint._(JSObject _) implements JSObject {
   external void setStrokeMiter(double miterLimit);
   external void setImageFilter(SkImageFilter? imageFilter);
   external void delete();
+
+  /// Applies a dash effect to the paint.
+  ///
+  /// [dashes] is a list of alternating on/off lengths (e.g., [10.0, 5.0]).
+  /// [phase] is the offset into the dash pattern.
+  void setDashPathEffect(List<double> dashes, [double phase = 0.0]) {
+    if (dashes.isEmpty) {
+      // Clear the effect using dynamic method call
+      callMethod('setPathEffect'.toJS);
+      return;
+    }
+
+    final intervals = Float32List.fromList(dashes);
+
+    // 1. Dynamically access the 'PathEffect' namespace on the CanvasKit object
+    final pathEffectNamespace = canvasKit.getProperty('PathEffect'.toJS)! as JSObject;
+
+    // 2. Call 'MakeDash' directly
+    final JSAny dashEffect = pathEffectNamespace.callMethod(
+      'MakeDash'.toJS,
+      intervals.toJS,
+      phase.toJS,
+    );
+
+    // 3. Apply the resulting effect to the underlying SkPaint object
+    callMethod('setPathEffect'.toJS, dashEffect);
+  }
 }
 
 extension type CkFilterOptions(JSObject _) implements JSObject {}

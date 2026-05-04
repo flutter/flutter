@@ -50,17 +50,9 @@ class PaintParagraph extends TextPaint {
             );
             _fillBlockText(layout, block as TextBlock);
           case StyleElements.decorations:
-            // For decorations we need to shift to the start of the line
-            paintContext.translate(block.shiftFromLineStart, 0);
-            // Let's calculate the sizes
-            final (ui.Rect sourceRect, ui.Rect targetRect) = calculateBlock(
-              layout,
-              block as TextBlock,
-              ui.Offset(line.advance.left + line.formattingShift, line.advance.top),
-              ui.Offset.zero, // We only need sourceRect here so we don't need the offset
-              ui.window.devicePixelRatio,
+            throw Exception(
+              'Decorations are drawn directly on the output canvas, not on the canvas2D',
             );
-            fillDecorations(block, sourceRect);
           case StyleElements.background:
             throw Exception(
               'Background is drawn directly on the output canvas, not on the canvas2D',
@@ -110,9 +102,7 @@ class PaintParagraph extends TextPaint {
           case StyleElements.background:
             painter.drawBackground(canvas, block, sourceRect, targetRect);
           case StyleElements.decorations:
-            throw Exception(
-              'Decorations are painted on the canvas2D and then drawn as an image on the output canvas, not drawn directly on the output canvas',
-            );
+            painter.drawDecorations(canvas, block, sourceRect, targetRect);
           case StyleElements.shadows:
             throw Exception(
               'Shadows are painted on the canvas2D and then drawn as an image on the output canvas, not drawn directly on the output canvas',
@@ -219,11 +209,11 @@ class PaintParagraph extends TextPaint {
       // Fill out all the blocks on Canvas2D canvas
       _fillAllBlocks(StyleElements.shadows, layout);
       _fillAllBlocks(StyleElements.text, layout);
-      _fillAllBlocks(StyleElements.decorations, layout);
 
-      // Draw background blocks directly on the output canvas
+      // Draw background and decorations blocks directly on the output canvas
       // so it will be cached together with the text blocks on Canvas2D canvas
       _drawAllBlocks(StyleElements.background, canvas, layout, painter, x, y);
+      _drawAllBlocks(StyleElements.decorations, canvas, layout, painter, x, y);
     } else {
       // We already have cached image for the entire paragraph (including the backgrounds)
     }
