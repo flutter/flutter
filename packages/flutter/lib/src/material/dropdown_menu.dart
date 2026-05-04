@@ -1240,6 +1240,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
             suffixIcon: _buildDefaultSuffixIcon(context, controller),
           );
         }
+        if (decoration.prefixIcon == null && widget.leadingIcon != null) {
+          decoration = decoration.copyWith(prefixIcon: widget.leadingIcon);
+        }
         final InputDecoration effectiveDecoration = decoration.applyDefaults(
           effectiveInputDecorationTheme,
         );

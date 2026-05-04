@@ -4894,6 +4894,56 @@ void main() {
       },
     );
 
+    testWidgets(
+      'leadingIcon is used when decorationBuilder does not set InputDecoration.prefixIcon',
+      (WidgetTester tester) async {
+        final menuController = MenuController();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                leadingIcon: const Icon(Icons.search),
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byIcon(Icons.search), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'Custom decorationBuilder prefixIcon is preserved when leadingIcon is also set',
+      (WidgetTester tester) async {
+        final menuController = MenuController();
+        InputDecoration buildDecorationWithPrefix(
+          BuildContext context,
+          MenuController controller,
+        ) {
+          return const InputDecoration(labelText: labelText, prefixIcon: Icon(Icons.lock));
+        }
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                menuController: menuController,
+                dropdownMenuEntries: menuChildren,
+                leadingIcon: const Icon(Icons.search),
+                decorationBuilder: buildDecorationWithPrefix,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byIcon(Icons.lock), findsOneWidget);
+        expect(find.byIcon(Icons.search), findsNothing);
+      },
+    );
+
     testWidgets('Passing label and decorationBuilder throws', (WidgetTester tester) async {
       final menuController = MenuController();
       await expectLater(() async {
