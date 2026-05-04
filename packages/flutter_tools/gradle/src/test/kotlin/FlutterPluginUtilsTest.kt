@@ -786,8 +786,8 @@ class FlutterPluginUtilsTest {
 
             @Test
             fun `KGP regex on single line apply`() {
-                assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexKotlin, "kotlin-android", DslType.KOTLIN)
-                assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexGroovy, "kotlin-android", DslType.GROOVY)
+                assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexKotlin, "org.jetbrains.kotlin.android", DslType.KOTLIN)
+                assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexGroovy, "org.jetbrains.kotlin.android", DslType.GROOVY)
                 assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexKotlin, "org.jetbrains.kotlin.android", DslType.KOTLIN)
                 assertSingeLinePluginDetection(FlutterPluginUtils.kgpRegexGroovy, "org.jetbrains.kotlin.android", DslType.GROOVY)
             }
@@ -798,7 +798,7 @@ class FlutterPluginUtilsTest {
                     """
                     plugins {
                         id("com.android.application")
-                        id("kotlin-android")
+                        id("org.jetbrains.kotlin.android")
                     }
                     """.trimIndent()
                 assertTrue(
@@ -840,7 +840,7 @@ class FlutterPluginUtilsTest {
                     """
                     plugins {
                         id 'com.android.application'
-                        id 'kotlin-android'
+                        id 'org.jetbrains.kotlin.android'
                     }
                     """.trimIndent()
                 assertTrue(
@@ -861,7 +861,7 @@ class FlutterPluginUtilsTest {
                     """
                     plugins {
                         id 'com.android.application'
-                        alias 'kotlin-android'
+                        alias 'org.jetbrains.kotlin.android'
                     }
                     """.trimIndent()
                 assertTrue(
@@ -884,7 +884,7 @@ class FlutterPluginUtilsTest {
                 val kotlinSameLine =
                     """
                     plugins {
-                        id("com.android.application") id("kotlin-android")
+                        id("com.android.application") id("org.jetbrains.kotlin.android")
                     }
                     """.trimIndent()
 
@@ -900,7 +900,7 @@ class FlutterPluginUtilsTest {
                 val groovySameLine =
                     """
                     plugins {
-                        id 'com.android.application' id 'kotlin-android'
+                        id 'com.android.application' id 'org.jetbrains.kotlin.android'
                     }
                     """.trimIndent()
 
@@ -917,7 +917,7 @@ class FlutterPluginUtilsTest {
                     """
                     plugins {
                        id 'com.android.application'
-                       // alias 'kotlin-android'
+                       // alias 'org.jetbrains.kotlin.android'
                     }
                     """.trimIndent()
                 assertTrue(
@@ -938,7 +938,7 @@ class FlutterPluginUtilsTest {
                     """
                     // plugins {
                     //    id 'com.android.application'
-                    //    alias 'kotlin-android'
+                    //    alias 'org.jetbrains.kotlin.android'
                     // }
                     """.trimIndent()
                 assertFalse(
@@ -1010,7 +1010,7 @@ class FlutterPluginUtilsTest {
                             """
                             plugins {
                                 id("com.android.application")
-                                id("kotlin-android")
+                                id("org.jetbrains.kotlin.android")
                             }
                             """.trimIndent()
                         )
@@ -1087,8 +1087,8 @@ class FlutterPluginUtilsTest {
                 verify(exactly = 0) {
                     mockLogger.error(match { it.contains("Your app uses the following plugins") })
                 }
-                verify(exactly = 0) { appProjectPluginManager.apply("kotlin-android") }
-                verify(exactly = 1) { pluginProjectPluginManager.apply("kotlin-android") }
+                verify(exactly = 0) { appProjectPluginManager.apply("org.jetbrains.kotlin.android") }
+                verify(exactly = 1) { pluginProjectPluginManager.apply("org.jetbrains.kotlin.android") }
             }
 
             @Test
@@ -1116,7 +1116,7 @@ class FlutterPluginUtilsTest {
                             """
                             plugins {
                                 id("com.android.library")
-                                id("kotlin-android")
+                                id("org.jetbrains.kotlin.android")
                             }
                             """.trimIndent()
                         )
@@ -1184,8 +1184,8 @@ class FlutterPluginUtilsTest {
                 verify(exactly = 0) {
                     mockLogger.error(match { it.contains("Your Android app project") })
                 }
-                verify(exactly = 1) { appProjectPluginManager.apply("kotlin-android") }
-                verify(exactly = 0) { pluginProjectPluginManager.apply("kotlin-android") }
+                verify(exactly = 1) { appProjectPluginManager.apply("org.jetbrains.kotlin.android") }
+                verify(exactly = 0) { pluginProjectPluginManager.apply("org.jetbrains.kotlin.android") }
             }
 
             @Test
@@ -1200,7 +1200,7 @@ class FlutterPluginUtilsTest {
                             """
                             plugins {
                                 id("com.android.application")
-                                id("kotlin-android")
+                                id("org.jetbrains.kotlin.android")
                             }
                             """.trimIndent()
                         )
@@ -1214,7 +1214,7 @@ class FlutterPluginUtilsTest {
                             """
                             plugins {
                                 id("com.android.library")
-                                id("kotlin-android")
+                                id("org.jetbrains.kotlin.android")
                             }
                             """.trimIndent()
                         )
@@ -1290,8 +1290,8 @@ class FlutterPluginUtilsTest {
                     )
                 }
 
-                verify(exactly = 0) { appProjectPluginManager.apply("kotlin-android") }
-                verify(exactly = 0) { pluginProjectPluginManager.apply("kotlin-android") }
+                verify(exactly = 0) { appProjectPluginManager.apply("org.jetbrains.kotlin.android") }
+                verify(exactly = 0) { pluginProjectPluginManager.apply("org.jetbrains.kotlin.android") }
             }
 
             @Test
@@ -1305,7 +1305,7 @@ class FlutterPluginUtilsTest {
                         writeText(
                             """
                             apply plugin: 'com.android.application'
-                            apply plugin: 'kotlin-android'
+                            apply plugin: 'org.jetbrains.kotlin.android'
                             """.trimIndent()
                         )
                     }
@@ -1317,7 +1317,7 @@ class FlutterPluginUtilsTest {
                         writeText(
                             """
                             apply plugin: 'com.android.library'
-                            apply plugin: 'kotlin-android'
+                            apply plugin: 'org.jetbrains.kotlin.android'
                             """.trimIndent()
                         )
                     }
@@ -1405,9 +1405,9 @@ class FlutterPluginUtilsTest {
                     )
                 }
 
-                verify(exactly = 0) { appProjectPluginManager.apply("kotlin-android") }
-                verify(exactly = 0) { pluginProjectOnePluginManager.apply("kotlin-android") }
-                verify(exactly = 0) { pluginProjectTwoPluginManager.apply("kotlin-android") }
+                verify(exactly = 0) { appProjectPluginManager.apply("org.jetbrains.kotlin.android") }
+                verify(exactly = 0) { pluginProjectOnePluginManager.apply("org.jetbrains.kotlin.android") }
+                verify(exactly = 0) { pluginProjectTwoPluginManager.apply("org.jetbrains.kotlin.android") }
             }
 
             @Test
@@ -1484,8 +1484,8 @@ class FlutterPluginUtilsTest {
                     mockLogger.error(any())
                 }
 
-                verify(exactly = 1) { appProjectPluginManager.apply("kotlin-android") }
-                verify(exactly = 1) { pluginProjectPluginManager.apply("kotlin-android") }
+                verify(exactly = 1) { appProjectPluginManager.apply("org.jetbrains.kotlin.android") }
+                verify(exactly = 1) { pluginProjectPluginManager.apply("org.jetbrains.kotlin.android") }
             }
 
             @Test
@@ -1553,8 +1553,8 @@ class FlutterPluginUtilsTest {
                 every { rootProject.subprojects(capture(subprojectsActionSlot)) } returns Unit
                 every { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) } returns Unit
 
-                every { appProjectPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
-                every { pluginProjectPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
+                every { appProjectPluginManager.apply("org.jetbrains.kotlin.android") } throws Exception("KGP not on classpath")
+                every { pluginProjectPluginManager.apply("org.jetbrains.kotlin.android") } throws Exception("KGP not on classpath")
 
                 detectApplyingKotlinGradlePlugin(appProject)
 

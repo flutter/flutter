@@ -632,7 +632,7 @@ object FlutterPluginUtils {
 
             if (!hasKgpPlugin) {
                 try {
-                    pluginManager.apply("kotlin-android")
+                    pluginManager.apply("org.jetbrains.kotlin.android")
                 } catch (_: Exception) {
                     logger.quiet(
                         """
