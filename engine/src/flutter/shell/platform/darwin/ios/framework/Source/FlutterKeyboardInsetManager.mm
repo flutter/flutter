@@ -402,9 +402,11 @@
       animationCallback(projectedTargetTime);
     });
   };
-  _keyboardAnimationVSyncClient =
-      [[FlutterVSyncClient alloc] initWithTaskRunner:delegate.engine.uiTaskRunner
-                                            callback:vsyncCallback];
+  _keyboardAnimationVSyncClient = [[FlutterVSyncClient alloc]
+                initWithTaskRunner:delegate.engine.uiTaskRunner
+      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+                          callback:vsyncCallback];
   _keyboardAnimationVSyncClient.allowPauseAfterVsync = NO;
   [_keyboardAnimationVSyncClient await];
 }
