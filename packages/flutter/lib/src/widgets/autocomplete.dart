@@ -121,20 +121,57 @@ enum OptionsViewOpenDirection {
   mostSpace,
 }
 
+/// A controller for a [RawAutocomplete] widget
+/// that allows the caller to manage the options list directly
+/// instead of using a [RawAutocomplete.optionsBuilder] callback.
+///
+/// This is useful when the options depend on criteria beyond just the
+/// [TextEditingValue], which is the only input
+/// that [RawAutocomplete.optionsBuilder] receives.
+///
+/// Provide an [AutocompleteController] to [RawAutocomplete.controller] and
+/// set [options] to update the displayed options. The widget will react to
+/// changes in the controller's options and show/hide the options view
+/// accordingly.
+///
+/// Remember to [dispose] of the [AutocompleteController] when it is no
+/// longer needed. This will ensure all resources used by the object are
+/// discarded.
+///
+/// See also:
+///
+///  * [RawAutocomplete.controller], which accepts this controller.
+///  * [RawAutocomplete.optionsBuilder], the callback-based alternative.
+class AutocompleteController<T extends Object> extends ChangeNotifier {
+  /// The current list of selectable options.
+  Iterable<T> get options => _options;
+  Iterable<T> _options = Iterable<T>.empty();
+  set options(Iterable<T> value) {
+    if (value == _options) {
+      return;
+    }
+    _options = value;
+    notifyListeners();
+  }
+}
+
 // TODO(justinmc): Mention AutocompleteCupertino when it is implemented.
 /// {@template flutter.widgets.RawAutocomplete.RawAutocomplete}
 /// A widget for helping the user make a selection by entering some text and
 /// choosing from among a list of options.
 ///
-/// The user's text input is received in a field built with the
-/// [fieldViewBuilder] parameter. The options to be displayed are determined
-/// using [optionsBuilder] and rendered with [optionsViewBuilder].
+/// The text input is rendered with [fieldViewBuilder].
+/// The options to be displayed are determined using [optionsBuilder]
+/// and rendered with [optionsViewBuilder].
 ///
 /// The options view opens when the field gains focus or when the field's text
-/// changes, as long as [optionsBuilder] returns at least one option. The options
-/// view closes when the user selects an option, when there are no matching
+/// changes, as long as there is at least one option. The options
+/// view closes when the user selects an option, when there are no
 /// options, or when the field loses focus.
 /// {@endtemplate}
+///
+/// Alternatively, provide a [controller] to manage the options list directly
+/// instead of using [optionsBuilder].
 ///
 /// This is a core framework widget with very basic UI.
 ///
@@ -171,12 +208,16 @@ enum OptionsViewOpenDirection {
 class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// Create an instance of RawAutocomplete.
   ///
-  /// [displayStringForOption], [optionsBuilder] and [optionsViewBuilder] must
-  /// not be null.
+  /// Exactly one of [optionsBuilder] or [controller] must be provided.
+  /// When [optionsBuilder] is provided, the widget internally calls it when the
+  /// text field's [TextEditingValue] changes and manages the result.
+  /// When [controller] is provided, the caller sets
+  /// [AutocompleteController.options] directly and the widget reacts.
   const RawAutocomplete({
     super.key,
     required this.optionsViewBuilder,
-    required this.optionsBuilder,
+    this.optionsBuilder,
+    this.controller,
     this.optionsViewOpenDirection = OptionsViewOpenDirection.down,
     this.displayStringForOption = defaultStringForOption,
     this.fieldViewBuilder,
@@ -193,6 +234,10 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
        assert(
          !(textEditingController != null && initialValue != null),
          'textEditingController and initialValue cannot be simultaneously defined.',
+       ),
+       assert(
+         (optionsBuilder == null) != (controller == null),
+         'Exactly one of optionsBuilder or controller must be provided.',
        );
 
   /// {@template flutter.widgets.RawAutocomplete.fieldViewBuilder}
@@ -277,7 +322,21 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// A function that returns the current selectable options objects given the
   /// current TextEditingValue.
   /// {@endtemplate}
-  final AutocompleteOptionsBuilder<T> optionsBuilder;
+  ///
+  /// Mutually exclusive with [controller]. Exactly one must be provided.
+  final AutocompleteOptionsBuilder<T>? optionsBuilder;
+
+  /// {@template flutter.widgets.RawAutocomplete.controller}
+  /// A controller that allows the caller to manage the options list directly.
+  ///
+  /// When provided, the caller sets [AutocompleteController.options]
+  /// directly and the widget reacts to changes. This is useful when the
+  /// options depend on criteria beyond just the [TextEditingValue], which is
+  /// the only input that [optionsBuilder] receives.
+  /// {@endtemplate}
+  ///
+  /// Mutually exclusive with [optionsBuilder]. Exactly one must be provided.
+  final AutocompleteController<T>? controller;
 
   /// The [TextEditingController] that is used for the text field.
   ///
@@ -383,11 +442,19 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     DismissIntent: CallbackAction<DismissIntent>(onInvoke: _hideOptions),
   };
 
-  Iterable<T> _options = Iterable<T>.empty();
+  AutocompleteController<T>? _internalController;
+  AutocompleteController<T> get _controller {
+    return widget.controller ??
+        (_internalController ??= AutocompleteController<T>()..addListener(_handleOptionsChanged));
+  }
+
+  Iterable<T> get _options => _controller.options;
+  bool _lastOptionsWereEmpty = true;
   T? _selection;
   // Set the initial value to null so when this widget gets focused for the first
   // time it will try to run the options view builder.
   String? _lastFieldText;
+  bool _userHidOptions = false;
   final ValueNotifier<int> _highlightedOptionIndex = ValueNotifier<int>(0);
 
   static const Map<ShortcutActivator, Intent> _appleShortcuts = <ShortcutActivator, Intent>{
@@ -426,8 +493,9 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   void _onFocusChange() {
     if (_focusNode.hasFocus != _hasFocus) {
       _hasFocus = _focusNode.hasFocus;
-      // Gaining focus can open the options view (if there are options). Losing
-      // focus always closes it.
+      if (_hasFocus) {
+        _userHidOptions = false;
+      }
       _updateOptionsViewVisibility();
     }
   }
@@ -435,7 +503,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   /// Shows the options view when the field is focused and there is at least one
   /// option to display; otherwise hides the options view.
   void _updateOptionsViewVisibility() {
-    if (_canShowOptionsView) {
+    if (_canShowOptionsView && !_userHidOptions) {
       _optionsViewController.show();
     } else if (_optionsViewController.isShowing) {
       _optionsViewController.hide();
@@ -479,34 +547,51 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
     }
     final TextEditingValue value = _textEditingController.value;
 
-    // Makes sure that options change only when content of the field changes.
-    var shouldUpdateOptions = false;
     if (value.text != _lastFieldText) {
-      shouldUpdateOptions = true;
-      _onChangedCallId += 1;
+      _userHidOptions = false;
     }
     _lastFieldText = value.text;
-    final int callId = _onChangedCallId;
-    final Iterable<T> options = await widget.optionsBuilder(value);
 
-    if (!mounted) {
-      return;
-    }
+    if (widget.optionsBuilder case final optionsBuilder?) {
+      _onChangedCallId += 1;
+      final int callId = _onChangedCallId;
+      final Iterable<T> options = await optionsBuilder(value);
 
-    // Makes sure that previous call results do not replace new ones.
-    if (callId != _onChangedCallId || !shouldUpdateOptions) {
-      return;
+      if (!mounted) {
+        return;
+      }
+
+      // Makes sure that previous call results do not replace new ones.
+      if (callId != _onChangedCallId) {
+        return;
+      }
+      _controller.options = options; // triggers _handleOptionsChanged via listener
+    } else {
+      // External controller: caller manages options separately.
+      // Still update selection validity and visibility for text changes.
+      _updateSelectionValidity();
     }
-    if (_options.isEmpty != options.isEmpty) {
-      _announceSemantics(options.isNotEmpty);
+  }
+
+  // No setState here: the overlay content rebuilds because
+  // _updateOptionsViewVisibility calls show()/hide() on the
+  // OverlayPortalController, which calls setState on _OverlayPortalState.
+  void _handleOptionsChanged() {
+    final bool optionsWereEmpty = _lastOptionsWereEmpty;
+    _lastOptionsWereEmpty = _options.isEmpty;
+    if (optionsWereEmpty != _options.isEmpty) {
+      _announceSemantics(_options.isNotEmpty);
     }
-    _options = options;
     _updateHighlight(_highlightedOptionIndex.value);
+    _updateSelectionValidity();
+  }
+
+  void _updateSelectionValidity() {
     final T? selection = _selection;
-    if (selection != null && value.text != widget.displayStringForOption(selection)) {
+    if (selection != null &&
+        _textEditingController.text != widget.displayStringForOption(selection)) {
       _selection = null;
     }
-
     _updateOptionsViewVisibility();
   }
 
@@ -567,6 +652,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   void _highlightOption(int index) {
     assert(_canShowOptionsView);
+    _userHidOptions = false;
     _updateOptionsViewVisibility();
     assert(_optionsViewController.isShowing);
     _updateHighlight(index);
@@ -574,6 +660,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
 
   Object? _hideOptions(DismissIntent intent) {
     if (_optionsViewController.isShowing) {
+      _userHidOptions = true;
       _optionsViewController.hide();
       return null;
     } else {
@@ -659,6 +746,10 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   @override
   void initState() {
     super.initState();
+    if (widget.controller != null) {
+      widget.controller!.addListener(_handleOptionsChanged);
+      _lastOptionsWereEmpty = widget.controller!.options.isEmpty;
+    }
     final TextEditingController initialController =
         widget.textEditingController ??
         (_internalTextEditingController = TextEditingController.fromValue(widget.initialValue));
@@ -670,6 +761,17 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   @override
   void didUpdateWidget(RawAutocomplete<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.controller, widget.controller)) {
+      oldWidget.controller?.removeListener(_handleOptionsChanged);
+      if (oldWidget.controller == null) {
+        _internalController?.dispose();
+        _internalController = null;
+      }
+      if (widget.controller != null) {
+        widget.controller!.addListener(_handleOptionsChanged);
+        _lastOptionsWereEmpty = widget.controller!.options.isEmpty;
+      }
+    }
     if (!identical(oldWidget.textEditingController, widget.textEditingController)) {
       oldWidget.textEditingController?.removeListener(_onChangedField);
       if (oldWidget.textEditingController == null) {
@@ -679,20 +781,22 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       widget.textEditingController?.addListener(_onChangedField);
     }
     if (!identical(oldWidget.focusNode, widget.focusNode)) {
-      oldWidget.focusNode?.removeListener(_updateOptionsViewVisibility);
+      oldWidget.focusNode?.removeListener(_onFocusChange);
       if (oldWidget.focusNode == null) {
         _internalFocusNode?.dispose();
         _internalFocusNode = null;
       }
-      widget.focusNode?.addListener(_updateOptionsViewVisibility);
+      widget.focusNode?.addListener(_onFocusChange);
     }
   }
 
   @override
   void dispose() {
+    widget.controller?.removeListener(_handleOptionsChanged);
+    _internalController?.dispose();
     widget.textEditingController?.removeListener(_onChangedField);
     _internalTextEditingController?.dispose();
-    widget.focusNode?.removeListener(_updateOptionsViewVisibility);
+    widget.focusNode?.removeListener(_onFocusChange);
     _internalFocusNode?.dispose();
     _highlightedOptionIndex.dispose();
     super.dispose();
