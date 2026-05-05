@@ -18,7 +18,11 @@ class VSyncClientTest: XCTestCase {
   }
 
   func testSetAllowPauseAfterVsyncCorrect() {
-    let vsyncClient = VSyncClient(taskRunner: threadTaskRunner) { _, _ in }!
+    let vsyncClient = VSyncClient(
+      taskRunner: threadTaskRunner,
+      isVariableRefreshRateEnabled: false,
+      maxRefreshRate: 60.0
+    ) { _, _ in }!
     let link = vsyncClient.displayLink
 
     vsyncClient.allowPauseAfterVsync = false
@@ -70,7 +74,11 @@ class VSyncClientTest: XCTestCase {
   }
 
   func testAwaitAndPauseWillWorkCorrectly() {
-    let vsyncClient = VSyncClient(taskRunner: threadTaskRunner) { _, _ in }!
+    let vsyncClient = VSyncClient(
+      taskRunner: threadTaskRunner,
+      isVariableRefreshRateEnabled: false,
+      maxRefreshRate: 60.0
+    ) { _, _ in }!
     let link = vsyncClient.displayLink
 
     XCTAssertTrue(link.isPaused)
@@ -86,7 +94,11 @@ class VSyncClientTest: XCTestCase {
 
     autoreleasepool {
       let vsyncExpectation = expectation(description: "vsync")
-      let client = VSyncClient(taskRunner: threadTaskRunner) { _, _ in
+      let client = VSyncClient(
+        taskRunner: threadTaskRunner,
+        isVariableRefreshRateEnabled: false,
+        maxRefreshRate: 60.0
+      ) { _, _ in
         vsyncExpectation.fulfill()
       }!
       weakClient = client
