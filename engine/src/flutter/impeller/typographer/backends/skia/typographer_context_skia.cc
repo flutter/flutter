@@ -70,6 +70,26 @@ SkPaint::Join ToSkiaJoin(Join join) {
   }
   FML_UNREACHABLE();
 }
+
+// Create an A8 bitmap by copying the alpha channel from an RGBA_8888 bitmap.
+SkBitmap RGBAToA8(const SkBitmap& rgba_bitmap) {
+  SkBitmap a8_bitmap;
+  a8_bitmap.setInfo(
+      SkImageInfo::MakeA8(rgba_bitmap.width(), rgba_bitmap.height()));
+  a8_bitmap.allocPixels();
+
+  size_t total_pixels = rgba_bitmap.width() * rgba_bitmap.height();
+  const uint8_t* src_bytes =
+      static_cast<const uint8_t*>(rgba_bitmap.getAddr(0, 0));
+  uint8_t* dst_pixels = static_cast<uint8_t*>(a8_bitmap.getAddr(0, 0));
+  for (size_t i = 0; i < total_pixels; ++i) {
+    // Copy alpha channel from RGBA to A8. The alpha channel is the 4th byte
+    // (index 3) of each 4-byte pixel from the RGBA_8888 src.
+    dst_pixels[i] = src_bytes[i * 4 + 3];
+  }
+
+  return a8_bitmap;
+}
 }  // namespace
 
 std::shared_ptr<TypographerContext> TypographerContextSkia::Make() {
@@ -86,15 +106,20 @@ TypographerContextSkia::CreateGlyphAtlasContext(GlyphAtlas::Type type) const {
 }
 
 SkImageInfo TypographerContextSkia::GetImageInfo(const GlyphAtlas& atlas,
-                                                 Size size) {
+                                                 Size size,
+                                                 bool support_light_glyphs) {
+  SkISize skia_size = {static_cast<int32_t>(size.width),
+                       static_cast<int32_t>(size.height)};
+
   switch (atlas.GetType()) {
     case GlyphAtlas::Type::kAlphaBitmap:
-      return SkImageInfo::MakeA8(SkISize{static_cast<int32_t>(size.width),
-                                         static_cast<int32_t>(size.height)});
+      return support_light_glyphs
+                 ? SkImageInfo::Make(skia_size, kRGBA_8888_SkColorType,
+                                     kPremul_SkAlphaType)
+                 : SkImageInfo::MakeA8(skia_size);
     case GlyphAtlas::Type::kColorBitmap:
-      return SkImageInfo::Make(SkISize{static_cast<int32_t>(size.width),
-                                       static_cast<int32_t>(size.height)},
-                               kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+      return SkImageInfo::Make(skia_size, kRGBA_8888_SkColorType,
+                               kPremul_SkAlphaType);
   }
   FML_UNREACHABLE();
 }
@@ -215,8 +240,7 @@ static void DrawGlyph(SkCanvas* canvas,
                       const ScaledFont& scaled_font,
                       const SubpixelGlyph& glyph,
                       const Rect& scaled_bounds,
-                      const std::optional<GlyphProperties>& prop,
-                      bool has_color) {
+                      const GlyphProperties& prop) {
   const auto& metrics = scaled_font.font.GetMetrics();
   SkGlyphID glyph_id = glyph.glyph.index;
 
@@ -229,23 +253,19 @@ static void DrawGlyph(SkCanvas* canvas,
   sk_font.setSubpixel(true);
   sk_font.setSize(sk_font.getSize() * static_cast<Scalar>(scaled_font.scale));
 
-  auto glyph_color = prop.has_value() ? prop->color.ToARGB() : SK_ColorBLACK;
+  auto glyph_color = prop.is_light ? SK_ColorWHITE : prop.color.ToARGB();
 
   SkPaint glyph_paint;
   glyph_paint.setColor(glyph_color);
   glyph_paint.setBlendMode(SkBlendMode::kSrc);
-  if (prop.has_value()) {
-    auto stroke = prop->stroke;
-    if (stroke.has_value()) {
-      glyph_paint.setStroke(true);
-      glyph_paint.setStrokeWidth(stroke->width *
-                                 static_cast<Scalar>(scaled_font.scale));
-      glyph_paint.setStrokeCap(ToSkiaCap(stroke->cap));
-      glyph_paint.setStrokeJoin(ToSkiaJoin(stroke->join));
-      glyph_paint.setStrokeMiter(stroke->miter_limit);
-    } else {
-      glyph_paint.setStroke(false);
-    }
+  if (prop.stroke.has_value()) {
+    auto stroke = prop.stroke;
+    glyph_paint.setStroke(true);
+    glyph_paint.setStrokeWidth(stroke->width *
+                               static_cast<Scalar>(scaled_font.scale));
+    glyph_paint.setStrokeCap(ToSkiaCap(stroke->cap));
+    glyph_paint.setStrokeJoin(ToSkiaJoin(stroke->join));
+    glyph_paint.setStrokeMiter(stroke->miter_limit);
   }
   canvas->save();
   Point subpixel_offset = SubpixelPositionToPoint(glyph.subpixel_offset);
@@ -273,11 +293,19 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
                                   size_t end_index) {
   TRACE_EVENT0("impeller", __FUNCTION__);
 
-  bool has_color = atlas.GetType() == GlyphAtlas::Type::kColorBitmap;
+  bool has_light_glyphs = false;
+  if (atlas.GetType() == GlyphAtlas::Type::kAlphaBitmap) {
+    for (size_t i = start_index; i < end_index; i++) {
+      if (new_pairs[i].glyph.properties.is_light) {
+        has_light_glyphs = true;
+        break;
+      }
+    }
+  }
 
   SkBitmap bitmap;
-  bitmap.setInfo(
-      TypographerContextSkia::GetImageInfo(atlas, Size(texture->GetSize())));
+  bitmap.setInfo(TypographerContextSkia::GetImageInfo(
+      atlas, Size(texture->GetSize()), has_light_glyphs));
   if (!bitmap.tryAllocPixels()) {
     return false;
   }
@@ -305,8 +333,11 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
     }
 
     DrawGlyph(canvas, SkPoint::Make(pos.GetLeft(), pos.GetTop()),
-              pair.scaled_font, pair.glyph, bounds, pair.glyph.properties,
-              has_color);
+              pair.scaled_font, pair.glyph, bounds, pair.glyph.properties);
+  }
+
+  if (has_light_glyphs) {
+    bitmap = RGBAToA8(bitmap);
   }
 
   // Writing to a malloc'd buffer and then copying to the staging buffers
@@ -333,8 +364,6 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
                               size_t end_index) {
   TRACE_EVENT0("impeller", __FUNCTION__);
 
-  bool has_color = atlas.GetType() == GlyphAtlas::Type::kColorBitmap;
-
   for (size_t i = start_index; i < end_index; i++) {
     const FontGlyphPair& pair = new_pairs[i];
     auto data = atlas.FindFontGlyphBounds(pair);
@@ -354,7 +383,9 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
     size.height += 2;
 
     SkBitmap bitmap;
-    bitmap.setInfo(TypographerContextSkia::GetImageInfo(atlas, size));
+    bool is_light_glyph = pair.glyph.properties.is_light;
+    bitmap.setInfo(
+        TypographerContextSkia::GetImageInfo(atlas, size, is_light_glyph));
     if (!bitmap.tryAllocPixels()) {
       return false;
     }
@@ -369,7 +400,11 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
     }
 
     DrawGlyph(canvas, SkPoint::Make(1, 1), pair.scaled_font, pair.glyph, bounds,
-              pair.glyph.properties, has_color);
+              pair.glyph.properties);
+
+    if (is_light_glyph) {
+      bitmap = RGBAToA8(bitmap);
+    }
 
     // Writing to a malloc'd buffer and then copying to the staging buffers
     // benchmarks as substantially faster on a number of Android devices.
@@ -402,12 +437,12 @@ static Rect ComputeGlyphSize(const SkFont& font,
                              Scalar scale) {
   SkRect scaled_bounds;
   SkPaint glyph_paint;
-  if (glyph.properties.has_value() && glyph.properties->stroke) {
+  if (glyph.properties.stroke.has_value()) {
     glyph_paint.setStroke(true);
-    glyph_paint.setStrokeWidth(glyph.properties->stroke->width * scale);
-    glyph_paint.setStrokeCap(ToSkiaCap(glyph.properties->stroke->cap));
-    glyph_paint.setStrokeJoin(ToSkiaJoin(glyph.properties->stroke->join));
-    glyph_paint.setStrokeMiter(glyph.properties->stroke->miter_limit);
+    glyph_paint.setStrokeWidth(glyph.properties.stroke->width * scale);
+    glyph_paint.setStrokeCap(ToSkiaCap(glyph.properties.stroke->cap));
+    glyph_paint.setStrokeJoin(ToSkiaJoin(glyph.properties.stroke->join));
+    glyph_paint.setStrokeMiter(glyph.properties.stroke->miter_limit);
   }
   // Get bounds for a single glyph
   font.getBounds({&glyph.glyph.index, 1}, {&scaled_bounds, 1}, &glyph_paint);

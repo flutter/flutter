@@ -20,11 +20,31 @@ struct GlyphProperties {
   Color color = Color::Black();
   std::optional<StrokeParameters> stroke;
 
+  // Whether the glyph is created by rendering light (white) text, as opposed to
+  // rendering dark (black) text.
+  //
+  // This is only used for MacOS. Apple's CoreText renders light and dark text
+  // differently, so different glyphs are required for light and dark text. On
+  // other platforms, is_light is always false.
+  //
+  // This is only used for alpha-channel-only glyphs. It is not used for color
+  // glyphs.
+  bool is_light = false;
+
+  /// Sets the is_light property based on the luminance of the color.
+  void SetIsLight(const Color& c) {
+#if defined(FML_OS_MACOSX)
+    // Luminance from https://www.w3.org/TR/WCAG20/#relativeluminancedef
+    Scalar luminance = c.red * 0.2126f + c.green * 0.7152f + c.blue * 0.0722f;
+    is_light = (luminance > 0.5f);
+#endif
+  }
+
   struct Equal {
     inline bool operator()(const impeller::GlyphProperties& lhs,
                            const impeller::GlyphProperties& rhs) const {
       return lhs.color.ToARGB() == rhs.color.ToARGB() &&
-             lhs.stroke == rhs.stroke;
+             lhs.stroke == rhs.stroke && lhs.is_light == rhs.is_light;
     }
   };
 };
@@ -85,28 +105,26 @@ enum SubpixelPosition : uint8_t {
 struct SubpixelGlyph {
   Glyph glyph;
   SubpixelPosition subpixel_offset;
-  std::optional<GlyphProperties> properties;
+  GlyphProperties properties;
 
   SubpixelGlyph(Glyph p_glyph,
                 SubpixelPosition p_subpixel_offset,
-                std::optional<GlyphProperties> p_properties)
+                GlyphProperties p_properties)
       : glyph(p_glyph),
         subpixel_offset(p_subpixel_offset),
         properties(p_properties) {}
 
   template <typename H>
   friend H AbslHashValue(H h, const SubpixelGlyph& sg) {
-    if (!sg.properties.has_value()) {
-      return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset);
-    }
     StrokeParameters stroke;
-    bool has_stroke = sg.properties->stroke.has_value();
+    bool has_stroke = sg.properties.stroke.has_value();
     if (has_stroke) {
-      stroke = sg.properties->stroke.value();
+      stroke = sg.properties.stroke.value();
     }
     return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset,
-                      sg.properties->color.ToARGB(), has_stroke, stroke.cap,
-                      stroke.join, stroke.miter_limit, stroke.width);
+                      sg.properties.color.ToARGB(), has_stroke, stroke.cap,
+                      stroke.join, stroke.miter_limit, stroke.width,
+                      sg.properties.is_light);
   }
 
   struct Equal {
@@ -115,17 +133,10 @@ struct SubpixelGlyph {
       // Check simple non-optionals first.
       if (lhs.glyph.index != rhs.glyph.index ||
           lhs.glyph.type != rhs.glyph.type ||
-          lhs.subpixel_offset != rhs.subpixel_offset ||
-          // Mixmatch properties.
-          lhs.properties.has_value() != rhs.properties.has_value()) {
+          lhs.subpixel_offset != rhs.subpixel_offset) {
         return false;
       }
-      if (lhs.properties.has_value()) {
-        // Both have properties.
-        return GlyphProperties::Equal{}(lhs.properties.value(),
-                                        rhs.properties.value());
-      }
-      return true;
+      return GlyphProperties::Equal{}(lhs.properties, rhs.properties);
     }
   };
 };
