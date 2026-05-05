@@ -135,4 +135,20 @@ bool UberSDFContents::ApplyColorFilter(
   return true;
 }
 
+std::optional<Color> UberSDFContents::AsBackgroundColor(
+    const Entity& entity,
+    ISize target_size) const {
+  if (params_.type != UberSDFParameters::Type::kRect) {
+    return std::nullopt;
+  }
+  const Geometry* geometry = GetGeometry();
+  if (geometry == nullptr) {
+    return std::nullopt;
+  }
+  Rect target_rect = Rect::MakeSize(target_size);
+  return geometry->CoversArea(entity.GetTransform(), target_rect)
+             ? GetColor()
+             : std::optional<Color>();
+}
+
 }  // namespace impeller
