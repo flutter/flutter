@@ -471,9 +471,9 @@ class SkwasmCanvas implements LayerCanvas {
       final int end = i + _drawAtlasMaxBatchSize < n ? i + _drawAtlasMaxBatchSize : n;
       _drawRawAtlasBatch(
         atlas,
-        rstTransforms.sublist(i * 4, end * 4),
-        rects.sublist(i * 4, end * 4),
-        colors == null ? null : colors.sublist(i, end),
+        Float32List.sublistView(rstTransforms, i * 4, end * 4),
+        Float32List.sublistView(rects, i * 4, end * 4),
+        colors == null ? null : Int32List.sublistView(colors, i, end),
         blendMode,
         cullRect,
         paint,
