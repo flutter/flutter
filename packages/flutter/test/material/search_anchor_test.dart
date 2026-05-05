@@ -4382,6 +4382,32 @@ void main() {
     await tester.pump();
     expect(find.text('X'), findsOne);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/185889.
+  testWidgets('SearchAnchor.bar respects SearchBarThemeData.padding', (WidgetTester tester) async {
+    const customPadding = EdgeInsets.all(32.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SearchBarTheme(
+            data: const SearchBarThemeData(
+              padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(customPadding),
+            ),
+            child: SearchAnchor.bar(
+              suggestionsBuilder: (BuildContext context, SearchController controller) => <Widget>[],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Padding paddingWidget = tester.widget<Padding>(
+      find.descendant(of: find.byType(SearchBar), matching: find.byType(Padding)).first,
+    );
+
+    expect(paddingWidget.padding, customPadding);
+  });
 }
 
 Future<void> checkSearchBarDefaults(
