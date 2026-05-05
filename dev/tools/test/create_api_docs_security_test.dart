@@ -5,74 +5,39 @@
 // ----------------------------------------------------------------------
 // SECURITY NOTE
 // ----------------------------------------------------------------------
-// This test verifies that the quote() helper in create_api_docs.dart correctly
-// sanitizes arguments and that process calls receive arguments as a list (not
-// as an interpolated string). See Flutter security guidelines for CI tooling.
+// This test verifies that runPubProcess passes arguments as an argv list.
+// A malicious shell payload must stay in a single argument and never become
+// shell syntax.
 // ----------------------------------------------------------------------
 
-import 'dart:io';
+import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
 import 'package:test/test.dart';
-import 'package:process/process.dart';
-import 'package:mockito/mockito.dart';
-import 'package:flutter_tools/dev/tools/create_api_docs.dart';
-
-// ----------------------------------------------------------------------
-// Simple quote() implementation being tested (mirrors create_api_docs.dart)
-// ----------------------------------------------------------------------
-String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
+import '../../../packages/flutter_tools/test/src/fake_process_manager.dart';
+import '../create_api_docs.dart' as apidocs;
 
 void main() {
-  group('quote() helper security tests', () {
-    test('quote() wraps args with spaces in single quotes', () {
-      expect(quote('path with spaces'), "'path with spaces'");
-    });
+  test('runPubProcess preserves malicious payload as a single argv token', () async {
+    const String payload = '--output=/tmp; echo HACKED';
+    final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      const FakeCommand(
+        command: <Pattern>['/flutter/bin/flutter', 'pub', payload],
+      ),
+    ]);
 
-    test('quote() leaves args without spaces untouched', () {
-      expect(quote('simple'), 'simple');
-    });
+    final MemoryFileSystem filesystem = MemoryFileSystem.test();
+    apidocs.FlutterInformation.instance = apidocs.FlutterInformation(
+      platform: FakePlatform(environment: <String, String>{'FLUTTER_ROOT': '/flutter'}),
+      processManager: processManager,
+      filesystem: filesystem,
+    );
 
-    test('quote() handles args with shell metacharacters', () {
-      // A malicious payload should still be quoted so the shell cannot interpret it.
-      final malicious = "'; rm -rf / #";
-      final quoted = quote(malicious);
-      expect(quoted, contains("'"));
-      expect(quoted, isNot(equals(malicious)));
-    });
-  });
+    await apidocs.runPubProcess(
+      arguments: <String>[payload],
+      processManager: processManager,
+      filesystem: filesystem,
+    );
 
-  group('runPubProcess argument handling', () {
-    test('process args are passed as separate list elements, not concatenated', () async {
-      final mockMgr = MockProcessManager();
-      final mockProc = MockProcess();
-      when(mockMgr.start(any, any, workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment'))).thenAnswer((_) async => mockProc);
-      when(mockProc.stdout).thenAnswer((_) => const Stream<List<int>>.empty());
-      when(mockProc.stderr).thenAnswer((_) => const Stream<List<int>>.empty());
-      when(mockProc.exitCode).thenAnswer((_) async => 0);
-
-      final docs = CreateApiDocs(
-        docsRoot: Directory('/tmp/docs'),
-        publishRoot: Directory('/tmp/publish'),
-        packageRoot: Directory('/tmp/pkg'),
-        filesystem: const LocalFileSystem(),
-        processManager: mockMgr,
-      );
-
-      try {
-        await docs.generateDartdoc();
-      } catch (_) {
-        // We expect it to fail because of missing dependencies, but the important
-        // thing is that start() was called with a List<String> of separate args.
-      }
-
-      verify(mockMgr.start(
-        any,
-        any,
-        workingDirectory: anyNamed('workingDirectory'),
-        environment: anyNamed('environment'),
-      ));
-    });
+    expect(processManager, hasNoRemainingExpectations);
   });
 }
-
-class MockProcessManager extends Mock implements ProcessManager {}

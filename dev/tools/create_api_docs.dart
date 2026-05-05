@@ -699,7 +699,6 @@ class DartdocGenerator {
       '--auto-include-dependencies',
     ];
 
-    String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
     print('Executing dartdoc with sanitized arguments');
 
     process = ProcessWrapper(

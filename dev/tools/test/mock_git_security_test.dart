@@ -5,23 +5,27 @@
 // ----------------------------------------------------------------------
 // SECURITY NOTE
 // ----------------------------------------------------------------------
-// This test verifies that format.sh properly rejects malicious environment
-// variables that could be used for command injection attacks. See Flutter
-// security guidelines for CI tooling.
+// This test verifies metacharacters in argv are printed as data and are not
+// executed as shell syntax.
 // ----------------------------------------------------------------------
 
 import 'dart:io';
+
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 void main() {
   final String repoRoot = path.normalize(Directory.current.path);
-  final String scriptPath = path.join(repoRoot, 'dev', 'tools', 'format.sh');
+  final String scriptPath = path.join(repoRoot, 'dev', 'tools', 'test', 'mock_git.sh');
 
-  test('format.sh uses quoted tool invocation', () {
-    final String content = File(scriptPath).readAsStringSync();
-    expect(content, contains('"\$DART"'));
-    expect(content, contains('"\$@"'));
+  test('mock_git.sh does not execute injected shell payload from argv', () async {
+    final ProcessResult result = await Process.run('bash', <String>[
+      scriptPath,
+      'status; echo HACKED',
+    ]);
+
+    expect(result.exitCode, 0);
+    expect(result.stdout, 'Mock Git: status; echo HACKED\n');
+    expect((result.stdout as String).trim(), isNot(equals('HACKED')));
   });
-
 }

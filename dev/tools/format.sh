@@ -1,15 +1,15 @@
-# ----------------------------------------------------------------------
-# SECURITY NOTE
-# ----------------------------------------------------------------------
-# This script previously interpolated untrusted environment variables directly into
-# command strings, which could lead to command injection (e.g., a malicious CI
-# variable could inject '; rm -rf /'). All variables are now explicitly quoted
-# using safe concatenation. See Flutter security guidelines for CI tooling.
-# ----------------------------------------------------------------------
 #!/usr/bin/env bash
 # Copyright 2014 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
+# ----------------------------------------------------------------------
+# SECURITY NOTE
+# ----------------------------------------------------------------------
+# This script executes tooling with argument lists instead of shell-evaluated
+# command strings. Variables like "$DART" and "$@" are explicitly quoted so
+# metacharacters in user-provided args are treated as data, not shell syntax.
+# ----------------------------------------------------------------------
 
 set -e
 

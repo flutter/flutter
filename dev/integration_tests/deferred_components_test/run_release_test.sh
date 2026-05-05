@@ -1,15 +1,15 @@
-# ----------------------------------------------------------------------
-# SECURITY NOTE
-# ----------------------------------------------------------------------
-# This script previously used unquoted variables in command substitutions,
-# which could lead to command injection if an attacker controlled any of the
-# input arguments (e.g., bundletool_jar_path, adb_path). All variables are now
-# explicitly quoted to prevent injection attacks. See Flutter security guidelines.
-# ----------------------------------------------------------------------
 #!/usr/bin/env bash
 # Copyright 2014 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
+# ----------------------------------------------------------------------
+# SECURITY NOTE
+# ----------------------------------------------------------------------
+# This script invokes adb/java directly with quoted argv values. Variables
+# derived from inputs are quoted in command substitutions and invocations so
+# shell metacharacters are not interpreted as extra commands.
+# ----------------------------------------------------------------------
 
 # Usage:
 #
