@@ -8,22 +8,45 @@ import Testing
 
 @Suite struct TracingTest {
 
-  @Test func testTraceScopeExecutesWork() {
-    var workExecuted = false
-
-    Tracing.traceScope("TestScope") {
-      workExecuted = true
-    }
-
-    #expect(workExecuted)
-  }
-
   @Test func testTracePlatformVsyncDoesNotCrash() {
-    Tracing.tracePlatformVsync(withStartTime: 1000, targetTime: 2000)
+    Tracing.tracePlatformVsync(
+      withStartTime: .microseconds(1000),
+      targetTime: .microseconds(2000)
+    )
   }
 
   @Test func testTraceAsyncDoesNotCrash() {
-    Tracing.traceAsyncBegin("TestAsyncEvent", eventId: 123)
-    Tracing.traceAsyncEnd("TestAsyncEvent", eventId: 123)
+    Tracing.traceAsyncBegin("TestAsyncEvent", eventID: 123)
+    Tracing.traceAsyncEnd("TestAsyncEvent", eventID: 123)
+  }
+
+  @Test func testWithTraceExecutesWorkAndReturns() {
+    var workExecuted = false
+    let result = Tracing.withTrace("TestScope") { () -> Int in
+      workExecuted = true
+      return 42
+    }
+    #expect(workExecuted)
+    #expect(result == 42)
+  }
+
+  @Test func testWithTracePropagatesThrows() {
+    struct DummyError: Error {}
+    #expect(throws: DummyError.self) {
+      try Tracing.withTrace("TestScope") {
+        throw DummyError()
+      }
+    }
+  }
+
+  @Test func testTraceScopeTokenDoesNotCrash() {
+    let scope = Tracing.beginScope("TestScope")
+    defer { scope.end() }
+  }
+}
+
+extension TimeInterval {
+  fileprivate static func microseconds(_ value: Int) -> TimeInterval {
+    return Double(value) / 1_000_000.0
   }
 }

@@ -11,23 +11,28 @@ FLUTTER_ASSERT_ARC
 
 @implementation FlutterTracing
 
-+ (void)traceScope:(NSString*)name work:(void(NS_NOESCAPE ^)(void))work {
-  TRACE_EVENT0("flutter", [name UTF8String] ?: "");
-  work();
-}
-
-+ (void)tracePlatformVsyncWithStartTime:(int64_t)startTimeMicroseconds
-                             targetTime:(int64_t)targetTimeMicroseconds {
++ (void)tracePlatformVsyncWithStartTime:(NSTimeInterval)startTime
+                             targetTime:(NSTimeInterval)targetTime {
+  int64_t startTimeMicroseconds = (int64_t)(startTime * 1000000);
+  int64_t targetTimeMicroseconds = (int64_t)(targetTime * 1000000);
   TRACE_EVENT2_INT("flutter", "PlatformVsync", "frame_start_time", startTimeMicroseconds,
                    "frame_target_time", targetTimeMicroseconds);
 }
 
-+ (void)traceAsyncBegin:(NSString*)name eventId:(int64_t)eventId {
-  TRACE_EVENT_ASYNC_BEGIN0("flutter", [name UTF8String] ?: "", eventId);
++ (void)traceAsyncBegin:(NSString*)name eventID:(int64_t)eventID {
+  TRACE_EVENT_ASYNC_BEGIN0("flutter", [name UTF8String] ?: "", eventID);
 }
 
-+ (void)traceAsyncEnd:(NSString*)name eventId:(int64_t)eventId {
-  TRACE_EVENT_ASYNC_END0("flutter", [name UTF8String] ?: "", eventId);
++ (void)traceAsyncEnd:(NSString*)name eventID:(int64_t)eventID {
+  TRACE_EVENT_ASYNC_END0("flutter", [name UTF8String] ?: "", eventID);
+}
+
++ (void)beginSection:(NSString*)name {
+  ::fml::tracing::TraceEvent0("flutter", [name UTF8String] ?: "", 0, nullptr);
+}
+
++ (void)endSection:(NSString*)name {
+  ::fml::tracing::TraceEventEnd([name UTF8String] ?: "");
 }
 
 @end

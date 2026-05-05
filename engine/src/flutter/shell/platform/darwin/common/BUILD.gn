@@ -148,7 +148,10 @@ source_set("InternalFlutterSwiftCommon") {
   visibility = [ ":framework_common" ]
   configs += [ ":config" ]
   bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h"
-  sources = [ "framework/Source/Logger.swift" ]
+  sources = [
+    "framework/Source/Logger.swift",
+    "framework/Source/Tracing+TraceScope.swift",
+  ]
   public = framework_common_headers
   deps = [ ":flutter_engine_bindings" ]
 }
