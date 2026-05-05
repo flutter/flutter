@@ -63,7 +63,7 @@ The easiest way (though not the quickest) is to use `run_tests.py`:
 
 ### Integration tests
 
-Integration tests for the Android embedder mostly exist outside of the engine
+Integration tests for the Android embedder mostly exist outside the engine
 for dubious historical reasons.
 
 To run these tests, you'll need to have a Flutter checkout and a working Android
@@ -194,7 +194,7 @@ but the following instructions are for if that doesn't work, or you want to use
 Android Studio:
 
 1. Open `shell/platform/android` in Android Studio.
-1. Configure the following:
+2. Configure the following:
 
    - [`Preferences | Build, Execution, Deployment | Gradle-Android Compiler`](jetbrains://AndroidStudio/settings?name=Build%2C+Execution%2C+Deployment--Gradle-Android+Compiler)
 
@@ -218,7 +218,7 @@ Android Studio:
      /Applications/Android Studio.app/Contents/jbr/Contents/Home
      ```
 
-1. Sync Gradle.
+3. Sync Gradle.
 
    ![Example](https://github.com/flutter/flutter/assets/168174/02fe0e6f-f0c4-47b2-8dae-9aa0b9520503)
 
