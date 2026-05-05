@@ -747,8 +747,12 @@ bool publicHeadersChanged({
 /// Remove extended attributes from all files in the Flutter project, except the Swift package
 /// cache in the build directory.
 ///
+/// The Swift package cache is skipped because it makes the command very slow and are not expected to
+/// need to have the attributes removed. See https://github.com/flutter/flutter/issues/183662.
+///
 /// Attributes must be removed from the entire project rather than just the iOS directory due to
-/// user reports. See https://github.com/flutter/flutter/pull/81435.
+/// user reporting images in the root of their project also need to have the attributes removed.
+/// See https://github.com/flutter/flutter/pull/81435.
 Future<void> removeExtendedAttributesForProject({
   required XcodeBasedProject xcodeProject,
   required ProcessUtils processUtils,
