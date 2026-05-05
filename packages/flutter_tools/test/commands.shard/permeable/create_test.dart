@@ -1029,7 +1029,7 @@ void main() {
     expect(projectDir.childDirectory('ios'), exists);
   }, overrides: {});
 
-  const String descAndroid = 'app does not include android if disabled in config';
+  const descAndroid = 'app does not include android if disabled in config';
   testUsingContext(descAndroid, () async {
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1039,7 +1039,7 @@ void main() {
     expect(projectDir.childDirectory('android'), isNot(exists));
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false)});
 
-  const String descIos = 'app does not include ios if disabled in config';
+  const descIos = 'app does not include ios if disabled in config';
   testUsingContext(descIos, () async {
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1049,7 +1049,7 @@ void main() {
     expect(projectDir.childDirectory('ios'), isNot(exists));
   }, overrides: {FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false)});
 
-  const String descDesktopWeb = 'app does not include desktop or web by default';
+  const descDesktopWeb = 'app does not include desktop or web by default';
   testUsingContext(descDesktopWeb, () async {
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1062,7 +1062,7 @@ void main() {
     expect(projectDir.childDirectory('web'), isNot(exists));
   }, overrides: {FeatureFlags: () => TestFeatureFlags()});
 
-  const String descPluginDesktopWeb = 'plugin does not include desktop or web by default';
+  const descPluginDesktopWeb = 'plugin does not include desktop or web by default';
   testUsingContext(descPluginDesktopWeb, () async {
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1079,12 +1079,12 @@ void main() {
     expect(projectDir.childDirectory('example').childDirectory('web'), isNot(exists));
   }, overrides: {FeatureFlags: () => TestFeatureFlags()});
 
-  final overridesLinux = {
+  final Map<Type, Object Function()> overridesLinux = {
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
     Logger: () => logger,
   };
 
-  const String descAppLinux = 'app supports Linux if requested';
+  const descAppLinux = 'app supports Linux if requested';
   testUsingContext(descAppLinux, () async {
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1100,7 +1100,7 @@ void main() {
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: overridesLinux);
 
-  const String descPluginLinux = 'plugin supports Linux if requested';
+  const descPluginLinux = 'plugin supports Linux if requested';
   testUsingContext(descPluginLinux, () async {
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1129,12 +1129,12 @@ void main() {
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: overridesLinux);
 
-  final overridesMacos = {
+  final Map<Type, Object Function()> overridesMacos = {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     Logger: () => logger,
   };
 
-  const String descAppMacos = 'app supports macOS if requested';
+  const descAppMacos = 'app supports macOS if requested';
   testUsingContext(descAppMacos, () async {
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -1150,7 +1150,7 @@ void main() {
     expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
   }, overrides: overridesMacos);
 
-  const String descPluginMacos = 'plugin supports macOS if requested';
+  const descPluginMacos = 'plugin supports macOS if requested';
   testUsingContext(descPluginMacos, () async {
     final command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
