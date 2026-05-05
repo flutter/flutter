@@ -238,7 +238,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
           ),
           quiet: false,
         );
-        migrationStatus.start();
+        migrationStatus = logger.startSpinner();
       } on Exception catch (e) {
         throw _PrefetchSwiftPackageException(e.toString());
       }

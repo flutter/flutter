@@ -29,84 +29,6 @@ import '../../src/package_config.dart';
 
 const xcodebuild = '/usr/bin/xcodebuild';
 
-class FakeFlutterManifest extends Fake implements FlutterManifest {
-  @override
-  final dependencies = <String>{};
-
-  @override
-  String get appName => 'my_app';
-}
-
-class FakeFlutterProject extends Fake implements FlutterProject {
-  FakeFlutterProject({required this.directory});
-
-  @override
-  final Directory directory;
-
-  @override
-  File get packageConfig => directory.childDirectory('.dart_tool').childFile('package_config.json');
-
-  @override
-  File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
-
-  @override
-  FlutterManifest get manifest => FakeFlutterManifest();
-}
-
-class FakeXcodeBasedProject extends IosProject {
-  FakeXcodeBasedProject({
-    required this.hostAppRoot,
-    this.usesSwiftPackageManager = true,
-    this.flutterPluginSwiftPackageInProjectSettings = true,
-    this.plugins,
-  }) : super.fromFlutter(FakeFlutterProject(directory: hostAppRoot.parent));
-
-  @override
-  final Directory hostAppRoot;
-
-  @override
-  final bool usesSwiftPackageManager;
-
-  @override
-  final bool flutterPluginSwiftPackageInProjectSettings;
-
-  final List<Plugin>? plugins;
-
-  @override
-  Future<List<Plugin>> getPlugins() async {
-    if (plugins != null) {
-      return plugins!;
-    }
-    return super.getPlugins();
-  }
-}
-
-Future<void> testPrefetchSwiftPackages(
-  String projectPath, {
-  required Directory buildDirectory,
-  required XcodeProjectInterpreter interpreter,
-  required BufferLogger testLogger,
-  bool quiet = true,
-  bool waitForCompletion = true,
-  List<Plugin>? plugins,
-  XcodeBasedProject? xcodeProject,
-}) async {
-  final XcodeBasedProject project =
-      xcodeProject ??
-      FakeXcodeBasedProject(
-        hostAppRoot: buildDirectory.fileSystem.directory(projectPath),
-        usesSwiftPackageManager: true,
-        flutterPluginSwiftPackageInProjectSettings: true,
-        plugins: plugins,
-      );
-  await interpreter.prefetchSwiftPackagesForProject(
-    project,
-    buildDirectory: buildDirectory,
-    quiet: quiet,
-    waitForCompletion: waitForCompletion,
-  );
-}
-
 void main() {
   group('MockProcessManager', () {
     setUp(() {
@@ -2575,4 +2497,56 @@ flutter:
       },
     );
   });
+}
+
+class FakeFlutterManifest extends Fake implements FlutterManifest {
+  @override
+  final dependencies = <String>{};
+
+  @override
+  String get appName => 'my_app';
+}
+
+class FakeFlutterProject extends Fake implements FlutterProject {
+  FakeFlutterProject({required this.directory});
+
+  @override
+  final Directory directory;
+
+  @override
+  File get packageConfig => directory.childDirectory('.dart_tool').childFile('package_config.json');
+
+  @override
+  File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
+
+  @override
+  FlutterManifest get manifest => FakeFlutterManifest();
+}
+
+class FakeXcodeBasedProject extends IosProject {
+  FakeXcodeBasedProject({
+    required this.hostAppRoot,
+    this.usesSwiftPackageManager = true,
+    this.flutterPluginSwiftPackageInProjectSettings = true,
+    this.plugins,
+  }) : super.fromFlutter(FakeFlutterProject(directory: hostAppRoot.parent));
+
+  @override
+  final Directory hostAppRoot;
+
+  @override
+  final bool usesSwiftPackageManager;
+
+  @override
+  final bool flutterPluginSwiftPackageInProjectSettings;
+
+  final List<Plugin>? plugins;
+
+  @override
+  Future<List<Plugin>> getPlugins() async {
+    if (plugins != null) {
+      return plugins!;
+    }
+    return super.getPlugins();
+  }
 }
