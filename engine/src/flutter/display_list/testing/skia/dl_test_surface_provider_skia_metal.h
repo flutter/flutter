@@ -22,7 +22,7 @@ class DlSurfaceProviderSkiaMetal : public DlSurfaceProvider {
                          size_t height,
                          PixelFormat format) override;
   std::shared_ptr<DlSurfaceInstance> GetPrimarySurface() const override;
-  std::shared_ptr<DlSurfaceInstance> MakeOffscreenSurface(
+  std::unique_ptr<DlSurfaceInstance> MakeOffscreenSurface(
       size_t width,
       size_t height,
       PixelFormat format) const override;

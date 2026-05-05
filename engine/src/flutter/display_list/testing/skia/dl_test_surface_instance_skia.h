@@ -25,7 +25,7 @@ class DlSurfaceInstanceSkiaBase : public DlSurfaceInstance {
   void FlushSubmitCpuSync() override;
 
   // |DlSurfaceInstance|
-  std::shared_ptr<DlPixelData> SnapshotToPixelData() const override;
+  std::unique_ptr<DlPixelData> SnapshotToPixelData() const override;
 
   // |DlSurfaceInstance|
   sk_sp<DlImage> SnapshotToImage() const override;

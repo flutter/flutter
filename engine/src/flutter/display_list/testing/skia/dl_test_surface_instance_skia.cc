@@ -13,22 +13,54 @@
 namespace {
 
 class DlSkiaPixelData : public flutter::testing::DlPixelData {
+ private:
+  struct FreeDeleter {
+    void operator()(uint8_t* p) { std::free(p); }
+  };
+
  public:
-  explicit DlSkiaPixelData(const sk_sp<SkImage>& raster_image) {
+  static std::unique_ptr<DlSkiaPixelData> MakeFromRasterImage(
+      const sk_sp<SkImage>& raster_image) {
     SkImageInfo info = raster_image->imageInfo();
     info = SkImageInfo::MakeN32Premul(info.dimensions());
-    if (info.bytesPerPixel() == 4) {
-      size_t byte_count = info.computeMinByteSize();
-      if (byte_count < std::numeric_limits<size_t>::max()) {
-        pixels_.reset(static_cast<uint8_t*>(std::malloc(byte_count)));
-        if (pixels_.get()) {
-          pixmap_.reset(info, pixels_.get(), info.minRowBytes());
-          if (raster_image->readPixels(pixmap_, 0, 0)) {
-            is_valid_ = true;
-          }
-        }
-      }
+    FML_CHECK(info.bytesPerPixel() == 4);
+
+    size_t min_row_bytes = info.minRowBytes();
+    size_t byte_count = info.computeByteSize(min_row_bytes);
+    if (byte_count == std::numeric_limits<size_t>::max()) {
+      return nullptr;
     }
+
+    std::unique_ptr<uint8_t, FreeDeleter> pixels;
+    pixels.reset(static_cast<uint8_t*>(std::malloc(byte_count)));
+    if (!pixels.get()) {
+      return nullptr;
+    }
+
+    SkPixmap pixmap;
+    // Resetting the pixmap does not give ownership of pixels to it.
+    pixmap.reset(info, pixels.get(), info.minRowBytes());
+    if (!raster_image->readPixels(pixmap, 0, 0)) {
+      return nullptr;
+    }
+
+    // We could hand in the already established SkPixmap object, but the
+    // pixel ownership needs to be explicitly transferred via std::move.
+    // Passing the pixmap doesn't transfer that ownership and passing it
+    // while additionally transferring the ownership creates an odd
+    // case of the pixmap having a pointer in it that is undergoing a
+    // transfer. Safer to pass in the raw info and then re-establish the
+    // pixmap field (for ease of the access methods) in the constructor.
+    return std::make_unique<DlSkiaPixelData>(info, min_row_bytes,
+                                             std::move(pixels));
+  }
+
+  DlSkiaPixelData(const SkImageInfo& info,
+                  size_t row_bytes,
+                  std::unique_ptr<uint8_t, FreeDeleter> pixels)
+      : pixels_(std::move(pixels)) {
+    // Resetting the pixmap_ does not give ownership of pixels to it.
+    pixmap_.reset(info, pixels_.get(), row_bytes);
   }
 
   ~DlSkiaPixelData() override = default;
@@ -54,16 +86,9 @@ class DlSkiaPixelData : public flutter::testing::DlPixelData {
                            path.c_str(), mapping);
   }
 
-  bool IsValid() { return is_valid_; }
-
  private:
-  SkPixmap pixmap_;
-  bool is_valid_ = false;
-
-  struct FreeDeleter {
-    void operator()(uint8_t* p) { std::free(p); }
-  };
   std::unique_ptr<uint8_t, FreeDeleter> pixels_;
+  SkPixmap pixmap_;
 };
 
 }  // namespace
@@ -124,20 +149,11 @@ bool DlSurfaceInstanceSkiaBase::SnapshotToFile(std::string& filename) const {
   return WriteAtomically(OpenFixturesDirectory(), filename.c_str(), mapping);
 }
 
-std::shared_ptr<DlPixelData> DlSurfaceInstanceSkiaBase::SnapshotToPixelData()
+std::unique_ptr<DlPixelData> DlSurfaceInstanceSkiaBase::SnapshotToPixelData()
     const {
   sk_sp<SkImage> raster = GetRasterImage();
-  if (!raster) {
-    return nullptr;
-  }
 
-  std::shared_ptr<DlSkiaPixelData> snapshot =
-      std::make_shared<DlSkiaPixelData>(raster);
-  if (!snapshot->IsValid()) {
-    return nullptr;
-  }
-
-  return snapshot;
+  return raster ? DlSkiaPixelData::MakeFromRasterImage(raster) : nullptr;
 }
 
 sk_sp<DlImage> DlSurfaceInstanceSkiaBase::SnapshotToImage() const {

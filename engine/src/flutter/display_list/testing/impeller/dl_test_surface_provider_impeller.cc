@@ -32,7 +32,7 @@ DlSurfaceProviderImpeller::GetPrimarySurface() const {
   return primary_;
 }
 
-std::shared_ptr<DlSurfaceInstance>
+std::unique_ptr<DlSurfaceInstance>
 DlSurfaceProviderImpeller::MakeOffscreenSurface(size_t width,
                                                 size_t height,
                                                 PixelFormat format) const {
@@ -40,7 +40,7 @@ DlSurfaceProviderImpeller::MakeOffscreenSurface(size_t width,
                               format);
 }
 
-std::shared_ptr<DlSurfaceInstanceImpeller>
+std::unique_ptr<DlSurfaceInstanceImpeller>
 DlSurfaceProviderImpeller::MakeOffscreenSurface(
     std::shared_ptr<impeller::Context> context,
     size_t width,
@@ -80,7 +80,7 @@ DlSurfaceProviderImpeller::MakeOffscreenSurface(
   if (!target->IsValid()) {
     return nullptr;
   }
-  return std::make_shared<DlSurfaceInstanceImpeller>(std::move(context),
+  return std::make_unique<DlSurfaceInstanceImpeller>(std::move(context),
                                                      target);
 }
 

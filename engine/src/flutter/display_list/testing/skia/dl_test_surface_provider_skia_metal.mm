@@ -49,13 +49,13 @@ std::shared_ptr<DlSurfaceInstance> DlSurfaceProviderSkiaMetal::GetPrimarySurface
   return metal_surface_;
 }
 
-std::shared_ptr<DlSurfaceInstance> DlSurfaceProviderSkiaMetal::MakeOffscreenSurface(
+std::unique_ptr<DlSurfaceInstance> DlSurfaceProviderSkiaMetal::MakeOffscreenSurface(
     size_t width,
     size_t height,
     PixelFormat format) const {
   auto surface = TestMetalSurface::Create(*metal_context_, DlISize(width, height));
   surface->GetSurface()->getCanvas()->clear(SK_ColorTRANSPARENT);
-  return std::make_shared<DlMetalSurfaceInstance>(std::move(surface));
+  return std::make_unique<DlMetalSurfaceInstance>(std::move(surface));
 }
 
 }  // namespace testing

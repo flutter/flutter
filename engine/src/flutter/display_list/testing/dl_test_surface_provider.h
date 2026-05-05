@@ -63,7 +63,7 @@ class DlSurfaceInstance {
 
   /// Read back the current contents of the surface and return it as a
   /// DlPixelData structure.
-  virtual std::shared_ptr<DlPixelData> SnapshotToPixelData() const = 0;
+  virtual std::unique_ptr<DlPixelData> SnapshotToPixelData() const = 0;
 
   /// Return the current contents of the surface as a DlImage compatible
   /// with the DlCanvas that it provides.
@@ -127,7 +127,7 @@ class DlSurfaceProvider {
                                  size_t height,
                                  PixelFormat format = kN32Premul) = 0;
   virtual std::shared_ptr<DlSurfaceInstance> GetPrimarySurface() const = 0;
-  virtual std::shared_ptr<DlSurfaceInstance> MakeOffscreenSurface(
+  virtual std::unique_ptr<DlSurfaceInstance> MakeOffscreenSurface(
       size_t width,
       size_t height,
       PixelFormat format = kN32Premul) const = 0;

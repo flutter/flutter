@@ -121,12 +121,12 @@ void DlSurfaceInstanceImpeller::DoRenderDisplayList(
                            display_list, cull_rect, false, false);
 }
 
-std::shared_ptr<DlPixelData> DlSurfaceInstanceImpeller::SnapshotToPixelData()
+std::unique_ptr<DlPixelData> DlSurfaceInstanceImpeller::SnapshotToPixelData()
     const {
   std::unique_ptr<impeller::testing::Screenshot> snapshot =
       snapshotter_.MakeScreenshot(aiks_context_,
                                   GetRenderTarget().GetRenderTargetTexture());
-  return snapshot ? std::make_shared<DlImpellerPixelData>(std::move(snapshot))
+  return snapshot ? std::make_unique<DlImpellerPixelData>(std::move(snapshot))
                   : nullptr;
 }
 
