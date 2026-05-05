@@ -1625,7 +1625,7 @@ A problem occurred configuring project ':app'.
   );
 
   testUsingContext(
-    'Failure to apply kotlin-android plugin',
+    'Failure to apply Kotlin plugin',
     () async {
       const applyingKotlinAndroidPluginErrorExample = r'''
 FAILURE: Build failed with an exception.
@@ -1634,8 +1634,8 @@ FAILURE: Build failed with an exception.
 Build file '/Users/jesswon/Desktop/fresh_flutter_app/android/app/build.gradle.kts'
 
 * What went wrong:
-An exception occurred applying plugin request [id: 'kotlin-android']
-> Failed to apply plugin 'kotlin-android'.
+An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android']
+> Failed to apply plugin 'org.jetbrains.kotlin.android'.
    > ⛔ Failed to apply plugin 'com.jetbrains.kotlin.android'
      The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0.
      Solution: Remove the 'org.jetbrains.kotlin.android' plugin from this project's build file: app/build.gradle.kts.
@@ -1656,9 +1656,9 @@ An exception occurred applying plugin request [id: 'kotlin-android']
       );
       expect(
         testLogger.statusText,
-        contains(' This results in a build failure when applying the kotlin-android plugin'),
+        contains(' This results in a build failure when applying the Kotlin plugin'),
       );
-      expect(testLogger.statusText, contains('applying the kotlin-android plugin'));
+      expect(testLogger.statusText, contains('applying the Kotlin plugin'));
       expect(testLogger.statusText, contains('For instructions on how to migrate, see:'));
       expect(testLogger.statusText, contains(kMigrateToBuiltInKotlinDocsUrl));
     },
@@ -1671,7 +1671,7 @@ An exception occurred applying plugin request [id: 'kotlin-android']
   );
 
   testUsingContext(
-    'Failure to apply kotlin-android plugin',
+    'Failure to apply Flutter Gradle plugin with new AGP DSL',
     () async {
       const useNewAgpDslErrorHandlerExample = r'''
 FAILURE: Build failed with an exception.

@@ -893,7 +893,7 @@ dependencies {
             gradleFileContent: () {
               return '''
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlin.android'
 ''';
             },
           );
@@ -919,7 +919,7 @@ apply plugin: 'kotlin-android'
               return '''
 plugins {
     id "com.android.application"
-    id "kotlin-android"
+    id "org.jetbrains.kotlin.android"
     id "dev.flutter.flutter-gradle-plugin"
 }
 ''';
@@ -947,7 +947,7 @@ plugins {
               return '''
 plugins {
     id "com.android.application"
-    id "kotlin-android"
+    id "org.jetbrains.kotlin.android"
     dev.flutter.`flutter-gradle-plugin`
 }
 ''';
@@ -986,7 +986,7 @@ plugins {
               return '''
 plugins {
     id("com.android.application")
-    id("kotlin-android")
+    id("org.jetbrains.kotlin.android")
     id("dev.flutter.flutter-gradle-plugin")
 }
 ''';

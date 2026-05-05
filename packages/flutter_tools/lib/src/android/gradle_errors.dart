@@ -669,7 +669,7 @@ const String kMigrateToBuiltInKotlinDocsUrl =
 const String kOptOutOfNewDslDocsUrl =
     'https://developer.android.com/build/releases/agp-9-0-0-release-notes';
 
-/// Handler when applying the kotlin-android plugin results in a build failure. This failure occurs when
+/// Handler when applying the Kotlin plugin results in a build failure. This failure occurs when
 /// using AGP 9+ because built-in Kotlin has become the default behavior.
 @visibleForTesting
 final applyingKotlinAndroidPluginErrorHandler = GradleHandledError(
@@ -682,7 +682,7 @@ final applyingKotlinAndroidPluginErrorHandler = GradleHandledError(
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
         globals.printBox('''
 ${globals.logger.terminal.warningMark} Starting AGP 9+, the default has become built-in Kotlin.
-This results in a build failure when applying the kotlin-android plugin.
+This results in a build failure when applying the Kotlin plugin.
 To resolve this, migrate to built-in Kotlin.
 \nFor instructions on how to migrate, see: $kMigrateToBuiltInKotlinDocsUrl''', title: _boxTitle);
 
