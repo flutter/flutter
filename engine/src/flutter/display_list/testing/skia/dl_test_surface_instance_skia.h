@@ -28,7 +28,7 @@ class DlSurfaceInstanceSkiaBase : public DlSurfaceInstance {
   std::shared_ptr<DlPixelData> SnapshotToPixelData() const override;
 
   // |DlSurfaceInstance|
-  virtual sk_sp<DlImage> SnapshotToImage() const override;
+  sk_sp<DlImage> SnapshotToImage() const override;
 
   // |DlSurfaceInstance|
   bool SnapshotToFile(std::string& filename) const override;

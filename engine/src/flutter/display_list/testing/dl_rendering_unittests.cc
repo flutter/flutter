@@ -49,6 +49,7 @@ constexpr DlScalar kRenderCenterX = (kRenderLeft + kRenderRight) / 2;
 constexpr DlScalar kRenderCenterY = (kRenderTop + kRenderBottom) / 2;
 constexpr DlScalar kRenderRadius = std::min(kRenderWidth, kRenderHeight) / 2.0;
 constexpr DlScalar kRenderCornerRadius = kRenderRadius / 5.0;
+constexpr DlScalar kTextFontHeight = kRenderHeight * 0.33f;
 
 constexpr DlRect kTestBounds2 = DlRect::MakeWH(kTestWidth, kTestHeight);
 const DlPoint kTestCenter2 = kTestBounds2.GetCenter();
@@ -319,17 +320,17 @@ class BoundsTolerance {
   DlScalar discrete_offset_ = 0;
 };
 
-template <typename E, typename C, typename P>
-struct RenderContext {
-  E env;
-  C canvas;
-  P paint;
-};
 class RenderEnvironment;
-using DlSetupContext =
-    RenderContext<const RenderEnvironment&, DlCanvas*, DlPaint&>;
-using DlRenderContext =
-    RenderContext<const RenderEnvironment&, DlCanvas*, const DlPaint&>;
+struct DlSetupContext {
+  const RenderEnvironment& env;
+  DlCanvas* canvas;
+  DlPaint& paint;
+};
+struct DlRenderContext {
+  const RenderEnvironment& env;
+  DlCanvas* canvas;
+  const DlPaint& paint;
+};
 
 using DlSetup = const std::function<void(const DlSetupContext&)>;
 using DlRenderer = const std::function<void(const DlRenderContext&)>;
@@ -476,7 +477,8 @@ class RenderEnvironment {
 
   RenderResult GetResult(const RenderJobInfo& info,
                          JobRenderer& renderer) const {
-    auto surface = getSurface(info.width, info.height);
+    std::shared_ptr<DlSurfaceInstance> surface =
+        getSurface(info.width, info.height);
     FML_DCHECK(surface != nullptr);
 
     DisplayListBuilder builder(DlRect::MakeWH(info.width, info.height));
@@ -547,8 +549,9 @@ class RenderEnvironment {
 
   mutable sk_sp<DlImage> test_image_;
   sk_sp<DlImage> MakeTestImage() const {
-    auto surface = provider_->MakeOffscreenSurface(
-        kRenderWidth, kRenderHeight, DlSurfaceProvider::kN32Premul);
+    std::shared_ptr<DlSurfaceInstance> surface =
+        provider_->MakeOffscreenSurface(kRenderWidth, kRenderHeight,
+                                        DlSurfaceProvider::kN32Premul);
     DisplayListBuilder builder(DlRect::MakeWH(kRenderWidth, kRenderHeight));
     DrawCheckerboard(&builder);
     surface->RenderDisplayList(builder.Build());
@@ -558,11 +561,10 @@ class RenderEnvironment {
 
   mutable std::shared_ptr<DlText> test_text_;
   std::shared_ptr<DlText> MakeTestText() const {
-    sk_sp<SkTextBlob> blob = MakeTextBlob("Testing", kRenderHeight * 0.33f);
+    sk_sp<SkTextBlob> blob = MakeTextBlob("Testing", kTextFontHeight);
     if (provider_->TargetsImpeller()) {
 #ifdef IMPELLER_SUPPORTS_RENDERING
-      auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
-      return DlTextImpeller::Make(frame);
+      return DlTextImpeller::MakeFromBlob(blob);
 #else   // IMPELLER_SUPPORTS_RENDERING
       return nullptr;
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -904,76 +906,41 @@ class TestParameters {
 };
 
 class CanvasCompareTester {
+ private:
+  static std::string failure_image_directory_;
+  static bool save_failure_images_;
+  static std::vector<std::string> failure_image_filenames_;
+
  public:
-  static std::vector<BackendType> TestBackends;
-  static std::string FailureImageDirectory;
-  static bool SaveFailureImages;
-  static std::vector<std::string> FailureImageFilenames;
+  static void EnableSaveImagesOnFailures() { save_failure_images_ = true; }
 
-  static std::unique_ptr<DlSurfaceProvider> GetProvider(BackendType type) {
-    auto provider = DlSurfaceProvider::Create(type);
-    if (provider == nullptr) {
-      FML_LOG(ERROR) << "provider " << DlSurfaceProvider::BackendName(type)
-                     << " not supported (ignoring)";
-      return nullptr;
+  static void PrintFailureImageFileNames() {
+    if (failure_image_filenames_.empty()) {
+      return;
     }
-    provider->InitializeSurface(kTestWidth, kTestHeight,
-                                PixelFormat::kN32Premul);
-    return provider;
-  }
-
-  static void ClearProviders() { TestBackends.clear(); }
-
-  static bool AddProvider(BackendType type) {
-    auto provider = GetProvider(type);
-    if (!provider) {
-      // Error already reported by GetProvider.
-      return false;
+    FML_LOG(INFO);
+    FML_LOG(INFO) << failure_image_filenames_.size() << " images saved in "
+                  << failure_image_directory_;
+    for (const std::string& filename : failure_image_filenames_) {
+      FML_LOG(INFO) << "  " << filename;
     }
-    for (auto it = TestBackends.begin(); it < TestBackends.end(); it++) {
-      if (*it == type) {
-        FML_LOG(ERROR) << "Backend " << provider->GetBackendName()
-                       << " already added";
-        return false;
-      }
-    }
-    TestBackends.push_back(type);
-    return true;
-  }
-
-  static bool RemoveProvider(BackendType type) {
-    auto provider = GetProvider(type);
-    if (!provider) {
-      // Error already reported by GetProvider.
-      return false;
-    }
-    for (auto it = TestBackends.begin(); it < TestBackends.end(); it++) {
-      if (*it == type) {
-        TestBackends.erase(it);
-        return true;
-      }
-    }
-    FML_LOG(ERROR) << "Backend " << provider->GetBackendName()
-                   << " was not present to remove";
-    return false;
+    FML_LOG(INFO);
   }
 
   static BoundsTolerance DefaultTolerance;
 
-  static void RenderAll(const TestParameters& params,
+  static void RenderAll(const std::unique_ptr<DlSurfaceProvider>& provider,
+                        const TestParameters& params,
                         const BoundsTolerance& tolerance = DefaultTolerance) {
-    for (auto& back_end : TestBackends) {
-      auto provider = GetProvider(back_end);
-      RenderEnvironment env = RenderEnvironment::MakeN32(provider.get());
-      env.InitializeReference(kEmptyDlSetup, params.dl_renderer());
+    RenderEnvironment env = RenderEnvironment::MakeN32(provider.get());
+    env.InitializeReference(kEmptyDlSetup, params.dl_renderer());
 
-      RenderWithTransforms(params, env, tolerance);
-      RenderWithClips(params, env, tolerance);
-      RenderWithSaveRestore(params, env, tolerance);
-      // Only test attributes if the canvas version uses the paint object
-      if (params.uses_paint()) {
-        RenderWithAttributes(params, env, tolerance);
-      }
+    RenderWithTransforms(params, env, tolerance);
+    RenderWithClips(params, env, tolerance);
+    RenderWithSaveRestore(params, env, tolerance);
+    // Only test attributes if the canvas version uses the paint object
+    if (params.uses_paint()) {
+      RenderWithAttributes(params, env, tolerance);
     }
   }
 
@@ -1125,7 +1092,7 @@ class CanvasCompareTester {
           0, 0, 0, 0.5, 0,
       };
       // clang-format on
-      auto dl_alpha_rotate_filter =
+      std::shared_ptr<const DlColorFilter> dl_alpha_rotate_filter =
           DlColorFilter::MakeMatrix(rotate_alpha_color_matrix);
       // clang-format off
       // The following section gets re-formatted on every commit even if it
@@ -1166,8 +1133,10 @@ class CanvasCompareTester {
           0, 0, 0, 1, 0,
       };
       // clang-format on
-      auto dl_color_filter = DlColorFilter::MakeMatrix(color_matrix);
-      auto dl_cf_image_filter = DlImageFilter::MakeColorFilter(dl_color_filter);
+      std::shared_ptr<const DlColorFilter> dl_color_filter =
+          DlColorFilter::MakeMatrix(color_matrix);
+      std::shared_ptr<DlImageFilter> dl_cf_image_filter =
+          DlImageFilter::MakeColorFilter(dl_color_filter);
       // clang-format off
       // The following section gets re-formatted on every commit even if it
       // doesn't change.
@@ -1211,7 +1180,7 @@ class CanvasCompareTester {
       RenderEnvironment aa_env = RenderEnvironment::MakeN32(env.GetProvider());
       // Tweak the bounds tolerance for the displacement of 1/10 of a pixel
       const BoundsTolerance aa_tolerance = tolerance.addBoundsPadding(1, 1);
-      auto dl_aa_setup = [=](DlSetupContext ctx, bool is_aa) {
+      auto dl_aa_setup = [=](DlSetupContext ctx, bool is_aa) -> void {
         ctx.canvas->Translate(0.1, 0.1);
         ctx.paint.setAntiAlias(is_aa);
         ctx.paint.setStrokeWidth(5.0);
@@ -1390,7 +1359,8 @@ class CanvasCompareTester {
           0, 0, 0, 1, 0,
       };
       // clang-format on
-      auto dl_color_filter = DlColorFilter::MakeMatrix(rotate_color_matrix);
+      std::shared_ptr<const DlColorFilter> dl_color_filter =
+          DlColorFilter::MakeMatrix(rotate_color_matrix);
       {
         DlColor bg = DlColor::kWhite();
         // clang-format off
@@ -1458,7 +1428,7 @@ class CanvasCompareTester {
           0.5,
           1.0,
       };
-      auto dl_gradient =
+      std::shared_ptr<DlColorSource> dl_gradient =
           DlColorSource::MakeLinear(dl_end_points[0], dl_end_points[1], 3,
                                     dl_colors, stops, DlTileMode::kMirror);
       {
@@ -1838,7 +1808,7 @@ class CanvasCompareTester {
   };
 
   static DirectoryStatus CheckDir(const std::string& dir) {
-    auto ret =
+    fml::UniqueFD ret =
         fml::OpenDirectory(dir.c_str(), false, fml::FilePermission::kRead);
     if (ret.is_valid()) {
       return DirectoryStatus::kExisted;
@@ -1869,7 +1839,7 @@ class CanvasCompareTester {
         case DirectoryStatus::kExisted:
           break;
         case DirectoryStatus::kCreated:
-          FailureImageDirectory = try_dir;
+          failure_image_directory_ = try_dir;
           return;
         case DirectoryStatus::kFailed:
           return;
@@ -1881,18 +1851,18 @@ class CanvasCompareTester {
   static void save_to_png(const RenderResult& result,
                           const std::string& op_desc,
                           const std::string& reason) {
-    if (!SaveFailureImages) {
+    if (!save_failure_images_) {
       return;
     }
-    if (FailureImageDirectory.length() == 0) {
+    if (failure_image_directory_.length() == 0) {
       SetupFailureImageDirectory();
-      if (FailureImageDirectory.length() == 0) {
-        SaveFailureImages = false;
+      if (failure_image_directory_.length() == 0) {
+        save_failure_images_ = false;
         return;
       }
     }
 
-    std::string filename = FailureImageDirectory + "/";
+    std::string filename = failure_image_directory_ + "/";
     for (const char& ch : op_desc) {
       filename += (ch == ':' || ch == ' ') ? '_' : ch;
     }
@@ -1900,7 +1870,7 @@ class CanvasCompareTester {
     if (!result.pixel_data->write(filename)) {
       FML_LOG(ERROR) << "Could not write output to " << filename;
     }
-    FailureImageFilenames.push_back(filename);
+    failure_image_filenames_.push_back(filename);
     FML_LOG(ERROR) << reason << ": " << filename;
   }
 
@@ -1946,7 +1916,7 @@ class CanvasCompareTester {
     DlJobRenderer dl_job(caseP.dl_setup(),     //
                          testP.dl_renderer(),  //
                          caseP.dl_restore());
-    auto dl_result = env.GetResult(base_info, dl_job);
+    RenderResult dl_result = env.GetResult(base_info, dl_job);
 
     ASSERT_EQ(dl_result.pixel_data->width(), kTestWidth) << info;
     ASSERT_EQ(dl_result.pixel_data->height(), kTestHeight) << info;
@@ -1985,7 +1955,7 @@ class CanvasCompareTester {
                 success;
     }
 
-    if (SaveFailureImages && !success) {
+    if (save_failure_images_ && !success) {
       FML_LOG(ERROR) << "Rendering issue encountered for: " << *display_list;
       save_to_png(dl_result, info + " (Test Result)", "output saved in");
       save_to_png(env.GetReferenceResult(), info + " (Test Reference)",
@@ -2030,6 +2000,7 @@ class CanvasCompareTester {
     }
     return 2;
   }
+
   static void checkGroupOpacity(const RenderEnvironment& env,
                                 const sk_sp<DisplayList>& display_list,
                                 const RenderResult& ref_result,
@@ -2045,7 +2016,8 @@ class CanvasCompareTester {
         .bg = bg,
         .opacity = opacity,
     };
-    auto group_opacity_result = env.GetResult(opacity_info, opacity_job);
+    RenderResult group_opacity_result =
+        env.GetResult(opacity_info, opacity_job);
 
     ASSERT_EQ(group_opacity_result.pixel_data->width(), kTestWidth) << info;
     ASSERT_EQ(group_opacity_result.pixel_data->height(), kTestHeight) << info;
@@ -2276,10 +2248,9 @@ class CanvasCompareTester {
   }
 };
 
-std::vector<BackendType> CanvasCompareTester::TestBackends;
-std::string CanvasCompareTester::FailureImageDirectory = "";
-bool CanvasCompareTester::SaveFailureImages = false;
-std::vector<std::string> CanvasCompareTester::FailureImageFilenames;
+std::string CanvasCompareTester::failure_image_directory_ = "";
+bool CanvasCompareTester::save_failure_images_ = false;
+std::vector<std::string> CanvasCompareTester::failure_image_filenames_;
 
 BoundsTolerance CanvasCompareTester::DefaultTolerance =
     BoundsTolerance().addAbsolutePadding(1, 1);
@@ -2287,18 +2258,120 @@ BoundsTolerance CanvasCompareTester::DefaultTolerance =
 // Eventually this bare bones testing::Test fixture will subsume the
 // CanvasCompareTester and the TestParameters could then become just
 // configuration calls made upon the fixture.
-template <typename BaseT>
-class DisplayListRenderingTestBase : public BaseT,
-                                     protected DisplayListOpFlags {
+class DisplayListRendering : public ::testing::Test,
+                             protected DisplayListOpFlags {
  public:
-  DisplayListRenderingTestBase() = default;
+  DisplayListRendering() = default;
 
-  static std::vector<BackendType> GetBackendList(
+  static void SetUpTestSuite() {
+    // Multiple test suites use this test base. Make sure that they don't
+    // double-register the supported providers.
+    test_backends_.clear();
+
+    std::vector<std::string> args = ::testing::internal::GetArgvs();
+    fml::CommandLine command_line =
+        fml::CommandLineFromIterators(args.begin(), args.end());
+
+    if (command_line.HasOption("--save-failure-images")) {
+      CanvasCompareTester::EnableSaveImagesOnFailures();
+    }
+
+    std::vector<BackendType> enable_backends =
+        ParseBackendList(command_line.GetOptionValues("enable"));
+    for (BackendType backend : enable_backends) {
+      AddProvider(backend);
+    }
+
+    std::vector<BackendType> disable_backends =
+        ParseBackendList(command_line.GetOptionValues("disable"));
+    for (BackendType backend : disable_backends) {
+      RemoveProvider(backend);
+    }
+
+    if (GetTestBackends().empty()) {
+      AddProvider(BackendType::kSkiaSoftware);
+    }
+
+    std::string providers = "";
+    for (BackendType back_end : GetTestBackends()) {
+      providers += " " + DlSurfaceProvider::BackendName(back_end);
+    }
+    FML_LOG(INFO) << "Running tests on [" << providers << " ]";
+  }
+
+  static void TearDownTestSuite() {
+    CanvasCompareTester::PrintFailureImageFileNames();
+  }
+
+  static const std::vector<BackendType>& GetTestBackends() {
+    return test_backends_;
+  }
+
+  static std::unique_ptr<DlSurfaceProvider> GetProvider(BackendType type) {
+    std::unique_ptr<DlSurfaceProvider> provider =
+        DlSurfaceProvider::Create(type);
+    if (provider == nullptr) {
+      FML_LOG(ERROR) << "provider " << DlSurfaceProvider::BackendName(type)
+                     << " not supported (ignoring)";
+      return nullptr;
+    }
+    provider->InitializeSurface(kTestWidth, kTestHeight,
+                                PixelFormat::kN32Premul);
+    return provider;
+  }
+
+  static void RenderAll(const TestParameters& params,
+                        const BoundsTolerance& tolerance =
+                            CanvasCompareTester::DefaultTolerance) {
+    for (BackendType backend : test_backends_) {
+      std::unique_ptr<DlSurfaceProvider> provider = GetProvider(backend);
+      CanvasCompareTester::RenderAll(provider, params, tolerance);
+    }
+  }
+
+ private:
+  static std::vector<BackendType> test_backends_;
+
+  static bool AddProvider(BackendType type) {
+    std::unique_ptr<DlSurfaceProvider> provider = GetProvider(type);
+    if (!provider) {
+      // Error already reported by GetProvider.
+      return false;
+    }
+    for (BackendType existing : test_backends_) {
+      if (existing == type) {
+        FML_LOG(ERROR) << "Backend " << provider->GetBackendName()
+                       << " already added";
+        return false;
+      }
+    }
+    test_backends_.push_back(type);
+    return true;
+  }
+
+  static bool RemoveProvider(BackendType type) {
+    std::unique_ptr<DlSurfaceProvider> provider = GetProvider(type);
+    if (!provider) {
+      // Error already reported by GetProvider.
+      return false;
+    }
+    for (auto it = test_backends_.begin(); it < test_backends_.end(); it++) {
+      if (*it == type) {
+        test_backends_.erase(it);
+        return true;
+      }
+    }
+    FML_LOG(ERROR) << "Backend " << provider->GetBackendName()
+                   << " was not present to remove";
+    return false;
+  }
+
+  static std::vector<BackendType> ParseBackendList(
       const std::vector<std::string_view>& arg_list) {
     std::vector<BackendType> value_list;
-    for (auto name_list : arg_list) {
+    for (const std::string_view& name_list : arg_list) {
       std::vector<std::string> names = absl::StrSplit(name_list, ',');
-      for (const auto& name : names) {
+      for (const std::string& name : names) {
         std::optional<BackendType> backend =
             DlSurfaceProvider::NameToBackend(name);
         if (backend.has_value()) {
@@ -2311,60 +2384,13 @@ class DisplayListRenderingTestBase : public BaseT,
     return value_list;
   }
 
-  static void SetUpTestSuite() {
-    // Multiple test suites use this test base. Make sure that they don't
-    // double-register the supported providers.
-    CanvasCompareTester::ClearProviders();
-
-    std::vector<std::string> args = ::testing::internal::GetArgvs();
-    fml::CommandLine command_line =
-        fml::CommandLineFromIterators(args.begin(), args.end());
-
-    CanvasCompareTester::SaveFailureImages =
-        command_line.HasOption("--save-failure-images");
-
-    std::vector<BackendType> backends =
-        GetBackendList(command_line.GetOptionValues("enable"));
-    for (auto backend : backends) {
-      CanvasCompareTester::AddProvider(backend);
-    }
-
-    backends = GetBackendList(command_line.GetOptionValues("disable"));
-    for (auto backend : backends) {
-      CanvasCompareTester::RemoveProvider(backend);
-    }
-
-    if (CanvasCompareTester::TestBackends.empty()) {
-      CanvasCompareTester::AddProvider(BackendType::kSkiaSoftware);
-    }
-
-    std::string providers = "";
-    for (auto& back_end : CanvasCompareTester::TestBackends) {
-      providers += " " + DlSurfaceProvider::BackendName(back_end);
-    }
-    FML_LOG(INFO) << "Running tests on [" << providers << " ]";
-  }
-
-  static void TearDownTestSuite() {
-    if (CanvasCompareTester::FailureImageFilenames.size() > 0) {
-      FML_LOG(INFO);
-      FML_LOG(INFO) << CanvasCompareTester::FailureImageFilenames.size()
-                    << " images saved in "
-                    << CanvasCompareTester::FailureImageDirectory;
-      for (const auto& filename : CanvasCompareTester::FailureImageFilenames) {
-        FML_LOG(INFO) << "  " << filename;
-      }
-      FML_LOG(INFO);
-    }
-  }
-
- private:
-  FML_DISALLOW_COPY_AND_ASSIGN(DisplayListRenderingTestBase);
+  FML_DISALLOW_COPY_AND_ASSIGN(DisplayListRendering);
 };
-using DisplayListRendering = DisplayListRenderingTestBase<::testing::Test>;
+
+std::vector<BackendType> DisplayListRendering::test_backends_;
 
 TEST_F(DisplayListRendering, DrawPaint) {
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawPaint(ctx.paint);
@@ -2374,7 +2400,7 @@ TEST_F(DisplayListRendering, DrawPaint) {
 
 TEST_F(DisplayListRendering, DrawOpaqueColor) {
   // We use a non-opaque color to avoid obliterating any backdrop filter output
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             // DrawColor is not tested against attributes because it is supposed
@@ -2390,7 +2416,7 @@ TEST_F(DisplayListRendering, DrawOpaqueColor) {
 
 TEST_F(DisplayListRendering, DrawAlphaColor) {
   // We use a non-opaque color to avoid obliterating any backdrop filter output
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawColor(DlColor(0x7FFF00FF));
@@ -2412,7 +2438,7 @@ TEST_F(DisplayListRendering, DrawDiagonalLines) {
   DlPoint p7 = DlPoint(kRenderCenterX, kRenderBottom - 15);
   DlPoint p8 = DlPoint(kRenderLeft + 15, kRenderCenterY);
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawLine(p1, p2, ctx.paint);
@@ -2432,7 +2458,7 @@ TEST_F(DisplayListRendering, DrawHorizontalLines) {
   DlPoint p5 = DlPoint(kRenderLeft, kRenderBottom - 16);
   DlPoint p6 = DlPoint(kRenderRight, kRenderBottom - 16);
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawLine(p1, p2, ctx.paint);
@@ -2452,7 +2478,7 @@ TEST_F(DisplayListRendering, DrawVerticalLines) {
   DlPoint p5 = DlPoint(kRenderRight - 16, kRenderTop);
   DlPoint p6 = DlPoint(kRenderRight - 16, kRenderBottom);
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawLine(p1, p2, ctx.paint);
@@ -2488,7 +2514,7 @@ TEST_F(DisplayListRendering, DrawDiagonalDashedLines) {
   // dash goes from 60 to 85 which means both ends of the
   // edge diagonals will be in a dash segment
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawDashedLine(p1, p2, 25.0f, 5.0f, ctx.paint);
@@ -2504,7 +2530,7 @@ TEST_F(DisplayListRendering, DrawRect) {
   // Bounds are offset by 0.5 pixels to induce AA
   DlRect rect = kRenderBounds.Shift(0.5f, 0.5f);
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawRect(rect, ctx.paint);
@@ -2515,7 +2541,7 @@ TEST_F(DisplayListRendering, DrawRect) {
 TEST_F(DisplayListRendering, DrawOval) {
   DlRect rect = kRenderBounds.Expand(0, -10);
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawOval(rect, ctx.paint);
@@ -2526,7 +2552,7 @@ TEST_F(DisplayListRendering, DrawOval) {
 TEST_F(DisplayListRendering, DrawCircle) {
   DlPoint center = kRenderBounds.GetCenter();
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawCircle(center, kRenderRadius, ctx.paint);
@@ -2539,7 +2565,7 @@ TEST_F(DisplayListRendering, DrawRoundRect) {
                                               kRenderCornerRadius,  //
                                               kRenderCornerRadius);
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawRoundRect(rrect, ctx.paint);
@@ -2556,7 +2582,7 @@ TEST_F(DisplayListRendering, DrawDiffRoundRect) {
                                               kRenderCornerRadius,  //
                                               kRenderCornerRadius);
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawDiffRoundRect(outer, inner, ctx.paint);
@@ -2589,7 +2615,7 @@ TEST_F(DisplayListRendering, DrawPath) {
 
   DlPath path = path_builder.TakePath();
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawPath(path, ctx.paint);
@@ -2599,7 +2625,7 @@ TEST_F(DisplayListRendering, DrawPath) {
 }
 
 TEST_F(DisplayListRendering, DrawArc) {
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawArc(kRenderBounds, 60, 330, false, ctx.paint);
@@ -2618,7 +2644,7 @@ TEST_F(DisplayListRendering, DrawArcCenter) {
   // Limit == 0, neither corner does a miter
   // Limit == 4, only the edge "turn-in" corners miter
   // Limit == 10, edge and center corners all miter
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawArc(kRenderBounds, 60, 360 - 12, true, ctx.paint);
@@ -2660,10 +2686,10 @@ TEST_F(DisplayListRendering, DrawPointsAsPoints) {
   // clang-format on
   const int count = sizeof(points) / sizeof(points[0]);
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
-            auto mode = DlPointMode::kPoints;
+            DlPointMode mode = DlPointMode::kPoints;
             ctx.canvas->DrawPoints(mode, count, points, ctx.paint);
           },
           kDrawPointsAsPointsFlags)
@@ -2703,10 +2729,10 @@ TEST_F(DisplayListRendering, DrawPointsAsLines) {
 
   const int count = sizeof(points) / sizeof(points[0]);
   ASSERT_TRUE((count & 1) == 0);
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
-            auto mode = DlPointMode::kLines;
+            DlPointMode mode = DlPointMode::kLines;
             ctx.canvas->DrawPoints(mode, count, points, ctx.paint);
           },
           kDrawPointsAsLinesFlags));
@@ -2729,10 +2755,10 @@ TEST_F(DisplayListRendering, DrawPointsAsPolygon) {
   };
   const int count1 = sizeof(points1) / sizeof(points1[0]);
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
-            auto mode = DlPointMode::kPolygon;
+            DlPointMode mode = DlPointMode::kPolygon;
             ctx.canvas->DrawPoints(mode, count1, points1, ctx.paint);
           },
           kDrawPointsAsPolygonFlags));
@@ -2765,7 +2791,7 @@ TEST_F(DisplayListRendering, DrawVerticesWithColors) {
   const std::shared_ptr<DlVertices> dl_vertices =
       DlVertices::Make(DlVertexMode::kTriangles, 6, pts, nullptr, dl_colors);
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawVertices(dl_vertices, DlBlendMode::kSrcOver,
@@ -2805,7 +2831,7 @@ TEST_F(DisplayListRendering, DrawVerticesWithImage) {
   const std::shared_ptr<DlVertices> dl_vertices =
       DlVertices::Make(DlVertexMode::kTriangles, 6, pts, tex, nullptr);
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             DlPaint v_paint = ctx.paint;
@@ -2819,7 +2845,7 @@ TEST_F(DisplayListRendering, DrawVerticesWithImage) {
 }
 
 TEST_F(DisplayListRendering, DrawImageNearest) {
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawImage(
@@ -2830,7 +2856,7 @@ TEST_F(DisplayListRendering, DrawImageNearest) {
 }
 
 TEST_F(DisplayListRendering, DrawImageNearestNoPaint) {
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawImage(ctx.env.GetTestImage(),
@@ -2841,7 +2867,7 @@ TEST_F(DisplayListRendering, DrawImageNearestNoPaint) {
 }
 
 TEST_F(DisplayListRendering, DrawImageLinear) {
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawImage(ctx.env.GetTestImage(),
@@ -2854,7 +2880,7 @@ TEST_F(DisplayListRendering, DrawImageLinear) {
 TEST_F(DisplayListRendering, DrawImageRectNearest) {
   DlRect src = DlRect::MakeWH(kRenderWidth, kRenderHeight).Expand(-5, -5);
   DlRect dst = kRenderBounds.Expand(-10.5f, -10.5f);
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawImageRect(ctx.env.GetTestImage(), src, dst,
@@ -2867,7 +2893,7 @@ TEST_F(DisplayListRendering, DrawImageRectNearest) {
 TEST_F(DisplayListRendering, DrawImageRectNearestNoPaint) {
   DlRect src = DlRect::MakeWH(kRenderWidth, kRenderHeight).Expand(-5, -5);
   DlRect dst = kRenderBounds.Expand(-10.5f, -10.5f);
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawImageRect(ctx.env.GetTestImage(), src, dst,
@@ -2880,7 +2906,7 @@ TEST_F(DisplayListRendering, DrawImageRectNearestNoPaint) {
 TEST_F(DisplayListRendering, DrawImageRectLinear) {
   DlRect src = DlRect::MakeWH(kRenderWidth, kRenderHeight).Expand(-5, -5);
   DlRect dst = kRenderBounds.Expand(-10.5f, -10.5f);
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawImageRect(ctx.env.GetTestImage(), src, dst,
@@ -2893,7 +2919,7 @@ TEST_F(DisplayListRendering, DrawImageRectLinear) {
 TEST_F(DisplayListRendering, DrawImageNineNearest) {
   DlIRect src = DlIRect::MakeWH(kRenderWidth, kRenderHeight).Expand(-25, -25);
   DlRect dst = kRenderBounds.Expand(-10.5f, -10.5f);
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawImageNine(ctx.env.GetTestImage(), src, dst,
@@ -2905,7 +2931,7 @@ TEST_F(DisplayListRendering, DrawImageNineNearest) {
 TEST_F(DisplayListRendering, DrawImageNineNearestNoPaint) {
   DlIRect src = DlIRect::MakeWH(kRenderWidth, kRenderHeight).Expand(-25, -25);
   DlRect dst = kRenderBounds.Expand(-10.5f, -10.5f);
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawImageNine(ctx.env.GetTestImage(), src, dst,
@@ -2917,7 +2943,7 @@ TEST_F(DisplayListRendering, DrawImageNineNearestNoPaint) {
 TEST_F(DisplayListRendering, DrawImageNineLinear) {
   DlIRect src = DlIRect::MakeWH(kRenderWidth, kRenderHeight).Expand(-25, -25);
   DlRect dst = kRenderBounds.Expand(-10.5f, -10.5f);
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawImageNine(ctx.env.GetTestImage(), src, dst,
@@ -2928,7 +2954,8 @@ TEST_F(DisplayListRendering, DrawImageNineLinear) {
 
 TEST_F(DisplayListRendering, DrawAtlasNearest) {
   auto relative_rect = [](DlScalar relative_left, DlScalar relative_top,
-                          DlScalar relative_right, DlScalar relative_bottom) {
+                          DlScalar relative_right,
+                          DlScalar relative_bottom) -> DlRect {
     return DlRect::MakeLTRB(
         kRenderWidth * relative_left, kRenderHeight * relative_top,
         kRenderWidth * relative_right, kRenderHeight * relative_bottom);
@@ -2955,7 +2982,7 @@ TEST_F(DisplayListRendering, DrawAtlasNearest) {
       DlColor::kMagenta(),
   };
   const DlImageSampling dl_sampling = DlImageSampling::kNearestNeighbor;
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawAtlas(ctx.env.GetTestImage(), dl_xform, tex,
@@ -2967,7 +2994,8 @@ TEST_F(DisplayListRendering, DrawAtlasNearest) {
 
 TEST_F(DisplayListRendering, DrawAtlasNearestNoPaint) {
   auto relative_rect = [](DlScalar relative_left, DlScalar relative_top,
-                          DlScalar relative_right, DlScalar relative_bottom) {
+                          DlScalar relative_right,
+                          DlScalar relative_bottom) -> DlRect {
     return DlRect::MakeLTRB(
         kRenderWidth * relative_left, kRenderHeight * relative_top,
         kRenderWidth * relative_right, kRenderHeight * relative_bottom);
@@ -2994,7 +3022,7 @@ TEST_F(DisplayListRendering, DrawAtlasNearestNoPaint) {
       DlColor::kMagenta(),
   };
   const DlImageSampling dl_sampling = DlImageSampling::kNearestNeighbor;
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawAtlas(ctx.env.GetTestImage(), dl_xform, tex,
@@ -3006,7 +3034,8 @@ TEST_F(DisplayListRendering, DrawAtlasNearestNoPaint) {
 
 TEST_F(DisplayListRendering, DrawAtlasLinear) {
   auto relative_rect = [](DlScalar relative_left, DlScalar relative_top,
-                          DlScalar relative_right, DlScalar relative_bottom) {
+                          DlScalar relative_right,
+                          DlScalar relative_bottom) -> DlRect {
     return DlRect::MakeLTRB(
         kRenderWidth * relative_left, kRenderHeight * relative_top,
         kRenderWidth * relative_right, kRenderHeight * relative_bottom);
@@ -3033,7 +3062,7 @@ TEST_F(DisplayListRendering, DrawAtlasLinear) {
       DlColor::kMagenta(),
   };
   const DlImageSampling dl_sampling = DlImageSampling::kLinear;
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
             ctx.canvas->DrawAtlas(ctx.env.GetTestImage(), dl_xform, tex,
@@ -3068,7 +3097,7 @@ sk_sp<DisplayList> makeTestDisplayList() {
 
 TEST_F(DisplayListRendering, DrawDisplayList) {
   sk_sp<DisplayList> display_list = makeTestDisplayList();
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawDisplayList(display_list);
@@ -3086,10 +3115,10 @@ TEST_F(DisplayListRendering, DrawText) {
 #else
   DlScalar render_y_1_3 = kRenderTop + kRenderHeight * 0.3;
   DlScalar render_y_2_3 = kRenderTop + kRenderHeight * 0.6;
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {
-            auto paint = ctx.paint;
+            DlPaint paint = ctx.paint;
             ctx.canvas->DrawText(ctx.env.GetTestText(), kRenderLeft,
                                  render_y_1_3, paint);
             ctx.canvas->DrawText(ctx.env.GetTestText(), kRenderLeft,
@@ -3118,7 +3147,7 @@ TEST_F(DisplayListRendering, DrawShadow) {
   const DlColor color = DlColor::kDarkGrey();
   const DlScalar elevation = 7;
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawShadow(path, color, elevation, false, 1.0);
@@ -3138,7 +3167,7 @@ TEST_F(DisplayListRendering, DrawShadowTransparentOccluder) {
   const DlColor color = DlColor::kDarkGrey();
   const DlScalar elevation = 7;
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawShadow(path, color, elevation, true, 1.0);
@@ -3158,7 +3187,7 @@ TEST_F(DisplayListRendering, DrawShadowDpr) {
   const DlColor color = DlColor::kDarkGrey();
   const DlScalar elevation = 7;
 
-  CanvasCompareTester::RenderAll(  //
+  RenderAll(  //
       TestParameters(
           [=](const DlRenderContext& ctx) {  //
             ctx.canvas->DrawShadow(path, color, elevation, false, 1.5);
@@ -3177,7 +3206,7 @@ TEST_F(DisplayListRendering, SaveLayerClippedContentStillFilters) {
   );
   TestParameters test_params(
       [=](const DlRenderContext& ctx) {
-        auto layer_filter =
+        std::shared_ptr<DlImageFilter> layer_filter =
             DlImageFilter::MakeBlur(10.0f, 10.0f, DlTileMode::kDecal);
         DlPaint layer_paint;
         layer_paint.setImageFilter(layer_filter);
@@ -3192,8 +3221,8 @@ TEST_F(DisplayListRendering, SaveLayerClippedContentStillFilters) {
   CaseParameters case_params("Filtered SaveLayer with clipped content");
   BoundsTolerance tolerance = BoundsTolerance().addAbsolutePadding(6.0f, 6.0f);
 
-  for (auto& back_end : CanvasCompareTester::TestBackends) {
-    auto provider = CanvasCompareTester::GetProvider(back_end);
+  for (BackendType back_end : GetTestBackends()) {
+    std::unique_ptr<DlSurfaceProvider> provider = GetProvider(back_end);
     RenderEnvironment env = RenderEnvironment::MakeN32(provider.get());
     env.InitializeReference(kEmptyDlSetup, test_params.dl_renderer());
 
@@ -3242,7 +3271,7 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
       DlImageFilter::MakeMatrix(contract_matrix, DlImageSampling::kLinear),
   };
 
-  auto render_content = [](DisplayListBuilder& builder) {
+  auto render_content = [](DisplayListBuilder& builder) -> void {
     builder.DrawRect(DlRect::MakeLTRB(kRenderLeft, kRenderTop,  //
                                       kRenderCenterX, kRenderCenterY),
                      DlPaint(DlColor::kYellow()));
@@ -3257,27 +3286,31 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
                      DlPaint(DlColor::kRed().modulateOpacity(0.5f)));
   };
 
+  // clang-format off
+  // The following section gets re-formatted on every commit even if it
+  // doesn't change.
   auto test_attributes_env =
       [render_content](DlPaint& paint1, DlPaint& paint2,
                        const DlPaint& paint_both, bool same, bool rev_same,
                        const std::string& desc1, const std::string& desc2,
-                       const RenderEnvironment* env) {
+                       const RenderEnvironment* env) -> void {
         DisplayListBuilder nested_builder;
         nested_builder.SaveLayer(kTestBounds2, &paint1);
         nested_builder.SaveLayer(kTestBounds2, &paint2);
         render_content(nested_builder);
-        auto nested_results = env->GetResult(nested_builder.Build());
+        RenderResult nested_results = env->GetResult(nested_builder.Build());
 
         DisplayListBuilder reverse_builder;
         reverse_builder.SaveLayer(kTestBounds2, &paint2);
         reverse_builder.SaveLayer(kTestBounds2, &paint1);
         render_content(reverse_builder);
-        auto reverse_results = env->GetResult(reverse_builder.Build());
+        RenderResult reverse_results = env->GetResult(reverse_builder.Build());
 
         DisplayListBuilder combined_builder;
         combined_builder.SaveLayer(kTestBounds2, &paint_both);
         render_content(combined_builder);
-        auto combined_results = env->GetResult(combined_builder.Build());
+        RenderResult combined_results =
+            env->GetResult(combined_builder.Build());
 
         // Set this boolean to true to test if combinations that are marked
         // as incompatible actually are compatible despite our predictions.
@@ -3308,16 +3341,18 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
               combined_results.pixel_data->height(), /*printMismatches=*/true);
         }
       };
+  // clang-format on
 
-  auto test_attributes = [test_attributes_env](DlPaint& paint1, DlPaint& paint2,
-                                               const DlPaint& paint_both,
-                                               bool same, bool rev_same,
-                                               const std::string& desc1,
-                                               const std::string& desc2) {
-    for (auto& back_end : CanvasCompareTester::TestBackends) {
-      auto provider = CanvasCompareTester::GetProvider(back_end);
-      auto env = std::make_unique<RenderEnvironment>(provider.get(),
-                                                     PixelFormat::kN32Premul);
+  auto test_attributes = [test_attributes_env](
+                             DlPaint& paint1, DlPaint& paint2,
+                             const DlPaint& paint_both, bool same,
+                             bool rev_same, const std::string& desc1,
+                             const std::string& desc2) -> void {
+    for (BackendType back_end : GetTestBackends()) {
+      std::unique_ptr<DlSurfaceProvider> provider = GetProvider(back_end);
+      std::unique_ptr<RenderEnvironment> env =
+          std::make_unique<RenderEnvironment>(provider.get(),
+                                              PixelFormat::kN32Premul);
       test_attributes_env(paint1, paint2, paint_both,  //
                           same, rev_same, desc1, desc2, env.get());
     }
@@ -3326,7 +3361,7 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
   // CF then Opacity should always work.
   // The reverse sometimes works.
   for (size_t cfi = 0; cfi < color_filters.size(); cfi++) {
-    const auto& color_filter = color_filters[cfi];
+    std::shared_ptr<const DlColorFilter>& color_filter = color_filters[cfi];
     std::string cf_desc = "color filter #" + std::to_string(cfi + 1);
     DlPaint nested_paint1 = DlPaint().setColorFilter(color_filter);
 
@@ -3356,7 +3391,7 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
     DlPaint nested_paint1 = DlPaint().setOpacity(opacity);
 
     for (size_t ifi = 0; ifi < image_filters.size(); ifi++) {
-      const auto& image_filter = image_filters[ifi];
+      std::shared_ptr<DlImageFilter>& image_filter = image_filters[ifi];
       std::string if_desc = "image filter #" + std::to_string(ifi + 1);
       DlPaint nested_paint2 = DlPaint().setImageFilter(image_filter);
 
@@ -3372,12 +3407,12 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
   // CF then IF should always work.
   // The reverse might work, but we lack the infrastructure to check it.
   for (size_t cfi = 0; cfi < color_filters.size(); cfi++) {
-    const auto& color_filter = color_filters[cfi];
+    std::shared_ptr<const DlColorFilter>& color_filter = color_filters[cfi];
     std::string cf_desc = "color filter #" + std::to_string(cfi + 1);
     DlPaint nested_paint1 = DlPaint().setColorFilter(color_filter);
 
     for (size_t ifi = 0; ifi < image_filters.size(); ifi++) {
-      const auto& image_filter = image_filters[ifi];
+      std::shared_ptr<DlImageFilter>& image_filter = image_filters[ifi];
       std::string if_desc = "image filter #" + std::to_string(ifi + 1);
       DlPaint nested_paint2 = DlPaint().setImageFilter(image_filter);
 
@@ -3391,7 +3426,7 @@ TEST_F(DisplayListRendering, SaveLayerConsolidation) {
 }
 
 TEST_F(DisplayListRendering, MatrixColorFilterModifyTransparencyCheck) {
-  auto test_matrix = [](int element, DlScalar value) {
+  auto test_matrix = [](int element, DlScalar value) -> void {
     // clang-format off
     float matrix[] = {
         1, 0, 0, 0, 0,
@@ -3410,7 +3445,8 @@ TEST_F(DisplayListRendering, MatrixColorFilterModifyTransparencyCheck) {
     // over the source color with the filter blend mode instead of
     // rendering via a ColorFilter, but this test is more "black box".
     DlMatrixColorFilter filter(matrix);
-    auto dl_filter = DlColorFilter::MakeMatrix(matrix);
+    std::shared_ptr<const DlColorFilter> dl_filter =
+        DlColorFilter::MakeMatrix(matrix);
     bool is_identity = (dl_filter == nullptr || original_value == value);
 
     DlPaint paint(DlColor(0x7f7f7f7f));
@@ -3421,7 +3457,7 @@ TEST_F(DisplayListRendering, MatrixColorFilterModifyTransparencyCheck) {
     builder1.Rotate(45);
     builder1.Translate(-kTestCenter2.x, -kTestCenter2.y);
     builder1.DrawRect(kRenderBounds, paint);
-    auto display_list1 = builder1.Build();
+    sk_sp<DisplayList> display_list1 = builder1.Build();
 
     DisplayListBuilder builder2;
     builder2.Translate(kTestCenter2.x, kTestCenter2.y);
@@ -3430,14 +3466,15 @@ TEST_F(DisplayListRendering, MatrixColorFilterModifyTransparencyCheck) {
     builder2.SaveLayer(kTestBounds2, &filter_save_paint);
     builder2.DrawRect(kRenderBounds, paint);
     builder2.Restore();
-    auto display_list2 = builder2.Build();
+    sk_sp<DisplayList> display_list2 = builder2.Build();
 
-    for (auto& back_end : CanvasCompareTester::TestBackends) {
-      auto provider = CanvasCompareTester::GetProvider(back_end);
-      auto env = std::make_unique<RenderEnvironment>(provider.get(),
-                                                     PixelFormat::kN32Premul);
-      auto results1 = env->GetResult(display_list1);
-      auto results2 = env->GetResult(display_list2);
+    for (BackendType back_end : GetTestBackends()) {
+      std::unique_ptr<DlSurfaceProvider> provider = GetProvider(back_end);
+      std::unique_ptr<RenderEnvironment> env =
+          std::make_unique<RenderEnvironment>(provider.get(),
+                                              PixelFormat::kN32Premul);
+      RenderResult results1 = env->GetResult(display_list1);
+      RenderResult results2 = env->GetResult(display_list2);
       CanvasCompareTester::quickCompareToReference(
           results1, results2, is_identity, desc + " filter affects rendering");
       int modified_transparent_pixels =
@@ -3465,7 +3502,7 @@ TEST_F(DisplayListRendering, MatrixColorFilterModifyTransparencyCheck) {
 }
 
 TEST_F(DisplayListRendering, MatrixColorFilterOpacityCommuteCheck) {
-  auto test_matrix = [](int element, DlScalar value) {
+  auto test_matrix = [](int element, DlScalar value) -> void {
     // clang-format off
     float matrix[] = {
         1, 0, 0, 0, 0,
@@ -3477,7 +3514,8 @@ TEST_F(DisplayListRendering, MatrixColorFilterOpacityCommuteCheck) {
     std::string desc =
         "matrix[" + std::to_string(element) + "] = " + std::to_string(value);
     matrix[element] = value;
-    auto filter = DlColorFilter::MakeMatrix(matrix);
+    std::shared_ptr<const DlColorFilter> filter =
+        DlColorFilter::MakeMatrix(matrix);
     EXPECT_EQ(std::isfinite(value), filter != nullptr);
 
     DlPaint paint(DlColor(0x80808080));
@@ -3491,7 +3529,7 @@ TEST_F(DisplayListRendering, MatrixColorFilterOpacityCommuteCheck) {
     builder1.DrawRect(kRenderBounds, paint);
     builder1.Restore();
     builder1.Restore();
-    auto display_list1 = builder1.Build();
+    sk_sp<DisplayList> display_list1 = builder1.Build();
 
     DisplayListBuilder builder2;
     builder2.SaveLayer(kTestBounds2, &filter_save_paint);
@@ -3500,14 +3538,15 @@ TEST_F(DisplayListRendering, MatrixColorFilterOpacityCommuteCheck) {
     builder2.DrawRect(kRenderBounds, paint);
     builder2.Restore();
     builder2.Restore();
-    auto display_list2 = builder2.Build();
+    sk_sp<DisplayList> display_list2 = builder2.Build();
 
-    for (auto& back_end : CanvasCompareTester::TestBackends) {
-      auto provider = CanvasCompareTester::GetProvider(back_end);
-      auto env = std::make_unique<RenderEnvironment>(provider.get(),
-                                                     PixelFormat::kN32Premul);
-      auto results1 = env->GetResult(display_list1);
-      auto results2 = env->GetResult(display_list2);
+    for (BackendType back_end : GetTestBackends()) {
+      std::unique_ptr<DlSurfaceProvider> provider = GetProvider(back_end);
+      std::unique_ptr<RenderEnvironment> env =
+          std::make_unique<RenderEnvironment>(provider.get(),
+                                              PixelFormat::kN32Premul);
+      RenderResult results1 = env->GetResult(display_list1);
+      RenderResult results2 = env->GetResult(display_list2);
       if (!filter || filter->can_commute_with_opacity()) {
         CanvasCompareTester::compareToReference(
             results2, results1, desc, nullptr, nullptr, DlColor::kTransparent(),
@@ -3566,7 +3605,7 @@ TEST_F(DisplayListRendering, MatrixColorFilterOpacityCommuteCheck) {
   FUNC(kLuminosity)
 
 TEST_F(DisplayListRendering, BlendColorFilterModifyTransparencyCheck) {
-  auto test_mode_color = [](DlBlendMode mode, DlColor color) {
+  auto test_mode_color = [](DlBlendMode mode, DlColor color) -> void {
     std::stringstream desc_str;
     std::string mode_string = BlendModeToString(mode);
     desc_str << "blend[" << mode_string << ", " << color << "]";
@@ -3584,7 +3623,7 @@ TEST_F(DisplayListRendering, BlendColorFilterModifyTransparencyCheck) {
     builder1.Rotate(45);
     builder1.Translate(-kTestCenter2.x, -kTestCenter2.y);
     builder1.DrawRect(kRenderBounds, paint);
-    auto display_list1 = builder1.Build();
+    sk_sp<DisplayList> display_list1 = builder1.Build();
 
     DisplayListBuilder builder2;
     builder2.Translate(kTestCenter2.x, kTestCenter2.y);
@@ -3593,14 +3632,15 @@ TEST_F(DisplayListRendering, BlendColorFilterModifyTransparencyCheck) {
     builder2.SaveLayer(kTestBounds2, &filter_save_paint);
     builder2.DrawRect(kRenderBounds, paint);
     builder2.Restore();
-    auto display_list2 = builder2.Build();
+    sk_sp<DisplayList> display_list2 = builder2.Build();
 
-    for (auto& back_end : CanvasCompareTester::TestBackends) {
-      auto provider = CanvasCompareTester::GetProvider(back_end);
-      auto env = std::make_unique<RenderEnvironment>(provider.get(),
-                                                     PixelFormat::kN32Premul);
-      auto results1 = env->GetResult(display_list1);
-      auto results2 = env->GetResult(display_list2);
+    for (BackendType back_end : GetTestBackends()) {
+      std::unique_ptr<DlSurfaceProvider> provider = GetProvider(back_end);
+      std::unique_ptr<RenderEnvironment> env =
+          std::make_unique<RenderEnvironment>(provider.get(),
+                                              PixelFormat::kN32Premul);
+      RenderResult results1 = env->GetResult(display_list1);
+      RenderResult results2 = env->GetResult(display_list2);
       int modified_transparent_pixels =
           CanvasCompareTester::countModifiedTransparentPixels(results1,
                                                               results2);
@@ -3610,7 +3650,7 @@ TEST_F(DisplayListRendering, BlendColorFilterModifyTransparencyCheck) {
     }
   };
 
-  auto test_mode = [&test_mode_color](DlBlendMode mode) {
+  auto test_mode = [&test_mode_color](DlBlendMode mode) -> void {
     test_mode_color(mode, DlColor::kTransparent());
     test_mode_color(mode, DlColor::kWhite());
     test_mode_color(mode, DlColor::kWhite().modulateOpacity(0.5));
@@ -3624,7 +3664,7 @@ TEST_F(DisplayListRendering, BlendColorFilterModifyTransparencyCheck) {
 }
 
 TEST_F(DisplayListRendering, BlendColorFilterOpacityCommuteCheck) {
-  auto test_mode_color = [](DlBlendMode mode, DlColor color) {
+  auto test_mode_color = [](DlBlendMode mode, DlColor color) -> void {
     std::stringstream desc_str;
     std::string mode_string = BlendModeToString(mode);
     desc_str << "blend[" << mode_string << ", " << color << "]";
@@ -3648,7 +3688,7 @@ TEST_F(DisplayListRendering, BlendColorFilterOpacityCommuteCheck) {
     builder1.DrawRect(kRenderBounds, paint);
     builder1.Restore();
     builder1.Restore();
-    auto display_list1 = builder1.Build();
+    sk_sp<DisplayList> display_list1 = builder1.Build();
 
     DisplayListBuilder builder2;
     builder2.SaveLayer(kTestBounds2, &filter_save_paint);
@@ -3657,16 +3697,17 @@ TEST_F(DisplayListRendering, BlendColorFilterOpacityCommuteCheck) {
     builder2.DrawRect(kRenderBounds, paint);
     builder2.Restore();
     builder2.Restore();
-    auto display_list2 = builder2.Build();
+    sk_sp<DisplayList> display_list2 = builder2.Build();
 
-    for (auto& back_end : CanvasCompareTester::TestBackends) {
-      auto provider = CanvasCompareTester::GetProvider(back_end);
+    for (BackendType back_end : GetTestBackends()) {
+      std::unique_ptr<DlSurfaceProvider> provider = GetProvider(back_end);
       std::string provider_desc = " " + provider->GetBackendName() + " " + desc;
-      auto env = std::make_unique<RenderEnvironment>(provider.get(),
-                                                     PixelFormat::kN32Premul);
+      std::unique_ptr<RenderEnvironment> env =
+          std::make_unique<RenderEnvironment>(provider.get(),
+                                              PixelFormat::kN32Premul);
 
-      auto results1 = env->GetResult(display_list1);
-      auto results2 = env->GetResult(display_list2);
+      RenderResult results1 = env->GetResult(display_list1);
+      RenderResult results2 = env->GetResult(display_list2);
       if (filter.can_commute_with_opacity()) {
         CanvasCompareTester::compareToReference(
             results2, results1, provider_desc, nullptr, nullptr,
@@ -3678,7 +3719,7 @@ TEST_F(DisplayListRendering, BlendColorFilterOpacityCommuteCheck) {
     }
   };
 
-  auto test_mode = [&test_mode_color](DlBlendMode mode) {
+  auto test_mode = [&test_mode_color](DlBlendMode mode) -> void {
     test_mode_color(mode, DlColor::kTransparent());
     test_mode_color(mode, DlColor::kWhite());
     test_mode_color(mode, DlColor::kWhite().modulateOpacity(0.5));
@@ -3772,7 +3813,8 @@ class DisplayListNopTest : public DisplayListRendering {
           }
         });
     sk_sp<DlImage> test_image = test_surface->SnapshotToImage();
-    auto test_pixels = test_surface->SnapshotToPixelData();
+    std::shared_ptr<DlPixelData> test_pixels =
+        test_surface->SnapshotToPixelData();
 
     // For image-on-image tests, the src and dest images will have repeated
     // rows/columns that have every color, but laid out at right angles to
@@ -3789,7 +3831,8 @@ class DisplayListNopTest : public DisplayListRendering {
                                          DlImageSampling::kNearestNeighbor);
                      }
                    });
-    auto dst_pixels = dst_surface->SnapshotToPixelData();
+    std::shared_ptr<DlPixelData> dst_pixels =
+        dst_surface->SnapshotToPixelData();
 
     std::shared_ptr<DlSurfaceInstance> src_surface =
         get_output(provider, data_count, data_count, true,
@@ -3803,7 +3846,8 @@ class DisplayListNopTest : public DisplayListRendering {
                                          DlImageSampling::kNearestNeighbor);
                      }
                    });
-    auto src_pixels = src_surface->SnapshotToPixelData();
+    std::shared_ptr<DlPixelData> src_pixels =
+        src_surface->SnapshotToPixelData();
 
     // Double check that the pixel data is laid out in orthogonal stripes
     for (int y = 0; y < data_count; y++) {
@@ -3854,7 +3898,7 @@ class DisplayListNopTest : public DisplayListRendering {
       int h,
       bool snapshot,
       const std::function<void(DlCanvas*)>& renderer) {
-    auto surface =
+    std::shared_ptr<DlSurfaceInstance> surface =
         provider->MakeOffscreenSurface(w, h, DlSurfaceProvider::kN32Premul);
     DisplayListBuilder builder;
     renderer(&builder);
@@ -3930,15 +3974,15 @@ class DisplayListNopTest : public DisplayListRendering {
     DisplayListBuilder builder(DlRect::MakeWH(100.0f, 100.0f));
     DlPaint paint = DlPaint(color).setBlendMode(mode);
     builder.DrawRect(DlRect::MakeLTRB(0.0f, 0.0f, 10.0f, 10.0f), paint);
-    auto dl = builder.Build();
+    sk_sp<DisplayList> dl = builder.Build();
     if (dl->modifies_transparent_black()) {
       ASSERT_TRUE(dl->op_count() != 0u);
     }
 
-    auto sk_mode = static_cast<SkBlendMode>(mode);
-    auto sk_color_filter =
+    SkBlendMode sk_mode = static_cast<SkBlendMode>(mode);
+    sk_sp<SkColorFilter> sk_color_filter =
         SkColorFilters::Blend(ToSkColor4f(color), nullptr, sk_mode);
-    auto srgb = SkColorSpace::MakeSRGB();
+    sk_sp<SkColorSpace> srgb = SkColorSpace::MakeSRGB();
     int all_flags = 0;
     if (sk_color_filter) {
       for (DlColor dst_color : test_dst_colors) {
@@ -3946,7 +3990,8 @@ class DisplayListNopTest : public DisplayListRendering {
         DlColor result = DlColor(
             sk_color_filter->filterColor4f(dst_color_f, srgb.get(), srgb.get())
                 .toSkColor());
-        all_flags |= check_color_result(dst_color, result, 0, 0, dl, desc);
+        all_flags |=
+            check_color_result(dst_color, result, /*x=*/0, /*y=*/0, dl, desc);
       }
       if ((all_flags & kWasMTB) != 0) {
         EXPECT_FALSE(sk_color_filter->isAlphaUnchanged());
@@ -3964,7 +4009,7 @@ class DisplayListNopTest : public DisplayListRendering {
     DisplayListBuilder builder_for_properties;
     DlPaint dl_paint = DlPaint(color).setBlendMode(mode);
     builder_for_properties.DrawRect(DlRect::MakeWH(100, 100), dl_paint);
-    auto properties_display_list = builder_for_properties.Build();
+    sk_sp<DisplayList> properties_display_list = builder_for_properties.Build();
     bool dl_is_elided = properties_display_list->op_count() == 0u;
     bool dl_affects_transparent_pixels =
         properties_display_list->modifies_transparent_black();
@@ -3973,17 +4018,18 @@ class DisplayListNopTest : public DisplayListRendering {
     DlPaint paint;
     paint.setBlendMode(mode);
     paint.setColor(color);
-    for (auto& back_end : CanvasCompareTester::TestBackends) {
-      auto provider = CanvasCompareTester::GetProvider(back_end);
-      auto test_data = GetTestData(provider.get());
+    for (BackendType back_end : GetTestBackends()) {
+      std::unique_ptr<DlSurfaceProvider> provider = GetProvider(back_end);
+      const TestData test_data = GetTestData(provider.get());
       std::string provider_desc = " " + provider->GetBackendName() + desc;
 
-      auto test_image = test_data.test_image_1d;
+      sk_sp<DlImage> test_image = test_data.test_image_1d;
       DlRect test_bounds =
           DlRect::MakeWH(test_image->width(), test_image->height());
-      auto result_surface = provider->MakeOffscreenSurface(
-          test_image->width(), test_image->height(),
-          DlSurfaceProvider::kN32Premul);
+      std::shared_ptr<DlSurfaceInstance> result_surface =
+          provider->MakeOffscreenSurface(test_image->width(),
+                                         test_image->height(),
+                                         DlSurfaceProvider::kN32Premul);
       DisplayListBuilder builder_for_rendering;
       builder_for_rendering.Clear(DlColor::kTransparent());
       builder_for_rendering.DrawImage(test_image, DlPoint(0, 0),
@@ -4023,9 +4069,9 @@ class DisplayListNopTest : public DisplayListRendering {
     desc_stream << ", IF: " << if_mtb;
     std::string desc = desc_stream.str();
 
-    for (auto& back_end : CanvasCompareTester::TestBackends) {
-      auto provider = CanvasCompareTester::GetProvider(back_end);
-      auto test_data = GetTestData(provider.get());
+    for (BackendType back_end : GetTestBackends()) {
+      std::unique_ptr<DlSurfaceProvider> provider = GetProvider(back_end);
+      const TestData test_data = GetTestData(provider.get());
       std::string provider_desc = " " + provider->GetBackendName() + desc;
 
       DisplayListBuilder builder_for_properties(DlRect::MakeWH(100.0f, 100.0f));
@@ -4036,11 +4082,12 @@ class DisplayListNopTest : public DisplayListRendering {
       builder_for_properties.DrawImage(test_data.src_image_2d, DlPoint(0, 0),
                                        DlImageSampling::kNearestNeighbor,
                                        &paint);
-      auto properties_display_list = builder_for_properties.Build();
+      sk_sp<DisplayList> properties_display_list =
+          builder_for_properties.Build();
 
       int w = test_data.src_image_2d->width();
       int h = test_data.src_image_2d->height();
-      auto result_surface =
+      std::shared_ptr<DlSurfaceInstance> result_surface =
           provider->MakeOffscreenSurface(w, h, DlSurfaceProvider::kN32Premul);
       DisplayListBuilder builder_for_rendering;
       builder_for_rendering.Clear(DlColor::kTransparent());
@@ -4062,7 +4109,7 @@ class DisplayListNopTest : public DisplayListRendering {
 };
 
 TEST_F(DisplayListNopTest, BlendModeAndColorViaColorFilter) {
-  auto test_mode_filter = [this](DlBlendMode mode) {
+  auto test_mode_filter = [this](DlBlendMode mode) -> void {
     for (DlColor color : test_src_colors) {
       test_mode_color_via_filter(mode, color);
     }
@@ -4074,7 +4121,7 @@ TEST_F(DisplayListNopTest, BlendModeAndColorViaColorFilter) {
 }
 
 TEST_F(DisplayListNopTest, BlendModeAndColorByRendering) {
-  auto test_mode_render = [this](DlBlendMode mode) {
+  auto test_mode_render = [this](DlBlendMode mode) -> void {
     // First check rendering a variety of colors onto image
     for (DlColor color : test_src_colors) {
       test_mode_color_via_rendering(mode, color);
@@ -4087,9 +4134,9 @@ TEST_F(DisplayListNopTest, BlendModeAndColorByRendering) {
 }
 
 TEST_F(DisplayListNopTest, BlendModeAndColorAndFiltersByRendering) {
-  auto test_mode_render = [this](DlBlendMode mode) {
-    auto image_filter_nomtb = DlColorFilterImageFilter(color_filter_nomtb);
-    auto image_filter_mtb = DlColorFilterImageFilter(color_filter_mtb);
+  auto test_mode_render = [this](DlBlendMode mode) -> void {
+    DlColorFilterImageFilter image_filter_nomtb(color_filter_nomtb);
+    DlColorFilterImageFilter image_filter_mtb(color_filter_mtb);
     for (DlColor color : test_src_colors) {
       test_attributes_image(mode, color, nullptr, nullptr);
       test_attributes_image(mode, color, color_filter_nomtb.get(), nullptr);

@@ -8,7 +8,7 @@ namespace flutter::testing {
 
 std::optional<DlSurfaceProvider::BackendType> DlSurfaceProvider::NameToBackend(
     const std::string& name) {
-#define PROCESS_BACKEND(name, BACKEND)                             \
+#define SURFACE_PROVIDER_HANDLE_BACKEND(name, BACKEND)             \
   {                                                                \
     BackendType type = BackendType::k##BACKEND;                    \
     if (name.compare(DlSurfaceProvider::BackendName(type)) == 0) { \
@@ -16,13 +16,13 @@ std::optional<DlSurfaceProvider::BackendType> DlSurfaceProvider::NameToBackend(
     }                                                              \
   }
 
-  PROCESS_BACKEND(name, SkiaSoftware);
-  PROCESS_BACKEND(name, SkiaOpenGL);
-  PROCESS_BACKEND(name, SkiaMetal);
-  PROCESS_BACKEND(name, ImpellerMetal);
-  PROCESS_BACKEND(name, ImpellerMetalSDF);
+  SURFACE_PROVIDER_HANDLE_BACKEND(name, SkiaSoftware);
+  SURFACE_PROVIDER_HANDLE_BACKEND(name, SkiaOpenGL);
+  SURFACE_PROVIDER_HANDLE_BACKEND(name, SkiaMetal);
+  SURFACE_PROVIDER_HANDLE_BACKEND(name, ImpellerMetal);
+  SURFACE_PROVIDER_HANDLE_BACKEND(name, ImpellerMetalSDF);
 
-#undef PROCESS_BACKEND
+#undef SURFACE_PROVIDER_HANDLE_BACKEND
 
   return std::nullopt;
 }
