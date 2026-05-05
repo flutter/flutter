@@ -99,7 +99,7 @@ Future<void> testMain() async {
       final ImageDecodingManager manager = ImageDecodingManager.instance;
       // Occupy all slots
       final requests = <ImageDecodingRequest>[];
-      for (var i = 0; i < 20; i++) {
+      for (var i = 0; i < 8; i++) {
         requests.add(manager.requestDecodingSlot(100, 100));
       }
 
@@ -119,7 +119,7 @@ Future<void> testMain() async {
       expect(decoded, true);
 
       // Clean up remaining slots
-      for (var i = 1; i < 20; i++) {
+      for (var i = 1; i < 8; i++) {
         manager.releaseDecodingSlot(requests[i]);
       }
     });
@@ -128,7 +128,7 @@ Future<void> testMain() async {
       final ImageDecodingManager manager = ImageDecodingManager.instance;
       // Occupy all slots
       final requests = <ImageDecodingRequest>[];
-      for (var i = 0; i < 20; i++) {
+      for (var i = 0; i < 8; i++) {
         requests.add(manager.requestDecodingSlot(100, 100));
       }
 
@@ -156,7 +156,7 @@ Future<void> testMain() async {
       expect(granted2, true);
 
       // Clean up
-      for (var i = 1; i < 20; i++) {
+      for (var i = 1; i < 8; i++) {
         manager.releaseDecodingSlot(requests[i]);
       }
       manager.releaseDecodingSlot(request2);

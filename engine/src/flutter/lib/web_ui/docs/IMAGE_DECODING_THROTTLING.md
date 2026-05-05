@@ -24,7 +24,7 @@ The technical implementation introduces a centralized resource coordinator to ma
 
 1.  **The `ImageDecodingManager` (Resource Coordinator):**
     A centralized singleton responsible for tracking active decoding operations. It manages a FIFO (First-In-First-Out) queue and enforces two primary safety constraints:
-    *   **Concurrency Limit:** A maximum of 20 simultaneous `decode()` operations.
+    *   **Concurrency Limit:** A maximum of 8 simultaneous `decode()` operations.
     *   **Memory Footprint Limit:** A maximum cumulative estimated footprint (128MB) for all in-flight decodes.
     *   **The "Greedy First" Rule:** To prevent deadlocks when an image exceeds the total budget (e.g., a single 200MB asset), the manager always allows the first item in the queue to proceed if no other decodes are active.
     *   **`cancel(Request request)`:** The manager provides an explicit `cancel` method. If an image is disposed of while waiting in the queue, this method is used to remove the request and reclaim the potential slot immediately.

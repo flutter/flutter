@@ -18,7 +18,7 @@ class ImageDecodingManager {
   /// The shared instance of [ImageDecodingManager].
   static final ImageDecodingManager instance = ImageDecodingManager._();
 
-  static const int _maxConcurrentDecodes = 20;
+  static const int _maxConcurrentDecodes = 8;
   static const int _maxConcurrentBytes = 128 * 1024 * 1024; // 128MB
 
   int _activeDecodesCount = 0;

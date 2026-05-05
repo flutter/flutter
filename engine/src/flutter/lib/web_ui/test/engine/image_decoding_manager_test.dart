@@ -33,12 +33,12 @@ void testMain() {
       }
 
       await Future<void>.delayed(Duration.zero);
-      expect(grantedCount, 20);
+      expect(grantedCount, 8);
 
       // Release one slot
       manager.releaseDecodingSlot(requests[0]);
       await Future<void>.delayed(Duration.zero);
-      expect(grantedCount, 21);
+      expect(grantedCount, 9);
     });
 
     test('throttles memory', () async {
@@ -87,7 +87,7 @@ void testMain() {
 
     test('cancel request', () async {
       final activeRequests = <ImageDecodingRequest>[];
-      for (var i = 0; i < 20; i++) {
+      for (var i = 0; i < 8; i++) {
         activeRequests.add(manager.requestDecodingSlot(100, 100));
       }
 
@@ -119,13 +119,13 @@ void testMain() {
     test('releasing pending request before grant', () async {
       // Occupy all slots
       final activeRequests = <ImageDecodingRequest>[];
-      for (var i = 0; i < 20; i++) {
+      for (var i = 0; i < 8; i++) {
         activeRequests.add(manager.requestDecodingSlot(100, 100));
       }
 
       final int initialCount = manager.debugActiveDecodesCount;
       final int initialBytes = manager.debugActiveDecodesBytes;
-      expect(initialCount, 20);
+      expect(initialCount, 8);
 
       // Request another slot (will be pending)
       final ImageDecodingRequest pendingRequest = manager.requestDecodingSlot(100, 100);
@@ -147,7 +147,7 @@ void testMain() {
 
       // The pending request should never have been granted
       expect(granted, false);
-      expect(manager.debugActiveDecodesCount, 19);
+      expect(manager.debugActiveDecodesCount, 7);
 
       // A new request should still be able to get a slot
       final ImageDecodingRequest newRequest = manager.requestDecodingSlot(100, 100);
@@ -155,7 +155,7 @@ void testMain() {
       unawaited(newRequest.future.then((_) => newGranted = true));
       await Future<void>.delayed(Duration.zero);
       expect(newGranted, true);
-      expect(manager.debugActiveDecodesCount, 20);
+      expect(manager.debugActiveDecodesCount, 8);
     });
   });
 }
