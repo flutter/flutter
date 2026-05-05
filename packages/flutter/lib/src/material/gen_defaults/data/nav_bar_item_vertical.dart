@@ -5,12 +5,6 @@
 // Version: 34.1.18
 
 class TokenNavBarItemVertical {
-  /// md.comp.nav-bar.item.vertical.active-indicator.icon-label-space
-  static const double activeIndicatorIconLabelSpace = 4.00;
-
-  /// md.comp.nav-bar.item.vertical.active-indicator.height
-  static const double activeIndicatorHeight = 32.00;
-
   /// md.comp.nav-bar.item.vertical.container.between-space
   static const double containerBetweenSpace = 6.00;
 
@@ -31,4 +25,10 @@ class TokenNavBarItemVertical {
 
   /// md.comp.nav-bar.item.vertical.label-text.font
   static const String labelTextFontFontFamily = 'Roboto';
+
+  /// md.comp.nav-bar.item.vertical.active-indicator.height
+  static const double activeIndicatorHeight = 32.00;
+
+  /// md.comp.nav-bar.item.vertical.active-indicator.icon-label-space
+  static const double activeIndicatorIconLabelSpace = 4.00;
 }

@@ -7,12 +7,6 @@
 import 'shape_struct.dart';
 
 class TokenFabMedium {
-  /// md.comp.fab.medium.container.height
-  static const double containerHeight = 80.00;
-
-  /// md.comp.fab.medium.icon.size
-  static const double iconSize = 28.00;
-
   /// md.comp.fab.medium.container.shape
   static const ShapeStruct containerShape = ShapeStruct(
     family: 'SHAPE_FAMILY_ROUNDED_CORNERS',
@@ -24,4 +18,10 @@ class TokenFabMedium {
 
   /// md.comp.fab.medium.container.width
   static const double containerWidth = 80.00;
+
+  /// md.comp.fab.medium.container.height
+  static const double containerHeight = 80.00;
+
+  /// md.comp.fab.medium.icon.size
+  static const double iconSize = 28.00;
 }

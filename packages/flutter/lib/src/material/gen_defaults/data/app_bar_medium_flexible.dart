@@ -8,9 +8,6 @@ class TokenAppBarMediumFlexible {
   /// md.comp.app-bar.medium-flexible.container.height
   static const double containerHeight = 112.00;
 
-  /// md.comp.app-bar.medium-flexible.with-subtitle.container.height
-  static const double withSubtitleContainerHeight = 136.00;
-
   /// md.comp.app-bar.medium-flexible.subtitle.font
   static const double subtitleFontFontSize = 14.00;
 
@@ -40,4 +37,7 @@ class TokenAppBarMediumFlexible {
 
   /// md.comp.app-bar.medium-flexible.title.font
   static const String titleFontFontFamily = 'Roboto';
+
+  /// md.comp.app-bar.medium-flexible.with-subtitle.container.height
+  static const double withSubtitleContainerHeight = 136.00;
 }

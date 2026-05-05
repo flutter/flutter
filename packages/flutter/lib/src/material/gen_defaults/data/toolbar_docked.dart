@@ -7,18 +7,6 @@
 import 'shape_struct.dart';
 
 class TokenToolbarDocked {
-  /// md.comp.toolbar.docked.container.height
-  static const double containerHeight = 64.00;
-
-  /// md.comp.toolbar.docked.container.shape
-  static const ShapeStruct containerShape = ShapeStruct(
-    family: 'SHAPE_FAMILY_ROUNDED_CORNERS',
-    topLeft: 0.00,
-    topRight: 0.00,
-    bottomLeft: 0.00,
-    bottomRight: 0.00,
-  );
-
   /// md.comp.toolbar.docked.container.max-spacing
   static const double containerMaxSpacing = 32.00;
 
@@ -30,4 +18,16 @@ class TokenToolbarDocked {
 
   /// md.comp.toolbar.docked.container.trailing-space
   static const double containerTrailingSpace = 16.00;
+
+  /// md.comp.toolbar.docked.container.shape
+  static const ShapeStruct containerShape = ShapeStruct(
+    family: 'SHAPE_FAMILY_ROUNDED_CORNERS',
+    topLeft: 0.00,
+    topRight: 0.00,
+    bottomLeft: 0.00,
+    bottomRight: 0.00,
+  );
+
+  /// md.comp.toolbar.docked.container.height
+  static const double containerHeight = 64.00;
 }

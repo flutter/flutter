@@ -5,9 +5,9 @@
 // Version: 34.1.18
 
 class TokenTypeface {
-  /// md.ref.typeface.brand
-  static const String brand = 'Roboto';
-
   /// md.ref.typeface.plain
   static const String plain = 'Roboto';
+
+  /// md.ref.typeface.brand
+  static const String brand = 'Roboto';
 }

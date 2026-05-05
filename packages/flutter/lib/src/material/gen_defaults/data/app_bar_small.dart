@@ -7,9 +7,6 @@
 import 'shape_struct.dart';
 
 class TokenAppBarSmall {
-  /// md.comp.app-bar.small.container.height
-  static const double containerHeight = 64.00;
-
   /// md.comp.app-bar.small.search.label-text.font
   static const double searchLabelTextFontFontSize = 16.00;
 
@@ -34,23 +31,11 @@ class TokenAppBarSmall {
     bottomRight: 0.00,
   );
 
+  /// md.comp.app-bar.small.container.height
+  static const double containerHeight = 64.00;
+
   /// md.comp.app-bar.small.search.container.height
   static const double searchContainerHeight = 56.00;
-
-  /// md.comp.app-bar.small.title.font
-  static const double titleFontFontSize = 22.00;
-
-  /// md.comp.app-bar.small.title.font
-  static const double titleFontFontWeight = 400;
-
-  /// md.comp.app-bar.small.title.font
-  static const double titleFontLineHeight = 28.00;
-
-  /// md.comp.app-bar.small.title.font
-  static const double titleFontLetterSpacing = 0.00;
-
-  /// md.comp.app-bar.small.title.font
-  static const String titleFontFontFamily = 'Roboto';
 
   /// md.comp.app-bar.small.subtitle.font
   static const double subtitleFontFontSize = 12.00;
@@ -66,4 +51,19 @@ class TokenAppBarSmall {
 
   /// md.comp.app-bar.small.subtitle.font
   static const String subtitleFontFontFamily = 'Roboto';
+
+  /// md.comp.app-bar.small.title.font
+  static const double titleFontFontSize = 22.00;
+
+  /// md.comp.app-bar.small.title.font
+  static const double titleFontFontWeight = 400;
+
+  /// md.comp.app-bar.small.title.font
+  static const double titleFontLineHeight = 28.00;
+
+  /// md.comp.app-bar.small.title.font
+  static const double titleFontLetterSpacing = 0.00;
+
+  /// md.comp.app-bar.small.title.font
+  static const String titleFontFontFamily = 'Roboto';
 }

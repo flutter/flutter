@@ -10,9 +10,6 @@ class TokenButtonGroupConnectedLarge {
   /// md.comp.button-group.connected.large.pressed.inner-corner.corner-size
   static const double pressedInnerCornerCornerSize = 12.00;
 
-  /// md.comp.button-group.connected.large.container.height
-  static const double containerHeight = 96.00;
-
   /// md.comp.button-group.connected.large.between-space
   static const double betweenSpace = 2.00;
 
@@ -25,9 +22,12 @@ class TokenButtonGroupConnectedLarge {
     bottomRight: 0.00,
   );
 
-  /// md.comp.button-group.connected.large.selected.inner-corner.corner-size
-  static const double selectedInnerCornerCornerSize = 50.00;
+  /// md.comp.button-group.connected.large.container.height
+  static const double containerHeight = 96.00;
 
   /// md.comp.button-group.connected.large.inner-corner.corner-size
   static const double innerCornerCornerSize = 16.00;
+
+  /// md.comp.button-group.connected.large.selected.inner-corner.corner-size
+  static const double selectedInnerCornerCornerSize = 50.00;
 }

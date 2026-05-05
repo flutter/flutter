@@ -10,14 +10,17 @@ class TokenButtonGroupConnectedSmall {
   /// md.comp.button-group.connected.small.inner-corner.corner-size
   static const double innerCornerCornerSize = 8.00;
 
-  /// md.comp.button-group.connected.small.selected.inner-corner.corner-size
-  static const double selectedInnerCornerCornerSize = 50.00;
-
   /// md.comp.button-group.connected.small.container.height
   static const double containerHeight = 40.00;
 
   /// md.comp.button-group.connected.small.pressed.inner-corner.corner-size
   static const double pressedInnerCornerCornerSize = 4.00;
+
+  /// md.comp.button-group.connected.small.selected.inner-corner.corner-size
+  static const double selectedInnerCornerCornerSize = 50.00;
+
+  /// md.comp.button-group.connected.small.between-space
+  static const double betweenSpace = 2.00;
 
   /// md.comp.button-group.connected.small.container.shape
   static const ShapeStruct containerShape = ShapeStruct(
@@ -27,7 +30,4 @@ class TokenButtonGroupConnectedSmall {
     bottomLeft: 0.00,
     bottomRight: 0.00,
   );
-
-  /// md.comp.button-group.connected.small.between-space
-  static const double betweenSpace = 2.00;
 }
