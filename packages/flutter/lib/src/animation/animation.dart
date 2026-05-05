@@ -253,7 +253,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// {@macro flutter.animation.AnimationStatus.isForwardOrCompleted}
   bool get isForwardOrCompleted => status.isForwardOrCompleted;
 
-  /// Chains a [Tween] (or [CurveTween]) to this [Animation].
+  /// Chains a [Tween] (for example, [CurveTween]) to this [Animation].
   ///
   /// This method is only valid for `Animation<double>` instances (i.e. when `T`
   /// is `double`). This means, for instance, that it can be called on
@@ -336,10 +336,8 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///
   ///  * [Animatable.animate], which does the same thing.
   ///  * [AnimationController], which is usually used to drive animations.
-  ///  * [CurvedAnimation], an alternative to [CurveTween] for applying easing
-  ///    curves.
-  ///  * [AsymmetricCurvedAnimation], which supports different curves in the
-  ///    forward direction and the reverse direction.
+  ///  * [CurvedAnimation], an alternative to [CurveTween] for applying a
+  ///    curve to an animation.
   ///  * [Animatable.fromCallback], which allows creating an [Animatable] from an
   ///    arbitrary transformation.
   @optionalTypeArgs
