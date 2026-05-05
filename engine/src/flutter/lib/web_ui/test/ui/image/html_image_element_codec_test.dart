@@ -168,6 +168,17 @@ Future<void> testMain() async {
       expect(() => codec.getNextFrame(), throwsStateError);
     });
 
+    test('clears src on loading failure', () async {
+      final HtmlImageElementCodec codec = CkImageElementCodec('non_existent_image.png');
+      try {
+        await codec.getNextFrame();
+        fail('Should have thrown an exception');
+      } catch (e) {
+        expect(e, isA<ImageCodecException>());
+      }
+      expect(codec.imgElement?.src, isNot(contains('non_existent_image.png')));
+    });
+
     test('dispose does not clear src if image handed out', () async {
       final HtmlImageElementCodec codec = CkImageElementCodec('sample_image1.png');
       final ui.FrameInfo frame = await codec.getNextFrame();

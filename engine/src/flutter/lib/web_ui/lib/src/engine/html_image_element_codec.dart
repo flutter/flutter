@@ -102,6 +102,9 @@ abstract class HtmlImageElementCodec implements ui.Codec {
       _status = _HtmlCodecStatus.disposed;
     } catch (e) {
       _status = _HtmlCodecStatus.failed;
+      if (!_imageHandedOut) {
+        imgElement?.src = '';
+      }
       rethrow;
     } finally {
       _cleanupDecodingSlot();
@@ -171,7 +174,13 @@ abstract class HtmlImageElementCodec implements ui.Codec {
     _status = _HtmlCodecStatus.decoding;
     // We use a timeout to prevent the decoder from hanging indefinitely and
     // blocking the queue.
-    await imgElement!.decode().timeout(const Duration(seconds: 30));
+    try {
+      await imgElement!.decode().timeout(const Duration(seconds: 30));
+    } on TimeoutException {
+      throw ImageCodecException('Timed out decoding image: $src');
+    } catch (e) {
+      throw ImageCodecException('Failed to decode image: $src. Error: $e');
+    }
     _checkDisposed();
   }
 
