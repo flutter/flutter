@@ -764,7 +764,7 @@ Future<void> removeExtendedAttributesForProject({
   final Directory buildDir = fileSystem.directory(getBuildDirectory(config, fileSystem));
   if (projectDirectory.existsSync()) {
     for (final FileSystemEntity entity in projectDirectory.listSync()) {
-      if (entity.absolute.path == buildDir.absolute.path) {
+      if (fileSystem.path.equals(entity.absolute.path, buildDir.absolute.path)) {
         continue;
       }
       futures.add(removeExtendedAttributes(entity, processUtils, logger));
@@ -780,7 +780,7 @@ Future<void> removeExtendedAttributesForProject({
   final String swiftPackageCachePath = xcodeProjectInterpreter.swiftPackageCachePath(iosBuildDir);
   if (iosBuildDir.existsSync()) {
     for (final FileSystemEntity entity in iosBuildDir.listSync()) {
-      if (entity.absolute.path == swiftPackageCachePath) {
+      if (fileSystem.path.equals(entity.absolute.path, swiftPackageCachePath)) {
         continue;
       }
       futures.add(removeExtendedAttributes(entity, processUtils, logger));
