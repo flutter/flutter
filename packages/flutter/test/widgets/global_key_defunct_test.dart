@@ -2,7 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('GlobalKey reuse after defunct does not assert', (WidgetTester tester) async {
+  testWidgets('GlobalKey reuse after defunct does not assert (different widget type)', (
+    WidgetTester tester,
+  ) async {
     final GlobalKey key = GlobalKey();
     // First widget with a Container
     await tester.pumpWidget(
@@ -20,10 +22,37 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Text('Reused', key: GlobalKey()),
+        child: Text('Reused', key: key),
       ),
     );
     // No exceptions means pass
     expect(find.text('Reused'), findsOneWidget);
+  });
+
+  testWidgets('GlobalKey reuse after defunct does not assert (same widget type)', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey key = GlobalKey();
+    // First widget with a Container
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Container(key: key),
+      ),
+    );
+    // Ensure it is attached
+    expect(find.byKey(key), findsOneWidget);
+    // Remove it to make element defunct
+    await tester.pumpWidget(const SizedBox.shrink());
+    // Now reuse the same key with the same widget type
+    // This should not trigger an assertion.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Container(key: key),
+      ),
+    );
+    // No exceptions means pass
+    expect(find.byKey(key), findsOneWidget);
   });
 }
