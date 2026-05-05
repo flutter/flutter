@@ -190,9 +190,9 @@ import org.junit.runner.RunWith
 
 @RunWith(FlutterTestRunner::class)
 class MainActivityTest {
-  @Rule
-  @JvmField
-  var rule: ActivityTestRule<MainActivity> = ActivityTestRule(MainActivity::class.java, true, false)
+    @Rule
+    @JvmField
+    val rule: ActivityTestRule<MainActivity> = ActivityTestRule(MainActivity::class.java, initialTouchMode = true, launchActivity = false)
 }
 ```
 
