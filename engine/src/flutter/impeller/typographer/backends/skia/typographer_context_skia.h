@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_TYPOGRAPHER_BACKENDS_SKIA_TYPOGRAPHER_CONTEXT_SKIA_H_
 
 #include "impeller/typographer/typographer_context.h"
+#include "third_party/skia/include/core/SkImageInfo.h"
 
 namespace impeller {
 
@@ -28,6 +29,9 @@ class TypographerContextSkia : public TypographerContext {
       HostBuffer& host_buffer,
       const std::shared_ptr<GlyphAtlasContext>& atlas_context,
       const std::vector<RenderableText>& renderable_texts) const override;
+
+  // Visible for testing.
+  static SkImageInfo GetImageInfo(const GlyphAtlas& atlas, Size size);
 
  private:
   static std::pair<std::vector<FontGlyphPair>, std::vector<Rect>>

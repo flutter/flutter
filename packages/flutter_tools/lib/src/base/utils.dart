@@ -612,6 +612,16 @@ final utf8LineDecoder = StreamTransformer<List<int>, String>.fromBind(
   (stream) => stream.transformWithCallSite(utf8.decoder).transform(const LineSplitter()),
 );
 
+/// A line decoder that permits malformed UTF-8 bytes.
+///
+/// Used for displaying tool output (compiler, tests, debuggers) where invalid
+/// UTF-8 is expected from external sources. Invalid UTF-8 sequences are decoded
+/// to replacement characters (U+FFFD) without warnings.
+final utf8AllowMalformedLineDecoder = StreamTransformer<List<int>, String>.fromBind(
+  (stream) =>
+      stream.transformWithCallSite(utf8AllowMalformed.decoder).transform(const LineSplitter()),
+);
+
 /// Formats a list of rows into a table with aligned columns.
 ///
 /// [table] is a list of rows, where each row is a list of strings.
