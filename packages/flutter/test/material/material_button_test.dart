@@ -635,9 +635,15 @@ void main() {
   testWidgets(
     'Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics',
     (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
+      addTearDown(tester.ensureSemantics().dispose);
 
-      const expectedButtonSize = Size(116.0, 48.0);
+      const Size expectedButtonSize = Size(116.0, 48.0);
+      // Button is in center of screen.
+      final Matrix4 expectedButtonTransform = Matrix4.identity()
+        ..translate(
+          TestSemantics.fullScreen.width / 2 - expectedButtonSize.width / 2,
+          TestSemantics.fullScreen.height / 2 - expectedButtonSize.height / 2,
+        );
 
       // enabled button
       await tester.pumpWidget(
@@ -657,8 +663,9 @@ void main() {
         ),
       );
 
+      final SemanticsNode enabledSemantics = tester.getSemantics(find.byType(MaterialButton));
       expect(
-        tester.getSemantics(find.byType(MaterialButton)),
+        enabledSemantics,
         matchesSemantics(
           label: 'Button',
           hasTapAction: true,
@@ -670,6 +677,7 @@ void main() {
           size: expectedButtonSize,
         ),
       );
+      expect(enabledSemantics.transform, expectedButtonTransform);
 
       // disabled button
       await tester.pumpWidget(
@@ -687,9 +695,9 @@ void main() {
         ),
       );
 
-      final SemanticsNode semantics = tester.getSemantics(find.byType(MaterialButton));
+      final SemanticsNode disabledSemantics = tester.getSemantics(find.byType(MaterialButton));
       expect(
-        semantics,
+        disabledSemantics,
         matchesSemantics(
           label: 'Button',
           hasFocusAction: true,
@@ -699,11 +707,10 @@ void main() {
           size: expectedButtonSize,
         ),
       );
-      final SemanticsData semanticsData = semantics.getSemanticsData();
+      expect(disabledSemantics.transform, expectedButtonTransform);
+      final SemanticsData semanticsData = disabledSemantics.getSemanticsData();
       expect(semanticsData.hasFlag(SemanticsFlag.isEnabled), isFalse);
       expect(semanticsData.hasAction(SemanticsAction.tap), isFalse);
-
-      handle.dispose();
     },
   );
 
