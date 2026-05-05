@@ -1029,169 +1029,155 @@ void main() {
     expect(projectDir.childDirectory('ios'), exists);
   }, overrides: {});
 
-  testUsingContext(
-    'app does not include android if disabled in config',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  const String descAndroid = 'app does not include android if disabled in config';
+  testUsingContext(descAndroid, () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      expect(projectDir.childDirectory('android'), isNot(exists));
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false)},
-  );
+    expect(projectDir.childDirectory('android'), isNot(exists));
+  }, overrides: {FeatureFlags: () => TestFeatureFlags(isAndroidEnabled: false)});
 
-  testUsingContext(
-    'app does not include ios if disabled in config',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  const String descIos = 'app does not include ios if disabled in config';
+  testUsingContext(descIos, () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      expect(projectDir.childDirectory('ios'), isNot(exists));
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false)},
-  );
+    expect(projectDir.childDirectory('ios'), isNot(exists));
+  }, overrides: {FeatureFlags: () => TestFeatureFlags(isIOSEnabled: false)});
 
-  testUsingContext(
-    'app does not include desktop or web by default',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  const String descDesktopWeb = 'app does not include desktop or web by default';
+  testUsingContext(descDesktopWeb, () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      expect(projectDir.childDirectory('linux'), isNot(exists));
-      expect(projectDir.childDirectory('macos'), isNot(exists));
-      expect(projectDir.childDirectory('windows'), isNot(exists));
-      expect(projectDir.childDirectory('web'), isNot(exists));
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags()},
-  );
+    expect(projectDir.childDirectory('linux'), isNot(exists));
+    expect(projectDir.childDirectory('macos'), isNot(exists));
+    expect(projectDir.childDirectory('windows'), isNot(exists));
+    expect(projectDir.childDirectory('web'), isNot(exists));
+  }, overrides: {FeatureFlags: () => TestFeatureFlags()});
 
-  testUsingContext(
-    'plugin does not include desktop or web by default',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  const String descPluginDesktopWeb = 'plugin does not include desktop or web by default';
+  testUsingContext(descPluginDesktopWeb, () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
-      expect(projectDir.childDirectory('linux'), isNot(exists));
-      expect(projectDir.childDirectory('macos'), isNot(exists));
-      expect(projectDir.childDirectory('windows'), isNot(exists));
-      expect(projectDir.childDirectory('web'), isNot(exists));
-      expect(projectDir.childDirectory('example').childDirectory('linux'), isNot(exists));
-      expect(projectDir.childDirectory('example').childDirectory('macos'), isNot(exists));
-      expect(projectDir.childDirectory('example').childDirectory('windows'), isNot(exists));
-      expect(projectDir.childDirectory('example').childDirectory('web'), isNot(exists));
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags()},
-  );
+    expect(projectDir.childDirectory('linux'), isNot(exists));
+    expect(projectDir.childDirectory('macos'), isNot(exists));
+    expect(projectDir.childDirectory('windows'), isNot(exists));
+    expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('linux'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('macos'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('windows'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('web'), isNot(exists));
+  }, overrides: {FeatureFlags: () => TestFeatureFlags()});
 
-  testUsingContext(
-    'app supports Linux if requested',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+  final overridesLinux = {
+    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+    Logger: () => logger,
+  };
 
-      await runner.run(<String>['create', '--no-pub', '--platform=linux', projectDir.path]);
+  const String descAppLinux = 'app supports Linux if requested';
+  testUsingContext(descAppLinux, () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt'), exists);
-      expect(projectDir.childDirectory('android'), isNot(exists));
-      expect(projectDir.childDirectory('ios'), isNot(exists));
-      expect(projectDir.childDirectory('windows'), isNot(exists));
-      expect(projectDir.childDirectory('macos'), isNot(exists));
-      expect(projectDir.childDirectory('web'), isNot(exists));
-      expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true), Logger: () => logger},
-  );
+    await runner.run(<String>['create', '--no-pub', '--platform=linux', projectDir.path]);
 
-  testUsingContext(
-    'plugin supports Linux if requested',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+    expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt'), exists);
+    expect(projectDir.childDirectory('android'), isNot(exists));
+    expect(projectDir.childDirectory('ios'), isNot(exists));
+    expect(projectDir.childDirectory('windows'), isNot(exists));
+    expect(projectDir.childDirectory('macos'), isNot(exists));
+    expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+  }, overrides: overridesLinux);
 
-      await runner.run(<String>[
-        'create',
-        '--no-pub',
-        '--template=plugin',
-        '--platform=linux',
-        projectDir.path,
-      ]);
+  const String descPluginLinux = 'plugin supports Linux if requested';
+  testUsingContext(descPluginLinux, () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt'), exists);
-      expect(projectDir.childDirectory('example').childDirectory('linux'), exists);
-      expect(projectDir.childDirectory('example').childDirectory('android'), isNot(exists));
-      expect(projectDir.childDirectory('example').childDirectory('ios'), isNot(exists));
-      expect(projectDir.childDirectory('example').childDirectory('windows'), isNot(exists));
-      expect(projectDir.childDirectory('example').childDirectory('macos'), isNot(exists));
-      expect(projectDir.childDirectory('example').childDirectory('web'), isNot(exists));
-      validatePubspecForPlugin(
-        projectDir: projectDir.absolute.path,
-        expectedPlatforms: const <String>['linux'],
-        pluginClass: 'FlutterProjectPlugin',
-        unexpectedPlatforms: <String>['some_platform'],
-      );
-      expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true), Logger: () => logger},
-  );
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--platform=linux',
+      projectDir.path,
+    ]);
 
-  testUsingContext(
-    'app supports macOS if requested',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+    expect(projectDir.childDirectory('linux').childFile('CMakeLists.txt'), exists);
+    expect(projectDir.childDirectory('example').childDirectory('linux'), exists);
+    expect(projectDir.childDirectory('example').childDirectory('android'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('ios'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('windows'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('macos'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('web'), isNot(exists));
+    validatePubspecForPlugin(
+      projectDir: projectDir.absolute.path,
+      expectedPlatforms: const <String>['linux'],
+      pluginClass: 'FlutterProjectPlugin',
+      unexpectedPlatforms: <String>['some_platform'],
+    );
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+  }, overrides: overridesLinux);
 
-      await runner.run(<String>['create', '--no-pub', '--platform=macos', projectDir.path]);
+  final overridesMacos = {
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    Logger: () => logger,
+  };
 
-      expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace'), exists);
-      expect(projectDir.childDirectory('android'), isNot(exists));
-      expect(projectDir.childDirectory('ios'), isNot(exists));
-      expect(projectDir.childDirectory('linux'), isNot(exists));
-      expect(projectDir.childDirectory('windows'), isNot(exists));
-      expect(projectDir.childDirectory('web'), isNot(exists));
-      expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true), Logger: () => logger},
-  );
+  const String descAppMacos = 'app supports macOS if requested';
+  testUsingContext(descAppMacos, () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
 
-  testUsingContext(
-    'plugin supports macOS if requested',
-    () async {
-      final command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
+    await runner.run(<String>['create', '--no-pub', '--platform=macos', projectDir.path]);
 
-      await runner.run(<String>[
-        'create',
-        '--no-pub',
-        '--template=plugin',
-        '--platform=macos',
-        projectDir.path,
-      ]);
+    expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace'), exists);
+    expect(projectDir.childDirectory('android'), isNot(exists));
+    expect(projectDir.childDirectory('ios'), isNot(exists));
+    expect(projectDir.childDirectory('linux'), isNot(exists));
+    expect(projectDir.childDirectory('windows'), isNot(exists));
+    expect(projectDir.childDirectory('web'), isNot(exists));
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+  }, overrides: overridesMacos);
 
-      expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec'), exists);
-      expect(projectDir.childDirectory('example').childDirectory('macos'), exists);
-      expect(projectDir.childDirectory('example').childDirectory('linux'), isNot(exists));
-      expect(projectDir.childDirectory('example').childDirectory('android'), isNot(exists));
-      expect(projectDir.childDirectory('example').childDirectory('ios'), isNot(exists));
-      expect(projectDir.childDirectory('example').childDirectory('windows'), isNot(exists));
-      expect(projectDir.childDirectory('example').childDirectory('web'), isNot(exists));
-      validatePubspecForPlugin(
-        projectDir: projectDir.absolute.path,
-        expectedPlatforms: const <String>['macos'],
-        pluginClass: 'FlutterProjectPlugin',
-        unexpectedPlatforms: <String>['some_platform'],
-      );
-      expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
-    },
-    overrides: {FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true), Logger: () => logger},
-  );
+  const String descPluginMacos = 'plugin supports macOS if requested';
+  testUsingContext(descPluginMacos, () async {
+    final command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>[
+      'create',
+      '--no-pub',
+      '--template=plugin',
+      '--platform=macos',
+      projectDir.path,
+    ]);
+
+    expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec'), exists);
+    expect(projectDir.childDirectory('example').childDirectory('macos'), exists);
+    expect(projectDir.childDirectory('example').childDirectory('linux'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('android'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('ios'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('windows'), isNot(exists));
+    expect(projectDir.childDirectory('example').childDirectory('web'), isNot(exists));
+    validatePubspecForPlugin(
+      projectDir: projectDir.absolute.path,
+      expectedPlatforms: const <String>['macos'],
+      pluginClass: 'FlutterProjectPlugin',
+      unexpectedPlatforms: <String>['some_platform'],
+    );
+    expect(logger.errorText, isNot(contains(_kNoPlatformsMessage)));
+  }, overrides: overridesMacos);
 
   testUsingContext(
     'app supports Windows if requested',
