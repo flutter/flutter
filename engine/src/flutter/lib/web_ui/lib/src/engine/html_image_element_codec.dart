@@ -75,10 +75,7 @@ abstract class HtmlImageElementCodec implements ui.Codec {
   bool _imageHandedOut = false;
 
   Future<void> decode() {
-    if (decodeFuture != null) {
-      return decodeFuture!;
-    }
-    decodeFuture = _performDecode();
+    decodeFuture ??= _performDecode();
     return decodeFuture!;
   }
 

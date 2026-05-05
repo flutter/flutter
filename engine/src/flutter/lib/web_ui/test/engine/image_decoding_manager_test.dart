@@ -115,5 +115,47 @@ void testMain() {
       await Future<void>.delayed(Duration.zero);
       expect(granted2, true);
     });
+
+    test('releasing pending request before grant', () async {
+      // Occupy all slots
+      final activeRequests = <ImageDecodingRequest>[];
+      for (var i = 0; i < 20; i++) {
+        activeRequests.add(manager.requestDecodingSlot(100, 100));
+      }
+
+      final int initialCount = manager.debugActiveDecodesCount;
+      final int initialBytes = manager.debugActiveDecodesBytes;
+      expect(initialCount, 20);
+
+      // Request another slot (will be pending)
+      final ImageDecodingRequest pendingRequest = manager.requestDecodingSlot(100, 100);
+      var granted = false;
+      unawaited(pendingRequest.future.then((_) => granted = true));
+      await Future<void>.delayed(Duration.zero);
+      expect(granted, false);
+
+      // Release the pending request before it's granted
+      manager.releaseDecodingSlot(pendingRequest);
+
+      // Verify that accounting hasn't changed
+      expect(manager.debugActiveDecodesCount, initialCount);
+      expect(manager.debugActiveDecodesBytes, initialBytes);
+
+      // Release an active slot
+      manager.releaseDecodingSlot(activeRequests[0]);
+      await Future<void>.delayed(Duration.zero);
+
+      // The pending request should never have been granted
+      expect(granted, false);
+      expect(manager.debugActiveDecodesCount, 19);
+
+      // A new request should still be able to get a slot
+      final ImageDecodingRequest newRequest = manager.requestDecodingSlot(100, 100);
+      var newGranted = false;
+      unawaited(newRequest.future.then((_) => newGranted = true));
+      await Future<void>.delayed(Duration.zero);
+      expect(newGranted, true);
+      expect(manager.debugActiveDecodesCount, 20);
+    });
   });
 }

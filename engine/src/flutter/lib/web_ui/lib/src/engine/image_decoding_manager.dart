@@ -42,6 +42,7 @@ class ImageDecodingManager {
   /// Releases a decoding slot previously obtained via [requestDecodingSlot].
   void releaseDecodingSlot(ImageDecodingRequest request) {
     if (!request._granted) {
+      _pendingRequests.remove(request);
       return;
     }
     request._granted = false;
@@ -56,6 +57,12 @@ class ImageDecodingManager {
       request._completer.completeError(const ImageDecodingCancelledException());
     }
   }
+
+  @visibleForTesting
+  int get debugActiveDecodesCount => _activeDecodesCount;
+
+  @visibleForTesting
+  int get debugActiveDecodesBytes => _activeDecodesBytes;
 
   @visibleForTesting
   void debugReset() {
