@@ -7,6 +7,7 @@ import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/ticker_provider.dart' show SingleTickerProviderStateMixin;
 
@@ -98,11 +99,23 @@ class _SelectionOverlayWidgetState extends State<SelectionOverlayWidget> {
   @override
   void initState() {
     super.initState();
+    _postFrameSync();
   }
 
   @override
   void didUpdateWidget(SelectionOverlayWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _postFrameSync();
+  }
+
+  void _postFrameSync() {
+    final RenderEditable? renderEditable = _renderEditable;
+    if (renderEditable != null) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _syncMagnifierVisibility(renderEditable);
+      });
+    }
   }
 
   @override
@@ -227,18 +240,26 @@ class _SelectionOverlayWidgetState extends State<SelectionOverlayWidget> {
 
     final midpoint = Offset(midX, endpoints.first.point.dy - lineHeight);
 
-    return _SelectionToolbarWrapper(
-      isVisible: isVisible,
-      child: Builder(
-        builder: (BuildContext context) {
-          if (widget.spellCheckToolbarVisible && widget.spellCheckToolbarBuilder != null) {
-            return widget.spellCheckToolbarBuilder!(context);
-          }
+    Widget toolbarContent;
+    if (widget.spellCheckToolbarVisible && widget.spellCheckToolbarBuilder != null) {
+      toolbarContent = widget.spellCheckToolbarBuilder!(context);
+    } else {
+      final TextSelectionControls? controls = widget.selectionControls;
 
-          final TextSelectionControls? controls = widget.selectionControls;
-
-          if (controls != null && controls is! TextSelectionHandleControls) {
-            return controls.buildToolbar(
+      if (controls != null && controls is! TextSelectionHandleControls) {
+        toolbarContent = controls.buildToolbar(
+          context,
+          editingRegion,
+          lineHeight,
+          midpoint,
+          endpoints,
+          widget.selectionDelegate,
+          widget.clipboardStatus,
+          renderEditable.lastSecondaryTapDownPosition,
+        );
+      } else {
+        toolbarContent = widget.contextMenuBuilder?.call(context) ??
+            controls?.buildToolbar(
               context,
               editingRegion,
               lineHeight,
@@ -247,23 +268,14 @@ class _SelectionOverlayWidgetState extends State<SelectionOverlayWidget> {
               widget.selectionDelegate,
               widget.clipboardStatus,
               renderEditable.lastSecondaryTapDownPosition,
-            );
-          }
+            ) ??
+            const SizedBox.shrink();
+      }
+    }
 
-          return widget.contextMenuBuilder?.call(context) ??
-              controls?.buildToolbar(
-                context,
-                editingRegion,
-                lineHeight,
-                midpoint,
-                endpoints,
-                widget.selectionDelegate,
-                widget.clipboardStatus,
-                renderEditable.lastSecondaryTapDownPosition,
-              ) ??
-              const SizedBox.shrink();
-        },
-      ),
+    return _SelectionToolbarWrapper(
+      isVisible: isVisible,
+      child: toolbarContent,
     );
   }
 
@@ -280,9 +292,6 @@ class _SelectionOverlayWidgetState extends State<SelectionOverlayWidget> {
     if (renderEditable == null || !hasVisibleElement) {
       return const SizedBox.shrink();
     }
-
-    // Synchronize secondary layout mechanics like magnifier positioning in step with geometry updates.
-    _syncMagnifierVisibility(renderEditable);
 
     final bool startInViewport = renderEditable.selectionStartInViewport.value;
     final bool endInViewport = renderEditable.selectionEndInViewport.value;
@@ -323,17 +332,19 @@ class _SelectionOverlayWidgetState extends State<SelectionOverlayWidget> {
             buildMagnifier: _buildMagnifier,
           );
 
-    return Stack(
-      children: <Widget>[
-        handlesLayer,
-        if (widget.toolbarVisible || widget.spellCheckToolbarVisible)
-          _buildToolbarWidget(
-            context: context,
-            layoutInfo: layoutInfo,
-            renderEditable: renderEditable,
-            isVisible: true,
-          ),
-      ],
+    return SizedBox.expand(
+      child: Stack(
+        children: <Widget>[
+          handlesLayer,
+          if (widget.toolbarVisible || widget.spellCheckToolbarVisible)
+            _buildToolbarWidget(
+              context: context,
+              layoutInfo: layoutInfo,
+              renderEditable: renderEditable,
+              isVisible: true,
+            ),
+        ],
+      ),
     );
   }
 
@@ -483,14 +494,14 @@ class _CollapsedSelectionOverlayState extends State<_CollapsedSelectionOverlay> 
       return const SizedBox.shrink();
     }
 
-    return TapRegion(
-      groupId: SelectableRegion,
-      child: TextFieldTapRegion(
-        child: ExcludeSemantics(
-          child: _SelectionHandleOverlay(
-            type: TextSelectionHandleType.collapsed,
-            handleLayerLink: widget.startHandleLayerLink,
-            onSelectionHandleTapped: widget.onSelectionHandleTapped,
+    return Stack(
+      children: <Widget>[
+        Positioned.fill(
+          child: ExcludeSemantics(
+            child: _SelectionHandleOverlay(
+              type: TextSelectionHandleType.collapsed,
+              handleLayerLink: widget.startHandleLayerLink,
+              onSelectionHandleTapped: widget.onSelectionHandleTapped,
             onSelectionHandleDragStart: _handleDragStart,
             onSelectionHandleDragUpdate: _handleDragUpdate,
             onSelectionHandleDragEnd: _handleDragEnd,
@@ -502,6 +513,7 @@ class _CollapsedSelectionOverlayState extends State<_CollapsedSelectionOverlay> 
           ),
         ),
       ),
+      ],
     );
   }
 }
@@ -862,16 +874,16 @@ class _RangeSelectionOverlayState extends State<_RangeSelectionOverlay> {
 
     return Stack(
       children: <Widget>[
-        TapRegion(
-          groupId: SelectableRegion,
-          child: TextFieldTapRegion(
-            child: ExcludeSemantics(
-              child: _SelectionHandleOverlay(
-                type: _startHandleType,
-                handleLayerLink: widget.startHandleLayerLink,
-                onSelectionHandleTapped: widget.onSelectionHandleTapped,
-                onSelectionHandleDragStart: _handleStartDragStart,
-                onSelectionHandleDragUpdate: _handleStartDragUpdate,
+        Positioned.fill(
+          child: Stack(
+            children: <Widget>[
+              ExcludeSemantics(
+                child: _SelectionHandleOverlay(
+                  type: _startHandleType,
+                  handleLayerLink: widget.startHandleLayerLink,
+                  onSelectionHandleTapped: widget.onSelectionHandleTapped,
+                  onSelectionHandleDragStart: _handleStartDragStart,
+                  onSelectionHandleDragUpdate: _handleStartDragUpdate,
                 onSelectionHandleDragEnd: _handleAnyDragEnd,
                 selectionControls: widget.selectionControls!,
                 handlesVisible: widget.showHandles,
@@ -880,26 +892,22 @@ class _RangeSelectionOverlayState extends State<_RangeSelectionOverlay> {
                 dragStartBehavior: widget.dragStartBehavior,
               ),
             ),
-          ),
-        ),
-        TapRegion(
-          groupId: SelectableRegion,
-          child: TextFieldTapRegion(
-            child: ExcludeSemantics(
-              child: _SelectionHandleOverlay(
-                type: _endHandleType,
-                handleLayerLink: widget.endHandleLayerLink,
-                onSelectionHandleTapped: widget.onSelectionHandleTapped,
-                onSelectionHandleDragStart: _handleEndDragStart,
-                onSelectionHandleDragUpdate: _handleEndDragUpdate,
-                onSelectionHandleDragEnd: _handleAnyDragEnd,
-                selectionControls: widget.selectionControls!,
-                handlesVisible: widget.showHandles,
-                inViewport: _renderEditable.selectionEndInViewport,
-                preferredLineHeight: _lineHeightAtEnd,
-                dragStartBehavior: widget.dragStartBehavior,
+              ExcludeSemantics(
+                child: _SelectionHandleOverlay(
+                  type: _endHandleType,
+                  handleLayerLink: widget.endHandleLayerLink,
+                  onSelectionHandleTapped: widget.onSelectionHandleTapped,
+                  onSelectionHandleDragStart: _handleEndDragStart,
+                  onSelectionHandleDragUpdate: _handleEndDragUpdate,
+                  onSelectionHandleDragEnd: _handleAnyDragEnd,
+                  selectionControls: widget.selectionControls!,
+                  handlesVisible: widget.showHandles,
+                  inViewport: _renderEditable.selectionEndInViewport,
+                  preferredLineHeight: _lineHeightAtEnd,
+                  dragStartBehavior: widget.dragStartBehavior,
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ],
@@ -1083,44 +1091,49 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
         child: SizedBox(
           width: interactiveRect.width,
           height: interactiveRect.height,
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: RawGestureDetector(
-              behavior: HitTestBehavior.translucent,
-              gestures: <Type, GestureRecognizerFactory>{
-                PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-                  () => PanGestureRecognizer(
-                    debugOwner: this,
-                    supportedDevices: <PointerDeviceKind>{
-                      PointerDeviceKind.touch,
-                      PointerDeviceKind.stylus,
-                      PointerDeviceKind.unknown,
-                    },
-                  ),
-                  (PanGestureRecognizer instance) {
-                    instance
-                      ..dragStartBehavior = widget.dragStartBehavior
-                      ..gestureSettings = eagerlyAcceptDragWhenCollapsed
-                          ? const DeviceGestureSettings(touchSlop: 1.0)
-                          : null
-                      ..onStart = widget.onSelectionHandleDragStart
-                      ..onUpdate = widget.onSelectionHandleDragUpdate
-                      ..onEnd = widget.onSelectionHandleDragEnd;
+          child: TapRegion(
+            groupId: SelectableRegion,
+            child: TextFieldTapRegion(
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: RawGestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  gestures: <Type, GestureRecognizerFactory>{
+                    PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+                      () => PanGestureRecognizer(
+                        debugOwner: this,
+                        supportedDevices: <PointerDeviceKind>{
+                          PointerDeviceKind.touch,
+                          PointerDeviceKind.stylus,
+                          PointerDeviceKind.unknown,
+                        },
+                      ),
+                      (PanGestureRecognizer instance) {
+                        instance
+                          ..dragStartBehavior = widget.dragStartBehavior
+                          ..gestureSettings = eagerlyAcceptDragWhenCollapsed
+                              ? const DeviceGestureSettings(touchSlop: 1.0)
+                              : null
+                          ..onStart = widget.onSelectionHandleDragStart
+                          ..onUpdate = widget.onSelectionHandleDragUpdate
+                          ..onEnd = widget.onSelectionHandleDragEnd;
+                      },
+                    ),
                   },
-                ),
-              },
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: padding.left,
-                  top: padding.top,
-                  right: padding.right,
-                  bottom: padding.bottom,
-                ),
-                child: widget.selectionControls.buildHandle(
-                  context,
-                  widget.type,
-                  widget.preferredLineHeight,
-                  widget.onSelectionHandleTapped,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: padding.left,
+                      top: padding.top,
+                      right: padding.right,
+                      bottom: padding.bottom,
+                    ),
+                    child: widget.selectionControls.buildHandle(
+                      context,
+                      widget.type,
+                      widget.preferredLineHeight,
+                      widget.onSelectionHandleTapped,
+                    ),
+                  ),
                 ),
               ),
             ),
