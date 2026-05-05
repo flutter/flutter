@@ -3283,6 +3283,59 @@ void main() {
     expect(textField.textInputAction, TextInputAction.previous);
   });
 
+  testWidgets('SearchAnchor.bar respects focusNode property', (WidgetTester tester) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor.bar(
+              focusNode: focusNode,
+              suggestionsBuilder: (context, controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.focusNode, focusNode);
+  });
+
+  testWidgets('SearchAnchor.bar focusNode can be used to control focus', (
+    WidgetTester tester,
+  ) async {
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchAnchor.bar(
+              focusNode: focusNode,
+              suggestionsBuilder: (context, controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isFalse);
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, isTrue);
+    focusNode.unfocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, isFalse);
+  });
+
   testWidgets('Block entering text on disabled widget', (WidgetTester tester) async {
     const initValue = 'init';
     final controller = TextEditingController(text: initValue);
