@@ -1912,6 +1912,68 @@ void main() {
       final SemanticsData semanticsData = node.getSemanticsData();
       expect(semanticsData.flagsCollection.isFocused, Tristate.none);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/186043.
+    testWidgets('mode toggle button exposes expanded/collapsed state', (WidgetTester tester) async {
+      final SemanticsHandle semantics = tester.ensureSemantics();
+
+      await prepareDatePicker(tester, (Future<DateTime?> date) async {
+        // The mode toggle button wraps the month/year title text. Its Semantics
+        // widget has label='Select year', button=true, and expanded reflects the
+        // current DatePickerMode (false=day/collapsed, true=year/expanded).
+        final Finder modeToggleTitle = find.text('January 2016');
+
+        // Initially in day mode — should report hasExpandedState=true, isExpanded=false.
+        expect(
+          tester.getSemantics(modeToggleTitle),
+          matchesSemantics(
+            label: 'Select year\nJanuary 2016',
+            isButton: true,
+            hasTapAction: true,
+            hasFocusAction: true,
+            isFocusable: true,
+            hasExpandedState: true,
+            isExpanded: false,
+          ),
+        );
+
+        // Tap the button to switch to year mode (expand).
+        await tester.tap(modeToggleTitle);
+        await tester.pumpAndSettle();
+
+        // Now in year mode — should report isExpanded=true.
+        expect(
+          tester.getSemantics(modeToggleTitle),
+          matchesSemantics(
+            label: 'Select year\nJanuary 2016',
+            isButton: true,
+            hasTapAction: true,
+            hasFocusAction: true,
+            isFocusable: true,
+            hasExpandedState: true,
+            isExpanded: true,
+          ),
+        );
+
+        // Tap again to collapse back to day mode.
+        await tester.tap(modeToggleTitle);
+        await tester.pumpAndSettle();
+
+        expect(
+          tester.getSemantics(modeToggleTitle),
+          matchesSemantics(
+            label: 'Select year\nJanuary 2016',
+            isButton: true,
+            hasTapAction: true,
+            hasFocusAction: true,
+            isFocusable: true,
+            hasExpandedState: true,
+            isExpanded: false,
+          ),
+        );
+      });
+      semantics.dispose();
+    });
   });
 
   group('Keyboard navigation', () {
