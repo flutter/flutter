@@ -272,6 +272,8 @@ void InternalFlutterWindows_WindowManager_UpdateTooltipPosition(HWND hwnd) {
     flutter::HostWindowTooltip* tooltip_window =
         reinterpret_cast<flutter::HostWindowTooltip*>(window);
     tooltip_window->UpdatePosition();
+  } else {
+    FML_LOG(WARNING) << "UpdateTooltipPosition: no host window for handle";
   }
 }
 
@@ -282,5 +284,7 @@ void InternalFlutterWindows_WindowManager_UpdatePopupPosition(HWND hwnd) {
     flutter::HostWindowPopup* popup_window =
         reinterpret_cast<flutter::HostWindowPopup*>(window);
     popup_window->UpdatePosition();
+  } else {
+    FML_LOG(WARNING) << "UpdatePopupPosition: no host window for handle";
   }
 }
