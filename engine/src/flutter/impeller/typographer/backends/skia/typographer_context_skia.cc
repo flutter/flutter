@@ -72,10 +72,27 @@ SkPaint::Join ToSkiaJoin(Join join) {
   FML_UNREACHABLE();
 }
 
-// Create an A8 bitmap from an existing bitmap.
+bool HasLightGlyphs(const GlyphAtlas& atlas,
+                    const std::vector<FontGlyphPair>& new_pairs,
+                    size_t start_index,
+                    size_t end_index) {
+  if (atlas.GetType() != GlyphAtlas::Type::kAlphaBitmap) {
+    return false;
+  }
+  for (size_t i = start_index; i < end_index; i++) {
+    if (new_pairs[i].glyph.properties.is_light) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Create an A8 bitmap from an color bitmap.
 //
 // Returns an empty optional if the bitmap cannot be created.
 std::optional<SkBitmap> ToA8Bitmap(const SkBitmap& src) {
+  FML_DCHECK(src.colorType() == kRGBA_8888_SkColorType);
+
   SkBitmap a8_bitmap;
   a8_bitmap.setInfo(SkImageInfo::MakeA8(src.width(), src.height()));
   if (!a8_bitmap.tryAllocPixels()) {
@@ -86,6 +103,7 @@ std::optional<SkBitmap> ToA8Bitmap(const SkBitmap& src) {
   }
   return a8_bitmap;
 }
+
 }  // namespace
 
 std::shared_ptr<TypographerContext> TypographerContextSkia::Make() {
@@ -289,15 +307,8 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
                                   size_t end_index) {
   TRACE_EVENT0("impeller", __FUNCTION__);
 
-  bool has_light_glyphs = false;
-  if (atlas.GetType() == GlyphAtlas::Type::kAlphaBitmap) {
-    for (size_t i = start_index; i < end_index; i++) {
-      if (new_pairs[i].glyph.properties.is_light) {
-        has_light_glyphs = true;
-        break;
-      }
-    }
-  }
+  bool has_light_glyphs =
+      HasLightGlyphs(atlas, new_pairs, start_index, end_index);
 
   SkBitmap bitmap;
   bitmap.setInfo(TypographerContextSkia::GetImageInfo(
