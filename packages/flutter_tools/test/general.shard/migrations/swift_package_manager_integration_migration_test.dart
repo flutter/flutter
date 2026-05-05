@@ -4566,11 +4566,10 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   bool prefetchSwiftPackagesCalled = false;
 
   @override
-  Future<void> prefetchSwiftPackages(
-    String projectPath, {
+  Future<void> prefetchSwiftPackagesForProject(
+    XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
     bool quiet = false,
-    bool force = false,
     bool waitForCompletion = false,
   }) async {
     prefetchSwiftPackagesCalled = true;
@@ -4581,7 +4580,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<XcodeProjectInfo?> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
   }) async {

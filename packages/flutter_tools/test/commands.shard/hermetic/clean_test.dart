@@ -434,7 +434,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<XcodeProjectInfo> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
   }) async {
@@ -448,6 +448,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<void> cleanWorkspace(
+    XcodeBasedProject xcodeProject,
     String workspacePath,
     String scheme, {
     required Directory buildDirectory,

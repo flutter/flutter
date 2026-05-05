@@ -303,7 +303,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final List<String> xcodebuildCommandArgs = await globals.xcode!
       .fetchDependenciesAndGenerateXcodebuildArgs(
-        app.project.hostAppRoot.path,
+        app.project,
         globals.fs.directory(buildDirectoryPath),
         skipPackageUpdatesAndValidation: false,
       );

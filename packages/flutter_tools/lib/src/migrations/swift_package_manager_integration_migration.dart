@@ -192,8 +192,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       if (isSchemeMigrated && isPbxprojMigrated && isOptionalFilesMigrated) {
         return;
       }
-
-      migrationStatus = logger.startProgress('Adding Swift Package Manager integration...');
+      logger.printStatus('Adding Swift Package Manager integration...');
+      migrationStatus = logger.startSpinner();
 
       if (isSchemeMigrated) {
         logger.printTrace('${schemeInfo.schemeFile.basename} already migrated. Skipping...');
@@ -230,21 +230,22 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       try {
         // When migrating for the first time, this will be the first time packages are downloaded
         // and may take a while.
-        await _xcodeProjectInterpreter.prefetchSwiftPackages(
-          _xcodeProject.hostAppRoot.path,
+        migrationStatus.stop();
+        await _xcodeProjectInterpreter.prefetchSwiftPackagesForProject(
+          _xcodeProject,
           buildDirectory: _fileSystem.directory(
             _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
           ),
           quiet: false,
-          force: true,
         );
+        migrationStatus.start();
       } on Exception catch (e) {
         throw _PrefetchSwiftPackageException(e.toString());
       }
 
       // Get the project info to make sure it compiles with xcodebuild
       await _xcodeProjectInterpreter.getInfo(
-        _xcodeProject.hostAppRoot.path,
+        _xcodeProject,
         buildDirectory: _fileSystem.directory(
           _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
         ),
@@ -252,9 +253,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     } on _PrefetchSwiftPackageException catch (e) {
       restoreFromBackup(schemeInfo);
       throwToolExit(
-          'An error occurred when adding Swift Package Manager integration:\n'
-          '  ${e.message}\n\n'
-          '$kDisableSwiftPMInstructions'
+        'An error occurred when adding Swift Package Manager integration:\n'
+        '  ${e.message}\n\n'
+        '$kDisableSwiftPMInstructions',
       );
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);

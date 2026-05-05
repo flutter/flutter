@@ -76,14 +76,16 @@ class DarwinDependencyManagement {
     if (xcodeProject.usesSwiftPackageManager) {
       await _swiftPackageManager.generatePluginsSwiftPackage(_plugins, platform, xcodeProject);
 
-      // Start the SwiftPM dependency resolution in the background.
-      await _xcodeProjectInterpreter?.prefetchSwiftPackages(
-        xcodeProject.hostAppRoot.path,
-        waitForCompletion: false,
-        buildDirectory: _fileSystem.directory(
-          platform.buildDirectory(config: _config, fileSystem: _fileSystem),
-        ),
-      );
+      if (_hostPlatform.isMacOS && xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
+        // Start the SwiftPM dependency resolution in the background.
+        await _xcodeProjectInterpreter?.prefetchSwiftPackagesForProject(
+          xcodeProject,
+          buildDirectory: _fileSystem.directory(
+            platform.buildDirectory(config: _config, fileSystem: _fileSystem),
+          ),
+          waitForCompletion: false,
+        );
+      }
     } else if (xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
       // If Swift Package Manager is not enabled but the project is already
       // integrated for Swift Package Manager, pass no plugins to the generator.
