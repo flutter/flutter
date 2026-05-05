@@ -464,33 +464,27 @@ void main() {
     );
   });
 
-  testWidgets(
-    'SemanticsDebugger ignores duplicated label and tooltip for Android',
-    (WidgetTester tester) async {
-      final Key child = UniqueKey();
-      final Key debugger = UniqueKey();
-      final isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: SemanticsDebugger(
-            key: debugger,
-            child: Semantics(container: true, key: child, label: 'text', tooltip: 'text'),
-          ),
+  testWidgets('SemanticsDebugger ignores duplicated label and tooltip for Android', (
+    WidgetTester tester,
+  ) async {
+    final Key child = UniqueKey();
+    final Key debugger = UniqueKey();
+    final isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SemanticsDebugger(
+          key: debugger,
+          child: Semantics(container: true, key: child, label: 'text', tooltip: 'text'),
         ),
-      );
+      ),
+    );
 
-      expect(
-        _getMessageShownInSemanticsDebugger(
-          widgetKey: child,
-          debuggerKey: debugger,
-          tester: tester,
-        ),
-        isPlatformAndroid ? 'text' : 'text\ntext',
-      );
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    expect(
+      _getMessageShownInSemanticsDebugger(widgetKey: child, debuggerKey: debugger, tester: tester),
+      isPlatformAndroid ? 'text' : 'text\ntext',
+    );
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('SemanticsDebugger textfield', (WidgetTester tester) async {
     final textField = UniqueKey();
