@@ -295,7 +295,7 @@ void main() {
             '-skipPackagePluginValidation',
             '-skipPackageSignatureValidation',
             '-project',
-            '/',
+            '/Runner.xcodeproj',
             '-scheme',
             'Free',
             '-destination',

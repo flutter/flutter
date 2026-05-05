@@ -620,7 +620,7 @@ Resolved source packages:
       ]);
       final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
 
-      final iosProject = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
       await iosProject.prefetchSwiftPackages(
         xcodebuildProjectCommandArguments: [
           'xcrun',
@@ -678,7 +678,7 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
     ]);
     final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
 
-    final iosProject = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+    final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
     await iosProject.prefetchSwiftPackages(
       xcodebuildProjectCommandArguments: [
         'xcrun',
@@ -724,7 +724,7 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
       ]);
       final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
 
-      final iosProject = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
       await iosProject.prefetchSwiftPackages(
         xcodebuildProjectCommandArguments: [
           'xcrun',
@@ -769,7 +769,7 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
     ]);
     final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
 
-    final iosProject = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+    final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
     await iosProject.prefetchSwiftPackages(
       xcodebuildProjectCommandArguments: [
         'xcrun',
@@ -847,7 +847,7 @@ Resolved source packages:
     ]);
     final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
 
-    final iosProject = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+    final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
     await iosProject.prefetchSwiftPackages(
       xcodebuildProjectCommandArguments: [
         'xcrun',
@@ -919,7 +919,7 @@ Resolved source packages:
       ]);
       final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
 
-      final iosProject = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
       await iosProject.prefetchSwiftPackages(
         xcodebuildProjectCommandArguments: [
           'xcrun',
@@ -969,7 +969,7 @@ Resolved source packages:
     ]);
     final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
 
-    final iosProject = IosProjectWithFakePlugins.fromFlutter(FakeFlutterProject(fileSystem: fs));
+    final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
     await expectLater(
       iosProject.prefetchSwiftPackages(
         xcodebuildProjectCommandArguments: [
@@ -1015,7 +1015,7 @@ Resolved source packages:
     ]);
     final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
 
-    final iosProject = IosProjectWithFakePlugins.fromFlutter(FakeFlutterProject(fileSystem: fs));
+    final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
     iosProject.plugins.add(FakePlugin('plugin_a'));
     await expectLater(
       iosProject.prefetchSwiftPackages(
@@ -1032,6 +1032,54 @@ Resolved source packages:
         message: 'Flutter plugin "plugin_a" has an incorrectly configured Package.swift file.',
       ),
     );
+  });
+
+  testWithoutContext('prefetchSwiftPackages skips if SwiftPM not enabled', () async {
+    final fs = MemoryFileSystem.test();
+    final testLogger = BufferLogger.test();
+    const projectPath = 'path/to/project';
+    final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+    final fakeProcessManager = FakeProcessManager.empty();
+    final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
+
+    final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+    iosProject.usesSwiftPackageManager = false;
+    await iosProject.prefetchSwiftPackages(
+      xcodebuildProjectCommandArguments: [
+        'xcrun',
+        'xcodebuild',
+        '-clonedSourcePackagesDirPath',
+        '/${buildDirectory.path}/SourcePackages',
+      ],
+      processUtils: processUtils,
+      logger: testLogger,
+      quiet: false,
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  });
+
+  testWithoutContext('prefetchSwiftPackages skips if not migrated to SwiftPM yet', () async {
+    final fs = MemoryFileSystem.test();
+    final testLogger = BufferLogger.test();
+    const projectPath = 'path/to/project';
+    final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+    final fakeProcessManager = FakeProcessManager.empty();
+    final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
+
+    final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+    iosProject.flutterPluginSwiftPackageInProjectSettings = false;
+    await iosProject.prefetchSwiftPackages(
+      xcodebuildProjectCommandArguments: [
+        'xcrun',
+        'xcodebuild',
+        '-clonedSourcePackagesDirPath',
+        '/${buildDirectory.path}/SourcePackages',
+      ],
+      processUtils: processUtils,
+      logger: testLogger,
+      quiet: false,
+    );
+    expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
   testWithoutContext('prefetchSwiftPackages can run for both platforms', () async {
@@ -1084,7 +1132,7 @@ Resolved source packages:
     ]);
     final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
 
-    final iosProject = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+    final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
     await iosProject.prefetchSwiftPackages(
       xcodebuildProjectCommandArguments: [
         'xcrun',
@@ -1097,7 +1145,7 @@ Resolved source packages:
       quiet: false,
     );
 
-    final macosProject = MacOSProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+    final macosProject = FakeMacOSProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
     await macosProject.prefetchSwiftPackages(
       xcodebuildProjectCommandArguments: [
         'xcrun',
@@ -1193,10 +1241,33 @@ class FakeCache extends Fake implements Cache {
   }
 }
 
-class IosProjectWithFakePlugins extends IosProject {
-  IosProjectWithFakePlugins.fromFlutter(super.parent) : super.fromFlutter();
+class FakeIosProject extends IosProject {
+  FakeIosProject.fromFlutter(super.parent) : super.fromFlutter();
 
   final List<Plugin> plugins = <Plugin>[];
+
+  @override
+  bool usesSwiftPackageManager = true;
+
+  @override
+  bool flutterPluginSwiftPackageInProjectSettings = true;
+
+  @override
+  Future<List<Plugin>> getPlugins() async {
+    return plugins;
+  }
+}
+
+class FakeMacOSProject extends MacOSProject {
+  FakeMacOSProject.fromFlutter(super.parent) : super.fromFlutter();
+
+  final List<Plugin> plugins = <Plugin>[];
+
+  @override
+  bool usesSwiftPackageManager = true;
+
+  @override
+  bool flutterPluginSwiftPackageInProjectSettings = true;
 
   @override
   Future<List<Plugin>> getPlugins() async {

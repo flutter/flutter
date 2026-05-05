@@ -254,7 +254,7 @@ class XcodeProjectInterpreter {
       xcodeProject,
       _fileSystem.directory(buildDir),
     );
-    final String projectPath = xcodeProject.hostAppRoot.path;
+    final String projectPath = xcodeProject.xcodeProject.path;
     final showBuildSettingsCommand = <String>[
       ...xcodebuildCommandArgs,
       '-project',
