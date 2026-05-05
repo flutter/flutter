@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Version: 34.1.9
+// Version: 34.1.18
 
 import 'shape_struct.dart';
 
@@ -16,14 +16,8 @@ class TokenExtendedFabLarge {
     bottomRight: 28.00,
   );
 
-  /// md.comp.extended-fab.large.trailing-space
-  static const double trailingSpace = 28.00;
-
   /// md.comp.extended-fab.large.leading-space
   static const double leadingSpace = 28.00;
-
-  /// md.comp.extended-fab.large.container.height
-  static const double containerHeight = 96.00;
 
   /// md.comp.extended-fab.large.label-text
   static const double labelTextFontSize = 24.00;
@@ -42,6 +36,12 @@ class TokenExtendedFabLarge {
 
   /// md.comp.extended-fab.large.icon-label-space
   static const double iconLabelSpace = 16.00;
+
+  /// md.comp.extended-fab.large.trailing-space
+  static const double trailingSpace = 28.00;
+
+  /// md.comp.extended-fab.large.container.height
+  static const double containerHeight = 96.00;
 
   /// md.comp.extended-fab.large.icon.size
   static const double iconSize = 36.00;

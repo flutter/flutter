@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Version: 34.1.9
+// Version: 34.1.18
 
 class TokenTypefaceVariable {
-  /// md.ref.typeface.brand
-  static const String brand = 'Roboto Flex';
-
   /// md.ref.typeface.plain
   static const String plain = 'Roboto Flex';
+
+  /// md.ref.typeface.brand
+  static const String brand = 'Roboto Flex';
 }

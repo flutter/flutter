@@ -2,14 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Version: 34.1.9
+// Version: 34.1.18
 
 import 'shape_struct.dart';
 
 class TokenFabSmall {
-  /// md.comp.fab.small.container.height
-  static const double containerHeight = 40.00;
-
   /// md.comp.fab.small.container.shape
   static const ShapeStruct containerShape = ShapeStruct(
     family: 'SHAPE_FAMILY_ROUNDED_CORNERS',
@@ -24,4 +21,7 @@ class TokenFabSmall {
 
   /// md.comp.fab.small.container.width
   static const double containerWidth = 40.00;
+
+  /// md.comp.fab.small.container.height
+  static const double containerHeight = 40.00;
 }

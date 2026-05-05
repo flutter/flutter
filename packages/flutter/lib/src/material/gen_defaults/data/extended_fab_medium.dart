@@ -2,26 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Version: 34.1.9
+// Version: 34.1.18
 
 import 'shape_struct.dart';
 
 class TokenExtendedFabMedium {
-  /// md.comp.extended-fab.medium.icon-label-space
-  static const double iconLabelSpace = 12.00;
-
-  /// md.comp.extended-fab.medium.icon.size
-  static const double iconSize = 28.00;
-
-  /// md.comp.extended-fab.medium.trailing-space
-  static const double trailingSpace = 26.00;
-
-  /// md.comp.extended-fab.medium.container.height
-  static const double containerHeight = 80.00;
-
-  /// md.comp.extended-fab.medium.leading-space
-  static const double leadingSpace = 26.00;
-
   /// md.comp.extended-fab.medium.label-text
   static const double labelTextFontSize = 22.00;
 
@@ -45,4 +30,19 @@ class TokenExtendedFabMedium {
     bottomLeft: 20.00,
     bottomRight: 20.00,
   );
+
+  /// md.comp.extended-fab.medium.icon-label-space
+  static const double iconLabelSpace = 12.00;
+
+  /// md.comp.extended-fab.medium.icon.size
+  static const double iconSize = 28.00;
+
+  /// md.comp.extended-fab.medium.container.height
+  static const double containerHeight = 80.00;
+
+  /// md.comp.extended-fab.medium.leading-space
+  static const double leadingSpace = 26.00;
+
+  /// md.comp.extended-fab.medium.trailing-space
+  static const double trailingSpace = 26.00;
 }

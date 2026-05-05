@@ -2,16 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Version: 34.1.9
+// Version: 34.1.18
 
 import 'shape_struct.dart';
 
 class TokenButtonGroupConnectedXsmall {
-  /// md.comp.button-group.connected.xsmall.pressed.inner-corner.corner-size
-  static const double pressedInnerCornerCornerSize = 4.00;
-
   /// md.comp.button-group.connected.xsmall.inner-corner.corner-size
   static const double innerCornerCornerSize = 8.00;
+
+  /// md.comp.button-group.connected.xsmall.pressed.inner-corner.corner-size
+  static const double pressedInnerCornerCornerSize = 4.00;
 
   /// md.comp.button-group.connected.xsmall.between-space
   static const double betweenSpace = 2.00;

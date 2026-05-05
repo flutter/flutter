@@ -2,21 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Version: 34.1.9
+// Version: 34.1.18
 
 import 'color_role.dart';
 import 'shape_struct.dart';
 
 class TokenBottomAppBar {
-  /// md.comp.bottom-app-bar.container.elevation
-  static const double containerElevation = 3.00;
-
-  /// md.comp.bottom-app-bar.container.height
-  static const double containerHeight = 80.00;
-
-  /// md.comp.bottom-app-bar.container.color
-  static const TokenColorRole containerColor = TokenColorRole.surfaceContainer;
-
   /// md.comp.bottom-app-bar.container.shape
   static const ShapeStruct containerShape = ShapeStruct(
     family: 'SHAPE_FAMILY_ROUNDED_CORNERS',
@@ -25,4 +16,13 @@ class TokenBottomAppBar {
     bottomLeft: 0.00,
     bottomRight: 0.00,
   );
+
+  /// md.comp.bottom-app-bar.container.height
+  static const double containerHeight = 80.00;
+
+  /// md.comp.bottom-app-bar.container.elevation
+  static const double containerElevation = 3.00;
+
+  /// md.comp.bottom-app-bar.container.color
+  static const TokenColorRole containerColor = TokenColorRole.surfaceContainer;
 }
