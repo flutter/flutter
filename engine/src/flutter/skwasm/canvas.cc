@@ -360,15 +360,15 @@ SKWASM_EXPORT void canvas_drawAtlas(flutter::DisplayListBuilder* canvas,
                                     int sprite_count,
                                     flutter::DlBlendMode mode,
                                     flutter::DlRect* cull_rect,
-                                    flutter::DlPaint* paint) {
+                                    flutter::DlPaint* paint,
+                                    Skwasm::FilterQuality quality) {
   std::vector<flutter::DlColor> dl_colors(sprite_count);
   for (int i = 0; i < sprite_count; i++) {
     dl_colors[i] = flutter::DlColor(colors[i]);
   }
   canvas->DrawAtlas(
       sk_ref_sp(atlas), transforms, rects, dl_colors.data(), sprite_count, mode,
-      Skwasm::SamplingOptionsForQuality(Skwasm::FilterQuality::medium),
-      cull_rect, paint);
+      Skwasm::SamplingOptionsForQuality(quality), cull_rect, paint);
 }
 
 SKWASM_EXPORT void canvas_getTransform(flutter::DisplayListBuilder* canvas,
