@@ -7,13 +7,16 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class DrawerUseCase extends UseCase {
-  DrawerUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  DrawerUseCase();
 
   @override
   String get name => 'drawer';
 
   @override
   String get route => '/drawer';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const DrawerExample();
@@ -34,10 +37,7 @@ class _DrawerExampleState extends State<DrawerExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       endDrawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,

@@ -9,10 +9,12 @@
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/command_buffer_gles.h"
 #include "impeller/renderer/backend/gles/context_gles.h"
+#include "impeller/renderer/backend/gles/pipeline_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
 #include "impeller/renderer/backend/gles/texture_gles.h"
+#include "impeller/renderer/backend/gles/unique_handle_gles.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
@@ -214,6 +216,138 @@ TEST(RenderPassGLESTest, ResolvingMultisampleTextureCachesResolveFBO) {
     ASSERT_TRUE(render_pass2->EncodeCommands());
     ASSERT_TRUE(reactor->React());
   }
+}
+
+class RenderPassGLESViewportTest : public ::testing::Test {
+ protected:
+  struct RenderPassGLESContext {
+    std::shared_ptr<MockGLES> mock_gl;
+    testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref;
+    std::shared_ptr<ContextGLES> context;
+    std::shared_ptr<MockWorker> dummy_worker;
+    std::shared_ptr<ReactorGLES> reactor;
+    std::shared_ptr<CommandBuffer> command_buffer;
+    std::shared_ptr<RenderPass> render_pass;
+    std::shared_ptr<PipelineGLES> pipeline;
+  };
+
+  RenderPassGLESContext CreateRenderPassGLESContext() {
+    std::unique_ptr<NiceMock<MockGLESImpl>> mock_gl_impl =
+        std::make_unique<NiceMock<MockGLESImpl>>();
+    testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = *mock_gl_impl;
+    std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gl_impl));
+
+    std::shared_ptr<ContextGLES> context = CreateFakeGLESContext();
+    std::shared_ptr<MockWorker> dummy_worker = std::make_shared<MockWorker>();
+    context->AddReactorWorker(dummy_worker);
+    std::shared_ptr<ReactorGLES> reactor = context->GetReactor();
+
+    TextureDescriptor tex_desc;
+    tex_desc.size = {100, 100};
+    tex_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+    auto texture = std::make_shared<TextureGLES>(reactor, tex_desc, false);
+
+    RenderTarget target;
+    ColorAttachment color0;
+    color0.texture = texture;
+    color0.store_action = StoreAction::kDontCare;
+    color0.load_action = LoadAction::kClear;
+    target.SetColorAttachment(color0, 0);
+
+    std::shared_ptr<CommandBuffer> command_buffer =
+        std::static_pointer_cast<Context>(context)->CreateCommandBuffer();
+    std::shared_ptr<RenderPass> render_pass =
+        command_buffer->CreateRenderPass(target);
+
+    EXPECT_CALL(mock_gl_impl_ref, CheckFramebufferStatus(_))
+        .WillRepeatedly(Return(GL_FRAMEBUFFER_COMPLETE));
+
+    PipelineDescriptor desc;
+    ColorAttachmentDescriptor color0_desc;
+    color0_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+    desc.SetColorAttachmentDescriptor(0, color0_desc);
+
+    HandleGLES pipeline_handle = reactor->CreateHandle(HandleType::kProgram);
+    std::shared_ptr<PipelineGLES> pipeline =
+        std::shared_ptr<PipelineGLES>(new PipelineGLES(
+            reactor, std::weak_ptr<PipelineLibrary>(), desc,
+            std::make_shared<UniqueHandleGLES>(reactor, pipeline_handle)));
+    pipeline->buffer_bindings_ = std::make_unique<BufferBindingsGLES>();
+
+    return {std::move(mock_gl),     mock_gl_impl_ref,
+            std::move(context),     std::move(dummy_worker),
+            std::move(reactor),     std::move(command_buffer),
+            std::move(render_pass), std::move(pipeline)};
+  }
+};
+
+TEST_F(RenderPassGLESViewportTest, ViewportCachedAcrossCommands) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(1);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(1);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  render_pass->SetViewport(
+      Viewport{Rect::MakeXYWH(0, 0, 50, 50), DepthRange{0.0f, 1.0f}});
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(1);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  render_pass->SetViewport(
+      Viewport{Rect::MakeXYWH(0, 0, 50, 50), DepthRange{0.0f, 1.0f}});
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  // Viewport should only be called twice. Once for the fallback, once for the
+  // first override. We set a catch-all to 0 to ensure no other calls occur.
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(_, _, _, _)).Times(0);
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 100, 100)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 50, 50, 50)).Times(1);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
+TEST_F(RenderPassGLESViewportTest,
+       CommandsWithoutViewportGetRenderPassViewport) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(1);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(1);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  render_pass->SetViewport(
+      Viewport{Rect::MakeXYWH(0, 0, 50, 50), DepthRange{0.0f, 1.0f}});
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(1);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(_, _, _, _)).Times(0);
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 100, 100)).Times(2);
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 50, 50, 50)).Times(1);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
 }
 
 }  // namespace testing

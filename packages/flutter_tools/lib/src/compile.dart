@@ -391,7 +391,8 @@ class KernelCompiler {
     _logger.printTrace(command.join(' '));
     final Process server = await _processManager.start(command);
 
-    server.stderr.transform<String>(utf8.decoder).listen(_logger.printError);
+    // Use permissive decoder for compiler stderr which may contain invalid UTF-8
+    server.stderr.transform<String>(utf8AllowMalformed.decoder).listen(_logger.printError);
     server.stdout.transform(utf8LineDecoder).listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
@@ -991,14 +992,16 @@ class DefaultResidentCompiler implements ResidentCompiler {
           onDone: () {
             // when outputFilename future is not completed, but stdout is closed
             // process has died unexpectedly.
-            if (_stdoutHandler.compilerOutput?.isCompleted == false) {
+            if (_stdoutHandler.compilerOutput?.isCompleted == false &&
+                !_shutdownHooks.isShuttingDown) {
               _stdoutHandler.compilerOutput?.complete();
               throwToolExit('The Dart compiler exited unexpectedly.');
             }
           },
         );
 
-    _server?.stderr.transform(utf8LineDecoder).listen(_logger.printError);
+    // Use permissive decoder for compiler stderr which may contain invalid UTF-8
+    _server?.stderr.transform(utf8AllowMalformedLineDecoder).listen(_logger.printError);
 
     unawaited(
       _server?.exitCode.then((int code) {

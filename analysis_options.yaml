@@ -55,7 +55,8 @@ linter:
     - avoid_equals_and_hash_code_on_mutable_classes
     - avoid_escaping_inner_quotes
     - avoid_field_initializers_in_const_classes
-    # - avoid_final_parameters # incompatible with prefer_final_parameters
+    # TODO(kallentu): Remove this lint once the Dart SDK in Flutter is on version 3.13.
+    - avoid_final_parameters
     - avoid_function_literals_in_foreach_calls
     # - avoid_futureor_void # not yet tested
     # - avoid_implementing_value_types # see https://github.com/dart-lang/linter/issues/4558
@@ -267,4 +268,6 @@ linter:
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
     - use_truncating_division
     - valid_regexps
+    # TODO(kallentu): Remove this lint once the Dart SDK in Flutter is on version 3.13.
+    - var_with_no_type_annotation
     - void_checks
