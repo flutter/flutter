@@ -1636,6 +1636,62 @@ class FlutterPluginUtilsTest {
     }
 
     @Test
+    fun `forceNdkDownload installs required NDK version when missing`() {
+        val project = mockk<Project>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        val mockExecSpec = mockk<org.gradle.process.ExecSpec>()
+        val projectActionSlot = slot<Action<Project>>()
+        val mockLogger = mockk<Logger>(relaxed = true)
+
+        every { project.findProperty("flutter.sdkManagerPath") } returns "/path/to/sdkmanager"
+        every { project.findProperty("flutter.installedNdkVersions") } returns "25.0.0,26.0.0"
+        every { project.afterEvaluate(capture(projectActionSlot)) } returns Unit
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { mockBaseExtension.ndkVersion } returns "27.0.0"
+        every { project.logger } returns mockLogger
+        every { project.exec(any<Action<org.gradle.process.ExecSpec>>()) } answers {
+            val action = it.invocation.args[0] as Action<org.gradle.process.ExecSpec>
+            action.execute(mockExecSpec)
+            mockk<org.gradle.process.ExecResult>()
+        }
+        every { mockExecSpec.commandLine(any<String>(), any<String>(), any<String>()) } returns mockExecSpec
+
+        FlutterPluginUtils.forceNdkDownload(project, "ignored")
+
+        verify { project.afterEvaluate(capture(projectActionSlot)) }
+        projectActionSlot.captured.execute(project)
+
+        verify(exactly = 1) {
+            mockLogger.lifecycle("Ensuring Android NDK '27.0.0' is installed...")
+        }
+        verify(exactly = 1) {
+            mockExecSpec.commandLine("/path/to/sdkmanager", "--install", "ndk;27.0.0")
+        }
+    }
+
+    @Test
+    fun `forceNdkDownload skips NDK installation when required version is already installed`() {
+        val project = mockk<Project>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        val projectActionSlot = slot<Action<Project>>()
+
+        every { project.findProperty("flutter.sdkManagerPath") } returns "/path/to/sdkmanager"
+        every { project.findProperty("flutter.installedNdkVersions") } returns "25.0.0,27.0.0"
+        every { project.afterEvaluate(capture(projectActionSlot)) } returns Unit
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { mockBaseExtension.ndkVersion } returns "27.0.0"
+
+        FlutterPluginUtils.forceNdkDownload(project, "ignored")
+
+        verify { project.afterEvaluate(capture(projectActionSlot)) }
+        projectActionSlot.captured.execute(project)
+
+        verify(exactly = 0) {
+            project.exec(any<Action<org.gradle.process.ExecSpec>>())
+        }
+    }
+
+    @Test
     fun `forceNdkDownload sets externalNativeBuild properties`() {
         val project = mockk<Project>()
         val mockCmakeOptions = mockk<CmakeOptions>()

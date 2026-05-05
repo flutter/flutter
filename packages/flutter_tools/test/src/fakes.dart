@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
 import 'package:dds/dds_launcher.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
@@ -782,6 +783,18 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   AndroidSdkVersion? latestVersion;
+
+  @override
+  String? get sdkManagerPath => null;
+
+  @override
+  bool get cmdlineToolsAvailable => true;
+
+  @override
+  String? getCmdlineToolsPath(String binaryName, {bool skipOldTools = false}) => binaryName;
+
+  @override
+  Directory get directory => MemoryFileSystem.test().directory('/');
 }
 
 class FakeAndroidStudio extends Fake implements AndroidStudio {

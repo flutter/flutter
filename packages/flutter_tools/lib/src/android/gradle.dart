@@ -166,6 +166,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required GradleUtils gradleUtils,
     required Platform platform,
     required AndroidStudio? androidStudio,
+    required AndroidSdk? androidSdk,
   }) : _java = java,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -173,10 +174,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _analytics = analytics,
        _gradleUtils = gradleUtils,
        _androidStudio = androidStudio,
+       _androidSdk = androidSdk,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final Java? _java;
+  final AndroidSdk? _androidSdk;
   final Logger _logger;
   final ProcessUtils _processUtils;
   final FileSystem _fileSystem;
@@ -570,7 +573,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       options.add('-Psplit-per-abi=true');
     }
 
-    final AndroidSdk? androidSdk = globals.androidSdk;
+    final AndroidSdk? androidSdk = _androidSdk;
     if (androidSdk != null && androidSdk.directory.existsSync()) {
       final String? sdkManagerPath = androidSdk.sdkManagerPath;
       if (sdkManagerPath != null &&
@@ -693,19 +696,19 @@ class AndroidGradleBuilder implements AndroidBuilder {
     String aabPath,
     Iterable<AndroidArch> targetArchs,
   ) async {
-    if (globals.androidSdk == null) {
+    if (_androidSdk == null) {
       _logger.printTrace(
         'Failed to find android sdk when checking final appbundle for debug symbols.',
       );
       return false;
     }
-    if (!globals.androidSdk!.cmdlineToolsAvailable) {
+    if (!_androidSdk.cmdlineToolsAvailable) {
       _logger.printTrace(
         'Failed to find cmdline-tools when checking final appbundle for debug symbols.',
       );
       return false;
     }
-    final String? apkAnalyzerPath = globals.androidSdk!.getCmdlineToolsPath(apkAnalyzerBinaryName);
+    final String? apkAnalyzerPath = _androidSdk.getCmdlineToolsPath(apkAnalyzerBinaryName);
     if (apkAnalyzerPath == null) {
       _logger.printTrace(
         'Failed to find apkanalyzer when checking final appbundle for debug symbols.',

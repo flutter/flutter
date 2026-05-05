@@ -102,6 +102,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         gradleUtils: globals.gradleUtils!,
         platform: globals.platform,
         androidStudio: globals.androidStudio,
+        androidSdk: globals.androidSdk,
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         platform: globals.platform,
