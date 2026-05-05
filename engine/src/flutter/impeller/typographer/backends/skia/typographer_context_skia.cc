@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -69,6 +70,21 @@ SkPaint::Join ToSkiaJoin(Join join) {
       return SkPaint::Join::kBevel_Join;
   }
   FML_UNREACHABLE();
+}
+
+// Create an A8 bitmap from an existing bitmap.
+//
+// Returns an empty optional if the bitmap cannot be created.
+std::optional<SkBitmap> ToA8Bitmap(const SkBitmap& src) {
+  SkBitmap a8_bitmap;
+  a8_bitmap.setInfo(SkImageInfo::MakeA8(src.width(), src.height()));
+  if (!a8_bitmap.tryAllocPixels()) {
+    return std::nullopt;
+  }
+  if (!src.readPixels(a8_bitmap.pixmap())) {
+    return std::nullopt;
+  }
+  return a8_bitmap;
 }
 }  // namespace
 
@@ -317,11 +333,11 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
   }
 
   if (has_light_glyphs) {
-    SkBitmap a8_bitmap;
-    if (!bitmap.extractAlpha(&a8_bitmap)) {
+    auto a8_bitmap = ToA8Bitmap(bitmap);
+    if (!a8_bitmap.has_value()) {
       return false;
     }
-    bitmap = a8_bitmap;
+    bitmap = a8_bitmap.value();
   }
 
   // Writing to a malloc'd buffer and then copying to the staging buffers
@@ -387,11 +403,11 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
               pair.glyph.properties);
 
     if (is_light_glyph) {
-      SkBitmap a8_bitmap;
-      if (!bitmap.extractAlpha(&a8_bitmap)) {
+      auto a8_bitmap = ToA8Bitmap(bitmap);
+      if (!a8_bitmap.has_value()) {
         return false;
       }
-      bitmap = a8_bitmap;
+      bitmap = a8_bitmap.value();
     }
 
     // Writing to a malloc'd buffer and then copying to the staging buffers
