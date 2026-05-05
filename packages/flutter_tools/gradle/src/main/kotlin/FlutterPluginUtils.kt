@@ -800,8 +800,13 @@ object FlutterPluginUtils {
                 if (requiredNdkVersion != null && !installedNdkVersions.contains(requiredNdkVersion)) {
                     gradleProject.logger.lifecycle("Ensuring Android NDK '$requiredNdkVersion' is installed...")
                     try {
-                        gradleProject.exec {
-                            commandLine(sdkManagerPath, "--install", "ndk;$requiredNdkVersion")
+                        val process = ProcessBuilder(sdkManagerPath, "--install", "ndk;$requiredNdkVersion")
+                            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                            .redirectError(ProcessBuilder.Redirect.INHERIT)
+                            .start()
+                        val exitCode = process.waitFor()
+                        if (exitCode != 0) {
+                            gradleProject.logger.error("Failed to install NDK $requiredNdkVersion using sdkmanager: exit code $exitCode")
                         }
                     } catch (e: Exception) {
                         gradleProject.logger.error("Failed to install NDK $requiredNdkVersion using sdkmanager", e)
