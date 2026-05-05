@@ -318,9 +318,10 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
 
   if (has_light_glyphs) {
     SkBitmap a8_bitmap;
-    if (bitmap.extractAlpha(&a8_bitmap)) {
-      bitmap = a8_bitmap;
+    if (!bitmap.extractAlpha(&a8_bitmap)) {
+      return false;
     }
+    bitmap = a8_bitmap;
   }
 
   // Writing to a malloc'd buffer and then copying to the staging buffers
@@ -387,9 +388,10 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
 
     if (is_light_glyph) {
       SkBitmap a8_bitmap;
-      if (bitmap.extractAlpha(&a8_bitmap)) {
-        bitmap = a8_bitmap;
+      if (!bitmap.extractAlpha(&a8_bitmap)) {
+        return false;
       }
+      bitmap = a8_bitmap;
     }
 
     // Writing to a malloc'd buffer and then copying to the staging buffers
