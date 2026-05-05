@@ -29,18 +29,26 @@ import 'android_sdk.dart';
 //
 // Please see the README before changing any of these values.
 
+// When bumping, also update:
+//  * Gradle warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
+//  * Gradle test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://gradle.org/releases
-const templateDefaultGradleVersion = '8.14';
+const templateDefaultGradleVersion = '9.1.0';
 
 // When bumping, also update:
 //  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
+//  * AGP warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
 //  * AGP test constants in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
-const templateAndroidGradlePluginVersion = '8.11.1';
-const templateAndroidGradlePluginVersionForModule = '8.11.1';
+const templateAndroidGradlePluginVersion = '9.0.1';
+const templateAndroidGradlePluginVersionForModule = '9.0.1';
 
+// When bumping, also update:
+//  * KGP version constants in packages/flutter_tools/gradle/build.gradle.kts
+//  * KGP warn version in packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
+//  * KGP jvm constant in packages/flutter_tools/gradle/src/test/kotlin/DependencyVersionCheckerTest.kt
 // See https://kotlinlang.org/docs/releases.html#release-details
-const templateKotlinGradlePluginVersion = '2.2.20';
+const templateKotlinGradlePluginVersion = '2.3.20';
 
 // The Flutter Gradle Plugin is only applied to app projects, and modules that
 // are built from source using (`include_flutter.groovy`). The remaining
@@ -73,29 +81,29 @@ const oneMajorVersionHigherJavaVersion = '26';
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAndSupportedGradleVersion = '9.1.0';
+const maxKnownAndSupportedGradleVersion = '9.3.1';
 
 // Update this with new KGP versions come out including minor versions.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAndSupportedKgpVersion = '2.2.20';
+const maxKnownAndSupportedKgpVersion = '2.3.20';
 
 // Update this when new versions of AGP come out.
 //
 // Supported here means tooling is aware of this version's Java <-> AGP
 // compatibility.
 @visibleForTesting
-const maxKnownAndSupportedAgpVersion = '9.0';
+const maxKnownAndSupportedAgpVersion = '9.1';
 
 // Update this when new versions of AGP with Kotlin support come out.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const maxKnownAgpVersionWithFullKotlinSupport = '8.11.1';
+const maxKnownAgpVersionWithFullKotlinSupport = '9.0.1';
 
 // Update this when new versions of AGP come out.
-const maxKnownAgpVersion = '9.0';
+const maxKnownAgpVersion = '9.1';
 
 // Supported here means tooling is aware of this versions
 // Java <-> AGP compatibility and does not imply broader flutter support.
@@ -574,8 +582,13 @@ bool validateGradleAndKGP(Logger logger, {required String? kgpV, required String
   // Continuous KGP version handling is prefered in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
 
-  // Documented max is 2.20, using 2.2.29 covers patch versions.
-  if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.2.29')) {
+  // Documented max is 2.3.10, using 2.3.29 covers patch versions.
+  if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.29')) {
+    // Documented max is 9.0.0, using 9.0.99 non inclusive covers patch versions.
+    return isWithinVersionRange(gradleV, min: '7.6.3', max: '9.0.99', inclusiveMax: false);
+  }
+  // Documented max is 2.2.21, using 2.3.0 covers patch versions.
+  if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.3.0')) {
     // Documented max is 8.14, using 8.14.99 non inclusive covers patch versions.
     return isWithinVersionRange(gradleV, min: '7.6.3', max: '8.14.99', inclusiveMax: false);
   }
@@ -683,8 +696,18 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
   // Continuous KGP version handling is prefered in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
 
+  // Documented max is 2.3.10
+  if (isWithinVersionRange(kgpV, min: '2.3.10', max: '2.3.29')) {
+    // Documented max is 9.0.0
+    return isWithinVersionRange(agpV, min: '8.2.2', max: '9.0.99', inclusiveMax: false);
+  }
+  // Documented max is 2.3.0
+  if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.10', inclusiveMax: false)) {
+    // Documented max is 8.13.0
+    return isWithinVersionRange(agpV, min: '8.2.2', max: '8.14', inclusiveMax: false);
+  }
   // Documented max is 2.2.20
-  if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.2.29')) {
+  if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.3.0', inclusiveMax: false)) {
     // Documented max is 8.11.1
     return isWithinVersionRange(agpV, min: '7.3.1', max: '8.12', inclusiveMax: false);
   }
@@ -1090,7 +1113,7 @@ String getGradleVersionFor(String agpV) {
     GradleForAgp(agpMin: '8.11.0', agpMax: '8.11.99', minRequiredGradle: '8.13'),
     GradleForAgp(agpMin: '8.12.0', agpMax: '8.12.99', minRequiredGradle: '8.13'),
     GradleForAgp(agpMin: '8.13.0', agpMax: '8.13.99', minRequiredGradle: '8.13'),
-    GradleForAgp(agpMin: '9.0', agpMax: '9.0.99', minRequiredGradle: '9.0.0'),
+    GradleForAgp(agpMin: '9.0', agpMax: '9.0.99', minRequiredGradle: '9.1.0'),
     // Assume if AGP is newer than this code knows about return the highest gradle
     // version we know about.
     GradleForAgp(
