@@ -183,7 +183,7 @@ class ArchivePublisher {
     bool failOk = false,
   }) async {
     if (dryRun) {
-      print('gsutil.py -- $args');
+      print('gsutil.py invoked with sanitized arguments');
       return '';
     }
     return _processRunner.runProcess(

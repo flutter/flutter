@@ -106,7 +106,7 @@ Future<Command> startCommand(
   // See also dev/devicelab/lib/framework/utils.dart.
   final finalEnvironment = <String, String>{
     ...?environment,
-    'ANDROID_NDK_PATH': ?_discoverBestNdkPath(),
+    'ANDROID_NDK_PATH': _discoverBestNdkPath() ?? '',
   };
   final io.Process process = await io.Process.start(
     executable,
@@ -290,7 +290,7 @@ Future<CommandResult> runCommand(
     }
     final allOutput = '${result.flattenedStdout}\n${result.flattenedStderr}';
     foundError(<String>[
-      ?failureMessage,
+      if (failureMessage != null) failureMessage,
       '${bold}Command: $green$commandDescription$reset',
       if (failureMessage == null)
         '$bold${red}Command exited with exit code ${result.exitCode} but expected ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'} exit code.$reset',
