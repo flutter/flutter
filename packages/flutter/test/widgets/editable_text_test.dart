@@ -5596,6 +5596,7 @@ void main() {
                             inputType: SemanticsInputType.text,
                             textSelection: TextSelection.collapsed(offset: controller.text.length),
                             textDirection: TextDirection.ltr,
+                            children: <TestSemantics>[TestSemantics(id: 5)],
                           ),
                         ],
                       ),
