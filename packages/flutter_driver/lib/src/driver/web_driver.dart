@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ----------------------------------------------------------------------
+// SECURITY NOTE
+// ----------------------------------------------------------------------
+// This file previously logged full command arguments to stdout, which could
+// expose sensitive information (e.g., tokens, file paths) in CI logs. The
+// logging has been sanitized to avoid information leakage. See Flutter
+// security guidelines for CI tooling.
+// ----------------------------------------------------------------------
 import 'dart:convert';
 import 'dart:io';
 import 'package:file/file.dart';
@@ -121,7 +129,10 @@ class WebFlutterDriver extends FlutterDriver {
     final Map<String, dynamic> response;
     final Object? data;
     final Map<String, String> serialized = command.serialize();
-    _logCommunication('>>> $serialized');
+    // NOTE: We intentionally avoid logging the full serialized command because it may contain
+    // sensitive information such as session IDs or tokens. Only the command type is logged
+    // for debugging purposes.
+    _logCommunication('>>> ${command.runtimeType}');
     try {
       data = await _connection.sendCommand(
         "window.\$flutterDriver('${jsonEncode(serialized)}')",

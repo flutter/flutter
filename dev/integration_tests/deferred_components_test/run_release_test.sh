@@ -1,3 +1,11 @@
+# ----------------------------------------------------------------------
+# SECURITY NOTE
+# ----------------------------------------------------------------------
+# This script previously used unquoted variables in command substitutions,
+# which could lead to command injection if an attacker controlled any of the
+# input arguments (e.g., bundletool_jar_path, adb_path). All variables are now
+# explicitly quoted to prevent injection attacks. See Flutter security guidelines.
+# ----------------------------------------------------------------------
 #!/usr/bin/env bash
 # Copyright 2014 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -14,23 +22,23 @@
 # The modified bundletool which waives the density requirement is at:
 # https://chrome-infra-packages.appspot.com/p/flutter/android/bundletool/+/vFt1jA0cUeZLmUCVR5NG2JVB-SgJ18GH_pVYKMOlfUIC
 
-bundletool_jar_path=$1
-adb_path=$2
+bundletool_jar_path="$1"
+adb_path="$2"
 
 # Store the time to prevent capturing logs from previous runs.
-script_start_time=$($adb_path shell 'date +"%m-%d %H:%M:%S.0"')
+script_start_time=$("$adb_path" shell 'date +"%m-%d %H:%M:%S.0"')
 
-$adb_path uninstall "io.flutter.integration.deferred_components_test"
+"$adb_path" uninstall "io.flutter.integration.deferred_components_test"
 
 rm -f build/app/outputs/bundle/release/app-release.apks
 rm -f build/app/outputs/bundle/release/run_logcat.log
 
 flutter build appbundle
 
-java -jar $bundletool_jar_path build-apks --bundle=build/app/outputs/bundle/release/app-release.aab --output=build/app/outputs/bundle/release/app-release.apks --local-testing --ks android/testing-keystore.jks --ks-key-alias testing_key --ks-pass pass:012345
-java -jar $bundletool_jar_path install-apks --apks=build/app/outputs/bundle/release/app-release.apks
+java -jar "$bundletool_jar_path" build-apks --bundle=build/app/outputs/bundle/release/app-release.aab --output=build/app/outputs/bundle/release/app-release.apks --local-testing --ks android/testing-keystore.jks --ks-key-alias testing_key --ks-pass pass:012345
+java -jar "$bundletool_jar_path" install-apks --apks=build/app/outputs/bundle/release/app-release.apks
 
-$adb_path shell "
+"$adb_path" shell "
 am start -n io.flutter.integration.deferred_components_test/.MainActivity
 exit
 "
@@ -50,7 +58,7 @@ do
         pkill -P $$
         exit 1
     fi
-done < <($adb_path logcat -T "$script_start_time")
+done < <("$adb_path" logcat -T "$script_start_time")
 
 echo "Failure: Deferred component did not load."
 exit 1
