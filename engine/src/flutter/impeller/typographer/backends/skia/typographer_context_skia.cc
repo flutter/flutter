@@ -38,7 +38,6 @@
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/core/SkFont.h"
-#include "third_party/skia/include/core/SkImageInfo.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkSize.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -86,13 +85,16 @@ TypographerContextSkia::CreateGlyphAtlasContext(GlyphAtlas::Type type) const {
   return std::make_shared<GlyphAtlasContext>(type);
 }
 
-static SkImageInfo GetImageInfo(const GlyphAtlas& atlas, Size size) {
+SkImageInfo TypographerContextSkia::GetImageInfo(const GlyphAtlas& atlas,
+                                                 Size size) {
   switch (atlas.GetType()) {
     case GlyphAtlas::Type::kAlphaBitmap:
       return SkImageInfo::MakeA8(SkISize{static_cast<int32_t>(size.width),
                                          static_cast<int32_t>(size.height)});
     case GlyphAtlas::Type::kColorBitmap:
-      return SkImageInfo::MakeN32Premul(size.width, size.height);
+      return SkImageInfo::Make(SkISize{static_cast<int32_t>(size.width),
+                                       static_cast<int32_t>(size.height)},
+                               kRGBA_8888_SkColorType, kPremul_SkAlphaType);
   }
   FML_UNREACHABLE();
 }
@@ -274,7 +276,8 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
   bool has_color = atlas.GetType() == GlyphAtlas::Type::kColorBitmap;
 
   SkBitmap bitmap;
-  bitmap.setInfo(GetImageInfo(atlas, Size(texture->GetSize())));
+  bitmap.setInfo(
+      TypographerContextSkia::GetImageInfo(atlas, Size(texture->GetSize())));
   if (!bitmap.tryAllocPixels()) {
     return false;
   }
@@ -351,7 +354,7 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
     size.height += 2;
 
     SkBitmap bitmap;
-    bitmap.setInfo(GetImageInfo(atlas, size));
+    bitmap.setInfo(TypographerContextSkia::GetImageInfo(atlas, size));
     if (!bitmap.tryAllocPixels()) {
       return false;
     }

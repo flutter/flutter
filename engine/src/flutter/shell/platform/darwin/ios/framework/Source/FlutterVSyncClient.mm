@@ -51,14 +51,6 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
   return self;
 }
 
-- (instancetype)initWithTaskRunnerPtr:(fml::RefPtr<fml::TaskRunner>)task_runner
-                             callback:(flutter::VsyncWaiter::Callback)callback {
-  return [self initWithTaskRunnerPtr:task_runner
-        isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
-                      maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
-                            callback:std::move(callback)];
-}
-
 - (instancetype)initWithTaskRunner:(FlutterFMLTaskRunner*)taskRunner
       isVariableRefreshRateEnabled:(BOOL)isVariableRefreshRateEnabled
                     maxRefreshRate:(double)maxRefreshRate
@@ -74,15 +66,6 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
         isVariableRefreshRateEnabled:isVariableRefreshRateEnabled
                       maxRefreshRate:maxRefreshRate
                             callback:cpp_callback];
-}
-
-- (instancetype)initWithTaskRunner:(FlutterFMLTaskRunner*)taskRunner
-                          callback:(void (^)(CFTimeInterval startTime,
-                                             CFTimeInterval targetTime))callback {
-  return [self initWithTaskRunner:taskRunner
-      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
-                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
-                          callback:callback];
 }
 
 - (void)setMaxRefreshRate:(double)refreshRate {
