@@ -273,13 +273,14 @@ class BoxConstraints extends Constraints {
   }
 
   Size _debugPropagateDebugSize(Size size, Size result) {
+    var updatedResult = result;
     assert(() {
       if (size is _DebugSize) {
-        result = _DebugSize(result, size._owner, size._canBeUsedByParent);
+        updatedResult = _DebugSize(result, size._owner, size._canBeUsedByParent);
       }
       return true;
     }());
-    return result;
+    return updatedResult;
   }
 
   /// Returns the size that both satisfies the constraints and is as close as
@@ -801,14 +802,15 @@ class BoxHitTestResult extends HitTestResult {
     required Offset position,
     required BoxHitTest hitTest,
   }) {
-    if (transform != null) {
-      transform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform));
-      if (transform == null) {
+    var effectiveTransform = transform;
+    if (effectiveTransform != null) {
+      effectiveTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(effectiveTransform));
+      if (effectiveTransform == null) {
         // Objects are not visible on screen and cannot be hit-tested.
         return false;
       }
     }
-    return addWithRawTransform(transform: transform, position: position, hitTest: hitTest);
+    return addWithRawTransform(transform: effectiveTransform, position: position, hitTest: hitTest);
   }
 
   /// Convenience method for hit testing children, that are translated by
@@ -928,9 +930,9 @@ class BoxHitTestResult extends HitTestResult {
       pushTransform(rawTransform);
     } else {
       assert(paintTransform != null);
-      paintTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(paintTransform!));
-      assert(paintTransform != null, 'paintTransform must be invertible.');
-      pushTransform(paintTransform!);
+      final Matrix4? effectiveTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(paintTransform!));
+      assert(effectiveTransform != null, 'paintTransform must be invertible.');
+      pushTransform(effectiveTransform!);
     }
     final bool isHit = hitTest(this);
     popTransform();
@@ -2355,11 +2357,12 @@ abstract class RenderBox extends RenderObject {
       }
       throw FlutterError.fromParts(information);
     }());
+    var finalValue = value;
     assert(() {
-      value = debugAdoptSize(value);
+      finalValue = debugAdoptSize(value);
       return true;
     }());
-    _size = value;
+    _size = finalValue;
     assert(() {
       debugAssertDoesMeetConstraints();
       return true;

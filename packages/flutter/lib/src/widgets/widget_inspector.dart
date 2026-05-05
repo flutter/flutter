@@ -1541,11 +1541,11 @@ mixin WidgetInspectorService {
   /// or other packages.
   @protected
   void addPubRootDirectories(List<String> pubRootDirectories) {
-    pubRootDirectories = pubRootDirectories
+    final List<String> effectivePubRootDirectories = pubRootDirectories
         .map<String>((String directory) => Uri.parse(directory).path)
         .toList();
 
-    final directorySet = Set<String>.of(pubRootDirectories);
+    final directorySet = Set<String>.of(effectivePubRootDirectories);
     if (_pubRootDirectories != null) {
       directorySet.addAll(_pubRootDirectories!);
     }
@@ -1565,12 +1565,12 @@ mixin WidgetInspectorService {
     if (_pubRootDirectories == null) {
       return;
     }
-    pubRootDirectories = pubRootDirectories
+    final List<String> effectivePubRootDirectories = pubRootDirectories
         .map<String>((String directory) => Uri.parse(directory).path)
         .toList();
 
     final directorySet = Set<String>.of(_pubRootDirectories!);
-    directorySet.removeAll(pubRootDirectories);
+    directorySet.removeAll(effectivePubRootDirectories);
 
     _pubRootDirectories = directorySet.toList();
     _isLocalCreationCache.clear();
@@ -1738,11 +1738,12 @@ mixin WidgetInspectorService {
 
   List<Element> _getRawElementParentChain(Element element, {required int? numLocalParents}) {
     List<Element> elements = element.debugGetDiagnosticChain();
-    if (numLocalParents != null) {
+    var effectiveNumLocalParents = numLocalParents;
+    if (effectiveNumLocalParents != null) {
       for (var i = 0; i < elements.length; i += 1) {
         if (_isValueCreatedByLocalProject(elements[i])) {
-          numLocalParents = numLocalParents! - 1;
-          if (numLocalParents <= 0) {
+          effectiveNumLocalParents = effectiveNumLocalParents! - 1;
+          if (effectiveNumLocalParents <= 0) {
             elements = elements.take(i + 1).toList();
             break;
           }
@@ -1768,9 +1769,10 @@ mixin WidgetInspectorService {
     String groupName,
   ) {
     final chain = <RenderObject>[];
-    while (renderObject != null) {
-      chain.add(renderObject);
-      renderObject = renderObject.parent;
+    var currentRenderObject = renderObject;
+    while (currentRenderObject != null) {
+      chain.add(currentRenderObject);
+      currentRenderObject = currentRenderObject.parent;
     }
     return _followDiagnosticableChain(chain.reversed.toList());
   }
@@ -4471,12 +4473,13 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
 
   @override
   List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
+    var effectiveNodes = nodes;
     if (maxDescendantsTruncatableNode >= 0 &&
         owner!.allowTruncate &&
-        nodes.length > maxDescendantsTruncatableNode) {
-      nodes = service._truncateNodes(nodes, maxDescendantsTruncatableNode);
+        effectiveNodes.length > maxDescendantsTruncatableNode) {
+      effectiveNodes = service._truncateNodes(effectiveNodes, maxDescendantsTruncatableNode);
     }
-    return nodes;
+    return effectiveNodes;
   }
 
   @override

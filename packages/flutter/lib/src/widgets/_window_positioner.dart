@@ -473,33 +473,34 @@ class WindowPositioner {
       Offset result =
           _constrainTo(parentRect, parentAnchor._anchorPositionFor(anchorRect) + offset) +
           childAnchor._offsetFor(childSize);
+      var effectiveChildSize = childSize;
 
       if (constraintAdjustment.resizeX) {
         final double leftOverhang = result.dx - displayRect.left;
-        final double rightOverhang = result.dx + childSize.width - displayRect.right;
+        final double rightOverhang = result.dx + effectiveChildSize.width - displayRect.right;
         if (leftOverhang < 0.0) {
           result = result.translate(-leftOverhang, 0.0);
-          childSize = Size(childSize.width + leftOverhang, childSize.height);
+          effectiveChildSize = Size(effectiveChildSize.width + leftOverhang, effectiveChildSize.height);
         }
         if (rightOverhang > 0.0) {
-          childSize = Size(childSize.width - rightOverhang, childSize.height);
+          effectiveChildSize = Size(effectiveChildSize.width - rightOverhang, effectiveChildSize.height);
         }
       }
 
       if (constraintAdjustment.resizeY) {
         final double topOverhang = result.dy - displayRect.top;
-        final double bottomOverhang = result.dy + childSize.height - displayRect.bottom;
+        final double bottomOverhang = result.dy + effectiveChildSize.height - displayRect.bottom;
         if (topOverhang < 0.0) {
           result = result.translate(0.0, -topOverhang);
-          childSize = Size(childSize.width, childSize.height + topOverhang);
+          effectiveChildSize = Size(effectiveChildSize.width, effectiveChildSize.height + topOverhang);
         }
         if (bottomOverhang > 0.0) {
-          childSize = Size(childSize.width, childSize.height - bottomOverhang);
+          effectiveChildSize = Size(effectiveChildSize.width, effectiveChildSize.height - bottomOverhang);
         }
       }
 
-      if (_rectContains(displayRect, result & childSize)) {
-        return result & childSize;
+      if (_rectContains(displayRect, result & effectiveChildSize)) {
+        return result & effectiveChildSize;
       }
     }
 

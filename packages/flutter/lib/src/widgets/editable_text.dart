@@ -3586,27 +3586,28 @@ class EditableTextState extends State<EditableText>
       return;
     }
 
-    if (_checkNeedsAdjustAffinity(value)) {
-      value = value.copyWith(
-        selection: value.selection.copyWith(affinity: _value.selection.affinity),
+    var effectiveValue = value;
+    if (_checkNeedsAdjustAffinity(effectiveValue)) {
+      effectiveValue = effectiveValue.copyWith(
+        selection: effectiveValue.selection.copyWith(affinity: _value.selection.affinity),
       );
     }
 
     if (widget.readOnly) {
       // In the read-only case, we only care about selection changes, and reject
       // everything else.
-      value = _value.copyWith(selection: value.selection);
+      effectiveValue = _value.copyWith(selection: effectiveValue.selection);
     }
-    _lastKnownRemoteTextEditingValue = value;
+    _lastKnownRemoteTextEditingValue = effectiveValue;
 
-    if (value == _value) {
+    if (effectiveValue == _value) {
       // This is possible, for example, when the numeric keyboard is input,
       // the engine will notify twice for the same value.
       // Track at https://github.com/flutter/flutter/issues/65811
       return;
     }
 
-    if (value.text == _value.text && value.composing == _value.composing) {
+    if (effectiveValue.text == _value.text && effectiveValue.composing == _value.composing) {
       // `selection` is the only change.
       SelectionChangedCause cause;
       if (_textInputConnection?.scribbleInProgress ?? false) {
@@ -3617,9 +3618,9 @@ class EditableTextState extends State<EditableText>
       } else {
         cause = SelectionChangedCause.keyboard;
       }
-      _handleSelectionChanged(value.selection, cause);
+      _handleSelectionChanged(effectiveValue.selection, cause);
     } else {
-      if (value.text != _value.text) {
+      if (effectiveValue.text != _value.text) {
         // Hide the toolbar if the text was changed, but only hide the toolbar
         // overlay; the selection handle's visibility will be handled
         // by `_handleSelectionChanged`. https://github.com/flutter/flutter/issues/108673
@@ -3631,11 +3632,11 @@ class EditableTextState extends State<EditableText>
           _hasInputConnection &&
           widget.obscureText &&
           WidgetsBinding.instance.platformDispatcher.brieflyShowPassword &&
-          value.text.length == _value.text.length + 1;
+          effectiveValue.text.length == _value.text.length + 1;
 
       _obscureShowCharTicksPending = revealObscuredInput ? _kObscureShowLatestCharCursorTicks : 0;
       _obscureLatestCharIndex = revealObscuredInput ? _value.selection.baseOffset : null;
-      _formatAndSetValue(value, SelectionChangedCause.keyboard);
+      _formatAndSetValue(effectiveValue, SelectionChangedCause.keyboard);
     }
 
     if (_showBlinkingCursor && _cursorTimer != null) {
@@ -4622,10 +4623,12 @@ class EditableTextState extends State<EditableText>
     SelectionChangedCause? cause, {
     bool userInteraction = false,
   }) {
+    var effectiveValue = value;
     final TextEditingValue oldValue = _value;
-    final textChanged = oldValue.text != value.text;
-    final bool textCommitted = !oldValue.composing.isCollapsed && value.composing.isCollapsed;
-    final selectionChanged = oldValue.selection != value.selection;
+    final textChanged = oldValue.text != effectiveValue.text;
+    final bool textCommitted =
+        !oldValue.composing.isCollapsed && effectiveValue.composing.isCollapsed;
+    final selectionChanged = oldValue.selection != effectiveValue.selection;
 
     if (textChanged || textCommitted) {
       // Only apply input formatters if the text has changed (including uncommitted
@@ -4637,16 +4640,18 @@ class EditableTextState extends State<EditableText>
       // will keep trying to modify the composing region while Gboard will keep
       // trying to restore the original composing region.
       try {
-        value =
+        effectiveValue =
             widget.inputFormatters?.fold<TextEditingValue>(
-              value,
+              effectiveValue,
               (TextEditingValue newValue, TextInputFormatter formatter) =>
                   formatter.formatEditUpdate(_value, newValue),
             ) ??
-            value;
+            effectiveValue;
 
-        if (spellCheckEnabled && value.text.isNotEmpty && _value.text != value.text) {
-          _performSpellCheck(value.text);
+        if (spellCheckEnabled &&
+            effectiveValue.text.isNotEmpty &&
+            _value.text != effectiveValue.text) {
+          _performSpellCheck(effectiveValue.text);
         }
       } catch (exception, stack) {
         FlutterError.reportError(
@@ -4665,7 +4670,7 @@ class EditableTextState extends State<EditableText>
     // Put all optional user callback invocations in a batch edit to prevent
     // sending multiple `TextInput.updateEditingValue` messages.
     beginBatchEdit();
-    _value = value;
+    _value = effectiveValue;
     // Changes made by the keyboard can sometimes be "out of band" for listening
     // components, so always send those events, even if we didn't think it
     // changed. Also, the user long pressing should always send a selection change
@@ -4675,7 +4680,7 @@ class EditableTextState extends State<EditableText>
             (cause == SelectionChangedCause.longPress ||
                 cause == SelectionChangedCause.keyboard))) {
       _handleSelectionChanged(_value.selection, cause);
-      _bringIntoViewBySelectionState(oldTextSelection, value.selection, cause);
+      _bringIntoViewBySelectionState(oldTextSelection, effectiveValue.selection, cause);
     }
     final String currentText = _value.text;
     if (oldValue.text != currentText) {

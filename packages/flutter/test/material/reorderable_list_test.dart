@@ -1797,11 +1797,12 @@ void main() {
                         return ReorderableListView(
                           onReorder: (int oldIndex, int newIndex) {
                             setState(() {
-                              if (newIndex > oldIndex) {
-                                newIndex -= 1;
+                              var effectiveNewIndex = newIndex;
+                              if (effectiveNewIndex > oldIndex) {
+                                effectiveNewIndex -= 1;
                               }
                               final String item = items.removeAt(oldIndex);
-                              items.insert(newIndex, item);
+                              items.insert(effectiveNewIndex, item);
                             });
                           },
                           children: <Widget>[
@@ -2089,11 +2090,12 @@ void main() {
     void handleReorder(int fromIndex, int toIndex) {
       onReorderCallCount += 1;
 
-      if (fromIndex < toIndex) {
-        toIndex -= 1;
+      var effectiveToIndex = toIndex;
+      if (fromIndex < effectiveToIndex) {
+        effectiveToIndex -= 1;
       }
 
-      children.insert(toIndex, children.removeAt(fromIndex));
+      children.insert(effectiveToIndex, children.removeAt(fromIndex));
     }
 
     await tester.pumpWidget(
@@ -2227,11 +2229,12 @@ void main() {
     void handleReorder(int fromIndex, int toIndex) {
       onReorderCallCount += 1;
 
-      if (fromIndex < toIndex) {
-        toIndex -= 1;
+      var effectiveToIndex = toIndex;
+      if (fromIndex < effectiveToIndex) {
+        effectiveToIndex -= 1;
       }
 
-      items.insert(toIndex, items.removeAt(fromIndex));
+      items.insert(effectiveToIndex, items.removeAt(fromIndex));
     }
 
     await tester.pumpWidget(

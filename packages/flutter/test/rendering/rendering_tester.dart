@@ -257,13 +257,14 @@ void layout(
   assert(box.parent == null); // We stick the box in another, so you can't reuse it easily, sorry.
 
   TestRenderingFlutterBinding.instance.renderView.child = null;
+  var effectiveBox = box;
   if (constraints != null) {
-    box = RenderPositionedBox(
+    effectiveBox = RenderPositionedBox(
       alignment: alignment,
       child: RenderConstrainedBox(additionalConstraints: constraints, child: box),
     );
   }
-  TestRenderingFlutterBinding.instance.renderView.child = box;
+  TestRenderingFlutterBinding.instance.renderView.child = effectiveBox;
 
   pumpFrame(phase: phase, onErrors: onErrors);
 }

@@ -416,16 +416,16 @@ class _GlowController extends ChangeNotifier {
     assert(velocity >= 0.0);
     _pullRecedeTimer?.cancel();
     _pullRecedeTimer = null;
-    velocity = clampDouble(velocity, _minVelocity, _maxVelocity);
+    final double effectiveVelocity = clampDouble(velocity, _minVelocity, _maxVelocity);
     _glowOpacityTween.begin = _state == _GlowState.idle ? 0.3 : _glowOpacity.value;
     _glowOpacityTween.end = clampDouble(
-      velocity * _velocityGlowFactor,
+      effectiveVelocity * _velocityGlowFactor,
       _glowOpacityTween.begin!,
       _maxOpacity,
     );
     _glowSizeTween.begin = _glowSize.value;
-    _glowSizeTween.end = math.min(0.025 + 7.5e-7 * velocity * velocity, 1.0);
-    _glowController.duration = Duration(milliseconds: (0.15 + velocity * 0.02).round());
+    _glowSizeTween.end = math.min(0.025 + 7.5e-7 * effectiveVelocity * effectiveVelocity, 1.0);
+    _glowController.duration = Duration(milliseconds: (0.15 + effectiveVelocity * 0.02).round());
     _glowController.forward(from: 0.0);
     _displacement = 0.5;
     _state = _GlowState.absorb;

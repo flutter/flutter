@@ -371,11 +371,11 @@ bool debugCheckHasDirectionality(
   assert(() {
     if (context.widget is! Directionality &&
         context.getElementForInheritedWidgetOfExactType<Directionality>() == null) {
-      why = why == null ? '' : ' $why';
+      final effectiveWhy = why == null ? '' : ' $why';
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Directionality widget found.'),
         ErrorDescription(
-          '${context.widget.runtimeType} widgets require a Directionality widget ancestor$why.\n',
+          '${context.widget.runtimeType} widgets require a Directionality widget ancestor$effectiveWhy.\n',
         ),
         if (hint != null) ErrorHint(hint),
         context.describeWidget(

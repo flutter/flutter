@@ -808,10 +808,11 @@ class _CompoundBorder extends ShapeBorder {
 
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    var effectiveRect = rect;
     for (var index = 0; index < borders.length - 1; index += 1) {
-      rect = borders[index].dimensions.resolve(textDirection).deflateRect(rect);
+      effectiveRect = borders[index].dimensions.resolve(textDirection).deflateRect(effectiveRect);
     }
-    return borders.last.getInnerPath(rect, textDirection: textDirection);
+    return borders.last.getInnerPath(effectiveRect, textDirection: textDirection);
   }
 
   @override
@@ -829,9 +830,10 @@ class _CompoundBorder extends ShapeBorder {
 
   @override
   void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    var effectiveRect = rect;
     for (final ShapeBorder border in borders) {
-      border.paint(canvas, rect, textDirection: textDirection);
-      rect = border.dimensions.resolve(textDirection).deflateRect(rect);
+      border.paint(canvas, effectiveRect, textDirection: textDirection);
+      effectiveRect = border.dimensions.resolve(textDirection).deflateRect(effectiveRect);
     }
   }
 

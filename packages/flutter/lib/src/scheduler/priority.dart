@@ -38,11 +38,12 @@ class Priority {
   ///
   /// The parameter [offset] is clamped to ±[kMaxOffset].
   Priority operator +(int offset) {
-    if (offset.abs() > kMaxOffset) {
+    var effectiveOffset = offset;
+    if (effectiveOffset.abs() > kMaxOffset) {
       // Clamp the input offset.
-      offset = kMaxOffset * offset.sign;
+      effectiveOffset = kMaxOffset * effectiveOffset.sign;
     }
-    return Priority._(_value + offset);
+    return Priority._(_value + effectiveOffset);
   }
 
   /// Returns a priority relative to this priority.

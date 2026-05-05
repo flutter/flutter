@@ -839,6 +839,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   }
 
   Widget _wrap(Widget sliver, Axis direction) {
+    var effectiveSliver = sliver;
     EdgeInsetsGeometry? effectivePadding = widget.padding;
     if (widget.padding == null) {
       final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
@@ -857,19 +858,19 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
             ? mediaQueryVerticalPadding
             : mediaQueryHorizontalPadding;
         // Leave behind the cross axis padding.
-        sliver = MediaQuery(
+        effectiveSliver = MediaQuery(
           data: mediaQuery.copyWith(
             padding: direction == Axis.vertical
                 ? mediaQueryHorizontalPadding
                 : mediaQueryVerticalPadding,
           ),
-          child: sliver,
+          child: effectiveSliver,
         );
       }
     }
 
     if (effectivePadding != null) {
-      sliver = SliverPadding(padding: effectivePadding, sliver: sliver);
+      effectiveSliver = SliverPadding(padding: effectivePadding, sliver: effectiveSliver);
     }
     return CustomScrollView(
       scrollDirection: widget.scrollDirection,
@@ -880,7 +881,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
       clipBehavior: widget.clipBehavior,
       shrinkWrap: widget.shrinkWrap,
       scrollCacheExtent: widget.scrollCacheExtent,
-      slivers: <Widget>[sliver],
+      slivers: <Widget>[effectiveSliver],
     );
   }
 }

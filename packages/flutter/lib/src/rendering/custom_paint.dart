@@ -752,16 +752,16 @@ class RenderCustomPaint extends RenderProxyBox {
   /// concept of a "forgotten" node in semantics, deactivated nodes, or global
   /// keys.
   static List<SemanticsNode> _updateSemanticsChildren(
-    List<SemanticsNode>? oldSemantics,
-    List<CustomPainterSemantics>? newChildSemantics,
+    List<SemanticsNode>? oldSemanticsParam,
+    List<CustomPainterSemantics>? newChildSemanticsParam,
   ) {
-    oldSemantics = oldSemantics ?? const <SemanticsNode>[];
-    newChildSemantics = newChildSemantics ?? const <CustomPainterSemantics>[];
+    final List<SemanticsNode> oldSemantics = oldSemanticsParam ?? const <SemanticsNode>[];
+    final List<CustomPainterSemantics> newChildSemantics = newChildSemanticsParam ?? const <CustomPainterSemantics>[];
 
     assert(() {
       final Map<Key, int> keys = HashMap<Key, int>();
       final information = <DiagnosticsNode>[];
-      for (var i = 0; i < newChildSemantics!.length; i += 1) {
+      for (var i = 0; i < newChildSemantics.length; i += 1) {
         final CustomPainterSemantics child = newChildSemantics[i];
         if (child.key != null) {
           if (keys.containsKey(child.key)) {

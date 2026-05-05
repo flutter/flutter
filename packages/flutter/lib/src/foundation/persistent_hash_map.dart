@@ -368,12 +368,12 @@ class _HashCollisionNode extends _TrieNode {
 @pragma('wasm:prefer-inline')
 int _bitCount(int n) {
   assert((n & 0xFFFFFFFF) == n);
-  n = n - ((n >> 1) & 0x55555555);
-  n = (n & 0x33333333) + ((n >>> 2) & 0x33333333);
-  n = (n + (n >> 4)) & 0x0F0F0F0F;
-  n = n + (n >> 8);
-  n = n + (n >> 16);
-  return n & 0x0000003F;
+  int v = n - ((n >> 1) & 0x55555555);
+  v = (v & 0x33333333) + ((v >>> 2) & 0x33333333);
+  v = (v + (v >> 4)) & 0x0F0F0F0F;
+  v = v + (v >> 8);
+  v = v + (v >> 16);
+  return v & 0x0000003F;
 }
 
 /// Create a copy of the given array.

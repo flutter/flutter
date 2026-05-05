@@ -1214,17 +1214,17 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
         return showVertical(rect);
       case null:
         // Update rect after revealing in one axis before revealing in the next.
-        rect = showHorizontal(rect) ?? rect;
+        final Rect? horizontalRect = showHorizontal(rect) ?? rect;
         // We only return the final rect after both have been revealed.
-        rect = showVertical(rect);
-        if (rect == null) {
+        final Rect? verticalRect = showVertical(horizontalRect);
+        if (verticalRect == null) {
           // `descendant` is between leading and trailing edge and hence already
           //  fully shown on screen.
           assert(viewport.parent != null);
           final Matrix4 transform = descendant.getTransformTo(viewport.parent);
-          return MatrixUtils.transformRect(transform, rect ?? descendant.paintBounds);
+          return MatrixUtils.transformRect(transform, horizontalRect ?? descendant.paintBounds);
         }
-        return rect;
+        return verticalRect;
     }
   }
 

@@ -587,13 +587,11 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     assert(_debugAssertChildListLocked());
     assert(childCount >= leadingGarbage + trailingGarbage);
     invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
-      while (leadingGarbage > 0) {
+      for (var i = 0; i < leadingGarbage; i++) {
         _destroyOrCacheChild(firstChild!);
-        leadingGarbage -= 1;
       }
-      while (trailingGarbage > 0) {
+      for (var i = 0; i < trailingGarbage; i++) {
         _destroyOrCacheChild(lastChild!);
-        trailingGarbage -= 1;
       }
       // Ask the child manager to remove the children that are no longer being
       // kept alive. (This should cause _keepAliveBucket to change, so we have

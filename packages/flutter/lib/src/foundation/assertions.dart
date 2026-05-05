@@ -1209,12 +1209,10 @@ void debugPrintStack({StackTrace? stackTrace, String? label, int? maxFrames}) {
   if (label != null) {
     ErrorToConsoleDumper.dump(label);
   }
-  if (stackTrace == null) {
-    stackTrace = StackTrace.current;
-  } else {
-    stackTrace = FlutterError.demangleStackTrace(stackTrace);
-  }
-  Iterable<String> lines = stackTrace.toString().trimRight().split('\n');
+  final StackTrace effectiveStackTrace = stackTrace == null
+      ? StackTrace.current
+      : FlutterError.demangleStackTrace(stackTrace);
+  Iterable<String> lines = effectiveStackTrace.toString().trimRight().split('\n');
   if (kIsWeb && lines.isNotEmpty) {
     // Remove extra call to StackTrace.current for web platform.
     // TODO(ferhat): remove when https://github.com/flutter/flutter/issues/37635

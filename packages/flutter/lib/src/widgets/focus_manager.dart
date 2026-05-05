@@ -265,9 +265,10 @@ class FocusAttachment {
   void reparent({FocusNode? parent}) {
     if (isAttached) {
       assert(_node.context != null);
-      parent ??= Focus.maybeOf(_node.context!, scopeOk: true);
-      parent ??= _node.context!.owner!.focusManager.rootScope;
-      parent._reparent(_node);
+      var effectiveParent = parent;
+      effectiveParent ??= Focus.maybeOf(_node.context!, scopeOk: true);
+      effectiveParent ??= _node.context!.owner!.focusManager.rootScope;
+      effectiveParent._reparent(_node);
     }
   }
 }

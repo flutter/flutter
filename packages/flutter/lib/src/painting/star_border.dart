@@ -193,8 +193,8 @@ class StarBorder extends OutlinedBorder {
     if (t < split) {
       return first(t * (1 / split));
     } else {
-      t = (1 / (1.0 - split)) * (t - split);
-      return second(t);
+      final double effectiveT = (1 / (1.0 - split)) * (t - split);
+      return second(effectiveT);
     }
   }
 
@@ -568,15 +568,16 @@ class _StarGenerator {
       double pointRadius,
       double pointInnerRadius,
     ) {
-      pointAngle += pointStep;
+      var effectivePointAngle = pointAngle;
+      effectivePointAngle += pointStep;
       final point = Offset(
-        center.dx + math.cos(pointAngle) * pointRadius,
-        center.dy + math.sin(pointAngle) * pointRadius,
+        center.dx + math.cos(effectivePointAngle) * pointRadius,
+        center.dy + math.sin(effectivePointAngle) * pointRadius,
       );
-      pointAngle += pointStep;
+      effectivePointAngle += pointStep;
       final nextValley = Offset(
-        center.dx + math.cos(pointAngle) * pointInnerRadius,
-        center.dy + math.sin(pointAngle) * pointInnerRadius,
+        center.dx + math.cos(effectivePointAngle) * pointInnerRadius,
+        center.dy + math.sin(effectivePointAngle) * pointInnerRadius,
       );
       final Offset valleyArc1 = valley + (point - valley) * valleyRounding;
       final Offset pointArc1 = point + (valley - point) * pointRounding;
@@ -594,7 +595,7 @@ class _StarGenerator {
         ),
       );
       valley = nextValley;
-      return pointAngle;
+      return effectivePointAngle;
     }
 
     final double remainder = points - points.truncateToDouble();

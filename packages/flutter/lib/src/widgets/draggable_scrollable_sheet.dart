@@ -983,10 +983,10 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
         // Make sure we pass along enough velocity to keep scrolling - otherwise
         // we just "bounce" off the top making it look like the list doesn't
         // have more to scroll.
-        velocity =
+        final double effectiveVelocity =
             ballisticController.velocity +
             (physics.toleranceFor(this).velocity * ballisticController.velocity.sign);
-        super.goBallistic(velocity);
+        super.goBallistic(effectiveVelocity);
         ballisticController.stop();
       } else if (ballisticController.isCompleted) {
         // Update the extent value after the snap animation completes to

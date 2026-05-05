@@ -2003,20 +2003,21 @@ class RootWidget extends Widget {
   /// Used by [WidgetsBinding.attachToBuildOwner] (which is indirectly called by
   /// [runApp]) to bootstrap applications.
   RootElement attach(BuildOwner owner, [RootElement? element]) {
-    if (element == null) {
+    var effectiveElement = element;
+    if (effectiveElement == null) {
       owner.lockState(() {
-        element = createElement();
-        assert(element != null);
-        element!.assignOwner(owner);
+        effectiveElement = createElement();
+        assert(effectiveElement != null);
+        effectiveElement!.assignOwner(owner);
       });
-      owner.buildScope(element!, () {
-        element!.mount(/* parent */ null, /* slot */ null);
+      owner.buildScope(effectiveElement!, () {
+        effectiveElement!.mount(/* parent */ null, /* slot */ null);
       });
     } else {
-      element._newWidget = this;
-      element.markNeedsBuild();
+      effectiveElement._newWidget = this;
+      effectiveElement.markNeedsBuild();
     }
-    return element!;
+    return effectiveElement!;
   }
 
   @override
