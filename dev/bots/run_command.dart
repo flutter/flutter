@@ -106,7 +106,7 @@ Future<Command> startCommand(
   // See also dev/devicelab/lib/framework/utils.dart.
   final finalEnvironment = <String, String>{
     ...?environment,
-    'ANDROID_NDK_PATH': _discoverBestNdkPath() ?? '',
+    if (_discoverBestNdkPath() != null) 'ANDROID_NDK_PATH': _discoverBestNdkPath()!,
   };
   final io.Process process = await io.Process.start(
     executable,
