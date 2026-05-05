@@ -20,6 +20,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterChannelKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyPrimaryResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardInsetManager.h"
@@ -1297,12 +1298,15 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     return;
   }
 
-  auto callback = [](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
-    // Do nothing in this block. Just trigger system to callback touch events with correct rate.
-  };
-  _touchRateCorrectionVSyncClient =
-      [[FlutterVSyncClient alloc] initWithTaskRunner:self.engine.platformTaskRunner
-                                            callback:callback];
+  void (^callback)(CFTimeInterval, CFTimeInterval) =
+      ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+        // Do nothing in this block. Just trigger system to callback touch events with correct rate.
+      };
+  _touchRateCorrectionVSyncClient = [[FlutterVSyncClient alloc]
+                initWithTaskRunner:self.engine.platformTaskRunner
+      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+                          callback:callback];
   _touchRateCorrectionVSyncClient.allowPauseAfterVsync = NO;
 }
 

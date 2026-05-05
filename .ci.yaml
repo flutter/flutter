@@ -1548,13 +1548,13 @@ targets:
     timeout: 60
     properties:
       add_recipes_cq: "true"
-      # This makes use of UpsideDownCake, a preview version of android. Preview versions eventually
+      # This makes use of Baklava, a preview version of android. Preview versions eventually
       # get removed from the sdk manager, so it is hosted on CIPD to ensure integration testing
       # doesn't flake when that happens.
-      # https://chrome-infra-packages.appspot.com/p/flutter/android/sdk/all/linux-amd64/+/version:udcv1
+      # https://chrome-infra-packages.appspot.com/p/flutter/android/sdk/all/linux-amd64/+/version:baklava_v1
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:udcv1"},
+          {"dependency": "android_sdk", "version": "version:baklava_v1"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
@@ -4927,6 +4927,11 @@ targets:
     presubmit: false
     timeout: 60
     properties:
+      # TODO(vashworth): Remove this once we're confident https://github.com/flutter/flutter/issues/185384 is resolved.
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "16c5032a"
+        }
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: animation_with_microtasks_perf_ios__timeline_summary
