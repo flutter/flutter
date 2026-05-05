@@ -22,8 +22,11 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners)
     const fml::TimePoint target_time = recorder->GetVsyncTargetTime();
     FireCallback(start_time, target_time, true);
   };
-  client_ = [[FlutterVSyncClient alloc] initWithTaskRunnerPtr:task_runners_.GetUITaskRunner()
-                                                     callback:callback];
+  client_ = [[FlutterVSyncClient alloc]
+             initWithTaskRunnerPtr:task_runners_.GetUITaskRunner()
+      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+                          callback:std::move(callback)];
   max_refresh_rate_ = FlutterDisplayLinkManager.displayRefreshRate;
 }
 
