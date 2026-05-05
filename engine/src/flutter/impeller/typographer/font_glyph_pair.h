@@ -34,9 +34,11 @@ struct GlyphProperties {
   /// Sets the is_light property based on the luminance of the color.
   void SetIsLight(const Color& c) {
 #if defined(FML_OS_MACOSX)
-    // Luminance from https://www.w3.org/TR/WCAG20/#relativeluminancedef
-    Scalar luminance = c.red * 0.2126f + c.green * 0.7152f + c.blue * 0.0722f;
-    is_light = (luminance > 0.5f);
+    // Uses BT.709 luma coefficients
+    // (https://en.wikipedia.org/wiki/Rec._709#Luma_coefficients) to determine
+    // whether a color is light or dark.
+    Scalar luma = c.red * 0.2126f + c.green * 0.7152f + c.blue * 0.0722f;
+    is_light = (luma > 0.5f);
 #endif
   }
 

@@ -70,26 +70,6 @@ SkPaint::Join ToSkiaJoin(Join join) {
   }
   FML_UNREACHABLE();
 }
-
-// Create an A8 bitmap by copying the alpha channel from an RGBA_8888 bitmap.
-SkBitmap RGBAToA8(const SkBitmap& rgba_bitmap) {
-  SkBitmap a8_bitmap;
-  a8_bitmap.setInfo(
-      SkImageInfo::MakeA8(rgba_bitmap.width(), rgba_bitmap.height()));
-  a8_bitmap.allocPixels();
-
-  size_t total_pixels = rgba_bitmap.width() * rgba_bitmap.height();
-  const uint8_t* src_bytes =
-      static_cast<const uint8_t*>(rgba_bitmap.getAddr(0, 0));
-  uint8_t* dst_pixels = static_cast<uint8_t*>(a8_bitmap.getAddr(0, 0));
-  for (size_t i = 0; i < total_pixels; ++i) {
-    // Copy alpha channel from RGBA to A8. The alpha channel is the 4th byte
-    // (index 3) of each 4-byte pixel from the RGBA_8888 src.
-    dst_pixels[i] = src_bytes[i * 4 + 3];
-  }
-
-  return a8_bitmap;
-}
 }  // namespace
 
 std::shared_ptr<TypographerContext> TypographerContextSkia::Make() {
@@ -337,7 +317,10 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
   }
 
   if (has_light_glyphs) {
-    bitmap = RGBAToA8(bitmap);
+    SkBitmap a8_bitmap;
+    if (bitmap.extractAlpha(&a8_bitmap)) {
+      bitmap = a8_bitmap;
+    }
   }
 
   // Writing to a malloc'd buffer and then copying to the staging buffers
@@ -403,7 +386,10 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
               pair.glyph.properties);
 
     if (is_light_glyph) {
-      bitmap = RGBAToA8(bitmap);
+      SkBitmap a8_bitmap;
+      if (bitmap.extractAlpha(&a8_bitmap)) {
+        bitmap = a8_bitmap;
+      }
     }
 
     // Writing to a malloc'd buffer and then copying to the staging buffers
