@@ -183,6 +183,21 @@ class Daemon {
     registerDomain(devToolsDomain = DevToolsDomain(this));
     registerDomain(proxyDomain = ProxyDomain(this, fileTransfer: fileTransfer));
 
+    // Load auth secret once at startup.
+    // Prefer FLUTTER_DAEMON_SECRET_FILE (file-based) over the direct
+    // FLUTTER_DAEMON_SECRET env var: the file path in the environment is
+    // far less sensitive than the secret value itself.
+    final String? secretFilePath =
+        globals.platform.environment['FLUTTER_DAEMON_SECRET_FILE'];
+    if (secretFilePath != null && secretFilePath.isNotEmpty) {
+      final secretFile = globals.fs.file(secretFilePath);
+      _authSecret = secretFile.existsSync()
+          ? secretFile.readAsStringSync().trim()
+          : null;
+    } else {
+      _authSecret = globals.platform.environment['FLUTTER_DAEMON_SECRET'];
+    }
+
     // Start listening.
     _commandSubscription = connection.incomingCommands.listen(
       _handleRequest,
@@ -225,6 +240,11 @@ class Daemon {
   final _onExitCompleter = Completer<int>();
   final _domainMap = <String, Domain>{};
 
+  // Auth secret loaded once at startup from FLUTTER_DAEMON_SECRET_FILE
+  // (preferred) or FLUTTER_DAEMON_SECRET. Stored in memory so the value
+  // is never re-read from the (world-readable) process environment.
+  late final String? _authSecret;
+
   @visibleForTesting
   void registerDomain(Domain domain) {
     _domainMap[domain.name] = domain;
@@ -243,13 +263,13 @@ class Daemon {
       return;
     }
 
-    // Verify shared secret to prevent unauthorized local processes from
-    // invoking daemon methods. Clients must supply the same value that was
-    // set in the FLUTTER_DAEMON_SECRET environment variable.
-    final String? requiredSecret = globals.platform.environment['FLUTTER_DAEMON_SECRET'];
-    if (requiredSecret != null && requiredSecret.isNotEmpty) {
-      if (request.data['secret'] != requiredSecret) {
-        connection.sendErrorResponse(id, 'authentication required', StackTrace.current);
+    // Verify shared secret using the value loaded at construction time.
+    // The stack trace is intentionally omitted from the error response to
+    // avoid leaking internal implementation details to a potentially
+    // malicious caller.
+    if (_authSecret != null && _authSecret!.isNotEmpty) {
+      if (request.data['secret'] != _authSecret) {
+        connection.sendErrorResponse(id, 'authentication required', null);
         return;
       }
     }
