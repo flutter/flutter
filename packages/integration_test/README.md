@@ -173,9 +173,30 @@ void main() {
 ## Android Device Testing
 
 Create an instrumentation test file in your application's
-**android/app/src/androidTest/java/com/example/myapp/** directory (replacing
-com, example, and myapp with values from your app's package name). You can name
-this test file `MainActivityTest.java` or another name of your choice.
+**android/app/src/androidTest/kotlin/com/example/myapp/** directory (replacing
+com, example, and myapp with values from your app's package name). If your project
+uses Java, create it in **android/app/src/androidTest/java/com/example/myapp/** instead. 
+You can name this test file `MainActivityTest.kt` (or `MainActivityTest.java` for Java).
+
+### Kotlin (Default)
+
+```kotlin
+package com.example.myapp
+
+import androidx.test.rule.ActivityTestRule
+import dev.flutter.plugins.integration_test.FlutterTestRunner
+import org.junit.Rule
+import org.junit.runner.RunWith
+
+@RunWith(FlutterTestRunner::class)
+class MainActivityTest {
+  @Rule
+  @JvmField
+  var rule: ActivityTestRule<MainActivity> = ActivityTestRule(MainActivity::class.java, true, false)
+}
+```
+
+### Java
 
 ```java
 package com.example.myapp;
