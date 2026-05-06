@@ -362,12 +362,16 @@ SKWASM_EXPORT void canvas_drawAtlas(flutter::DisplayListBuilder* canvas,
                                     flutter::DlRect* cull_rect,
                                     flutter::DlPaint* paint,
                                     Skwasm::FilterQuality quality) {
-  std::vector<flutter::DlColor> dl_colors(sprite_count);
-  for (int i = 0; i < sprite_count; i++) {
-    dl_colors[i] = flutter::DlColor(colors[i]);
+  std::vector<flutter::DlColor> dl_colors;
+  if (colors != nullptr) {
+    dl_colors.resize(sprite_count);
+    for (int i = 0; i < sprite_count; i++) {
+      dl_colors[i] = flutter::DlColor(colors[i]);
+    }
   }
   canvas->DrawAtlas(
-      sk_ref_sp(atlas), transforms, rects, dl_colors.data(), sprite_count, mode,
+      sk_ref_sp(atlas), transforms, rects,
+      colors != nullptr ? dl_colors.data() : nullptr, sprite_count, mode,
       Skwasm::SamplingOptionsForQuality(quality), cull_rect, paint);
 }
 
