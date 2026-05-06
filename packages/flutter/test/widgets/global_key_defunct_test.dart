@@ -1,31 +1,33 @@
-import 'package:flutter_test/flutter_test.dart';
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('GlobalKey reuse after defunct does not assert (different widget type)', (
     WidgetTester tester,
   ) async {
     final GlobalKey key = GlobalKey();
-    // First widget with a Container
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Container(key: key),
       ),
     );
-    // Ensure it is attached
     expect(find.byKey(key), findsOneWidget);
-    // Remove it to make element defunct
+
     await tester.pumpWidget(const SizedBox.shrink());
-    // Now reuse the same key with a different widget type (Text)
-    // This should not trigger an assertion because the previous element is defunct.
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Text('Reused', key: key),
       ),
     );
-    // No exceptions means pass
+
+    expect(tester.takeException(), isNull);
     expect(find.text('Reused'), findsOneWidget);
   });
 
@@ -33,26 +35,24 @@ void main() {
     WidgetTester tester,
   ) async {
     final GlobalKey key = GlobalKey();
-    // First widget with a Container
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Container(key: key),
       ),
     );
-    // Ensure it is attached
     expect(find.byKey(key), findsOneWidget);
-    // Remove it to make element defunct
+
     await tester.pumpWidget(const SizedBox.shrink());
-    // Now reuse the same key with the same widget type
-    // This should not trigger an assertion.
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Container(key: key),
       ),
     );
-    // No exceptions means pass
+
+    expect(tester.takeException(), isNull);
     expect(find.byKey(key), findsOneWidget);
   });
 }

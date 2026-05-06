@@ -3179,8 +3179,9 @@ class BuildOwner {
     assert(() {
       if (_globalKeyRegistry.containsKey(key)) {
         final Element oldElement = _globalKeyRegistry[key]!;
-        // If the old element is already defunct, allow replacement; otherwise flag a potential misuse.
-        if (oldElement._lifecycleState != _ElementLifecycle.defunct) {
+        // If the old element is already defunct or failed, allow replacement; otherwise flag a potential misuse.
+        if (oldElement._lifecycleState != _ElementLifecycle.defunct &&
+            oldElement._lifecycleState != _ElementLifecycle.failed) {
           assert(element.widget.runtimeType != oldElement.widget.runtimeType);
           _debugIllFatedElements?.add(oldElement);
         }
