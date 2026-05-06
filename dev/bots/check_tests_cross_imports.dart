@@ -187,9 +187,7 @@ class TestsCrossImportChecker {
     'packages/flutter/test/rendering/object_test.dart',
   };
   static final Set<String> knownSchedulerCrossImports = <String>{};
-  static final Set<String> knownSemanticsCrossImports = <String>{
-    'packages/flutter/test/semantics/traversal_order_test.dart',
-  };
+  static final Set<String> knownSemanticsCrossImports = <String>{};
   static final Set<String> knownServicesCrossImports = <String>{};
 
   /// These tests are known to have cross imports. These cross imports
