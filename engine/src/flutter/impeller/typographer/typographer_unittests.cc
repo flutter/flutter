@@ -389,7 +389,7 @@ TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
 
   // Initial area was 200 x 100 = 20_000
   // We added 20x20 = 400. 400 / 20_000 == 0.02 == 2%
-  ASSERT_TRUE(flutter::testing::NumberNear(packer->PercentFull(), 0.02));
+  ASSERT_TRUE(flutter::testing::NumberNear(packer->PercentFull(), 2.0f));
 
   IPoint16 second_output = {-1, -1};
   ASSERT_TRUE(packer->AddRect(140, 90, &second_output));
@@ -402,14 +402,14 @@ TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
 
   // We added another 90 x 140 = 12_600 units, now taking us to 13_000
   // 13_000 / 20_000 == 0.65 == 65%
-  ASSERT_TRUE(flutter::testing::NumberNear(packer->PercentFull(), 0.65));
+  ASSERT_TRUE(flutter::testing::NumberNear(packer->PercentFull(), 65.0f));
 
   // There's enough area to add this rectangle, but no space big enough for
   // the 50 units of width.
   IPoint16 output;
   ASSERT_FALSE(packer->AddRect(50, 50, &output));
   // Should be unchanged.
-  ASSERT_TRUE(flutter::testing::NumberNear(packer->PercentFull(), 0.65));
+  ASSERT_TRUE(flutter::testing::NumberNear(packer->PercentFull(), 65.0f));
 
   packer->Reset();
   // Should be empty now.
@@ -437,6 +437,79 @@ TEST(TypographerTest, RectanglePackerFillsRows) {
   EXPECT_EQ(loc.y(), 16);
 }
 
+TEST(TypographerTest, RectanglePackerDoesNotShrink) {
+  auto skyline = RectanglePacker::Factory(200, 200);
+
+  EXPECT_FALSE(skyline->GrowTo(199, 200));
+  EXPECT_FALSE(skyline->GrowTo(200, 199));
+  EXPECT_FALSE(skyline->GrowTo(199, 201));
+  EXPECT_FALSE(skyline->GrowTo(201, 199));
+  EXPECT_FALSE(skyline->GrowTo(std::numeric_limits<int>::min(), 200));
+  EXPECT_FALSE(skyline->GrowTo(200, std::numeric_limits<int>::min()));
+  EXPECT_FALSE(skyline->GrowTo(std::numeric_limits<int>::min(), 201));
+  EXPECT_FALSE(skyline->GrowTo(201, std::numeric_limits<int>::min()));
+}
+
+TEST(TypographerTest, RectanglePackerGrowsVertically) {
+  auto skyline = RectanglePacker::Factory(200, 200);
+  IPoint16 loc;
+
+  // We should be able to fit a grid of 10x10 rects of size 20x20
+  for (int i = 0; i < 100; i++) {
+    EXPECT_TRUE(skyline->AddRect(20, 20, &loc)) << "index: " << i;
+  }
+  // We should not able to fit a single additional rect.
+  EXPECT_FALSE(skyline->AddRect(1, 1, &loc));
+
+  EXPECT_TRUE(skyline->GrowTo(200, 400));
+  // We should be able to fit a second grid of 10x10 rects of size 20x20
+  for (int i = 0; i < 100; i++) {
+    EXPECT_TRUE(skyline->AddRect(20, 20, &loc)) << "index: " << i;
+  }
+  // We should not able to fit a single additional rect.
+  EXPECT_FALSE(skyline->AddRect(1, 1, &loc));
+}
+
+TEST(TypographerTest, RectanglePackerGrowsHorizontally) {
+  auto skyline = RectanglePacker::Factory(200, 200);
+  IPoint16 loc;
+
+  // We should be able to fit a grid of 10x10 rects of size 20x20
+  for (int i = 0; i < 100; i++) {
+    EXPECT_TRUE(skyline->AddRect(20, 20, &loc)) << "index: " << i;
+  }
+  // We should not able to fit a single additional rect.
+  EXPECT_FALSE(skyline->AddRect(1, 1, &loc));
+
+  EXPECT_TRUE(skyline->GrowTo(400, 200));
+  // We should be able to fit a second grid of 10x10 rects of size 20x20
+  for (int i = 0; i < 100; i++) {
+    EXPECT_TRUE(skyline->AddRect(20, 20, &loc)) << "index: " << i;
+  }
+  // We should not able to fit a single additional rect.
+  EXPECT_FALSE(skyline->AddRect(1, 1, &loc));
+}
+
+TEST(TypographerTest, RectanglePackerGrowsBothDirections) {
+  auto skyline = RectanglePacker::Factory(200, 200);
+  IPoint16 loc;
+
+  // We should be able to fit a grid of 10x10 rects of size 20x20
+  for (int i = 0; i < 100; i++) {
+    EXPECT_TRUE(skyline->AddRect(20, 20, &loc)) << "index: " << i;
+  }
+  // We should not able to fit a single additional rect.
+  EXPECT_FALSE(skyline->AddRect(1, 1, &loc));
+
+  EXPECT_TRUE(skyline->GrowTo(400, 400));
+  // We should be able to fit 3 more grids of 10x10 rects of size 20x20
+  for (int i = 0; i < 100 * 3; i++) {
+    EXPECT_TRUE(skyline->AddRect(20, 20, &loc)) << "index: " << i;
+  }
+  // We should not able to fit a single additional rect.
+  EXPECT_FALSE(skyline->AddRect(1, 1, &loc));
+}
+
 TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
   if (GetBackend() == PlaygroundBackend::kOpenGLES) {
     GTEST_SKIP() << "Atlas growth isn't supported for OpenGLES currently.";
@@ -456,11 +529,14 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
       CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
                        GlyphAtlas::Type::kAlphaBitmap, Matrix(), atlas_context,
                        MakeTextFrameFromTextBlobSkia(blob));
+  constexpr int test_count = 15;
   // Continually append new glyphs until the glyph size grows to the maximum.
   // Note that the sizes here are more or less experimentally determined, but
   // the important expectation is that the atlas size will shrink again after
   // growing to the maximum size.
-  constexpr ISize expected_sizes[13] = {
+  constexpr ISize expected_sizes[test_count] = {
+      {4096, 2048},   //
+      {4096, 2048},   //
       {4096, 4096},   //
       {4096, 4096},   //
       {4096, 8192},   //
@@ -476,9 +552,72 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
       {4096, 4096}    // Shrinks!
   };
 
+  constexpr std::array<Rect, 2> expected_glyph_sizes[test_count] = {
+      {{
+          Rect::MakeLTRB(-37.5, -1762.5, 1575, 37.5),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-38.25, -1797.75, 1606.5, 38.25),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-39, -1833, 1638, 39),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-39.75, -1868.25, 1669.5, 39.75),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-40.5, -1903.5, 1701, 40.5),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-41.25, -1938.75, 1732.5, 41.25),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-42, -1974, 1764, 42),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-42.75, -2009.25, 1795.5, 42.75),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-43.5, -2044.5, 1827, 43.5),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-44.25, -2079.75, 1858.5, 44.25),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-45, -2115, 1890, 45),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-45.75, -2150.25, 1921.5, 45.75),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-46.5, -2185.5, 1953, 46.5),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-47.25, -2220.75, 1984.5, 47.25),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+      {{
+          Rect::MakeLTRB(-48, -2256, 2016, 48),
+          Rect::MakeLTRB(30.0f, -352.5f, 285.0f, 7.5f),
+      }},
+  };
+
   SkFont sk_font_small = flutter::testing::CreateTestFontOfSize(10);
 
-  for (int i = 0; i < 13; i++) {
+  for (int i = 0; i < test_count; i++) {
     SkTextBlobBuilder builder;
 
     auto add_char = [&](const SkFont& sk_font, char c) {
@@ -496,13 +635,43 @@ TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
     auto blob = builder.make();
 
     Matrix transform = Matrix::MakeScale({50.0f + i, 50.0f + i, 1.0f});
-    atlas =
-        CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
-                         GlyphAtlas::Type::kAlphaBitmap, transform,
-                         atlas_context, MakeTextFrameFromTextBlobSkia(blob));
+    auto frame = MakeTextFrameFromTextBlobSkia(blob);
+    ASSERT_EQ(frame->GetRunCount(), 2u);
+    atlas = CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                             GlyphAtlas::Type::kAlphaBitmap, transform,
+                             atlas_context, frame);
     ASSERT_TRUE(!!atlas);
+
+    EXPECT_GE(atlas->GetGlyphCount(), 2u);
+    int run_index = 0;
+    int glyph_index = 0;
+    for (const auto& run : frame->GetRuns()) {
+      Rational rounded_scale =
+          TextFrame::RoundScaledFontSize(transform.GetMaxBasisLengthXY());
+      ScaledFont scaled_font = {
+          .font = run.GetFont(),
+          .scale = rounded_scale,
+      };
+      for (const auto& glyph_position : run.GetGlyphPositions()) {
+        SubpixelPosition subpixel = TextFrame::ComputeSubpixelPosition(
+            glyph_position, scaled_font.font.GetAxisAlignment(), transform);
+        SubpixelGlyph subpixel_glyph(glyph_position.glyph, subpixel, {});
+        auto font_glyph_atlas = atlas->GetFontGlyphAtlas(scaled_font);
+        const auto& font_glyph_bounds =
+            font_glyph_atlas->FindGlyphBounds(subpixel_glyph);
+        ASSERT_TRUE(font_glyph_bounds.has_value());
+        EXPECT_EQ(font_glyph_bounds->glyph_bounds,
+                  expected_glyph_sizes[i][glyph_index])
+            << "test index: " << i           //
+            << ", run index: " << run_index  //
+            << ", glyph index: " << glyph_index;
+        glyph_index++;
+      }
+      run_index++;
+    }
     EXPECT_EQ(atlas->GetTexture()->GetTextureDescriptor().size,
-              expected_sizes[i]);
+              expected_sizes[i])
+        << "at index: " << i;
   }
 
   // The final atlas should contain both the "A" glyph (which was not present

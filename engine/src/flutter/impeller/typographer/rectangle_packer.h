@@ -57,18 +57,25 @@ class RectanglePacker {
   ///
   virtual void Reset() = 0;
 
+  //----------------------------------------------------------------------------
+  /// @brief     Resize the specified area, which must be larger that the
+  ///            existing area.
+  ///
+  ///            None of the previously added rectangles will be disturbed.
+  ///
+  virtual bool GrowTo(int width, int height) = 0;
+
+  int width() const { return width_; }
+  int height() const { return height_; }
+
  protected:
   RectanglePacker(int width, int height) : width_(width), height_(height) {
     FML_DCHECK(width >= 0);
     FML_DCHECK(height >= 0);
   }
 
-  int width() const { return width_; }
-  int height() const { return height_; }
-
- private:
-  const int width_;
-  const int height_;
+  int width_;
+  int height_;
 };
 
 }  // namespace impeller
