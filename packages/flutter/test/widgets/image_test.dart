@@ -2982,35 +2982,23 @@ void main() {
     final bytes = Uint8List.fromList(kTransparentImage);
     for (final flag in <bool>[false, true]) {
       expect(
-        Image.memory(
-          bytes,
-          cacheWidth: 100,
-          cacheHeight: 100,
-          useLogicalCacheSize: flag,
-        ).image,
+        Image.memory(bytes, cacheWidth: 100, cacheHeight: 100, useLogicalCacheSize: flag).image,
         isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
       );
     }
   });
 
-  testWidgets(
-    'Image.file forwards useLogicalCacheSize to ResizeImage',
-    (WidgetTester tester) async {
-      final file = File.fromUri(Uri.parse('/home/flutter/dash.png'));
-      for (final flag in <bool>[false, true]) {
-        expect(
-          Image.file(
-            file,
-            cacheWidth: 100,
-            cacheHeight: 100,
-            useLogicalCacheSize: flag,
-          ).image,
-          isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
-        );
-      }
-    },
-    skip: kIsWeb,
-  );
+  testWidgets('Image.file forwards useLogicalCacheSize to ResizeImage', (
+    WidgetTester tester,
+  ) async {
+    final file = File.fromUri(Uri.parse('/home/flutter/dash.png'));
+    for (final flag in <bool>[false, true]) {
+      expect(
+        Image.file(file, cacheWidth: 100, cacheHeight: 100, useLogicalCacheSize: flag).image,
+        isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+      );
+    }
+  }, skip: kIsWeb);
 
   testWidgets(
     'Animated GIFs do not require layout for subsequent frames',
