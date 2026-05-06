@@ -41,12 +41,6 @@ abstract class Painter {
     // 1. Do we resize to 0, 0 at the end of each paint so we do not hold on to large buffers?
     // 2. Do we keep the canvas around (even big ones) and only resize when needed?
     // 3. Do we have a max size and reuse the canvas up to that size?
-    if (currentDevicePixelRatio == devicePixelRatio &&
-        paintCanvas.width == (width * devicePixelRatio).ceilToDouble() &&
-        paintCanvas.height == (height * devicePixelRatio).ceilToDouble()) {
-      // We need to resize canvas whenever the requested size changes
-      return;
-    }
 
     if (currentDevicePixelRatio != devicePixelRatio) {
       // We need to reset the scale transform whenever the device pixel ratio changes
