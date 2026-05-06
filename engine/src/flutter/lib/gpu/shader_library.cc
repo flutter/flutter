@@ -190,7 +190,11 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
       impeller::fb::shaderbundle::ShaderBundleFormatVersion::kVersion);
   if (version != expected) {
     VALIDATION_LOG << "Unsupported shader bundle format version: " << version
-                   << ", expected: " << expected;
+                   << ", expected: " << expected
+                   << ". This shader bundle was compiled with an incompatible "
+                      "version of impellerc. Please rebuild the shader bundle "
+                      "with the version of impellerc that ships with the "
+                      "current Flutter SDK.";
     return nullptr;
   }
 
@@ -219,8 +223,10 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
         std::vector<impeller::ShaderStructMemberMetadata> members;
         if (uniform->fields() != nullptr) {
           for (const auto& struct_member : *uniform->fields()) {
+            const impeller::ShaderType type =
+                FromUniformType(struct_member->type());
             members.push_back(impeller::ShaderStructMemberMetadata{
-                .type = FromUniformType(struct_member->type()),
+                .type = type,
                 .name = struct_member->name()->c_str(),
                 .offset = static_cast<size_t>(struct_member->offset_in_bytes()),
                 .size =
@@ -231,6 +237,9 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
                     struct_member->array_elements() == 0
                         ? std::optional<size_t>(std::nullopt)
                         : static_cast<size_t>(struct_member->array_elements()),
+                .float_type = impeller::DeriveShaderFloatType(
+                    type, static_cast<size_t>(struct_member->vec_size()),
+                    static_cast<size_t>(struct_member->columns())),
             });
           }
         }

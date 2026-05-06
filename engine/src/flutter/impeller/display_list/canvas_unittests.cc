@@ -545,5 +545,16 @@ TEST_P(AiksTest, BlendModeCompatibilityWithSDFRendering) {
   }
 }
 
+TEST(CanvasTest, NonAntialiasedPaintIncompatibleWithSDFRendering) {
+  Paint paint;
+  paint.anti_alias = false;
+  EXPECT_FALSE(Canvas::IsCompatibleWithSDFRendering(paint));
+}
+
+TEST(CanvasTest, AntialiasedPaintCompatibleWithSDFRendering) {
+  Paint paint;
+  EXPECT_TRUE(Canvas::IsCompatibleWithSDFRendering(paint));
+}
+
 }  // namespace testing
 }  // namespace impeller
