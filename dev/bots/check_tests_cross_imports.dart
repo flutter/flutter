@@ -164,7 +164,6 @@ class TestsCrossImportChecker {
   static final Set<String> knownPaintingCrossImports = <String>{
     'packages/flutter/test/painting/system_fonts_test.dart',
     'packages/flutter/test/painting/decoration_image_lerp_test.dart',
-    'packages/flutter/test/painting/_network_image_test_web.dart',
     'packages/flutter/test/painting/continuous_rectangle_border_test.dart',
     'packages/flutter/test/painting/colors_test.dart',
     'packages/flutter/test/painting/star_border_test.dart',
