@@ -515,6 +515,51 @@ void main() {
 
         expect(called, true);
       });
+
+      test('memoryNetwork forwards useLogicalCacheSize to placeholder and image', () {
+        final testBytes = Uint8List.fromList(kTransparentImage);
+        for (final flag in <bool>[false, true]) {
+          final image = FadeInImage.memoryNetwork(
+            placeholder: testBytes,
+            image: 'test.com',
+            placeholderCacheWidth: 20,
+            placeholderCacheHeight: 30,
+            imageCacheWidth: 40,
+            imageCacheHeight: 50,
+            useLogicalCacheSize: flag,
+          );
+          expect(
+            image.placeholder,
+            isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+          );
+          expect(
+            image.image,
+            isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+          );
+        }
+      });
+
+      test('assetNetwork forwards useLogicalCacheSize to placeholder and image', () {
+        for (final flag in <bool>[false, true]) {
+          final image = FadeInImage.assetNetwork(
+            placeholder: 'asset.png',
+            image: 'test.com',
+            placeholderCacheWidth: 20,
+            placeholderCacheHeight: 30,
+            imageCacheWidth: 40,
+            imageCacheHeight: 50,
+            useLogicalCacheSize: flag,
+          );
+          expect(
+            image.placeholder,
+            isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+          );
+          expect(
+            image.image,
+            isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+          );
+        }
+      });
     });
 
     group('semantics', () {

@@ -2944,6 +2944,74 @@ void main() {
     );
   });
 
+  testWidgets('Image.network forwards useLogicalCacheSize to ResizeImage', (
+    WidgetTester tester,
+  ) async {
+    for (final flag in <bool>[false, true]) {
+      expect(
+        Image.network(
+          'https://example.com/test.png',
+          cacheWidth: 100,
+          cacheHeight: 100,
+          useLogicalCacheSize: flag,
+        ).image,
+        isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+      );
+    }
+  });
+
+  testWidgets('Image.asset forwards useLogicalCacheSize to ResizeImage', (
+    WidgetTester tester,
+  ) async {
+    for (final flag in <bool>[false, true]) {
+      expect(
+        Image.asset(
+          'asset.png',
+          cacheWidth: 100,
+          cacheHeight: 100,
+          useLogicalCacheSize: flag,
+        ).image,
+        isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+      );
+    }
+  });
+
+  testWidgets('Image.memory forwards useLogicalCacheSize to ResizeImage', (
+    WidgetTester tester,
+  ) async {
+    final bytes = Uint8List.fromList(kTransparentImage);
+    for (final flag in <bool>[false, true]) {
+      expect(
+        Image.memory(
+          bytes,
+          cacheWidth: 100,
+          cacheHeight: 100,
+          useLogicalCacheSize: flag,
+        ).image,
+        isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+      );
+    }
+  });
+
+  testWidgets(
+    'Image.file forwards useLogicalCacheSize to ResizeImage',
+    (WidgetTester tester) async {
+      final file = File.fromUri(Uri.parse('/home/flutter/dash.png'));
+      for (final flag in <bool>[false, true]) {
+        expect(
+          Image.file(
+            file,
+            cacheWidth: 100,
+            cacheHeight: 100,
+            useLogicalCacheSize: flag,
+          ).image,
+          isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+        );
+      }
+    },
+    skip: kIsWeb,
+  );
+
   testWidgets(
     'Animated GIFs do not require layout for subsequent frames',
     experimentalLeakTesting: LeakTesting.settings
