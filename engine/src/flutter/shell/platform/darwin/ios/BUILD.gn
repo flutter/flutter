@@ -247,7 +247,6 @@ if (enable_ios_unittests) {
     ]
   }
 
-  # Swift testing tests.
   source_set("ios_test_flutter_swift") {
     testonly = true
     visibility = [ ":*" ]
