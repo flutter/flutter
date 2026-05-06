@@ -9,7 +9,6 @@ import 'package:ui/ui.dart' as ui;
 import '../canvaskit/canvaskit_api.dart';
 import '../canvaskit/image.dart';
 import '../dom.dart';
-import 'debug.dart';
 import 'layout.dart';
 import 'paint.dart';
 
@@ -18,6 +17,8 @@ abstract class Painter {
   Painter();
 
   bool get hasSingleImageCache => false;
+
+  double? _lastDevicePixelRatio;
 
   /// Draws the previously filled on Canvas2D text cluster
   void drawTextCluster(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
@@ -37,34 +38,18 @@ abstract class Painter {
   bool hasCache();
 
   /// Adjust the _paintCanvas scale based on device pixel ratio
-  void resizePaintCanvas(double devicePixelRatio, double width, double height) {
+  void prepareToPaint(double devicePixelRatio, double width, double height) {
     // 1. Do we resize to 0, 0 at the end of each paint so we do not hold on to large buffers?
     // 2. Do we keep the canvas around (even big ones) and only resize when needed?
     // 3. Do we have a max size and reuse the canvas up to that size?
 
-    if (currentDevicePixelRatio != devicePixelRatio) {
+    if (_lastDevicePixelRatio != devicePixelRatio) {
       // We need to reset the scale transform whenever the device pixel ratio changes
       resetCache();
     }
+    _lastDevicePixelRatio = devicePixelRatio;
 
-    // Since the output canvas is zoomed by device pixel ratio,
-    // we need to adjust our offscreen canvas accordingly to avoid pixelation
-    // that would happen if didn't resize it.
-    if (currentDevicePixelRatio != null) {
-      paintContext.restore(); // Restore to unscaled state
-    }
-    paintCanvas.width = (width * devicePixelRatio).ceilToDouble();
-    paintCanvas.height = (height * devicePixelRatio).ceilToDouble();
-    paintContext.scale(devicePixelRatio, devicePixelRatio);
-    paintContext.save();
-
-    currentDevicePixelRatio = devicePixelRatio;
-
-    if (WebParagraphDebug.logging) {
-      WebParagraphDebug.log(
-        'resizePaintCanvas: ${paintCanvas.width}x${paintCanvas.height} @ $devicePixelRatio',
-      );
-    }
+    resizePaintCanvas(devicePixelRatio, width, height);
   }
 }
 

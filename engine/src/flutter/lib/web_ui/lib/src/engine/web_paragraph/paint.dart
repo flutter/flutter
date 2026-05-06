@@ -16,6 +16,18 @@ final DomHTMLCanvasElement paintCanvas =
 final paintContext =
     paintCanvas.getContext('2d', {'willReadFrequently': true})! as DomCanvasRenderingContext2D;
 
+/// Resizes the global paint canvas to the given width and height and updates the device pixel ratio.
+///
+/// The paint canvas is scaled by the device pixel ratio to avoid pixelation
+/// that would happen if it wasn't resized.
+void resizePaintCanvas(double devicePixelRatio, double width, double height) {
+  paintCanvas.width = (width * devicePixelRatio).ceilToDouble();
+  paintCanvas.height = (height * devicePixelRatio).ceilToDouble();
+  paintCanvas.style.width = '${width}px';
+  paintCanvas.style.height = '${height}px';
+  currentDevicePixelRatio = devicePixelRatio;
+}
+
 /// Paints on a [WebParagraph].
 ///
 /// It uses a [DomCanvasElement] to get text information
