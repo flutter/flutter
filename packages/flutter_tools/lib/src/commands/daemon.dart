@@ -1803,6 +1803,9 @@ class ProxyDomain extends Domain {
 final class MachineOutputLogger extends DelegatingLogger {
   MachineOutputLogger({required Logger parent}) : super(parent);
 
+  @override
+  bool get isMachine => true;
+
   AppDomain? _domain;
   late final AppInstance _app;
   var _nextProgressId = 0;

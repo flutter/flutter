@@ -290,12 +290,7 @@ if (enable_unittests) {
   source_set("display_list_benchmarks_source") {
     testonly = true
 
-    sources = [
-      "benchmarking/dl_benchmarks.cc",
-      "benchmarking/dl_benchmarks.h",
-    ]
-
-    deps = [
+    public_deps = [
       ":display_list",
       ":display_list_fixtures",
       "//flutter/benchmarking",
@@ -309,7 +304,7 @@ if (enable_unittests) {
     ]
 
     if (!is_wasm) {
-      deps += [
+      public_deps += [
         "$dart_src/runtime:libdart_jit",  # for tracing
       ]
     }
@@ -317,6 +312,23 @@ if (enable_unittests) {
 
   executable("display_list_benchmarks") {
     testonly = true
+
+    sources = [
+      "benchmarking/dl_benchmarks.cc",
+      "benchmarking/dl_benchmarks.h",
+    ]
+
+    defines = [ "DISPLAY_LIST_BENCHMARK_ALL_OPS" ]
+    deps = [ ":display_list_benchmarks_source" ]
+  }
+
+  executable("primitive_rendering_benchmarks") {
+    testonly = true
+
+    sources = [
+      "benchmarking/dl_benchmarks.cc",
+      "benchmarking/dl_benchmarks.h",
+    ]
 
     deps = [ ":display_list_benchmarks_source" ]
   }
