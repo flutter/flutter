@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:dds/dap.dart' hide PidTracker;
 
@@ -51,18 +50,11 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
       if (debug) '--start-paused',
     ];
 
-    // Handle customTool and deletion of any arguments for it.
-    final String executable =
-        args.customTool ??
-        fileSystem.path.join(
-          Cache.flutterRoot!,
-          'bin',
-          platform.isWindows ? 'flutter.bat' : 'flutter',
-        );
-    final int? removeArgs = args.customToolReplacesArgs;
-    if (args.customTool != null && removeArgs != null) {
-      toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
-    }
+    final String executable = fileSystem.path.join(
+      Cache.flutterRoot!,
+      'bin',
+      platform.isWindows ? 'flutter.bat' : 'flutter',
+    );
 
     final processArgs = <String>[...toolArgs, ...?args.toolArgs, ?program, ...?args.args];
 

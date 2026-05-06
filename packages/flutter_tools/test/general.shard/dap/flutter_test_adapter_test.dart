@@ -71,7 +71,7 @@ void main() {
       expect(adapter.env!['MY_TEST_ENV'], 'MY_TEST_VALUE');
     });
 
-    group('includes customTool', () {
+    group('ignores customTool', () {
       test('with no args replaced', () async {
         final adapter = FakeFlutterTestDebugAdapter(
           fileSystem: MemoryFileSystem.test(style: fsStyle),
@@ -90,7 +90,7 @@ void main() {
         await adapter.launchRequest(request, args, responseCompleter.complete);
         await responseCompleter.future;
 
-        expect(adapter.executable, equals('/custom/flutter'));
+        expect(adapter.executable, equals(expectedFlutterExecutable));
         // args should be in-tact
         expect(adapter.processArgs, contains('--machine'));
       });
@@ -115,10 +115,9 @@ void main() {
         await adapter.launchRequest(request, args, responseCompleter.complete);
         await responseCompleter.future;
 
-        expect(adapter.executable, equals('/custom/flutter'));
-        // normal built-in args are replaced by customToolReplacesArgs, but
-        // user-provided toolArgs are not.
-        expect(adapter.processArgs, isNot(contains('--machine')));
+        expect(adapter.executable, equals(expectedFlutterExecutable));
+        // customToolReplacesArgs is ignored; normal built-in args remain.
+        expect(adapter.processArgs, contains('--machine'));
         expect(adapter.processArgs, contains('tool_args'));
       });
     });

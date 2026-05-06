@@ -2,45 +2,74 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+import 'dart:async';
 
-import 'package:test/test.dart';
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
+import 'package:flutter_tools/src/globals.dart' as globals show platform;
+import 'package:test/test.dart';
+
+import '../general.shard/dap/mocks.dart';
 
 void main() {
-  test('rejects non-absolute customTool', () {
-    expect(() => FlutterLaunchRequestArguments(customTool: 'bin/flutter', program: null), throwsFormatException);
+  final platform = FakePlatform.fromPlatform(globals.platform);
+  final fsStyle = platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix;
+  final expectedFlutterExecutable =
+      platform.isWindows ? r'C:\fake\flutter\bin\flutter.bat' : '/fake/flutter/bin/flutter';
+
+  setUpAll(() {
+    Cache.flutterRoot = platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter';
   });
 
-  test('rejects disallowed basename even if absolute', () {
-    final path = Platform.isWindows ? r'C:\Windows\System32\cmd.exe' : '/bin/sh';
-    expect(() => FlutterLaunchRequestArguments(customTool: path, program: null), throwsFormatException);
+  test('launch adapter ignores customTool', () async {
+    final adapter = FakeFlutterDebugAdapter(
+      fileSystem: MemoryFileSystem.test(style: fsStyle),
+      platform: platform,
+    );
+    final responseCompleter = Completer<void>();
+    final request = FakeRequest();
+    final args = FlutterLaunchRequestArguments(
+      cwd: '.',
+      program: 'foo.dart',
+      customTool: '/custom/flutter',
+      customToolReplacesArgs: 9999,
+      noDebug: true,
+      toolArgs: <String>['tool_args'],
+    );
+
+    await adapter.configurationDoneRequest(request, null, () {});
+    await adapter.launchRequest(request, args, responseCompleter.complete);
+    await responseCompleter.future;
+
+    expect(adapter.executable, expectedFlutterExecutable);
+    expect(adapter.processArgs, contains('--machine'));
+    expect(adapter.processArgs, contains('tool_args'));
   });
 
-  test('accepts allowed basename when file exists and is executable', () async {
-    if (Platform.isWindows) {
-      // On Windows, skip executable permission checks and just ensure basename check.
-      // Create a temp file named flutter to satisfy the basename allowlist.
-      final tmpDir = await Directory.systemTemp.createTemp('flutter_adapter_test');
-      final file = File('${tmpDir.path}${Platform.pathSeparator}flutter');
-      await file.writeAsString('echo');
-      try {
-        // Should throw only if path is not absolute; this is absolute.
-        FlutterLaunchRequestArguments(customTool: file.path, program: null);
-      } finally {
-        await tmpDir.delete(recursive: true);
-      }
-    } else {
-      final tmpDir = await Directory.systemTemp.createTemp('flutter_adapter_test');
-      final file = File('${tmpDir.path}${Platform.pathSeparator}flutter');
-      await file.writeAsString('echo');
-      // Make it executable.
-      await Process.run('chmod', ['+x', file.path]);
-      try {
-        FlutterLaunchRequestArguments(customTool: file.path, program: null);
-      } finally {
-        await tmpDir.delete(recursive: true);
-      }
-    }
+  test('test adapter ignores customTool', () async {
+    final adapter = FakeFlutterTestDebugAdapter(
+      fileSystem: MemoryFileSystem.test(style: fsStyle),
+      platform: platform,
+    );
+    final responseCompleter = Completer<void>();
+    final request = FakeRequest();
+    final args = FlutterLaunchRequestArguments(
+      cwd: '.',
+      program: 'foo.dart',
+      customTool: '/custom/flutter',
+      customToolReplacesArgs: 9999,
+      noDebug: true,
+      toolArgs: <String>['tool_args'],
+    );
+
+    await adapter.configurationDoneRequest(request, null, () {});
+    await adapter.launchRequest(request, args, responseCompleter.complete);
+    await responseCompleter.future;
+
+    expect(adapter.executable, expectedFlutterExecutable);
+    expect(adapter.processArgs, contains('--machine'));
+    expect(adapter.processArgs, contains('tool_args'));
   });
 }

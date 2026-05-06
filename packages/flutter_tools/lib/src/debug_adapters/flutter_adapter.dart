@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:dds/dap.dart' hide PidTracker;
 import 'package:vm_service/vm_service.dart' as vm;
@@ -157,8 +156,6 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
 
     await _startProcess(
       toolArgs: toolArgs,
-      customTool: args.customTool,
-      customToolReplacesArgs: args.customToolReplacesArgs,
       userToolArgs: args.toolArgs,
       targetProgram: args.program,
     );
@@ -257,8 +254,6 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
 
     await _startProcess(
       toolArgs: toolArgs,
-      customTool: args.customTool,
-      customToolReplacesArgs: args.customToolReplacesArgs,
       targetProgram: args.program,
       userToolArgs: args.toolArgs,
       userArgs: args.args,
@@ -267,25 +262,16 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
 
   /// Starts the `flutter` process to run/attach to the required app.
   Future<void> _startProcess({
-    required String? customTool,
-    required int? customToolReplacesArgs,
     required List<String> toolArgs,
     required List<String>? userToolArgs,
     String? targetProgram,
     List<String>? userArgs,
   }) async {
-    // Handle customTool and deletion of any arguments for it.
-    final String executable =
-        customTool ??
-        fileSystem.path.join(
-          Cache.flutterRoot!,
-          'bin',
-          platform.isWindows ? 'flutter.bat' : 'flutter',
-        );
-    final removeArgs = customToolReplacesArgs;
-    if (customTool != null && removeArgs != null) {
-      toolArgs.removeRange(0, math.min(removeArgs, toolArgs.length));
-    }
+    final String executable = fileSystem.path.join(
+      Cache.flutterRoot!,
+      'bin',
+      platform.isWindows ? 'flutter.bat' : 'flutter',
+    );
 
     final processArgs = <String>[
       ...toolArgs,

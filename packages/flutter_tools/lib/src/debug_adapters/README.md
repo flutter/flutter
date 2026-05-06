@@ -29,8 +29,8 @@ Arguments common to both `launchRequest` and `attachRequest` are:
 - `List<String>? additionalProjectPaths` - paths of any projects (outside of `cwd`) that are open in the users workspace
 - `String? cwd` - the working directory for the Flutter process to be spawned in
 - `List<String>? toolArgs` - arguments for the `flutter run`, `flutter attach` or `flutter test` commands
-- `String? customTool` - an optional tool to run instead of `flutter` - the custom tool must be completely compatible with the tool/command it is replacing
-- `int? customToolReplacesArgs` - the number of arguments to delete from the beginning of the argument list when invoking `customTool` - e.g. setting `customTool` to `flutter_test_wrapper` and `customToolReplacesArgs` to `1` for a test run would invoke `flutter_test_wrapper foo_test.dart` instead of `flutter test foo_test.dart` (if larger than the number of computed arguments all arguments will be removed, if not supplied will default to `0`)
+- `String? customTool` - legacy protocol field retained for compatibility only; it is ignored by the debug adapters
+- `int? customToolReplacesArgs` - legacy protocol field retained for compatibility only; it is ignored by the debug adapters
 
 Arguments specific to `launchRequest` are:
 
