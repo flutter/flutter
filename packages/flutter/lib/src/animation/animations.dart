@@ -371,18 +371,41 @@ class ReverseAnimation extends Animation<double>
 ///    [AnimationController].
 ///  * [Curve.flipped] and [FlippedCurve], which provide the reverse of a
 ///    [Curve].
-class CurvedAnimation extends AsymmetricCurvedAnimation {
+class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<double> {
   /// Creates a curved animation.
   CurvedAnimation({
-    required super.parent,
-    required super.curve,
+    required Animation<double> parent,
+    required Curve curve,
     @Deprecated(
       'Switch to AsymmetricCurvedAnimation if you need different forward & backward animations. '
       'In the future, CurvedAnimation will only support a single curve for improved memory efficiency. '
       'This feature was deprecated after v3.44.0-0.2.pre.',
     )
-    super.reverseCurve,
-  });
+    Curve? reverseCurve,
+  }) : _proxy = AsymmetricCurvedAnimation(parent: parent, curve: curve, reverseCurve: reverseCurve);
+
+  /// The underlying animation that (currently) implements the behaviour
+  /// of [CurvedAnimation].
+  ///
+  /// [AsymmetricCurvedAnimation] is used so this renamed API acts
+  /// near-identically to the old API to reduce breaking change impact.
+  /// In a future update, [CurvedAnimation] will shed its [reverseCurve]
+  /// functionality and remove this field.
+  ///
+  /// While [_proxy] may be considered the true "parent" of this animation,
+  /// the [parent] field is also being proxied to avoid API breakage.
+  /// Aside from the naming, it actually makes no difference whether
+  /// [_proxy] or [parent] is exposed as [AnimationWithParentMixin.parent]
+  /// because the listeners can be notified through either one.
+  late final AsymmetricCurvedAnimation _proxy;
+
+  /// The animation to which this animation applies a curve.
+  @override
+  Animation<double> get parent => _proxy.parent;
+
+  /// The curve to use in the forward direction.
+  Curve get curve => _proxy.curve;
+  set curve(Curve value) => _proxy.curve = value;
 
   /// The curve to use in the reverse direction.
   ///
@@ -399,21 +422,30 @@ class CurvedAnimation extends AsymmetricCurvedAnimation {
   /// disposal.
   ///
   /// If this field is null, uses [curve] in both directions.
-  @override
   @Deprecated(
     'Switch to AsymmetricCurvedAnimation if you need different forward & backward animations. '
     'In the future, CurvedAnimation will only support a single curve for improved memory efficiency. '
     'This feature was deprecated after v3.44.0-0.2.pre.',
   )
-  Curve? get reverseCurve => super.reverseCurve;
+  Curve? get reverseCurve => _proxy.reverseCurve;
+  @Deprecated(
+    'Switch to AsymmetricCurvedAnimation if you need different forward & backward animations. '
+    'In the future, CurvedAnimation will only support a single curve for improved memory efficiency. '
+    'This feature was deprecated after v3.44.0-0.2.pre.',
+  )
+  set reverseCurve(Curve? value) => _proxy.reverseCurve = value;
+
+  /// True if this [CurvedAnimation] has been disposed.
+  bool get isDisposed => _proxy.isDisposed;
+
+  /// Cleans up any listeners added by this [CurvedAnimation].
+  void dispose() => _proxy.dispose();
 
   @override
-  @Deprecated(
-    'Switch to AsymmetricCurvedAnimation if you need different forward & backward animations. '
-    'In the future, CurvedAnimation will only support a single curve for improved memory efficiency. '
-    'This feature was deprecated after v3.44.0-0.2.pre.',
-  )
-  set reverseCurve(Curve? value) => super.reverseCurve = value;
+  double get value => _proxy.value;
+
+  @override
+  String toString() => _proxy.toString();
 }
 
 /// An animation that applies different curves to its [parent] animation
@@ -497,7 +529,7 @@ class AsymmetricCurvedAnimation extends Animation<double> with AnimationWithPare
   /// animation is used to animate.
   AnimationStatus? _curveDirection;
 
-  /// True if this AsymmetricCurvedAnimation has been disposed.
+  /// True if this [AsymmetricCurvedAnimation] has been disposed.
   bool isDisposed = false;
 
   void _updateCurveDirection(AnimationStatus status) {
@@ -508,7 +540,7 @@ class AsymmetricCurvedAnimation extends Animation<double> with AnimationWithPare
     return reverseCurve == null || (_curveDirection ?? parent.status) != AnimationStatus.reverse;
   }
 
-  /// Cleans up any listeners added by this AsymmetricCurvedAnimation.
+  /// Cleans up any listeners added by this [AsymmetricCurvedAnimation].
   void dispose() {
     assert(debugMaybeDispatchDisposed(this));
     isDisposed = true;
