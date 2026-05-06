@@ -44,18 +44,17 @@ class ProxiedDevices extends PollingDeviceDiscovery {
     this.connection, {
     bool deltaFileTransfer = true,
     bool enableDdsProxy = false,
-    required Logger logger,
+    required this.logger,
     FileTransfer fileTransfer = const FileTransfer(),
   }) : _deltaFileTransfer = deltaFileTransfer,
        _enableDdsProxy = enableDdsProxy,
-       _logger = logger,
        _fileTransfer = fileTransfer,
        super('Proxied devices');
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
 
-  final Logger _logger;
+  final Logger logger;
 
   final bool _deltaFileTransfer;
 
@@ -133,7 +132,7 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       supportsFlutterExit: _cast<bool>(capabilities['flutterExit']),
       supportsScreenshot: _cast<bool>(capabilities['screenshot']),
       supportsHardwareRendering: _cast<bool>(capabilities['hardwareRendering']),
-      logger: _logger,
+      logger: logger,
       fileTransfer: _fileTransfer,
     );
   }
@@ -148,7 +147,7 @@ class ProxiedDevices extends PollingDeviceDiscovery {
     } on String catch (e) {
       // Daemon actually does throw string types.
       if (e.contains('command not understood')) {
-        _logger.printTrace(
+        logger.printTrace(
           'The daemon is on an older version that does not support `device.getDiagnostics`.',
         );
         // Silently ignore.
