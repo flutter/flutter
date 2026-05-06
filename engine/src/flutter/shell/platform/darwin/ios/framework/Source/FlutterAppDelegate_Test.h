@@ -5,10 +5,15 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERAPPDELEGATE_TEST_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERAPPDELEGATE_TEST_H_
 
+#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
+
+@class FlutterEngine;
 @class FlutterViewController;
 
 @interface FlutterAppDelegate (Test)
+
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
+- (FlutterEngine*)acquireLaunchEngine;
 
 @end
 

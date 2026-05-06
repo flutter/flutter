@@ -236,14 +236,15 @@ FLUTTER_ASSERT_ARC
 // Verifies that acquireLaunchEngine logs a warning when called before
 // a FlutterViewController is available.
 - (void)testAcquireLaunchEngineLogsWarning {
+  id<FlutterOutputWriter> savedWriter = FlutterLogger.outputWriter;
+
   FlutterStringOutputWriter* writer = [[FlutterStringOutputWriter alloc] init];
   writer.expectedOutput = @"Registering plugins before a FlutterViewController is available";
   FlutterLogger.outputWriter = writer;
-
   [self.appDelegate acquireLaunchEngine];
   XCTAssertTrue(writer.gotExpectedOutput, @"Expected warning was not logged");
 
-  FlutterLogger.outputWriter = nil;
+  FlutterLogger.outputWriter = savedWriter;
 }
 
 @end
