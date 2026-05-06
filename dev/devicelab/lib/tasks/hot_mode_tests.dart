@@ -187,7 +187,14 @@ TaskFunction createHotModeTest({
                 );
 
             await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
-            await process.exitCode;
+
+            final int exitCode = await process.exitCode;
+            if (exitCode != 0) {
+              _checkAndPrintJvmCrashLogs();
+              throw TaskResult.failure(
+                'flutter run (fresh restart) failed with exit code $exitCode',
+              );
+            }
 
             freshRestartReloadsData =
                 json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
@@ -312,7 +319,13 @@ Future<Map<String, dynamic>> captureReloadData({
       .listen((String line) => print('stderr: $line'), onDone: stderrDone.complete);
 
   await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
-  await process.exitCode;
+
+  final int exitCode = await process.exitCode;
+  if (exitCode != 0) {
+    _checkAndPrintJvmCrashLogs();
+    throw TaskResult.failure('flutter run failed with exit code $exitCode');
+  }
+
   final result = json.decode(benchmarkFile.readAsStringSync()) as Map<String, dynamic>;
   benchmarkFile.deleteSync();
   return result;
@@ -336,4 +349,19 @@ Future<void> _checkAppRunning(bool shouldBeRunning) async {
   }
   print(galleryProcesses.join('\n'));
   throw TaskResult.failure('Flutter Gallery app is ${shouldBeRunning ? 'not' : 'still'} running');
+}
+
+void _checkAndPrintJvmCrashLogs() {
+  final androidDir = Directory(path.join(_editedFlutterGalleryDir.path, 'android'));
+  if (!androidDir.existsSync()) {
+    return;
+  }
+  for (final FileSystemEntity entity in androidDir.listSync()) {
+    if (entity is File && path.basename(entity.path).startsWith('hs_err_pid')) {
+      print('\n\n================ JVM CRASH LOG DETECTED ================');
+      print('File: ${entity.path}');
+      print(entity.readAsStringSync());
+      print('========================================================\n\n');
+    }
+  }
 }
