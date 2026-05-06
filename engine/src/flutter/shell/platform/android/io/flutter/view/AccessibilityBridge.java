@@ -3194,6 +3194,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
               accessibilityBridge.getRootSemanticsNode().log("Semantics tree:", true);
             }
             hitTestTransform = new float[16];
+            Matrix.setIdentityM(hitTestTransform, 0);
           }
           nodeTransform = hitTestTransform;
         } else {
@@ -3203,6 +3204,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
               accessibilityBridge.getRootSemanticsNode().log("Semantics tree:", true);
             }
             transform = new float[16];
+            Matrix.setIdentityM(transform, 0);
           }
           nodeTransform = transform;
         }
