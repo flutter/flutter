@@ -150,9 +150,7 @@ class TestsCrossImportChecker {
   static final Set<String> knownDartCrossImports = <String>{};
   static final Set<String> knownExamplesCrossImports = <String>{};
   static final Set<String> knownFoundationCrossImports = <String>{};
-  static final Set<String> knownGesturesCrossImports = <String>{
-    'packages/flutter/test/gestures/force_press_test.dart',
-  };
+  static final Set<String> knownGesturesCrossImports = <String>{};
   static final Set<String> knownHarnessCrossImports = <String>{};
   static final Set<String> knownPaintingCrossImports = <String>{
     'packages/flutter/test/painting/system_fonts_test.dart',
