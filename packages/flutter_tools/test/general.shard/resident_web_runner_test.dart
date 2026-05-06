@@ -1246,9 +1246,8 @@ name: my_app
   testUsingContext(
     'ResidentWebRunner forwards platform args when starting a web app',
     () async {
-      setupMocks();
-      flutterDevice.device = chromeDevice;
       fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
       final ResidentRunner runner = ResidentWebRunner(
         flutterDevice,
         flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
@@ -1263,12 +1262,13 @@ name: my_app
         systemClock: globals.systemClock,
       );
 
-      unawaited(runner.run());
-      await Future<void>.microtask(() {});
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(runner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
 
-      expect(chromeDevice.lastPlatformArgs, isNotNull);
-      expect(chromeDevice.lastPlatformArgs!['no-launch-chrome'], true);
-      expect(chromeDevice.lastPlatformArgs!['uri'], isNotNull);
+      expect(mockDevice.lastPlatformArgs, isNotNull);
+      expect(mockDevice.lastPlatformArgs!['no-launch-chrome'], true);
+      expect(mockDevice.lastPlatformArgs!['uri'], isNotNull);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -2141,7 +2141,10 @@ class FakeAppConnection extends Fake implements AppConnection {
   }
 }
 
-class FakeChromeDevice extends FakeDevice implements ChromiumDevice {}
+class FakeChromeDevice extends FakeDevice implements ChromiumDevice {
+  @override
+  final ChromiumLauncher chromeLauncher = TestChromiumLauncher();
+}
 
 class FakeWipDebugger extends Fake implements WipDebugger {}
 
