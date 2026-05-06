@@ -142,8 +142,8 @@ class WindowingOwnerWin32 extends WindowingOwner {
   RegularWindowController createRegularWindowController({
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    required bool resizable,
     String? title,
-    bool decorated = true,
     required RegularWindowControllerDelegate delegate,
   }) {
     return RegularWindowControllerWin32(
@@ -152,7 +152,6 @@ class WindowingOwnerWin32 extends WindowingOwner {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
-      decorated: decorated,
     );
   }
 
@@ -162,9 +161,9 @@ class WindowingOwnerWin32 extends WindowingOwner {
     required DialogWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    required bool resizable,
     BaseWindowController? parent,
     String? title,
-    bool decorated = true,
   }) {
     return DialogWindowControllerWin32(
       owner: this,
@@ -172,7 +171,6 @@ class WindowingOwnerWin32 extends WindowingOwner {
       preferredSize: preferredSize,
       preferredConstraints: preferredConstraints,
       title: title,
-      decorated: decorated,
       parent: parent,
     );
   }
@@ -224,6 +222,7 @@ class WindowingOwnerWin32 extends WindowingOwner {
     Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    required bool resizable,
     String? title,
   }) {
     throw UnimplementedError('Satellite windows are not yet implemented on Windows.');
@@ -341,19 +340,12 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-    bool decorated = true,
   }) : _owner = owner,
        _delegate = delegate,
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
-    if (!decorated) {
-      // TODO(team-windows): Implement undecorated windows on Windows.
-      // See https://github.com/flutter/flutter/issues/183559
-      throw UnimplementedError('Undecorated windows are not yet implemented on Windows.');
-    }
-
     _handler = _RegularWindowMesageHandler(controller: this);
     owner._addMessageHandler(_handler);
     final int viewId = _Win32PlatformInterface.createRegularWindow(
@@ -579,7 +571,6 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-    bool decorated = true,
     BaseWindowController? parent,
   }) : _owner = owner,
        _delegate = delegate,
@@ -588,12 +579,6 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
-    if (!decorated) {
-      // TODO(team-windows): Implement undecorated windows on Windows.
-      // See https://github.com/flutter/flutter/issues/183559
-      throw UnimplementedError('Undecorated windows are not yet implemented on Windows.');
-    }
-
     _handler = _DialogWindowMesageHandler(controller: this);
     owner._addMessageHandler(_handler);
     final int viewId = _Win32PlatformInterface.createDialogWindow(

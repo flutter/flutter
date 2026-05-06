@@ -90,6 +90,21 @@ final fakeVM = vm_service.VM(
 
 final fakeFlutterView = FlutterView(id: 'a', uiIsolate: fakeUnpausedIsolate);
 
+/// Returns a [FakeVmServiceRequest] for the 'getVM' method with the provided
+/// [isolates].
+FakeVmServiceRequest getVm([List<vm_service.Isolate>? isolates]) {
+  // TODO(dantup): Remove this if vm_service is updated to convert nulls back
+  //  to empty lists.
+  //  See https://github.com/flutter/flutter/pull/185274#discussion_r3116379311
+  isolates ??= [];
+  return FakeVmServiceRequest(
+    method: 'getVM',
+    jsonResponse: vm_service.VM.parse(<String, Object>{
+      'isolates': isolates.map((isolate) => isolate.toJson()).toList(),
+    })!.toJson(),
+  );
+}
+
 final listViews = FakeVmServiceRequest(
   method: kListViewsMethod,
   jsonResponse: <String, Object>{

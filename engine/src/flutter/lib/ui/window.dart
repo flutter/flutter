@@ -966,7 +966,7 @@ class AccessibilityFeatures {
 
   /// The platform is requesting that UI be rendered with darker colors.
   ///
-  /// Only supported on iOS.
+  /// Only supported on iOS and Android API 34+.
   bool get highContrast => _kHighContrastIndex & _index != 0;
 
   /// The platform is requesting to show on/off labels inside switches.
