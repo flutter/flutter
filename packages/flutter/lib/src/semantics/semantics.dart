@@ -1854,7 +1854,7 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node currently holds input focus.
   ///
-  /// If null, the node is not fosusable.
+  /// If null, the node is not focusable.
   ///
   /// At most one node in the tree should hold input focus at any point in time,
   /// and it should not be set to true if [focusable] is false.
