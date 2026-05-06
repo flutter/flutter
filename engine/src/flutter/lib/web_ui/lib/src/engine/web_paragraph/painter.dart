@@ -115,13 +115,12 @@ class CanvasKitPainter extends Painter {
   void drawParagraph(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect) {
     if (!hasSingleImageCache) {
       // We should have resized the small canvas before calling this method
-      if (sourceRect.width != paintCanvas.width || sourceRect.height != paintCanvas.height) {
-        assert(
-          false,
-          'resizePaintCanvas needed: '
-          'canvas=${paintCanvas.width}x${paintCanvas.height} vs bounds=${sourceRect.width}x${sourceRect.height}',
-        );
-      }
+      assert(
+        (sourceRect.width * currentDevicePixelRatio!).ceilToDouble() == paintCanvas.width &&
+            (sourceRect.height * currentDevicePixelRatio!).ceilToDouble() == paintCanvas.height,
+        'resizePaintCanvas needed: '
+        'canvas=${paintCanvas.width}x${paintCanvas.height} vs bounds=${sourceRect.width}x${sourceRect.height}',
+      );
 
       final DomImageData imageData = paintContext.getImageData(
         0,
