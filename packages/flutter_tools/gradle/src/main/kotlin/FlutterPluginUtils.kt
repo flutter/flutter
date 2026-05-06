@@ -62,7 +62,7 @@ object FlutterPluginUtils {
      * The URL for documentation instructing app developers on how to report incompatible KGP usage to plugin authors.
      */
     internal const val BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS =
-        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers/report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors"
+        "https://docs.flutter.dev/release/breaking-changes/migrate-to-built-in-kotlin/for-app-developers#report-incompatible-kotlin-gradle-plugin-usage-to-plugin-authors"
 
     /**
      * Matches the AGP application plugin declaration in Kotlin DSL (`build.gradle.kts`).
