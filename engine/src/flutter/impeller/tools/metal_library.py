@@ -42,6 +42,7 @@ def main():
   parser.add_argument(
       '--metal-version', required=True, help='The language standard version to compile for.'
   )
+  parser.add_argument('--debug', action='store_true', help='Generate debugging information.')
 
   args = parser.parse_args()
 
@@ -79,13 +80,22 @@ def main():
       '-Oz',
       # Allow aggressive, lossy floating-point optimizations.
       '-ffast-math',
-      # Record symbols in a separate *.metallibsym file.
-      '-frecord-sources=flat',
       '-MF',
       args.depfile,
       '-o',
       args.output,
   ]
+
+  if args.debug:
+    command += [
+        '-g',
+        '-frecord-sources',
+    ]
+  else:
+    command += [
+        # Record symbols in a separate *.metallibsym file.
+        '-frecord-sources=flat',
+    ]
 
   # Select the Metal standard and the minimum supported OS versions.
   # The Metal standard must match the specification in impellerc.

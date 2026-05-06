@@ -4,17 +4,19 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 import 'clipboard_utils.dart';
 import 'editable_text_tester.dart';
 import 'editable_text_utils.dart';
+import 'widgets_app_tester.dart';
 
 const int kSingleTapUpTimeout = 500;
+const Color _white = Color(0xFFFFFFFF);
 
 void main() {
   late int tapCount;
@@ -127,7 +129,7 @@ void main() {
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: provider.buildGestureDetector(
           behavior: HitTestBehavior.translucent,
           child: FakeEditableText(
@@ -562,21 +564,18 @@ void main() {
       addTearDown(scrollController.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: CustomScrollView(
-              controller: scrollController,
-              slivers: <Widget>[
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (_, int index) =>
-                        index == 0 ? const TestTextField() : const SizedBox(height: 50),
-                    childCount: 200,
-                    addAutomaticKeepAlives: false,
-                  ),
+        TestWidgetsApp(
+          home: CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (_, int index) => index == 0 ? const TestTextField() : const SizedBox(height: 50),
+                  childCount: 200,
+                  addAutomaticKeepAlives: false,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       );
@@ -874,11 +873,13 @@ void main() {
 
   testWidgets('Mouse drag does not show handles nor toolbar', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/69001
+    final controller = TextEditingController(text: 'I love Flutter!');
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
-      const MaterialApp(home: Scaffold(body: SelectableText('I love Flutter!'))),
+      TestWidgetsApp(home: TestTextField(controller: controller, readOnly: true)),
     );
 
-    final Offset textFieldStart = tester.getTopLeft(find.byType(SelectableText));
+    final Offset textFieldStart = tester.getTopLeft(find.byType(TestTextField));
 
     final TestGesture gesture = await tester.startGesture(
       textFieldStart,
@@ -910,17 +911,17 @@ void main() {
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: provider.buildGestureDetector(
           behavior: HitTestBehavior.translucent,
           child: EditableText(
             key: editableTextKey,
             controller: controller,
             focusNode: focusNode,
-            backgroundCursorColor: Colors.white,
-            cursorColor: Colors.white,
+            backgroundCursorColor: _white,
+            cursorColor: _white,
             style: const TextStyle(),
-            selectionControls: materialTextSelectionControls,
+            selectionControls: testTextSelectionHandleControls,
           ),
         ),
       ),
@@ -973,17 +974,17 @@ void main() {
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: provider.buildGestureDetector(
           behavior: HitTestBehavior.translucent,
           child: EditableText(
             key: editableTextKey,
             controller: controller,
             focusNode: focusNode,
-            backgroundCursorColor: Colors.white,
-            cursorColor: Colors.white,
+            backgroundCursorColor: _white,
+            cursorColor: _white,
             style: const TextStyle(),
-            selectionControls: materialTextSelectionControls,
+            selectionControls: testTextSelectionHandleControls,
           ),
         ),
       ),
@@ -1014,61 +1015,76 @@ void main() {
     expect(controller.selection.baseOffset, 10);
   });
 
-  testWidgets('Stylus drag moves the cursor', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/102928
-    final controller = TextEditingController(text: 'I love flutter!');
-    addTearDown(controller.dispose);
-    final editableTextKey = GlobalKey<EditableTextState>();
-    final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
-      editableTextKey: editableTextKey,
-      forcePressEnabled: false,
-      selectionEnabled: true,
-    );
-    final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
-    final focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
+  testWidgets(
+    'Stylus drag selects text',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/102928
+      final controller = TextEditingController(text: 'I love flutter!');
+      addTearDown(controller.dispose);
+      final editableTextKey = GlobalKey<EditableTextState>();
+      final delegate = FakeTextSelectionGestureDetectorBuilderDelegate(
+        editableTextKey: editableTextKey,
+        forcePressEnabled: false,
+        selectionEnabled: true,
+      );
+      final provider = TextSelectionGestureDetectorBuilder(delegate: delegate);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: provider.buildGestureDetector(
-          behavior: HitTestBehavior.translucent,
-          child: EditableText(
-            key: editableTextKey,
-            controller: controller,
-            focusNode: focusNode,
-            backgroundCursorColor: Colors.white,
-            cursorColor: Colors.white,
-            style: const TextStyle(),
-            selectionControls: materialTextSelectionControls,
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: provider.buildGestureDetector(
+            behavior: HitTestBehavior.translucent,
+            child: EditableText(
+              key: editableTextKey,
+              controller: controller,
+              focusNode: focusNode,
+              backgroundCursorColor: _white,
+              cursorColor: _white,
+              style: const TextStyle(),
+              selectionControls: testTextSelectionHandleControls,
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, -1);
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, -1);
 
-    final Offset position = textOffsetToPosition(tester, 4);
+      final Offset position = textOffsetToPosition(tester, 4);
 
-    await tester.tapAt(position);
-    await tester.pump();
+      await tester.tapAt(position);
+      await tester.pump();
 
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.isCollapsed, isTrue);
+      expect(controller.selection.baseOffset, 4);
 
-    final TestGesture gesture = await tester.startGesture(position, kind: PointerDeviceKind.stylus);
-    addTearDown(gesture.removePointer);
-    await tester.pump();
-    await gesture.moveTo(textOffsetToPosition(tester, 7));
-    await tester.pump();
-    await gesture.moveTo(textOffsetToPosition(tester, 10));
-    await tester.pump();
-    await gesture.up();
-    await tester.pumpAndSettle();
+      final TestGesture gesture = await tester.startGesture(
+        position,
+        kind: PointerDeviceKind.stylus,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.moveTo(textOffsetToPosition(tester, 7));
+      await tester.pump();
+      await gesture.moveTo(textOffsetToPosition(tester, 10));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
 
-    expect(controller.selection.isCollapsed, isTrue);
-    expect(controller.selection.baseOffset, 10);
-  });
+      // On Android, stylus drag selects text (like mouse), not moves cursor.
+      expect(controller.selection.isCollapsed, isFalse);
+      expect(controller.selection.baseOffset, 4);
+      expect(controller.selection.extentOffset, 10);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+    }),
+  );
 
   testWidgets('Drag of unknown type moves the cursor', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/102928
@@ -1085,17 +1101,17 @@ void main() {
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: provider.buildGestureDetector(
           behavior: HitTestBehavior.translucent,
           child: EditableText(
             key: editableTextKey,
             controller: controller,
             focusNode: focusNode,
-            backgroundCursorColor: Colors.white,
-            cursorColor: Colors.white,
+            backgroundCursorColor: _white,
+            cursorColor: _white,
             style: const TextStyle(),
-            selectionControls: materialTextSelectionControls,
+            selectionControls: testTextSelectionHandleControls,
           ),
         ),
       ),
@@ -1237,9 +1253,7 @@ void main() {
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(body: TestTextField(autofocus: true, controller: controller)),
-        ),
+        TestWidgetsApp(home: TestTextField(autofocus: true, controller: controller)),
       );
 
       await tester.pumpAndSettle();
@@ -1281,16 +1295,22 @@ void main() {
       final endHandleLayerLink = LayerLink();
       final toolbarLayerLink = LayerLink();
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: Column(
             key: column,
             children: <Widget>[
               CompositedTransformTarget(
                 link: startHandleLayerLink,
-                child: const Text('start handle'),
+                child: const SizedBox(height: 100, child: Text('start handle')),
               ),
-              CompositedTransformTarget(link: endHandleLayerLink, child: const Text('end handle')),
-              CompositedTransformTarget(link: toolbarLayerLink, child: const Text('toolbar')),
+              CompositedTransformTarget(
+                link: endHandleLayerLink,
+                child: const SizedBox(height: 100, child: Text('end handle')),
+              ),
+              CompositedTransformTarget(
+                link: toolbarLayerLink,
+                child: const SizedBox(height: 100, child: Text('toolbar')),
+              ),
             ],
           ),
         ),
@@ -1670,27 +1690,25 @@ void main() {
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SizedBox(
-            // Only 4 lines visible of 8 given.
-            height: kLineHeight * 4,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: provider.buildGestureDetector(
-                behavior: HitTestBehavior.translucent,
-                child: EditableText(
-                  key: editableTextKey,
-                  controller: controller,
-                  focusNode: focusNode,
-                  backgroundCursorColor: Colors.white,
-                  cursorColor: Colors.white,
-                  style: const TextStyle(),
-                  selectionControls: materialTextSelectionControls,
-                  // EditableText will expand to the full 8 line height and will
-                  // not scroll itself.
-                  maxLines: null,
-                ),
+      TestWidgetsApp(
+        home: SizedBox(
+          // Only 4 lines visible of 8 given.
+          height: kLineHeight * 4,
+          child: SingleChildScrollView(
+            controller: scrollController,
+            child: provider.buildGestureDetector(
+              behavior: HitTestBehavior.translucent,
+              child: EditableText(
+                key: editableTextKey,
+                controller: controller,
+                focusNode: focusNode,
+                backgroundCursorColor: _white,
+                cursorColor: _white,
+                style: const TextStyle(),
+                selectionControls: testTextSelectionHandleControls,
+                // EditableText will expand to the full 8 line height and will
+                // not scroll itself.
+                maxLines: null,
               ),
             ),
           ),
@@ -1748,27 +1766,25 @@ void main() {
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: SizedBox(
-              // Only 4 lines visible of 8 given.
-              height: kLineHeight * 4,
-              child: SingleChildScrollView(
-                controller: scrollController,
-                child: provider.buildGestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  child: EditableText(
-                    key: editableTextKey,
-                    controller: controller,
-                    focusNode: focusNode,
-                    backgroundCursorColor: Colors.white,
-                    cursorColor: Colors.white,
-                    style: const TextStyle(),
-                    selectionControls: materialTextSelectionControls,
-                    // EditableText is taller than the SizedBox but not taller
-                    // than the text.
-                    maxLines: 6,
-                  ),
+        TestWidgetsApp(
+          home: SizedBox(
+            // Only 4 lines visible of 8 given.
+            height: kLineHeight * 4,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: provider.buildGestureDetector(
+                behavior: HitTestBehavior.translucent,
+                child: EditableText(
+                  key: editableTextKey,
+                  controller: controller,
+                  focusNode: focusNode,
+                  backgroundCursorColor: _white,
+                  cursorColor: _white,
+                  style: const TextStyle(),
+                  selectionControls: testTextSelectionHandleControls,
+                  // EditableText is taller than the SizedBox but not taller
+                  // than the text.
+                  maxLines: 6,
                 ),
               ),
             ),
@@ -1823,7 +1839,7 @@ void main() {
       addTearDown(focusNode.dispose);
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: Column(
             key: column,
             children: <Widget>[
@@ -1877,15 +1893,15 @@ void main() {
     addTearDown(focusNode.dispose);
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: provider.buildGestureDetector(
           behavior: HitTestBehavior.translucent,
           child: EditableText(
             key: editableTextKey,
             controller: controller,
             focusNode: focusNode,
-            backgroundCursorColor: Colors.white,
-            cursorColor: Colors.white,
+            backgroundCursorColor: _white,
+            cursorColor: _white,
             style: const TextStyle(),
             contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
               return const Placeholder();
@@ -1923,11 +1939,7 @@ class FakeTextSelectionGestureDetectorBuilderDelegate
 
 class FakeEditableText extends EditableText {
   FakeEditableText({required super.controller, required super.focusNode, super.key})
-    : super(
-        backgroundCursorColor: Colors.white,
-        cursorColor: Colors.white,
-        style: const TextStyle(),
-      );
+    : super(backgroundCursorColor: _white, cursorColor: _white, style: const TextStyle());
 
   @override
   FakeEditableTextState createState() => FakeEditableTextState();
@@ -2078,8 +2090,8 @@ class TextSelectionControlsSpy extends TextSelectionControls {
     double textLineHeight, [
     VoidCallback? onTap,
   ]) {
-    return ElevatedButton(
-      onPressed: onTap,
+    return _TapCallbackWidget(
+      onTap: onTap,
       child: Text(
         key: switch (type) {
           TextSelectionHandleType.left => leftHandleKey,
@@ -2132,4 +2144,26 @@ class FakeTextSelectionDelegate extends Fake implements TextSelectionDelegate {
 
   @override
   void copySelection(SelectionChangedCause cause) {}
+}
+
+/// A widget that calls [onTap] when tapped via a [Listener] rather than a
+/// [GestureDetector], so it does not participate in the gesture arena.
+///
+/// This is used in [TextSelectionControlsSpy] to handle tap callbacks from
+/// [TextSelectionControls.buildHandle] without interfering with the
+/// [PanGestureRecognizer] used by [SelectionOverlay] for handle dragging.
+class _TapCallbackWidget extends StatelessWidget {
+  const _TapCallbackWidget({required this.onTap, required this.child});
+
+  final VoidCallback? onTap;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      behavior: HitTestBehavior.opaque,
+      onPointerUp: onTap != null ? (_) => onTap!() : null,
+      child: child,
+    );
+  }
 }

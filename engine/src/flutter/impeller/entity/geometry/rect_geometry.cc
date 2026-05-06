@@ -35,7 +35,7 @@ std::optional<Rect> FillRectGeometry::GetCoverage(
 }
 
 bool FillRectGeometry::CoversArea(const Matrix& transform,
-                                  const Rect& rect) const {
+                                  const IRect& rect) const {
   if (!transform.IsTranslationScaleOnly()) {
     return false;
   }

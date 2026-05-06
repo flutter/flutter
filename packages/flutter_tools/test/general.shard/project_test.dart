@@ -1002,6 +1002,111 @@ plugins {
           FlutterProjectFactory: () => flutterProjectFactory,
         },
       );
+
+      group('_kotlinCompilerOptionsPattern', () {
+        void testRegex(String description, String content, {bool expected = true}) {
+          testUsingContext(
+            description,
+            () async {
+              final FlutterProject project = await someProject();
+              addAndroidGradleFile(project.directory, gradleFileContent: () => content);
+              expect(project.android.isKotlin, expected);
+            },
+            overrides: <Type, Generator>{
+              FileSystem: () => fs,
+              ProcessManager: () => FakeProcessManager.any(),
+              XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+              FlutterProjectFactory: () => flutterProjectFactory,
+            },
+          );
+        }
+
+        testRegex('matches standard formatting', '''
+kotlin {
+  compilerOptions {
+    jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+  }
+}
+''');
+
+        testRegex('matches irregular whitespace', '''
+kotlin
+{
+  compilerOptions
+  {
+    jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+  }
+}
+''');
+
+        testRegex('matches even when there are additional blocks in kotlin{}', '''
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
+
+    sourceSets {
+        main {
+            kotlin.srcDir("src/main/custom_kotlin")
+        }
+    }
+}
+''');
+
+        testRegex(
+          'matches no spacing',
+          'kotlin{compilerOptions{jvmTarget=org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17}}',
+        );
+
+        testRegex('does not match generic block without kotlin.compilerOptions{} DSL', '''
+android {
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+''', expected: false);
+      });
+
+      testUsingContext(
+        'isKotlin is true if src/main/kotlin directory exists',
+        () async {
+          final FlutterProject project = await someProject();
+          project.android.hostAppGradleRoot
+              .childDirectory('app')
+              .childDirectory('src')
+              .childDirectory('main')
+              .childDirectory('kotlin')
+              .createSync(recursive: true);
+          expect(project.android.isKotlin, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'isKotlin is false if src/main/kotlin directory does not exist',
+        () async {
+          final FlutterProject project = await someProject();
+          project.android.hostAppGradleRoot
+              .childDirectory('app')
+              .childDirectory('src')
+              .childDirectory('main')
+              .childDirectory('java')
+              .createSync(recursive: true);
+          expect(project.android.isKotlin, isFalse);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
     });
 
     group('With mocked context', () {

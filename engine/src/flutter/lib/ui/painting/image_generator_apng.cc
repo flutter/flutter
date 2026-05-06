@@ -7,6 +7,7 @@
 #include <cstring>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/safe_math.h"
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkAlphaType.h"
@@ -91,10 +92,26 @@ bool APNGImageGenerator::GetPixels(const SkImageInfo& info,
 
   APNGImage& frame = images_[image_index];
   SkImageInfo frame_info = frame.codec->getInfo();
-  auto frame_row_bytes = frame_info.bytesPerPixel() * frame_info.width();
+
+  fml::SafeMath safe;
+  size_t frame_row_bytes =
+      safe.mul(frame_info.bytesPerPixel(), frame_info.width());
+  if (safe.overflow_detected()) {
+    FML_DLOG(ERROR) << "Failed to decode image at index " << image_index
+                    << " (frame index: " << frame_index
+                    << ") of APNG due to frame row bytes overflow.";
+    return false;
+  }
 
   if (frame.pixels.empty()) {
-    frame.pixels.resize(frame_row_bytes * frame_info.height());
+    size_t pixels_bytes = safe.mul(frame_row_bytes, frame_info.height());
+    if (safe.overflow_detected()) {
+      FML_DLOG(ERROR) << "Failed to decode image at index " << image_index
+                      << " (frame index: " << frame_index
+                      << ") of APNG due to pixel buffer size overflow.";
+      return false;
+    }
+    frame.pixels.resize(pixels_bytes);
     SkCodec::Result result = frame.codec->getPixels(
         frame.codec->getInfo(), frame.pixels.data(), frame_row_bytes);
     if (result != SkCodec::kSuccess) {

@@ -684,7 +684,7 @@ class _LicensePageState extends State<LicensePage> {
     );
   }
 
-  Widget _packagesView(final BuildContext _, final bool isLateral) {
+  Widget _packagesView(BuildContext _, bool isLateral) {
     final Widget about = _AboutProgram(
       name: widget.applicationName ?? _defaultApplicationName(context),
       icon: widget.applicationIcon ?? _defaultApplicationIcon(context),
@@ -835,10 +835,10 @@ class _PackagesViewState extends State<_PackagesView> {
   }
 
   Widget _packagesList(
-    final BuildContext context,
-    final int? selectedId,
-    final _LicenseData data,
-    final bool drawSelection,
+    BuildContext context,
+    int? selectedId,
+    _LicenseData data,
+    bool drawSelection,
   ) {
     final EdgeInsets safeAreaPadding = MediaQuery.paddingOf(context);
     final padding = EdgeInsets.only(
@@ -971,7 +971,7 @@ class _DetailArguments {
   final List<LicenseEntry> licenseEntries;
 
   @override
-  bool operator ==(final Object other) {
+  bool operator ==(Object other) {
     if (other is _DetailArguments) {
       return other.packageName == packageName;
     }
