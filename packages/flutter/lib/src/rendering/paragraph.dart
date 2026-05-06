@@ -1234,37 +1234,40 @@ class RenderParagraph extends RenderBox
     var placeholderIndex = 0;
     var childConfigsIndex = 0;
     var attributedLabelCacheIndex = 0;
-    InlineSpanSemanticsInformation? seenTextInfo;
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
       if (info.isPlaceholder) {
-        if (seenTextInfo != null) {
-          builder.markAsMergeUp(
-            _createSemanticsConfigForTextInfo(seenTextInfo, attributedLabelCacheIndex),
-          );
-          attributedLabelCacheIndex += 1;
-        }
         // Mark every childConfig belongs to this placeholder to merge up group.
         while (childConfigsIndex < childConfigs.length &&
-            childConfigs[childConfigsIndex].tagsChildrenWith(
-              PlaceholderSpanIndexSemanticsTag(placeholderIndex),
-            )) {
+            _childConfigBelongsToPlaceholder(childConfigs[childConfigsIndex], placeholderIndex)) {
           builder.markAsMergeUp(childConfigs[childConfigsIndex]);
           childConfigsIndex += 1;
         }
         placeholderIndex += 1;
       } else {
-        seenTextInfo = info;
+        builder.markAsMergeUp(_createSemanticsConfigForTextInfo(info, attributedLabelCacheIndex));
+        attributedLabelCacheIndex += 1;
       }
     }
-
-    // Handle plain text info at the end.
-    if (seenTextInfo != null) {
-      builder.markAsMergeUp(
-        _createSemanticsConfigForTextInfo(seenTextInfo, attributedLabelCacheIndex),
-      );
-    }
     return builder.build();
+  }
+
+  static bool _childConfigBelongsToPlaceholder(
+    SemanticsConfiguration childConfig,
+    int placeholderIndex,
+  ) {
+    final Iterable<SemanticsTag>? tags = childConfig.tagsForChildren;
+    if (tags == null) {
+      return false;
+    }
+    for (final SemanticsTag tag in tags) {
+      if (tag is PlaceholderSpanIndexSemanticsTag) {
+        // The first placeholder tag comes from this paragraph. Later tags may
+        // be inherited from ancestor paragraphs with colliding placeholder indexes.
+        return tag.index == placeholderIndex;
+      }
+    }
+    return false;
   }
 
   SemanticsConfiguration _createSemanticsConfigForTextInfo(
