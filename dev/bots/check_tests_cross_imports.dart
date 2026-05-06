@@ -151,7 +151,6 @@ class TestsCrossImportChecker {
   static final Set<String> knownExamplesCrossImports = <String>{};
   static final Set<String> knownFoundationCrossImports = <String>{};
   static final Set<String> knownGesturesCrossImports = <String>{
-    'packages/flutter/test/gestures/transformed_scale_test.dart',
     'packages/flutter/test/gestures/force_press_test.dart',
     'packages/flutter/test/gestures/transformed_double_tap_test.dart',
     'packages/flutter/test/gestures/gesture_config_regression_test.dart',
