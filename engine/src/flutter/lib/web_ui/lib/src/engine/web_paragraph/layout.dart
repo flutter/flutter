@@ -70,6 +70,8 @@ class TextLayout {
     // Wrapping text into lines is required on every layout.
     wrapText(width);
     formatLines(width);
+
+    paragraph.clearPaintCache();
   }
 
   void calculateStrutMetrics() {

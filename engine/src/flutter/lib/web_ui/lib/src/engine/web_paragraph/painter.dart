@@ -34,8 +34,7 @@ abstract class Painter {
 
   void drawParagraph(ui.Canvas canvas, ui.Rect sourceRect, ui.Rect targetRect);
 
-  void resetCache();
-  bool hasCache();
+  void clearCache();
 
   /// Adjust the _paintCanvas scale based on device pixel ratio
   void prepareToPaint(double devicePixelRatio, double width, double height) {
@@ -45,7 +44,7 @@ abstract class Painter {
 
     if (_lastDevicePixelRatio != devicePixelRatio) {
       // We need to reset the scale transform whenever the device pixel ratio changes
-      resetCache();
+      clearCache();
     }
     _lastDevicePixelRatio = devicePixelRatio;
 
@@ -141,15 +140,8 @@ class CanvasKitPainter extends Painter {
   }
 
   @override
-  void resetCache() {
-    if (_singleImageCache != null) {
-      _singleImageCache!.dispose();
-      _singleImageCache = null;
-    }
-  }
-
-  @override
-  bool hasCache() {
-    return _singleImageCache != null;
+  void clearCache() {
+    _singleImageCache?.dispose();
+    _singleImageCache = null;
   }
 }

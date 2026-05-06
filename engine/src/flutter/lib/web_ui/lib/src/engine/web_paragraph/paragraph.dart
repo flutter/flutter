@@ -1041,11 +1041,16 @@ class WebParagraph implements ui.Paragraph {
     return null;
   }
 
+  void clearPaintCache() {
+    _painter.clearCache();
+  }
+
   bool _disposed = false;
 
   @override
   void dispose() {
     assert(!_disposed, 'Paragraph has been disposed.');
+    clearPaintCache();
     _disposed = true;
   }
 
