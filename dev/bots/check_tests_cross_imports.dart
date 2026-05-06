@@ -192,9 +192,7 @@ class TestsCrossImportChecker {
     'packages/flutter/test/semantics/semantics_update_test.dart',
     'packages/flutter/test/semantics/semantics_owner_test.dart',
   };
-  static final Set<String> knownServicesCrossImports = <String>{
-    'packages/flutter/test/services/system_context_menu_controller_test.dart',
-  };
+  static final Set<String> knownServicesCrossImports = <String>{};
 
   /// These tests are known to have cross imports. These cross imports
   /// should all eventually be resolved, but until they are we allow them, so
