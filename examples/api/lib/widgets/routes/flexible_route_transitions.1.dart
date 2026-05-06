@@ -277,8 +277,6 @@ class _VerticalTransitionPage<T> extends Page<T> {
 
   final bool fullscreenDialog = false;
 
-  final bool allowSnapshotting;
-
   @override
   Route<T> createRoute(BuildContext context) {
     return _PageBasedVerticalPageRoute<T>(page: this);
