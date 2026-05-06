@@ -422,7 +422,7 @@ class NavigationDestination extends StatelessWidget {
   /// Defaults to true.
   final bool enabled;
 
-  /// How the [label] text should be aligned horizontally.
+  /// The horizontal alignment of the [label] text.
   ///
   /// This parameter sets the [TextAlign] for the [Text] widget that displays
   /// the [label] below the icon in this [NavigationDestination].
