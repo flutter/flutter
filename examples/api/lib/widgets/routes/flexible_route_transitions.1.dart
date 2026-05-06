@@ -286,9 +286,8 @@ class _VerticalTransitionPage<T> extends Page<T> {
 }
 
 class _PageBasedVerticalPageRoute<T> extends PageRoute<T> {
-  _PageBasedVerticalPageRoute({
-    required _VerticalTransitionPage<T> page,
-  }) : super(settings: page);
+  _PageBasedVerticalPageRoute({required _VerticalTransitionPage<T> page})
+    : super(settings: page);
 
   _VerticalTransitionPage<T> get _page =>
       settings as _VerticalTransitionPage<T>;
