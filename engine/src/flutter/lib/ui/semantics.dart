@@ -1097,7 +1097,7 @@ enum CheckedState {
   /// If two semantics nodes both have check state, they have conflict and can't be merged.
   bool hasConflict(CheckedState other) => this != CheckedState.none && other != CheckedState.none;
 
-  /// Semantics nodes  will only be merged when they are not in conflict.
+  /// Semantics nodes will only be merged when they are not in conflict.
   CheckedState merge(CheckedState other) {
     if (this == CheckedState.mixed || other == CheckedState.mixed) {
       return CheckedState.mixed;

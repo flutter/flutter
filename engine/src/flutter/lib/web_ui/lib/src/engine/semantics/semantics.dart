@@ -619,7 +619,7 @@ enum EngineSemanticsRole {
   navigation,
 
   /// A section of content sufficiently important but cannot be described by one
-  /// of the other landmark roles, such as main, contentInfo, complementary, or
+  /// of the other landmark roles, such as main, contentinfo, complementary, or
   /// navigation.
   region,
 
