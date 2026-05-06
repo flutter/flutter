@@ -54,6 +54,7 @@ class ProxiedDevices extends PollingDeviceDiscovery {
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
 
+  @override
   final Logger logger;
 
   final bool _deltaFileTransfer;
@@ -804,18 +805,18 @@ class ProxiedDartDevelopmentService
   ProxiedDartDevelopmentService(
     this.connection,
     this.deviceId, {
-    required Logger logger,
+    required this.logger,
     required ProxiedPortForwarder proxiedPortForwarder,
     required ProxiedPortForwarder devicePortForwarder,
     @visibleForTesting DartDevelopmentService? localDds,
-  }) : _logger = logger,
-       _proxiedPortForwarder = proxiedPortForwarder,
+  }) : _proxiedPortForwarder = proxiedPortForwarder,
        _devicePortForwarder = devicePortForwarder,
        _localDds = localDds ?? DartDevelopmentService(logger: logger);
 
   final String deviceId;
 
-  final Logger _logger;
+  @override
+  final Logger logger;
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
@@ -886,7 +887,7 @@ class ProxiedDartDevelopmentService
     }
 
     if (remoteVMServicePort == null) {
-      _logger.printTrace('VM service port is not a forwarded port. Start DDS locally.');
+      logger.printTrace('VM service port is not a forwarded port. Start DDS locally.');
       await startLocalDds();
       return;
     }
@@ -941,12 +942,12 @@ class ProxiedDartDevelopmentService
     }
 
     if (remoteUriStr == null) {
-      _logger.printTrace('Remote daemon cannot start DDS. Start a local DDS instead.');
+      logger.printTrace('Remote daemon cannot start DDS. Start a local DDS instead.');
       await startLocalDds();
       return;
     }
 
-    _logger.printTrace('Remote DDS started on $remoteUriStr.');
+    logger.printTrace('Remote DDS started on $remoteUriStr.');
 
     // Forward the port.
     final Uri remoteUri = Uri.parse(remoteUriStr);
@@ -957,8 +958,8 @@ class ProxiedDartDevelopmentService
     );
 
     _localUri = remoteUri.replace(port: localPort);
-    _logger.printTrace('Local port forwarded DDS on $_localUri.');
-    _logger.sendEvent('device.proxied_dds_forwarded', <String, String>{
+    logger.printTrace('Local port forwarded DDS on $_localUri.');
+    logger.sendEvent('device.proxied_dds_forwarded', <String, String>{
       'deviceId': deviceId,
       'remoteUri': remoteUri.toString(),
       'localUri': _localUri!.toString(),

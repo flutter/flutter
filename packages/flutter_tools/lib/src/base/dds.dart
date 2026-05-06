@@ -36,6 +36,8 @@ typedef DDSLauncherCallback =
       String? google3WorkspaceRoot,
     });
 
+typedef StartChromeCallback = Future<io.Process> Function(List<String> urls, {List<String> args});
+
 // TODO(fujino): This should be direct injected, rather than mutable global state.
 /// Used by tests to override the DDS spawn behavior for mocking purposes.
 @visibleForTesting
@@ -163,14 +165,17 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
 
   /// Launches a DevTools instance connected to the DDS instance connected to
   /// [device] in Chrome.
-  bool launchDevToolsInBrowser(FlutterDevice device) {
+  bool launchDevToolsInBrowser(
+    FlutterDevice device, {
+    @visibleForTesting StartChromeCallback startChrome = Chrome.start,
+  }) {
     _calledLaunchDevToolsInBrowser = true;
     if (devToolsUri == null) {
       return false;
     }
     assert(devToolsUri != null);
     logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUri');
-    unawaited(Chrome.start(<String>[devToolsUri!.toString()]));
+    unawaited(startChrome(<String>[devToolsUri!.toString()]));
     return true;
   }
 
