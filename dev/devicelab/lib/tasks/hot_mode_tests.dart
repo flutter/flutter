@@ -351,17 +351,22 @@ Future<void> _checkAppRunning(bool shouldBeRunning) async {
   throw TaskResult.failure('Flutter Gallery app is ${shouldBeRunning ? 'not' : 'still'} running');
 }
 
+/// Checks the android directory for JVM crash logs and prints their content.
 void _checkAndPrintJvmCrashLogs() {
-  final androidDir = Directory(path.join(_editedFlutterGalleryDir.path, 'android'));
-  if (!androidDir.existsSync()) {
-    return;
-  }
-  for (final FileSystemEntity entity in androidDir.listSync()) {
-    if (entity is File && path.basename(entity.path).startsWith('hs_err_pid')) {
-      print('\n\n================ JVM CRASH LOG DETECTED ================');
-      print('File: ${entity.path}');
-      print(entity.readAsStringSync());
-      print('========================================================\n\n');
+  try {
+    final Directory androidDir = Directory(path.join(_editedFlutterGalleryDir.path, 'android'));
+    if (!androidDir.existsSync()) {
+      return;
     }
+    for (final FileSystemEntity entity in androidDir.listSync()) {
+      if (entity is File && path.basename(entity.path).startsWith('hs_err_pid')) {
+        print('\n\n================ JVM CRASH LOG DETECTED ================');
+        print('File: ${entity.path}');
+        print(entity.readAsStringSync());
+        print('========================================================\n\n');
+      }
+    }
+  } catch (e) {
+    print('Error while looking for JVM crash logs: $e');
   }
 }
