@@ -9,7 +9,6 @@ import 'package:vm_service/vm_service.dart' as vm;
 
 import '../base/io.dart';
 import '../base/process.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals show fs;
 import 'error_formatter.dart';
@@ -267,11 +266,7 @@ class FlutterDebugAdapter extends FlutterBaseDebugAdapter with VmServiceInfoFile
     String? targetProgram,
     List<String>? userArgs,
   }) async {
-    final String executable = fileSystem.path.join(
-      Cache.flutterRoot!,
-      'bin',
-      platform.isWindows ? 'flutter.bat' : 'flutter',
-    );
+    final String executable = flutterExecutable;
 
     final processArgs = <String>[
       ...toolArgs,

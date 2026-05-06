@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:dds/dap.dart' hide PidTracker;
 
 import '../base/io.dart';
-import '../cache.dart';
 import '../convert.dart';
 import 'flutter_adapter_args.dart';
 import 'flutter_base_adapter.dart';
@@ -50,13 +49,9 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
       if (debug) '--start-paused',
     ];
 
-    final String executable = fileSystem.path.join(
-      Cache.flutterRoot!,
-      'bin',
-      platform.isWindows ? 'flutter.bat' : 'flutter',
-    );
+    final String executable = flutterExecutable;
 
-    final processArgs = <String>[...toolArgs, ...?args.toolArgs, ?program, ...?args.args];
+    final processArgs = <String>[...toolArgs, ...?args.toolArgs, if (program != null) program, ...?args.args];
 
     await launchAsProcess(executable: executable, processArgs: processArgs, env: args.env);
 

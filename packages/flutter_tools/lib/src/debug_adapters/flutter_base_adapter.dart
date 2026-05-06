@@ -39,6 +39,13 @@ abstract class FlutterBaseDebugAdapter
 
   final String flutterSdkRoot;
 
+  /// The Flutter SDK executable used by the adapter.
+  String get flutterExecutable => fileSystem.path.join(
+    flutterSdkRoot,
+    'bin',
+    platform.isWindows ? 'flutter.bat' : 'flutter',
+  );
+
   /// Whether DDS should be enabled in the Flutter process.
   ///
   /// We never enable DDS in the DAP process for Flutter, so this value is not

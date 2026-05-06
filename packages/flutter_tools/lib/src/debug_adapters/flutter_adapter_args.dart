@@ -73,10 +73,10 @@ class FlutterAttachRequestArguments extends DartCommonLaunchAttachRequestArgumen
   @override
   Map<String, Object?> toJson() => <String, Object?>{
     ...super.toJson(),
-    'toolArgs': toolArgs,
-    'customTool': customTool,
-    'customToolReplacesArgs': customToolReplacesArgs,
-    'vmServiceUri': vmServiceUri,
+    if (toolArgs != null) 'toolArgs': toolArgs,
+    if (customTool != null) 'customTool': customTool,
+    if (customToolReplacesArgs != null) 'customToolReplacesArgs': customToolReplacesArgs,
+    if (vmServiceUri != null) 'vmServiceUri': vmServiceUri,
   };
 }
 
@@ -142,11 +142,11 @@ class FlutterLaunchRequestArguments extends DartCommonLaunchAttachRequestArgumen
   @override
   Map<String, Object?> toJson() => <String, Object?>{
     ...super.toJson(),
-    'noDebug': noDebug,
-    'program': program,
-    'args': args,
-    'toolArgs': toolArgs,
-    'customTool': customTool,
-    'customToolReplacesArgs': customToolReplacesArgs,
+    if (noDebug != null) 'noDebug': noDebug,
+    if (program != null) 'program': program,
+    if (args != null) 'args': args,
+    if (toolArgs != null) 'toolArgs': toolArgs,
+    if (customTool != null) 'customTool': customTool,
+    if (customToolReplacesArgs != null) 'customToolReplacesArgs': customToolReplacesArgs,
   };
 }
