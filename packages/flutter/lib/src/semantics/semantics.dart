@@ -3276,6 +3276,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
     owner!._nodes.remove(id);
     owner!._detachedNodes.add(this);
 
+    if (_traversalChildIdentifier case final Object identifier?) {
+      owner!._traversalParentNodes[identifier]?._markDirty();
+    }
+
     // Clean up the according entry in owner._traversalParentNodes map.
     owner!._traversalParentNodes.removeWhere((Object key, SemanticsNode node) => node == this);
     // Clean up this node from the value set in owner._traversalChildNodes map.
