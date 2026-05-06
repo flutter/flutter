@@ -95,8 +95,8 @@ class CanvasKitPainter extends Painter {
     if (!hasSingleImageCache) {
       // We should have resized the small canvas before calling this method
       assert(
-        (sourceRect.width * currentDevicePixelRatio!).ceilToDouble() == paintCanvas.width &&
-            (sourceRect.height * currentDevicePixelRatio!).ceilToDouble() == paintCanvas.height,
+        sourceRect.width.ceilToDouble() == paintCanvas.width &&
+            sourceRect.height.ceilToDouble() == paintCanvas.height,
         'resizePaintCanvas needed: '
         'canvas=${paintCanvas.width}x${paintCanvas.height} vs bounds=${sourceRect.width}x${sourceRect.height}',
       );

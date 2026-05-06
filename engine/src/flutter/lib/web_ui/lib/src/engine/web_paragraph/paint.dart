@@ -21,10 +21,17 @@ final paintContext =
 /// The paint canvas is scaled by the device pixel ratio to avoid pixelation
 /// that would happen if it wasn't resized.
 void resizePaintCanvas(double devicePixelRatio, double width, double height) {
-  paintCanvas.width = (width * devicePixelRatio).ceilToDouble();
-  paintCanvas.height = (height * devicePixelRatio).ceilToDouble();
-  paintCanvas.style.width = '${width}px';
-  paintCanvas.style.height = '${height}px';
+  if (currentDevicePixelRatio != null) {
+    paintContext.restore();
+  }
+  paintContext.save();
+
+  paintCanvas.width = width.ceilToDouble();
+  paintCanvas.height = height.ceilToDouble();
+  paintCanvas.style.width = '${width / devicePixelRatio}px';
+  paintCanvas.style.height = '${height / devicePixelRatio}px';
+  paintContext.scale(devicePixelRatio, devicePixelRatio);
+
   currentDevicePixelRatio = devicePixelRatio;
 }
 
