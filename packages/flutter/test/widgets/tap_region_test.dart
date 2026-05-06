@@ -13,17 +13,21 @@ import 'widgets_app_tester.dart';
 
 /// Helper for the navigation regression tests below: locate the currently
 /// visible [TapRegion] identified by [regionKey] and tap at a point that is
-/// outside its bounds in global coordinates.
+/// guaranteed to be just outside its bounds in global coordinates.
 ///
-/// Looking up the region's [RenderBox] dynamically (rather than using a
-/// hardcoded coordinate) makes the helper robust to changes in the test
-/// surface size or in where the region is laid out within it.
+/// The tap is placed one pixel past the bottom-right corner of the region's
+/// global rect (`rect.bottomRight + (1, 1)`). Using the rect itself — rather
+/// than an arbitrary offset from the top-left — guarantees the point lies
+/// outside the region regardless of the region's size, while keeping it
+/// close enough to remain inside the test surface for the layouts these
+/// tests use.
 Future<void> _tapOutside(WidgetTester tester, Key regionKey) async {
   final RenderBox renderBox =
       tester.renderObject<RenderBox>(find.byKey(regionKey));
-  final Offset outsidePoint =
-      renderBox.localToGlobal(Offset.zero) + const Offset(200, 200);
-  await tester.tapAt(outsidePoint);
+  final Rect rect = renderBox.localToGlobal(Offset.zero) & renderBox.size;
+  // Sanity-check: the tap target must actually be outside the region.
+  assert(!rect.contains(rect.bottomRight + const Offset(1, 1)));
+  await tester.tapAt(rect.bottomRight + const Offset(1, 1));
   await tester.pump();
 }
 
