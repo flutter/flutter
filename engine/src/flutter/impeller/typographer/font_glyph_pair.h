@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_TYPOGRAPHER_FONT_GLYPH_PAIR_H_
 
 #include <optional>
+#include <variant>
 
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/rational.h"
@@ -17,38 +18,46 @@
 namespace impeller {
 
 struct GlyphProperties {
-  Color color = Color::Black();
+  enum class Tone {
+    kDark,
+    kLight,
+  };
+
+  using ToneOrColor = std::variant<Tone, Color>;
+  static constexpr ToneOrColor kDarkTone{Tone::kDark};
+  static constexpr ToneOrColor kLightTone{Tone::kLight};
+
+  // The tone or color of the glyph. Defaults to Tone::kDark.
+  //
+  // For alpha-channel-only glyphs, this stores a Tone (kDark or kLight). Use
+  // `ComputeTone` to determine the tone from a color.
+  //
+  // For glyphs with a built-in color, this stores the specific Color.
+  ToneOrColor tone_or_color;
   std::optional<StrokeParameters> stroke;
 
-  // Whether the glyph is created by rendering light (white) text, as opposed to
-  // rendering dark (black) text.
+  // Computes a Tone from a color. Use to set `tone_or_color` for an alpha-only
+  // Glyph.
   //
-  // This is only used for MacOS. Apple's CoreText renders light and dark text
-  // differently, so different glyphs are required for light and dark text. On
-  // other platforms, is_light is always false.
-  //
-  // This is only used for alpha-channel-only glyphs. It is not used for color
-  // glyphs.
-  bool is_light = false;
-
-  /// Sets the is_light property based on the luminance of the color.
-  ///
-  /// No-op on platforms other than MacOS.
-  void SetIsLight(const Color& c) {
+  // kLight is only used for macOS, where Apple's CoreText renders dark and
+  // light text differently, requiring different glyphs for each. On other
+  // platforms, this always returns kDark.
+  static Tone ComputeTone(const Color& c) {
 #if FML_OS_MACOSX && !FML_OS_IOS
     // Uses BT.709 luma coefficients
     // (https://en.wikipedia.org/wiki/Rec._709#Luma_coefficients) to determine
     // whether a color is light or dark.
     Scalar luma = c.red * 0.2126f + c.green * 0.7152f + c.blue * 0.0722f;
-    is_light = (luma > 0.5f);
+    return (luma > 0.5f) ? Tone::kLight : Tone::kDark;
+#else
+    return Tone::kDark;
 #endif
   }
 
   struct Equal {
     inline bool operator()(const impeller::GlyphProperties& lhs,
                            const impeller::GlyphProperties& rhs) const {
-      return lhs.color.ToARGB() == rhs.color.ToARGB() &&
-             lhs.stroke == rhs.stroke && lhs.is_light == rhs.is_light;
+      return lhs.tone_or_color == rhs.tone_or_color && lhs.stroke == rhs.stroke;
     }
   };
 };
@@ -126,9 +135,8 @@ struct SubpixelGlyph {
       stroke = sg.properties.stroke.value();
     }
     return H::combine(std::move(h), sg.glyph.index, sg.subpixel_offset,
-                      sg.properties.color.ToARGB(), has_stroke, stroke.cap,
-                      stroke.join, stroke.miter_limit, stroke.width,
-                      sg.properties.is_light);
+                      sg.properties.tone_or_color, has_stroke, stroke.cap,
+                      stroke.join, stroke.miter_limit, stroke.width);
   }
 
   struct Equal {

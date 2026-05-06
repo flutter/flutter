@@ -1104,9 +1104,9 @@ void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
   if (text_frame->HasColor()) {
     // Alpha is always applied when rendering, remove it here so
     // we do not double-apply the alpha.
-    properties.color = paint_.color.WithAlpha(1.0);
+    properties.tone_or_color = paint_.color.WithAlpha(1.0);
   } else {
-    properties.SetIsLight(paint_.color);
+    properties.tone_or_color = GlyphProperties::ComputeTone(paint_.color);
   }
 
   renderer_.GetLazyGlyphAtlas()->AddTextFrame(text_frame,   //

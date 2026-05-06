@@ -69,9 +69,9 @@ void TextContents::SetTextProperties(
   if (frame_->HasColor()) {
     // Alpha is always applied when rendering, remove it here so
     // we do not double-apply the alpha.
-    properties_.color = color.WithAlpha(1.0);
+    properties_.tone_or_color = color.WithAlpha(1.0);
   } else {
-    properties_.SetIsLight(color);
+    properties_.tone_or_color = GlyphProperties::ComputeTone(color);
   }
   properties_.stroke = stroke;
 }

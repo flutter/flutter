@@ -329,8 +329,8 @@ TEST_P(TypographerTest, GlyphColorIsPartOfCacheKey) {
   auto frame_2 = MakeTextFrameFromTextBlobSkia(
       SkTextBlob::MakeFromString("😂", emoji_font));
   std::vector<GlyphProperties> properties = {
-      GlyphProperties{.color = Color::Red()},
-      GlyphProperties{.color = Color::Blue()},
+      GlyphProperties{.tone_or_color = Color::Red()},
+      GlyphProperties{.tone_or_color = Color::Blue()},
   };
 
   auto next_atlas =
@@ -392,8 +392,8 @@ TEST_P(TypographerTest, GlyphIsLightIsPartOfCacheKey) {
       GlyphProperties{},
   };
   // One light color, one dark color
-  properties[0].SetIsLight(Color::Beige());
-  properties[1].SetIsLight(Color::Crimson());
+  properties[0].tone_or_color = GlyphProperties::ComputeTone(Color::Beige());
+  properties[1].tone_or_color = GlyphProperties::ComputeTone(Color::Crimson());
 
   auto next_atlas =
       CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,

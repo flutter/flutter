@@ -80,7 +80,8 @@ bool HasLightGlyphs(const GlyphAtlas& atlas,
     return false;
   }
   for (size_t i = start_index; i < end_index; i++) {
-    if (new_pairs[i].glyph.properties.is_light) {
+    if (new_pairs[i].glyph.properties.tone_or_color ==
+        GlyphProperties::kLightTone) {
       return true;
     }
   }
@@ -267,7 +268,15 @@ static void DrawGlyph(SkCanvas* canvas,
   sk_font.setSubpixel(true);
   sk_font.setSize(sk_font.getSize() * static_cast<Scalar>(scaled_font.scale));
 
-  auto glyph_color = prop.is_light ? SK_ColorWHITE : prop.color.ToARGB();
+  SkColor glyph_color;
+  if (prop.tone_or_color == GlyphProperties::kDarkTone) {
+    glyph_color = SK_ColorBLACK;
+  } else if (prop.tone_or_color == GlyphProperties::kLightTone) {
+    glyph_color = SK_ColorWHITE;
+  } else {
+    FML_DCHECK(std::holds_alternative<Color>(prop.tone_or_color));
+    glyph_color = std::get<Color>(prop.tone_or_color).ToARGB();
+  }
 
   SkPaint glyph_paint;
   glyph_paint.setColor(glyph_color);
@@ -394,7 +403,9 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
     size.height += 2;
 
     SkBitmap bitmap;
-    bool is_light_glyph = pair.glyph.properties.is_light;
+    bool is_light_glyph =
+        pair.glyph.properties.tone_or_color == GlyphProperties::kLightTone;
+
     bitmap.setInfo(
         TypographerContextSkia::GetImageInfo(atlas, size, is_light_glyph));
     if (!bitmap.tryAllocPixels()) {
