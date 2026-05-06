@@ -156,7 +156,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/gestures/gesture_config_regression_test.dart',
     'packages/flutter/test/gestures/monodrag_test.dart',
     'packages/flutter/test/gestures/transformed_long_press_test.dart',
-    'packages/flutter/test/gestures/transformed_tap_test.dart',
   };
   static final Set<String> knownHarnessCrossImports = <String>{};
   static final Set<String> knownPaintingCrossImports = <String>{
