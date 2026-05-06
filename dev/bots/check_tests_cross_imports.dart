@@ -190,7 +190,6 @@ class TestsCrossImportChecker {
   static final Set<String> knownSemanticsCrossImports = <String>{
     'packages/flutter/test/semantics/traversal_order_test.dart',
     'packages/flutter/test/semantics/semantics_update_test.dart',
-    'packages/flutter/test/semantics/semantics_owner_test.dart',
   };
   static final Set<String> knownServicesCrossImports = <String>{};
 
