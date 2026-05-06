@@ -54,7 +54,6 @@ class ProxiedDevices extends PollingDeviceDiscovery {
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
 
-  @override
   final Logger logger;
 
   final bool _deltaFileTransfer;

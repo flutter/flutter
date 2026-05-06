@@ -880,8 +880,8 @@ void main() {
       await startFuture;
       expect(dds.devToolsUri, Uri.parse('http://127.0.0.1:300/devtools'));
 
-      final List<String> launchedUrls = <String>[];
-      final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
+      final launchedUrls = <String>[];
+      final flutterDevice = FakeFlutterDevice()
         ..device = FakeDevice('test_device', 'device');
 
       final bool result = dds.launchDevToolsInBrowser(
@@ -908,7 +908,7 @@ void main() {
         devicePortForwarder: devicePortForwarder,
       );
 
-      final FakeFlutterDevice flutterDevice = FakeFlutterDevice()
+      final flutterDevice = FakeFlutterDevice()
         ..device = FakeDevice('test_device', 'device');
 
       final bool result = dds.launchDevToolsInBrowser(flutterDevice);
