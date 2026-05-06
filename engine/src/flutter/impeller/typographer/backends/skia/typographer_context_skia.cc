@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <memory>
 #include <numeric>
-#include <optional>
 #include <utility>
 #include <vector>
 
@@ -34,6 +33,7 @@
 #include "impeller/typographer/rectangle_packer.h"
 #include "impeller/typographer/typographer_context.h"
 
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -89,18 +89,18 @@ bool HasLightGlyphs(const GlyphAtlas& atlas,
 }
 
 // Create an A8 bitmap from an color bitmap.
-//
-// Returns an empty optional if the bitmap cannot be created.
-std::optional<SkBitmap> ToA8Bitmap(const SkBitmap& src) {
+absl::StatusOr<SkBitmap> ToA8Bitmap(const SkBitmap& src) {
   FML_DCHECK(src.colorType() == kRGBA_8888_SkColorType);
 
   SkBitmap a8_bitmap;
   a8_bitmap.setInfo(SkImageInfo::MakeA8(src.width(), src.height()));
   if (!a8_bitmap.tryAllocPixels()) {
-    return std::nullopt;
+    return absl::Status(absl::StatusCode::kInternal,
+                        "Failed to allocate pixels for A8 bitmap");
   }
   if (!src.readPixels(a8_bitmap.pixmap())) {
-    return std::nullopt;
+    return absl::Status(absl::StatusCode::kInternal,
+                        "Failed to read pixels into A8 bitmap");
   }
   return a8_bitmap;
 }
@@ -353,11 +353,12 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
   }
 
   if (has_light_glyphs) {
-    auto a8_bitmap = ToA8Bitmap(bitmap);
-    if (!a8_bitmap.has_value()) {
+    auto a8_bitmap_status = ToA8Bitmap(bitmap);
+    if (!a8_bitmap_status.ok()) {
+      VALIDATION_LOG << a8_bitmap_status.status().message();
       return false;
     }
-    bitmap = a8_bitmap.value();
+    bitmap = a8_bitmap_status.value();
   }
 
   // Writing to a malloc'd buffer and then copying to the staging buffers
@@ -425,11 +426,12 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
               pair.glyph.properties);
 
     if (is_light_glyph) {
-      auto a8_bitmap = ToA8Bitmap(bitmap);
-      if (!a8_bitmap.has_value()) {
+      auto a8_bitmap_status = ToA8Bitmap(bitmap);
+      if (!a8_bitmap_status.ok()) {
+        VALIDATION_LOG << a8_bitmap_status.status().message();
         return false;
       }
-      bitmap = a8_bitmap.value();
+      bitmap = a8_bitmap_status.value();
     }
 
     // Writing to a malloc'd buffer and then copying to the staging buffers
