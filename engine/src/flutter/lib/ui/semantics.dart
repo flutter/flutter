@@ -1132,7 +1132,7 @@ enum Tristate {
   /// If two semantics nodes both have this property, they have conflict and can't be merged.
   bool hasConflict(Tristate other) => this != Tristate.none && other != Tristate.none;
 
-  /// Semantics nodes  will only be merged when they are not in conflict.
+  /// Semantics nodes will only be merged when they are not in conflict.
   Tristate merge(Tristate other) {
     if (this == Tristate.isTrue || other == Tristate.isTrue) {
       return Tristate.isTrue;
