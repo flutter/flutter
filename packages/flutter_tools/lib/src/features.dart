@@ -82,7 +82,7 @@ abstract class FeatureFlags {
   /// Whether UIScene migration is enabled.
   bool get isUISceneMigrationEnabled;
 
-  /// Wether riscv64 support is enabled.
+  /// Whether riscv64 support is enabled.
   bool get isRiscv64SupportEnabled;
 
   /// Whether a particular feature is enabled for the current channel.
