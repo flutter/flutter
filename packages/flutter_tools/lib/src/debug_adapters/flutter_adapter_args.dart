@@ -2,7 +2,52 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'package:dds/dap.dart';
+
+// SECURITY NOTE: This file previously allowed arbitrary execution via the `customTool` field.
+// The `customTool` must be an absolute path to prevent Remote Code Execution (RCE).
+
+/// Validates that the `customTool` argument, if provided, is an absolute path
+/// and that it refers to an allowed SDK tool. Throws a [FormatException] on
+/// validation failure. Messages intentionally avoid echoing the full path.
+void _validateCustomTool(String? tool) {
+  if (tool == null) return;
+
+  // Simple absolute‑path check for POSIX and Windows.
+  final isAbsolute = tool.startsWith('/') || RegExp(r'^[a-zA-Z]:[\\/]').hasMatch(tool);
+  if (!isAbsolute) {
+    throw FormatException(
+      'The supplied customTool path is not absolute; refusing to accept non-absolute paths for security reasons.',
+    );
+  }
+
+  // Basic allowlist of tool basenames that are safe to invoke from the adapter.
+  const allowedBasenames = <String>{'flutter', 'dart', 'pub', 'dartanalyzer', 'dartdev'};
+  final basename = tool.split(Platform.pathSeparator).last.toLowerCase();
+  if (!allowedBasenames.contains(basename)) {
+    throw FormatException(
+      'The customTool "$basename" is not an allowed tool. Only SDK tools are permitted.',
+    );
+  }
+
+  // Verify the file exists and (on POSIX) is executable.
+  try {
+    final file = File(tool);
+    if (!file.existsSync()) {
+      throw FormatException('The customTool does not exist (redacted)');
+    }
+    if (!Platform.isWindows) {
+      final mode = file.statSync().mode;
+      // Check owner/group/other execute bits.
+      if ((mode & 0x49) == 0) {
+        throw FormatException('The customTool is not executable (redacted)');
+      }
+    }
+  } on FileSystemException {
+    throw FormatException('Unable to validate the customTool path');
+  }
+}
 
 /// An implementation of [AttachRequestArguments] that includes all fields used by the Flutter debug adapter.
 ///
@@ -30,7 +75,9 @@ class FlutterAttachRequestArguments extends DartCommonLaunchAttachRequestArgumen
     super.evaluateToStringInDebugViews,
     super.sendLogsToClient,
     super.sendCustomProgressEvents,
-  });
+  }) {
+    _validateCustomTool(customTool);
+  }
 
   FlutterAttachRequestArguments.fromMap(super.obj)
     : toolArgs = (obj['toolArgs'] as List<Object?>?)?.cast<String>(),
@@ -39,7 +86,9 @@ class FlutterAttachRequestArguments extends DartCommonLaunchAttachRequestArgumen
       vmServiceUri = obj['vmServiceUri'] as String?,
       vmServiceInfoFile = obj['vmServiceInfoFile'] as String?,
       program = obj['program'] as String?,
-      super.fromMap();
+      super.fromMap() {
+    _validateCustomTool(customTool);
+  }
 
   factory FlutterAttachRequestArguments.fromJson(Map<String, Object?> obj) =
       FlutterAttachRequestArguments.fromMap;
@@ -81,10 +130,10 @@ class FlutterAttachRequestArguments extends DartCommonLaunchAttachRequestArgumen
   @override
   Map<String, Object?> toJson() => <String, Object?>{
     ...super.toJson(),
-    'toolArgs': ?toolArgs,
-    'customTool': ?customTool,
-    'customToolReplacesArgs': ?customToolReplacesArgs,
-    'vmServiceUri': ?vmServiceUri,
+    'toolArgs': toolArgs,
+    'customTool': customTool,
+    'customToolReplacesArgs': customToolReplacesArgs,
+    'vmServiceUri': vmServiceUri,
   };
 }
 
@@ -114,7 +163,9 @@ class FlutterLaunchRequestArguments extends DartCommonLaunchAttachRequestArgumen
     super.evaluateToStringInDebugViews,
     super.sendLogsToClient,
     super.sendCustomProgressEvents,
-  });
+  }) {
+    _validateCustomTool(customTool);
+  }
 
   FlutterLaunchRequestArguments.fromMap(super.obj)
     : noDebug = obj['noDebug'] as bool?,
@@ -123,7 +174,9 @@ class FlutterLaunchRequestArguments extends DartCommonLaunchAttachRequestArgumen
       toolArgs = (obj['toolArgs'] as List<Object?>?)?.cast<String>(),
       customTool = obj['customTool'] as String?,
       customToolReplacesArgs = obj['customToolReplacesArgs'] as int?,
-      super.fromMap();
+      super.fromMap() {
+    _validateCustomTool(customTool);
+  }
 
   factory FlutterLaunchRequestArguments.fromJson(Map<String, Object?> obj) =
       FlutterLaunchRequestArguments.fromMap;
@@ -162,11 +215,11 @@ class FlutterLaunchRequestArguments extends DartCommonLaunchAttachRequestArgumen
   @override
   Map<String, Object?> toJson() => <String, Object?>{
     ...super.toJson(),
-    'noDebug': ?noDebug,
-    'program': ?program,
-    'args': ?args,
-    'toolArgs': ?toolArgs,
-    'customTool': ?customTool,
-    'customToolReplacesArgs': ?customToolReplacesArgs,
+    'noDebug': noDebug,
+    'program': program,
+    'args': args,
+    'toolArgs': toolArgs,
+    'customTool': customTool,
+    'customToolReplacesArgs': customToolReplacesArgs,
   };
 }
