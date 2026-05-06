@@ -1252,6 +1252,13 @@ class RenderParagraph extends RenderBox
     return builder.build();
   }
 
+  /// Returns whether [childConfig] belongs to the placeholder at
+  /// [placeholderIndex] in this paragraph.
+  ///
+  /// Nested paragraphs may inherit [PlaceholderSpanIndexSemanticsTag]s from
+  /// ancestors with colliding indexes. The first placeholder tag is the one
+  /// added by this paragraph, so later inherited tags must not decide ownership
+  /// here.
   static bool _childConfigBelongsToPlaceholder(
     SemanticsConfiguration childConfig,
     int placeholderIndex,
@@ -1262,8 +1269,6 @@ class RenderParagraph extends RenderBox
     }
     for (final SemanticsTag tag in tags) {
       if (tag is PlaceholderSpanIndexSemanticsTag) {
-        // The first placeholder tag comes from this paragraph. Later tags may
-        // be inherited from ancestor paragraphs with colliding placeholder indexes.
         return tag.index == placeholderIndex;
       }
     }
