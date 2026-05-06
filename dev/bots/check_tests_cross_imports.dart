@@ -145,7 +145,6 @@ class TestsCrossImportChecker {
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownAnimationCrossImports = <String>{
     'packages/flutter/test/animation/animation_sheet_test.dart',
-    'packages/flutter/test/animation/live_binding_test.dart',
   };
   static final Set<String> knownCupertinoCrossImports = <String>{};
   static final Set<String> knownDartCrossImports = <String>{};
