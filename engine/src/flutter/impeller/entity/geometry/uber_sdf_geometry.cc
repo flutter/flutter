@@ -36,15 +36,22 @@ bool UberSDFGeometry::CoversArea(const Matrix& transform,
                                  const Rect& rect) const {
   if (params_.type == UberSDFParameters::Type::kRect && !params_.stroke &&
       transform.IsTranslationScaleOnly()) {
-    // The SDF is a filled axis-aligned rectangle. It covers the input rect if
-    // the SDF's transformed bounds rect covers the input rect, subtracting
-    // the AA padding from the SDF rect.
-    return GetExpandedBounds(transform)
-        .TransformAndClipBounds(transform)
-        // Subtract twice the AA padding. This subtracts the AA padding added
-        // by GetExpandedBounds, and also insets the quad by another AA padding
-        // amount to account for AA fading into the interior of the shape.
-        .Expand(-2.0f * UberSDFParameters::kAntialiasPixels)
+    // The SDF is a filled axis-aligned rectangle. It "covers" the input rect if
+    // the SDF shader fully replaces the pixels contained in the rect parameter.
+    // The SDF shader is computed by the GPU at the center of the pixels it
+    // intersects and it computes a coverage for the pixels that reaches full
+    // coverage (1.0) at (aa_pixels / 2.0) inside the geometry. That coverage
+    // value will be applied for every MSAA sample intersected by the geometry.
+    //
+    // Since the input rect is an integer rect we already know that it encloses
+    // at least half a pixel on each side of the pixel centers inside it and
+    // that it encloses every MSAA sample location within those pixels. This
+    // means that the integer rect already meets all of the above criteria (as
+    // long as kAntialiasPixels is <= 1.0), so if the transformed geometry
+    // contains the integer input rect, all pixels will be fully rendered.
+    static_assert(UberSDFParameters::kAntialiasPixels <= 1.0);
+    return Rect::MakeEllipseBounds(params_.center, params_.size)
+        .TransformBounds(transform)
         .Contains(rect);
   }
 

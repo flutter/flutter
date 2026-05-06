@@ -542,6 +542,27 @@ TEST_P(TypographerTest, InvalidAtlasForcesRepopulation) {
   EXPECT_TRUE(second_atlas_context->GetGlyphAtlas()->IsValid());
 }
 
+TEST_P(TypographerTest, ColorBitmapAtlasSkiaBitmapIsRGBA8888) {
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kColorBitmap);
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  ASSERT_TRUE(context && context->IsValid());
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+  auto blob = SkTextBlob::MakeFromString("A", sk_font);
+  ASSERT_TRUE(blob);
+  auto atlas =
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                       GlyphAtlas::Type::kColorBitmap, Matrix(), atlas_context,
+                       MakeTextFrameFromTextBlobSkia(blob));
+
+  SkImageInfo image_info =
+      TypographerContextSkia::GetImageInfo(*atlas, Size{100, 100});
+  EXPECT_EQ(image_info.colorType(), kRGBA_8888_SkColorType);
+}
+
 }  // namespace testing
 }  // namespace impeller
 

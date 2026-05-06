@@ -916,8 +916,6 @@ constexpr inline Color operator/(T value, const Color& c) {
   return {v / c.red, v / c.green, v / c.blue, v / c.alpha};
 }
 
-std::string ColorToString(const Color& color);
-
 static_assert(sizeof(Color) == 4 * sizeof(Scalar));
 
 }  // namespace impeller

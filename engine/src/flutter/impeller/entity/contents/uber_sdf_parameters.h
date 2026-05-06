@@ -28,7 +28,7 @@ struct UberSDFParameters {
     kRect,
     kOval,
     kRoundedRect,
-    kRoundSuperellipse,
+    kRoundedSuperellipse,
   };
 
   /// Creates UberSDFParameters for a rectangle.
@@ -57,11 +57,15 @@ struct UberSDFParameters {
   /// Creates UberSDFParameters for a symmetric round superellipse.
   static UberSDFParameters MakeRoundedSuperellipse(
       Color color,
-      const Rect& bounds,
-      Scalar degree,
-      const RoundingRadii& radii,
-      Scalar corner_angle_span,
-      Point corner_circle_center,
+      Rect bounds,
+      Point superellipse_degree,
+      Point superellipse_a,
+      RoundingRadii radii,
+      Point corner_angle_span,
+      Point corner_circle_center_top,
+      Point corner_circle_center_right,
+      Scalar superellipse_c,
+      Point superellipse_scale,
       std::optional<StrokeParameters> stroke);
 
   /// The type of shape to render.
@@ -82,17 +86,31 @@ struct UberSDFParameters {
   std::optional<StrokeParameters> stroke;
 
   /// The corner radii for a rounded shapes.
-  /// Used for kRoundedRectangle and kRoundSuperellipse.
+  ///
+  /// For RoundSuperellipse, the 'width' component holds the top-octant radius
+  /// and the 'height' component holds the right-octant radius.
   RoundingRadii radii;
 
-  /// The degree of a RoundSuperellipse.
-  Scalar superellipse_degree;
+  /// The degrees of the top (.x) and right (.y) octants of a RoundSuperellipse.
+  Point superellipse_degree;
 
-  /// The span of the circular arc in a RoundSuperellipse
-  Scalar corner_angle_span;
+  /// The semi-axes of the top (.x) and right (.y) superellipse segments.
+  Point superellipse_a;
 
-  /// The center of the circular arc in a RoundSuperellipse
-  Point corner_circle_center;
+  /// The spans of the top (.x) and right (.y) circular arcs.
+  Point corner_angle_span;
+
+  /// The center of the top circular arc in a RoundSuperellipse.
+  Point corner_circle_center_top;
+
+  /// The center of the right circular arc in a RoundSuperellipse.
+  Point corner_circle_center_right;
+
+  /// The offset of the octants in a RoundSuperellipse.
+  Scalar superellipse_c;
+
+  /// The scale of the superellipse.
+  Point superellipse_scale;
 };
 
 }  // namespace impeller
