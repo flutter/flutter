@@ -220,7 +220,7 @@ In general, a really productive way to improve documentation is to use Flutter a
 document the answer where you first looked for it.
 
 We also keep [a list of areas that need better API documentation](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3A%22d%3A+api+docs%22+sort%3Areactions-%2B1-desc).
-In many cases, we have written down what needs to be said in the relevant issue, we just haven't gotten around to doing it!
+In many cases, we have written down what needs to be said in the relevant issue. We just haven't gotten around to doing it!
 
 We're especially eager to add sample code and diagrams to our API documentation. Diagrams are generated from Flutter code that
 draws to a canvas, and stored in a [special repository](https://github.com/flutter/assets-for-api-docs/#readme). It can be a lot of fun
