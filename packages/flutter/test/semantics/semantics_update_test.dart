@@ -264,6 +264,73 @@ void main() {
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   }, skip: kIsWeb); // intended: the web engine handles the transform calculation itself.
+
+  testWidgets('Semantics update removes detached OverlayPortal traversal child', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(const Placeholder(), phase: EnginePhase.build);
+    SemanticsUpdateBuilderSpy.observations.clear();
+
+    final controller = OverlayPortalController()..show();
+    final entry = OverlayEntry(
+      builder: (BuildContext context) {
+        return OverlayPortal(
+          controller: controller,
+          child: TextButton(onPressed: () {}, child: const Text('anchor')),
+          overlayChildBuilder: (BuildContext context) {
+            return TextButton(onPressed: () {}, child: const Text('menu item'));
+          },
+        );
+      },
+    );
+    addTearDown(() {
+      entry
+        ..remove()
+        ..dispose();
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(initialEntries: <OverlayEntry>[entry]),
+      ),
+    );
+
+    final int anchorId = SemanticsUpdateBuilderSpy.observations.entries.singleWhere((
+      MapEntry<int, SemanticsNodeUpdateObservation> entry,
+    ) {
+      return entry.value.label == 'anchor';
+    }).key;
+    final int menuItemId = SemanticsUpdateBuilderSpy.observations.entries.singleWhere((
+      MapEntry<int, SemanticsNodeUpdateObservation> entry,
+    ) {
+      return entry.value.label == 'menu item';
+    }).key;
+    expect(
+      SemanticsUpdateBuilderSpy.observations.values.any((
+        SemanticsNodeUpdateObservation observation,
+      ) {
+        return observation.childrenInTraversalOrder.contains(menuItemId);
+      }),
+      isTrue,
+    );
+
+    SemanticsUpdateBuilderSpy.observations.clear();
+    controller.hide();
+    await tester.pump();
+
+    expect(SemanticsUpdateBuilderSpy.observations.containsKey(menuItemId), isFalse);
+    expect(
+      SemanticsUpdateBuilderSpy.observations.values.any((
+        SemanticsNodeUpdateObservation observation,
+      ) {
+        return listEquals(observation.childrenInTraversalOrder, <int>[anchorId]);
+      }),
+      isTrue,
+    );
+    handle.dispose();
+  }, skip: kIsWeb); // intended: the web engine handles the traversal order itself.
 }
 
 class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
