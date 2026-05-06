@@ -5,9 +5,10 @@
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/widgets_app_tester.dart';
 import 'gesture_tester.dart';
 
 void main() {
@@ -142,28 +143,26 @@ void main() {
     // recognizers in the arena. This pan recognizer uses a smaller threshold to
     // accept the gesture, that should make it win the arena.
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: CustomScrollView(
-            slivers: <Widget>[
-              SliverToBoxAdapter(
-                child: RawGestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  gestures: <Type, GestureRecognizerFactory>{
-                    _EagerPanGestureRecognizer:
-                        GestureRecognizerFactoryWithHandlers<_EagerPanGestureRecognizer>(
-                          () => _EagerPanGestureRecognizer(),
-                          (_EagerPanGestureRecognizer recognizer) {
-                            recognizer.onStart = (DragStartDetails details) =>
-                                wasPanStartCalled = true;
-                          },
-                        ),
-                  },
-                  child: SizedBox(key: tapTargetKey, width: 100, height: 100),
-                ),
+      TestWidgetsApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: RawGestureDetector(
+                behavior: HitTestBehavior.translucent,
+                gestures: <Type, GestureRecognizerFactory>{
+                  _EagerPanGestureRecognizer:
+                      GestureRecognizerFactoryWithHandlers<_EagerPanGestureRecognizer>(
+                        () => _EagerPanGestureRecognizer(),
+                        (_EagerPanGestureRecognizer recognizer) {
+                          recognizer.onStart = (DragStartDetails details) =>
+                              wasPanStartCalled = true;
+                        },
+                      ),
+                },
+                child: SizedBox(key: tapTargetKey, width: 100, height: 100),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
