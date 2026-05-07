@@ -21,6 +21,7 @@ struct _FlWindowMonitor {
   void (*on_state_changed)(void);
   void (*on_is_active_notify)(void);
   void (*on_title_notify)(void);
+  void (*on_moved_to_rect)(int, int, int, int);
   void (*on_close)(void);
   void (*on_destroy)(void);
 };
@@ -51,6 +52,16 @@ static void is_active_notify_cb(FlWindowMonitor* self) {
 static void title_notify_cb(FlWindowMonitor* self) {
   flutter::IsolateScope scope(self->isolate);
   self->on_title_notify();
+}
+
+static void moved_to_rect_cb(FlWindowMonitor* self,
+                             GdkRectangle* flipped_rect,
+                             GdkRectangle* final_rect,
+                             gboolean flipped_x,
+                             gboolean flipped_y) {
+  flutter::IsolateScope scope(self->isolate);
+  self->on_moved_to_rect(final_rect->x, final_rect->y, final_rect->width,
+                         final_rect->height);
 }
 
 static gboolean delete_event_cb(FlWindowMonitor* self, GdkEvent* event) {
@@ -89,6 +100,7 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
     void (*on_state_changed)(void),
     void (*on_is_active_notify)(void),
     void (*on_title_notify)(void),
+    void (*on_moved_to_rect)(int, int, int, int),
     void (*on_close)(void),
     void (*on_destroy)(void)) {
   FlWindowMonitor* self =
@@ -100,6 +112,7 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
   self->on_state_changed = on_state_changed;
   self->on_is_active_notify = on_is_active_notify;
   self->on_title_notify = on_title_notify;
+  self->on_moved_to_rect = on_moved_to_rect;
   self->on_close = on_close;
   self->on_destroy = on_destroy;
   g_signal_connect_swapped(window, "configure-event",
@@ -110,6 +123,8 @@ G_MODULE_EXPORT FlWindowMonitor* fl_window_monitor_new(
                            G_CALLBACK(is_active_notify_cb), self);
   g_signal_connect_swapped(window, "notify::title", G_CALLBACK(title_notify_cb),
                            self);
+  g_signal_connect_swapped(gtk_widget_get_window(GTK_WIDGET(window)),
+                           "moved-to-rect", G_CALLBACK(moved_to_rect_cb), self);
   g_signal_connect_swapped(window, "delete-event", G_CALLBACK(delete_event_cb),
                            self);
   g_signal_connect_swapped(window, "destroy", G_CALLBACK(destroy_cb), self);

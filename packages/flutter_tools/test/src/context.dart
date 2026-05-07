@@ -420,6 +420,11 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }) async {
     return <String>['xcrun', 'xcodebuild'];
   }
+
+  @override
+  String swiftPackageCachePath(Directory buildDirectory) {
+    return '';
+  }
 }
 
 /// Prevent test crashes from being reported to the crash backend.

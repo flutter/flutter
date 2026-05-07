@@ -134,7 +134,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
   }
 }
 
-// TODO(mdebbar): Rename to `PaintElements`?
+// TODO(mdebbar): Rename to 'PaintElements'?
 enum StyleElements {
   // Background for a text clusters block
   background,
@@ -421,14 +421,16 @@ class WebTextStyle implements ui.TextStyle {
     return (wordSpacing != null) ? '${wordSpacing}px' : '0px';
   }
 
+  String _buildLangString() {
+    return locale != null ? '${locale!.languageCode}-${locale!.countryCode}' : '';
+  }
+
   void _applyFontFeatures(DomCanvasRenderingContext2D context) {
     if (fontFeatures == null) {
       return;
     }
 
     final fontFeatureSettings = <ui.FontFeature>[];
-    var optimizeLegibility = false;
-
     for (final ui.FontFeature feature in fontFeatures!) {
       switch (feature.feature) {
         case 'smcp':
@@ -445,25 +447,21 @@ class WebTextStyle implements ui.TextStyle {
           context.fontVariantCaps = feature.value != 0 ? 'titling-caps' : 'normal';
         default:
           fontFeatureSettings.add(feature);
-          if (feature.value != 0) {
-            optimizeLegibility = true;
-          }
       }
     }
 
     if (fontFeatureSettings.isNotEmpty) {
-      // TODO(jlavrova): Do we really need to set this?
-      context.textRendering = optimizeLegibility ? 'optimizeLegibility' : 'optimizeSpeed';
       context.canvas!.style.fontFeatureSettings = fontFeatureListToCss(fontFeatureSettings);
     }
   }
 
   void applyToContext(DomCanvasRenderingContext2D context) {
     // Setup all the font-affecting attributes
-    // TODO(jlavrova): set 'lang' attribute as a combination of locale+language
+    // Set 'lang' attribute as a combination of locale+language
     context.font = _buildCssFontString();
     context.letterSpacing = _buildLetterSpacingString();
     context.wordSpacing = _buildWordSpacingString();
+    context.lang = _buildLangString();
     _applyFontFeatures(context);
   }
 
@@ -641,6 +639,7 @@ class TextSpan extends ParagraphSpan {
 
   DomTextMetrics _getMetrics() {
     style.applyToContext(layoutContext);
+
     // We need to set in up because we otherwise in RTL text without textDirection
     // Canvas2D will return all clusters placed right to left starting from 0.
     // Also, we have a separate (possibly, different) textDirection for the ellipsis.
@@ -743,7 +742,7 @@ class WebStrutStyle implements ui.StrutStyle {
     this.fontFamilyFallback,
     this.fontSize,
     double? height,
-    // TODO(mdebbar): implement leadingDistribution.
+    // TODO(jlavrova): Implement leadingDistribution.
     this.leadingDistribution,
     this.leading,
     this.fontWeight,
@@ -849,7 +848,6 @@ class WebParagraph implements ui.Paragraph {
   @override
   double alphabeticBaseline = 0;
 
-  // TODO(jlavrova): Implement.
   @override
   bool didExceedMaxLines = false;
 
