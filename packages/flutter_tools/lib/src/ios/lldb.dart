@@ -117,6 +117,9 @@ return False
       if (!start) {
         return false;
       }
+      await _lldbProcess?.stdinWriteln('settings set symbols.load-on-demand true');
+      // await _lldbProcess?.stdinWriteln('settings set symbols.enable-lldb-index-cache true');
+      // await _lldbProcess?.stdinWriteln('settings set symbols.lldb-index-cache-path ~/.lldb/index-cache');
       await _selectDevice(deviceId);
       if (mode == BuildMode.debug) {
         await _setBreakpoint();
