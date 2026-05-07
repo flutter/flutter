@@ -175,7 +175,7 @@ void main() {
 Create an instrumentation test file in your application's
 **android/app/src/androidTest/kotlin/com/example/myapp/** directory (replacing
 com, example, and myapp with values from your app's package name). If your project
-uses Java, create it in **android/app/src/androidTest/java/com/example/myapp/** instead. 
+uses Java, create it in **android/app/src/androidTest/java/com/example/myapp/** instead.
 You can name this test file `MainActivityTest.kt` (or `MainActivityTest.java` for Java).
 
 ### Kotlin (Default)
