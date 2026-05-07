@@ -286,8 +286,8 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
     }
 
     {
-      TRACE_EVENT1("impeller", "TexImage2DUpload", "Bytes",
-                   std::to_string(mapping->GetSize()).c_str());
+      std::string size_str = std::to_string(mapping->GetSize());
+      TRACE_EVENT1("impeller", "TexImage2DUpload", "Bytes", size_str.c_str());
       gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
       gl.TexImage2D(texture_target,          // target
                     0u,                      // LOD level
