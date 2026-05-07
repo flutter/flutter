@@ -1957,9 +1957,15 @@ class FlutterNativeIntegrationSwiftPackage {
     );
     scriptsTemplate.render(scriptsDirectory, <String, Object>{
       'flutterFrameworkName': _targetPlatform.binaryName,
+      'flutterFrameworkBinaryPath': _targetPlatform == FlutterDarwinPlatform.macos
+          ? 'Versions/A/${_targetPlatform.binaryName}'
+          : _targetPlatform.binaryName,
       'infoPlistPath': _targetPlatform == FlutterDarwinPlatform.macos
           ? 'Versions/A/Resources/Info.plist'
           : 'Info.plist',
+      'appFrameworkBinaryPath': _targetPlatform == FlutterDarwinPlatform.macos
+          ? 'Versions/A/App'
+          : 'App',
     }, printStatusWhenWriting: false);
   }
 

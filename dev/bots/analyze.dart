@@ -85,7 +85,37 @@ String? _getDartSdkFromArguments(List<String> arguments) {
   return result;
 }
 
-Future<void> run(List<String> arguments) async {
+void _printHelp(List<Validation> validations) {
+  print('Usage: dart dev/bots/analyze.dart [arguments]');
+  print('');
+  print('Options:');
+  print('  -h, --help                  Show this help message.');
+  print('  --only=rule1,rule2,...      Run only the specified validations.');
+  print('  --skip=rule1,rule2,...      Skip the specified validations.');
+  print('');
+  print('Available rules:');
+  for (final validation in validations) {
+    print('  ${validation.name.padRight(25)} ${validation.description}');
+  }
+}
+
+/// Represents a specific validation step in the analyze script.
+@visibleForTesting
+class Validation {
+  /// Creates a new validation step.
+  const Validation(this.name, this.description, this.callback);
+
+  /// The short name of the rule used for filtering with --only or --skip.
+  final String name;
+
+  /// A human-readable description of the validation step.
+  final String description;
+
+  /// The function that performs the validation.
+  final Future<void> Function() callback;
+}
+
+Future<void> run(List<String> arguments, {List<Validation>? validationsForTesting}) async {
   var assertsEnabled = false;
   assert(() {
     assertsEnabled = true;
@@ -95,207 +125,267 @@ Future<void> run(List<String> arguments) async {
     foundError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
-  printProgress('Release branch validation');
-  await verifyReleaseBranchState(flutterRoot);
+  CommandResult? dartAnalyzeResult;
+  final passthroughArguments = <String>[];
 
-  printProgress('TargetPlatform tool/framework consistency');
-  await verifyTargetPlatform(flutterRoot);
+  final List<Validation> validations =
+      validationsForTesting ??
+      _getValidations(
+        passthroughArguments: passthroughArguments,
+        getDartAnalyzeResult: () => dartAnalyzeResult,
+        onDartAnalyzeResult: (CommandResult? result) => dartAnalyzeResult = result,
+      );
 
-  printProgress('All tool test files end in _test.dart...');
-  await verifyToolTestsEndInTestDart(flutterRoot);
-
-  printProgress('No sync*/async*');
-  await verifyNoSyncAsyncStar(flutterPackages);
-  await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
-
-  printProgress('No runtimeType in toString...');
-  await verifyNoRuntimeTypeInToString(flutterRoot);
-
-  printProgress('Debug mode instead of checked mode...');
-  await verifyNoCheckedMode(flutterRoot);
-
-  printProgress('Links for creating GitHub issues...');
-  await verifyIssueLinks(flutterRoot);
-
-  printProgress('Links to repositories...');
-  await verifyRepositoryLinks(flutterRoot);
-
-  printProgress('Unexpected binaries...');
-  await verifyNoBinaries(flutterRoot);
-
-  printProgress('Trailing spaces...');
-  await verifyNoTrailingSpaces(
-    flutterRoot,
-  ); // assumes no unexpected binaries, so should be after verifyNoBinaries
-
-  printProgress('Spaces after flow control statements...');
-  await verifySpacesAfterFlowControlStatements(flutterRoot);
-
-  printProgress('Deprecations...');
-  await verifyDeprecations(flutterRoot);
-
-  printProgress('Goldens...');
-  await verifyGoldenTags(flutterPackages);
-
-  printProgress('Skip test comments...');
-  await verifySkipTestComments(flutterRoot);
-
-  printProgress('Licenses...');
-  await verifyNoMissingLicense(flutterRoot);
-
-  printProgress('Test imports...');
-  await verifyNoTestImports(flutterRoot);
-
-  printProgress('Bad imports (framework)...');
-  await verifyNoBadImportsInFlutter(flutterRoot);
-
-  printProgress('Bad imports (tools)...');
-  await verifyNoBadImportsInFlutterTools(flutterRoot);
-
-  printProgress('Internationalization...');
-  await verifyInternationalizations(flutterRoot, dart);
-
-  printProgress('Localization files of stocks app...');
-  await verifyStockAppLocalizations(flutterRoot);
-
-  printProgress('Integration test timeouts...');
-  await verifyIntegrationTestTimeouts(flutterRoot);
-
-  printProgress('null initialized debug fields...');
-  await verifyNullInitializedDebugExpensiveFields(flutterRoot);
-
-  printProgress('Taboo words...');
-  await verifyTabooDocumentation(flutterRoot);
-
-  printProgress('Lint Kotlin files...');
-  await lintKotlinFiles(flutterRoot);
-
-  printProgress('Lint generated Kotlin files from templates...');
-  await lintKotlinTemplatedFiles(flutterRoot);
-
-  // Ensure that all package dependencies are in sync.
-  printProgress('Package dependencies...');
-  await runCommand(flutter, <String>['update-packages'], workingDirectory: flutterRoot);
-
-  /// Ensure that no new dependencies have been accidentally
-  /// added to core packages.
-  printProgress('Package Allowlist...');
-  await _checkConsumerDependencies();
-
-  // Analyze all the Dart code in the repo.
-  printProgress('Dart analysis...');
-  final CommandResult dartAnalyzeResult = await _runFlutterAnalyze(
-    flutterRoot,
-    options: <String>['--flutter-repo', ...arguments],
-  );
-
-  printProgress('Check formatting of Dart files...');
-  await runCommand(dart, <String>[
-    '--enable-asserts',
-    path.join(flutterRoot, 'dev', 'tools', 'bin', 'format.dart'),
-  ], workingDirectory: flutterRoot);
-
-  if (dartAnalyzeResult.exitCode == 0) {
-    // Only run the private lints when the code is free of type errors. The
-    // lints are easier to write when they can assume, for example, there is no
-    // inheritance cycles.
-    final rules = <AnalyzeRule>[
-      noDoubleClamp,
-      noStopwatches,
-      renderBoxIntrinsicCalculation,
-      protectPublicStateSubtypes,
-    ];
-    final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
-    printProgress('Analyzing code in the framework with the following rules:$ruleNames');
-    await analyzeWithRules(
-      flutterRoot,
-      rules,
-      includePaths: const <String>['packages/flutter/lib'],
-      excludePaths: const <String>['packages/flutter/lib/fix_data'],
-    );
-    final testRules = <AnalyzeRule>[noStopwatches];
-    final String testRuleNames = testRules.map((AnalyzeRule rule) => '\n * $rule').join();
-    printProgress('Analyzing code in the test folder with the following rules:$testRuleNames');
-    await analyzeWithRules(flutterRoot, testRules, includePaths: <String>['packages/flutter/test']);
-    final toolRules = <AnalyzeRule>[AvoidFutureCatchError()];
-    final String toolRuleNames = toolRules.map((AnalyzeRule rule) => '\n * $rule').join();
-    printProgress('Analyzing code in the tool with the following rules:$toolRuleNames');
-    await analyzeWithRules(
-      flutterRoot,
-      toolRules,
-      includePaths: const <String>['packages/flutter_tools/lib', 'packages/flutter_tools/test'],
-    );
-  } else {
-    printProgress(
-      'Skipped performing further analysis in the framework because "flutter analyze" finished with a non-zero exit code.',
-    );
+  final seenNames = <String>{};
+  for (final validation in validations) {
+    if (!seenNames.add(validation.name)) {
+      foundError(<String>['Duplicate validation name "${validation.name}" found in analyze.dart.']);
+    }
   }
 
-  printProgress('Executable allowlist...');
-  await _checkForNewExecutables();
+  var onlyRules = <String>[];
+  var skipRules = <String>[];
 
-  // Try with the --watch analyzer, to make sure it returns success also.
-  // The --benchmark argument exits after one run.
-  // We specify a failureMessage so that the actual output is muted in the case where _runFlutterAnalyze above already failed.
-  printProgress('Dart analysis (with --watch)...');
-  await _runFlutterAnalyze(
-    flutterRoot,
-    failureMessage: 'Dart analyzer failed when --watch was used.',
-    options: <String>['--flutter-repo', '--watch', '--benchmark', ...arguments],
-  );
-
-  // Analyze the code in `{@tool snippet}` sections in the repo.
-  printProgress('Snippet code...');
-  await runCommand(dart, <String>[
-    '--enable-asserts',
-    path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'),
-    '--verbose',
-  ], workingDirectory: flutterRoot);
-
-  // Make sure that all of the existing samples are linked from at least one API doc comment.
-  printProgress('Code sample link validation...');
-  await runCommand(dart, <String>[
-    '--enable-asserts',
-    path.join(flutterRoot, 'dev', 'bots', 'check_code_samples.dart'),
-  ], workingDirectory: flutterRoot);
-
-  // Try analysis against a big version of the gallery; generate into a temporary directory.
-  printProgress('Dart analysis (mega gallery)...');
-  final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
-  try {
-    await runCommand(dart, <String>[
-      path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart'),
-      '--out',
-      outDir.path,
-    ], workingDirectory: flutterRoot);
-    await _runFlutterAnalyze(
-      outDir.path,
-      failureMessage: 'Dart analyzer failed on mega_gallery benchmark.',
-      options: <String>['--watch', '--benchmark', ...arguments],
-    );
-  } finally {
-    outDir.deleteSync(recursive: true);
+  for (final arg in arguments) {
+    if (arg == '-h' || arg == '--help') {
+      _printHelp(validations);
+      return;
+    }
+    if (arg.startsWith('--only=')) {
+      if (onlyRules.isNotEmpty) {
+        foundError(<String>['The --only argument must not be used more than once.']);
+        return;
+      }
+      onlyRules = arg.substring('--only='.length).split(',');
+      continue;
+    }
+    if (arg.startsWith('--skip=')) {
+      if (skipRules.isNotEmpty) {
+        foundError(<String>['The --skip argument must not be used more than once.']);
+        return;
+      }
+      skipRules = arg.substring('--skip='.length).split(',');
+      continue;
+    }
+    passthroughArguments.add(arg);
   }
 
-  // Ensure gen_default links the correct files
-  printProgress('Correct file names in gen_defaults.dart...');
-  await verifyTokenTemplatesUpdateCorrectFiles(flutterRoot);
+  if (onlyRules.isNotEmpty && skipRules.isNotEmpty) {
+    foundError(<String>['Cannot use both --only and --skip at the same time.']);
+    return;
+  }
 
-  // Ensure material library files are up-to-date with the token template files.
-  printProgress('Material library files are up-to-date with token template files...');
-  await verifyMaterialFilesAreUpToDateWithTemplateFiles(flutterRoot, dart);
+  final Set<String> validNames = validations.map((Validation v) => v.name).toSet();
 
-  // Ensure integration test files are up-to-date with the app template.
-  printProgress('Up to date integration test template files...');
-  await verifyIntegrationTestTemplateFiles(flutterRoot);
+  for (final rule in onlyRules) {
+    if (!validNames.contains(rule)) {
+      foundError(<String>['Unknown rule "$rule" passed to --only.']);
+      return;
+    }
+  }
+  for (final rule in skipRules) {
+    if (!validNames.contains(rule)) {
+      foundError(<String>['Unknown rule "$rule" passed to --skip.']);
+      return;
+    }
+  }
 
-  // Check for cross-library imports in tests. For example,
-  // widget library tests should not import the Material library.
-  printProgress('Cross-import test validation...');
-  await runCommand(dart, <String>[
-    '--enable-asserts',
-    path.join(flutterRoot, 'dev', 'bots', 'check_tests_cross_imports.dart'),
-  ], workingDirectory: flutterRoot);
+  for (final validation in validations) {
+    final bool shouldRun = onlyRules.isNotEmpty
+        ? onlyRules.contains(validation.name)
+        : !skipRules.contains(validation.name);
+
+    if (shouldRun) {
+      printProgress('${validation.description} [${validation.name}]');
+      await validation.callback();
+    }
+  }
+}
+
+List<Validation> _getValidations({
+  required List<String> passthroughArguments,
+  required CommandResult? Function() getDartAnalyzeResult,
+  required void Function(CommandResult?) onDartAnalyzeResult,
+}) {
+  return <Validation>[
+    Validation(
+      'release-branch',
+      'Release branch validation',
+      () => verifyReleaseBranchState(flutterRoot),
+    ),
+    Validation(
+      'target-platform',
+      'TargetPlatform tool/framework consistency',
+      () => verifyTargetPlatform(flutterRoot),
+    ),
+    Validation(
+      'tool-end-to-end',
+      'All tool test files end in _test.dart...',
+      () => verifyToolTestsEndInTestDart(flutterRoot),
+    ),
+    Validation('no-sync-star-async-star', 'No sync*/async*', () async {
+      await verifyNoSyncAsyncStar(flutterPackages);
+      await verifyNoSyncAsyncStar(flutterExamples, minimumMatches: 200);
+    }),
+    Validation(
+      'no-runtime-type',
+      'No runtimeType in toString...',
+      () => verifyNoRuntimeTypeInToString(flutterRoot),
+    ),
+    Validation(
+      'no-checked-mode',
+      'Debug mode instead of checked mode...',
+      () => verifyNoCheckedMode(flutterRoot),
+    ),
+    Validation(
+      'issue-links',
+      'Links for creating GitHub issues...',
+      () => verifyIssueLinks(flutterRoot),
+    ),
+    Validation(
+      'repository-links',
+      'Links to repositories...',
+      () => verifyRepositoryLinks(flutterRoot),
+    ),
+    Validation('no-binaries', 'Unexpected binaries...', () => verifyNoBinaries(flutterRoot)),
+    Validation(
+      'no-trailing-spaces',
+      'Trailing spaces...',
+      () => verifyNoTrailingSpaces(flutterRoot),
+    ),
+    Validation(
+      'spaces-after-flow',
+      'Spaces after flow control statements...',
+      () => verifySpacesAfterFlowControlStatements(flutterRoot),
+    ),
+    Validation('deprecations', 'Deprecations...', () => verifyDeprecations(flutterRoot)),
+    Validation('golden-tags', 'Goldens...', () => verifyGoldenTags(flutterPackages)),
+    Validation(
+      'skip-test-comments',
+      'Skip test comments...',
+      () => verifySkipTestComments(flutterRoot),
+    ),
+    Validation('no-missing-license', 'Licenses...', () => verifyNoMissingLicense(flutterRoot)),
+    Validation('no-test-imports', 'Test imports...', () => verifyNoTestImports(flutterRoot)),
+    Validation(
+      'no-bad-imports-flutter',
+      'Bad imports (framework)...',
+      () => verifyNoBadImportsInFlutter(flutterRoot),
+    ),
+    Validation(
+      'no-bad-imports-tools',
+      'Bad imports (tools)...',
+      () => verifyNoBadImportsInFlutterTools(flutterRoot),
+    ),
+    Validation(
+      'internationalization',
+      'Internationalization...',
+      () => verifyInternationalizations(flutterRoot, dart),
+    ),
+    Validation(
+      'stock-app-localizations',
+      'Localization files of stocks app...',
+      () => verifyStockAppLocalizations(flutterRoot),
+    ),
+    Validation(
+      'integration-timeouts',
+      'Integration test timeouts...',
+      () => verifyIntegrationTestTimeouts(flutterRoot),
+    ),
+    Validation(
+      'null-fields',
+      'null initialized debug fields...',
+      () => verifyNullInitializedDebugExpensiveFields(flutterRoot),
+    ),
+    Validation('taboo', 'Taboo words...', () => verifyTabooDocumentation(flutterRoot)),
+    Validation('lint-kotlin', 'Lint Kotlin files...', () => lintKotlinFiles(flutterRoot)),
+    Validation(
+      'lint-kotlin-templates',
+      'Lint generated Kotlin files from templates...',
+      () => lintKotlinTemplatedFiles(flutterRoot),
+    ),
+    Validation(
+      'update-packages',
+      'Package dependencies...',
+      () => runCommand(flutter, <String>['update-packages'], workingDirectory: flutterRoot),
+    ),
+    Validation('package-allowlist', 'Package Allowlist...', () => _checkConsumerDependencies()),
+    Validation('dart-analysis', 'Dart analysis...', () async {
+      final CommandResult result = await _runFlutterAnalyze(
+        flutterRoot,
+        options: <String>['--flutter-repo', ...passthroughArguments],
+      );
+      onDartAnalyzeResult(result);
+    }),
+    Validation(
+      'format',
+      'Check formatting of Dart files...',
+      () => runCommand(dart, <String>[
+        '--enable-asserts',
+        path.join(flutterRoot, 'dev', 'tools', 'bin', 'format.dart'),
+      ], workingDirectory: flutterRoot),
+    ),
+    Validation(
+      'private-lints',
+      'Private lints...',
+      () => _verifyPrivateLints(flutterRoot, getDartAnalyzeResult()),
+    ),
+    Validation('executable-allowlist', 'Executable allowlist...', () => _checkForNewExecutables()),
+    Validation(
+      'dart-analysis-watch',
+      'Dart analysis (with --watch)...',
+      () => _runFlutterAnalyze(
+        flutterRoot,
+        failureMessage: 'Dart analyzer failed when --watch was used.',
+        options: <String>['--flutter-repo', '--watch', '--benchmark', ...passthroughArguments],
+      ),
+    ),
+    Validation(
+      'snippets',
+      'Snippet code...',
+      () => runCommand(dart, <String>[
+        '--enable-asserts',
+        path.join(flutterRoot, 'dev', 'bots', 'analyze_snippet_code.dart'),
+        '--verbose',
+      ], workingDirectory: flutterRoot),
+    ),
+    Validation(
+      'code-samples',
+      'Code sample link validation...',
+      () => runCommand(dart, <String>[
+        '--enable-asserts',
+        path.join(flutterRoot, 'dev', 'bots', 'check_code_samples.dart'),
+      ], workingDirectory: flutterRoot),
+    ),
+    Validation(
+      'mega-gallery',
+      'Dart analysis (mega gallery)...',
+      () => _verifyMegaGallery(flutterRoot, dart, passthroughArguments),
+    ),
+    Validation(
+      'gen-defaults-names',
+      'Correct file names in gen_defaults.dart...',
+      () => verifyTokenTemplatesUpdateCorrectFiles(flutterRoot),
+    ),
+    Validation(
+      'gen-defaults-up-to-date',
+      'Material library files are up-to-date with token template files...',
+      () => verifyMaterialFilesAreUpToDateWithTemplateFiles(flutterRoot, dart),
+    ),
+    Validation(
+      'integration-templates',
+      'Up to date integration test template files...',
+      () => verifyIntegrationTestTemplateFiles(flutterRoot),
+    ),
+    Validation(
+      'cross-imports',
+      'Cross-import test validation...',
+      () => runCommand(dart, <String>[
+        '--enable-asserts',
+        path.join(flutterRoot, 'dev', 'bots', 'check_tests_cross_imports.dart'),
+      ], workingDirectory: flutterRoot),
+    ),
+  ];
 }
 
 // TESTS
@@ -2812,4 +2902,67 @@ bool _isGeneratedPluginRegistrant(File file) {
           filename == 'generated_plugin_registrant.dart' ||
           filename == 'generated_plugin_registrant.h' ||
           filename == 'generated_plugin_registrant.cc');
+}
+
+Future<void> _verifyPrivateLints(String flutterRoot, CommandResult? dartAnalyzeResult) async {
+  if (dartAnalyzeResult == null) {
+    foundError(<String>[
+      'The "dart-analysis" rule must run before "private-lints".',
+      'Ensure "dart-analysis" is not skipped and is included in --only if used.',
+    ]);
+    return;
+  }
+  // Only run the private lints when the code is free of type errors. The
+  // lints are easier to write when they can assume, for example, there is no
+  // inheritance cycles.
+  if (dartAnalyzeResult.exitCode == 0) {
+    final rules = <AnalyzeRule>[
+      noDoubleClamp,
+      noStopwatches,
+      renderBoxIntrinsicCalculation,
+      protectPublicStateSubtypes,
+    ];
+    final String ruleNames = rules.map((AnalyzeRule rule) => '\n * $rule').join();
+    printProgress('Analyzing code in the framework with the following rules:$ruleNames');
+    await analyzeWithRules(
+      flutterRoot,
+      rules,
+      includePaths: const <String>['packages/flutter/lib'],
+      excludePaths: const <String>['packages/flutter/lib/fix_data'],
+    );
+    final testRules = <AnalyzeRule>[noStopwatches];
+    final String testRuleNames = testRules.map((AnalyzeRule rule) => '\n * $rule').join();
+    printProgress('Analyzing code in the test folder with the following rules:$testRuleNames');
+    await analyzeWithRules(flutterRoot, testRules, includePaths: <String>['packages/flutter/test']);
+    final toolRules = <AnalyzeRule>[AvoidFutureCatchError()];
+    final String toolRuleNames = toolRules.map((AnalyzeRule rule) => '\n * $rule').join();
+    printProgress('Analyzing code in the tool with the following rules:$toolRuleNames');
+    await analyzeWithRules(
+      flutterRoot,
+      toolRules,
+      includePaths: const <String>['packages/flutter_tools/lib', 'packages/flutter_tools/test'],
+    );
+  }
+}
+
+Future<void> _verifyMegaGallery(
+  String flutterRoot,
+  String dart,
+  List<String> passthroughArguments,
+) async {
+  final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
+  try {
+    await runCommand(dart, <String>[
+      path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart'),
+      '--out',
+      outDir.path,
+    ], workingDirectory: flutterRoot);
+    await _runFlutterAnalyze(
+      outDir.path,
+      failureMessage: 'Dart analyzer failed on mega_gallery benchmark.',
+      options: <String>['--watch', '--benchmark', ...passthroughArguments],
+    );
+  } finally {
+    outDir.deleteSync(recursive: true);
+  }
 }
