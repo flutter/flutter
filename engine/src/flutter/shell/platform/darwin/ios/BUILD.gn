@@ -50,7 +50,10 @@ source_set("InternalFlutterSwift") {
     ":ios_test_flutter",
   ]
   configs += [ "//flutter/shell/platform/darwin/common:config" ]
-  deps = [ ":flutter_engine_bindings" ]
+  deps = [
+    ":flutter_engine_bindings",
+    "//flutter/shell/platform/darwin/common:framework_common",
+  ]
   include_dirs = [
     "//flutter/shell/platform/darwin/common/framework/Headers",
     "//flutter/shell/platform/darwin/ios/framework/Headers",
@@ -311,7 +314,7 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterSpellCheckPluginTest.mm",
       "framework/Source/FlutterTextInputPluginTest.mm",
       "framework/Source/FlutterTextureRegistryRelayTest.mm",
-      "framework/Source/FlutterTouchInterceptingView_Test.h",
+      "framework/Source/FlutterTouchInterceptingView+Test.h",
       "framework/Source/FlutterUndoManagerPluginTest.mm",
       "framework/Source/FlutterViewControllerTest.mm",
       "framework/Source/FlutterViewTest.mm",

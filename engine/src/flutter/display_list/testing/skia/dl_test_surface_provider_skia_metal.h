@@ -8,25 +8,21 @@
 #include "flutter/display_list/testing/dl_test_surface_provider.h"
 
 #include "flutter/fml/platform/darwin/scoped_nsautorelease_pool.h"
-#include "flutter/impeller/golden_tests/metal_screenshotter.h"
 #include "flutter/testing/test_metal_surface.h"
 
 namespace flutter {
 namespace testing {
 
-using MetalScreenshotter = impeller::testing::MetalScreenshotter;
-
 class DlSurfaceProviderSkiaMetal : public DlSurfaceProvider {
  public:
-  explicit DlSurfaceProviderSkiaMetal(bool use_sdfs)
-      : DlSurfaceProvider(), use_sdfs_(use_sdfs) {}
+  explicit DlSurfaceProviderSkiaMetal() : DlSurfaceProvider() {}
   virtual ~DlSurfaceProviderSkiaMetal() = default;
 
   bool InitializeSurface(size_t width,
                          size_t height,
                          PixelFormat format) override;
   std::shared_ptr<DlSurfaceInstance> GetPrimarySurface() const override;
-  std::shared_ptr<DlSurfaceInstance> MakeOffscreenSurface(
+  std::unique_ptr<DlSurfaceInstance> MakeOffscreenSurface(
       size_t width,
       size_t height,
       PixelFormat format) const override;
@@ -37,26 +33,15 @@ class DlSurfaceProviderSkiaMetal : public DlSurfaceProvider {
   bool SupportsPixelFormat(PixelFormat format) const override {
     return format == kN32Premul;
   }
-  bool SupportsImpeller() const override { return true; }
-  sk_sp<DlPixelData> ImpellerSnapshot(const sk_sp<DisplayList>& list,
-                                      int width,
-                                      int height) const override;
-  virtual sk_sp<DlImage> MakeImpellerImage(const sk_sp<DisplayList>& list,
-                                           int width,
-                                           int height) const override;
+  bool TargetsImpeller() const override { return false; }
 
  private:
   // This must be placed before any other members that may use the
   // autorelease pool.
   fml::ScopedNSAutoreleasePool autorelease_pool_;
 
-  bool use_sdfs_;
   std::unique_ptr<TestMetalContext> metal_context_;
   std::shared_ptr<DlSurfaceInstance> metal_surface_;
-  mutable std::unique_ptr<MetalScreenshotter> snapshotter_;
-  mutable std::unique_ptr<impeller::AiksContext> aiks_context_;
-
-  void InitScreenShotter() const;
 };
 
 }  // namespace testing

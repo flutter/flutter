@@ -7,8 +7,8 @@
 
 #import <UIKit/UIKit.h>
 
-#include "flutter/fml/trace_event.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterTracing.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
 
 FLUTTER_ASSERT_ARC
@@ -88,9 +88,9 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
   CFTimeInterval duration = link.targetTimestamp - link.timestamp;
   fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(duration);
 
-  TRACE_EVENT2_INT("flutter", "PlatformVsync", "frame_start_time",
-                   frame_start_time.ToEpochDelta().ToMicroseconds(), "frame_target_time",
-                   frame_target_time.ToEpochDelta().ToMicroseconds());
+  [FlutterTracing
+      tracePlatformVsyncWithStartTime:frame_start_time.ToEpochDelta().ToMicroseconds()
+                           targetTime:frame_target_time.ToEpochDelta().ToMicroseconds()];
 
   std::unique_ptr<flutter::FrameTimingsRecorder> recorder =
       std::make_unique<flutter::FrameTimingsRecorder>();

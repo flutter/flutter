@@ -258,7 +258,8 @@ static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
     // If not shareable make buffer to copy frame pixels into.
     if (!self->shareable) {
       size_t data_length = width * height * 4;
-      self->pixels = static_cast<uint8_t*>(realloc(self->pixels, data_length));
+      self->pixels =
+          static_cast<uint8_t*>(g_realloc(self->pixels, data_length));
     }
   }
 
