@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient+FML.h"
+#include "flutter/shell/common/vsync_waiter.h"
 
 #import <UIKit/UIKit.h>
 
-#include "flutter/fml/trace_event.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterTracing.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
 
 FLUTTER_ASSERT_ARC
@@ -21,17 +21,25 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
   BOOL _isVariableRefreshRateEnabled;
 }
 
-- (instancetype)initWithTaskRunnerPtr:(fml::RefPtr<fml::TaskRunner>)task_runner
-         isVariableRefreshRateEnabled:(BOOL)isVariableRefreshRateEnabled
-                       maxRefreshRate:(double)maxRefreshRate
-                             callback:(flutter::VsyncWaiter::Callback)callback {
+- (instancetype)initWithTaskRunner:(FlutterFMLTaskRunner*)taskRunner
+      isVariableRefreshRateEnabled:(BOOL)isVariableRefreshRateEnabled
+                    maxRefreshRate:(double)maxRefreshRate
+                          callback:(void (^)(CFTimeInterval startTime,
+                                             CFTimeInterval targetTime))callback {
+  FML_DCHECK(callback);
+  FML_DCHECK(taskRunner);
+  fml::RefPtr<fml::TaskRunner> task_runner = taskRunner.taskRunner;
   FML_DCHECK(task_runner);
 
   if (self = [super init]) {
     _refreshRate = maxRefreshRate;
     _isVariableRefreshRateEnabled = isVariableRefreshRateEnabled;
     _allowPauseAfterVsync = YES;
-    _callback = std::move(callback);
+    _callback = [callback](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
+      double start_time_seconds = recorder->GetVsyncStartTime().ToEpochDelta().ToSecondsF();
+      double target_time_seconds = recorder->GetVsyncTargetTime().ToEpochDelta().ToSecondsF();
+      callback(start_time_seconds, target_time_seconds);
+    };
     _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)];
     _displayLink.paused = YES;
 
@@ -49,40 +57,6 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
   }
 
   return self;
-}
-
-- (instancetype)initWithTaskRunnerPtr:(fml::RefPtr<fml::TaskRunner>)task_runner
-                             callback:(flutter::VsyncWaiter::Callback)callback {
-  return [self initWithTaskRunnerPtr:task_runner
-        isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
-                      maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
-                            callback:std::move(callback)];
-}
-
-- (instancetype)initWithTaskRunner:(FlutterFMLTaskRunner*)taskRunner
-      isVariableRefreshRateEnabled:(BOOL)isVariableRefreshRateEnabled
-                    maxRefreshRate:(double)maxRefreshRate
-                          callback:(void (^)(CFTimeInterval startTime,
-                                             CFTimeInterval targetTime))callback {
-  fml::RefPtr<fml::TaskRunner> runner = taskRunner.taskRunner;
-  auto cpp_callback = [callback](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
-    double start_time_seconds = recorder->GetVsyncStartTime().ToEpochDelta().ToSecondsF();
-    double target_time_seconds = recorder->GetVsyncTargetTime().ToEpochDelta().ToSecondsF();
-    callback(start_time_seconds, target_time_seconds);
-  };
-  return [self initWithTaskRunnerPtr:runner
-        isVariableRefreshRateEnabled:isVariableRefreshRateEnabled
-                      maxRefreshRate:maxRefreshRate
-                            callback:cpp_callback];
-}
-
-- (instancetype)initWithTaskRunner:(FlutterFMLTaskRunner*)taskRunner
-                          callback:(void (^)(CFTimeInterval startTime,
-                                             CFTimeInterval targetTime))callback {
-  return [self initWithTaskRunner:taskRunner
-      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
-                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
-                          callback:callback];
 }
 
 - (void)setMaxRefreshRate:(double)refreshRate {
@@ -114,9 +88,8 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
   CFTimeInterval duration = link.targetTimestamp - link.timestamp;
   fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(duration);
 
-  TRACE_EVENT2_INT("flutter", "PlatformVsync", "frame_start_time",
-                   frame_start_time.ToEpochDelta().ToMicroseconds(), "frame_target_time",
-                   frame_target_time.ToEpochDelta().ToMicroseconds());
+  [FlutterTracing tracePlatformVsyncWithStartTime:frame_start_time.ToEpochDelta().ToSecondsF()
+                                       targetTime:frame_target_time.ToEpochDelta().ToSecondsF()];
 
   std::unique_ptr<flutter::FrameTimingsRecorder> recorder =
       std::make_unique<flutter::FrameTimingsRecorder>();

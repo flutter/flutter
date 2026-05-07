@@ -201,6 +201,11 @@ class XcodeProjectInterpreter {
     );
   }
 
+  /// Returns the absolute path to the Swift package cache directory.
+  String swiftPackageCachePath(Directory buildDirectory) {
+    return buildDirectory.childDirectory(kSwiftPackageCacheDirectoryName).absolute.path;
+  }
+
   /// Returns a list of required arguments for the `xcodebuild` Xcode project command.
   ///
   /// When [skipPackageUpdatesAndValidation] is true, it uses arguments to attempt skipping any
@@ -209,10 +214,7 @@ class XcodeProjectInterpreter {
     Directory buildDirectory, {
     bool skipPackageUpdatesAndValidation = true,
   }) {
-    final String cachePath = buildDirectory
-        .childDirectory(kSwiftPackageCacheDirectoryName)
-        .absolute
-        .path;
+    final String cachePath = swiftPackageCachePath(buildDirectory);
     return <String>[
       ...xcrunCommand(),
       'xcodebuild',

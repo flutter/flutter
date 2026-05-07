@@ -1043,7 +1043,7 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value() &&
+      IsCompatibleWithSDFRendering(paint) &&
       round_superellipse.GetRadii().AreAllCornersSame()) {
     auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
         round_superellipse.GetBounds(), round_superellipse.GetRadii());
@@ -2461,6 +2461,9 @@ void Canvas::EndReplay() {
 }
 
 bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
+  if (!paint.anti_alias) {
+    return false;
+  }
   if (paint.mask_blur_descriptor.has_value()) {
     return false;
   }

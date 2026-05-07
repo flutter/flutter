@@ -5,6 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -1012,6 +1013,101 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       expect(logger.traceText, contains('Failed to remove com.apple.provenance'));
       expect(processManager, hasNoRemainingExpectations);
     });
+
+    testWithoutContext(
+      'removeExtendedAttributesForProject removes attributes from expected files/directories',
+      () async {
+        final fs = MemoryFileSystem.test();
+
+        // Create project level entities (excluding buildDir)
+        final Directory projectDir = fs.directory('/app_name')..createSync(recursive: true);
+        fs.currentDirectory = projectDir;
+        projectDir.childFile('pubspec.yaml').createSync();
+        projectDir.childDirectory('lib').createSync();
+
+        // Create build directory level entities (excluding iosBuildDir)
+        final Directory buildDir = projectDir.childDirectory('build')..createSync(recursive: true);
+        buildDir.childDirectory('macos').createSync();
+
+        // Create iOS build directory level entities (excluding swiftPackageCacheDir)
+        final Directory iosBuildDir = buildDir.childDirectory('ios')..createSync(recursive: true);
+        iosBuildDir.childDirectory('iphoneos').createSync();
+        iosBuildDir.childDirectory('Release-iphoneos').createSync();
+
+        // swiftPackageCacheDir contains files that should NOT have attributes removed
+        final Directory swiftPackageCacheDir = iosBuildDir.childDirectory('SourcePackages');
+        swiftPackageCacheDir.createSync(recursive: true);
+
+        final processManager = FakeProcessManager.unordered(<FakeCommand>[
+          // Project files FinderInfo
+          const FakeCommand(
+            command: <String>[
+              'xattr',
+              '-r',
+              '-d',
+              'com.apple.FinderInfo',
+              '/app_name/pubspec.yaml',
+            ],
+          ),
+          const FakeCommand(
+            command: <String>[
+              'xattr',
+              '-r',
+              '-d',
+              'com.apple.provenance',
+              '/app_name/pubspec.yaml',
+            ],
+          ),
+          const FakeCommand(
+            command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', '/app_name/lib'],
+          ),
+          const FakeCommand(
+            command: <String>['xattr', '-r', '-d', 'com.apple.provenance', '/app_name/lib'],
+          ),
+          // iOS Build directory files FinderInfo
+          const FakeCommand(
+            command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', 'build/ios/iphoneos'],
+          ),
+          const FakeCommand(
+            command: <String>['xattr', '-r', '-d', 'com.apple.provenance', 'build/ios/iphoneos'],
+          ),
+          const FakeCommand(
+            command: <String>[
+              'xattr',
+              '-r',
+              '-d',
+              'com.apple.FinderInfo',
+              'build/ios/Release-iphoneos',
+            ],
+          ),
+          const FakeCommand(
+            command: <String>[
+              'xattr',
+              '-r',
+              '-d',
+              'com.apple.provenance',
+              'build/ios/Release-iphoneos',
+            ],
+          ),
+        ]);
+
+        final fakeFlutterProject = FakeFlutterProjectWithAbsoluteDirectory(fileSystem: fs);
+        final xcodeProject = FakeXcodeBasedProject(parent: fakeFlutterProject);
+
+        final config = Config.test(directory: fs.directory('/config_dir'), logger: logger);
+
+        await removeExtendedAttributesForProject(
+          xcodeProject: xcodeProject,
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
+          logger: logger,
+          fileSystem: fs,
+          config: config,
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        );
+
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
   });
 
   group('publicHeadersChanged', () {
@@ -1245,6 +1341,11 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   }) async {
     return <String>['xcrun', 'xcodebuild'];
   }
+
+  @override
+  String swiftPackageCachePath(Directory buildDirectory) {
+    return buildDirectory.childDirectory('SourcePackages').absolute.path;
+  }
 }
 
 class FakePlugin extends Fake implements Plugin {
@@ -1265,4 +1366,18 @@ class FakePlugin extends Fake implements Plugin {
   String? pluginPodspecPath(FileSystem fileSystem, String platform) {
     return 'path/to/$name/$platform/$name.podspec';
   }
+}
+
+class FakeXcodeBasedProject extends Fake implements XcodeBasedProject {
+  FakeXcodeBasedProject({required this.parent});
+
+  @override
+  final FlutterProject parent;
+}
+
+class FakeFlutterProjectWithAbsoluteDirectory extends FakeFlutterProject {
+  FakeFlutterProjectWithAbsoluteDirectory({required super.fileSystem});
+
+  @override
+  Directory get directory => fileSystem.directory('/app_name');
 }
