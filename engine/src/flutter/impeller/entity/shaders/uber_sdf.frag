@@ -17,12 +17,24 @@ uniform FragInfo {
   float stroked;
   float type;
   vec4 radii;
+  vec4 radii_right;
+  vec2 superellipse_degree;
+  vec2 superellipse_a;
+  vec2 corner_angle_span;
+  vec2 corner_circle_center_top;
+  vec2 corner_circle_center_right;
+  float superellipse_c;
+  vec2 superellipse_scale;
 }
 frag_info;
 
 out vec4 frag_color;
 
 highp in vec2 v_position;
+
+const float PI = 3.14159265;
+const float TWO_PI = 6.28318531;
+const float PI_OVER_FOUR = 0.78539816;
 
 float distanceFromCircle(vec2 p, float radius) {
   return length(p) - radius;
@@ -31,6 +43,127 @@ float distanceFromCircle(vec2 p, float radius) {
 float distanceFromRect(vec2 p, vec2 b) {
   vec2 d = abs(p) - b;
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+}
+
+// SDF for a superellipse defined by (x/a)^n + (y/b)^n = 1
+//
+// `p` is the coordinate of the point relative to the center of the superellipse
+// normalized by the length of the ellipse semi-axes (a, b)
+// `n` is the exponent of the superellipse
+//
+// https://iquilezles.org/articles/ellipsedist/
+//
+// The MIT License
+// Copyright © 2015 Inigo Quilez
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions: The above copyright
+// notice and this permission notice shall be included in all copies or
+// substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS",
+// WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+// TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+// FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+// THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// https://www.youtube.com/c/InigoQuilez
+// https://iquilezles.org
+
+float sdSuperellipse(vec2 p, float n) {
+  // symmetries
+  p = abs(p);
+  if (p.y > p.x)
+    p = p.yx;
+
+  n = 2.0 / n;  // note the remapping in order to match the implicit versions
+
+  float xa = 0.0, xb = TWO_PI / 8.0;
+  for (int i = 0; i < 6; i++) {
+    float x = 0.5 * (xa + xb);
+    float c = cos(x);
+    float s = sin(x);
+    float cn = pow(c, n);
+    float sn = pow(s, n);
+    float y = (p.x - cn) * cn * s * s - (p.y - sn) * sn * c * c;
+
+    if (y < 0.0)
+      xa = x;
+    else
+      xb = x;
+  }
+  // compute distance
+  vec2 qa = pow(vec2(cos(xa), sin(xa)), vec2(n));
+  vec2 qb = pow(vec2(cos(xb), sin(xb)), vec2(n));
+  vec2 pa = p - qa, ba = qb - qa;
+  float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+  return length(pa - ba * h) * sign(pa.x * ba.y - pa.y * ba.x);
+}
+
+float distanceFromRoundedSuperellipse(vec2 p,
+                                      vec2 degree,
+                                      vec2 se_a,
+                                      vec4 radii_top,
+                                      vec2 angle_span,
+                                      vec2 circle_center_top,
+                                      vec4 radii_right,
+                                      vec2 circle_center_right,
+                                      float c,
+                                      vec2 scale) {
+  // Do work in the first quadrant to simply things.
+  p = abs(p);
+  // Map p in to a square.
+  vec2 p_norm = p / scale;
+
+  // Declare all RSE params for a single octant.
+  float se_degree, span, radius, axis_length;
+  vec2 circle_center;
+
+  // 'p' in the coordinate system of the octant.
+  vec2 p_oct;
+
+  // We split the quadrant along the diagonal of the transition (p_norm.y + c ==
+  // p_norm.x). This allows us to grab the correct set of parameters for the
+  // "top" and "right" halves of the corner.
+  if (p_norm.y + c > p_norm.x) {
+    p_oct = p_norm + vec2(0.0, c);
+    se_degree = degree.x;
+    span = angle_span.x;
+    radius = radii_top.x;
+    circle_center = circle_center_top;
+    axis_length = se_a.x;
+  } else {
+    // For the 'right' octant, we flip the point and shift it according to
+    // the CPU's OctantContains/Flip logic.
+    p_oct = p_norm.yx - vec2(0.0, c);
+    se_degree = degree.y;
+    span = angle_span.y;
+    radius = radii_right.x;
+    circle_center = circle_center_right;
+    axis_length = se_a.y;
+  }
+
+  // Move the point to the corner circle's coordinate system.
+  vec2 p_rel = p_oct - circle_center;
+
+  // Grab the angle offset of the point.
+  float theta = atan(p_rel.y, p_rel.x);
+
+  // The angular distance between the point and the 45 degree midline.
+  float d_theta = theta - PI_OVER_FOUR;
+  d_theta = mod(d_theta + PI, TWO_PI) - PI;
+
+  // If the point is within the span of the corner circle's arc,
+  // use a circle SDF.
+  // This works because the normals of the circular and superelliptical sections
+  // agree at the transition angle, the total RSE curve is continuous and
+  // the closest point on a continuous curve to a point lies along the normal.
+  if (abs(d_theta) < abs(span)) {
+    return distanceFromCircle(p_rel, radius);
+  }
+  return sdSuperellipse(p_oct / axis_length, se_degree) * axis_length;
 }
 
 // Define an ellipse as q(w) = (a*cos(w), b*sin(w)), and p = (x, y) on the
@@ -206,8 +339,15 @@ vec2 filledSDF(vec2 p) {
     sdf = distanceFromRect(p, frag_info.size);
   } else if (frag_info.type < 2.5) {  // Oval
     sdf = distanceFromOval(p, frag_info.size);
-  } else {  // Rounded Rect
+  } else if (frag_info.type < 3.5) {  // Rounded Rect
     sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
+  } else {
+    sdf = distanceFromRoundedSuperellipse(
+        p, frag_info.superellipse_degree, frag_info.superellipse_a,
+        frag_info.radii, frag_info.corner_angle_span,
+        frag_info.corner_circle_center_top, frag_info.radii_right,
+        frag_info.corner_circle_center_right, frag_info.superellipse_c,
+        frag_info.superellipse_scale);
   }
   return vec2(sdf, pixelSize(sdf));
 }

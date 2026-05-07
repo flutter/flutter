@@ -1444,6 +1444,18 @@ TEST(RectTest, ContainsFloatingPoint) {
   EXPECT_TRUE(rect1.Contains(rect2));
 }
 
+TEST(RectTest, FloatContainsInteger) {
+  auto rect1 =
+      Rect::MakeLTRB(472.599945f, 440.999969f, 1574.80005f, 1094.000000f);
+  EXPECT_TRUE(rect1.Contains(IRect::MakeLTRB(473, 441, 1574, 1094)));
+
+  // Now test failure to contain same rect expanded by 1 on each side
+  EXPECT_FALSE(rect1.Contains(IRect::MakeLTRB(472, 441, 1574, 1094)));
+  EXPECT_FALSE(rect1.Contains(IRect::MakeLTRB(473, 440, 1574, 1094)));
+  EXPECT_FALSE(rect1.Contains(IRect::MakeLTRB(473, 441, 1575, 1094)));
+  EXPECT_FALSE(rect1.Contains(IRect::MakeLTRB(473, 441, 1574, 1095)));
+}
+
 template <typename R>
 static constexpr inline R flip_lr(R rect) {
   return R::MakeLTRB(rect.GetRight(), rect.GetTop(),  //

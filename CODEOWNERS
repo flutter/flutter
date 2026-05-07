@@ -63,3 +63,5 @@
 .agents/skills/find-release @reidbaker
 .agents/skills/rebuilding-flutter-tool @vashworth
 .agents/skills/upgrade-browser @mdebbar
+.agents/skills/flutter-pr-checks-finder @bkonyi
+.agents/skills/dart-log-failure-parser @bkonyi

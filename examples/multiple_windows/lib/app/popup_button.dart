@@ -32,7 +32,7 @@ class _PopupButtonState extends State<PopupButton> {
     super.dispose();
   }
 
-  void _onPressed(final WindowRegistry windowRegistry, final WindowSettings windowSettings) {
+  void _onPressed(WindowRegistry windowRegistry, WindowSettings windowSettings) {
     // Toggle popup visibility.
     if (_popupWindowEntry != null) {
       _popupWindowEntry!.controller.destroy();
