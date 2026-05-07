@@ -148,7 +148,7 @@ you can specify a library `lib.dart` in package `p`:
 ```yaml
 library: 'package:p/lib.dart'
 ```
-Currently, the only transform that can be done on a library is a [`replaceby`](#replaceBy) change. For example, to replace a library `package:p/lib.dart` with a library
+Currently, the only transform that can be done on a library is a [`replacedBy`](#replacedby) change. For example, to replace a library `package:p/lib.dart` with a library
 `package:p2/lib.dart` in import statements, you would write:
 
 ```yaml
@@ -424,6 +424,7 @@ When used to replace a library, a _replacedBy_ change has two keys: `kind` and `
 ```yaml
 kind: 'replacedBy'
 newLibrary: 'package:p2/lib.dart'
+```
 
 ### code template
 
