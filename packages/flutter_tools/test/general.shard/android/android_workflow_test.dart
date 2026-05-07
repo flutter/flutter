@@ -898,7 +898,7 @@ Android sdkmanager tool was found, but failed to run
       validationResult.messages.any(
         (ValidationMessage message) =>
             message.type == ValidationMessageType.hint &&
-            message.message.contains('Multiple adb binaries found on PATH') &&
+            message.message.contains('Multiple adb binaries found') &&
             message.message.contains('/foo/bar/platform-tools/adb') &&
             message.message.contains('/usr/bin/adb'),
       ),
@@ -936,7 +936,7 @@ Android sdkmanager tool was found, but failed to run
       validationResult.messages.any(
         (ValidationMessage message) =>
             message.type == ValidationMessageType.hint &&
-            message.message.contains('Multiple adb binaries found on PATH'),
+            message.message.contains('Multiple adb binaries found'),
       ),
       false,
     );

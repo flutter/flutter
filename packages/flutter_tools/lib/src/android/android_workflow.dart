@@ -305,29 +305,24 @@ class AndroidValidator extends DoctorValidator {
     final String? sdkAdbPath = androidSdk.adbPath;
     final uniqueAdbPaths = <String>{};
 
-    if (sdkAdbPath != null) {
+    void addAdbPath(String path, FileSystem fs) {
       try {
-        final String resolvedSdkAdb = androidSdk.directory.fileSystem
-            .file(sdkAdbPath)
-            .resolveSymbolicLinksSync();
-        uniqueAdbPaths.add(resolvedSdkAdb);
+        uniqueAdbPaths.add(fs.file(path).resolveSymbolicLinksSync());
       } on Exception catch (_) {
-        uniqueAdbPaths.add(sdkAdbPath);
+        uniqueAdbPaths.add(path);
       }
     }
 
+    if (sdkAdbPath != null) {
+      addAdbPath(sdkAdbPath, androidSdk.directory.fileSystem);
+    }
     for (final adbFile in adbCandidates) {
-      try {
-        final String resolvedPath = adbFile.resolveSymbolicLinksSync();
-        uniqueAdbPaths.add(resolvedPath);
-      } on Exception catch (_) {
-        uniqueAdbPaths.add(adbFile.path);
-      }
+      addAdbPath(adbFile.path, adbFile.fileSystem);
     }
 
     if (uniqueAdbPaths.length > 1) {
       final warningMessage = StringBuffer(
-        'Warning: Multiple adb binaries found on PATH. This can cause conflicts '
+        'Multiple adb binaries found. This can cause conflicts '
         'and device detection issues:\n',
       );
       for (final adbPath in uniqueAdbPaths) {
