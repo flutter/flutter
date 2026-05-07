@@ -968,7 +968,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
-    _paint.paint(canvas, _layout, _painter, offset.dx, offset.dy);
+    _paint.paint(canvas, _layout, _painter, offset);
   }
 
   @override
