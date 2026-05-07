@@ -676,6 +676,11 @@ bool ContextVK::FlushCommandBuffers() {
   }
 }
 
+bool ContextVK::FinishQueue() {
+  GetIdleWaiter()->WaitIdle();
+  return true;
+}
+
 // Creating a render pass is observed to take an additional 6ms on a Pixel 7
 // device as the driver will lazily bootstrap and compile shaders to do so.
 // The render pass does not need to be begun or executed.

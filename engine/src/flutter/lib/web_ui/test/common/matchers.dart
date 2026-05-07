@@ -257,7 +257,7 @@ class HtmlPatternMatcher extends Matcher {
   final html.Element pattern;
 
   @override
-  bool matches(final Object? object, Map<Object?, Object?> matchState) {
+  bool matches(Object? object, Map<Object?, Object?> matchState) {
     // TODO(srujzs): Replace this with `!object.isJSAny` once we have that API
     // in `dart:js_interop`.
     // https://github.com/dart-lang/sdk/issues/56905
