@@ -864,8 +864,8 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
       overlayLocation: useRootOverlay
           ? OverlayChildLocation.rootOverlay
           : OverlayChildLocation.nearestOverlay,
-      child: child,
       accessibilityOpaque: true,
+      child: child,
     );
   }
 

@@ -2203,7 +2203,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
   @override
   Widget build(BuildContext context) {
     final int? zOrderIndex = _zOrderIndex;
-    
+
     if (zOrderIndex == null) {
       return _OverlayPortal(
         overlayLocation: null,
@@ -2958,7 +2958,7 @@ class _RenderLayoutBuilder extends RenderProxyBox
     if (node == null) {
       throw FlutterError('Could not find a _RenderDeferredLayoutBox ancestor for $this');
     }
-    final _RenderDeferredLayoutBox deferredParent = node as _RenderDeferredLayoutBox;
+    final deferredParent = node as _RenderDeferredLayoutBox;
     final _RenderLayoutSurrogateProxyBox layoutSurrogate = deferredParent._layoutSurrogate;
     assert(() {
       for (
@@ -3085,7 +3085,6 @@ class _RenderLayoutBuilder extends RenderProxyBox
 
 class _AccessibilityBarrier extends SingleChildRenderObjectWidget {
   const _AccessibilityBarrier({
-    super.key,
     required super.child,
     required this.isCovered,
   });
