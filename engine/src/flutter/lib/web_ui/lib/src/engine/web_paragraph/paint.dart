@@ -29,15 +29,11 @@ void resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
   paintContext.save();
   isFirstResize = false;
 
-  final double width = rect.width.ceilToDouble();
-  final double height = rect.height.ceilToDouble();
-
-  paintCanvas.width = width;
-  paintCanvas.height = height;
-  paintCanvas.style.width = '${width / devicePixelRatio}px';
-  paintCanvas.style.height = '${height / devicePixelRatio}px';
+  paintCanvas.width = rect.width;
+  paintCanvas.height = rect.height;
+  paintCanvas.style.width = '${rect.width / devicePixelRatio}px';
+  paintCanvas.style.height = '${rect.height / devicePixelRatio}px';
   paintContext.scale(devicePixelRatio, devicePixelRatio);
-
 }
 
 /// Paints on a [WebParagraph].
@@ -164,13 +160,12 @@ abstract class TextPaint {
       (layout.paragraph.height * devicePixelRatio).ceilToDouble(),
     );
     // Target rect will be scaled by the canvas transform, so we don't scale it here
-    final zeroRect = ui.Rect.fromLTWH(
-      0,
-      0,
+    final targetRect = ui.Rect.fromLTWH(
+      offset.dx,
+      offset.dy,
       maxWidth.ceilToDouble(),
       layout.paragraph.height.ceilToDouble(),
     );
-    final ui.Rect targetRect = zeroRect.translate(offset.dx, offset.dy);
 
     if (WebParagraphDebug.logging) {
       WebParagraphDebug.log(
