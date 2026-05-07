@@ -2413,12 +2413,19 @@ abstract class BuildContext {
   /// [Theme.of].
   ///
   /// This method should not be called from widget constructors or from
-  /// [State.initState] methods, because those methods would not get called
-  /// again if the inherited value were to change. To ensure that the widget
-  /// correctly updates itself when the inherited value changes, only call this
-  /// (directly or indirectly) from build methods, layout and paint callbacks,
-  /// or from [State.didChangeDependencies] (which is called immediately after
-  /// [State.initState]).
+  /// [State.initState] methods. While calling this method registers the
+  /// [BuildContext] for future rebuilds, those methods are only executed once.
+  /// If the inherited value changes, the widget will rebuild, but any logic
+  /// or variables initialized inside the constructor or [State.initState]
+  /// will not execute again, leaving the widget with stale data.
+  ///
+  /// To ensure the widget stays in sync, call this (directly or indirectly)
+  /// from build methods, layout/paint callbacks, or [State.didChangeDependencies].
+  ///
+  /// [State.didChangeDependencies] is the reactive counterpart to [State.initState].
+  /// It runs immediately after [State.initState] and is re-invoked whenever
+  /// the inherited widgets this context depends on change, allowing the
+  /// [State] to update internal variables before [State.build] is called.
   ///
   /// This method should not be called from [State.dispose] because the element
   /// tree is no longer stable at that time. To refer to an ancestor from that
@@ -2432,12 +2439,6 @@ abstract class BuildContext {
   ///
   /// Calling this method is O(1) with a small constant factor, but will lead to
   /// the widget being rebuilt more often.
-  ///
-  /// Once a widget registers a dependency on a particular type by calling this
-  /// method, it will be rebuilt, and [State.didChangeDependencies] will be
-  /// called, whenever changes occur relating to that widget until the next time
-  /// the widget or one of its ancestors is moved (for example, because an
-  /// ancestor is added or removed).
   ///
   /// The [aspect] parameter is only used when `T` is an
   /// [InheritedWidget] subclasses that supports partial updates, like
