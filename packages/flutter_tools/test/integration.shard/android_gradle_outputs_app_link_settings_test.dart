@@ -449,7 +449,7 @@ void main() {
       expect(result, const ProcessResultMatcher());
 
       // Enable Gradle build caching.
-      final io.File gradleProperties = io.File(
+      final gradleProperties = io.File(
         fileSystem.path.join(tempDir.path, 'android', 'gradle.properties'),
       );
       gradleProperties.writeAsStringSync('\norg.gradle.caching=true\n', mode: io.FileMode.append);
@@ -487,7 +487,7 @@ void main() {
       expect(result, const ProcessResultMatcher());
 
       // Verify custom tasks are successfully resolved FROM-CACHE.
-      final String stdout = result.stdout as String;
+      final stdout = result.stdout as String;
       expect(stdout.contains('generateDebugResValues FROM-CACHE'), isTrue);
       expect(stdout.contains('extractDeepLinksDebug FROM-CACHE'), isTrue);
       expect(stdout.contains('processDebugMainManifest FROM-CACHE'), isTrue);
