@@ -864,6 +864,114 @@ name: my_app
   );
 
   testUsingContext(
+    'Can hot reload and evict dirty assets/shaders',
+    () async {
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: logger,
+        systemClock: SystemClock.fixed(DateTime(2001)),
+        debuggingOptions: DebuggingOptions.enabled(
+          const BuildInfo(
+            BuildMode.debug,
+            null,
+            trackWidgetCreation: true,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+            webEnableHotReload: true,
+            extraFrontEndOptions: kDdcLibraryBundleFlags,
+          ),
+        ),
+      );
+
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          ...kAttachExpectations,
+          FakeVmServiceRequest(method: 'getVM', jsonResponse: fakeVM.toJson()),
+          const FakeVmServiceRequest(
+            method: kReloadSourcesServiceName,
+            args: <String, Object>{'isolateId': '1'},
+            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
+          ),
+          const FakeVmServiceRequest(
+            method: '_flutter.listViews',
+            jsonResponse: <String, Object>{
+              'views': <Object>[
+                <String, Object>{
+                  'id': '1',
+                  'isolate': <String, Object>{'id': '1', 'name': 'isolate', 'number': '1'},
+                },
+              ],
+            },
+          ),
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.evict',
+            args: <String, Object>{'isolateId': '1', 'value': 'assets/foo.png'},
+            jsonResponse: <String, Object>{'type': 'Success'},
+          ),
+          const FakeVmServiceRequest(
+            method: 'ext.ui.window.reinitializeShader',
+            args: <String, Object>{'isolateId': '1', 'assetKey': 'shaders/bar.frag'},
+            jsonResponse: <String, Object>{'type': 'Success'},
+          ),
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.reassemble',
+            jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
+          ),
+        ],
+      );
+      setupMocks();
+
+      // Populate dirty assets and shaders to evict
+      webDevFS.assetPathsToEvict.add('assets/foo.png');
+      webDevFS.shaderPathsToEvict.add('shaders/bar.frag');
+
+      final chromiumLauncher = TestChromiumLauncher();
+      final process = FakeProcess();
+      final chrome = Chromium(
+        1,
+        chromeConnection,
+        chromiumLauncher: chromiumLauncher,
+        process: process,
+        logger: logger,
+      );
+      chromiumLauncher.setInstance(chrome);
+
+      flutterDevice.device = GoogleChromeDevice(
+        fileSystem: fileSystem,
+        chromiumLauncher: chromiumLauncher,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        processManager: FakeProcessManager.any(),
+      );
+      webDevFS.report = UpdateFSReport(success: true);
+
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
+
+      expect(debugConnectionInfo, isNotNull);
+
+      final OperationResult result = await residentWebRunner.restart();
+
+      expect(logger.statusText, contains('Reloaded application in'));
+      expect(result.code, 0);
+      expect(webDevFS.mainUri.toString(), contains('entrypoint.dart'));
+
+      // Verifying the sets are successfully cleared after eviction
+      expect(webDevFS.assetPathsToEvict, isEmpty);
+      expect(webDevFS.shaderPathsToEvict, isEmpty);
+
+      expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'Hot reload reject reports correct analytics',
     () async {
       final logger = BufferLogger.test();
@@ -2163,6 +2271,12 @@ class FakeWebDevFS extends Fake implements WebDevFS {
 
   @override
   PackageConfig? lastPackageConfig = PackageConfig.empty;
+
+  @override
+  final Set<String> assetPathsToEvict = <String>{};
+
+  @override
+  final Set<String> shaderPathsToEvict = <String>{};
 
   @override
   bool useDwdsWebSocketConnection = false;

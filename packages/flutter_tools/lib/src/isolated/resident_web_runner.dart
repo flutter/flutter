@@ -588,6 +588,7 @@ class ResidentWebRunner extends ResidentRunner {
             }
             return OperationResult(1, reloadFailedMessage);
           }
+          await _evictDirtyAssets();
           String? failedReassemble;
           final DateTime reassembleStart = _systemClock.now();
           await _vmService
@@ -975,6 +976,35 @@ class ResidentWebRunner extends ResidentRunner {
       await flutterDevice!.exitApps();
     }
     appFinished();
+  }
+
+  Future<void> _evictDirtyAssets() async {
+    final futures = <Future<void>>[];
+    for (final FlutterDevice? device in flutterDevices) {
+      if (device?.devFS == null) {
+        continue;
+      }
+      if (device!.devFS!.assetPathsToEvict.isEmpty && device.devFS!.shaderPathsToEvict.isEmpty) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
+      if (views.isEmpty || views.first.uiIsolate == null) {
+        continue;
+      }
+      for (final String assetPath in device.devFS!.assetPathsToEvict) {
+        futures.add(
+          device.vmService!.flutterEvictAsset(assetPath, isolateId: views.first.uiIsolate!.id!),
+        );
+      }
+      for (final String assetPath in device.devFS!.shaderPathsToEvict) {
+        futures.add(
+          device.vmService!.flutterEvictShader(assetPath, isolateId: views.first.uiIsolate!.id!),
+        );
+      }
+      device.devFS!.assetPathsToEvict.clear();
+      device.devFS!.shaderPathsToEvict.clear();
+    }
+    await Future.wait<void>(futures);
   }
 
   void _onServiceEvent(vmservice.Event e) {

@@ -99,6 +99,44 @@ void main() {
   });
 
   test(
+    'WebDevFS.assetPathsToEvict is mutable and can be cleared/modified',
+    () => testbed.run(() {
+      final webDevFS = WebDevFS(
+        packagesFilePath: '.dart_tool/package_config.json',
+        urlTunneller: null,
+        useSseForDebugProxy: false,
+        useSseForDebugBackend: false,
+        useSseForInjectedClient: false,
+        buildInfo: BuildInfo.debug,
+        enableDwds: false,
+        ddsConfig: const DartDevelopmentServiceConfiguration(),
+        entrypoint: Uri.parse('org-dartlang-app:///main.dart'),
+        expressionCompiler: null,
+        chromiumLauncher: null,
+        nativeNullAssertions: true,
+        ddcModuleSystem: false,
+        canaryFeatures: false,
+        webDevServerConfig: const WebDevServerConfig(),
+        webRenderer: WebRendererMode.canvaskit,
+        isWasm: false,
+        useLocalCanvasKit: false,
+        rootDirectory: globals.fs.currentDirectory,
+        fileSystem: globals.fs,
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        webCrossOriginIsolation: false,
+        testMode: true,
+      );
+
+      expect(() => webDevFS.assetPathsToEvict.clear(), returnsNormally);
+      webDevFS.assetPathsToEvict.add('assets/foo.png');
+      expect(webDevFS.assetPathsToEvict, contains('assets/foo.png'));
+      webDevFS.assetPathsToEvict.clear();
+      expect(webDevFS.assetPathsToEvict, isEmpty);
+    }),
+  );
+
+  test(
     '.log() reports warnings',
     () => testbed.run(() {
       const unresolvedUriMessage = 'Unresolved uri:';

@@ -146,6 +146,7 @@ class WebDevFS implements DevFS {
   bool didUpdateFontManifest = false;
 
   final Set<String> _shaderPathsToEvict = <String>{};
+  final Set<String> _assetPathsToEvict = <String>{};
 
   Future<DebugConnection>? _cachedExtensionFuture;
   StreamSubscription<void>? _connectedApps;
@@ -205,9 +206,8 @@ class WebDevFS implements DevFS {
   @override
   PackageConfig? lastPackageConfig;
 
-  // We do not evict assets on the web.
   @override
-  Set<String> get assetPathsToEvict => const <String>{};
+  Set<String> get assetPathsToEvict => _assetPathsToEvict;
 
   @override
   Uri get baseUri => webAssetServer.baseUri;
@@ -292,6 +292,7 @@ class WebDevFS implements DevFS {
     File? dartPluginRegistrant,
   }) async {
     _shaderPathsToEvict.clear();
+    _assetPathsToEvict.clear();
     lastPackageConfig = packageConfig;
     final File mainFile = fileSystem.file(mainUri);
     final String outputDirectoryPath = mainFile.parent.path;
@@ -377,7 +378,7 @@ class WebDevFS implements DevFS {
           shaderCompiler: shaderCompiler,
           fileSystem: fileSystem,
           rootDirectoryPath: rootDirectory.path,
-          assetPathsToEvict: <String>{}, // Web doesn't evict regular assets
+          assetPathsToEvict: _assetPathsToEvict,
           shaderPathsToEvict: _shaderPathsToEvict,
           bundleFirstUpload: bundleFirstUpload,
           syncAllAssetsOnFirstUpload: true,
