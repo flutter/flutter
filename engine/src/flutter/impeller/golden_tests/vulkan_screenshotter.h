@@ -20,7 +20,7 @@ class VulkanScreenshotter : public Screenshotter {
       const std::unique_ptr<PlaygroundImpl>& playground);
 
   std::unique_ptr<Screenshot> MakeScreenshot(
-      AiksContext& aiks_context,
+      const AiksContext& aiks_context,
       const std::shared_ptr<Texture> texture) override;
 
   PlaygroundImpl& GetPlayground() override { return *playground_; }
