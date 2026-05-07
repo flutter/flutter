@@ -469,19 +469,6 @@ DartVM::DartVM(const std::shared_ptr<const DartVMData>& vm_data,
     DartVMInitializer::Initialize(&params,
                                   settings_.enable_timeline_event_handler,
                                   settings_.trace_systrace);
-
-    // Get the current time point from the system clock
-    auto now = std::chrono::system_clock::now();
-
-    // Calculate duration since epoch
-    auto duration = now.time_since_epoch();
-
-    // Cast duration to the desired unit (seconds, milliseconds, etc.)
-    auto microseconds =
-        std::chrono::duration_cast<std::chrono::microseconds>(duration);
-
-    FML_LOG(ERROR) << "VICTORIA: Starting Dart VM at timestamp: "
-                   << microseconds.count() << " microseconds";
     // Send the earliest available timestamp in the application lifecycle to
     // timeline. The difference between this timestamp and the time we render
     // the very first frame gives us a good idea about Flutter's startup time.

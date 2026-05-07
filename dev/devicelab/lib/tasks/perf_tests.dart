@@ -928,7 +928,7 @@ class StartupTest {
   }
 
   Future<TaskResult> run() async {
-    await disableLLDBDebugging();
+    // await disableLLDBDebugging();
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();

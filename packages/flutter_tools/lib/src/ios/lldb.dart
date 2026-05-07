@@ -151,7 +151,7 @@ return False
     }
     try {
       _lldbProcess = _LLDBProcess(
-        process: await _processUtils.start(<String>['lldb']),
+        process: await _processUtils.start(<String>['xcrun', 'lldb']),
         appProcessId: appProcessId,
         logger: _logger,
       );

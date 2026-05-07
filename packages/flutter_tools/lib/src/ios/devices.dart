@@ -1654,13 +1654,13 @@ class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
     if (_isCoreDevice) {
       // `idevicesyslog` stopped working with at least Xcode 26 (may have been before).
       // Instead, use logging from `devicectl` and `lldb`.
-      // final Version? xcodeVersion = _xcode?.currentVersion;
-      // if (xcodeVersion != null && xcodeVersion.major >= 26) {
-      //   return _IOSDeviceLogSources(
-      //     primarySource: IOSDeviceLogSource.devicectlAndLldb,
-      //     fallbackSource: IOSDeviceLogSource.unifiedLogging,
-      //   );
-      // }
+      final Version? xcodeVersion = _xcode?.currentVersion;
+      if (xcodeVersion != null && xcodeVersion.major >= 26) {
+        return _IOSDeviceLogSources(
+          primarySource: IOSDeviceLogSource.devicectlAndLldb,
+          fallbackSource: IOSDeviceLogSource.unifiedLogging,
+        );
+      }
       if (_isWirelesslyConnected) {
         return _IOSDeviceLogSources(primarySource: IOSDeviceLogSource.unifiedLogging);
       }
