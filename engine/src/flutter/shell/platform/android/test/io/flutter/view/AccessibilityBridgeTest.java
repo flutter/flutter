@@ -2119,6 +2119,43 @@ public class AccessibilityBridgeTest {
   }
 
   @Test
+  public void itDoesNotCrashWhenHitTestingChildWithUninitializedTransform() {
+    // Regression test for https://github.com/flutter/flutter/issues/184810.
+    // When an OverlayPortal grafts a semantics node as a traversal child of one parent
+    // and a hit-test child of another, the engine may create the node via
+    // getOrCreateSemanticsNode before its own updateWith() has been called, leaving
+    // hitTestTransform null. A subsequent hover event must not crash.
+    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
+    AccessibilityManager mockManager = mock(AccessibilityManager.class);
+    View mockRootView = mock(View.class);
+    Context context = mock(Context.class);
+    when(mockRootView.getContext()).thenReturn(context);
+    when(context.getPackageName()).thenReturn("test");
+    when(mockManager.isTouchExplorationEnabled()).thenReturn(true);
+    AccessibilityBridge accessibilityBridge =
+        setUpBridge(mockRootView, mockManager, mockViewEmbedder);
+
+    // Build a root node that references a phantom child (id=1) whose data is not
+    // in the update buffer. This simulates the scenario where a parent's updateWith()
+    // creates the child via getOrCreateSemanticsNode but the child never receives its
+    // own updateWith(), leaving hitTestTransform as null.
+    TestSemanticsNode root = new TestSemanticsNode();
+    root.id = 0;
+    root.left = 0;
+    root.top = 0;
+    root.bottom = 20;
+    root.right = 20;
+    root.phantomChildIds.add(1);
+    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
+    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
+
+    // Fire a hover event within the root's bounds. Before the fix, this would crash
+    // with a NullPointerException in ensureInverseTransform because the phantom child's
+    // hitTestTransform was never initialized.
+    accessibilityBridge.onAccessibilityHoverEvent(MotionEvent.obtain(1, 1, 1, 10, 10, 0));
+  }
+
+  @Test
   public void itProducesPlatformViewNodeForHybridComposition() {
     PlatformViewsAccessibilityDelegate accessibilityDelegate =
         mock(PlatformViewsAccessibilityDelegate.class);
@@ -3320,6 +3357,7 @@ public class AccessibilityBridgeTest {
         };
 
     final List<TestSemanticsNode> children = new ArrayList<TestSemanticsNode>();
+    final List<Integer> phantomChildIds = new ArrayList<Integer>();
 
     public void addChild(TestSemanticsNode child) {
       children.add(child);
@@ -3411,14 +3449,20 @@ public class AccessibilityBridgeTest {
         bytes.putFloat(hitTestTransform[i]);
       }
       // children in traversal order.
-      bytes.putInt(children.size());
+      bytes.putInt(children.size() + phantomChildIds.size());
       for (TestSemanticsNode node : children) {
         bytes.putInt(node.id);
       }
+      for (int phantomId : phantomChildIds) {
+        bytes.putInt(phantomId);
+      }
       // children in hit test order.
-      bytes.putInt(children.size());
+      bytes.putInt(children.size() + phantomChildIds.size());
       for (TestSemanticsNode node : children) {
         bytes.putInt(node.id);
+      }
+      for (int phantomId : phantomChildIds) {
+        bytes.putInt(phantomId);
       }
       // custom actions
       bytes.putInt(0);
