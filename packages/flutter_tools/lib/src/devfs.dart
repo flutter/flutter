@@ -740,8 +740,7 @@ class DevFS {
       if (archivePath == kFontManifestJson) {
         onFontManifestUpdated?.call();
       }
-      final AssetKind kind = entry.kind;
-      switch (kind) {
+      switch (entry.kind) {
         case AssetKind.shader:
           pendingAssetBuilds.add(() async {
             DevFSContent content = entry.content;
@@ -771,7 +770,7 @@ class DevFS {
         case AssetKind.font:
           pendingAssetBuilds.add(() async {
             DevFSContent? content;
-            if (entry.transformers.isEmpty || kind != AssetKind.regular) {
+            if (entry.transformers.isEmpty || entry.kind != AssetKind.regular) {
               content = entry.content;
             } else {
               content = await assetTransformer.retransformAsset(
