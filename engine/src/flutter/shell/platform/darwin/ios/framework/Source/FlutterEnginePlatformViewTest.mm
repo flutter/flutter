@@ -10,8 +10,8 @@
 
 #include "flutter/fml/message_loop.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
 FLUTTER_ASSERT_ARC
