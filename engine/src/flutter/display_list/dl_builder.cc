@@ -53,6 +53,14 @@ std::optional<std::pair<DlRoundRect, DlPaint>> DiffRoundRectToRoundRect(
   const DlRect& inner_bounds = inner.GetBounds();
   const DlScalar stroke_width = inner_bounds.GetLeft() - outer_bounds.GetLeft();
 
+  // There are behavior differences between DiffRoundRect and stroked RoundRect
+  // when the calculated stroke width is 0 or negative. It's not clear what the
+  // right behavior is for this case, but we exit here and don't return a
+  // RoundRect to preserve the existing DiffRoundRect behavior.
+  if (stroke_width <= 0) {
+    return std::nullopt;
+  }
+
   // Verify the other sides are inset by the same amount.
   if (!DlScalarNearlyEqual(inner_bounds.GetTop() - outer_bounds.GetTop(),
                            stroke_width) ||

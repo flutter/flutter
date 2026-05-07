@@ -8,7 +8,6 @@
 #include <utility>
 #include <vector>
 
-#include "display_list/geometry/dl_geometry_types.h"
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
@@ -5144,17 +5143,23 @@ TEST_F(DisplayListTest, DrawStrokedDiffRoundRectDoesNotPromoteToDrawRoundRect) {
       .bottom_right = DlSize(outer_radii.bottom_right.width - inner_inset)};
   DlRoundRect inner_rrect = DlRoundRect::MakeRectRadii(inner_rect, inner_radii);
 
-  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kFill);
+  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kStroke);
 
   DisplayListBuilder builder;
   builder.DrawDiffRoundRect(outer_rrect, inner_rrect, paint);
   auto dl = builder.Build();
 
-  DisplayListBuilder expected;
-  expected.DrawDiffRoundRect(outer_rrect, inner_rrect, paint);
-  auto expect_dl = expected.Build();
-
-  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+  bool dl_has_draw_drrect = false;
+  bool dl_has_draw_rrect = false;
+  for (DlIndex i = 0; i < dl->GetRecordCount(); i++) {
+    if (dl->GetOpType(i) == DisplayListOpType::kDrawDiffRoundRect) {
+      dl_has_draw_drrect = true;
+    } else if (dl->GetOpType(i) == DisplayListOpType::kDrawRoundRect) {
+      dl_has_draw_rrect = true;
+    }
+  }
+  EXPECT_TRUE(dl_has_draw_drrect);
+  EXPECT_FALSE(dl_has_draw_rrect);
 }
 
 // DrawDiffRoundRect with unequal side widths does not have an equivalent
@@ -5185,11 +5190,17 @@ TEST_F(DisplayListTest,
   builder.DrawDiffRoundRect(outer_rrect, inner_rrect, paint);
   auto dl = builder.Build();
 
-  DisplayListBuilder expected;
-  expected.DrawDiffRoundRect(outer_rrect, inner_rrect, paint);
-  auto expect_dl = expected.Build();
-
-  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+  bool dl_has_draw_drrect = false;
+  bool dl_has_draw_rrect = false;
+  for (DlIndex i = 0; i < dl->GetRecordCount(); i++) {
+    if (dl->GetOpType(i) == DisplayListOpType::kDrawDiffRoundRect) {
+      dl_has_draw_drrect = true;
+    } else if (dl->GetOpType(i) == DisplayListOpType::kDrawRoundRect) {
+      dl_has_draw_rrect = true;
+    }
+  }
+  EXPECT_TRUE(dl_has_draw_drrect);
+  EXPECT_FALSE(dl_has_draw_rrect);
 }
 
 TEST_F(DisplayListTest, DrawRectPathPromoteToDrawRect) {
