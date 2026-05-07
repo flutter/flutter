@@ -12,16 +12,17 @@ base class Texture extends NativeFieldWrapperClass1 {
     return _valid;
   }
 
-  /// Returns the maximum number of mip levels the underlying HAL will
-  /// allocate for a texture of the given [width] and [height].
+  /// Returns the maximum number of mip levels Flutter GPU will allocate
+  /// for a texture of the given [width] and [height].
   ///
-  /// This currently matches `impeller::ISize::MipCount`, which uses
-  /// `floor(log2(min(w, h)))` and clamps at 1. Note that this is one less
-  /// than the canonical `floor(log2(max(w, h))) + 1` used by Vulkan and
-  /// OpenGL, and uses the smaller dimension instead of the larger; the HAL
-  /// may eventually relax this. Users should treat this as the upper bound
-  /// for the `mipLevelCount` argument to `GpuContext.createTexture` rather
-  /// than as a fixed mathematical formula.
+  /// This currently uses `floor(log2(min(w, h)))` and clamps at 1. Note
+  /// that this is one less than the canonical `floor(log2(max(w, h))) + 1`
+  /// used by Vulkan and OpenGL, and uses the smaller dimension instead of
+  /// the larger; Flutter GPU may eventually relax this (tracked in
+  /// https://github.com/flutter/flutter/issues/186176). Users should treat
+  /// this as the upper bound for the `mipLevelCount` argument to
+  /// `GpuContext.createTexture` rather than as a fixed mathematical
+  /// formula.
   static int fullMipCount(int width, int height) {
     if (width < 1 || height < 1) {
       return 1;
