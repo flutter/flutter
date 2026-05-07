@@ -708,10 +708,10 @@ class DevFS {
     required bool bundleFirstUpload,
     void Function()? onFontManifestUpdated,
   }) async {
-    final String assetBuildDirPrefix = '${fileSystem.path.toUri(assetDirectory).path}/';
-    final List<Future<void>> pendingAssetBuilds = <Future<void>>[];
-    int syncedBytes = 0;
-    bool assetBuildFailed = false;
+    final assetBuildDirPrefix = '${fileSystem.path.toUri(assetDirectory).path}/';
+    final pendingAssetBuilds = <Future<void>>[];
+    var syncedBytes = 0;
+    var assetBuildFailed = false;
 
     bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
       // If the content is backed by a real file, isModified will file stat and return true if
@@ -731,7 +731,7 @@ class DevFS {
       if (archivePath == kFontManifestJson) {
         onFontManifestUpdated?.call();
       }
-      final AssetKind? kind = entry.kind;
+      final AssetKind kind = entry.kind;
       switch (kind) {
         case AssetKind.shader:
           pendingAssetBuilds.add(
@@ -764,7 +764,6 @@ class DevFS {
           );
         case AssetKind.regular:
         case AssetKind.font:
-        case null:
           pendingAssetBuilds.add(
             Future<void>(() async {
               DevFSContent? content;
@@ -798,9 +797,6 @@ class DevFS {
     }
     return syncedBytes;
   }
-
-  /// Converts a platform-specific file path to a platform-independent URL path.
-  String _asUriPath(String filePath) => '${_fileSystem.path.toUri(filePath).path}/';
 }
 
 /// An implementation of a devFS writer which copies physical files for devices
