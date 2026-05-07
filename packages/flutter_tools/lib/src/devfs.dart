@@ -751,13 +751,13 @@ class DevFS {
                 workingDirectory: rootDirectoryPath,
               );
               if (transformed == null) {
-                throw Exception('Failed to transform shader $archivePath');
+                throw AssetTransformationException(archivePath, 'Failed to transform shader');
               }
               content = transformed;
             }
             final DevFSContent? compiled = await shaderCompiler.recompileShader(content);
             if (compiled == null) {
-              throw Exception('Failed to compile shader $archivePath');
+              throw DevFSShaderCompilationException(archivePath, 'Failed to compile shader');
             }
             dirtyEntries[deviceUri] = compiled;
             syncedBytes += compiled.size;
@@ -780,7 +780,7 @@ class DevFS {
               );
             }
             if (content == null) {
-              throw Exception('Failed to transform asset $archivePath');
+              throw AssetTransformationException(archivePath, 'Failed to transform asset');
             }
             dirtyEntries[deviceUri] = content;
             syncedBytes += content.size;
@@ -830,4 +830,26 @@ class LocalDevFSWriter implements DevFSWriter {
       throw DevFSException(err.toString());
     }
   }
+}
+
+/// Exception thrown when development-time asset transformation fails.
+final class AssetTransformationException implements Exception {
+  AssetTransformationException(this.archivePath, this.message);
+
+  final String archivePath;
+  final String message;
+
+  @override
+  String toString() => 'AssetTransformationException: $message (Asset: $archivePath)';
+}
+
+/// Exception thrown when development-time shader compilation fails.
+final class DevFSShaderCompilationException implements Exception {
+  DevFSShaderCompilationException(this.archivePath, this.message);
+
+  final String archivePath;
+  final String message;
+
+  @override
+  String toString() => 'DevFSShaderCompilationException: $message (Shader: $archivePath)';
 }

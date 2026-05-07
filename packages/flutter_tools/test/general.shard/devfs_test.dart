@@ -937,7 +937,8 @@ void main() {
         'stdout:\n'
         '\n'
         'stderr:\n'
-        '\n',
+        '\n'
+        'Error updating bundle: AssetTransformationException: Failed to transform asset (Asset: asset.txt)\n',
       );
     });
 
