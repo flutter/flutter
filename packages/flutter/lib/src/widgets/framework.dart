@@ -2420,12 +2420,13 @@ abstract class BuildContext {
   /// will not execute again, leaving the widget with stale data.
   ///
   /// To ensure the widget stays in sync, call this (directly or indirectly)
-  /// from build methods, layout/paint callbacks, or [State.didChangeDependencies].
+  /// from build methods, layout and paint callbacks, or from [State.didChangeDependencies].
   ///
-  /// [State.didChangeDependencies] is the reactive counterpart to [State.initState].
-  /// It runs immediately after [State.initState] and is re-invoked whenever
-  /// the inherited widgets this context depends on change, allowing the
-  /// [State] to update internal variables before [State.build] is called.
+  /// [State.didChangeDependencies] is called immediately after [State.initState]
+  /// and is re-invoked whenever the inherited widgets this context depends on
+  /// change. This allows the [State] to update internal variables or perform
+  /// initialization logic that depends on the inherited value before
+  /// [State.build] is called.
   ///
   /// This method should not be called from [State.dispose] because the element
   /// tree is no longer stable at that time. To refer to an ancestor from that
