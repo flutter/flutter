@@ -224,7 +224,7 @@ void main() {
   testWithoutContext('toBuildSystemEnvironment encoding of standard values', () {
     const buildInfo = BuildInfo(
       BuildMode.debug,
-      '',
+      'strawberry',
       treeShakeIcons: true,
       trackWidgetCreation: true,
       dartDefines: <String>['foo=2', 'bar=2'],
@@ -256,7 +256,19 @@ void main() {
       'FileSystemScheme': 'scheme',
       'BuildName': '122',
       'BuildNumber': '22',
+      'Flavor': 'strawberry',
     });
+  });
+
+  testWithoutContext('toBuildSystemEnvironment omits Flavor when flavor is null', () {
+    const buildInfo = BuildInfo(
+      BuildMode.release,
+      null,
+      treeShakeIcons: false,
+      packageConfigPath: '.dart_tool/package_config.json',
+    );
+
+    expect(buildInfo.toBuildSystemEnvironment().containsKey('Flavor'), isFalse);
   });
 
   testWithoutContext('toEnvironmentConfig encoding of standard values', () {
