@@ -88,7 +88,7 @@ VulkanScreenshotter::VulkanScreenshotter(
 }
 
 std::unique_ptr<Screenshot> VulkanScreenshotter::MakeScreenshot(
-    AiksContext& aiks_context,
+    const AiksContext& aiks_context,
     const std::shared_ptr<Texture> texture) {
   return ReadTexture(aiks_context.GetContext(), texture);
 }

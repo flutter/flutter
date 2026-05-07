@@ -70,7 +70,7 @@ class FallbackFontService {
   /// Adds a list of missing code points to be processed.
   void addMissingCodePoints(List<int> codePoints) {
     var added = false;
-    final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager!;
+    final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager;
 
     // Caches to avoid redundant binary-search lookups for consecutive
     // characters (common in script blocks like CJK or Arabic).
@@ -136,7 +136,7 @@ class FallbackFontService {
   void _process() {
     _processTimer = null;
 
-    final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager!;
+    final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager;
 
     // The "Gap" represents unique components that we need to find new fonts for.
     // We map Component -> Count of missing codepoints it covers in this batch.
@@ -281,7 +281,7 @@ class FallbackFontService {
     }
 
     final List<FallbackFontComponent> requiredComponents = componentCoverCounts.keys.toList();
-    final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager!;
+    final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager;
 
     // Initialize coverage state for candidate fonts. We only consider fonts
     // that haven't been marked as permanently unavailable. For each candidate
@@ -508,7 +508,7 @@ class FallbackFontService {
 
           if (success) {
             _registeredFonts.add(font);
-            renderer.fontCollection.fontFallbackManager!.registerFallbackFont(font.name);
+            renderer.fontCollection.fontFallbackManager.registerFallbackFont(font.name);
             _notifyFontsChanged();
             return;
           } else {
@@ -560,7 +560,7 @@ class FallbackFontService {
 
     // Track failures for the global kill switch and per-component cap.
     _totalPermanentFailures++;
-    final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager!;
+    final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager;
     // Note: This is slightly inefficient as we repeat the search, but it keeps
     // the download task's signature simple.
     // We check all components to see which one was supposed to be covered by this font.
@@ -598,7 +598,7 @@ class FallbackFontService {
     // fonts were registered in the same turn of the event loop.
     _notifyTimer ??= Timer(Duration.zero, () {
       _notifyTimer = null;
-      final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager!;
+      final FontFallbackManager manager = renderer.fontCollection.fontFallbackManager;
 
       // Update the font family lists used by Skia/CanvasKit.
       manager.updateFallbackFontFamilies();
