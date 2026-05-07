@@ -1146,9 +1146,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('semantics node cant be keyboard focusable but accessibility unfocusable', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('accessibilityBlockType also blocks keyboard focus', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
     await tester.pumpWidget(
       Semantics(
         container: true,
@@ -1160,13 +1160,26 @@ void main() {
         child: const SizedBox(width: 10, height: 10),
       ),
     );
-    final Object? exception = tester.takeException();
-    expect(exception, isFlutterError);
-    final error = exception! as FlutterError;
+
     expect(
-      error.message,
-      startsWith('A node that is keyboard focusable cannot be set to accessibility unfocusable'),
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+              actions: <SemanticsAction>[SemanticsAction.customAction],
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
     );
+
+    semantics.dispose();
   });
 
   testWidgets('Increased/decreased values are annotated', (WidgetTester tester) async {
