@@ -493,6 +493,11 @@ mixin RendererBinding
     }
 
     final SemanticsOwner? semanticsOwner = renderView.owner?.semanticsOwner;
+    assert(
+      semanticsOwner != null,
+      'semanticsNodeGlobalRect was called for view $viewId, but the view does not have a '
+      'SemanticsOwner. Semantics must be enabled for the lookup to succeed.',
+    );
     if (semanticsOwner == null) {
       return null;
     }
@@ -511,6 +516,9 @@ mixin RendererBinding
       current = current.parent;
     }
 
+    // Walking the SemanticsNode parent chain accumulates RenderView's
+    // _rootTransform (a devicePixelRatio scale), so the resulting rect is in
+    // physical pixels. Divide back to logical pixels for hit testing.
     final ui.Rect physicalRect = MatrixUtils.transformRect(transform, node.rect);
     final double devicePixelRatio = renderView.flutterView.devicePixelRatio;
     return ui.Rect.fromLTRB(

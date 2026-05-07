@@ -150,6 +150,11 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderProxyBoxWithHitTestBehavior renderObject) {}
 }
 
+typedef _ClassifiedTapRegions = ({
+  Iterable<RenderTapRegion> inside,
+  Iterable<RenderTapRegion> outside,
+});
+
 /// A render object that provides notification of a tap inside or outside of a
 /// set of registered regions, without participating in the [gesture
 /// disambiguation](https://flutter.dev/to/gesture-disambiguation) system
@@ -255,11 +260,10 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
       return;
     }
 
-    final (:Set<RenderTapRegion> inside, :Set<RenderTapRegion> outside) = _classifyRegions(
-      hitResult,
-    );
+    final (:Iterable<RenderTapRegion> inside, :Iterable<RenderTapRegion> outside) =
+        _classifyRegions(hitResult);
 
-    final syntheticEvent = PointerDownEvent(position: globalCenter);
+    final syntheticEvent = PointerDownEvent(viewId: event.viewId, position: globalCenter);
     for (final region in outside) {
       assert(_tapRegionDebug('Calling onTapOutside for $region (from semantics action)'));
       region.onTapOutside?.call(syntheticEvent);
@@ -316,21 +320,23 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
   // regions appear in the hit test result path. Grouped regions are treated
   // as a single unit: if any member of a group is hit, all members are
   // considered inside.
-  ({Set<RenderTapRegion> inside, Set<RenderTapRegion> outside}) _classifyRegions(
-    BoxHitTestResult result,
-  ) {
-    final Set<RenderTapRegion> hitRegions = _getRegionsHit(
+  _ClassifiedTapRegions _classifyRegions(BoxHitTestResult result) {
+    final Iterable<RenderTapRegion> hitRegions = _getRegionsHit(
       _registeredRegions,
       result.path,
-    ).cast<RenderTapRegion>().toSet();
+    ).cast<RenderTapRegion>();
     assert(_tapRegionDebug('Tap event hit ${hitRegions.length} descendants.'));
 
     final insideRegions = <RenderTapRegion>{
       for (final RenderTapRegion region in hitRegions)
         if (region.groupId == null) region else ..._groupIdToRegions[region.groupId]!,
     };
-    final Set<RenderTapRegion> outsideRegions = _registeredRegions.difference(insideRegions);
-    return (inside: insideRegions, outside: outsideRegions);
+    return (
+      inside: insideRegions,
+      // Materialize the outside list so callbacks that mutate registrations
+      // during iteration do not affect the snapshot we are walking.
+      outside: _registeredRegions.where((RenderTapRegion r) => !insideRegions.contains(r)).toList(),
+    );
   }
 
   @override
@@ -361,7 +367,8 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
       return;
     }
 
-    final (:Set<RenderTapRegion> inside, :Set<RenderTapRegion> outside) = _classifyRegions(result);
+    final (:Iterable<RenderTapRegion> inside, :Iterable<RenderTapRegion> outside) =
+        _classifyRegions(result);
 
     var consumeOutsideTaps = false;
     for (final region in outside) {
