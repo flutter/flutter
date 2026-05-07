@@ -12,4 +12,4 @@ If a test fails, you can re-run the failed tests directly from the check-run int
 
 ## Presubmit Dashboard
 Clicking the **View more details on flutter-dashboard** link within the **Flutter Presubmits** check-run opens the presubmit dashboard. This interface provides detailed test run execution information, allows you to re-run failed tests from the latest check-run, and provides links to the LUCI UI for deeper investigation into test execution.
-<img width="820" height="471" alt="Presubmit Dashboard" src="https://github.com/user-attachments/assets/9d2dad35-c1f5-4b36-8744-ba9c52c46fe5" />
+<img width="820" height="471" alt="Presubmit Dashboard" src="https://github.com/user-attachments/assets/3bca7bfe-da48-490b-97dd-dd4cde42356f" />
