@@ -3308,6 +3308,7 @@ void main() {
       // child's offset if the overlay child was laid out via treewalk, since
       // RenderPadding.performLayout calls child.layout before computing the
       // child offset.
+      await tester.pump();
       expect(computedPaintTransform, Matrix4.translationValues(10.0, 0.0, 123.0));
 
       setState(() {
@@ -3388,6 +3389,95 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('OverlayPortal accessibilityOpaque blocks background focus', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final controller = OverlayPortalController();
+
+    late final OverlayEntry entry1;
+    late final OverlayEntry entry2;
+    addTearDown(() {
+      entry1.remove();
+      entry1.dispose();
+      entry2.remove();
+      entry2.dispose();
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            entry1 = OverlayEntry(
+              builder: (BuildContext context) {
+                return Semantics(
+                  label: 'Background',
+                  child: const SizedBox(width: 100, height: 100),
+                );
+              },
+            ),
+            entry2 = OverlayEntry(
+              builder: (BuildContext context) {
+                return OverlayPortal(
+                  controller: controller,
+                  accessibilityOpaque: true,
+                  overlayChildBuilder: (BuildContext context) =>
+                      Semantics(label: 'Menu', child: const SizedBox(width: 50, height: 50)),
+                  child: Semantics(label: 'Anchor', child: const SizedBox(width: 20, height: 20)),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(label: 'Background'),
+            TestSemantics(label: 'Anchor'),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
+
+    controller.show();
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+              label: 'Background',
+            ),
+            TestSemantics(
+              children: <TestSemantics>[
+                TestSemantics(label: 'Anchor'),
+                TestSemantics(children: <TestSemantics>[TestSemantics(label: 'Menu')]),
+              ],
+            ),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
 }
 
 class OverlayStatefulEntry extends OverlayEntry {
