@@ -354,7 +354,7 @@ Future<void> _checkAppRunning(bool shouldBeRunning) async {
 /// Checks the android directory for JVM crash logs and prints their content.
 void _checkAndPrintJvmCrashLogs() {
   try {
-    final Directory androidDir = Directory(path.join(_editedFlutterGalleryDir.path, 'android'));
+    final androidDir = Directory(path.join(_editedFlutterGalleryDir.path, 'android'));
     if (!androidDir.existsSync()) {
       return;
     }
