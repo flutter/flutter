@@ -117,6 +117,7 @@ class OverlayEntry implements Listenable {
     bool opaque = false,
     bool maintainState = false,
     this.canSizeOverlay = false,
+    this.accessibilityOpaque = false,
   }) : _opaque = opaque,
        _maintainState = maintainState {
     assert(debugMaybeDispatchCreated('widgets', 'OverlayEntry', this));
@@ -128,6 +129,12 @@ class OverlayEntry implements Listenable {
   /// To cause this builder to be called again, call [markNeedsBuild] on this
   /// overlay entry.
   final WidgetBuilder builder;
+
+  /// Whether this entry is accessibility opaque.
+  ///
+  /// If true, this entry prevents accessibility focus from entering any entries
+  /// below it.
+  final bool accessibilityOpaque;
 
   /// Whether this entry occludes the entire overlay.
   ///
@@ -345,12 +352,22 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
       insertPosition.insertAfter(child);
     }
     assert(children.contains(child));
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _markNeedsBuild();
+      }
+    });
   }
 
   void _remove(_OverlayEntryLocation child) {
     assert(_sortedTheaterSiblings != null);
     final bool wasInCollection = _sortedTheaterSiblings?.remove(child) ?? false;
     assert(wasInCollection);
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _markNeedsBuild();
+      }
+    });
   }
 
   // Returns an Iterable that traverse the children in the child model in paint
@@ -417,6 +434,7 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isCovered = widget.overlayState.isAccessibilityCovered(widget.entry);
     return TickerMode(
       enabled: widget.tickerEnabled,
       child: _RenderTheaterMarker(
@@ -424,7 +442,10 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
         overlayEntryWidgetState: this,
         // Use a Builder so that the `widget.entry.builder` can have access to
         // _RenderTheaterMarker.of
-        child: Builder(builder: widget.entry.builder),
+        child: _AccessibilityBarrier(
+          isCovered: isCovered,
+          child: Builder(builder: widget.entry.builder),
+        ),
       ),
     );
   }
@@ -666,6 +687,89 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       return _entries.indexOf(above) + 1;
     }
     return _entries.length;
+  }
+
+  /// Checks if the given [entry] is covered by any accessibility opaque entry
+  /// or overlay portal child above it.
+  bool isAccessibilityCovered(OverlayEntry entry) {
+    final int index = _entries.indexOf(entry);
+    if (index == -1) {
+      return false;
+    }
+
+    for (int i = _entries.length - 1; i > index; i--) {
+      final OverlayEntry currentEntry = _entries[i];
+      if (currentEntry.accessibilityOpaque) {
+        return true;
+      }
+      final _OverlayEntryWidgetState? currentEntryState = currentEntry._overlayEntryStateNotifier?.value;
+      if (currentEntryState != null) {
+        final LinkedList<_OverlayEntryLocation>? siblings = currentEntryState._sortedTheaterSiblings;
+        if (siblings != null) {
+          for (final _OverlayEntryLocation sibling in siblings) {
+            if (sibling.accessibilityOpaque) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    final _OverlayEntryWidgetState? entryState = entry._overlayEntryStateNotifier?.value;
+    if (entryState != null) {
+      final LinkedList<_OverlayEntryLocation>? siblings = entryState._sortedTheaterSiblings;
+      if (siblings != null) {
+        for (final _OverlayEntryLocation sibling in siblings) {
+          if (sibling.accessibilityOpaque) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /// Checks if the given [location] (representing an OverlayPortal child) is
+  /// covered by any accessibility opaque entry or overlay portal child above it.
+  bool _isLocationAccessibilityCovered(_OverlayEntryLocation location) {
+    final _OverlayEntryWidgetState entryState = location._childModel;
+    final OverlayEntry entry = entryState.widget.entry;
+    final int index = _entries.indexOf(entry);
+    if (index == -1) {
+      return false;
+    }
+
+    for (int i = _entries.length - 1; i > index; i--) {
+      final OverlayEntry currentEntry = _entries[i];
+      if (currentEntry.accessibilityOpaque) {
+        return true;
+      }
+      final _OverlayEntryWidgetState? currentEntryState =
+          currentEntry._overlayEntryStateNotifier?.value;
+      if (currentEntryState != null) {
+        final LinkedList<_OverlayEntryLocation>? siblings =
+            currentEntryState._sortedTheaterSiblings;
+        if (siblings != null) {
+          for (final _OverlayEntryLocation sibling in siblings) {
+            if (sibling.accessibilityOpaque) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    final LinkedList<_OverlayEntryLocation>? siblings = entryState._sortedTheaterSiblings;
+    if (siblings != null) {
+      for (final _OverlayEntryLocation sibling in siblings) {
+        if (sibling._zOrderIndex > location._zOrderIndex && sibling.accessibilityOpaque) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   bool _debugCanInsertEntry(OverlayEntry entry) {
@@ -1879,6 +1983,7 @@ class OverlayPortal extends StatefulWidget {
     required this.overlayChildBuilder,
     this.overlayLocation = OverlayChildLocation.nearestOverlay,
     this.child,
+    this.accessibilityOpaque = false,
   });
 
   /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
@@ -1893,6 +1998,7 @@ class OverlayPortal extends StatefulWidget {
     required this.controller,
     required this.overlayChildBuilder,
     this.child,
+    this.accessibilityOpaque = false,
   }) : overlayLocation = OverlayChildLocation.rootOverlay;
 
   /// Creates an [OverlayPortal] that renders the widget `overlayChildBuilder`
@@ -1926,12 +2032,14 @@ class OverlayPortal extends StatefulWidget {
     required OverlayChildLayoutBuilder overlayChildBuilder,
     OverlayChildLocation overlayLocation = OverlayChildLocation.nearestOverlay,
     required Widget? child,
+    bool accessibilityOpaque = false,
   }) : this(
          key: key,
          controller: controller,
          overlayChildBuilder: (_) => _OverlayChildLayoutBuilder(builder: overlayChildBuilder),
          child: child,
          overlayLocation: overlayLocation,
+         accessibilityOpaque: accessibilityOpaque,
        );
 
   /// The controller to show, hide and bring to top the overlay child.
@@ -1961,6 +2069,12 @@ class OverlayPortal extends StatefulWidget {
   /// The [Overlay] that the widget returns from [overlayChildBuilder] is
   /// attached to.
   final OverlayChildLocation overlayLocation;
+
+  /// Whether this overlay portal is accessibility opaque.
+  ///
+  /// If true, this portal's overlay child prevents accessibility focus from
+  /// entering any entries or portals below it.
+  final bool accessibilityOpaque;
 
   @override
   State<OverlayPortal> createState() => _OverlayPortalState();
@@ -2006,6 +2120,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
       zOrderIndex,
       marker.overlayEntryWidgetState,
       marker.theater,
+      accessibilityOpaque: widget.accessibilityOpaque,
     );
     assert(newLocation._zOrderIndex == zOrderIndex);
     return _locationCache = newLocation;
@@ -2088,6 +2203,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
   @override
   Widget build(BuildContext context) {
     final int? zOrderIndex = _zOrderIndex;
+    
     if (zOrderIndex == null) {
       return _OverlayPortal(
         overlayLocation: null,
@@ -2103,13 +2219,18 @@ class _OverlayPortalState extends State<OverlayPortal> {
       viewInsets: overlayData.viewInsets,
       viewPadding: overlayData.viewPadding,
     );
+    final OverlayState overlayState = Overlay.of(context);
+    final bool isCovered = overlayState._isLocationAccessibilityCovered(overlayLocation);
     return _OverlayPortal(
       overlayLocation: overlayLocation,
       overlayChild: _DeferredLayout(
         childIdentifier: this,
-        child: MediaQuery(
-          data: data,
-          child: Builder(builder: widget.overlayChildBuilder),
+        child: _AccessibilityBarrier(
+          isCovered: isCovered,
+          child: MediaQuery(
+            data: data,
+            child: Builder(builder: widget.overlayChildBuilder),
+          ),
         ),
       ),
       child: Semantics(traversalParentIdentifier: this, child: widget.child),
@@ -2150,11 +2271,17 @@ class _OverlayPortalState extends State<OverlayPortal> {
 // Since it can't implement operator== (it's mutable), the same `_OverlayEntryLocation`
 // instance must not be used to represent more than one locations.
 final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation> {
-  _OverlayEntryLocation(this._zOrderIndex, this._childModel, this._theater);
+  _OverlayEntryLocation(
+    this._zOrderIndex,
+    this._childModel,
+    this._theater, {
+    this.accessibilityOpaque = false,
+  });
 
   final int _zOrderIndex;
   final _OverlayEntryWidgetState _childModel;
   final _RenderTheater _theater;
+  final bool accessibilityOpaque;
 
   _RenderDeferredLayoutBox? _overlayChildRenderBox;
   void _addToChildModel(_RenderDeferredLayoutBox child) {
@@ -2792,10 +2919,16 @@ class _RenderLayoutBuilder extends RenderProxyBox
   Iterable<RenderBox> _childrenInHitTestOrder() => _childrenInPaintOrder();
 
   @override
-  _RenderTheater get theater => switch (parent) {
-    final _RenderDeferredLayoutBox parent => parent.theater,
-    _ => throw FlutterError('$parent of $this is not a _RenderDeferredLayoutBox'),
-  };
+  _RenderTheater get theater {
+    RenderObject? node = parent;
+    while (node != null) {
+      if (node is _RenderDeferredLayoutBox) {
+        return node.theater;
+      }
+      node = node.parent;
+    }
+    throw FlutterError('Could not find a _RenderDeferredLayoutBox ancestor for $this');
+  }
 
   @override
   bool get sizedByParent => true;
@@ -2818,8 +2951,15 @@ class _RenderLayoutBuilder extends RenderProxyBox
 
   OverlayChildLayoutInfo _computeNewLayoutInfo() {
     final _RenderTheater theater = this.theater;
-    final parent = this.parent! as _RenderDeferredLayoutBox;
-    final _RenderLayoutSurrogateProxyBox layoutSurrogate = parent._layoutSurrogate;
+    RenderObject? node = parent;
+    while (node != null && node is! _RenderDeferredLayoutBox) {
+      node = node.parent;
+    }
+    if (node == null) {
+      throw FlutterError('Could not find a _RenderDeferredLayoutBox ancestor for $this');
+    }
+    final _RenderDeferredLayoutBox deferredParent = node as _RenderDeferredLayoutBox;
+    final _RenderLayoutSurrogateProxyBox layoutSurrogate = deferredParent._layoutSurrogate;
     assert(() {
       for (
         RenderObject? node = layoutSurrogate;
@@ -2852,7 +2992,7 @@ class _RenderLayoutBuilder extends RenderProxyBox
     // The paint transform we're about to compute is only useful if this RenderBox
     // uses the same coordinates as the theater.
     assert(getTransformTo(theater).isIdentity());
-    final Size overlayPortalSize = parent._layoutSurrogate.size;
+    final Size overlayPortalSize = deferredParent._layoutSurrogate.size;
     final Matrix4 paintTransform = layoutSurrogate.getTransformTo(theater);
     return OverlayChildLayoutInfo._((overlayPortalSize, paintTransform, size));
   }
@@ -2940,5 +3080,56 @@ class _RenderLayoutBuilder extends RenderProxyBox
       SchedulerBinding.instance.cancelFrameCallbackWithId(callbackId);
     }
     super.dispose();
+  }
+}
+
+class _AccessibilityBarrier extends SingleChildRenderObjectWidget {
+  const _AccessibilityBarrier({
+    super.key,
+    required super.child,
+    required this.isCovered,
+  });
+
+  final bool isCovered;
+
+  @override
+  _RenderAccessibilityBarrier createRenderObject(BuildContext context) {
+    return _RenderAccessibilityBarrier(isCovered: isCovered);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderAccessibilityBarrier renderObject) {
+    renderObject.isCovered = isCovered;
+  }
+}
+
+final class _RenderAccessibilityBarrier extends RenderProxyBox {
+  _RenderAccessibilityBarrier({
+    required bool isCovered,
+  }) : _isCovered = isCovered;
+
+  bool get isCovered => _isCovered;
+  bool _isCovered;
+  set isCovered(bool value) {
+    if (_isCovered == value) {
+      return;
+    }
+    _isCovered = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _TheaterParentData) {
+      child.parentData = _TheaterParentData();
+    }
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.accessibilityFocusBlockType = _isCovered
+        ? AccessibilityFocusBlockType.blockSubtree
+        : AccessibilityFocusBlockType.none;
   }
 }
