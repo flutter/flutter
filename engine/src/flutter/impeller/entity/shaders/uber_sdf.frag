@@ -18,13 +18,24 @@ uniform FragInfo {
   float type;
   vec4 radii;
   vec4 radii_right;
-  vec2 superellipse_degree;
-  vec2 superellipse_a;
-  vec2 corner_angle_span;
-  vec2 corner_circle_center_top;
-  vec2 corner_circle_center_right;
-  float superellipse_c;
-  vec2 superellipse_scale;
+  vec4 superellipse_degrees_top;
+  vec4 superellipse_degrees_right;
+  vec4 superellipse_semi_axes_top;
+  vec4 superellipse_semi_axes_right;
+  vec4 angle_spans_top;
+  vec4 angle_spans_right;
+  vec4 octant_offsets_c;
+  vec4 radii_width;
+  vec4 radii_height;
+  vec4 circle_centers_top_x;
+  vec4 circle_centers_top_y;
+  vec4 circle_centers_right_x;
+  vec4 circle_centers_right_y;
+  vec4 superellipse_scales_x;
+  vec4 superellipse_scales_y;
+  vec4 quadrant_centers_x;
+  vec4 quadrant_centers_y;
+  vec4 quadrant_splits;
 }
 frag_info;
 
@@ -102,70 +113,174 @@ float sdSuperellipse(vec2 p, float n) {
   return length(pa - ba * h) * sign(pa.x * ba.y - pa.y * ba.x);
 }
 
-float distanceFromRoundedSuperellipse(vec2 p,
-                                      vec2 degree,
-                                      vec2 se_a,
-                                      vec4 radii_top,
-                                      vec2 angle_span,
-                                      vec2 circle_center_top,
-                                      vec4 radii_right,
-                                      vec2 circle_center_right,
-                                      float c,
-                                      vec2 scale) {
-  // Do work in the first quadrant to simply things.
-  p = abs(p);
-  // Map p in to a square.
-  vec2 p_norm = p / scale;
+float getComponent(vec4 v, int index) {
+  if (index == 0) return v.x;
+  if (index == 1) return v.y;
+  if (index == 2) return v.z;
+  return v.w;
+}
 
-  // Declare all RSE params for a single octant.
-  float se_degree, span, radius, axis_length;
-  vec2 circle_center;
+float smax(float a, float b, float k) {
+    float m = max(a, b);
+    // Taper the smoothing factor to 0 outside the shape to prevent bloat/overdraw.
+    float effective_k = k * smoothstep(0.0, -k, m);
+    if (effective_k < 0.001) return m;
+    
+    float h = clamp(0.5 + 0.5 * (b - a) / effective_k, 0.0, 1.0);
+    return mix(a, b, h) + effective_k * h * (1.0 - h);
+}
 
-  // 'p' in the coordinate system of the octant.
-  vec2 p_oct;
+float getQuadrantDistance(vec2 p, int quadrant_index) {
+  float se_degree_top = getComponent(frag_info.superellipse_degrees_top, quadrant_index);
+  float se_degree_right = getComponent(frag_info.superellipse_degrees_right, quadrant_index);
+  float se_a_top = getComponent(frag_info.superellipse_semi_axes_top, quadrant_index);
+  float se_a_right = getComponent(frag_info.superellipse_semi_axes_right, quadrant_index);
+  float angle_span_top = getComponent(frag_info.angle_spans_top, quadrant_index);
+  float angle_span_right = getComponent(frag_info.angle_spans_right, quadrant_index);
+  float c = getComponent(frag_info.octant_offsets_c, quadrant_index);
+  float radius_top = getComponent(frag_info.radii_width, quadrant_index);
+  float radius_right = getComponent(frag_info.radii_height, quadrant_index);
 
-  // We split the quadrant along the diagonal of the transition (p_norm.y + c ==
-  // p_norm.x). This allows us to grab the correct set of parameters for the
-  // "top" and "right" halves of the corner.
-  if (p_norm.y + c > p_norm.x) {
-    p_oct = p_norm + vec2(0.0, c);
-    se_degree = degree.x;
-    span = angle_span.x;
-    radius = radii_top.x;
-    circle_center = circle_center_top;
-    axis_length = se_a.x;
-  } else {
-    // For the 'right' octant, we flip the point and shift it according to
-    // the CPU's OctantContains/Flip logic.
-    p_oct = p_norm.yx - vec2(0.0, c);
-    se_degree = degree.y;
-    span = angle_span.y;
-    radius = radii_right.x;
-    circle_center = circle_center_right;
-    axis_length = se_a.y;
+  vec2 circle_center_top = vec2(
+      getComponent(frag_info.circle_centers_top_x, quadrant_index),
+      getComponent(frag_info.circle_centers_top_y, quadrant_index)
+  );
+  vec2 circle_center_right = vec2(
+      getComponent(frag_info.circle_centers_right_x, quadrant_index),
+      getComponent(frag_info.circle_centers_right_y, quadrant_index)
+  );
+
+  vec2 scale = vec2(
+      getComponent(frag_info.superellipse_scales_x, quadrant_index),
+      getComponent(frag_info.superellipse_scales_y, quadrant_index)
+  );
+
+  vec2 q_center = vec2(
+      getComponent(frag_info.quadrant_centers_x, quadrant_index),
+      getComponent(frag_info.quadrant_centers_y, quadrant_index)
+  );
+
+  vec2 q_sign = vec2(1.0);
+  if (quadrant_index == 0) q_sign = vec2(1.0, -1.0);
+  else if (quadrant_index == 1) q_sign = vec2(1.0, 1.0);
+  else if (quadrant_index == 2) q_sign = vec2(-1.0, 1.0);
+  else q_sign = vec2(-1.0, -1.0);
+
+  vec2 p_local = (p - q_center) * q_sign;
+  vec2 extents = vec2(scale.x * se_a_top, scale.y * se_a_right);
+
+  vec2 d_rect = p_local - extents;
+  float dist_rect_local = length(max(d_rect, 0.0)) + min(max(d_rect.x, d_rect.y), 0.0);
+
+  if (p_local.x <= 0.0 || p_local.y <= 0.0) {
+    return dist_rect_local;
   }
 
-  // Move the point to the corner circle's coordinate system.
-  vec2 p_rel = p_oct - circle_center;
+  vec2 p_norm = p_local / scale;
 
-  // Grab the angle offset of the point.
+  float se_degree;
+  float span;
+  float radius;
+  vec2 circle_center;
+  float axis_length;
+  vec2 p_oct;
+
+  if (p_norm.y + c > p_norm.x) {
+    p_oct = p_norm + vec2(0.0, c);
+    se_degree = se_degree_top;
+    span = angle_span_top;
+    radius = radius_top;
+    circle_center = circle_center_top;
+    axis_length = se_a_top;
+  } else {
+    p_oct = p_norm.yx - vec2(0.0, c);
+    se_degree = se_degree_right;
+    span = angle_span_right;
+    radius = radius_right;
+    circle_center = circle_center_right;
+    axis_length = se_a_right;
+  }
+
+  if (se_degree < 1.9) {  // Sharp rectangular corner
+    return dist_rect_local;
+  }
+
+  vec2 p_rel = p_oct - circle_center;
   float theta = atan(p_rel.y, p_rel.x);
 
-  // The angular distance between the point and the 45 degree midline.
   float d_theta = theta - PI_OVER_FOUR;
   d_theta = mod(d_theta + PI, TWO_PI) - PI;
 
-  // If the point is within the span of the corner circle's arc,
-  // use a circle SDF.
-  // This works because the normals of the circular and superelliptical sections
-  // agree at the transition angle, the total RSE curve is continuous and
-  // the closest point on a continuous curve to a point lies along the normal.
+  float d_scaled;
+  vec2 grad_oct;
   if (abs(d_theta) < abs(span)) {
-    return distanceFromCircle(p_rel, radius);
+    d_scaled = distanceFromCircle(p_rel, radius);
+    grad_oct = normalize(p_rel);
+  } else {
+    d_scaled = sdSuperellipse(p_oct / axis_length, se_degree) * axis_length;
+    vec2 p_oct_clamped = max(p_oct, vec2(0.001));
+    float max_p = max(p_oct_clamped.x, p_oct_clamped.y);
+    vec2 p_safe = p_oct_clamped / max_p;
+    grad_oct = normalize(pow(p_safe, vec2(se_degree - 1.0)));
   }
-  return sdSuperellipse(p_oct / axis_length, se_degree) * axis_length;
+
+  vec2 grad_norm;
+  if (p_norm.y + c > p_norm.x) {
+    grad_norm = grad_oct;
+  } else {
+    grad_norm = grad_oct.yx;
+  }
+
+  float corner_dist = d_scaled / length(grad_norm / scale);
+
+  return max(dist_rect_local, corner_dist);
 }
 
+float distanceFromRoundedSuperellipse(vec2 p) {
+  vec2 T = vec2(frag_info.quadrant_splits.x, -frag_info.size.y);
+  vec2 R = vec2(frag_info.size.x, frag_info.quadrant_splits.w);
+  vec2 B = vec2(frag_info.quadrant_splits.y, frag_info.size.y);
+  vec2 L = vec2(-frag_info.size.x, frag_info.quadrant_splits.z);
+
+  // Exact Wedge Partition from Bounding Box Center (0,0)
+  // Using (0,0) guarantees that the rays to symmetric split points are perfectly horizontal/vertical,
+  // preventing diagonal hairline discontinuities between symmetric quadrants.
+  float cT = T.x * p.y - T.y * p.x;
+  float cR = R.x * p.y - R.y * p.x;
+  float cB = B.x * p.y - B.y * p.x;
+  float cL = L.x * p.y - L.y * p.x;
+
+  int quadrant_index = 0;
+  if (cT >= 0.0 && cR <= 0.0 && dot(p, T + R) >= 0.0) {
+    quadrant_index = 0; // TR
+  } else if (cR >= 0.0 && cB <= 0.0 && dot(p, R + B) >= 0.0) {
+    quadrant_index = 1; // BR
+  } else if (cB >= 0.0 && cL <= 0.0 && dot(p, B + L) >= 0.0) {
+    quadrant_index = 2; // BL
+  } else {
+    quadrant_index = 3; // TL
+  }
+
+  // When two split points meet at a corner (zero radius), we reduce the 
+  // partitions to perfectly partition the shape without evaluating the degenerate corner.
+  bool TR_zero = distance(T, R) < 0.01;
+  bool BR_zero = distance(R, B) < 0.01;
+  bool BL_zero = distance(B, L) < 0.01;
+  bool TL_zero = distance(L, T) < 0.01;
+
+  if (TR_zero && quadrant_index == 0) quadrant_index = 3;
+  if (BR_zero && quadrant_index == 1) quadrant_index = 0;
+  if (BL_zero && quadrant_index == 2) quadrant_index = 1;
+  if (TL_zero && quadrant_index == 3) quadrant_index = 2;
+
+  // Second pass in case of multiple zero-radius corners
+  if (TR_zero && quadrant_index == 0) quadrant_index = 3;
+  if (BR_zero && quadrant_index == 1) quadrant_index = 0;
+  if (BL_zero && quadrant_index == 2) quadrant_index = 1;
+  if (TL_zero && quadrant_index == 3) quadrant_index = 2;
+
+  return getQuadrantDistance(p, quadrant_index);
+}
 // Define an ellipse as q(w) = (a*cos(w), b*sin(w)), and p = (x, y) on the
 // plane. Let q(w0) be the closest point on q to p, then q(w0) - p is tangent to
 // q(w0), and (q(w0) - p) dot q'(w0) = 0. This function uses the Newton-Raphson
@@ -342,12 +457,7 @@ vec2 filledSDF(vec2 p) {
   } else if (frag_info.type < 3.5) {  // Rounded Rect
     sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
   } else {
-    sdf = distanceFromRoundedSuperellipse(
-        p, frag_info.superellipse_degree, frag_info.superellipse_a,
-        frag_info.radii, frag_info.corner_angle_span,
-        frag_info.corner_circle_center_top, frag_info.radii_right,
-        frag_info.corner_circle_center_right, frag_info.superellipse_c,
-        frag_info.superellipse_scale);
+    sdf = distanceFromRoundedSuperellipse(p);
   }
   return vec2(sdf, pixelSize(sdf));
 }
@@ -404,6 +514,12 @@ vec2 strokedSDF(vec2 p) {
   return vec2(sdf, base_pixel_size);
 }
 
+float distanceToSegment(vec2 p, vec2 a, vec2 b) {
+  vec2 pa = p - a, ba = b - a;
+  float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+  return length(pa - ba * h);
+}
+
 void main() {
   vec2 p = v_position - frag_info.center;
 
@@ -417,7 +533,8 @@ void main() {
   // (pixel_size * aa_pixels) in each direction.
   float fade_size = pixel_size * frag_info.aa_pixels * 0.5;
   float alpha = 1.0 - smoothstep(-fade_size, fade_size, sdf);
-
+  
   frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
   frag_color = IPPremultiply(frag_color);
+  
 }
