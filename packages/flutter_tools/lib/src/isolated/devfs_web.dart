@@ -384,7 +384,9 @@ class WebDevFS implements DevFS {
           onFontManifestUpdated: () => didUpdateFontManifest = true,
         );
         syncedBytes += bundleSyncedBytes;
-      } on Exception {
+      } on Exception catch (err, stackTrace) {
+        logger.printError('Error updating bundle: $err');
+        logger.printTrace('$stackTrace');
         return UpdateFSReport();
       }
       if (dirtyEntries.isNotEmpty) {

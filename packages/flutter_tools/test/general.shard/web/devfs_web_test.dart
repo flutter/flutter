@@ -1115,7 +1115,7 @@ void main() {
         globals.fs.path.join(assetDir.path, 'my_shader.frag'),
       );
       expect(destinationFile.existsSync(), isTrue);
-      expect(destinationFile.readAsStringSync(), equals('compiled_shader'));
+      expect(destinationFile.readAsStringSync(), equals('compiled_shader: shader_source_modified'));
       expect(webDevFS.shaderPathsToEvict, contains('my_shader.frag'));
 
       await webDevFS.destroy();
@@ -1322,7 +1322,7 @@ void main() {
         globals.fs.path.join(getAssetBuildDirectory(), 'my_image.png'),
       );
       expect(destinationShader.existsSync(), isTrue);
-      expect(destinationShader.readAsStringSync(), equals('compiled_shader'));
+      expect(destinationShader.readAsStringSync(), equals('compiled_shader: shader_source'));
       expect(destinationImage.existsSync(), isTrue);
       expect(destinationImage.readAsBytesSync(), equals(kTransparentImage));
 
@@ -1437,8 +1437,8 @@ void main() {
       expect(destinationFile.existsSync(), isTrue);
       expect(
         destinationFile.readAsStringSync(),
-        equals('compiled_shader'),
-      ); // Still compiled_shader
+        equals('compiled_shader: shader_source'),
+      ); // Still compiled_shader: shader_source
       expect(webDevFS.shaderPathsToEvict, isNot(contains('my_shader.frag')));
 
       await webDevFS.destroy();
@@ -2446,7 +2446,8 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
     if (returnNull) {
       return null;
     }
-    return DevFSStringContent('compiled_shader');
+    final String source = utf8.decode(await inputShader.contentsAsBytes());
+    return DevFSStringContent('compiled_shader: $source');
   }
 }
 

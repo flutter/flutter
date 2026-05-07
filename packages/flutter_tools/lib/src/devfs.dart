@@ -639,7 +639,9 @@ class DevFS {
           onFontManifestUpdated: () => didUpdateFontManifest = true,
         );
         syncedBytes += bundleSyncedBytes;
-      } on Exception {
+      } on Exception catch (err, stackTrace) {
+        _logger.printError('Error updating bundle: $err');
+        _logger.printTrace('$stackTrace');
         assetBuildFailed = true;
       }
 
@@ -712,19 +714,16 @@ class DevFS {
     bool syncAllAssetsOnFirstUpload = false,
     void Function()? onFontManifestUpdated,
   }) async {
+    if (bundleFirstUpload && !syncAllAssetsOnFirstUpload) {
+      return 0;
+    }
+
     final String assetBuildDirPrefix = _asUriPath(fileSystem, assetDirectory);
     final pendingAssetBuilds = <Future<void>>[];
     var syncedBytes = 0;
 
     bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
-      // For mobile platforms, skip asset processing on the first upload since
-      // they are already included in the initial app bundle.
-      // Web, however, needs to process all assets on the first upload.
-      if (bundleFirstUpload) {
-        if (!syncAllAssetsOnFirstUpload) {
-          return;
-        }
-      } else if (!entry.content.isModified) {
+      if (!bundleFirstUpload && !entry.content.isModified) {
         return;
       }
 
@@ -752,13 +751,13 @@ class DevFS {
                 workingDirectory: rootDirectoryPath,
               );
               if (transformed == null) {
-                throw Exception('Asset build failed');
+                throw Exception('Failed to transform shader $archivePath');
               }
               content = transformed;
             }
             final DevFSContent? compiled = await shaderCompiler.recompileShader(content);
             if (compiled == null) {
-              throw Exception('Asset build failed');
+              throw Exception('Failed to compile shader $archivePath');
             }
             dirtyEntries[deviceUri] = compiled;
             syncedBytes += compiled.size;
@@ -781,7 +780,7 @@ class DevFS {
               );
             }
             if (content == null) {
-              throw Exception('Asset build failed');
+              throw Exception('Failed to transform asset $archivePath');
             }
             dirtyEntries[deviceUri] = content;
             syncedBytes += content.size;
