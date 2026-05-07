@@ -55,12 +55,7 @@ executable("touch-input-test-bin") {
 }
 
 fuchsia_test_archive("touch-input-test") {
-  deps = [
-    ":touch-input-test-bin",
-
-    # "OOT" copies of the runners used by tests, to avoid conflicting with the
-    # runners in the base fuchsia image.
-    # TODO(fxbug.dev/106575): Fix this with subpackages.
-    "//flutter/shell/platform/fuchsia/flutter:oot_flutter_jit_runner",
-  ]
+  deps = [ ":touch-input-test-bin" ]
+  subpackages =
+      [ "//flutter/shell/platform/fuchsia/flutter:flutter_jit_runner" ]
 }

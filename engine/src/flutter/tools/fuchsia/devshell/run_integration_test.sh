@@ -46,8 +46,6 @@ shift # past argument
 # Ensure we know about the test and look up its packages.
 # The first package listed here should be the main package for the test
 # (the package that gets passed to `ffx test run`).
-# Note: You do not need to include oot_flutter_jit_runner-0.far, the script
-# automatically publishes it.
 test_packages=
 case $test_name in
   embedder)
@@ -179,7 +177,7 @@ then
   "$jiri_bin"/fx build
 fi
 
-test_package_paths=( "$fuchsia_out_dir"/oot_flutter_jit_runner-0.far )
+test_package_paths=()
 for test_package in "${test_packages[@]}"
 do
   test_package_paths+=( $(find "$fuchsia_out_dir" -name "$test_package") )
