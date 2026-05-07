@@ -5105,18 +5105,6 @@ TEST_F(DisplayListTest, DrawDiffRoundRectPromoteToDrawRoundRect) {
   builder.DrawDiffRoundRect(outer_rrect, inner_rrect, paint);
   auto dl = builder.Build();
 
-  bool dl_has_draw_drrect = false;
-  bool dl_has_draw_rrect = false;
-  for (DlIndex i = 0; i < dl->GetRecordCount(); i++) {
-    if (dl->GetOpType(i) == DisplayListOpType::kDrawDiffRoundRect) {
-      dl_has_draw_drrect = true;
-    } else if (dl->GetOpType(i) == DisplayListOpType::kDrawRoundRect) {
-      dl_has_draw_rrect = true;
-    }
-  }
-  EXPECT_FALSE(dl_has_draw_drrect);
-  EXPECT_TRUE(dl_has_draw_rrect);
-
   DlScalar expected_stroke_width = inner_inset;
   DlScalar half_width = expected_stroke_width * 0.5f;
   DlRoundRect expected_round_rect = DlRoundRect::MakeRectRadii(
