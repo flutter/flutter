@@ -1813,6 +1813,7 @@ server:
       Logger: () => BufferLogger.test(),
     },
   );
+
   group('run --web-experimental-hot-reload flag', () {
     late BufferLogger logger;
     late TestDeviceManager testDeviceManager;
@@ -1852,6 +1853,7 @@ server:
       },
       initializeFlutterRoot: false,
     );
+
     testUsingContext(
       'warning triggered when web hot reload flag is passed (enabled)',
       () async {

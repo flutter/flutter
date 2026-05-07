@@ -54,7 +54,7 @@ class BuildInfo {
     this.buildNativeAssets = true,
     this.useLocalCanvasKit = false,
     this.includeUnsupportedPlatformLibraryStubs = false,
-    this.webEnableHotReload = true,
+    this.webEnableHotReload = false,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
        fileSystemRoots = fileSystemRoots ?? const <String>[],

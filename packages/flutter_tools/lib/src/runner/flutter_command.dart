@@ -1394,7 +1394,6 @@ abstract class FlutterCommand extends Command<void> {
         extraGenSnapshotOptions.add(flag);
       }
     }
-
     String? codeSizeDirectory;
     if (argParser.options.containsKey(FlutterOptions.kAnalyzeSize) &&
         boolArg(FlutterOptions.kAnalyzeSize)) {
@@ -1528,6 +1527,7 @@ abstract class FlutterCommand extends Command<void> {
           argParser.options.containsKey(FlutterOptions.kAssumeInitializeFromDillUpToDate) &&
           boolArg(FlutterOptions.kAssumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
+      webEnableHotReload: true,
     );
   }
 
