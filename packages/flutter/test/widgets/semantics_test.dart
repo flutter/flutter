@@ -1147,8 +1147,6 @@ void main() {
   });
 
   testWidgets('accessibilityBlockType also blocks keyboard focus', (WidgetTester tester) async {
-    final semantics = SemanticsTester(tester);
-
     await tester.pumpWidget(
       Semantics(
         container: true,
@@ -1161,25 +1159,9 @@ void main() {
       ),
     );
 
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              id: 1,
-              flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
-              actions: <SemanticsAction>[SemanticsAction.customAction],
-            ),
-          ],
-        ),
-        ignoreTransform: true,
-        ignoreRect: true,
-        ignoreId: true,
-      ),
-    );
-
-    semantics.dispose();
+    final SemanticsNode node = tester.getSemantics(find.byType(Semantics));
+    expect(node.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, true);
+    expect(node.getSemanticsData().flagsCollection.isFocused, Tristate.none);
   });
 
   testWidgets('Increased/decreased values are annotated', (WidgetTester tester) async {

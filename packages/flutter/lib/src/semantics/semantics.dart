@@ -115,10 +115,14 @@ typedef SemanticsUpdateCallback = void Function(SemanticsUpdate update);
 typedef ChildSemanticsConfigurationsDelegate =
     ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
 
-/// Controls how accessibility and keyboard focus are blocked.
+/// Controls how accessibility focus is blocked.
 ///
-/// This is typically used to prevent screen readers and keyboard focus
-/// from focusing on parts of the UI.
+/// This is typically used to prevent screen readers from focusing on parts
+/// of the UI.
+///
+/// Setting this property also blocks the reporting of keyboard focusability
+/// for the semantics node, but it does not affect the actual keyboard focus
+/// handled by [FocusNode].
 enum AccessibilityFocusBlockType {
   /// Accessibility focus is **not blocked**.
   none,
@@ -3950,10 +3954,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
         return true;
       });
-    }
-
-    if (flags.isAccessibilityFocusBlocked) {
-      flags = flags.copyWith(isFocused: Tristate.none);
     }
 
     return SemanticsData(
