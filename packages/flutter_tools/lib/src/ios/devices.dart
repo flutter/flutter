@@ -634,9 +634,7 @@ class IOSDevice extends Device {
       }
 
       _logger.printTrace('Application launched on the device. Waiting for Dart VM Service url.');
-      print('VICTORIA: wait');
-      await Future<void>.delayed(const Duration(seconds: 20));
-      print('VICTORIA: stop wait');
+
       final int defaultTimeout;
       if (isCoreDevice && debuggingOptions.debuggingEnabled) {
         // Core devices with debugging enabled takes longer because this
@@ -786,8 +784,6 @@ class IOSDevice extends Device {
       }
       return LaunchResult.failed();
     } finally {
-      int microseconds = DateTime.now().microsecondsSinceEpoch;
-      print("VICTORIA: Found Dart VM at $microseconds microseconds");
       startAppStatus.stop();
 
       if (isCoreDevice && debuggingOptions.debuggingEnabled && package is BuildableIOSApp) {

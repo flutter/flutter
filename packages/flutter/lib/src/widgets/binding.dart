@@ -1552,6 +1552,8 @@ mixin WidgetsBinding
           // the user tag should be set to "AppStartUp" (originally set in the
           // engine), so we need to change it back to the default tag to mark
           // the end of app start up for CPU profiles.
+          int microseconds = DateTime.now().microsecondsSinceEpoch;
+          print("VICTORIA: First frame rasterized at $microseconds microseconds");
           developer.UserTag.defaultTag.makeCurrent();
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
@@ -1584,6 +1586,8 @@ mixin WidgetsBinding
     }
     if (!kReleaseMode) {
       if (_needToReportFirstFrame && sendFramesToEngine) {
+        int microseconds = DateTime.now().microsecondsSinceEpoch;
+        print("VICTORIA: Widgets built first useful frame at $microseconds microseconds");
         developer.Timeline.instantSync('Widgets built first useful frame');
       }
     }
