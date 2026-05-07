@@ -17,7 +17,7 @@ enum SwipeEdge {
   /// Indicates that the swipe gesture starts from the right edge of the screen.
   right,
 
-  /// Indicates that the swipe gesture starts from an edge other than left or right.
+  /// Indicates that there was no swipe edge at all.
   ///
   /// This corresponds to Android's `BackEvent.EDGE_NONE` and is used when
   /// the back gesture is triggered by a button press rather than a swipe.
@@ -64,9 +64,10 @@ final class PredictiveBackEvent {
   /// back gesture. When `null`, it indicates the gesture was not started by a
   /// touch event, such as a back button press in devices with hardware buttons.
   ///
-  /// The Android API specifies that `getTouchX` and `getTouchY` return `NaN`
-  /// for button-triggered events. The engine maps those `NaN` values to
-  /// `null` here.
+  /// The Android `BackEvent` API (`BackEvent.getTouchX()` and
+  /// `BackEvent.getTouchY()`) specifies that these values return `NaN` for
+  /// button-triggered events. The engine maps those `NaN` values to `null`
+  /// here.
   ///
   /// See also:
   ///
