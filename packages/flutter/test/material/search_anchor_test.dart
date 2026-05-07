@@ -3306,7 +3306,7 @@ void main() {
     expect(textField.focusNode, focusNode);
   });
 
-  testWidgets('SearchAnchor.bar focusNode can be used to control focus', (
+  testWidgets('SearchAnchor.bar barFocusNode can be used to control focus', (
     WidgetTester tester,
   ) async {
     final focusNode = FocusNode();
