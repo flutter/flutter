@@ -54,8 +54,7 @@ class MySelectableAdapter extends StatelessWidget {
 }
 
 class _SelectableAdapter extends SingleChildRenderObjectWidget {
-  const _SelectableAdapter({required this.registrar, required Widget child})
-    : super(child: child);
+  const _SelectableAdapter({required this.registrar, required Widget super.child});
 
   final SelectionRegistrar registrar;
 
