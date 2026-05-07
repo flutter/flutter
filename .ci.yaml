@@ -5441,9 +5441,10 @@ targets:
   - name: Mac wide_gamut_macos
     recipe: devicelab/devicelab_drone
     bringup: true
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
+      cpu: arm64
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
@@ -5451,9 +5452,6 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac"]
       task_name: wide_gamut_macos
-    drone_dimensions:
-      - gpu=apple
-      - cpu=arm64
 
   - name: Mac_x64_ios hot_mode_dev_cycle_ios__benchmark
     recipe: devicelab/devicelab_drone
