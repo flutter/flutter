@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 import '../../engine.dart';
 
-bool isFirstResize = true;
 //final DomOffscreenCanvas paintCanvas = createDomOffscreenCanvas(0, 0);
 //final paintContext =
 //    paintCanvas.getContext('2d', {'willReadFrequently': true})! as DomCanvasRenderingContext2D;
@@ -21,14 +20,6 @@ final paintContext =
 /// The paint canvas is scaled by the device pixel ratio to avoid pixelation
 /// that would happen if it wasn't resized.
 void resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
-  if (!isFirstResize) {
-    // On first resize, we don't restore because there's nothing to restore.
-    // On subsequent resizes, we restore otherwise the scale transformations will accumulate.
-    paintContext.restore();
-  }
-  paintContext.save();
-  isFirstResize = false;
-
   paintCanvas.width = rect.width;
   paintCanvas.height = rect.height;
   paintCanvas.style.width = '${rect.width / devicePixelRatio}px';
