@@ -5096,8 +5096,10 @@ TEST_F(DisplayListTest, DrawOvalRRectPromoteToDrawOval) {
 // DrawDiffRoundRect with an equivalent RoundRect draws the RoundRect.
 TEST_F(DisplayListTest, DrawDiffRoundRectPromoteToDrawRoundRect) {
   DlRect outer_rect = DlRect::MakeLTRB(10.0f, 10.0f, 110.0f, 110.0f);
-  DlRoundingRadii outer_radii = {DlSize(5.0f), DlSize(10.0f), DlSize(20.0f),
-                                 DlSize(50.0f)};
+  DlRoundingRadii outer_radii = {.top_left = DlSize(5.0f),
+                                 .top_right = DlSize(10.0f),
+                                 .bottom_left = DlSize(20.0f),
+                                 .bottom_right = DlSize(50.0f)};
   DlRoundRect outer_rrect = DlRoundRect::MakeRectRadii(outer_rect, outer_radii);
 
   DlScalar inner_inset = 5.0f;
@@ -5143,8 +5145,10 @@ TEST_F(DisplayListTest, DrawStrokedDiffRoundRectDoesNotPromoteToDrawRoundRect) {
   // All values match the above
   // `DrawDiffRoundRectPromoteToDrawRoundRect` test, except with a stroke paint.
   DlRect outer_rect = DlRect::MakeLTRB(10.0f, 10.0f, 110.0f, 110.0f);
-  DlRoundingRadii outer_radii = {DlSize(5.0f), DlSize(10.0f), DlSize(20.0f),
-                                 DlSize(50.0f)};
+  DlRoundingRadii outer_radii = {.top_left = DlSize(5.0f),
+                                 .top_right = DlSize(10.0f),
+                                 .bottom_left = DlSize(20.0f),
+                                 .bottom_right = DlSize(50.0f)};
   DlRoundRect outer_rrect = DlRoundRect::MakeRectRadii(outer_rect, outer_radii);
 
   DlScalar inner_inset = 5.0f;
@@ -5174,8 +5178,10 @@ TEST_F(DisplayListTest,
   // `DrawDiffRoundRectPromoteToDrawRoundRect` test, except the inner rect is
   // inset by a different amount vertically and horizontally.
   DlRect outer_rect = DlRect::MakeLTRB(10.0f, 10.0f, 110.0f, 110.0f);
-  DlRoundingRadii outer_radii = {DlSize(5.0f), DlSize(10.0f), DlSize(20.0f),
-                                 DlSize(50.0f)};
+  DlRoundingRadii outer_radii = {.top_left = DlSize(5.0f),
+                                 .top_right = DlSize(10.0f),
+                                 .bottom_left = DlSize(20.0f),
+                                 .bottom_right = DlSize(50.0f)};
   DlRoundRect outer_rrect = DlRoundRect::MakeRectRadii(outer_rect, outer_radii);
 
   DlScalar inner_inset_x = 5.0f;
