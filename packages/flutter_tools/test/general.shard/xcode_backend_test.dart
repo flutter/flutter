@@ -1328,10 +1328,7 @@ class TestContext extends Context {
     File? super.scriptOutputStreamFile,
     FakeProcessManager? fakeProcessManager,
   }) : processManager = fakeProcessManager ?? FakeProcessManager.list(commands),
-       super(
-         arguments: arguments,
-         environment: environment,
-       );
+       super(arguments: arguments, environment: environment);
 
   final FileSystem fileSystem;
   final FakeProcessManager processManager;
