@@ -2423,10 +2423,11 @@ abstract class BuildContext {
   /// from build methods, layout and paint callbacks, or from [State.didChangeDependencies].
   ///
   /// [State.didChangeDependencies] is called immediately after [State.initState]
-  /// and is re-invoked whenever the inherited widgets this context depends on
-  /// change. This allows the [State] to update internal variables or perform
-  /// initialization logic that depends on the inherited value before
-  /// [State.build] is called.
+  /// and is re-invoked whenever the inherited widget this context depends on
+  /// changes, until the next time the widget or one of its ancestors is moved
+  /// (for example, because an ancestor is added or removed). This allows the
+  /// [State] to update internal variables or perform initialization logic that
+  /// depends on the inherited value before [State.build] is called.
   ///
   /// This method should not be called from [State.dispose] because the element
   /// tree is no longer stable at that time. To refer to an ancestor from that
