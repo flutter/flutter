@@ -6,10 +6,14 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'package:package_config/package_config_types.dart';
+
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../cache.dart';
 import '../compile.dart';
+import '../dart/language_version.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -153,6 +157,13 @@ class TestCompiler {
   ResidentCompiler? compiler;
   late File outputDill;
 
+  /// The language version the plugin registrant was last generated for, or
+  /// `null` if it hasn't been generated yet. The plugin set is stable for the
+  /// lifetime of a single `flutter test` run, so the registrant only needs to
+  /// be regenerated when the language version of the entrypoint changes (e.g.
+  /// when test files come from packages with different `// @dart =` versions).
+  LanguageVersion? _registrantLanguageVersion;
+
   /// Compiles the Dart program (an entrypoint containing `main()`).
   Future<TestCompilerResult> compile(Uri dartEntrypointPath) {
     if (compilerController.isClosed) {
@@ -218,17 +229,29 @@ class TestCompiler {
 
       final invalidatedRegistrantFiles = <Uri>[];
       if (flutterProject != null) {
-        // Update the generated registrant to use the test target's main.
-        final String mainUriString =
-            buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString() ??
-            request.mainUri.toString();
-        await generateMainDartWithPluginRegistrant(
-          flutterProject!,
-          buildInfo.packageConfig,
-          mainUriString,
-          globals.fs.file(request.mainUri),
+        final File mainFile = globals.fs.file(request.mainUri);
+        final LanguageVersion languageVersion = determineLanguageVersion(
+          mainFile,
+          buildInfo.packageConfig.packageOf(request.mainUri),
+          Cache.flutterRoot!,
         );
-        invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
+        if (languageVersion != _registrantLanguageVersion) {
+          // (Re)generate the registrant. The output is keyed only on the plugin
+          // set (stable for one `flutter test` run) and the entrypoint's
+          // language version, so we can skip this work when the language
+          // version matches the previous compilation.
+          final String mainUriString =
+              buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString() ??
+              request.mainUri.toString();
+          await generateMainDartWithPluginRegistrant(
+            flutterProject!,
+            buildInfo.packageConfig,
+            mainUriString,
+            mainFile,
+          );
+          invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
+          _registrantLanguageVersion = languageVersion;
+        }
       }
 
       final CompilerOutput? compilerOutput = await compiler!.recompile(
