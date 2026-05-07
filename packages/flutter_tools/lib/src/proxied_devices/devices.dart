@@ -44,18 +44,17 @@ class ProxiedDevices extends PollingDeviceDiscovery {
     this.connection, {
     bool deltaFileTransfer = true,
     bool enableDdsProxy = false,
-    required Logger logger,
+    required this.logger,
     FileTransfer fileTransfer = const FileTransfer(),
   }) : _deltaFileTransfer = deltaFileTransfer,
        _enableDdsProxy = enableDdsProxy,
-       _logger = logger,
        _fileTransfer = fileTransfer,
        super('Proxied devices');
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
 
-  final Logger _logger;
+  final Logger logger;
 
   final bool _deltaFileTransfer;
 
@@ -133,7 +132,7 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       supportsFlutterExit: _cast<bool>(capabilities['flutterExit']),
       supportsScreenshot: _cast<bool>(capabilities['screenshot']),
       supportsHardwareRendering: _cast<bool>(capabilities['hardwareRendering']),
-      logger: _logger,
+      logger: logger,
       fileTransfer: _fileTransfer,
     );
   }
@@ -148,7 +147,7 @@ class ProxiedDevices extends PollingDeviceDiscovery {
     } on String catch (e) {
       // Daemon actually does throw string types.
       if (e.contains('command not understood')) {
-        _logger.printTrace(
+        logger.printTrace(
           'The daemon is on an older version that does not support `device.getDiagnostics`.',
         );
         // Silently ignore.
@@ -805,18 +804,18 @@ class ProxiedDartDevelopmentService
   ProxiedDartDevelopmentService(
     this.connection,
     this.deviceId, {
-    required Logger logger,
+    required this.logger,
     required ProxiedPortForwarder proxiedPortForwarder,
     required ProxiedPortForwarder devicePortForwarder,
     @visibleForTesting DartDevelopmentService? localDds,
-  }) : _logger = logger,
-       _proxiedPortForwarder = proxiedPortForwarder,
+  }) : _proxiedPortForwarder = proxiedPortForwarder,
        _devicePortForwarder = devicePortForwarder,
        _localDds = localDds ?? DartDevelopmentService(logger: logger);
 
   final String deviceId;
 
-  final Logger _logger;
+  @override
+  final Logger logger;
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
@@ -887,7 +886,7 @@ class ProxiedDartDevelopmentService
     }
 
     if (remoteVMServicePort == null) {
-      _logger.printTrace('VM service port is not a forwarded port. Start DDS locally.');
+      logger.printTrace('VM service port is not a forwarded port. Start DDS locally.');
       await startLocalDds();
       return;
     }
@@ -942,12 +941,12 @@ class ProxiedDartDevelopmentService
     }
 
     if (remoteUriStr == null) {
-      _logger.printTrace('Remote daemon cannot start DDS. Start a local DDS instead.');
+      logger.printTrace('Remote daemon cannot start DDS. Start a local DDS instead.');
       await startLocalDds();
       return;
     }
 
-    _logger.printTrace('Remote DDS started on $remoteUriStr.');
+    logger.printTrace('Remote DDS started on $remoteUriStr.');
 
     // Forward the port.
     final Uri remoteUri = Uri.parse(remoteUriStr);
@@ -958,8 +957,8 @@ class ProxiedDartDevelopmentService
     );
 
     _localUri = remoteUri.replace(port: localPort);
-    _logger.printTrace('Local port forwarded DDS on $_localUri.');
-    _logger.sendEvent('device.proxied_dds_forwarded', <String, String>{
+    logger.printTrace('Local port forwarded DDS on $_localUri.');
+    logger.sendEvent('device.proxied_dds_forwarded', <String, String>{
       'deviceId': deviceId,
       'remoteUri': remoteUri.toString(),
       'localUri': _localUri!.toString(),

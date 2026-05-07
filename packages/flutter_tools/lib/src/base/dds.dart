@@ -36,6 +36,8 @@ typedef DDSLauncherCallback =
       String? google3WorkspaceRoot,
     });
 
+typedef StartChromeCallback = Future<io.Process> Function(List<String> urls, {List<String> args});
+
 // TODO(fujino): This should be direct injected, rather than mutable global state.
 /// Used by tests to override the DDS spawn behavior for mocking purposes.
 @visibleForTesting
@@ -44,7 +46,7 @@ DDSLauncherCallback ddsLauncherCallback = DartDevelopmentServiceLauncher.start;
 /// Helper class to launch a [DartDevelopmentServiceLauncher]. Allows for us to
 /// mock out this functionality for testing purposes.
 class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
-  DartDevelopmentService({required Logger logger}) : _logger = logger;
+  DartDevelopmentService({required this.logger});
 
   DartDevelopmentServiceLauncher? _ddsInstance;
 
@@ -61,7 +63,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
   final _completer = Completer<void>();
 
   @override
-  final Logger _logger;
+  final Logger logger;
 
   @override
   Future<void> startDartDevelopmentService(
@@ -82,7 +84,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
           .host,
       port: ddsPort ?? 0,
     );
-    _logger.printTrace(
+    logger.printTrace(
       'Launching a Dart Developer Service (DDS) instance at $ddsUri, '
       'connecting to VM service at $vmServiceUri.',
     );
@@ -107,7 +109,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
       );
       unawaited(_ddsInstance!.done.whenComplete(completeFuture));
     } on DartDevelopmentServiceException catch (e) {
-      _logger.printTrace('Warning: Failed to start DDS: ${e.message}');
+      logger.printTrace('Warning: Failed to start DDS: ${e.message}');
       if (e is ExistingDartDevelopmentServiceException) {
         _existingDdsUri = e.ddsUri;
       }
@@ -124,7 +126,7 @@ class DartDevelopmentService with DartDevelopmentServiceLocalOperationsMixin {
 mixin DartDevelopmentServiceLocalOperationsMixin {
   Uri? get uri;
   Uri? get devToolsUri;
-  Logger get _logger;
+  Logger get logger;
 
   /// Used to confirm `launchDevToolsInBrowser` is called in tests.
   @visibleForTesting
@@ -163,14 +165,17 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
 
   /// Launches a DevTools instance connected to the DDS instance connected to
   /// [device] in Chrome.
-  bool launchDevToolsInBrowser(FlutterDevice device) {
+  bool launchDevToolsInBrowser(
+    FlutterDevice device, {
+    @visibleForTesting StartChromeCallback startChrome = Chrome.start,
+  }) {
     _calledLaunchDevToolsInBrowser = true;
     if (devToolsUri == null) {
       return false;
     }
     assert(devToolsUri != null);
-    _logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUri');
-    unawaited(Chrome.start(<String>[devToolsUri!.toString()]));
+    logger.printStatus('Launching Flutter DevTools for ${device.device!.name} at $devToolsUri');
+    unawaited(startChrome(<String>[devToolsUri!.toString()]));
     return true;
   }
 
@@ -193,7 +198,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
       await flutterDevice.vmService?.findExtensionIsolate(extension);
       return true;
     } on VmServiceDisappearedException {
-      _logger.printTrace(
+      logger.printTrace(
         'The VM Service for ${flutterDevice.device} disappeared while trying to'
         ' find the $extension service extension. Skipping subsequent DevTools '
         'setup for this device.',
@@ -226,7 +231,7 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
         params: <String, dynamic>{'value': uri.toString()},
       );
     } on Exception catch (e) {
-      _logger.printError(
+      logger.printError(
         'Failed to set DevTools server address: $e. Deep links to'
         ' DevTools will not show in Flutter errors.',
       );
@@ -244,8 +249,8 @@ mixin DartDevelopmentServiceLocalOperationsMixin {
         params: <String, dynamic>{'value': uri.toString()},
       );
     } on Exception catch (e) {
-      _logger.printError(e.toString());
-      _logger.printError(
+      logger.printError(e.toString());
+      logger.printError(
         'Failed to set vm service URI: $e. Deep links to DevTools'
         ' will not show in Flutter errors.',
       );
