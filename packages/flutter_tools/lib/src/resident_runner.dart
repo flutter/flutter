@@ -1472,17 +1472,21 @@ abstract class ResidentRunner extends ResidentHandlers {
   @protected
   Future<void> reloadFonts(FlutterDevice device, FlutterView view) async {}
 
+  @internal
   Future<void> evictDirtyAssets() async {
     final futures = <Future<void>>[];
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device?.devFS == null) {
+    for (final FlutterDevice device in flutterDevices) {
+      final DevFS? devFS = device.devFS;
+      if (devFS == null) {
         continue;
       }
-      if (device!.devFS!.assetPathsToEvict.isEmpty && device.devFS!.shaderPathsToEvict.isEmpty) {
+      if (devFS.assetPathsToEvict.isEmpty && devFS.shaderPathsToEvict.isEmpty) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
-      if (views.isEmpty || views.first.uiIsolate == null) {
+
+      final vm_service.IsolateRef? firstUiIsolate = views.firstOrNull?.uiIsolate;
+      if (firstUiIsolate == null) {
         continue;
       }
 
@@ -1493,19 +1497,15 @@ abstract class ResidentRunner extends ResidentHandlers {
       await reloadFonts(device, views.first);
 
       // 3. Perform the standard, cross-platform eviction calls!
-      for (final String assetPath in device.devFS!.assetPathsToEvict) {
-        futures.add(
-          device.vmService!.flutterEvictAsset(assetPath, isolateId: views.first.uiIsolate!.id!),
-        );
+      for (final String assetPath in devFS.assetPathsToEvict) {
+        futures.add(device.vmService!.flutterEvictAsset(assetPath, isolateId: firstUiIsolate.id!));
       }
-      for (final String assetPath in device.devFS!.shaderPathsToEvict) {
-        futures.add(
-          device.vmService!.flutterEvictShader(assetPath, isolateId: views.first.uiIsolate!.id!),
-        );
+      for (final String assetPath in devFS.shaderPathsToEvict) {
+        futures.add(device.vmService!.flutterEvictShader(assetPath, isolateId: firstUiIsolate.id!));
       }
 
-      device.devFS!.assetPathsToEvict.clear();
-      device.devFS!.shaderPathsToEvict.clear();
+      devFS.assetPathsToEvict.clear();
+      devFS.shaderPathsToEvict.clear();
     }
     await Future.wait<void>(futures);
   }
