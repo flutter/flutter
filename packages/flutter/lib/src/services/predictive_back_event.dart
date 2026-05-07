@@ -51,8 +51,7 @@ final class PredictiveBackEvent {
       swipeEdge: switch (map['swipeEdge']) {
         0 => SwipeEdge.left,
         1 => SwipeEdge.right,
-        2 => SwipeEdge.none,
-        _ => SwipeEdge.none,
+        2 || _ => SwipeEdge.none,
       },
     );
   }
