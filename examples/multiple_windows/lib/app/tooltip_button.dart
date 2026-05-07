@@ -32,8 +32,8 @@ class _TooltipButtonState extends State<TooltipButton> {
   }
 
   void _onPressed(
-    final WindowRegistry windowRegistry,
-    final WindowSettings windowSettings,
+    WindowRegistry windowRegistry,
+    WindowSettings windowSettings,
   ) {
     // Toggle tooltip visibility.
     if (_tooltipEntry != null) {

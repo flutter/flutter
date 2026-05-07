@@ -33,8 +33,8 @@ class _PopupButtonState extends State<PopupButton> {
   }
 
   void _onPressed(
-    final WindowRegistry windowRegistry,
-    final WindowSettings windowSettings,
+    WindowRegistry windowRegistry,
+    WindowSettings windowSettings,
   ) {
     // Toggle popup visibility.
     if (_popupWindowEntry != null) {
