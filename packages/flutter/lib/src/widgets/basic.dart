@@ -24,6 +24,7 @@ import 'debug.dart';
 import 'framework.dart';
 import 'indexed_stack.dart';
 import 'localizations.dart';
+import 'media_query.dart';
 import 'widget_span.dart';
 
 export 'package:flutter/animation.dart';
@@ -6592,6 +6593,7 @@ class RichText extends MultiChildRenderObjectWidget {
       locale: locale ?? Localizations.maybeLocaleOf(context),
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
+      devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0,
     );
   }
 
@@ -6611,7 +6613,8 @@ class RichText extends MultiChildRenderObjectWidget {
       ..textHeightBehavior = textHeightBehavior
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..registrar = selectionRegistrar
-      ..selectionColor = selectionColor;
+      ..selectionColor = selectionColor
+      ..devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0;
   }
 
   @override

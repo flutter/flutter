@@ -234,4 +234,36 @@ void main() {
       ]),
     );
   });
+
+  testWidgets('RichText propagates devicePixelRatio', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 3.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: RichText(
+            text: const TextSpan(text: 'Hello'),
+          ),
+        ),
+      ),
+    );
+
+    RenderParagraph paragraph = tester.renderObject(find.byType(RichText));
+    expect(paragraph.devicePixelRatio, 3.0);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 4.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: RichText(
+            text: const TextSpan(text: 'Hello'),
+          ),
+        ),
+      ),
+    );
+
+    paragraph = tester.renderObject(find.byType(RichText));
+    expect(paragraph.devicePixelRatio, 4.0);
+  });
 }
