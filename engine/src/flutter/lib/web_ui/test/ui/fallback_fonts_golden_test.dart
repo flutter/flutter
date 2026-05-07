@@ -39,8 +39,8 @@ void testMain() {
         <String, Object?>{'fontFallbackBaseUrl': 'assets/fallback_fonts/'}.jsify()
             as JsFlutterConfiguration?,
       );
-      renderer.fontCollection.fontFallbackManager!.debugUserPreferredLanguage = 'en';
-      renderer.fontCollection.fontFallbackManager!.debugOnLoadFontFamily = (String family) =>
+      renderer.fontCollection.fontFallbackManager.debugUserPreferredLanguage = 'en';
+      renderer.fontCollection.fontFallbackManager.debugOnLoadFontFamily = (String family) =>
           downloadedFontFamilies.add(family);
       savedCallback = ui.PlatformDispatcher.instance.onPlatformMessage;
     });
@@ -52,7 +52,7 @@ void testMain() {
     });
 
     test('Roboto is always a fallback font', () {
-      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, contains('Roboto'));
+      expect(renderer.fontCollection.fontFallbackManager.globalFontFallbacks, contains('Roboto'));
     });
 
     test('can override font fallback base URL using JS', () {
@@ -66,7 +66,7 @@ void testMain() {
     });
 
     test('will download Noto Sans Arabic if Arabic text is added', () async {
-      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
+      expect(renderer.fontCollection.fontFallbackManager.globalFontFallbacks, <String>['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
       // fallback font.
@@ -77,7 +77,7 @@ void testMain() {
       await FallbackFontService.instance.waitForIdle();
 
       expect(
-        renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
+        renderer.fontCollection.fontFallbackManager.globalFontFallbacks,
         contains('Noto Sans Arabic'),
       );
 
@@ -99,9 +99,9 @@ void testMain() {
     });
 
     test('will download Noto Sans JP if Japanese text is added in ja', () async {
-      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
+      expect(renderer.fontCollection.fontFallbackManager.globalFontFallbacks, <String>['Roboto']);
 
-      renderer.fontCollection.fontFallbackManager!.debugUserPreferredLanguage = 'ja';
+      renderer.fontCollection.fontFallbackManager.debugUserPreferredLanguage = 'ja';
 
       // Creating this paragraph should cause us to start to download the
       // fallback font.
@@ -112,7 +112,7 @@ void testMain() {
       await FallbackFontService.instance.waitForIdle();
 
       expect(
-        renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
+        renderer.fontCollection.fontFallbackManager.globalFontFallbacks,
         contains(startsWith('Noto Sans JP')),
       );
 
@@ -134,7 +134,7 @@ void testMain() {
     });
 
     test('will put the Noto Color Emoji font before other fallback fonts in the list', () async {
-      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
+      expect(renderer.fontCollection.fontFallbackManager.globalFontFallbacks, <String>['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
       // Arabic fallback font.
@@ -144,7 +144,7 @@ void testMain() {
 
       await FallbackFontService.instance.waitForIdle();
 
-      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>[
+      expect(renderer.fontCollection.fontFallbackManager.globalFontFallbacks, <String>[
         'Roboto',
         'Noto Sans Arabic',
       ]);
@@ -158,7 +158,7 @@ void testMain() {
 
       await FallbackFontService.instance.waitForIdle();
 
-      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>[
+      expect(renderer.fontCollection.fontFallbackManager.globalFontFallbacks, <String>[
         'Roboto',
         'Noto Color Emoji 9',
         'Noto Sans Arabic',
@@ -166,7 +166,7 @@ void testMain() {
     });
 
     test('will download Noto Color Emojis and Noto Symbols if no matching Noto Font', () async {
-      expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>['Roboto']);
+      expect(renderer.fontCollection.fontFallbackManager.globalFontFallbacks, <String>['Roboto']);
 
       // Creating this paragraph should cause us to start to download the
       // fallback font.
@@ -177,7 +177,7 @@ void testMain() {
       await FallbackFontService.instance.waitForIdle();
 
       expect(
-        renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
+        renderer.fontCollection.fontFallbackManager.globalFontFallbacks,
         contains('Noto Color Emoji 9'),
       );
 
@@ -238,7 +238,7 @@ void testMain() {
       // downloadedFontFamilies.clear();
       // renderer.fontCollection.debugResetFallbackFonts();
 
-      final FontFallbackManager fallbackManager = renderer.fontCollection.fontFallbackManager!;
+      final FontFallbackManager fallbackManager = renderer.fontCollection.fontFallbackManager;
       final String oldLanguage = fallbackManager.preferredLanguage;
       if (userPreferredLanguage != null) {
         fallbackManager.debugUserPreferredLanguage = userPreferredLanguage;
@@ -390,7 +390,7 @@ void testMain() {
       // font tree.
       final testedFonts = <String>{};
       final supportedUniqueCodePoints = <int>{};
-      renderer.fontCollection.fontFallbackManager!.codePointToComponents.forEachRange((
+      renderer.fontCollection.fontFallbackManager.codePointToComponents.forEachRange((
         int start,
         int end,
         FallbackFontComponent component,
@@ -575,7 +575,7 @@ void testMain() {
         for (final codePoint in codePoints) {
           final List<NotoFont> fontsForPoint = renderer
               .fontCollection
-              .fontFallbackManager!
+              .fontFallbackManager
               .codePointToComponents
               .lookup(codePoint)
               .fonts;
@@ -597,9 +597,7 @@ void testMain() {
       });
 
       test('fallback fonts do not download', () async {
-        expect(renderer.fontCollection.fontFallbackManager!.globalFontFallbacks, <String>[
-          'Roboto',
-        ]);
+        expect(renderer.fontCollection.fontFallbackManager.globalFontFallbacks, <String>['Roboto']);
 
         // Creating this paragraph would cause us to start to download the
         // fallback font if we didn't disable font fallbacks.
@@ -611,7 +609,7 @@ void testMain() {
 
         // Make sure we didn't download the fallback font.
         expect(
-          renderer.fontCollection.fontFallbackManager!.globalFontFallbacks,
+          renderer.fontCollection.fontFallbackManager.globalFontFallbacks,
           isNot(contains('Noto Color Emoji 9')),
         );
       });

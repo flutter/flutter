@@ -3679,6 +3679,23 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
+  /// Whether this node can perform the specific [CustomSemanticsAction]
+  /// identified by [actionId].
+  bool _canPerformCustomAction(int actionId) {
+    final CustomSemanticsAction? customAction = CustomSemanticsAction.getAction(actionId);
+    return customAction != null && _customSemanticsActions.containsKey(customAction);
+  }
+
+  /// Whether this node can handle [action], taking [args] into account for
+  /// custom actions so that nodes which only have *other* custom actions
+  /// registered are not treated as candidates.
+  bool _canHandleAction(SemanticsAction action, Object? args) {
+    if (action == SemanticsAction.customAction) {
+      return args is int && _canPerformCustomAction(args);
+    }
+    return _canPerformAction(action);
+  }
+
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
 
   /// Reconfigures the properties of this object to describe the configuration
@@ -5041,21 +5058,34 @@ class SemanticsOwner extends ChangeNotifier {
     notifyListeners();
   }
 
-  SemanticsActionHandler? _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
+  SemanticsActionHandler? _getSemanticsActionHandlerForId(
+    int id,
+    SemanticsAction action, [
+    Object? args,
+  ]) {
     SemanticsNode? result = _nodes[id];
-    if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
+    if (result == null) {
+      return null;
+    }
+    // For merged nodes, walk descendants whenever the merge root itself does
+    // not handle the specific (action, args) pair. Without the args check,
+    // a merge root that owns *some* custom action would short-circuit the
+    // walk and we'd dispatch to the wrong handler.
+    if (result.isPartOfNodeMerging && !result._canHandleAction(action, args)) {
+      SemanticsNode? found;
       result._visitDescendants((SemanticsNode node) {
-        if (node._canPerformAction(action)) {
-          result = node;
+        if (node._canHandleAction(action, args)) {
+          found = node;
           return false; // found node, abort walk
         }
         return true; // continue walk
       });
+      result = found;
     }
-    if (result == null || !result!._canPerformAction(action)) {
+    if (result == null || !result._canHandleAction(action, args)) {
       return null;
     }
-    return result!._actions[action];
+    return result._actions[action];
   }
 
   /// Asks the [SemanticsNode] with the given id to perform the given action.
@@ -5066,7 +5096,7 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
   void performAction(int id, SemanticsAction action, [Object? args]) {
-    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action);
+    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action, args);
     if (handler != null) {
       handler(args);
       return;
@@ -5081,8 +5111,9 @@ class SemanticsOwner extends ChangeNotifier {
   SemanticsActionHandler? _getSemanticsActionHandlerForPosition(
     SemanticsNode node,
     Offset position,
-    SemanticsAction action,
-  ) {
+    SemanticsAction action, [
+    Object? args,
+  ]) {
     if (node.transform != null) {
       final inverse = Matrix4.identity();
       if (inverse.copyInverse(node.transform!) == 0.0) {
@@ -5094,12 +5125,12 @@ class SemanticsOwner extends ChangeNotifier {
       return null;
     }
     if (node.mergeAllDescendantsIntoThisNode) {
-      if (node._canPerformAction(action)) {
+      if (node._canHandleAction(action, args)) {
         return node._actions[action];
       }
       SemanticsNode? result;
       node._visitDescendants((SemanticsNode child) {
-        if (child._canPerformAction(action)) {
+        if (child._canHandleAction(action, args)) {
           result = child;
           return false;
         }
@@ -5113,6 +5144,7 @@ class SemanticsOwner extends ChangeNotifier {
           child,
           position,
           action,
+          args,
         );
         if (handler != null) {
           return handler;
@@ -5138,6 +5170,7 @@ class SemanticsOwner extends ChangeNotifier {
       node,
       position,
       action,
+      args,
     );
     if (handler != null) {
       handler(args);

@@ -230,6 +230,7 @@ if (enable_unittests) {
       "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
       "//flutter/testing",
       "//flutter/txt",
+      "//third_party/abseil-cpp/absl/strings",
     ]
 
     if (!defined(defines)) {
