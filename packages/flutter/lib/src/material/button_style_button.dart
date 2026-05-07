@@ -87,6 +87,8 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.clipBehavior,
     this.statesController,
     this.isSemanticButton = true,
+    this.isSelected,
+    this.onSelected,
     @Deprecated(
       'Remove this parameter as it is now ignored. '
       'Use ButtonStyle.iconAlignment instead. '
@@ -114,6 +116,11 @@ abstract class ButtonStyleButton extends StatefulWidget {
   ///
   ///  * [enabled], which is true if the button is enabled.
   final VoidCallback? onLongPress;
+
+  /// Called when the button is selected or deselected.
+  ///
+  /// Passes the new selection state to the callback.
+  final ValueChanged<bool>? onSelected;
 
   /// Called when a pointer enters or exits the button response area.
   ///
@@ -162,6 +169,12 @@ abstract class ButtonStyleButton extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool? isSemanticButton;
+
+  /// Whether the button is selected.
+  ///
+  /// If true, the button will be considered selected and its appearance will
+  /// resolve using [WidgetState.selected].
+  final bool? isSelected;
 
   /// {@macro flutter.material.ButtonStyle.iconAlignment}
   @Deprecated(
@@ -237,9 +250,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
 
   /// Whether the button is enabled or disabled.
   ///
-  /// Buttons are disabled by default. To enable a button, set its [onPressed]
-  /// or [onLongPress] properties to a non-null value.
-  bool get enabled => onPressed != null || onLongPress != null;
+  /// Buttons are disabled by default. To enable a button, set its [onPressed],
+  /// [onLongPress], or [onSelected] properties to a non-null value.
+  bool get enabled => onPressed != null || onLongPress != null || onSelected != null;
 
   @override
   State<ButtonStyleButton> createState() => _ButtonStyleState();
@@ -334,6 +347,9 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       internalStatesController = MaterialStatesController();
     }
     statesController.update(WidgetState.disabled, !widget.enabled);
+    if (widget.isSelected != null) {
+      statesController.update(WidgetState.selected, widget.isSelected!);
+    }
     statesController.addListener(handleStatesControllerChange);
   }
 
@@ -359,6 +375,11 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       if (!widget.enabled) {
         // The button may have been disabled while a press gesture is currently underway.
         statesController.update(WidgetState.pressed, false);
+      }
+    }
+    if (widget.isSelected != oldWidget.isSelected) {
+      if (widget.isSelected != null) {
+        statesController.update(WidgetState.selected, widget.isSelected!);
       }
     }
   }
@@ -553,7 +574,14 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         iconTheme: iconTheme.merge(IconThemeData(color: resolvedIconColor, size: resolvedIconSize)),
       ),
       child: InkWell(
-        onTap: widget.onPressed,
+        onTap: widget.enabled
+            ? () {
+                if (widget.onSelected != null && widget.isSelected != null) {
+                  widget.onSelected!(!widget.isSelected!);
+                }
+                widget.onPressed?.call();
+              }
+            : null,
         onLongPress: widget.onLongPress,
         onHover: widget.onHover,
         mouseCursor: mouseCursor,

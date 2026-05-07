@@ -4,8 +4,9 @@
 
 import 'dart:io';
 import 'package:test/test.dart';
+import '../data/shape_struct.dart';
 import '../templates/color_scheme_template.dart';
-import '../templates/token_template.dart';
+import '../templates/template.dart';
 
 class TestTemplate extends TokenTemplate {
   TestTemplate(super.blockName, super.fileName, {this.generatedContent = '  // Generated code\n'});
@@ -156,13 +157,60 @@ void foo() {}
         tempDir.deleteSync(recursive: true);
       }
     });
+
+    test('shape generates a rounded rectangle for uniform corner tokens', () {
+      final Directory tempDir = Directory.systemTemp.createTempSync('gen_defaults');
+      try {
+        final file = File('${tempDir.path}/test_file.dart');
+        final template = TestTemplate('TestBlock', file.path);
+
+        expect(
+          template.shape(
+            const ShapeStruct(
+              family: 'SHAPE_FAMILY_ROUNDED_CORNERS',
+              topLeft: 12.0,
+              topRight: 12.0,
+              bottomLeft: 12.0,
+              bottomRight: 12.0,
+            ),
+          ),
+          'const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12.0)))',
+        );
+      } finally {
+        tempDir.deleteSync(recursive: true);
+      }
+    });
+
+    test('shape generates a stadium border for circular tokens', () {
+      final Directory tempDir = Directory.systemTemp.createTempSync('gen_defaults');
+      try {
+        final file = File('${tempDir.path}/test_file.dart');
+        final template = TestTemplate('TestBlock', file.path);
+
+        expect(
+          template.shape(
+            const ShapeStruct(
+              family: 'SHAPE_FAMILY_CIRCULAR',
+              topLeft: 0.0,
+              topRight: 0.0,
+              bottomLeft: 0.0,
+              bottomRight: 0.0,
+            ),
+            circularRadius: 20.0,
+          ),
+          'const StadiumBorder()',
+        );
+      } finally {
+        tempDir.deleteSync(recursive: true);
+      }
+    });
   });
 
   test('ColorSchemeTemplate uses all tokens from color data files', () {
-    const ColorSchemeTemplate template = ColorSchemeTemplate('ColorScheme', 'color_scheme.dart');
+    const template = ColorSchemeTemplate('ColorScheme', 'color_scheme.dart');
     final String generatedCode = template.generate();
 
-    final List<String> dataFiles = <String>[
+    final dataFiles = <String>[
       'lib/src/material/gen_defaults/data/color.dart',
       'lib/src/material/gen_defaults/data/color_dark.dart',
       'lib/src/material/gen_defaults/data/color_light_medium_contrast.dart',
@@ -171,23 +219,50 @@ void foo() {}
       'lib/src/material/gen_defaults/data/color_dark_high_contrast.dart',
     ];
 
-    for (final String filePath in dataFiles) {
-      final File file = File(filePath);
-      expect(file.existsSync(), isTrue, reason: 'File $filePath should exist. Current directory: ${Directory.current.path}');
-      
+    for (final filePath in dataFiles) {
+      final file = File(filePath);
+      expect(
+        file.existsSync(),
+        isTrue,
+        reason: 'File $filePath should exist. Current directory: ${Directory.current.path}',
+      );
+
       final String content = file.readAsStringSync();
-      final RegExp regex = RegExp(r'static const Color (\w+) =');
+      final regex = RegExp(r'static const String (\w+) =');
       final Iterable<RegExpMatch> matches = regex.allMatches(content);
 
       expect(matches, isNotEmpty, reason: 'File $filePath should contain token definitions.');
 
-      for (final RegExpMatch match in matches) {
+      for (final match in matches) {
         final String tokenName = match.group(1)!;
-        final bool isUsed = generatedCode.contains('$tokenName: ') || 
-                            generatedCode.contains('.$tokenName}');
-        
-        expect(isUsed, isTrue, reason: 'Token $tokenName from $filePath should be used in the template');
+        final String colorSchemeName = switch (tokenName) {
+          'inverseOnSurface' => 'onInverseSurface',
+          _ => tokenName,
+        };
+        final bool isUsed =
+            generatedCode.contains('$colorSchemeName: ') || generatedCode.contains('.$tokenName}');
+
+        expect(
+          isUsed,
+          isTrue,
+          reason: 'Token $tokenName from $filePath should be used in the template',
+        );
       }
     }
+  });
+
+  test('IconButtonTemplate uses opacity tokens for component colors', () {
+    final String templateSource = File(
+      'lib/src/material/gen_defaults/templates/icon_button_template.dart',
+    ).readAsStringSync();
+
+    expect(
+      templateSource,
+      isNot(contains(RegExp(r'componentColor\(TokenIconButton\w+\.\w+, 0\.\d+\)'))),
+    );
+    expect(templateSource, contains('TokenIconButtonStandard.disabledIconOpacity'));
+    expect(templateSource, contains('TokenIconButtonFilled.disabledContainerOpacity'));
+    expect(templateSource, contains('TokenIconButtonTonal.hoveredStateLayerOpacity'));
+    expect(templateSource, contains('TokenIconButtonOutlined.selectedDisabledContainerOpacity'));
   });
 }

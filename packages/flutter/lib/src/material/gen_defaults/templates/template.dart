@@ -4,6 +4,7 @@
 
 import 'dart:io';
 import '../data/color_role.dart';
+import '../data/shape_struct.dart';
 
 /// Base class for code generation templates.
 abstract class TokenTemplate {
@@ -40,7 +41,7 @@ abstract class TokenTemplate {
   void updateFile() {
     final file = File(fileName);
     if (!file.existsSync()) {
-      stdout.writeln(r'File $fileName does not exist. Skipping.');
+      stdout.writeln('File $fileName does not exist. Skipping.');
       return;
     }
     final String contents = file.readAsStringSync();
@@ -53,7 +54,7 @@ abstract class TokenTemplate {
     if (beginPreviousBlock != -1) {
       if (endPreviousBlock < beginPreviousBlock) {
         stdout.writeln(
-          r'Unable to find block named ${blockName}M3E in $fileName, skipping code generation.',
+          'Unable to find block named ${blockName}M3E in $fileName, skipping code generation.',
         );
         return;
       }
@@ -78,7 +79,7 @@ abstract class TokenTemplate {
   String generate();
 
   String color(TokenColorRole role) {
-    return '$colorSchemePrefix${role.name}';
+    return '$colorSchemePrefix${_colorSchemeName(role)}';
   }
 
   String componentColor(TokenColorRole role, [double? opacity]) {
@@ -87,5 +88,38 @@ abstract class TokenTemplate {
       value += '.withOpacity($opacity)';
     }
     return value;
+  }
+
+  String _colorSchemeName(TokenColorRole role) {
+    return switch (role) {
+      TokenColorRole.inverseOnSurface => 'onInverseSurface',
+      _ => role.name,
+    };
+  }
+
+  String shape(ShapeStruct token, {double? circularRadius}) {
+    final isCircular = token.family == 'SHAPE_FAMILY_CIRCULAR';
+    final bool hasUniformCorners =
+        token.topLeft == token.topRight &&
+        token.topLeft == token.bottomLeft &&
+        token.topLeft == token.bottomRight;
+
+    if (isCircular) {
+      return 'const StadiumBorder()';
+    }
+
+    if (hasUniformCorners) {
+      return 'const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(${token.topLeft})))';
+    }
+
+    return '''
+const RoundedRectangleBorder(
+  borderRadius: BorderRadius.only(
+    topLeft: Radius.circular(${token.topLeft}),
+    topRight: Radius.circular(${token.topRight}),
+    bottomLeft: Radius.circular(${token.bottomLeft}),
+    bottomRight: Radius.circular(${token.bottomRight}),
+  ),
+)''';
   }
 }

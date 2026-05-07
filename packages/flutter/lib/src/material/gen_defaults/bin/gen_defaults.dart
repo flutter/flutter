@@ -23,6 +23,9 @@ void main() {
   const ColorSchemeTemplate('ColorScheme', '$materialLib/theme_data.dart').updateFile();
 
   stdout.writeln('Updating IconButton defaults...');
-  const IconButtonTemplate('IconButton', '$materialLib/icon_button.dart').updateFile();
+  const IconButtonTemplate(
+    'IconButton',
+    '$materialLib/material_3_expressive/icon_button.dart',
+  ).updateFile();
   stdout.writeln('Done!');
 }

@@ -31,6 +31,47 @@ import 'theme_data.dart';
 // late BuildContext context;
 // typedef MyAppHome = Placeholder;
 
+/// Defines the size variants for Material 3 Expressive [IconButton], [ElevatedButton],
+/// [OutlinedButton], [TextButton], [FilledButton].
+///
+/// Each size variant determines the container dimensions, icon size, padding,
+/// shape, and outline width of the icon button.
+///
+/// See also:
+///
+///  * [IconButtonThemeData.size], which can be used to set the default size
+///    for all icon buttons in a theme.
+///  * <https://m3.material.io/components/icon-buttons/specs>, which describes
+///    the Material Design icon button size specifications.
+enum IconButtonSize {
+  /// Extra small icon button: 32dp container, 20dp icon.
+  xSmall,
+
+  /// Small icon button: 40dp container, 24dp icon. This is the default.
+  small,
+
+  /// Medium icon button: 56dp container, 24dp icon.
+  medium,
+
+  /// Large icon button: 96dp container, 32dp icon.
+  large,
+
+  /// Extra large icon button: 136dp container, 40dp icon.
+  xLarge,
+}
+
+/// Defines the width variants for Material 3 Expressive [IconButton].
+enum IconButtonWidth {
+  /// Uses the narrow leading and trailing space tokens.
+  narrow,
+
+  /// Uses the default leading and trailing space tokens.
+  standard,
+
+  /// Uses the wide leading and trailing space tokens.
+  wide,
+}
+
 /// The type for [ButtonStyle.backgroundBuilder] and [ButtonStyle.foregroundBuilder].
 ///
 /// The [states] parameter is the button's current pressed/hovered/etc state. The [child] is
@@ -187,6 +228,8 @@ class ButtonStyle with Diagnosticable {
     this.splashFactory,
     this.backgroundBuilder,
     this.foregroundBuilder,
+    this.size,
+    this.iconButtonWidth,
   });
 
   /// The style for a button's [Text] widget descendants.
@@ -372,6 +415,19 @@ class ButtonStyle with Diagnosticable {
   /// Always defaults to [Alignment.center].
   final AlignmentGeometry? alignment;
 
+  /// The size variant for this icon button.
+  ///
+  /// Determines container dimensions, icon size, padding, and shape.
+  /// If null, the size from [IconButtonThemeData.size] is used, or
+  /// [IconButtonSize.small] as the ultimate default.
+  final IconButtonSize? size;
+
+  /// The width variant for this icon button.
+  ///
+  /// If null, the width from [IconButtonThemeData.style] is used, or
+  /// [IconButtonWidth.standard] as the ultimate default.
+  final IconButtonWidth? iconButtonWidth;
+
   /// Creates the [InkWell] splash factory, which defines the appearance of
   /// "ink" splashes that occur in response to taps.
   ///
@@ -451,6 +507,8 @@ class ButtonStyle with Diagnosticable {
     InteractiveInkFeatureFactory? splashFactory,
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
+    IconButtonSize? size,
+    IconButtonWidth? iconButtonWidth,
   }) {
     return ButtonStyle(
       textStyle: textStyle ?? this.textStyle,
@@ -478,6 +536,8 @@ class ButtonStyle with Diagnosticable {
       splashFactory: splashFactory ?? this.splashFactory,
       backgroundBuilder: backgroundBuilder ?? this.backgroundBuilder,
       foregroundBuilder: foregroundBuilder ?? this.foregroundBuilder,
+      size: size ?? this.size,
+      iconButtonWidth: iconButtonWidth ?? this.iconButtonWidth,
     );
   }
 
@@ -516,6 +576,8 @@ class ButtonStyle with Diagnosticable {
       splashFactory: splashFactory ?? style.splashFactory,
       backgroundBuilder: backgroundBuilder ?? style.backgroundBuilder,
       foregroundBuilder: foregroundBuilder ?? style.foregroundBuilder,
+      size: size ?? style.size,
+      iconButtonWidth: iconButtonWidth ?? style.iconButtonWidth,
     );
   }
 
@@ -547,6 +609,8 @@ class ButtonStyle with Diagnosticable {
       splashFactory,
       backgroundBuilder,
       foregroundBuilder,
+      size,
+      iconButtonWidth,
     ];
     return Object.hashAll(values);
   }
@@ -584,7 +648,9 @@ class ButtonStyle with Diagnosticable {
         other.alignment == alignment &&
         other.splashFactory == splashFactory &&
         other.backgroundBuilder == backgroundBuilder &&
-        other.foregroundBuilder == foregroundBuilder;
+        other.foregroundBuilder == foregroundBuilder &&
+        other.size == size &&
+        other.iconButtonWidth == iconButtonWidth;
   }
 
   @override
@@ -706,6 +772,10 @@ class ButtonStyle with Diagnosticable {
         defaultValue: null,
       ),
     );
+    properties.add(EnumProperty<IconButtonSize>('size', size, defaultValue: null));
+    properties.add(
+      EnumProperty<IconButtonWidth>('iconButtonWidth', iconButtonWidth, defaultValue: null),
+    );
   }
 
   /// Linearly interpolate between two [ButtonStyle]s.
@@ -769,6 +839,8 @@ class ButtonStyle with Diagnosticable {
       splashFactory: t < 0.5 ? a?.splashFactory : b?.splashFactory,
       backgroundBuilder: t < 0.5 ? a?.backgroundBuilder : b?.backgroundBuilder,
       foregroundBuilder: t < 0.5 ? a?.foregroundBuilder : b?.foregroundBuilder,
+      size: t < 0.5 ? a?.size : b?.size,
+      iconButtonWidth: t < 0.5 ? a?.iconButtonWidth : b?.iconButtonWidth,
     );
   }
 }

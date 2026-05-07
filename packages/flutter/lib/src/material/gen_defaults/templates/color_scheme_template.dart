@@ -8,7 +8,7 @@ import '../data/color_dark_high_contrast.dart';
 import '../data/color_dark_medium_contrast.dart';
 import '../data/color_light_high_contrast.dart';
 import '../data/color_light_medium_contrast.dart';
-import 'token_template.dart';
+import 'template.dart';
 
 class ColorSchemeTemplate extends TokenTemplate {
   const ColorSchemeTemplate(super.blockName, super.fileName);
