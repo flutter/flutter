@@ -20,6 +20,7 @@ workspace:
   - dev/devicelab
   - dev/forbidden_from_release_tests
   - dev/integration_tests/android_engine_test
+  - dev/integration_tests/android_hardware_smoke_test
   - dev/integration_tests/android_semantics_testing
   - dev/integration_tests/android_verified_input
   - dev/integration_tests/android_views
