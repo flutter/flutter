@@ -77,7 +77,7 @@ class SimpleBuilderTableView extends TwoDimensionalScrollView {
     super.mainAxis = Axis.vertical,
     super.verticalDetails = const ScrollableDetails.vertical(),
     super.horizontalDetails = const ScrollableDetails.horizontal(),
-    required TwoDimensionalChildBuilderDelegate delegate,
+    required TwoDimensionalChildBuilderDelegate super.delegate,
     super.cacheExtent,
     super.cacheExtentStyle,
     super.diagonalDragBehavior = DiagonalDragBehavior.none,
@@ -89,7 +89,7 @@ class SimpleBuilderTableView extends TwoDimensionalScrollView {
     this.forgetToLayoutChild = false,
     this.setLayoutOffset = true,
     super.hitTestBehavior,
-  }) : super(delegate: delegate);
+  });
 
   // Piped through for testing in RenderTwoDimensionalViewport
   final bool useCacheExtent;
@@ -128,7 +128,7 @@ class SimpleBuilderTableViewport extends TwoDimensionalViewport {
     required super.verticalAxisDirection,
     required super.horizontalOffset,
     required super.horizontalAxisDirection,
-    required TwoDimensionalChildBuilderDelegate delegate,
+    required TwoDimensionalChildBuilderDelegate super.delegate,
     required super.mainAxis,
     super.cacheExtent,
     super.cacheExtentStyle,
@@ -137,7 +137,7 @@ class SimpleBuilderTableViewport extends TwoDimensionalViewport {
     this.applyDimensions = true,
     this.forgetToLayoutChild = false,
     this.setLayoutOffset = true,
-  }) : super(delegate: delegate);
+  });
 
   // Piped through for testing in RenderTwoDimensionalViewport
   final bool useCacheExtent;
@@ -186,7 +186,7 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
     required super.horizontalAxisDirection,
     required super.verticalOffset,
     required super.verticalAxisDirection,
-    required TwoDimensionalChildBuilderDelegate delegate,
+    required TwoDimensionalChildBuilderDelegate super.delegate,
     required super.mainAxis,
     required super.childManager,
     super.cacheExtent,
@@ -196,7 +196,7 @@ class RenderSimpleBuilderTableViewport extends RenderTwoDimensionalViewport {
     this.setLayoutOffset = true,
     this.useCacheExtent = false,
     this.forgetToLayoutChild = false,
-  }) : super(delegate: delegate);
+  });
 
   // These are to test conditions to validate subclass implementations after
   // layoutChildSequence
@@ -378,12 +378,12 @@ class SimpleListTableViewport extends TwoDimensionalViewport {
     required super.verticalAxisDirection,
     required super.horizontalOffset,
     required super.horizontalAxisDirection,
-    required TwoDimensionalChildListDelegate delegate,
+    required TwoDimensionalChildListDelegate super.delegate,
     required super.mainAxis,
     super.cacheExtent,
     super.cacheExtentStyle,
     super.clipBehavior = Clip.hardEdge,
-  }) : super(delegate: delegate);
+  });
 
   @override
   RenderTwoDimensionalViewport createRenderObject(BuildContext context) {
@@ -422,13 +422,13 @@ class RenderSimpleListTableViewport extends RenderTwoDimensionalViewport {
     required super.horizontalAxisDirection,
     required super.verticalOffset,
     required super.verticalAxisDirection,
-    required TwoDimensionalChildListDelegate delegate,
+    required TwoDimensionalChildListDelegate super.delegate,
     required super.mainAxis,
     required super.childManager,
     super.cacheExtent,
     super.cacheExtentStyle,
     super.clipBehavior = Clip.hardEdge,
-  }) : super(delegate: delegate);
+  });
 
   @override
   void layoutChildSequence() {

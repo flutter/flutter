@@ -2491,9 +2491,9 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
   const _DeferredLayout({
     // This widget must not be given a key: we currently do not support
     // reparenting between the overlayChild and child.
-    required Widget child,
+    required Widget super.child,
     this.childIdentifier,
-  }) : super(child: child);
+  });
 
   final Object? childIdentifier;
 
