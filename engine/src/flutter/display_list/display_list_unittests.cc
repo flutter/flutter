@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include "display_list/geometry/dl_geometry_types.h"
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
@@ -5078,6 +5079,114 @@ TEST_F(DisplayListTest, DrawOvalRRectPromoteToDrawOval) {
 
   DisplayListBuilder expected;
   expected.DrawOval(rect, DlPaint());
+  auto expect_dl = expected.Build();
+
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+}
+
+// DrawDiffRoundRect with an equivalent RoundRect draws the RoundRect.
+TEST_F(DisplayListTest, DrawDiffRoundRectPromoteToDrawRoundRect) {
+  DlRect outer_rect = DlRect::MakeLTRB(10.0f, 10.0f, 110.0f, 110.0f);
+  DlRoundingRadii outer_radii = {DlSize(5.0f), DlSize(10.0f), DlSize(20.0f),
+                                 DlSize(50.0f)};
+  DlRoundRect outer_rrect = DlRoundRect::MakeRectRadii(outer_rect, outer_radii);
+
+  DlScalar inner_inset = 5.0f;
+  DlRect inner_rect = outer_rect.Expand(-inner_inset);
+  DlRoundingRadii inner_radii = {
+      .top_left = DlSize(outer_radii.top_left.width - inner_inset),
+      .top_right = DlSize(outer_radii.top_right.width - inner_inset),
+      .bottom_left = DlSize(outer_radii.bottom_left.width - inner_inset),
+      .bottom_right = DlSize(outer_radii.bottom_right.width - inner_inset)};
+  DlRoundRect inner_rrect = DlRoundRect::MakeRectRadii(inner_rect, inner_radii);
+
+  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kFill);
+
+  DisplayListBuilder builder;
+  builder.DrawDiffRoundRect(outer_rrect, inner_rrect, paint);
+  auto dl = builder.Build();
+
+  DlScalar expected_stroke_width = inner_inset;
+  DlScalar half_width = expected_stroke_width * 0.5f;
+  DlRoundRect expected_round_rect = DlRoundRect::MakeRectRadii(
+      inner_rect.Expand(half_width),
+      {.top_left = DlSize(inner_radii.top_left.width + half_width),
+       .top_right = DlSize(inner_radii.top_right.width + half_width),
+       .bottom_left = DlSize(inner_radii.bottom_left.width + half_width),
+       .bottom_right = DlSize(inner_radii.bottom_right.width + half_width)});
+  DlPaint expected_paint = DlPaint()
+                               .setDrawStyle(DlDrawStyle::kStroke)
+                               .setStrokeWidth(expected_stroke_width);
+
+  DisplayListBuilder expected;
+  expected.DrawRoundRect(expected_round_rect, expected_paint);
+  auto expect_dl = expected.Build();
+
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+}
+
+// DrawDiffRoundRect with stroked paint does not have an equivalent RoundRect,
+// and draws the DiffRoundRect.
+TEST_F(DisplayListTest, DrawStrokedDiffRoundRectDoesNotPromoteToDrawRoundRect) {
+  // All values match the above
+  // `DrawDiffRoundRectPromoteToDrawRoundRect` test, except with a stroke paint.
+  DlRect outer_rect = DlRect::MakeLTRB(10.0f, 10.0f, 110.0f, 110.0f);
+  DlRoundingRadii outer_radii = {DlSize(5.0f), DlSize(10.0f), DlSize(20.0f),
+                                 DlSize(50.0f)};
+  DlRoundRect outer_rrect = DlRoundRect::MakeRectRadii(outer_rect, outer_radii);
+
+  DlScalar inner_inset = 5.0f;
+  DlRect inner_rect = outer_rect.Expand(-inner_inset);
+  DlRoundingRadii inner_radii = {
+      .top_left = DlSize(outer_radii.top_left.width - inner_inset),
+      .top_right = DlSize(outer_radii.top_right.width - inner_inset),
+      .bottom_left = DlSize(outer_radii.bottom_left.width - inner_inset),
+      .bottom_right = DlSize(outer_radii.bottom_right.width - inner_inset)};
+  DlRoundRect inner_rrect = DlRoundRect::MakeRectRadii(inner_rect, inner_radii);
+
+  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kFill);
+
+  DisplayListBuilder builder;
+  builder.DrawDiffRoundRect(outer_rrect, inner_rrect, paint);
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawDiffRoundRect(outer_rrect, inner_rrect, paint);
+  auto expect_dl = expected.Build();
+
+  ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
+}
+
+// DrawDiffRoundRect with unequal side widths does not have an equivalent
+// RoundRect, and draws the DiffRoundRect.
+TEST_F(DisplayListTest,
+       DrawDiffRoundRectWithUnequalSidesDoesNotPromoteToDrawRoundRect) {
+  // All values match the above
+  // `DrawDiffRoundRectPromoteToDrawRoundRect` test, except the inner rect is
+  // inset by a different amount vertically and horizontally.
+  DlRect outer_rect = DlRect::MakeLTRB(10.0f, 10.0f, 110.0f, 110.0f);
+  DlRoundingRadii outer_radii = {DlSize(5.0f), DlSize(10.0f), DlSize(20.0f),
+                                 DlSize(50.0f)};
+  DlRoundRect outer_rrect = DlRoundRect::MakeRectRadii(outer_rect, outer_radii);
+
+  DlScalar inner_inset_x = 5.0f;
+  DlScalar inner_inset_y = 4.0f;
+  DlRect inner_rect = outer_rect.Expand(-inner_inset_x, -inner_inset_y);
+  DlRoundingRadii inner_radii = {
+      .top_left = DlSize(outer_radii.top_left.width - inner_inset_x),
+      .top_right = DlSize(outer_radii.top_right.width - inner_inset_x),
+      .bottom_left = DlSize(outer_radii.bottom_left.width - inner_inset_x),
+      .bottom_right = DlSize(outer_radii.bottom_right.width - inner_inset_x)};
+  DlRoundRect inner_rrect = DlRoundRect::MakeRectRadii(inner_rect, inner_radii);
+
+  DlPaint paint = DlPaint().setDrawStyle(DlDrawStyle::kFill);
+
+  DisplayListBuilder builder;
+  builder.DrawDiffRoundRect(outer_rrect, inner_rrect, paint);
+  auto dl = builder.Build();
+
+  DisplayListBuilder expected;
+  expected.DrawDiffRoundRect(outer_rrect, inner_rrect, paint);
   auto expect_dl = expected.Build();
 
   ASSERT_TRUE(DisplayListsEQ_Verbose(dl, expect_dl));
