@@ -124,7 +124,6 @@ class TextWrapper {
     if (!line.reachedMaxLines()) {
       // Special case: we have only whitespaces in the whole paragraph
       if (_layout.lines.isEmpty && line.hasOnlyWhitespaces) {
-        line._maxIntrinsicWidth = line._widthWhitespaces;
         line._minIntrinsicWidth = line._widthWhitespaces;
         line._longestLine = line._widthWhitespaces;
         line._maxLineWidthWithTrailingSpaces = line._widthWhitespaces;
@@ -150,11 +149,25 @@ class TextWrapper {
       line._top += _layout.addLine(emptyClusterRange, emptyClusterRange, false, line._top);
     }
 
-    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, line._maxIntrinsicWidth);
     _minIntrinsicWidth = math.max(_minIntrinsicWidth, line._minIntrinsicWidth);
     _longestLine = math.max(_longestLine, line._longestLine);
     _maxLineWidthWithTrailingSpaces = math.max(_longestLine, line._maxLineWidthWithTrailingSpaces);
     _height = line._top;
+
+    _calculateMaxIntrinsicWidth();
+  }
+
+  void _calculateMaxIntrinsicWidth() {
+    var currentWidth = 0.0;
+    for (final WebCluster cluster in _layout.allClusters) {
+      if (_isHardLineBreak(cluster)) {
+        _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, currentWidth);
+        currentWidth = 0.0;
+      } else {
+        currentWidth += cluster.advance.width;
+      }
+    }
+    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, currentWidth);
   }
 }
 
@@ -185,9 +198,6 @@ class _LineBuilder {
 
   double get minIntrinsicWidth => _minIntrinsicWidth;
   double _minIntrinsicWidth = 0.0;
-
-  double get maxIntrinsicWidth => _maxIntrinsicWidth;
-  double _maxIntrinsicWidth = 0.0;
 
   double get longestLine => _longestLine;
   double _longestLine = 0.0;
@@ -331,8 +341,6 @@ class _LineBuilder {
   ///
   /// Returns the height of the line.
   double build(bool hardLineBreak) {
-    // Update max intrinsic width.
-    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthConsumedText);
     _longestLine = math.max(_longestLine, _widthConsumedText);
     _maxLineWidthWithTrailingSpaces = math.max(
       _maxLineWidthWithTrailingSpaces,
