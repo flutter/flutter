@@ -137,6 +137,7 @@ test_fixtures("file_fixtures") {
     "//flutter/txt/third_party/fonts/NotoColorEmoji.ttf",
     "//flutter/txt/third_party/fonts/Roboto-Medium.ttf",
     "//flutter/txt/third_party/fonts/Roboto-Regular.ttf",
+    "//flutter/txt/third_party/fonts/RobotoSlab-VariableFont_wght.ttf",
     "airplane.jpg",
     "array_assignment.frag",
     "array_initializer_with_constants.frag",
