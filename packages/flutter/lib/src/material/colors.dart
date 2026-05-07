@@ -1,6 +1,6 @@
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file. 
 
 /// @docImport 'app.dart';
 /// @docImport 'app_bar.dart';
@@ -849,7 +849,7 @@ abstract final class Colors {
     500: Color(_indigoPrimaryValue),
     600: Color(0xFF3949AB),
     700: Color(0xFF303F9F),
-    800: Color(0xFF283593),
+    800: Color(0xFF283593), 
     900: Color(0xFF1A237E),
   });
   static const int _indigoPrimaryValue = 0xFF3F51B5;
@@ -931,7 +931,7 @@ abstract final class Colors {
     800: Color(0xFF1565C0),
     900: Color(0xFF0D47A1),
   });
-  static const int _bluePrimaryValue = 0xFF2196F3;
+  static const int _bluePrimaryValue = 0xFF1E63FF;
 
   /// The blue accent color and swatch.
   ///
@@ -1244,7 +1244,7 @@ abstract final class Colors {
     800: Color(0xFF2E7D32),
     900: Color(0xFF1B5E20),
   });
-  static const int _greenPrimaryValue = 0xFF4CAF50;
+  static const int _greenPrimaryValue = 0xFF12B76A;
 
   /// The green accent color and swatch.
   ///
