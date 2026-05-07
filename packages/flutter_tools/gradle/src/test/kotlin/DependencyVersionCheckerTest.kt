@@ -61,6 +61,25 @@ private val SUPPORTED_SDK_VERSION: MinSdkVersion = MinSdkVersion("release", 30)
 
 class DependencyVersionCheckerTest {
     @Test
+    fun `Template versions are considered supported`() {
+        val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions()
+
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
+        val mockLogger = mockProject.logger
+        every { mockLogger.error(any()) } returns Unit
+        every { mockLogger.warn(any()) } returns Unit
+
+        DependencyVersionChecker.checkDependencyVersions(mockProject)
+
+        // Verify that no error or warning messages were logged.
+        verify(exactly = 0) { mockLogger.error(any()) }
+        verify(exactly = 0) { mockLogger.warn(any()) }
+        // Verify that the project was not marked as being out of support range.
+        verify { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) }
+    }
+
+    @Test
     fun `AGP version in error range results in DependencyValidationException`() {
         val exampleErrorAgpVersion = AndroidPluginVersion(8, 5, 0)
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleErrorAgpVersion)

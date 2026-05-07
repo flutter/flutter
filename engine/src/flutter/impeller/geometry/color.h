@@ -261,6 +261,11 @@ struct Color {
     return result[3] << 24 | result[0] << 16 | result[1] << 8 | result[2];
   }
 
+  template <typename H>
+  friend H AbslHashValue(H h, const Color& c) {
+    return H::combine(std::move(h), c.ToARGB());
+  }
+
   static constexpr Color White() { return {1.0f, 1.0f, 1.0f, 1.0f}; }
 
   static constexpr Color Black() { return {0.0f, 0.0f, 0.0f, 1.0f}; }

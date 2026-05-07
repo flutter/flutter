@@ -30,7 +30,7 @@ class UberSDFGeometry final : public Geometry {
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
   // |Geometry|
-  bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+  bool CoversArea(const Matrix& transform, const IRect& rect) const override;
 
   // |Geometry|
   bool IsAxisAlignedRect() const override;
