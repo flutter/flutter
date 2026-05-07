@@ -31,7 +31,10 @@ class _TooltipButtonState extends State<TooltipButton> {
     super.dispose();
   }
 
-  void _onPressed(WindowRegistry windowRegistry, WindowSettings windowSettings) {
+  void _onPressed(
+    WindowRegistry windowRegistry,
+    WindowSettings windowSettings,
+  ) {
     // Toggle tooltip visibility.
     if (_tooltipEntry != null) {
       _tooltipEntry!.controller.destroy();
