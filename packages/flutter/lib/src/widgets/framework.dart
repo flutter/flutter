@@ -2413,11 +2413,19 @@ abstract class BuildContext {
   /// [Theme.of].
   ///
   /// This method should not be called from widget constructors or from
-  /// [State.initState] methods. While calling this method registers the
-  /// [BuildContext] for future rebuilds, those methods are only executed once.
-  /// If the inherited value changes, the widget will rebuild, but any logic
-  /// or variables initialized inside the constructor or [State.initState]
-  /// will not execute again, leaving the widget with stale data.
+  /// [State.initState] methods. While calling this method effectively registers
+  /// the [BuildContext] as a dependent for future rebuilds, the constructor and
+  /// [State.initState] are lifecycle-locked and only execute once during the
+  /// initial creation of the element.
+  ///
+  /// If an inherited value changes later, the framework will correctly trigger
+  /// the [State.build] method to run again, but it cannot re-run the
+  /// constructor or [State.initState]. Consequently, if any internal variables,
+  /// controllers, or side effects were initialized using a "snapshot" of the
+  /// inherited value in those one-time methods, they will retain their original,
+  /// now-obsolete values. This leads to a state desynchronization where the
+  /// widget's [State.build] method might be using updated data while its
+  /// internal logic remains bound to stale data captured during [State.initState].
   ///
   /// To ensure the widget stays in sync, call this (directly or indirectly)
   /// from build methods, layout and paint callbacks, or from [State.didChangeDependencies].
