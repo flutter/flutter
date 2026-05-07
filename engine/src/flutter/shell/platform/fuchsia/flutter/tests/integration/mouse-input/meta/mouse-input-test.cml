@@ -67,12 +67,8 @@
     facets: {
         "fuchsia.test": {
             "deprecated-allowed-packages": [
-                "child-view",
-                "cursor",
                 "flatland-scene-manager-test-ui-stack",
-                "mouse-input-view",
-                "test_manager",
-                "test-ui-stack",
+                "test_manager"
             ],
         },
     },
