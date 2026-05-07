@@ -1462,6 +1462,54 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
+  /// A runner-specific hook to initialize the asset directory path on the device's VM Service.
+  /// Native runners override this to call setAssetDirectory; Web runners keep it as a no-op.
+  @protected
+  Future<void> confirmAssetDirectory(FlutterDevice device, List<FlutterView> views) async {}
+
+  /// A runner-specific hook to reload font manifests.
+  /// Native runners override this to call reloadAssetFonts; Web runners keep it as a no-op.
+  @protected
+  Future<void> reloadFonts(FlutterDevice device, FlutterView view) async {}
+
+  Future<void> evictDirtyAssets() async {
+    final futures = <Future<void>>[];
+    for (final FlutterDevice? device in flutterDevices) {
+      if (device?.devFS == null) {
+        continue;
+      }
+      if (device!.devFS!.assetPathsToEvict.isEmpty && device.devFS!.shaderPathsToEvict.isEmpty) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
+      if (views.isEmpty || views.first.uiIsolate == null) {
+        continue;
+      }
+
+      // 1. Delegate platform-specific asset directory setup to the subclass!
+      await confirmAssetDirectory(device, views);
+
+      // 2. Delegate platform-specific font manifest reloading to the subclass!
+      await reloadFonts(device, views.first);
+
+      // 3. Perform the standard, cross-platform eviction calls!
+      for (final String assetPath in device.devFS!.assetPathsToEvict) {
+        futures.add(
+          device.vmService!.flutterEvictAsset(assetPath, isolateId: views.first.uiIsolate!.id!),
+        );
+      }
+      for (final String assetPath in device.devFS!.shaderPathsToEvict) {
+        futures.add(
+          device.vmService!.flutterEvictShader(assetPath, isolateId: views.first.uiIsolate!.id!),
+        );
+      }
+
+      device.devFS!.assetPathsToEvict.clear();
+      device.devFS!.shaderPathsToEvict.clear();
+    }
+    await Future.wait<void>(futures);
+  }
+
   @override
   Future<void> cleanupAfterSignal();
 
