@@ -7,6 +7,7 @@ library;
 
 import 'dart:async';
 
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
@@ -95,6 +96,7 @@ return False
     required int appProcessId,
     required LLDBLogForwarder lldbLogForwarder,
     required BuildMode mode,
+    required Directory buildDirectory,
   }) async {
     Timer? timer;
     try {
@@ -118,8 +120,10 @@ return False
         return false;
       }
       await _lldbProcess?.stdinWriteln('settings set symbols.load-on-demand true');
-      // await _lldbProcess?.stdinWriteln('settings set symbols.enable-lldb-index-cache true');
-      // await _lldbProcess?.stdinWriteln('settings set symbols.lldb-index-cache-path ~/.lldb/index-cache');
+      await _lldbProcess?.stdinWriteln('settings set symbols.enable-lldb-index-cache true');
+      await _lldbProcess?.stdinWriteln(
+        'settings set symbols.lldb-index-cache-path ${buildDirectory.childDirectory('lldb/index-cache').absolute.path}',
+      );
       await _selectDevice(deviceId);
       if (mode == BuildMode.debug) {
         await _setBreakpoint();

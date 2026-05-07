@@ -148,6 +148,7 @@ class IOSCoreDeviceLauncher {
       appProcessId: processId,
       lldbLogForwarder: lldbLogForwarder,
       mode: mode,
+      buildDirectory: _fileSystem.directory(getIosBuildDirectory()),
     );
 
     // If it fails to attach with lldb, kill the launched process so it doesn't stay hanging.
