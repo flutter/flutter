@@ -40,8 +40,7 @@ class _DragHandler extends Drag {
 class _IgnoreDrag extends Drag {}
 
 class _PointDemoPainter extends CustomPainter {
-  _PointDemoPainter({Animation<double>? super.repaint, required this.arc})
-    : _repaint = repaint;
+  _PointDemoPainter({Animation<double>? super.repaint, required this.arc}) : _repaint = repaint;
 
   final MaterialPointArcTween arc;
   final Animation<double>? _repaint;
