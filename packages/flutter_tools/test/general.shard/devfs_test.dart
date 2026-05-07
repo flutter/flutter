@@ -945,7 +945,7 @@ void main() {
       'DevFS.updateBundle ensures all side effects are completed before returning (regression test for race condition)',
       () async {
         final FileSystem fileSystem = MemoryFileSystem.test();
-        final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
+        final dirtyEntries = <Uri, DevFSContent>{};
         final assetBundle = FakeBundle();
         assetBundle.entries['shader.frag'] = AssetBundleEntry(
           DevFSStringContent('source'),
@@ -956,7 +956,7 @@ void main() {
         final shaderCompleter = Completer<DevFSContent>();
         final shaderCompiler = DelayedFakeShaderCompiler(shaderCompleter.future);
 
-        final DevelopmentAssetTransformer assetTransformer = DevelopmentAssetTransformer(
+        final assetTransformer = DevelopmentAssetTransformer(
           fileSystem: fileSystem,
           transformer: AssetTransformer(
             processManager: FakeProcessManager.any(),
@@ -974,11 +974,11 @@ void main() {
           assetTransformer: assetTransformer,
           shaderCompiler: shaderCompiler,
           fileSystem: fileSystem,
-          logger: BufferLogger.test(),
           rootDirectoryPath: '/',
           assetPathsToEvict: <String>{},
           shaderPathsToEvict: <String>{},
           bundleFirstUpload: true,
+          syncAllAssetsOnFirstUpload: true,
         );
 
         // Complete the shader compilation.

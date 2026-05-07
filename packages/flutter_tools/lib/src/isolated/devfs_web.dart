@@ -367,25 +367,26 @@ class WebDevFS implements DevFS {
       }
       assetDir.createSync(recursive: true);
 
-      final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
-      final int bundleSyncedBytes = await DevFS.updateBundle(
-        bundle: bundle,
-        dirtyEntries: dirtyEntries,
-        assetDirectory: assetDirectory,
-        assetTransformer: _assetTransformer,
-        shaderCompiler: shaderCompiler,
-        fileSystem: fileSystem,
-        logger: logger,
-        rootDirectoryPath: rootDirectory.path,
-        assetPathsToEvict: <String>{}, // Web doesn't evict regular assets
-        shaderPathsToEvict: _shaderPathsToEvict,
-        bundleFirstUpload: bundleFirstUpload,
-        onFontManifestUpdated: () => didUpdateFontManifest = true,
-      );
-      if (bundleSyncedBytes < 0) {
+      final dirtyEntries = <Uri, DevFSContent>{};
+      try {
+        final int bundleSyncedBytes = await DevFS.updateBundle(
+          bundle: bundle,
+          dirtyEntries: dirtyEntries,
+          assetDirectory: assetDirectory,
+          assetTransformer: _assetTransformer,
+          shaderCompiler: shaderCompiler,
+          fileSystem: fileSystem,
+          rootDirectoryPath: rootDirectory.path,
+          assetPathsToEvict: <String>{}, // Web doesn't evict regular assets
+          shaderPathsToEvict: _shaderPathsToEvict,
+          bundleFirstUpload: bundleFirstUpload,
+          syncAllAssetsOnFirstUpload: true,
+          onFontManifestUpdated: () => didUpdateFontManifest = true,
+        );
+        syncedBytes += bundleSyncedBytes;
+      } on Exception {
         return UpdateFSReport();
       }
-      syncedBytes += bundleSyncedBytes;
       if (dirtyEntries.isNotEmpty) {
         await LocalDevFSWriter(
           fileSystem: fileSystem,
