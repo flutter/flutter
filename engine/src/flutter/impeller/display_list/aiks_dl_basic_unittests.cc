@@ -2630,5 +2630,45 @@ TEST_P(AiksTest, CanRenderTransformedRoundSuperellipse) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CompareAntiAliasAndNonAntiAlias) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kWhite());
+
+  DlRect bounds = DlRect::MakeXYWH(75, 75, 50, 50);
+
+  // --- Left Half: Zoom-in on the top-left corner WITH anti-aliasing (SDF) ---
+  DlPaint layer_paint_left;
+  layer_paint_left.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({200, 300}) * DlMatrix::MakeScale({8, 8, 1}) *
+          DlMatrix::MakeTranslation({-100, -100}),
+      DlImageSampling::kNearestNeighbor));
+  builder.SaveLayer(bounds, &layer_paint_left);
+
+  paint.setAntiAlias(true);
+  builder.DrawRoundRect(
+      DlRoundRect::MakeRectRadius(DlRect::MakeXYWH(100, 100, 200, 200), 50.0f),
+      paint);
+  builder.Restore();
+
+  // --- Right Half: Zoom-in on the top-left corner WITHOUT anti-aliasing ---
+  DlPaint layer_paint_right;
+  layer_paint_right.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({600, 300}) * DlMatrix::MakeScale({8, 8, 1}) *
+          DlMatrix::MakeTranslation({-100, -100}),
+      DlImageSampling::kNearestNeighbor));
+  builder.SaveLayer(bounds, &layer_paint_right);
+
+  paint.setAntiAlias(false);
+  builder.DrawRoundRect(
+      DlRoundRect::MakeRectRadius(DlRect::MakeXYWH(100, 100, 200, 200), 50.0f),
+      paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

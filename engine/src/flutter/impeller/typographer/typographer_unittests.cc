@@ -40,6 +40,7 @@ static std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
   RenderableText render_frame{
       .text_frame = frame,
       .origin_transform = transform,
+      .properties = GlyphProperties{},
   };
   return typographer_context->CreateGlyphAtlas(context, type, data_host_buffer,
                                                atlas_context, {render_frame});
@@ -53,7 +54,7 @@ static std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
     const Matrix& transform,
     const std::shared_ptr<GlyphAtlasContext>& atlas_context,
     const std::vector<std::shared_ptr<TextFrame>>& frames,
-    const std::vector<std::optional<GlyphProperties>>& properties) {
+    const std::vector<GlyphProperties>& properties) {
   size_t offset = 0;
   std::vector<RenderableText> render_frames;
   render_frames.reserve(frames.size());
@@ -327,9 +328,9 @@ TEST_P(TypographerTest, GlyphColorIsPartOfCacheKey) {
       SkTextBlob::MakeFromString("😂", emoji_font));
   auto frame_2 = MakeTextFrameFromTextBlobSkia(
       SkTextBlob::MakeFromString("😂", emoji_font));
-  std::vector<std::optional<GlyphProperties>> properties = {
-      GlyphProperties{.color = Color::Red()},
-      GlyphProperties{.color = Color::Blue()},
+  std::vector<GlyphProperties> properties = {
+      GlyphProperties{.tone_or_color = Color::Red()},
+      GlyphProperties{.tone_or_color = Color::Blue()},
   };
 
   auto next_atlas =
@@ -359,7 +360,7 @@ TEST_P(TypographerTest, GlyphColorIsIgnoredForNonEmojiFonts) {
       MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("A", sk_font));
   auto frame_2 =
       MakeTextFrameFromTextBlobSkia(SkTextBlob::MakeFromString("A", sk_font));
-  std::vector<std::optional<GlyphProperties>> properties = {
+  std::vector<GlyphProperties> properties = {
       GlyphProperties{},
       GlyphProperties{},
   };
@@ -370,6 +371,42 @@ TEST_P(TypographerTest, GlyphColorIsIgnoredForNonEmojiFonts) {
                        {frame, frame_2}, properties);
 
   EXPECT_EQ(next_atlas->GetGlyphCount(), 1u);
+}
+
+TEST_P(TypographerTest, GlyphIsLightIsPartOfCacheKey) {
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+  auto blob1 = SkTextBlob::MakeFromString("A", sk_font);
+  auto blob2 = SkTextBlob::MakeFromString("A", sk_font);
+  auto frame1 = MakeTextFrameFromTextBlobSkia(blob1);
+  auto frame2 = MakeTextFrameFromTextBlobSkia(blob2);
+
+  std::vector<GlyphProperties> properties = {
+      GlyphProperties{},
+      GlyphProperties{},
+  };
+  // One light color, one dark color
+  properties[0].tone_or_color = GlyphProperties::ComputeTone(Color::Beige());
+  properties[1].tone_or_color = GlyphProperties::ComputeTone(Color::Crimson());
+
+  auto next_atlas =
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                       GlyphAtlas::Type::kAlphaBitmap, Matrix(), atlas_context,
+                       {frame1, frame2}, properties);
+
+#if defined(FML_OS_MACOSX)
+  // On Apple platforms, they should be separated into 2 entries
+  EXPECT_EQ(next_atlas->GetGlyphCount(), 2u);
+#else
+  // On other platforms, both are classified as "dark" (false) and share 1 entry
+  EXPECT_EQ(next_atlas->GetGlyphCount(), 1u);
+#endif
 }
 
 TEST_P(TypographerTest, RectanglePackerAddsNonoverlapingRectangles) {
@@ -558,8 +595,50 @@ TEST_P(TypographerTest, ColorBitmapAtlasSkiaBitmapIsRGBA8888) {
                        GlyphAtlas::Type::kColorBitmap, Matrix(), atlas_context,
                        MakeTextFrameFromTextBlobSkia(blob));
 
-  SkImageInfo image_info =
-      TypographerContextSkia::GetImageInfo(*atlas, Size{100, 100});
+  SkImageInfo image_info = TypographerContextSkia::GetImageInfo(
+      *atlas, Size{100, 100}, /*support_light_glyphs=*/false);
+  EXPECT_EQ(image_info.colorType(), kRGBA_8888_SkColorType);
+}
+
+TEST_P(TypographerTest, AlphaBitmapAtlasSkiaBitmapIsA8) {
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  ASSERT_TRUE(context && context->IsValid());
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+  auto blob = SkTextBlob::MakeFromString("A", sk_font);
+  ASSERT_TRUE(blob);
+  auto atlas =
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                       GlyphAtlas::Type::kAlphaBitmap, Matrix(), atlas_context,
+                       MakeTextFrameFromTextBlobSkia(blob));
+
+  SkImageInfo image_info = TypographerContextSkia::GetImageInfo(
+      *atlas, Size{100, 100}, /*support_light_glyphs=*/false);
+  EXPECT_EQ(image_info.colorType(), kAlpha_8_SkColorType);
+}
+
+TEST_P(TypographerTest, AlphaBitmapAtlasWithLightGlyphsSkiaBitmapIsRGBA8888) {
+  auto context = TypographerContextSkia::Make();
+  auto atlas_context =
+      context->CreateGlyphAtlasContext(GlyphAtlas::Type::kAlphaBitmap);
+  auto data_host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
+  ASSERT_TRUE(context && context->IsValid());
+  SkFont sk_font = flutter::testing::CreateTestFontOfSize(12);
+  auto blob = SkTextBlob::MakeFromString("A", sk_font);
+  ASSERT_TRUE(blob);
+  auto atlas =
+      CreateGlyphAtlas(*GetContext(), context.get(), *data_host_buffer,
+                       GlyphAtlas::Type::kAlphaBitmap, Matrix(), atlas_context,
+                       MakeTextFrameFromTextBlobSkia(blob));
+
+  SkImageInfo image_info = TypographerContextSkia::GetImageInfo(
+      *atlas, Size{100, 100}, /*support_light_glyphs=*/true);
   EXPECT_EQ(image_info.colorType(), kRGBA_8888_SkColorType);
 }
 
