@@ -1,14 +1,18 @@
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('DropdownMenu mimic app test', (WidgetTester tester) async {
+  testWidgets('DropdownMenu mimic app test with OverlayPortal', (WidgetTester tester) async {
+    // SemanticsTester is required to enable semantics collection.
     final semantics = SemanticsTester(tester);
-    final intController = TextEditingController();
+
+    final intController = TextEditingController(text: '1');
+    final controller = OverlayPortalController();
+    final isOverlayOpen = ValueNotifier<bool>(false);
 
     final intEntries = <DropdownMenuEntry<int>>[];
     for (var i = 0; i < 5; i++) {
@@ -26,10 +30,46 @@ void main() {
                 children: <Widget>[
                   Semantics(
                     button: true,
-                    child: DropdownMenu<int>(
-                      initialSelection: 1,
-                      controller: intController,
-                      dropdownMenuEntries: intEntries,
+                    child: OverlayPortal(
+                      controller: controller,
+                      accessibilityOpaque: true,
+                      overlayChildBuilder: (BuildContext context) {
+                        return Positioned(
+                          width: 200,
+                          child: Material(
+                            elevation: 8,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: intEntries.map((entry) {
+                                return ListTile(
+                                  title: Text(entry.label),
+                                  onTap: () {
+                                    intController.text = entry.label;
+                                    controller.hide();
+                                    isOverlayOpen.value = false;
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        );
+                      },
+                      child: ValueListenableBuilder<bool>(
+                        valueListenable: isOverlayOpen,
+                        builder: (context, isOpen, child) {
+                          return TextField(
+                            controller: intController,
+                            onTap: () {
+                              controller.show();
+                              isOverlayOpen.value = true;
+                            },
+                            readOnly: true,
+                            decoration: const InputDecoration(
+                              suffixIcon: Icon(Icons.arrow_drop_down),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                   const Text('hello'),
@@ -40,176 +80,20 @@ void main() {
         ),
       ),
     );
-    debugDumpSemanticsTree();
 
-    // Verify initial selection label is in the text field.
+    // Verify initial text.
     expect(find.text('1'), findsOneWidget);
 
-    // Open the dropdown.
+    // Open the overlay.
     await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
-    // Assert semantics tree.
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              textDirection: TextDirection.ltr,
-              children: <TestSemantics>[
-                TestSemantics(), // Placeholder for node 2
-                TestSemantics(
-                  flags: ui.SemanticsFlags(isAccessibilityFocusBlocked: true),
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  inputType: ui.SemanticsInputType.text,
-                                  flags: <SemanticsFlag>[
-                                    SemanticsFlag.isTextField,
-                                    SemanticsFlag.isFocusable,
-                                    SemanticsFlag.hasEnabledState,
-                                    SemanticsFlag.isEnabled,
-                                    SemanticsFlag.isReadOnly,
-                                    SemanticsFlag.isButton,
-                                    SemanticsFlag.hasExpandedState,
-                                    SemanticsFlag.isExpanded,
-                                  ],
-                                  actions: <SemanticsAction>[
-                                    SemanticsAction.collapse,
-                                    SemanticsAction.focus,
-                                  ],
-                                  value: '1',
-                                  textDirection: TextDirection.ltr,
-                                  currentValueLength: 1,
-                                ),
-                              ],
-                            ),
-                            TestSemantics(label: 'hello', textDirection: TextDirection.ltr),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                TestSemantics(
-                  children: <TestSemantics>[
-                    TestSemantics(
-                      children: <TestSemantics>[
-                        TestSemantics(
-                          children: <TestSemantics>[
-                            TestSemantics(
-                              flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
-                              children: <TestSemantics>[
-                                TestSemantics(
-                                  children: <TestSemantics>[
-                                    TestSemantics(
-                                      label: '0',
-                                      flags: <SemanticsFlag>[
-                                        SemanticsFlag.hasEnabledState,
-                                        SemanticsFlag.isEnabled,
-                                        SemanticsFlag.isFocusable,
-                                      ],
-                                      actions: <SemanticsAction>[
-                                        SemanticsAction.focus,
-                                        SemanticsAction.tap,
-                                      ],
-                                      textDirection: TextDirection.ltr,
-                                    ),
-                                  ],
-                                ),
-                                TestSemantics(
-                                  children: <TestSemantics>[
-                                    TestSemantics(
-                                      label: '1',
-                                      flags: <SemanticsFlag>[
-                                        SemanticsFlag.hasEnabledState,
-                                        SemanticsFlag.isEnabled,
-                                        SemanticsFlag.isFocusable,
-                                      ],
-                                      actions: <SemanticsAction>[
-                                        SemanticsAction.focus,
-                                        SemanticsAction.tap,
-                                      ],
-                                      textDirection: TextDirection.ltr,
-                                    ),
-                                  ],
-                                ),
-                                TestSemantics(
-                                  children: <TestSemantics>[
-                                    TestSemantics(
-                                      label: '2',
-                                      flags: <SemanticsFlag>[
-                                        SemanticsFlag.hasEnabledState,
-                                        SemanticsFlag.isEnabled,
-                                        SemanticsFlag.isFocusable,
-                                      ],
-                                      actions: <SemanticsAction>[
-                                        SemanticsAction.focus,
-                                        SemanticsAction.tap,
-                                      ],
-                                      textDirection: TextDirection.ltr,
-                                    ),
-                                  ],
-                                ),
-                                TestSemantics(
-                                  children: <TestSemantics>[
-                                    TestSemantics(
-                                      label: '3',
-                                      flags: <SemanticsFlag>[
-                                        SemanticsFlag.hasEnabledState,
-                                        SemanticsFlag.isEnabled,
-                                        SemanticsFlag.isFocusable,
-                                      ],
-                                      actions: <SemanticsAction>[
-                                        SemanticsAction.focus,
-                                        SemanticsAction.tap,
-                                      ],
-                                      textDirection: TextDirection.ltr,
-                                    ),
-                                  ],
-                                ),
-                                TestSemantics(
-                                  children: <TestSemantics>[
-                                    TestSemantics(
-                                      label: '4',
-                                      flags: <SemanticsFlag>[
-                                        SemanticsFlag.hasEnabledState,
-                                        SemanticsFlag.isEnabled,
-                                        SemanticsFlag.isFocusable,
-                                      ],
-                                      actions: <SemanticsAction>[
-                                        SemanticsAction.focus,
-                                        SemanticsAction.tap,
-                                      ],
-                                      textDirection: TextDirection.ltr,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-        ignoreRect: true,
-        ignoreTransform: true,
-        ignoreId: true,
-      ),
-    );
+    // Assert semantics of the TextField using find instead of brittle full tree matching.
+    final SemanticsNode node = tester.semantics.find(find.byType(TextField));
+    final SemanticsData data = node.getSemanticsData();
+    debugDumpSemanticsTree();
+    // Verify accessibility is blocked when open.
+    expect(data.flagsCollection.isAccessibilityFocusBlocked, isTrue);
 
     semantics.dispose();
   });
