@@ -916,7 +916,19 @@ class StartupTest {
   final String target;
   final Map<String, String>? runEnvironment;
 
+  Future<void> disableLLDBDebugging() async {
+    final int configResult = await exec(
+      path.join(flutterDirectory.path, 'bin', 'flutter'),
+      <String>['config', '--no-enable-lldb-debugging'],
+      canFail: true,
+    );
+    if (configResult != 0) {
+      print('Failed to enable configuration.');
+    }
+  }
+
   Future<TaskResult> run() async {
+    await disableLLDBDebugging();
     return inDirectory<TaskResult>(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
