@@ -7,7 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -120,7 +119,20 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
     final box = Material.of(tester.element(find.byType(InkWell))) as RenderBox;
-    if (kIsWeb) {
+    final isSparkle =
+        Theme.of(tester.element(find.byType(InkWell))).splashFactory == InkSparkle.splashFactory;
+    if (isSparkle) {
+      expect(
+        box,
+        paints
+          ..translate(x: 0.0, y: 0.0)
+          ..save()
+          ..translate(x: 300.0, y: 270.0)
+          ..clipRRect(rrect: RRect.fromLTRBR(0.0, 0.0, 200.0, 60.0, const Radius.circular(6.0)))
+          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200, 60))
+          ..restore(),
+      );
+    } else {
       expect(
         box,
         paints
@@ -131,17 +143,6 @@ void main() {
           ..translate(x: 300.0, y: 270.0)
           ..clipRRect(rrect: RRect.fromLTRBR(0.0, 0.0, 200.0, 60.0, const Radius.circular(6.0)))
           ..circle()
-          ..restore(),
-      );
-    } else {
-      expect(
-        box,
-        paints
-          ..translate(x: 0.0, y: 0.0)
-          ..save()
-          ..translate(x: 300.0, y: 270.0)
-          ..clipRRect(rrect: RRect.fromLTRBR(0.0, 0.0, 200.0, 60.0, const Radius.circular(6.0)))
-          ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 200, 60))
           ..restore(),
       );
     }
@@ -831,6 +832,17 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
 /// in this test run.
 final Set<InteractiveInkFeatureFactory> _warmedUpFactories = <InteractiveInkFeatureFactory>{};
 
+/// The real-world delay duration used to yield execution to the engine for
+/// asynchronous shader compilation.
+///
+/// Shaders are compiled asynchronously on a background thread in the engine,
+/// which operates outside the control of the virtualized [WidgetTester] clock.
+/// Since the engine/framework have no mechanism exposing [Future] that
+/// completes when a fragment program finishes compiling, we use a relatively
+/// large real-world delay to ensure compilation completes even under heavy
+/// load on CI.
+const Duration _kShaderWarmUpDelay = Duration(milliseconds: 200);
+
 /// Warms up fragment shaders for a given [splashFactory] before running golden
 /// tests.
 ///
@@ -860,7 +872,7 @@ Future<void> _warmUpShader(WidgetTester tester, InteractiveInkFeatureFactory spl
   // Yield to the real-world event loop to allow asynchronous shader compilation
   // to complete.
   await tester.runAsync(() async {
-    await Future<void>.delayed(const Duration(milliseconds: 50));
+    await Future<void>.delayed(_kShaderWarmUpDelay);
   });
   await tester.pumpAndSettle();
   _warmedUpFactories.add(splashFactory);
