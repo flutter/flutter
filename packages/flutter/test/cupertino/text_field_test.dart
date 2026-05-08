@@ -10268,7 +10268,7 @@ void main() {
 
       // Double tapping a non-misspelled word shows the normal blue selection and
       // the selection handles.
-      expect(state.selectionOverlay, isNull);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
       await tester.tapAt(textOffsetToPosition(tester, 2));
       await tester.pump(const Duration(milliseconds: 50));
       expect(state.selectionOverlay!.handlesAreVisible, isFalse);

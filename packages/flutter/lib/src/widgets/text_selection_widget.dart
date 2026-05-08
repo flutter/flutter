@@ -41,20 +41,23 @@ class SelectionOverlayWidget extends StatefulWidget {
     required this.toolbarLayerLink,
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
-    this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
-    this.handlesVisible = false,
+    required this.isHandleShowing,
+    this.showSelectionHandles = false,
     this.toolbarVisible = false,
     this.spellCheckToolbarVisible = false,
     this.spellCheckToolbarBuilder,
-    this.magnifierVisible = false,
-    this.externalMagnifierPosition,
+    this.onMagnifierShow,
+    this.onMagnifierUpdate,
+    this.onMagnifierHide,
+    this.onDragEnd,
   });
 
   final Widget child;
   final OverlayPortalController controller;
   final GlobalKey editableKey;
   final TextSelection selection;
-  final ValueChanged<TextSelection>? onSelectionChanged;
+  final void Function({required TextSelection selection, required SelectionChangedCause? cause})?
+  onSelectionChanged;
   final WidgetBuilder? contextMenuBuilder;
   final TextSelectionDelegate selectionDelegate;
   final TextSelectionControls? selectionControls;
@@ -64,84 +67,37 @@ class SelectionOverlayWidget extends StatefulWidget {
   final LayerLink toolbarLayerLink;
   final DragStartBehavior dragStartBehavior;
   final VoidCallback? onSelectionHandleTapped;
-  final TextMagnifierConfiguration magnifierConfiguration;
-
-  /// Whether the selection handles are fully opaque.
-  ///
-  /// When this is false, the handles will be kept in the tree with opacity 0.0
-  /// rather than unmounted, so long as the portal is showing.
-  final bool handlesVisible;
-
-  /// Whether the toolbar is fully opaque.
+  final bool isHandleShowing;
+  final bool showSelectionHandles;
   final bool toolbarVisible;
-
-  /// Whether the spell check toolbar is fully opaque.
   final bool spellCheckToolbarVisible;
   final WidgetBuilder? spellCheckToolbarBuilder;
-
-  /// Whether the magnifier is fully opaque.
-  final bool magnifierVisible;
-  final Offset? externalMagnifierPosition;
+  final ValueChanged<MagnifierInfo>? onMagnifierShow;
+  final ValueChanged<MagnifierInfo>? onMagnifierUpdate;
+  final VoidCallback? onMagnifierHide;
+  final VoidCallback? onDragEnd;
 
   @override
   State<SelectionOverlayWidget> createState() => _SelectionOverlayWidgetState();
 }
 
 class _SelectionOverlayWidgetState extends State<SelectionOverlayWidget> {
-  final MagnifierController _magnifierController = MagnifierController();
-  final ValueNotifier<MagnifierInfo> _magnifierInfo = ValueNotifier<MagnifierInfo>(
-    MagnifierInfo.empty,
-  );
-
   RenderEditable? get _renderEditable =>
       widget.editableKey.currentContext?.findRenderObject() as RenderEditable?;
 
   @override
   void initState() {
     super.initState();
-    _postFrameSync();
   }
 
   @override
   void didUpdateWidget(SelectionOverlayWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _postFrameSync();
-  }
-
-  void _postFrameSync() {
-    final RenderEditable? renderEditable = _renderEditable;
-    if (renderEditable != null) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _syncMagnifierVisibility(renderEditable);
-      });
-    }
   }
 
   @override
   void dispose() {
-    _magnifierController.hide();
-    _magnifierInfo.dispose();
     super.dispose();
-  }
-
-  void _syncMagnifierVisibility(RenderEditable renderEditable) {
-    if (widget.magnifierVisible && widget.externalMagnifierPosition != null) {
-      final TextPosition position = renderEditable.getPositionForPoint(
-        widget.externalMagnifierPosition!,
-      );
-      final MagnifierInfo info = _buildMagnifier(
-        renderEditable: renderEditable,
-        globalGesturePosition: widget.externalMagnifierPosition!,
-        currentTextPosition: position,
-      );
-
-      if (_magnifierController.overlayEntry == null) {
-        _handleMagnifierShow(info);
-      } else {
-        _handleMagnifierUpdate(info);
-      }
-    }
   }
 
   MagnifierInfo _buildMagnifier({
@@ -179,33 +135,6 @@ class _SelectionOverlayWidgetState extends State<SelectionOverlayWidget> {
       caretRect: overlayCaretRect,
       currentLineBoundaries: overlayLineBoundaries,
     );
-  }
-
-  void _handleMagnifierShow(MagnifierInfo info) {
-    if (_magnifierController.overlayEntry != null) {
-      return;
-    }
-    _magnifierInfo.value = info;
-    final Widget? magnifier = widget.magnifierConfiguration.magnifierBuilder(
-      context,
-      _magnifierController,
-      _magnifierInfo,
-    );
-    if (magnifier == null) {
-      return;
-    }
-    _magnifierController.show(context: context, builder: (_) => magnifier);
-  }
-
-  void _handleMagnifierUpdate(MagnifierInfo info) {
-    if (_magnifierController.overlayEntry == null) {
-      return;
-    }
-    _magnifierInfo.value = info;
-  }
-
-  void _handleMagnifierHide() {
-    _magnifierController.hide();
   }
 
   Widget _buildToolbarWidget({
@@ -258,7 +187,8 @@ class _SelectionOverlayWidgetState extends State<SelectionOverlayWidget> {
           renderEditable.lastSecondaryTapDownPosition,
         );
       } else {
-        toolbarContent = widget.contextMenuBuilder?.call(context) ??
+        toolbarContent =
+            widget.contextMenuBuilder?.call(context) ??
             controls?.buildToolbar(
               context,
               editingRegion,
@@ -273,10 +203,7 @@ class _SelectionOverlayWidgetState extends State<SelectionOverlayWidget> {
       }
     }
 
-    return _SelectionToolbarWrapper(
-      isVisible: isVisible,
-      child: toolbarContent,
-    );
+    return _SelectionToolbarWrapper(isVisible: isVisible, child: toolbarContent);
   }
 
   Widget _buildOverlayChild(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
@@ -284,10 +211,7 @@ class _SelectionOverlayWidgetState extends State<SelectionOverlayWidget> {
     // with live Render Tree geometry.
     final RenderEditable? renderEditable = _renderEditable;
     final bool hasVisibleElement =
-        widget.handlesVisible ||
-        widget.toolbarVisible ||
-        widget.spellCheckToolbarVisible ||
-        widget.magnifierVisible;
+        widget.isHandleShowing || widget.toolbarVisible || widget.spellCheckToolbarVisible;
 
     if (renderEditable == null || !hasVisibleElement) {
       return const SizedBox.shrink();
@@ -306,12 +230,13 @@ class _SelectionOverlayWidgetState extends State<SelectionOverlayWidget> {
             startHandleLayerLink: widget.startHandleLayerLink,
             dragStartBehavior: widget.dragStartBehavior,
             onSelectionHandleTapped: widget.onSelectionHandleTapped,
-            showHandles: widget.handlesVisible,
+            handlesVisible: widget.isHandleShowing && widget.showSelectionHandles,
             onSelectionChanged: widget.onSelectionChanged,
-            onMagnifierShow: _handleMagnifierShow,
-            onMagnifierUpdate: _handleMagnifierUpdate,
-            onMagnifierHide: _handleMagnifierHide,
+            onMagnifierShow: widget.onMagnifierShow,
+            onMagnifierUpdate: widget.onMagnifierUpdate,
+            onMagnifierHide: widget.onMagnifierHide,
             buildMagnifier: _buildMagnifier,
+            onDragEnd: widget.onDragEnd,
           )
         : _RangeSelectionOverlay(
             editableKey: widget.editableKey,
@@ -324,27 +249,27 @@ class _SelectionOverlayWidgetState extends State<SelectionOverlayWidget> {
             endHandleLayerLink: widget.endHandleLayerLink,
             dragStartBehavior: widget.dragStartBehavior,
             onSelectionHandleTapped: widget.onSelectionHandleTapped,
-            showHandles: widget.handlesVisible,
+            handlesVisible: widget.isHandleShowing && widget.showSelectionHandles,
             onSelectionChanged: widget.onSelectionChanged,
-            onMagnifierShow: _handleMagnifierShow,
-            onMagnifierUpdate: _handleMagnifierUpdate,
-            onMagnifierHide: _handleMagnifierHide,
+            onMagnifierShow: widget.onMagnifierShow,
+            onMagnifierUpdate: widget.onMagnifierUpdate,
+            onMagnifierHide: widget.onMagnifierHide,
             buildMagnifier: _buildMagnifier,
+            onDragEnd: widget.onDragEnd,
           );
 
-    return SizedBox.expand(
-      child: Stack(
-        children: <Widget>[
-          handlesLayer,
-          if (widget.toolbarVisible || widget.spellCheckToolbarVisible)
-            _buildToolbarWidget(
-              context: context,
-              layoutInfo: layoutInfo,
-              renderEditable: renderEditable,
-              isVisible: true,
-            ),
-        ],
-      ),
+    return Stack(
+      fit: StackFit.expand,
+      children: <Widget>[
+        handlesLayer,
+        if (widget.toolbarVisible || widget.spellCheckToolbarVisible)
+          _buildToolbarWidget(
+            context: context,
+            layoutInfo: layoutInfo,
+            renderEditable: renderEditable,
+            isVisible: true,
+          ),
+      ],
     );
   }
 
@@ -383,12 +308,13 @@ class _CollapsedSelectionOverlay extends StatefulWidget {
     required this.startHandleLayerLink,
     required this.dragStartBehavior,
     this.onSelectionHandleTapped,
-    required this.showHandles,
+    required this.handlesVisible,
     this.onSelectionChanged,
     this.onMagnifierShow,
     this.onMagnifierUpdate,
     this.onMagnifierHide,
     required this.buildMagnifier,
+    this.onDragEnd,
   });
 
   final GlobalKey editableKey;
@@ -399,12 +325,14 @@ class _CollapsedSelectionOverlay extends StatefulWidget {
   final LayerLink startHandleLayerLink;
   final DragStartBehavior dragStartBehavior;
   final VoidCallback? onSelectionHandleTapped;
-  final bool showHandles;
-  final ValueChanged<TextSelection>? onSelectionChanged;
+  final bool handlesVisible;
+  final void Function({required TextSelection selection, required SelectionChangedCause? cause})?
+  onSelectionChanged;
   final ValueChanged<MagnifierInfo>? onMagnifierShow;
   final ValueChanged<MagnifierInfo>? onMagnifierUpdate;
   final VoidCallback? onMagnifierHide;
   final _MagnifierBuilderCallback buildMagnifier;
+  final VoidCallback? onDragEnd;
 
   @override
   State<_CollapsedSelectionOverlay> createState() => _CollapsedSelectionOverlayState();
@@ -480,12 +408,26 @@ class _CollapsedSelectionOverlayState extends State<_CollapsedSelectionOverlay> 
       ),
     );
 
-    widget.onSelectionChanged?.call(TextSelection.fromPosition(position));
+    final nextSelection = TextSelection.fromPosition(position);
+    if (nextSelection != widget.selection) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+          HapticFeedback.selectionClick();
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          break;
+      }
+    }
+    widget.onSelectionChanged?.call(selection: nextSelection, cause: SelectionChangedCause.drag);
   }
 
   void _handleDragEnd(DragEndDetails details) {
     _isDragging = false;
     widget.onMagnifierHide?.call();
+    widget.onDragEnd?.call();
   }
 
   @override
@@ -497,22 +439,27 @@ class _CollapsedSelectionOverlayState extends State<_CollapsedSelectionOverlay> 
     return Stack(
       children: <Widget>[
         Positioned.fill(
-          child: ExcludeSemantics(
-            child: _SelectionHandleOverlay(
-              type: TextSelectionHandleType.collapsed,
-              handleLayerLink: widget.startHandleLayerLink,
-              onSelectionHandleTapped: widget.onSelectionHandleTapped,
-            onSelectionHandleDragStart: _handleDragStart,
-            onSelectionHandleDragUpdate: _handleDragUpdate,
-            onSelectionHandleDragEnd: _handleDragEnd,
-            selectionControls: widget.selectionControls!,
-            handlesVisible: widget.showHandles,
-            inViewport: _renderEditable.selectionStartInViewport,
-            preferredLineHeight: _lineHeight,
-            dragStartBehavior: widget.dragStartBehavior,
+          child: TapRegion(
+            groupId: SelectableRegion,
+            child: TextFieldTapRegion(
+              child: ExcludeSemantics(
+                child: _SelectionHandleOverlay(
+                  type: TextSelectionHandleType.collapsed,
+                  handleLayerLink: widget.startHandleLayerLink,
+                  onSelectionHandleTapped: widget.onSelectionHandleTapped,
+                  onSelectionHandleDragStart: _handleDragStart,
+                  onSelectionHandleDragUpdate: _handleDragUpdate,
+                  onSelectionHandleDragEnd: _handleDragEnd,
+                  selectionControls: widget.selectionControls!,
+                  handlesVisible: widget.handlesVisible,
+                  inViewport: _renderEditable.selectionStartInViewport,
+                  preferredLineHeight: _lineHeight,
+                  dragStartBehavior: widget.dragStartBehavior,
+                ),
+              ),
+            ),
           ),
         ),
-      ),
       ],
     );
   }
@@ -530,12 +477,13 @@ class _RangeSelectionOverlay extends StatefulWidget {
     required this.endHandleLayerLink,
     required this.dragStartBehavior,
     this.onSelectionHandleTapped,
-    required this.showHandles,
+    required this.handlesVisible,
     this.onSelectionChanged,
     this.onMagnifierShow,
     this.onMagnifierUpdate,
     this.onMagnifierHide,
     required this.buildMagnifier,
+    this.onDragEnd,
   });
 
   final GlobalKey editableKey;
@@ -548,12 +496,14 @@ class _RangeSelectionOverlay extends StatefulWidget {
   final LayerLink endHandleLayerLink;
   final DragStartBehavior dragStartBehavior;
   final VoidCallback? onSelectionHandleTapped;
-  final bool showHandles;
-  final ValueChanged<TextSelection>? onSelectionChanged;
+  final bool handlesVisible;
+  final void Function({required TextSelection selection, required SelectionChangedCause? cause})?
+  onSelectionChanged;
   final ValueChanged<MagnifierInfo>? onMagnifierShow;
   final ValueChanged<MagnifierInfo>? onMagnifierUpdate;
   final VoidCallback? onMagnifierHide;
   final _MagnifierBuilderCallback buildMagnifier;
+  final VoidCallback? onDragEnd;
 
   @override
   State<_RangeSelectionOverlay> createState() => _RangeSelectionOverlayState();
@@ -752,7 +702,19 @@ class _RangeSelectionOverlayState extends State<_RangeSelectionOverlay> {
             : nextSelection.base,
       ),
     );
-    widget.onSelectionChanged?.call(nextSelection);
+    if (nextSelection != widget.selection) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+          HapticFeedback.selectionClick();
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          break;
+      }
+    }
+    widget.onSelectionChanged?.call(selection: nextSelection, cause: SelectionChangedCause.drag);
   }
 
   void _handleEndDragStart(DragStartDetails details) {
@@ -856,7 +818,19 @@ class _RangeSelectionOverlayState extends State<_RangeSelectionOverlay> {
         currentTextPosition: nextSelection.extent,
       ),
     );
-    widget.onSelectionChanged?.call(nextSelection);
+    if (nextSelection != widget.selection) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+          HapticFeedback.selectionClick();
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          break;
+      }
+    }
+    widget.onSelectionChanged?.call(selection: nextSelection, cause: SelectionChangedCause.drag);
   }
 
   void _handleAnyDragEnd(DragEndDetails details) {
@@ -864,6 +838,7 @@ class _RangeSelectionOverlayState extends State<_RangeSelectionOverlay> {
     _isDraggingEnd = false;
     _dragStartSelection = null;
     widget.onMagnifierHide?.call();
+    widget.onDragEnd?.call();
   }
 
   @override
@@ -873,41 +848,46 @@ class _RangeSelectionOverlayState extends State<_RangeSelectionOverlay> {
     }
 
     return Stack(
+      fit: StackFit.expand,
       children: <Widget>[
-        Positioned.fill(
-          child: Stack(
-            children: <Widget>[
-              ExcludeSemantics(
-                child: _SelectionHandleOverlay(
-                  type: _startHandleType,
-                  handleLayerLink: widget.startHandleLayerLink,
-                  onSelectionHandleTapped: widget.onSelectionHandleTapped,
-                  onSelectionHandleDragStart: _handleStartDragStart,
-                  onSelectionHandleDragUpdate: _handleStartDragUpdate,
+        TapRegion(
+          groupId: SelectableRegion,
+          child: TextFieldTapRegion(
+            child: ExcludeSemantics(
+              child: _SelectionHandleOverlay(
+                type: _startHandleType,
+                handleLayerLink: widget.startHandleLayerLink,
+                onSelectionHandleTapped: widget.onSelectionHandleTapped,
+                onSelectionHandleDragStart: _handleStartDragStart,
+                onSelectionHandleDragUpdate: _handleStartDragUpdate,
                 onSelectionHandleDragEnd: _handleAnyDragEnd,
                 selectionControls: widget.selectionControls!,
-                handlesVisible: widget.showHandles,
+                handlesVisible: widget.handlesVisible,
                 inViewport: _renderEditable.selectionStartInViewport,
                 preferredLineHeight: _lineHeightAtStart,
                 dragStartBehavior: widget.dragStartBehavior,
               ),
             ),
-              ExcludeSemantics(
-                child: _SelectionHandleOverlay(
-                  type: _endHandleType,
-                  handleLayerLink: widget.endHandleLayerLink,
-                  onSelectionHandleTapped: widget.onSelectionHandleTapped,
-                  onSelectionHandleDragStart: _handleEndDragStart,
-                  onSelectionHandleDragUpdate: _handleEndDragUpdate,
-                  onSelectionHandleDragEnd: _handleAnyDragEnd,
-                  selectionControls: widget.selectionControls!,
-                  handlesVisible: widget.showHandles,
-                  inViewport: _renderEditable.selectionEndInViewport,
-                  preferredLineHeight: _lineHeightAtEnd,
-                  dragStartBehavior: widget.dragStartBehavior,
-                ),
+          ),
+        ),
+        TapRegion(
+          groupId: SelectableRegion,
+          child: TextFieldTapRegion(
+            child: ExcludeSemantics(
+              child: _SelectionHandleOverlay(
+                type: _endHandleType,
+                handleLayerLink: widget.endHandleLayerLink,
+                onSelectionHandleTapped: widget.onSelectionHandleTapped,
+                onSelectionHandleDragStart: _handleEndDragStart,
+                onSelectionHandleDragUpdate: _handleEndDragUpdate,
+                onSelectionHandleDragEnd: _handleAnyDragEnd,
+                selectionControls: widget.selectionControls!,
+                handlesVisible: widget.handlesVisible,
+                inViewport: _renderEditable.selectionEndInViewport,
+                preferredLineHeight: _lineHeightAtEnd,
+                dragStartBehavior: widget.dragStartBehavior,
               ),
-            ],
+            ),
           ),
         ),
       ],
@@ -930,7 +910,7 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper>
   late final AnimationController _controller = AnimationController(
     duration: SelectionOverlay.fadeDuration,
     vsync: this,
-    value: widget.isVisible ? 1.0 : 0.0,
+    value: 0.0,
   );
   Animation<double> get _opacity => _controller.view;
 
@@ -1084,56 +1064,53 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
 
     return CompositedTransformFollower(
       link: widget.handleLayerLink,
+      // Put the handle's anchor point on the leader's anchor point.
       offset: -handleAnchor - Offset(padding.left, padding.top),
       showWhenUnlinked: false,
       child: FadeTransition(
-        opacity: _controller.view,
+        opacity: _controller,
         child: SizedBox(
           width: interactiveRect.width,
           height: interactiveRect.height,
-          child: TapRegion(
-            groupId: SelectableRegion,
-            child: TextFieldTapRegion(
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: RawGestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  gestures: <Type, GestureRecognizerFactory>{
-                    PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-                      () => PanGestureRecognizer(
-                        debugOwner: this,
-                        supportedDevices: <PointerDeviceKind>{
-                          PointerDeviceKind.touch,
-                          PointerDeviceKind.stylus,
-                          PointerDeviceKind.unknown,
-                        },
-                      ),
-                      (PanGestureRecognizer instance) {
-                        instance
-                          ..dragStartBehavior = widget.dragStartBehavior
-                          ..gestureSettings = eagerlyAcceptDragWhenCollapsed
-                              ? const DeviceGestureSettings(touchSlop: 1.0)
-                              : null
-                          ..onStart = widget.onSelectionHandleDragStart
-                          ..onUpdate = widget.onSelectionHandleDragUpdate
-                          ..onEnd = widget.onSelectionHandleDragEnd;
-                      },
-                    ),
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: padding.left,
-                      top: padding.top,
-                      right: padding.right,
-                      bottom: padding.bottom,
-                    ),
-                    child: widget.selectionControls.buildHandle(
-                      context,
-                      widget.type,
-                      widget.preferredLineHeight,
-                      widget.onSelectionHandleTapped,
-                    ),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: RawGestureDetector(
+              behavior: HitTestBehavior.translucent,
+              gestures: <Type, GestureRecognizerFactory>{
+                PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+                  () => PanGestureRecognizer(
+                    debugOwner: this,
+                    // Mouse events select the text and do not drag the cursor.
+                    supportedDevices: <PointerDeviceKind>{
+                      PointerDeviceKind.touch,
+                      PointerDeviceKind.stylus,
+                      PointerDeviceKind.unknown,
+                    },
                   ),
+                  (PanGestureRecognizer instance) {
+                    instance
+                      ..dragStartBehavior = widget.dragStartBehavior
+                      ..gestureSettings = eagerlyAcceptDragWhenCollapsed
+                          ? const DeviceGestureSettings(touchSlop: 1.0)
+                          : null
+                      ..onStart = widget.onSelectionHandleDragStart
+                      ..onUpdate = widget.onSelectionHandleDragUpdate
+                      ..onEnd = widget.onSelectionHandleDragEnd;
+                  },
+                ),
+              },
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: padding.left,
+                  top: padding.top,
+                  right: padding.right,
+                  bottom: padding.bottom,
+                ),
+                child: widget.selectionControls.buildHandle(
+                  context,
+                  widget.type,
+                  widget.preferredLineHeight,
+                  widget.onSelectionHandleTapped,
                 ),
               ),
             ),
