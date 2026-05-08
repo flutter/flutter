@@ -80,27 +80,76 @@ export class FlutterLoader {
     }
 
     const enableWasm = config.wasmAllowList?.[browserEnvironment.browserEngine] ?? defaultWasmSupport[browserEnvironment.browserEngine];
-    const rendererIsCompatible = (renderer) => {
+
+    /**
+     * Returns null if [renderer] is compatible, or a human-readable string
+     * explaining why it isn't.
+     */
+    const rendererIncompatibilityReason = (renderer) => {
       switch (renderer) {
         case "skwasm":
-          return supportsSkwasm && enableWasm;
+          if (!supportsSkwasm) {
+            return "Skwasm requires both WasmGC and WebGL; this browser does not provide both.";
+          }
+          if (!enableWasm) {
+            return `Skwasm is disabled by the loader's WASM allowlist for browser engine "${browserEnvironment.browserEngine}".`;
+          }
+          return null;
         default:
-          return true;
+          return null;
       }
-    }
+    };
 
-    const buildIsCompatible = (build) => {
+    /**
+     * Returns null if [build] is compatible, or a human-readable string
+     * explaining why it isn't. Used both to filter candidate builds and to
+     * log a useful explanation when the loader has to fall back.
+     */
+    const buildIncompatibilityReason = (build) => {
       if (build.compileTarget === "dart2wasm" && !supportsDart2Wasm) {
-        return false;
+        return "dart2wasm requires WasmGC support; this browser does not implement it yet.";
       }
       if (config.renderer && config.renderer != build.renderer) {
-        return false;
+        return `The application is configured to use the "${config.renderer}" renderer; this build targets "${build.renderer}".`;
       }
-      return rendererIsCompatible(build.renderer);
+      return rendererIncompatibilityReason(build.renderer);
     };
-    const build = buildConfig.builds.find(buildIsCompatible);
+
+    let build;
+    const skippedBuilds = [];
+    for (const candidate of buildConfig.builds) {
+      const reason = buildIncompatibilityReason(candidate);
+      if (reason === null) {
+        build = candidate;
+        break;
+      }
+      skippedBuilds.push({ candidate, reason });
+    }
+
     if (!build) {
+      // Surface every skipped build's reason so a user with a "no compatible
+      // build" failure can see exactly which constraint blocked each.
+      for (const skipped of skippedBuilds) {
+        console.warn(
+          `Flutter Web: build ${JSON.stringify(skipped.candidate)} was rejected: ${skipped.reason}`
+        );
+      }
       throw "FlutterLoader could not find a build compatible with configuration and environment.";
+    }
+
+    // If we had to skip preferred builds before finding a compatible one,
+    // log a single info-level explanation so developers understand why
+    // their app silently fell back (e.g. wasm -> js on an older browser).
+    // See https://github.com/flutter/flutter/issues/143603.
+    if (skippedBuilds.length > 0) {
+      const skippedSummary = skippedBuilds
+        .map(({ candidate, reason }) =>
+          `  - ${candidate.compileTarget}/${candidate.renderer}: ${reason}`)
+        .join("\n");
+      console.info(
+        `Flutter Web: using ${build.compileTarget} with the ${build.renderer} ` +
+        `renderer. Earlier candidates were skipped:\n${skippedSummary}`
+      );
     }
 
     const deps = {};
