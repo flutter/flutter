@@ -849,6 +849,71 @@ void main() {
         expect(localDds.shutdownCalled, true);
       },
     );
+
+    testWithoutContext('launchDevToolsInBrowser calls startChrome', () async {
+      final portForwarder = FakeProxiedPortForwarder();
+      portForwarder.originalRemotePortReturnValue = 100;
+      portForwarder.forwardReturnValue = 200;
+      final devicePortForwarder = FakeProxiedPortForwarder();
+      final dds = ProxiedDartDevelopmentService(
+        clientDaemonConnection,
+        'test_id',
+        logger: bufferLogger,
+        proxiedPortForwarder: portForwarder,
+        devicePortForwarder: devicePortForwarder,
+      );
+
+      final Stream<DaemonMessage> broadcastOutput = serverDaemonConnection.incomingCommands
+          .asBroadcastStream();
+
+      final Future<void> startFuture = dds.startDartDevelopmentService(
+        Uri.parse('http://127.0.0.1:100/fake'),
+        enableDevTools: true,
+      );
+
+      final DaemonMessage startMessage = await broadcastOutput.first;
+      serverDaemonConnection.sendResponse(startMessage.data['id']!, <String, Object?>{
+        'ddsUri': 'http://127.0.0.1:300/remote',
+        'devToolsUri': 'http://127.0.0.1:300/devtools',
+      });
+
+      await startFuture;
+      expect(dds.devToolsUri, Uri.parse('http://127.0.0.1:300/devtools'));
+
+      final launchedUrls = <String>[];
+      final flutterDevice = FakeFlutterDevice()..device = FakeDevice('test_device', 'device');
+
+      final bool result = dds.launchDevToolsInBrowser(
+        flutterDevice,
+        startChrome: (List<String> urls, {List<String>? args}) async {
+          launchedUrls.addAll(urls);
+          return FakeProcess();
+        },
+      );
+
+      expect(result, true);
+      expect(launchedUrls, <String>['http://127.0.0.1:300/devtools']);
+      expect(dds.calledLaunchDevToolsInBrowser, true);
+    });
+
+    testWithoutContext('launchDevToolsInBrowser returns false if devToolsUri is null', () async {
+      final portForwarder = FakeProxiedPortForwarder();
+      final devicePortForwarder = FakeProxiedPortForwarder();
+      final dds = ProxiedDartDevelopmentService(
+        clientDaemonConnection,
+        'test_id',
+        logger: bufferLogger,
+        proxiedPortForwarder: portForwarder,
+        devicePortForwarder: devicePortForwarder,
+      );
+
+      final flutterDevice = FakeFlutterDevice()..device = FakeDevice('test_device', 'device');
+
+      final bool result = dds.launchDevToolsInBrowser(flutterDevice);
+
+      expect(result, false);
+      expect(dds.calledLaunchDevToolsInBrowser, true);
+    });
   });
 
   group('ProxiedVMServiceDiscoveryForAttach', () {
@@ -1278,5 +1343,12 @@ class FakeVMServiceDiscoveryForAttach extends Fake implements VMServiceDiscovery
   @override
   Stream<Uri> uris;
 }
+
+class FakeFlutterDevice extends Fake implements FlutterDevice {
+  @override
+  Device? device;
+}
+
+class FakeProcess extends Fake implements Process {}
 
 class TestException implements Exception {}
