@@ -104,7 +104,7 @@ class Chrome {
     final withDebugging = options.debugPort != null;
     final args = <String>[
       if (options.userDataDirectory != null) '--user-data-dir=${options.userDataDirectory}',
-      if (options.url != null) options.url!,
+      ?options.url,
       if (io.Platform.environment['CHROME_NO_SANDBOX'] == 'true') '--no-sandbox',
       if (options.headless ?? false) '--headless',
       if (withDebugging) '--remote-debugging-port=${options.debugPort}',

@@ -351,13 +351,17 @@ Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocations(
   KernelAsset Function(FlutterCodeAsset asset, Set<String> alreadyTakenNames)
   targetLocationCallback,
 ) {
-  final alreadyTakenNames = <String>{};
+  final alreadyTakenNamesPerTarget = <Target, Set<String>>{};
   final result = <KernelAssetPath, List<FlutterCodeAsset>>{};
   final idToPath = <String, KernelAssetPath>{};
   for (final asset in nativeAssets) {
     // Use same target path for all assets with the same id.
     final String assetId = asset.codeAsset.id;
     final KernelAssetPath? existingPath = idToPath[assetId];
+    final Set<String> alreadyTakenNames = alreadyTakenNamesPerTarget.putIfAbsent(
+      asset.target,
+      () => <String>{},
+    );
     final KernelAssetPath currentPath = targetLocationCallback(asset, alreadyTakenNames).path;
 
     if (existingPath != null && existingPath != currentPath) {
