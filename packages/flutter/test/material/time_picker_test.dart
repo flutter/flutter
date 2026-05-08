@@ -2096,6 +2096,58 @@ void main() {
         expect(result, equals(const TimeOfDay(hour: 9, minute: 12)));
       });
 
+      testWidgets('parses localized digits in input fields (Farsi)', (
+        WidgetTester tester,
+      ) async {
+        TimeOfDay? result;
+
+        // Build launcher with Farsi locale so that localized digits are used.
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const <Locale>[Locale('en'), Locale('fa', 'IR')],
+            restorationScopeId: 'app',
+            locale: const Locale('fa', 'IR'),
+            theme: ThemeData(useMaterial3: materialType == MaterialType.material3),
+            home: _TimePickerLauncher(
+              onChanged: (TimeOfDay? time) {
+                result = time;
+              },
+              emptyInitialInput: false,
+            ),
+          ),
+        );
+
+        // Open the picker.
+        await tester.tap(find.text('X'));
+        await tester.pumpAndSettle();
+
+        // Switch to input mode and read the text fields.
+        await tester.tap(find.byIcon(Icons.keyboard_outlined));
+        await tester.pumpAndSettle();
+
+        final TextField hourField = tester.widget(find.byType(TextField).first);
+        final TextField minuteField = tester.widget(find.byType(TextField).last);
+
+        final String hourText = hourField.controller?.text ?? '';
+        final String minuteText = minuteField.controller?.text ?? '';
+
+        final BuildContext context = tester.element(find.byType(TextField).first);
+
+        final String localizedSeven = MaterialLocalizations.of(context).formatDecimal(7);
+        expect(hourText, equals(localizedSeven));
+        final String localizedZero = MaterialLocalizations.of(context).formatDecimal(0);
+        expect(minuteText, equals('$localizedZero$localizedZero'));
+
+        await finishPicker(tester);
+
+        expect(result, equals(const TimeOfDay(hour: 7, minute: 0)));
+      });
+
       testWidgets('Toggle to dial mode keeps selected time', (WidgetTester tester) async {
         late TimeOfDay result;
         await startPicker(
