@@ -197,8 +197,7 @@ class TextLayout {
     // It's exactly how it's implemented in SkParagraph
     // but it only makes sense if we have one line
     paragraph.alphabeticBaseline = lines.first.fontBoundingBoxAscent;
-    paragraph.ideographicBaseline =
-        lines.first.fontBoundingBoxAscent + lines.first.fontBoundingBoxDescent;
+    paragraph.ideographicBaseline = lines.first.height;
   }
 
   double addLine(
