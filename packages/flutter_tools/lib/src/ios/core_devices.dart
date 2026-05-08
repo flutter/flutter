@@ -113,11 +113,14 @@ class IOSCoreDeviceLauncher {
       deviceId: deviceId,
       bundleId: bundleId,
       launchArguments: launchArguments,
-      startStopped: true,
+      startStopped: mode == BuildMode.debug,
       shutdownHooks: shutdownHooks,
     );
 
     if (!launchResult) {
+      return launchResult;
+    }
+    if (mode == .profile) {
       return launchResult;
     }
 
