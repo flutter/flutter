@@ -29,9 +29,7 @@ constexpr auto kDartRunnerEnvironment = "dart_runner_env";
 
 constexpr auto kDartJitRunner = "dart_jit_runner";
 constexpr auto kDartJitRunnerRef = ChildRef{kDartJitRunner};
-constexpr auto kDartJitRunnerUrl =
-    "fuchsia-pkg://fuchsia.com/oot_dart_jit_runner#meta/"
-    "dart_jit_runner.cm";
+constexpr auto kDartJitRunnerUrl = "dart_jit_runner#meta/dart_jit_runner.cm";
 
 constexpr auto kDartJitEchoServer = "dart_jit_echo_server";
 constexpr auto kDartJitEchoServerRef = ChildRef{kDartJitEchoServer};
