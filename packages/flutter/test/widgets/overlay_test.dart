@@ -70,33 +70,47 @@ void main() {
         ' │ skipCount: 0\n'
         ' │ textDirection: ltr\n'
         ' │\n'
-        ' ├─onstage 1: RenderLimitedBox#bb803\n'
+        ' ├─onstage 1: _RenderAccessibilityBarrier#b9528\n'
         ' │ │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
         ' │ │   size)\n'
         ' │ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' │ │ semantics node: SemanticsNode#1\n'
         ' │ │ size: Size(800.0, 600.0)\n'
-        ' │ │ maxWidth: 0.0\n'
-        ' │ │ maxHeight: 0.0\n'
         ' │ │\n'
-        ' │ └─child: RenderConstrainedBox#62707\n'
-        ' │     parentData: <none> (can use size)\n'
-        ' │     constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        ' │     size: Size(800.0, 600.0)\n'
-        ' │     additionalConstraints: BoxConstraints(biggest)\n'
+        ' │ └─child: RenderLimitedBox#39c1a\n'
+        ' │   │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
+        ' │   │   size)\n'
+        ' │   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' │   │ size: Size(800.0, 600.0)\n'
+        ' │   │ maxWidth: 0.0\n'
+        ' │   │ maxHeight: 0.0\n'
+        ' │   │\n'
+        ' │   └─child: RenderConstrainedBox#7c7f9\n'
+        ' │       parentData: <none> (can use size)\n'
+        ' │       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' │       size: Size(800.0, 600.0)\n'
+        ' │       additionalConstraints: BoxConstraints(biggest)\n'
         ' │\n'
-        ' ├─onstage 2: RenderLimitedBox#af5f1\n'
+        ' ├─onstage 2: _RenderAccessibilityBarrier#dbea5\n'
         ' ╎ │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
         ' ╎ │   size)\n'
         ' ╎ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎ │ semantics node: SemanticsNode#2\n'
         ' ╎ │ size: Size(800.0, 600.0)\n'
-        ' ╎ │ maxWidth: 0.0\n'
-        ' ╎ │ maxHeight: 0.0\n'
         ' ╎ │\n'
-        ' ╎ └─child: RenderConstrainedBox#69c48\n'
-        ' ╎     parentData: <none> (can use size)\n'
-        ' ╎     constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        ' ╎     size: Size(800.0, 600.0)\n'
-        ' ╎     additionalConstraints: BoxConstraints(biggest)\n'
+        ' ╎ └─child: RenderLimitedBox#c4a8a\n'
+        ' ╎   │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
+        ' ╎   │   size)\n'
+        ' ╎   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎   │ size: Size(800.0, 600.0)\n'
+        ' ╎   │ maxWidth: 0.0\n'
+        ' ╎   │ maxHeight: 0.0\n'
+        ' ╎   │\n'
+        ' ╎   └─child: RenderConstrainedBox#2deab\n'
+        ' ╎       parentData: <none> (can use size)\n'
+        ' ╎       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎       size: Size(800.0, 600.0)\n'
+        ' ╎       additionalConstraints: BoxConstraints(biggest)\n'
         ' ╎\n'
         ' └╌no offstage children\n',
       ),
@@ -150,7 +164,6 @@ void main() {
       ),
     );
     final RenderObject theater = overlayKey.currentContext!.findRenderObject()!;
-
     expect(theater, hasAGoodToStringDeep);
     expect(
       theater.toStringDeep(minLevel: DiagnosticLevel.info),
@@ -162,45 +175,62 @@ void main() {
         ' │ skipCount: 2\n'
         ' │ textDirection: ltr\n'
         ' │\n'
-        ' ├─onstage 1: RenderLimitedBox#0a77a\n'
+        ' ├─onstage 1: _RenderAccessibilityBarrier#0a77a\n'
         ' ╎ │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
         ' ╎ │   size)\n'
         ' ╎ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎ │ semantics node: SemanticsNode#1\n'
         ' ╎ │ size: Size(800.0, 600.0)\n'
-        ' ╎ │ maxWidth: 0.0\n'
-        ' ╎ │ maxHeight: 0.0\n'
         ' ╎ │\n'
-        ' ╎ └─child: RenderConstrainedBox#21f3a\n'
-        ' ╎     parentData: <none> (can use size)\n'
-        ' ╎     constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        ' ╎     size: Size(800.0, 600.0)\n'
-        ' ╎     additionalConstraints: BoxConstraints(biggest)\n'
+        ' ╎ └─child: RenderLimitedBox#0a77a\n'
+        ' ╎   │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
+        ' ╎   │   size)\n'
+        ' ╎   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎   │ size: Size(800.0, 600.0)\n'
+        ' ╎   │ maxWidth: 0.0\n'
+        ' ╎   │ maxHeight: 0.0\n'
+        ' ╎   │\n'
+        ' ╎   └─child: RenderConstrainedBox#21f3a\n'
+        ' ╎       parentData: <none> (can use size)\n'
+        ' ╎       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎       size: Size(800.0, 600.0)\n'
+        ' ╎       additionalConstraints: BoxConstraints(biggest)\n'
         ' ╎\n'
-        ' ╎╌offstage 1: RenderLimitedBox#62c8c NEEDS-LAYOUT NEEDS-PAINT\n'
+        ' ╎╌offstage 1: _RenderAccessibilityBarrier#62c8c NEEDS-LAYOUT NEEDS-PAINT\n'
         ' ╎ │ parentData: not positioned; offset=Offset(0.0, 0.0)\n'
         ' ╎ │ constraints: MISSING\n'
         ' ╎ │ size: MISSING\n'
-        ' ╎ │ maxWidth: 0.0\n'
-        ' ╎ │ maxHeight: 0.0\n'
         ' ╎ │\n'
-        ' ╎ └─child: RenderConstrainedBox#425fa NEEDS-LAYOUT NEEDS-PAINT\n'
-        ' ╎     parentData: <none>\n'
-        ' ╎     constraints: MISSING\n'
-        ' ╎     size: MISSING\n'
-        ' ╎     additionalConstraints: BoxConstraints(biggest)\n'
+        ' ╎ └─child: RenderLimitedBox#62c8c NEEDS-LAYOUT NEEDS-PAINT\n'
+        ' ╎   │ parentData: not positioned; offset=Offset(0.0, 0.0)\n'
+        ' ╎   │ constraints: MISSING\n'
+        ' ╎   │ size: MISSING\n'
+        ' ╎   │ maxWidth: 0.0\n'
+        ' ╎   │ maxHeight: 0.0\n'
+        ' ╎   │\n'
+        ' ╎   └─child: RenderConstrainedBox#425fa NEEDS-LAYOUT NEEDS-PAINT\n'
+        ' ╎       parentData: <none>\n'
+        ' ╎       constraints: MISSING\n'
+        ' ╎       size: MISSING\n'
+        ' ╎       additionalConstraints: BoxConstraints(biggest)\n'
         ' ╎\n'
-        ' └╌offstage 2: RenderLimitedBox#03ae2 NEEDS-LAYOUT NEEDS-PAINT\n'
+        ' └╌offstage 2: _RenderAccessibilityBarrier#03ae2 NEEDS-LAYOUT NEEDS-PAINT\n'
         '   │ parentData: not positioned; offset=Offset(0.0, 0.0)\n'
         '   │ constraints: MISSING\n'
         '   │ size: MISSING\n'
-        '   │ maxWidth: 0.0\n'
-        '   │ maxHeight: 0.0\n'
         '   │\n'
-        '   └─child: RenderConstrainedBox#b4d48 NEEDS-LAYOUT NEEDS-PAINT\n'
-        '       parentData: <none>\n'
-        '       constraints: MISSING\n'
-        '       size: MISSING\n'
-        '       additionalConstraints: BoxConstraints(biggest)\n',
+        '   └─child: RenderLimitedBox#03ae2 NEEDS-LAYOUT NEEDS-PAINT\n'
+        '     │ parentData: not positioned; offset=Offset(0.0, 0.0)\n'
+        '     │ constraints: MISSING\n'
+        '     │ size: MISSING\n'
+        '     │ maxWidth: 0.0\n'
+        '     │ maxHeight: 0.0\n'
+        '     │\n'
+        '     └─child: RenderConstrainedBox#b4d48 NEEDS-LAYOUT NEEDS-PAINT\n'
+        '         parentData: <none>\n'
+        '         constraints: MISSING\n'
+        '         size: MISSING\n'
+        '         additionalConstraints: BoxConstraints(biggest)\n',
       ),
     );
   });
@@ -1303,7 +1333,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics of entries below accessibilityOpaque entries are blocked', (WidgetTester tester) async {
+  testWidgets('Semantics of entries below accessibilityOpaque entries are blocked', (
+    WidgetTester tester,
+  ) async {
     final semantics = SemanticsTester(tester);
     final overlayKey = GlobalKey<OverlayState>();
     late final OverlayEntry bottomEntry;
@@ -1342,24 +1374,24 @@ void main() {
     );
     expect(find.text('bottom'), findsOneWidget);
     expect(find.text('top'), findsOneWidget);
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
-            label: 'bottom',
-            flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
-            textDirection: TextDirection.ltr,
-          ),
-          TestSemantics(
-            label: 'top',
-            textDirection: TextDirection.ltr,
-          ),
-        ],
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'bottom',
+              flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(label: 'top', textDirection: TextDirection.ltr),
+          ],
+        ),
+        ignoreTransform: true,
+        ignoreRect: true,
+        ignoreId: true,
       ),
-      ignoreTransform: true,
-      ignoreRect: true,
-      ignoreId: true,
-    ));
+    );
     semantics.dispose();
   });
 
