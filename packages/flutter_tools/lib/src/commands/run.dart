@@ -247,6 +247,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   }
 
   bool get traceStartup => boolArg('trace-startup');
+  bool get traceSystrace => boolArg('trace-systrace');
   bool get enableDartProfiling => boolArg('enable-dart-profiling');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
@@ -328,6 +329,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webDevServerConfig: webDevServerConfig,
         enableHcpp: enableHcpp,
         testFlag: testFlag,
+        traceSystrace: traceSystrace,
       );
     } else {
       return DebuggingOptions.enabled(
