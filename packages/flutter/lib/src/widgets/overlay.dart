@@ -1515,11 +1515,26 @@ class _RenderTheater extends RenderBox
 
     // Compute blockFocus for semantics.
     var isOpaque = false;
-    for (final _RenderAccessibilityFocusBlocker child
-        in _childrenInHitTestOrder().whereType<_RenderAccessibilityFocusBlocker>()) {
-      isOpaque = child.accessibilityOpaque;
-      child.blockFocus = isOpaque;
-      isOpaque |= child.accessibilityOpaque;
+
+    void processChild(RenderBox child) {
+      if (child is _RenderAccessibilityFocusBlocker) {
+        final blocker = child as _RenderAccessibilityFocusBlocker;
+        blocker.blockFocus = isOpaque;
+        isOpaque |= blocker.accessibilityOpaque;
+      }
+    }
+
+    RenderBox? child = lastChild;
+    while (child != null) {
+      final childParentData = child.parentData! as _TheaterParentData;
+      final Iterator<RenderBox>? innerIterator = childParentData.hitTestOrderIterator;
+      if (innerIterator != null) {
+        while (innerIterator.moveNext()) {
+          processChild(innerIterator.current);
+        }
+      }
+      processChild(child);
+      child = childParentData.previousSibling;
     }
   }
 
