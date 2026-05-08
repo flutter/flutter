@@ -3951,6 +3951,61 @@ void main() {
     // The text field should be updated to 'test'.
     expect(textCtrl.text, 'test');
   });
+
+  testWidgets(
+    'TAB from field skips the options overlay and advances to the next focusable sibling',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/183456.
+      final targetFocus = FocusNode(debugLabel: 'target');
+      addTearDown(targetFocus.dispose);
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              RawAutocomplete<String>(
+                optionsBuilder: (TextEditingValue value) =>
+                    kOptions.where((String option) => option.contains(value.text.toLowerCase())),
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController textEditingController,
+                      FocusNode focusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) => TestTextField(controller: textEditingController, focusNode: focusNode),
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<String> onSelected,
+                      Iterable<String> options,
+                    ) => ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: options.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final String option = options.elementAt(index);
+                        return GestureDetector(
+                          onTap: () => onSelected(option),
+                          child: Focus(child: Text(option)),
+                        );
+                      },
+                    ),
+              ),
+              const ExcludeFocus(child: TestTextField()),
+              TestTextField(focusNode: targetFocus),
+            ],
+          ),
+        ),
+      );
+
+      // Focus the autocomplete field by tapping it, then TAB.
+      await tester.tap(find.byType(TestTextField).first);
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(targetFocus.hasFocus, isTrue);
+    },
+  );
 }
 
 /// A simple tappable widget used as a replacement for [InkWell] in tests.

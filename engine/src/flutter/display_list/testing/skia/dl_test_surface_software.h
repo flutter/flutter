@@ -21,7 +21,7 @@ class DlSoftwareSurfaceProvider : public DlSurfaceProvider {
   std::shared_ptr<DlSurfaceInstance> GetPrimarySurface() const override {
     return primary_;
   }
-  std::shared_ptr<DlSurfaceInstance> MakeOffscreenSurface(
+  std::unique_ptr<DlSurfaceInstance> MakeOffscreenSurface(
       size_t width,
       size_t height,
       PixelFormat format) const override;
@@ -30,6 +30,7 @@ class DlSoftwareSurfaceProvider : public DlSurfaceProvider {
     return BackendType::kSkiaSoftware;
   }
   bool SupportsPixelFormat(PixelFormat format) const override { return true; }
+  bool TargetsImpeller() const override { return false; }
 
  private:
   std::shared_ptr<DlSurfaceInstance> primary_;

@@ -692,8 +692,7 @@ class ImageElementImageSource extends ImageSource {
 
   @override
   void _doClose() {
-    // There's no way to immediately close the <img> element. Just let the
-    // browser garbage collect it.
+    imageElement.src = '';
   }
 
   @override
