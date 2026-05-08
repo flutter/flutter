@@ -110,7 +110,7 @@ static bool HasNonRectClipForUnderlayCutout(const flutter::EmbeddedViewParams& p
 // Overlay canvas needs to be clipped to the shape of platform view to ensure
 // underlay shows up correctly, so that when there's backdrop filter, the region outside of platform
 // view's shape is blurred. See: https://github.com/flutter/flutter/issues/150660
-static void ApplyComplexClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
+static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
                                             const flutter::EmbeddedViewParams& params) {
   flutter::DlMatrix transform;
   auto iter = params.mutatorsStack().Begin();
@@ -845,19 +845,19 @@ static void ApplyComplexClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
   std::vector<std::unique_ptr<flutter::SurfaceFrame>> surfaceFrames;
   surfaceFrames.reserve(self.compositionOrder.size());
   std::unordered_map<int64_t, DlRect> viewRects;
-  std::unordered_set<int64_t> preserveUnderlayForViews;
+  std::unordered_set<int64_t> viewsWithUnderlayPreserved;
 
   for (int64_t viewId : self.compositionOrder) {
     const flutter::EmbeddedViewParams& params = self.currentCompositionParams[viewId];
     viewRects[viewId] = params.finalBoundingRect();
     if (HasNonRectClipForUnderlayCutout(params)) {
-      preserveUnderlayForViews.insert(viewId);
+      viewsWithUnderlayPreserved.insert(viewId);
     }
   }
 
   std::unordered_map<int64_t, DlRect> overlayLayers =
       SliceViews(background_frame->Canvas(), self.compositionOrder, self.slices, viewRects,
-                 preserveUnderlayForViews);
+                 viewsWithUnderlayPreserved);
 
   size_t requiredOverlayLayers = 0;
   for (int64_t viewId : self.compositionOrder) {
@@ -893,7 +893,7 @@ static void ApplyComplexClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
     int restoreCount = overlayCanvas->GetSaveCount();
     overlayCanvas->Save();
     overlayCanvas->ClipRect(overlay->second);
-    if (preserveUnderlayForViews.find(viewId) != preserveUnderlayForViews.end()) {
+    if (viewsWithUnderlayPreserved.find(viewId) != viewsWithUnderlayPreserved.end()) {
       ApplyComplexClipToOverlayCanvas(overlayCanvas, self.currentCompositionParams[viewId]);
     }
     overlayCanvas->Clear(flutter::DlColor::kTransparent());
