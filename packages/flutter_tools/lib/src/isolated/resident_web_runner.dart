@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:dds/dds.dart';
 import 'package:dwds/dwds.dart';
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
@@ -416,6 +417,9 @@ class ResidentWebRunner extends ResidentRunner {
   /// Without `--wasm`, only a single JS config is returned.
   ///
   /// See https://github.com/flutter/flutter/issues/172006.
+  @visibleForTesting
+  List<WebCompilerConfig> get debugCompilerConfigs => _compilerConfigs;
+
   List<WebCompilerConfig> get _compilerConfigs {
     if (debuggingOptions.webUseWasm) {
       return <WebCompilerConfig>[

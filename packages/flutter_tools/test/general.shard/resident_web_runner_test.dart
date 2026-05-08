@@ -27,6 +27,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
+import 'package:flutter_tools/src/web/compiler_config.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -1022,6 +1023,62 @@ name: my_app
     overrides: <Type, Generator>{
       Analytics: () => fakeAnalytics,
       BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  // Regression tests for https://github.com/flutter/flutter/issues/172006:
+  // `flutter run --wasm` must produce both a Wasm and a JS compiler config so
+  // the runtime web loader can fall back to JS on browsers that don't support
+  // WasmGC. Without `--wasm`, only a JS config is produced.
+  testUsingContext(
+    '--wasm produces both Wasm and JS compiler configs for runtime fallback',
+    () async {
+      final ResidentWebRunner residentWebRunner =
+          setUpResidentRunner(
+            flutterDevice,
+            debuggingOptions: DebuggingOptions.enabled(
+              const BuildInfo(
+                BuildMode.debug,
+                null,
+                trackWidgetCreation: true,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
+              webUseWasm: true,
+            ),
+          )
+              as ResidentWebRunner;
+
+      final List<WebCompilerConfig> configs = residentWebRunner.debugCompilerConfigs;
+
+      expect(configs, hasLength(2));
+      expect(
+        configs.map((WebCompilerConfig c) => c.compileTarget),
+        containsAll(<CompileTarget>[CompileTarget.wasm, CompileTarget.js]),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'no --wasm produces only a JS compiler config',
+    () async {
+      final ResidentWebRunner residentWebRunner =
+          setUpResidentRunner(flutterDevice) as ResidentWebRunner;
+
+      final List<WebCompilerConfig> configs = residentWebRunner.debugCompilerConfigs;
+
+      expect(configs, hasLength(1));
+      expect(configs.single, isA<JsCompilerConfig>());
+    },
+    overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Pub: ThrowingPub.new,
