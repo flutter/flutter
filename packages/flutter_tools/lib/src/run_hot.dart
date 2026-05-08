@@ -1207,13 +1207,6 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> reloadFonts(FlutterDevice device, FlutterView view) async {
-    if (device.devFS!.didUpdateFontManifest) {
-      await device.vmService!.reloadAssetFonts(isolateId: view.uiIsolate!.id!, viewId: view.id);
-    }
-  }
-
-  @override
   Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
     await hotRunnerConfig!.runPreShutdownOperations();

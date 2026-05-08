@@ -1462,15 +1462,18 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
-  /// A runner-specific hook to initialize the asset directory path on the device's VM Service.
-  /// Native runners override this to call setAssetDirectory; Web runners keep it as a no-op.
+  /// Configures the asset directory path on the target device's VM Service.
+  ///
+  /// This is called during hot reload to ensure the Flutter engine is pointing
+  /// at the correct synced asset bundle directory inside the local DevFS before
+  /// assets are evicted and reloaded.
+  ///
+  /// Native runners (like 'HotRunner') override this to invoke the
+  /// `setAssetDirectory` VM Service extension. Web runners (like 'ResidentWebRunner')
+  /// keep this as a no-op because asset paths are already resolved relative
+  /// to the web server base URI.
   @protected
   Future<void> confirmAssetDirectory(FlutterDevice device, List<FlutterView> views) async {}
-
-  /// A runner-specific hook to reload font manifests.
-  /// Native runners override this to call reloadAssetFonts; Web runners keep it as a no-op.
-  @protected
-  Future<void> reloadFonts(FlutterDevice device, FlutterView view) async {}
 
   @internal
   Future<void> evictDirtyAssets() async {
@@ -1493,8 +1496,12 @@ abstract class ResidentRunner extends ResidentHandlers {
       // 1. Delegate platform-specific asset directory setup to the subclass!
       await confirmAssetDirectory(device, views);
 
-      // 2. Delegate platform-specific font manifest reloading to the subclass!
-      await reloadFonts(device, views.first);
+      // 2. Perform font manifest reloading if it was updated.
+      if (devFS.didUpdateFontManifest) {
+        futures.add(
+          device.vmService!.reloadAssetFonts(isolateId: firstUiIsolate.id!, viewId: views.first.id),
+        );
+      }
 
       // 3. Perform the standard, cross-platform eviction calls!
       for (final String assetPath in devFS.assetPathsToEvict) {

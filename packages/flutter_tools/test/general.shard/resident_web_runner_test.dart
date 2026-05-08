@@ -905,6 +905,11 @@ name: my_app
             },
           ),
           const FakeVmServiceRequest(
+            method: '_flutter.reloadAssetFonts',
+            args: <String, Object>{'isolateId': '1', 'viewId': '1'},
+            jsonResponse: <String, Object>{'type': 'Success'},
+          ),
+          const FakeVmServiceRequest(
             method: 'ext.flutter.evict',
             args: <String, Object>{'isolateId': '1', 'value': 'assets/foo.png'},
             jsonResponse: <String, Object>{'type': 'Success'},
@@ -925,6 +930,7 @@ name: my_app
       // Populate dirty assets and shaders to evict
       webDevFS.assetPathsToEvict.add('assets/foo.png');
       webDevFS.shaderPathsToEvict.add('shaders/bar.frag');
+      webDevFS.didUpdateFontManifest = true;
 
       final chromiumLauncher = TestChromiumLauncher();
       final process = FakeProcess();
@@ -2277,6 +2283,9 @@ class FakeWebDevFS extends Fake implements WebDevFS {
 
   @override
   final Set<String> shaderPathsToEvict = <String>{};
+
+  @override
+  bool didUpdateFontManifest = false;
 
   @override
   bool useDwdsWebSocketConnection = false;
