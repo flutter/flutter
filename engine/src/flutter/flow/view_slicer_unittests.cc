@@ -161,11 +161,11 @@ TEST(ViewSlicerTest, PreservesUnderlayForSelectedViews) {
   std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>>
       preserve_slices;
   AddSliceOfSize(preserve_slices, 1, DlRect::MakeLTRB(0, 0, 50, 50));
-  std::unordered_set<int64_t> preserve_underlay_for_views = {1};
+  std::unordered_set<int64_t> views_with_underlay_preserved = {1};
   DisplayListBuilder preserve_builder(DlRect::MakeLTRB(0, 0, 100, 100));
   auto preserve_overlays =
       SliceViews(&preserve_builder, composition_order, preserve_slices,
-                 view_rects, preserve_underlay_for_views);
+                 view_rects, views_with_underlay_preserved);
   EXPECT_EQ(preserve_overlays.size(), 1u);
   auto preserve_dl = preserve_builder.Build();
   EXPECT_FALSE(ContainsClipDifferenceRect(preserve_dl));
