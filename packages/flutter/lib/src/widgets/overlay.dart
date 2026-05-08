@@ -1514,31 +1514,12 @@ class _RenderTheater extends RenderBox
     }
 
     // Compute blockFocus for semantics.
-    var opaqueCovered = false;
-    OverlayEntry? opaqueEntry;
-    for (final RenderBox child in _childrenInHitTestOrder()) {
-      var isOpaque = false;
-      OverlayEntry? currentEntry;
-
-      if (child is _RenderFocusBlocker) {
-        final blocker = child as _RenderFocusBlocker;
-        isOpaque = blocker.accessibilityOpaque;
-
-        if (child is _RenderAccessibilityBarrier) {
-          final childParentData = child.parentData! as _TheaterParentData;
-          currentEntry = childParentData.overlayEntry;
-        } else if (child is _RenderDeferredLayoutBox) {
-          currentEntry = child.hostEntry;
-        }
-
-        final bool shouldBlock = opaqueCovered && currentEntry != opaqueEntry;
-        blocker.blockFocus = shouldBlock;
-      }
-
-      if (isOpaque) {
-        opaqueCovered = true;
-        opaqueEntry = currentEntry;
-      }
+    var isOpaque = false;
+    for (final _RenderAccessibilityFocusBlocker child
+        in _childrenInHitTestOrder().whereType<_RenderAccessibilityFocusBlocker>()) {
+      isOpaque = child.accessibilityOpaque;
+      child.blockFocus = isOpaque;
+      isOpaque |= child.accessibilityOpaque;
     }
   }
 
@@ -2634,7 +2615,10 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 //  When invoked from `PipelineOwner.flushLayout`, this `RenderObject` behaves
 //  like an `Overlay` that has only one entry.
 final class _RenderDeferredLayoutBox extends RenderProxyBox
-    with _RenderTheaterMixin, LinkedListEntry<_RenderDeferredLayoutBox>, _RenderFocusBlocker {
+    with
+        _RenderTheaterMixin,
+        LinkedListEntry<_RenderDeferredLayoutBox>,
+        _RenderAccessibilityFocusBlocker {
   _RenderDeferredLayoutBox(
     this._layoutSurrogate,
     Object? childIdentifier, {
@@ -3112,7 +3096,8 @@ class _AccessibilityBarrier extends SingleChildRenderObjectWidget {
   }
 }
 
-final class _RenderAccessibilityBarrier extends RenderProxyBox with _RenderFocusBlocker {
+final class _RenderAccessibilityBarrier extends RenderProxyBox
+    with _RenderAccessibilityFocusBlocker {
   _RenderAccessibilityBarrier({required bool accessibilityOpaque})
     : _accessibilityOpaque = accessibilityOpaque;
 
@@ -3135,7 +3120,7 @@ final class _RenderAccessibilityBarrier extends RenderProxyBox with _RenderFocus
   }
 }
 
-mixin _RenderFocusBlocker on RenderObject {
+mixin _RenderAccessibilityFocusBlocker on RenderObject {
   bool get blockFocus => _blockFocus;
   bool _blockFocus = false;
   set blockFocus(bool value) {
