@@ -39,7 +39,7 @@ external void heapFree(Pointer<Void> ptr);
 class StackScope {
   final List<Pointer<Void>> _heapPointers = <Pointer<Void>>[];
 
-  Pointer<Void> allocate(int length) {
+  Pointer<Void> _allocate(int length) {
     // Use heap allocation for buffers that would consume too much stack space.
     final int heapThreshold = math.min(4096, stackGetFree() ~/ 2);
     if (length > heapThreshold) {
@@ -50,12 +50,11 @@ class StackScope {
     return stackAlloc(length).cast<Void>();
   }
 
-  void freeHeap() {
+  void _freeHeap() {
     // ignore: prefer_foreach
     for (final Pointer<Void> ptr in _heapPointers) {
       heapFree(ptr);
     }
-    _heapPointers.clear();
   }
 
   Pointer<Int8> convertStringToNative(String string) {
@@ -226,44 +225,49 @@ class StackScope {
 
   Pointer<Bool> allocBoolArray(int count) {
     final int length = count * sizeOf<Bool>();
-    return allocate(length).cast<Bool>();
+    return _allocate(length).cast<Bool>();
   }
 
   Pointer<Int8> allocInt8Array(int count) {
     final int length = count * sizeOf<Int8>();
-    return allocate(length).cast<Int8>();
+    return _allocate(length).cast<Int8>();
   }
 
   Pointer<Uint16> allocUint16Array(int count) {
     final int length = count * sizeOf<Uint16>();
-    return allocate(length).cast<Uint16>();
+    return _allocate(length).cast<Uint16>();
   }
 
   Pointer<Int32> allocInt32Array(int count) {
     final int length = count * sizeOf<Int32>();
-    return allocate(length).cast<Int32>();
+    return _allocate(length).cast<Int32>();
   }
 
   Pointer<Uint32> allocUint32Array(int count) {
     final int length = count * sizeOf<Uint32>();
-    return allocate(length).cast<Uint32>();
+    return _allocate(length).cast<Uint32>();
   }
 
   Pointer<Float> allocFloatArray(int count) {
     final int length = count * sizeOf<Float>();
-    return allocate(length).cast<Float>();
+    return _allocate(length).cast<Float>();
   }
 
   Pointer<Pointer<Void>> allocPointerArray(int count) {
     final int length = count * sizeOf<Pointer<Void>>();
-    return allocate(length).cast<Pointer<Void>>();
+    return _allocate(length).cast<Pointer<Void>>();
   }
 }
 
 T withStackScope<T>(T Function(StackScope scope) f) {
   final StackPointer stack = stackSave();
   final scope = StackScope();
-  final T result = f(scope);
+  late final T result;
+  try {
+    result = f(scope);
+  } finally {
+    scope._freeHeap();
+  }
   assert(
     result is! Future,
     'withStackScope() closure returned a Future. '
@@ -271,7 +275,6 @@ T withStackScope<T>(T Function(StackScope scope) f) {
     'use async/await, because the stack is restored immediately after the '
     'closure returns.',
   );
-  scope.freeHeap();
   stackRestore(stack);
   return result;
 }
