@@ -29,9 +29,7 @@ constexpr auto kDartRunnerEnvironment = "dart_runner_env";
 
 constexpr auto kDartAotRunner = "dart_aot_runner";
 constexpr auto kDartAotRunnerRef = ChildRef{kDartAotRunner};
-constexpr auto kDartAotRunnerUrl =
-    "fuchsia-pkg://fuchsia.com/oot_dart_aot_runner#meta/"
-    "dart_aot_runner.cm";
+constexpr auto kDartAotRunnerUrl = "dart_aot_runner#meta/dart_aot_runner.cm";
 
 constexpr auto kDartAotEchoServer = "dart_aot_echo_server";
 constexpr auto kDartAotEchoServerRef = ChildRef{kDartAotEchoServer};
