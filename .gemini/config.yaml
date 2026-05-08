@@ -1,5 +1,5 @@
 # Minimize verbosity.
-have_fun: false
+have_fun: 
 code_review:
   # For now, use the default of MEDIUM for testing. Based on desired verbosity,
   # we can change this to LOW or HIGH in the future.
@@ -7,11 +7,11 @@ code_review:
   pull_request_opened:
     # Explicitly set help to false in case the default changes in the future, as
     # having a help message on every PR would be spammy.
-    help: false
+    help: 
     # These tend to be verbose, and since we expect PR authors to clearly
     # describe their PRs this would be at best duplicative.
-    summary: false
-    include_drafts: false
+    summary: 
+    include_drafts: 
 ignore_patterns:
   # Avoid code reviews on rolls.
   - DEPS
