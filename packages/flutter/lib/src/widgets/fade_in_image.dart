@@ -615,36 +615,24 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
     }
 
     if (widget.transition == FadeInImageTransition.fadeInOver) {
-      // Image fades in on top of the placeholder. The placeholder stays at full
-      // opacity and is removed from the tree once the fade-in completes.
+      // Image fades in on top of the placeholder, which stays at full opacity.
       _targetOpacityAnimation = animation.drive(
         _targetOpacity!.chain(CurveTween(curve: widget.fadeInCurve)),
       );
-      _placeholderOpacityAnimation = animation.drive(ConstantTween<double>(1.0))
-        ..addStatusListener((AnimationStatus status) {
-          if (_placeholderOpacityAnimation!.isCompleted) {
-            setState(() {});
-          }
-        });
+      _placeholderOpacityAnimation = animation.drive(ConstantTween<double>(1.0));
     } else {
-      _placeholderOpacityAnimation =
-          animation.drive(
-            TweenSequence<double>(<TweenSequenceItem<double>>[
-              TweenSequenceItem<double>(
-                tween: _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
-                weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
-              ),
-              TweenSequenceItem<double>(
-                tween: ConstantTween<double>(0),
-                weight: widget.fadeInDuration.inMilliseconds.toDouble(),
-              ),
-            ]),
-          )..addStatusListener((AnimationStatus status) {
-            if (_placeholderOpacityAnimation!.isCompleted) {
-              // Need to rebuild to remove placeholder now that it is invisible.
-              setState(() {});
-            }
-          });
+      _placeholderOpacityAnimation = animation.drive(
+        TweenSequence<double>(<TweenSequenceItem<double>>[
+          TweenSequenceItem<double>(
+            tween: _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
+            weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
+          ),
+          TweenSequenceItem<double>(
+            tween: ConstantTween<double>(0),
+            weight: widget.fadeInDuration.inMilliseconds.toDouble(),
+          ),
+        ]),
+      );
 
       _targetOpacityAnimation = animation.drive(
         TweenSequence<double>(<TweenSequenceItem<double>>[
@@ -659,6 +647,14 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
         ]),
       );
     }
+
+    // Rebuild when the placeholder animation completes so it can be removed
+    // from the widget tree.
+    _placeholderOpacityAnimation!.addStatusListener((AnimationStatus status) {
+      if (_placeholderOpacityAnimation!.isCompleted) {
+        setState(() {});
+      }
+    });
 
     widget.targetProxyAnimation.parent = _targetOpacityAnimation;
     widget.placeholderProxyAnimation.parent = _placeholderOpacityAnimation;
