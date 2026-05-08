@@ -15,6 +15,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
+#include "third_party/skia/src/base/SkBase64.h"
 
 namespace flutter {
 namespace testing {
@@ -143,6 +144,13 @@ bool WriteImageToDisk(const fml::UniqueFD& directory,
 
   if (!data) {
     return false;
+  }
+
+  std::string base64(SkBase64::EncodedSize(data->size()), 0);
+  SkBase64::Encode(data->data(), data->size(), base64.data());
+  std::cout << std::endl << "**************** image name=" << name << std::endl;
+  for (size_t i = 0; i < base64.size(); i += 80) {
+    std::cout << base64.substr(i, 80) << std::endl;
   }
 
   fml::NonOwnedMapping mapping(static_cast<const uint8_t*>(data->data()),
