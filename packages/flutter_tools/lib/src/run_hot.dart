@@ -1186,8 +1186,11 @@ class HotRunner extends ResidentRunner {
       final Uri deviceAssetsDirectoryUri = device.devFS!.baseUri!.resolveUri(
         globals.fs.path.toUri(getAssetBuildDirectory()),
       );
+      final List<FlutterView> activeViews = views
+          .where((FlutterView view) => view.uiIsolate != null)
+          .toList();
       await Future.wait<void>(
-        views.map<Future<void>>(
+        activeViews.map<Future<void>>(
           (FlutterView view) => device.vmService!.setAssetDirectory(
             assetsDirectory: deviceAssetsDirectoryUri,
             uiIsolateId: view.uiIsolate!.id,
@@ -1199,7 +1202,7 @@ class HotRunner extends ResidentRunner {
           ),
         ),
       );
-      for (final view in views) {
+      for (final view in activeViews) {
         globals.printTrace('Set asset directory in $view.');
       }
       device.devFS!.hasSetAssetDirectory = true;

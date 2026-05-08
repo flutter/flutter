@@ -1488,7 +1488,10 @@ abstract class ResidentRunner extends ResidentHandlers {
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
 
-      final vm_service.IsolateRef? firstUiIsolate = views.firstOrNull?.uiIsolate;
+      final FlutterView? firstViewWithIsolate = views
+          .where((FlutterView v) => v.uiIsolate != null)
+          .firstOrNull;
+      final vm_service.IsolateRef? firstUiIsolate = firstViewWithIsolate?.uiIsolate;
       if (firstUiIsolate == null) {
         continue;
       }
@@ -1499,7 +1502,10 @@ abstract class ResidentRunner extends ResidentHandlers {
       // 2. Perform font manifest reloading if it was updated.
       if (devFS.didUpdateFontManifest) {
         futures.add(
-          device.vmService!.reloadAssetFonts(isolateId: firstUiIsolate.id!, viewId: views.first.id),
+          device.vmService!.reloadAssetFonts(
+            isolateId: firstUiIsolate.id!,
+            viewId: firstViewWithIsolate!.id,
+          ),
         );
       }
 
