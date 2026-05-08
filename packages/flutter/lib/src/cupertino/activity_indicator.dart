@@ -172,17 +172,22 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     final int tickCount = _kAlphaValues.length;
 
     canvas.save();
-    canvas.translate(size.width / 2.0, size.height / 2.0);
+    canvas.translate(
+      (size.width / 2.0).roundToDouble(),
+      (size.height / 2.0).roundToDouble(),
+    );
 
     final int activeTick = (tickCount * position.value).floor();
 
     for (var i = 0; i < tickCount * progress; ++i) {
       final int t = (i - activeTick) % tickCount;
+      canvas.save();
+      canvas.rotate(i * _kTwoPI / tickCount);
       paint.color = activeColor.withAlpha(
         progress < 1 ? _partiallyRevealedAlpha : _kAlphaValues[t],
       );
       canvas.drawRRect(tickFundamentalShape, paint);
-      canvas.rotate(_kTwoPI / tickCount);
+      canvas.restore();
     }
 
     canvas.restore();
