@@ -2436,7 +2436,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)testSetupKeyboardAnimationVsyncClientWillCreateNewVsyncClientForFlutterViewController {
   id bundleMock = OCMPartialMock([NSBundle mainBundle]);
-  OCMStub([bundleMock objectForInfoDictionaryKey:@"CADisableMinimumFrameDurationOnPhone"])
+  OCMStub([bundleMock objectForInfoDictionaryKey:FlutterDisplayLinkManager
+                                                     .disableMinimumFrameDurationOnPhoneKey])
       .andReturn(@YES);
   id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;

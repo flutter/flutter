@@ -6,14 +6,15 @@ import Foundation
 import QuartzCore
 import UIKit
 
-/// Info.plist key enabling the full range of ProMotion refresh rates for CADisplayLink callbacks
-/// and CAAnimation animations in the app.
-///
-/// - SeeAlso: https://developer.apple.com/documentation/quartzcore/optimizing_promotion_refresh_rates_for_iphone_13_pro_and_ipad_pro#3885321
-public let kCADisableMinimumFrameDurationOnPhoneKey = "CADisableMinimumFrameDurationOnPhone"
-
 @objc(FlutterDisplayLinkManager)
 public class DisplayLinkManager: NSObject {
+
+  /// Info.plist key enabling the full range of ProMotion refresh rates for CADisplayLink callbacks
+  /// and CAAnimation animations in the app.
+  ///
+  /// - SeeAlso: https://developer.apple.com/documentation/quartzcore/optimizing_promotion_refresh_rates_for_iphone_13_pro_and_ipad_pro#3885321
+  @objc
+  public static let disableMinimumFrameDurationOnPhoneKey = "CADisableMinimumFrameDurationOnPhone"
 
   /// Whether the max refresh rate on iPhone ProMotion devices are enabled. This reflects the value
   /// of `CADisableMinimumFrameDurationOnPhone` in the info.plist file. On iPads that support
@@ -22,7 +23,7 @@ public class DisplayLinkManager: NSObject {
   /// - Returns: `true` if the max refresh rate on ProMotion devices is enabled.
   @objc
   public static let maxRefreshRateEnabledOnIPhone: Bool = {
-    return Bundle.main.object(forInfoDictionaryKey: kCADisableMinimumFrameDurationOnPhoneKey)
+    return Bundle.main.object(forInfoDictionaryKey: disableMinimumFrameDurationOnPhoneKey)
       as? Bool ?? false
   }()
 
@@ -63,9 +64,11 @@ public class DisplayLinkManager: NSObject {
 
 @objc(FlutterVSyncClient)
 public class VSyncClient: NSObject {
-  private let callback: (CFTimeInterval, CFTimeInterval) -> Void
-  @objc public private(set) var displayLink: CADisplayLink?
   private let isVariableRefreshRateEnabled: Bool
+  private let callback: (CFTimeInterval, CFTimeInterval) -> Void
+
+  /// The display link used to coordinate vsync callbacks.
+  @objc internal private(set) var displayLink: CADisplayLink?
 
   /// The current display refresh rate in Hertz, rounded to the nearest integer value.
   ///
@@ -115,6 +118,12 @@ public class VSyncClient: NSObject {
     }
   }
 
+  /// Configures the maximum and preferred refresh rate range for the display link.
+  ///
+  /// Sets the preferred frame rate range on iOS 15.0 and above, or preferred frames per second on
+  /// older iOS versions, provided that variable refresh rate support is enabled.
+  ///
+  /// - Parameter refreshRate: The target maximum refresh rate in Hertz.
   @objc
   public func setMaxRefreshRate(_ refreshRate: Double) {
     guard isVariableRefreshRateEnabled else { return }
@@ -134,25 +143,43 @@ public class VSyncClient: NSObject {
     }
   }
 
+  /// Resumes the display link to begin receiving vsync callback ticks.
+  ///
+  /// Calling this method unpauses the underlying `CADisplayLink`, allowing it to trigger
+  /// `onDisplayLink(_:)` on the next vsync event.
   @objc
   public func await() {
     displayLink?.isPaused = false
   }
 
+  /// Pauses the display link to stop receiving vsync callbacks.
+  ///
+  /// Calling this method pauses the underlying `CADisplayLink`, preventing it from triggering
+  /// any subsequent vsync events until `await()` is called.
   @objc
   public func pause() {
     displayLink?.isPaused = true
   }
 
-  /// Call invalidate before releasing this object to remove from runloops.
+  /// Invalidates the underlying display link to remove it from all run loops.
+  ///
+  /// This method must be called before releasing the `VSyncClient` instance to prevent memory leaks
+  /// caused by the `CADisplayLink` retaining its target.
   @objc
   public func invalidate() {
     displayLink?.invalidate()
     displayLink = nil
   }
 
+  /// The callback target triggered by the `CADisplayLink` on every vsync tick.
+  ///
+  /// This method updates the current display refresh rate metrics, logs a timeline trace for
+  /// instrumentation, automatically pauses the display link if `allowPauseAfterVsync` is set to
+  /// `true`, and invokes the vsync listener callback with the target start and next frame times.
+  ///
+  /// - Parameter link: The display link triggering this event.
   @objc
-  public func onDisplayLink(_ link: CADisplayLink) {
+  internal func onDisplayLink(_ link: CADisplayLink) {
     Tracing.tracePlatformVsync(
       withStartTime: link.timestamp,
       targetTime: link.targetTimestamp
