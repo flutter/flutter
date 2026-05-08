@@ -48,6 +48,12 @@ enum FadeInImageTransition {
 /// has been loaded and cached, the [image] is displayed immediately, and the
 /// [placeholder] is never displayed.
 ///
+/// The [transition] property controls how the widget transitions from the
+/// [placeholder] to the [image]. By default ([FadeInImageTransition.sequential]),
+/// the [placeholder] fades out before the [image] fades in. Use
+/// [FadeInImageTransition.fadeInOver] to have the [image] fade in on top of the
+/// [placeholder] without fading the placeholder out first.
+///
 /// The [fadeOutDuration] and [fadeOutCurve] properties control the fade-out
 /// animation of the [placeholder].
 ///
@@ -83,7 +89,7 @@ enum FadeInImageTransition {
 /// {@end-tool}
 class FadeInImage extends StatefulWidget {
   /// Creates a widget that displays a [placeholder] while an [image] is loading,
-  /// then fades-out the placeholder and fades-in the image.
+  /// then transitions to the image according to [transition].
   ///
   /// The [placeholder] and [image] may be composed in a [ResizeImage] to provide
   /// a custom decode/cache size.
