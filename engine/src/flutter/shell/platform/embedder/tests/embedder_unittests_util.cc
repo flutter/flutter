@@ -10,7 +10,6 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer.h"
 #include "flutter/shell/platform/embedder/tests/embedder_unittests_util.h"
 
-#include "third_party/abseil-cpp/absl/strings/escaping.h"
 #include "third_party/skia/include/core/SkCPURecorder.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -144,13 +143,6 @@ bool WriteImageToDisk(const fml::UniqueFD& directory,
 
   if (!data) {
     return false;
-  }
-
-  std::string base64 = absl::Base64Escape(std::string_view(
-      reinterpret_cast<const char*>(data->data()), data->size()));
-  std::cout << std::endl << "**************** image name=" << name << std::endl;
-  for (size_t i = 0; i < base64.size(); i += 80) {
-    std::cout << base64.substr(i, 80) << std::endl;
   }
 
   fml::NonOwnedMapping mapping(static_cast<const uint8_t*>(data->data()),

@@ -312,7 +312,6 @@ if (enable_unittests) {
       "//flutter/testing:dart",
       "//flutter/testing:skia",
       "//flutter/third_party/tonic",
-      "//third_party/abseil-cpp/absl/strings",
     ]
 
     if (test_enable_gl) {
