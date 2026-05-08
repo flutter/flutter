@@ -143,35 +143,6 @@ void main() {
         expect(testLogger.statusText, isEmpty);
       });
 
-      testWithoutContext('fails if Xcode workspace not found', () async {
-        final memoryFileSystem = MemoryFileSystem();
-        final testLogger = BufferLogger.test();
-        final project = FakeXcodeProject(
-          platform: FlutterDarwinPlatform.ios.name,
-          fileSystem: memoryFileSystem,
-          logger: testLogger,
-        );
-        _createProjectFiles(project, FlutterDarwinPlatform.ios, schemeMigrated: false);
-        project.xcodeWorkspace = null;
-
-        final projectMigration = SwiftPackageManagerIntegrationMigration(
-          project,
-          FlutterDarwinPlatform.ios,
-          BuildInfo.debug,
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          logger: testLogger,
-          fileSystem: memoryFileSystem,
-          plistParser: FakePlistParser(),
-          config: FakeConfig(),
-        );
-        await expectLater(
-          () => projectMigration.migrate(),
-          throwsToolExit(message: 'Xcode workspace not found.'),
-        );
-        expect(testLogger.traceText, isEmpty);
-        expect(testLogger.statusText, isEmpty);
-      });
-
       testWithoutContext('fails if scheme not found', () async {
         final memoryFileSystem = MemoryFileSystem();
         final testLogger = BufferLogger.test();
@@ -555,6 +526,45 @@ void main() {
             expect(
               project.xcodeProjectSchemeFile().readAsStringSync(),
               _validBuildActions(platform, hasFrameworkScript: true, hasBuildEntries: false),
+            );
+          });
+
+          testWithoutContext('successfully updates scheme with no Runner.xcworkspace', () async {
+            final memoryFileSystem = MemoryFileSystem();
+            final testLogger = BufferLogger.test();
+            final project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform, schemeMigrated: false);
+            project.xcodeWorkspace = null;
+            project.xcodeProjectSchemeFile().writeAsStringSync(
+              _validBuildActions(platform),
+            );
+
+            final plistParser = FakePlistParser.multiple(<String>[
+              _plutilOutput(_allSectionsMigratedAsJson(platform)),
+              _plutilOutput(_allSectionsMigratedAsJson(platform)),
+            ]);
+            project.xcodeProjectInfoFile.writeAsStringSync(
+              _projectSettings(_allSectionsMigrated(platform)),
+            );
+            final projectMigration = SwiftPackageManagerIntegrationMigration(
+              project,
+              platform,
+              BuildInfo.debug,
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              logger: testLogger,
+              fileSystem: memoryFileSystem,
+              plistParser: plistParser,
+              config: FakeConfig(),
+            );
+
+            await projectMigration.migrate();
+            expect(
+              project.xcodeProjectSchemeFile().readAsStringSync(),
+              _validBuildActions(platform, hasFrameworkScript: true),
             );
           });
 
