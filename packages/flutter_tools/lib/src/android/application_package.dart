@@ -189,7 +189,11 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     final String? packageId = manifests.first.getAttribute('package') ?? androidProject.namespace;
 
     String? launchActivity;
-    for (final XmlElement activity in document.findAllElements('activity')) {
+    final activities = <XmlElement>[
+      ...document.findAllElements('activity'),
+      ...document.findAllElements('activity-alias'),
+    ];
+    for (final activity in activities) {
       final String? enabled = activity.getAttribute('android:enabled');
       if (enabled != null && enabled == 'false') {
         continue;
