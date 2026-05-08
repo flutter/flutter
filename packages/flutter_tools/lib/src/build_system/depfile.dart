@@ -24,13 +24,31 @@ class DepfileService {
   /// This can be overridden with the [writeEmpty] parameter when
   /// both static and runtime dependencies exist and it is not desired
   /// to force a rerun due to no depfile.
-  void writeToFile(Depfile depfile, File output, {bool writeEmpty = false}) {
+  ///
+  /// If [filterOutputs] is true, files that are listed as both inputs and
+  /// outputs in the depfile are filtered out from the outputs list before
+  /// writing to avoid circular dependency cycles in external systems like Xcode.
+  void writeToFile(
+    Depfile depfile,
+    File output, {
+    bool writeEmpty = false,
+    bool filterOutputs = false,
+  }) {
     if (depfile.inputs.isEmpty && depfile.outputs.isEmpty && !writeEmpty) {
       ErrorHandlingFileSystem.deleteIfExists(output);
       return;
     }
     final buffer = StringBuffer();
-    _writeFilesToBuffer(depfile.outputs, buffer);
+    final List<File> outputsToWrite;
+    if (filterOutputs) {
+      final Set<String> inputPaths = depfile.inputs.map((File f) => f.absolute.path).toSet();
+      outputsToWrite = depfile.outputs
+          .where((File file) => !inputPaths.contains(file.absolute.path))
+          .toList();
+    } else {
+      outputsToWrite = depfile.outputs;
+    }
+    _writeFilesToBuffer(outputsToWrite, buffer);
     buffer.write(': ');
     _writeFilesToBuffer(depfile.inputs, buffer);
     output.writeAsStringSync(buffer.toString());

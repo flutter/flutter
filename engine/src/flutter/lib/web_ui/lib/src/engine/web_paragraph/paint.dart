@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 import '../../engine.dart';
 
-// TODO(jlavrova): We use it to paint shadows (with vertical shifts) so we need to make it tall enough as well.
 double? currentDevicePixelRatio;
 //final DomOffscreenCanvas paintCanvas = createDomOffscreenCanvas(0, 0);
 //final paintContext =
@@ -56,11 +55,10 @@ abstract class TextPaint {
     // We shift the target rect to the correct x position inside the line and
     // the correct y position of the line itself
     // (and then to the paragraph.paint x and y)
-
-    // TODO(jlavrova): Make translation in a single operation so it's actually an integer
-    final ui.Rect targetRect = zeroRect
-        .translate(clusterOffset.dx + webTextCluster.advance.left, clusterOffset.dy)
-        .translate(lineOffset.dx, lineOffset.dy);
+    final ui.Rect targetRect = zeroRect.translate(
+      lineOffset.dx + clusterOffset.dx + webTextCluster.advance.left,
+      lineOffset.dy + clusterOffset.dy,
+    );
 
     if (WebParagraphDebug.logging) {
       final String text = block is EllipsisBlock
@@ -102,12 +100,10 @@ abstract class TextPaint {
     // We shift the target rect to the correct x position inside the line and
     // the correct y position of the line itself
     // (and then to the paragraph.paint x and y)
-    // TODO(jlavrova): Make translation in a single operation so it's actually an integer
-    final ui.Rect targetRect = zeroRect
-        // TODO(jlavrova): Can we use `block.advance.left` instead of the cluster? That way
-        //                 we don't have to worry about LTR vs RTL to get first cluster.
-        .translate(blockOffset.dx, blockOffset.dy)
-        .translate(paragraphOffset.dx, paragraphOffset.dy);
+    final ui.Rect targetRect = zeroRect.translate(
+      paragraphOffset.dx + blockOffset.dx,
+      paragraphOffset.dy + blockOffset.dy,
+    );
 
     if (WebParagraphDebug.logging) {
       WebParagraphDebug.log(
@@ -223,8 +219,7 @@ abstract class TextPaint {
     paintContext.stroke();
   }
 
-  // TODO(jlavrova): implement decorations entirely on the resulting Canvas
-  /// Paints text decorations on Canvas2D
+  // TODO(jlavrova): Implement decorations entirely on the CanvasKit Canvas
   void fillDecorations(TextBlock block, ui.Rect sourceRect) {
     if (!block.style.hasElement(StyleElements.decorations) || block.style.decoration == null) {
       return;
