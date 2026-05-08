@@ -1303,6 +1303,66 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Semantics of entries below accessibilityOpaque entries are blocked', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    final overlayKey = GlobalKey<OverlayState>();
+    late final OverlayEntry bottomEntry;
+    addTearDown(
+      () => bottomEntry
+        ..remove()
+        ..dispose(),
+    );
+    late final OverlayEntry topEntry;
+    addTearDown(
+      () => topEntry
+        ..remove()
+        ..dispose(),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            bottomEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return const Text('bottom');
+              },
+            ),
+            topEntry = OverlayEntry(
+              accessibilityOpaque: true,
+              builder: (BuildContext context) {
+                return const Text('top');
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(find.text('bottom'), findsOneWidget);
+    expect(find.text('top'), findsOneWidget);
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics(
+            label: 'bottom',
+            flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+            textDirection: TextDirection.ltr,
+          ),
+          TestSemantics(
+            label: 'top',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
+      ),
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
+    semantics.dispose();
+  });
+
   testWidgets('Can use Positioned within OverlayEntry', (WidgetTester tester) async {
     late final OverlayEntry baseEntry;
     addTearDown(

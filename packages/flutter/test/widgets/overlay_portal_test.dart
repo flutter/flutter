@@ -3301,14 +3301,25 @@ void main() {
       TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics(
-            label: 'Background',
             flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+            children: <TestSemantics>[
+              TestSemantics(
+                label: 'Background',
+              ),
+            ],
           ),
           TestSemantics(
             label: 'Anchor',
-            flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
+            children: <TestSemantics>[
+              TestSemantics(
+                children: <TestSemantics>[
+                  TestSemantics(
+                    label: 'Menu',
+                  ),
+                ],
+              ),
+            ],
           ),
-          TestSemantics(label: 'Menu'),
         ],
       ),
       ignoreTransform: true,
