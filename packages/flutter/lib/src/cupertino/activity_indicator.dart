@@ -172,10 +172,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
     final int tickCount = _kAlphaValues.length;
 
     canvas.save();
-    canvas.translate(
-      (size.width / 2.0).roundToDouble(),
-      (size.height / 2.0).roundToDouble(),
-    );
+    canvas.translate((size.width / 2.0).roundToDouble(), (size.height / 2.0).roundToDouble());
 
     final int activeTick = (tickCount * position.value).floor();
     final int totalTicks = (tickCount * progress).ceil();
