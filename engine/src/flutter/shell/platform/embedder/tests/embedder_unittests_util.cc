@@ -10,12 +10,12 @@
 #include "flutter/shell/platform/embedder/tests/embedder_test_backingstore_producer.h"
 #include "flutter/shell/platform/embedder/tests/embedder_unittests_util.h"
 
+#include "third_party/abseil-cpp/absl/strings/escaping.h"
 #include "third_party/skia/include/core/SkCPURecorder.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/encode/SkPngEncoder.h"
 #include "third_party/skia/include/gpu/ganesh/SkSurfaceGanesh.h"
-#include "third_party/skia/src/base/SkBase64.h"
 
 namespace flutter {
 namespace testing {
@@ -146,8 +146,8 @@ bool WriteImageToDisk(const fml::UniqueFD& directory,
     return false;
   }
 
-  std::string base64(SkBase64::EncodedSize(data->size()), 0);
-  SkBase64::Encode(data->data(), data->size(), base64.data());
+  std::string base64 = absl::Base64Escape(std::string_view(
+      reinterpret_cast<const char*>(data->data()), data->size()));
   std::cout << std::endl << "**************** image name=" << name << std::endl;
   for (size_t i = 0; i < base64.size(); i += 80) {
     std::cout << base64.substr(i, 80) << std::endl;
