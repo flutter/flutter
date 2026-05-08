@@ -149,7 +149,7 @@ void validateIterablePropertyJsonSerialization(IterableProperty<Object> property
 }
 
 void validatePropertyJsonSerializationHelper(
-  Map<String, Object?> json,
+  final Map<String, Object?> json,
   DiagnosticsProperty<Object?> property,
 ) {
   if (property.defaultValue != kNoDefaultValue) {
