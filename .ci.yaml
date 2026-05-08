@@ -5441,7 +5441,7 @@ targets:
   - name: Mac wide_gamut_macos
     recipe: devicelab/devicelab_drone
     bringup: true
-    presubmit: true
+    presubmit: false
     timeout: 60
     properties:
       cpu: arm64
