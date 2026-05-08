@@ -119,11 +119,14 @@ return False
       if (!start) {
         return false;
       }
-      await _lldbProcess?.stdinWriteln('settings set symbols.load-on-demand true');
-      await _lldbProcess?.stdinWriteln('settings set symbols.enable-lldb-index-cache true');
-      await _lldbProcess?.stdinWriteln(
-        'settings set symbols.lldb-index-cache-path ${buildDirectory.childDirectory('lldb/index-cache').absolute.path}',
-      );
+      await _lldbProcess?.stdinWriteln('settings set script-lang python');
+      await _lldbProcess?.stdinWriteln('settings set show-inline-diagnostics false');
+      await _lldbProcess?.stdinWriteln('settings set use-color false');
+      await _lldbProcess?.stdinWriteln('settings set target.arg0 ${buildDirectory.childDirectory('Profile-iphoneos/Runner.app/Runner').absolute.path}');
+      await _lldbProcess?.stdinWriteln('settings set target.debug-file-search-paths ${buildDirectory.childDirectory('Profile-iphoneos').absolute.path}');
+      await _lldbProcess?.stdinWriteln('settings set target.exec-search-paths ${buildDirectory.childDirectory('Profile-iphoneos').absolute.path} ${buildDirectory.childDirectory('Profile-iphoneos').absolute.path}/');
+      await _lldbProcess?.stdinWriteln('settings set target.process.thread.step-out-avoid-nodebug true');
+
       await _selectDevice(deviceId);
       if (mode == BuildMode.debug) {
         await _setBreakpoint();
