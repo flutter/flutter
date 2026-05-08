@@ -119,13 +119,54 @@ return False
       if (!start) {
         return false;
       }
-      await _lldbProcess?.stdinWriteln('settings set script-lang python');
-      await _lldbProcess?.stdinWriteln('settings set show-inline-diagnostics false');
-      await _lldbProcess?.stdinWriteln('settings set use-color false');
-      await _lldbProcess?.stdinWriteln('settings set target.arg0 ${buildDirectory.childDirectory('Profile-iphoneos/Runner.app/Runner').absolute.path}');
-      await _lldbProcess?.stdinWriteln('settings set target.debug-file-search-paths ${buildDirectory.childDirectory('Profile-iphoneos').absolute.path}');
-      await _lldbProcess?.stdinWriteln('settings set target.exec-search-paths ${buildDirectory.childDirectory('Profile-iphoneos').absolute.path} ${buildDirectory.childDirectory('Profile-iphoneos').absolute.path}/');
-      await _lldbProcess?.stdinWriteln('settings set target.process.thread.step-out-avoid-nodebug true');
+      // await _lldbProcess?.stdinWriteln('settings set script-lang python');
+      await _lldbProcess?.stdinWriteln('settings set target.preload-symbols false');
+      // await _lldbProcess?.stdinWriteln('settings set symbols.load-on-demand true');
+      // await _lldbProcess?.stdinWriteln('settings set symbols.enable-external-lookup false');
+      // await _lldbProcess?.stdinWriteln('settings set symbols.enable-lldb-index-cache true');
+      // await _lldbProcess?.stdinWriteln(
+      //   'settings set symbols.lldb-index-cache-path ${buildDirectory.childDirectory('lldb/index-cache').absolute.path}',
+      // );
+      // final Directory supportDir = buildDirectory.fileSystem
+      //     .directory('/Users/vashworth/Library/Developer/Xcode')
+      //     .childDirectory(r'iOS\ DeviceSupport');
+      // final String deviceSupportPath = supportDir.childDirectory('iPad14,3 26.4 (23E246)').absolute.path;
+      // await _lldbProcess?.stdinWriteln(
+      //   r'settings set target.exec-search-paths /Users/vashworth/Library/Developer/Xcode/iOS\ DeviceSupport/ '
+      //   r'/Users/vashworth/Library/Developer/Xcode/iOS\ DeviceSupport '
+      //   r'/Users/vashworth/Library/Developer/Xcode/iOS\ DeviceSupport/iPad14,3\ 26.4\ \(23E246\) '
+      //   r'/Users/vashworth/Library/Developer/Xcode/iOS\ DeviceSupport/iPad14,3\ 26.4\ (23E246) '
+      //   r'/Users/vashworth/Library/Developer/Xcode/iOS\ DeviceSupport/iPad14,3\ 26.4\ \(23E246\)/Symbols '
+      //   r'/Users/vashworth/Library/Developer/Xcode/iOS\ DeviceSupport/iPad14,3\ 26.4\ (23E246)/Symbols ',
+      // );
+      // settings set target.exec-search-paths ~/Library/Developer/Xcode/iOS\ DeviceSupport/
+      // // await _lldbProcess?.stdinWriteln(
+      // //   'settings set target.arg0 ${buildDirectory.childDirectory('Profile-iphoneos/Runner.app/Runner').absolute.path}',
+      // // );
+      // await _lldbProcess?.stdinWriteln(
+      //   'target create ${buildDirectory.childDirectory('Profile-iphoneos/Runner.app/Runner').absolute.path}',
+      // );
+      // await _lldbProcess?.stdinWriteln(
+      //   'settings set target.debug-file-search-paths ${buildDirectory.childDirectory('Profile-iphoneos').absolute.path}',
+      // );
+      // await _lldbProcess?.stdinWriteln(
+      //   'settings set target.exec-search-paths ${buildDirectory.childDirectory('Profile-iphoneos').absolute.path} ${buildDirectory.childDirectory('Profile-iphoneos').absolute.path}/',
+      // );
+      // await _lldbProcess?.stdinWriteln(
+      //   'settings set target.process.thread.step-out-avoid-nodebug true',
+      // );
+
+      // unawaited(
+      //   Future.delayed(Duration(seconds: 25)).whenComplete(() {
+      //     _lldbProcess?.stdinWriteln('statistics dump');
+      //   }),
+      // );
+
+      //  unawaited(
+      //   Future.delayed(Duration(seconds: 30)).whenComplete(() {
+      //     _lldbProcess?.stdinWriteln('settings show');
+      //   }),
+      // );
 
       await _selectDevice(deviceId);
       if (mode == BuildMode.debug) {
@@ -221,7 +262,11 @@ return False
 
   /// Selects a device for LLDB to interact with.
   Future<void> _selectDevice(String deviceId) async {
+    final Future<String> futureLog = _startWaitingForLog(
+      RegExp('device select $deviceId'),
+    ).then((value) => value, onError: _handleAsyncError);
     await _lldbProcess?.stdinWriteln('device select $deviceId');
+    await futureLog;
   }
 
   /// Attaches LLDB to the [appProcessId] running on the device.
