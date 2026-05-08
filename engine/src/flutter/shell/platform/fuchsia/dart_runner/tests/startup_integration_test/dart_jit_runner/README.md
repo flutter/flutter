@@ -22,8 +22,6 @@ ninja -C $ENGINE_DIR/out/fuchsia_debug_x64 flutter/shell/platform/fuchsia fuchsi
 ```
 $FUCHSIA_DIR/.jiri_root/bin/ffx repository publish $FUCHSIA_DIR/$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files --package-archive $ENGINE_DIR/out/fuchsia_debug_x64/dart-jit-runner-integration-test-0.far
 
-$FUCHSIA_DIR/.jiri_root/bin/ffx repository publish $FUCHSIA_DIR/$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files --package-archive $ENGINE_DIR/out/fuchsia_debug_x64/oot_dart_jit_runner-0.far
-
 $FUCHSIA_DIR/.jiri_root/bin/ffx repository publish $FUCHSIA_DIR/$(cat $FUCHSIA_DIR/.fx-build-dir)/amber-files --package-archive $ENGINE_DIR/out/fuchsia_debug_x64/gen/flutter/shell/platform/fuchsia/dart_runner/tests/startup_integration_test/dart_echo_server/dart_jit_echo_server/dart_jit_echo_server.far
 ```
 

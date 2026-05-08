@@ -194,7 +194,7 @@ dependencies:
   vector_math: ^2.3.0
   video_player: 2.11.1
   video_player_android: 2.9.5
-  video_player_avfoundation: 2.9.4
+  video_player_avfoundation: 2.9.5
   video_player_platform_interface: 6.7.0
   video_player_web: 2.4.0
   vm_service: 15.2.0
@@ -224,4 +224,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: jhgspa
+# PUBSPEC CHECKSUM: o9r9q

@@ -40,4 +40,6 @@ executable("dart-aot-runner-integration-test-bin") {
 
 fuchsia_test_archive("dart-aot-runner-integration-test") {
   deps = [ ":dart-aot-runner-integration-test-bin" ]
+  subpackages =
+      [ "//flutter/shell/platform/fuchsia/dart_runner:dart_aot_runner" ]
 }
