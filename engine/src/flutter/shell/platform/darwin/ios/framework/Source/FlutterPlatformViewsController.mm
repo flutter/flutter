@@ -894,7 +894,7 @@ static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
     overlayCanvas->Save();
     overlayCanvas->ClipRect(overlay->second);
     if (viewsWithUnderlayPreserved.find(viewId) != viewsWithUnderlayPreserved.end()) {
-      ApplyComplexClipToOverlayCanvas(overlayCanvas, self.currentCompositionParams[viewId]);
+      ApplyNonRectClipToOverlayCanvas(overlayCanvas, self.currentCompositionParams[viewId]);
     }
     overlayCanvas->Clear(flutter::DlColor::kTransparent());
     self.slices[viewId]->render_into(overlayCanvas);
