@@ -116,7 +116,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 @property(nonatomic, assign) DlISize frameSize;
 
 /// The task runner for posting tasks to the platform thread.
-@property(nonatomic, readonly) const fml::RefPtr<fml::TaskRunner>& platformTaskRunner;
+@property(nonatomic, readonly) FlutterFMLTaskRunner* platformTaskRunner;
 
 /// This data must only be accessed on the platform thread.
 @property(nonatomic, readonly) std::unordered_map<int64_t, PlatformViewData>& platformViews;
@@ -241,7 +241,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::unordered_map<std::string, NSObject<FlutterPlatformViewFactory>*> _factories;
   std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>
       _gestureRecognizersBlockingPoliciesByType;
-  fml::RefPtr<fml::TaskRunner> _platformTaskRunner;
+  FlutterFMLTaskRunner* _platformTaskRunner;
   std::unordered_map<int64_t, PlatformViewData> _platformViews;
   std::unordered_map<int64_t, flutter::EmbeddedViewParams> _currentCompositionParams;
   std::unordered_set<int64_t> _viewsToDispose;
@@ -262,11 +262,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   return self;
 }
 
-- (const fml::RefPtr<fml::TaskRunner>&)taskRunner {
+- (FlutterFMLTaskRunner*)taskRunner {
   return _platformTaskRunner;
 }
 
-- (void)setTaskRunner:(const fml::RefPtr<fml::TaskRunner>&)platformTaskRunner {
+- (void)setTaskRunner:(FlutterFMLTaskRunner*)platformTaskRunner {
   _platformTaskRunner = platformTaskRunner;
 }
 
@@ -728,13 +728,14 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   // Reset will only be called from the raster thread or a merged raster/platform thread.
   // _platformViews must only be modified on the platform thread, and any operations that
   // read or modify platform views should occur there.
-  fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner, [self]() {
-    for (int64_t viewId : self.compositionOrder) {
+  std::vector<int64_t> compositionOrder = self.compositionOrder;
+  [self.taskRunner runNowOrPostTask:^{
+    for (int64_t viewId : compositionOrder) {
       [self.platformViews[viewId].root_view removeFromSuperview];
     }
     self.platformViews.clear();
     _previousCompositionOrder.clear();
-  });
+  }];
 
   self.compositionOrder.clear();
   self.slices.clear();
@@ -753,15 +754,16 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     // No platform views to render but the FlutterView may need to be resized.
     __weak FlutterPlatformViewsController* weakSelf = self;
     if (self.flutterView != nil) {
-      fml::TaskRunner::RunNowOrPostTask(
-          weakSelf.platformTaskRunner,
-          fml::MakeCopyable([weakSelf, frameSize = weakSelf.frameSize]() {
-            FlutterPlatformViewsController* strongSelf = weakSelf;
-            if (!strongSelf) {
-              return;
-            }
-            [strongSelf performResize:frameSize];
-          }));
+      // Pass frameSize by value since self.frameSize is mutated both here (on the platform
+      // thread) and in beginFrameWithSize: (on the raster thread).
+      const flutter::DlISize frameSize = self.frameSize;
+      [self.taskRunner runNowOrPostTask:^{
+        FlutterPlatformViewsController* strongSelf = weakSelf;
+        if (!strongSelf) {
+          return;
+        }
+        [strongSelf performResize:frameSize];
+      }];
     }
 
     self.hadPlatformViews = NO;
@@ -849,22 +851,24 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::vector<std::shared_ptr<flutter::OverlayLayer>> unusedLayers =
       self.layerPool->RemoveUnusedLayers();
   self.layerPool->RecycleLayers();
-  auto task = [self,                                                      //
-               platformViewLayers = std::move(platformViewLayers),        //
-               currentCompositionParams = self.currentCompositionParams,  //
-               viewsToRecomposite = self.viewsToRecomposite,              //
-               compositionOrder = self.compositionOrder,                  //
-               unusedLayers = std::move(unusedLayers),                    //
-               surfaceFrames = std::move(surfaceFrames)]() mutable {
+  auto task = fml::MakeCopyable([self,                                                      //
+                                 platformViewLayers = std::move(platformViewLayers),        //
+                                 currentCompositionParams = self.currentCompositionParams,  //
+                                 viewsToRecomposite = self.viewsToRecomposite,              //
+                                 compositionOrder = self.compositionOrder,                  //
+                                 unusedLayers = std::move(unusedLayers),                    //
+                                 surfaceFrames = std::move(surfaceFrames)]() mutable {
     [self performSubmit:platformViewLayers
         currentCompositionParams:currentCompositionParams
               viewsToRecomposite:viewsToRecomposite
                 compositionOrder:compositionOrder
                     unusedLayers:unusedLayers
                    surfaceFrames:surfaceFrames];
-  };
+  });
 
-  fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner, fml::MakeCopyable(std::move(task)));
+  [self.taskRunner runNowOrPostTask:^{
+    task();
+  }];
   return didEncode;
 }
 
@@ -878,16 +882,16 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   auto missingLayerCount = requiredOverlayLayers - self.layerPool->size();
 
   // If the raster thread isn't merged, create layers on the platform thread and block until
-  // complete.
+  // complete. The self-capture here is fine since this is effectively synchronous (we block on the
+  // latch right below).
   auto latch = std::make_shared<fml::CountDownLatch>(1u);
-  fml::TaskRunner::RunNowOrPostTask(
-      self.platformTaskRunner, [self, missingLayerCount, iosContext, latch]() {
-        for (auto i = 0u; i < missingLayerCount; i++) {
-          [self createLayerWithIosContext:iosContext
-                              pixelFormat:((FlutterView*)self.flutterView).pixelFormat];
-        }
-        latch->CountDown();
-      });
+  [self.taskRunner runNowOrPostTask:^{
+    for (auto i = 0u; i < missingLayerCount; i++) {
+      [self createLayerWithIosContext:iosContext
+                          pixelFormat:((FlutterView*)self.flutterView).pixelFormat];
+    }
+    latch->CountDown();
+  }];
   if (![[NSThread currentThread] isMainThread]) {
     latch->Wait();
   }

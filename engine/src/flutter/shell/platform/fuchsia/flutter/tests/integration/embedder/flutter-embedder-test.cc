@@ -52,17 +52,13 @@ using fuchsia_test_utils::CheckViewExistsInUpdates;
 constexpr auto kVulkanLoaderServiceName = "fuchsia.vulkan.loader.Loader";
 
 constexpr auto kFlutterJitRunnerUrl =
-    "fuchsia-pkg://fuchsia.com/oot_flutter_jit_runner#meta/"
-    "flutter_jit_runner.cm";
+    "flutter_jit_runner#meta/flutter_jit_runner.cm";
 constexpr auto kFlutterJitProductRunnerUrl =
-    "fuchsia-pkg://fuchsia.com/oot_flutter_jit_product_runner#meta/"
-    "flutter_jit_product_runner.cm";
+    "flutter_jit_product_runner#meta/flutter_jit_product_runner.cm";
 constexpr auto kFlutterAotRunnerUrl =
-    "fuchsia-pkg://fuchsia.com/oot_flutter_aot_runner#meta/"
-    "flutter_aot_runner.cm";
+    "flutter_aot_runner#meta/flutter_aot_runner.cm";
 constexpr auto kFlutterAotProductRunnerUrl =
-    "fuchsia-pkg://fuchsia.com/oot_flutter_aot_product_runner#meta/"
-    "flutter_aot_product_runner.cm";
+    "flutter_aot_product_runner#meta/flutter_aot_product_runner.cm";
 constexpr char kChildViewUrl[] =
     "fuchsia-pkg://fuchsia.com/child-view#meta/child-view.cm";
 constexpr char kParentViewUrl[] =

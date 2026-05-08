@@ -38,7 +38,6 @@ abstract class Painter {
 
   /// Adjust the _paintCanvas scale based on device pixel ratio
   void resizePaintCanvas(double devicePixelRatio, double width, double height) {
-    // TODO(jlavrova): we need to investigate different approaches to resizing the canvas.
     // 1. Do we resize to 0, 0 at the end of each paint so we do not hold on to large buffers?
     // 2. Do we keep the canvas around (even big ones) and only resize when needed?
     // 3. Do we have a max size and reuse the canvas up to that size?

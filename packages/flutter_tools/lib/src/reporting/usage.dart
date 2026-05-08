@@ -316,8 +316,11 @@ class _DefaultUsage implements Usage {
     // the license terms have changed since it was last displayed.
     final FirstRunMessenger? messenger = firstRunMessenger;
     if (messenger != null && messenger.shouldDisplayLicenseTerms()) {
-      globals.printStatus('');
-      globals.printStatus(messenger.licenseTerms, emphasis: true);
+      final void Function(String, {bool emphasis}) logFunction = globals.logger.isMachine
+          ? globals.logger.printError
+          : globals.printStatus;
+      logFunction('');
+      logFunction(messenger.licenseTerms, emphasis: true);
       _printedWelcome = true;
       messenger.confirmLicenseTermsDisplayed();
     }

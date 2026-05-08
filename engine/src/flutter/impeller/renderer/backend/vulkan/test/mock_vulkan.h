@@ -89,6 +89,12 @@ class MockVulkanContextBuilder {
     return *this;
   }
 
+  MockVulkanContextBuilder& SetDeviceExtensions(
+      const std::vector<std::string>& device_extensions) {
+    device_extensions_ = device_extensions;
+    return *this;
+  }
+
   /// Set the behavior of vkGetPhysicalDeviceFormatProperties, which needs to
   /// respond differently for different formats.
   MockVulkanContextBuilder& SetPhysicalDeviceFormatPropertiesCallback(
@@ -132,6 +138,7 @@ class MockVulkanContextBuilder {
   std::function<void(ContextVK::Settings&)> settings_callback_;
   std::vector<std::string> instance_extensions_;
   std::vector<std::string> instance_layers_;
+  std::vector<std::string> device_extensions_;
   std::optional<ContextVK::EmbedderData> embedder_data_;
   std::function<void(VkPhysicalDevice physicalDevice,
                      VkFormat format,

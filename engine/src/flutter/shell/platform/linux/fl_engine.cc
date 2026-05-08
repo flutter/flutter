@@ -223,9 +223,9 @@ static void view_removed_cb(const FlutterRemoveViewResult* result) {
 }
 
 static void free_locale(FlutterLocale* locale) {
-  free(const_cast<gchar*>(locale->language_code));
-  free(const_cast<gchar*>(locale->country_code));
-  free(locale);
+  g_free(const_cast<gchar*>(locale->language_code));
+  g_free(const_cast<gchar*>(locale->country_code));
+  g_free(locale);
 }
 
 // Passes locale information to the Flutter engine.
