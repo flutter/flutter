@@ -90,6 +90,7 @@ void main() {
   });
 
   testWidgets('Material3 - InkWell widget renders an ink splash', (WidgetTester tester) async {
+    await _warmUpShader(tester, InkSparkle.splashFactory);
     const inkWellKey = Key('InkWell');
     const splashColor = Color(0xAA0000FF);
     const borderRadius = BorderRadius.all(Radius.circular(6.0));
@@ -326,6 +327,7 @@ void main() {
   });
 
   testWidgets('Material3 - Does the Ink widget render anything', (WidgetTester tester) async {
+    await _warmUpShader(tester, InkSparkle.splashFactory);
     const inkWellKey = Key('InkWell');
     await tester.pumpWidget(
       MaterialApp(
@@ -717,6 +719,7 @@ void main() {
   testWidgets('Material3 - Custom rectCallback renders an ink splash from its center', (
     WidgetTester tester,
   ) async {
+    await _warmUpShader(tester, InkSparkle.splashFactory);
     const inkWResponseKey = Key('InkResponse');
     const splashColor = Color(0xff00ff00);
 
@@ -822,4 +825,43 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
       textDirection: textDirection,
     );
   }
+}
+
+/// The set of [InteractiveInkFeatureFactory]s whose shaders have been warmed up
+/// in this test run.
+final Set<InteractiveInkFeatureFactory> _warmedUpFactories = <InteractiveInkFeatureFactory>{};
+
+/// Warms up fragment shaders for a given [splashFactory] before running golden
+/// tests.
+///
+/// Because fragment shaders are compiled asynchronously on the engine's
+/// background thread, compiling them is a real-world task that does not respect
+/// the virtual clock. We use [WidgetTester.runAsync] to yield to the real-world
+/// event loop, allowing the compilation to finish before taking a golden
+/// screenshot.
+Future<void> _warmUpShader(WidgetTester tester, InteractiveInkFeatureFactory splashFactory) async {
+  if (_warmedUpFactories.contains(splashFactory)) {
+    return;
+  }
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Material(
+        child: Center(
+          child: InkWell(splashFactory: splashFactory, onTap: () {}),
+        ),
+      ),
+    ),
+  );
+  await tester.tap(find.byType(InkWell));
+
+  // Trigger the ink splash animation.
+  await tester.pump();
+
+  // Yield to the real-world event loop to allow asynchronous shader compilation
+  // to complete.
+  await tester.runAsync(() async {
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+  });
+  await tester.pumpAndSettle();
+  _warmedUpFactories.add(splashFactory);
 }
