@@ -19,7 +19,7 @@ class Screenshotter {
   virtual ~Screenshotter() = default;
 
   virtual std::unique_ptr<Screenshot> MakeScreenshot(
-      AiksContext& aiks_context,
+      const AiksContext& aiks_context,
       const std::shared_ptr<Texture> texture) = 0;
 
   virtual PlaygroundImpl& GetPlayground() = 0;

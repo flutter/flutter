@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_INTERNALFLUTTERSWIFT_BRIDGING_HEADER_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_INTERNALFLUTTERSWIFT_BRIDGING_HEADER_H_
 
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterTracing.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/Flutter.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunners.h"

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "key_mapping.h"
+#include "fl_key_mapping.h"
 #include <gmodule.h>
 #include <algorithm>
 #include <vector>
