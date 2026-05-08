@@ -698,8 +698,10 @@ void main() {
       ({FadeInImageElements placeholder, FadeInImageElements target}) findFadeInOverImages(
         WidgetTester tester,
       ) {
-        final List<FadeInImageElements> elements =
-            tester.elementList(find.byType(RawImage)).map(FadeInImageElements.new).toList();
+        final List<FadeInImageElements> elements = tester
+            .elementList(find.byType(RawImage))
+            .map(FadeInImageElements.new)
+            .toList();
         expect(elements, hasLength(2));
         // In [placeholder, target] stack order the first element is the placeholder.
         return (placeholder: elements.first, target: elements.last);
@@ -729,7 +731,8 @@ void main() {
 
         // Placeholder should remain at full opacity while image fades in.
         for (var i = 0; i < 5; i += 1) {
-          final ({FadeInImageElements placeholder, FadeInImageElements target}) images = findFadeInOverImages(tester);
+          final ({FadeInImageElements placeholder, FadeInImageElements target}) images =
+              findFadeInOverImages(tester);
           expect(
             images.placeholder.rawImage.image!.isCloneOf(placeholderImage),
             true,
