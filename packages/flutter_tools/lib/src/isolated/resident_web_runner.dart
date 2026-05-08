@@ -349,7 +349,7 @@ class ResidentWebRunner extends ResidentRunner {
             target,
             debuggingOptions.buildInfo,
             ServiceWorkerStrategy.none,
-            compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+            compilerConfigs: _compilerConfigs,
           );
         }
         final webDevFS = flutterDevice!.devFS! as WebDevFS;
@@ -406,18 +406,37 @@ class ResidentWebRunner extends ResidentRunner {
     }
   }
 
-  WebCompilerConfig get _compilerConfig {
+  /// Compiler configurations to build for `flutter run`.
+  ///
+  /// When `--wasm` is set, this returns both a Wasm and a JS configuration so
+  /// the Flutter web loader can fall back to JS at runtime on browsers that
+  /// don't support WasmGC. This matches `flutter build web --wasm`, which
+  /// already builds both variants for the same reason.
+  ///
+  /// Without `--wasm`, only a single JS config is returned.
+  ///
+  /// See https://github.com/flutter/flutter/issues/172006.
+  List<WebCompilerConfig> get _compilerConfigs {
     if (debuggingOptions.webUseWasm) {
-      return WasmCompilerConfig(
-        optimizationLevel: 0,
-        stripWasm: false,
-        renderer: debuggingOptions.webRenderer,
-      );
+      return <WebCompilerConfig>[
+        WasmCompilerConfig(
+          optimizationLevel: 0,
+          stripWasm: false,
+          renderer: debuggingOptions.webRenderer,
+        ),
+        // JS fallback for browsers that don't support WasmGC.
+        JsCompilerConfig.run(
+          nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+          renderer: debuggingOptions.webRenderer,
+        ),
+      ];
     }
-    return JsCompilerConfig.run(
-      nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-      renderer: debuggingOptions.webRenderer,
-    );
+    return <WebCompilerConfig>[
+      JsCompilerConfig.run(
+        nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+        renderer: debuggingOptions.webRenderer,
+      ),
+    ];
   }
 
   /// Handles the no clients available scenario gracefully.
@@ -502,7 +521,7 @@ class ResidentWebRunner extends ResidentRunner {
           target,
           debuggingOptions.buildInfo,
           ServiceWorkerStrategy.none,
-          compilerConfigs: <WebCompilerConfig>[_compilerConfig],
+          compilerConfigs: _compilerConfigs,
         );
       } on ToolExit {
         return OperationResult(1, 'Failed to recompile application.');
