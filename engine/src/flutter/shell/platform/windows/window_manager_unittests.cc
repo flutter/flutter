@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
+#include <vector>
+
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/testing/egl/mock_context.h"
 #include "flutter/shell/platform/windows/testing/egl/mock_manager.h"
@@ -1135,6 +1138,108 @@ TEST_F(WindowManagerTest, UpdatePopupPositionWithNonFlutterHandleDoesNotCrash) {
   // window) causes GetThisFromHandle to return nullptr because the class name
   // does not match. The call must not dereference the null result.
   InternalFlutterWindows_WindowManager_UpdatePopupPosition(GetDesktopWindow());
+}
+
+// Verifies that |OnEngineShutdown| destroys popup windows BEFORE clearing
+// |on_message_|, so the WM_DESTROY round-trip reaches the isolate. Without
+// this, |PopupWindowControllerWin32._destroyed| would never be set during
+// engine shutdown and queued FFI calls (e.g. updatePosition) would
+// dereference stale HostWindow pointers.
+TEST_F(WindowManagerTest, OnEngineShutdownDispatchesWmDestroyForPopupWindow) {
+  IsolateScope isolate_scope(isolate());
+
+  static std::vector<UINT> received_messages;
+  received_messages.clear();
+  WindowingInitRequest init_request{.on_message = [](WindowsMessage* message) {
+    received_messages.push_back(message->message);
+  }};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  auto position_callback = [](const WindowSize& child_size,
+                              const WindowRect& parent_rect,
+                              const WindowRect& output_rect) -> WindowRect* {
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
+  };
+
+  PopupWindowCreationRequest creation_request{
+      .preferred_constraints = {.has_view_constraints = true,
+                                .view_min_width = 100,
+                                .view_min_height = 50,
+                                .view_max_width = 300,
+                                .view_max_height = 200},
+      .parent = parent_window_handle,
+      .get_position_callback = position_callback};
+
+  InternalFlutterWindows_WindowManager_CreatePopupWindow(engine_id(),
+                                                         &creation_request);
+
+  received_messages.clear();
+  engine()->window_manager()->OnEngineShutdown();
+
+  EXPECT_NE(std::find(received_messages.begin(), received_messages.end(),
+                      static_cast<UINT>(WM_DESTROY)),
+            received_messages.end());
+}
+
+// Same as above for tooltips.
+TEST_F(WindowManagerTest, OnEngineShutdownDispatchesWmDestroyForTooltipWindow) {
+  IsolateScope isolate_scope(isolate());
+
+  static std::vector<UINT> received_messages;
+  received_messages.clear();
+  WindowingInitRequest init_request{.on_message = [](WindowsMessage* message) {
+    received_messages.push_back(message->message);
+  }};
+  InternalFlutterWindows_WindowManager_Initialize(engine_id(), &init_request);
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  auto position_callback = [](const WindowSize& child_size,
+                              const WindowRect& parent_rect,
+                              const WindowRect& output_rect) -> WindowRect* {
+    WindowRect* rect = static_cast<WindowRect*>(malloc(sizeof(WindowRect)));
+    rect->left = parent_rect.left + 10;
+    rect->top = parent_rect.top + 10;
+    rect->width = child_size.width;
+    rect->height = child_size.height;
+    return rect;
+  };
+
+  TooltipWindowCreationRequest creation_request{
+      .preferred_constraints = {.has_view_constraints = true,
+                                .view_min_width = 100,
+                                .view_min_height = 50,
+                                .view_max_width = 300,
+                                .view_max_height = 200},
+      .parent = parent_window_handle,
+      .get_position_callback = position_callback};
+
+  InternalFlutterWindows_WindowManager_CreateTooltipWindow(engine_id(),
+                                                           &creation_request);
+
+  received_messages.clear();
+  engine()->window_manager()->OnEngineShutdown();
+
+  EXPECT_NE(std::find(received_messages.begin(), received_messages.end(),
+                      static_cast<UINT>(WM_DESTROY)),
+            received_messages.end());
 }
 
 }  // namespace testing

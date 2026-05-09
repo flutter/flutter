@@ -891,6 +891,9 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
 
   @override
   void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
+    if (_destroyed) {
+      return;
+    }
     if (anchorRect != null) {
       _anchorRect = anchorRect;
     }

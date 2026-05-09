@@ -87,19 +87,23 @@ FlutterViewId WindowManager::CreatePopupWindow(
 }
 
 void WindowManager::OnEngineShutdown() {
-  // Don't send any more messages to isolate.
-  on_message_ = nullptr;
   std::vector<HWND> active_handles;
   active_handles.reserve(active_windows_.size());
   for (auto& [hwnd, window] : active_windows_) {
     active_handles.push_back(hwnd);
   }
+  // Destroy the windows before clearing |on_message_| so the WM_DESTROY
+  // round-trip reaches the isolate. Otherwise per-view Dart controllers
+  // never observe destruction and may issue follow-up FFI calls (e.g.
+  // updatePosition) with stale handles after the engine is torn down.
   for (auto hwnd : active_handles) {
     // This will destroy the window, which will in turn remove the
     // HostWindow from map when handling WM_NCDESTROY inside
     // HandleMessage.
     InternalFlutterWindows_WindowManager_OnDestroyWindow(hwnd);
   }
+  // Don't send any more messages to isolate.
+  on_message_ = nullptr;
 }
 
 std::optional<LRESULT> WindowManager::HandleMessage(HWND hwnd,
@@ -268,23 +272,15 @@ bool InternalFlutterWindows_WindowManager_GetFullscreen(HWND hwnd) {
 FLUTTER_EXPORT
 void InternalFlutterWindows_WindowManager_UpdateTooltipPosition(HWND hwnd) {
   flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
-  if (window) {
-    flutter::HostWindowTooltip* tooltip_window =
-        reinterpret_cast<flutter::HostWindowTooltip*>(window);
-    tooltip_window->UpdatePosition();
-  } else {
-    FML_LOG(WARNING) << "UpdateTooltipPosition: no host window for handle";
-  }
+  flutter::HostWindowTooltip* tooltip_window =
+      reinterpret_cast<flutter::HostWindowTooltip*>(window);
+  tooltip_window->UpdatePosition();
 }
 
 FLUTTER_EXPORT
 void InternalFlutterWindows_WindowManager_UpdatePopupPosition(HWND hwnd) {
   flutter::HostWindow* window = flutter::HostWindow::GetThisFromHandle(hwnd);
-  if (window) {
-    flutter::HostWindowPopup* popup_window =
-        reinterpret_cast<flutter::HostWindowPopup*>(window);
-    popup_window->UpdatePosition();
-  } else {
-    FML_LOG(WARNING) << "UpdatePopupPosition: no host window for handle";
-  }
+  flutter::HostWindowPopup* popup_window =
+      reinterpret_cast<flutter::HostWindowPopup*>(window);
+  popup_window->UpdatePosition();
 }
