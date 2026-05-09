@@ -442,10 +442,7 @@ void main() async {
     const blue = ui.Color.fromARGB(0xFF, 0, 0, 0xFF);
 
     // Mip 0: 8x8 = 64 texels.
-    texture.overwrite(
-      Int32List.fromList(List<int>.filled(64, red.value)).buffer.asByteData(),
-      mipLevel: 0,
-    );
+    texture.overwrite(Int32List.fromList(List<int>.filled(64, red.value)).buffer.asByteData());
     // Mip 1: 4x4 = 16 texels.
     texture.overwrite(
       Int32List.fromList(List<int>.filled(16, blue.value)).buffer.asByteData(),
@@ -508,7 +505,7 @@ void main() async {
       ui.Color.fromARGB(0xFF, 0xFF, 0, 0xFF),
       ui.Color.fromARGB(0xFF, 0, 0xFF, 0xFF),
     ];
-    for (int slice = 0; slice < 6; slice++) {
+    for (var slice = 0; slice < 6; slice++) {
       final int v = colors[slice].value;
       texture.overwrite(Int32List.fromList(<int>[v, v, v, v]).buffer.asByteData(), slice: slice);
     }
