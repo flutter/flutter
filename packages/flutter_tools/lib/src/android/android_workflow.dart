@@ -195,6 +195,7 @@ class AndroidValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validateImpl() async {
     final messages = <ValidationMessage>[];
+    String? sdkVersionText;
     final AndroidSdk? androidSdk = _androidSdk;
     if (androidSdk == null) {
       // No Android SDK found.
@@ -234,13 +235,41 @@ class AndroidValidator extends DoctorValidator {
       return ValidationResult(ValidationType.missing, messages);
     }
 
+    if (androidSdk.avdManagerPath != null) {
+      _task = 'Validating avdmanager is functional';
+      final processUtils = ProcessUtils(processManager: _processManager, logger: _logger);
+      try {
+        final RunResult result = await processUtils.run(<String>[
+          androidSdk.avdManagerPath!,
+          'list',
+        ], environment: _java?.environment);
+        if (result.exitCode != 0) {
+          messages.add(
+            ValidationMessage.error(
+              'avdmanager is not functional. Running avdmanager failed with exit code ${result.exitCode}:\n'
+              '${result.stderr}\n'
+              'This usually indicates that the Java Development Kit (JDK) is not installed or is misconfigured.',
+            ),
+          );
+          return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
+        }
+      } on Exception catch (error) {
+        messages.add(
+          ValidationMessage.error(
+            'avdmanager is not functional. Failed to run avdmanager:\n'
+            '$error',
+          ),
+        );
+        return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
+      }
+    }
+
     _task = 'Validating Android SDK licenses';
     if (androidSdk.licensesAvailable && !androidSdk.platformToolsAvailable) {
       messages.add(ValidationMessage.hint(_userMessages.androidSdkLicenseOnly(kAndroidHome)));
       return ValidationResult(ValidationType.partial, messages);
     }
 
-    String? sdkVersionText;
     final AndroidSdkVersion? androidSdkLatestVersion = androidSdk.latestVersion;
     if (androidSdkLatestVersion != null) {
       if (androidSdkLatestVersion.sdkLevel < gradle_utils.compileSdkVersionInt ||

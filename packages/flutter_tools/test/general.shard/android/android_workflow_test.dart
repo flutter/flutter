@@ -599,6 +599,73 @@ Review licenses that have not been accepted (y/N)?
     );
   });
 
+  testUsingContext('avdmanager is functional', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
+      ..avdManagerPath = '/foo/bar/avdmanager'
+      ..directory = fileSystem.directory('/foo/bar')
+      ..emulatorPath = 'path/to/emulator';
+
+    processManager.addCommand(const FakeCommand(command: <String>['/foo/bar/avdmanager', 'list']));
+
+    final androidValidator = AndroidValidator(
+      java: FakeJava(),
+      androidSdk: sdk,
+      logger: logger,
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+      userMessages: UserMessages(),
+      processManager: processManager,
+    );
+
+    final ValidationResult validationResult = await androidValidator.validate();
+    expect(validationResult.type, ValidationType.success);
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
+  testUsingContext('avdmanager is not functional due to missing Java', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
+      ..avdManagerPath = '/foo/bar/avdmanager'
+      ..directory = fileSystem.directory('/foo/bar')
+      ..emulatorPath = 'path/to/emulator';
+
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['/foo/bar/avdmanager', 'list'],
+        exitCode: 1,
+        stderr: 'No Java runtime present, requesting install.',
+      ),
+    );
+
+    final androidValidator = AndroidValidator(
+      java: FakeJava(),
+      androidSdk: sdk,
+      logger: logger,
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+      userMessages: UserMessages(),
+      processManager: processManager,
+    );
+
+    final ValidationResult validationResult = await androidValidator.validate();
+    expect(validationResult.type, ValidationType.partial);
+
+    final ValidationMessage errorMessage = validationResult.messages.firstWhere(
+      (ValidationMessage message) => message.type == ValidationMessageType.error,
+    );
+    expect(
+      errorMessage.message,
+      contains(
+        'avdmanager is not functional. Running avdmanager failed with exit code 1:\n'
+        'No Java runtime present, requesting install.',
+      ),
+    );
+    expect(processManager, hasNoRemainingExpectations);
+  });
+
   // Warning test not available when minimum and error are aligned.
   testUsingContext('detects minimum required java version', () async {
     // Test with older version of JDK
@@ -863,6 +930,9 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 
   @override
   String? sdkManagerVersion;
+
+  @override
+  String? avdManagerPath;
 
   @override
   String? adbPath;
