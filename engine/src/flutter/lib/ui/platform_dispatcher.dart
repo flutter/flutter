@@ -57,6 +57,9 @@ typedef PlatformMessageResponseCallback = void Function(ByteData? data);
 /// The callback receives the ID of the texture that has a new frame available.
 typedef TextureFrameAvailableCallback = void Function(int textureId);
 
+/// Signature for [PlatformDispatcher.onMarkAllViewsDirty].
+typedef MarkAllViewsDirtyCallback = void Function();
+
 /// Deprecated. Migrate to [ChannelBuffers.setListener] instead.
 ///
 /// Signature for [PlatformDispatcher.onPlatformMessage].
@@ -667,6 +670,20 @@ class PlatformDispatcher {
   // Called from the engine, via hooks.dart
   void _notifyTextureFrameAvailable(int textureId) {
     _invoke1<int>(onTextureFrameAvailable, _onTextureFrameAvailableZone, textureId);
+  }
+
+  /// Called from the engine to force repaint of all views on the next frame.
+  MarkAllViewsDirtyCallback? get onMarkAllViewsDirty => _onMarkAllViewsDirty;
+  MarkAllViewsDirtyCallback? _onMarkAllViewsDirty;
+  Zone _onMarkAllViewsDirtyZone = Zone.root;
+  set onMarkAllViewsDirty(MarkAllViewsDirtyCallback? callback) {
+    _onMarkAllViewsDirty = callback;
+    _onMarkAllViewsDirtyZone = Zone.current;
+  }
+
+  // Called from the engine, via hooks.dart
+  void _markAllViewsDirty() {
+    _invoke(onMarkAllViewsDirty, _onMarkAllViewsDirtyZone);
   }
 
   // Called from the engine, via hooks.dart
