@@ -1548,6 +1548,24 @@ void hooksTests() async {
     expectEquals(receivedTextureId, 1234);
   });
 
+  await test('onMarkAllViewsDirty preserves callback zone', () {
+    late Zone innerZone;
+    late Zone runZone;
+    bool called = false;
+
+    runZoned(() {
+      innerZone = Zone.current;
+      PlatformDispatcher.instance.onMarkAllViewsDirty = () {
+        runZone = Zone.current;
+        called = true;
+      };
+    });
+
+    _callHook('_markAllViewsDirty', 0);
+    expectIdentical(runZone, innerZone);
+    expectEquals(called, true);
+  });
+
   await test('_futureize handles callbacker sync error', () async {
     String? callbacker(void Function(Object? arg) cb) {
       return 'failure';
