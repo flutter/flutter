@@ -67,6 +67,8 @@ class ContextMenuController {
     final OverlayState overlayState = Overlay.of(
       context,
       rootOverlay: true,
+      _shownInstance = this;
+    overlayState.insert(_menuOverlayEntry!);
       debugRequiredFor: debugRequiredFor,
     );
     _contextMenuBuilder = contextMenuBuilder;
