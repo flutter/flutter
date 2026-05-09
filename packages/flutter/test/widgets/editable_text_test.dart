@@ -294,42 +294,41 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('EditableText uses tight selection width style by default', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('default text selection width style', (WidgetTester tester) async {
+    controller.text = 'a b c\na b c d e f g';
+
+    final TextStyle style = Typography.material2018().black.titleMedium!.copyWith(
+      fontFamily: 'Roboto',
+      fontSize: 14.0, // default.
+    );
+
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: EditableText(
-          controller: controller,
-          focusNode: focusNode,
-          maxLines: null,
-          style: textStyle,
-          cursorColor: cursorColor,
-          backgroundCursorColor: Colors.grey,
+      MaterialApp(
+        home: Center(
+          child: EditableText(
+            showSelectionHandles: true,
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: null,
+            style: style,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectionControls: materialTextSelectionControls,
+            selectionColor: Colors.deepPurpleAccent.withOpacity(0.40),
+            keyboardType: TextInputType.text,
+          ),
         ),
       ),
     );
 
-    RenderEditable renderEditable = findRenderEditable(tester);
-    expect(renderEditable.selectionWidthStyle, EditableText.defaultSelectionWidthStyle);
+    controller.selection = TextSelection(baseOffset: 0, extentOffset: controller.text.length);
+    await tester.pumpAndSettle();
 
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: EditableText(
-          controller: controller,
-          focusNode: focusNode,
-          style: textStyle,
-          cursorColor: cursorColor,
-          backgroundCursorColor: Colors.grey,
-        ),
-      ),
+    await expectLater(
+      find.byType(MaterialApp),
+      matchesGoldenFile('editable_text_golden.TextSelectionWidthStyle.1.png'),
     );
-
-    renderEditable = findRenderEditable(tester);
-    expect(renderEditable.selectionWidthStyle, EditableText.defaultSelectionWidthStyle);
-  });
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('Explicit selectionWidthStyle is honored for multiline EditableText', (
     WidgetTester tester,
