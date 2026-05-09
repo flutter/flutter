@@ -691,8 +691,8 @@ void main() {
       expect(tester.getSize(find.byType(FadeInImage)), Size.zero);
     });
 
-    group('FadeInImageTransition.fadeInOver', () {
-      // Helper: finds the two RawImages inside a FadeInImage with fadeInOver.
+    group('FadeInImage.fadeInOver', () {
+      // Helper: finds the two RawImages inside a FadeInImage.fadeInOver widget.
       // In fadeInOver the Stack order is [placeholder, target], so the first
       // RawImage in the tree is the placeholder and the second is the target.
       ({FadeInImageElements placeholder, FadeInImageElements target}) findFadeInOverImages(
@@ -712,13 +712,11 @@ void main() {
         final imageProvider = TestImageProvider(targetImage);
 
         await tester.pumpWidget(
-          FadeInImage(
+          FadeInImage.fadeInOver(
             placeholder: placeholderProvider,
             image: imageProvider,
             fadeInDuration: animationDuration,
-            fadeOutDuration: animationDuration,
             fadeInCurve: Curves.linear,
-            transition: FadeInImageTransition.fadeInOver,
             excludeFromSemantics: true,
           ),
         );
@@ -756,12 +754,10 @@ void main() {
         final imageProvider = TestImageProvider(targetImage);
 
         await tester.pumpWidget(
-          FadeInImage(
+          FadeInImage.fadeInOver(
             placeholder: placeholderProvider,
             image: imageProvider,
             fadeInDuration: animationDuration,
-            fadeOutDuration: animationDuration,
-            transition: FadeInImageTransition.fadeInOver,
             excludeFromSemantics: true,
           ),
         );
@@ -783,13 +779,11 @@ void main() {
         final imageProvider = TestImageProvider(targetImage);
 
         await tester.pumpWidget(
-          FadeInImage(
+          FadeInImage.fadeInOver(
             placeholder: placeholderProvider,
             image: imageProvider,
             fadeInDuration: animationDuration,
-            fadeOutDuration: animationDuration * 10, // ignored in fadeInOver mode
             fadeInCurve: Curves.linear,
-            transition: FadeInImageTransition.fadeInOver,
             excludeFromSemantics: true,
           ),
         );
@@ -814,11 +808,7 @@ void main() {
         imageProvider.complete();
 
         await tester.pumpWidget(
-          FadeInImage(
-            placeholder: placeholderProvider,
-            image: imageProvider,
-            transition: FadeInImageTransition.fadeInOver,
-          ),
+          FadeInImage.fadeInOver(placeholder: placeholderProvider, image: imageProvider),
         );
 
         expect(findFadeInImage(tester).target.rawImage.image!.isCloneOf(targetImage), true);
