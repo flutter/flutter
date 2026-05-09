@@ -567,6 +567,15 @@ class PlatformConfiguration final {
   void NotifyTextureFrameAvailable(int64_t texture_id);
 
   //----------------------------------------------------------------------------
+  /// @brief      Notifies the framework that all views should be marked dirty.
+  ///
+  ///             This is called when the engine needs to force full repaint of
+  ///             all views on the next frame, for example during lifecycle
+  ///             events.
+  ///
+  void MarkAllViewsDirty();
+
+  //----------------------------------------------------------------------------
   /// @brief      Retrieves the viewport metrics with the given ID managed by
   ///             the `PlatformConfiguration`.
   ///
@@ -623,6 +632,7 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue draw_frame_;
   tonic::DartPersistentValue report_timings_;
   tonic::DartPersistentValue notify_texture_frame_available_;
+  tonic::DartPersistentValue mark_all_views_dirty_;
 
   uint64_t last_frame_number_ = 0;
   int64_t last_microseconds_ = 0;
