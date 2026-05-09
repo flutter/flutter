@@ -3,7 +3,7 @@
 solutions = [
   {
     "deps_file": "DEPS",
-    "managed": False,
+    "managed": True,
     "name": ".",
     "safesync_url": "",
 
@@ -12,10 +12,10 @@ solutions = [
     "url": "https://github.com/flutter/flutter.git",
 
     "custom_vars": {
-      "use_rbe": True,
+      "use_rbe": False,
 
       # Uncomment download_emsdk below if you plan to build the web engine.
-      # "download_emsdk": True,
+      # "download_emsdk": False,
     },
   },
 ]
