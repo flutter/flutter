@@ -492,6 +492,10 @@ class BackdropGroup extends InheritedWidget {
 /// widget's clip. If there's no clip, the filter will be applied to the full
 /// screen.
 ///
+/// This widget only filters content rendered by Flutter. It does not affect
+/// native platform views (like Android views or iOS views) because those views
+/// are rendered by the platform itself, not by Flutter's engine.
+///
 /// The results of the filter will be blended back into the background using
 /// the [blendMode] parameter.
 /// {@template flutter.widgets.BackdropFilter.blendMode}
