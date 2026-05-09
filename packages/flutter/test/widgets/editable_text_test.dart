@@ -631,6 +631,51 @@ void main() {
     expect(render.backgroundCursorColor, Colors.green);
   });
 
+  testWidgets('when cursorWidth is updated, TextSelectionOverlay should be updated', (
+    WidgetTester tester,
+  ) async {
+    final controls = _RecordingTextSelectionControls();
+
+    Widget buildWidget(double cursorWidth) {
+      return MaterialApp(
+        home: EditableText(
+          controller: controller,
+          backgroundCursorColor: Colors.grey,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          cursorWidth: cursorWidth,
+          selectionControls: controls,
+        ),
+      );
+    }
+
+    controller.text = 'abc';
+    await tester.pumpWidget(buildWidget(2.0));
+    final EditableTextState state = tester.state(find.byType(EditableText));
+
+    // Ensure valid selection and focus.
+    controller.selection = const TextSelection.collapsed(offset: 1);
+    focusNode.requestFocus();
+    await tester.pump();
+
+    // Use toggleToolbar to force creation of selectionOverlay if it doesn't exist.
+    state.toggleToolbar();
+    await tester.pump();
+
+    expect(state.selectionOverlay, isNotNull);
+    state.selectionOverlay!.showHandles();
+    await tester.pump();
+    expect(controls.lastTargetWidth, 2.0);
+
+    // Update cursorWidth.
+    controls.lastTargetWidth = null;
+    await tester.pumpWidget(buildWidget(10.0));
+    await tester.pump();
+    expect(state.selectionOverlay, isNotNull);
+    expect(controls.lastTargetWidth, 10.0);
+  });
+
   testWidgets('text keyboard is requested when maxLines is default', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
@@ -17753,9 +17798,10 @@ void main() {
         .getHandleSize(lineHeight)
         .height;
     final double interactiveHandleHeight = math.max(handleHeight, kMinInteractiveDimension);
-    final Offset anchor = state.selectionOverlay!.selectionControls!.getHandleAnchor(
+    final Offset anchor = state.selectionOverlay!.selectionControls!.calculateHandleAnchor(
       TextSelectionHandleType.collapsed,
       lineHeight,
+      targetWidth: state.widget.cursorWidth,
     );
     final double handleCenter = handleHeight / 2 - anchor.dy;
     final double bottomSpacing = math.max(
@@ -18645,7 +18691,11 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset calculateHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    required double targetWidth,
+  }) {
     return Offset.zero;
   }
 
@@ -18750,7 +18800,11 @@ class _CustomTextSelectionControls extends TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset calculateHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    required double targetWidth,
+  }) {
     return Offset.zero;
   }
 
@@ -18812,6 +18866,49 @@ class _CustomTextSelectionToolbar extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class _RecordingTextSelectionControls extends TextSelectionControls {
+  double? lastTargetWidth;
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Offset calculateHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    required double targetWidth,
+  }) {
+    lastTargetWidth = targetWidth;
+    return Offset.zero;
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return const Size(10.0, 10.0);
   }
 }
 

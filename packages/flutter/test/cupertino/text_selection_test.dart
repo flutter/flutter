@@ -230,6 +230,33 @@ void main() {
         matchesGoldenFile('text_selection.handle.transparent.png'),
       );
     });
+
+    test('calculateHandleAnchor ignores targetWidth for Cupertino handles', () {
+      final Offset anchorDefault = cupertinoTextSelectionControls.calculateHandleAnchor(
+        TextSelectionHandleType.left,
+        10.0,
+        targetWidth: 2.0,
+      );
+      final Offset anchorWide = cupertinoTextSelectionControls.calculateHandleAnchor(
+        TextSelectionHandleType.left,
+        10.0,
+        targetWidth: 20.0,
+      );
+      expect(anchorDefault, equals(anchorWide));
+    });
+
+    test('getHandleAnchor correctly delegates to calculateHandleAnchor', () {
+      final Offset anchorDefault = cupertinoTextSelectionControls.getHandleAnchor(
+        TextSelectionHandleType.left,
+        10.0,
+      );
+      final Offset anchorCalculated = cupertinoTextSelectionControls.calculateHandleAnchor(
+        TextSelectionHandleType.left,
+        10.0,
+        targetWidth: 2.0,
+      );
+      expect(anchorDefault, equals(anchorCalculated));
+    });
   });
 
   group('Text selection menu overflow (iOS)', () {

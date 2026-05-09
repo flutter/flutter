@@ -1289,6 +1289,7 @@ void main() {
       VoidCallback? onSelectionHandleTapped,
       TextSelectionControls? selectionControls,
       TextMagnifierConfiguration? magnifierConfiguration,
+      double targetWidth = 2.0,
     }) async {
       final column = UniqueKey();
       final startHandleLayerLink = LayerLink();
@@ -1339,6 +1340,7 @@ void main() {
         selectionControls: selectionControls,
         selectionEndpoints: const <TextSelectionPoint>[],
         toolbarLayerLink: toolbarLayerLink,
+        targetWidth: targetWidth,
         magnifierConfiguration: magnifierConfiguration ?? TextMagnifierConfiguration.disabled,
       );
     }
@@ -1447,6 +1449,74 @@ void main() {
       rightHandle = tester.widget(find.byKey(spy.rightHandleKey)) as Text;
       expect(leftHandle.data, 'height 13');
       expect(rightHandle.data, 'height 12');
+
+      selectionOverlay.dispose();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('uses the default target width for handle anchors', (WidgetTester tester) async {
+      final spy = TextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.collapsed
+        ..endHandleType = TextSelectionHandleType.collapsed
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+
+      selectionOverlay.showHandles();
+      await tester.pump();
+
+      expect(spy.lastTargetWidth, 2.0);
+
+      selectionOverlay.dispose();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('forwards a custom target width to handle anchors', (WidgetTester tester) async {
+      final spy = TextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(
+        tester,
+        selectionControls: spy,
+        targetWidth: 20.0,
+      );
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.collapsed
+        ..endHandleType = TextSelectionHandleType.collapsed
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+
+      selectionOverlay.showHandles();
+      await tester.pump();
+
+      expect(spy.lastTargetWidth, 20.0);
+
+      selectionOverlay.dispose();
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('supports legacy getHandleAnchor overrides', (WidgetTester tester) async {
+      final controls = LegacyTextSelectionControlsSpy();
+      final SelectionOverlay selectionOverlay = await pumpApp(
+        tester,
+        selectionControls: controls,
+        targetWidth: 20.0,
+      );
+      selectionOverlay
+        ..startHandleType = TextSelectionHandleType.collapsed
+        ..endHandleType = TextSelectionHandleType.collapsed
+        ..selectionEndpoints = const <TextSelectionPoint>[
+          TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+          TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+        ];
+
+      selectionOverlay.showHandles();
+      await tester.pump();
+
+      expect(controls.lastCursorWidth, 20.0);
 
       selectionOverlay.dispose();
       await tester.pumpAndSettle();
@@ -1826,7 +1896,7 @@ void main() {
   );
 
   group('TextSelectionOverlay', () {
-    Future<TextSelectionOverlay> pumpApp(WidgetTester tester) async {
+    Future<TextSelectionOverlay> pumpApp(WidgetTester tester, {TextEditingValue? value}) async {
       final column = UniqueKey();
       final startHandleLayerLink = LayerLink();
       final endHandleLayerLink = LayerLink();
@@ -1855,14 +1925,23 @@ void main() {
         ),
       );
 
+      if (value != null) {
+        final renderObject =
+            tester.state<EditableTextState>(find.byKey(editableTextKey)).renderEditable
+                as FakeRenderEditable;
+        renderObject.text = TextSpan(style: const TextStyle(fontSize: 10.0), text: value.text);
+      }
+
       return TextSelectionOverlay(
-        value: TextEditingValue.empty,
+        value: value ?? TextEditingValue.empty,
         renderObject: tester.state<EditableTextState>(find.byKey(editableTextKey)).renderEditable,
         context: tester.element(find.byKey(column)),
         onSelectionHandleTapped: () {},
         startHandleLayerLink: startHandleLayerLink,
         endHandleLayerLink: endHandleLayerLink,
-        selectionDelegate: FakeTextSelectionDelegate(),
+        selectionDelegate: FakeTextSelectionDelegate(
+          textEditingValue: value ?? TextEditingValue.empty,
+        ),
         toolbarLayerLink: toolbarLayerLink,
         magnifierConfiguration: TextMagnifierConfiguration.disabled,
       );
@@ -1877,6 +1956,36 @@ void main() {
         areCreateAndDispose,
       );
     });
+
+    testWidgets(
+      'handles auto-dismiss after timeout on Android',
+      (WidgetTester tester) async {
+        final TextSelectionOverlay overlay = await pumpApp(
+          tester,
+          value: const TextEditingValue(
+            text: 'test',
+            selection: TextSelection.collapsed(offset: 0),
+          ),
+        );
+
+        // Show handles.
+        overlay.handlesVisible = true;
+        overlay.showHandles();
+        await tester.pump();
+        expect(overlay.handlesAreVisible, isTrue);
+
+        // Fast forward to just before the timeout (3.9s).
+        await tester.pump(const Duration(milliseconds: 3900));
+        expect(overlay.handlesAreVisible, isTrue);
+
+        // Fast forward to just after the timeout (4.1s total).
+        await tester.pump(const Duration(milliseconds: 200));
+        expect(overlay.handlesAreVisible, isFalse);
+
+        overlay.dispose();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
   });
 
   testWidgets('Context menus', (WidgetTester tester) async {
@@ -1917,6 +2026,37 @@ void main() {
     await tester.pump();
     expect(find.byType(Placeholder), findsOneWidget);
   }, skip: kIsWeb); // [intended] On web, we use native context menus for text fields.
+
+  test('returns Offset.zero when no handle anchor method is overridden', () {
+    final controls = IncompleteTextSelectionControlsSpy();
+
+    expect(
+      resolveTextSelectionHandleAnchor(
+        controls,
+        TextSelectionHandleType.collapsed,
+        10.0,
+        targetWidth: 20.0,
+      ),
+      Offset.zero,
+    );
+    expect(
+      controls.calculateHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        10.0,
+        targetWidth: 20.0,
+      ),
+      Offset.zero,
+    );
+    expect(
+      controls.getHandleAnchor(
+        TextSelectionHandleType.collapsed,
+        10.0,
+        cursorWidth: 20.0,
+      ),
+      Offset.zero,
+    );
+  });
+
 }
 
 class FakeTextSelectionGestureDetectorBuilderDelegate
@@ -2082,6 +2222,7 @@ class TextSelectionControlsSpy extends TextSelectionControls {
   UniqueKey rightHandleKey = UniqueKey();
   UniqueKey collapsedHandleKey = UniqueKey();
   UniqueKey toolBarKey = UniqueKey();
+  double? lastTargetWidth;
 
   @override
   Widget buildHandle(
@@ -2118,13 +2259,92 @@ class TextSelectionControlsSpy extends TextSelectionControls {
   }
 
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset calculateHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    required double targetWidth,
+  }) {
+    lastTargetWidth = targetWidth;
     return Offset.zero;
   }
 
   @override
   Size getHandleSize(double textLineHeight) {
     return Size(textLineHeight, textLineHeight);
+  }
+}
+
+class LegacyTextSelectionControlsSpy extends TextSelectionControls {
+  double? lastCursorWidth;
+
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Offset getHandleAnchor(
+    TextSelectionHandleType type,
+    double textLineHeight, {
+    double cursorWidth = 2.0,
+  }) {
+    lastCursorWidth = cursorWidth;
+    return Offset(cursorWidth, textLineHeight);
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size.zero;
+  }
+}
+
+class IncompleteTextSelectionControlsSpy extends TextSelectionControls {
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    return const SizedBox.shrink();
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size.zero;
   }
 }
 
@@ -2139,6 +2359,11 @@ class FakeClipboardStatusNotifier extends ClipboardStatusNotifier {
 }
 
 class FakeTextSelectionDelegate extends Fake implements TextSelectionDelegate {
+  FakeTextSelectionDelegate({this.textEditingValue = TextEditingValue.empty});
+
+  @override
+  final TextEditingValue textEditingValue;
+
   @override
   void cutSelection(SelectionChangedCause cause) {}
 
