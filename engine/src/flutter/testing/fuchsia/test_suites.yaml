@@ -15,7 +15,6 @@
   package: common_cpp_unittests-0.far
 - test_command: test run fuchsia-pkg://fuchsia.com/dart-aot-runner-integration-test#meta/dart-aot-runner-integration-test.cm
   packages:
-    - oot_dart_aot_runner-0.far
     - dart-aot-runner-integration-test-0.far
     - gen/flutter/shell/platform/fuchsia/dart_runner/tests/startup_integration_test/dart_echo_server/dart_aot_echo_server/dart_aot_echo_server.far
   emulator_arch:
@@ -24,7 +23,6 @@
   variant: profile
 - test_command: test run fuchsia-pkg://fuchsia.com/dart-jit-runner-integration-test#meta/dart-jit-runner-integration-test.cm
   packages:
-    - oot_dart_jit_runner-0.far
     - dart-jit-runner-integration-test-0.far
     - gen/flutter/shell/platform/fuchsia/dart_runner/tests/startup_integration_test/dart_echo_server/dart_jit_echo_server/dart_jit_echo_server.far
   emulator_arch:
@@ -55,7 +53,6 @@
 - test_command: test run fuchsia-pkg://fuchsia.com/flutter-embedder-test#meta/flutter-embedder-test.cm
   packages:
     - flutter-embedder-test-0.far
-    - oot_flutter_jit_runner-0.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/embedder/child-view/child-view/child-view.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/embedder/parent-view/parent-view/parent-view.far
   variant: debug_x64
@@ -70,7 +67,6 @@
 - test_command: test run fuchsia-pkg://fuchsia.com/mouse-input-test#meta/mouse-input-test.cm
   packages:
     - mouse-input-test-0.far
-    - oot_flutter_jit_runner-0.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/mouse-input/mouse-input-view/mouse-input-view/mouse-input-view.far
 - test_command: test run fuchsia-pkg://fuchsia.com/no_dart_plugin_registrant_unittests#meta/no_dart_plugin_registrant_unittests.cm
   package: no_dart_plugin_registrant_unittests-0.far
@@ -86,7 +82,6 @@
 - test_command: test run fuchsia-pkg://fuchsia.com/text-input-test#meta/text-input-test.cm
   packages:
     - text-input-test-0.far
-    - oot_flutter_jit_runner-0.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/text-input/text-input-view/text-input-view/text-input-view.far
   variant: debug_x64
 - test_command: test run fuchsia-pkg://fuchsia.com/tonic_unittests#meta/tonic_unittests.cm
@@ -96,7 +91,6 @@
 - test_command: test run fuchsia-pkg://fuchsia.com/touch-input-test#meta/touch-input-test.cm
   packages:
     - touch-input-test-0.far
-    - oot_flutter_jit_runner-0.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/touch-input/touch-input-view/touch-input-view/touch-input-view.far
     - gen/flutter/shell/platform/fuchsia/flutter/tests/integration/touch-input/embedding-flutter-view/embedding-flutter-view/embedding-flutter-view.far
   variant: debug_x64
