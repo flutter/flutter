@@ -1136,6 +1136,11 @@ void Shell::OnPlatformViewScheduleFrame() {
   fml::TaskRunner::RunNowOrPostTask(task_runners_.GetUITaskRunner(),
                                     [engine = engine_->GetWeakPtr()]() {
                                       if (engine) {
+                                        // This is an engine requested repaint
+                                        // so force all views to redraw.
+                                        // Without this only views with dirty
+                                        // render objects would get repainted.
+                                        engine->MarkAllViewsDirty();
                                         engine->ScheduleFrame();
                                       }
                                     });

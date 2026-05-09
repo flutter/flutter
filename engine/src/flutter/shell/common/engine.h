@@ -893,6 +893,15 @@ class Engine final : public RuntimeDelegate {
   ///
   void SetAccessibilityFeatures(int32_t flags);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Notifies the framework that all views should be marked dirty.
+  ///
+  ///             This is called when the engine needs to force full repaint of
+  ///             all views on the next frame, for example during lifecycle
+  ///             events.
+  ///
+  void MarkAllViewsDirty();
+
   // |RuntimeDelegate|
   void ScheduleFrame(bool regenerate_layer_trees) override;
 
