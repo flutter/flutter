@@ -391,6 +391,18 @@ class RuntimeController : public PlatformConfigurationClient,
   bool NotifyTextureFrameAvailable(int64_t texture_id);
 
   //----------------------------------------------------------------------------
+  /// @brief      Notifies the framework that all views should be marked dirty.
+  ///
+  ///             This is called when the engine needs to force full repaint of
+  ///             all views on the next frame, for example during lifecycle
+  ///             events.
+  ///
+  /// @return     Returns if the notification to the running isolate was
+  ///             successful. Returns false if the root isolate is not running.
+  ///
+  bool MarkAllViewsDirty();
+
+  //----------------------------------------------------------------------------
   /// @brief      Notify the Dart VM that no frame workloads are expected on the
   ///             UI task runner till the specified deadline. The VM uses this
   ///             opportunity to perform garbage collection operations is a

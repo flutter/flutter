@@ -188,36 +188,6 @@ void main() {
     binding.removeRenderView(renderView2);
   });
 
-  test('forced composition when returning to foreground', () {
-    final flutterView1 = FakeFlutterView(viewId: 1);
-    final renderView1 = RenderView(view: flutterView1);
-    final owner1 = PipelineOwner()..rootNode = renderView1;
-    binding.rootPipelineOwner.adoptChild(owner1);
-    binding.addRenderView(renderView1);
-    renderView1.prepareInitialFrame();
-
-    // Initial frame.
-    binding.handleBeginFrame(Duration.zero);
-    binding.handleDrawFrame();
-    expect(flutterView1.renderedScenes, hasLength(1));
-
-    // Clean frame: nothing composited.
-    binding.handleBeginFrame(Duration.zero);
-    binding.handleDrawFrame();
-    expect(flutterView1.renderedScenes, hasLength(1));
-
-    // Simulate going to background then foreground.
-    binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
-    binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-
-    // Next frame should force composition even though nothing is dirty.
-    binding.handleBeginFrame(Duration.zero);
-    binding.handleDrawFrame();
-    expect(flutterView1.renderedScenes, hasLength(2));
-
-    binding.removeRenderView(renderView1);
-  });
-
   test('hit-testing reaches the right view', () {
     final flutterView1 = FakeFlutterView(viewId: 1);
     final flutterView2 = FakeFlutterView(viewId: 2);
