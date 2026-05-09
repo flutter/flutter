@@ -383,6 +383,21 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     invoke1<int>(_onTextureFrameAvailable, _onTextureFrameAvailableZone, textureId);
   }
 
+  /// Called from the engine to force repaint of all views on the next frame.
+  @override
+  ui.MarkAllViewsDirtyCallback? get onMarkAllViewsDirty => _onMarkAllViewsDirty;
+  ui.MarkAllViewsDirtyCallback? _onMarkAllViewsDirty;
+  Zone _onMarkAllViewsDirtyZone = Zone.root;
+  @override
+  set onMarkAllViewsDirty(ui.MarkAllViewsDirtyCallback? callback) {
+    _onMarkAllViewsDirty = callback;
+    _onMarkAllViewsDirtyZone = Zone.current;
+  }
+
+  void markAllViewsDirty() {
+    invoke(onMarkAllViewsDirty, _onMarkAllViewsDirtyZone);
+  }
+
   @override
   void sendPlatformMessage(
     String name,
