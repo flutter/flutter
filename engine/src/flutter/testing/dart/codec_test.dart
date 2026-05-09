@@ -314,6 +314,22 @@ void main() {
       }
     },
   );
+
+  test('Decodes truncated JPEG successfully', () async {
+    final Uint8List data = await _getSkiaResource('flutter_logo.jpg').readAsBytes();
+    // Truncate the JPEG data slightly (removing the EOI marker at the end)
+    final truncatedData = Uint8List.view(data.buffer, 0, data.length - 100);
+    final ui.Codec codec = await ui.instantiateImageCodec(truncatedData);
+    try {
+      final ui.FrameInfo frameInfo = await codec.getNextFrame();
+      expect(frameInfo.image, isNotNull);
+      expect(frameInfo.image.width, isPositive);
+      expect(frameInfo.image.height, isPositive);
+      frameInfo.image.dispose();
+    } finally {
+      codec.dispose();
+    }
+  });
 }
 
 /// Returns a File handle to a file in the skia/resources directory.
