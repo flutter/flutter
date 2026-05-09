@@ -357,10 +357,15 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
     } on ProcessException catch (exception) {
       consumeLog(exception.toString());
-      // Rethrow the exception if the error isn't handled by any of the
-      // `localGradleErrors`.
-      if (detectedGradleError == null) {
-        rethrow;
+      // Rethrow the exception if the error is handled by any of the `localGradleErrors`.
+      if (detectedGradleError != null) {
+        // This will proceed to throw in exitCode check or error handling below.
+      } else {
+        throwToolExit(
+          'Gradle build failed to start.\n'
+          'This can happen if the Gradle wrapper is missing, corrupted, or has incorrect permissions.\n'
+          'Details: $exception',
+        );
       }
     } finally {
       status.stop();
@@ -873,6 +878,12 @@ class AndroidGradleBuilder implements AndroidBuilder {
         workingDirectory: project.android.hostAppGradleRoot.path,
         allowReentrantFlutter: true,
         environment: _java?.environment,
+      );
+    } on ProcessException catch (exception) {
+      throwToolExit(
+        'Gradle build failed to start.\n'
+        'This can happen if the Gradle wrapper is missing, corrupted, or has incorrect permissions.\n'
+        'Details: $exception',
       );
     } finally {
       status.stop();
