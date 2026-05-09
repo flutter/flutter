@@ -325,6 +325,15 @@ bool RuntimeController::NotifyTextureFrameAvailable(int64_t texture_id) {
   return false;
 }
 
+bool RuntimeController::MarkAllViewsDirty() {
+  if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
+    platform_configuration->MarkAllViewsDirty();
+    return true;
+  }
+
+  return false;
+}
+
 bool RuntimeController::NotifyIdle(fml::TimeDelta deadline) {
   if (deadline - fml::TimeDelta::FromMicroseconds(Dart_TimelineGetMicros()) <
       fml::TimeDelta::FromMilliseconds(1)) {

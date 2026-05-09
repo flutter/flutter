@@ -64,8 +64,10 @@ mixin RendererBinding
       ..onMetricsChanged = handleMetricsChanged
       ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onPlatformBrightnessChanged = handlePlatformBrightnessChanged
-      ..onAlwaysUse24HourFormatChanged = handleAlwaysUse24HourFormatChanged;
-    _initTextureFrameCallback();
+      ..onAlwaysUse24HourFormatChanged = handleAlwaysUse24HourFormatChanged
+      ..onTextureFrameAvailable = handleTextureFrameAvailable
+      ..onMarkAllViewsDirty = markAllViewsDirty;
+
     addPersistentFrameCallback(_handlePersistentFrameCallback);
     initMouseTracker();
     if (kIsWeb) {
@@ -93,10 +95,6 @@ mixin RendererBinding
     _textureFrameAvailableHandlers.remove(handler);
   }
 
-  void _initTextureFrameCallback() {
-    platformDispatcher.onTextureFrameAvailable = handleTextureFrameAvailable;
-  }
-
   /// Dispatches a texture-frame-available notification to every registered
   /// [TextureFrameAvailableHandler].
   ///
@@ -111,6 +109,16 @@ mixin RendererBinding
     // Iterate a copy so handlers may add/remove themselves mid-dispatch.
     for (final handler in List<TextureFrameAvailableHandler>.of(_textureFrameAvailableHandlers)) {
       handler(textureId);
+    }
+  }
+
+  /// Marks all views to require compositing, which will force them to repaint
+  /// on the next frame.
+  @protected
+  @visibleForTesting
+  void markAllViewsDirty() {
+    for (final RenderView view in renderViews) {
+      view.markRequiresCompositing();
     }
   }
 
@@ -788,19 +796,6 @@ mixin RendererBinding
       return true;
     }
     return renderView.owner?.needsPaint ?? false;
-  }
-
-  @override
-  void handleAppLifecycleStateChanged(AppLifecycleState state) {
-    final bool framesEnabledBefore = framesEnabled;
-    super.handleAppLifecycleStateChanged(state);
-    // When transitioning from a state where frames were disabled to one where
-    // they are enabled, mark all views for compositing on the next frame.
-    if (!framesEnabledBefore && framesEnabled) {
-      for (final RenderView renderView in renderViews) {
-        renderView.markRequiresCompositing();
-      }
-    }
   }
 
   @override
