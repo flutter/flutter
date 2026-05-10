@@ -426,7 +426,7 @@ TEST(BlitCommandGLESTest,
               TexSubImage2D(GL_TEXTURE_2D, 2, _, _, 2, 2, _, _, _))
       .Times(1);
 
-  for (auto [level, w, source] : std::initializer_list<
+  for (const auto& [level, w, source] : std::initializer_list<
            std::tuple<uint32_t, int32_t, std::shared_ptr<DeviceBufferGLES>>>{
            {0, 8, source0}, {1, 4, source1}, {2, 2, source2}}) {
     BlitCopyBufferToTextureCommandGLES command;
