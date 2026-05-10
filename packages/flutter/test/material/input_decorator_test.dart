@@ -1812,8 +1812,8 @@ void main() {
       expect(find.text(labelText), findsOneWidget);
       expect(findBorderPainter(), findsOneWidget);
       // Verify fill via paintInterior (drawRRect), then stroke path (outline with label gap).
-      const double inputDecoratorWidth = 800.0;
-      const double inputDecoratorHeight = 56.0;
+      const inputDecoratorWidth = 800.0;
+      const inputDecoratorHeight = 56.0;
       expect(
         findBorderPainter(),
         paints
@@ -1821,9 +1821,9 @@ void main() {
           ..rrect(
             style: PaintingStyle.fill,
             color: const Color(0xFF00FF00),
-            rrect: BorderRadius.circular(borderRadius).toRRect(
-              const Rect.fromLTWH(0, 0, inputDecoratorWidth, inputDecoratorHeight),
-            ),
+            rrect: BorderRadius.circular(
+              borderRadius,
+            ).toRRect(const Rect.fromLTWH(0, 0, inputDecoratorWidth, inputDecoratorHeight)),
           )
           ..path(style: PaintingStyle.stroke)
           ..restore(),
@@ -2140,10 +2140,7 @@ void main() {
 
     test('OutlineInputBorder paint with gap draws path with stroke', () {
       const canvasRect = Rect.fromLTWH(0, 0, 200, 56);
-      const border = OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(20.0)),
-        borderSide: BorderSide(color: Colors.black),
-      );
+      const border = OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(20.0)));
       expect(
         (Canvas canvas) => border.paint(
           canvas,
