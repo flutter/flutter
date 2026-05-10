@@ -16003,9 +16003,7 @@ void main() {
       expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
     });
 
-    testWidgets('Spell check disabled when obscureText changes to true', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('Spell check updates when obscureText changes', (WidgetTester tester) async {
       final fakeSpellCheckService = FakeSpellCheckService();
       controller.text = 'A';
 
@@ -16042,6 +16040,15 @@ void main() {
       expect(state.spellCheckEnabled, isFalse);
       expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
       expect(state.spellCheckResults, isNull);
+      expect(fakeSpellCheckService.fetchSpellCheckSuggestionsCallCount, 0);
+
+      await tester.pumpWidget(buildEditableText(obscureText: false));
+      await tester.pump();
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isTrue);
+      expect(fakeSpellCheckService.fetchSpellCheckSuggestionsCallCount, 1);
+      expect(fakeSpellCheckService.lastSpellCheckText, 'A');
     });
 
     testWidgets(
@@ -19088,7 +19095,17 @@ class _TestScrollController extends ScrollController {
   bool get attached => hasListeners;
 }
 
-class FakeSpellCheckService extends DefaultSpellCheckService {}
+class FakeSpellCheckService extends DefaultSpellCheckService {
+  int fetchSpellCheckSuggestionsCallCount = 0;
+  String? lastSpellCheckText;
+
+  @override
+  Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(Locale locale, String text) async {
+    fetchSpellCheckSuggestionsCallCount += 1;
+    lastSpellCheckText = text;
+    return const <SuggestionSpan>[];
+  }
+}
 
 class FakeFlutterView extends TestFlutterView {
   FakeFlutterView(TestFlutterView view, {required this.viewId})

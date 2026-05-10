@@ -3507,7 +3507,11 @@ class EditableTextState extends State<EditableText>
         widget.spellCheckConfiguration,
         obscureText: widget.obscureText,
       );
-      if (!spellCheckEnabled) {
+      if (spellCheckEnabled) {
+        if (textEditingValue.text.isNotEmpty) {
+          _performSpellCheck(textEditingValue.text);
+        }
+      } else {
         spellCheckResults = null;
       }
     }
@@ -4633,7 +4637,7 @@ class EditableTextState extends State<EditableText>
       final List<SuggestionSpan>? suggestions = await _spellCheckConfiguration.spellCheckService!
           .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
 
-      if (suggestions == null || !mounted || !spellCheckEnabled || widget.obscureText) {
+      if (suggestions == null || !mounted || !spellCheckEnabled) {
         // The request to fetch spell check suggestions was canceled due to ongoing request,
         // the widget was unmounted, or spell check was disabled before the
         // request completed.
