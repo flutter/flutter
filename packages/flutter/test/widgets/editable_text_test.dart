@@ -15975,6 +15975,75 @@ void main() {
       );
     });
 
+    testWidgets('Spell check disabled when obscureText is true', (WidgetTester tester) async {
+      final fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            obscureText: true,
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: fakeSpellCheckService,
+              misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+    });
+
+    testWidgets('Spell check disabled when obscureText changes to true', (
+      WidgetTester tester,
+    ) async {
+      final fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
+
+      Widget buildEditableText({required bool obscureText}) {
+        return MaterialApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            obscureText: obscureText,
+            style: const TextStyle(),
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: fakeSpellCheckService,
+              misspelledTextStyle: TextField.materialMisspelledTextStyle,
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildEditableText(obscureText: false));
+
+      EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isTrue);
+      state.spellCheckResults = const SpellCheckResults('A', <SuggestionSpan>[
+        SuggestionSpan(TextRange(start: 0, end: 1), <String>['a']),
+      ]);
+
+      await tester.pumpWidget(buildEditableText(obscureText: true));
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+      expect(state.spellCheckResults, isNull);
+    });
+
     testWidgets(
       'Spell check disabled when spell check configuration specified but no default spell check service available',
       (WidgetTester tester) async {

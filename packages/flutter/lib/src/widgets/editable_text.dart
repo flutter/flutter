@@ -2051,6 +2051,8 @@ class EditableText extends StatefulWidget {
   /// Specifies the [SpellCheckService] used to spell check text input and the
   /// [TextStyle] used to style text with misspelled words.
   ///
+  /// Spell check is disabled when [obscureText] is true.
+  ///
   /// If the [SpellCheckService] is left null, spell check is disabled by
   /// default unless the [DefaultSpellCheckService] is supported, in which case
   /// it is used. It is currently supported only on Android and iOS.
@@ -3050,18 +3052,21 @@ class EditableTextState extends State<EditableText>
   /// If spell check is enabled, this will try to infer a value for
   /// the [SpellCheckService] if left unspecified.
   static SpellCheckConfiguration _inferSpellCheckConfiguration(
-    SpellCheckConfiguration? configuration,
-  ) {
+    SpellCheckConfiguration? configuration, {
+    required bool obscureText,
+  }) {
     final SpellCheckService? spellCheckService = configuration?.spellCheckService;
     final bool spellCheckAutomaticallyDisabled =
-        configuration == null || configuration == const SpellCheckConfiguration.disabled();
+        obscureText ||
+        configuration == null ||
+        configuration == const SpellCheckConfiguration.disabled();
     final bool spellCheckServiceIsConfigured =
         spellCheckService != null ||
         WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
     if (spellCheckAutomaticallyDisabled || !spellCheckServiceIsConfigured) {
       // Only enable spell check if a non-disabled configuration is provided
-      // and if that configuration does not specify a spell check service,
-      // a native spell checker must be supported.
+      // for unobscured text and, if that configuration does not specify a
+      // spell check service, a native spell checker must be supported.
       assert(() {
         if (!spellCheckAutomaticallyDisabled && !spellCheckServiceIsConfigured) {
           FlutterError.reportError(
@@ -3284,7 +3289,10 @@ class EditableTextState extends State<EditableText>
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _cursorVisibilityNotifier.value = widget.showCursor;
-    _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
+    _spellCheckConfiguration = _inferSpellCheckConfiguration(
+      widget.spellCheckConfiguration,
+      obscureText: widget.obscureText,
+    );
     _appLifecycleListener = AppLifecycleListener(onResume: _onResume);
     _initProcessTextActions();
   }
@@ -3490,6 +3498,17 @@ class EditableTextState extends State<EditableText>
           _obscureLatestCharIndex = null;
         }
         _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+      }
+    }
+
+    if (oldWidget.spellCheckConfiguration != widget.spellCheckConfiguration ||
+        oldWidget.obscureText != widget.obscureText) {
+      _spellCheckConfiguration = _inferSpellCheckConfiguration(
+        widget.spellCheckConfiguration,
+        obscureText: widget.obscureText,
+      );
+      if (!spellCheckEnabled) {
+        spellCheckResults = null;
       }
     }
 
@@ -4614,9 +4633,10 @@ class EditableTextState extends State<EditableText>
       final List<SuggestionSpan>? suggestions = await _spellCheckConfiguration.spellCheckService!
           .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
 
-      if (suggestions == null || !mounted) {
+      if (suggestions == null || !mounted || !spellCheckEnabled || widget.obscureText) {
         // The request to fetch spell check suggestions was canceled due to ongoing request,
-        // or the widget was unmounted.
+        // the widget was unmounted, or spell check was disabled before the
+        // request completed.
         return;
       }
 
