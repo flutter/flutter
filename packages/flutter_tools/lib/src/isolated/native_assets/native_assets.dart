@@ -9,8 +9,10 @@ import 'package:data_assets/data_assets.dart';
 import 'package:hooks/hooks.dart';
 import 'package:hooks_runner/hooks_runner.dart';
 import 'package:logging/logging.dart' as logging;
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
+import '../../artifacts.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
@@ -419,6 +421,47 @@ abstract interface class FlutterNativeAssetsBuildRunner {
 }
 
 /// Uses `package:hooks_runner` for its implementation.
+/// Builds the environment passed to build hook subprocesses.
+///
+/// Starts from the parent process environment, filtered through
+/// [NativeAssetsBuildRunner.includeHookEnvironmentVariable] (the same
+/// allowlist the package would compute by default), and then injects
+/// well-known host-tool paths so hooks don't have to re-implement
+/// flutter_tools' own artifact resolution.
+///
+/// Currently exposes:
+///
+///   * `IMPELLERC`: absolute path to the host-side `impellerc` binary.
+///   * `LIBTESSELLATOR`: absolute path to the host-side
+///     `libtessellator` shared library.
+///
+/// When `--local-engine` is in effect [artifacts] resolves to
+/// `CachedLocalEngineArtifacts`, which prefers the local-engine
+/// binaries with a fall-through to the SDK cache. Hooks that read these
+/// env vars therefore get the correct host tools whether or not
+/// `--local-engine` is set, with no per-package logic required.
+@visibleForTesting
+Map<String, String> buildHookEnvironment({
+  required Artifacts artifacts,
+  required Platform platform,
+}) {
+  final env = <String, String>{
+    for (final entry in platform.environment.entries)
+      if (NativeAssetsBuildRunner.includeHookEnvironmentVariable(
+        entry.key.toUpperCase(),
+      ))
+        entry.key: entry.value,
+  };
+  // Resolve to absolute paths so hooks that change their working
+  // directory before invoking these tools still find them.
+  env['IMPELLERC'] = artifacts.getHostArtifact(HostArtifact.impellerc).absolute.path;
+  env['LIBTESSELLATOR'] = artifacts
+      .getHostArtifact(HostArtifact.libtessellator)
+      .absolute
+      .path;
+  return env;
+}
+
 class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunner {
   FlutterNativeAssetsBuildRunnerImpl(
     this.packageConfigPath,
@@ -428,6 +471,8 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.runPackageName,
     this.pubspecPath, {
     required this.includeDevDependencies,
+    required this.artifacts,
+    required this.platform,
   });
 
   final String pubspecPath;
@@ -439,6 +484,16 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
 
   /// Include the dev dependencies of [runPackageName].
   final bool includeDevDependencies;
+
+  /// Used to resolve host-side tools that hooks may need (e.g. `impellerc`).
+  /// When `--local-engine` is in effect this returns the local-engine
+  /// binaries with a fall-through to the SDK cache, so hooks see the same
+  /// versions of host tools that flutter_tools' own build targets do.
+  final Artifacts artifacts;
+
+  /// Provides access to environment variables for filtering through to the
+  /// hook subprocess.
+  final Platform platform;
 
   late final _logger = logging.Logger('')
     ..onRecord.listen((logging.LogRecord record) {
@@ -479,6 +534,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     fileSystem: fileSystem,
     packageLayout: packageLayout,
     userDefines: UserDefines(workspacePubspec: Uri.file(pubspecPath)),
+    hookEnvironment: buildHookEnvironment(artifacts: artifacts, platform: platform),
   );
 
   @override

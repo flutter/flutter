@@ -388,6 +388,8 @@ Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
     environment.logger,
     runPackageName,
     includeDevDependencies: includeDevDependencies,
+    artifacts: environment.artifacts,
+    platform: environment.platform,
     pubspecPath,
   );
 }

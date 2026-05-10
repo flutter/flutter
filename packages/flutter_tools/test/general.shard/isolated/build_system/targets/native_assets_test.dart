@@ -8,6 +8,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
@@ -399,6 +400,56 @@ void main() {
       },
     );
   }
+
+  group('buildHookEnvironment', () {
+    test('exposes IMPELLERC and LIBTESSELLATOR from cached artifacts', () {
+      final Map<String, String> env = buildHookEnvironment(
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(),
+      );
+      expect(env, contains('IMPELLERC'));
+      expect(env, contains('LIBTESSELLATOR'));
+      expect(env['IMPELLERC'], endsWith('impellerc'));
+    });
+
+    test('values match Artifacts.getHostArtifact(...)', () {
+      // Whatever path the host-artifact resolver produces is the same path
+      // the hook subprocess sees. This is the contract that lets a
+      // --local-engine override flow through to hooks: when
+      // CachedLocalEngineArtifacts overrides getHostArtifact to point at
+      // out/<host>/impellerc with a fall-through to the SDK cache,
+      // buildHookEnvironment publishes that resolved path verbatim.
+      final artifacts = Artifacts.test();
+      final Map<String, String> env = buildHookEnvironment(
+        artifacts: artifacts,
+        platform: FakePlatform(),
+      );
+      expect(
+        env['IMPELLERC'],
+        artifacts.getHostArtifact(HostArtifact.impellerc).absolute.path,
+      );
+      expect(
+        env['LIBTESSELLATOR'],
+        artifacts.getHostArtifact(HostArtifact.libtessellator).absolute.path,
+      );
+    });
+
+    test('preserves filtered parent environment variables', () {
+      final Map<String, String> env = buildHookEnvironment(
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(
+          environment: const <String, String>{
+            'PATH': '/usr/bin',
+            'HOME': '/home/dev',
+            'SOMETHING_ELSE': 'should-be-dropped',
+          },
+        ),
+      );
+      expect(env['PATH'], '/usr/bin');
+      expect(env['HOME'], '/home/dev');
+      expect(env, isNot(contains('SOMETHING_ELSE')));
+    });
+  });
 }
 
 List<String> _resolvedOutputs(Target target, Environment environment) {
