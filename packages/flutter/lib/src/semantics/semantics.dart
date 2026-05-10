@@ -7111,7 +7111,7 @@ class OrdinalSortKey extends SemanticsSortKey {
 /// Argument [sourceLevel] is the heading level of the source node that is being
 /// merged into a target node, which has heading level [targetLevel].
 ///
-/// If the target node is not a heading, the the source heading level is used.
+/// If the target node is not a heading, the source heading level is used.
 /// Otherwise, the target heading level is used irrespective of the source
 /// heading level.
 int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {
