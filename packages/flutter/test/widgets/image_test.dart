@@ -2998,7 +2998,7 @@ void main() {
         isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
       );
     }
-  }, skip: kIsWeb);
+  }, skip: kIsWeb); // Image.file is not supported on Flutter Web.
 
   testWidgets(
     'Animated GIFs do not require layout for subsequent frames',
