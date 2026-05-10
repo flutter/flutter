@@ -317,15 +317,21 @@ class _DefaultPub implements Pub {
         }
       }
 
-      // If the pubspec.yaml is older than the package config file and the last
-      // flutter version used is the same as the current version skip pub get.
-      // This will incorrectly skip pub on the master branch if dependencies
-      // are being added/removed from the flutter framework packages, but this
-      // can be worked around by manually running pub.
+      // If the pubspec.yaml is no newer than the package config file and the
+      // last flutter version used is the same as the current version, skip
+      // pub get. This will incorrectly skip pub on the master branch if
+      // dependencies are being added/removed from the flutter framework
+      // packages, but this can be worked around by manually running pub.
+      //
+      // `!isAfter` (rather than `isBefore`) treats equal mtimes as up-to-date.
+      // After a fresh `pub get` or a `git pull` that touches both files in the
+      // same instant, pubspec.yaml and pubspec.lock often share an identical
+      // mtime; the previous `isBefore` returned false on equal mtimes and
+      // forced an unnecessary pub respawn on every Flutter command.
       if (checkUpToDate &&
           pubLockFile.existsSync() &&
-          pubspecYaml.lastModifiedSync().isBefore(pubLockFile.lastModifiedSync()) &&
-          pubspecYaml.lastModifiedSync().isBefore(packageConfigFile.lastModifiedSync()) &&
+          !pubspecYaml.lastModifiedSync().isAfter(pubLockFile.lastModifiedSync()) &&
+          !pubspecYaml.lastModifiedSync().isAfter(packageConfigFile.lastModifiedSync()) &&
           lastVersion.existsSync() &&
           lastVersion.readAsStringSync() == versionFromFile.frameworkVersion) {
         _logger.printTrace('Skipping pub get: version match.');

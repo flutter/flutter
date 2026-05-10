@@ -290,6 +290,50 @@ void main() {
   });
 
   testUsingContext(
+    'checkUpToDate skips pub get when pubspec.yaml has the same mtime as '
+    'pubspec.lock and package_config.json',
+    () async {
+      final processManager = FakeProcessManager.empty();
+      final logger = BufferLogger.test();
+      final fileSystem = MemoryFileSystem.test();
+
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('pubspec.lock').createSync();
+      fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
+      fileSystem.file('.dart_tool/version').writeAsStringSync('a');
+      fileSystem.file('bin/cache/flutter.version.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_generateFlutterVersionJson('a'));
+
+      // Synchronize all three files to the same instant — this happens in
+      // practice after a `git pull` or fresh checkout, and used to defeat
+      // the skip because the strict `isBefore` returned false on equal mtimes.
+      final sameMoment = DateTime(2026);
+      fileSystem.file('pubspec.yaml').setLastModifiedSync(sameMoment);
+      fileSystem.file('pubspec.lock').setLastModifiedSync(sameMoment);
+      fileSystem.file('.dart_tool/package_config.json').setLastModifiedSync(sameMoment);
+
+      final pub = Pub.test(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        platform: FakePlatform(),
+        botDetector: const FakeBotDetector(false),
+        stdio: FakeStdio(),
+      );
+
+      await pub.get(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        context: PubContext.pubGet,
+        checkUpToDate: true,
+      );
+
+      expect(logger.traceText, contains('Skipping pub get: version match.'));
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testUsingContext(
     'checkUpToDate does not skip pub get if the package config is newer than the pubspec '
     'but the current framework version is not the same as the last version',
     () async {
