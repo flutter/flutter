@@ -311,6 +311,7 @@ List<Validation> _getValidations({
     ),
     Validation('package-allowlist', 'Package Allowlist...', () => _checkConsumerDependencies()),
     Validation('dart-analysis', 'Dart analysis...', () async {
+      await _ensureStandalonePackagesArePubGot();
       final CommandResult result = await _runFlutterAnalyze(
         flutterRoot,
         options: <String>['--flutter-repo', ...passthroughArguments],
@@ -331,15 +332,14 @@ List<Validation> _getValidations({
       () => _verifyPrivateLints(flutterRoot, getDartAnalyzeResult()),
     ),
     Validation('executable-allowlist', 'Executable allowlist...', () => _checkForNewExecutables()),
-    Validation(
-      'dart-analysis-watch',
-      'Dart analysis (with --watch)...',
-      () => _runFlutterAnalyze(
+    Validation('dart-analysis-watch', 'Dart analysis (with --watch)...', () async {
+      await _ensureStandalonePackagesArePubGot();
+      await _runFlutterAnalyze(
         flutterRoot,
         failureMessage: 'Dart analyzer failed when --watch was used.',
         options: <String>['--flutter-repo', '--watch', '--benchmark', ...passthroughArguments],
-      ),
-    ),
+      );
+    }),
     Validation(
       'snippets',
       'Snippet code...',
@@ -2763,6 +2763,33 @@ Future<CommandResult> _runFlutterAnalyze(
     workingDirectory: workingDirectory,
     failureMessage: failureMessage,
   );
+}
+
+/// Packages whose `pubspec.yaml` is intentionally outside the workspace.
+/// `flutter analyze --flutter-repo` walks them along with the workspace
+/// packages, so they need their own `.dart_tool/package_config.json` to
+/// be analyzable.
+///
+/// `flutter update-packages` (run as the `update-packages` validation in
+/// this same shard) already pub gets these. We pin the pub get here too
+/// so that the analyze validation is self-contained, which keeps it
+/// passing if any state was wiped between validations or if a future
+/// refactor changes the validation order.
+const List<List<String>> _standalonePackagesOutsideWorkspace = <List<String>>[
+  <String>['dev', 'integration_tests', 'hook_user_defines'],
+];
+
+Future<void> _ensureStandalonePackagesArePubGot() async {
+  for (final List<String> segments in _standalonePackagesOutsideWorkspace) {
+    final String packageDir = path.joinAll(<String>[flutterRoot, ...segments]);
+    await runCommand(
+      flutter,
+      const <String>['pub', 'get'],
+      workingDirectory: packageDir,
+      failureMessage:
+          'Failed to "flutter pub get" the standalone (non-workspace) package at $packageDir.',
+    );
+  }
 }
 
 // These files legitimately require executable permissions
