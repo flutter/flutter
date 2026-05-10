@@ -290,6 +290,50 @@ void main() {
   });
 
   testUsingContext(
+    'checkUpToDate skips pub get for a workspace sub-package when the workspace_ref '
+    'points to the workspace root directory',
+    () async {
+      final processManager = FakeProcessManager.empty();
+      final logger = BufferLogger.test();
+      final fileSystem = MemoryFileSystem.test();
+
+      // Sub-package pubspec.yaml is created first so its mtime is older than
+      // the workspace-level pubspec.lock and package_config.json (the skip
+      // check requires pubspec.yaml mtime < lock and < package_config).
+      fileSystem.file('pkg/pubspec.yaml').createSync(recursive: true);
+      fileSystem.file('pkg/.dart_tool/pub/workspace_ref.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"workspaceRoot": "../../.."}');
+
+      // Workspace root files (created later → newer mtime).
+      fileSystem.file('pubspec.lock').createSync();
+      fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
+      fileSystem.file('.dart_tool/version').writeAsStringSync('a');
+      fileSystem.file('bin/cache/flutter.version.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_generateFlutterVersionJson('a'));
+
+      final pub = Pub.test(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: processManager,
+        platform: FakePlatform(),
+        botDetector: const FakeBotDetector(false),
+        stdio: FakeStdio(),
+      );
+
+      await pub.get(
+        project: FlutterProject.fromDirectoryTest(fileSystem.directory('pkg')),
+        context: PubContext.pubGet,
+        checkUpToDate: true,
+      );
+
+      expect(logger.traceText, contains('Skipping pub get: version match.'));
+      expect(processManager, hasNoRemainingExpectations);
+    },
+  );
+
+  testUsingContext(
     'checkUpToDate does not skip pub get if the package config is newer than the pubspec '
     'but the current framework version is not the same as the last version',
     () async {
