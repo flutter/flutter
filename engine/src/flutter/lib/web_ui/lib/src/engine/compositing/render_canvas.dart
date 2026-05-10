@@ -47,6 +47,7 @@ class RenderCanvas extends DisplayCanvas {
   final DomHTMLCanvasElement canvasElement = createDomCanvasElement();
   int _pixelWidth = 0;
   int _pixelHeight = 0;
+  bool _hasTransferredBitmap = false;
 
   late final DomImageBitmapRenderingContext renderContext = canvasElement.contextBitmapRenderer;
 
@@ -73,6 +74,7 @@ class RenderCanvas extends DisplayCanvas {
   void render(DomImageBitmap bitmap) {
     _ensureSize(BitmapSize(bitmap.width, bitmap.height));
     renderContext.transferFromImageBitmap(bitmap);
+    _hasTransferredBitmap = true;
   }
 
   void renderWithNoBitmapSupport(
@@ -127,7 +129,21 @@ class RenderCanvas extends DisplayCanvas {
   }
 
   @override
+  void release() {
+    if (!_hasTransferredBitmap) {
+      return;
+    }
+    renderContext.transferFromImageBitmap(null);
+    _hasTransferredBitmap = false;
+  }
+
+  @override
   void dispose() {
-    // No extra cleanup needed.
+    release();
+    _pixelWidth = 0;
+    _pixelHeight = 0;
+    canvasElement.width = 0;
+    canvasElement.height = 0;
+    _updateLogicalHtmlCanvasSize();
   }
 }

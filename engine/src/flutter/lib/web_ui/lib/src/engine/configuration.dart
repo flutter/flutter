@@ -47,6 +47,7 @@ library configuration;
 import 'dart:js_interop';
 
 import 'package:meta/meta.dart';
+import 'browser_detection.dart';
 import 'dom.dart';
 
 enum CanvasKitVariant {
@@ -288,10 +289,25 @@ class FlutterConfiguration {
   ///
   /// This is mainly used for testing or for apps that want to ensure they
   /// run on devices which don't support WebGL.
-  bool get canvasKitForceCpuOnly =>
-      _configuration?.canvasKitForceCpuOnly ?? _defaultCanvasKitForceCpuOnly;
+  bool get canvasKitForceCpuOnly {
+    final bool? configured = _configuration?.canvasKitForceCpuOnly;
+    if (configured != null) {
+      return configured;
+    }
+    if (_hasDefaultCanvasKitForceCpuOnly) {
+      return _defaultCanvasKitForceCpuOnly;
+    }
+    return isSafari;
+  }
+
+  static const String _canvasKitForceCpuOnlyEnvironment = 'FLUTTER_WEB_CANVASKIT_FORCE_CPU_ONLY';
+
+  static const bool _hasDefaultCanvasKitForceCpuOnly = bool.hasEnvironment(
+    _canvasKitForceCpuOnlyEnvironment,
+  );
+
   static const bool _defaultCanvasKitForceCpuOnly = bool.fromEnvironment(
-    'FLUTTER_WEB_CANVASKIT_FORCE_CPU_ONLY',
+    _canvasKitForceCpuOnlyEnvironment,
   );
 
   bool get canvasKitForceMultiSurfaceRasterizer =>
@@ -301,11 +317,23 @@ class FlutterConfiguration {
     'FLUTTER_WEB_CANVASKIT_FORCE_MULTI_SURFACE_RASTERIZER',
   );
 
+  /// The default maximum number of canvases to use when rendering in CanvasKit.
+  @visibleForTesting
+  static const int defaultCanvasKitMaximumSurfaces = 8;
+
+  /// Safari needs at least two surfaces to keep platform-view underlays and
+  /// Flutter overlays separate, but more surfaces retain additional GPU state.
+  @visibleForTesting
+  static const int safariDefaultCanvasKitMaximumSurfaces = 2;
+
   /// The maximum number of canvases to use when rendering in CanvasKit.
   ///
   /// Limits the amount of overlays that can be created.
   int get canvasKitMaximumSurfaces {
-    final int maxSurfaces = _configuration?.canvasKitMaximumSurfaces?.toInt() ?? 8;
+    final int defaultMaxSurfaces = isSafari
+        ? safariDefaultCanvasKitMaximumSurfaces
+        : defaultCanvasKitMaximumSurfaces;
+    final int maxSurfaces = _configuration?.canvasKitMaximumSurfaces?.toInt() ?? defaultMaxSurfaces;
     if (maxSurfaces < 1) {
       return 1;
     }

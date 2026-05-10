@@ -43,6 +43,9 @@ abstract class SurfaceProvider<C extends Surface, D extends CanvasProvider> {
 
   int? _resourceCacheMaxBytes;
 
+  @visibleForTesting
+  int? get debugResourceCacheMaxBytes => _resourceCacheMaxBytes;
+
   void setSkiaResourceCacheMaxBytes(int bytes) {
     _resourceCacheMaxBytes = bytes;
     for (final C surface in _createdSurfaces) {

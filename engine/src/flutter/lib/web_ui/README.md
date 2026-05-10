@@ -277,6 +277,9 @@ The Flutter Web engine's sources are in `localhost:<port>` > `lib` > `_engine` >
 `engine`. You can set breakpoints in Dart source files and use the Chrome
 debugger to inspect variables' values.
 
+For Safari-specific CanvasKit memory behavior, see
+[Safari CanvasKit memory][10].
+
 ## Building CanvasKit and Skwasm
 
 To build CanvasKit and/or Skwasm locally, you must first set up your gclient config to
@@ -329,3 +332,4 @@ Note: The provided Dart SDK is used to run the `felt` tool itself, and to compil
 [7]: https://developer.chrome.com/docs/devtools
 [8]: https://developer.chrome.com/docs/devtools/sources
 [9]: https://github.com/flutter/flutter/blob/main/docs/engine/contributing/Setting-up-the-Engine-development-environment.md#additional-steps-for-web-engine
+[10]: docs/SAFARI_CANVASKIT_MEMORY.md

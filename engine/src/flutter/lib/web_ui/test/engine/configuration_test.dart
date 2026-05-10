@@ -10,6 +10,7 @@ import 'dart:js_interop';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/matchers.dart';
 
@@ -78,8 +79,42 @@ void testMain() {
       defaultConfig.setUserConfiguration(<String, Object?>{}.jsify()! as JsFlutterConfiguration);
     });
 
+    tearDown(() {
+      ui_web.browser.debugBrowserEngineOverride = null;
+    });
+
     test('canvasKitVariant', () {
       expect(defaultConfig.canvasKitVariant, CanvasKitVariant.auto);
+    });
+
+    test('canvasKitMaximumSurfaces defaults to 8 outside Safari', () {
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.blink;
+
+      expect(
+        defaultConfig.canvasKitMaximumSurfaces,
+        FlutterConfiguration.defaultCanvasKitMaximumSurfaces,
+      );
+    });
+
+    test('canvasKitMaximumSurfaces defaults to 2 on Safari', () {
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+
+      expect(
+        defaultConfig.canvasKitMaximumSurfaces,
+        FlutterConfiguration.safariDefaultCanvasKitMaximumSurfaces,
+      );
+    });
+
+    test('canvasKitForceCpuOnly defaults to false outside Safari', () {
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.blink;
+
+      expect(defaultConfig.canvasKitForceCpuOnly, isFalse);
+    });
+
+    test('canvasKitForceCpuOnly defaults to true on Safari', () {
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+
+      expect(defaultConfig.canvasKitForceCpuOnly, isTrue);
     });
 
     test('multiViewEnabled', () {
@@ -130,6 +165,28 @@ void testMain() {
         <String, Object?>{'multiViewEnabled': true}.jsify()! as JsFlutterConfiguration,
       );
       expect(config.multiViewEnabled, isTrue);
+    });
+
+    test('canvasKitMaximumSurfaces override is preserved on Safari', () {
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+
+      final config = FlutterConfiguration();
+      config.setUserConfiguration(
+        <String, Object?>{'canvasKitMaximumSurfaces': 4}.jsify()! as JsFlutterConfiguration,
+      );
+
+      expect(config.canvasKitMaximumSurfaces, 4);
+    });
+
+    test('canvasKitForceCpuOnly override is preserved on Safari', () {
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+
+      final config = FlutterConfiguration();
+      config.setUserConfiguration(
+        <String, Object?>{'canvasKitForceCpuOnly': false}.jsify()! as JsFlutterConfiguration,
+      );
+
+      expect(config.canvasKitForceCpuOnly, isFalse);
     });
   });
 }

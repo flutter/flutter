@@ -58,7 +58,10 @@ extension HtmlElementViewImpl on HtmlElementView {
   /// Creates the controller and kicks off its initialization.
   _HtmlElementViewController _createController(PlatformViewCreationParams params) {
     final controller = _HtmlElementViewController(params.id, viewType, creationParams);
-    controller._initialize().then((_) {
+    controller._initialize().then((bool shouldNotifyCreated) {
+      if (!shouldNotifyCreated) {
+        return;
+      }
       params.onPlatformViewCreated(params.id);
       onPlatformViewCreated?.call(params.id);
     });
@@ -91,11 +94,18 @@ class _HtmlElementViewController extends PlatformViewController {
   final dynamic creationParams;
 
   bool _initialized = false;
+  bool _disposed = false;
+  bool _disposeSent = false;
 
-  Future<void> _initialize() async {
+  Future<bool> _initialize() async {
     final args = <String, dynamic>{'id': viewId, 'viewType': viewType, 'params': creationParams};
     await SystemChannels.platform_views.invokeMethod<void>('create', args);
     _initialized = true;
+    if (_disposed) {
+      await _disposePlatformView();
+      return false;
+    }
+    return true;
   }
 
   @override
@@ -112,8 +122,17 @@ class _HtmlElementViewController extends PlatformViewController {
 
   @override
   Future<void> dispose() async {
+    _disposed = true;
     if (_initialized) {
-      await SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
+      await _disposePlatformView();
     }
+  }
+
+  Future<void> _disposePlatformView() async {
+    if (_disposeSent) {
+      return;
+    }
+    _disposeSent = true;
+    await SystemChannels.platform_views.invokeMethod<void>('dispose', viewId);
   }
 }

@@ -13,6 +13,8 @@ void main() {
 }
 
 class DummyDisplayCanvas extends DisplayCanvas {
+  int releaseCount = 0;
+
   @override
   void dispose() {}
 
@@ -23,6 +25,11 @@ class DummyDisplayCanvas extends DisplayCanvas {
 
   @override
   void initialize() {}
+
+  @override
+  void release() {
+    releaseCount += 1;
+  }
 
   @override
   bool get isConnected => throw UnimplementedError();
@@ -62,6 +69,17 @@ void testMain() {
       // just created.
       final DisplayCanvas newCanvas = factory.getCanvas();
       expect(newCanvas, equals(canvas));
+    });
+
+    test('releaseCanvas releases transient resources before caching the canvas', () {
+      final factory = DisplayCanvasFactory<DummyDisplayCanvas>(
+        createCanvas: () => DummyDisplayCanvas(),
+      );
+
+      final DummyDisplayCanvas canvas = factory.getCanvas();
+      factory.releaseCanvas(canvas);
+
+      expect(canvas.releaseCount, 1);
     });
 
     test('isLive', () {

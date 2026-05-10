@@ -226,6 +226,8 @@ abstract class CkSurface extends Surface {
     _skSurface = null;
   }
 
+  void release() {}
+
   @override
   void setSkiaResourceCacheMaxBytes(int bytes) {
     _grContext?.setResourceCacheLimitBytes(bytes.toDouble());

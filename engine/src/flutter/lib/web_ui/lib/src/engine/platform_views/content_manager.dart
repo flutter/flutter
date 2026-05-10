@@ -176,6 +176,7 @@ class PlatformViewManager {
   /// never been rendered before.
   void clearPlatformView(int viewId) {
     // Remove from our cache, and then from the DOM...
+    _viewIdToType.remove(viewId);
     _contents.remove(viewId)?.remove();
   }
 

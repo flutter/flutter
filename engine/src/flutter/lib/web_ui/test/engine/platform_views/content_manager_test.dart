@@ -60,6 +60,21 @@ void testMain() {
         expect(contentManager.knowsViewId(viewId), isFalse);
         expect(view.parentNode, isNull);
       });
+
+      test('forgets visibility metadata after clearing viewIds', () {
+        contentManager.renderContent(
+          ui_web.PlatformViewRegistry.defaultInvisibleViewType,
+          viewId,
+          <dynamic, dynamic>{'tagName': 'script'},
+        );
+
+        expect(contentManager.isInvisible(viewId), isTrue);
+
+        contentManager.clearPlatformView(viewId);
+
+        expect(contentManager.knowsViewId(viewId), isFalse);
+        expect(contentManager.isInvisible(viewId), isFalse);
+      });
     });
 
     group('registerFactory', () {

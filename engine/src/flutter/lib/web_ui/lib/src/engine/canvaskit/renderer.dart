@@ -7,6 +7,7 @@ import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
@@ -17,6 +18,9 @@ bool get isExperimentalWebParagraph =>
 class CanvasKitRenderer extends Renderer {
   static CanvasKitRenderer get instance => _instance;
   static late CanvasKitRenderer _instance;
+
+  @visibleForTesting
+  static const int safariResourceCacheMaxBytes = 24 * 1024 * 1024;
 
   Future<void>? _initialized;
 
@@ -34,14 +38,22 @@ class CanvasKitRenderer extends Renderer {
   FlutterFontCollection get fontCollection => _fontCollection;
 
   static Rasterizer _createRasterizer() {
-    if (configuration.canvasKitForceMultiSurfaceRasterizer || isSafari || isFirefox) {
-      return MultiSurfaceRasterizer(
+    final Rasterizer rasterizer;
+    final bool useMultiSurfaceRasterizer =
+        configuration.canvasKitForceMultiSurfaceRasterizer || isFirefox || isSafari;
+    if (useMultiSurfaceRasterizer) {
+      rasterizer = MultiSurfaceRasterizer(
         (OnscreenCanvasProvider canvasProvider) => CkOnscreenSurface(canvasProvider),
       );
+    } else {
+      rasterizer = OffscreenCanvasRasterizer(
+        (OffscreenCanvasProvider canvasProvider) => CkOffscreenSurface(canvasProvider),
+      );
     }
-    return OffscreenCanvasRasterizer(
-      (OffscreenCanvasProvider canvasProvider) => CkOffscreenSurface(canvasProvider),
-    );
+    if (isSafari) {
+      rasterizer.setResourceCacheMaxBytes(safariResourceCacheMaxBytes);
+    }
+    return rasterizer;
   }
 
   @override

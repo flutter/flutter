@@ -208,6 +208,51 @@ void main() {
       expect(fakePlatformViewRegistry.views, isEmpty);
     });
 
+    testWidgets('Dispose HTML view when create completes after widget disposal', (
+      WidgetTester tester,
+    ) async {
+      final createCompleter = Completer<void>();
+      final methodCalls = <String>[];
+      var didCallOnPlatformViewCreated = false;
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform_views,
+        (MethodCall call) {
+          methodCalls.add(call.method);
+          return switch (call.method) {
+            'create' => createCompleter.future,
+            'dispose' => Future<void>.value(),
+            _ => Future<void>.value(),
+          };
+        },
+      );
+
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: HtmlElementView(
+              viewType: 'webview',
+              onPlatformViewCreated: (_) {
+                didCallOnPlatformViewCreated = true;
+              },
+            ),
+          ),
+        ),
+      );
+      expect(methodCalls, <String>['create']);
+
+      await tester.pumpWidget(const Center(child: SizedBox(width: 200.0, height: 100.0)));
+      expect(methodCalls, <String>['create']);
+
+      createCompleter.complete();
+      await tester.pump();
+
+      expect(methodCalls, <String>['create', 'dispose']);
+      expect(didCallOnPlatformViewCreated, isFalse);
+    });
+
     testWidgets('HTML view survives widget tree change', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       fakePlatformViewRegistry.registerViewFactory('webview', _mockViewFactory);

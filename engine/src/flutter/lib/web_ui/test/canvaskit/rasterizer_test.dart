@@ -7,6 +7,7 @@ import 'dart:js_interop';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import 'common.dart';
 
@@ -16,16 +17,38 @@ void main() {
 
 void testMain() {
   setUpCanvasKitTest(withImplicitView: true);
-  test(
-    'defaults to OffscreenCanvasRasterizer on Chrome and MultiSurfaceRasterizer on Firefox and Safari',
-    () {
-      if (isChromium) {
-        expect(CanvasKitRenderer.instance.rasterizer, isA<OffscreenCanvasRasterizer>());
-      } else {
-        expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
-      }
-    },
-  );
+
+  tearDown(() {
+    ui_web.browser.debugBrowserEngineOverride = null;
+    ui_web.browser.debugOperatingSystemOverride = null;
+    CanvasKitRenderer.instance.debugResetRasterizer();
+  });
+
+  test('defaults to OffscreenCanvasRasterizer on Chrome and MultiSurfaceRasterizer on Firefox', () {
+    if (isChromium) {
+      expect(CanvasKitRenderer.instance.rasterizer, isA<OffscreenCanvasRasterizer>());
+    } else {
+      expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
+    }
+  });
+
+  test('defaults to MultiSurfaceRasterizer on desktop Safari', () {
+    ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+    ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.macOs;
+
+    CanvasKitRenderer.instance.debugResetRasterizer();
+
+    expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
+  });
+
+  test('defaults to MultiSurfaceRasterizer on iOS Safari', () {
+    ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+    ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.iOs;
+
+    CanvasKitRenderer.instance.debugResetRasterizer();
+
+    expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
+  });
 
   test('can be configured to always use MultiSurfaceRasterizer', () {
     debugOverrideJsConfiguration(

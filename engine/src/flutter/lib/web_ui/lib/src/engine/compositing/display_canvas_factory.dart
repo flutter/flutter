@@ -97,6 +97,7 @@ class DisplayCanvasFactory<T extends DisplayCanvas> {
       'was not created by this factory',
     );
     canvas.hostElement.remove();
+    canvas.release();
     _liveCanvases.remove(canvas);
     _cache.add(canvas);
   }
