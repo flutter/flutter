@@ -279,12 +279,42 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     _bindPipeline(pipeline);
   }
 
-  void bindVertexBuffer(BufferView bufferView, int vertexCount) {
+  /// Binds [bufferView] as the vertex buffer at the given [slot].
+  ///
+  /// [slot] selects which vertex-buffer binding the data should appear at,
+  /// matching the corresponding `VertexBufferLayout.binding` declared on
+  /// the active pipeline's `VertexLayout`. The default of 0 matches the
+  /// default layout declared by a shader bundle, which is what every
+  /// single-buffer call site expects. To bind multiple structure-of-arrays
+  /// vertex buffers, call this method once per slot with the same
+  /// [vertexCount]; the [vertexCount] only takes effect when no index
+  /// buffer is bound and is ignored on subsequent slots, so the values
+  /// supplied to later calls must match the first.
+  /// The maximum number of vertex buffer slots that can be bound to a single
+  /// draw. Matches `flutter::gpu::RenderPass::kMaxVertexBufferSlots` on the
+  /// native side; keep them in sync.
+  static const int _kMaxVertexBufferSlots = 16;
+
+  void bindVertexBuffer(
+    BufferView bufferView,
+    int vertexCount, {
+    int slot = 0,
+  }) {
+    if (slot < 0 || slot >= _kMaxVertexBufferSlots) {
+      throw RangeError.range(
+        slot,
+        0,
+        _kMaxVertexBufferSlots - 1,
+        'slot',
+        'bindVertexBuffer slot must be in [0, $_kMaxVertexBufferSlots)',
+      );
+    }
     bufferView.buffer._bindAsVertexBuffer(
       this,
       bufferView.offsetInBytes,
       bufferView.lengthInBytes,
       vertexCount,
+      slot,
     );
   }
 
@@ -519,7 +549,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   )
   external void _bindPipeline(RenderPipeline pipeline);
 
-  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int, Int, Int)>(
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int, Int, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_BindVertexBufferDevice',
   )
   external void _bindVertexBufferDevice(
@@ -527,6 +557,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     int offsetInBytes,
     int lengthInBytes,
     int vertexCount,
+    int slot,
   );
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Int, Int, Int, Int)>(

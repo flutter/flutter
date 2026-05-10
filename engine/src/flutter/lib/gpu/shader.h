@@ -60,6 +60,11 @@ class Shader : public RefCountedDartWrappable<Shader> {
 
   std::shared_ptr<impeller::VertexDescriptor> CreateVertexDescriptor() const;
 
+  const std::vector<impeller::ShaderStageIOSlot>& GetStageInputs() const;
+
+  const std::vector<impeller::ShaderStageBufferLayout>& GetStageBufferLayouts()
+      const;
+
   const std::vector<impeller::DescriptorSetLayout>& GetDescriptorSetLayouts()
       const;
 
