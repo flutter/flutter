@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 /// A [CustomPainter] that invokes a callback when it paints.
 class TestCallbackPainter extends CustomPainter {
+  /// Creates a [TestCallbackPainter] that calls [onPaint] when it paints.
   const TestCallbackPainter({required this.onPaint});
 
   /// The callback to invoke during [paint].

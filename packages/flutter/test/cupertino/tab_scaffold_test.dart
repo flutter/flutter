@@ -13,7 +13,6 @@ import 'rendering_test_utils.dart' show TestCallbackPainter;
 
 late List<int> selectedTabs;
 
-
 class MockCupertinoTabController extends CupertinoTabController {
   MockCupertinoTabController({required super.initialIndex});
 
