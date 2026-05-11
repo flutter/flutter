@@ -3,7 +3,7 @@ module.exports = async ({ github, context }) => {
   const repo = context.repo.repo;
   const labelName = 'waiting for response';
   // TODO(chunhtai): Remove this once all issues have applied or reapplied the
-  // label name.
+  // label. This should happen after 21 days.
   const oldLabelName = 'waiting for customer response';
   const daysUntilClose = 21;
   const issueCloseComment = `Without additional information, we are unfortunately not sure how to resolve this issue. We are therefore reluctantly going to close this bug for now.
