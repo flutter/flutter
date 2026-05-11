@@ -524,6 +524,10 @@ class AndroidProject extends FlutterProjectPlatform {
     '^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$',
   );
 
+  static final _kotlinCompilerOptionsPattern = RegExp(
+    r'kotlin\s*\{[\s\S]*?compilerOptions\s*\{[^}]*\}',
+  );
+
   /// Examples of strings that this regex matches:
   /// - `id "kotlin-android"`
   /// - `id("kotlin-android")`
@@ -630,11 +634,30 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
-    final bool declarativeMatch = _declarativeKotlinPluginPatterns.any((RegExp pattern) {
-      return (firstMatchInFile(appGradleFile, pattern) != null);
-    });
-    return imperativeMatch || declarativeMatch;
+    if (appGradleFile.existsSync()) {
+      if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+        return true;
+      }
+      for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
+        if (firstMatchInFile(appGradleFile, pattern) != null) {
+          return true;
+        }
+      }
+      try {
+        final String content = appGradleFile.readAsStringSync();
+        if (_kotlinCompilerOptionsPattern.hasMatch(content)) {
+          return true;
+        }
+      } on FileSystemException {
+        // Ignore and continue with other checks.
+      }
+    }
+    final Directory kotlinSrc = hostAppGradleRoot
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('kotlin');
+    return kotlinSrc.existsSync();
   }
 
   /// Gets top-level Gradle build file.

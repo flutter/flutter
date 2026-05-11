@@ -5917,6 +5917,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         config.locale = localeForChildren;
       });
     }
+    if (accessibilityFocusBlockType != AccessibilityFocusBlockType.none) {
+      configProvider.updateConfig((SemanticsConfiguration config) {
+        config.isFocused = null;
+      });
+    }
   }
 
   List<_RenderObjectSemantics> _getNonBlockedChildren() {
