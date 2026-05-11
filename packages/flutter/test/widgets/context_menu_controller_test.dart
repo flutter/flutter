@@ -265,4 +265,105 @@ void main() {
     // [intended] no Flutter-drawn text selection toolbar on web.
     skip: isContextMenuProvidedByPlatform,
   );
+
+  testWidgets('ContextMenuController.show updates in-place', (WidgetTester tester) async {
+    final controller = ContextMenuController();
+    addTearDown(ContextMenuController.removeAny);
+
+    await tester.pumpWidget(TestWidgetsApp(home: Container()));
+
+    final BuildContext context = tester.element(find.byType(Container));
+
+    // Show the menu with value 1.
+    controller.show(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        return const _StatefulMenu(value: 1);
+      },
+    );
+    await tester.pump();
+
+    expect(find.text('Initial: 1, Current: 1'), findsOneWidget);
+
+    // Show the menu again with value 2.
+    controller.show(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        return const _StatefulMenu(value: 2);
+      },
+    );
+    await tester.pump();
+
+    // If it updates in-place, the state is preserved, so initialValue is still 1.
+    // If it recreates the entry, the state is lost, so initialValue becomes 2.
+    expect(find.text('Initial: 1, Current: 2'), findsOneWidget);
+
+    controller.remove();
+    await tester.pump();
+  });
+
+  testWidgets('ContextMenuController.show after remove creates a new overlay entry', (
+    WidgetTester tester,
+  ) async {
+    final controller = ContextMenuController();
+    addTearDown(ContextMenuController.removeAny);
+
+    await tester.pumpWidget(TestWidgetsApp(home: Container()));
+
+    final BuildContext context = tester.element(find.byType(Container));
+
+    controller.show(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        return const _StatefulMenu(value: 1);
+      },
+    );
+    await tester.pump();
+
+    expect(find.text('Initial: 1, Current: 1'), findsOneWidget);
+
+    controller.remove();
+    await tester.pump();
+
+    expect(find.text('Initial: 1, Current: 1'), findsNothing);
+
+    // After remove, show should create a fresh overlay entry (not update in-place).
+    controller.show(
+      context: context,
+      contextMenuBuilder: (BuildContext context) {
+        return const _StatefulMenu(value: 2);
+      },
+    );
+    await tester.pump();
+
+    // State is fresh (not preserved from the first show), so initialValue is 2.
+    expect(find.text('Initial: 2, Current: 2'), findsOneWidget);
+
+    controller.remove();
+    await tester.pump();
+  });
+}
+
+class _StatefulMenu extends StatefulWidget {
+  const _StatefulMenu({required this.value});
+  final int value;
+  @override
+  State<_StatefulMenu> createState() => _StatefulMenuState();
+}
+
+class _StatefulMenuState extends State<_StatefulMenu> {
+  late int initialValue;
+  @override
+  void initState() {
+    super.initState();
+    initialValue = widget.value;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      'Initial: $initialValue, Current: ${widget.value}',
+      textDirection: TextDirection.ltr,
+    );
+  }
 }
