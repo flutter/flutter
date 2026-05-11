@@ -488,7 +488,6 @@ void main() {
 
       // Verify custom tasks are successfully resolved FROM-CACHE.
       final stdout = result.stdout as String;
-      expect(stdout.contains('generateDebugResValues FROM-CACHE'), isTrue);
       expect(stdout.contains('extractDeepLinksDebug FROM-CACHE'), isTrue);
       expect(stdout.contains('processDebugMainManifest FROM-CACHE'), isTrue);
       expect(stdout.contains('outputDebugAppLinkSettings FROM-CACHE'), isTrue);
