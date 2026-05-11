@@ -1881,8 +1881,8 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
 
 /// Generates the Dart plugin registrant, which allows to bind a platform
 /// implementation of a Dart only plugin to its interface.
-/// The new entrypoint wraps [currentMainUri], adds the `_PluginRegistrant` class,
-/// and writes the file to `newMainDart` at [FlutterProject.dartPluginRegistrant].
+/// The new entrypoint adds the `_PluginRegistrant` class and writes the file to
+/// `newMainDart` at [FlutterProject.dartPluginRegistrant].
 ///
 /// [mainFile] is the main entrypoint file, for example: `/<app>/lib/main.dart`.
 ///
@@ -1893,7 +1893,6 @@ bool _hasPluginInlineDartImpl(Plugin plugin, String platformKey) {
 Future<void> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
-  String currentMainUri,
   File mainFile,
 ) async {
   final List<Plugin> plugins = await findPlugins(rootProject);
@@ -1907,7 +1906,6 @@ Future<void> generateMainDartWithPluginRegistrant(
     Cache.flutterRoot!,
   );
   final templateContext = <String, Object>{
-    'mainEntrypoint': currentMainUri,
     'dartLanguageVersion': entrypointVersion.toString(),
     AndroidPlugin.kConfigKey: <Object?>[],
     IOSPlugin.kConfigKey: <Object?>[],
