@@ -707,7 +707,7 @@ void main() async {
         );
         fail('Expected exception for overlapping VertexAttributes.');
       } catch (e) {
-        final String msg = e.toString();
+        final msg = e.toString();
         expect(msg, contains('overlaps'));
         expect(msg, contains("'position'"));
         expect(msg, contains("'aliased'"));
