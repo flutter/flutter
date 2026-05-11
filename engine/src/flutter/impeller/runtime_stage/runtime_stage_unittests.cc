@@ -527,6 +527,24 @@ TEST(ShaderKeyTest, MakeUserScopedNameDifferentScopesDoNotCollide) {
   EXPECT_NE(runtime_effect, flutter_gpu);
 }
 
+TEST(ShaderKeyTest, MakeUserScopedNameHandlesLongInputs) {
+  // The scoped name is used solely as a `std::string` key in the per-process
+  // shader library registry; there is no fixed length limit. Confirm that
+  // long inputs (e.g. deeply-nested package asset paths) round-trip through
+  // the builder without truncation.
+  const std::string long_library_id(4096, 'a');
+  const std::string long_entrypoint(2048, 'b');
+  std::string scoped = ShaderKey::MakeUserScopedName(
+      ShaderKey::kScopeFlutterGPU, long_library_id, long_entrypoint);
+  EXPECT_EQ(scoped.size(), ShaderKey::kScopeFlutterGPU.size() + 1 +
+                               long_library_id.size() + 1 +
+                               long_entrypoint.size());
+  EXPECT_EQ(scoped.substr(0, 3), "fg:");
+  EXPECT_EQ(scoped.substr(3, long_library_id.size()), long_library_id);
+  EXPECT_EQ(scoped.substr(3 + long_library_id.size(), 1), ":");
+  EXPECT_EQ(scoped.substr(3 + long_library_id.size() + 1), long_entrypoint);
+}
+
 TEST_P(RuntimeStageTest, RuntimeStageHasUniqueLibraryIdByDefault) {
   // Two stages decoded independently must get distinct fallback library ids
   // so that programmatically-constructed stages cannot collide with each
