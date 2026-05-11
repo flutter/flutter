@@ -426,4 +426,30 @@ void main() {
     await tester.pumpAndSettle();
     expect(findHeadingLevelOnes, findsOne);
   });
+
+  testWidgets('Filter shows items from both batches when both are selected', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const App());
+    await tester.pumpAndSettle();
+
+    // Initially, only batch2 is selected by default.
+    // Verify a batch2 item is visible.
+    expect(find.text('AboutListTile'), findsOneWidget);
+    // Verify a batch1 item is not visible.
+    expect(find.text('CheckBoxListTile'), findsNothing);
+
+    // Open the filter menu.
+    await tester.tap(find.byTooltip('Filter by tags'));
+    await tester.pumpAndSettle();
+
+    // Select batch1.
+    await tester.tap(find.text('batch1'));
+    await tester.pumpAndSettle();
+
+    // Now both batch1 and batch2 should be selected.
+    // Verify both items are visible.
+    expect(find.text('AboutListTile'), findsOneWidget);
+    expect(find.text('CheckBoxListTile'), findsOneWidget);
+  });
 }

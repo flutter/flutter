@@ -117,7 +117,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final List<UseCase> effectiveUseCases = useCases.where((UseCase useCase) {
-      return _selectedTags.isEmpty || _selectedTags.every((Tag tag) => useCase.tags.contains(tag));
+      return _selectedTags.isEmpty || _selectedTags.any((Tag tag) => useCase.tags.contains(tag));
     }).toList();
 
     return Scaffold(
