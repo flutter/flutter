@@ -158,10 +158,8 @@ Future<void> main() async {
         if (Directory(defaultPath).existsSync()) {
           throw TaskResult.failure('Producing unexpected build artifacts in $defaultPath');
         }
-        if (!Directory(modifiedPath).existsSync()) {
-          throw TaskResult.failure(
-            'Not producing external native build output directory in $modifiedPath',
-          );
+        if (Directory(modifiedPath).existsSync()) {
+          throw TaskResult.failure('Producing unexpected build artifacts in $modifiedPath');
         }
       });
 

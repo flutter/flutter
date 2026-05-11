@@ -95,9 +95,8 @@ void main() {
       );
     }
 
-    late AndroidSdk sdkForPreprovisionBuild;
     testUsingContext(
-      'build apk preprovisions the configured ndk and passes the gradle property',
+      'build apk passes sdkmanager path, sdk root, and validated installed ndk versions to gradle',
       () async {
         final builder = AndroidGradleBuilder(
           java: FakeJava(),
@@ -109,31 +108,10 @@ void main() {
           gradleUtils: FakeGradleUtils(),
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
-        );
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>['gradlew', '-q', 'printNdkVersion'],
-            stdout: 'NdkVersion: 29.0.13846066\n',
-          ),
+          androidSdk: globals.androidSdk,
         );
         processManager.addCommand(
           FakeCommand(
-            command: <String>[
-              sdkManagerPath(),
-              '--sdk_root=${sdkPath()}',
-              '--install',
-              'ndk;29.0.13846066',
-            ],
-            onRun: (_) {
-              fileSystem
-                  .directory(ndkPath('29.0.13846066'))
-                  .childFile('source.properties')
-                  .createSync(recursive: true);
-            },
-          ),
-        );
-        processManager.addCommand(
-          const FakeCommand(
             command: <String>[
               'gradlew',
               '-q',
@@ -143,7 +121,9 @@ void main() {
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=false',
               '-Ptree-shake-icons=false',
-              '-Pflutter-preprovisioned-ndk-version=29.0.13846066',
+              '-Pflutter.androidSdkRoot=${sdkPath()}',
+              '-Pflutter.installedNdkVersions=29.0.13846066',
+              '-Pflutter.sdkManagerPath=${sdkManagerPath()}',
               'assembleDevRelease',
             ],
           ),
@@ -186,7 +166,6 @@ void main() {
           localGradleErrors: const <GradleHandledError>[],
         );
 
-        expect(sdkForPreprovisionBuild.hasNdkVersion('29.0.13846066'), isTrue);
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
@@ -197,19 +176,23 @@ void main() {
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
               .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
               .createSync(recursive: true);
-          sdkForPreprovisionBuild = AndroidSdk(
+          fileSystem
+              .directory(ndkPath('29.0.13846066'))
+              .childFile('source.properties')
+              .createSync(recursive: true);
+          fileSystem.directory(ndkPath('29.0.13846066-bad')).createSync(recursive: true);
+          return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
             fileSystem: fileSystem,
           );
-          return sdkForPreprovisionBuild;
         },
         AndroidStudio: () => FakeAndroidStudio(),
       },
     );
 
     testUsingContext(
-      'build apk forwards skip dependency checks to printNdkVersion',
+      'build apk keeps skip dependency checks on the main gradle invocation when ndk provisioning is unavailable',
       () async {
         final builder = AndroidGradleBuilder(
           java: FakeJava(),
@@ -221,31 +204,10 @@ void main() {
           gradleUtils: FakeGradleUtils(),
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
-        );
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>['gradlew', '-q', '-PskipDependencyChecks=true', 'printNdkVersion'],
-            stdout: 'NdkVersion: 29.0.13846066\n',
-          ),
+          androidSdk: globals.androidSdk,
         );
         processManager.addCommand(
           FakeCommand(
-            command: <String>[
-              sdkManagerPath(),
-              '--sdk_root=${sdkPath()}',
-              '--install',
-              'ndk;29.0.13846066',
-            ],
-            onRun: (_) {
-              fileSystem
-                  .directory(ndkPath('29.0.13846066'))
-                  .childFile('source.properties')
-                  .createSync(recursive: true);
-            },
-          ),
-        );
-        processManager.addCommand(
-          const FakeCommand(
             command: <String>[
               'gradlew',
               '-q',
@@ -256,7 +218,8 @@ void main() {
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=false',
               '-Ptree-shake-icons=false',
-              '-Pflutter-preprovisioned-ndk-version=29.0.13846066',
+              '-Pflutter.androidSdkRoot=${sdkPath()}',
+              '-Pflutter.installedNdkVersions=',
               'assembleDevRelease',
             ],
           ),
@@ -305,7 +268,6 @@ void main() {
       overrides: <Type, Generator>{
         AndroidSdk: () {
           fileSystem.directory(sdkPath()).createSync(recursive: true);
-          fileSystem.directory(sdkLicensesPath()).createSync(recursive: true);
           fileSystem
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
               .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
@@ -320,9 +282,8 @@ void main() {
       },
     );
 
-    late AndroidSdk sdkForFailedQuery;
     testUsingContext(
-      'build apk continues without ndk property when printNdkVersion fails',
+      'build apk passes an empty installed ndk version list when no valid ndks are installed',
       () async {
         final builder = AndroidGradleBuilder(
           java: FakeJava(),
@@ -334,16 +295,10 @@ void main() {
           gradleUtils: FakeGradleUtils(),
           platform: FakePlatform(),
           androidStudio: FakeAndroidStudio(),
+          androidSdk: globals.androidSdk,
         );
         processManager.addCommand(
-          const FakeCommand(
-            command: <String>['gradlew', '-q', 'printNdkVersion'],
-            stderr: 'Task failed\n',
-            exitCode: 1,
-          ),
-        );
-        processManager.addCommand(
-          const FakeCommand(
+          FakeCommand(
             command: <String>[
               'gradlew',
               '-q',
@@ -353,6 +308,9 @@ void main() {
               '-Pdart-obfuscation=false',
               '-Ptrack-widget-creation=false',
               '-Ptree-shake-icons=false',
+              '-Pflutter.androidSdkRoot=${sdkPath()}',
+              '-Pflutter.installedNdkVersions=',
+              '-Pflutter.sdkManagerPath=${sdkManagerPath()}',
               'assembleDevRelease',
             ],
           ),
@@ -395,7 +353,6 @@ void main() {
           localGradleErrors: const <GradleHandledError>[],
         );
 
-        expect(sdkForFailedQuery.hasNdkVersion('29.0.13846066'), isFalse);
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
@@ -406,12 +363,11 @@ void main() {
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
               .childFile(globals.platform.isWindows ? 'sdkmanager.bat' : 'sdkmanager')
               .createSync(recursive: true);
-          sdkForFailedQuery = AndroidSdk(
+          return AndroidSdk(
             fileSystem.directory(sdkPath()),
             java: FakeJava(),
             fileSystem: fileSystem,
           );
-          return sdkForFailedQuery;
         },
         AndroidStudio: () => FakeAndroidStudio(),
       },
@@ -1082,7 +1038,7 @@ void main() {
     );
 
     group('Appbundle debug symbol tests', () {
-      final commonCommandPortion = <String>[
+      List<String> commonCommandPortion() => <String>[
         'gradlew',
         '-q',
         '-Ptarget-platform=android-arm64,android-arm,android-x64',
@@ -1091,6 +1047,8 @@ void main() {
         '-Pdart-obfuscation=false',
         '-Ptrack-widget-creation=false',
         '-Ptree-shake-icons=false',
+        '-Pflutter.androidSdkRoot=${sdkPath()}',
+        '-Pflutter.installedNdkVersions=',
       ];
 
       // Output from `<android_sdk_root>/tools/bin/apkanalyzer files list <aab>`
@@ -1272,9 +1230,10 @@ void main() {
             gradleUtils: FakeGradleUtils(),
             platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
             androidStudio: FakeAndroidStudio(),
+            androidSdk: globals.androidSdk,
           );
           processManager.addCommand(
-            FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
+            FakeCommand(command: List<String>.of(commonCommandPortion())..add('bundleRelease')),
           );
 
           createSharedGradleFiles();
@@ -1346,9 +1305,10 @@ void main() {
             gradleUtils: FakeGradleUtils(),
             platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
             androidStudio: FakeAndroidStudio(),
+            androidSdk: globals.androidSdk,
           );
           processManager.addCommand(
-            FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
+            FakeCommand(command: List<String>.of(commonCommandPortion())..add('bundleRelease')),
           );
 
           createSharedGradleFiles();
@@ -1420,9 +1380,10 @@ void main() {
             gradleUtils: FakeGradleUtils(),
             platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
             androidStudio: FakeAndroidStudio(),
+            androidSdk: globals.androidSdk,
           );
           processManager.addCommand(
-            FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleDebug')),
+            FakeCommand(command: List<String>.of(commonCommandPortion())..add('bundleDebug')),
           );
 
           createSharedGradleFiles();
@@ -1476,24 +1437,6 @@ void main() {
       testUsingContext(
         'throws tool exit for missing debug symbols when building release app bundle',
         () async {
-          final builder = AndroidGradleBuilder(
-            java: FakeJava(),
-            logger: logger,
-            processManager: processManager,
-            fileSystem: fileSystem,
-            artifacts: Artifacts.test(),
-            analytics: fakeAnalytics,
-            gradleUtils: FakeGradleUtils(),
-            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
-            androidStudio: FakeAndroidStudio(),
-          );
-          processManager.addCommand(
-            FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
-          );
-
-          createSharedGradleFiles();
-          final File aabFile = createAabFile(BuildMode.release);
-
           fileSystem.directory(sdkPath()).createSync(recursive: true);
           fileSystem
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
@@ -1504,6 +1447,24 @@ void main() {
             java: FakeJava(),
             fileSystem: fileSystem,
           );
+          final builder = AndroidGradleBuilder(
+            java: FakeJava(),
+            logger: logger,
+            processManager: processManager,
+            fileSystem: fileSystem,
+            artifacts: Artifacts.test(),
+            analytics: fakeAnalytics,
+            gradleUtils: FakeGradleUtils(),
+            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
+            androidStudio: FakeAndroidStudio(),
+            androidSdk: sdk,
+          );
+          processManager.addCommand(
+            FakeCommand(command: List<String>.of(commonCommandPortion())..add('bundleRelease')),
+          );
+
+          createSharedGradleFiles();
+          final File aabFile = createAabFile(BuildMode.release);
 
           processManager.addCommand(
             FakeCommand(
@@ -1568,24 +1529,6 @@ void main() {
       testUsingContext(
         'build aab in release mode fails when apkanalyzer exit code is non zero',
         () async {
-          final builder = AndroidGradleBuilder(
-            java: FakeJava(),
-            logger: logger,
-            processManager: processManager,
-            fileSystem: fileSystem,
-            artifacts: Artifacts.test(),
-            analytics: fakeAnalytics,
-            gradleUtils: FakeGradleUtils(),
-            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
-            androidStudio: FakeAndroidStudio(),
-          );
-          processManager.addCommand(
-            FakeCommand(command: List<String>.of(commonCommandPortion)..add('bundleRelease')),
-          );
-
-          createSharedGradleFiles();
-          final File aabFile = createAabFile(BuildMode.release);
-
           fileSystem.directory(sdkPath()).createSync(recursive: true);
           fileSystem
               .directory(fileSystem.path.join(sdkPath(), 'cmdline-tools', 'latest', 'bin'))
@@ -1596,6 +1539,24 @@ void main() {
             java: FakeJava(),
             fileSystem: fileSystem,
           );
+          final builder = AndroidGradleBuilder(
+            java: FakeJava(),
+            logger: logger,
+            processManager: processManager,
+            fileSystem: fileSystem,
+            artifacts: Artifacts.test(),
+            analytics: fakeAnalytics,
+            gradleUtils: FakeGradleUtils(),
+            platform: FakePlatform(environment: <String, String>{'HOME': '/home'}),
+            androidStudio: FakeAndroidStudio(),
+            androidSdk: sdk,
+          );
+          processManager.addCommand(
+            FakeCommand(command: List<String>.of(commonCommandPortion())..add('bundleRelease')),
+          );
+
+          createSharedGradleFiles();
+          final File aabFile = createAabFile(BuildMode.release);
 
           processManager.addCommand(
             FakeCommand(

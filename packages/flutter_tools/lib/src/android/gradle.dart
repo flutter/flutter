@@ -56,10 +56,9 @@ import 'migrations/top_level_gradle_build_file_migration.dart';
 final _kBuildVariantRegex = RegExp('^BuildVariant: (?<$_kBuildVariantRegexGroupName>.*)\$');
 const _kBuildVariantRegexGroupName = 'variant';
 const _kBuildVariantTaskName = 'printBuildVariants';
-final _kNdkVersionRegex = RegExp('^NdkVersion: (?<$_kNdkVersionRegexGroupName>.*)\$');
-const _kNdkVersionRegexGroupName = 'ndkVersion';
-const _kNdkVersionTaskName = 'printNdkVersion';
-const _kPreprovisionedNdkVersionProperty = 'flutter-preprovisioned-ndk-version';
+const _kSdkManagerPathProperty = 'flutter.sdkManagerPath';
+const _kAndroidSdkRootProperty = 'flutter.androidSdkRoot';
+const _kInstalledNdkVersionsProperty = 'flutter.installedNdkVersions';
 @visibleForTesting
 const failedToStripDebugSymbolsErrorMessage = r'''
 Release app bundle failed to strip debug symbols from native libraries.
@@ -170,6 +169,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required GradleUtils gradleUtils,
     required Platform platform,
     required AndroidStudio? androidStudio,
+    AndroidSdk? androidSdk,
   }) : _java = java,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -177,6 +177,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _analytics = analytics,
        _gradleUtils = gradleUtils,
        _androidStudio = androidStudio,
+       _androidSdk = androidSdk,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
@@ -189,6 +190,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final GradleUtils _gradleUtils;
   final FileSystemUtils _fileSystemUtils;
   final AndroidStudio? _androidStudio;
+  final AndroidSdk? _androidSdk;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -575,16 +577,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
     if (androidBuildInfo.splitPerAbi) {
       options.add('-Psplit-per-abi=true');
     }
-    final String? preprovisionedNdkVersion = _shouldPreprovisionAndroidNdk(buildInfo)
-        ? await _preprovisionAndroidNdkIfNeeded(
-            project: project,
-            gradleExecutablePath: gradleExecutablePath,
-            buildInfo: buildInfo,
-          )
-        : null;
-    if (preprovisionedNdkVersion != null) {
-      options.add('-P$_kPreprovisionedNdkVersionProperty=$preprovisionedNdkVersion');
-    }
+
+    options.addAll(_getAndroidNdkProvisioningProperties());
     late Stopwatch sw;
     final int exitCode = await _runGradleTask(
       assembleTask,
@@ -690,19 +684,19 @@ class AndroidGradleBuilder implements AndroidBuilder {
     String aabPath,
     Iterable<AndroidArch> targetArchs,
   ) async {
-    if (globals.androidSdk == null) {
+    if (_androidSdk == null) {
       _logger.printTrace(
         'Failed to find android sdk when checking final appbundle for debug symbols.',
       );
       return false;
     }
-    if (!globals.androidSdk!.cmdlineToolsAvailable) {
+    if (!_androidSdk.cmdlineToolsAvailable) {
       _logger.printTrace(
         'Failed to find cmdline-tools when checking final appbundle for debug symbols.',
       );
       return false;
     }
-    final String? apkAnalyzerPath = globals.androidSdk!.getCmdlineToolsPath(apkAnalyzerBinaryName);
+    final String? apkAnalyzerPath = _androidSdk.getCmdlineToolsPath(apkAnalyzerBinaryName);
     if (apkAnalyzerPath == null) {
       _logger.printTrace(
         'Failed to find apkanalyzer when checking final appbundle for debug symbols.',
@@ -924,129 +918,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
     );
   }
 
-  Future<String?> _preprovisionAndroidNdkIfNeeded({
-    required FlutterProject project,
-    required String gradleExecutablePath,
-    required BuildInfo buildInfo,
-  }) async {
-    final AndroidSdk? androidSdk = globals.androidSdk;
-    if (androidSdk == null || !androidSdk.directory.existsSync()) {
-      return null;
-    }
-
-    final String? requiredNdkVersion = await _getNdkVersion(
-      project: project,
-      gradleExecutablePath: gradleExecutablePath,
-      buildInfo: buildInfo,
-    );
-    if (requiredNdkVersion == null) {
-      return null;
-    }
-
-    if (androidSdk.hasNdkVersion(requiredNdkVersion)) {
-      return requiredNdkVersion;
-    }
-
-    if (!androidSdk.cmdlineToolsAvailable) {
-      throwToolExit(
-        'Android sdkmanager not found. Update to the latest Android SDK and ensure that '
-        'the cmdline-tools are installed to resolve this.',
-      );
-    }
-
-    if (!androidSdk.licensesAvailable) {
-      throwToolExit(
-        'Unable to download needed Android SDK components because the Android SDK licenses have '
-        'not been accepted.\n\nTo resolve this, please run the following command in a Terminal:\n'
-        'flutter doctor --android-licenses',
-      );
-    }
-
-    final Status status = _logger.startProgress(
-      "Ensuring Android NDK '$requiredNdkVersion' is installed...",
-    );
-    try {
-      final RunResult result = await androidSdk.installNdkVersion(
-        requiredNdkVersion,
-        java: _java,
-        processUtils: _processUtils,
-      );
-      if (result.exitCode != 0) {
-        _logger.printTrace(
-          'Android sdkmanager failed while installing NDK $requiredNdkVersion.\n'
-          'stdout: ${result.stdout}\n'
-          'stderr: ${result.stderr}',
-        );
-        throwToolExit(
-          'Unable to download needed Android NDK $requiredNdkVersion.\n'
-          'Please check that the Android SDK command-line tools are installed and that SDK '
-          'licenses have been accepted with `flutter doctor --android-licenses`.',
-        );
-      }
-    } finally {
-      status.stop();
-    }
-
-    if (!androidSdk.hasNdkVersion(requiredNdkVersion)) {
-      throwToolExit(
-        'Android NDK $requiredNdkVersion could not be found in ${androidSdk.directory.path} '
-        'after sdkmanager completed.',
-      );
-    }
-
-    return requiredNdkVersion;
-  }
-
-  Future<String?> _getNdkVersion({
-    required FlutterProject project,
-    required String gradleExecutablePath,
-    required BuildInfo buildInfo,
-  }) async {
-    late Stopwatch sw;
-    var exitCode = 1;
-    String? result;
-
-    try {
-      exitCode = await _runGradleTask(
-        _kNdkVersionTaskName,
-        preRunTask: () {
-          sw = Stopwatch()..start();
-        },
-        postRunTask: () {
-          final Duration elapsedDuration = sw.elapsed;
-          _analytics.send(
-            Event.timing(
-              workflow: 'print',
-              variableName: 'android ndk version',
-              elapsedMilliseconds: elapsedDuration.inMilliseconds,
-            ),
-          );
-        },
-        options: <String>[
-          '-q',
-          if (buildInfo.androidSkipBuildDependencyValidation) '-PskipDependencyChecks=true',
-        ],
-        project: project,
-        localGradleErrors: gradleErrors,
-        gradleExecutablePath: gradleExecutablePath,
-        printOutput: false,
-        outputParser: (String line) {
-          if (_kNdkVersionRegex.firstMatch(line) case final RegExpMatch match) {
-            result = match.namedGroup(_kNdkVersionRegexGroupName);
-          }
-        },
-      );
-    } on Error catch (error) {
-      _logger.printTrace('Failed to query Android ndkVersion: $error');
-    }
-
-    if (exitCode != 0) {
-      return null;
-    }
-
-    return result;
-  }
-
   @override
   Future<List<String>> getBuildVariants({required FlutterProject project}) async {
     late Stopwatch sw;
@@ -1134,6 +1005,26 @@ class AndroidGradleBuilder implements AndroidBuilder {
       throwToolExit('Gradle task $taskName failed with exit code $exitCode');
     }
     return outputPath;
+  }
+
+  List<String> _getAndroidNdkProvisioningProperties() {
+    final AndroidSdk? androidSdk = _androidSdk;
+    if (androidSdk == null || !androidSdk.directory.existsSync()) {
+      return const <String>[];
+    }
+
+    final properties = <String>[
+      '-P$_kAndroidSdkRootProperty=${androidSdk.directory.path}',
+      '-P$_kInstalledNdkVersionsProperty=${_getInstalledNdkVersionsForGradle(androidSdk).join(',')}',
+    ];
+
+    final String? sdkManagerPath = androidSdk.sdkManagerPath;
+    if (sdkManagerPath != null &&
+        androidSdk.cmdlineToolsAvailable &&
+        androidSdk.licensesAvailable) {
+      properties.add('-P$_kSdkManagerPathProperty=$sdkManagerPath');
+    }
+    return properties;
   }
 }
 
@@ -1505,7 +1396,19 @@ String _getTargetPlatformByLocalEnginePath(String engineOutPath) {
   return result;
 }
 
-bool _shouldPreprovisionAndroidNdk(BuildInfo buildInfo) {
-  final String? flavor = buildInfo.flavor;
-  return flavor != null && flavor.isNotEmpty;
+List<String> _getInstalledNdkVersionsForGradle(AndroidSdk androidSdk) {
+  final Directory ndkDir = androidSdk.directory.childDirectory('ndk');
+  if (!ndkDir.existsSync()) {
+    return const <String>[];
+  }
+
+  final List<String> installedNdkVersions =
+      ndkDir
+          .listSync()
+          .whereType<Directory>()
+          .map((Directory dir) => dir.basename)
+          .where((String version) => androidSdk.hasNdkVersion(version))
+          .toList()
+        ..sort();
+  return installedNdkVersions;
 }
