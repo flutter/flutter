@@ -42,7 +42,7 @@ Thanks for your contribution.`;
     const labelEvent = events.reverse().find(
       event =>
         event.event === 'labeled' &&
-        // Issues that applied the label before the renaming still shows oldLabelName.
+        // Issues that applied the label before the renaming still use oldLabelName.
         (event.label.name === labelName || event.label.name === oldLabelName)
     );
 
