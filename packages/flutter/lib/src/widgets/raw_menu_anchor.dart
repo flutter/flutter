@@ -313,8 +313,8 @@ class RawMenuAnchor extends StatefulWidget {
   /// This callback can be used to add a delay or a closing animation before the
   /// menu is hidden.
   ///
-  /// This callback is triggered every time [MenuController.close] is called
-  /// while this menu is open.
+  /// This callback is triggered every time [MenuController.close] is called,
+  /// even when the menu overlay is already hidden.
   ///
   /// This callback is also triggered when a sibling [RawMenuAnchor] is opened
   /// while this menu is open. In this case, the callback can be used to add a
@@ -797,10 +797,6 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   void handleCloseRequest() {
-    if (!isOpen) {
-      return;
-    }
-
     // Changes in MediaQuery.sizeOf(context) cause RawMenuAnchor to close during
     // didChangeDependencies. When this happens, calling setState during the
     // closing sequence (handleCloseRequest -> onCloseRequested -> hideOverlay)
