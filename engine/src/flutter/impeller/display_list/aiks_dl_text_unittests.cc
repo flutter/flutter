@@ -733,10 +733,10 @@ TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
   Point preroll_point = Point{23, 45};
   {
     aiks_context.GetContentContext().GetLazyGlyphAtlas()->AddTextFrame(
-        text_frame,     //
-        preroll_point,  //
-        preroll_matrix,
-        std::nullopt  //
+        text_frame,        //
+        preroll_point,     //
+        preroll_matrix,    //
+        GlyphProperties{}  //
     );
   }
 
@@ -765,6 +765,48 @@ TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
 
   EXPECT_TRUE(text_contents.Render(aiks_context.GetContentContext(), entity,
                                    *render_pass));
+}
+
+TEST_P(AiksTest, CanRenderTextFrameWithThinLightAndDarkColors) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+
+  auto mapping =
+      flutter::testing::OpenFixtureAsSkData("RobotoSlab-VariableFont_wght.ttf");
+  ASSERT_TRUE(mapping);
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+
+  // Set the variation axis for weight to 100 (typically "Thin").
+  SkFontArguments::VariationPosition::Coordinate weight_coord{
+      SkSetFourByteTag('w', 'g', 'h', 't'), 100.0f};
+  SkFontArguments args;
+  args.setVariationDesignPosition({&weight_coord, 1});
+
+  SkFont thin_font(font_mgr->makeFromData(mapping)->makeClone(args), 25);
+
+  // Render light text
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), builder, "the quick brown fox jumped over the lazy dog!.?",
+      "RobotoSlab-VariableFont_wght.ttf",
+      TextRenderOptions{.color = DlColor::kWhite(),
+                        .position = DlPoint(100, 200)},
+      thin_font));
+
+  // Render dark text on a light background
+  DlPaint dart_text_background_paint;
+  dart_text_background_paint.setColor(DlColor::ARGB(1, 0.9, 0.9, 0.9));
+  builder.DrawRect(DlRect::MakeXYWH(50, 250, 900, 100),
+                   dart_text_background_paint);
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), builder, "the quick brown fox jumped over the lazy dog!.?",
+      "RobotoSlab-VariableFont_wght.ttf",
+      TextRenderOptions{.color = DlColor::kDarkGreen(),
+                        .position = DlPoint(100, 300)},
+      thin_font));
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 TEST_P(AiksTest, TextWithShadowCache) {

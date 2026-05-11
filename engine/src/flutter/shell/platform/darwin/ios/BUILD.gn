@@ -314,7 +314,7 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterSpellCheckPluginTest.mm",
       "framework/Source/FlutterTextInputPluginTest.mm",
       "framework/Source/FlutterTextureRegistryRelayTest.mm",
-      "framework/Source/FlutterTouchInterceptingView_Test.h",
+      "framework/Source/FlutterTouchInterceptingView+Test.h",
       "framework/Source/FlutterUndoManagerPluginTest.mm",
       "framework/Source/FlutterViewControllerTest.mm",
       "framework/Source/FlutterViewTest.mm",
