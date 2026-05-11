@@ -3290,8 +3290,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
         result.setEditable(!node.hasFlag(Flag.IS_READ_ONLY));
         if (node.textSelectionBase != -1 && node.textSelectionExtent != -1) {
-          result.setTextSelection(
-              node.textSelectionBase, node.textSelectionExtent);
+          result.setTextSelection(node.textSelectionBase, node.textSelectionExtent);
         }
         if (node.accessibilityBridge.accessibilityFocusedSemanticsNode != null
             && node.accessibilityBridge.accessibilityFocusedSemanticsNode.id == node.id) {
@@ -3318,8 +3317,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         result.setMovementGranularities(granularities);
         if (node.maxValueLength >= 0) {
           final int length = node.value == null ? 0 : node.value.length();
-          result.setMaxTextLength(
-              length - node.currentValueLength + node.maxValueLength);
+          result.setMaxTextLength(length - node.currentValueLength + node.maxValueLength);
         }
       }
     }
