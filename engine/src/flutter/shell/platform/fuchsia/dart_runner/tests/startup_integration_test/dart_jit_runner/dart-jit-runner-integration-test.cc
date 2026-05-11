@@ -34,8 +34,7 @@ constexpr auto kDartJitRunnerUrl = "dart_jit_runner#meta/dart_jit_runner.cm";
 constexpr auto kDartJitEchoServer = "dart_jit_echo_server";
 constexpr auto kDartJitEchoServerRef = ChildRef{kDartJitEchoServer};
 constexpr auto kDartJitEchoServerUrl =
-    "fuchsia-pkg://fuchsia.com/dart_jit_echo_server#meta/"
-    "dart_jit_echo_server.cm";
+    "dart_jit_echo_server#meta/dart_jit_echo_server.cm";
 
 class RealmBuilderTest : public ::loop_fixture::RealLoop,
                          public ::testing::Test {
