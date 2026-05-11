@@ -2155,4 +2155,19 @@ flutter:
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true, isMacOSEnabled: true),
     },
   );
+
+  testUsingContext(
+    'ResidentRunner delays on connection failure to allow logs to flush',
+    () => testbed.run(() async {
+      flutterDevice.connectError = Exception('Failed to connect');
+      flutterDevice.logFlushDelay = const Duration(milliseconds: 100);
+
+      final stopwatch = Stopwatch()..start();
+      final int result = await residentRunner.attach();
+      stopwatch.stop();
+
+      expect(result, 2);
+      expect(stopwatch.elapsedMilliseconds, greaterThanOrEqualTo(100));
+    }),
+  );
 }
