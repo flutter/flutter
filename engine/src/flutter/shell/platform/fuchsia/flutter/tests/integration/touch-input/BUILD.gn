@@ -45,8 +45,6 @@ executable("touch-input-test-bin") {
     "${fuchsia_sdk}/pkg/fidl_cpp",
     "${fuchsia_sdk}/pkg/sys_component_cpp_testing",
     "${fuchsia_sdk}/pkg/zx",
-    "embedding-flutter-view:package",
-    "touch-input-view:package",
     "//flutter/fml",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:portable_ui_test",
     "//flutter/third_party/googletest:gtest",
@@ -55,12 +53,10 @@ executable("touch-input-test-bin") {
 }
 
 fuchsia_test_archive("touch-input-test") {
-  deps = [
-    ":touch-input-test-bin",
-
-    # "OOT" copies of the runners used by tests, to avoid conflicting with the
-    # runners in the base fuchsia image.
-    # TODO(fxbug.dev/106575): Fix this with subpackages.
-    "//flutter/shell/platform/fuchsia/flutter:oot_flutter_jit_runner",
+  deps = [ ":touch-input-test-bin" ]
+  subpackages = [
+    "embedding-flutter-view:package",
+    "touch-input-view:package",
+    "//flutter/shell/platform/fuchsia/flutter:flutter_jit_runner",
   ]
 }

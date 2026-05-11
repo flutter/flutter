@@ -60,7 +60,7 @@ constexpr auto kKeyboardInputListenerRef = ChildRef{kKeyboardInputListener};
 constexpr auto kTextInputView = "text-input-view";
 constexpr auto kTextInputViewRef = ChildRef{kTextInputView};
 static constexpr auto kTextInputViewUrl =
-    "fuchsia-pkg://fuchsia.com/text-input-view#meta/text-input-view.cm";
+    "text-input-view#meta/text-input-view.cm";
 
 constexpr auto kTestUIStackUrl =
     "fuchsia-pkg://fuchsia.com/flatland-scene-manager-test-ui-stack#meta/"
