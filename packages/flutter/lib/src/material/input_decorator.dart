@@ -1472,7 +1472,6 @@ class _RenderDecoration extends RenderBox
         );
         if (counter != null) {
           _boxParentData(counter).offset = Offset(
-            // end + decoration.inputGap,
             endSupporting + decoration.inputGap,
             subtextBaseline - counterBaseline,
           );
