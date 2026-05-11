@@ -245,7 +245,7 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
       return;
     }
 
-    final ui.Rect? globalRect = SemanticsBinding.instance.semanticsNodeGlobalRect(
+    final ui.Rect? globalRect = SemanticsBinding.instance.getRectOfSemanticsNodeInViewCoordinates(
       event.viewId,
       event.nodeId,
     );

@@ -69,7 +69,7 @@ void main() {
     );
   });
 
-  testWidgets('semanticsNodeGlobalRect asserts for unknown views and nodes', (
+  testWidgets('getRectOfSemanticsNodeInViewCoordinates asserts for unknown views and nodes', (
     WidgetTester tester,
   ) async {
     final SemanticsHandle handle = tester.ensureSemantics();
@@ -86,11 +86,14 @@ void main() {
 
       expect(owner.getSemanticsNode(node.id), same(node));
       expect(
-        () => SemanticsBinding.instance.semanticsNodeGlobalRect(999, node.id),
+        () => SemanticsBinding.instance.getRectOfSemanticsNodeInViewCoordinates(999, node.id),
         throwsAssertionError,
       );
       expect(
-        () => SemanticsBinding.instance.semanticsNodeGlobalRect(tester.view.viewId, -1),
+        () => SemanticsBinding.instance.getRectOfSemanticsNodeInViewCoordinates(
+          tester.view.viewId,
+          -1,
+        ),
         throwsAssertionError,
       );
     } finally {
@@ -98,7 +101,7 @@ void main() {
     }
   });
 
-  testWidgets('semanticsNodeGlobalRect returns transformed logical rect', (
+  testWidgets('getRectOfSemanticsNodeInViewCoordinates returns transformed logical rect', (
     WidgetTester tester,
   ) async {
     tester.view.devicePixelRatio = 2.0;
@@ -124,7 +127,10 @@ void main() {
       final SemanticsNode node = tester.semantics.find(find.bySemanticsLabel('target'));
 
       expect(
-        SemanticsBinding.instance.semanticsNodeGlobalRect(tester.view.viewId, node.id),
+        SemanticsBinding.instance.getRectOfSemanticsNodeInViewCoordinates(
+          tester.view.viewId,
+          node.id,
+        ),
         rectMoreOrLessEquals(const Rect.fromLTWH(40.0, 20.0, 100.0, 50.0)),
       );
     } finally {

@@ -122,7 +122,7 @@ mixin SemanticsBinding on BindingBase {
   /// the view has no semantics owner, or the node cannot be found. Callers
   /// should only invoke this in response to a semantics action, in which case
   /// all three lookups are expected to succeed.
-  ui.Rect? semanticsNodeGlobalRect(int viewId, int nodeId) => null;
+  ui.Rect? getRectOfSemanticsNodeInViewCoordinates(int viewId, int nodeId) => null;
 
   /// The number of clients registered to listen for semantics.
   ///

@@ -486,9 +486,12 @@ mixin RendererBinding
   }
 
   @override
-  ui.Rect? semanticsNodeGlobalRect(int viewId, int nodeId) {
+  ui.Rect? getRectOfSemanticsNodeInViewCoordinates(int viewId, int nodeId) {
     final RenderView? renderView = _viewIdToRenderView[viewId];
-    assert(renderView != null, 'semanticsNodeGlobalRect was called for unknown view $viewId.');
+    assert(
+      renderView != null,
+      'getRectOfSemanticsNodeInViewCoordinates was called for unknown view $viewId.',
+    );
     if (renderView == null) {
       return null;
     }
@@ -496,7 +499,7 @@ mixin RendererBinding
     final SemanticsOwner? semanticsOwner = renderView.owner?.semanticsOwner;
     assert(
       semanticsOwner != null,
-      'semanticsNodeGlobalRect was called for view $viewId, but the view does not have a '
+      'getRectOfSemanticsNodeInViewCoordinates was called for view $viewId, but the view does not have a '
       'SemanticsOwner. Semantics must be enabled for the lookup to succeed.',
     );
     if (semanticsOwner == null) {
@@ -506,7 +509,7 @@ mixin RendererBinding
     final SemanticsNode? node = semanticsOwner.getSemanticsNode(nodeId);
     assert(
       node != null,
-      'semanticsNodeGlobalRect was called for unknown node $nodeId in view $viewId.',
+      'getRectOfSemanticsNodeInViewCoordinates was called for unknown node $nodeId in view $viewId.',
     );
     if (node == null) {
       return null;
