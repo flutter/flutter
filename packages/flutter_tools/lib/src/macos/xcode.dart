@@ -231,14 +231,14 @@ class Xcode {
   /// See [XcodeProjectInterpreter.xcrunCommand].
   List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
 
-  Future<List<String>> xcodebuildProjectCommand(
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     String projectPath,
     Directory buildDirectory, {
-    bool skipPackageResolution = true,
-  }) async => _xcodeProjectInterpreter.xcodebuildProjectCommand(
+    bool skipPackageUpdatesAndValidation = true,
+  }) async => _xcodeProjectInterpreter.fetchDependenciesAndGenerateXcodebuildArgs(
     projectPath,
     buildDirectory,
-    skipPackageResolution: skipPackageResolution,
+    skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
   );
 
   Future<RunResult> cc(List<String> args) => _run('cc', args);

@@ -215,14 +215,16 @@ Future<void> buildMacOS({
   final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
 
   try {
+    final List<String> xcodebuildCommandArgs = await globals.xcode!
+        .fetchDependenciesAndGenerateXcodebuildArgs(
+          flutterProject.macos.hostAppRoot.path,
+          globals.fs.directory(buildDirectoryPath),
+          skipPackageUpdatesAndValidation: false,
+        );
     result = await globals.processUtils.stream(
       <String>[
         '/usr/bin/env',
-        ...(await globals.xcode!.xcodebuildProjectCommand(
-          flutterProject.macos.hostAppRoot.path,
-          globals.fs.directory(buildDirectoryPath),
-          skipPackageResolution: false,
-        )),
+        ...xcodebuildCommandArgs,
         '-workspace',
         xcodeWorkspace.path,
         '-configuration',

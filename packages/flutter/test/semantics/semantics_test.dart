@@ -465,6 +465,31 @@ void main() {
       expect(node.role, config.role);
       expect(node.debugIsDirty, isTrue);
     });
+
+    test('updateWith marks node as dirty when customSemanticsActions changes', () {
+      final owner = SemanticsOwner(onSemanticsUpdate: (SemanticsUpdate update) {});
+      final node = SemanticsNode.root(owner: owner)
+        ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+
+      const action1 = CustomSemanticsAction(label: 'Action 1');
+      final config1 = SemanticsConfiguration()
+        ..isSemanticBoundary = true
+        ..customSemanticsActions = <CustomSemanticsAction, VoidCallback>{action1: () {}};
+
+      node.updateWith(config: config1);
+      expect(node.debugIsDirty, isTrue);
+
+      owner.sendSemanticsUpdate();
+      expect(node.debugIsDirty, isFalse);
+
+      const action2 = CustomSemanticsAction(label: 'Action 2');
+      final config2 = SemanticsConfiguration()
+        ..isSemanticBoundary = true
+        ..customSemanticsActions = <CustomSemanticsAction, VoidCallback>{action2: () {}};
+
+      node.updateWith(config: config2);
+      expect(node.debugIsDirty, isTrue);
+    });
   });
 
   test('toStringDeep() does not throw with transform == null', () {

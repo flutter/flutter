@@ -133,7 +133,7 @@ TEST_P(TextContentsTest, SimpleComputeVertexData) {
                                   /*frame=*/text_frame,
                                   /*position=*/Point(0, 0),
                                   /*screen_transform=*/Matrix(),
-                                  /*glyph_properties=*/std::nullopt,
+                                  /*glyph_properties=*/GlyphProperties{},
                                   /*atlas=*/atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data.begin());
@@ -174,7 +174,7 @@ TEST_P(TextContentsTest, SimpleComputeVertexData2x) {
       /*frame=*/text_frame,
       /*position=*/Point(0, 0),
       /*screen_transform=*/render_transform,
-      /*glyph_properties=*/std::nullopt,
+      /*glyph_properties=*/GlyphProperties{},
       /*atlas=*/atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data.begin());
@@ -216,7 +216,7 @@ TEST_P(TextContentsTest, MaintainsShape) {
           /*frame=*/text_frame,
           /*position=*/Point(0, 0),
           /*screen_transform=*/transform,
-          /*glyph_properties=*/std::nullopt,
+          /*glyph_properties=*/GlyphProperties{},
           /*atlas=*/atlas);
       position_rect[0] = PerVertexDataPositionToRect(data.begin());
       uv_rect[0] = PerVertexDataUVToRect(data.begin(), texture_size);
@@ -259,7 +259,7 @@ TEST_P(TextContentsTest, SimpleSubpixel) {
       /*frame=*/text_frame,
       /*position=*/offset,
       /*screen_transform=*/Matrix(),
-      /*glyph_properties=*/std::nullopt,
+      /*glyph_properties=*/GlyphProperties{},
       /*atlas=*/atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data.begin());
@@ -302,7 +302,7 @@ TEST_P(TextContentsTest, SimpleSubpixel3x) {
       /*frame=*/text_frame,
       /*position=*/offset,
       /*screen_transform=*/transform,
-      /*glyph_properties=*/std::nullopt,
+      /*glyph_properties=*/GlyphProperties{},
       /*atlas=*/atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data.begin());
@@ -346,7 +346,7 @@ TEST_P(TextContentsTest, SimpleSubpixel26) {
       /*frame=*/text_frame,
       /*position=*/offset,
       /*screen_transform=*/Matrix(),
-      /*glyph_properties=*/std::nullopt,
+      /*glyph_properties=*/GlyphProperties{},
       /*atlas=*/atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data.begin());
@@ -388,7 +388,7 @@ TEST_P(TextContentsTest, SimpleSubpixel80) {
       /*frame=*/text_frame,
       /*position=*/offset,
       /*screen_transform=*/Matrix(),
-      /*glyph_properties=*/std::nullopt,
+      /*glyph_properties=*/GlyphProperties{},
       /*atlas=*/atlas);
 
   Rect position_rect = PerVertexDataPositionToRect(data.begin());

@@ -1495,7 +1495,7 @@ allprojects {
       expect(getGradleVersionFor('8.11'), '8.13');
       expect(getGradleVersionFor('8.12'), '8.13');
       expect(getGradleVersionFor('8.13'), '8.13');
-      expect(getGradleVersionFor('9.0'), '9.0.0');
+      expect(getGradleVersionFor('9.0.1'), '9.1.0');
     });
 
     testWithoutContext('throws on unsupported versions', () {
