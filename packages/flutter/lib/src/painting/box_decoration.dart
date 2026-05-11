@@ -316,7 +316,7 @@ class BoxDecoration extends Decoration {
   }
 
   static bool _hasBuiltInBoxBorderLerp(BoxBorder? border) {
-    return border == null || border is Border || border is BorderDirectional;
+    return border is Border? || border is BorderDirectional?;
   }
 
   static BoxBorder? _lerpBorder(BoxBorder? a, BoxBorder? b, double t) {
@@ -324,16 +324,16 @@ class BoxDecoration extends Decoration {
       return BoxBorder.lerp(a, b, t);
     }
 
-    final ShapeBorder? border = ShapeBorder.lerp(a, b, t);
-    if (border == null || border is BoxBorder) {
-      return border as BoxBorder?;
+    final ShapeBorder? result = ShapeBorder.lerp(a, b, t);
+    if (result is BoxBorder?) {
+      return result;
     }
 
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary('BoxDecoration.border can only interpolate BoxBorder classes.'),
       ErrorDescription(
-        'ShapeBorder.lerp() returned an object of type ${border.runtimeType}:\n'
-        '  $border\n'
+        'ShapeBorder.lerp() returned an object of type ${result.runtimeType}:\n'
+        '  $result\n'
         'However, BoxDecoration.border can only be a BoxBorder.',
       ),
     ]);
