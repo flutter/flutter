@@ -59,10 +59,8 @@
     facets: {
         "fuchsia.test": {
             "deprecated-allowed-packages": [
-                "embedding-flutter-view",
                 "flatland-scene-manager-test-ui-stack",
-                "test_manager",
-                "touch-input-view",
+                "test_manager"
             ],
         },
     },
