@@ -37,23 +37,29 @@ external Pointer<Void> heapAlloc(int length);
 external void heapFree(Pointer<Void> ptr);
 
 class StackScope {
-  final List<Pointer<Void>> _heapPointers = <Pointer<Void>>[];
+  List<Pointer<Void>>? _heapPointers;
 
   Pointer<Void> _allocate(int length) {
     // Use heap allocation for buffers that would consume too much stack space.
     final int heapThreshold = math.min(4096, stackGetFree() ~/ 2);
     if (length > heapThreshold) {
       final Pointer<Void> ptr = heapAlloc(length);
-      _heapPointers.add(ptr);
+      _heapPointers ??= <Pointer<Void>>[];
+      _heapPointers!.add(ptr);
       return ptr;
     }
     return stackAlloc(length).cast<Void>();
   }
 
   void _freeHeap() {
-    // ignore: prefer_foreach
-    for (final Pointer<Void> ptr in _heapPointers) {
-      heapFree(ptr);
+    if (_heapPointers != null) {
+      // Iterable.forEach is not usable here because tear-offs are disallowed
+      // for external functions like heapFree.
+      // ignore: prefer_foreach
+      for (final Pointer<Void> ptr in _heapPointers!) {
+        heapFree(ptr);
+      }
+      _heapPointers = null;
     }
   }
 
