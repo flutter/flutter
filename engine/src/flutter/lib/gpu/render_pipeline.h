@@ -38,6 +38,12 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
   // a custom `VertexLayout` to `GpuContext.createRenderPipeline`, this is
   // built from that layout against the vertex shader's reflection metadata.
   // Otherwise it is the impellerc-generated default for the vertex shader.
+  //
+  // Shared rather than unique because `impeller::PipelineDescriptor::
+  // SetVertexDescriptor` stores its argument as `shared_ptr<VertexDescriptor>`
+  // and `impeller::VertexDescriptor` is non-copyable; we have to keep a
+  // reference here so the descriptor remains valid across the many
+  // `BindToPipelineDescriptor` calls a single pipeline may participate in.
   std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPipeline);

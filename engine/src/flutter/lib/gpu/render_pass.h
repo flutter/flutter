@@ -75,9 +75,13 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   BufferUniformMap fragment_uniform_bindings;
   TextureUniformMap fragment_texture_bindings;
 
-  // Vertex buffers indexed by binding slot. Impeller's RenderPass accepts up
-  // to 16 vertex buffers per draw call; index `i` corresponds to the binding
-  // declared at slot `i` in the active VertexLayout.
+  // Vertex buffers indexed by binding slot. Mirrors
+  // `impeller::kMaxVertexBuffers`; Impeller's HAL caps vertex buffer
+  // bindings at 16 per draw, and index `i` here corresponds to the binding
+  // declared at slot `i` in the active VertexLayout. On the OpenGL ES
+  // backend the per-pipeline limit on the *total attribute count* across
+  // all bound buffers is `GL_MAX_VERTEX_ATTRIBS` (spec minimum 8 on GLES
+  // 2.0, 16 on GLES 3.0+), enforced by the driver.
   static constexpr size_t kMaxVertexBufferSlots = 16;
   std::array<impeller::BufferView, kMaxVertexBufferSlots> vertex_buffers;
   // Highest slot index that has been bound on this pass (plus one).

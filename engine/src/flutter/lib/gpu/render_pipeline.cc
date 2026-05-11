@@ -7,13 +7,16 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
-#include <sstream>
+#include <span>
 #include <string_view>
 
 #include "flutter/lib/gpu/shader.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/vertex_descriptor.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
@@ -27,17 +30,22 @@ RenderPipeline::RenderPipeline(
     std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor)
     : vertex_shader_(std::move(vertex_shader)),
       fragment_shader_(std::move(fragment_shader)),
-      vertex_descriptor_(std::move(vertex_descriptor)) {}
-
-void RenderPipeline::BindToPipelineDescriptor(
-    impeller::ShaderLibrary& library,
-    impeller::PipelineDescriptor& desc) {
+      vertex_descriptor_(std::move(vertex_descriptor)) {
+  // Register the descriptor set layouts contributed by each shader exactly
+  // once, here at construction. Doing this in BindToPipelineDescriptor (as
+  // earlier revisions did) would append the same layouts on every bind
+  // since `RegisterDescriptorSetLayouts` accumulates rather than replaces.
   vertex_descriptor_->RegisterDescriptorSetLayouts(
       vertex_shader_->GetDescriptorSetLayouts().data(),
       vertex_shader_->GetDescriptorSetLayouts().size());
   vertex_descriptor_->RegisterDescriptorSetLayouts(
       fragment_shader_->GetDescriptorSetLayouts().data(),
       fragment_shader_->GetDescriptorSetLayouts().size());
+}
+
+void RenderPipeline::BindToPipelineDescriptor(
+    impeller::ShaderLibrary& library,
+    impeller::PipelineDescriptor& desc) {
   desc.SetVertexDescriptor(vertex_descriptor_);
 
   desc.AddStageEntrypoint(vertex_shader_->GetFunctionFromLibrary(library));
@@ -89,8 +97,8 @@ constexpr size_t kAttributeInts = 3;
 
 // Builds an `impeller::VertexDescriptor` from the user-supplied buffer
 // layout and attribute arrays, validating each entry against the vertex
-// shader's reflection metadata. On validation failure, returns a non-empty
-// string describing the first problem found.
+// shader's reflection metadata. On validation failure, returns a non-OK
+// status whose message describes the first problem found.
 //
 // Binding slots are implicit in buffer-list position. Buffer N (0-indexed)
 // is bound at binding slot N. This makes sparse bindings impossible to
@@ -99,15 +107,13 @@ constexpr size_t kAttributeInts = 3;
 // `firstBinding`-style entry point added to the HAL.
 // TODO(https://github.com/flutter/flutter/issues/186308): Allow sparse
 // vertex buffer binding slots.
-std::string BuildCustomVertexDescriptor(
-    const flutter::gpu::Shader& vertex_shader,
-    const int32_t* buffer_layouts,
-    size_t buffer_layout_count,
-    const int32_t* attributes,
-    size_t attribute_count,
-    const char* attribute_names,
-    size_t attribute_names_byte_length,
-    impeller::VertexDescriptor& out) {
+absl::StatusOr<std::shared_ptr<impeller::VertexDescriptor>>
+BuildCustomVertexDescriptor(const flutter::gpu::Shader& vertex_shader,
+                            std::span<const int32_t> buffer_layouts,
+                            std::span<const int32_t> attributes,
+                            std::span<const char> attribute_names) {
+  const size_t buffer_layout_count = buffer_layouts.size() / kBufferLayoutInts;
+  const size_t attribute_count = attributes.size() / kAttributeInts;
   const auto& shader_inputs = vertex_shader.GetStageInputs();
 
   std::vector<impeller::ShaderStageBufferLayout> stage_layouts;
@@ -123,16 +129,16 @@ std::string BuildCustomVertexDescriptor(
     const int32_t attr_count_in_buffer =
         buffer_layouts[buffer_index * kBufferLayoutInts + 1];
     if (stride <= 0) {
-      std::ostringstream s;
-      s << "VertexBuffer.strideInBytes must be positive (got " << stride
-        << ") on buffer at index " << buffer_index << ".";
-      return s.str();
+      return absl::InvalidArgumentError(
+          absl::StrCat("VertexBuffer.strideInBytes must be positive (got ",
+                       stride, ") on buffer at index ", buffer_index, "."));
     }
     if (attr_count_in_buffer < 0 ||
         attr_cursor + static_cast<size_t>(attr_count_in_buffer) >
             attribute_count) {
-      return "Internal error: attribute count overruns the packed attributes "
-             "blob.";
+      return absl::InvalidArgumentError(
+          "Internal error: attribute count overruns the packed attributes "
+          "blob.");
     }
     stage_layouts.push_back({static_cast<size_t>(stride), buffer_index});
 
@@ -155,36 +161,33 @@ std::string BuildCustomVertexDescriptor(
 
       if (name_byte_length <= 0 ||
           name_cursor + static_cast<size_t>(name_byte_length) >
-              attribute_names_byte_length) {
-        return "Internal error: attribute name overruns the packed names "
-               "blob.";
+              attribute_names.size()) {
+        return absl::InvalidArgumentError(
+            "Internal error: attribute name overruns the packed names blob.");
       }
-      const std::string_view name(attribute_names + name_cursor,
+      const std::string_view name(attribute_names.data() + name_cursor,
                                   static_cast<size_t>(name_byte_length));
       name_cursor += static_cast<size_t>(name_byte_length);
 
       if (offset < 0) {
-        std::ostringstream s;
-        s << "VertexAttribute '" << name
-          << "' offsetInBytes must be non-negative (got " << offset << ").";
-        return s.str();
+        return absl::InvalidArgumentError(absl::StrCat(
+            "VertexAttribute '", name,
+            "' offsetInBytes must be non-negative (got ", offset, ")."));
       }
       if (format_index < 0 ||
           static_cast<size_t>(format_index) >= kVertexFormatTable.size()) {
-        std::ostringstream s;
-        s << "VertexAttribute '" << name << "' format index " << format_index
-          << " is out of range.";
-        return s.str();
+        return absl::InvalidArgumentError(
+            absl::StrCat("VertexAttribute '", name, "' format index ",
+                         format_index, " is out of range."));
       }
       const VertexFormatInfo& format = kVertexFormatTable[format_index];
 
       if (static_cast<size_t>(offset) + format.bytes_per_element >
           static_cast<size_t>(stride)) {
-        std::ostringstream s;
-        s << "VertexAttribute '" << name << "' (offset " << offset << " + "
-          << format.bytes_per_element << " bytes) overruns stride of " << stride
-          << " on buffer at index " << buffer_index << ".";
-        return s.str();
+        return absl::InvalidArgumentError(absl::StrCat(
+            "VertexAttribute '", name, "' (offset ", offset, " + ",
+            format.bytes_per_element, " bytes) overruns stride of ", stride,
+            " on buffer at index ", buffer_index, "."));
       }
 
       // Detect overlap against earlier attributes in this buffer before
@@ -195,12 +198,11 @@ std::string BuildCustomVertexDescriptor(
       const std::string name_owned(name);
       for (const auto& other : ranges_in_buffer) {
         if (begin < other.end && other.begin < end) {
-          std::ostringstream s;
-          s << "VertexAttribute '" << name << "' (bytes [" << begin << ", "
-            << end << ")) overlaps VertexAttribute '" << other.name
-            << "' (bytes [" << other.begin << ", " << other.end
-            << ")) on buffer at index " << buffer_index << ".";
-          return s.str();
+          return absl::InvalidArgumentError(
+              absl::StrCat("VertexAttribute '", name, "' (bytes [", begin, ", ",
+                           end, ")) overlaps VertexAttribute '", other.name,
+                           "' (bytes [", other.begin, ", ", other.end,
+                           ")) on buffer at index ", buffer_index, "."));
         }
       }
       ranges_in_buffer.push_back({name_owned, begin, end});
@@ -221,11 +223,10 @@ std::string BuildCustomVertexDescriptor(
         }
       }
       if (shader_slot == nullptr) {
-        std::ostringstream s;
-        s << "VertexAttribute name '" << name
-          << "' does not match any input declared by the bound vertex "
-             "shader.";
-        return s.str();
+        return absl::InvalidArgumentError(absl::StrCat(
+            "VertexAttribute name '", name,
+            "' does not match any input declared by the bound vertex "
+            "shader."));
       }
       // Match the shader's scalar type class (float vs signed int vs
       // unsigned int). Mirroring WebGPU, Vulkan, and Metal, component-count
@@ -241,11 +242,10 @@ std::string BuildCustomVertexDescriptor(
       // `bit_width` once those land.
       if (shader_slot->type != format.type ||
           shader_slot->bit_width != format.bit_width) {
-        std::ostringstream s;
-        s << "VertexAttribute '" << name
-          << "' format does not match the vertex shader's declared input "
-             "type.";
-        return s.str();
+        return absl::InvalidArgumentError(absl::StrCat(
+            "VertexAttribute '", name,
+            "' format does not match the vertex shader's declared input "
+            "type."));
       }
 
       impeller::ShaderStageIOSlot built = *shader_slot;
@@ -256,15 +256,18 @@ std::string BuildCustomVertexDescriptor(
   }
 
   if (attr_cursor != attribute_count) {
-    return "Internal error: attributes blob has trailing rows not consumed "
-           "by any buffer.";
+    return absl::InvalidArgumentError(
+        "Internal error: attributes blob has trailing rows not consumed "
+        "by any buffer.");
   }
-  if (name_cursor != attribute_names_byte_length) {
-    return "Internal error: attribute names blob has trailing bytes.";
+  if (name_cursor != attribute_names.size()) {
+    return absl::InvalidArgumentError(
+        "Internal error: attribute names blob has trailing bytes.");
   }
 
-  out.SetStageInputs(stage_inputs, stage_layouts);
-  return {};
+  auto descriptor = std::make_shared<impeller::VertexDescriptor>();
+  descriptor->SetStageInputs(stage_inputs, stage_layouts);
+  return descriptor;
 }
 
 }  // namespace
@@ -347,20 +350,19 @@ Dart_Handle InternalFlutterGpu_RenderPipeline_Initialize(
       return tonic::ToDart(copy_error);
     }
 
-    const size_t buffer_layout_count =
-        buffer_layouts_ints.size() / flutter::gpu::kBufferLayoutInts;
-    const size_t attribute_count =
-        attribute_ints.size() / flutter::gpu::kAttributeInts;
-
-    auto descriptor = std::make_shared<impeller::VertexDescriptor>();
-    std::string error = flutter::gpu::BuildCustomVertexDescriptor(
-        *vertex_shader, buffer_layouts_ints.data(), buffer_layout_count,
-        attribute_ints.data(), attribute_count, attribute_names_bytes.data(),
-        attribute_names_bytes.size(), *descriptor);
-    if (!error.empty()) {
-      return tonic::ToDart(error);
+    absl::StatusOr<std::shared_ptr<impeller::VertexDescriptor>> built =
+        flutter::gpu::BuildCustomVertexDescriptor(
+            *vertex_shader,
+            std::span<const int32_t>(buffer_layouts_ints.data(),
+                                     buffer_layouts_ints.size()),
+            std::span<const int32_t>(attribute_ints.data(),
+                                     attribute_ints.size()),
+            std::span<const char>(attribute_names_bytes.data(),
+                                  attribute_names_bytes.size()));
+    if (!built.ok()) {
+      return tonic::ToDart(std::string(built.status().message()));
     }
-    vertex_descriptor = std::move(descriptor);
+    vertex_descriptor = *std::move(built);
   } else {
     vertex_descriptor = vertex_shader->CreateVertexDescriptor();
   }

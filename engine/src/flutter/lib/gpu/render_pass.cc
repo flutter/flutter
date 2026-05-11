@@ -346,15 +346,18 @@ static void BindVertexBuffer(
     wrapper->vertex_buffer_count = static_cast<size_t>(slot) + 1;
   }
 
-  // If the index type is set, then the `vertex_count` becomes the index
-  // count... So don't overwrite the count if it's already been set when binding
-  // the index buffer.
+  // `vertex_count` is only meaningful for slot 0: the Dart-side docstring
+  // for `bindVertexBuffer` states that for slots > 0 the value is ignored
+  // (the slot-0 binding determines the draw range). When the index type is
+  // set, `vertex_count` would become the index count and is already set by
+  // the index-buffer binding path, so we only assign it here if no index
+  // buffer has been bound.
   // TODO(bdero): Consider just doing a more traditional API with
   //              draw(vertexCount) and drawIndexed(indexCount). This is fine,
   //              but overall it would be a bit more explicit and we wouldn't
   //              have to document this behavior where the presence of the index
   //              buffer always takes precedent.
-  if (!wrapper->has_index_buffer) {
+  if (slot == 0 && !wrapper->has_index_buffer) {
     wrapper->element_count = vertex_count;
   }
 }

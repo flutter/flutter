@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: public_member_api_docs
-
 part of flutter_gpu;
 
 /// The format of a single vertex attribute.
@@ -17,19 +15,40 @@ part of flutter_gpu;
 // TODO(https://github.com/flutter/flutter/issues/186309): Add normalized,
 // packed, half-float, BGRA-swizzled, and 64-bit vertex attribute formats.
 enum VertexFormat {
+  /// One 32-bit float (4 bytes).
   float32(bytesPerElement: 4, componentCount: 1),
+
+  /// Two 32-bit floats (8 bytes).
   float32x2(bytesPerElement: 8, componentCount: 2),
+
+  /// Three 32-bit floats (12 bytes).
   float32x3(bytesPerElement: 12, componentCount: 3),
+
+  /// Four 32-bit floats (16 bytes).
   float32x4(bytesPerElement: 16, componentCount: 4),
 
+  /// One 32-bit unsigned integer (4 bytes).
   uint32(bytesPerElement: 4, componentCount: 1),
+
+  /// Two 32-bit unsigned integers (8 bytes).
   uint32x2(bytesPerElement: 8, componentCount: 2),
+
+  /// Three 32-bit unsigned integers (12 bytes).
   uint32x3(bytesPerElement: 12, componentCount: 3),
+
+  /// Four 32-bit unsigned integers (16 bytes).
   uint32x4(bytesPerElement: 16, componentCount: 4),
 
+  /// One 32-bit signed integer (4 bytes).
   sint32(bytesPerElement: 4, componentCount: 1),
+
+  /// Two 32-bit signed integers (8 bytes).
   sint32x2(bytesPerElement: 8, componentCount: 2),
+
+  /// Three 32-bit signed integers (12 bytes).
   sint32x3(bytesPerElement: 12, componentCount: 3),
+
+  /// Four 32-bit signed integers (16 bytes).
   sint32x4(bytesPerElement: 16, componentCount: 4);
 
   const VertexFormat({
@@ -97,7 +116,12 @@ final class VertexAttribute {
 final class VertexBuffer {
   const VertexBuffer({required this.strideInBytes, required this.attributes});
 
-  /// Byte distance between consecutive elements in this vertex buffer.
+  /// Byte distance from the start of one element to the start of the next
+  /// element in this vertex buffer (not the gap between an element's end and
+  /// the next element's start). Equivalent to the size of a single vertex
+  /// element plus any trailing padding before the next element begins. For a
+  /// tightly packed structure-of-arrays buffer carrying a single attribute,
+  /// this is the same as `attributes[0].format.bytesPerElement`.
   final int strideInBytes;
 
   /// Attributes read from this vertex buffer by the vertex shader.
