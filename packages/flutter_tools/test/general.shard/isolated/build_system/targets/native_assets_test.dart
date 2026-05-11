@@ -67,23 +67,15 @@ void main() {
     androidEnvironment.buildDir.createSync(recursive: true);
   });
 
-  testUsingContext(
-    'no dependency on KernelSnapshot',
-    () async {
-      const target = BuildHooks();
-      expect(target.dependencies, isNot(isA<KernelSnapshot>()));
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-  );
+  testUsingContext('no dependency on KernelSnapshot', () async {
+    const target = BuildHooks();
+    expect(target.dependencies, isNot(isA<KernelSnapshot>()));
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
-  testUsingContext(
-    'NativeAssets throws error if missing target platform',
-    () async {
-      iosEnvironment.defines.remove(kTargetPlatform);
-      expect(const BuildHooks().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-  );
+  testUsingContext('NativeAssets throws error if missing target platform', () async {
+    iosEnvironment.defines.remove(kTargetPlatform);
+    expect(const BuildHooks().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
   testUsingContext('NativeAssets defaults to ios archs if missing', () async {
     writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
@@ -424,10 +416,7 @@ void main() {
         artifacts: artifacts,
         platform: FakePlatform(),
       );
-      expect(
-        env['IMPELLERC'],
-        artifacts.getHostArtifact(HostArtifact.impellerc).absolute.path,
-      );
+      expect(env['IMPELLERC'], artifacts.getHostArtifact(HostArtifact.impellerc).absolute.path);
       expect(
         env['LIBTESSELLATOR'],
         artifacts.getHostArtifact(HostArtifact.libtessellator).absolute.path,
