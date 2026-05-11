@@ -45,69 +45,67 @@ enum VertexFormat {
 }
 
 /// Describes a single vertex attribute: which shader input it feeds (by name),
-/// which vertex buffer slot it reads from, the byte offset within that
-/// buffer's element, and its format.
+/// its byte offset within the owning vertex buffer's element, and its format.
 ///
 /// The [name] must exactly match an `in` (or equivalent stage input)
 /// declaration in the bound vertex shader. Looking the attribute up by name
 /// (rather than by raw location index) keeps Dart-side layouts robust to
 /// shader source edits, mirroring how uniform bindings are resolved by name
 /// via `Shader.getUniformSlot`.
+///
+/// Two attributes within the same [VertexBuffer] must not occupy overlapping
+/// byte ranges (i.e. `[offsetInBytes, offsetInBytes + format.bytesPerElement)`
+/// ranges must be disjoint across the buffer's attributes).
 final class VertexAttribute {
   const VertexAttribute({
     required this.name,
-    required this.bufferBinding,
-    required this.offsetInBytes,
     required this.format,
+    this.offsetInBytes = 0,
   });
 
   /// Name of the shader-side input this attribute feeds (e.g. `position`).
   final String name;
 
-  /// Vertex buffer slot that this attribute reads from. Must reference a
-  /// [VertexBufferLayout.binding] present in the same [VertexLayout].
-  final int bufferBinding;
-
-  /// Byte offset of this attribute from the start of each element in the
-  /// referenced vertex buffer. Must satisfy
-  /// `offsetInBytes + format.bytesPerElement <= layout.strideInBytes`.
-  final int offsetInBytes;
-
   /// Format of each attribute element.
   final VertexFormat format;
+
+  /// Byte offset of this attribute from the start of each element in the
+  /// owning vertex buffer. Must satisfy
+  /// `offsetInBytes + format.bytesPerElement <= VertexBuffer.strideInBytes`.
+  ///
+  /// Defaults to 0, which is the common case for a structure-of-arrays
+  /// layout where each buffer holds exactly one attribute.
+  final int offsetInBytes;
 }
 
-/// Describes one vertex buffer slot: its binding index and per-element stride.
+/// Describes one vertex buffer slot: its per-element stride and the
+/// attributes that are read from it.
+///
+/// A buffer's position in [VertexLayout.buffers] determines the binding
+/// slot it is bound to via [RenderPass.bindVertexBuffer]; the first buffer
+/// is slot 0, the second is slot 1, and so on. Sparse binding slots are
+/// not currently supported.
 ///
 /// Step mode (vertex vs instance) and instance step rate are not yet
-/// configurable; every binding currently advances per vertex. Both options
+/// configurable; every buffer currently advances per vertex. Both options
 /// will be added later as named parameters with sensible defaults, and the
 /// addition will be a non-breaking change for existing call sites.
-///
-/// The [binding] indices used across a [VertexLayout] must be densely
-/// packed starting from 0 (i.e. `0, 1, 2, ...`), and every binding
-/// declared in the layout must have a buffer bound via
-/// [RenderPass.bindVertexBuffer] before drawing. Sparse binding indices
-/// are not currently supported.
 // TODO(https://github.com/flutter/flutter/issues/186307): Allow specifying
 // vertex step mode and instance step rate.
 // TODO(https://github.com/flutter/flutter/issues/186308): Allow sparse
-// vertex buffer binding indices.
-final class VertexBufferLayout {
-  const VertexBufferLayout({
-    required this.binding,
-    required this.strideInBytes,
-  });
-
-  /// Binding index for this vertex buffer slot.
-  final int binding;
+// vertex buffer binding slots.
+final class VertexBuffer {
+  const VertexBuffer({required this.strideInBytes, required this.attributes});
 
   /// Byte distance between consecutive elements in this vertex buffer.
   final int strideInBytes;
+
+  /// Attributes read from this vertex buffer by the vertex shader.
+  final List<VertexAttribute> attributes;
 }
 
 /// A complete vertex input layout: zero or more vertex buffer slots and the
-/// attributes that read from them.
+/// attributes that read from each one.
 ///
 /// Pass an instance of this class to `GpuContext.createRenderPipeline` to
 /// override the default interleaved layout that the shader bundle declares
@@ -115,14 +113,10 @@ final class VertexBufferLayout {
 /// consume a structure-of-arrays mesh without converting to interleaved
 /// form on the CPU).
 final class VertexLayout {
-  const VertexLayout({required this.buffers, required this.attributes});
+  const VertexLayout({required this.buffers});
 
-  /// Vertex buffer slots this layout uses. Each entry's [VertexBufferLayout
-  /// .binding] must be referenced by at least one [VertexAttribute].
-  final List<VertexBufferLayout> buffers;
-
-  /// Attributes consumed by the vertex shader. Each [VertexAttribute
-  /// .bufferBinding] must reference a [VertexBufferLayout.binding] present
-  /// in [buffers].
-  final List<VertexAttribute> attributes;
+  /// Vertex buffer slots this layout uses. Each buffer's position in this
+  /// list determines the binding slot it must be bound to via
+  /// [RenderPass.bindVertexBuffer] before drawing.
+  final List<VertexBuffer> buffers;
 }

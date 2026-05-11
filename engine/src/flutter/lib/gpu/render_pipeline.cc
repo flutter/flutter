@@ -75,19 +75,30 @@ constexpr std::array<VertexFormatInfo, 12> kVertexFormatTable = {{
 }};
 
 // Width of each "row" in the packed `bufferLayouts` ByteData passed from
-// Dart: `[binding, stride]`.
+// Dart: `[strideInBytes, attributeCount]`. Each buffer's binding slot is
+// implicit in its position in the array (the first buffer is slot 0, etc.).
 constexpr size_t kBufferLayoutInts = 2;
 
 // Width of each "row" in the packed `attributes` ByteData passed from Dart:
-// `[bufferBinding, offset, formatIndex, nameByteLength]`. The attribute name
-// itself lives in a parallel `attribute_names` byte blob walked sequentially
-// using the per-row `nameByteLength`.
-constexpr size_t kAttributeInts = 4;
+// `[offsetInBytes, formatIndex, nameByteLength]`. Attribute rows are
+// flattened across buffers in buffer-list order; each buffer's
+// `attributeCount` indicates how many attribute rows belong to it. The
+// attribute name itself lives in a parallel `attribute_names` byte blob
+// walked sequentially using the per-row `nameByteLength`.
+constexpr size_t kAttributeInts = 3;
 
 // Builds an `impeller::VertexDescriptor` from the user-supplied buffer
 // layout and attribute arrays, validating each entry against the vertex
 // shader's reflection metadata. On validation failure, returns a non-empty
 // string describing the first problem found.
+//
+// Binding slots are implicit in buffer-list position. Buffer N (0-indexed)
+// is bound at binding slot N. This makes sparse bindings impossible to
+// express by construction; Impeller's RenderPass::SetVertexBuffer also
+// rejects sparse bindings, and lifting that restriction would need a
+// `firstBinding`-style entry point added to the HAL.
+// TODO(https://github.com/flutter/flutter/issues/186308): Allow sparse
+// vertex buffer binding slots.
 std::string BuildCustomVertexDescriptor(
     const flutter::gpu::Shader& vertex_shader,
     const int32_t* buffer_layouts,
@@ -97,157 +108,157 @@ std::string BuildCustomVertexDescriptor(
     const char* attribute_names,
     size_t attribute_names_byte_length,
     impeller::VertexDescriptor& out) {
-  // Build the per-binding stride table. Bindings must be densely packed
-  // `{0, 1, ..., buffer_layout_count - 1}` because Impeller's
-  // RenderPass::SetVertexBuffer rejects sparse bindings; the HAL would need
-  // a `firstBinding`-style entry point before this restriction can be lifted.
-  // TODO(https://github.com/flutter/flutter/issues/186308): Allow sparse
-  // vertex buffer binding indices.
+  const auto& shader_inputs = vertex_shader.GetStageInputs();
+
   std::vector<impeller::ShaderStageBufferLayout> stage_layouts;
   stage_layouts.reserve(buffer_layout_count);
-  std::vector<bool> binding_seen(buffer_layout_count, false);
-  for (size_t i = 0; i < buffer_layout_count; ++i) {
-    const int32_t binding = buffer_layouts[i * kBufferLayoutInts + 0];
-    const int32_t stride = buffer_layouts[i * kBufferLayoutInts + 1];
-    if (binding < 0 || static_cast<size_t>(binding) >= buffer_layout_count) {
-      std::ostringstream s;
-      s << "VertexBufferLayout.binding must be in [0, " << buffer_layout_count
-        << ") (got " << binding
-        << "); binding indices must be densely packed starting from 0.";
-      return s.str();
-    }
-    if (binding_seen[binding]) {
-      std::ostringstream s;
-      s << "VertexBufferLayout.binding " << binding << " was declared twice.";
-      return s.str();
-    }
-    binding_seen[binding] = true;
-    if (stride <= 0) {
-      std::ostringstream s;
-      s << "VertexBufferLayout.strideInBytes must be positive (got " << stride
-        << ").";
-      return s.str();
-    }
-    stage_layouts.push_back(
-        {static_cast<size_t>(stride), static_cast<size_t>(binding)});
-  }
-
-  // Build per-attribute IOSlots, looking up shader reflection by name for
-  // the metadata we don't carry on the Dart side. Name-keyed lookup mirrors
-  // the existing uniform binding API and keeps Dart layouts robust to
-  // shader source edits (e.g. reordering `in` declarations).
-  const auto& shader_inputs = vertex_shader.GetStageInputs();
   std::vector<impeller::ShaderStageIOSlot> stage_inputs;
   stage_inputs.reserve(attribute_count);
+
+  size_t attr_cursor = 0;
   size_t name_cursor = 0;
-  for (size_t i = 0; i < attribute_count; ++i) {
-    const int32_t buffer_binding = attributes[i * kAttributeInts + 0];
-    const int32_t offset = attributes[i * kAttributeInts + 1];
-    const int32_t format_index = attributes[i * kAttributeInts + 2];
-    const int32_t name_byte_length = attributes[i * kAttributeInts + 3];
-
-    if (name_byte_length <= 0 ||
-        name_cursor + static_cast<size_t>(name_byte_length) >
-            attribute_names_byte_length) {
-      return "Internal error: attribute name overruns the packed names blob.";
-    }
-    const std::string_view name(attribute_names + name_cursor,
-                                static_cast<size_t>(name_byte_length));
-    name_cursor += static_cast<size_t>(name_byte_length);
-
-    if (buffer_binding < 0) {
+  for (size_t buffer_index = 0; buffer_index < buffer_layout_count;
+       ++buffer_index) {
+    const int32_t stride = buffer_layouts[buffer_index * kBufferLayoutInts + 0];
+    const int32_t attr_count_in_buffer =
+        buffer_layouts[buffer_index * kBufferLayoutInts + 1];
+    if (stride <= 0) {
       std::ostringstream s;
-      s << "VertexAttribute '" << name
-        << "' bufferBinding must be non-negative (got " << buffer_binding
-        << ").";
+      s << "VertexBuffer.strideInBytes must be positive (got " << stride
+        << ") on buffer at index " << buffer_index << ".";
       return s.str();
     }
-    if (offset < 0) {
-      std::ostringstream s;
-      s << "VertexAttribute '" << name
-        << "' offsetInBytes must be non-negative (got " << offset << ").";
-      return s.str();
+    if (attr_count_in_buffer < 0 ||
+        attr_cursor + static_cast<size_t>(attr_count_in_buffer) >
+            attribute_count) {
+      return "Internal error: attribute count overruns the packed attributes "
+             "blob.";
     }
-    if (format_index < 0 ||
-        static_cast<size_t>(format_index) >= kVertexFormatTable.size()) {
-      std::ostringstream s;
-      s << "VertexAttribute '" << name << "' format index " << format_index
-        << " is out of range.";
-      return s.str();
-    }
-    const VertexFormatInfo& format = kVertexFormatTable[format_index];
+    stage_layouts.push_back({static_cast<size_t>(stride), buffer_index});
 
-    // Find the matching layout (for stride bounds checking).
-    const impeller::ShaderStageBufferLayout* matching_layout = nullptr;
-    for (const auto& layout : stage_layouts) {
-      if (layout.binding == static_cast<size_t>(buffer_binding)) {
-        matching_layout = &layout;
-        break;
+    // Track each attribute's byte range within this buffer so we can
+    // detect overlaps after building them all.
+    struct AttrRange {
+      std::string name;
+      size_t begin;
+      size_t end;
+    };
+    std::vector<AttrRange> ranges_in_buffer;
+    ranges_in_buffer.reserve(attr_count_in_buffer);
+
+    for (size_t a = 0; a < static_cast<size_t>(attr_count_in_buffer); ++a) {
+      const int32_t offset = attributes[attr_cursor * kAttributeInts + 0];
+      const int32_t format_index = attributes[attr_cursor * kAttributeInts + 1];
+      const int32_t name_byte_length =
+          attributes[attr_cursor * kAttributeInts + 2];
+      ++attr_cursor;
+
+      if (name_byte_length <= 0 ||
+          name_cursor + static_cast<size_t>(name_byte_length) >
+              attribute_names_byte_length) {
+        return "Internal error: attribute name overruns the packed names "
+               "blob.";
       }
-    }
-    if (matching_layout == nullptr) {
-      std::ostringstream s;
-      s << "VertexAttribute '" << name << "' references bufferBinding "
-        << buffer_binding << " which is not declared in VertexLayout.buffers.";
-      return s.str();
-    }
-    if (static_cast<size_t>(offset) + format.bytes_per_element >
-        matching_layout->stride) {
-      std::ostringstream s;
-      s << "VertexAttribute '" << name << "' (offset " << offset << " + "
-        << format.bytes_per_element << " bytes) overruns stride of "
-        << matching_layout->stride << " on bufferBinding " << buffer_binding
-        << ".";
-      return s.str();
-    }
+      const std::string_view name(attribute_names + name_cursor,
+                                  static_cast<size_t>(name_byte_length));
+      name_cursor += static_cast<size_t>(name_byte_length);
 
-    // Find the matching shader input by name to validate format and to copy
-    // the (location, set, columns, relaxed_precision) metadata we don't
-    // carry on the Dart side. The Shader's IOSlot names point into the
-    // shader bundle flatbuffer, which the Shader keeps alive via its code
-    // mapping; the impellerc-generated builds use static string literals.
-    // Either way, strcmp against a NUL-terminated needle is safe.
-    const impeller::ShaderStageIOSlot* shader_slot = nullptr;
-    const std::string name_owned(name);
-    for (const auto& slot : shader_inputs) {
-      if (slot.name != nullptr &&
-          std::strcmp(slot.name, name_owned.c_str()) == 0) {
-        shader_slot = &slot;
-        break;
+      if (offset < 0) {
+        std::ostringstream s;
+        s << "VertexAttribute '" << name
+          << "' offsetInBytes must be non-negative (got " << offset << ").";
+        return s.str();
       }
-    }
-    if (shader_slot == nullptr) {
-      std::ostringstream s;
-      s << "VertexAttribute name '" << name
-        << "' does not match any input declared by the bound vertex shader.";
-      return s.str();
-    }
-    // Match the shader's scalar type class (float vs signed int vs unsigned
-    // int). Mirroring WebGPU, Vulkan, and Metal, component-count mismatches
-    // are NOT errors: the shader receives default substitution (missing
-    // components default to (0, 0, 0, 1)) when the buffer supplies fewer
-    // components than declared, and reads only the leading components when
-    // the buffer supplies more. The shipped enum only contains 32-bit
-    // formats, so checking `type` alone is sufficient until 8/16-bit
-    // formats are added.
-    // TODO(https://github.com/flutter/flutter/issues/186309): Add
-    // normalized, packed, half-float, BGRA-swizzled, and 64-bit vertex
-    // attribute formats; the format check will need to also verify
-    // `bit_width` once those land.
-    if (shader_slot->type != format.type ||
-        shader_slot->bit_width != format.bit_width) {
-      std::ostringstream s;
-      s << "VertexAttribute '" << name
-        << "' format does not match the vertex shader's declared input type.";
-      return s.str();
-    }
+      if (format_index < 0 ||
+          static_cast<size_t>(format_index) >= kVertexFormatTable.size()) {
+        std::ostringstream s;
+        s << "VertexAttribute '" << name << "' format index " << format_index
+          << " is out of range.";
+        return s.str();
+      }
+      const VertexFormatInfo& format = kVertexFormatTable[format_index];
 
-    impeller::ShaderStageIOSlot built = *shader_slot;
-    built.binding = static_cast<size_t>(buffer_binding);
-    built.offset = static_cast<size_t>(offset);
-    stage_inputs.push_back(built);
+      if (static_cast<size_t>(offset) + format.bytes_per_element >
+          static_cast<size_t>(stride)) {
+        std::ostringstream s;
+        s << "VertexAttribute '" << name << "' (offset " << offset << " + "
+          << format.bytes_per_element << " bytes) overruns stride of " << stride
+          << " on buffer at index " << buffer_index << ".";
+        return s.str();
+      }
+
+      // Detect overlap against earlier attributes in this buffer before
+      // doing any shader-side lookups, so the overlap diagnostic isn't
+      // shadowed by a less informative name-mismatch error.
+      const size_t begin = static_cast<size_t>(offset);
+      const size_t end = begin + format.bytes_per_element;
+      const std::string name_owned(name);
+      for (const auto& other : ranges_in_buffer) {
+        if (begin < other.end && other.begin < end) {
+          std::ostringstream s;
+          s << "VertexAttribute '" << name << "' (bytes [" << begin << ", "
+            << end << ")) overlaps VertexAttribute '" << other.name
+            << "' (bytes [" << other.begin << ", " << other.end
+            << ")) on buffer at index " << buffer_index << ".";
+          return s.str();
+        }
+      }
+      ranges_in_buffer.push_back({name_owned, begin, end});
+
+      // Find the matching shader input by name to validate format and to
+      // copy the (location, set, columns, relaxed_precision) metadata we
+      // don't carry on the Dart side. The Shader's IOSlot names point into
+      // the shader bundle flatbuffer, which the Shader keeps alive via its
+      // code mapping; the impellerc-generated builds use static string
+      // literals. Either way, strcmp against a NUL-terminated needle is
+      // safe.
+      const impeller::ShaderStageIOSlot* shader_slot = nullptr;
+      for (const auto& slot : shader_inputs) {
+        if (slot.name != nullptr &&
+            std::strcmp(slot.name, name_owned.c_str()) == 0) {
+          shader_slot = &slot;
+          break;
+        }
+      }
+      if (shader_slot == nullptr) {
+        std::ostringstream s;
+        s << "VertexAttribute name '" << name
+          << "' does not match any input declared by the bound vertex "
+             "shader.";
+        return s.str();
+      }
+      // Match the shader's scalar type class (float vs signed int vs
+      // unsigned int). Mirroring WebGPU, Vulkan, and Metal, component-count
+      // mismatches are NOT errors: the shader receives default substitution
+      // (missing components default to (0, 0, 0, 1)) when the buffer
+      // supplies fewer components than declared, and reads only the leading
+      // components when the buffer supplies more. The shipped enum only
+      // contains 32-bit formats, so checking `type` alone is sufficient
+      // until 8/16-bit formats are added.
+      // TODO(https://github.com/flutter/flutter/issues/186309): Add
+      // normalized, packed, half-float, BGRA-swizzled, and 64-bit vertex
+      // attribute formats; the format check will need to also verify
+      // `bit_width` once those land.
+      if (shader_slot->type != format.type ||
+          shader_slot->bit_width != format.bit_width) {
+        std::ostringstream s;
+        s << "VertexAttribute '" << name
+          << "' format does not match the vertex shader's declared input "
+             "type.";
+        return s.str();
+      }
+
+      impeller::ShaderStageIOSlot built = *shader_slot;
+      built.binding = buffer_index;
+      built.offset = static_cast<size_t>(offset);
+      stage_inputs.push_back(built);
+    }
   }
 
+  if (attr_cursor != attribute_count) {
+    return "Internal error: attributes blob has trailing rows not consumed "
+           "by any buffer.";
+  }
   if (name_cursor != attribute_names_byte_length) {
     return "Internal error: attribute names blob has trailing bytes.";
   }

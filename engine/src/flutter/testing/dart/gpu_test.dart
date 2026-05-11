@@ -575,11 +575,11 @@ void main() async {
     await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  // A custom VertexLayout that matches the impellerc-generated default for the
-  // UnlitVertex shader (one binding 0, vec2 position at location 0, offset 0)
+  // A custom VertexLayout that matches the shader bundle's default for the
+  // UnlitVertex shader (one buffer at slot 0, vec2 position at offset 0)
   // should produce identical pipeline behavior. This pins the shape of the
-  // VertexLayout/VertexAttribute/VertexBufferLayout/VertexFormat API and the
-  // FFI plumbing through createRenderPipeline.
+  // VertexLayout/VertexBuffer/VertexAttribute/VertexFormat API and the FFI
+  // plumbing through createRenderPipeline.
   test('Can render triangle with explicit VertexLayout', () async {
     final RenderPassState state = createSimpleRenderPass();
 
@@ -588,13 +588,12 @@ void main() async {
       library['UnlitVertex']!,
       library['UnlitFragment']!,
       vertexLayout: const gpu.VertexLayout(
-        buffers: <gpu.VertexBufferLayout>[gpu.VertexBufferLayout(binding: 0, strideInBytes: 8)],
-        attributes: <gpu.VertexAttribute>[
-          gpu.VertexAttribute(
-            name: 'position',
-            bufferBinding: 0,
-            offsetInBytes: 0,
-            format: gpu.VertexFormat.float32x2,
+        buffers: <gpu.VertexBuffer>[
+          gpu.VertexBuffer(
+            strideInBytes: 8,
+            attributes: <gpu.VertexAttribute>[
+              gpu.VertexAttribute(name: 'position', format: gpu.VertexFormat.float32x2),
+            ],
           ),
         ],
       ),
@@ -624,19 +623,18 @@ void main() async {
           library['UnlitVertex']!,
           library['UnlitFragment']!,
           vertexLayout: const gpu.VertexLayout(
-            buffers: <gpu.VertexBufferLayout>[gpu.VertexBufferLayout(binding: 0, strideInBytes: 8)],
-            attributes: <gpu.VertexAttribute>[
-              // UnlitVertex declares a float `vec2 position`, so binding a
-              // uint32x2 (different scalar type class) here must throw.
-              // Component-count mismatches are NOT errors: a buffer can
-              // supply more or fewer components than the shader reads,
-              // matching the default-substitution rules every modern HAL
-              // uses.
-              gpu.VertexAttribute(
-                name: 'position',
-                bufferBinding: 0,
-                offsetInBytes: 0,
-                format: gpu.VertexFormat.uint32x2,
+            buffers: <gpu.VertexBuffer>[
+              gpu.VertexBuffer(
+                strideInBytes: 8,
+                attributes: <gpu.VertexAttribute>[
+                  // UnlitVertex declares a float `vec2 position`, so binding
+                  // a uint32x2 (different scalar type class) here must throw.
+                  // Component-count mismatches are NOT errors: a buffer can
+                  // supply more or fewer components than the shader reads,
+                  // matching the default-substitution rules every modern HAL
+                  // uses.
+                  gpu.VertexAttribute(name: 'position', format: gpu.VertexFormat.uint32x2),
+                ],
               ),
             ],
           ),
@@ -661,14 +659,17 @@ void main() async {
           library['UnlitVertex']!,
           library['UnlitFragment']!,
           vertexLayout: const gpu.VertexLayout(
-            buffers: <gpu.VertexBufferLayout>[gpu.VertexBufferLayout(binding: 0, strideInBytes: 8)],
-            attributes: <gpu.VertexAttribute>[
-              // float32x2 (8 bytes) at offset 4 with stride 8 overruns by 4.
-              gpu.VertexAttribute(
-                name: 'position',
-                bufferBinding: 0,
-                offsetInBytes: 4,
-                format: gpu.VertexFormat.float32x2,
+            buffers: <gpu.VertexBuffer>[
+              gpu.VertexBuffer(
+                strideInBytes: 8,
+                attributes: <gpu.VertexAttribute>[
+                  // float32x2 (8 bytes) at offset 4 with stride 8 overruns by 4.
+                  gpu.VertexAttribute(
+                    name: 'position',
+                    offsetInBytes: 4,
+                    format: gpu.VertexFormat.float32x2,
+                  ),
+                ],
               ),
             ],
           ),
@@ -682,7 +683,7 @@ void main() async {
   );
 
   test(
-    'createRenderPipeline rejects VertexAttribute with unknown bufferBinding',
+    'createRenderPipeline rejects VertexLayout with overlapping attributes',
     () async {
       final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
       try {
@@ -690,20 +691,26 @@ void main() async {
           library['UnlitVertex']!,
           library['UnlitFragment']!,
           vertexLayout: const gpu.VertexLayout(
-            buffers: <gpu.VertexBufferLayout>[gpu.VertexBufferLayout(binding: 0, strideInBytes: 8)],
-            attributes: <gpu.VertexAttribute>[
-              gpu.VertexAttribute(
-                name: 'position',
-                bufferBinding: 7, // not declared in `buffers`
-                offsetInBytes: 0,
-                format: gpu.VertexFormat.float32x2,
+            buffers: <gpu.VertexBuffer>[
+              gpu.VertexBuffer(
+                strideInBytes: 8,
+                attributes: <gpu.VertexAttribute>[
+                  // Two attributes both occupying bytes [0, 8) in the same
+                  // buffer. The second one isn't a real shader input, but
+                  // the overlap check fires before the name check.
+                  gpu.VertexAttribute(name: 'position', format: gpu.VertexFormat.float32x2),
+                  gpu.VertexAttribute(name: 'aliased', format: gpu.VertexFormat.float32x2),
+                ],
               ),
             ],
           ),
         );
-        fail('Expected exception for unknown bufferBinding.');
+        fail('Expected exception for overlapping VertexAttributes.');
       } catch (e) {
-        expect(e.toString(), contains('not declared in VertexLayout.buffers'));
+        final String msg = e.toString();
+        expect(msg, contains('overlaps'));
+        expect(msg, contains("'position'"));
+        expect(msg, contains("'aliased'"));
       }
     },
     skip: !(impellerEnabled && flutterGpuEnabled),
@@ -736,13 +743,15 @@ void main() async {
           library['UnlitVertex']!,
           library['UnlitFragment']!,
           vertexLayout: const gpu.VertexLayout(
-            buffers: <gpu.VertexBufferLayout>[gpu.VertexBufferLayout(binding: 0, strideInBytes: 8)],
-            attributes: <gpu.VertexAttribute>[
-              gpu.VertexAttribute(
-                name: 'nonexistent_attribute',
-                bufferBinding: 0,
-                offsetInBytes: 0,
-                format: gpu.VertexFormat.float32x2,
+            buffers: <gpu.VertexBuffer>[
+              gpu.VertexBuffer(
+                strideInBytes: 8,
+                attributes: <gpu.VertexAttribute>[
+                  gpu.VertexAttribute(
+                    name: 'nonexistent_attribute',
+                    format: gpu.VertexFormat.float32x2,
+                  ),
+                ],
               ),
             ],
           ),
