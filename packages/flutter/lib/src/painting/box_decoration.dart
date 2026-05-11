@@ -240,7 +240,7 @@ class BoxDecoration extends Decoration {
     return BoxDecoration(
       color: Color.lerp(null, color, factor),
       image: DecorationImage.lerp(null, image, factor),
-      border: BoxBorder.lerp(null, border, factor),
+      border: _lerpBorder(null, border, factor),
       borderRadius: BorderRadiusGeometry.lerp(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
       gradient: gradient?.scale(factor),
@@ -307,12 +307,36 @@ class BoxDecoration extends Decoration {
     return BoxDecoration(
       color: Color.lerp(a.color, b.color, t),
       image: DecorationImage.lerp(a.image, b.image, t),
-      border: BoxBorder.lerp(a.border, b.border, t),
+      border: _lerpBorder(a.border, b.border, t),
       borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
       gradient: Gradient.lerp(a.gradient, b.gradient, t),
       shape: t < 0.5 ? a.shape : b.shape,
     );
+  }
+
+  static bool _hasBuiltInBoxBorderLerp(BoxBorder? border) {
+    return border == null || border is Border || border is BorderDirectional;
+  }
+
+  static BoxBorder? _lerpBorder(BoxBorder? a, BoxBorder? b, double t) {
+    if (_hasBuiltInBoxBorderLerp(a) && _hasBuiltInBoxBorderLerp(b)) {
+      return BoxBorder.lerp(a, b, t);
+    }
+
+    final ShapeBorder? border = ShapeBorder.lerp(a, b, t);
+    if (border == null || border is BoxBorder) {
+      return border as BoxBorder?;
+    }
+
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('BoxDecoration.border can only interpolate BoxBorder classes.'),
+      ErrorDescription(
+        'ShapeBorder.lerp() returned an object of type ${border.runtimeType}:\n'
+        '  $border\n'
+        'However, BoxDecoration.border can only be a BoxBorder.',
+      ),
+    ]);
   }
 
   @override
