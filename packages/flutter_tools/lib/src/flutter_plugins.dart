@@ -1359,7 +1359,7 @@ Future<void> injectPlugins(
         DarwinDependencyManagement(
           project: project,
           plugins: plugins,
-          cocoapods: globals.cocoaPods!,
+          cocoapods: globals.cocoaPods,
           swiftPackageManager: SwiftPackageManager(
             fileSystem: globals.fs,
             templateRenderer: globals.templateRenderer,
@@ -1368,9 +1368,7 @@ Future<void> injectPlugins(
           ),
           fileSystem: globals.fs,
           featureFlags: featureFlags,
-          logger: globals.logger,
           analytics: globals.analytics,
-          platform: globals.platform,
           xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
           config: globals.config,
         );
