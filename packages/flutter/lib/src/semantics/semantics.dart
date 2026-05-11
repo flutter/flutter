@@ -6389,6 +6389,9 @@ class SemanticsConfiguration {
   /// is blocked in the a11y focus (different from input focus).
   AccessibilityFocusBlockType get accessibilityFocusBlockType => _accessibilityFocusBlockType;
   set accessibilityFocusBlockType(AccessibilityFocusBlockType value) {
+    if (_accessibilityFocusBlockType == value) {
+      return;
+    }
     _accessibilityFocusBlockType = value;
     _flags = _flags.copyWith(
       isAccessibilityFocusBlocked: value != AccessibilityFocusBlockType.none,

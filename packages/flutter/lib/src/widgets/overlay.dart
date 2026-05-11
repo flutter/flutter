@@ -3145,8 +3145,8 @@ mixin _RenderAccessibilityFocusBlocker on RenderObject {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.accessibilityFocusBlockType = blockFocus
-        ? AccessibilityFocusBlockType.blockSubtree
-        : AccessibilityFocusBlockType.none;
+    if (blockFocus) {
+      config.accessibilityFocusBlockType = AccessibilityFocusBlockType.blockSubtree;
+    }
   }
 }
