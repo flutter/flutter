@@ -330,6 +330,7 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
         );
       }
       dataAssets.addAll(_filterDataAssets(buildResult.encodedAssets));
+      dependencies.addAll(buildResult.dependencies);
     }
   }
 

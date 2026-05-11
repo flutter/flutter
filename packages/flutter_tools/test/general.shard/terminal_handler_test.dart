@@ -495,6 +495,22 @@ void main() {
       await terminalHandler.processTerminalInput('O');
     });
 
+    testWithoutContext('o,O - debugTogglePlatform with null vmService does not crash', () async {
+      for (final key in <String>['o', 'O']) {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(
+          <FakeVmServiceRequest>[],
+          nullVmService: true,
+        );
+        await terminalHandler.processTerminalInput(key);
+
+        expect(
+          terminalHandler.logger.statusText,
+          contains('Platform toggle is not supported for this device.'),
+          reason: 'Expected message when pressing "$key"',
+        );
+      }
+    });
+
     testWithoutContext('p - debugToggleDebugPaintSizeEnabled', () async {
       final TerminalHandler terminalHandler = setUpTerminalHandler(<FakeVmServiceRequest>[
         listViews,
@@ -1637,6 +1653,7 @@ TerminalHandler setUpTerminalHandler(
   bool web = false,
   bool fatalReloadError = false,
   bool supportsScreenshot = false,
+  bool nullVmService = false,
   int reloadExitCode = 0,
   BuildMode buildMode = BuildMode.debug,
   Logger? logger,
@@ -1659,7 +1676,7 @@ TerminalHandler setUpTerminalHandler(
     developmentShaderCompiler: const FakeShaderCompiler(),
     targetPlatform: web ? TargetPlatform.web_javascript : TargetPlatform.android_arm,
   );
-  device.vmService = FakeVmServiceHost(requests: requests).vmService;
+  device.vmService = nullVmService ? null : FakeVmServiceHost(requests: requests).vmService;
   final residentRunner = FakeResidentRunner(device, testLogger, localFileSystem)
     ..supportsServiceProtocol = supportsServiceProtocol
     ..supportsRestart = supportsRestart

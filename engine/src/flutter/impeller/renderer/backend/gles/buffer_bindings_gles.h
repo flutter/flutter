@@ -20,6 +20,7 @@ namespace testing {
 FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformData);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindArrayData);
 FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformDataVerticesAndMatrices);
+FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformFailsWithoutFloatType);
 }  // namespace testing
 
 //------------------------------------------------------------------------------
@@ -56,6 +57,8 @@ class BufferBindingsGLES {
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest, BindArrayData);
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
                   BindUniformDataVerticesAndMatrices);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  BindUniformFailsWithoutFloatType);
   //----------------------------------------------------------------------------
   /// @brief      The arguments to glVertexAttribPointer.
   ///
