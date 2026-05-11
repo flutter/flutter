@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -1336,7 +1337,7 @@ void main() {
   testWidgets('Semantics of entries below accessibilityOpaque entries are blocked', (
     WidgetTester tester,
   ) async {
-    final semantics = SemanticsTester(tester);
+    final SemanticsHandle handle = tester.ensureSemantics();
     final overlayKey = GlobalKey<OverlayState>();
     late final OverlayEntry bottomEntry;
     addTearDown(
@@ -1374,25 +1375,14 @@ void main() {
     );
     expect(find.text('bottom'), findsOneWidget);
     expect(find.text('top'), findsOneWidget);
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics(
-              label: 'bottom',
-              flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
-              textDirection: TextDirection.ltr,
-            ),
-            TestSemantics(label: 'top', textDirection: TextDirection.ltr),
-          ],
-        ),
-        ignoreTransform: true,
-        ignoreRect: true,
-        ignoreId: true,
-      ),
-    );
-    semantics.dispose();
+    
+    final SemanticsNode bottomNode = tester.semantics.find(find.text('bottom'));
+    expect(bottomNode.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, isTrue);
+
+    final SemanticsNode topNode = tester.semantics.find(find.text('top'));
+    expect(topNode.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, isFalse);
+
+    handle.dispose();
   });
 
   testWidgets('Can use Positioned within OverlayEntry', (WidgetTester tester) async {

@@ -2176,12 +2176,9 @@ class _OverlayPortalState extends State<OverlayPortal> {
         childIdentifier: this,
         accessibilityOpaque: widget.accessibilityOpaque,
         hostEntry: overlayLocation._childModel.widget.entry,
-        child: _AccessibilityBarrier(
-          accessibilityOpaque: widget.accessibilityOpaque,
-          child: MediaQuery(
-            data: data,
-            child: Builder(builder: widget.overlayChildBuilder),
-          ),
+        child: MediaQuery(
+          data: data,
+          child: Builder(builder: widget.overlayChildBuilder),
         ),
       ),
       child: Semantics(traversalParentIdentifier: this, child: widget.child),
@@ -2242,7 +2239,6 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
     );
     _overlayChildRenderBox = child;
     _childModel._add(this);
-    _theater.markNeedsLayout();
     _theater.markNeedsPaint();
     _theater.markNeedsCompositingBitsUpdate();
     _theater.markNeedsSemanticsUpdate();
@@ -2253,7 +2249,6 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
     _overlayChildRenderBox = null;
     assert(_childModel._sortedTheaterSiblings?.contains(this) ?? false);
     _childModel._remove(this);
-    _theater.markNeedsLayout();
     _theater.markNeedsPaint();
     _theater.markNeedsCompositingBitsUpdate();
     _theater.markNeedsSemanticsUpdate();
@@ -2643,7 +2638,6 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
        _accessibilityOpaque = accessibilityOpaque,
        _hostEntry = hostEntry;
 
-  StackParentData get stackParentData => parentData! as StackParentData;
   final _RenderLayoutSurrogateProxyBox _layoutSurrogate;
 
   Object? get childIdentifier => _childIdentifier;

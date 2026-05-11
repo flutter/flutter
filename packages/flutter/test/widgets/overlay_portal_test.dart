@@ -3237,7 +3237,7 @@ void main() {
   testWidgets('OverlayPortal accessibilityOpaque blocks background focus', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     final controller = OverlayPortalController();
-    
+
     late final OverlayEntry entry1;
     late final OverlayEntry entry2;
     addTearDown(() {
