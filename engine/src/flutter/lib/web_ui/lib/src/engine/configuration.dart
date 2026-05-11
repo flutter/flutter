@@ -318,21 +318,19 @@ class FlutterConfiguration {
   );
 
   /// The default maximum number of canvases to use when rendering in CanvasKit.
-  @visibleForTesting
-  static const int defaultCanvasKitMaximumSurfaces = 8;
+  static const int _defaultCanvasKitMaximumSurfaces = 8;
 
   /// Safari needs at least two surfaces to keep platform-view underlays and
   /// Flutter overlays separate, but more surfaces retain additional GPU state.
-  @visibleForTesting
-  static const int safariDefaultCanvasKitMaximumSurfaces = 2;
+  static const int _safariDefaultCanvasKitMaximumSurfaces = 2;
 
   /// The maximum number of canvases to use when rendering in CanvasKit.
   ///
   /// Limits the amount of overlays that can be created.
   int get canvasKitMaximumSurfaces {
     final int defaultMaxSurfaces = isSafari
-        ? safariDefaultCanvasKitMaximumSurfaces
-        : defaultCanvasKitMaximumSurfaces;
+        ? _safariDefaultCanvasKitMaximumSurfaces
+        : _defaultCanvasKitMaximumSurfaces;
     final int maxSurfaces = _configuration?.canvasKitMaximumSurfaces?.toInt() ?? defaultMaxSurfaces;
     if (maxSurfaces < 1) {
       return 1;

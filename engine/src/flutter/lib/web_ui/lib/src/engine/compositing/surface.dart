@@ -43,7 +43,7 @@ abstract class SurfaceProvider<C extends Surface, D extends CanvasProvider> {
 
   int? _resourceCacheMaxBytes;
 
-  @visibleForTesting
+  /// The configured Skia resource cache limit, if one has been set.
   int? get debugResourceCacheMaxBytes => _resourceCacheMaxBytes;
 
   void setSkiaResourceCacheMaxBytes(int bytes) {

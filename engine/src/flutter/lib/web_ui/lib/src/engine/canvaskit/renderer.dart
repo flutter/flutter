@@ -7,7 +7,6 @@ import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
@@ -19,8 +18,7 @@ class CanvasKitRenderer extends Renderer {
   static CanvasKitRenderer get instance => _instance;
   static late CanvasKitRenderer _instance;
 
-  @visibleForTesting
-  static const int safariResourceCacheMaxBytes = 24 * 1024 * 1024;
+  static const int _safariResourceCacheMaxBytes = 24 * 1024 * 1024;
 
   Future<void>? _initialized;
 
@@ -51,7 +49,7 @@ class CanvasKitRenderer extends Renderer {
       );
     }
     if (isSafari) {
-      rasterizer.setResourceCacheMaxBytes(safariResourceCacheMaxBytes);
+      rasterizer.setResourceCacheMaxBytes(_safariResourceCacheMaxBytes);
     }
     return rasterizer;
   }

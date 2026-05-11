@@ -79,42 +79,48 @@ void testMain() {
       defaultConfig.setUserConfiguration(<String, Object?>{}.jsify()! as JsFlutterConfiguration);
     });
 
-    tearDown(() {
-      ui_web.browser.debugBrowserEngineOverride = null;
-    });
-
     test('canvasKitVariant', () {
       expect(defaultConfig.canvasKitVariant, CanvasKitVariant.auto);
     });
 
     test('canvasKitMaximumSurfaces defaults to 8 outside Safari', () {
-      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.blink;
+      try {
+        ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.blink;
 
-      expect(
-        defaultConfig.canvasKitMaximumSurfaces,
-        FlutterConfiguration.defaultCanvasKitMaximumSurfaces,
-      );
+        expect(defaultConfig.canvasKitMaximumSurfaces, 8);
+      } finally {
+        ui_web.browser.debugBrowserEngineOverride = null;
+      }
     });
 
     test('canvasKitMaximumSurfaces defaults to 2 on Safari', () {
-      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+      try {
+        ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
 
-      expect(
-        defaultConfig.canvasKitMaximumSurfaces,
-        FlutterConfiguration.safariDefaultCanvasKitMaximumSurfaces,
-      );
+        expect(defaultConfig.canvasKitMaximumSurfaces, 2);
+      } finally {
+        ui_web.browser.debugBrowserEngineOverride = null;
+      }
     });
 
     test('canvasKitForceCpuOnly defaults to false outside Safari', () {
-      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.blink;
+      try {
+        ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.blink;
 
-      expect(defaultConfig.canvasKitForceCpuOnly, isFalse);
+        expect(defaultConfig.canvasKitForceCpuOnly, isFalse);
+      } finally {
+        ui_web.browser.debugBrowserEngineOverride = null;
+      }
     });
 
     test('canvasKitForceCpuOnly defaults to true on Safari', () {
-      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+      try {
+        ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
 
-      expect(defaultConfig.canvasKitForceCpuOnly, isTrue);
+        expect(defaultConfig.canvasKitForceCpuOnly, isTrue);
+      } finally {
+        ui_web.browser.debugBrowserEngineOverride = null;
+      }
     });
 
     test('multiViewEnabled', () {
@@ -168,25 +174,33 @@ void testMain() {
     });
 
     test('canvasKitMaximumSurfaces override is preserved on Safari', () {
-      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+      try {
+        ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
 
-      final config = FlutterConfiguration();
-      config.setUserConfiguration(
-        <String, Object?>{'canvasKitMaximumSurfaces': 4}.jsify()! as JsFlutterConfiguration,
-      );
+        final config = FlutterConfiguration();
+        config.setUserConfiguration(
+          <String, Object?>{'canvasKitMaximumSurfaces': 4}.jsify()! as JsFlutterConfiguration,
+        );
 
-      expect(config.canvasKitMaximumSurfaces, 4);
+        expect(config.canvasKitMaximumSurfaces, 4);
+      } finally {
+        ui_web.browser.debugBrowserEngineOverride = null;
+      }
     });
 
     test('canvasKitForceCpuOnly override is preserved on Safari', () {
-      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+      try {
+        ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
 
-      final config = FlutterConfiguration();
-      config.setUserConfiguration(
-        <String, Object?>{'canvasKitForceCpuOnly': false}.jsify()! as JsFlutterConfiguration,
-      );
+        final config = FlutterConfiguration();
+        config.setUserConfiguration(
+          <String, Object?>{'canvasKitForceCpuOnly': false}.jsify()! as JsFlutterConfiguration,
+        );
 
-      expect(config.canvasKitForceCpuOnly, isFalse);
+        expect(config.canvasKitForceCpuOnly, isFalse);
+      } finally {
+        ui_web.browser.debugBrowserEngineOverride = null;
+      }
     });
   });
 }

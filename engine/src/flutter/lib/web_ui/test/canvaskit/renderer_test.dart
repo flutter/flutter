@@ -84,8 +84,6 @@ void testMain() {
     setUpCanvasKitTest();
 
     tearDown(() {
-      ui_web.browser.debugBrowserEngineOverride = null;
-      ui_web.browser.debugOperatingSystemOverride = null;
       CanvasKitRenderer.instance.debugResetRasterizer();
     });
 
@@ -204,41 +202,55 @@ void testMain() {
     );
 
     test('uses MultiSurfaceRasterizer and caps Skia resource cache on desktop Safari', () {
-      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
-      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.macOs;
+      try {
+        ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+        ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.macOs;
 
-      CanvasKitRenderer.instance.debugResetRasterizer();
+        CanvasKitRenderer.instance.debugResetRasterizer();
 
-      expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
-      expect(
-        CanvasKitRenderer.instance.rasterizer.surfaceProvider.debugResourceCacheMaxBytes,
-        CanvasKitRenderer.safariResourceCacheMaxBytes,
-      );
+        expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
+        expect(
+          CanvasKitRenderer.instance.rasterizer.surfaceProvider.debugResourceCacheMaxBytes,
+          24 * 1024 * 1024,
+        );
+      } finally {
+        ui_web.browser.debugBrowserEngineOverride = null;
+        ui_web.browser.debugOperatingSystemOverride = null;
+      }
     });
 
     test('uses MultiSurfaceRasterizer and caps Skia resource cache on iOS Safari', () {
-      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
-      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.iOs;
+      try {
+        ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+        ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.iOs;
 
-      CanvasKitRenderer.instance.debugResetRasterizer();
+        CanvasKitRenderer.instance.debugResetRasterizer();
 
-      expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
-      expect(
-        CanvasKitRenderer.instance.rasterizer.surfaceProvider.debugResourceCacheMaxBytes,
-        CanvasKitRenderer.safariResourceCacheMaxBytes,
-      );
+        expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
+        expect(
+          CanvasKitRenderer.instance.rasterizer.surfaceProvider.debugResourceCacheMaxBytes,
+          24 * 1024 * 1024,
+        );
+      } finally {
+        ui_web.browser.debugBrowserEngineOverride = null;
+        ui_web.browser.debugOperatingSystemOverride = null;
+      }
     });
 
     test('does not cap Skia resource cache on Chromium', () {
-      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.blink;
+      try {
+        ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.blink;
 
-      CanvasKitRenderer.instance.debugResetRasterizer();
+        CanvasKitRenderer.instance.debugResetRasterizer();
 
-      expect(CanvasKitRenderer.instance.rasterizer, isA<OffscreenCanvasRasterizer>());
-      expect(
-        CanvasKitRenderer.instance.rasterizer.surfaceProvider.debugResourceCacheMaxBytes,
-        isNull,
-      );
+        expect(CanvasKitRenderer.instance.rasterizer, isA<OffscreenCanvasRasterizer>());
+        expect(
+          CanvasKitRenderer.instance.rasterizer.surfaceProvider.debugResourceCacheMaxBytes,
+          isNull,
+        );
+      } finally {
+        ui_web.browser.debugBrowserEngineOverride = null;
+      }
     });
 
     test('can be configured to always use MultiSurfaceRasterizer', () {

@@ -20,6 +20,6 @@ footprint:
 
 When changing these defaults, validate both memory and platform-view
 composition. A useful regression test is a release-mode CanvasKit app that
-places Flutter content above a platform view, idles for at least 60 seconds, and
-checks that the platform view remains visible while Safari WebContent memory
+places Flutter content above a platform view, waits for Safari WebContent memory
+to stabilize, and checks that the platform view remains visible while memory
 stays below the expected limit.

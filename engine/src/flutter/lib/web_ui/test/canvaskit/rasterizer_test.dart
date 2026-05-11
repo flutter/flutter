@@ -18,12 +18,6 @@ void main() {
 void testMain() {
   setUpCanvasKitTest(withImplicitView: true);
 
-  tearDown(() {
-    ui_web.browser.debugBrowserEngineOverride = null;
-    ui_web.browser.debugOperatingSystemOverride = null;
-    CanvasKitRenderer.instance.debugResetRasterizer();
-  });
-
   test('defaults to OffscreenCanvasRasterizer on Chrome and MultiSurfaceRasterizer on Firefox', () {
     if (isChromium) {
       expect(CanvasKitRenderer.instance.rasterizer, isA<OffscreenCanvasRasterizer>());
@@ -33,21 +27,33 @@ void testMain() {
   });
 
   test('defaults to MultiSurfaceRasterizer on desktop Safari', () {
-    ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
-    ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.macOs;
+    try {
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.macOs;
 
-    CanvasKitRenderer.instance.debugResetRasterizer();
+      CanvasKitRenderer.instance.debugResetRasterizer();
 
-    expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
+      expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
+    } finally {
+      ui_web.browser.debugBrowserEngineOverride = null;
+      ui_web.browser.debugOperatingSystemOverride = null;
+      CanvasKitRenderer.instance.debugResetRasterizer();
+    }
   });
 
   test('defaults to MultiSurfaceRasterizer on iOS Safari', () {
-    ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
-    ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.iOs;
+    try {
+      ui_web.browser.debugBrowserEngineOverride = ui_web.BrowserEngine.webkit;
+      ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.iOs;
 
-    CanvasKitRenderer.instance.debugResetRasterizer();
+      CanvasKitRenderer.instance.debugResetRasterizer();
 
-    expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
+      expect(CanvasKitRenderer.instance.rasterizer, isA<MultiSurfaceRasterizer>());
+    } finally {
+      ui_web.browser.debugBrowserEngineOverride = null;
+      ui_web.browser.debugOperatingSystemOverride = null;
+      CanvasKitRenderer.instance.debugResetRasterizer();
+    }
   });
 
   test('can be configured to always use MultiSurfaceRasterizer', () {

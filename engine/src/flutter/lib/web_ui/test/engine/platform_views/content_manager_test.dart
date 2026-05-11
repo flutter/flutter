@@ -65,7 +65,7 @@ void testMain() {
         contentManager.renderContent(
           ui_web.PlatformViewRegistry.defaultInvisibleViewType,
           viewId,
-          <dynamic, dynamic>{'tagName': 'script'},
+          <String, String>{'tagName': 'script'},
         );
 
         expect(contentManager.isInvisible(viewId), isTrue);
