@@ -5,6 +5,7 @@
 #include "impeller/runtime_stage/runtime_stage.h"
 
 #include <array>
+#include <atomic>
 #include <memory>
 #include <sstream>
 
@@ -16,6 +17,19 @@
 #include "runtime_stage_types_flatbuffers.h"
 
 namespace impeller {
+
+namespace {
+// Generates a process-unique fallback library id for runtime stages that
+// were not constructed via an asset-bearing entry point (e.g. tests, or
+// future in-memory APIs). Stable for the lifetime of the stage but distinct
+// across stages.
+std::string MakeFallbackLibraryId() {
+  static std::atomic<uint64_t> counter{0};
+  std::ostringstream s;
+  s << "auto:" << counter.fetch_add(1, std::memory_order_relaxed);
+  return s.str();
+}
+}  // namespace
 
 static RuntimeUniformType ToType(fb::UniformDataType type) {
   switch (type) {
@@ -58,6 +72,7 @@ absl::StatusOr<RuntimeStage> RuntimeStage::Create(
   RuntimeStage stage(payload);
   stage.stage_ = ToShaderStage(runtime_stage->stage());
   stage.entrypoint_ = runtime_stage->entrypoint()->str();
+  stage.library_id_ = MakeFallbackLibraryId();
 
   auto* uniforms = runtime_stage->uniforms();
 
@@ -235,6 +250,14 @@ bool RuntimeStage::IsDirty() const {
 
 void RuntimeStage::SetClean() {
   is_dirty_ = false;
+}
+
+void RuntimeStage::SetLibraryId(std::string library_id) {
+  library_id_ = std::move(library_id);
+}
+
+const std::string& RuntimeStage::GetLibraryId() const {
+  return library_id_;
 }
 
 const std::vector<DescriptorSetLayout>& RuntimeStage::GetDescriptorSetLayouts()

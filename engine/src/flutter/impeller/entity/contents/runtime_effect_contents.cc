@@ -20,9 +20,22 @@
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/shader_function.h"
+#include "impeller/renderer/shader_key.h"
 #include "impeller/renderer/vertex_descriptor.h"
 
 namespace impeller {
+
+namespace {
+// Build the scoped registry name used to register and look up this stage's
+// fragment function in the per-Context shader library, so that user runtime
+// effect shaders cannot collide with engine-internal entrypoints or with
+// runtime effects loaded from a different asset.
+std::string ScopedFragmentName(const RuntimeStage& runtime_stage) {
+  return ShaderKey::MakeUserScopedName(ShaderKey::kScopeRuntimeEffect,
+                                       runtime_stage.GetLibraryId(),
+                                       runtime_stage.GetEntrypoint());
+}
+}  // namespace
 
 // static
 BufferView RuntimeEffectContents::EmplaceUniform(
@@ -150,18 +163,18 @@ bool RuntimeEffectContents::RegisterShader(
   const std::shared_ptr<Context>& context = renderer.GetContext();
   const std::shared_ptr<ShaderLibrary>& library = context->GetShaderLibrary();
 
-  std::shared_ptr<const ShaderFunction> function = library->GetFunction(
-      runtime_stage_->GetEntrypoint(), ShaderStage::kFragment);
+  const std::string scoped_name = ScopedFragmentName(*runtime_stage_);
+  std::shared_ptr<const ShaderFunction> function =
+      library->GetFunction(scoped_name, ShaderStage::kFragment);
 
   //--------------------------------------------------------------------------
   /// Resolve runtime stage function.
   ///
 
   if (function && runtime_stage_->IsDirty()) {
-    renderer.ClearCachedRuntimeEffectPipeline(runtime_stage_->GetEntrypoint());
+    renderer.ClearCachedRuntimeEffectPipeline(scoped_name);
     context->GetPipelineLibrary()->RemovePipelinesWithEntryPoint(function);
-    library->UnregisterFunction(runtime_stage_->GetEntrypoint(),
-                                ShaderStage::kFragment);
+    library->UnregisterFunction(scoped_name, ShaderStage::kFragment);
 
     function = nullptr;
   }
@@ -171,8 +184,7 @@ bool RuntimeEffectContents::RegisterShader(
     auto future = promise.get_future();
 
     library->RegisterFunction(
-        runtime_stage_->GetEntrypoint(),
-        ToShaderStage(runtime_stage_->GetShaderStage()),
+        scoped_name, ToShaderStage(runtime_stage_->GetShaderStage()),
         runtime_stage_->GetCodeMapping(),
         fml::MakeCopyable([promise = std::move(promise)](bool result) mutable {
           promise.set_value(result);
@@ -184,8 +196,7 @@ bool RuntimeEffectContents::RegisterShader(
       return false;
     }
 
-    function = library->GetFunction(runtime_stage_->GetEntrypoint(),
-                                    ShaderStage::kFragment);
+    function = library->GetFunction(scoped_name, ShaderStage::kFragment);
     if (!function) {
       VALIDATION_LOG
           << "Failed to fetch runtime effect function immediately after "
@@ -216,8 +227,8 @@ RuntimeEffectContents::CreatePipeline(const ContentContext& renderer,
   desc.SetLabel("Runtime Stage");
   desc.AddStageEntrypoint(
       library->GetFunction(VS::kEntrypointName, ShaderStage::kVertex));
-  desc.AddStageEntrypoint(library->GetFunction(runtime_stage_->GetEntrypoint(),
-                                               ShaderStage::kFragment));
+  desc.AddStageEntrypoint(library->GetFunction(
+      ScopedFragmentName(*runtime_stage_), ShaderStage::kFragment));
 
   std::shared_ptr<VertexDescriptor> vertex_descriptor =
       std::make_shared<VertexDescriptor>();
@@ -351,7 +362,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
       [&](ContentContextOptions options) {
         // Pipeline creation callback for the cache handler to call.
         return renderer.GetCachedRuntimeEffectPipeline(
-            runtime_stage_->GetEntrypoint(), options, [&]() {
+            ScopedFragmentName(*runtime_stage_), options, [&]() {
               return CreatePipeline(renderer, options, /*async=*/false);
             });
       };

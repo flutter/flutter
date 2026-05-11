@@ -4,7 +4,9 @@
 
 #include "flutter/lib/gpu/shader_library.h"
 
+#include <atomic>
 #include <optional>
+#include <sstream>
 #include <utility>
 
 #include "flutter/assets/asset_manager.h"
@@ -20,6 +22,17 @@
 
 namespace flutter {
 namespace gpu {
+
+namespace {
+// Process-unique fallback library id used when MakeFromFlatbuffer is invoked
+// without a stable asset path (e.g. tests or future in-memory APIs).
+std::string MakeFallbackLibraryId() {
+  static std::atomic<uint64_t> counter{0};
+  std::ostringstream s;
+  s << "auto:" << counter.fetch_add(1, std::memory_order_relaxed);
+  return s.str();
+}
+}  // namespace
 
 IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, ShaderLibrary);
 
@@ -43,7 +56,7 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromAsset(
     return nullptr;
   }
 
-  return MakeFromFlatbuffer(backend_type, std::move(data));
+  return MakeFromFlatbuffer(backend_type, std::move(data), name);
 }
 
 fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromShaders(ShaderMap shaders) {
@@ -171,9 +184,13 @@ static const impeller::fb::shaderbundle::BackendShader* GetShaderBackend(
 
 fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
     impeller::Context::BackendType backend_type,
-    std::shared_ptr<fml::Mapping> payload) {
+    std::shared_ptr<fml::Mapping> payload,
+    std::string library_id) {
   if (payload == nullptr || !payload->GetMapping()) {
     return nullptr;
+  }
+  if (library_id.empty()) {
+    library_id = MakeFallbackLibraryId();
   }
   if (!impeller::fb::shaderbundle::ShaderBundleBufferHasIdentifier(
           payload->GetMapping())) {
@@ -324,7 +341,7 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
     }
 
     auto shader = flutter::gpu::Shader::Make(
-        backend_shader->entrypoint()->str(),
+        library_id, backend_shader->entrypoint()->str(),
         ToShaderStage(backend_shader->stage()), std::move(code_mapping),
         std::move(inputs), std::move(layouts), std::move(uniform_structs),
         std::move(uniform_textures), std::move(descriptor_set_layouts));
