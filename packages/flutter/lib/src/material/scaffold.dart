@@ -29,6 +29,7 @@ import 'app_bar.dart';
 import 'banner.dart';
 import 'banner_theme.dart';
 import 'bottom_sheet.dart';
+import 'bottom_sheet_theme.dart';
 import 'colors.dart';
 import 'curves.dart';
 import 'debug.dart';
@@ -66,6 +67,7 @@ enum _ScaffoldSlot {
   appBar,
   bodyScrim,
   bottomSheet,
+  bottomSheetKeyboardBackdrop,
   snackBar,
   materialBanner,
   persistentFooter,
@@ -1004,6 +1006,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     required this.extendBody,
     required this.extendBodyBehindAppBar,
     required this.extendBodyBehindMaterialBanner,
+    required this.bottomSheetKeyboardBackdropMaxWidth,
   }) : super(relayout: floatingActionButtonMoveAnimation);
 
   final bool extendBody;
@@ -1022,6 +1025,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   final double? snackBarWidth;
 
   final bool extendBodyBehindMaterialBanner;
+
+  // The effective `maxWidth` of the persistent bottom sheet's constraints,
+  // used to size and center the `_ScaffoldSlot.bottomSheetKeyboardBackdrop`
+  // so it does not over-extend past the visible sheet on wide layouts.
+  //
+  // Infinite when the sheet is unconstrained (full screen width).
+  final double bottomSheetKeyboardBackdropMaxWidth;
 
   @override
   void performLayout(Size size) {
@@ -1153,6 +1163,39 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         _ScaffoldSlot.bottomSheet,
         Offset((size.width - bottomSheetSize.width) / 2.0, contentBottom - bottomSheetSize.height),
       );
+    }
+
+    // The bottom-sheet keyboard backdrop spans the keyboard region (height
+    // `minInsets.bottom`) horizontally aligned with the sheet so it covers
+    // the gap between the sheet's bottom and the screen bottom that would
+    // otherwise expose the Scaffold's backgroundColor. Its width matches
+    // the sheet's effective maxWidth, so on wide layouts where the sheet
+    // is centered (e.g. M3's default `maxWidth: 640` on tablets) the
+    // backdrop does not over-extend past the sheet horizontally.
+    if (hasChild(_ScaffoldSlot.bottomSheetKeyboardBackdrop)) {
+      final double backdropHeight = minInsets.bottom;
+      if (backdropHeight > 0.0) {
+        final double backdropWidth = math.min(
+          size.width,
+          bottomSheetKeyboardBackdropMaxWidth,
+        );
+        layoutChild(
+          _ScaffoldSlot.bottomSheetKeyboardBackdrop,
+          BoxConstraints.tightFor(width: backdropWidth, height: backdropHeight),
+        );
+        positionChild(
+          _ScaffoldSlot.bottomSheetKeyboardBackdrop,
+          Offset((size.width - backdropWidth) / 2.0, size.height - backdropHeight),
+        );
+      } else {
+        // If the keyboard isn't visible, lay out at zero size to keep the slot
+        // valid.
+        layoutChild(
+          _ScaffoldSlot.bottomSheetKeyboardBackdrop,
+          BoxConstraints.tight(Size.zero),
+        );
+        positionChild(_ScaffoldSlot.bottomSheetKeyboardBackdrop, Offset.zero);
+      }
     }
 
     late Rect floatingActionButtonRect;
@@ -1303,7 +1346,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         oldDelegate.previousFloatingActionButtonLocation != previousFloatingActionButtonLocation ||
         oldDelegate.currentFloatingActionButtonLocation != currentFloatingActionButtonLocation ||
         oldDelegate.extendBody != extendBody ||
-        oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar;
+        oldDelegate.extendBodyBehindAppBar != extendBodyBehindAppBar ||
+        oldDelegate.bottomSheetKeyboardBackdropMaxWidth != bottomSheetKeyboardBackdropMaxWidth;
   }
 }
 
@@ -3069,8 +3113,84 @@ class ScaffoldState extends State<Scaffold>
 
     var isSnackBarFloating = false;
     double? snackBarWidth;
+    // Resolved when a persistent bottom sheet is present and a backdrop
+    // slot is added; ignored otherwise.
+    double bottomSheetKeyboardBackdropMaxWidth = double.infinity;
 
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
+      // On platforms with a translucent soft keyboard (e.g. iOS 26+), the
+      // Scaffold's `backgroundColor` would otherwise tint through the
+      // keyboard in the gap between the persistent bottom sheet's bottom
+      // edge and the screen bottom. Paint a backdrop in that region using
+      // the sheet's effective `backgroundColor` so the keyboard tints the
+      // sheet's chrome rather than the scaffold's. Skipped when:
+      //   * `resizeToAvoidBottomInset` is false — the sheet stays put and
+      //     the keyboard simply covers it; there is no gap to bleed.
+      //   * the resolved color is null or fully transparent — the caller
+      //     has fully opted out via theme.
+      if (_resizeToAvoidBottomInset) {
+        final BottomSheetThemeData sheetTheme = themeData.bottomSheetTheme;
+        // The "active" sheet for backdrop purposes is the current sheet if
+        // present, otherwise the most recent dismissing sheet. During the
+        // close animation `removeCurrentBottomSheet` nulls
+        // `_currentBottomSheet` before the reverse animation finishes, but
+        // the outgoing sheet is still rendering as it slides off; the
+        // backdrop must continue to honor its color and constraints so the
+        // dismissal looks visually consistent.
+        final _StandardBottomSheet? activeSheet =
+            _currentBottomSheet?._widget
+            ?? (_dismissedBottomSheets.isNotEmpty ? _dismissedBottomSheets.last : null);
+        // The M3 token mirrors `_BottomSheetDefaultsM3.backgroundColor`
+        // (a private class in bottom_sheet.dart). For non-M3, the empty
+        // `BottomSheetThemeData()` default returns null, so the sheet's
+        // `Material` falls through to `Theme.canvasColor` — match that
+        // here so the backdrop matches the sheet's actual painted color.
+        final Color defaultBackgroundColor = themeData.useMaterial3
+            ? themeData.colorScheme.surfaceContainerLow
+            : themeData.canvasColor;
+        Color? backdropColor;
+        for (final candidate in <Color?>[
+          activeSheet?.backgroundColor,
+          sheetTheme.backgroundColor,
+          defaultBackgroundColor,
+        ]) {
+        // Zero-alpha candidates are skipped so an explicit
+        // `backgroundColor: Colors.transparent` falls through to theme
+        // and defaults instead of suppressing the backdrop.
+          if (candidate != null && candidate.a != 0) {
+            backdropColor = candidate;
+            break;
+          }
+        }
+        if (backdropColor != null) {
+          // Mirror BottomSheet's constraint resolution so the backdrop's
+          // horizontal extent matches the sheet's. M3 defaults the sheet
+          // to `maxWidth: 640`, which on wide layouts centers the sheet
+          // and leaves the scaffold visible on either side; the backdrop
+          // must match that bound to avoid over-extending into the side
+          // regions.
+          final BoxConstraints? defaultBottomSheetConstraints = themeData.useMaterial3
+              ? const BoxConstraints(maxWidth: 640.0)
+              : null;
+          final BoxConstraints? effectiveSheetConstraints =
+              activeSheet?.constraints
+              ?? sheetTheme.constraints
+              ?? defaultBottomSheetConstraints;
+          bottomSheetKeyboardBackdropMaxWidth =
+              effectiveSheetConstraints?.maxWidth ?? double.infinity;
+          _addIfNonNull(
+            children,
+            // The backdrop is decorative and should not receive pointer events.
+            IgnorePointer(child: ColoredBox(color: backdropColor)),
+            _ScaffoldSlot.bottomSheetKeyboardBackdrop,
+            removeLeftPadding: true,
+            removeTopPadding: true,
+            removeRightPadding: true,
+            removeBottomPadding: true,
+          );
+        }
+      }
+
       final Widget stack = Stack(
         alignment: Alignment.bottomCenter,
         children: <Widget>[..._dismissedBottomSheets, ?_currentBottomSheet?._widget],
@@ -3254,6 +3374,7 @@ class ScaffoldState extends State<Scaffold>
                     isSnackBarFloating: isSnackBarFloating,
                     extendBodyBehindMaterialBanner: extendBodyBehindMaterialBanner,
                     snackBarWidth: snackBarWidth,
+                    bottomSheetKeyboardBackdropMaxWidth: bottomSheetKeyboardBackdropMaxWidth,
                   ),
                   children: children,
                 ),
