@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient.h"
+#include "flutter/shell/common/vsync_waiter.h"
 
 #import <UIKit/UIKit.h>
 
@@ -15,7 +16,7 @@ FLUTTER_ASSERT_ARC
 NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFrameDurationOnPhone";
 
 @implementation FlutterVSyncClient {
-  void (^_callback)(CFTimeInterval startTime, CFTimeInterval targetTime);
+  flutter::VsyncWaiter::Callback _callback;
   CADisplayLink* _displayLink;
   BOOL _isVariableRefreshRateEnabled;
 }
@@ -34,7 +35,11 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
     _refreshRate = maxRefreshRate;
     _isVariableRefreshRateEnabled = isVariableRefreshRateEnabled;
     _allowPauseAfterVsync = YES;
-    _callback = callback;
+    _callback = [callback](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
+      double start_time_seconds = recorder->GetVsyncStartTime().ToEpochDelta().ToSecondsF();
+      double target_time_seconds = recorder->GetVsyncTargetTime().ToEpochDelta().ToSecondsF();
+      callback(start_time_seconds, target_time_seconds);
+    };
     _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)];
     _displayLink.paused = YES;
 
@@ -77,17 +82,28 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
-  [FlutterTracing tracePlatformVsyncWithStartTime:link.timestamp targetTime:link.targetTimestamp];
+  CFTimeInterval delay = CACurrentMediaTime() - link.timestamp;
+  fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
 
   CFTimeInterval duration = link.targetTimestamp - link.timestamp;
+  fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(duration);
+
+  [FlutterTracing tracePlatformVsyncWithStartTime:frame_start_time.ToEpochDelta().ToSecondsF()
+                                       targetTime:frame_target_time.ToEpochDelta().ToSecondsF()];
+
+  std::unique_ptr<flutter::FrameTimingsRecorder> recorder =
+      std::make_unique<flutter::FrameTimingsRecorder>();
+
   if (duration > 0) {
     _refreshRate = round(1 / duration);
   }
 
+  recorder->RecordVsync(frame_start_time, frame_target_time);
+
   if (_allowPauseAfterVsync) {
     link.paused = YES;
   }
-  _callback(link.timestamp, link.targetTimestamp);
+  _callback(std::move(recorder));
 }
 
 - (void)dealloc {

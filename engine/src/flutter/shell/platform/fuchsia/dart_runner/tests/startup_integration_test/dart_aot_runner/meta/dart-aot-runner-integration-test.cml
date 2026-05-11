@@ -44,8 +44,7 @@
     facets: {
         "fuchsia.test": {
             "deprecated-allowed-packages": [
-                "dart_aot_echo_server",
-                "test_manager",
+                "test_manager"
             ],
         },
     },
