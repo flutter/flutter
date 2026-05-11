@@ -3045,53 +3045,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   public static class GenericRoleConfigurator implements AccessibilityNodeConfigurator {
     @Override
     public void configure(AccessibilityNodeInfo result, SemanticsNode node) {
-      if (semanticsNode.hasFlag(Flag.IS_TEXT_FIELD)) {
-        result.setPassword(semanticsNode.hasFlag(Flag.IS_OBSCURED));
-        if (!semanticsNode.hasFlag(Flag.IS_READ_ONLY)) {
-          result.setClassName("android.widget.EditText");
-        }
-        result.setEditable(!semanticsNode.hasFlag(Flag.IS_READ_ONLY));
-        if (semanticsNode.textSelectionBase != -1 && semanticsNode.textSelectionExtent != -1) {
-          result.setTextSelection(
-              semanticsNode.textSelectionBase, semanticsNode.textSelectionExtent);
-        }
-        // Text fields will always be created as a live region when they have input
-        // focus, so that updates to the label trigger polite announcements. This makes
-        // it easy to follow a11y guidelines for text fields on Android.
-        if (accessibilityFocusedSemanticsNode != null
-            && accessibilityFocusedSemanticsNode.id == virtualViewId) {
-          result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
-        }
+      configureTextField(result, node);
 
-        // Cursor movements
-        int granularities = 0;
-        if (semanticsNode.hasAction(Action.MOVE_CURSOR_FORWARD_BY_CHARACTER)) {
-          result.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
-          granularities |= AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER;
-        }
-        if (semanticsNode.hasAction(Action.MOVE_CURSOR_BACKWARD_BY_CHARACTER)) {
-          result.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
-          granularities |= AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER;
-        }
-        if (semanticsNode.hasAction(Action.MOVE_CURSOR_FORWARD_BY_WORD)) {
-          result.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
-          granularities |= AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD;
-        }
-        if (semanticsNode.hasAction(Action.MOVE_CURSOR_BACKWARD_BY_WORD)) {
-          result.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
-          granularities |= AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD;
-        }
-        result.setMovementGranularities(granularities);
-        if (semanticsNode.maxValueLength >= 0) {
-          // Account for the fact that Flutter is counting Unicode scalar values and
-          // Android
-          // is counting UTF16 words.
-          final int length = semanticsNode.value == null ? 0 : semanticsNode.value.length();
-          int a = length - semanticsNode.currentValueLength + semanticsNode.maxValueLength;
-          result.setMaxTextLength(
-              length - semanticsNode.currentValueLength + semanticsNode.maxValueLength);
-        }
-      }
       if (node.shouldBeTreatedAsButton()) {
         result.setClassName("android.widget.Button");
       }
@@ -3110,22 +3065,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         result.setClickable(true);
       }
 
-      if (node.hasAction(Action.SCROLL_LEFT)
-          || node.hasAction(Action.SCROLL_UP)
-          || node.hasAction(Action.SCROLL_RIGHT)
-          || node.hasAction(Action.SCROLL_DOWN)) {
-        // This tells Android's a11y to send scroll events when reaching the end of
-        // the visible viewport of a scrollable, unless the node itself does not
-        // allow implicit scrolling - then we leave the className as view.View.
-        result.setScrollable(true);
-        if (node.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)) {
-          if (node.hasAction(Action.SCROLL_LEFT) || node.hasAction(Action.SCROLL_RIGHT)) {
-            result.setClassName("android.widget.HorizontalScrollView");
-          } else {
-            result.setClassName("android.widget.ScrollView");
-          }
-        }
-      }
+      configureScrollable(result, node);
 
       // We should prefer setCollectionInfo to the class names, as this way we get "In List"
       // and "Out of list" announcements.  But we don't always know the counts, so we
@@ -3337,6 +3277,64 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           }
           if (node.hasAction(Action.COLLAPSE)) {
             result.addAction(AccessibilityNodeInfo.ACTION_COLLAPSE);
+          }
+        }
+      }
+    }
+
+    private void configureTextField(AccessibilityNodeInfo result, SemanticsNode node) {
+      if (node.hasFlag(Flag.IS_TEXT_FIELD)) {
+        result.setPassword(node.hasFlag(Flag.IS_OBSCURED));
+        if (!node.hasFlag(Flag.IS_READ_ONLY)) {
+          result.setClassName("android.widget.EditText");
+        }
+        result.setEditable(!node.hasFlag(Flag.IS_READ_ONLY));
+        if (node.textSelectionBase != -1 && node.textSelectionExtent != -1) {
+          result.setTextSelection(
+              node.textSelectionBase, node.textSelectionExtent);
+        }
+        if (node.accessibilityBridge.accessibilityFocusedSemanticsNode != null
+            && node.accessibilityBridge.accessibilityFocusedSemanticsNode.id == node.id) {
+          result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
+        }
+
+        int granularities = 0;
+        if (node.hasAction(Action.MOVE_CURSOR_FORWARD_BY_CHARACTER)) {
+          result.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
+          granularities |= AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER;
+        }
+        if (node.hasAction(Action.MOVE_CURSOR_BACKWARD_BY_CHARACTER)) {
+          result.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
+          granularities |= AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER;
+        }
+        if (node.hasAction(Action.MOVE_CURSOR_FORWARD_BY_WORD)) {
+          result.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
+          granularities |= AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD;
+        }
+        if (node.hasAction(Action.MOVE_CURSOR_BACKWARD_BY_WORD)) {
+          result.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
+          granularities |= AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD;
+        }
+        result.setMovementGranularities(granularities);
+        if (node.maxValueLength >= 0) {
+          final int length = node.value == null ? 0 : node.value.length();
+          result.setMaxTextLength(
+              length - node.currentValueLength + node.maxValueLength);
+        }
+      }
+    }
+
+    private void configureScrollable(AccessibilityNodeInfo result, SemanticsNode node) {
+      if (node.hasAction(Action.SCROLL_LEFT)
+          || node.hasAction(Action.SCROLL_UP)
+          || node.hasAction(Action.SCROLL_RIGHT)
+          || node.hasAction(Action.SCROLL_DOWN)) {
+        result.setScrollable(true);
+        if (node.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)) {
+          if (node.hasAction(Action.SCROLL_LEFT) || node.hasAction(Action.SCROLL_RIGHT)) {
+            result.setClassName("android.widget.HorizontalScrollView");
+          } else {
+            result.setClassName("android.widget.ScrollView");
           }
         }
       }
