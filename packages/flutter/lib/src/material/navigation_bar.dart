@@ -427,9 +427,8 @@ class NavigationDestination extends StatelessWidget {
   /// This parameter sets the [TextAlign] for the [Text] widget that displays
   /// the [label] below the icon in this [NavigationDestination].
   ///
-  /// This would be useful to let customise the label's appearance in cases where
-  /// the destination has additional layout constraints or text direction
-  /// requirements.
+  /// Use this to customize the label's appearance for specific layout
+  /// constraints or text direction requirements.
   ///
   /// If null, defaults to [TextAlign.center], following the Material Design
   /// navigation bar accessibility guidelines.
