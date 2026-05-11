@@ -488,6 +488,7 @@ mixin RendererBinding
   @override
   ui.Rect? semanticsNodeGlobalRect(int viewId, int nodeId) {
     final RenderView? renderView = _viewIdToRenderView[viewId];
+    assert(renderView != null, 'semanticsNodeGlobalRect was called for unknown view $viewId.');
     if (renderView == null) {
       return null;
     }
@@ -503,6 +504,10 @@ mixin RendererBinding
     }
 
     final SemanticsNode? node = semanticsOwner.getSemanticsNode(nodeId);
+    assert(
+      node != null,
+      'semanticsNodeGlobalRect was called for unknown node $nodeId in view $viewId.',
+    );
     if (node == null) {
       return null;
     }
@@ -516,17 +521,14 @@ mixin RendererBinding
       current = current.parent;
     }
 
-    // Walking the SemanticsNode parent chain accumulates RenderView's
-    // _rootTransform (a devicePixelRatio scale), so the resulting rect is in
-    // physical pixels. Divide back to logical pixels for hit testing.
-    final ui.Rect physicalRect = MatrixUtils.transformRect(transform, node.rect);
-    final double devicePixelRatio = renderView.flutterView.devicePixelRatio;
-    return ui.Rect.fromLTRB(
-      physicalRect.left / devicePixelRatio,
-      physicalRect.top / devicePixelRatio,
-      physicalRect.right / devicePixelRatio,
-      physicalRect.bottom / devicePixelRatio,
-    );
+    // The walk above accumulates RenderView's root transform, which scales
+    // from logical to physical pixels. Undo it with the same matrix the
+    // framework applied, so the result is in logical pixels regardless of
+    // what that matrix encodes.
+    final rootInverse = Matrix4.copy(renderView.configuration.toMatrix())..invert();
+    transform = rootInverse * transform as Matrix4;
+
+    return MatrixUtils.transformRect(transform, node.rect);
   }
 
   void _handleWebFirstFrame(Duration _) {

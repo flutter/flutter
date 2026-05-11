@@ -118,10 +118,10 @@ mixin SemanticsBinding on BindingBase {
   /// and need the on-screen position of the semantics node that received the
   /// action.
   ///
-  /// Returns null if the view is unknown or the node cannot be found in the
-  /// view's semantics tree. Asserts in non-release builds if the view exists
-  /// but has no semantics owner, since callers should only invoke this in
-  /// response to a semantics action, which implies semantics is enabled.
+  /// Asserts in non-release builds and returns null if the view is unknown,
+  /// the view has no semantics owner, or the node cannot be found. Callers
+  /// should only invoke this in response to a semantics action, in which case
+  /// all three lookups are expected to succeed.
   ui.Rect? semanticsNodeGlobalRect(int viewId, int nodeId) => null;
 
   /// The number of clients registered to listen for semantics.

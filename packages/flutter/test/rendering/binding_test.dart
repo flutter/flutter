@@ -69,7 +69,7 @@ void main() {
     );
   });
 
-  testWidgets('semanticsNodeGlobalRect returns null for unknown views and nodes', (
+  testWidgets('semanticsNodeGlobalRect asserts for unknown views and nodes', (
     WidgetTester tester,
   ) async {
     final SemanticsHandle handle = tester.ensureSemantics();
@@ -85,8 +85,14 @@ void main() {
       final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
 
       expect(owner.getSemanticsNode(node.id), same(node));
-      expect(SemanticsBinding.instance.semanticsNodeGlobalRect(999, node.id), isNull);
-      expect(SemanticsBinding.instance.semanticsNodeGlobalRect(tester.view.viewId, -1), isNull);
+      expect(
+        () => SemanticsBinding.instance.semanticsNodeGlobalRect(999, node.id),
+        throwsAssertionError,
+      );
+      expect(
+        () => SemanticsBinding.instance.semanticsNodeGlobalRect(tester.view.viewId, -1),
+        throwsAssertionError,
+      );
     } finally {
       handle.dispose();
     }
