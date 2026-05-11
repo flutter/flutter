@@ -204,7 +204,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     plugins: await project.ios.getPlugins(),
     fileSystem: globals.fs,
     logger: globals.logger,
-    cocoapods: globals.cocoaPods!,
+    cocoapods: globals.cocoaPods,
   );
 
   await removeExtendedAttributesForProject(

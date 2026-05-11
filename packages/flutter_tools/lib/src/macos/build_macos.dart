@@ -119,7 +119,7 @@ Future<void> buildMacOS({
     plugins: await flutterProject.macos.getPlugins(),
     fileSystem: globals.fs,
     logger: globals.logger,
-    cocoapods: globals.cocoaPods!,
+    cocoapods: globals.cocoaPods,
   );
 
   final String buildDirectoryPath = getMacOSBuildDirectory();

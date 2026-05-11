@@ -25,7 +25,7 @@ class DarwinDependencyManagement {
   DarwinDependencyManagement({
     required FlutterProject project,
     required List<Plugin> plugins,
-    required CocoaPods cocoapods,
+    required CocoaPods? cocoapods,
     required SwiftPackageManager swiftPackageManager,
     required FileSystem fileSystem,
     required FeatureFlags featureFlags,
@@ -44,7 +44,7 @@ class DarwinDependencyManagement {
 
   final FlutterProject _project;
   final List<Plugin> _plugins;
-  final CocoaPods _cocoapods;
+  final CocoaPods? _cocoapods;
   final SwiftPackageManager _swiftPackageManager;
   final FileSystem _fileSystem;
   final FeatureFlags _featureFlags;
@@ -112,12 +112,12 @@ class DarwinDependencyManagement {
     }
 
     if (useCocoapods) {
-      await _cocoapods.setupPodfile(xcodeProject);
+      await _cocoapods?.setupPodfile(xcodeProject);
     }
     /// The user may have a custom maintained Podfile that they're running `pod install`
     /// on themselves.
     else if (xcodeProject.podfile.existsSync() && xcodeProject.podfileLock.existsSync()) {
-      _cocoapods.addPodsDependencyToFlutterXcconfig(xcodeProject);
+      _cocoapods?.addPodsDependencyToFlutterXcconfig(xcodeProject);
     }
 
     final event = Event.flutterInjectDarwinPlugins(
@@ -188,7 +188,7 @@ class DarwinDependencyManagement {
     required List<Plugin> plugins,
     required FileSystem fileSystem,
     required Logger logger,
-    required CocoaPods cocoapods,
+    required CocoaPods? cocoapods,
   }) async {
     final bool projectUsesSwiftPM =
         xcodeProject.usesSwiftPackageManager &&
@@ -302,14 +302,14 @@ class DarwinDependencyManagement {
 
   /// Print a message recommending removing CocoaPod integration when all plugins support SwiftPM.
   static Future<void> _printRemoveCocoapodIntegrationMessage({
-    required CocoaPods cocoapods,
+    required CocoaPods? cocoapods,
     required XcodeBasedProject xcodeProject,
     required Logger logger,
     required FlutterDarwinPlatform platform,
     required List<String> cocoapodOnlyPlugins,
     required bool projectUsesSwiftPM,
   }) async {
-    if (!projectUsesSwiftPM || cocoapodOnlyPlugins.isNotEmpty) {
+    if (!projectUsesSwiftPM || cocoapodOnlyPlugins.isNotEmpty || cocoapods == null) {
       return;
     }
     final bool podfileExists = xcodeProject.podfile.existsSync();
