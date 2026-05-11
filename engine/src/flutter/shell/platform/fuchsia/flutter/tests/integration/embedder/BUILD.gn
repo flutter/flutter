@@ -50,12 +50,10 @@ executable("flutter-embedder-test-bin") {
 }
 
 fuchsia_test_archive("flutter-embedder-test") {
-  deps = [
-    ":flutter-embedder-test-bin",
+  deps = [ ":flutter-embedder-test-bin" ]
+  subpackages = [
     "child-view:package",
     "parent-view:package",
-  ]
-  subpackages = [
     "//flutter/shell/platform/fuchsia/flutter:flutter_jit_runner",
     "//flutter/shell/platform/fuchsia/flutter:flutter_jit_product_runner",
     "//flutter/shell/platform/fuchsia/flutter:flutter_aot_runner",
