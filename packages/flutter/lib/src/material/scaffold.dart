@@ -1175,10 +1175,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     if (hasChild(_ScaffoldSlot.bottomSheetKeyboardBackdrop)) {
       final double backdropHeight = minInsets.bottom;
       if (backdropHeight > 0.0) {
-        final double backdropWidth = math.min(
-          size.width,
-          bottomSheetKeyboardBackdropMaxWidth,
-        );
+        final double backdropWidth = math.min(size.width, bottomSheetKeyboardBackdropMaxWidth);
         layoutChild(
           _ScaffoldSlot.bottomSheetKeyboardBackdrop,
           BoxConstraints.tightFor(width: backdropWidth, height: backdropHeight),
@@ -1190,10 +1187,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       } else {
         // If the keyboard isn't visible, lay out at zero size to keep the slot
         // valid.
-        layoutChild(
-          _ScaffoldSlot.bottomSheetKeyboardBackdrop,
-          BoxConstraints.tight(Size.zero),
-        );
+        layoutChild(_ScaffoldSlot.bottomSheetKeyboardBackdrop, BoxConstraints.tight(Size.zero));
         positionChild(_ScaffoldSlot.bottomSheetKeyboardBackdrop, Offset.zero);
       }
     }
@@ -3138,8 +3132,8 @@ class ScaffoldState extends State<Scaffold>
         // backdrop must continue to honor its color and constraints so the
         // dismissal looks visually consistent.
         final _StandardBottomSheet? activeSheet =
-            _currentBottomSheet?._widget
-            ?? (_dismissedBottomSheets.isNotEmpty ? _dismissedBottomSheets.last : null);
+            _currentBottomSheet?._widget ??
+            (_dismissedBottomSheets.isNotEmpty ? _dismissedBottomSheets.last : null);
         // The M3 token mirrors `_BottomSheetDefaultsM3.backgroundColor`
         // (a private class in bottom_sheet.dart). For non-M3, the empty
         // `BottomSheetThemeData()` default returns null, so the sheet's
@@ -3154,28 +3148,17 @@ class ScaffoldState extends State<Scaffold>
           sheetTheme.backgroundColor,
           defaultBackgroundColor,
         ]) {
-        // Zero-alpha candidates are skipped so an explicit
-        // `backgroundColor: Colors.transparent` falls through to theme
-        // and defaults instead of suppressing the backdrop.
+          // Zero-alpha candidates are skipped so an explicit
+          // `backgroundColor: Colors.transparent` falls through to theme
+          // and defaults instead of suppressing the backdrop.
           if (candidate != null && candidate.a != 0) {
             backdropColor = candidate;
             break;
           }
         }
         if (backdropColor != null) {
-          // Mirror BottomSheet's constraint resolution so the backdrop's
-          // horizontal extent matches the sheet's. M3 defaults the sheet
-          // to `maxWidth: 640`, which on wide layouts centers the sheet
-          // and leaves the scaffold visible on either side; the backdrop
-          // must match that bound to avoid over-extending into the side
-          // regions.
-          final BoxConstraints? defaultBottomSheetConstraints = themeData.useMaterial3
-              ? const BoxConstraints(maxWidth: 640.0)
-              : null;
           final BoxConstraints? effectiveSheetConstraints =
-              activeSheet?.constraints
-              ?? sheetTheme.constraints
-              ?? defaultBottomSheetConstraints;
+              activeSheet?.constraints ?? sheetTheme.constraints;
           bottomSheetKeyboardBackdropMaxWidth =
               effectiveSheetConstraints?.maxWidth ?? double.infinity;
           _addIfNonNull(

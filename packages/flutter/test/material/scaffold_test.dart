@@ -757,73 +757,69 @@ void main() {
     }),
   );
 
-  testWidgets(
-    'Tapping the status bar scrolls to top with ease out curve animation',
-    (WidgetTester tester) async {
-      const duration = 1000;
-      final stops = <double>[0.842, 0.959, 0.993, 1.0];
-      const double scrollOffset = 1000;
+  testWidgets('Tapping the status bar scrolls to top with ease out curve animation', (
+    WidgetTester tester,
+  ) async {
+    const duration = 1000;
+    final stops = <double>[0.842, 0.959, 0.993, 1.0];
+    const double scrollOffset = 1000;
 
-      await tester.pumpWidget(buildStatusBarTestApp());
-      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-      scrollable.position.jumpTo(scrollOffset);
+    await tester.pumpWidget(buildStatusBarTestApp());
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    scrollable.position.jumpTo(scrollOffset);
 
-      tester.simulateStatusBarTap();
-      await tester.pump(Duration.zero);
-      expect(scrollable.position.pixels, equals(scrollOffset));
+    tester.simulateStatusBarTap();
+    await tester.pump(Duration.zero);
+    expect(scrollable.position.pixels, equals(scrollOffset));
 
-      for (var i = 0; i < stops.length; i++) {
-        await tester.pump(Duration(milliseconds: duration ~/ stops.length));
-        // Scroll pixel position is very long double, compare with floored int
-        // pixel position
-        expect(
-          scrollable.position.pixels.toInt(),
-          equals((scrollOffset * (1 - stops[i])).toInt()),
-          reason: 'stop $i',
-        );
-      }
-
-      // Finally stops at the top.
-      expect(scrollable.position.pixels, equals(0.0));
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
-
-  testWidgets(
-    'status bar tap only scrolls the foregrounded primary controller',
-    (WidgetTester tester) async {
-      final app = MaterialApp(
-        initialRoute: 'a',
-        onGenerateInitialRoutes: (initialRoute) {
-          return [
-            MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
-            MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
-          ];
-        },
-        onGenerateRoute: (_) => throw UnimplementedError(),
+    for (var i = 0; i < stops.length; i++) {
+      await tester.pump(Duration(milliseconds: duration ~/ stops.length));
+      // Scroll pixel position is very long double, compare with floored int
+      // pixel position
+      expect(
+        scrollable.position.pixels.toInt(),
+        equals((scrollOffset * (1 - stops[i])).toInt()),
+        reason: 'stop $i',
       );
-      await tester.pumpWidget(app);
+    }
 
-      final Iterable<ScrollableState> scrollables = tester.stateList<ScrollableState>(
-        find.descendant(
-          of: find.byType(_ScaffoldWithPrimaryScrollView, skipOffstage: false),
-          matching: find.byType(Scrollable, skipOffstage: false),
-          skipOffstage: false,
-        ),
-      );
+    // Finally stops at the top.
+    expect(scrollable.position.pixels, equals(0.0));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-      final [ScrollableState scrollable1, ScrollableState scrollable2] = scrollables.toList();
-      expect(scrollable1.position.pixels, 1000);
-      expect(scrollable2.position.pixels, 1000);
+  testWidgets('status bar tap only scrolls the foregrounded primary controller', (
+    WidgetTester tester,
+  ) async {
+    final app = MaterialApp(
+      initialRoute: 'a',
+      onGenerateInitialRoutes: (initialRoute) {
+        return [
+          MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
+          MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
+        ];
+      },
+      onGenerateRoute: (_) => throw UnimplementedError(),
+    );
+    await tester.pumpWidget(app);
 
-      tester.simulateStatusBarTap();
-      await tester.pumpAndSettle();
+    final Iterable<ScrollableState> scrollables = tester.stateList<ScrollableState>(
+      find.descendant(
+        of: find.byType(_ScaffoldWithPrimaryScrollView, skipOffstage: false),
+        matching: find.byType(Scrollable, skipOffstage: false),
+        skipOffstage: false,
+      ),
+    );
 
-      expect(scrollable1.position.pixels, 1000);
-      expect(scrollable2.position.pixels, 0);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    final [ScrollableState scrollable1, ScrollableState scrollable2] = scrollables.toList();
+    expect(scrollable1.position.pixels, 1000);
+    expect(scrollable2.position.pixels, 1000);
+
+    tester.simulateStatusBarTap();
+    await tester.pumpAndSettle();
+
+    expect(scrollable1.position.pixels, 1000);
+    expect(scrollable2.position.pixels, 0);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
     final Key sheetKey = UniqueKey();
@@ -2189,63 +2185,61 @@ void main() {
     expect(scaffoldState.isDrawerOpen, true);
   });
 
-  testWidgets(
-    'Drawer does not open with a drag gesture when it is disabled on mobile',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            drawer: const Drawer(child: Text('Drawer')),
-            body: const Text('Scaffold Body'),
-            appBar: AppBar(centerTitle: true, title: const Text('Title')),
-          ),
+  testWidgets('Drawer does not open with a drag gesture when it is disabled on mobile', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(child: Text('Drawer')),
+          body: const Text('Scaffold Body'),
+          appBar: AppBar(centerTitle: true, title: const Text('Title')),
         ),
-      );
-      ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
-      expect(scaffoldState.isDrawerOpen, false);
+      ),
+    );
+    ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
 
-      // Test that we can open the drawer with a drag gesture when
-      // `Scaffold.drawerEnableDragGesture` is true.
-      await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, true);
+    // Test that we can open the drawer with a drag gesture when
+    // `Scaffold.drawerEnableDragGesture` is true.
+    await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, true);
 
-      await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, false);
+    await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            drawer: const Drawer(child: Text('Drawer')),
-            drawerEnableOpenDragGesture: false,
-            body: const Text('Scaffold body'),
-            appBar: AppBar(centerTitle: true, title: const Text('Title')),
-          ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          drawer: const Drawer(child: Text('Drawer')),
+          drawerEnableOpenDragGesture: false,
+          body: const Text('Scaffold body'),
+          appBar: AppBar(centerTitle: true, title: const Text('Title')),
         ),
-      );
-      scaffoldState = tester.state(find.byType(Scaffold));
-      expect(scaffoldState.isDrawerOpen, false);
+      ),
+    );
+    scaffoldState = tester.state(find.byType(Scaffold));
+    expect(scaffoldState.isDrawerOpen, false);
 
-      // Test that we cannot open the drawer with a drag gesture when
-      // `Scaffold.drawerEnableDragGesture` is false.
-      await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, false);
+    // Test that we cannot open the drawer with a drag gesture when
+    // `Scaffold.drawerEnableDragGesture` is false.
+    await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
 
-      // Test that we can close drawer with a drag gesture when
-      // `Scaffold.drawerEnableDragGesture` is false.
-      final Finder drawerOpenButton = find.byType(IconButton).first;
-      await tester.tap(drawerOpenButton);
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, true);
+    // Test that we can close drawer with a drag gesture when
+    // `Scaffold.drawerEnableDragGesture` is false.
+    final Finder drawerOpenButton = find.byType(IconButton).first;
+    await tester.tap(drawerOpenButton);
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, true);
 
-      await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
-      await tester.pumpAndSettle();
-      expect(scaffoldState.isDrawerOpen, false);
-    },
-    variant: TargetPlatformVariant.mobile(),
-  );
+    await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
+    await tester.pumpAndSettle();
+    expect(scaffoldState.isDrawerOpen, false);
+  }, variant: TargetPlatformVariant.mobile());
 
   testWidgets('Drawer does not open with a drag gesture on desktop', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -3836,19 +3830,14 @@ void main() {
               child: Scaffold(
                 backgroundColor: Colors.red,
                 body: SizedBox.expand(),
-                bottomSheet: SizedBox(
-                  height: 100.0,
-                  child: ColoredBox(color: Color(0xFFCDA0CD)),
-                ),
+                bottomSheet: SizedBox(height: 100.0, child: ColoredBox(color: Color(0xFFCDA0CD))),
               ),
             ),
           ),
         );
         await tester.pumpAndSettle();
 
-        final ColorScheme colors = Theme.of(
-          tester.element(find.byType(Scaffold)),
-        ).colorScheme;
+        final ColorScheme colors = Theme.of(tester.element(find.byType(Scaffold))).colorScheme;
         final RenderBox backdropRenderBox = tester.firstRenderObject<RenderBox>(
           find.byWidgetPredicate(
             (Widget w) => w is ColoredBox && w.color == colors.surfaceContainerLow,
@@ -3860,120 +3849,16 @@ void main() {
       },
     );
 
-    testWidgets(
-      'showBottomSheet uses the explicit backgroundColor for the backdrop',
-      (WidgetTester tester) async {
-        const sheetColor = Color(0xFFCDA0CD);
-        late BuildContext bodyContext;
-        await tester.pumpWidget(
-          MaterialApp(
-            home: MediaQuery(
-              data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200.0)),
-              child: Scaffold(
-                backgroundColor: Colors.red,
-                body: Builder(
-                  builder: (BuildContext c) {
-                    bodyContext = c;
-                    return const SizedBox.expand();
-                  },
-                ),
-              ),
-            ),
-          ),
-        );
-
-        showBottomSheet(
-          context: bodyContext,
-          backgroundColor: sheetColor,
-          builder: (BuildContext context) => const SizedBox(height: 100.0),
-        );
-        await tester.pumpAndSettle();
-
-        // The explicit backgroundColor flows into the backdrop.
-        final RenderBox backdropRenderBox = tester.firstRenderObject<RenderBox>(
-          find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == sheetColor),
-        );
-        expect(backdropRenderBox.size.height, 200.0);
-        expect(backdropRenderBox.localToGlobal(Offset.zero).dy, 600.0 - 200.0);
-      },
-    );
-
-    testWidgets(
-      'ScaffoldState.showBottomSheet shares the same backdrop path as showBottomSheet',
-      (WidgetTester tester) async {
-        const sheetColor = Color(0xFFCDA0CD);
-        final scaffoldKey = GlobalKey<ScaffoldState>();
-        await tester.pumpWidget(
-          MaterialApp(
-            home: MediaQuery(
-              data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200.0)),
-              child: Scaffold(
-                key: scaffoldKey,
-                backgroundColor: Colors.red,
-                body: const SizedBox.expand(),
-              ),
-            ),
-          ),
-        );
-
-        scaffoldKey.currentState!.showBottomSheet(
-          (BuildContext context) => const SizedBox(height: 100.0),
-          backgroundColor: sheetColor,
-        );
-        await tester.pumpAndSettle();
-
-        final RenderBox backdropRenderBox = tester.firstRenderObject<RenderBox>(
-          find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == sheetColor),
-        );
-        expect(backdropRenderBox.size.height, 200.0);
-      },
-    );
-
-    testWidgets(
-      'no backdrop when resizeToAvoidBottomInset is false',
-      (WidgetTester tester) async {
-        const sheetColor = Color(0xFFCDA0CD);
-        await tester.pumpWidget(
-          const MaterialApp(
-            home: MediaQuery(
-              data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200.0)),
-              child: Scaffold(
-                resizeToAvoidBottomInset: false,
-                backgroundColor: Colors.red,
-                body: SizedBox.expand(),
-                bottomSheet: SizedBox(
-                  height: 100.0,
-                  child: ColoredBox(color: sheetColor),
-                ),
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-
-        // With resize disabled, the sheet stays at the bottom and the
-        // keyboard simply covers it; there's no gap to bleed and no
-        // backdrop should be painted.
-        final ColorScheme colors = Theme.of(
-          tester.element(find.byType(Scaffold)),
-        ).colorScheme;
-        expect(
-          find.byWidgetPredicate(
-            (Widget w) => w is ColoredBox && w.color == colors.surfaceContainerLow,
-          ),
-          findsNothing,
-        );
-      },
-    );
-
-    testWidgets(
-      'backdrop has zero size when keyboard is not visible',
-      (WidgetTester tester) async {
-        const sheetColor = Color(0xFFCDA0CD);
-        late BuildContext bodyContext;
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
+    testWidgets('showBottomSheet uses the explicit backgroundColor for the backdrop', (
+      WidgetTester tester,
+    ) async {
+      const sheetColor = Color(0xFFCDA0CD);
+      late BuildContext bodyContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200.0)),
+            child: Scaffold(
               backgroundColor: Colors.red,
               body: Builder(
                 builder: (BuildContext c) {
@@ -3983,221 +3868,294 @@ void main() {
               ),
             ),
           ),
-        );
+        ),
+      );
 
-        showBottomSheet(
-          context: bodyContext,
-          backgroundColor: sheetColor,
-          builder: (BuildContext context) => const SizedBox(height: 100.0),
-        );
-        await tester.pumpAndSettle();
-        final Finder backdropFinder = find.descendant(
-          of: find.byWidgetPredicate(
-            (Widget w) => w is IgnorePointer && w.ignoring,
-          ),
-          matching: find.byWidgetPredicate(
-            (Widget w) => w is ColoredBox && w.color == sheetColor,
-          ),
-        );
-        expect(backdropFinder, findsOneWidget);
-        expect(tester.getSize(backdropFinder), Size.zero);
-      },
-    );
+      showBottomSheet(
+        context: bodyContext,
+        backgroundColor: sheetColor,
+        builder: (BuildContext context) => const SizedBox(height: 100.0),
+      );
+      await tester.pumpAndSettle();
 
-    testWidgets(
-      'backdrop horizontal bounds match the sheet on a constrained tablet layout',
-      (WidgetTester tester) async {
-        const sheetColor = Color(0xFFCDA0CD);
-        late BuildContext bodyContext;
-        await tester.pumpWidget(
-          MaterialApp(
-            home: MediaQuery(
-              data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200.0)),
-              child: Scaffold(
-                backgroundColor: Colors.red,
-                body: Builder(
-                  builder: (BuildContext c) {
-                    bodyContext = c;
-                    return const SizedBox.expand();
-                  },
-                ),
-              ),
+      // The explicit backgroundColor flows into the backdrop.
+      final RenderBox backdropRenderBox = tester.firstRenderObject<RenderBox>(
+        find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == sheetColor),
+      );
+      expect(backdropRenderBox.size.height, 200.0);
+      expect(backdropRenderBox.localToGlobal(Offset.zero).dy, 600.0 - 200.0);
+    });
+
+    testWidgets('ScaffoldState.showBottomSheet shares the same backdrop path as showBottomSheet', (
+      WidgetTester tester,
+    ) async {
+      const sheetColor = Color(0xFFCDA0CD);
+      final scaffoldKey = GlobalKey<ScaffoldState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200.0)),
+            child: Scaffold(
+              key: scaffoldKey,
+              backgroundColor: Colors.red,
+              body: const SizedBox.expand(),
             ),
           ),
-        );
+        ),
+      );
 
-        // Sheet constrained to maxWidth: 400 on an 800px-wide screen.
-        showBottomSheet(
-          context: bodyContext,
-          backgroundColor: sheetColor,
-          constraints: const BoxConstraints(maxWidth: 400.0),
-          builder: (BuildContext context) => const SizedBox(height: 100.0),
-        );
-        await tester.pumpAndSettle();
+      scaffoldKey.currentState!.showBottomSheet(
+        (BuildContext context) => const SizedBox(height: 100.0),
+        backgroundColor: sheetColor,
+      );
+      await tester.pumpAndSettle();
 
-        final RenderBox backdropRenderBox = tester.firstRenderObject<RenderBox>(
-          find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == sheetColor),
-        );
-        expect(backdropRenderBox.size, const Size(400.0, 200.0));
-        // Centered horizontally: x = (800 - 400) / 2 = 200.
-        expect(backdropRenderBox.localToGlobal(Offset.zero), const Offset(200.0, 400.0));
-      },
-    );
+      final RenderBox backdropRenderBox = tester.firstRenderObject<RenderBox>(
+        find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == sheetColor),
+      );
+      expect(backdropRenderBox.size.height, 200.0);
+    });
 
-    testWidgets(
-      'backdrop honors the outgoing sheet color and constraints during dismissal',
-      (WidgetTester tester) async {
-        const sheetColor = Color(0xFFCDA0CD);
-        late BuildContext bodyContext;
-        await tester.pumpWidget(
-          MaterialApp(
-            home: MediaQuery(
-              data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200.0)),
-              child: Scaffold(
-                backgroundColor: Colors.red,
-                body: Builder(
-                  builder: (BuildContext c) {
-                    bodyContext = c;
-                    return const SizedBox.expand();
-                  },
-                ),
-              ),
+    testWidgets('no backdrop when resizeToAvoidBottomInset is false', (WidgetTester tester) async {
+      const sheetColor = Color(0xFFCDA0CD);
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200.0)),
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              backgroundColor: Colors.red,
+              body: SizedBox.expand(),
+              bottomSheet: SizedBox(height: 100.0, child: ColoredBox(color: sheetColor)),
             ),
           ),
-        );
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        // Pin the reverse animation duration so the mid-animation pump
-        // below remains within the dismissal window even if the framework
-        // default changes.
-        final PersistentBottomSheetController controller = showBottomSheet(
-          context: bodyContext,
-          backgroundColor: sheetColor,
-          constraints: const BoxConstraints(maxWidth: 400.0),
-          sheetAnimationStyle: const AnimationStyle(
-            reverseDuration: Duration(milliseconds: 200),
-          ),
-          builder: (BuildContext context) => const SizedBox(height: 100.0),
-        );
-        await tester.pumpAndSettle();
+      // With resize disabled, the sheet stays at the bottom and the
+      // keyboard simply covers it; there's no gap to bleed and no
+      // backdrop should be painted.
+      final ColorScheme colors = Theme.of(tester.element(find.byType(Scaffold))).colorScheme;
+      expect(
+        find.byWidgetPredicate(
+          (Widget w) => w is ColoredBox && w.color == colors.surfaceContainerLow,
+        ),
+        findsNothing,
+      );
+    });
 
-        // Confirm the open-state baseline.
-        RenderBox backdropRenderBox = tester.firstRenderObject<RenderBox>(
-          find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == sheetColor),
-        );
-        expect(backdropRenderBox.size, const Size(400.0, 200.0));
-
-        controller.close();
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 50));
-
-        // The backdrop is still painting the outgoing sheet's color and
-        // honoring its constraints — not falling back to theme/defaults.
-        backdropRenderBox = tester.firstRenderObject<RenderBox>(
-          find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == sheetColor),
-        );
-        expect(backdropRenderBox.size, const Size(400.0, 200.0));
-        await tester.pumpAndSettle();
-        expect(
-          find.descendant(
-            of: find.byWidgetPredicate(
-              (Widget w) => w is IgnorePointer && w.ignoring,
-            ),
-            matching: find.byWidgetPredicate(
-              (Widget w) => w is ColoredBox && w.color == sheetColor,
-            ),
-          ),
-          findsNothing,
-        );
-      },
-    );
-
-    testWidgets(
-      'backdrop appears when the keyboard rises after the sheet is shown',
-      (WidgetTester tester) async {
-        const sheetColor = Color(0xFFCDA0CD);
-        EdgeInsets viewInsets = EdgeInsets.zero;
-        late StateSetter setMediaState;
-        late BuildContext bodyContext;
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                setMediaState = setState;
-                return MediaQuery(
-                  data: MediaQueryData(viewInsets: viewInsets),
-                  child: Scaffold(
-                    backgroundColor: Colors.red,
-                    body: Builder(
-                      builder: (BuildContext c) {
-                        bodyContext = c;
-                        return const SizedBox.expand();
-                      },
-                    ),
-                  ),
-                );
+    testWidgets('backdrop has zero size when keyboard is not visible', (WidgetTester tester) async {
+      const sheetColor = Color(0xFFCDA0CD);
+      late BuildContext bodyContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            backgroundColor: Colors.red,
+            body: Builder(
+              builder: (BuildContext c) {
+                bodyContext = c;
+                return const SizedBox.expand();
               },
             ),
           ),
-        );
+        ),
+      );
 
-        showBottomSheet(
-          context: bodyContext,
-          backgroundColor: sheetColor,
-          builder: (BuildContext context) => const SizedBox(height: 100.0),
-        );
-        await tester.pumpAndSettle();
+      showBottomSheet(
+        context: bodyContext,
+        backgroundColor: sheetColor,
+        builder: (BuildContext context) => const SizedBox(height: 100.0),
+      );
+      await tester.pumpAndSettle();
+      final Finder backdropFinder = find.descendant(
+        of: find.byWidgetPredicate((Widget w) => w is IgnorePointer && w.ignoring),
+        matching: find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == sheetColor),
+      );
+      expect(backdropFinder, findsOneWidget);
+      expect(tester.getSize(backdropFinder), Size.zero);
+    });
 
-        // Initial state: keyboard down, backdrop has zero size.
-        final Finder backdropFinder = find.descendant(
-          of: find.byWidgetPredicate((Widget w) => w is IgnorePointer && w.ignoring),
-          matching: find.byWidgetPredicate(
-            (Widget w) => w is ColoredBox && w.color == sheetColor,
-          ),
-        );
-        expect(tester.getSize(backdropFinder), Size.zero);
-
-        // Keyboard rises. The backdrop tracks viewInsets.bottom.
-        setMediaState(() {
-          viewInsets = const EdgeInsets.only(bottom: 200.0);
-        });
-        await tester.pumpAndSettle();
-        expect(tester.getSize(backdropFinder).height, 200.0);
-
-        // Keyboard falls again. Backdrop returns to zero size.
-        setMediaState(() {
-          viewInsets = EdgeInsets.zero;
-        });
-        await tester.pumpAndSettle();
-        expect(tester.getSize(backdropFinder), Size.zero);
-      },
-    );
-
-    testWidgets(
-      'backdrop falls back to canvasColor on Material 2',
-      (WidgetTester tester) async {
-        const canvasColor = Color(0xFFAABBCC);
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: ThemeData(useMaterial3: false, canvasColor: canvasColor),
-            home: const MediaQuery(
-              data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200.0)),
-              child: Scaffold(
-                backgroundColor: Colors.red,
-                body: SizedBox.expand(),
-                bottomSheet: SizedBox(height: 100.0),
+    testWidgets('backdrop horizontal bounds match the sheet on a constrained tablet layout', (
+      WidgetTester tester,
+    ) async {
+      const sheetColor = Color(0xFFCDA0CD);
+      late BuildContext bodyContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200.0)),
+            child: Scaffold(
+              backgroundColor: Colors.red,
+              body: Builder(
+                builder: (BuildContext c) {
+                  bodyContext = c;
+                  return const SizedBox.expand();
+                },
               ),
             ),
           ),
-        );
-        await tester.pumpAndSettle();
+        ),
+      );
 
-        final RenderBox backdropRenderBox = tester.firstRenderObject<RenderBox>(
-          find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == canvasColor),
-        );
-        expect(backdropRenderBox.size.height, 200.0);
-      },
-    );
+      // Sheet constrained to maxWidth: 400 on an 800px-wide screen.
+      showBottomSheet(
+        context: bodyContext,
+        backgroundColor: sheetColor,
+        constraints: const BoxConstraints(maxWidth: 400.0),
+        builder: (BuildContext context) => const SizedBox(height: 100.0),
+      );
+      await tester.pumpAndSettle();
+
+      final RenderBox backdropRenderBox = tester.firstRenderObject<RenderBox>(
+        find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == sheetColor),
+      );
+      expect(backdropRenderBox.size, const Size(400.0, 200.0));
+      // Centered horizontally: x = (800 - 400) / 2 = 200.
+      expect(backdropRenderBox.localToGlobal(Offset.zero), const Offset(200.0, 400.0));
+    });
+
+    testWidgets('backdrop honors the outgoing sheet color and constraints during dismissal', (
+      WidgetTester tester,
+    ) async {
+      const sheetColor = Color(0xFFCDA0CD);
+      late BuildContext bodyContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200.0)),
+            child: Scaffold(
+              backgroundColor: Colors.red,
+              body: Builder(
+                builder: (BuildContext c) {
+                  bodyContext = c;
+                  return const SizedBox.expand();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Pin the reverse animation duration so the mid-animation pump
+      // below remains within the dismissal window even if the framework
+      // default changes.
+      final PersistentBottomSheetController controller = showBottomSheet(
+        context: bodyContext,
+        backgroundColor: sheetColor,
+        constraints: const BoxConstraints(maxWidth: 400.0),
+        sheetAnimationStyle: const AnimationStyle(reverseDuration: Duration(milliseconds: 200)),
+        builder: (BuildContext context) => const SizedBox(height: 100.0),
+      );
+      await tester.pumpAndSettle();
+
+      // Confirm the open-state baseline.
+      RenderBox backdropRenderBox = tester.firstRenderObject<RenderBox>(
+        find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == sheetColor),
+      );
+      expect(backdropRenderBox.size, const Size(400.0, 200.0));
+
+      controller.close();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // The backdrop is still painting the outgoing sheet's color and
+      // honoring its constraints — not falling back to theme/defaults.
+      backdropRenderBox = tester.firstRenderObject<RenderBox>(
+        find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == sheetColor),
+      );
+      expect(backdropRenderBox.size, const Size(400.0, 200.0));
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.byWidgetPredicate((Widget w) => w is IgnorePointer && w.ignoring),
+          matching: find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == sheetColor),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('backdrop appears when the keyboard rises after the sheet is shown', (
+      WidgetTester tester,
+    ) async {
+      const sheetColor = Color(0xFFCDA0CD);
+      EdgeInsets viewInsets = EdgeInsets.zero;
+      late StateSetter setMediaState;
+      late BuildContext bodyContext;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              setMediaState = setState;
+              return MediaQuery(
+                data: MediaQueryData(viewInsets: viewInsets),
+                child: Scaffold(
+                  backgroundColor: Colors.red,
+                  body: Builder(
+                    builder: (BuildContext c) {
+                      bodyContext = c;
+                      return const SizedBox.expand();
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      showBottomSheet(
+        context: bodyContext,
+        backgroundColor: sheetColor,
+        builder: (BuildContext context) => const SizedBox(height: 100.0),
+      );
+      await tester.pumpAndSettle();
+
+      // Initial state: keyboard down, backdrop has zero size.
+      final Finder backdropFinder = find.descendant(
+        of: find.byWidgetPredicate((Widget w) => w is IgnorePointer && w.ignoring),
+        matching: find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == sheetColor),
+      );
+      expect(tester.getSize(backdropFinder), Size.zero);
+
+      // Keyboard rises. The backdrop tracks viewInsets.bottom.
+      setMediaState(() {
+        viewInsets = const EdgeInsets.only(bottom: 200.0);
+      });
+      await tester.pumpAndSettle();
+      expect(tester.getSize(backdropFinder).height, 200.0);
+
+      // Keyboard falls again. Backdrop returns to zero size.
+      setMediaState(() {
+        viewInsets = EdgeInsets.zero;
+      });
+      await tester.pumpAndSettle();
+      expect(tester.getSize(backdropFinder), Size.zero);
+    });
+
+    testWidgets('backdrop falls back to canvasColor on Material 2', (WidgetTester tester) async {
+      const canvasColor = Color(0xFFAABBCC);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false, canvasColor: canvasColor),
+          home: const MediaQuery(
+            data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: 200.0)),
+            child: Scaffold(
+              backgroundColor: Colors.red,
+              body: SizedBox.expand(),
+              bottomSheet: SizedBox(height: 100.0),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final RenderBox backdropRenderBox = tester.firstRenderObject<RenderBox>(
+        find.byWidgetPredicate((Widget w) => w is ColoredBox && w.color == canvasColor),
+      );
+      expect(backdropRenderBox.size.height, 200.0);
+    });
   });
 }
 
