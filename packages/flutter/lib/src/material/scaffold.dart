@@ -1165,13 +1165,12 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       );
     }
 
-    // The bottom-sheet keyboard backdrop spans the keyboard region (height
-    // `minInsets.bottom`) horizontally aligned with the sheet so it covers
-    // the gap between the sheet's bottom and the screen bottom that would
-    // otherwise expose the Scaffold's backgroundColor. Its width matches
-    // the sheet's effective maxWidth, so on wide layouts where the sheet
-    // is centered (e.g. M3's default `maxWidth: 640` on tablets) the
-    // backdrop does not over-extend past the sheet horizontally.
+    // The bottom-sheet keyboard backdrop spans the keyboard region and is
+    // horizontally aligned with the sheet so it covers the gap between the
+    // sheet's bottom and the screen bottom that would otherwise expose the
+    // Scaffold's backgroundColor. Its width matches the sheet's effective
+    // maxWidth, so on wide layouts where the sheet is centered, the backdrop
+    // does not over-extend past the sheet horizontally.
     if (hasChild(_ScaffoldSlot.bottomSheetKeyboardBackdrop)) {
       final double backdropHeight = minInsets.bottom;
       if (backdropHeight > 0.0) {
@@ -3117,7 +3116,7 @@ class ScaffoldState extends State<Scaffold>
       // keyboard in the gap between the persistent bottom sheet's bottom
       // edge and the screen bottom. Paint a backdrop in that region using
       // the sheet's effective `backgroundColor` so the keyboard tints the
-      // sheet's chrome rather than the scaffold's. Skipped when:
+      // sheet's chrome rather than the Scaffold's. Skipped when:
       //   * `resizeToAvoidBottomInset` is false — the sheet stays put and
       //     the keyboard simply covers it; there is no gap to bleed.
       //   * the resolved color is null or fully transparent — the caller
@@ -3134,11 +3133,9 @@ class ScaffoldState extends State<Scaffold>
         final _StandardBottomSheet? activeSheet =
             _currentBottomSheet?._widget ??
             (_dismissedBottomSheets.isNotEmpty ? _dismissedBottomSheets.last : null);
-        // The M3 token mirrors `_BottomSheetDefaultsM3.backgroundColor`
-        // (a private class in bottom_sheet.dart). For non-M3, the empty
-        // `BottomSheetThemeData()` default returns null, so the sheet's
-        // `Material` falls through to `Theme.canvasColor` — match that
-        // here so the backdrop matches the sheet's actual painted color.
+        // For non-M3, the empty `BottomSheetThemeData` default returns null, so
+        // the sheet's `Material` falls through to `Theme.canvasColor`. Match
+        // that here so the backdrop matches the sheet's actual painted color.
         final Color defaultBackgroundColor = themeData.useMaterial3
             ? themeData.colorScheme.surfaceContainerLow
             : themeData.canvasColor;
