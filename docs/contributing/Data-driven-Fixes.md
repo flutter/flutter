@@ -142,7 +142,7 @@ You might find it useful to include a comment to provide more information about 
 
 ### library
 
-A _library_ describes a single library. The uri of the library is specified as the value of the key. For example, 
+A _library_ describes a single library. The uri of the library is specified as the value of the key. For example,
 you can specify a library `lib.dart` in package `p`:
 
 ```yaml
