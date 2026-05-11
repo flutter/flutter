@@ -4,9 +4,7 @@
 
 #include "flutter/lib/gpu/shader_library.h"
 
-#include <atomic>
 #include <optional>
-#include <sstream>
 #include <utility>
 
 #include "flutter/assets/asset_manager.h"
@@ -17,22 +15,12 @@
 #include "fml/memory/ref_ptr.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/shader_types.h"
+#include "impeller/renderer/shader_key.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
 #include "lib/gpu/context.h"
 
 namespace flutter {
 namespace gpu {
-
-namespace {
-// Process-unique fallback library id used when MakeFromFlatbuffer is invoked
-// without a stable asset path (e.g. tests or future in-memory APIs).
-std::string MakeFallbackLibraryId() {
-  static std::atomic<uint64_t> counter{0};
-  std::ostringstream s;
-  s << "auto:" << counter.fetch_add(1, std::memory_order_relaxed);
-  return s.str();
-}
-}  // namespace
 
 IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, ShaderLibrary);
 
@@ -190,7 +178,7 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
     return nullptr;
   }
   if (library_id.empty()) {
-    library_id = MakeFallbackLibraryId();
+    library_id = impeller::ShaderKey::MakeFallbackLibraryId();
   }
   if (!impeller::fb::shaderbundle::ShaderBundleBufferHasIdentifier(
           payload->GetMapping())) {

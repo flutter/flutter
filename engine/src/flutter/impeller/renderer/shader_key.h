@@ -57,6 +57,12 @@ struct ShaderKey {
 
   /// Scope tag for Flutter GPU user shader bundles.
   static constexpr std::string_view kScopeFlutterGPU = "fg";
+
+  /// Returns a process-unique library id for user shader sources that were
+  /// not constructed via an asset-bearing entry point (e.g. tests, future
+  /// in-memory APIs). Stable for the lifetime of the source but distinct
+  /// across sources, so the user-scoped registry name cannot collide.
+  static std::string MakeFallbackLibraryId();
 };
 
 class ShaderFunction;
