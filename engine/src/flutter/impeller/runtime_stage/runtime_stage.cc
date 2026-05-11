@@ -5,18 +5,33 @@
 #include "impeller/runtime_stage/runtime_stage.h"
 
 #include <array>
+#include <atomic>
+#include <cstdint>
 #include <memory>
 #include <sstream>
+#include <string>
 
 #include "fml/mapping.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/core/shader_types.h"
-#include "impeller/renderer/shader_key.h"
 #include "impeller/runtime_stage/runtime_stage_flatbuffers.h"
 #include "runtime_stage_types_flatbuffers.h"
 
 namespace impeller {
+
+namespace {
+// Process-unique fallback library id for runtime stages decoded without an
+// asset path (e.g. tests, future in-memory APIs). Kept local to this
+// translation unit because `impeller::renderer` (where the equivalent
+// `ShaderKey::MakeFallbackLibraryId` lives) already depends on
+// `impeller::runtime_stage`, so it is not reachable from here.
+std::string MakeFallbackLibraryId() {
+  static std::atomic<uint64_t> counter{0};
+  return "auto:" +
+         std::to_string(counter.fetch_add(1, std::memory_order_relaxed));
+}
+}  // namespace
 
 static RuntimeUniformType ToType(fb::UniformDataType type) {
   switch (type) {
@@ -59,7 +74,7 @@ absl::StatusOr<RuntimeStage> RuntimeStage::Create(
   RuntimeStage stage(payload);
   stage.stage_ = ToShaderStage(runtime_stage->stage());
   stage.entrypoint_ = runtime_stage->entrypoint()->str();
-  stage.library_id_ = ShaderKey::MakeFallbackLibraryId();
+  stage.library_id_ = MakeFallbackLibraryId();
 
   auto* uniforms = runtime_stage->uniforms();
 
