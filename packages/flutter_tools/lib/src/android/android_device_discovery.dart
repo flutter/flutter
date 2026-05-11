@@ -147,8 +147,13 @@ class AndroidDevices extends PollingDeviceDiscovery {
         final Match match = _kDeviceRegex.firstMatch(line)!;
 
         final String deviceID = match[1]!;
-        final String deviceState = match[2]!;
+        String deviceState = match[2]!;
         String? rest = match[3];
+
+        if (deviceState == 'no' && rest != null && rest.trim().startsWith('permissions')) {
+          deviceState = 'no permissions';
+          rest = rest.trim().substring('permissions'.length);
+        }
 
         final info = <String, String>{};
         if (rest != null && rest.isNotEmpty) {
@@ -174,6 +179,11 @@ class AndroidDevices extends PollingDeviceDiscovery {
             );
           case 'offline':
             diagnostics?.add('Device $deviceID is offline.');
+          case 'no permissions':
+            diagnostics?.add(
+              'Device $deviceID has no permissions.\n'
+              'Please check your udev rules.',
+            );
           default:
             devices?.add(
               AndroidDevice(

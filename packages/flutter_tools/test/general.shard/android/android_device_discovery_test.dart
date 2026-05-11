@@ -274,6 +274,40 @@ Use the 'android' tool to install them:
     expect(diagnostics, hasLength(1));
     expect(diagnostics.first, contains('you do not have'));
   });
+
+  testWithoutContext('AndroidDevices handles no permissions devices', () async {
+    final androidDevices = AndroidDevices(
+      userMessages: UserMessages(),
+      androidWorkflow: androidWorkflow,
+      androidSdk: FakeAndroidSdk(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['adb', 'devices', '-l'],
+          stdout: '''
+List of devices attached
+015d172c98400a03       no permissions usb:3-4
+''',
+        ),
+        const FakeCommand(
+          command: <String>['adb', 'devices', '-l'],
+          stdout: '''
+List of devices attached
+015d172c98400a03       no permissions usb:3-4
+''',
+        ),
+      ]),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+    );
+
+    final List<Device> devices = await androidDevices.pollingGetDevices();
+    expect(devices, isEmpty);
+
+    final List<String> diagnostics = await androidDevices.getDiagnostics();
+    expect(diagnostics, hasLength(1));
+    expect(diagnostics.first, contains('no permissions'));
+  });
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
