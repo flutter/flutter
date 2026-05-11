@@ -245,9 +245,6 @@ std::optional<fb::shaderbundle::ShaderBundleT> GenerateShaderBundleFlatbuffer(
 static bool OutputBundleDepfile(const Switches& switches,
                                 const std::string& target,
                                 const std::set<std::string>& dependencies) {
-  auto depfile_path = std::filesystem::absolute(
-      std::filesystem::current_path() / switches.depfile_path);
-
   std::stringstream stream;
   stream << target << ":";
   for (const auto& dep : dependencies) {
@@ -259,8 +256,13 @@ static bool OutputBundleDepfile(const Switches& switches,
       reinterpret_cast<const uint8_t*>(contents->data()), contents->size(),
       [contents](auto, auto) {});
 
+  // Pass the relative path straight through; fml::WriteAtomically
+  // resolves it against switches.working_directory (a directory fd
+  // representing the build system's intended working dir, which may
+  // differ from std::filesystem::current_path()).
   if (!fml::WriteAtomically(*switches.working_directory,
-                            Utf8FromPath(depfile_path).c_str(), mapping)) {
+                            Utf8FromPath(switches.depfile_path).c_str(),
+                            mapping)) {
     std::cerr << "Could not write depfile to " << switches.depfile_path
               << std::endl;
     return false;
@@ -326,7 +328,8 @@ bool GenerateShaderBundle(Switches& switches) {
   /// or `#include`d header changes.
 
   if (want_depfile) {
-    if (!OutputBundleDepfile(switches, sl_file_name.string(), dependencies)) {
+    if (!OutputBundleDepfile(switches, Utf8FromPath(sl_file_name),
+                             dependencies)) {
       return false;
     }
   }
