@@ -391,6 +391,13 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
     // No extra initialization is required.
   }
 
+  /// Keeps this surface reusable in the display canvas cache.
+  ///
+  /// CanvasKit on-screen surfaces do not transfer bitmap ownership to a
+  /// separate display context, so there are no transient resources to release.
+  @override
+  void release() {}
+
   @override
   Future<void> triggerContextLoss() async {
     _handledContextLostEvent = Completer<void>();

@@ -52,6 +52,8 @@ class FakeDisplayCanvas extends DisplayCanvas {
   @override
   void initialize() {}
   @override
+  void release() {}
+  @override
   void dispose() {}
 }
 

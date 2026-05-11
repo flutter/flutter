@@ -164,6 +164,9 @@ abstract class DisplayCanvas {
   /// Initialize the overlay.
   void initialize();
 
+  /// Releases transient resources while keeping this canvas reusable.
+  void release();
+
   /// Disposes this overlay.
   void dispose();
 }

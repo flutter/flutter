@@ -59,6 +59,26 @@ void testMain() {
       expect(canvas.canvasElement.style.height, '32px');
     });
 
+    test('releases transferred bitmap resources while remaining reusable', () async {
+      final canvas = RenderCanvas();
+      canvas.render(await newBitmap(10, 16));
+
+      expect(canvas.canvasElement.width, 10);
+      expect(canvas.canvasElement.height, 16);
+
+      canvas.release();
+      expect(canvas.canvasElement.width, 10);
+      expect(canvas.canvasElement.height, 16);
+
+      canvas.render(await newBitmap(20, 24));
+      expect(canvas.canvasElement.width, 20);
+      expect(canvas.canvasElement.height, 24);
+
+      canvas.dispose();
+      expect(canvas.canvasElement.width, 0);
+      expect(canvas.canvasElement.height, 0);
+    });
+
     test('rounds physical size to nearest integer size', () async {
       final EngineFlutterWindow implicitView = EnginePlatformDispatcher.instance.implicitView!;
       implicitView.debugPhysicalSizeOverride = const ui.Size(199.999999, 200.000001);
