@@ -591,7 +591,7 @@ void main() async {
         buffers: <gpu.VertexBufferLayout>[gpu.VertexBufferLayout(binding: 0, strideInBytes: 8)],
         attributes: <gpu.VertexAttribute>[
           gpu.VertexAttribute(
-            location: 0,
+            name: 'position',
             bufferBinding: 0,
             offsetInBytes: 0,
             format: gpu.VertexFormat.float32x2,
@@ -626,13 +626,14 @@ void main() async {
           vertexLayout: const gpu.VertexLayout(
             buffers: <gpu.VertexBufferLayout>[gpu.VertexBufferLayout(binding: 0, strideInBytes: 8)],
             attributes: <gpu.VertexAttribute>[
-              // UnlitVertex declares a float `vec2 position` at location 0,
-              // so binding a uint32x2 (different scalar type class) here must
-              // throw. Component-count mismatches are NOT errors: a buffer
-              // can supply more or fewer components than the shader reads,
-              // matching WebGPU / Vulkan / Metal default-substitution rules.
+              // UnlitVertex declares a float `vec2 position`, so binding a
+              // uint32x2 (different scalar type class) here must throw.
+              // Component-count mismatches are NOT errors: a buffer can
+              // supply more or fewer components than the shader reads,
+              // matching the default-substitution rules every modern HAL
+              // uses.
               gpu.VertexAttribute(
-                location: 0,
+                name: 'position',
                 bufferBinding: 0,
                 offsetInBytes: 0,
                 format: gpu.VertexFormat.uint32x2,
@@ -664,7 +665,7 @@ void main() async {
             attributes: <gpu.VertexAttribute>[
               // float32x2 (8 bytes) at offset 4 with stride 8 overruns by 4.
               gpu.VertexAttribute(
-                location: 0,
+                name: 'position',
                 bufferBinding: 0,
                 offsetInBytes: 4,
                 format: gpu.VertexFormat.float32x2,
@@ -692,7 +693,7 @@ void main() async {
             buffers: <gpu.VertexBufferLayout>[gpu.VertexBufferLayout(binding: 0, strideInBytes: 8)],
             attributes: <gpu.VertexAttribute>[
               gpu.VertexAttribute(
-                location: 0,
+                name: 'position',
                 bufferBinding: 7, // not declared in `buffers`
                 offsetInBytes: 0,
                 format: gpu.VertexFormat.float32x2,
@@ -727,7 +728,7 @@ void main() async {
   );
 
   test(
-    'createRenderPipeline rejects VertexAttribute with unknown location',
+    'createRenderPipeline rejects VertexAttribute with unknown name',
     () async {
       final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
       try {
@@ -738,7 +739,7 @@ void main() async {
             buffers: <gpu.VertexBufferLayout>[gpu.VertexBufferLayout(binding: 0, strideInBytes: 8)],
             attributes: <gpu.VertexAttribute>[
               gpu.VertexAttribute(
-                location: 5, // UnlitVertex only declares location 0
+                name: 'nonexistent_attribute',
                 bufferBinding: 0,
                 offsetInBytes: 0,
                 format: gpu.VertexFormat.float32x2,
@@ -746,7 +747,7 @@ void main() async {
             ],
           ),
         );
-        fail('Expected exception for unknown location.');
+        fail('Expected exception for unknown attribute name.');
       } catch (e) {
         expect(
           e.toString(),

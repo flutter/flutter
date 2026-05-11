@@ -59,7 +59,8 @@ extern Dart_Handle InternalFlutterGpu_RenderPipeline_Initialize(
     flutter::gpu::Shader* vertex_shader,
     flutter::gpu::Shader* fragment_shader,
     Dart_Handle buffer_layouts_handle,
-    Dart_Handle attributes_handle);
+    Dart_Handle attributes_handle,
+    Dart_Handle attribute_names_handle);
 
 }  // extern "C"
 

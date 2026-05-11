@@ -6,7 +6,9 @@
 
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <sstream>
+#include <string_view>
 
 #include "flutter/lib/gpu/shader.h"
 #include "impeller/core/shader_types.h"
@@ -77,7 +79,9 @@ constexpr std::array<VertexFormatInfo, 12> kVertexFormatTable = {{
 constexpr size_t kBufferLayoutInts = 2;
 
 // Width of each "row" in the packed `attributes` ByteData passed from Dart:
-// `[location, bufferBinding, offset, formatIndex]`.
+// `[bufferBinding, offset, formatIndex, nameByteLength]`. The attribute name
+// itself lives in a parallel `attribute_names` byte blob walked sequentially
+// using the per-row `nameByteLength`.
 constexpr size_t kAttributeInts = 4;
 
 // Builds an `impeller::VertexDescriptor` from the user-supplied buffer
@@ -90,6 +94,8 @@ std::string BuildCustomVertexDescriptor(
     size_t buffer_layout_count,
     const int32_t* attributes,
     size_t attribute_count,
+    const char* attribute_names,
+    size_t attribute_names_byte_length,
     impeller::VertexDescriptor& out) {
   // Build the per-binding stride table. Bindings must be densely packed
   // `{0, 1, ..., buffer_layout_count - 1}` because Impeller's
@@ -126,39 +132,46 @@ std::string BuildCustomVertexDescriptor(
         {static_cast<size_t>(stride), static_cast<size_t>(binding)});
   }
 
-  // Build per-attribute IOSlots, looking up shader reflection by location
-  // for the metadata we don't carry on the Dart side.
+  // Build per-attribute IOSlots, looking up shader reflection by name for
+  // the metadata we don't carry on the Dart side. Name-keyed lookup mirrors
+  // the existing uniform binding API and keeps Dart layouts robust to
+  // shader source edits (e.g. reordering `in` declarations).
   const auto& shader_inputs = vertex_shader.GetStageInputs();
   std::vector<impeller::ShaderStageIOSlot> stage_inputs;
   stage_inputs.reserve(attribute_count);
+  size_t name_cursor = 0;
   for (size_t i = 0; i < attribute_count; ++i) {
-    const int32_t location = attributes[i * kAttributeInts + 0];
-    const int32_t buffer_binding = attributes[i * kAttributeInts + 1];
-    const int32_t offset = attributes[i * kAttributeInts + 2];
-    const int32_t format_index = attributes[i * kAttributeInts + 3];
+    const int32_t buffer_binding = attributes[i * kAttributeInts + 0];
+    const int32_t offset = attributes[i * kAttributeInts + 1];
+    const int32_t format_index = attributes[i * kAttributeInts + 2];
+    const int32_t name_byte_length = attributes[i * kAttributeInts + 3];
 
-    if (location < 0) {
-      std::ostringstream s;
-      s << "VertexAttribute.location must be non-negative (got " << location
-        << ").";
-      return s.str();
+    if (name_byte_length <= 0 ||
+        name_cursor + static_cast<size_t>(name_byte_length) >
+            attribute_names_byte_length) {
+      return "Internal error: attribute name overruns the packed names blob.";
     }
+    const std::string_view name(attribute_names + name_cursor,
+                                static_cast<size_t>(name_byte_length));
+    name_cursor += static_cast<size_t>(name_byte_length);
+
     if (buffer_binding < 0) {
       std::ostringstream s;
-      s << "VertexAttribute.bufferBinding must be non-negative (got "
-        << buffer_binding << ").";
+      s << "VertexAttribute '" << name
+        << "' bufferBinding must be non-negative (got " << buffer_binding
+        << ").";
       return s.str();
     }
     if (offset < 0) {
       std::ostringstream s;
-      s << "VertexAttribute.offsetInBytes must be non-negative (got " << offset
-        << ").";
+      s << "VertexAttribute '" << name
+        << "' offsetInBytes must be non-negative (got " << offset << ").";
       return s.str();
     }
     if (format_index < 0 ||
         static_cast<size_t>(format_index) >= kVertexFormatTable.size()) {
       std::ostringstream s;
-      s << "VertexAttribute.format index " << format_index
+      s << "VertexAttribute '" << name << "' format index " << format_index
         << " is out of range.";
       return s.str();
     }
@@ -174,35 +187,39 @@ std::string BuildCustomVertexDescriptor(
     }
     if (matching_layout == nullptr) {
       std::ostringstream s;
-      s << "VertexAttribute at location " << location
-        << " references bufferBinding " << buffer_binding
-        << " which is not declared in VertexLayout.buffers.";
+      s << "VertexAttribute '" << name << "' references bufferBinding "
+        << buffer_binding << " which is not declared in VertexLayout.buffers.";
       return s.str();
     }
     if (static_cast<size_t>(offset) + format.bytes_per_element >
         matching_layout->stride) {
       std::ostringstream s;
-      s << "VertexAttribute at location " << location << " (offset " << offset
-        << " + " << format.bytes_per_element << " bytes) overruns stride of "
+      s << "VertexAttribute '" << name << "' (offset " << offset << " + "
+        << format.bytes_per_element << " bytes) overruns stride of "
         << matching_layout->stride << " on bufferBinding " << buffer_binding
         << ".";
       return s.str();
     }
 
-    // Find the matching shader input by location to validate format and to
-    // copy the metadata we don't carry on the Dart side (name, set, columns,
-    // relaxed_precision).
+    // Find the matching shader input by name to validate format and to copy
+    // the (location, set, columns, relaxed_precision) metadata we don't
+    // carry on the Dart side. The Shader's IOSlot names point into the
+    // shader bundle flatbuffer, which the Shader keeps alive via its code
+    // mapping; the impellerc-generated builds use static string literals.
+    // Either way, strcmp against a NUL-terminated needle is safe.
     const impeller::ShaderStageIOSlot* shader_slot = nullptr;
+    const std::string name_owned(name);
     for (const auto& slot : shader_inputs) {
-      if (slot.location == static_cast<size_t>(location)) {
+      if (slot.name != nullptr &&
+          std::strcmp(slot.name, name_owned.c_str()) == 0) {
         shader_slot = &slot;
         break;
       }
     }
     if (shader_slot == nullptr) {
       std::ostringstream s;
-      s << "VertexAttribute.location " << location
-        << " does not match any input declared by the bound vertex shader.";
+      s << "VertexAttribute name '" << name
+        << "' does not match any input declared by the bound vertex shader.";
       return s.str();
     }
     // Match the shader's scalar type class (float vs signed int vs unsigned
@@ -220,8 +237,8 @@ std::string BuildCustomVertexDescriptor(
     if (shader_slot->type != format.type ||
         shader_slot->bit_width != format.bit_width) {
       std::ostringstream s;
-      s << "VertexAttribute at location " << location
-        << " format does not match the vertex shader's declared input type.";
+      s << "VertexAttribute '" << name
+        << "' format does not match the vertex shader's declared input type.";
       return s.str();
     }
 
@@ -229,6 +246,10 @@ std::string BuildCustomVertexDescriptor(
     built.binding = static_cast<size_t>(buffer_binding);
     built.offset = static_cast<size_t>(offset);
     stage_inputs.push_back(built);
+  }
+
+  if (name_cursor != attribute_names_byte_length) {
+    return "Internal error: attribute names blob has trailing bytes.";
   }
 
   out.SetStageInputs(stage_inputs, stage_layouts);
@@ -250,7 +271,8 @@ Dart_Handle InternalFlutterGpu_RenderPipeline_Initialize(
     flutter::gpu::Shader* vertex_shader,
     flutter::gpu::Shader* fragment_shader,
     Dart_Handle buffer_layouts_handle,
-    Dart_Handle attributes_handle) {
+    Dart_Handle attributes_handle,
+    Dart_Handle attribute_names_handle) {
   // Lazily register the shaders synchronously if they haven't been already.
   vertex_shader->RegisterSync(*gpu_context);
   fragment_shader->RegisterSync(*gpu_context);
@@ -259,10 +281,12 @@ Dart_Handle InternalFlutterGpu_RenderPipeline_Initialize(
 
   const bool buffer_layouts_provided = !Dart_IsNull(buffer_layouts_handle);
   const bool attributes_provided = !Dart_IsNull(attributes_handle);
-  if (buffer_layouts_provided != attributes_provided) {
+  const bool attribute_names_provided = !Dart_IsNull(attribute_names_handle);
+  if (buffer_layouts_provided != attributes_provided ||
+      attributes_provided != attribute_names_provided) {
     return tonic::ToDart(
-        "VertexLayout requires both buffer layouts and attributes to be "
-        "provided together.");
+        "VertexLayout requires buffer layouts, attributes, and attribute "
+        "names to be provided together.");
   }
 
   if (buffer_layouts_provided) {
@@ -275,10 +299,12 @@ Dart_Handle InternalFlutterGpu_RenderPipeline_Initialize(
     // and returned only after the typed-data handles go out of scope.
     std::vector<int32_t> buffer_layouts_ints;
     std::vector<int32_t> attribute_ints;
+    std::vector<char> attribute_names_bytes;
     std::string copy_error;
     {
       tonic::DartByteData buffer_layouts_data(buffer_layouts_handle);
       tonic::DartByteData attributes_data(attributes_handle);
+      tonic::DartByteData attribute_names_data(attribute_names_handle);
       if (buffer_layouts_data.length_in_bytes() %
               (flutter::gpu::kBufferLayoutInts * sizeof(int32_t)) !=
           0) {
@@ -293,6 +319,8 @@ Dart_Handle InternalFlutterGpu_RenderPipeline_Initialize(
             static_cast<const int32_t*>(buffer_layouts_data.data());
         const auto* attributes_src =
             static_cast<const int32_t*>(attributes_data.data());
+        const auto* names_src =
+            static_cast<const char*>(attribute_names_data.data());
         buffer_layouts_ints.assign(
             buffer_layouts_src,
             buffer_layouts_src +
@@ -300,6 +328,8 @@ Dart_Handle InternalFlutterGpu_RenderPipeline_Initialize(
         attribute_ints.assign(
             attributes_src, attributes_src + attributes_data.length_in_bytes() /
                                                  sizeof(int32_t));
+        attribute_names_bytes.assign(
+            names_src, names_src + attribute_names_data.length_in_bytes());
       }
     }
     if (!copy_error.empty()) {
@@ -314,7 +344,8 @@ Dart_Handle InternalFlutterGpu_RenderPipeline_Initialize(
     auto descriptor = std::make_shared<impeller::VertexDescriptor>();
     std::string error = flutter::gpu::BuildCustomVertexDescriptor(
         *vertex_shader, buffer_layouts_ints.data(), buffer_layout_count,
-        attribute_ints.data(), attribute_count, *descriptor);
+        attribute_ints.data(), attribute_count, attribute_names_bytes.data(),
+        attribute_names_bytes.size(), *descriptor);
     if (!error.empty()) {
       return tonic::ToDart(error);
     }

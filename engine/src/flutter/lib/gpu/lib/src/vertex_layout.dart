@@ -44,20 +44,25 @@ enum VertexFormat {
   final int componentCount;
 }
 
-/// Describes a single vertex attribute: which shader location it feeds, which
-/// vertex buffer slot it reads from, the byte offset within that buffer's
-/// element, and its format.
+/// Describes a single vertex attribute: which shader input it feeds (by name),
+/// which vertex buffer slot it reads from, the byte offset within that
+/// buffer's element, and its format.
+///
+/// The [name] must exactly match an `in` (or equivalent stage input)
+/// declaration in the bound vertex shader. Looking the attribute up by name
+/// (rather than by raw location index) keeps Dart-side layouts robust to
+/// shader source edits, mirroring how uniform bindings are resolved by name
+/// via `Shader.getUniformSlot`.
 final class VertexAttribute {
   const VertexAttribute({
-    required this.location,
+    required this.name,
     required this.bufferBinding,
     required this.offsetInBytes,
     required this.format,
   });
 
-  /// Shader-side input location, matching the `@location(N)` (WGSL) /
-  /// `layout(location = N)` (GLSL) decoration on the vertex shader's input.
-  final int location;
+  /// Name of the shader-side input this attribute feeds (e.g. `position`).
+  final String name;
 
   /// Vertex buffer slot that this attribute reads from. Must reference a
   /// [VertexBufferLayout.binding] present in the same [VertexLayout].
