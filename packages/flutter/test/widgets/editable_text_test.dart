@@ -15980,19 +15980,19 @@ void main() {
       controller.text = 'A';
 
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: EditableText(
             controller: controller,
             focusNode: focusNode,
             obscureText: true,
             style: const TextStyle(),
-            cursorColor: Colors.blue,
-            backgroundCursorColor: Colors.grey,
+            cursorColor: const Color(0xFF0000FF),
+            backgroundCursorColor: const Color(0xFF808080),
             cursorOpacityAnimates: true,
             autofillHints: null,
             spellCheckConfiguration: SpellCheckConfiguration(
               spellCheckService: fakeSpellCheckService,
-              misspelledTextStyle: TextField.materialMisspelledTextStyle,
+              misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
             ),
           ),
         ),
@@ -16004,23 +16004,28 @@ void main() {
     });
 
     testWidgets('Spell check updates when obscureText changes', (WidgetTester tester) async {
-      final fakeSpellCheckService = FakeSpellCheckService();
+      const suggestionSpans = <SuggestionSpan>[
+        SuggestionSpan(TextRange(start: 0, end: 1), <String>['a']),
+      ];
+      final fakeSpellCheckService = FakeSpellCheckService(
+        suggestionSpansByText: const <String, List<SuggestionSpan>?>{'A': suggestionSpans},
+      );
       controller.text = 'A';
 
       Widget buildEditableText({required bool obscureText}) {
-        return MaterialApp(
+        return TestWidgetsApp(
           home: EditableText(
             controller: controller,
             focusNode: focusNode,
             obscureText: obscureText,
             style: const TextStyle(),
-            cursorColor: Colors.blue,
-            backgroundCursorColor: Colors.grey,
+            cursorColor: const Color(0xFF0000FF),
+            backgroundCursorColor: const Color(0xFF808080),
             cursorOpacityAnimates: true,
             autofillHints: null,
             spellCheckConfiguration: SpellCheckConfiguration(
               spellCheckService: fakeSpellCheckService,
-              misspelledTextStyle: TextField.materialMisspelledTextStyle,
+              misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
             ),
           ),
         );
@@ -16030,9 +16035,7 @@ void main() {
 
       EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.spellCheckEnabled, isTrue);
-      state.spellCheckResults = const SpellCheckResults('A', <SuggestionSpan>[
-        SuggestionSpan(TextRange(start: 0, end: 1), <String>['a']),
-      ]);
+      state.spellCheckResults = const SpellCheckResults('A', suggestionSpans);
 
       await tester.pumpWidget(buildEditableText(obscureText: true));
 
@@ -16049,6 +16052,7 @@ void main() {
       expect(state.spellCheckEnabled, isTrue);
       expect(fakeSpellCheckService.fetchSpellCheckSuggestionsCallCount, 1);
       expect(fakeSpellCheckService.lastSpellCheckText, 'A');
+      expect(state.spellCheckResults, const SpellCheckResults('A', suggestionSpans));
     });
 
     testWidgets(
@@ -19096,6 +19100,9 @@ class _TestScrollController extends ScrollController {
 }
 
 class FakeSpellCheckService extends DefaultSpellCheckService {
+  FakeSpellCheckService({this.suggestionSpansByText = const <String, List<SuggestionSpan>?>{}});
+
+  final Map<String, List<SuggestionSpan>?> suggestionSpansByText;
   int fetchSpellCheckSuggestionsCallCount = 0;
   String? lastSpellCheckText;
 
@@ -19103,7 +19110,9 @@ class FakeSpellCheckService extends DefaultSpellCheckService {
   Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(Locale locale, String text) async {
     fetchSpellCheckSuggestionsCallCount += 1;
     lastSpellCheckText = text;
-    return const <SuggestionSpan>[];
+    return suggestionSpansByText.containsKey(text)
+        ? suggestionSpansByText[text]
+        : const <SuggestionSpan>[];
   }
 }
 
