@@ -352,7 +352,7 @@ TextureGLES::Type TextureGLES::ComputeTypeForBinding(GLenum target) const {
   return type_;
 }
 
-void TextureGLES::InitializeContentsIfNecessary() const {
+void TextureGLES::InitializeContentsIfNecessary() {
   if (!IsValid() || IsSliceMipLevelInitialized(0, 0)) {
     return;
   }
@@ -487,7 +487,7 @@ std::optional<GLuint> TextureGLES::GetGLHandle() const {
   return reactor_->GetGLHandle(handle_);
 }
 
-bool TextureGLES::Bind() const {
+bool TextureGLES::Bind() {
   auto handle = GetGLHandle();
   if (!handle.has_value()) {
     return false;
@@ -522,13 +522,13 @@ bool TextureGLES::Bind() const {
   return true;
 }
 
-void TextureGLES::MarkContentsInitialized() const {
+void TextureGLES::MarkContentsInitialized() {
   for (auto& slice_mips : slice_mip_initialized_) {
     slice_mips.set();
   }
 }
 
-void TextureGLES::MarkSliceInitialized(size_t slice) const {
+void TextureGLES::MarkSliceInitialized(size_t slice) {
   MarkSliceMipLevelInitialized(slice, 0);
 }
 
@@ -536,8 +536,7 @@ bool TextureGLES::IsSliceInitialized(size_t slice) const {
   return IsSliceMipLevelInitialized(slice, 0);
 }
 
-void TextureGLES::MarkSliceMipLevelInitialized(size_t slice,
-                                               size_t mip_level) const {
+void TextureGLES::MarkSliceMipLevelInitialized(size_t slice, size_t mip_level) {
   if (slice >= slice_mip_initialized_.size() ||
       mip_level >= kMaxTrackedMipLevels) {
     return;
@@ -603,9 +602,8 @@ static GLenum ToAttachmentType(TextureGLES::AttachmentType point) {
   }
 }
 
-bool TextureGLES::SetAsFramebufferAttachment(
-    GLenum target,
-    AttachmentType attachment_type) const {
+bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
+                                             AttachmentType attachment_type) {
   if (!IsValid()) {
     return false;
   }

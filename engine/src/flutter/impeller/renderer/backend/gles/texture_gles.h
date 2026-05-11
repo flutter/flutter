@@ -88,7 +88,7 @@ class TextureGLES final : public Texture,
 
   std::optional<GLuint> GetGLHandle() const;
 
-  [[nodiscard]] bool Bind() const;
+  [[nodiscard]] bool Bind();
 
   [[nodiscard]] bool GenerateMipmap();
 
@@ -97,9 +97,8 @@ class TextureGLES final : public Texture,
     kDepth,
     kStencil,
   };
-  [[nodiscard]] bool SetAsFramebufferAttachment(
-      GLenum target,
-      AttachmentType attachment_type) const;
+  [[nodiscard]] bool SetAsFramebufferAttachment(GLenum target,
+                                                AttachmentType attachment_type);
 
   Type GetType() const;
 
@@ -120,14 +119,14 @@ class TextureGLES final : public Texture,
   ///
   /// @see        MarkSliceInitialized.
   ///
-  void MarkContentsInitialized() const;
+  void MarkContentsInitialized();
 
   //----------------------------------------------------------------------------
   /// @brief      Indicates that a specific texture slice has been initialized.
   ///
   /// @param[in]  slice  The slice to mark as being initialized.
   ///
-  void MarkSliceInitialized(size_t slice) const;
+  void MarkSliceInitialized(size_t slice);
 
   bool IsSliceInitialized(size_t slice) const;
 
@@ -144,7 +143,7 @@ class TextureGLES final : public Texture,
   ///                        always 0).
   /// @param[in]  mip_level  The mip level whose storage was allocated.
   ///
-  void MarkSliceMipLevelInitialized(size_t slice, size_t mip_level) const;
+  void MarkSliceMipLevelInitialized(size_t slice, size_t mip_level);
 
   bool IsSliceMipLevelInitialized(size_t slice, size_t mip_level) const;
 
@@ -175,7 +174,7 @@ class TextureGLES final : public Texture,
   std::shared_ptr<ReactorGLES> reactor_;
   const Type type_;
   HandleGLES handle_;
-  mutable std::optional<HandleGLES> fence_ = std::nullopt;
+  std::optional<HandleGLES> fence_ = std::nullopt;
   // Tracks which `(slice, mip_level)` pairs have had their storage allocated
   // by a `glTexImage2D` call. Allocation is performed lazily on first write
   // to a level so the only-renders-then-mipmaps path (Impeller's snapshot
@@ -185,8 +184,7 @@ class TextureGLES final : public Texture,
   // Sized for up to 6 cubemap faces × 16 mip levels (covers a 32k base
   // dimension); requested levels above this are simply not tracked.
   static constexpr size_t kMaxTrackedMipLevels = 16;
-  mutable std::array<std::bitset<kMaxTrackedMipLevels>, 6>
-      slice_mip_initialized_ = {};
+  std::array<std::bitset<kMaxTrackedMipLevels>, 6> slice_mip_initialized_ = {};
   const bool is_wrapped_;
   const std::optional<GLuint> wrapped_fbo_;
   HandleGLES cached_fbo_ = HandleGLES::DeadHandle();
@@ -219,7 +217,7 @@ class TextureGLES final : public Texture,
   // |Texture|
   Scalar GetYCoordScale() const override;
 
-  void InitializeContentsIfNecessary() const;
+  void InitializeContentsIfNecessary();
 
   TextureGLES(const TextureGLES&) = delete;
 
