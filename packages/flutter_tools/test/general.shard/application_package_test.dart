@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -113,8 +114,8 @@ void main() {
         processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
         logger: logger,
         fileSystem: fs,
+
         // ignore: avoid_redundant_argument_values
-        buildInfo: null,
       );
       expect(androidApk, isNotNull);
     }, overrides: overrides);
@@ -273,6 +274,155 @@ void main() {
       expect(androidApk, isNull);
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
+
+    testUsingContext('falls back to source AndroidManifest.xml when fromApk fails', () async {
+      const aaptPath = 'aaptPath';
+      final sdkVersion = FakeAndroidSdkVersion();
+      sdkVersion.aaptPath = aaptPath;
+      sdk.latestVersion = sdkVersion;
+      sdk.platformToolsAvailable = true;
+      sdk.licensesAvailable = false;
+
+      fakeProcessManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            aaptPath,
+            'dump',
+            'xmltree',
+            fs.path.join('module_project', 'build', 'host', 'outputs', 'apk', 'app.apk'),
+            'AndroidManifest.xml',
+          ],
+          exception: const ProcessException('aapt', <String>[]),
+        ),
+      );
+
+      final logger = BufferLogger.test();
+      final FlutterProject project = await aModuleProject();
+      project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
+      final File appGradle = project.android.hostAppGradleRoot.childFile(
+        fs.path.join('app', 'build.gradle'),
+      );
+      appGradle.createSync(recursive: true);
+      appGradle.writeAsStringSync("def flutterPluginVersion = 'managed'");
+      final File apkDebugFile = project.directory
+          .childDirectory('build')
+          .childDirectory('host')
+          .childDirectory('outputs')
+          .childDirectory('apk')
+          .childFile('app.apk');
+      apkDebugFile.createSync(recursive: true);
+
+      final File sourceManifest = project.android.appManifestFile;
+      sourceManifest.createSync(recursive: true);
+      sourceManifest.writeAsStringSync('''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.flutter.examples.hello_world">
+    <application android:label="hello_world">
+        <activity android:name="MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+''');
+
+      final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+        project.android,
+        androidSdk: sdk,
+        processManager: fakeProcessManager,
+        userMessages: UserMessages(),
+        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        logger: logger,
+        fileSystem: fs,
+      );
+      expect(androidApk, isNotNull);
+      expect(androidApk!.id, 'io.flutter.examples.hello_world');
+      expect(androidApk.launchActivity, 'io.flutter.examples.hello_world/MainActivity');
+      expect(
+        logger.warningText,
+        contains('Failed to extract manifest from APK: falling back to source AndroidManifest.xml'),
+      );
+    }, overrides: overrides);
+
+    testUsingContext(
+      'falls back to source AndroidManifest.xml when fromApk returns garbage',
+      () async {
+        const aaptPath = 'aaptPath';
+        final sdkVersion = FakeAndroidSdkVersion();
+        sdkVersion.aaptPath = aaptPath;
+        sdk.latestVersion = sdkVersion;
+        sdk.platformToolsAvailable = true;
+        sdk.licensesAvailable = false;
+
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              aaptPath,
+              'dump',
+              'xmltree',
+              fs.path.join('module_project', 'build', 'host', 'outputs', 'apk', 'app.apk'),
+              'AndroidManifest.xml',
+            ],
+            stdout: 'this is garbage and not xml at all',
+          ),
+        );
+
+        final logger = BufferLogger.test();
+        final FlutterProject project = await aModuleProject();
+        project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
+        final File appGradle = project.android.hostAppGradleRoot.childFile(
+          fs.path.join('app', 'build.gradle'),
+        );
+        appGradle.createSync(recursive: true);
+        appGradle.writeAsStringSync("def flutterPluginVersion = 'managed'");
+        final File apkDebugFile = project.directory
+            .childDirectory('build')
+            .childDirectory('host')
+            .childDirectory('outputs')
+            .childDirectory('apk')
+            .childFile('app.apk');
+        apkDebugFile.createSync(recursive: true);
+
+        final File sourceManifest = project.android.appManifestFile;
+        sourceManifest.createSync(recursive: true);
+        sourceManifest.writeAsStringSync('''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.flutter.examples.hello_world">
+    <application android:label="hello_world">
+        <activity android:name="MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+''');
+
+        final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+          project.android,
+          androidSdk: sdk,
+          processManager: fakeProcessManager,
+          userMessages: UserMessages(),
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          logger: logger,
+          fileSystem: fs,
+        );
+        expect(androidApk, isNotNull);
+        expect(androidApk!.id, 'io.flutter.examples.hello_world');
+        expect(androidApk.launchActivity, 'io.flutter.examples.hello_world/MainActivity');
+        expect(
+          logger.warningText,
+          contains(
+            'Failed to extract manifest from APK: falling back to source AndroidManifest.xml',
+          ),
+        );
+        expect(logger.errorText, contains('Failed to parse manifest from APK'));
+      },
+      overrides: overrides,
+    );
   });
 
   group('ApkManifestData', () {

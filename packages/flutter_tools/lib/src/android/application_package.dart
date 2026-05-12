@@ -66,25 +66,31 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       return null;
     }
 
-    final ApkManifestData? data = ApkManifestData.parseFromXmlDump(apptStdout, logger);
+    try {
+      final ApkManifestData? data = ApkManifestData.parseFromXmlDump(apptStdout, logger);
 
-    if (data == null) {
-      logger.printError('Unable to read manifest info from ${apk.path}.');
+      if (data == null) {
+        logger.printError('Unable to read manifest info from ${apk.path}.');
+        return null;
+      }
+
+      final String? packageName = data.packageName;
+      if (packageName == null || data.launchableActivityName == null) {
+        logger.printError('Unable to read manifest info from ${apk.path}.');
+        return null;
+      }
+
+      return AndroidApk(
+        id: packageName,
+        applicationPackage: apk,
+        versionCode: data.versionCode == null ? null : int.tryParse(data.versionCode!),
+        launchActivity: '${data.packageName}/${data.launchableActivityName}',
+      );
+      // ignore: avoid_catches_without_on_clauses
+    } catch (error, stackTrace) {
+      logger.printError('Failed to parse manifest from APK: $error', stackTrace: stackTrace);
       return null;
     }
-
-    final String? packageName = data.packageName;
-    if (packageName == null || data.launchableActivityName == null) {
-      logger.printError('Unable to read manifest info from ${apk.path}.');
-      return null;
-    }
-
-    return AndroidApk(
-      id: packageName,
-      applicationPackage: apk,
-      versionCode: data.versionCode == null ? null : int.tryParse(data.versionCode!),
-      launchActivity: '${data.packageName}/${data.launchableActivityName}',
-    );
   }
 
   @override
@@ -128,13 +134,19 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       if (apkFile.existsSync()) {
         // Grab information from the .apk. The gradle build script might alter
         // the application Id, so we need to look at what was actually built.
-        return AndroidApk.fromApk(
+        final AndroidApk? builtApk = AndroidApk.fromApk(
           apkFile,
           androidSdk: androidSdk!,
           processManager: processManager,
           logger: logger,
           userMessages: userMessages,
           processUtils: processUtils,
+        );
+        if (builtApk != null) {
+          return builtApk;
+        }
+        logger.printWarning(
+          'Failed to extract manifest from APK: falling back to source AndroidManifest.xml',
         );
       }
       // The .apk hasn't been built yet, so we work with what we have. The run
