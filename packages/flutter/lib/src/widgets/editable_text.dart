@@ -35,6 +35,7 @@ import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'context_menu_button_item.dart';
+import 'context_menu_controller.dart';
 import 'debug.dart';
 import 'default_selection_style.dart';
 import 'default_text_editing_shortcuts.dart';
@@ -2587,9 +2588,14 @@ class EditableTextState extends State<EditableText>
   bool _isHandleShowing = false;
   _SelectionOverlayType? _overlayType;
   WidgetBuilder? _spellCheckToolbarBuilder;
-  Offset? _magnifierPosition;
 
   final MagnifierController _magnifierController = MagnifierController();
+  late final ContextMenuController _contextMenuController = ContextMenuController(
+    onRemove: _hideToolbar,
+  );
+  // ContextMenuController.remove must be called in dispose to unregister,
+  // but we don't want it to trigger a rebuild.
+  bool _isDisposing = false;
   final ValueNotifier<MagnifierInfo> _magnifierInfo = ValueNotifier<MagnifierInfo>(
     MagnifierInfo.empty,
   );
@@ -3456,17 +3462,30 @@ class EditableTextState extends State<EditableText>
 
     // Hide the text selection toolbar on mobile when orientation changes.
     final Orientation orientation = MediaQuery.orientationOf(context);
-    if (_lastOrientation == null) {
-      _lastOrientation = orientation;
-      return;
-    }
     if (orientation != _lastOrientation) {
       _lastOrientation = orientation;
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
-        hideToolbar(false);
-      }
-      if (defaultTargetPlatform == TargetPlatform.android) {
-        hideToolbar();
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS:
+          _disposeScrollNotificationObserver();
+          setState(() {
+            if (_overlayType?.isToolbar ?? false) {
+              _overlayType = null;
+            }
+          });
+
+        case TargetPlatform.android:
+          _disposeScrollNotificationObserver();
+          setState(() {
+            if (_overlayType?.isToolbar ?? false) {
+              _overlayType = null;
+            }
+            _isHandleShowing = false;
+          });
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          break;
       }
     }
 
@@ -3557,16 +3576,12 @@ class EditableTextState extends State<EditableText>
     if (widget.selectionEnabled && pasteEnabled && canPaste) {
       clipboardStatus.update();
     }
-
-
   }
 
   void _disposeScrollNotificationObserver() {
     _listeningToScrollNotificationObserver = false;
-    if (_scrollNotificationObserver != null) {
-      _scrollNotificationObserver!.removeListener(_handleContextMenuOnParentScroll);
-      _scrollNotificationObserver = null;
-    }
+    _scrollNotificationObserver?.removeListener(_handleContextMenuOnParentScroll);
+    _scrollNotificationObserver = null;
   }
 
   TextInputStyle _getTextInputStyle(BuildContext context) {
@@ -3612,6 +3627,8 @@ class EditableTextState extends State<EditableText>
     _appLifecycleListener.dispose();
     FocusManager.instance.removeListener(_unflagInternalFocus);
     FocusManager.instance.removeListener(_resetJustResumed);
+    _isDisposing = true;
+    _contextMenuController.remove();
     _disposeScrollNotificationObserver();
     super.dispose();
     assert(_batchEditDepth <= 0, 'unfinished batch edits: $_batchEditDepth');
@@ -4237,13 +4254,6 @@ class EditableTextState extends State<EditableText>
     }
   }
 
-  void _updateOrDisposeSelectionOverlayIfNeeded() {
-    if (!_hasFocus) {
-      _isHandleShowing = false;
-      _overlayType = null;
-    }
-  }
-
   final bool _platformSupportsFadeOnScroll = switch (defaultTargetPlatform) {
     TargetPlatform.android || TargetPlatform.iOS => true,
     TargetPlatform.fuchsia ||
@@ -4464,11 +4474,7 @@ class EditableTextState extends State<EditableText>
         requestKeyboard();
       case SelectionChangedCause.keyboard:
     }
-    if (widget.selectionControls == null && widget.contextMenuBuilder == null) {
-      _isHandleShowing = false;
-    } else {
-      _isHandleShowing = true;
-    }
+    _isHandleShowing = widget.selectionControls != null || widget.contextMenuBuilder != null;
     _updatePortalVisibility();
     // TODO(chunhtai): we should make sure selection actually changed before
     // we call the onSelectionChanged.
@@ -4862,7 +4868,6 @@ class EditableTextState extends State<EditableText>
     }
     _updateRemoteEditingValueIfNeeded();
     _startOrStopCursorTimerIfNeeded();
-    _updateOrDisposeSelectionOverlayIfNeeded();
     // TODO(abarth): Teach RenderEditable about ValueNotifier<TextEditingValue>
     // to avoid this setState().
     setState(() {
@@ -4874,7 +4879,6 @@ class EditableTextState extends State<EditableText>
   void _handleFocusChanged() {
     _openOrCloseInputConnectionIfNeeded();
     _startOrStopCursorTimerIfNeeded();
-    _updateOrDisposeSelectionOverlayIfNeeded();
     if (_hasFocus) {
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance.addObserver(this);
@@ -4888,6 +4892,9 @@ class EditableTextState extends State<EditableText>
       }
     } else {
       WidgetsBinding.instance.removeObserver(this);
+      _isHandleShowing = false;
+      _overlayType = null;
+      _updatePortalVisibility();
       setState(() {
         _currentPromptRectRange = null;
       });
@@ -5158,6 +5165,10 @@ class EditableTextState extends State<EditableText>
     }
     _liveTextInputStatus?.update();
     clipboardStatus.update();
+    _contextMenuController.show(
+      context: context,
+      contextMenuBuilder: (BuildContext context) => const SizedBox.shrink(),
+    );
     setState(() {
       _overlayType = _SelectionOverlayType.toolbar;
     });
@@ -5175,15 +5186,35 @@ class EditableTextState extends State<EditableText>
 
   @override
   void hideToolbar([bool hideHandles = true]) {
+    // This calls _hideToolbar.
+    _contextMenuController.remove();
+    if (hideHandles) {
+      _hideHandles();
+    }
+  }
+
+  // Private helper method to actually hide the toolbar and update the state.
+  // Having a separate private method allows the ContextMenuController onRemove
+  // callback to trigger dismissal without re-entering the remove() loop,
+  // cleanly avoiding any infinite recursion without needing boolean guards.
+  void _hideToolbar() {
     // Stop listening to parent scroll events when toolbar is hidden.
     _disposeScrollNotificationObserver();
+    if (_isDisposing) {
+      return;
+    }
+    assert(mounted);
     setState(() {
       if (_overlayType?.isToolbar ?? false) {
         _overlayType = null;
       }
-      if (hideHandles) {
-        _isHandleShowing = false;
-      }
+    });
+    _updatePortalVisibility();
+  }
+
+  void _hideHandles() {
+    setState(() {
+      _isHandleShowing = false;
     });
     _updatePortalVisibility();
   }
@@ -5277,21 +5308,24 @@ class EditableTextState extends State<EditableText>
   ///
   /// Does nothing if a magnifier couldn't be shown, such as when the selection
   /// overlay does not currently exist.
-  void showMagnifier(Offset positionToShow) {
+  void showMagnifier(Offset positionToShow, [MagnifierInfo? magnifierInfo]) {
+    if (!_hasFocus) {
+      return;
+    }
     setState(() {
       _overlayType = _SelectionOverlayType.magnifier;
-      _magnifierPosition = positionToShow;
     });
     _updatePortalVisibility();
 
     final RenderEditable? renderEditable = this.renderEditable;
     if (renderEditable != null) {
-      final TextPosition position = renderEditable.getPositionForPoint(positionToShow);
-      final MagnifierInfo info = _buildMagnifier(
-        renderEditable: renderEditable,
-        globalGesturePosition: positionToShow,
-        currentTextPosition: position,
-      );
+      final MagnifierInfo info =
+          magnifierInfo ??
+          _buildMagnifier(
+            renderEditable: renderEditable,
+            globalGesturePosition: positionToShow,
+            currentTextPosition: renderEditable.getPositionForPoint(positionToShow),
+          );
       if (_magnifierController.overlayEntry == null) {
         final Widget? magnifier = widget.magnifierConfiguration.magnifierBuilder(
           context,
@@ -5887,8 +5921,10 @@ class EditableTextState extends State<EditableText>
               toolbarVisible: _overlayType?.isNormalToolbar ?? false,
               spellCheckToolbarVisible: _overlayType?.isSpellCheckToolbar ?? false,
               spellCheckToolbarBuilder: _spellCheckToolbarBuilder,
-              onMagnifierShow: (MagnifierInfo info) => showMagnifier(info.globalGesturePosition),
-              onMagnifierUpdate: (MagnifierInfo info) => showMagnifier(info.globalGesturePosition),
+              onMagnifierShow: (MagnifierInfo info) =>
+                  showMagnifier(info.globalGesturePosition, info),
+              onMagnifierUpdate: (MagnifierInfo info) =>
+                  showMagnifier(info.globalGesturePosition, info),
               onMagnifierHide: hideMagnifier,
               onDragEnd: () {
                 if (!_value.selection.isCollapsed) {

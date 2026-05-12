@@ -9898,6 +9898,7 @@ void main() {
           CupertinoApp(
             home: Center(
               child: CupertinoTextField(
+                  autofocus: true,
                 dragStartBehavior: DragStartBehavior.down,
                 magnifierConfiguration: TextMagnifierConfiguration(
                   magnifierBuilder:
@@ -9914,6 +9915,7 @@ void main() {
             ),
           ),
         );
+        await tester.pump(); // Make sure the TextField is focused.
 
         expect(find.byKey(fakeMagnifier.key!), findsNothing);
 

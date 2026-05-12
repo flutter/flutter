@@ -387,11 +387,13 @@ class _CollapsedSelectionOverlayState extends State<_CollapsedSelectionOverlay> 
     }
 
     final Offset localPosition = _renderEditable.globalToLocal(details.globalPosition);
+    final double startHandleDragLocalY = _renderEditable.globalToLocal(Offset(0.0, _startHandleDragPosition)).dy;
     final double nextPositionLocal = _getHandleDy(
       localPosition.dy,
-      _renderEditable.globalToLocal(Offset(0.0, _startHandleDragPosition)).dy,
+      startHandleDragLocalY,
       _lineHeight,
     );
+
     _startHandleDragPosition = _renderEditable.localToGlobal(Offset(0.0, nextPositionLocal)).dy;
 
     final handleTargetGlobal = Offset(
