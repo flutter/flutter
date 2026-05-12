@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -78,6 +80,21 @@ void main() {
     );
   });
 
+  test('Near-miss async-gap markers are not parsed as asynchronousSuspension', () {
+    expect(
+      StackFrame.fromStackTraceLine('===== asynchronous gap =========================='),
+      isNull,
+    );
+    expect(
+      StackFrame.fromStackTraceLine('===== asynchronous gap =========================== '),
+      isNull,
+    );
+    expect(
+      StackFrame.fromStackTraceLine('===== asynchronous frame ==========================='),
+      isNull,
+    );
+  });
+
   test('debugPrintStack does not throw on a stack carrying an async-gap marker', () {
     // Regression test for https://github.com/flutter/flutter/issues/179018.
     final printed = <String?>[];
@@ -91,6 +108,29 @@ void main() {
     } finally {
       debugPrint = original;
     }
+    expect(printed, isNotEmpty);
+  });
+
+  test('debugPrintStack does not throw on a ParallelWaitError stack', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/179018.
+    StackTrace? parallelWaitStack;
+    final printed = <String?>[];
+    final DebugPrintCallback original = debugPrint;
+    debugPrint = (String? message, {int? wrapWidth}) => printed.add(message);
+    try {
+      await (_function1(), _function2()).wait.then<void>(
+        (_) {},
+        onError: (Object error, StackTrace stack) {
+          expect(error, isA<ParallelWaitError<(void, void), (AsyncError?, AsyncError?)>>());
+          parallelWaitStack = stack;
+          expect(stack.toString(), contains('===== asynchronous gap ==========================='));
+          debugPrintStack(label: error.toString(), stackTrace: stack);
+        },
+      );
+    } finally {
+      debugPrint = original;
+    }
+    expect(parallelWaitStack, isNotNull);
     expect(printed, isNotEmpty);
   });
 
@@ -116,6 +156,15 @@ void main() {
   test('Parses to null for wrong format.', () {
     expect(StackFrame.fromStackTraceLine('wrong stack trace format'), null);
   });
+}
+
+Future<void> _function1() async {
+  await Future<void>.delayed(Duration.zero);
+}
+
+Future<void> _function2() async {
+  await Future<void>.delayed(Duration.zero);
+  throw Exception('function2');
 }
 
 const String stackString = '''
