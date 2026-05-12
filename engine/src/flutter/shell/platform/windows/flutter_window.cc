@@ -43,7 +43,7 @@ static int GetCursorPositionForComposition(const TextInputManager& manager,
     return static_cast<int>(text_length);
   }
 
-  long position = manager.GetComposingCursorPosition();
+  int position = static_cast<int>(manager.GetComposingCursorPosition());
   if (position < 0 || static_cast<size_t>(position) > text_length) {
     return static_cast<int>(text_length);
   }
