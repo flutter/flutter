@@ -14,7 +14,11 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dds: 5.3.0
-  dwds: 27.1.1
+  dwds:
+    git:
+      url: https://github.com/dart-lang/webdev.git
+      ref: new-restart-logic
+      path: dwds
   code_builder: 4.11.1
   collection: 1.19.1
   completion: 1.0.2
@@ -127,4 +131,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 4aafc0
+# PUBSPEC CHECKSUM: v61s8d

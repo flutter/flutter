@@ -310,11 +310,12 @@ packages:
   dwds:
     dependency: transitive
     description:
-      name: dwds
-      sha256: d2fe0b3608330627871d7b0e070ffb4f356087a3e19fea64fa58f95a2c2871d6
-      url: "https://pub.dev"
-    source: hosted
-    version: "27.1.1"
+      path: dwds
+      ref: new-restart-logic
+      resolved-ref: c6c6fbeb0af2e1e447261fca1bd19c613c43f3d3
+      url: "https://github.com/dart-lang/webdev.git"
+    source: git
+    version: "27.1.2-wip"
   extension_discovery:
     dependency: transitive
     description:
@@ -1368,5 +1369,5 @@ packages:
     source: hosted
     version: "2.2.4"
 sdks:
-  dart: ">=3.12.0 <4.0.0"
+  dart: ">=3.13.0-107.0.dev <4.0.0"
   flutter: ">=3.44.0"
