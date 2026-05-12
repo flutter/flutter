@@ -1052,10 +1052,15 @@ class AndroidMemoryInfo extends MemoryInfo {
 
 /// A log reader that logs from `adb logcat`.
 class AdbLogReader extends DeviceLogReader {
-  AdbLogReader._(this._adbProcess, this.name, this._logger);
+  AdbLogReader._(this._adbProcess, this.name, this._logger, {this.adbLogFiltering = true});
 
   @visibleForTesting
-  factory AdbLogReader.test(Process adbProcess, String name, Logger logger) = AdbLogReader._;
+  factory AdbLogReader.test(
+    Process adbProcess,
+    String name,
+    Logger logger, {
+    bool adbLogFiltering,
+  }) = AdbLogReader._;
 
   /// Create a new [AdbLogReader] from an [AndroidDevice] instance.
   static Future<AdbLogReader> createLogReader(
@@ -1090,7 +1095,12 @@ class AdbLogReader extends DeviceLogReader {
       ]);
     }
     final Process process = await processManager.start(device.adbCommandForDevice(args));
-    return AdbLogReader._(process, device.displayName, logger);
+    return AdbLogReader._(
+      process,
+      device.displayName,
+      logger,
+      adbLogFiltering: device.adbLogFiltering,
+    );
   }
 
   int? _appPid;
@@ -1098,6 +1108,8 @@ class AdbLogReader extends DeviceLogReader {
   final Process _adbProcess;
 
   final Logger _logger;
+
+  final bool adbLogFiltering;
 
   @override
   final String name;
@@ -1212,7 +1224,9 @@ class AdbLogReader extends DeviceLogReader {
     if (logMatch != null) {
       var acceptLine = false;
 
-      if (_fatalCrash) {
+      if (!adbLogFiltering) {
+        acceptLine = true;
+      } else if (_fatalCrash) {
         // While a fatal crash is going on, only accept lines from the crash
         // Otherwise the crash log in the console may get interrupted
 

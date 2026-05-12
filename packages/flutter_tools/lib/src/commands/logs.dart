@@ -21,6 +21,7 @@ class LogsCommand extends FlutterCommand {
     );
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
+    usesAdbLogFilteringOption(hide: false);
   }
 
   @override

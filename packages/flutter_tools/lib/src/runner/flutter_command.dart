@@ -152,6 +152,7 @@ abstract final class FlutterOptions {
   static const kEnableImpeller = 'enable-impeller';
   static const kCodesignIdentity = 'codesign-identity';
   static const kCodesign = 'codesign';
+  static const kAdbLogFiltering = 'adb-log-filtering';
 }
 
 /// flutter command categories for usage.
@@ -845,6 +846,15 @@ abstract class FlutterCommand extends Command<void> {
         'wireless':
             'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.',
       },
+    );
+  }
+
+  void usesAdbLogFilteringOption({required bool hide}) {
+    argParser.addFlag(
+      FlutterOptions.kAdbLogFiltering,
+      defaultsTo: true,
+      help: 'Whether to filter ADB logcat tags/messages on the Dart side.',
+      hide: hide,
     );
   }
 
@@ -2042,10 +2052,17 @@ abstract class FlutterCommand extends Command<void> {
   Future<List<Device>?> findAllTargetDevices({
     bool includeDevicesUnsupportedByProject = false,
   }) async {
-    return _targetDevices.findAllTargetDevices(
+    final List<Device>? devices = await _targetDevices.findAllTargetDevices(
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );
+    if (devices != null && argParser.options.containsKey(FlutterOptions.kAdbLogFiltering)) {
+      final bool filtering = boolArg(FlutterOptions.kAdbLogFiltering);
+      for (final Device device in devices) {
+        device.adbLogFiltering = filtering;
+      }
+    }
+    return devices;
   }
 
   /// Find and return the target [Device] based upon currently connected

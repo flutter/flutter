@@ -637,6 +637,10 @@ abstract class Device {
 
   bool get isWirelesslyConnected => connectionInterface == DeviceConnectionInterface.wireless;
 
+  /// Whether to filter ADB logcat tags/messages on the Dart side.
+  /// Only used by Android devices.
+  bool adbLogFiltering = true;
+
   String get name;
 
   String get displayName {
