@@ -90,8 +90,7 @@ static uint64_t ConvertWinStylusFlagsToFlutterButtons(UINT pen_flags,
   return flutter_buttons;
 }
 
-// Translate pointer pointer flags from Win32 API to
-// FlutterPointerStylusButtons.
+// Translate pointer flags from Win32 API to Flutter pointer buttons.
 static uint64_t ConvertWinPointerFlagsToFlutterButtons(UINT flags) {
   uint64_t flutter_buttons = 0;
   if ((flags & POINTER_FLAG_INCONTACT) == 0) {
@@ -599,9 +598,6 @@ FlutterWindow::HandleMessage(UINT const message,
             is_inverted = penInfo.penFlags & PEN_FLAG_INVERTED;
             flutter_button = ConvertWinStylusFlagsToFlutterButtons(
                 penInfo.penFlags, pointerInfo.pointerFlags);
-          } else {
-            flutter_button = ConvertWinPointerFlagsToFlutterButtons(
-                pointerInfo.pointerFlags);
           }
         }
         auto touch_id = touch_id_generator_.GetGeneratedId(pointerId);
@@ -642,8 +638,7 @@ FlutterWindow::HandleMessage(UINT const message,
           pointer_buttons_[pointerId] = flutter_button;
         } else if (message == WM_POINTERUP) {
           const uint64_t previous_buttons = pointer_buttons_[pointerId];
-          const uint64_t buttons_released =
-              flutter_button != 0 ? flutter_button : previous_buttons;
+          const uint64_t buttons_released = previous_buttons;
           OnPointerUp(x, y, device_kind, touch_id, buttons_released);
           pointer_buttons_[pointerId] = 0;
           // keep tracking the pointer (especially important for stylus)
