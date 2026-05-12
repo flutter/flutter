@@ -409,6 +409,61 @@ public class ListenableEditingStateTest {
 
     editingState.addEditingStateListener(listener);
   }
+  @Test
+  public void testDirectSetSelectionNotifiesListener() {
+    final ListenableEditingState editingState = new ListenableEditingState(
+        new TextInputChannel.TextEditState("hello", 0, 0, -1, -1), new View(ctx));
+    final Listener listener = new Listener();
+    editingState.addEditingStateListener(listener);
+
+    // Direct selection modification (mimicking IME/Android direct span changes).
+    Selection.setSelection(editingState, 1, 3);
+
+    assertTrue("Listener should be called on direct selection change", listener.isCalled());
+    assertTrue("Selection change should be detected", listener.selectionChanged);
+    assertFalse("Text should not be changed", listener.textChanged);
+  }
+
+  private Object getComposingSpan() {
+    try {
+      java.lang.reflect.Field composingField = BaseInputConnection.class.getDeclaredField("COMPOSING");
+      composingField.setAccessible(true);
+      return composingField.get(null);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Test
+  public void testDirectSetComposingRegionNotifiesListener() {
+    final ListenableEditingState editingState = new ListenableEditingState(
+        new TextInputChannel.TextEditState("hello", 0, 0, -1, -1), new View(ctx));
+    final Listener listener = new Listener();
+    editingState.addEditingStateListener(listener);
+
+    // Direct composing region modification (mimicking IME direct span changes).
+    editingState.setSpan(getComposingSpan(), 1, 4, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+    assertTrue("Listener should be called on direct composing region change", listener.isCalled());
+    assertTrue("Composing region change should be detected", listener.composingRegionChanged);
+    assertFalse("Text should not be changed", listener.textChanged);
+  }
+
+  @Test
+  public void testDirectRemoveComposingRegionNotifiesListener() {
+    final ListenableEditingState editingState = new ListenableEditingState(
+        new TextInputChannel.TextEditState("hello", 0, 0, 1, 4), new View(ctx));
+    final Listener listener = new Listener();
+    editingState.addEditingStateListener(listener);
+
+    // Direct composing region removal (mimicking IME direct span removal).
+    editingState.removeSpan(getComposingSpan());
+
+    assertTrue("Listener should be called on direct composing region removal", listener.isCalled());
+    assertTrue("Composing region change should be detected", listener.composingRegionChanged);
+    assertFalse("Text should not be changed", listener.textChanged);
+  }
+
   // -------- End: Test InputMethods actions   -------
 
   public static class Listener implements ListenableEditingState.EditingStateWatcher {
