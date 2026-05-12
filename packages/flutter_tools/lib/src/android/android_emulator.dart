@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -180,10 +181,14 @@ class AndroidEmulator extends Emulator {
     // after the startup phase (3 seconds), then we only echo its output if
     // its error code is non-zero and its stderr is non-empty.
     var earlyFailure = true;
+    final completer = Completer<void>();
     unawaited(
       process.exitCode.then((int status) async {
         if (status == 0) {
           _logger.printTrace('The Android emulator exited successfully');
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
           return;
         }
         // Make sure the process' stdout and stderr are drained.
@@ -196,6 +201,9 @@ class AndroidEmulator extends Emulator {
         }
         if (!earlyFailure && stderrList.isEmpty) {
           _logger.printStatus('The Android emulator exited with code $status');
+          if (!completer.isCompleted) {
+            completer.complete();
+          }
           return;
         }
         final when = earlyFailure ? 'during startup' : 'after startup';
@@ -203,12 +211,42 @@ class AndroidEmulator extends Emulator {
         _logger.printError('Android emulator stderr:');
         stderrList.forEach(_logger.printError);
         _logger.printError('Address these issues and try again.');
+
+        if (earlyFailure && !completer.isCompleted) {
+          final String stderrString = stderrList.join('\n');
+          try {
+            if (stderrString.contains(
+              'Running multiple emulators with the same AVD is an experimental feature',
+            )) {
+              throwToolExit(
+                'Running multiple emulators with the same AVD is an experimental feature.\n'
+                'To launch multiple emulators with the same AVD, use the "-read-only" flag, or '
+                'close any existing emulator instances or delete any .lock files/folders in '
+                'your AVD directory if they are hanging.',
+              );
+            } else {
+              throwToolExit(
+                'The Android emulator exited with code $status during startup.\n$stderrString',
+              );
+            }
+          } catch (error, stackTrace) {
+            completer.completeError(error, stackTrace);
+          }
+        }
       }),
     );
 
     // Wait a few seconds for the emulator to start.
-    await Future<void>.delayed(startupDuration ?? const Duration(seconds: 3));
-    earlyFailure = false;
+    unawaited(
+      Future<void>.delayed(startupDuration ?? const Duration(seconds: 3)).then((_) {
+        earlyFailure = false;
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }),
+    );
+
+    await completer.future;
     return;
   }
 }
