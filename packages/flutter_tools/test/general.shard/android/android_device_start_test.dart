@@ -350,6 +350,75 @@ void main() {
     expect(launchResult.started, false);
     expect(processManager, hasNoRemainingExpectations);
   });
+
+  testWithoutContext('AndroidDevice.startApp fails when am start returns Error type 3', () async {
+    final device = AndroidDevice(
+      '1234',
+      modelID: 'TestModel',
+      fileSystem: fileSystem,
+      processManager: processManager,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+      androidSdk: androidSdk,
+    );
+    final File apkFile = fileSystem.file('app-release.apk')..createSync();
+    final apk = AndroidApk(
+      id: 'FlutterApp',
+      applicationPackage: apkFile,
+      launchActivity: 'FlutterActivity',
+      versionCode: 1,
+    );
+
+    processManager.addCommand(kAdbVersionCommand);
+    processManager.addCommand(kStartServer);
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+        stdout: '[ro.product.cpu.abi]: [arm64-v8a]',
+      ),
+    );
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', 'FlutterApp'],
+      ),
+    );
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-release.apk'],
+      ),
+    );
+    processManager.addCommand(kShaCommand);
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'adb',
+          '-s',
+          '1234',
+          'shell',
+          'am',
+          'start',
+          '-a',
+          'android.intent.action.MAIN',
+          '-c',
+          'android.intent.category.LAUNCHER',
+          '-f',
+          '0x20000000',
+          'FlutterActivity',
+        ],
+        stdout: 'Error type 3: Activity class {FlutterApp/FlutterActivity} does not exist.',
+      ),
+    );
+
+    final LaunchResult launchResult = await device.startApp(
+      apk,
+      prebuiltApplication: true,
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.release, enableDartProfiling: false),
+      platformArgs: <String, dynamic>{},
+    );
+
+    expect(launchResult.started, false);
+    expect(processManager, hasNoRemainingExpectations);
+  });
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
