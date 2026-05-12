@@ -80,12 +80,12 @@ void main() async {
     // Both shaders must remain usable end to end. Construct a Paint that
     // uses each and confirm we can build a Picture, which exercises the
     // pipeline that the shader is registered against.
-    for (final FragmentShader shader in <FragmentShader>[shaderA, shaderB]) {
-      final Paint paint = Paint()..shader = shader;
-      final PictureRecorder recorder = PictureRecorder();
-      final Canvas canvas = Canvas(recorder);
+    for (final shader in <FragmentShader>[shaderA, shaderB]) {
+      final paint = Paint()..shader = shader;
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder);
       canvas.drawRect(const Rect.fromLTWH(0, 0, 10, 10), paint);
-      final Picture picture = recorder.endRecording();
+      final picture = recorder.endRecording();
       expect(picture, isNotNull);
       picture.dispose();
     }
