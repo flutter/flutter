@@ -110,6 +110,7 @@ class UniqueKey extends LocalKey {
 /// In such cases, a [ValueKey] is typically appropriate, using a value that is
 /// stable and unique for each item, such as an identifier from the data model.
 ///
+/// {@tool snippet}
 /// the following example demonstrates the importance of using [Key]s when reordering
 /// a list of [StatefulWidget]s.
 ///
@@ -222,6 +223,7 @@ class UniqueKey extends LocalKey {
 ///   }
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
