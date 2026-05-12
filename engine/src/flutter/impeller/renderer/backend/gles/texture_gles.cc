@@ -301,8 +301,11 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
     }
   };
 
-  slices_initialized_ = reactor_->AddOperation(texture_upload);
-  return slices_initialized_[0];
+  const bool added = reactor_->AddOperation(texture_upload);
+  if (added) {
+    MarkSliceMipLevelInitialized(slice, 0);
+  }
+  return added;
 }
 
 // |Texture|
@@ -349,19 +352,21 @@ TextureGLES::Type TextureGLES::ComputeTypeForBinding(GLenum target) const {
   return type_;
 }
 
-void TextureGLES::InitializeContentsIfNecessary() const {
-  if (!IsValid() || slices_initialized_[0]) {
+void TextureGLES::InitializeContentsIfNecessary() {
+  if (!IsValid() || IsSliceMipLevelInitialized(0, 0)) {
     return;
   }
-  slices_initialized_[0] = true;
 
   if (is_wrapped_) {
+    // Storage is owned externally; mark it covered so we don't re-enter.
+    MarkContentsInitialized();
     return;
   }
 
   auto size = GetSize();
 
   if (size.IsEmpty()) {
+    MarkContentsInitialized();
     return;
   }
 
@@ -375,8 +380,9 @@ void TextureGLES::InitializeContentsIfNecessary() const {
   switch (type_) {
     case Type::kTexture:
     case Type::kTextureMultisampled: {
+      const auto& desc = GetTextureDescriptor();
       std::optional<PixelFormatGLES> gles_format = ToPixelFormatGLES(
-          GetTextureDescriptor().format,
+          desc.format,
           /*supports_bgra=*/
           reactor_->GetProcTable().GetDescription()->HasExtension(
               "GL_EXT_texture_format_BGRA8888"));
@@ -384,12 +390,38 @@ void TextureGLES::InitializeContentsIfNecessary() const {
         VALIDATION_LOG << "Invalid format for texture image.";
         return;
       }
-      gl.BindTexture(GL_TEXTURE_2D, handle.value());
-      {
-        TRACE_EVENT0("impeller", "TexImage2DInitialization");
-        gl.TexImage2D(GL_TEXTURE_2D,  // target
-                      0u,             // LOD level (base mip level size checked)
-                      gles_format->internal_format,  // internal format
+      TRACE_EVENT0("impeller", "TexImage2DInitialization");
+      if (desc.type == TextureType::kTextureCube) {
+        // Cubemap handles must be bound to GL_TEXTURE_CUBE_MAP and each face
+        // target must be defined independently before sampling. Allocate the
+        // base mip level for every face here so the cubemap is sample-ready
+        // even before any face has been uploaded; non-zero mip levels are
+        // still allocated lazily on first per-level write in the blit path.
+        gl.BindTexture(GL_TEXTURE_CUBE_MAP, handle.value());
+        for (size_t face = 0; face < 6; ++face) {
+          gl.TexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,  // target
+                        0u,                                     // LOD level
+                        gles_format->internal_format,           // internal
+                        size.width,                             // width
+                        size.height,                            // height
+                        0u,                                     // border
+                        gles_format->external_format,           // format
+                        gles_format->type,                      // type
+                        nullptr                                 // data
+          );
+          MarkSliceMipLevelInitialized(face, 0);
+        }
+      } else {
+        // 2D / multisampled. External-OES textures are always wrapped, so
+        // they returned at the is_wrapped_ check above. Only the base mip
+        // is allocated here. `glGenerateMipmap` (used by the snapshot
+        // pipeline) implicitly allocates and fills the rest, and per-level
+        // uploads from the blit path allocate non-zero levels lazily on
+        // first write.
+        gl.BindTexture(GL_TEXTURE_2D, handle.value());
+        gl.TexImage2D(GL_TEXTURE_2D,                 // target
+                      0u,                            // LOD level
+                      gles_format->internal_format,  // internal
                       size.width,                    // width
                       size.height,                   // height
                       0u,                            // border
@@ -397,6 +429,7 @@ void TextureGLES::InitializeContentsIfNecessary() const {
                       gles_format->type,             // type
                       nullptr                        // data
         );
+        MarkSliceMipLevelInitialized(0, 0);
       }
     } break;
     case Type::kRenderBuffer:
@@ -439,6 +472,10 @@ void TextureGLES::InitializeContentsIfNecessary() const {
           );
         }
       }
+      // Renderbuffers don't have mip levels, but we still mark slot (0, 0)
+      // so the early-out guard at the top of this function fires on subsequent
+      // calls.
+      MarkSliceMipLevelInitialized(0, 0);
     } break;
   }
 }
@@ -450,7 +487,7 @@ std::optional<GLuint> TextureGLES::GetGLHandle() const {
   return reactor_->GetGLHandle(handle_);
 }
 
-bool TextureGLES::Bind() const {
+bool TextureGLES::Bind() {
   auto handle = GetGLHandle();
   if (!handle.has_value()) {
     return false;
@@ -486,17 +523,34 @@ bool TextureGLES::Bind() const {
 }
 
 void TextureGLES::MarkContentsInitialized() {
-  for (size_t i = 0; i < slices_initialized_.size(); i++) {
-    slices_initialized_[i] = true;
+  for (auto& slice_mips : slice_mip_initialized_) {
+    slice_mips.set();
   }
 }
 
-void TextureGLES::MarkSliceInitialized(size_t slice) const {
-  slices_initialized_[slice] = true;
+void TextureGLES::MarkSliceInitialized(size_t slice) {
+  MarkSliceMipLevelInitialized(slice, 0);
 }
 
 bool TextureGLES::IsSliceInitialized(size_t slice) const {
-  return slices_initialized_[slice];
+  return IsSliceMipLevelInitialized(slice, 0);
+}
+
+void TextureGLES::MarkSliceMipLevelInitialized(size_t slice, size_t mip_level) {
+  if (slice >= slice_mip_initialized_.size() ||
+      mip_level >= kMaxTrackedMipLevels) {
+    return;
+  }
+  slice_mip_initialized_[slice].set(mip_level);
+}
+
+bool TextureGLES::IsSliceMipLevelInitialized(size_t slice,
+                                             size_t mip_level) const {
+  if (slice >= slice_mip_initialized_.size() ||
+      mip_level >= kMaxTrackedMipLevels) {
+    return false;
+  }
+  return slice_mip_initialized_[slice].test(mip_level);
 }
 
 bool TextureGLES::GenerateMipmap() {
@@ -548,9 +602,8 @@ static GLenum ToAttachmentType(TextureGLES::AttachmentType point) {
   }
 }
 
-bool TextureGLES::SetAsFramebufferAttachment(
-    GLenum target,
-    AttachmentType attachment_type) const {
+bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
+                                             AttachmentType attachment_type) {
   if (!IsValid()) {
     return false;
   }
