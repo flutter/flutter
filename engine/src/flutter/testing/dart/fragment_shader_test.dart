@@ -85,7 +85,7 @@ void main() async {
       final recorder = PictureRecorder();
       final canvas = Canvas(recorder);
       canvas.drawRect(const Rect.fromLTWH(0, 0, 10, 10), paint);
-      final picture = recorder.endRecording();
+      final Picture picture = recorder.endRecording();
       expect(picture, isNotNull);
       picture.dispose();
     }
