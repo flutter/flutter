@@ -406,7 +406,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   @override
   ui.TextureFrameAvailableCallback? get onTextureFrameAvailable => _onTextureFrameAvailable;
   ui.TextureFrameAvailableCallback? _onTextureFrameAvailable;
-  Zone? _onTextureFrameAvailableZone;
+  Zone _onTextureFrameAvailableZone = Zone.root;
   @override
   set onTextureFrameAvailable(ui.TextureFrameAvailableCallback? callback) {
     _onTextureFrameAvailable = callback;
