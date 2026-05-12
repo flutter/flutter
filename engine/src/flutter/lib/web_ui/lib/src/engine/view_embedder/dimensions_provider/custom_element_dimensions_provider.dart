@@ -87,8 +87,8 @@ class CustomElementDimensionsProvider extends DimensionsProvider {
   @override
   ui.Size computePhysicalSize() {
     final double devicePixelRatio = EngineFlutterDisplay.instance.devicePixelRatio;
-    double width = (_hostElement.clientWidth * devicePixelRatio).clamp(0, _maxElementSize);
-    double height = (_hostElement.clientHeight * devicePixelRatio).clamp(0, _maxElementSize);
+    double width = (_hostElement.clientWidth * devicePixelRatio).clamp(0.0, _maxElementSize);
+    double height = (_hostElement.clientHeight * devicePixelRatio).clamp(0.0, _maxElementSize);
     return ui.Size(width, height);
   }
 
