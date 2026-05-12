@@ -608,6 +608,7 @@ def main(args):
 
   parser.add_argument('--target-cpu',
                       required=True,
+                      choices=['x64', 'arm64'],
                       help='target CPU architecture (e.g. "arm64", "x64")')
 
   parser.add_argument('--target-os',
