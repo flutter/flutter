@@ -81,7 +81,7 @@ class CleanCommand extends FlutterCommand {
     try {
       final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter!;
       final XcodeProjectInfo projectInfo = (await xcodeProjectInterpreter.getInfo(
-        xcodeWorkspace.parent.path,
+        xcodeProject,
         buildDirectory: globals.fs.directory(xcodeProject.darwinPlatform.buildDirectory()),
       ))!;
       if (argResults?.wasParsed('scheme') ?? false) {
@@ -93,6 +93,7 @@ class CleanCommand extends FlutterCommand {
           throwToolExit('Scheme "$scheme" not found in ${projectInfo.schemes}');
         }
         await xcodeProjectInterpreter.cleanWorkspace(
+          xcodeProject,
           xcodeWorkspace.path,
           scheme,
           verbose: _verbose,
@@ -101,6 +102,7 @@ class CleanCommand extends FlutterCommand {
       } else {
         for (final String scheme in projectInfo.schemes) {
           await xcodeProjectInterpreter.cleanWorkspace(
+            xcodeProject,
             xcodeWorkspace.path,
             scheme,
             verbose: _verbose,

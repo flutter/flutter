@@ -240,7 +240,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       return null;
     }
     return _projectInfo ??= await xcodeProjectInterpreter.getInfo(
-      hostAppRoot.path,
+      this,
       buildDirectory: globals.fs.directory(darwinPlatform.buildDirectory()),
     );
   }
@@ -339,7 +339,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     }
 
     final Map<String, String> buildSettings = await xcodeProjectInterpreter.getBuildSettings(
-      xcodeProject.path,
+      this,
       buildContext: buildContext,
     );
     if (buildSettings.isNotEmpty) {
