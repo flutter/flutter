@@ -16011,33 +16011,45 @@ void main() {
         suggestionSpansByText: const <String, List<SuggestionSpan>?>{'A': suggestionSpans},
       );
       controller.text = 'A';
+      var obscureText = false;
+      late StateSetter setState;
 
-      Widget buildEditableText({required bool obscureText}) {
-        return TestWidgetsApp(
-          home: EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            obscureText: obscureText,
-            style: const TextStyle(),
-            cursorColor: const Color(0xFF0000FF),
-            backgroundCursorColor: const Color(0xFF808080),
-            cursorOpacityAnimates: true,
-            autofillHints: null,
-            spellCheckConfiguration: SpellCheckConfiguration(
-              spellCheckService: fakeSpellCheckService,
-              misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
-            ),
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              return EditableText(
+                controller: controller,
+                focusNode: focusNode,
+                obscureText: obscureText,
+                style: const TextStyle(),
+                cursorColor: const Color(0xFF0000FF),
+                backgroundCursorColor: const Color(0xFF808080),
+                cursorOpacityAnimates: true,
+                autofillHints: null,
+                spellCheckConfiguration: SpellCheckConfiguration(
+                  spellCheckService: fakeSpellCheckService,
+                  misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+                ),
+              );
+            },
           ),
-        );
-      }
+        ),
+      );
 
-      await tester.pumpWidget(buildEditableText(obscureText: false));
+      void setObscureText(bool value) {
+        setState(() {
+          obscureText = value;
+        });
+      }
 
       EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.spellCheckEnabled, isTrue);
       state.spellCheckResults = const SpellCheckResults('A', suggestionSpans);
 
-      await tester.pumpWidget(buildEditableText(obscureText: true));
+      setObscureText(true);
+      await tester.pump();
 
       state = tester.state<EditableTextState>(find.byType(EditableText));
       expect(state.spellCheckEnabled, isFalse);
@@ -16045,7 +16057,7 @@ void main() {
       expect(state.spellCheckResults, isNull);
       expect(fakeSpellCheckService.fetchSpellCheckSuggestionsCallCount, 0);
 
-      await tester.pumpWidget(buildEditableText(obscureText: false));
+      setObscureText(false);
       await tester.pump();
 
       state = tester.state<EditableTextState>(find.byType(EditableText));
