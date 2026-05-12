@@ -74,13 +74,17 @@ static uint64_t ConvertWinButtonToFlutterButton(UINT button) {
 }
 
 // Translate stylus pointer flags from Win32 API to FlutterPointerStylusButtons.
-static uint64_t ConvertWinStylusFlagsToFlutterButtons(UINT flags) {
+static uint64_t ConvertWinStylusFlagsToFlutterButtons(UINT pen_flags,
+                                                      UINT pointer_flags) {
   uint64_t flutter_buttons = 0;
+  if ((pointer_flags & POINTER_FLAG_INCONTACT) == 0) {
+    return flutter_buttons;
+  }
   flutter_buttons |= kFlutterPointerButtonStylusContact;
-  if (flags & PEN_FLAG_BARREL) {
+  if (pen_flags & PEN_FLAG_BARREL) {
     flutter_buttons |= kFlutterPointerButtonStylusPrimary;
   }
-  if (flags & PEN_FLAG_ERASER) {
+  if (pen_flags & PEN_FLAG_ERASER) {
     flutter_buttons |= kFlutterPointerButtonStylusSecondary;
   }
   return flutter_buttons;
@@ -593,8 +597,8 @@ FlutterWindow::HandleMessage(UINT const message,
             pressure = penInfo.pressure;
             rotation = penInfo.rotation;
             is_inverted = penInfo.penFlags & PEN_FLAG_INVERTED;
-            flutter_button =
-                ConvertWinStylusFlagsToFlutterButtons(penInfo.penFlags);
+            flutter_button = ConvertWinStylusFlagsToFlutterButtons(
+                penInfo.penFlags, pointerInfo.pointerFlags);
           } else {
             flutter_button = ConvertWinPointerFlagsToFlutterButtons(
                 pointerInfo.pointerFlags);

@@ -374,7 +374,15 @@ TEST_F(FlutterWindowTest, OnStylusPointerUp) {
   auto mock_proc_table = std::make_shared<MockWindowsProcTable>();
 
   EXPECT_CALL(*mock_proc_table, GetPointerInfo(_, _))
-      .WillRepeatedly([](UINT32 pointer_id, POINTER_INFO* pointer_info) {
+      .WillOnce([](UINT32 pointer_id, POINTER_INFO* pointer_info) {
+        if (pointer_info != nullptr) {
+          pointer_info->pointerType = PT_PEN;
+          pointer_info->pointerId = pointer_id;
+          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT;
+        }
+        return TRUE;
+      })
+      .WillOnce([](UINT32 pointer_id, POINTER_INFO* pointer_info) {
         if (pointer_info != nullptr) {
           pointer_info->pointerType = PT_PEN;
           pointer_info->pointerId = pointer_id;
@@ -397,6 +405,11 @@ TEST_F(FlutterWindowTest, OnStylusPointerUp) {
   MockWindowBindingHandlerDelegate delegate;
   win32window.SetView(&delegate);
 
+  EXPECT_CALL(delegate,
+              OnPointerDown(25, 30, kFlutterPointerDeviceKindStylus,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonStylusContact, 720, 0))
+      .Times(1);
   EXPECT_CALL(delegate, OnPointerUp(25, 30, kFlutterPointerDeviceKindStylus,
                                     kDefaultPointerDeviceId,
                                     kFlutterPointerButtonStylusContact))
@@ -404,6 +417,8 @@ TEST_F(FlutterWindowTest, OnStylusPointerUp) {
 
   UINT32 pointerId = 1;
   WPARAM wparam = static_cast<WPARAM>(pointerId);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERDOWN, wparam, 25,
+                                      30);
   InjectPointerMessageWithClientPoint(win32window, WM_POINTERUP, wparam, 25,
                                       30);
 }
@@ -571,11 +586,12 @@ TEST_F(FlutterWindowTest, OnStylusHoverAfterPointerUp) {
 
   UINT32 pointerId = 1;
   WPARAM wparam = static_cast<WPARAM>(pointerId);
-  LPARAM lparam = MAKELPARAM(10, 10);
-
-  win32window.InjectWindowMessage(WM_POINTERDOWN, wparam, lparam);
-  win32window.InjectWindowMessage(WM_POINTERUP, wparam, lparam);
-  win32window.InjectWindowMessage(WM_POINTERUPDATE, wparam, lparam);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERDOWN, wparam, 10,
+                                      10);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERUP, wparam, 10,
+                                      10);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERUPDATE, wparam, 10,
+                                      10);
 }
 
 TEST_F(FlutterWindowTest, OnStylusBarrelButtonUsesPenFlags) {
@@ -615,9 +631,88 @@ TEST_F(FlutterWindowTest, OnStylusBarrelButtonUsesPenFlags) {
 
   UINT32 pointerId = 1;
   WPARAM wparam = static_cast<WPARAM>(pointerId);
-  LPARAM lparam = MAKELPARAM(10, 10);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERDOWN, wparam, 10,
+                                      10);
+}
 
-  win32window.InjectWindowMessage(WM_POINTERDOWN, wparam, lparam);
+TEST_F(FlutterWindowTest, OnStylusEraserButtonUsesPenFlags) {
+  auto mock_proc_table = std::make_shared<MockWindowsProcTable>();
+
+  EXPECT_CALL(*mock_proc_table, GetPointerInfo(_, _))
+      .WillRepeatedly([](UINT32 pointer_id, POINTER_INFO* pointer_info) {
+        if (pointer_info != nullptr) {
+          pointer_info->pointerType = PT_PEN;
+          pointer_info->pointerId = pointer_id;
+          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT;
+        }
+        return TRUE;
+      });
+
+  EXPECT_CALL(*mock_proc_table, GetPointerPenInfo(_, _))
+      .WillRepeatedly([](UINT32 pointer_id, POINTER_PEN_INFO* pen_info) {
+        if (pen_info != nullptr) {
+          pen_info->pressure = 720;
+          pen_info->rotation = 0;
+          pen_info->penFlags = PEN_FLAG_ERASER;
+        }
+        return TRUE;
+      });
+
+  MockFlutterWindow win32window(100, 100, mock_proc_table);
+  MockWindowBindingHandlerDelegate delegate;
+  win32window.SetView(&delegate);
+
+  EXPECT_CALL(delegate,
+              OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonStylusContact |
+                                kFlutterPointerButtonStylusSecondary,
+                            720, 0))
+      .Times(1);
+
+  UINT32 pointerId = 1;
+  WPARAM wparam = static_cast<WPARAM>(pointerId);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERDOWN, wparam, 10,
+                                      10);
+}
+
+TEST_F(FlutterWindowTest, OnInvertedStylusPointerDownUsesDeviceKind) {
+  auto mock_proc_table = std::make_shared<MockWindowsProcTable>();
+
+  EXPECT_CALL(*mock_proc_table, GetPointerInfo(_, _))
+      .WillRepeatedly([](UINT32 pointer_id, POINTER_INFO* pointer_info) {
+        if (pointer_info != nullptr) {
+          pointer_info->pointerType = PT_PEN;
+          pointer_info->pointerId = pointer_id;
+          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT;
+        }
+        return TRUE;
+      });
+
+  EXPECT_CALL(*mock_proc_table, GetPointerPenInfo(_, _))
+      .WillRepeatedly([](UINT32 pointer_id, POINTER_PEN_INFO* pen_info) {
+        if (pen_info != nullptr) {
+          pen_info->pressure = 720;
+          pen_info->rotation = 0;
+          pen_info->penFlags = PEN_FLAG_INVERTED;
+        }
+        return TRUE;
+      });
+
+  MockFlutterWindow win32window(100, 100, mock_proc_table);
+  MockWindowBindingHandlerDelegate delegate;
+  win32window.SetView(&delegate);
+
+  EXPECT_CALL(delegate,
+              OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindInvertedStylus,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonStylusContact, 720, 0))
+      .Times(1);
+
+  UINT32 pointerId = 1;
+  WPARAM wparam = static_cast<WPARAM>(pointerId);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERDOWN, wparam, 10,
+                                      10);
 }
 
 TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateEmitsTransition) {
@@ -668,10 +763,65 @@ TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateEmitsTransition) {
 
   UINT32 pointerId = 1;
   WPARAM wparam = static_cast<WPARAM>(pointerId);
-  LPARAM lparam = MAKELPARAM(10, 10);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERDOWN, wparam, 10,
+                                      10);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERUPDATE, wparam, 10,
+                                      10);
+}
 
-  win32window.InjectWindowMessage(WM_POINTERDOWN, wparam, lparam);
-  win32window.InjectWindowMessage(WM_POINTERUPDATE, wparam, lparam);
+TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateEmitsReleaseTransition) {
+  auto mock_proc_table = std::make_shared<MockWindowsProcTable>();
+
+  EXPECT_CALL(*mock_proc_table, GetPointerInfo(_, _))
+      .WillRepeatedly([](UINT32 pointer_id, POINTER_INFO* pointer_info) {
+        if (pointer_info != nullptr) {
+          pointer_info->pointerType = PT_PEN;
+          pointer_info->pointerId = pointer_id;
+          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT;
+        }
+        return TRUE;
+      });
+
+  EXPECT_CALL(*mock_proc_table, GetPointerPenInfo(_, _))
+      .WillOnce([](UINT32 pointer_id, POINTER_PEN_INFO* pen_info) {
+        if (pen_info != nullptr) {
+          pen_info->pressure = 720;
+          pen_info->rotation = 0;
+          pen_info->penFlags = PEN_FLAG_BARREL;
+        }
+        return TRUE;
+      })
+      .WillOnce([](UINT32 pointer_id, POINTER_PEN_INFO* pen_info) {
+        if (pen_info != nullptr) {
+          pen_info->pressure = 720;
+          pen_info->rotation = 0;
+          pen_info->penFlags = 0;
+        }
+        return TRUE;
+      });
+
+  MockFlutterWindow win32window(100, 100, mock_proc_table);
+  MockWindowBindingHandlerDelegate delegate;
+  win32window.SetView(&delegate);
+
+  EXPECT_CALL(delegate,
+              OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonStylusContact |
+                                kFlutterPointerButtonStylusPrimary,
+                            720, 0))
+      .Times(1);
+  EXPECT_CALL(delegate, OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindStylus,
+                                    kDefaultPointerDeviceId,
+                                    kFlutterPointerButtonStylusPrimary))
+      .Times(1);
+
+  UINT32 pointerId = 1;
+  WPARAM wparam = static_cast<WPARAM>(pointerId);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERDOWN, wparam, 10,
+                                      10);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERUPDATE, wparam, 10,
+                                      10);
 }
 
 TEST_F(FlutterWindowTest, OnMousePointerDown) {
