@@ -633,10 +633,10 @@ object FlutterPluginUtils {
 
         val androidComponents = project.extensions.getByType(AndroidComponentsExtension::class.java)
         androidComponents.finalizeDsl { _ ->
-            val extension = getAndroidExtension(project)
+            val projectAndroidExtension = getAndroidExtension(project)
             validateTask.configure {
-                projectCompileSdk.set(extension.compileSdk ?: Int.MAX_VALUE)
-                projectNdkVersion.set(extension.ndkVersion)
+                projectCompileSdk.set(projectAndroidExtension.compileSdk ?: Int.MAX_VALUE)
+                projectNdkVersion.set(projectAndroidExtension.ndkVersion)
 
                 val pluginSdksMap = mutableMapOf<String, Int>()
                 val pluginNdksMap = mutableMapOf<String, String>()
@@ -645,16 +645,16 @@ object FlutterPluginUtils {
                     val name = requireNotNull(plugin["name"] as? String) { "Missing valid \"name\" property for plugin object: $plugin" }
                     val pluginProject = project.rootProject.findProject(":$name")
                     if (pluginProject != null) {
-                        val androidExtensionWrapper =
+                        val pluginAndroidExtension =
                             try {
                                 getAndroidExtension(pluginProject)
                             } catch (e: IllegalStateException) {
                                 null
                             }
 
-                        pluginSdksMap[name] = androidExtensionWrapper?.compileSdk ?: Int.MAX_VALUE
+                        pluginSdksMap[name] = pluginAndroidExtension?.compileSdk ?: Int.MAX_VALUE
 
-                        val ndkVersion = androidExtensionWrapper?.ndkVersion ?: extension.ndkVersion
+                        val ndkVersion = pluginAndroidExtension?.ndkVersion ?: projectAndroidExtension.ndkVersion
                         if (ndkVersion != null) {
                             pluginNdksMap[name] = ndkVersion
                         }
