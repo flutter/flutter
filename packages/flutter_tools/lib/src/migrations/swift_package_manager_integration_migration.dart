@@ -192,8 +192,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       if (isSchemeMigrated && isPbxprojMigrated && isOptionalFilesMigrated) {
         return;
       }
-
-      migrationStatus = logger.startProgress('Adding Swift Package Manager integration...');
+      logger.printStatus('Adding Swift Package Manager integration...');
+      migrationStatus = logger.startSpinner();
 
       if (isSchemeMigrated) {
         logger.printTrace('${schemeInfo.schemeFile.basename} already migrated. Skipping...');
@@ -227,12 +227,35 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         }
       }
 
+      try {
+        // When migrating for the first time, this will be the first time packages are downloaded
+        // and may take a while.
+        migrationStatus.stop();
+        await _xcodeProjectInterpreter.prefetchSwiftPackagesForProject(
+          _xcodeProject,
+          buildDirectory: _fileSystem.directory(
+            _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
+          ),
+          quiet: false,
+        );
+        migrationStatus = logger.startSpinner();
+      } on Exception catch (e) {
+        throw _PrefetchSwiftPackageException(e.toString());
+      }
+
       // Get the project info to make sure it compiles with xcodebuild
       await _xcodeProjectInterpreter.getInfo(
-        _xcodeProject.hostAppRoot.path,
+        _xcodeProject,
         buildDirectory: _fileSystem.directory(
           _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
         ),
+      );
+    } on _PrefetchSwiftPackageException catch (e) {
+      restoreFromBackup(schemeInfo);
+      throwToolExit(
+        'An error occurred when adding Swift Package Manager integration:\n'
+        '  ${e.message}\n\n'
+        '$kDisableSwiftPMInstructions',
       );
     } on Exception catch (e) {
       restoreFromBackup(schemeInfo);
@@ -248,8 +271,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         throwToolExit(
           'An error occurred when adding Swift Package Manager integration:\n'
           '  $e\n\n'
-          'Swift Package Manager is currently an experimental feature, please file a bug at\n'
-          '  https://github.com/flutter/flutter/issues/new?template=01_activation.yml \n'
+          'Please file a bug at https://github.com/flutter/flutter/issues/new?template=01_activation.yml \n'
           'Consider including a copy of the following files in your bug report:\n'
           '  ${_platform.name}/Runner.xcodeproj/project.pbxproj\n'
           '  ${_platform.name}/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme '
@@ -1429,4 +1451,13 @@ class ParsedProject {
   final Map<String, Object?> data;
   final String identifier;
   final List<String>? packageReferences;
+}
+
+class _PrefetchSwiftPackageException implements Exception {
+  _PrefetchSwiftPackageException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
 }

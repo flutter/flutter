@@ -403,4 +403,51 @@ class SwiftPackageManager {
       manifestContents.replaceFirst(oldSupportedPlatform, newSupportedPlatform),
     );
   }
+
+  static final List<_SwiftPMPluginErrorMatcher> _errorMatchers = <_SwiftPMPluginErrorMatcher>[
+    _SwiftPMPluginErrorMatcher(
+      // Example: target 'plugin_a' in package 'plugin_a' is outside the package root
+      pattern: RegExp(r"target '([^']+)' in package '[^']+' is outside the package root"),
+      message: (RegExpMatch match) =>
+          'Flutter plugin "${match.group(1)}" has an incorrectly configured Package.swift file.\n'
+          'Please contact the plugin maintainers for assistance.',
+    ),
+    _SwiftPMPluginErrorMatcher(
+      // Example: /path/to/plugin_a/Package.swift:25:17: error: expected ',' separator
+      pattern: RegExp(r'([^\/]+)\/Package\.swift:\d+:\d+: error:'),
+      message: (RegExpMatch match) =>
+          'Flutter plugin "${match.group(1)}" has an incorrectly configured Package.swift file.\n'
+          'Please contact the plugin maintainers for assistance.',
+    ),
+    _SwiftPMPluginErrorMatcher(
+      // Example: unknown package 'some-package' in dependencies of target 'plugin_a'
+      pattern: RegExp(r"unknown package '[^']+' in dependencies of target '([^']+)'"),
+      message: (RegExpMatch match) =>
+          'Flutter plugin "${match.group(1)}" has an incorrectly configured Package.swift file.\n'
+          'Please contact the plugin maintainers for assistance.',
+    ),
+  ];
+
+  /// Parses a Swift Package Manager error message and returns a guided error
+  /// message if the error matches a known pattern.
+  static String? parsePluginError(String? message, {required List<String> pluginNames}) {
+    if (message == null || message.isEmpty) {
+      return null;
+    }
+    for (final _SwiftPMPluginErrorMatcher matcher in _errorMatchers) {
+      for (final RegExpMatch match in matcher.pattern.allMatches(message)) {
+        final String? packageName = match.group(1);
+        if (packageName != null && pluginNames.contains(packageName)) {
+          return matcher.message(match);
+        }
+      }
+    }
+    return null;
+  }
+}
+
+class _SwiftPMPluginErrorMatcher {
+  const _SwiftPMPluginErrorMatcher({required this.pattern, required this.message});
+  final RegExp pattern;
+  final String Function(RegExpMatch match) message;
 }

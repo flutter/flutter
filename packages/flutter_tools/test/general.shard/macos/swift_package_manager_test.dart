@@ -562,6 +562,63 @@ let package = Package(
         });
       });
     }
+
+    group('parseError', () {
+      testWithoutContext('returns null for empty or null message', () {
+        expect(SwiftPackageManager.parsePluginError(null, pluginNames: <String>[]), isNull);
+        expect(SwiftPackageManager.parsePluginError('', pluginNames: <String>[]), isNull);
+      });
+
+      testWithoutContext('returns null for unknown error', () {
+        expect(
+          SwiftPackageManager.parsePluginError('some random error', pluginNames: <String>[]),
+          isNull,
+        );
+      });
+
+      testWithoutContext('returns guided message for outside package root error', () {
+        const message =
+            'xcodebuild: error: Could not resolve package dependencies:\n'
+            "  target 'plugin_1' in package 'plugin_1' is outside the package root";
+        const expected =
+            'Flutter plugin "plugin_1" has an incorrectly configured Package.swift file.\n'
+            'Please contact the plugin maintainers for assistance.';
+        expect(
+          SwiftPackageManager.parsePluginError(message, pluginNames: <String>['plugin_1']),
+          expected,
+        );
+      });
+
+      testWithoutContext('returns guided message for Package.swift error', () {
+        const message = 'plugin_1/Package.swift:1:1: error: some error';
+        const expected =
+            'Flutter plugin "plugin_1" has an incorrectly configured Package.swift file.\n'
+            'Please contact the plugin maintainers for assistance.';
+        expect(
+          SwiftPackageManager.parsePluginError(message, pluginNames: <String>['plugin_1']),
+          expected,
+        );
+      });
+
+      testWithoutContext('returns guided message for unknown package in dependencies error', () {
+        const message = "unknown package 'some_package' in dependencies of target 'plugin_1'";
+        const expected =
+            'Flutter plugin "plugin_1" has an incorrectly configured Package.swift file.\n'
+            'Please contact the plugin maintainers for assistance.';
+        expect(
+          SwiftPackageManager.parsePluginError(message, pluginNames: <String>['plugin_1']),
+          expected,
+        );
+      });
+
+      testWithoutContext('returns null if error matches but plugin is not in pluginNames', () {
+        const message = "unknown package 'some_package' in dependencies of target 'plugin_1'";
+        expect(
+          SwiftPackageManager.parsePluginError(message, pluginNames: <String>['other_plugin']),
+          isNull,
+        );
+      });
+    });
   });
 }
 
