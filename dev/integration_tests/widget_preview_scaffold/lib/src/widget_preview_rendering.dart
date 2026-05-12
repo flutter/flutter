@@ -505,8 +505,10 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
               : null,
           child: Column(
             children: [
-              InteractiveViewerWrapper(
+              ZoomablePreviewArea(
                 transformationController: transformationController,
+                errorThrownDuringTreeConstruction:
+                    errorThrownDuringTreeConstruction,
                 child: preview,
               ),
               const VerticalSpacer(),
@@ -766,22 +768,136 @@ class WidgetPreviewerWindowConstraints extends InheritedWidget {
   }
 }
 
-class InteractiveViewerWrapper extends StatelessWidget {
-  const InteractiveViewerWrapper({
+class ZoomablePreviewArea extends StatelessWidget {
+  const ZoomablePreviewArea({
     super.key,
     required this.child,
     required this.transformationController,
+    required this.errorThrownDuringTreeConstruction,
   });
 
   final Widget child;
   final TransformationController transformationController;
+  final bool errorThrownDuringTreeConstruction;
 
   @override
   Widget build(BuildContext context) {
-    return InteractiveViewer(
-      transformationController: transformationController,
-      scaleEnabled: false,
-      child: child,
+    if (errorThrownDuringTreeConstruction) {
+      return child;
+    }
+    return ListenableBuilder(
+      listenable: transformationController,
+      builder: (context, _) {
+        final double scale = transformationController.value.entry(0, 0);
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: _ScaledLayoutWrapper(scale: scale, child: child),
+        );
+      },
+    );
+  }
+}
+
+class _ScaledLayoutWrapper extends SingleChildRenderObjectWidget {
+  const _ScaledLayoutWrapper({super.child, required this.scale});
+
+  final double scale;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _ScaledLayoutRenderObject(scale: scale);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _ScaledLayoutRenderObject renderObject,
+  ) {
+    renderObject.scale = scale;
+  }
+}
+
+class _ScaledLayoutRenderObject extends RenderShiftedBox {
+  _ScaledLayoutRenderObject({required this._scale, RenderBox? child})
+    : super(child);
+
+  double _scale;
+  double get scale => _scale;
+  set scale(double value) {
+    if (_scale == value) {
+      return;
+    }
+    _scale = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return super.computeMinIntrinsicWidth(height) * scale;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return super.computeMaxIntrinsicWidth(height) * scale;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return super.computeMinIntrinsicHeight(width) * scale;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return super.computeMaxIntrinsicHeight(width) * scale;
+  }
+
+  @override
+  void performLayout() {
+    final child = this.child;
+    if (child == null) {
+      size = Size.zero;
+      return;
+    }
+    child.layout(constraints, parentUsesSize: true);
+    size = constraints.constrain(child.size * scale);
+
+    final BoxParentData childParentData = child.parentData! as BoxParentData;
+    childParentData.offset = Offset.zero;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null) {
+      layer = null;
+      return;
+    }
+    if (scale == 1.0) {
+      super.paint(context, offset);
+      layer = null;
+      return;
+    }
+    final Matrix4 transform = Matrix4.diagonal3Values(scale, scale, 1.0);
+    layer = context.pushTransform(
+      needsCompositing,
+      offset,
+      transform,
+      super.paint,
+      oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
+    );
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    if (child == null) {
+      return false;
+    }
+    final Matrix4 transform = Matrix4.diagonal3Values(scale, scale, 1.0);
+    return result.addWithPaintTransform(
+      transform: transform,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        return super.hitTestChildren(result, position: position);
+      },
     );
   }
 }
@@ -820,10 +936,8 @@ class _WidgetPreviewWrapper extends SingleChildRenderObjectWidget {
 class _WidgetPreviewWrapperBox extends RenderShiftedBox {
   _WidgetPreviewWrapperBox({
     required RenderBox? child,
-    required BoxConstraints previewerConstraints,
-    // ignore: prefer_initializing_formals
-  }) : _previewerConstraints = previewerConstraints,
-       super(child);
+    required this._previewerConstraints,
+  }) : super(child);
 
   BoxConstraints _constraintOverride = const BoxConstraints();
   BoxConstraints _previewerConstraints;
