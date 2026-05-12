@@ -564,6 +564,8 @@ class PlatformConfiguration final {
   ///
   /// @param[in]  texture_id  The ID of the texture that has a new frame.
   ///
+  /// @note       Must be called on the UI task runner.
+  ///
   void NotifyTextureFrameAvailable(int64_t texture_id);
 
   //----------------------------------------------------------------------------
