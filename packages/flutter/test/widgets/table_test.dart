@@ -930,9 +930,7 @@ void main() {
   // [_RenderDeferredLayoutBox.redepthChildren] used to call
   // `_layoutSurrogate.redepthChild(this)` unconditionally and trip a
   // `child.owner == owner` assertion in that window.
-  testWidgets('OverlayPortal child inside a TableRow does not crash', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('OverlayPortal child inside a TableRow does not crash', (WidgetTester tester) async {
     // Mirrors how Slider uses OverlayPortal: controller.show() runs in a
     // field initializer, before the OverlayPortal widget is mounted.
     final controller = OverlayPortalController()..show();
