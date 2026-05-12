@@ -548,21 +548,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
       }
       if (componentNames.isNotEmpty) {
         options.add('-Pdeferred-component-names=${componentNames.join(',')}');
-        final String? agpVersion = gradle.getAgpVersion(project.android.hostAppGradleRoot, _logger);
-        final bool isAgpAtLeast42 =
-            agpVersion != null &&
-            (Version.parse(agpVersion) ?? Version(0, 0, 0)) >= Version(4, 2, 0);
-        if (!isAgpAtLeast42) {
-          // Multi-apk applications cannot use shrinking. This is only relevant when using
-          // android dynamic feature modules.
-          _logger.printStatus(
-            'Shrinking has been disabled for this build due to deferred components. Shrinking is '
-            'not available for multi-apk applications with Android Gradle Plugin versions below 4.2. '
-            'To enable shrinking, upgrade to Android Gradle Plugin 4.2 or later.',
-            color: TerminalColor.yellow,
-          );
-          options.add('-Pshrink=false');
-        }
       }
     }
     options.addAll(androidBuildInfo.buildInfo.toGradleConfig());
