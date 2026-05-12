@@ -93,7 +93,7 @@ class PaintParagraph extends TextPaint {
           block as TextBlock,
           ui.Offset(
             line.advance.left + line.formattingShift + block.shiftFromLineStart,
-            line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
+            line.advance.top + line.fontBoundingBoxAscent - block.multipliedFontBoundingBoxAscent,
           ),
           offset,
           ui.window.devicePixelRatio,
@@ -107,7 +107,16 @@ class PaintParagraph extends TextPaint {
 
         switch (styleElement) {
           case StyleElements.background:
-            painter.drawBackground(canvas, targetRect, block.style.background!);
+            // TODO(jlavrova): We use calculateBlock in several places and it may need to calculate the rect height
+            // differently for background blocks (to include the entire line height instead of just the text height).
+            // I correct the value in place for now, but it may need to be fixed in calculateBlock itself.
+            final correctedTargetRect = ui.Rect.fromLTWH(
+              targetRect.left,
+              targetRect.top,
+              targetRect.width,
+              block.multipliedHeight,
+            );
+            painter.drawBackground(canvas, correctedTargetRect, block.style.background!);
           case StyleElements.decorations:
             throw Exception(
               'Decorations are painted on the canvas2D and then drawn as an image on the output canvas, not drawn directly on the output canvas',
