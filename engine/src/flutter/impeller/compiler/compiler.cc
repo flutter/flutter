@@ -281,12 +281,8 @@ uint32_t CalculateUBOSize(const spirv_cross::Compiler* compiler) {
   return result;
 }
 
-// Mirror of the OpenGL ES backend's `BufferBindingsGLES` uniform key
-// normalization: ASCII uppercase and drop underscores. Two GLSL identifiers
-// that reduce to the same string here are interchangeable as far as that
-// backend's (case- and underscore-insensitive) uniform lookup is concerned.
-// GLSL identifiers are ASCII, so a locale-independent fold is both sufficient
-// and correct here.
+// Mirrors BufferBindingsGLES's uniform key normalization: ASCII uppercase
+// and drop underscores. GLSL identifiers are ASCII, so this is locale-safe.
 std::string StripUnderscoresAndUpper(std::string_view name) {
   std::string result;
   result.reserve(name.size());
@@ -303,19 +299,13 @@ std::string StripUnderscoresAndUpper(std::string_view name) {
   return result;
 }
 
-// OpenGL targets older than #version 140 (i.e. the `kOpenGLES` ESSL 1.00 and
-// `kOpenGLDesktop` GLSL 1.20 outputs) have no uniform buffer objects, so
-// SPIRV-Cross lowers each uniform block to a plain `uniform StructType
-// instanceName;` declaration and the driver reports its members as
-// `instanceName.member`. The OpenGL ES backend resolves those members by the
-// *block* name (carried in shader reflection), reaching them through a
-// case-insensitive, underscore-insensitive match. That match only succeeds
-// when the instance name normalizes to the block name. Impeller's own shaders
-// follow the `uniform XInfo { ... } x_info;` convention and satisfy it, but a
-// caller-authored Flutter GPU shader bundle need not (e.g. `uniform ToonInfo {
-// ... } toon;`), in which case all of its uniform block members silently fail
-// to bind. Rename any non-conforming instance variable to a canonical,
-// collision-free form so every uniform block binds on these backends.
+// On pre-`#version 140` GL targets, SPIRV-Cross lowers each uniform block to a
+// flat `uniform StructType instanceName;` and BufferBindingsGLES resolves
+// members by the block name modulo `StripUnderscoresAndUpper`. A
+// non-conforming instance name (e.g. `uniform ToonInfo { ... } toon;`) causes
+// every member to silently bind to GL location `-1`. Rename the instance to
+// `_<BlockName>`, which reduces to the block name under the same fold.
+// See flutter/flutter#186393.
 void CanonicalizeUniformBlockInstanceNamesForGL(
     TargetPlatform target_platform,
     spirv_cross::Compiler* compiler) {
@@ -331,9 +321,6 @@ void CanonicalizeUniformBlockInstanceNamesForGL(
         StripUnderscoresAndUpper(block_name)) {
       continue;
     }
-    // A leading underscore reduces to the block name under the normalization
-    // above, mirrors the synthetic names SPIRV-Cross already emits, and cannot
-    // collide with the (identically named, case sensitive) struct type.
     compiler->set_name(ubo.id, "_" + block_name);
   }
 }
