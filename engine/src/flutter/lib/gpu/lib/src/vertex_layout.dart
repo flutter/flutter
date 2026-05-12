@@ -76,6 +76,9 @@ enum VertexFormat {
 /// byte ranges (i.e. `[offsetInBytes, offsetInBytes + format.bytesPerElement)`
 /// ranges must be disjoint across the buffer's attributes).
 final class VertexAttribute {
+  /// Creates a vertex attribute description bound to the shader-side input
+  /// named [name], reading its data in the given [format] starting at byte
+  /// [offsetInBytes] into each element of the owning vertex buffer.
   const VertexAttribute({
     required this.name,
     required this.format,
@@ -114,6 +117,9 @@ final class VertexAttribute {
 // TODO(https://github.com/flutter/flutter/issues/186308): Allow sparse
 // vertex buffer binding slots.
 final class VertexBuffer {
+  /// Creates a vertex buffer slot description with the given per-element
+  /// [strideInBytes] and the list of [attributes] that the vertex shader
+  /// reads from this buffer.
   const VertexBuffer({required this.strideInBytes, required this.attributes});
 
   /// Byte distance from the start of one element to the start of the next
@@ -137,6 +143,7 @@ final class VertexBuffer {
 /// consume a structure-of-arrays mesh without converting to interleaved
 /// form on the CPU).
 final class VertexLayout {
+  /// Creates a vertex input layout that reads from the given [buffers].
   const VertexLayout({required this.buffers});
 
   /// Vertex buffer slots this layout uses. Each buffer's position in this
