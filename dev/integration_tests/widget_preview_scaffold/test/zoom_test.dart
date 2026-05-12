@@ -155,7 +155,7 @@ void main() {
 
       // Scaling is applied, so we should find the child and verify it builds within _ScaledLayoutWrapper
       expect(find.byKey(childKey), findsOneWidget);
-      expect(find.byType(SingleChildScrollView), findsOneWidget);
+      expect(find.byType(SingleChildScrollView), findsNWidgets(2));
     });
 
     testWidgets(

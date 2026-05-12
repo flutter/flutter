@@ -790,8 +790,11 @@ class ZoomablePreviewArea extends StatelessWidget {
       builder: (context, _) {
         final double scale = transformationController.value.entry(0, 0);
         return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: _ScaledLayoutWrapper(scale: scale, child: child),
+          scrollDirection: Axis.vertical,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: _ScaledLayoutWrapper(scale: scale, child: child),
+          ),
         );
       },
     );
@@ -884,6 +887,14 @@ class _ScaledLayoutRenderObject extends RenderShiftedBox {
       super.paint,
       oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
     );
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    if (scale != 1.0) {
+      transform.scaleByDouble(scale, scale, 1.0, 1.0);
+    }
+    super.applyPaintTransform(child, transform);
   }
 
   @override

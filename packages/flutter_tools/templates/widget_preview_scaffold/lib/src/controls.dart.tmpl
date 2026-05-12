@@ -94,7 +94,6 @@ class ZoomControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const iconColor = Colors.black;
     return _ControlDecorator(
       child: ValueListenableBuilder<Matrix4>(
         valueListenable: _transformationController,
@@ -109,8 +108,8 @@ class ZoomControls extends StatelessWidget {
                 style: theme.iconButtonTheme.style,
                 onPressed: scale > _minScale ? _zoomOut : null,
                 icon: const Icon(Icons.zoom_out),
-                color: iconColor,
-                disabledColor: Colors.black38,
+                color: theme.colorScheme.onSurface,
+                disabledColor: theme.colorScheme.onSurface.withValues(alpha: 0.38),
               ),
               SizedBox(
                 width: 100,
@@ -120,8 +119,6 @@ class ZoomControls extends StatelessWidget {
                   max: _maxScale,
                   value: scale.clamp(_minScale, _maxScale),
                   onChanged: _setScale,
-                  activeColor: Colors.blue,
-                  inactiveColor: Colors.grey,
                 ),
               ),
               IconButton(
@@ -129,24 +126,24 @@ class ZoomControls extends StatelessWidget {
                 style: theme.iconButtonTheme.style,
                 onPressed: scale < _maxScale ? _zoomIn : null,
                 icon: const Icon(Icons.zoom_in_sharp),
-                color: iconColor,
-                disabledColor: Colors.black38,
+                color: theme.colorScheme.onSurface,
+                disabledColor: theme.colorScheme.onSurface.withValues(alpha: 0.38),
               ),
               IconButton(
                 tooltip: 'Reset zoom',
                 style: theme.iconButtonTheme.style,
                 onPressed: scale != _minScale ? _reset : null,
                 icon: const Icon(Icons.zoom_out_map),
-                color: iconColor,
-                disabledColor: Colors.black38,
+                color: theme.colorScheme.onSurface,
+                disabledColor: theme.colorScheme.onSurface.withValues(alpha: 0.38),
               ),
               SizedBox(
-                width: 32,
+                width: 36,
                 child: Text(
                   scalePercentage,
                   textAlign: TextAlign.end,
-                  style: const TextStyle(
-                    color: iconColor,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
