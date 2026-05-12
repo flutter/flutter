@@ -26,6 +26,7 @@ import '../features.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
+import '../macos/darwin_dependency_management.dart';
 import '../macos/swift_package_manager.dart';
 import '../macos/xcode.dart';
 import '../migrations/lldb_init_migration.dart';
@@ -149,7 +150,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final FlutterProject project = FlutterProject.current();
-
+  const FlutterDarwinPlatform darwinPlatform = FlutterDarwinPlatform.ios;
   final migrators = <ProjectMigrator>[
     RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.analytics),
     XcodeBuildSystemMigration(app.project, globals.logger),
@@ -164,7 +165,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     UIApplicationMainDeprecationMigration(app.project, globals.logger),
     SwiftPackageManagerIntegrationMigration(
       app.project,
-      FlutterDarwinPlatform.ios,
+      darwinPlatform,
       buildInfo,
       xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       logger: globals.logger,
@@ -196,6 +197,15 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (!_checkXcodeVersion()) {
     return XcodeBuildResult(success: false);
   }
+
+  await DarwinDependencyManagement.validatePluginSupport(
+    platform: darwinPlatform,
+    xcodeProject: project.ios,
+    plugins: await project.ios.getPlugins(),
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    cocoapods: globals.cocoaPods,
+  );
 
   await removeExtendedAttributesForProject(
     xcodeProject: app.project,
@@ -359,7 +369,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
     if (iosDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(
-        platform: FlutterDarwinPlatform.ios,
+        platform: darwinPlatform,
         project: project.ios,
         deploymentTarget: iosDeploymentTarget,
       );
