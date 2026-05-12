@@ -345,7 +345,7 @@ class ArchiveUnpublisher {
     if (confirm) {
       return _processRunner.runProcess(command, workingDirectory: workingDirectory, failOk: failOk);
     } else {
-      print('Would run: ${command.take(2).join(' ')} ...');
+      print('Would run: ${command.join(' ')}');
       return '';
     }
   }
