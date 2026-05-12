@@ -957,8 +957,10 @@ class _RenderDecoration extends RenderBox
     final double bottomPadding = supportingTextPadding?.bottom ?? 0.0;
     final double ascent =
         math.max(counterAscent, getBaseline(helperError, helperErrorConstraints)) + topPadding;
-    final double bottomHeight = math.max(counterAscent, helperErrorHeight) + (topPadding+bottomPadding);
-    final double subtextHeight = math.max(counterSize.height, helperErrorHeight) + (topPadding+bottomPadding);
+    final double bottomHeight =
+        math.max(counterAscent, helperErrorHeight) + (topPadding + bottomPadding);
+    final double subtextHeight =
+        math.max(counterSize.height, helperErrorHeight) + (topPadding + bottomPadding);
     return (ascent: ascent, bottomHeight: bottomHeight, subtextHeight: subtextHeight);
   }
 
@@ -1443,12 +1445,13 @@ class _RenderDecoration extends RenderBox
     final double helperErrorBaseline = helperError.getDistanceToBaseline(TextBaseline.alphabetic)!;
     final double counterBaseline = counter?.getDistanceToBaseline(TextBaseline.alphabetic)! ?? 0.0;
 
-    double start, end, startSupporting , endSupporting;
+    double start, end, startSupporting, endSupporting;
     switch (textDirection) {
       case TextDirection.ltr:
         start = contentPadding.start + _boxSize(icon).width;
         end = overallWidth - contentPadding.end;
-        startSupporting = (supportingTextPadding?.start ?? contentPadding.start) + _boxSize(icon).width;
+        startSupporting =
+            (supportingTextPadding?.start ?? contentPadding.start) + _boxSize(icon).width;
         endSupporting = overallWidth - (supportingTextPadding?.end ?? contentPadding.end);
         _boxParentData(helperError).offset = Offset(
           startSupporting + decoration.inputGap,
@@ -1464,7 +1467,9 @@ class _RenderDecoration extends RenderBox
         start = overallWidth - contentPadding.start - _boxSize(icon).width;
         end = contentPadding.end;
         startSupporting =
-            overallWidth - (supportingTextPadding?.start ?? contentPadding.start) - _boxSize(icon).width;
+            overallWidth -
+            (supportingTextPadding?.start ?? contentPadding.start) -
+            _boxSize(icon).width;
         endSupporting = supportingTextPadding?.end ?? contentPadding.end;
         _boxParentData(helperError).offset = Offset(
           startSupporting - helperError.size.width - decoration.inputGap,
@@ -2606,13 +2611,20 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
             resolvedPadding.bottom,
           );
 
-    final EdgeInsets? resolvedSupportingTextPadding = decoration.supportingTextPadding?.resolve(textDirection);
-    final EdgeInsetsDirectional? decorationSupportingTextPadding = resolvedSupportingTextPadding == null
+    final EdgeInsets? resolvedSupportingTextPadding = decoration.supportingTextPadding?.resolve(
+      textDirection,
+    );
+    final EdgeInsetsDirectional? decorationSupportingTextPadding =
+        resolvedSupportingTextPadding == null
         ? null
         : EdgeInsetsDirectional.fromSTEB(
-            flipHorizontal ? resolvedSupportingTextPadding.right : resolvedSupportingTextPadding.left,
+            flipHorizontal
+                ? resolvedSupportingTextPadding.right
+                : resolvedSupportingTextPadding.left,
             resolvedSupportingTextPadding.top,
-            flipHorizontal ? resolvedSupportingTextPadding.left : resolvedSupportingTextPadding.right,
+            flipHorizontal
+                ? resolvedSupportingTextPadding.left
+                : resolvedSupportingTextPadding.right,
             resolvedSupportingTextPadding.bottom,
           );
 
@@ -5427,7 +5439,6 @@ class InputDecorationThemeData with Diagnosticable {
   ///    within a [Theme].
   ///  * [InputDecoration.visualDensity], which can override this setting for a
   ///    given decorator.
-  /// {@macro flutter.material.inputDecoration.visualDensity}
   final VisualDensity? visualDensity;
 
   /// The padding applied to the supporting text row.

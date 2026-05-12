@@ -15771,7 +15771,9 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), Size.zero);
   });
 
-  testWidgets('supportingTextPadding defined in InputDecoration is used for supporting text', (WidgetTester tester) async {
+  testWidgets('supportingTextPadding defined in InputDecoration is used for supporting text', (
+    WidgetTester tester,
+  ) async {
     const customPaddingStart = 32.0;
     const customPaddingEnd = 24.0;
     const customPaddingTop = 16.0;
@@ -15836,7 +15838,7 @@ void main() {
     );
     expect(tester.getTopLeft(errorFinder).dx, customPaddingStart + inputGap);
     expect(tester.getTopRight(counterFinder).dx, inputWidth - customPaddingEnd - inputGap);
-    
+
     // Verify vertical padding shift.
     final double customErrorDy = tester.getTopLeft(errorFinder).dy;
     final double customTotalHeight = tester.getSize(find.byType(InputDecorator)).height;
@@ -15882,7 +15884,9 @@ void main() {
     expect(tester.getTopLeft(counterFinder).dx, customPaddingEnd + inputGap);
   });
 
-  testWidgets('supportingTextPadding defined in InputDecorationTheme is used for supporting text', (WidgetTester tester) async {
+  testWidgets('supportingTextPadding defined in InputDecorationTheme is used for supporting text', (
+    WidgetTester tester,
+  ) async {
     const themePaddingStart = 40.0;
     const themePaddingEnd = 20.0;
     const inputWidth = 300.0;
