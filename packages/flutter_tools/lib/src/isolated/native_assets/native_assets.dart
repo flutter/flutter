@@ -90,6 +90,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   final (
     results: SerializedBuildResults results,
     dependencies: List<Uri> dependencies,
+    filesToBeBundled: _,
   ) = await runFlutterSpecificBuildHooks(
     environmentDefines: environmentDefines,
     buildRunner: buildRunner,
@@ -125,7 +126,8 @@ Future<DartHooksResult> runFlutterSpecificHooks({
 ///
 /// Returns the serialized build results per target and the list of dependencies
 /// collected during the build stage.
-Future<({SerializedBuildResults results, List<Uri> dependencies})> runFlutterSpecificBuildHooks({
+Future<({SerializedBuildResults results, List<Uri> dependencies, List<Uri> filesToBeBundled})>
+runFlutterSpecificBuildHooks({
   required Map<String, String> environmentDefines,
   required FlutterNativeAssetsBuildRunner buildRunner,
   required TargetPlatform targetPlatform,
@@ -135,7 +137,11 @@ Future<({SerializedBuildResults results, List<Uri> dependencies})> runFlutterSpe
   required bool buildDataAssets,
 }) async {
   if (!await _hookRunRequired(buildRunner)) {
-    return (results: const <String, Map<String, Object?>>{}, dependencies: const <Uri>[]);
+    return (
+      results: const <String, Map<String, Object?>>{},
+      dependencies: const <Uri>[],
+      filesToBeBundled: const <Uri>[],
+    );
   }
 
   final (
@@ -158,6 +164,7 @@ Future<({SerializedBuildResults results, List<Uri> dependencies})> runFlutterSpe
 
   final results = <String, Map<String, Object?>>{};
   final dependencies = <Uri>{};
+  final filesToBeBundled = <Uri>[];
   for (var i = 0; i < targets.length; i++) {
     final AssetBuildTarget target = targets[i];
     // Only run non-code extensions (like data assets) for the first target,
@@ -168,9 +175,18 @@ Future<({SerializedBuildResults results, List<Uri> dependencies})> runFlutterSpe
     final BuildResult buildResult = await _build(buildRunner, extensions, linkingEnabled);
     results[target.targetString] = buildResult.toJson();
     dependencies.addAll(buildResult.dependencies);
+    _decodeAssets(
+      encodedAssets: buildResult.encodedAssets,
+      target: target,
+      bundledFilesAccumulator: filesToBeBundled,
+    );
   }
   globals.logger.printTrace('Running build hooks for $targetString done.');
-  return (results: results, dependencies: dependencies.toList());
+  return (
+    results: results,
+    dependencies: dependencies.toList(),
+    filesToBeBundled: filesToBeBundled,
+  );
 }
 
 List<AssetBuildTarget> _getTargets({
@@ -301,35 +317,22 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
     if (linkingEnabled) {
       linkResult = await _link(buildRunner, extensions, buildResult, recordedUsesFile);
 
-      if (target is CodeAssetTarget) {
-        codeAssets
-          ..addAll(
-            _filterCodeAssets(
-              linkResult.encodedAssets,
-              Target.fromArchitectureAndOS(target.architecture, target.os),
-            ),
-          )
-          ..addAll(
-            _filterCodeAssets(
-              buildResult.encodedAssets,
-              Target.fromArchitectureAndOS(target.architecture, target.os),
-            ),
-          );
-      }
-      dataAssets
-        ..addAll(_filterDataAssets(linkResult.encodedAssets))
-        ..addAll(_filterDataAssets(buildResult.encodedAssets));
-      dependencies.addAll(linkResult.dependencies);
+      _decodeAssets(
+        encodedAssets: <EncodedAsset>[...linkResult.encodedAssets, ...buildResult.encodedAssets],
+        target: target,
+        codeAssetsAccumulator: codeAssets,
+        dataAssetsAccumulator: dataAssets,
+      );
+      dependencies
+        ..addAll(buildResult.dependencies)
+        ..addAll(linkResult.dependencies);
     } else {
-      if (target is CodeAssetTarget) {
-        codeAssets.addAll(
-          _filterCodeAssets(
-            buildResult.encodedAssets,
-            Target.fromArchitectureAndOS(target.architecture, target.os),
-          ),
-        );
-      }
-      dataAssets.addAll(_filterDataAssets(buildResult.encodedAssets));
+      _decodeAssets(
+        encodedAssets: buildResult.encodedAssets,
+        target: target,
+        codeAssetsAccumulator: codeAssets,
+        dataAssetsAccumulator: dataAssets,
+      );
       dependencies.addAll(buildResult.dependencies);
     }
   }
@@ -355,6 +358,42 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
     dataAssets: dataAssets,
     dependencies: dependencies.toList(),
   );
+}
+
+/// Extracts and categorizes code and data assets from [encodedAssets] for the given [target].
+///
+/// The extracted assets and files to be bundled are appended to the optional accumulator lists:
+/// - [codeAssetsAccumulator]: Collects matching [FlutterCodeAsset]s.
+/// - [dataAssetsAccumulator]: Collects matching [DataAsset]s.
+/// - [bundledFilesAccumulator]: Collects the file URIs of dynamic libraries and data assets that need to be bundled.
+void _decodeAssets({
+  required Iterable<EncodedAsset> encodedAssets,
+  required AssetBuildTarget target,
+  List<FlutterCodeAsset>? codeAssetsAccumulator,
+  List<DataAsset>? dataAssetsAccumulator,
+  List<Uri>? bundledFilesAccumulator,
+}) {
+  if (target is CodeAssetTarget) {
+    final Iterable<FlutterCodeAsset> filteredCode = _filterCodeAssets(
+      encodedAssets,
+      Target.fromArchitectureAndOS(target.architecture, target.os),
+    );
+    codeAssetsAccumulator?.addAll(filteredCode);
+    if (bundledFilesAccumulator != null) {
+      for (final code in filteredCode) {
+        if (code.codeAsset.linkMode is DynamicLoadingBundled) {
+          bundledFilesAccumulator.add(code.codeAsset.file!);
+        }
+      }
+    }
+  }
+  final Iterable<DataAsset> filteredData = _filterDataAssets(encodedAssets);
+  dataAssetsAccumulator?.addAll(filteredData);
+  if (bundledFilesAccumulator != null) {
+    for (final asset in filteredData) {
+      bundledFilesAccumulator.add(asset.file);
+    }
+  }
 }
 
 Future<List<File>> installCodeAssets({

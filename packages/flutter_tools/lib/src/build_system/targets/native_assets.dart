@@ -59,6 +59,7 @@ class BuildHooks extends Target {
     final (
       results: SerializedBuildResults results,
       dependencies: List<Uri> dependencies,
+      filesToBeBundled: List<Uri> filesToBeBundled,
     ) = await runFlutterSpecificBuildHooks(
       environmentDefines: environment.defines,
       buildRunner: buildRunner,
@@ -78,7 +79,11 @@ class BuildHooks extends Target {
 
     final depfile = Depfile(
       <File>[for (final Uri dependency in dependencies) fileSystem.file(dependency)],
-      <File>[fileSystem.file(dartBuildOutputJsonFile)],
+      <File>[
+        fileSystem.file(dartBuildOutputJsonFile),
+        for (final Uri uri in filesToBeBundled)
+          if (!dependencies.contains(uri)) fileSystem.file(uri),
+      ],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
     if (!outputDepfile.parent.existsSync()) {
@@ -229,7 +234,8 @@ class LinkHooks extends Target {
       <File>[for (final Uri dependency in result.dependencies) fileSystem.file(dependency)],
       <File>[
         fileSystem.file(dartHookResultJsonFile),
-        for (final Uri uri in result.filesToBeBundled) fileSystem.file(uri),
+        for (final Uri uri in result.filesToBeBundled)
+          if (!result.dependencies.contains(uri)) fileSystem.file(uri),
       ],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
