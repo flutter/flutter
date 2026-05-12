@@ -367,8 +367,7 @@ void main() {
 
       final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
       expect(assetDirectory.childFile('kernel_blob.bin'), exists);
-      expect(assetDirectory.childFile('vm_snapshot_data'), exists);
-      expect(assetDirectory.childFile('isolate_snapshot_data'), exists);
+      expect(assetDirectory.childFile('snapshot_data.bin'), exists);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -579,8 +578,7 @@ void main() {
 
       final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
       expect(assetDirectory.childFile('kernel_blob.bin'), exists);
-      expect(assetDirectory.childFile('vm_snapshot_data'), exists);
-      expect(assetDirectory.childFile('isolate_snapshot_data'), exists);
+      expect(assetDirectory.childFile('snapshot_data.bin'), exists);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -672,8 +670,7 @@ void main() {
 
       final Directory assetDirectory = frameworkDirectory.childDirectory('flutter_assets');
       expect(assetDirectory.childFile('kernel_blob.bin'), isNot(exists));
-      expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
-      expect(assetDirectory.childFile('isolate_snapshot_data'), isNot(exists));
+      expect(assetDirectory.childFile('snapshot_data.bin'), isNot(exists));
       expect(fakeAnalytics.sentEvents, isEmpty);
     },
     overrides: <Type, Generator>{

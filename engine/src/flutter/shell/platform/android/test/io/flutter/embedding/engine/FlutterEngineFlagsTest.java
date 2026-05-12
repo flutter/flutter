@@ -70,8 +70,8 @@ public class FlutterEngineFlagsTest {
     assertEquals(FlutterEngineFlags.OLD_GEN_HEAP_SIZE, flag);
 
     // Test with flag.
-    flag = FlutterEngineFlags.getFlagFromIntentKey("vm-snapshot-data");
-    assertEquals(FlutterEngineFlags.VM_SNAPSHOT_DATA, flag);
+    flag = FlutterEngineFlags.getFlagFromIntentKey("snapshot-data");
+    assertEquals(FlutterEngineFlags.SNAPSHOT_DATA, flag);
   }
 
   @Test
@@ -86,7 +86,7 @@ public class FlutterEngineFlagsTest {
 
   @Test
   public void isDisabled_returnsFalseWhenFlagIsNotDisabled() {
-    assertFalse(FlutterEngineFlags.isDisabled(FlutterEngineFlags.VM_SNAPSHOT_DATA));
+    assertFalse(FlutterEngineFlags.isDisabled(FlutterEngineFlags.SNAPSHOT_DATA));
   }
 
   // Deprecated flags are tested in this test.
@@ -105,7 +105,6 @@ public class FlutterEngineFlagsTest {
 
   @Test
   public void getReplacementFlagIfDeprecated_returnsNullWhenFlagIsNotDeprecated() {
-    assertNull(
-        FlutterEngineFlags.getReplacementFlagIfDeprecated(FlutterEngineFlags.VM_SNAPSHOT_DATA));
+    assertNull(FlutterEngineFlags.getReplacementFlagIfDeprecated(FlutterEngineFlags.SNAPSHOT_DATA));
   }
 }

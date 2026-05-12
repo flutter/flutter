@@ -198,9 +198,9 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [BuildMode
     case Artifact.flutterMacOSXcframework:
       return 'FlutterMacOS.xcframework';
     case Artifact.vmSnapshotData:
-      return 'vm_isolate_snapshot.bin';
+      return 'snapshot_data.bin';
     case Artifact.isolateSnapshotData:
-      return 'isolate_snapshot.bin';
+      return 'snapshot_data.bin';
     case Artifact.icuData:
       return 'icudtl.dat';
     case Artifact.platformKernelDill:

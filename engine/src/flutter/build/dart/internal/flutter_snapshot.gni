@@ -118,28 +118,19 @@ template("flutter_snapshot") {
       }
     } else {
       deps += [ "//flutter/lib/snapshot:generate_snapshot_bin" ]
-      vm_snapshot_data =
-          "$root_gen_dir/flutter/lib/snapshot/vm_isolate_snapshot.bin"
-      snapshot_data = "$root_gen_dir/flutter/lib/snapshot/isolate_snapshot.bin"
-      isolate_snapshot_data = "$target_gen_dir/isolate_snapshot_data"
-      isolate_snapshot_instructions = "$target_gen_dir/isolate_snapshot_instr"
+      snapshot_data = "$target_gen_dir/snapshot_data.bin"
+      snapshot_text = "$target_gen_dir/snapshot_text.bin"
 
-      inputs += [
-        vm_snapshot_data,
-        snapshot_data,
-      ]
+      inputs += []
 
       outputs += [
-        isolate_snapshot_data,
-        isolate_snapshot_instructions,
+        snapshot_data,
+        snapshot_text,
       ]
       args += [
-        "--snapshot_kind=app-jit",
-        "--load_vm_snapshot_data=" + rebase_path(vm_snapshot_data),
-        "--load_isolate_snapshot_data=" + rebase_path(snapshot_data),
-        "--isolate_snapshot_data=" + rebase_path(isolate_snapshot_data),
-        "--isolate_snapshot_instructions=" +
-            rebase_path(isolate_snapshot_instructions),
+        "--snapshot_kind=app",
+        "--snapshot_data=" + rebase_path(snapshot_data),
+        "--snapshot_text=" + rebase_path(snapshot_text),
       ]
     }
 

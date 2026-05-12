@@ -27,20 +27,16 @@ class ElfSnapshot {
   bool Load(fdio_ns_t* namespc, const std::string& path);
   bool Load(int dirfd, const std::string& path);
 
-  const uint8_t* VmData() const { return vm_data_; }
-  const uint8_t* VmInstrs() const { return vm_instrs_; }
-  const uint8_t* IsolateData() const { return isolate_data_; }
-  const uint8_t* IsolateInstrs() const { return isolate_instrs_; }
+  const uint8_t* SnapshotData() const { return snapshot_data_; }
+  const uint8_t* SnapshotText() const { return snapshot_text_; }
 
  private:
   bool Load(const fml::UniqueFD& fd);
 
   void* handle_ = nullptr;
 
-  const uint8_t* vm_data_ = nullptr;
-  const uint8_t* vm_instrs_ = nullptr;
-  const uint8_t* isolate_data_ = nullptr;
-  const uint8_t* isolate_instrs_ = nullptr;
+  const uint8_t* snapshot_data_ = nullptr;
+  const uint8_t* snapshot_text_ = nullptr;
 
   // Disallow copy and assignment.
   ElfSnapshot(const ElfSnapshot&) = delete;

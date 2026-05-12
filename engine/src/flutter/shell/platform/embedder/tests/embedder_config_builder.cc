@@ -62,22 +62,12 @@ void EmbedderConfigBuilder::SetAssetsPath() {
 }
 
 void EmbedderConfigBuilder::SetSnapshots() {
-  if (auto mapping = context_.GetVMSnapshotData()) {
-    project_args_.vm_snapshot_data = mapping->GetMapping();
-    project_args_.vm_snapshot_data_size = mapping->GetSize();
-  }
-
-  if (auto mapping = context_.GetVMSnapshotInstructions()) {
-    project_args_.vm_snapshot_instructions = mapping->GetMapping();
-    project_args_.vm_snapshot_instructions_size = mapping->GetSize();
-  }
-
-  if (auto mapping = context_.GetIsolateSnapshotData()) {
+  if (auto mapping = context_.GetSnapshotData()) {
     project_args_.isolate_snapshot_data = mapping->GetMapping();
     project_args_.isolate_snapshot_data_size = mapping->GetSize();
   }
 
-  if (auto mapping = context_.GetIsolateSnapshotInstructions()) {
+  if (auto mapping = context_.GetSnapshotInstructions()) {
     project_args_.isolate_snapshot_instructions = mapping->GetMapping();
     project_args_.isolate_snapshot_instructions_size = mapping->GetSize();
   }

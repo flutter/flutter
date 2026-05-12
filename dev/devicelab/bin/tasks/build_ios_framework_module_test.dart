@@ -132,7 +132,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
       'ios-arm64_x86_64-simulator',
       'App.framework',
       'flutter_assets',
-      'vm_snapshot_data',
+      'snapshot_data.bin',
     ),
   );
 
@@ -144,7 +144,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
 
   final String aotSymbols = await dumpSymbolTable(debugAppFrameworkPath);
 
-  if (aotSymbols.contains('architecture') || aotSymbols.contains('_kDartVmSnapshot')) {
+  if (aotSymbols.contains('architecture') || aotSymbols.contains('_kDartSnapshot')) {
     throw TaskResult.failure('Debug App.framework contains AOT');
   }
 
@@ -164,7 +164,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
 
     final String aotSymbols = await dumpSymbolTable(appFrameworkPath);
 
-    if (!aotSymbols.contains('_kDartVmSnapshot')) {
+    if (!aotSymbols.contains('_kDartSnapshot')) {
       throw TaskResult.failure('$mode App.framework missing Dart AOT');
     }
 
@@ -176,7 +176,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
         'ios-arm64',
         'App.framework',
         'flutter_assets',
-        'vm_snapshot_data',
+        'snapshot_data.bin',
       ),
     );
 
@@ -537,7 +537,7 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
       'App.framework',
       'Resources',
       'flutter_assets',
-      'vm_snapshot_data',
+      'snapshot_data.bin',
     ),
   );
 
@@ -551,7 +551,7 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
 
   final String aotSymbols = await dumpSymbolTable(debugAppFrameworkPath);
 
-  if (aotSymbols.contains('architecture') || aotSymbols.contains('_kDartVmSnapshot')) {
+  if (aotSymbols.contains('architecture') || aotSymbols.contains('_kDartSnapshot')) {
     throw TaskResult.failure('Debug App.framework contains AOT');
   }
 
@@ -571,7 +571,7 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
 
     final String aotSymbols = await dumpSymbolTable(appFrameworkPath);
 
-    if (!aotSymbols.contains('_kDartVmSnapshot')) {
+    if (!aotSymbols.contains('_kDartSnapshot')) {
       throw TaskResult.failure('$mode App.framework missing Dart AOT');
     }
 
@@ -584,7 +584,7 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
         'App.framework',
         'Resources',
         'flutter_assets',
-        'vm_snapshot_data',
+        'snapshot_data.bin',
       ),
     );
 

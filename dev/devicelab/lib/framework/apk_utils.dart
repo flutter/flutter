@@ -19,7 +19,7 @@ final List<String> flutterAssets = <String>[
 final List<String> debugAssets = <String>[
   'assets/flutter_assets/isolate_snapshot_data',
   'assets/flutter_assets/kernel_blob.bin',
-  'assets/flutter_assets/vm_snapshot_data',
+  'assets/flutter_assets/snapshot_data.bin',
 ];
 
 final List<String> baseApkFiles = <String>['classes.dex', 'AndroidManifest.xml'];

@@ -37,7 +37,6 @@ class DartVMData {
   ///
   static std::shared_ptr<const DartVMData> Create(
       const Settings& settings,
-      fml::RefPtr<const DartSnapshot> vm_snapshot,
       fml::RefPtr<const DartSnapshot> isolate_snapshot);
 
   //----------------------------------------------------------------------------
@@ -54,14 +53,6 @@ class DartVMData {
   const Settings& GetSettings() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Gets the VM snapshot. This can be in the call to bootstrap
-  ///             the Dart VM via `Dart_Initialize`.
-  ///
-  /// @return     The VM snapshot.
-  ///
-  const DartSnapshot& GetVMSnapshot() const;
-
-  //----------------------------------------------------------------------------
   /// @brief      Get the isolate snapshot necessary to launch isolates in the
   ///             Dart VM. The Dart VM instance in which these isolates are
   ///             launched must be the same as the VM created using snapshot
@@ -69,7 +60,7 @@ class DartVMData {
   ///
   /// @return     The isolate snapshot.
   ///
-  fml::RefPtr<const DartSnapshot> GetIsolateSnapshot() const;
+  fml::RefPtr<const DartSnapshot> GetSnapshot() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Get the isolate snapshot used to launch the service isolate
@@ -89,12 +80,10 @@ class DartVMData {
 
  private:
   const Settings settings_;
-  const fml::RefPtr<const DartSnapshot> vm_snapshot_;
   const fml::RefPtr<const DartSnapshot> isolate_snapshot_;
   const fml::RefPtr<const DartSnapshot> service_isolate_snapshot_;
 
   DartVMData(const Settings& settings,
-             fml::RefPtr<const DartSnapshot> vm_snapshot,
              fml::RefPtr<const DartSnapshot> isolate_snapshot,
              fml::RefPtr<const DartSnapshot> service_isolate_snapshot);
 

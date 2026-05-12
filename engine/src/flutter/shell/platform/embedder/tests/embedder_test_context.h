@@ -63,13 +63,9 @@ class EmbedderTestContext {
 
   const std::string& GetAssetsPath() const;
 
-  const fml::Mapping* GetVMSnapshotData() const;
+  const fml::Mapping* GetSnapshotData() const;
 
-  const fml::Mapping* GetVMSnapshotInstructions() const;
-
-  const fml::Mapping* GetIsolateSnapshotData() const;
-
-  const fml::Mapping* GetIsolateSnapshotInstructions() const;
+  const fml::Mapping* GetSnapshotInstructions() const;
 
   FlutterEngineAOTData GetAOTData() const;
 
@@ -126,10 +122,8 @@ class EmbedderTestContext {
 
   std::string assets_path_;
   ELFAOTSymbols aot_symbols_;
-  std::unique_ptr<fml::Mapping> vm_snapshot_data_;
-  std::unique_ptr<fml::Mapping> vm_snapshot_instructions_;
-  std::unique_ptr<fml::Mapping> isolate_snapshot_data_;
-  std::unique_ptr<fml::Mapping> isolate_snapshot_instructions_;
+  std::unique_ptr<fml::Mapping> snapshot_data_;
+  std::unique_ptr<fml::Mapping> snapshot_text_;
   UniqueAOTData aot_data_;
   std::vector<fml::closure> isolate_create_callbacks_;
   std::shared_ptr<TestDartNativeResolver> native_resolver_;

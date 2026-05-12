@@ -155,16 +155,11 @@ bool ElfSnapshot::Load(const fml::UniqueFD& fd) {
     return false;
   }
 
-  vm_data_ =
-      reinterpret_cast<const uint8_t*>(dlsym(handle_, kVmSnapshotDataCSymbol));
-  vm_instrs_ = reinterpret_cast<const uint8_t*>(
-      dlsym(handle_, kVmSnapshotInstructionsCSymbol));
-  isolate_data_ = reinterpret_cast<const uint8_t*>(
-      dlsym(handle_, kIsolateSnapshotDataCSymbol));
-  isolate_instrs_ = reinterpret_cast<const uint8_t*>(
-      dlsym(handle_, kIsolateSnapshotInstructionsCSymbol));
-  if (vm_data_ == nullptr || vm_instrs_ == nullptr ||
-      isolate_data_ == nullptr || isolate_instrs_ == nullptr) {
+  snapshot_data_ =
+      reinterpret_cast<const uint8_t*>(dlsym(handle_, kSnapshotDataCSymbol));
+  snapshot_text_ =
+      reinterpret_cast<const uint8_t*>(dlsym(handle_, kSnapshotTextCSymbol));
+  if (snapshot_data_ == nullptr || snapshot_text_ == nullptr) {
     FML_LOG(ERROR) << "Failed to load ELF symbols";
     return false;
   }

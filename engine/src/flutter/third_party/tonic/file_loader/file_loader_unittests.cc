@@ -16,9 +16,8 @@ using FileLoaderTest = FixtureTest;
 TEST_F(FileLoaderTest, CanonicalizesFileUrlCorrectly) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   auto settings = CreateSettingsForFixture();
-  auto vm_snapshot = DartSnapshot::VMSnapshotFromSettings(settings);
   auto isolate_snapshot = DartSnapshot::IsolateSnapshotFromSettings(settings);
-  auto vm_ref = DartVMRef::Create(settings, vm_snapshot, isolate_snapshot);
+  auto vm_ref = DartVMRef::Create(settings, isolate_snapshot);
   ASSERT_TRUE(vm_ref);
 
   TaskRunners task_runners(GetCurrentTestName(),    //

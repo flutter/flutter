@@ -39,14 +39,10 @@ void EmbedderTestContext::SetupAOTMappingsIfNecessary() {
   if (!DartVM::IsRunningPrecompiledCode()) {
     return;
   }
-  vm_snapshot_data_ =
-      std::make_unique<fml::NonOwnedMapping>(aot_symbols_.vm_snapshot_data, 0u);
-  vm_snapshot_instructions_ = std::make_unique<fml::NonOwnedMapping>(
-      aot_symbols_.vm_snapshot_instrs, 0u);
-  isolate_snapshot_data_ =
-      std::make_unique<fml::NonOwnedMapping>(aot_symbols_.vm_isolate_data, 0u);
-  isolate_snapshot_instructions_ = std::make_unique<fml::NonOwnedMapping>(
-      aot_symbols_.vm_isolate_instrs, 0u);
+  snapshot_data_ =
+      std::make_unique<fml::NonOwnedMapping>(aot_symbols_.snapshot_data, 0u);
+  snapshot_text_ =
+      std::make_unique<fml::NonOwnedMapping>(aot_symbols_.snapshot_text, 0u);
 }
 
 void EmbedderTestContext::SetupAOTDataIfNecessary() {
@@ -71,21 +67,12 @@ const std::string& EmbedderTestContext::GetAssetsPath() const {
   return assets_path_;
 }
 
-const fml::Mapping* EmbedderTestContext::GetVMSnapshotData() const {
-  return vm_snapshot_data_.get();
+const fml::Mapping* EmbedderTestContext::GetSnapshotData() const {
+  return snapshot_data_.get();
 }
 
-const fml::Mapping* EmbedderTestContext::GetVMSnapshotInstructions() const {
-  return vm_snapshot_instructions_.get();
-}
-
-const fml::Mapping* EmbedderTestContext::GetIsolateSnapshotData() const {
-  return isolate_snapshot_data_.get();
-}
-
-const fml::Mapping* EmbedderTestContext::GetIsolateSnapshotInstructions()
-    const {
-  return isolate_snapshot_instructions_.get();
+const fml::Mapping* EmbedderTestContext::GetSnapshotInstructions() const {
+  return snapshot_text_.get();
 }
 
 FlutterEngineAOTData EmbedderTestContext::GetAOTData() const {

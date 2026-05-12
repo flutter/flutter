@@ -40,11 +40,6 @@ class DartRunner : public fuchsia::component::runner::ComponentRunner {
   fidl::BindingSet<fuchsia::component::runner::ComponentRunner>
       component_runner_bindings_;
 
-#if !defined(AOT_RUNTIME)
-  dart_utils::MappedResource vm_snapshot_data_;
-  dart_utils::MappedResource vm_snapshot_instructions_;
-#endif
-
   // Disallow copy and assignment.
   DartRunner(const DartRunner&) = delete;
   DartRunner& operator=(const DartRunner&) = delete;

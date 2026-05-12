@@ -1739,15 +1739,13 @@ FlutterEngineResult FlutterEngineCreateAOTData(
       // Dart doesn't implement Dart_LoadELF on Fuchsia
       Dart_LoadedElf* loaded_elf = nullptr;
 #else
-      Dart_LoadedElf* loaded_elf = Dart_LoadELF(
-          source->elf_path,               // file path
-          0,                              // file offset
-          &error,                         // error (out)
-          &aot_data->vm_snapshot_data,    // vm snapshot data (out)
-          &aot_data->vm_snapshot_instrs,  // vm snapshot instr (out)
-          &aot_data->vm_isolate_data,     // vm isolate data (out)
-          &aot_data->vm_isolate_instrs    // vm isolate instr (out)
-      );
+      Dart_LoadedElf* loaded_elf =
+          Dart_LoadELF2(source->elf_path,             // file path
+                        0,                            // file offset
+                        &error,                       // error (out)
+                        &aot_data->vm_isolate_data,   // vm isolate data (out)
+                        &aot_data->vm_isolate_instrs  // vm isolate instr (out)
+          );
 #endif
 
       if (loaded_elf == nullptr) {

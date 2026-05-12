@@ -128,7 +128,7 @@ std::unique_ptr<AutoIsolateShutdown> RunDartCodeInIsolateOnUITaskRunner(
   auto isolate =
       DartIsolate::CreateRunningRootIsolate(
           settings,                            // settings
-          vm_data->GetIsolateSnapshot(),       // isolate snapshot
+          vm_data->GetSnapshot(),              // isolate snapshot
           std::move(platform_configuration),   // platform configuration
           DartIsolate::Flags{},                // flags
           nullptr,                             // root isolate create callback

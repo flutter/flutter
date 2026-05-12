@@ -61,13 +61,7 @@ void main() {
 
     expect(
       fileSystem
-          .file(fileSystem.path.join('out', 'flutter_assets', 'isolate_snapshot_data'))
-          .existsSync(),
-      true,
-    );
-    expect(
-      fileSystem
-          .file(fileSystem.path.join('out', 'flutter_assets', 'vm_snapshot_data'))
+          .file(fileSystem.path.join('out', 'flutter_assets', 'snapshot_data.bin'))
           .existsSync(),
       true,
     );
@@ -105,11 +99,7 @@ void main() {
     await const DebugAndroidApplication().build(environment);
 
     expect(
-      fileSystem.file(fileSystem.path.join('out', 'flutter_assets', 'isolate_snapshot_data')),
-      exists,
-    );
-    expect(
-      fileSystem.file(fileSystem.path.join('out', 'flutter_assets', 'vm_snapshot_data')),
+      fileSystem.file(fileSystem.path.join('out', 'flutter_assets', 'snapshot_data.bin')),
       exists,
     );
     expect(
@@ -578,13 +568,7 @@ void main() {
 
       expect(
         fileSystem
-            .file(fileSystem.path.join('out', 'flutter_assets', 'isolate_snapshot_data'))
-            .existsSync(),
-        true,
-      );
-      expect(
-        fileSystem
-            .file(fileSystem.path.join('out', 'flutter_assets', 'vm_snapshot_data'))
+            .file(fileSystem.path.join('out', 'flutter_assets', 'snapshot_data.bin'))
             .existsSync(),
         true,
       );

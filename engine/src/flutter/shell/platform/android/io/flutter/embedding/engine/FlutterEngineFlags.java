@@ -196,22 +196,20 @@ public final class FlutterEngineFlags {
       new Flag("--merged-platform-ui-thread", "MergedPlatformUIThread", true);
 
   /**
-   * Specifies the path to the VM snapshot data file.
+   * Specifies the path to the snapshot data file.
    *
    * <p>Allowed in release to support different snapshot configurations. Only settable via the
    * manifest.
    */
-  public static final Flag VM_SNAPSHOT_DATA =
-      new Flag("--vm-snapshot-data=", "VmSnapshotData", true);
+  public static final Flag SNAPSHOT_DATA = new Flag("--snapshot-data=", "SnapshotData", true);
 
   /**
-   * Specifies the path to the isolate snapshot data file.
+   * Specifies the path to the snapshot text file.
    *
    * <p>Allowed in release to support different snapshot configurations. Only settable via the
    * manifest.
    */
-  public static final Flag ISOLATE_SNAPSHOT_DATA =
-      new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
+  public static final Flag SNAPSHOT_TEXT = new Flag("--snapshot-text=", "SnapshotText", true);
 
   /**
    * Enables Hybrid Composition++.
@@ -463,8 +461,8 @@ public final class FlutterEngineFlags {
               DEPRECATED_AOT_SHARED_LIBRARY_NAME,
               DEPRECATED_FLUTTER_ASSETS_DIR,
               OLD_GEN_HEAP_SIZE,
-              VM_SNAPSHOT_DATA,
-              ISOLATE_SNAPSHOT_DATA,
+              SNAPSHOT_DATA,
+              SNAPSHOT_TEXT,
               PURGE_PERSISTENT_CACHE,
               TRACE_STARTUP,
               LEAK_VM,

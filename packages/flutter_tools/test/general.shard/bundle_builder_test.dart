@@ -37,8 +37,7 @@ void main() {
         Environment environment,
       ) {
         environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
-        environment.outputDir.childFile('isolate_snapshot_data').createSync();
-        environment.outputDir.childFile('vm_snapshot_data').createSync();
+        environment.outputDir.childFile('snapshot_data.bin').createSync();
         environment.outputDir.childFile('LICENSE').createSync(recursive: true);
       });
 
@@ -170,8 +169,7 @@ void main() {
       ) {
         env = environment;
         environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
-        environment.outputDir.childFile('isolate_snapshot_data').createSync();
-        environment.outputDir.childFile('vm_snapshot_data').createSync();
+        environment.outputDir.childFile('snapshot_data.bin').createSync();
         environment.outputDir.childFile('LICENSE').createSync(recursive: true);
       });
 

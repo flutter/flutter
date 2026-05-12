@@ -503,22 +503,14 @@ abstract class MacOSBundleFlutterAssets extends Target {
       }
       // Copy precompiled runtimes.
       try {
-        final String vmSnapshotData = environment.artifacts.getArtifactPath(
-          Artifact.vmSnapshotData,
-          platform: TargetPlatform.darwin,
-          mode: BuildMode.debug,
-        );
         final String isolateSnapshotData = environment.artifacts.getArtifactPath(
           Artifact.isolateSnapshotData,
           platform: TargetPlatform.darwin,
           mode: BuildMode.debug,
         );
         environment.fileSystem
-            .file(vmSnapshotData)
-            .copySync(assetDirectory.childFile('vm_snapshot_data').path);
-        environment.fileSystem
             .file(isolateSnapshotData)
-            .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
+            .copySync(assetDirectory.childFile('snapshot_data.bin').path);
       } on Exception catch (err) {
         throw Exception('Failed to copy precompiled runtimes: $err');
       }
@@ -601,10 +593,7 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
       '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/kernel_blob.bin',
     ),
     const Source.pattern(
-      '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data',
-    ),
-    const Source.pattern(
-      '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data',
+      '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/snapshot_data.bin',
     ),
   ];
 }

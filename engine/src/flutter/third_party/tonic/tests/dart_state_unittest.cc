@@ -16,9 +16,8 @@ using DartState = FixtureTest;
 TEST_F(DartState, CurrentWithNullDataDoesNotSegfault) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   auto settings = CreateSettingsForFixture();
-  auto vm_snapshot = DartSnapshot::VMSnapshotFromSettings(settings);
   auto isolate_snapshot = DartSnapshot::IsolateSnapshotFromSettings(settings);
-  auto vm_ref = DartVMRef::Create(settings, vm_snapshot, isolate_snapshot);
+  auto vm_ref = DartVMRef::Create(settings, isolate_snapshot);
   ASSERT_TRUE(vm_ref);
   auto vm_data = vm_ref.GetVMData();
   ASSERT_TRUE(vm_data);
@@ -37,8 +36,8 @@ TEST_F(DartState, CurrentWithNullDataDoesNotSegfault) {
   isolate_flags.snapshot_is_dontneed_safe = isolate_snapshot->IsDontNeedSafe();
   char* error;
   Dart_CreateIsolateGroup(
-      "main.dart", "main", vm_data->GetIsolateSnapshot()->GetDataMapping(),
-      vm_data->GetIsolateSnapshot()->GetInstructionsMapping(), &isolate_flags,
+      "main.dart", "main", vm_data->GetSnapshot()->GetDataMapping(),
+      vm_data->GetSnapshot()->GetInstructionsMapping(), &isolate_flags,
       nullptr, nullptr, &error);
   ASSERT_FALSE(error) << error;
   ::free(error);
@@ -70,7 +69,7 @@ TEST_F(DartState, IsShuttingDown) {
   context.advisory_script_entrypoint = "main";
   auto weak_isolate = DartIsolate::CreateRunningRootIsolate(
       vm_data->GetSettings(),              // settings
-      vm_data->GetIsolateSnapshot(),       // isolate snapshot
+      vm_data->GetSnapshot(),       // isolate snapshot
       nullptr,                             // platform configuration
       DartIsolate::Flags{},                // flags
       nullptr,                             // root_isolate_create_callback

@@ -31,10 +31,8 @@ using UniqueLoadedELF = std::unique_ptr<Dart_LoadedElf, LoadedELFDeleter>;
 
 struct ELFAOTSymbols {
   UniqueLoadedELF loaded_elf;
-  const uint8_t* vm_snapshot_data = nullptr;
-  const uint8_t* vm_snapshot_instrs = nullptr;
-  const uint8_t* vm_isolate_data = nullptr;
-  const uint8_t* vm_isolate_instrs = nullptr;
+  const uint8_t* snapshot_data = nullptr;
+  const uint8_t* snapshot_text = nullptr;
 };
 
 //------------------------------------------------------------------------------

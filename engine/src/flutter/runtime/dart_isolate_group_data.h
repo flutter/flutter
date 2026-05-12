@@ -45,7 +45,7 @@ class DartIsolateGroupData : public PlatformMessageHandlerStorage {
 
   const Settings& GetSettings() const;
 
-  fml::RefPtr<const DartSnapshot> GetIsolateSnapshot() const;
+  fml::RefPtr<const DartSnapshot> GetSnapshot() const;
 
   const std::string& GetAdvisoryScriptURI() const;
 

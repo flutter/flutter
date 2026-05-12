@@ -41,45 +41,15 @@ namespace flutter {
 class DartSnapshot : public fml::RefCountedThreadSafe<DartSnapshot> {
  public:
   //----------------------------------------------------------------------------
-  /// The symbol name of the heap data of the core snapshot in a dynamic library
-  /// or currently loaded process.
-  ///
-  static const char* kVMDataSymbol;
-  //----------------------------------------------------------------------------
-  /// The symbol name of the instructions data of the core snapshot in a dynamic
-  /// library or currently loaded process.
-  ///
-  static const char* kVMInstructionsSymbol;
-  //----------------------------------------------------------------------------
   /// The symbol name of the heap data of the isolate snapshot in a dynamic
   /// library or currently loaded process.
   ///
-  static const char* kIsolateDataSymbol;
+  static const char* kSnapshotDataSymbol;
   //----------------------------------------------------------------------------
   /// The symbol name of the instructions data of the isolate snapshot in a
   /// dynamic library or currently loaded process.
   ///
-  static const char* kIsolateInstructionsSymbol;
-
-  //----------------------------------------------------------------------------
-  /// @brief      From the fields present in the given settings object, infer
-  ///             the core snapshot.
-  ///
-  /// @attention  Depending on the runtime mode of the Flutter application and
-  ///             the target that Flutter is running on, a complex fallback
-  ///             mechanism is in place to infer the locations of each snapshot
-  ///             buffer. If the caller wants to explicitly specify the buffers
-  ///             of the core snapshot, the `Settings::vm_snapshot_data` and
-  ///             `Settings::vm_snapshots_instr` mapping fields may be used.
-  ///             This specification takes precedence over all fallback search
-  ///             paths.
-  ///
-  /// @param[in]  settings  The settings to infer the core snapshot from.
-  ///
-  /// @return     A valid core snapshot or nullptr.
-  ///
-  static fml::RefPtr<const DartSnapshot> VMSnapshotFromSettings(
-      const Settings& settings);
+  static const char* kSnapshotTextSymbol;
 
   //----------------------------------------------------------------------------
   /// @brief      From the fields present in the given settings object, infer

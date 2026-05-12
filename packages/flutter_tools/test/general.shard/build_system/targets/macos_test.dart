@@ -459,11 +459,7 @@ void main() {
         contains('io.flutter.flutter.app'),
       );
       expect(
-        fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
-        exists,
-      );
-      expect(
-        fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+        fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/snapshot_data.bin'),
         exists,
       );
     },
@@ -561,10 +557,10 @@ void main() {
     'release/profile macOS application has no blob or precompiled runtime',
     () async {
       fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
+          .file('bin/cache/artifacts/engine/darwin-x64/snapshot_data.bin')
           .createSync(recursive: true);
       fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
+          .file('bin/cache/artifacts/engine/darwin-x64/snapshot_text.bin')
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
@@ -578,11 +574,7 @@ void main() {
         isNot(exists),
       );
       expect(
-        fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/vm_snapshot_data'),
-        isNot(exists),
-      );
-      expect(
-        fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
+        fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/snapshot_data.bin'),
         isNot(exists),
       );
     },
@@ -596,10 +588,10 @@ void main() {
     'release macOS application creates App.framework.dSYM',
     () async {
       fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
+          .file('bin/cache/artifacts/engine/darwin-x64/snapshot_data.bin')
           .createSync(recursive: true);
       fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
+          .file('bin/cache/artifacts/engine/darwin-x64/snapshot_text.bin')
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
       fileSystem
@@ -623,10 +615,10 @@ void main() {
     'release/profile macOS application updates when App.framework updates',
     () async {
       fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
+          .file('bin/cache/artifacts/engine/darwin-x64/snapshot_data.bin')
           .createSync(recursive: true);
       fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
+          .file('bin/cache/artifacts/engine/darwin-x64/snapshot_text.bin')
           .createSync(recursive: true);
       final File inputFramework =
           fileSystem.file(fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'))
@@ -663,10 +655,10 @@ void main() {
       environment.defines[kXcodeAction] = 'install';
 
       fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
+          .file('bin/cache/artifacts/engine/darwin-x64/snapshot_data.bin')
           .createSync(recursive: true);
       fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
+          .file('bin/cache/artifacts/engine/darwin-x64/snapshot_text.bin')
           .createSync(recursive: true);
       fileSystem
           .file(fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'))
