@@ -27,7 +27,7 @@ import 'dimensions_provider.dart';
 /// to be effective.
 class CustomElementDimensionsProvider extends DimensionsProvider {
   /// Limit size of canvas to render into. Anything larger than 16384 breaks rendering
-  static final double _maxElementSize = 16384;
+  static final double _maxElementSize = 16384.0;
 
   /// Creates a [CustomElementDimensionsProvider] from a [_hostElement].
   CustomElementDimensionsProvider(this._hostElement, {Stream<double>? onDprChange}) {
