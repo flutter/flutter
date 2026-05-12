@@ -90,7 +90,7 @@ bool CompilerTestBase::CanCompileAndReflect(
     SourceType source_type,
     SourceLanguage source_language,
     const char* entry_point_name,
-    ESSLLanguageVersion gles_language_version) const {
+    ESSLLanguageVersion gles_language_version) {
   std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping(fixture_name);
   if (!fixture || !fixture->GetMapping()) {
