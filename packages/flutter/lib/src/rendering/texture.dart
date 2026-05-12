@@ -70,7 +70,7 @@ class TextureBox extends RenderBox {
   }
 
   void _handleTextureFrameAvailable(int textureId) {
-    if (textureId == _textureId) {
+    if (!_freeze && textureId == _textureId) {
       markNeedsPaint();
     }
   }
