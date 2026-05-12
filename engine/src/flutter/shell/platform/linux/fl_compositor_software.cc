@@ -55,7 +55,7 @@ static gboolean fl_compositor_software_present_layers(
                                   ? cairo_image_surface_get_data(self->surface)
                                   : nullptr;
     unsigned char* data =
-        static_cast<unsigned char*>(realloc(old_data, allocation_length));
+        static_cast<unsigned char*>(g_realloc(old_data, allocation_length));
     memcpy(data, backing_store->software.allocation, allocation_length);
     cairo_surface_destroy(self->surface);
     self->surface = cairo_image_surface_create_for_data(
@@ -133,7 +133,7 @@ static void fl_compositor_software_dispose(GObject* object) {
 
   g_clear_object(&self->task_runner);
   if (self->surface != nullptr) {
-    free(cairo_image_surface_get_data(self->surface));
+    g_free(cairo_image_surface_get_data(self->surface));
   }
   g_clear_pointer(&self->surface, cairo_surface_destroy);
   g_mutex_clear(&self->frame_mutex);

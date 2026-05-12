@@ -143,7 +143,7 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
             missingCodePointCount,
           );
           assert(missingCodePointCount == returnedCodePointCount);
-          renderer.fontCollection.fontFallbackManager!.addMissingCodePoints(
+          FallbackFontService.instance.addMissingCodePoints(
             List<int>.generate(missingCodePointCount, (int index) => codePointBuffer[index]),
           );
         });

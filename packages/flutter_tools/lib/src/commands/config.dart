@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../src/android/android_sdk.dart';
-import '../../src/android/android_studio.dart';
+import '../android/android_sdk.dart';
+import '../android/android_studio.dart';
 import '../android/java.dart';
 import '../base/common.dart';
 import '../convert.dart';

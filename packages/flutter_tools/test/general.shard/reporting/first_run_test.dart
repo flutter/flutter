@@ -3,14 +3,22 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/reporting/first_run.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.flutterRoot = 'flutter';
+  });
+
   testWithoutContext('FirstRunMessenger delegates to the first run message', () {
     final FirstRunMessenger messenger = setUpFirstRunMessenger();
 
@@ -54,6 +62,28 @@ void main() {
       expect(messenger.shouldDisplayLicenseTerms(), false);
     },
   );
+
+  testUsingContext('Usage.printWelcome prints to stdout when not machine', () {
+    final logger = context.get<Logger>()! as BufferLogger;
+    final FirstRunMessenger messenger = setUpFirstRunMessenger(redisplayWelcomeMessage: true);
+    final usage = Usage(runningOnBot: false, firstRunMessenger: messenger);
+
+    usage.printWelcome();
+
+    expect(logger.statusText, contains('Welcome to Flutter'));
+    expect(logger.errorText, isEmpty);
+  }, overrides: <Type, Generator>{Logger: () => BufferLogger.test()});
+
+  testUsingContext('Usage.printWelcome prints to stderr when machine', () {
+    final logger = context.get<Logger>()! as MockLogger;
+    final FirstRunMessenger messenger = setUpFirstRunMessenger(redisplayWelcomeMessage: true);
+    final usage = Usage(runningOnBot: false, firstRunMessenger: messenger);
+
+    usage.printWelcome();
+
+    expect(logger.errorText, contains('Welcome to Flutter'));
+    expect(logger.statusText, isEmpty);
+  }, overrides: <Type, Generator>{Logger: () => MockLogger(machine: true)});
 }
 
 FirstRunMessenger setUpFirstRunMessenger({bool? redisplayWelcomeMessage, bool test = false}) {
@@ -79,4 +109,11 @@ class TestFirstRunMessenger extends FirstRunMessenger {
 
   @override
   String get licenseTerms => overrideLicenseTerms ?? super.licenseTerms;
+}
+
+class MockLogger extends BufferLogger {
+  MockLogger({bool machine = false}) : _isMachine = machine, super.test();
+  final bool _isMachine;
+  @override
+  bool get isMachine => _isMachine;
 }
