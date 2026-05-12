@@ -575,6 +575,228 @@ void main() async {
     await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  // A custom VertexLayout that matches the shader bundle's default for the
+  // UnlitVertex shader (one buffer at slot 0, vec2 position at offset 0)
+  // should produce identical pipeline behavior. This pins the shape of the
+  // VertexLayout/VertexBuffer/VertexAttribute/VertexFormat API and the FFI
+  // plumbing through createRenderPipeline.
+  test('Can render triangle with explicit VertexLayout', () async {
+    final RenderPassState state = createSimpleRenderPass();
+
+    final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
+    final gpu.RenderPipeline pipeline = gpu.gpuContext.createRenderPipeline(
+      library['UnlitVertex']!,
+      library['UnlitFragment']!,
+      vertexLayout: const gpu.VertexLayout(
+        buffers: <gpu.VertexBuffer>[
+          gpu.VertexBuffer(
+            strideInBytes: 8,
+            attributes: <gpu.VertexAttribute>[
+              gpu.VertexAttribute(name: 'position', format: gpu.VertexFormat.float32x2),
+            ],
+          ),
+        ],
+      ),
+    );
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(
+      float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
+    );
+    final gpu.BufferView vertInfo = transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime));
+    state.renderPass.bindVertexBuffer(vertices, 3);
+    state.renderPass.bindUniform(pipeline.vertexShader.getUniformSlot('VertInfo'), vertInfo);
+    state.renderPass.draw();
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test(
+    'createRenderPipeline rejects VertexLayout with wrong attribute format',
+    () async {
+      final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
+      try {
+        gpu.gpuContext.createRenderPipeline(
+          library['UnlitVertex']!,
+          library['UnlitFragment']!,
+          vertexLayout: const gpu.VertexLayout(
+            buffers: <gpu.VertexBuffer>[
+              gpu.VertexBuffer(
+                strideInBytes: 8,
+                attributes: <gpu.VertexAttribute>[
+                  // UnlitVertex declares a float `vec2 position`, so binding
+                  // a uint32x2 (different scalar type class) here must throw.
+                  // Component-count mismatches are NOT errors: a buffer can
+                  // supply more or fewer components than the shader reads,
+                  // matching the default-substitution rules every modern HAL
+                  // uses.
+                  gpu.VertexAttribute(name: 'position', format: gpu.VertexFormat.uint32x2),
+                ],
+              ),
+            ],
+          ),
+        );
+        fail('Expected exception for mismatched VertexFormat scalar type.');
+      } catch (e) {
+        expect(
+          e.toString(),
+          contains("format does not match the vertex shader's declared input type"),
+        );
+      }
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
+
+  test(
+    'createRenderPipeline rejects VertexAttribute that overruns stride',
+    () async {
+      final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
+      try {
+        gpu.gpuContext.createRenderPipeline(
+          library['UnlitVertex']!,
+          library['UnlitFragment']!,
+          vertexLayout: const gpu.VertexLayout(
+            buffers: <gpu.VertexBuffer>[
+              gpu.VertexBuffer(
+                strideInBytes: 8,
+                attributes: <gpu.VertexAttribute>[
+                  // float32x2 (8 bytes) at offset 4 with stride 8 overruns by 4.
+                  gpu.VertexAttribute(
+                    name: 'position',
+                    offsetInBytes: 4,
+                    format: gpu.VertexFormat.float32x2,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+        fail('Expected exception for offset+format overruning stride.');
+      } catch (e) {
+        expect(e.toString(), contains('overruns stride'));
+      }
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
+
+  test(
+    'createRenderPipeline rejects VertexLayout with overlapping attributes',
+    () async {
+      final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
+      try {
+        gpu.gpuContext.createRenderPipeline(
+          library['UnlitVertex']!,
+          library['UnlitFragment']!,
+          vertexLayout: const gpu.VertexLayout(
+            buffers: <gpu.VertexBuffer>[
+              gpu.VertexBuffer(
+                strideInBytes: 8,
+                attributes: <gpu.VertexAttribute>[
+                  // Two attributes both occupying bytes [0, 8) in the same
+                  // buffer. The second one isn't a real shader input, but
+                  // the overlap check fires before the name check.
+                  gpu.VertexAttribute(name: 'position', format: gpu.VertexFormat.float32x2),
+                  gpu.VertexAttribute(name: 'aliased', format: gpu.VertexFormat.float32x2),
+                ],
+              ),
+            ],
+          ),
+        );
+        fail('Expected exception for overlapping VertexAttributes.');
+      } catch (e) {
+        final msg = e.toString();
+        expect(msg, contains('overlaps'));
+        expect(msg, contains("'position'"));
+        expect(msg, contains("'aliased'"));
+      }
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
+
+  test(
+    'bindVertexBuffer throws RangeError for out-of-range slot',
+    () async {
+      final RenderPassState state = createSimpleRenderPass();
+      final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+      state.renderPass.bindPipeline(pipeline);
+
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      final gpu.BufferView vertices = transients.emplace(
+        float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
+      );
+
+      expect(() => state.renderPass.bindVertexBuffer(vertices, 3, slot: -1), throwsRangeError);
+      expect(() => state.renderPass.bindVertexBuffer(vertices, 3, slot: 16), throwsRangeError);
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
+
+  test(
+    'draw throws StateError on sparse vertex buffer bindings',
+    () async {
+      final RenderPassState state = createSimpleRenderPass();
+      final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+      state.renderPass.bindPipeline(pipeline);
+
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      final gpu.BufferView vertices = transients.emplace(
+        float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
+      );
+
+      // Bind only slot 1 (skipping slot 0). draw() must surface a clear
+      // error rather than letting the underlying HAL validation fail
+      // silently or render with an empty slot.
+      state.renderPass.bindVertexBuffer(vertices, 3, slot: 1);
+      expect(
+        () => state.renderPass.draw(),
+        throwsA(
+          isA<StateError>().having(
+            (StateError e) => e.message,
+            'message',
+            allOf(contains('sparse'), contains('slot(s) 0')),
+          ),
+        ),
+      );
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
+
+  test(
+    'createRenderPipeline rejects VertexAttribute with unknown name',
+    () async {
+      final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
+      try {
+        gpu.gpuContext.createRenderPipeline(
+          library['UnlitVertex']!,
+          library['UnlitFragment']!,
+          vertexLayout: const gpu.VertexLayout(
+            buffers: <gpu.VertexBuffer>[
+              gpu.VertexBuffer(
+                strideInBytes: 8,
+                attributes: <gpu.VertexAttribute>[
+                  gpu.VertexAttribute(
+                    name: 'nonexistent_attribute',
+                    format: gpu.VertexFormat.float32x2,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+        fail('Expected exception for unknown attribute name.');
+      } catch (e) {
+        expect(
+          e.toString(),
+          contains('does not match any input declared by the bound vertex shader'),
+        );
+      }
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
+
   // Renders a green triangle pointing downwards using polygon mode line.
   test('Can render triangle with polygon mode line.', () async {
     final RenderPassState state = createSimpleRenderPass();
