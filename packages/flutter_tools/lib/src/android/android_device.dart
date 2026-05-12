@@ -130,14 +130,20 @@ class AndroidDevice extends Device {
   late final Future<bool> isLocalEmulator = () async {
     final String? hardware = await _getProperty('ro.hardware');
     _logger.printTrace('ro.hardware = $hardware');
+    var isEmu = false;
     if (kKnownHardware.containsKey(hardware)) {
       // Look for known hardware models.
-      return kKnownHardware[hardware] == HardwareType.emulator;
+      isEmu = kKnownHardware[hardware] == HardwareType.emulator;
+    } else {
+      // Fall back to a best-effort heuristic-based approach.
+      final String? characteristics = await _getProperty('ro.build.characteristics');
+      _logger.printTrace('ro.build.characteristics = $characteristics');
+      isEmu = characteristics != null && characteristics.contains('emulator');
     }
-    // Fall back to a best-effort heuristic-based approach.
-    final String? characteristics = await _getProperty('ro.build.characteristics');
-    _logger.printTrace('ro.build.characteristics = $characteristics');
-    return characteristics != null && characteristics.contains('emulator');
+    if (isEmu) {
+      await _resolveEmulatorName();
+    }
+    return isEmu;
   }();
 
   /// The unique identifier for the emulator that corresponds to this device, or
@@ -151,7 +157,10 @@ class AndroidDevice extends Device {
     if (!(await isLocalEmulator)) {
       return null;
     }
+    return _getEmulatorId();
+  }
 
+  Future<String?> _getEmulatorId() async {
     // Emulators always have IDs in the format emulator-(port) where port is the
     // Android Console port number.
     final emulatorPortRegex = RegExp(r'emulator-(\d+)');
@@ -188,6 +197,60 @@ class AndroidDevice extends Device {
       // an empty name. This data is best-effort.
       return null;
     }
+  }
+
+  Future<void> _resolveEmulatorName() async {
+    final String? avdId = await _getEmulatorId();
+    if (avdId == null) {
+      return;
+    }
+    final String? avdPath = _androidSdk.getAvdPath();
+    if (avdPath == null) {
+      return;
+    }
+    final File iniFile = _fileSystem.file(_fileSystem.path.join(avdPath, '$avdId.ini'));
+    if (!iniFile.existsSync()) {
+      return;
+    }
+    try {
+      final Map<String, String> ini = _parseIniLines(iniFile.readAsLinesSync());
+      final String? path = ini['path'];
+      if (path == null) {
+        return;
+      }
+      final File configFile = _fileSystem.file(_fileSystem.path.join(path, 'config.ini'));
+      if (!configFile.existsSync()) {
+        return;
+      }
+      final Map<String, String> properties = _parseIniLines(configFile.readAsLinesSync());
+      final String? displayName = properties['avd.ini.displayname'];
+      if (displayName != null && displayName.isNotEmpty) {
+        _emulatorName = displayName;
+      } else {
+        _emulatorName = avdId.replaceAll('_', ' ').trim();
+      }
+    } on Exception catch (e) {
+      _logger.printTrace('Failed to resolve AVD name for $avdId: $e');
+    }
+  }
+
+  Map<String, String> _parseIniLines(List<String> contents) {
+    final results = <String, String>{};
+
+    final Iterable<List<String>> properties = contents
+        .map<String>((String l) => l.trim())
+        // Strip blank lines/comments
+        .where((String l) => l != '' && !l.startsWith('#'))
+        // Discard anything that isn't simple name=value
+        .where((String l) => l.contains('='))
+        // Split into name/value
+        .map<List<String>>((String l) => l.split('='));
+
+    for (final property in properties) {
+      results[property[0].trim()] = property[1].trim();
+    }
+
+    return results;
   }
 
   @override
@@ -371,8 +434,10 @@ class AndroidDevice extends Device {
     return shaFile.existsSync() ? shaFile.readAsStringSync() : '';
   }
 
+  String? _emulatorName;
+
   @override
-  String get name => modelID;
+  String get name => _emulatorName ?? modelID;
 
   @override
   bool get supportsFlavors => true;

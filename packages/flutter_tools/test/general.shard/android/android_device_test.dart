@@ -499,6 +499,34 @@ Uptime: 441088659 Realtime: 521464097
     expect(json, containsPair('platform', 'Android'));
   });
 
+  testWithoutContext('AndroidDevice resolves emulator name from AVD config', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory avdDir = fileSystem.directory('/fake/avd')..createSync(recursive: true);
+    avdDir.childFile('dummyEmulatorId.ini').writeAsStringSync('path=/fake/avd/dummyEmulatorId.avd');
+    fileSystem.directory('/fake/avd/dummyEmulatorId.avd').createSync(recursive: true);
+    fileSystem
+        .file('/fake/avd/dummyEmulatorId.avd/config.ini')
+        .writeAsStringSync('avd.ini.displayname=My Custom Pixel 6');
+
+    final AndroidDevice device = setUpAndroidDevice(
+      id: 'emulator-5555',
+      androidSdk: FakeAndroidSdkWithAvd(),
+      fileSystem: fileSystem,
+      processManager: FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['adb', '-s', 'emulator-5555', 'shell', 'getprop'],
+          stdout: '[ro.hardware]: [goldfish]',
+        ),
+      ]),
+      androidConsoleSocketFactory: (String host, int port) async =>
+          FakeWorkingAndroidConsoleSocket('dummyEmulatorId'),
+    );
+
+    expect(device.name, 'TestModel');
+    expect(await device.isLocalEmulator, true);
+    expect(device.name, 'My Custom Pixel 6');
+  });
+
   testWithoutContext('AndroidDevice stopApp does nothing if app is not passed', () async {
     final AndroidDevice device = setUpAndroidDevice();
 
@@ -593,6 +621,14 @@ AndroidDevice setUpAndroidDevice({
 class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
   String get adbPath => 'adb';
+
+  @override
+  String? getAvdPath() => null;
+}
+
+class FakeAndroidSdkWithAvd extends FakeAndroidSdk {
+  @override
+  String getAvdPath() => '/fake/avd';
 }
 
 const kAdbShellGetprop = '''
