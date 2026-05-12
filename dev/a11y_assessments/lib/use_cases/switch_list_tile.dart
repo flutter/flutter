@@ -7,13 +7,16 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class SwitchListTileUseCase extends UseCase {
-  SwitchListTileUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  SwitchListTileUseCase();
 
   @override
   String get name => 'SwitchListTile';
 
   @override
   String get route => '/switch-list-tile';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => const SwitchListTileExample();
@@ -35,10 +38,7 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: Center(
         child: Column(
           children: <Widget>[

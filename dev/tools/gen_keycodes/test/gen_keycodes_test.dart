@@ -122,7 +122,7 @@ void main() {
     );
     final String output = codeGenerator.generate();
 
-    expect(codeGenerator.outputPath(platform), endsWith('key_mapping.g.cc'));
+    expect(codeGenerator.outputPath(platform), endsWith('fl_key_mapping.g.cc'));
     expect(output, contains('initialize_modifier_bit_to_checked_keys'));
     expect(output, contains('initialize_lock_bit_to_checked_keys'));
     checkCommonOutput(output);

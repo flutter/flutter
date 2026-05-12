@@ -5,10 +5,10 @@
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
-import '../src/convert.dart';
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
@@ -20,11 +20,13 @@ import 'base/version.dart';
 import 'base/yaml.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'package_graph.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
 import 'template.dart';
@@ -364,6 +366,9 @@ class FlutterProject {
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     required bool releaseMode,
+    PubspecCache? pubspecCache,
+    PackageGraph? packageGraph,
+    PackageConfig? packageConfig,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
@@ -376,6 +381,9 @@ class FlutterProject {
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
       releaseMode: releaseMode,
+      pubspecCache: pubspecCache,
+      packageGraph: packageGraph,
+      packageConfig: packageConfig,
     );
   }
 
@@ -394,11 +402,21 @@ class FlutterProject {
     bool windowsPlatform = false,
     bool webPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    PubspecCache? pubspecCache,
+    PackageGraph? packageGraph,
+    PackageConfig? packageConfig,
   }) async {
     if (!directory.existsSync() || isPlugin) {
       return;
     }
-    await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
+    await refreshPluginsList(
+      this,
+      iosPlatform: iosPlatform,
+      macOSPlatform: macOSPlatform,
+      pubspecCache: pubspecCache,
+      packageGraph: packageGraph,
+      packageConfig: packageConfig,
+    );
     if (androidPlatform) {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
@@ -425,6 +443,9 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       releaseMode: releaseMode,
+      pubspecCache: pubspecCache,
+      packageGraph: packageGraph,
+      packageConfig: packageConfig,
     );
   }
 
@@ -501,6 +522,10 @@ class AndroidProject extends FlutterProjectPlatform {
   static final _applicationIdPattern = RegExp('^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
   static final _imperativeKotlinPluginPattern = RegExp(
     '^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$',
+  );
+
+  static final _kotlinCompilerOptionsPattern = RegExp(
+    r'kotlin\s*\{[\s\S]*?compilerOptions\s*\{[^}]*\}',
   );
 
   /// Examples of strings that this regex matches:
@@ -609,11 +634,30 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
-    final bool declarativeMatch = _declarativeKotlinPluginPatterns.any((RegExp pattern) {
-      return (firstMatchInFile(appGradleFile, pattern) != null);
-    });
-    return imperativeMatch || declarativeMatch;
+    if (appGradleFile.existsSync()) {
+      if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+        return true;
+      }
+      for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
+        if (firstMatchInFile(appGradleFile, pattern) != null) {
+          return true;
+        }
+      }
+      try {
+        final String content = appGradleFile.readAsStringSync();
+        if (_kotlinCompilerOptionsPattern.hasMatch(content)) {
+          return true;
+        }
+      } on FileSystemException {
+        // Ignore and continue with other checks.
+      }
+    }
+    final Directory kotlinSrc = hostAppGradleRoot
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('kotlin');
+    return kotlinSrc.existsSync();
   }
 
   /// Gets top-level Gradle build file.

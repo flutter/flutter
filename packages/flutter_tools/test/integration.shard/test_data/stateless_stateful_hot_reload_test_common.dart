@@ -9,9 +9,9 @@ import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
 
 import '../../src/common.dart';
-import '../test_data/stateless_stateful_project.dart';
 import '../test_driver.dart';
 import '../test_utils.dart';
+import 'stateless_stateful_project.dart';
 
 // This test verifies that we can hot reload a stateless widget into a
 // stateful one and back.

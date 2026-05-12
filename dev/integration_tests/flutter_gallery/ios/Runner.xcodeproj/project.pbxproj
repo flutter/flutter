@@ -373,6 +373,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.examples.gallery;
 				PRODUCT_NAME = "Flutter Gallery";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Profile;
 		};
@@ -493,6 +494,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.examples.gallery;
 				PRODUCT_NAME = "Flutter Gallery";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -509,6 +511,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.examples.gallery;
 				PRODUCT_NAME = "Flutter Gallery";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};

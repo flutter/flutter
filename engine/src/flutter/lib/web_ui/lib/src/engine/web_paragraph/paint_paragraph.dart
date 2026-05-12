@@ -188,12 +188,7 @@ class PaintParagraph extends TextPaint {
 
   @override
   void fillShadowCluster(WebCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr) {
-    final WebTextStyle style = webTextCluster.style;
-
-    // TODO(jlavrova): see if we can implement shadowing ourself avoiding redrawing text clusters many times.
-    // Answer: we cannot, and also there is a question of calculating the size of the shadow which we have to
-    // take from Chrome as well (performing another measure text operation with shadow attribute set).
-    paintContext.fillStyle = style.getForegroundColor().toCssString();
+    // It's not clear how to draw the shadow directly on CanvasKit without going through canvas2d.
     paintContext.shadowColor = shadow.color.toCssString();
     paintContext.shadowBlur = shadow.blurRadius;
     paintContext.shadowOffsetX = shadow.offset.dx;
@@ -212,7 +207,7 @@ class PaintParagraph extends TextPaint {
       ui.Offset(x, y),
       ui.window.devicePixelRatio,
     );
-    // TODO(jlavrova): How resizing affects the cached image?
+    // TODO(jlavrova): Test how the image cache works after zooming in or out.
     painter.resizePaintCanvas(ui.window.devicePixelRatio, sourceRect.width, sourceRect.height);
 
     if (!painter.hasSingleImageCache) {

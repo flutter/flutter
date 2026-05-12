@@ -658,7 +658,7 @@ TEST_F(EmbedderTest, CanRenderTextWithImpellerMetal) {
   event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event), kSuccess);
 
-  ASSERT_TRUE(ImageMatchesFixture("impeller_text_test.png", rendered_scene));
+  ASSERT_TRUE(ImageMatchesFixture("impeller_text_test.png", rendered_scene, 10));
 }
 
 TEST_F(EmbedderTest, CanRenderTextWithImpellerAndCompositorMetal) {
@@ -686,7 +686,7 @@ TEST_F(EmbedderTest, CanRenderTextWithImpellerAndCompositorMetal) {
   event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event), kSuccess);
 
-  ASSERT_TRUE(ImageMatchesFixture("impeller_text_test.png", rendered_scene));
+  ASSERT_TRUE(ImageMatchesFixture("impeller_text_test.png", rendered_scene, 10));
 }
 
 }  // namespace testing

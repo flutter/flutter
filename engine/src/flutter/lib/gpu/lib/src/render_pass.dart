@@ -224,6 +224,22 @@ base class RenderTarget {
 }
 
 base class RenderPass extends NativeFieldWrapperClass1 {
+  /// The maximum number of vertex buffer slots that can be bound to a single
+  /// draw. Matches `flutter::gpu::RenderPass::kMaxVertexBufferSlots` on the
+  /// native side, which in turn matches `impeller::kMaxVertexBuffers`; keep
+  /// them in sync.
+  static const int _kMaxVertexBufferSlots = 16;
+
+  /// Bitmask of slots that have been bound via [bindVertexBuffer] since the
+  /// most recent [clearBindings] (or since this RenderPass was created).
+  /// Bit `i` is set when slot `i` has been bound.
+  int _boundVertexSlotsMask = 0;
+
+  /// Highest slot index that has been bound, or -1 if no slot has been
+  /// bound. Tracked so [draw] can detect sparse bindings without scanning
+  /// the entire bitmask.
+  int _maxBoundVertexSlot = -1;
+
   /// Creates a new RenderPass.
   RenderPass._(
     GpuContext gpuContext,
@@ -279,12 +295,52 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     _bindPipeline(pipeline);
   }
 
-  void bindVertexBuffer(BufferView bufferView, int vertexCount) {
+  /// Binds [bufferView] as the vertex buffer at the given [slot].
+  ///
+  /// [slot] selects which vertex-buffer binding the data appears at,
+  /// matching the corresponding `VertexBuffer` declared on the active
+  /// pipeline's `VertexLayout`. The default of 0 matches the default
+  /// layout declared by a shader bundle, which is what every single-buffer
+  /// call site expects. To bind multiple structure-of-arrays vertex
+  /// buffers, call this method once per slot. The [vertexCount] takes
+  /// effect only when no index buffer is bound, and is read from the
+  /// binding at slot 0, so values supplied at higher slots are ignored.
+  ///
+  /// Sparse bindings are not supported. Every slot in `[0, highestBound]`
+  /// must have been bound before [draw] is called, otherwise [draw] throws
+  /// a [StateError] naming the unbound slots. Slots can be bound in any
+  /// order.
+  ///
+  /// [slot] must be in `[0, 16)` (Impeller's HAL caps vertex buffer
+  /// bindings at 16). On the OpenGL ES backend, the per-pipeline limit on
+  /// the *total attribute count* across all bound buffers is whatever the
+  /// device reports for `GL_MAX_VERTEX_ATTRIBS` (minimum 8 on GL ES 2.0,
+  /// minimum 16 on GL ES 3.0+), and is enforced by the driver rather than
+  /// by this method.
+  void bindVertexBuffer(
+    BufferView bufferView,
+    int vertexCount, {
+    int slot = 0,
+  }) {
+    if (slot < 0 || slot >= _kMaxVertexBufferSlots) {
+      throw RangeError.range(
+        slot,
+        0,
+        _kMaxVertexBufferSlots - 1,
+        'slot',
+        'bindVertexBuffer slot must be in [0, $_kMaxVertexBufferSlots)',
+      );
+    }
+    _boundVertexSlotsMask |= 1 << slot;
+    if (slot > _maxBoundVertexSlot) {
+      _maxBoundVertexSlot = slot;
+    }
     bufferView.buffer._bindAsVertexBuffer(
       this,
       bufferView.offsetInBytes,
       bufferView.lengthInBytes,
       vertexCount,
+      slot,
     );
   }
 
@@ -349,6 +405,8 @@ base class RenderPass extends NativeFieldWrapperClass1 {
 
   void clearBindings() {
     _clearBindings();
+    _boundVertexSlotsMask = 0;
+    _maxBoundVertexSlot = -1;
   }
 
   void setColorBlendEnable(bool enable, {int colorAttachmentIndex = 0}) {
@@ -448,6 +506,20 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   }
 
   void draw() {
+    if (_maxBoundVertexSlot >= 0) {
+      final int expectedMask = (1 << (_maxBoundVertexSlot + 1)) - 1;
+      if (_boundVertexSlotsMask != expectedMask) {
+        final List<int> missing = <int>[
+          for (int i = 0; i <= _maxBoundVertexSlot; i++)
+            if ((_boundVertexSlotsMask & (1 << i)) == 0) i,
+        ];
+        throw StateError(
+          'draw() called with sparse vertex buffer bindings: slot(s) '
+          '${missing.join(', ')} were not bound but slot $_maxBoundVertexSlot '
+          'was. Bind every slot in [0, $_maxBoundVertexSlot] before drawing.',
+        );
+      }
+    }
     if (!_draw()) {
       throw Exception("Failed to append draw");
     }
@@ -519,7 +591,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   )
   external void _bindPipeline(RenderPipeline pipeline);
 
-  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int, Int, Int)>(
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int, Int, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_BindVertexBufferDevice',
   )
   external void _bindVertexBufferDevice(
@@ -527,6 +599,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     int offsetInBytes,
     int lengthInBytes,
     int vertexCount,
+    int slot,
   );
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Int, Int, Int, Int)>(
