@@ -2,23 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-typedef SemanticsNodeUpdateObservation = ({
-  String label,
-  List<StringAttribute>? labelAttributes,
-  String value,
-  List<StringAttribute>? valueAttributes,
-  String hint,
-  List<StringAttribute>? hintAttributes,
-  Int32List childrenInTraversalOrder,
-  Float64List transform,
-});
+import 'semantics_update_tester.dart';
 
 void main() {
   SemanticsUpdateTestBinding();
@@ -26,6 +15,7 @@ void main() {
   testWidgets('Semantics update does not send update for merged nodes.', (
     WidgetTester tester,
   ) async {
+    addTearDown(SemanticsUpdateBuilderSpy.observations.clear);
     final SemanticsHandle handle = tester.ensureSemantics();
     // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(
@@ -36,7 +26,6 @@ void main() {
     // The warm up frame will send update for an empty semantics tree. We
     // ignore this one time update.
     SemanticsUpdateBuilderSpy.observations.clear();
-
     // Builds the real widget tree.
     await tester.pumpWidget(
       Directionality(
@@ -85,11 +74,11 @@ void main() {
     expect(SemanticsUpdateBuilderSpy.observations[1]!.childrenInTraversalOrder.length, 0);
     expect(SemanticsUpdateBuilderSpy.observations[1]!.label, 'outer\ninner-updated\ntext');
 
-    SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   });
 
   testWidgets('Semantics update receives attributed text', (WidgetTester tester) async {
+    addTearDown(SemanticsUpdateBuilderSpy.observations.clear);
     final SemanticsHandle handle = tester.ensureSemantics();
     // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(
@@ -183,8 +172,6 @@ void main() {
       'attributedHint: "hint" [SpellOutStringAttribute(TextRange(start: 1, end: 2))]' // ignore: missing_whitespace_between_adjacent_strings
       ')',
     );
-
-    SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   });
 
@@ -264,85 +251,4 @@ void main() {
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   }, skip: kIsWeb); // intended: the web engine handles the transform calculation itself.
-}
-
-class SemanticsUpdateTestBinding extends AutomatedTestWidgetsFlutterBinding {
-  @override
-  ui.SemanticsUpdateBuilder createSemanticsUpdateBuilder() {
-    return SemanticsUpdateBuilderSpy();
-  }
-}
-
-class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilder {
-  final SemanticsUpdateBuilder _builder = ui.SemanticsUpdateBuilder();
-
-  static Map<int, SemanticsNodeUpdateObservation> observations =
-      <int, SemanticsNodeUpdateObservation>{};
-
-  @override
-  void updateNode({
-    required int id,
-    required SemanticsFlags flags,
-    required int actions,
-    required int maxValueLength,
-    required int currentValueLength,
-    required int textSelectionBase,
-    required int textSelectionExtent,
-    required int platformViewId,
-    required int scrollChildren,
-    required int scrollIndex,
-    required int? traversalParent,
-    required double scrollPosition,
-    required double scrollExtentMax,
-    required double scrollExtentMin,
-    required Rect rect,
-    required String identifier,
-    required String label,
-    List<StringAttribute>? labelAttributes,
-    required String value,
-    List<StringAttribute>? valueAttributes,
-    required String increasedValue,
-    List<StringAttribute>? increasedValueAttributes,
-    required String decreasedValue,
-    List<StringAttribute>? decreasedValueAttributes,
-    required String hint,
-    List<StringAttribute>? hintAttributes,
-    String? tooltip,
-    TextDirection? textDirection,
-    required Float64List transform,
-    required Float64List hitTestTransform,
-    required Int32List childrenInTraversalOrder,
-    required Int32List childrenInHitTestOrder,
-    required Int32List additionalActions,
-    int headingLevel = 0,
-    String? linkUrl,
-    SemanticsRole role = SemanticsRole.none,
-    required List<String>? controlsNodes,
-    SemanticsValidationResult validationResult = SemanticsValidationResult.none,
-    ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
-    required ui.SemanticsInputType inputType,
-    required ui.Locale? locale,
-    required String minValue,
-    required String maxValue,
-  }) {
-    // Makes sure we don't send the same id twice.
-    assert(!observations.containsKey(id));
-    observations[id] = (
-      label: label,
-      labelAttributes: labelAttributes,
-      hint: hint,
-      hintAttributes: hintAttributes,
-      value: value,
-      valueAttributes: valueAttributes,
-      childrenInTraversalOrder: childrenInTraversalOrder,
-      transform: transform,
-    );
-  }
-
-  @override
-  void updateCustomAction({required int id, String? label, String? hint, int overrideId = -1}) =>
-      _builder.updateCustomAction(id: id, label: label, hint: hint, overrideId: overrideId);
-
-  @override
-  ui.SemanticsUpdate build() => _builder.build();
 }
