@@ -352,7 +352,7 @@ class _LLDBLogPatternCompleter {
   }
 }
 
-/// A container class for associating a [Process] that is is running LLDB with
+/// A container class for associating a [Process] that is running LLDB with
 /// the iOS device process of an application.
 class _LLDBProcess {
   _LLDBProcess({required Process process, required this.appProcessId, required Logger logger})
