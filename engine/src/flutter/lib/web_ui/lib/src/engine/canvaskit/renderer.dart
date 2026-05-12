@@ -11,6 +11,8 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import 'web_paragraph_painter.dart';
+
 bool get isExperimentalWebParagraph =>
     configuration.canvasKitVariant == CanvasKitVariant.experimentalWebParagraph;
 
@@ -462,6 +464,10 @@ class CanvasKitRenderer extends Renderer {
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
       isExperimentalWebParagraph ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
+
+  @override
+  WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) =>
+      CanvasKitPainter(paragraph);
 
   @override
   void clearFragmentProgramCache() {
