@@ -116,10 +116,10 @@ TEST(UberSDFParametersTest, MakeRoundedRect) {
   EXPECT_EQ(params.color, Color::Red());
   EXPECT_EQ(params.center, Point(60, 70));
   EXPECT_EQ(params.size, Point(50, 50));
-  EXPECT_EQ(params.radii.top_left.width, 1.0f);
-  EXPECT_EQ(params.radii.top_right.width, 2.0f);
-  EXPECT_EQ(params.radii.bottom_left.width, 3.0f);
-  EXPECT_EQ(params.radii.bottom_right.width, 4.0f);
+  EXPECT_EQ(params.radii_width.w, 1.0f);
+  EXPECT_EQ(params.radii_width.y, 2.0f);
+  EXPECT_EQ(params.radii_width.z, 3.0f);
+  EXPECT_EQ(params.radii_width.x, 4.0f);
   EXPECT_FALSE(params.stroke.has_value());
 }
 

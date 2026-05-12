@@ -16,8 +16,6 @@ uniform FragInfo {
   float aa_pixels;
   float stroked;
   float type;
-  vec4 radii;
-  vec4 radii_right;
   vec4 superellipse_degrees_top;
   vec4 superellipse_degrees_right;
   vec4 superellipse_semi_axes_top;
@@ -167,16 +165,10 @@ float getQuadrantDistance(vec2 p, int quadrant_index) {
   else q_sign = vec2(-1.0, -1.0);
 
   vec2 p_local = (p - q_center) * q_sign;
-  vec2 extents = vec2(scale.x * se_a_top, scale.y * se_a_right);
 
-  vec2 d_rect = p_local - extents;
-  float dist_rect_local = length(max(d_rect, 0.0)) + min(max(d_rect.x, d_rect.y), 0.0);
+  vec2 p_clamped = max(p_local, 0.0);
 
-  if (p_local.x <= 0.0 || p_local.y <= 0.0) {
-    return dist_rect_local;
-  }
-
-  vec2 p_norm = p_local / scale;
+  vec2 p_norm = p_clamped / scale;
 
   float se_degree;
   float span;
@@ -201,9 +193,7 @@ float getQuadrantDistance(vec2 p, int quadrant_index) {
     axis_length = se_a_right;
   }
 
-  if (se_degree < 1.9) {  // Sharp rectangular corner
-    return dist_rect_local;
-  }
+
 
   vec2 p_rel = p_oct - circle_center;
   float theta = atan(p_rel.y, p_rel.x);
@@ -233,53 +223,15 @@ float getQuadrantDistance(vec2 p, int quadrant_index) {
 
   float corner_dist = d_scaled / length(grad_norm / scale);
 
-  return max(dist_rect_local, corner_dist);
+  return corner_dist;
 }
 
 float distanceFromRoundedSuperellipse(vec2 p) {
-  vec2 T = vec2(frag_info.quadrant_splits.x, -frag_info.size.y);
-  vec2 R = vec2(frag_info.size.x, frag_info.quadrant_splits.w);
-  vec2 B = vec2(frag_info.quadrant_splits.y, frag_info.size.y);
-  vec2 L = vec2(-frag_info.size.x, frag_info.quadrant_splits.z);
-
-  // Exact Wedge Partition from Bounding Box Center (0,0)
-  // Using (0,0) guarantees that the rays to symmetric split points are perfectly horizontal/vertical,
-  // preventing diagonal hairline discontinuities between symmetric quadrants.
-  float cT = T.x * p.y - T.y * p.x;
-  float cR = R.x * p.y - R.y * p.x;
-  float cB = B.x * p.y - B.y * p.x;
-  float cL = L.x * p.y - L.y * p.x;
-
-  int quadrant_index = 0;
-  if (cT >= 0.0 && cR <= 0.0 && dot(p, T + R) >= 0.0) {
-    quadrant_index = 0; // TR
-  } else if (cR >= 0.0 && cB <= 0.0 && dot(p, R + B) >= 0.0) {
-    quadrant_index = 1; // BR
-  } else if (cB >= 0.0 && cL <= 0.0 && dot(p, B + L) >= 0.0) {
-    quadrant_index = 2; // BL
-  } else {
-    quadrant_index = 3; // TL
-  }
-
-  // When two split points meet at a corner (zero radius), we reduce the 
-  // partitions to perfectly partition the shape without evaluating the degenerate corner.
-  bool TR_zero = distance(T, R) < 0.01;
-  bool BR_zero = distance(R, B) < 0.01;
-  bool BL_zero = distance(B, L) < 0.01;
-  bool TL_zero = distance(L, T) < 0.01;
-
-  if (TR_zero && quadrant_index == 0) quadrant_index = 3;
-  if (BR_zero && quadrant_index == 1) quadrant_index = 0;
-  if (BL_zero && quadrant_index == 2) quadrant_index = 1;
-  if (TL_zero && quadrant_index == 3) quadrant_index = 2;
-
-  // Second pass in case of multiple zero-radius corners
-  if (TR_zero && quadrant_index == 0) quadrant_index = 3;
-  if (BR_zero && quadrant_index == 1) quadrant_index = 0;
-  if (BL_zero && quadrant_index == 2) quadrant_index = 1;
-  if (TL_zero && quadrant_index == 3) quadrant_index = 2;
-
-  return getQuadrantDistance(p, quadrant_index);
+  float d0 = getQuadrantDistance(p, 0);
+  float d1 = getQuadrantDistance(p, 1);
+  float d2 = getQuadrantDistance(p, 2);
+  float d3 = getQuadrantDistance(p, 3);
+  return max(max(d0, d1), max(d2, d3));
 }
 // Define an ellipse as q(w) = (a*cos(w), b*sin(w)), and p = (x, y) on the
 // plane. Let q(w0) be the closest point on q to p, then q(w0) - p is tangent to
@@ -455,7 +407,7 @@ vec2 filledSDF(vec2 p) {
   } else if (frag_info.type < 2.5) {  // Oval
     sdf = distanceFromOval(p, frag_info.size);
   } else if (frag_info.type < 3.5) {  // Rounded Rect
-    sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
+    sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii_width);
   } else {
     sdf = distanceFromRoundedSuperellipse(p);
   }
@@ -534,7 +486,40 @@ void main() {
   float fade_size = pixel_size * frag_info.aa_pixels * 0.5;
   float alpha = 1.0 - smoothstep(-fade_size, fade_size, sdf);
   
-  frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
-  frag_color = IPPremultiply(frag_color);
+  if (frag_info.type > 3.5) {  // Rounded Superellipse
+    // Base visualizer
+    vec3 col = (sdf < 0.0) ? vec3(0.9, 0.6, 0.3) : vec3(0.4, 0.7, 0.85);
+    col *= 1.0 - exp(-3.0 * abs(sdf / 100.0));
+    col *= 0.8 + 0.2 * cos(1.2 * sdf);
+    col = mix(col, vec3(1.0), 1.0 - smoothstep(0.0, 1.5, abs(sdf)));
+
+    // 1. Quadrant centers TR (Red), BR (Green), BL (Blue), TL (Yellow)
+    float dot_radius = 3.5;
+    vec2 C_TR = vec2(frag_info.quadrant_centers_x[0], frag_info.quadrant_centers_y[0]);
+    vec2 C_BR = vec2(frag_info.quadrant_centers_x[1], frag_info.quadrant_centers_y[1]);
+    vec2 C_BL = vec2(frag_info.quadrant_centers_x[2], frag_info.quadrant_centers_y[2]);
+    vec2 C_TL = vec2(frag_info.quadrant_centers_x[3], frag_info.quadrant_centers_y[3]);
+
+    float dt_ctr_TR = length(p - C_TR) - dot_radius;
+    float dt_ctr_BR = length(p - C_BR) - dot_radius;
+    float dt_ctr_BL = length(p - C_BL) - dot_radius;
+    float dt_ctr_TL = length(p - C_TL) - dot_radius;
+
+    float alpha_ctr_TR = max(0.0, 1.0 - smoothstep(-1.0, 1.0, dt_ctr_TR));
+    float alpha_ctr_BR = max(0.0, 1.0 - smoothstep(-1.0, 1.0, dt_ctr_BR));
+    float alpha_ctr_BL = max(0.0, 1.0 - smoothstep(-1.0, 1.0, dt_ctr_BL));
+    float alpha_ctr_TL = max(0.0, 1.0 - smoothstep(-1.0, 1.0, dt_ctr_TL));
+
+    col = mix(col, vec3(1.0, 0.0, 0.0), alpha_ctr_TR); // Red
+    col = mix(col, vec3(0.0, 1.0, 0.0), alpha_ctr_BR); // Green
+    col = mix(col, vec3(0.0, 0.0, 1.0), alpha_ctr_BL); // Blue
+    col = mix(col, vec3(1.0, 1.0, 0.0), alpha_ctr_TL); // Yellow
+
+    frag_color = vec4(col, frag_info.color.a);
+    frag_color = IPPremultiply(frag_color);
+  }  {
+    frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
+    frag_color = IPPremultiply(frag_color);
+  }
   
 }

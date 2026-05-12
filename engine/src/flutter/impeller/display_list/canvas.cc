@@ -1044,126 +1044,14 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
-    auto split_proc = [](Scalar left, Scalar right, Scalar ratio_left,
-                         Scalar ratio_right) -> Scalar {
-      if (ratio_left == 0 && ratio_right == 0) {
-        return (left + right) / 2;
-      }
-      return (left * ratio_right + right * ratio_left) /
-             (ratio_left + ratio_right);
-    };
 
     auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
         round_superellipse.GetBounds(), round_superellipse.GetRadii());
 
-    RoundSuperellipseParam::Quadrant tr = round_superellipse_params.top_right;
-    RoundSuperellipseParam::Quadrant br =
-        round_superellipse_params.all_corners_same
-            ? tr
-            : round_superellipse_params.bottom_right;
-    RoundSuperellipseParam::Quadrant bl =
-        round_superellipse_params.all_corners_same
-            ? tr
-            : round_superellipse_params.bottom_left;
-    RoundSuperellipseParam::Quadrant tl =
-        round_superellipse_params.all_corners_same
-            ? tr
-            : round_superellipse_params.top_left;
-
-    Rect bounds = round_superellipse.GetBounds();
-    Point center = bounds.GetCenter();
-    RoundingRadii radii = round_superellipse.GetRadii();
-
-    Scalar top_split = split_proc(bounds.GetLeft(), bounds.GetRight(),
-                                  radii.top_left.width, radii.top_right.width) -
-                       center.x;
-    Scalar bottom_split =
-        split_proc(bounds.GetLeft(), bounds.GetRight(), radii.bottom_left.width,
-                   radii.bottom_right.width) -
-        center.x;
-    Scalar left_split =
-        split_proc(bounds.GetTop(), bounds.GetBottom(), radii.top_left.height,
-                   radii.bottom_left.height) -
-        center.y;
-    Scalar right_split =
-        split_proc(bounds.GetTop(), bounds.GetBottom(), radii.top_right.height,
-                   radii.bottom_right.height) -
-        center.y;
-
-    Point tr_center_relative = tr.offset - center;
-    Point br_center_relative = br.offset - center;
-    Point bl_center_relative = bl.offset - center;
-    Point tl_center_relative = tl.offset - center;
-
-    Vector4 superellipse_degrees_top(tr.top.se_n, br.top.se_n, bl.top.se_n,
-                                     tl.top.se_n);
-    Vector4 superellipse_degrees_right(tr.right.se_n, br.right.se_n,
-                                       bl.right.se_n, tl.right.se_n);
-    Vector4 superellipse_semi_axes_top(tr.top.se_a, br.top.se_a, bl.top.se_a,
-                                       tl.top.se_a);
-    Vector4 superellipse_semi_axes_right(tr.right.se_a, br.right.se_a,
-                                         bl.right.se_a, tl.right.se_a);
-    Vector4 angle_spans_top(tr.top.circle_max_angle.radians,
-                            br.top.circle_max_angle.radians,
-                            bl.top.circle_max_angle.radians,
-                            tl.top.circle_max_angle.radians);
-    Vector4 angle_spans_right(tr.right.circle_max_angle.radians,
-                              br.right.circle_max_angle.radians,
-                              bl.right.circle_max_angle.radians,
-                              tl.right.circle_max_angle.radians);
-    Vector4 octant_offsets_c(tr.top.se_a - tr.right.se_a,
-                             br.top.se_a - br.right.se_a,
-                             bl.top.se_a - bl.right.se_a,
-                             tl.top.se_a - tl.right.se_a);
-    Vector4 radii_width(tr.top.circle_radius, br.top.circle_radius,
-                        bl.top.circle_radius, tl.top.circle_radius);
-    Vector4 radii_height(tr.right.circle_radius, br.right.circle_radius,
-                         bl.right.circle_radius, tl.right.circle_radius);
-    Vector4 circle_centers_top_x(tr.top.circle_center.x, br.top.circle_center.x,
-                                 bl.top.circle_center.x,
-                                 tl.top.circle_center.x);
-    Vector4 circle_centers_top_y(tr.top.circle_center.y, br.top.circle_center.y,
-                                 bl.top.circle_center.y,
-                                 tl.top.circle_center.y);
-    Vector4 circle_centers_right_x(
-        tr.right.circle_center.x, br.right.circle_center.x,
-        bl.right.circle_center.x, tl.right.circle_center.x);
-    Vector4 circle_centers_right_y(
-        tr.right.circle_center.y, br.right.circle_center.y,
-        bl.right.circle_center.y, tl.right.circle_center.y);
-    Vector4 superellipse_scales_x(
-        tr.signed_scale.Abs().x, br.signed_scale.Abs().x,
-        bl.signed_scale.Abs().x, tl.signed_scale.Abs().x);
-    Vector4 superellipse_scales_y(
-        tr.signed_scale.Abs().y, br.signed_scale.Abs().y,
-        bl.signed_scale.Abs().y, tl.signed_scale.Abs().y);
-    Vector4 quadrant_centers_x(tr_center_relative.x, br_center_relative.x,
-                               bl_center_relative.x, tl_center_relative.x);
-    Vector4 quadrant_centers_y(tr_center_relative.y, br_center_relative.y,
-                               bl_center_relative.y, tl_center_relative.y);
-    Vector4 quadrant_splits(top_split, bottom_split, left_split, right_split);
-
     auto params = UberSDFParameters::MakeRoundedSuperellipse(
         /*color=*/paint.color,
-        /*bounds=*/bounds,
-        /*superellipse_degrees_top=*/superellipse_degrees_top,
-        /*superellipse_degrees_right=*/superellipse_degrees_right,
-        /*superellipse_semi_axes_top=*/superellipse_semi_axes_top,
-        /*superellipse_semi_axes_right=*/superellipse_semi_axes_right,
-        /*angle_spans_top=*/angle_spans_top,
-        /*angle_spans_right=*/angle_spans_right,
-        /*octant_offsets_c=*/octant_offsets_c,
-        /*radii_width=*/radii_width,
-        /*radii_height=*/radii_height,
-        /*circle_centers_top_x=*/circle_centers_top_x,
-        /*circle_centers_top_y=*/circle_centers_top_y,
-        /*circle_centers_right_x=*/circle_centers_right_x,
-        /*circle_centers_right_y=*/circle_centers_right_y,
-        /*superellipse_scales_x=*/superellipse_scales_x,
-        /*superellipse_scales_y=*/superellipse_scales_y,
-        /*quadrant_centers_x=*/quadrant_centers_x,
-        /*quadrant_centers_y=*/quadrant_centers_y,
-        /*quadrant_splits=*/quadrant_splits,
+        /*bounds=*/round_superellipse.GetBounds(),
+        /*round_superellipse_params=*/round_superellipse_params,
         /*stroke=*/paint.GetStroke());
 
     AddRenderSDFEntityToCurrentPass(paint, params);

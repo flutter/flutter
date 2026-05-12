@@ -11,6 +11,7 @@
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/round_rect.h"
+#include "impeller/geometry/round_superellipse_param.h"
 #include "impeller/geometry/stroke_parameters.h"
 #include "impeller/geometry/vector.h"
 
@@ -57,25 +58,8 @@ struct UberSDFParameters {
   /// Creates UberSDFParameters for an asymmetric round superellipse.
   static UberSDFParameters MakeRoundedSuperellipse(
       Color color,
-      Rect bounds,
-      Vector4 superellipse_degrees_top,
-      Vector4 superellipse_degrees_right,
-      Vector4 superellipse_semi_axes_top,
-      Vector4 superellipse_semi_axes_right,
-      Vector4 angle_spans_top,
-      Vector4 angle_spans_right,
-      Vector4 octant_offsets_c,
-      Vector4 radii_width,
-      Vector4 radii_height,
-      Vector4 circle_centers_top_x,
-      Vector4 circle_centers_top_y,
-      Vector4 circle_centers_right_x,
-      Vector4 circle_centers_right_y,
-      Vector4 superellipse_scales_x,
-      Vector4 superellipse_scales_y,
-      Vector4 quadrant_centers_x,
-      Vector4 quadrant_centers_y,
-      Vector4 quadrant_splits,
+      const Rect& bounds,
+      const RoundSuperellipseParam& round_superellipse_params,
       std::optional<StrokeParameters> stroke);
 
   /// The type of shape to render.
@@ -94,9 +78,6 @@ struct UberSDFParameters {
 
   /// The stroke parameters. If std::nullopt, the shape is filled.
   std::optional<StrokeParameters> stroke;
-
-  /// The corner radii for a rounded shapes.
-  RoundingRadii radii;
 
   Vector4 superellipse_degrees_top;
   Vector4 superellipse_degrees_right;

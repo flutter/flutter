@@ -63,61 +63,70 @@ UberSDFParameters UberSDFParameters::MakeRoundedRect(
     const RoundingRadii& radii,
     std::optional<StrokeParameters> stroke) {
   Point size = Point(rect.GetSize() * 0.5f);
-  return UberSDFParameters{.type = Type::kRoundedRect,
-                           .color = color,
-                           .center = rect.GetCenter(),
-                           .size = size,
-                           .stroke = stroke,
-                           .radii = radii};
-}
-
-UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
-    Color color,
-    Rect rect,
-    Vector4 superellipse_degrees_top,
-    Vector4 superellipse_degrees_right,
-    Vector4 superellipse_semi_axes_top,
-    Vector4 superellipse_semi_axes_right,
-    Vector4 angle_spans_top,
-    Vector4 angle_spans_right,
-    Vector4 octant_offsets_c,
-    Vector4 radii_width,
-    Vector4 radii_height,
-    Vector4 circle_centers_top_x,
-    Vector4 circle_centers_top_y,
-    Vector4 circle_centers_right_x,
-    Vector4 circle_centers_right_y,
-    Vector4 superellipse_scales_x,
-    Vector4 superellipse_scales_y,
-    Vector4 quadrant_centers_x,
-    Vector4 quadrant_centers_y,
-    Vector4 quadrant_splits,
-    std::optional<StrokeParameters> stroke) {
-  Point size = Point(rect.GetSize() * 0.5f);
   return UberSDFParameters{
-      .type = Type::kRoundedSuperellipse,
+      .type = Type::kRoundedRect,
       .color = color,
       .center = rect.GetCenter(),
       .size = size,
       .stroke = stroke,
-      .superellipse_degrees_top = superellipse_degrees_top,
-      .superellipse_degrees_right = superellipse_degrees_right,
-      .superellipse_semi_axes_top = superellipse_semi_axes_top,
-      .superellipse_semi_axes_right = superellipse_semi_axes_right,
-      .angle_spans_top = angle_spans_top,
-      .angle_spans_right = angle_spans_right,
-      .octant_offsets_c = octant_offsets_c,
-      .radii_width = radii_width,
-      .radii_height = radii_height,
-      .circle_centers_top_x = circle_centers_top_x,
-      .circle_centers_top_y = circle_centers_top_y,
-      .circle_centers_right_x = circle_centers_right_x,
-      .circle_centers_right_y = circle_centers_right_y,
-      .superellipse_scales_x = superellipse_scales_x,
-      .superellipse_scales_y = superellipse_scales_y,
-      .quadrant_centers_x = quadrant_centers_x,
-      .quadrant_centers_y = quadrant_centers_y,
-      .quadrant_splits = quadrant_splits};
+      .radii_width = Vector4(radii.bottom_right.width, radii.top_right.width,
+                             radii.bottom_left.width, radii.top_left.width)};
+}
+
+UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
+    Color color,
+    const Rect& bounds,
+    const RoundSuperellipseParam& round_superellipse_params,
+    std::optional<StrokeParameters> stroke) {
+  Point center = bounds.GetCenter();
+
+  RoundSuperellipseParam::Quadrant top_right = round_superellipse_params.top_right;
+  RoundSuperellipseParam::Quadrant bottom_right =
+      round_superellipse_params.all_corners_same
+          ? top_right
+          : round_superellipse_params.bottom_right;
+  RoundSuperellipseParam::Quadrant bottom_left =
+      round_superellipse_params.all_corners_same
+          ? top_right
+          : round_superellipse_params.bottom_left;
+  RoundSuperellipseParam::Quadrant top_left =
+      round_superellipse_params.all_corners_same
+          ? top_right
+          : round_superellipse_params.top_left;
+
+  Point top_right_center_relative = top_right.offset - center;
+  Point bottom_right_center_relative = bottom_right.offset - center;
+  Point bottom_left_center_relative = bottom_left.offset - center;
+  Point top_left_center_relative = top_left.offset - center;
+
+  Point size = Point(bounds.GetSize() * 0.5f);
+  return UberSDFParameters{
+      .type = Type::kRoundedSuperellipse,
+      .color = color,
+      .center = center,
+      .size = size,
+      .stroke = stroke,
+      .superellipse_degrees_top = Vector4(top_right.top.se_n, bottom_right.top.se_n, bottom_left.top.se_n, top_left.top.se_n),
+      .superellipse_degrees_right = Vector4(top_right.right.se_n, bottom_right.right.se_n, bottom_left.right.se_n, top_left.right.se_n),
+      .superellipse_semi_axes_top = Vector4(top_right.top.se_a, bottom_right.top.se_a, bottom_left.top.se_a, top_left.top.se_a),
+      .superellipse_semi_axes_right = Vector4(top_right.right.se_a, bottom_right.right.se_a, bottom_left.right.se_a, top_left.right.se_a),
+      .angle_spans_top = Vector4(top_right.top.circle_max_angle.radians, bottom_right.top.circle_max_angle.radians, bottom_left.top.circle_max_angle.radians, top_left.top.circle_max_angle.radians),
+      .angle_spans_right = Vector4(top_right.right.circle_max_angle.radians, bottom_right.right.circle_max_angle.radians, bottom_left.right.circle_max_angle.radians, top_left.right.circle_max_angle.radians),
+      .octant_offsets_c = Vector4(top_right.top.se_a - top_right.right.se_a, bottom_right.top.se_a - bottom_right.right.se_a, bottom_left.top.se_a - bottom_left.right.se_a, top_left.top.se_a - top_left.right.se_a),
+      .radii_width = Vector4(top_right.top.circle_radius, bottom_right.top.circle_radius, bottom_left.top.circle_radius, top_left.top.circle_radius),
+      .radii_height = Vector4(top_right.right.circle_radius, bottom_right.right.circle_radius, bottom_left.right.circle_radius, top_left.right.circle_radius),
+      .circle_centers_top_x = Vector4(top_right.top.circle_center.x, bottom_right.top.circle_center.x, bottom_left.top.circle_center.x, top_left.top.circle_center.x),
+      .circle_centers_top_y = Vector4(top_right.top.circle_center.y, bottom_right.top.circle_center.y, bottom_left.top.circle_center.y, top_left.top.circle_center.y),
+      .circle_centers_right_x = Vector4(top_right.right.circle_center.x, bottom_right.right.circle_center.x, bottom_left.right.circle_center.x, top_left.right.circle_center.x),
+      .circle_centers_right_y = Vector4(top_right.right.circle_center.y, bottom_right.right.circle_center.y, bottom_left.right.circle_center.y, top_left.right.circle_center.y),
+      .superellipse_scales_x = Vector4(top_right.signed_scale.Abs().x, bottom_right.signed_scale.Abs().x, bottom_left.signed_scale.Abs().x, top_left.signed_scale.Abs().x),
+      .superellipse_scales_y = Vector4(top_right.signed_scale.Abs().y, bottom_right.signed_scale.Abs().y, bottom_left.signed_scale.Abs().y, top_left.signed_scale.Abs().y),
+      .quadrant_centers_x = Vector4(top_right_center_relative.x, bottom_right_center_relative.x, bottom_left_center_relative.x, top_left_center_relative.x),
+      .quadrant_centers_y = Vector4(top_right_center_relative.y, bottom_right_center_relative.y, bottom_left_center_relative.y, top_left_center_relative.y),
+      .quadrant_splits = Vector4(round_superellipse_params.top_split - center.x,
+                                 round_superellipse_params.bottom_split - center.x,
+                                 round_superellipse_params.left_split - center.y,
+                                 round_superellipse_params.right_split - center.y)};
 }
 
 }  // namespace impeller

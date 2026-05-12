@@ -73,12 +73,6 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       params_.color.WithAlpha(params_.color.alpha * GetOpacityFactor());
   frag_info.center = params_.center;
   frag_info.size = params_.size;
-  frag_info.radii =
-      Vector4(params_.radii.bottom_right.width, params_.radii.top_right.width,
-              params_.radii.bottom_left.width, params_.radii.top_left.width);
-  frag_info.radii_right =
-      Vector4(params_.radii.bottom_right.height, params_.radii.top_right.height,
-              params_.radii.bottom_left.height, params_.radii.top_left.height);
   frag_info.stroked = params_.stroke ? 1.0f : 0.0f;
   frag_info.stroke_width = params_.stroke ? params_.stroke->width : 0.0f;
   frag_info.stroke_join =
