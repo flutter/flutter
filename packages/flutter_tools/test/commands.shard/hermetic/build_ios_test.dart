@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
@@ -39,7 +38,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
   FakeXcodeProjectInterpreterWithBuildSettings({
     this.productBundleIdentifier,
     this.developmentTeam = 'abc',
-    this.errorGettingBuildSettings = false,
+    this.returnsEmptyBuildSettings = false,
   });
 
   @override
@@ -48,7 +47,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
     XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
-    if (errorGettingBuildSettings) {
+    if (returnsEmptyBuildSettings) {
       return <String, String>{};
     }
 
@@ -65,7 +64,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
 
   final String? developmentTeam;
 
-  final bool errorGettingBuildSettings;
+  final bool returnsEmptyBuildSettings;
 }
 
 final Platform macosPlatform = FakePlatform(
@@ -349,8 +348,8 @@ void main() {
       final command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-        fileSystem: MemoryFileSystem.test(),
-        logger: BufferLogger.test(),
+        fileSystem: fileSystem,
+        logger: logger,
         osUtils: FakeOperatingSystemUtils(),
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
@@ -358,7 +357,7 @@ void main() {
         config: FakeConfig(),
         platform: FakePlatform(),
         processUtils: FakeProcessUtils(),
-        processManager: FakeProcessManager.any(),
+        processManager: processManager,
         fileSystemUtils: FakeFileSystemUtils(),
         templateRenderer: FakeTemplateRenderer(),
         terminal: FakeTerminal(),
@@ -383,7 +382,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[setUpFakeXcodeBuildHandler()]),
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
-          FakeXcodeProjectInterpreterWithBuildSettings(errorGettingBuildSettings: true),
+          FakeXcodeProjectInterpreterWithBuildSettings(returnsEmptyBuildSettings: true),
       Artifacts: () => Artifacts.test(),
       PlistParser: () => testPlistUtils,
     },
