@@ -340,6 +340,21 @@ void main() {
       areCreateAndDispose,
     );
   });
+
+  testWidgets('SnapshotWidget does not crash at zero area', (WidgetTester tester) async {
+    final controller = SnapshotController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: SnapshotWidget(controller: controller, child: const Placeholder()),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(SnapshotWidget)), Size.zero);
+  });
 }
 
 class TestPlatformView extends SingleChildRenderObjectWidget {

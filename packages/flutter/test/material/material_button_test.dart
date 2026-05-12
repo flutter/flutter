@@ -971,4 +971,17 @@ void main() {
     final RawMaterialButton rawMaterialButton = tester.widget(rawMaterialButtonFinder);
     expect(rawMaterialButton.disabledElevation, equals(0.0));
   });
+
+  testWidgets('MaterialButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(
+            child: MaterialButton(onPressed: () {}, child: const Text('X')),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(MaterialButton)), Size.zero);
+  });
 }

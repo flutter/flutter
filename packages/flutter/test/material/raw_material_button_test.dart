@@ -652,4 +652,15 @@ void main() {
       SystemMouseCursors.basic,
     );
   });
+
+  testWidgets('RawMaterialButton does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: SizedBox.shrink(child: RawMaterialButton(onPressed: () {})),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(RawMaterialButton)), Size.zero);
+  });
 }
