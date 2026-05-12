@@ -85,7 +85,7 @@ class UniqueKey extends LocalKey {
 /// A key that uses a value of a particular type to identify itself.
 ///
 /// A [ValueKey] is equal to another [ValueKey] if, and only if, their values
-/// are equal (using [operator ==]).
+/// are equal (using [operator==]).
 ///
 /// This class can be subclassed to create value keys that will not be equal to
 /// other value keys that happen to use the same value. If the subclass is
