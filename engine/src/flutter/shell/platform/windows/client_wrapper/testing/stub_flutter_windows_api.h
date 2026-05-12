@@ -111,6 +111,11 @@ class StubFlutterWindowsApi {
   virtual void PluginRegistrarUnregisterTopLevelWindowProcDelegate(
       FlutterDesktopWindowProcCallback delegate) {}
 
+  // Called for FlutterDesktopPluginRegistrarGetGraphicsAdapter.
+  virtual bool PluginRegistrarGetGraphicsAdapter(IDXGIAdapter** adapter_out) {
+    return false;
+  }
+
   // Called for FlutterDesktopEngineProcessExternalWindowMessage.
   virtual bool EngineProcessExternalWindowMessage(
       FlutterDesktopEngineRef engine,

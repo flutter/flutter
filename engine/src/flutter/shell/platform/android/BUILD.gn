@@ -48,6 +48,7 @@ executable("flutter_shell_native_unittests") {
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
     "image_lru_unittests.cc",
+    "platform_view_android_jni_impl_unittests.cc",
     "platform_view_android_unittests.cc",
   ]
   if (!slimpeller) {
@@ -58,6 +59,7 @@ executable("flutter_shell_native_unittests") {
     ":flutter_shell_native_src",
     "//flutter/fml",
     "//flutter/shell/platform/android/jni:jni_mock",
+    "//flutter/shell/platform/android/jni:mock_jni_env",
     "//flutter/third_party/googletest:gmock",
     "//flutter/third_party/googletest:gtest",
   ]
@@ -779,7 +781,9 @@ if (target_cpu != "x86") {
       gen_snapshot_dest = "gen_snapshot.exe"
     }
 
-    if (host_os == "linux") {
+    if (host_os == "linux" && host_cpu == "arm64") {
+      output = "$android_zip_archive_dir/linux-arm64.zip"
+    } else if (host_os == "linux") {
       output = "$android_zip_archive_dir/linux-x64.zip"
     } else if (host_os == "mac") {
       output = "$android_zip_archive_dir/darwin-x64.zip"
@@ -821,7 +825,9 @@ if (host_os == "linux" &&
     analyze_snapshot_path =
         rebase_path("$analyze_snapshot_out_dir/$analyze_snapshot_bin")
 
-    if (host_os == "linux") {
+    if (host_os == "linux" && host_cpu == "arm64") {
+      output = "$android_zip_archive_dir/analyze-snapshot-linux-arm64.zip"
+    } else if (host_os == "linux") {
       output = "$android_zip_archive_dir/analyze-snapshot-linux-x64.zip"
     } else if (host_os == "mac") {
       output = "$android_zip_archive_dir/analyze-snapshot-darwin-x64.zip"

@@ -157,9 +157,15 @@ base class GpuContext extends NativeFieldWrapperClass1 {
 
   RenderPipeline createRenderPipeline(
     Shader vertexShader,
-    Shader fragmentShader,
-  ) {
-    return RenderPipeline._(this, vertexShader, fragmentShader);
+    Shader fragmentShader, {
+    VertexLayout? vertexLayout,
+  }) {
+    return RenderPipeline._(
+      this,
+      vertexShader,
+      fragmentShader,
+      vertexLayout: vertexLayout,
+    );
   }
 
   /// Associates the default Impeller context with this Context.

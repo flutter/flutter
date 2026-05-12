@@ -4,8 +4,8 @@
 
 // Test sliver which always attempts to paint itself whether it is visible or not.
 // Use for checking if slivers which take sliver children paints optimally.
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 class RenderMockSliverToBoxAdapter extends RenderSliverToBoxAdapter {
   RenderMockSliverToBoxAdapter({super.child, required this.incrementCounter});

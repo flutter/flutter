@@ -1028,7 +1028,7 @@ class LocalizationsGenerator {
     String className,
     String fileName,
     String header,
-    final LocaleInfo locale,
+    LocaleInfo locale,
   ) {
     final Iterable<String> methods = _allMessages.map((Message message) {
       var localeWithFallback = locale;
