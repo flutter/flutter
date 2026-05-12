@@ -33,6 +33,9 @@ abstract class Logger {
   /// Whether or not this logger should print [printTrace] messages.
   bool get isVerbose => false;
 
+  /// Whether this logger is used for machine readable output.
+  bool get isMachine => false;
+
   /// If true, silences the logger output.
   bool quiet = false;
 
@@ -266,6 +269,9 @@ class DelegatingLogger implements Logger {
 
   @override
   bool get isVerbose => _delegate.isVerbose;
+
+  @override
+  bool get isMachine => _delegate.isMachine;
 
   @override
   bool get hadErrorOutput => _delegate.hadErrorOutput;

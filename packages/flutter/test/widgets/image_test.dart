@@ -3061,70 +3061,69 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-    'errorBuilder prevents FlutterError report only if errorBuilder is non-null when widget is disposed',
-    (WidgetTester tester) async {
-      // This test verifies that if an errorBuilder is provided, FlutterError.reportError
-      // is called, only if the errorBuilder stays present when the widget is unmounted.
+  testWidgets('errorBuilder prevents FlutterError report even if errorBuilder is later removed', (
+    WidgetTester tester,
+  ) async {
+    // Originally verified that errors were reported when errorBuilder was removed
+    // before the widget is disposed. With the reportErrors fix for
+    // https://github.com/flutter/flutter/issues/81931, the completer remembers
+    // that an error handler was once present, so errors are no longer reported.
 
-      // 1. Setup: Capture FlutterError reports
-      final reportedErrors = <FlutterErrorDetails>[];
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-      FlutterError.onError = reportedErrors.add;
-      addTearDown(() {
-        FlutterError.onError = oldHandler;
-      }); // Ensure handler is restored
-
-      final provider = _TestImageProvider();
-      final testException = Exception('Network failed');
-      final StackTrace testStack = StackTrace.current;
-
-      // Function to build the widget with the Image
-      Widget buildImage({required bool hasErrorBuilder}) {
-        return Directionality(
-          textDirection: TextDirection.ltr,
-          child: Image(
-            image: provider,
-            errorBuilder: hasErrorBuilder
-                ? (_, _, _) => const SizedBox(width: 10, height: 10)
-                : null,
-          ),
-        );
-      }
-
-      // 2. Pump the widget with an errorBuilder
-      await tester.pumpWidget(buildImage(hasErrorBuilder: true));
-      expect(find.byType(Image), findsOneWidget);
-      expect(reportedErrors, isEmpty); // No errors yet
-
-      // 3. Update the widget with no errorBuilder
-      await tester.pumpWidget(buildImage(hasErrorBuilder: false));
-      expect(find.byType(Image), findsOneWidget);
-      expect(reportedErrors, isEmpty); // No errors yet
-
-      // 4. Remove the Image widget from the tree.
-      await tester.pumpWidget(const SizedBox.shrink());
-      expect(find.byType(Image), findsNothing);
-
-      // 5. Now, make the image provider fail *after* the widget state is disposed.
-      provider.fail(testException, testStack);
-
-      // 5. Allow asynchronous error propagation to complete robustly.
-      await tester.pumpAndSettle();
-      // Restore the handler now in case `expect`s in step 6 fail.
+    // 1. Setup: Capture FlutterError reports
+    final reportedErrors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = reportedErrors.add;
+    addTearDown(() {
       FlutterError.onError = oldHandler;
+    }); // Ensure handler is restored
 
-      // 6. Verify that a FlutterError was reported via the onError handler
-      expect(
-        reportedErrors,
-        isNotEmpty,
-        reason:
-            'FlutterError.onError should be called when an errorBuilder was not provided eventually.',
+    final provider = _TestImageProvider();
+    final testException = Exception('Network failed');
+    final StackTrace testStack = StackTrace.current;
+
+    // Function to build the widget with the Image
+    Widget buildImage({required bool hasErrorBuilder}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Image(
+          image: provider,
+          errorBuilder: hasErrorBuilder ? (_, _, _) => const SizedBox(width: 10, height: 10) : null,
+        ),
       );
-      // Also check takeException as a standard backup.
-      expect(tester.takeException(), isNull);
-    },
-  );
+    }
+
+    // 2. Pump the widget with an errorBuilder
+    await tester.pumpWidget(buildImage(hasErrorBuilder: true));
+    expect(find.byType(Image), findsOneWidget);
+    expect(reportedErrors, isEmpty); // No errors yet
+
+    // 3. Update the widget with no errorBuilder
+    await tester.pumpWidget(buildImage(hasErrorBuilder: false));
+    expect(find.byType(Image), findsOneWidget);
+    expect(reportedErrors, isEmpty); // No errors yet
+
+    // 4. Remove the Image widget from the tree.
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(find.byType(Image), findsNothing);
+
+    // 5. Now, make the image provider fail *after* the widget state is disposed.
+    provider.fail(testException, testStack);
+
+    // 5. Allow asynchronous error propagation to complete robustly.
+    await tester.pumpAndSettle();
+    // Restore the handler now in case `expect`s in step 6 fail.
+    FlutterError.onError = oldHandler;
+
+    // 6. Verify error reporting behavior.
+    expect(
+      reportedErrors,
+      isEmpty,
+      reason:
+          'reportErrors was set to false when errorBuilder was present, so errors are not reported.',
+    );
+    // Also check takeException as a standard backup.
+    expect(tester.takeException(), isNull);
+  });
 }
 
 @immutable

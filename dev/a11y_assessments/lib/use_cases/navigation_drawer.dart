@@ -64,10 +64,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
   Widget buildDrawerScaffold(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: SafeArea(
         bottom: false,
         top: false,
