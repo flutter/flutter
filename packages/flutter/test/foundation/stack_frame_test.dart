@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'capture_output.dart';
+
 void main() {
   test('Parses line', () {
     expect(StackFrame.fromStackTraceLine(stackString.split('\n')[0]), stackFrames[0]);
@@ -97,39 +99,32 @@ void main() {
 
   test('debugPrintStack does not throw on a stack carrying an async-gap marker', () {
     // Regression test for https://github.com/flutter/flutter/issues/179018.
-    final printed = <String?>[];
-    final DebugPrintCallback original = debugPrint;
-    debugPrint = (String? message, {int? wrapWidth}) => printed.add(message);
-    try {
+    final List<String> printed = captureOutput(() {
       debugPrintStack(
         label: 'ParallelWaitError-style stack',
         stackTrace: StackTrace.fromString(mangledStackString),
       );
-    } finally {
-      debugPrint = original;
-    }
+    });
     expect(printed, isNotEmpty);
   });
 
   test('debugPrintStack does not throw on a ParallelWaitError stack', () async {
     // Regression test for https://github.com/flutter/flutter/issues/179018.
     StackTrace? parallelWaitStack;
-    final printed = <String?>[];
-    final DebugPrintCallback original = debugPrint;
-    debugPrint = (String? message, {int? wrapWidth}) => printed.add(message);
-    try {
-      await (_function1(), _function2()).wait.then<void>(
-        (_) {},
-        onError: (Object error, StackTrace stack) {
-          expect(error, isA<ParallelWaitError<(void, void), (AsyncError?, AsyncError?)>>());
-          parallelWaitStack = stack;
-          expect(stack.toString(), contains('===== asynchronous gap ==========================='));
-          debugPrintStack(label: error.toString(), stackTrace: stack);
-        },
-      );
-    } finally {
-      debugPrint = original;
-    }
+    final printed = <String>[];
+    await (_function1(), _function2()).wait.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stack) {
+        expect(error, isA<ParallelWaitError<(void, void), (AsyncError?, AsyncError?)>>());
+        parallelWaitStack = stack;
+        expect(stack.toString(), contains('===== asynchronous gap ==========================='));
+        printed.addAll(
+          captureOutput(() {
+            debugPrintStack(label: error.toString(), stackTrace: stack);
+          }),
+        );
+      },
+    );
     expect(parallelWaitStack, isNotNull);
     expect(printed, isNotEmpty);
   });
