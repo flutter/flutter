@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOW_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOW_H_
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -365,6 +366,9 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
 
   // Generates touch point IDs for touch events.
   SequentialIdGenerator touch_id_generator_;
+
+  // Tracks the most recent button mask reported for each native pointer id.
+  std::map<UINT32, uint64_t> pointer_buttons_;
 
   // Provides access to the list of available displays.
   std::shared_ptr<DisplayManagerWin32> display_manager_;

@@ -1328,7 +1328,7 @@ typedef enum {
 
 /// Flags for the `buttons` field of `FlutterPointerEvent` when `device_kind`
 /// is `kFlutterPointerDeviceKindStylus` or
-// `kFlutterPointerDeviceKindInvertedStylus`.
+/// `kFlutterPointerDeviceKindInvertedStylus`.
 typedef enum {
   kFlutterPointerButtonStylusContact = 1 << 0,
   kFlutterPointerButtonStylusPrimary = 1 << 1,

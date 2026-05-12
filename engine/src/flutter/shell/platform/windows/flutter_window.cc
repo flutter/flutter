@@ -585,6 +585,8 @@ FlutterWindow::HandleMessage(UINT const message,
         UINT32 pressure = 0;
         UINT32 rotation = 0;
         BOOL is_inverted = FALSE;
+        flutter_button =
+            ConvertWinPointerFlagsToFlutterButtons(pointerInfo.pointerFlags);
         if (pointerInfo.pointerType == PT_PEN) {
           POINTER_PEN_INFO penInfo;
           if (windows_proc_table_->GetPointerPenInfo(pointerId, &penInfo)) {
@@ -622,15 +624,29 @@ FlutterWindow::HandleMessage(UINT const message,
         if (message == WM_POINTERDOWN) {
           OnPointerDown(x, y, device_kind, touch_id, flutter_button, rotation,
                         pressure);
+          pointer_buttons_[pointerId] = flutter_button;
         } else if (message == WM_POINTERUPDATE) {
+          const uint64_t previous_buttons = pointer_buttons_[pointerId];
+          const uint64_t buttons_pressed = flutter_button & ~previous_buttons;
+          const uint64_t buttons_released = previous_buttons & ~flutter_button;
+
+          OnPointerUp(x, y, device_kind, touch_id, buttons_released);
+          OnPointerDown(x, y, device_kind, touch_id, buttons_pressed, rotation,
+                        pressure);
           OnPointerMove(x, y, device_kind, touch_id, rotation, pressure,
                         /* modifiers_state=*/0);
+          pointer_buttons_[pointerId] = flutter_button;
         } else if (message == WM_POINTERUP) {
-          OnPointerUp(x, y, device_kind, touch_id, flutter_button);
+          const uint64_t previous_buttons = pointer_buttons_[pointerId];
+          const uint64_t buttons_released =
+              flutter_button != 0 ? flutter_button : previous_buttons;
+          OnPointerUp(x, y, device_kind, touch_id, buttons_released);
+          pointer_buttons_[pointerId] = 0;
           // keep tracking the pointer (especially important for stylus)
           // This allows a stylus to "hover" over the window
         } else if (message == WM_POINTERLEAVE) {
           OnPointerLeave(x, y, device_kind, touch_id);
+          pointer_buttons_.erase(pointerId);
           touch_id_generator_.ReleaseNumber(pointerId);
         }
       }

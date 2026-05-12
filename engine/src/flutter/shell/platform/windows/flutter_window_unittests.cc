@@ -251,9 +251,11 @@ TEST_F(FlutterWindowTest, OnPointerStarSendsDeviceType) {
   win32window.OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindMouse,
                             kDefaultPointerDeviceId, 0, 0, 0);
   win32window.OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindMouse,
-                            kDefaultPointerDeviceId, WM_LBUTTONDOWN, 0, 0);
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonMousePrimary, 0, 0);
   win32window.OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindMouse,
-                          kDefaultPointerDeviceId, WM_LBUTTONDOWN);
+                          kDefaultPointerDeviceId,
+                          kFlutterPointerButtonMousePrimary);
   win32window.OnPointerLeave(10.0, 10.0, kFlutterPointerDeviceKindMouse,
                              kDefaultPointerDeviceId);
 
@@ -261,9 +263,11 @@ TEST_F(FlutterWindowTest, OnPointerStarSendsDeviceType) {
   win32window.OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindTouch,
                             kDefaultPointerDeviceId, 0, 0, 0);
   win32window.OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindTouch,
-                            kDefaultPointerDeviceId, WM_LBUTTONDOWN, 0, 0);
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonMousePrimary, 0, 0);
   win32window.OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindTouch,
-                          kDefaultPointerDeviceId, WM_LBUTTONDOWN);
+                          kDefaultPointerDeviceId,
+                          kFlutterPointerButtonMousePrimary);
   win32window.OnPointerLeave(10.0, 10.0, kFlutterPointerDeviceKindTouch,
                              kDefaultPointerDeviceId);
 
@@ -271,9 +275,11 @@ TEST_F(FlutterWindowTest, OnPointerStarSendsDeviceType) {
   win32window.OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                             kDefaultPointerDeviceId, 0, 0, 0);
   win32window.OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
-                            kDefaultPointerDeviceId, WM_LBUTTONDOWN, 0, 0);
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonMousePrimary, 0, 0);
   win32window.OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindStylus,
-                          kDefaultPointerDeviceId, WM_LBUTTONDOWN);
+                          kDefaultPointerDeviceId,
+                          kFlutterPointerButtonMousePrimary);
   win32window.OnPointerLeave(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                              kDefaultPointerDeviceId);
 
