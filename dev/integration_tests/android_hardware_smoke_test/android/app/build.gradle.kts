@@ -20,10 +20,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.android_hardware_smoke_test"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -40,18 +37,16 @@ android {
     }
 }
 
-// kotlin {
-//     compilerOptions {
-//         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
-//     }
-// }
-
 flutter {
     source = "../.."
 }
 
 dependencies {
+    implementation("androidx.test.ext:junit:1.3.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.2+")
+    androidTestImplementation("androidx.test:rules:1.2+")
+    androidTestImplementation("androidx.test:core:1.5+")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.2+")
+    androidTestImplementation("androidx.test.services:test-services:1.4.2")
 }
