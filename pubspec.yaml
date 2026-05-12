@@ -120,7 +120,7 @@ dependencies:
   google_identity_services_web: 0.3.3+1
   google_mobile_ads: 8.0.0
   googleapis: 14.0.0
-  googleapis_auth: 2.3.0
+  googleapis_auth: 2.3.1
   hooks: 1.0.3
   data_assets: 0.19.6
   record_use: 0.6.0
@@ -224,4 +224,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 5rudho
+# PUBSPEC CHECKSUM: pl962k
