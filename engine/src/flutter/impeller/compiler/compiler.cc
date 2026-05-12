@@ -4,12 +4,14 @@
 
 #include "impeller/compiler/compiler.h"
 
+#include <cctype>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
 #include <optional>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "flutter/fml/paths.h"
@@ -280,6 +282,56 @@ uint32_t CalculateUBOSize(const spirv_cross::Compiler* compiler) {
   return result;
 }
 
+// Mirror of the OpenGL ES backend's `BufferBindingsGLES` uniform key
+// normalization: uppercase and drop underscores. Two GLSL identifiers that
+// reduce to the same string here are interchangeable as far as that backend's
+// (case- and underscore-insensitive) uniform lookup is concerned.
+std::string StripUnderscoresAndUpper(std::string_view name) {
+  std::string result;
+  result.reserve(name.size());
+  for (char ch : name) {
+    if (ch != '_') {
+      result.push_back(static_cast<char>(std::toupper(ch)));
+    }
+  }
+  return result;
+}
+
+// OpenGL targets older than #version 140 (i.e. the `kOpenGLES` ESSL 1.00 and
+// `kOpenGLDesktop` GLSL 1.20 outputs) have no uniform buffer objects, so
+// SPIRV-Cross lowers each uniform block to a plain `uniform StructType
+// instanceName;` declaration and the driver reports its members as
+// `instanceName.member`. The OpenGL ES backend resolves those members by the
+// *block* name (carried in shader reflection), reaching them through a
+// case-insensitive, underscore-insensitive match. That match only succeeds
+// when the instance name normalizes to the block name. Impeller's own shaders
+// follow the `uniform XInfo { ... } x_info;` convention and satisfy it, but a
+// caller-authored Flutter GPU shader bundle need not (e.g. `uniform ToonInfo {
+// ... } toon;`), in which case all of its uniform block members silently fail
+// to bind. Rename any non-conforming instance variable to a canonical,
+// collision-free form so every uniform block binds on these backends.
+void CanonicalizeUniformBlockInstanceNamesForGL(
+    TargetPlatform target_platform,
+    spirv_cross::Compiler* compiler) {
+  if (target_platform != TargetPlatform::kOpenGLES &&
+      target_platform != TargetPlatform::kOpenGLDesktop) {
+    return;
+  }
+  for (const spirv_cross::Resource& ubo :
+       compiler->get_shader_resources().uniform_buffers) {
+    const std::string block_name = compiler->get_name(ubo.base_type_id);
+    const std::string instance_name = compiler->get_name(ubo.id);
+    if (StripUnderscoresAndUpper(instance_name) ==
+        StripUnderscoresAndUpper(block_name)) {
+      continue;
+    }
+    // A leading underscore reduces to the block name under the normalization
+    // above, mirrors the synthetic names SPIRV-Cross already emits, and cannot
+    // collide with the (identically named, case sensitive) struct type.
+    compiler->set_name(ubo.id, "_" + block_name);
+  }
+}
+
 }  // namespace
 
 Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
@@ -439,6 +491,9 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
         << "Could not create compiler for target platform.";
     return;
   }
+
+  CanonicalizeUniformBlockInstanceNamesForGL(source_options.target_platform,
+                                             sl_compiler.GetCompiler());
 
   uint32_t ubo_size = CalculateUBOSize(sl_compiler.GetCompiler());
   if (ubo_size > kMaxUniformBufferSize) {

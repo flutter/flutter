@@ -128,6 +128,33 @@ TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
   ASSERT_FALSE(CanCompileAndReflect("struct_def_bug.vert"));
 }
 
+TEST_P(CompilerTest, UniformBlockInstanceNameCanonicalizedForGL) {
+  if (!TargetPlatformIsOpenGL(GetParam())) {
+    GTEST_SKIP() << "Only relevant for the OpenGL ES / Desktop backends, which "
+                    "lower uniform blocks to plain `uniform Struct instance;` "
+                    "declarations.";
+  }
+  // mat2_test.frag declares `uniform Params { ... } uParams;`. The instance
+  // name "uParams" does not normalize to the block name "Params" (the OpenGL ES
+  // backend resolves uniform block members by the block name, modulo a
+  // case-insensitive, underscore-insensitive match), so without
+  // canonicalization the driver-reported `uParams.uMat2` could not be resolved.
+  ASSERT_TRUE(
+      CanCompileAndReflect("mat2_test.frag", SourceType::kFragmentShader));
+  auto sl_source = GetCompiler()->GetSLShaderSource();
+  ASSERT_NE(sl_source, nullptr);
+  const std::string source(
+      reinterpret_cast<const char*>(sl_source->GetMapping()),
+      sl_source->GetSize());
+  EXPECT_EQ(source.find("uParams."), std::string::npos)
+      << "Non-conforming uniform block instance name should have been "
+         "rewritten. Generated source:\n"
+      << source;
+  EXPECT_NE(source.find("_Params."), std::string::npos)
+      << "Expected the canonical instance name `_Params`. Generated source:\n"
+      << source;
+}
+
 TEST_P(CompilerTest, BindingBaseForFragShader) {
   if (!TargetPlatformIsVulkan(GetParam())) {
     GTEST_SKIP();
