@@ -117,13 +117,6 @@ void main() {
     createCoreMockProjectFiles();
   }
 
-  const xattrCommand1 = FakeCommand(
-    command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', '/'],
-  );
-  const xattrCommand2 = FakeCommand(
-    command: <String>['xattr', '-r', '-d', 'com.apple.provenance', '/'],
-  );
-
   List<FakeCommand> postBuildCommands({void Function(List<String> command)? onRun}) {
     return [
       const FakeCommand(
@@ -430,9 +423,6 @@ void main() {
       FileSystem: () => fileSystem,
       Pub: ThrowingPub.new,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem
@@ -473,9 +463,6 @@ void main() {
       createMinimalMockProjectFiles();
 
       processManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem
@@ -531,9 +518,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           disablePortPublication: true,
           onRun: (_) {
@@ -583,9 +567,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem
@@ -626,9 +607,6 @@ void main() {
       );
 
       processManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           customNaming: true,
           onRun: (_) {
@@ -687,9 +665,6 @@ void main() {
         flutterVersion: FakeFlutterVersion(),
       );
       processManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           deviceId: '1234',
           onRun: (_) {
@@ -740,9 +715,6 @@ void main() {
         flutterVersion: FakeFlutterVersion(),
       );
       processManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           simulator: true,
           onRun: (_) {
@@ -793,9 +765,6 @@ void main() {
       );
       createMinimalMockProjectFiles();
       processManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           verbose: true,
           onRun: (_) {
@@ -842,9 +811,6 @@ void main() {
         flutterVersion: FakeFlutterVersion(),
       );
       processManager.addCommands(<FakeCommand>[
-        xattrCommand1,
-
-        xattrCommand2,
         setUpFakeXcodeBuildHandler(
           onRun: (_) {
             fileSystem
@@ -946,9 +912,6 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             onRun: (_) {
               fileSystem
@@ -1013,9 +976,6 @@ void main() {
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             onRun: (_) {
               fileSystem
@@ -1076,9 +1036,6 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
@@ -1132,9 +1089,6 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
@@ -1195,9 +1149,6 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
@@ -1263,9 +1214,6 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(exitCode: 1),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           ...postBuildCommands(),
@@ -1316,9 +1264,6 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
@@ -1386,9 +1331,6 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
@@ -1448,9 +1390,6 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
@@ -1504,9 +1443,6 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           // Intentionally fail the first xcodebuild command with concurrent run failure message.
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
@@ -1577,9 +1513,6 @@ void main() {
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             stdout: '''
@@ -1636,9 +1569,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
@@ -1705,9 +1635,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             stdout: '''
@@ -1751,9 +1678,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
@@ -1807,9 +1731,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
@@ -1865,9 +1786,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             exitCode: 1,
             onRun: (_) {
@@ -1925,9 +1843,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             simulator: true,
             exitCode: 1,
@@ -1984,9 +1899,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             simulator: true,
             exitCode: 1,
@@ -2048,9 +1960,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
         );
 
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(
             simulator: true,
             exitCode: 1,
@@ -2119,9 +2028,6 @@ Runner requires a provisioning profile. Select a provisioning profile in the Sig
           flutterVersion: FakeFlutterVersion(),
         );
         processManager.addCommands(<FakeCommand>[
-          xattrCommand1,
-
-          xattrCommand2,
           setUpFakeXcodeBuildHandler(simulator: true, exitCode: 1),
           setUpLegacyXCResultCommand(stdout: kSampleResultJsonWithIssues),
           ...postBuildCommands(),
