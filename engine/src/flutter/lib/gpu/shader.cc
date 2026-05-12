@@ -93,6 +93,15 @@ std::shared_ptr<impeller::VertexDescriptor> Shader::CreateVertexDescriptor()
   return vertex_descriptor;
 }
 
+const std::vector<impeller::ShaderStageIOSlot>& Shader::GetStageInputs() const {
+  return inputs_;
+}
+
+const std::vector<impeller::ShaderStageBufferLayout>&
+Shader::GetStageBufferLayouts() const {
+  return layouts_;
+}
+
 impeller::ShaderStage Shader::GetShaderStage() const {
   return stage_;
 }

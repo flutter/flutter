@@ -111,16 +111,12 @@ void main() {
     });
 
     group('projectInfo', () {
-      testUsingContext(
-        'is null if XcodeProjectInterpreter is null',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-          project.xcodeProject.createSync(recursive: true);
-          expect(await project.projectInfo(), isNull);
-        },
-        overrides: <Type, Generator>{XcodeProjectInterpreter: () => null},
-      );
+      testUsingContext('is null if XcodeProjectInterpreter is null', () async {
+        final fs = MemoryFileSystem.test();
+        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        project.xcodeProject.createSync(recursive: true);
+        expect(await project.projectInfo(), isNull);
+      }, overrides: <Type, Generator>{XcodeProjectInterpreter: () => null});
 
       testUsingContext(
         'is null if XcodeProjectInterpreter is not installed',
@@ -157,28 +153,20 @@ void main() {
       );
     });
 
-    testUsingContext(
-      'schemeForBuildInfo succeeds',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-        project.xcodeProject.createSync(recursive: true);
-        const BuildInfo buildInfo = BuildInfo.debug;
-        expect(await project.schemeForBuildInfo(buildInfo), 'Runner');
-      },
-      overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter()},
-    );
+    testUsingContext('schemeForBuildInfo succeeds', () async {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      project.xcodeProject.createSync(recursive: true);
+      const BuildInfo buildInfo = BuildInfo.debug;
+      expect(await project.schemeForBuildInfo(buildInfo), 'Runner');
+    }, overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter()});
 
-    testUsingContext(
-      'schemeForBuildInfo returns null if unable to find project',
-      () async {
-        final fs = MemoryFileSystem.test();
-        final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-        const BuildInfo buildInfo = BuildInfo.debug;
-        expect(await project.schemeForBuildInfo(buildInfo), isNull);
-      },
-      overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter()},
-    );
+    testUsingContext('schemeForBuildInfo returns null if unable to find project', () async {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      const BuildInfo buildInfo = BuildInfo.debug;
+      expect(await project.schemeForBuildInfo(buildInfo), isNull);
+    }, overrides: <Type, Generator>{XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter()});
 
     testUsingContext(
       'schemeForBuildInfo succeeds with flavor',
@@ -399,53 +387,42 @@ void main() {
 
     group('ensureReadyForPlatformSpecificTooling', () {
       group('lldb files are generated', () {
-        testUsingContext(
-          'when they are missing',
-          () async {
-            final fs = MemoryFileSystem.test();
-            final Directory projectDirectory = fs.directory('path');
-            projectDirectory.childDirectory('ios').createSync(recursive: true);
-            final FlutterManifest manifest = FakeFlutterManifest();
-            final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
-            final project = IosProject.fromFlutter(flutterProject);
-            expect(project.lldbInitFile, isNot(exists));
-            expect(project.lldbHelperPythonFile, isNot(exists));
+        testUsingContext('when they are missing', () async {
+          final fs = MemoryFileSystem.test();
+          final Directory projectDirectory = fs.directory('path');
+          projectDirectory.childDirectory('ios').createSync(recursive: true);
+          final FlutterManifest manifest = FakeFlutterManifest();
+          final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
+          final project = IosProject.fromFlutter(flutterProject);
+          expect(project.lldbInitFile, isNot(exists));
+          expect(project.lldbHelperPythonFile, isNot(exists));
 
-            await project.ensureReadyForPlatformSpecificTooling();
+          await project.ensureReadyForPlatformSpecificTooling();
 
-            expect(project.lldbInitFile, exists);
-            expect(project.lldbHelperPythonFile, exists);
-          },
-          overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)},
-        );
+          expect(project.lldbInitFile, exists);
+          expect(project.lldbHelperPythonFile, exists);
+        }, overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)});
 
-        testUsingContext(
-          'when they are older than tool',
-          () async {
-            final fs = MemoryFileSystem.test();
-            final Directory projectDirectory = fs.directory('path');
-            projectDirectory.childDirectory('ios').createSync(recursive: true);
-            final FlutterManifest manifest = FakeFlutterManifest();
-            final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
-            final project = IosProject.fromFlutter(flutterProject);
-            project.lldbInitFile.createSync(recursive: true);
-            project.lldbInitFile.writeAsStringSync('old');
-            project.lldbHelperPythonFile.createSync(recursive: true);
-            project.lldbHelperPythonFile.writeAsStringSync('old');
+        testUsingContext('when they are older than tool', () async {
+          final fs = MemoryFileSystem.test();
+          final Directory projectDirectory = fs.directory('path');
+          projectDirectory.childDirectory('ios').createSync(recursive: true);
+          final FlutterManifest manifest = FakeFlutterManifest();
+          final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
+          final project = IosProject.fromFlutter(flutterProject);
+          project.lldbInitFile.createSync(recursive: true);
+          project.lldbInitFile.writeAsStringSync('old');
+          project.lldbHelperPythonFile.createSync(recursive: true);
+          project.lldbHelperPythonFile.writeAsStringSync('old');
 
-            await project.ensureReadyForPlatformSpecificTooling();
+          await project.ensureReadyForPlatformSpecificTooling();
 
-            expect(
-              project.lldbInitFile.readAsStringSync(),
-              contains('Generated file, do not edit.'),
-            );
-            expect(
-              project.lldbHelperPythonFile.readAsStringSync(),
-              contains('Generated file, do not edit.'),
-            );
-          },
-          overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)},
-        );
+          expect(project.lldbInitFile.readAsStringSync(), contains('Generated file, do not edit.'));
+          expect(
+            project.lldbHelperPythonFile.readAsStringSync(),
+            contains('Generated file, do not edit.'),
+          );
+        }, overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)});
       });
     });
   });
@@ -618,7 +595,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<XcodeProjectInfo?> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
   }) async {

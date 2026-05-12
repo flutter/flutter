@@ -88,9 +88,8 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
   CFTimeInterval duration = link.targetTimestamp - link.timestamp;
   fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(duration);
 
-  [FlutterTracing
-      tracePlatformVsyncWithStartTime:frame_start_time.ToEpochDelta().ToMicroseconds()
-                           targetTime:frame_target_time.ToEpochDelta().ToMicroseconds()];
+  [FlutterTracing tracePlatformVsyncWithStartTime:frame_start_time.ToEpochDelta().ToSecondsF()
+                                       targetTime:frame_target_time.ToEpochDelta().ToSecondsF()];
 
   std::unique_ptr<flutter::FrameTimingsRecorder> recorder =
       std::make_unique<flutter::FrameTimingsRecorder>();
