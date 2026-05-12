@@ -184,7 +184,10 @@ void main() {
   test('Cubic transformInternal clamps values outside the unit interval', () {
     expect(Curves.easeOut.transformInternal(2.0), 1.0);
     expect(Curves.easeOut.transformInternal(-1.0), 0.0);
-    expect(Curves.easeOut.transformInternal(double.nan), 0.0);
+  });
+
+  test('Cubic transformInternal throws for NaN', () {
+    expect(() => Curves.easeOut.transformInternal(double.nan), throwsArgumentError);
   });
 
   test('Invalid transform parameter should assert', () {

@@ -401,7 +401,10 @@ class Cubic extends Curve {
 
   @override
   double transformInternal(double t) {
-    if (t.isNaN || t <= 0.0) {
+    if (t.isNaN) {
+      throw ArgumentError.value(t, 't', 'must not be NaN');
+    }
+    if (t <= 0.0) {
       return 0.0;
     }
     if (t >= 1.0) {
