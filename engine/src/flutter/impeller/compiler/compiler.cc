@@ -4,7 +4,6 @@
 
 #include "impeller/compiler/compiler.h"
 
-#include <cctype>
 #include <cstdint>
 #include <filesystem>
 #include <memory>
@@ -283,15 +282,22 @@ uint32_t CalculateUBOSize(const spirv_cross::Compiler* compiler) {
 }
 
 // Mirror of the OpenGL ES backend's `BufferBindingsGLES` uniform key
-// normalization: uppercase and drop underscores. Two GLSL identifiers that
-// reduce to the same string here are interchangeable as far as that backend's
-// (case- and underscore-insensitive) uniform lookup is concerned.
+// normalization: ASCII uppercase and drop underscores. Two GLSL identifiers
+// that reduce to the same string here are interchangeable as far as that
+// backend's (case- and underscore-insensitive) uniform lookup is concerned.
+// GLSL identifiers are ASCII, so a locale-independent fold is both sufficient
+// and correct here.
 std::string StripUnderscoresAndUpper(std::string_view name) {
   std::string result;
   result.reserve(name.size());
   for (char ch : name) {
-    if (ch != '_') {
-      result.push_back(static_cast<char>(std::toupper(ch)));
+    if (ch == '_') {
+      continue;
+    }
+    if (ch >= 'a' && ch <= 'z') {
+      result.push_back(static_cast<char>(ch - 'a' + 'A'));
+    } else {
+      result.push_back(ch);
     }
   }
   return result;
