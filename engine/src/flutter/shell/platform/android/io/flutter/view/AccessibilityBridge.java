@@ -1999,7 +1999,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (rootObject != null) {
       final float[] identity = new float[16];
       Matrix.setIdentityM(identity, 0);
-      rootObject.updateRecursively(identity, visitedObjects, false);
+      rootObject.updateRecursively(identity, visitedObjects, false, false);
       rootObject.collectRoutes(newRoutes);
     }
 
@@ -3060,6 +3060,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       if (inverseTransform == null) {
         inverseTransform = new float[16];
       }
+
+      if (hitTestTransform == null) {
+        hitTestTransform = new float[16];
+        Matrix.setIdentityM(hitTestTransform, 0);
+      }
       if (!Matrix.invertM(inverseTransform, 0, hitTestTransform, 0)) {
         Arrays.fill(inverseTransform, 0);
       }
@@ -3167,7 +3172,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
 
     private void updateRecursively(
-        float[] ancestorTransform, Set<SemanticsNode> visitedObjects, boolean forceUpdate) {
+        float[] ancestorTransform,
+        Set<SemanticsNode> visitedObjects,
+        boolean forceUpdate,
+        boolean useHitTestTransform) {
       visitedObjects.add(this);
 
       if (globalGeometryDirty) {
@@ -3178,14 +3186,29 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         if (globalTransform == null) {
           globalTransform = new float[16];
         }
-        if (transform == null) {
-          if (BuildConfig.DEBUG) {
-            Log.e(TAG, "transform has not been initialized for id = " + id);
-            accessibilityBridge.getRootSemanticsNode().log("Semantics tree:", true);
+        float[] nodeTransform;
+        if (useHitTestTransform) {
+          if (hitTestTransform == null) {
+            if (BuildConfig.DEBUG) {
+              Log.e(TAG, "hitTestTransform has not been initialized for id = " + id);
+              accessibilityBridge.getRootSemanticsNode().log("Semantics tree:", true);
+            }
+            hitTestTransform = new float[16];
+            Matrix.setIdentityM(hitTestTransform, 0);
           }
-          transform = new float[16];
+          nodeTransform = hitTestTransform;
+        } else {
+          if (transform == null) {
+            if (BuildConfig.DEBUG) {
+              Log.e(TAG, "transform has not been initialized for id = " + id);
+              accessibilityBridge.getRootSemanticsNode().log("Semantics tree:", true);
+            }
+            transform = new float[16];
+            Matrix.setIdentityM(transform, 0);
+          }
+          nodeTransform = transform;
         }
-        Matrix.multiplyMM(globalTransform, 0, ancestorTransform, 0, transform, 0);
+        Matrix.multiplyMM(globalTransform, 0, ancestorTransform, 0, nodeTransform, 0);
 
         final float[] sample = new float[4];
         sample[2] = 0;
@@ -3236,7 +3259,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       for (SemanticsNode child : childrenInTraversalOrder) {
         child.previousNodeId = previousNodeId;
         previousNodeId = child.id;
-        child.updateRecursively(globalTransform, visitedObjects, forceUpdate);
+        child.updateRecursively(globalTransform, visitedObjects, forceUpdate, false);
+      }
+
+      for (SemanticsNode child : childrenInHitTestOrder) {
+        if (!visitedObjects.contains(child)) {
+          child.updateRecursively(globalTransform, visitedObjects, forceUpdate, true);
+        }
       }
     }
 
