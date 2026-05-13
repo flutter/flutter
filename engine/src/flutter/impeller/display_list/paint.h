@@ -85,6 +85,7 @@ struct Paint {
   Style style = Style::kFill;
   BlendMode blend_mode = BlendMode::kSrcOver;
   bool invert_colors = false;
+  bool anti_alias = true;
 
   std::optional<MaskBlurDescriptor> mask_blur_descriptor;
 

@@ -1000,8 +1000,12 @@ enum Brightness {
 }
 
 /// Process a VM service log event into a string message.
+///
+/// Uses a permissive UTF-8 decoder because app-generated logs may contain
+/// invalid UTF-8 from external sources (Bluetooth devices, network APIs, etc.).
 String processVmServiceMessage(vm_service.Event event) {
-  final String message = utf8.decode(base64.decode(event.bytes!));
+  // Use permissive decoder for app logs that may have invalid UTF-8
+  final String message = utf8AllowMalformed.decode(base64.decode(event.bytes!));
   // Remove extra trailing newlines appended by the vm service.
   if (message.endsWith('\n')) {
     return message.substring(0, message.length - 1);

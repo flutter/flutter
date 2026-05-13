@@ -25,6 +25,12 @@ class DlSurfaceInstanceSkiaBase : public DlSurfaceInstance {
   void FlushSubmitCpuSync() override;
 
   // |DlSurfaceInstance|
+  std::unique_ptr<DlPixelData> SnapshotToPixelData() const override;
+
+  // |DlSurfaceInstance|
+  sk_sp<DlImage> SnapshotToImage() const override;
+
+  // |DlSurfaceInstance|
   bool SnapshotToFile(std::string& filename) const override;
 
   // |DlSurfaceInstance|
@@ -44,6 +50,8 @@ class DlSurfaceInstanceSkiaBase : public DlSurfaceInstance {
 
  private:
   DlSkCanvasAdapter adapter_;
+
+  sk_sp<SkImage> GetRasterImage() const;
 };
 
 class DlSurfaceInstanceSkia : public DlSurfaceInstanceSkiaBase {
