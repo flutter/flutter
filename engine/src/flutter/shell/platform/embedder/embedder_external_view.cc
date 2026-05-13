@@ -100,7 +100,6 @@ void EmbedderExternalView::Render(DlCanvas& dl_canvas, bool clear_surface) {
   }
   slice_->render_into(&dl_canvas);
   dl_canvas.RestoreToCount(restore_count);
-  dl_canvas.Flush();
 }
 
 void EmbedderExternalView::TryEndRecording() const {

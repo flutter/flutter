@@ -352,6 +352,7 @@ class Layer {
       c->Render(dl_canvas, clear_surface);
       clear_surface = false;
     }
+    dl_canvas.Flush();
   }
 #endif  //  !SLIMPELLER
 
