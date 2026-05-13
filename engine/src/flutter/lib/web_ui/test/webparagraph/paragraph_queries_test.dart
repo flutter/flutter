@@ -207,11 +207,7 @@ Future<void> testMain() async {
           final ui.GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(i);
           if (glyphInfo != null) {
             expect(glyphInfo.graphemeClusterCodeUnitRange, ui.TextRange(start: i, end: i + 1));
-            // TODO(jlavrova): It's not clear why canvas2d advances are bigger than the line height.
-            // expect(
-            //   glyphInfo.graphemeClusterLayoutBounds.height,
-            //   closeTo(line.advance.height, epsilon),
-            // );
+            expect(glyphInfo.graphemeClusterLayoutBounds.height, line.advance.height);
             expect(glyphInfo.graphemeClusterLayoutBounds.left, closeTo(left, epsilon));
             left = glyphInfo.graphemeClusterLayoutBounds.right;
             expect(glyphInfo.writingDirection, ui.TextDirection.ltr);
@@ -287,7 +283,7 @@ Future<void> testMain() async {
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
     expect(paragraph.width, double.infinity);
-    expect(paragraph.height, closeTo(20.0, EPSILON));
+    expect(paragraph.height, closeTo(22.0, EPSILON));
     expect(paragraph.minIntrinsicWidth, closeTo(5.556640625, EPSILON));
     expect(paragraph.maxIntrinsicWidth, closeTo(5.556640625, EPSILON));
     expect(paragraph.longestLine, closeTo(5.556640625, EPSILON));

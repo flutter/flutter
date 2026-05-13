@@ -1078,14 +1078,21 @@ class PlaceholderCluster extends WebCluster {
 abstract class LineBlock {
   LineBlock(this.span, this._bidiLevel, this.clusterRange, this.textRange, this.shiftFromLineStart);
 
-  double get _styleHeight;
+  double? get _styleHeight;
 
-  double get _heightMultiplier => (_styleHeight * span.style.fontSize!) / _rawHeight;
+  double get _heightMultiplier {
+    if (_styleHeight == null) {
+      return 1.0;
+    }
+    return (_styleHeight! * span.style.fontSize!) / _rawHeight;
+  }
 
   double get _rawHeight => rawFontBoundingBoxAscent + rawFontBoundingBoxDescent;
 
+  // TODO(jlavrova): Make this private and don't use it anywhere outside this class.
   double get rawFontBoundingBoxAscent => span.fontBoundingBoxAscent;
 
+  // TODO(jlavrova): Make this private and don't use it anywhere outside this class.
   double get rawFontBoundingBoxDescent => span.fontBoundingBoxDescent;
 
   double get multipliedHeight => _rawHeight * _heightMultiplier;
@@ -1145,8 +1152,7 @@ class TextBlock extends LineBlock {
   double spanShiftFromLineStart;
 
   @override
-  // TODO(jlavrova): Why are we defaulting to 1.0? In Chrome, the default line-height is `1.2` most of the time.
-  double get _styleHeight => style.height == null ? 1.0 : style.height!;
+  double? get _styleHeight => style.height;
 
   int get visualClusterStart => isLtr ? clusterRange.start : clusterRange.end - 1;
   int get visualClusterEnd => isLtr ? clusterRange.end : clusterRange.start - 1;
@@ -1198,7 +1204,7 @@ class PlaceholderBlock extends LineBlock {
   final double spanShiftFromLineStart;
 
   @override
-  double get _styleHeight => 1.0;
+  double? get _styleHeight => span.style.height;
 
   void calculatePlaceholderTop(double lineAscent, double lineDescent) {
     double baselineAdjustment = 0;
