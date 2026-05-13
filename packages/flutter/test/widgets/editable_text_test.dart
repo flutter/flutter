@@ -16003,7 +16003,66 @@ void main() {
       expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
     });
 
-    testWidgets('Spell check updates when obscureText changes', (WidgetTester tester) async {
+    testWidgets('Spell check disabled for visible password input type', (
+      WidgetTester tester,
+    ) async {
+      final fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            keyboardType: TextInputType.visiblePassword,
+            style: const TextStyle(),
+            cursorColor: const Color(0xFF0000FF),
+            backgroundCursorColor: const Color(0xFF808080),
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: fakeSpellCheckService,
+              misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+    });
+
+    testWidgets('Spell check disabled for password autofill hints', (WidgetTester tester) async {
+      final fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(),
+            cursorColor: const Color(0xFF0000FF),
+            backgroundCursorColor: const Color(0xFF808080),
+            cursorOpacityAnimates: true,
+            autofillHints: const <String>[AutofillHints.password],
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: fakeSpellCheckService,
+              misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+    });
+
+    testWidgets('Spell check updates when non-password obscureText changes', (
+      WidgetTester tester,
+    ) async {
       const suggestionSpans = <SuggestionSpan>[
         SuggestionSpan(TextRange(start: 0, end: 1), <String>['a']),
       ];
@@ -16065,6 +16124,53 @@ void main() {
       expect(fakeSpellCheckService.fetchSpellCheckSuggestionsCallCount, 1);
       expect(fakeSpellCheckService.lastSpellCheckText, 'A');
       expect(state.spellCheckResults, const SpellCheckResults('A', suggestionSpans));
+    });
+
+    testWidgets('Spell check stays disabled for visible password when obscureText changes', (
+      WidgetTester tester,
+    ) async {
+      final fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
+      var obscureText = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              return EditableText(
+                controller: controller,
+                focusNode: focusNode,
+                keyboardType: TextInputType.visiblePassword,
+                obscureText: obscureText,
+                style: const TextStyle(),
+                cursorColor: const Color(0xFF0000FF),
+                backgroundCursorColor: const Color(0xFF808080),
+                cursorOpacityAnimates: true,
+                autofillHints: null,
+                spellCheckConfiguration: SpellCheckConfiguration(
+                  spellCheckService: fakeSpellCheckService,
+                  misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+
+      setState(() {
+        obscureText = false;
+      });
+      await tester.pump();
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+      expect(fakeSpellCheckService.fetchSpellCheckSuggestionsCallCount, 0);
     });
 
     testWidgets(
