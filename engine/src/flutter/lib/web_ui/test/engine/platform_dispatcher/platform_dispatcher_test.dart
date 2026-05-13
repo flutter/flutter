@@ -428,7 +428,7 @@ void testMain() {
       expect(ui.PlatformDispatcher.instance.lineHeightScaleFactorOverride, null);
     });
 
-    test('does not detect override when initialized with browser zoom', () async {
+    test('does not detect override when initialized with browser zoom', () {
       final DomElement root = domDocument.documentElement!;
       final DomElement style = createDomHTMLStyleElement(null);
 
@@ -438,7 +438,7 @@ void testMain() {
 
       try {
         // Create a new dispatcher while the zoom is active.
-        final EnginePlatformDispatcher testDispatcher = EnginePlatformDispatcher();
+        final testDispatcher = EnginePlatformDispatcher();
 
         // It should have textScaleFactor of 1.25.
         expect(testDispatcher.textScaleFactor, 1.25);

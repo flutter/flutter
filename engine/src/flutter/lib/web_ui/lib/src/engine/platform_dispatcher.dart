@@ -1092,7 +1092,8 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     // The factor that we expect for line-height if no override is present.
     // This factor is constant regardless of browser zoom because both
     // lineHeight and fontSize scale proportionally.
-    final double defaultLineHeightFactor = spacingDefault / (typographyMeasurementElementFontSize / findBrowserTextScaleFactor());
+    final double defaultLineHeightFactor =
+        spacingDefault / (typographyMeasurementElementFontSize / findBrowserTextScaleFactor());
 
     _typographySettingsObserver = createDomResizeObserver((
       List<DomResizeObserverEntry> entries,
@@ -1111,8 +1112,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         if (value == null) {
           return true;
         }
-        return (value - defaultValue).abs() < 1e-4 ||
-               (value - defaultValue * computedTextScaleFactor).abs() < 1e-4;
+        return (value - defaultValue).abs() < _typographyPrecisionErrorTolerance ||
+            (value - defaultValue * computedTextScaleFactor).abs() <
+                _typographyPrecisionErrorTolerance;
       }
 
       // We only consider it an override if the line-height factor deviates from
@@ -1148,7 +1150,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       computedTextScaleFactorChanged = _updateTextScaleFactor(computedTextScaleFactor);
       computedLineHeightScaleFactorChanged = _updateLineHeightScaleFactorOverride(
-        (computedLineHeightScaleFactor != null && (computedLineHeightScaleFactor - defaultLineHeightFactor).abs() < 1e-4)
+        (computedLineHeightScaleFactor != null &&
+                (computedLineHeightScaleFactor - defaultLineHeightFactor).abs() <
+                    _typographyPrecisionErrorTolerance)
             ? null
             : computedLineHeightScaleFactor,
       );
@@ -1794,6 +1798,7 @@ void invoke3<A1, A2, A3>(
 }
 
 const double _defaultRootFontSize = 16.0;
+const double _typographyPrecisionErrorTolerance = 1e-4;
 
 /// Finds the text scale factor of the browser by looking at the computed style
 /// of the browser's <html> element.
