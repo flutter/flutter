@@ -1037,11 +1037,11 @@ void main() {
       const selectionColor = Color(0xAF6694e8);
       final paragraph = RenderParagraph(
         const TextSpan(text: 'a\na\na\na'),
-        textDirection: TextDirection.ltr,
+        textDirection: .ltr,
         registrar: registrar,
         selectionColor: selectionColor,
         maxLines: 3,
-        overflow: TextOverflow.fade,
+        overflow: .fade,
       );
       layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
       expect(paragraph.debugHasOverflowShader, isTrue);
@@ -1631,11 +1631,7 @@ class MockCanvas extends Fake implements Canvas {
   }
 
   @override
-  void clipRect(
-    Rect rect, {
-    ui.ClipOp clipOp = ui.ClipOp.intersect,
-    bool doAntiAlias = true,
-  }) {
+  void clipRect(Rect rect, {ui.ClipOp clipOp = ui.ClipOp.intersect, bool doAntiAlias = true}) {
     operations.add('clipRect');
   }
 
