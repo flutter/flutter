@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart'
-    show EnginePhase, TestDefaultBinaryMessengerBinding, fail;
+    show EnginePhase, TestDefaultBinaryMessengerBinding, addTearDown, fail;
 
 export 'package:flutter/foundation.dart' show FlutterError, FlutterErrorDetails;
 export 'package:flutter_test/flutter_test.dart' show EnginePhase, TestDefaultBinaryMessengerBinding;
@@ -149,6 +149,23 @@ class TestRenderingFlutterBinding extends BindingBase
     }
   }
 
+  bool _tearDownRegistered = false;
+
+  void _reset({bool force = false}) {
+    if (force) {
+      _errors.clear();
+      onErrors = null;
+    }
+    if (!_tearDownRegistered) {
+      _tearDownRegistered = true;
+      addTearDown(() {
+        _errors.clear();
+        onErrors = null;
+        _tearDownRegistered = false;
+      });
+    }
+  }
+
   EnginePhase phase = EnginePhase.composite;
 
   /// Pumps a frame and runs its entire life cycle.
@@ -156,6 +173,7 @@ class TestRenderingFlutterBinding extends BindingBase
   /// This method runs all of the [SchedulerPhase]s in a frame, this is useful
   /// to test [SchedulerPhase.postFrameCallbacks].
   void pumpCompleteFrame() {
+    _reset();
     final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
     FlutterError.onError = _errors.add;
     try {
@@ -256,7 +274,9 @@ void layout(
 }) {
   assert(box.parent == null); // We stick the box in another, so you can't reuse it easily, sorry.
 
-  TestRenderingFlutterBinding.instance.renderView.child = null;
+  final TestRenderingFlutterBinding binding = TestRenderingFlutterBinding.instance;
+  binding._reset(force: true);
+  binding.renderView.child = null;
   if (constraints != null) {
     box = RenderPositionedBox(
       alignment: alignment,
