@@ -111,49 +111,21 @@ float sdSuperellipse(vec2 p, float n) {
   return length(pa - ba * h) * sign(pa.x * ba.y - pa.y * ba.x);
 }
 
-float getComponent(vec4 v, int index) {
-  if (index == 0)
-    return v.x;
-  if (index == 1)
-    return v.y;
-  if (index == 2)
-    return v.z;
-  return v.w;
-}
-
-float getQuadrantDistance(vec2 p, int quadrant_index) {
-  // Unpack the parameters for the quadrant.
-  float se_degree_top =
-      getComponent(frag_info.superellipse_degrees_top, quadrant_index);
-  float se_degree_right =
-      getComponent(frag_info.superellipse_degrees_right, quadrant_index);
-  float se_a_top =
-      getComponent(frag_info.superellipse_semi_axes_top, quadrant_index);
-  float se_a_right =
-      getComponent(frag_info.superellipse_semi_axes_right, quadrant_index);
-  float angle_span_top =
-      getComponent(frag_info.angle_spans_top, quadrant_index);
-  float angle_span_right =
-      getComponent(frag_info.angle_spans_right, quadrant_index);
-  float c = getComponent(frag_info.octant_offsets_c, quadrant_index);
-  float radius_top = getComponent(frag_info.radii_width, quadrant_index);
-  float radius_right = getComponent(frag_info.radii_height, quadrant_index);
-
-  vec2 circle_center_top =
-      vec2(getComponent(frag_info.circle_centers_top_x, quadrant_index),
-           getComponent(frag_info.circle_centers_top_y, quadrant_index));
-  vec2 circle_center_right =
-      vec2(getComponent(frag_info.circle_centers_right_x, quadrant_index),
-           getComponent(frag_info.circle_centers_right_y, quadrant_index));
-
-  vec2 scale =
-      vec2(getComponent(frag_info.superellipse_scales_x, quadrant_index),
-           getComponent(frag_info.superellipse_scales_y, quadrant_index));
-
-  vec2 q_center =
-      vec2(getComponent(frag_info.quadrant_centers_x, quadrant_index),
-           getComponent(frag_info.quadrant_centers_y, quadrant_index));
-
+float getQuadrantDistance(vec2 p,
+                          float se_degree_top,
+                          float se_degree_right,
+                          float se_a_top,
+                          float se_a_right,
+                          float angle_span_top,
+                          float angle_span_right,
+                          float c,
+                          float radius_top,
+                          float radius_right,
+                          vec2 circle_center_top,
+                          vec2 circle_center_right,
+                          vec2 scale,
+                          vec2 q_center,
+                          int quadrant_index) {
   vec2 q_sign = vec2(1.0);
   if (quadrant_index == 0)
     q_sign = vec2(1.0, -1.0);
@@ -171,6 +143,16 @@ float getQuadrantDistance(vec2 p, int quadrant_index) {
   // calculations below. This also means that interior distances for this
   // function are not totally accurate.
   vec2 p_clamped = max(p_local, 0.0);
+
+  // For points that we clamped, return an approximate interior distance
+  vec2 extents = vec2(scale.x * se_a_top, scale.y * se_a_right);
+  vec2 d_rect = p_local - extents;
+  float dist_rect_local =
+      length(max(d_rect, 0.0)) + min(max(d_rect.x, d_rect.y), 0.0);
+
+  if (p_local.x <= 0.0 || p_local.y <= 0.0) {
+    return dist_rect_local;
+  }
 
   // Map p in to a square.
   vec2 p_norm = p_clamped / scale;
@@ -245,17 +227,84 @@ float getQuadrantDistance(vec2 p, int quadrant_index) {
   // everywhere, allowing to be mixed cleanly with other SDFs.
   float corner_dist = dist_raw / length(grad_oct / scale);
 
-  return corner_dist;
+  return max(corner_dist, dist_rect_local);
 }
 
-float distanceFromRoundedSuperellipse(vec2 p) {
-  // An RSE is constructed by four different quadrant curves,
-  // take the max distance from all four curves.
-  float d0 = getQuadrantDistance(p, 0);
-  float d1 = getQuadrantDistance(p, 1);
-  float d2 = getQuadrantDistance(p, 2);
-  float d3 = getQuadrantDistance(p, 3);
-  return max(max(d0, d1), max(d2, d3));
+float distanceFromRoundedSuperellipse(vec2 p,
+                                      vec4 quadrant_splits,
+                                      vec2 size,
+                                      vec4 superellipse_degrees_top,
+                                      vec4 superellipse_degrees_right,
+                                      vec4 superellipse_semi_axes_top,
+                                      vec4 superellipse_semi_axes_right,
+                                      vec4 angle_spans_top,
+                                      vec4 angle_spans_right,
+                                      vec4 octant_offsets_c,
+                                      vec4 radii_width,
+                                      vec4 radii_height,
+                                      vec4 circle_centers_top_x,
+                                      vec4 circle_centers_top_y,
+                                      vec4 circle_centers_right_x,
+                                      vec4 circle_centers_right_y,
+                                      vec4 superellipse_scales_x,
+                                      vec4 superellipse_scales_y,
+                                      vec4 quadrant_centers_x,
+                                      vec4 quadrant_centers_y) {
+  vec2 T = vec2(quadrant_splits.x, -size.y);
+  vec2 R = vec2(size.x, quadrant_splits.w);
+  vec2 B = vec2(quadrant_splits.y, size.y);
+  vec2 L = vec2(-size.x, quadrant_splits.z);
+
+  // Grab the 2d cross products between p and the split points.
+  // Imagine drawing a line L from the center of the shape to each split point,
+  // p x L tells us whether p is clockwise or counterclockwise relative to L.
+  float cT = T.x * p.y - T.y * p.x;
+  float cR = R.x * p.y - R.y * p.x;
+  float cB = B.x * p.y - B.y * p.x;
+  float cL = L.x * p.y - L.y * p.x;
+
+  int quadrant_index = 0;
+  // cR = p x R <= 0 -> p is counterclockwise relative to R.
+  // cT = p x T > 0 -> p is clockwise relative to T.
+  // If p is clockwise relative to T and counterclockwise relative to R,
+  // p must lie in the TL quadrant.
+  // If cT = p x T == 0, p is parallel to T, which can misidentify points in the
+  // BR quadrant.
+  if (cR <= 0.0 && (cT > 0.0 || cT == 0.0 && p.x > 0.0)) {
+    quadrant_index = 0;  // TR
+  } else if (cB <= 0.0 && (cR > 0.0 || cR == 0.0 && p.x > 0.0)) {
+    quadrant_index = 1;  // BR
+  } else if (cB >= 0.0 && cL <= 0.0) {
+    quadrant_index = 2;  // BL
+  } else {
+    quadrant_index = 3;  // TL
+  }
+
+  float se_degree_top = superellipse_degrees_top[quadrant_index];
+  float se_degree_right = superellipse_degrees_right[quadrant_index];
+  float se_a_top = superellipse_semi_axes_top[quadrant_index];
+  float se_a_right = superellipse_semi_axes_right[quadrant_index];
+  float angle_span_top = angle_spans_top[quadrant_index];
+  float angle_span_right = angle_spans_right[quadrant_index];
+  float c = octant_offsets_c[quadrant_index];
+  float radius_top = radii_width[quadrant_index];
+  float radius_right = radii_height[quadrant_index];
+
+  vec2 circle_center_top = vec2(circle_centers_top_x[quadrant_index],
+                                circle_centers_top_y[quadrant_index]);
+  vec2 circle_center_right = vec2(circle_centers_right_x[quadrant_index],
+                                  circle_centers_right_y[quadrant_index]);
+
+  vec2 scale = vec2(superellipse_scales_x[quadrant_index],
+                    superellipse_scales_y[quadrant_index]);
+
+  vec2 q_center = vec2(quadrant_centers_x[quadrant_index],
+                       quadrant_centers_y[quadrant_index]);
+
+  return getQuadrantDistance(
+      p, se_degree_top, se_degree_right, se_a_top, se_a_right, angle_span_top,
+      angle_span_right, c, radius_top, radius_right, circle_center_top,
+      circle_center_right, scale, q_center, quadrant_index);
 }
 // Define an ellipse as q(w) = (a*cos(w), b*sin(w)), and p = (x, y) on the
 // plane. Let q(w0) be the closest point on q to p, then q(w0) - p is tangent to
@@ -433,7 +482,18 @@ vec2 filledSDF(vec2 p) {
   } else if (frag_info.type < 3.5) {  // Rounded Rect
     sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii_width);
   } else {
-    sdf = distanceFromRoundedSuperellipse(p);
+    sdf = distanceFromRoundedSuperellipse(
+        p, frag_info.quadrant_splits, frag_info.size,
+        frag_info.superellipse_degrees_top,
+        frag_info.superellipse_degrees_right,
+        frag_info.superellipse_semi_axes_top,
+        frag_info.superellipse_semi_axes_right, frag_info.angle_spans_top,
+        frag_info.angle_spans_right, frag_info.octant_offsets_c,
+        frag_info.radii_width, frag_info.radii_height,
+        frag_info.circle_centers_top_x, frag_info.circle_centers_top_y,
+        frag_info.circle_centers_right_x, frag_info.circle_centers_right_y,
+        frag_info.superellipse_scales_x, frag_info.superellipse_scales_y,
+        frag_info.quadrant_centers_x, frag_info.quadrant_centers_y);
   }
   return vec2(sdf, pixelSize(sdf));
 }
@@ -488,12 +548,6 @@ vec2 strokedSDF(vec2 p) {
   // the base SDF's gradient (except for a discontinuity at the center of the
   // stroke, which does not affect the final render).
   return vec2(sdf, base_pixel_size);
-}
-
-float distanceToSegment(vec2 p, vec2 a, vec2 b) {
-  vec2 pa = p - a, ba = b - a;
-  float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
-  return length(pa - ba * h);
 }
 
 void main() {
