@@ -2630,5 +2630,81 @@ TEST_P(AiksTest, CanRenderTransformedRoundSuperellipse) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CompareAntiAliasAndNonAntiAlias) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kWhite());
+
+  DlRect bounds = DlRect::MakeXYWH(75, 75, 50, 50);
+
+  // --- Left Half: Zoom-in on the top-left corner WITH anti-aliasing (SDF) ---
+  DlPaint layer_paint_left;
+  layer_paint_left.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({200, 300}) * DlMatrix::MakeScale({8, 8, 1}) *
+          DlMatrix::MakeTranslation({-100, -100}),
+      DlImageSampling::kNearestNeighbor));
+  builder.SaveLayer(bounds, &layer_paint_left);
+
+  paint.setAntiAlias(true);
+  builder.DrawRoundRect(
+      DlRoundRect::MakeRectRadius(DlRect::MakeXYWH(100, 100, 200, 200), 50.0f),
+      paint);
+  builder.Restore();
+
+  // --- Right Half: Zoom-in on the top-left corner WITHOUT anti-aliasing ---
+  DlPaint layer_paint_right;
+  layer_paint_right.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({600, 300}) * DlMatrix::MakeScale({8, 8, 1}) *
+          DlMatrix::MakeTranslation({-100, -100}),
+      DlImageSampling::kNearestNeighbor));
+  builder.SaveLayer(bounds, &layer_paint_right);
+
+  paint.setAntiAlias(false);
+  builder.DrawRoundRect(
+      DlRoundRect::MakeRectRadius(DlRect::MakeXYWH(100, 100, 200, 200), 50.0f),
+      paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CompareDiffRoundRectAndRoundRect) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
+
+  DlRect outer_rect = DlRect::MakeXYWH(0, 0, 100, 100);
+  DlRoundingRadii outer_radii = {.top_left = DlSize(5.0f),
+                                 .top_right = DlSize(10.0f),
+                                 .bottom_left = DlSize(20.0f),
+                                 .bottom_right = DlSize(50.0f)};
+  DlRoundRect outer_rrect = DlRoundRect::MakeRectRadii(outer_rect, outer_radii);
+
+  DlScalar inner_inset = 5.0f;
+  DlRect inner_rect = outer_rect.Expand(-inner_inset);
+  DlRoundingRadii inner_radii = {
+      .top_left = DlSize(outer_radii.top_left.width - inner_inset),
+      .top_right = DlSize(outer_radii.top_right.width - inner_inset),
+      .bottom_left = DlSize(outer_radii.bottom_left.width - inner_inset),
+      .bottom_right = DlSize(outer_radii.bottom_right.width - inner_inset)};
+  DlRoundRect inner_rrect = DlRoundRect::MakeRectRadii(inner_rect, inner_radii);
+
+  builder.Translate(50, 50);
+
+  // Draw DiffRoundRect.
+  builder.DrawDiffRoundRect(outer_rrect, inner_rrect,
+                            DlPaint().setColor(DlColor::kSkyBlue()));
+
+  // Draw simalated DiffRoundRect by drawing the outer RoundRect and clearing
+  // the inner RoundRect.
+  builder.Translate(200, 0);
+  builder.DrawRoundRect(outer_rrect, DlPaint().setColor(DlColor::kSkyBlue()));
+  builder.DrawRoundRect(inner_rrect,
+                        DlPaint().setBlendMode(DlBlendMode::kClear));
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

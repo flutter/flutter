@@ -11,8 +11,8 @@
 
 #include "flutter/shell/platform/linux/fl_key_channel_responder.h"
 #include "flutter/shell/platform/linux/fl_key_embedder_responder.h"
+#include "flutter/shell/platform/linux/fl_key_mapping.h"
 #include "flutter/shell/platform/linux/fl_keyboard_layout.h"
-#include "flutter/shell/platform/linux/key_mapping.h"
 
 // Turn on this flag to print complete layout data when switching IMEs. The data
 // is used in unit tests.
