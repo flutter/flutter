@@ -1,7 +1,7 @@
 # Impeller Golden Tests
 
 This is the executable that will generate the golden image results that can then
-be sent to Skia Gold vial the
+be sent to Skia Gold via the
 [golden_tests_harvester](../../tools/golden_tests_harvester).
 
 Running these tests should happen from
