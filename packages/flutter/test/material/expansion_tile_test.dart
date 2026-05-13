@@ -1054,46 +1054,44 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/132264.
-  testWidgets(
-    'ExpansionTile Semantics announcement is delayed on iOS',
-    (WidgetTester tester) async {
-      final SemanticsHandle handle = tester.ensureSemantics();
-      const localizations = DefaultMaterialLocalizations();
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Material(
-            child: ExpansionTile(
-              title: Text('Title'),
-              children: <Widget>[SizedBox(height: 100, width: 100)],
-            ),
+  testWidgets('ExpansionTile Semantics announcement is delayed on iOS', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    const localizations = DefaultMaterialLocalizations();
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: ExpansionTile(
+            title: Text('Title'),
+            children: <Widget>[SizedBox(height: 100, width: 100)],
           ),
         ),
-      );
+      ),
+    );
 
-      // There is no semantics announcement without tap action.
-      expect(tester.takeAnnouncements(), isEmpty);
+    // There is no semantics announcement without tap action.
+    expect(tester.takeAnnouncements(), isEmpty);
 
-      // Tap the title to expand ExpansionTile.
-      await tester.tap(find.text('Title'));
-      await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
+    // Tap the title to expand ExpansionTile.
+    await tester.tap(find.text('Title'));
+    await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
 
-      expect(
-        tester.takeAnnouncements().first,
-        isAccessibilityAnnouncement(localizations.collapsedHint),
-      );
+    expect(
+      tester.takeAnnouncements().first,
+      isAccessibilityAnnouncement(localizations.collapsedHint),
+    );
 
-      // Tap the title to collapse ExpansionTile.
-      await tester.tap(find.text('Title'));
-      await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
+    // Tap the title to collapse ExpansionTile.
+    await tester.tap(find.text('Title'));
+    await tester.pump(const Duration(seconds: 1)); // Wait for the announcement to be made.
 
-      expect(
-        tester.takeAnnouncements().first,
-        isAccessibilityAnnouncement(localizations.expandedHint),
-      );
-      handle.dispose();
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    expect(
+      tester.takeAnnouncements().first,
+      isAccessibilityAnnouncement(localizations.expandedHint),
+    );
+    handle.dispose();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('Semantics with the onTapHint is an ancestor of ListTile', (
     WidgetTester tester,
@@ -2232,65 +2230,63 @@ void main() {
     );
   });
   group('Semantics tests for android platform', () {
-    testWidgets(
-      'Semantics liveregion updates when expansion state changes',
-      (WidgetTester tester) async {
-        final SemanticsHandle handle = tester.ensureSemantics();
-        const localizations = DefaultMaterialLocalizations();
-        await tester.pumpWidget(
-          const MaterialApp(
-            home: Material(
-              child: ExpansionTile(title: Text('Test Tile'), children: <Widget>[Text('Child')]),
-            ),
+    testWidgets('Semantics liveregion updates when expansion state changes', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      const localizations = DefaultMaterialLocalizations();
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: ExpansionTile(title: Text('Test Tile'), children: <Widget>[Text('Child')]),
           ),
-        );
+        ),
+      );
 
-        // Initially collapsed - live region label is "Collapsed".
+      // Initially collapsed - live region label is "Collapsed".
 
-        SemanticsNode liveRegionSemantics = tester.getSemantics(
-          find.ancestor(
-            of: find.byType(ListTile),
-            matching: find.byWidgetPredicate(
-              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
-            ),
+      SemanticsNode liveRegionSemantics = tester.getSemantics(
+        find.ancestor(
+          of: find.byType(ListTile),
+          matching: find.byWidgetPredicate(
+            (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
           ),
-        );
-        expect(liveRegionSemantics.label, localizations.expandedHint);
+        ),
+      );
+      expect(liveRegionSemantics.label, localizations.expandedHint);
 
-        // Tap to expand.
-        await tester.tap(find.text('Test Tile'));
-        await tester.pumpAndSettle();
+      // Tap to expand.
+      await tester.tap(find.text('Test Tile'));
+      await tester.pumpAndSettle();
 
-        // Now expanded - should show "Expanded".
-        liveRegionSemantics = tester.getSemantics(
-          find.ancestor(
-            of: find.byType(ListTile),
-            matching: find.byWidgetPredicate(
-              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
-            ),
+      // Now expanded - should show "Expanded".
+      liveRegionSemantics = tester.getSemantics(
+        find.ancestor(
+          of: find.byType(ListTile),
+          matching: find.byWidgetPredicate(
+            (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
           ),
-        );
-        expect(liveRegionSemantics.label, localizations.collapsedHint);
+        ),
+      );
+      expect(liveRegionSemantics.label, localizations.collapsedHint);
 
-        // Tap to collapse.
-        await tester.tap(find.text('Test Tile'));
-        await tester.pumpAndSettle();
+      // Tap to collapse.
+      await tester.tap(find.text('Test Tile'));
+      await tester.pumpAndSettle();
 
-        // Back to collapsed - should show "Collapsed" again.
-        liveRegionSemantics = tester.getSemantics(
-          find.ancestor(
-            of: find.byType(ListTile),
-            matching: find.byWidgetPredicate(
-              (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
-            ),
+      // Back to collapsed - should show "Collapsed" again.
+      liveRegionSemantics = tester.getSemantics(
+        find.ancestor(
+          of: find.byType(ListTile),
+          matching: find.byWidgetPredicate(
+            (Widget widget) => widget is Semantics && (widget.properties.liveRegion ?? false),
           ),
-        );
-        expect(liveRegionSemantics.label, localizations.expandedHint);
+        ),
+      );
+      expect(liveRegionSemantics.label, localizations.expandedHint);
 
-        handle.dispose();
-      },
-      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
-    );
+      handle.dispose();
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}));
   });
 
   testWidgets('ExpansionTile forwards statesController to ListTile', (tester) async {

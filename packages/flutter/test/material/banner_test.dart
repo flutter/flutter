@@ -906,6 +906,7 @@ void main() {
         ),
       );
     }
+
     // The action coordinates that follow were obtained by running
     // the test code, before ButtonBar was replaced by OverflowBar.
 
