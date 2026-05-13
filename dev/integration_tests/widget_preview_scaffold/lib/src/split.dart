@@ -99,6 +99,7 @@ final class SplitPane extends StatefulWidget {
 
 final class _SplitPaneState extends State<SplitPane> {
   late final List<double> fractions;
+  bool _isDragging = false;
 
   bool get isHorizontal => widget.axis == Axis.horizontal;
 
@@ -106,6 +107,14 @@ final class _SplitPaneState extends State<SplitPane> {
   void initState() {
     super.initState();
     fractions = List.of(widget.initialFractions);
+  }
+
+  @override
+  void dispose() {
+    if (_isDragging) {
+      toggleIframePointerEvents(false);
+    }
+    super.dispose();
   }
 
   @override
@@ -273,13 +282,16 @@ final class _SplitPaneState extends State<SplitPane> {
               key: widget.dividerKey(i),
               behavior: HitTestBehavior.translucent,
               onPanStart: (details) {
+                _isDragging = true;
                 toggleIframePointerEvents(true);
               },
               onPanUpdate: (details) => updateSpacing(details, i),
               onPanEnd: (details) {
+                _isDragging = false;
                 toggleIframePointerEvents(false);
               },
               onPanCancel: () {
+                _isDragging = false;
                 toggleIframePointerEvents(false);
               },
               // DartStartBehavior.down is needed to keep the mouse pointer stuck to
