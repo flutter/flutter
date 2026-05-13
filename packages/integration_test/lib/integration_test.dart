@@ -405,13 +405,13 @@ https://docs.flutter.dev/testing/integration-tests
     final frameTimings = <FrameTiming>[];
     Future<void> delayForFrameTimings() async {
       var count = 0;
-      while (frameTimings.isEmpty) {
+      do {
         count++;
         await Future<void>.delayed(const Duration(seconds: 2));
         if (count > 20) {
           debugPrint('delayForFrameTimings is taking longer than expected...');
         }
-      }
+      } while (frameTimings.isEmpty);
     }
 
     await Future<void>.delayed(const Duration(seconds: 2)); // flush old FrameTimings
