@@ -1901,6 +1901,40 @@ void main() {
     );
   });
 
+  testWidgets('FormFieldState.build delegates semantics wrapping to wrapWithSemantics', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: Form(child: _WrappingFormField())),
+      ),
+    );
+
+    expect(find.byKey(_semanticsWrapperKey), findsOneWidget);
+    expect(
+      tester.getSemantics(find.text('field')),
+      containsSemantics(validationResult: SemanticsValidationResult.valid),
+    );
+
+    handle.dispose();
+  });
+
+  testWidgets('FormFieldState.build delegates onUnfocus wrapping to wrapWithFocus', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Form(autovalidateMode: AutovalidateMode.onUnfocus, child: _WrappingFormField()),
+        ),
+      ),
+    );
+
+    expect(find.byKey(_focusWrapperKey), findsOneWidget);
+  });
+
   testWidgets('Form does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -2148,4 +2182,27 @@ class _PlatformAnnounceScenario {
   _PlatformAnnounceScenario({required this.supportsAnnounce, required this.testName});
   final bool supportsAnnounce;
   final String testName;
+}
+
+const Key _semanticsWrapperKey = Key('semantics wrapper');
+const Key _focusWrapperKey = Key('focus wrapper');
+
+class _WrappingFormField extends FormField<String> {
+  _WrappingFormField()
+    : super(initialValue: 'value', builder: (FormFieldState<String> state) => const Text('field'));
+
+  @override
+  FormFieldState<String> createState() => _WrappingFormFieldState();
+}
+
+class _WrappingFormFieldState extends FormFieldState<String> {
+  @override
+  Widget wrapWithSemantics(Widget child) {
+    return KeyedSubtree(key: _semanticsWrapperKey, child: super.wrapWithSemantics(child));
+  }
+
+  @override
+  Widget wrapWithFocus(Widget child) {
+    return KeyedSubtree(key: _focusWrapperKey, child: super.wrapWithFocus(child));
+  }
 }
