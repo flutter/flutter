@@ -159,6 +159,10 @@ void SetSwapchainImageSize(ISize size);
 std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
     VkCommandBuffer buffer);
 
+/// @brief Returns the viewports passed to `vkCmdSetViewport` calls on the
+///        given command buffer, in call order.
+const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer);
+
 }  // namespace testing
 }  // namespace impeller
 

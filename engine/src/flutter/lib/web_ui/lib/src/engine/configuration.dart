@@ -193,14 +193,18 @@ class FlutterConfiguration {
   // runtime. They must be static constants for the compiler to remove dead code
   // effectively.
 
+  /// Whether to use the Skwasm rendering backend.
+  ///
+  /// If this is `false`, the engine will use the CanvasKit rendering backend.
+  ///
+  /// Using flutter tools option "--web-renderer=skwasm" sets this to `true`.
   static const bool flutterWebUseSkwasm = bool.fromEnvironment('FLUTTER_WEB_USE_SKWASM');
 
-  /// Enable the Skia-based rendering backend.
+  /// Whether to use the CanvasKit rendering backend.
   ///
-  /// Using flutter tools option "--web-renderer=canvaskit" would set the value to
-  /// true.
+  /// If this is `false`, the engine will use the Skwasm rendering backend.
   ///
-  /// Using flutter tools option "--web-renderer=html" would set the value to false.
+  /// Using flutter tools option "--web-renderer=canvaskit" sets this to `true`.
   static const bool useSkia = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
   // Runtime parameters.

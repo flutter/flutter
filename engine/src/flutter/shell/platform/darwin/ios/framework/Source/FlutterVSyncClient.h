@@ -16,6 +16,8 @@
 ///
 extern NSString* const kCADisableMinimumFrameDurationOnPhoneKey;
 
+@class FlutterFMLTaskRunner;
+
 NS_SWIFT_NAME(DisplayLinkManager)
 @interface FlutterDisplayLinkManager : NSObject
 
@@ -62,6 +64,21 @@ NS_SWIFT_NAME(VSyncClient)
 /// @param allowPauseAfterVsync Allow vsync client to pause after receiving a vsync signal.
 ///
 @property(nonatomic, assign) BOOL allowPauseAfterVsync;
+
+//------------------------------------------------------------------------------
+/// @brief      Initializes the vsync client.
+///
+/// @param      taskRunner                   The task runner to use for posting tasks.
+/// @param      isVariableRefreshRateEnabled Whether variable refresh rate should be enabled.
+/// @param      maxRefreshRate               The maximum refresh rate to configure the display link
+///                                          with.
+/// @param      callback                     The callback to invoke when a vsync signal is received.
+///
+- (instancetype)initWithTaskRunner:(FlutterFMLTaskRunner*)taskRunner
+      isVariableRefreshRateEnabled:(BOOL)isVariableRefreshRateEnabled
+                    maxRefreshRate:(double)maxRefreshRate
+                          callback:(void (^)(CFTimeInterval startTime,
+                                             CFTimeInterval targetTime))callback;
 
 - (void)await;
 

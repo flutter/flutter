@@ -192,13 +192,6 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
   );
 }
 
-bool AreCornersCircular(const RoundingRadii& radii) {
-  return ScalarNearlyEqual(radii.top_left.width, radii.top_left.height) &&
-         ScalarNearlyEqual(radii.top_right.width, radii.top_right.height) &&
-         ScalarNearlyEqual(radii.bottom_left.width, radii.bottom_left.height) &&
-         ScalarNearlyEqual(radii.bottom_right.width, radii.bottom_right.height);
-}
-
 }  // namespace
 
 class Canvas::RRectBlurShape : public BlurShape {
@@ -977,7 +970,7 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   const RoundingRadii& radii = round_rect.GetRadii();
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint) && AreCornersCircular(radii)) {
+      IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
     auto params = UberSDFParameters::MakeRoundedRect(
         /*color=*/paint.color,
         /*rect=*/round_rect.GetBounds(),
@@ -1043,7 +1036,7 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      IsCompatibleWithSDFRendering(paint)) {
     auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
         round_superellipse.GetBounds(), round_superellipse.GetRadii());
 
@@ -2442,6 +2435,9 @@ void Canvas::EndReplay() {
 }
 
 bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
+  if (!paint.anti_alias) {
+    return false;
+  }
   if (paint.mask_blur_descriptor.has_value()) {
     return false;
   }

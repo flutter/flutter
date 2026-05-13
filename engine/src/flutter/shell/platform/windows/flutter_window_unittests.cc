@@ -83,6 +83,30 @@ class MockFlutterWindow : public FlutterWindow {
   FML_DISALLOW_COPY_AND_ASSIGN(MockFlutterWindow);
 };
 
+LRESULT InjectPointerMessageWithClientPoint(MockFlutterWindow& window,
+                                            UINT message,
+                                            WPARAM wparam,
+                                            int x,
+                                            int y) {
+  HWND flutter_window = window.FlutterWindow::GetWindowHandle();
+  HWND parent_window =
+      CreateWindowEx(0, L"STATIC", L"", WS_POPUP, 100, 100, 300, 300, nullptr,
+                     nullptr, GetModuleHandle(nullptr), nullptr);
+  EXPECT_NE(parent_window, nullptr);
+  EXPECT_NE(SetParent(flutter_window, parent_window), nullptr);
+  EXPECT_TRUE(SetWindowPos(flutter_window, nullptr, 0, 0, 100, 100,
+                           SWP_NOZORDER | SWP_NOACTIVATE));
+
+  POINT point = {x, y};
+  EXPECT_TRUE(ClientToScreen(flutter_window, &point));
+  LRESULT result =
+      window.InjectWindowMessage(message, wparam, MAKELPARAM(point.x, point.y));
+
+  EXPECT_NE(SetParent(flutter_window, HWND_MESSAGE), nullptr);
+  DestroyWindow(parent_window);
+  return result;
+}
+
 class MockFlutterWindowsView : public FlutterWindowsView {
  public:
   MockFlutterWindowsView(FlutterWindowsEngine* engine,
@@ -297,9 +321,8 @@ TEST_F(FlutterWindowTest, OnStylusPointerDown) {
 
   UINT32 pointerId = 1;
   WPARAM wparam = static_cast<WPARAM>(pointerId);
-  LPARAM lparam = MAKELPARAM(10, 10);
-
-  win32window.InjectWindowMessage(WM_POINTERDOWN, wparam, lparam);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERDOWN, wparam, 10,
+                                      10);
 }
 
 TEST_F(FlutterWindowTest, OnStylusPointerMove) {
@@ -335,9 +358,8 @@ TEST_F(FlutterWindowTest, OnStylusPointerMove) {
 
   UINT32 pointerId = 1;
   WPARAM wparam = static_cast<WPARAM>(pointerId);
-  LPARAM lparam = MAKELPARAM(15, 20);
-
-  win32window.InjectWindowMessage(WM_POINTERUPDATE, wparam, lparam);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERUPDATE, wparam, 15,
+                                      20);
 }
 
 TEST_F(FlutterWindowTest, OnStylusPointerUp) {
@@ -373,9 +395,8 @@ TEST_F(FlutterWindowTest, OnStylusPointerUp) {
 
   UINT32 pointerId = 1;
   WPARAM wparam = static_cast<WPARAM>(pointerId);
-  LPARAM lparam = MAKELPARAM(25, 30);
-
-  win32window.InjectWindowMessage(WM_POINTERUP, wparam, lparam);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERUP, wparam, 25,
+                                      30);
 }
 
 TEST_F(FlutterWindowTest, OnStylusPointerLeave) {
@@ -410,9 +431,8 @@ TEST_F(FlutterWindowTest, OnStylusPointerLeave) {
 
   UINT32 pointerId = 1;
   WPARAM wparam = static_cast<WPARAM>(pointerId);
-  LPARAM lparam = MAKELPARAM(35, 40);
-
-  win32window.InjectWindowMessage(WM_POINTERLEAVE, wparam, lparam);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERLEAVE, wparam, 35,
+                                      40);
 }
 
 TEST_F(FlutterWindowTest, OnStylusPointerHover) {
@@ -454,8 +474,8 @@ TEST_F(FlutterWindowTest, OnStylusPointerHover) {
 
   UINT32 pointerId = 1;
   WPARAM wparam = static_cast<WPARAM>(pointerId);
-  LPARAM lparam = MAKELPARAM(45, 50);
-  win32window.InjectWindowMessage(WM_POINTERDOWN, wparam, lparam);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERDOWN, wparam, 45,
+                                      50);
 
   // Now expect OnPointerMove to be called for hover events
   EXPECT_CALL(delegate, OnPointerMove(45, 50, kFlutterPointerDeviceKindStylus,
@@ -463,7 +483,8 @@ TEST_F(FlutterWindowTest, OnStylusPointerHover) {
       .Times(1);
 
   // Inject WM_POINTERUPDATE message (hover event)
-  win32window.InjectWindowMessage(WM_POINTERUPDATE, wparam, lparam);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERUPDATE, wparam, 45,
+                                      50);
 }
 
 TEST_F(FlutterWindowTest, OnMousePointerDown) {
@@ -490,9 +511,8 @@ TEST_F(FlutterWindowTest, OnMousePointerDown) {
 
   UINT32 pointerId = 1;
   WPARAM wparam = static_cast<WPARAM>(pointerId);
-  LPARAM lparam = MAKELPARAM(45, 50);
-
-  win32window.InjectWindowMessage(WM_POINTERDOWN, wparam, lparam);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERDOWN, wparam, 45,
+                                      50);
 }
 
 TEST_F(FlutterWindowTest, OnTouchPointerDown) {
@@ -519,9 +539,57 @@ TEST_F(FlutterWindowTest, OnTouchPointerDown) {
 
   UINT32 pointerId = 1;
   WPARAM wparam = static_cast<WPARAM>(pointerId);
-  LPARAM lparam = MAKELPARAM(55, 60);
+  InjectPointerMessageWithClientPoint(win32window, WM_POINTERDOWN, wparam, 55,
+                                      60);
+}
 
-  win32window.InjectWindowMessage(WM_POINTERDOWN, wparam, lparam);
+TEST_F(FlutterWindowTest, PointerMessageScreenCoordinatesAreConvertedToClient) {
+  constexpr int kClientX = 15;
+  constexpr int kClientY = 20;
+
+  auto mock_proc_table = std::make_shared<MockWindowsProcTable>();
+
+  EXPECT_CALL(*mock_proc_table, GetPointerInfo(_, _))
+      .WillRepeatedly([](UINT32 pointer_id, POINTER_INFO* pointer_info) {
+        if (pointer_info != nullptr) {
+          pointer_info->pointerType = PT_TOUCH;
+          pointer_info->pointerId = pointer_id;
+          pointer_info->pointerFlags = POINTER_FLAG_INCONTACT;
+        }
+        return TRUE;
+      });
+
+  MockFlutterWindow win32window(100, 100, mock_proc_table);
+  MockWindowBindingHandlerDelegate delegate;
+  EXPECT_CALL(win32window, OnWindowStateEvent).Times(AnyNumber());
+  EXPECT_CALL(delegate, OnWindowStateEvent).Times(AnyNumber());
+  win32window.SetView(&delegate);
+
+  HWND parent_window =
+      CreateWindowEx(0, L"STATIC", L"", WS_POPUP, 100, 100, 300, 300, nullptr,
+                     nullptr, GetModuleHandle(nullptr), nullptr);
+  ASSERT_NE(parent_window, nullptr);
+
+  HWND flutter_window = win32window.FlutterWindow::GetWindowHandle();
+  ASSERT_NE(flutter_window, nullptr);
+  ASSERT_NE(SetParent(flutter_window, parent_window), nullptr);
+  ASSERT_TRUE(SetWindowPos(flutter_window, nullptr, 25, 35, 100, 100,
+                           SWP_NOZORDER | SWP_NOACTIVATE));
+
+  POINT pointer_point = {kClientX, kClientY};
+  ASSERT_TRUE(ClientToScreen(flutter_window, &pointer_point));
+
+  EXPECT_CALL(delegate,
+              OnPointerDown(kClientX, kClientY, kFlutterPointerDeviceKindTouch,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonMousePrimary, 0, 0))
+      .Times(1);
+
+  win32window.InjectWindowMessage(WM_POINTERDOWN, /*wparam=*/1,
+                                  MAKELPARAM(pointer_point.x, pointer_point.y));
+
+  EXPECT_NE(SetParent(flutter_window, HWND_MESSAGE), nullptr);
+  DestroyWindow(parent_window);
 }
 
 // Tests that calls to OnScroll in turn calls GetScrollOffsetMultiplier

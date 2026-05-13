@@ -865,7 +865,7 @@ class IosUsbArtifacts extends CachedArtifact {
   @visibleForTesting
   Uri get archiveUri => Uri.parse(
     '${cache.realmlessStorageBaseUrl}/flutter_infra_release/'
-    'ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}'
+    'ios-usb-dependencies/arm64_x86_64${cache.useUnsignedMacBinaries ? '/unsigned' : ''}'
     '/$name/$version/$name.zip',
   );
 }

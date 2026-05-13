@@ -113,13 +113,13 @@ Future<void> testMain() async {
       paragraph.getWordBoundary(
         const ui.TextPosition(offset: 0 /* affinity: ui.TextAffinity.downstream */),
       ),
-      const ui.TextRange(start: 0, end: 1),
+      ui.TextRange(start: 0, end: paragraph.text.length),
     );
     expect(
       paragraph.getWordBoundary(
         ui.TextPosition(offset: paragraph.text.length, affinity: ui.TextAffinity.upstream),
       ),
-      ui.TextRange(start: paragraph.text.length - 1, end: paragraph.text.length),
+      ui.TextRange(start: 0, end: paragraph.text.length),
     );
   });
 
