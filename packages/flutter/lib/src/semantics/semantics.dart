@@ -117,8 +117,12 @@ typedef ChildSemanticsConfigurationsDelegate =
 
 /// Controls how accessibility focus is blocked.
 ///
-/// This is typically used to prevent screen readers
-/// from focusing on parts of the UI.
+/// This is typically used to prevent screen readers from focusing on parts
+/// of the UI.
+///
+/// Setting this property also blocks the reporting of keyboard focusability
+/// for the semantics node, but it does not affect the actual keyboard focus
+/// handled by [FocusNode].
 enum AccessibilityFocusBlockType {
   /// Accessibility focus is **not blocked**.
   none,
@@ -1850,7 +1854,7 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node currently holds input focus.
   ///
-  /// If null, the node is not fosusable.
+  /// If null, the node is not focusable.
   ///
   /// At most one node in the tree should hold input focus at any point in time,
   /// and it should not be set to true if [focusable] is false.
@@ -3679,6 +3683,23 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
+  /// Whether this node can perform the specific [CustomSemanticsAction]
+  /// identified by [actionId].
+  bool _canPerformCustomAction(int actionId) {
+    final CustomSemanticsAction? customAction = CustomSemanticsAction.getAction(actionId);
+    return customAction != null && _customSemanticsActions.containsKey(customAction);
+  }
+
+  /// Whether this node can handle [action], taking [args] into account for
+  /// custom actions so that nodes which only have *other* custom actions
+  /// registered are not treated as candidates.
+  bool _canHandleAction(SemanticsAction action, Object? args) {
+    if (action == SemanticsAction.customAction) {
+      return args is int && _canPerformCustomAction(args);
+    }
+    return _canPerformAction(action);
+  }
+
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
 
   /// Reconfigures the properties of this object to describe the configuration
@@ -4843,6 +4864,9 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the semantics tree is empty, returns null.
   SemanticsNode? get rootSemanticsNode => _nodes[0];
 
+  /// Returns the [SemanticsNode] with the given [id], if any.
+  SemanticsNode? getSemanticsNode(int id) => _nodes[id];
+
   @override
   void dispose() {
     assert(debugMaybeDispatchDisposed(this));
@@ -5041,21 +5065,34 @@ class SemanticsOwner extends ChangeNotifier {
     notifyListeners();
   }
 
-  SemanticsActionHandler? _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
+  SemanticsActionHandler? _getSemanticsActionHandlerForId(
+    int id,
+    SemanticsAction action, [
+    Object? args,
+  ]) {
     SemanticsNode? result = _nodes[id];
-    if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
+    if (result == null) {
+      return null;
+    }
+    // For merged nodes, walk descendants whenever the merge root itself does
+    // not handle the specific (action, args) pair. Without the args check,
+    // a merge root that owns *some* custom action would short-circuit the
+    // walk and we'd dispatch to the wrong handler.
+    if (result.isPartOfNodeMerging && !result._canHandleAction(action, args)) {
+      SemanticsNode? found;
       result._visitDescendants((SemanticsNode node) {
-        if (node._canPerformAction(action)) {
-          result = node;
+        if (node._canHandleAction(action, args)) {
+          found = node;
           return false; // found node, abort walk
         }
         return true; // continue walk
       });
+      result = found;
     }
-    if (result == null || !result!._canPerformAction(action)) {
+    if (result == null || !result._canHandleAction(action, args)) {
       return null;
     }
-    return result!._actions[action];
+    return result._actions[action];
   }
 
   /// Asks the [SemanticsNode] with the given id to perform the given action.
@@ -5066,7 +5103,7 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
   void performAction(int id, SemanticsAction action, [Object? args]) {
-    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action);
+    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action, args);
     if (handler != null) {
       handler(args);
       return;
@@ -5081,8 +5118,9 @@ class SemanticsOwner extends ChangeNotifier {
   SemanticsActionHandler? _getSemanticsActionHandlerForPosition(
     SemanticsNode node,
     Offset position,
-    SemanticsAction action,
-  ) {
+    SemanticsAction action, [
+    Object? args,
+  ]) {
     if (node.transform != null) {
       final inverse = Matrix4.identity();
       if (inverse.copyInverse(node.transform!) == 0.0) {
@@ -5094,12 +5132,12 @@ class SemanticsOwner extends ChangeNotifier {
       return null;
     }
     if (node.mergeAllDescendantsIntoThisNode) {
-      if (node._canPerformAction(action)) {
+      if (node._canHandleAction(action, args)) {
         return node._actions[action];
       }
       SemanticsNode? result;
       node._visitDescendants((SemanticsNode child) {
-        if (child._canPerformAction(action)) {
+        if (child._canHandleAction(action, args)) {
           result = child;
           return false;
         }
@@ -5113,6 +5151,7 @@ class SemanticsOwner extends ChangeNotifier {
           child,
           position,
           action,
+          args,
         );
         if (handler != null) {
           return handler;
@@ -5138,6 +5177,7 @@ class SemanticsOwner extends ChangeNotifier {
       node,
       position,
       action,
+      args,
     );
     if (handler != null) {
       handler(args);
@@ -7074,7 +7114,7 @@ class OrdinalSortKey extends SemanticsSortKey {
 /// Argument [sourceLevel] is the heading level of the source node that is being
 /// merged into a target node, which has heading level [targetLevel].
 ///
-/// If the target node is not a heading, the the source heading level is used.
+/// If the target node is not a heading, the source heading level is used.
 /// Otherwise, the target heading level is used irrespective of the source
 /// heading level.
 int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {
