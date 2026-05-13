@@ -14,8 +14,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix3;
 
-import '../widgets/semantics_tester.dart';
 import 'data_table_test_utils.dart';
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('DataTable control test', (WidgetTester tester) async {
