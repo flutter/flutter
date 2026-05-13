@@ -7,9 +7,12 @@ package com.flutter.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 
 /**
@@ -19,9 +22,11 @@ import org.gradle.api.tasks.TaskAction
  * designed for modification. The task is responsible for an exact copy of the input
  * manifest being used for the output manifest.
 */
+@CacheableTask
 abstract class DeepLinkJsonFromManifestTask : DefaultTask() {
     // Input property to receive the manifest file
     @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val manifestFile: RegularFileProperty
 
     // In the past for this task namespace was the ApplicationId.

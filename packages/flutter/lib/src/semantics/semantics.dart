@@ -1854,7 +1854,7 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node currently holds input focus.
   ///
-  /// If null, the node is not fosusable.
+  /// If null, the node is not focusable.
   ///
   /// At most one node in the tree should hold input focus at any point in time,
   /// and it should not be set to true if [focusable] is false.
@@ -4864,6 +4864,9 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the semantics tree is empty, returns null.
   SemanticsNode? get rootSemanticsNode => _nodes[0];
 
+  /// Returns the [SemanticsNode] with the given [id], if any.
+  SemanticsNode? getSemanticsNode(int id) => _nodes[id];
+
   @override
   void dispose() {
     assert(debugMaybeDispatchDisposed(this));
@@ -7111,7 +7114,7 @@ class OrdinalSortKey extends SemanticsSortKey {
 /// Argument [sourceLevel] is the heading level of the source node that is being
 /// merged into a target node, which has heading level [targetLevel].
 ///
-/// If the target node is not a heading, the the source heading level is used.
+/// If the target node is not a heading, the source heading level is used.
 /// Otherwise, the target heading level is used irrespective of the source
 /// heading level.
 int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {

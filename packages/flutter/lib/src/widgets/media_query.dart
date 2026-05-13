@@ -707,7 +707,7 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
-  ///  [TextStyle.height] and [StrutStyle.height] are overriden by
+  ///  [TextStyle.height] and [StrutStyle.height] are overridden by
   ///  [lineHeightScaleFactorOverride].
   final double? lineHeightScaleFactorOverride;
 
@@ -722,7 +722,7 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
-  ///  [TextStyle.letterSpacing] is overriden by [letterSpacingOverride].
+  ///  [TextStyle.letterSpacing] is overridden by [letterSpacingOverride].
   final double? letterSpacingOverride;
 
   /// Overrides the amount of space (in logical pixels) to add at each
@@ -736,7 +736,7 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
-  ///  [TextStyle.wordSpacing] is overriden by [wordSpacingOverride].
+  ///  [TextStyle.wordSpacing] is overridden by [wordSpacingOverride].
   final double? wordSpacingOverride;
 
   /// The amount of space (in logical pixels) to add following each paragraph
