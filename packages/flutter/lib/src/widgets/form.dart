@@ -836,17 +836,17 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
   /// Whether [wrapWithFocus]'s [Focus] should add its own [Semantics] node.
   ///
-  /// Subclasses whose [wrapWithSemantics] uses [SliverSemantics] override this
-  /// to `false`, since the box-typed semantics node added by [Focus] would
-  /// otherwise crash on a sliver child.
+  /// Subclasses whose [wrapWithSemantics] uses a sliver-typed semantics node
+  /// override this to `false`, since the box-typed semantics node added by
+  /// [Focus] would otherwise crash on a sliver child.
   bool get _focusIncludesSemantics => true;
 
   /// Wraps the result of [FormField.builder] with a [Semantics] node that
   /// publishes the field's [SemanticsValidationResult].
   ///
-  /// Subclasses whose builder returns a sliver (such as [SliverFormField])
-  /// override this to wrap with [SliverSemantics] instead, since [Semantics]
-  /// is a render-box widget and would crash when given a sliver child.
+  /// Subclasses whose builder returns a sliver override this to wrap with a
+  /// sliver-typed semantics node instead, since [Semantics] is a render-box
+  /// widget and would crash when given a sliver child.
   @protected
   Widget wrapWithSemantics(Widget child) {
     return Semantics(validationResult: _semanticsValidationResult, child: child);
@@ -908,49 +908,6 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 }
 
-/// A [FormField] whose [FormField.builder] returns a sliver instead of a box.
-///
-/// [SliverFormField] is API-equivalent to [FormField] but wraps the result of
-/// its [builder] with [SliverSemantics] (and a sliver-friendly [Focus]) so it
-/// can be placed inside a viewport such as [CustomScrollView].
-///
-/// Use [FormField] when the builder returns a render-box widget; use
-/// [SliverFormField] when the builder returns a sliver.
-class SliverFormField<T> extends FormField<T> {
-  /// Creates a single sliver form field.
-  const SliverFormField({
-    super.key,
-    required super.builder,
-    super.onSaved,
-    super.onReset,
-    super.forceErrorText,
-    super.validator,
-    super.errorBuilder,
-    super.initialValue,
-    super.enabled,
-    super.autovalidateMode,
-    super.restorationId,
-  });
-
-  @override
-  SliverFormFieldState<T> createState() => SliverFormFieldState<T>();
-}
-
-/// The current state of a [SliverFormField].
-class SliverFormFieldState<T> extends FormFieldState<T> {
-  // [Focus] adds its own [Semantics] wrapper around its child, which is a
-  // render-box widget and would crash on a sliver child. The [SliverSemantics]
-  // wrapper from [wrapWithSemantics] already publishes the field's semantics,
-  // so [Focus.includeSemantics] can safely be disabled.
-  @override
-  bool get _focusIncludesSemantics => false;
-
-  @override
-  Widget wrapWithSemantics(Widget child) {
-    return SliverSemantics(validationResult: _semanticsValidationResult, sliver: child);
-  }
-}
-
 /// Used to configure the auto validation of [FormField] and [Form] widgets.
 enum AutovalidateMode {
   /// No auto validation will occur.
@@ -971,7 +928,7 @@ enum AutovalidateMode {
   onUnfocus,
 
   /// Used to auto-validate [Form] and [FormField] after each user
-  /// interaction, only if the the field already has an error.
+  /// interaction, only if the field already has an error.
   ///
   /// This is useful for reducing unnecessary validation calls while
   /// still ensuring errors are re-checked when the user attempts to fix them.
