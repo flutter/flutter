@@ -29,6 +29,7 @@ struct UberSDFParameters {
     kRect,
     kOval,
     kRoundedRect,
+    kRoundedSuperellipseSymmetric,
     kRoundedSuperellipse,
   };
 

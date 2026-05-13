@@ -101,8 +101,12 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
   Point top_left_center_relative = top_left.offset - center;
 
   Point size = Point(bounds.GetSize() * 0.5f);
+  Type type = round_superellipse_params.all_corners_same
+                  ? Type::kRoundedSuperellipseSymmetric
+                  : Type::kRoundedSuperellipse;
+
   return UberSDFParameters{
-      .type = Type::kRoundedSuperellipse,
+      .type = type,
       .color = color,
       .center = center,
       .size = size,

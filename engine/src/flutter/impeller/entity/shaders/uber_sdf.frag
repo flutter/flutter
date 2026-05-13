@@ -464,6 +464,58 @@ float pixelSize(float sdf) {
   return length(gradient);
 }
 
+float distanceFromSymmetricRoundedSuperellipse(
+    vec2 p,
+    vec4 superellipse_degrees_top,
+    vec4 superellipse_degrees_right,
+    vec4 superellipse_semi_axes_top,
+    vec4 superellipse_semi_axes_right,
+    vec4 angle_spans_top,
+    vec4 angle_spans_right,
+    vec4 octant_offsets_c,
+    vec4 radii_width,
+    vec4 radii_height,
+    vec4 circle_centers_top_x,
+    vec4 circle_centers_top_y,
+    vec4 circle_centers_right_x,
+    vec4 circle_centers_right_y,
+    vec4 superellipse_scales_x,
+    vec4 superellipse_scales_y,
+    vec4 quadrant_centers_x,
+    vec4 quadrant_centers_y) {
+  // Fold the pixel into the Top-Right quadrant (x > 0, y < 0)
+  vec2 p_folded = vec2(abs(p.x), -abs(p.y));
+
+  // The Top-Right quadrant is always index 0
+  int quadrant_index = 0;
+
+  float se_degree_top = superellipse_degrees_top[quadrant_index];
+  float se_degree_right = superellipse_degrees_right[quadrant_index];
+  float se_a_top = superellipse_semi_axes_top[quadrant_index];
+  float se_a_right = superellipse_semi_axes_right[quadrant_index];
+  float angle_span_top = angle_spans_top[quadrant_index];
+  float angle_span_right = angle_spans_right[quadrant_index];
+  float c = octant_offsets_c[quadrant_index];
+  float radius_top = radii_width[quadrant_index];
+  float radius_right = radii_height[quadrant_index];
+
+  vec2 circle_center_top = vec2(circle_centers_top_x[quadrant_index],
+                                circle_centers_top_y[quadrant_index]);
+  vec2 circle_center_right = vec2(circle_centers_right_x[quadrant_index],
+                                  circle_centers_right_y[quadrant_index]);
+
+  vec2 scale = vec2(superellipse_scales_x[quadrant_index],
+                    superellipse_scales_y[quadrant_index]);
+
+  vec2 q_center = vec2(quadrant_centers_x[quadrant_index],
+                       quadrant_centers_y[quadrant_index]);
+
+  return getQuadrantDistance(
+      p_folded, se_degree_top, se_degree_right, se_a_top, se_a_right,
+      angle_span_top, angle_span_right, c, radius_top, radius_right,
+      circle_center_top, circle_center_right, scale, q_center, quadrant_index);
+}
+
 // Computes the SDF value and pixel size for a filled shape.
 //
 // `p` is position relative to the center of the shape.
@@ -481,7 +533,19 @@ vec2 filledSDF(vec2 p) {
     sdf = distanceFromOval(p, frag_info.size);
   } else if (frag_info.type < 3.5) {  // Rounded Rect
     sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii_width);
-  } else {
+  } else if (frag_info.type < 4.5) {  // Symmetric Rounded Superellipse
+    sdf = distanceFromSymmetricRoundedSuperellipse(
+        p, frag_info.superellipse_degrees_top,
+        frag_info.superellipse_degrees_right,
+        frag_info.superellipse_semi_axes_top,
+        frag_info.superellipse_semi_axes_right, frag_info.angle_spans_top,
+        frag_info.angle_spans_right, frag_info.octant_offsets_c,
+        frag_info.radii_width, frag_info.radii_height,
+        frag_info.circle_centers_top_x, frag_info.circle_centers_top_y,
+        frag_info.circle_centers_right_x, frag_info.circle_centers_right_y,
+        frag_info.superellipse_scales_x, frag_info.superellipse_scales_y,
+        frag_info.quadrant_centers_x, frag_info.quadrant_centers_y);
+  } else {  // Asymmetric Rounded Superellipse
     sdf = distanceFromRoundedSuperellipse(
         p, frag_info.quadrant_splits, frag_info.size,
         frag_info.superellipse_degrees_top,
