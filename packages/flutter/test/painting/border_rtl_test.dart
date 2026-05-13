@@ -347,24 +347,23 @@ void main() {
     expect(
       error.diagnostics[2].toStringDeep(),
       equalsIgnoringHashCodes(
-        'For a more general interpolation method, consider using\n'
-        'ShapeBorder.lerp instead.\n',
+        'To support custom BoxBorder interpolation, override\n'
+        'ShapeBorder.lerpFrom or ShapeBorder.lerpTo.\n',
       ),
     );
     expect(
       error.toStringDeep(),
       equalsIgnoringHashCodes(
         'FlutterError\n'
-        '   BoxBorder.lerp can only interpolate Border and BorderDirectional\n'
+        '   BoxBorder.lerp could not interpolate the provided BoxBorder\n'
         '   classes.\n'
         '   BoxBorder.lerp() was called with two objects of type SillyBorder\n'
         '   and Border:\n'
         '     SillyBorder()\n'
         '     Border.all(BorderSide(width: 0.0, style: none))\n'
-        '   However, only Border and BorderDirectional classes are supported\n'
-        '   by this method.\n'
-        '   For a more general interpolation method, consider using\n'
-        '   ShapeBorder.lerp instead.\n',
+        '   However, neither object knew how to interpolate the other.\n'
+        '   To support custom BoxBorder interpolation, override\n'
+        '   ShapeBorder.lerpFrom or ShapeBorder.lerpTo.\n',
       ),
     );
   });

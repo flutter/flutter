@@ -147,8 +147,8 @@ abstract class BoxBorder extends ShapeBorder {
   /// animation, and then bringing `b`'s lateral edges _from_ [BorderSide.none]
   /// over the second half of the animation.
   ///
-  /// For a more flexible approach, consider [ShapeBorder.lerp], which would
-  /// instead [add] the two sets of sides and interpolate them simultaneously.
+  /// Other [BoxBorder] subclasses can support this method by overriding
+  /// [lerpFrom] or [lerpTo] to return a [BoxBorder].
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BoxBorder? lerp(BoxBorder? a, BoxBorder? b, double t) {
@@ -203,16 +203,35 @@ abstract class BoxBorder extends ShapeBorder {
         bottom: BorderSide.lerp(a.bottom, b.bottom, t),
       );
     }
+    final ShapeBorder? result = b?.lerpFrom(a, t) ?? a?.lerpTo(b, t);
+    if (result == null) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('BoxBorder.lerp could not interpolate the provided BoxBorder classes.'),
+        ErrorDescription(
+          'BoxBorder.lerp() was called with two objects of type ${a.runtimeType} and ${b.runtimeType}:\n'
+          '  $a\n'
+          '  $b\n'
+          'However, neither object knew how to interpolate the other.',
+        ),
+        ErrorHint(
+          'To support custom BoxBorder interpolation, override ShapeBorder.lerpFrom or '
+          'ShapeBorder.lerpTo.',
+        ),
+      ]);
+    }
+    if (result is BoxBorder) {
+      return result;
+    }
     throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary('BoxBorder.lerp can only interpolate Border and BorderDirectional classes.'),
+      ErrorSummary('BoxBorder.lerp can only return BoxBorder classes.'),
       ErrorDescription(
         'BoxBorder.lerp() was called with two objects of type ${a.runtimeType} and ${b.runtimeType}:\n'
         '  $a\n'
         '  $b\n'
-        'However, only Border and BorderDirectional classes are supported by this method.',
-      ),
-      ErrorHint(
-        'For a more general interpolation method, consider using ShapeBorder.lerp instead.',
+        'However, ShapeBorder.lerpFrom or ShapeBorder.lerpTo returned an object of type '
+        '${result.runtimeType}:\n'
+        '  $result\n'
+        'BoxBorder.lerp can only return BoxBorder objects.',
       ),
     ]);
   }
