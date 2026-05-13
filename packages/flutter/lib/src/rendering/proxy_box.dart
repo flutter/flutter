@@ -4112,12 +4112,15 @@ class RenderSemanticsGestureHandler extends RenderProxyBoxWithHitTestBehavior {
     GestureLongPressCallback? onLongPress,
     GestureDragUpdateCallback? onHorizontalDragUpdate,
     GestureDragUpdateCallback? onVerticalDragUpdate,
-    this.scrollFactor = 0.8,
+    this.scrollFactor = kScrollFactor,
     super.behavior,
   }) : _onTap = onTap,
        _onLongPress = onLongPress,
        _onHorizontalDragUpdate = onHorizontalDragUpdate,
        _onVerticalDragUpdate = onVerticalDragUpdate;
+
+  /// The default value for [scrollFactor].
+  static const double kScrollFactor = 0.8;
 
   /// If non-null, the set of actions to allow. Other actions will be omitted,
   /// even if their callback is provided.
