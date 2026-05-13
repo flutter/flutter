@@ -60,7 +60,7 @@ class WidgetPreviewErrorWidget extends StatelessWidget {
       height: size.height,
       child: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text.rich(
               TextSpan(
