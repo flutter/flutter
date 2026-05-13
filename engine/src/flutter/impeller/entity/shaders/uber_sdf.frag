@@ -236,7 +236,6 @@ float getQuadrantDistance(vec2 p, int quadrant_index) {
     grad_oct = normalize(pow(p_safe, vec2(se_degree - 1.0)));
   }
 
-  vec2 grad_norm;
   if (p_norm.y + c <= p_norm.x) {
     grad_oct = grad_oct.yx;
   }
@@ -244,7 +243,7 @@ float getQuadrantDistance(vec2 p, int quadrant_index) {
   // Divide the distance by the length of the gradient.
   // This ensures that the resulting distance has a gradient magnitude of 1
   // everywhere, allowing to be mixed cleanly with other SDFs.
-  float corner_dist = dist_raw / length(grad_norm / scale);
+  float corner_dist = dist_raw / length(grad_oct / scale);
 
   return corner_dist;
 }
