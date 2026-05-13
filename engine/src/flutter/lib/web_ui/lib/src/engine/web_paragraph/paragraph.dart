@@ -692,6 +692,19 @@ class TextSpan extends ParagraphSpan {
     );
   }
 
+  ui.Rect getBlockBounds(TextBlock block) {
+    final ui.Rect bounds = _metrics.getBounds(
+      block.textRange.start - start,
+      block.textRange.end - start,
+    );
+    return ui.Rect.fromLTWH(
+      bounds.left + block.spanShiftFromLineStart,
+      bounds.top,
+      bounds.width,
+      bounds.height,
+    );
+  }
+
   ui.Rect getBlockSelection(LineBlock block) {
     // This `selection` is relative to the span, but blocks should be positioned relative to the line.
     final ui.Rect selection = _metrics.getSelection(
@@ -834,6 +847,13 @@ class WebStrutStyle implements ui.StrutStyle {
   }
 }
 
+typedef PaintOverflows = ({double left, double top, double right, double bottom});
+
+extension PaintOverflowsSize on PaintOverflows {
+  double get horizontal => left + right;
+  double get vertical => top + bottom;
+}
+
 /// An implementation of [ui.Paragraph] based on the new Enhanced TextMetrics API.
 ///
 /// See: https://chromestatus.com/feature/5075532483657728
@@ -871,6 +891,9 @@ class WebParagraph implements ui.Paragraph {
   double maxLineWidthWithTrailingSpaces = 0; // without trailing spaces it would be longestLine
 
   List<TextLine> get lines => _layout.lines;
+
+  /// The amount of overflow needed in each direction in order to paint all glyphs fully.
+  late PaintOverflows paintOverflows;
 
   @override
   List<ui.TextBox> getBoxesForPlaceholders() => _layout.getBoxesForPlaceholders();

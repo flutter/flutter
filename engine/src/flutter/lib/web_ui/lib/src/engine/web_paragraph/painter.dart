@@ -8,7 +8,6 @@ import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
 import '../util.dart';
-import 'debug.dart';
 import 'decorations.dart';
 import 'layout.dart';
 import 'paragraph.dart';
@@ -54,10 +53,12 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
   ui.Offset offset,
   double devicePixelRatio,
 ) {
+  final WebParagraph paragraph = layout.paragraph;
+
   // Calculate the longest line taking in account the formatting shifts
-  double maxWidth = 0;
+  var maxWidth = 0.0;
   for (final TextLine line in layout.lines) {
-    final double lineWidth = line.advance.width + line.formattingShift + line.trailingSpacesWidth;
+    final double lineWidth = line.fullWidth;
     if (lineWidth > maxWidth) {
       maxWidth = lineWidth;
     }
@@ -68,23 +69,16 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
   final sourceRect = ui.Rect.fromLTWH(
     0,
     0,
-    (maxWidth * devicePixelRatio).ceilToDouble(),
-    (layout.paragraph.height * devicePixelRatio).ceilToDouble(),
+    ((maxWidth + paragraph.paintOverflows.horizontal) * devicePixelRatio).ceilToDouble(),
+    ((paragraph.height + paragraph.paintOverflows.vertical) * devicePixelRatio).ceilToDouble(),
   );
   // Target rect will be scaled by the canvas transform, so we don't scale it here
   final targetRect = ui.Rect.fromLTWH(
-    offset.dx,
-    offset.dy,
+    (offset.dx - paragraph.paintOverflows.left).floorToDouble(),
+    (offset.dy - paragraph.paintOverflows.top).floorToDouble(),
     (sourceRect.width / devicePixelRatio).ceilToDouble(),
     (sourceRect.height / devicePixelRatio).ceilToDouble(),
   );
-
-  if (WebParagraphDebug.logging) {
-    WebParagraphDebug.log(
-      'calculateParagraph source: ${sourceRect.left}:${sourceRect.right}x${sourceRect.top}:${sourceRect.bottom} => '
-      'target: ${targetRect.left}:${targetRect.right}x${targetRect.top}:${targetRect.bottom}',
-    );
-  }
 
   return (sourceRect, targetRect);
 }
@@ -207,11 +201,12 @@ abstract class WebParagraphPainter {
 class DomCanvasParagraphPainter {
   static void _fillAllBlocks(StyleElements styleElement, TextLayout layout) {
     // Paint the entire paragraph as a single image on Canvas2D
-    double yOffset = 0;
     for (final TextLine line in layout.lines) {
       _paintContext.save();
-      _paintContext.translate(line.formattingShift, yOffset);
-      yOffset += line.advance.height;
+      _paintContext.translate(
+        line.formattingShift,
+        line.baseline + layout.paragraph.paintOverflows.top,
+      );
 
       for (final LineBlock block in line.visualBlocks) {
         if (block is PlaceholderBlock) {
@@ -222,21 +217,15 @@ class DomCanvasParagraphPainter {
         _paintContext.save();
         switch (styleElement) {
           case StyleElements.shadows:
-            // For text and shadows we need to shift to the start of the block
-            _paintContext.translate(
-              block.spanShiftFromLineStart,
-              line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
-            );
+            // For text and shadows we need to shift to the start of the span
+            _paintContext.translate(block.spanShiftFromLineStart, 0);
             _fillBlockShadows(layout, block as TextBlock);
           case StyleElements.text:
-            // For text and shadows we need to shift to the start of the block
-            _paintContext.translate(
-              block.spanShiftFromLineStart,
-              line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
-            );
+            // For text and shadows we need to shift to the start of the span
+            _paintContext.translate(block.spanShiftFromLineStart, 0);
             _fillBlockText(layout, block as TextBlock);
           case StyleElements.decorations:
-            // For decorations we need to shift to the start of the line
+            // For decorations we need to shift to the start of the block
             _paintContext.translate(block.shiftFromLineStart, 0);
             // Let's calculate the sizes
             final (ui.Rect sourceRect, ui.Rect targetRect) = _calculateBlock(

@@ -71,6 +71,9 @@ class TextLayout {
     wrapText(width);
     formatLines(width);
 
+    // Calculate how much overflow is needed in all directions in order to paint the full glyphs.
+    calculatePaintOverflows();
+
     // TODO(jlavrova): Optimize. If lines are the same as the previous layout, we don't need to
     // clear the paint cache.
     paragraph.clearPaintCache();
@@ -381,15 +384,7 @@ class TextLayout {
             (line.visualBlocks.last as TextBlock).whitespacesWidth = trailingSpacesWidth;
           }
 
-          // Line always counts multipled metrics (no need for the others)
-          line.fontBoundingBoxAscent = math.max(
-            line.fontBoundingBoxAscent,
-            block.multipliedFontBoundingBoxAscent,
-          );
-          line.fontBoundingBoxDescent = math.max(
-            line.fontBoundingBoxDescent,
-            block.multipliedFontBoundingBoxDescent,
-          );
+          line.updateBoundingBox(block);
           blockWidth = block.advance.width;
         }
 
@@ -428,9 +423,7 @@ class TextLayout {
         continue;
       }
       block.calculatePlaceholderTop(line.fontBoundingBoxAscent, line.fontBoundingBoxDescent);
-      // Line always counts multipled metrics (no need for the others)
-      line.fontBoundingBoxAscent = math.max(line.fontBoundingBoxAscent, block.ascent);
-      line.fontBoundingBoxDescent = math.max(line.fontBoundingBoxDescent, block.descent);
+      line.updateBoundingBox(block);
     }
 
     line.advance = ui.Rect.fromLTWH(
@@ -482,7 +475,32 @@ class TextLayout {
     }
   }
 
-  static double epsilon = 0.001;
+  void calculatePaintOverflows() {
+    // First, calculate the actual bounds of the entire paragraph.
+    double leftBound = 0;
+    double topBound = 0;
+    double rightBound = 0;
+    double bottomBound = 0;
+
+    var maxWidth = 0.0;
+    for (final TextLine line in lines) {
+      leftBound = math.min(leftBound, line.formattingShift + line.actualBoundingBoxLeft);
+      topBound = math.min(topBound, line.baseline - line.actualBoundingBoxAscent);
+      rightBound = math.max(rightBound, line.formattingShift + line.actualBoundingBoxRight);
+      bottomBound = math.max(bottomBound, line.baseline + line.actualBoundingBoxDescent);
+
+      maxWidth = math.max(maxWidth, line.fullWidth);
+    }
+
+    paragraph.paintOverflows = (
+      left: math.max(0, -leftBound),
+      top: math.max(0, -topBound),
+      right: math.max(0, rightBound - maxWidth),
+      bottom: math.max(0, bottomBound - paragraph.height),
+    );
+  }
+
+  static const epsilon = 0.001;
 
   List<ui.TextBox> getBoxesForRange(
     int start,
@@ -940,14 +958,12 @@ abstract class WebCluster {
   int get endInSpan;
 
   // TODO(mdebbar): DISCUSS:
-  // Cluster's `bounds` and `advance` are relative to the span, which isn't very useful
-  // most of the time. Should we hide those and only show `width`/`height` since those
+  // Cluster's `advance` is relative to the span, which isn't very useful
+  // most of the time. Should we hide it and only show `width`/`height` since those
   // are still useful?
-  // Callsites that need `bounds` and `advance` are usually performing some kind of
+  // Callsites that need `advance` are usually performing some kind of
   // coordinate conversion to make them relative to the line, for example. We should
   // encapsulate that logic here and make it convenient to use.
-  ui.Rect get bounds;
-
   ui.Rect get advance;
 
   ParagraphSpan get span;
@@ -979,8 +995,6 @@ class TextCluster extends WebCluster {
   final int endInSpan;
 
   @override
-  late final ui.Rect bounds = span.getClusterBounds(this);
-  @override
   late final ui.Rect advance = span.getClusterSelection(this);
 
   final DomTextCluster _cluster;
@@ -998,7 +1012,7 @@ class TextCluster extends WebCluster {
 
   @override
   void addToContext(DomCanvasRenderingContext2D context, double x, double y) {
-    context.fillTextCluster(_cluster, /*left:*/ x, /*top:*/ y + span.fontBoundingBoxAscent);
+    context.fillTextCluster(_cluster, /*left:*/ x, /*top:*/ y);
   }
 
   @override
@@ -1023,8 +1037,6 @@ class EmptyCluster extends WebCluster {
   @override
   final int endInSpan = 0;
 
-  @override
-  late final ui.Rect bounds = ui.Rect.fromLTWH(0, 0, 0, height);
   @override
   late final ui.Rect advance = ui.Rect.fromLTWH(0, 0, 0, height);
 
@@ -1059,11 +1071,7 @@ class PlaceholderCluster extends WebCluster {
   WebTextStyle get style => span.style;
 
   @override
-  late final ui.Rect bounds = ui.Rect.fromLTWH(0, 0, span.width, span.height);
-
-  @override
-  // For placeholders bounds == advance
-  ui.Rect get advance => bounds;
+  late final ui.Rect advance = ui.Rect.fromLTWH(0, 0, span.width, span.height);
 
   @override
   void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y}) {
@@ -1149,6 +1157,11 @@ class TextBlock extends LineBlock {
 
   @override
   late final ui.Rect advance = span.getBlockSelection(this);
+
+  late final ui.Rect actualBounds = span.getBlockBounds(this);
+
+  double get actualBoundingBoxAscent => -actualBounds.top;
+  double get actualBoundingBoxDescent => actualBounds.bottom;
 
   @override
   double spanShiftFromLineStart;
@@ -1291,11 +1304,15 @@ class TextLine {
       unscaledAscent: fontBoundingBoxAscent,
       height: advance.height,
       width: advance.width,
+      // TODO(jlavrova): This should be set to `formattingShift`, right?
+      //                 `advance.left` is always zero.
       left: advance.left,
-      baseline: advance.top + fontBoundingBoxAscent,
+      baseline: baseline,
       lineNumber: lineNumber,
     );
   }
+
+  double get baseline => advance.top + fontBoundingBoxAscent;
 
   double get height => fontBoundingBoxAscent + fontBoundingBoxDescent;
 
@@ -1310,10 +1327,41 @@ class TextLine {
   ui.Rect advance = ui.Rect.zero;
   double fontBoundingBoxAscent = 0.0;
   double fontBoundingBoxDescent = 0.0;
+
+  double actualBoundingBoxAscent = 0.0;
+  double actualBoundingBoxDescent = 0.0;
+  double actualBoundingBoxLeft = 0.0;
+  double actualBoundingBoxRight = 0.0;
+
   double formattingShift = 0.0; // For centered or right aligned text
   double trailingSpacesWidth = 0.0;
 
+  double get fullWidth => advance.width + formattingShift + trailingSpacesWidth;
+
   List<LineBlock> visualBlocks = <LineBlock>[];
+
+  void updateBoundingBox(LineBlock block) {
+    if (block is TextBlock) {
+      // Line always counts multipled metrics.
+      fontBoundingBoxAscent = math.max(
+        fontBoundingBoxAscent,
+        block.multipliedFontBoundingBoxAscent,
+      );
+      fontBoundingBoxDescent = math.max(
+        fontBoundingBoxDescent,
+        block.multipliedFontBoundingBoxDescent,
+      );
+      actualBoundingBoxAscent = math.max(actualBoundingBoxAscent, block.actualBoundingBoxAscent);
+      actualBoundingBoxDescent = math.max(actualBoundingBoxDescent, block.actualBoundingBoxDescent);
+      actualBoundingBoxLeft = math.min(actualBoundingBoxLeft, block.actualBounds.left);
+      actualBoundingBoxRight = math.max(actualBoundingBoxRight, block.actualBounds.right);
+    } else if (block is PlaceholderBlock) {
+      fontBoundingBoxAscent = math.max(fontBoundingBoxAscent, block.ascent);
+      fontBoundingBoxDescent = math.max(fontBoundingBoxDescent, block.descent);
+    } else {
+      throw UnsupportedError('Unknown block type: $block');
+    }
+  }
 }
 
 extension DomTextMetricsExtension on DomTextMetrics {
