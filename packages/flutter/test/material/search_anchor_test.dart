@@ -3495,9 +3495,9 @@ void main() {
     expect(box.size.height, 32);
   });
 
-  testWidgets(
-    'Tapping outside searchbar should unfocus the searchbar on mobile',
-    (WidgetTester tester) async {
+  testWidgets('Tapping outside searchbar should unfocus the searchbar on mobile', (
+    WidgetTester tester,
+  ) async {
     final focusNode = FocusNode(debugLabel: 'Test Node');
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
@@ -3537,9 +3537,7 @@ void main() {
     await tester.pump();
 
     expect(focusNode.hasPrimaryFocus, isFalse);
-    },
-    variant: TargetPlatformVariant.mobile(),
-  );
+  }, variant: TargetPlatformVariant.mobile());
 
   testWidgets('The default clear button only shows when text input is not empty '
       'on the search view', (WidgetTester tester) async {
