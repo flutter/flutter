@@ -965,38 +965,9 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     if (defaultScheme == null) {
       projectInfo.reportFlavorNotFoundAndExit();
     }
-    // Only consider schemes shared by the host Xcode project or workspace.
-    // With Swift Package Manager enabled, projectInfo.schemes also contains a
-    // scheme per resolved package/plugin. Those cannot be a watchOS companion
-    // target, and probing each one with `xcodebuild -showBuildSettings
-    // -destination generic/platform=watchOS` is expensive (seconds per scheme).
-    final Directory projectSharedSchemesDir = xcodeProject
-        .childDirectory('xcshareddata')
-        .childDirectory('xcschemes');
-    final Directory? workspaceSharedSchemesDir = xcodeWorkspaceSharedData?.childDirectory(
-      'xcschemes',
-    );
-    bool isHostSharedScheme(String scheme) {
-      final fileName = '$scheme.xcscheme';
-      if (projectSharedSchemesDir.childFile(fileName).existsSync()) {
-        return true;
-      }
-      if (workspaceSharedSchemesDir != null &&
-          workspaceSharedSchemesDir.childFile(fileName).existsSync()) {
-        return true;
-      }
-      return false;
-    }
-
     for (final String scheme in projectInfo.schemes) {
       // Flutter assumes single build target per scheme, so skip default scheme.
       if (scheme == defaultScheme) {
-        continue;
-      }
-      // Skip schemes that aren't shared by the host .xcodeproj or .xcworkspace
-      // (e.g. SwiftPM package schemes). See
-      // https://github.com/flutter/flutter/issues/186004.
-      if (!isHostSharedScheme(scheme)) {
         continue;
       }
 

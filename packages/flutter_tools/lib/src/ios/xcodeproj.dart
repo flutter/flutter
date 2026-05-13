@@ -21,12 +21,15 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../plugins.dart';
 import '../reporting/reporting.dart';
 import '../xcode_project.dart';
 
 final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final _varExpr = RegExp(r'\$\(([^)]*)\)');
 const kSwiftPackageCacheDirectoryName = 'SourcePackages';
+const _flutterGeneratedPluginSwiftPackageSchemeName = 'FlutterGeneratedPluginSwiftPackage';
+const _flutterFrameworkSchemeName = 'FlutterFramework';
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
@@ -530,7 +533,61 @@ class XcodeProjectInterpreter {
       // User configuration error, tool exit instead of crashing.
       throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
     }
-    return XcodeProjectInfo.fromXcodeBuildOutput(result.toString(), _logger);
+    return XcodeProjectInfo.fromXcodeBuildOutput(
+      result.toString(),
+      _logger,
+      ignoredSchemes: await _ignoredSwiftPackageSchemes(xcodeProject, buildDirectory),
+    );
+  }
+
+  Future<Set<String>> _ignoredSwiftPackageSchemes(
+    XcodeBasedProject xcodeProject,
+    Directory buildDirectory,
+  ) async {
+    final ignoredSchemes = <String>{
+      _flutterGeneratedPluginSwiftPackageSchemeName,
+      _flutterFrameworkSchemeName,
+      ..._swiftPackageCheckoutSchemes(buildDirectory),
+    };
+    try {
+      for (final Plugin plugin in await xcodeProject.getPlugins()) {
+        final String dashedPluginName = plugin.name.replaceAll('_', '-');
+        ignoredSchemes.add(plugin.name);
+        ignoredSchemes.add(sentenceCase(plugin.name));
+        ignoredSchemes.add(dashedPluginName);
+        ignoredSchemes.add(sentenceCase(dashedPluginName));
+      }
+    } on Object catch (error) {
+      _logger.printTrace('Failed to get plugins while filtering Xcode schemes: $error');
+    }
+    return ignoredSchemes;
+  }
+
+  Set<String> _swiftPackageCheckoutSchemes(Directory buildDirectory) {
+    final Directory checkoutsDirectory = buildDirectory
+        .childDirectory(kSwiftPackageCacheDirectoryName)
+        .childDirectory('checkouts');
+    if (!checkoutsDirectory.existsSync()) {
+      return const <String>{};
+    }
+    final schemes = <String>{};
+    for (final Directory checkoutDirectory
+        in checkoutsDirectory.listSync().whereType<Directory>()) {
+      final Directory schemeDirectory = checkoutDirectory
+          .childDirectory('.swiftpm')
+          .childDirectory('xcode')
+          .childDirectory('xcshareddata')
+          .childDirectory('xcschemes');
+      if (!schemeDirectory.existsSync()) {
+        continue;
+      }
+      for (final File schemeFile in schemeDirectory.listSync().whereType<File>()) {
+        if (_fileSystem.path.extension(schemeFile.path) == '.xcscheme') {
+          schemes.add(_fileSystem.path.basenameWithoutExtension(schemeFile.path));
+        }
+      }
+    }
+    return schemes;
   }
 }
 
@@ -647,7 +704,11 @@ class XcodeProjectInfo {
   const XcodeProjectInfo(this.targets, this.buildConfigurations, this.schemes, Logger logger)
     : _logger = logger;
 
-  factory XcodeProjectInfo.fromXcodeBuildOutput(String output, Logger logger) {
+  factory XcodeProjectInfo.fromXcodeBuildOutput(
+    String output,
+    Logger logger, {
+    Set<String> ignoredSchemes = const <String>{},
+  }) {
     final targets = <String>[];
     final buildConfigurations = <String>[];
     final schemes = <String>[];
@@ -668,6 +729,7 @@ class XcodeProjectInfo {
       }
       collector?.add(line.trim());
     }
+    schemes.removeWhere(ignoredSchemes.contains);
     if (schemes.isEmpty) {
       schemes.add('Runner');
     }
