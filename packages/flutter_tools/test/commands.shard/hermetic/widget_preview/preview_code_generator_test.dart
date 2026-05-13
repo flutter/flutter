@@ -463,6 +463,7 @@ List<_i1.WidgetPreview> previews() => [];
           dtdUri: dtdUri,
           widgetPreviewServiceName: 'widget-preview-service',
           widgetPreviewScaffoldStreamName: 'widget-preview-stream',
+          projectRootPath: project.directory.absolute.path,
         );
 
         final expectedDtdConnectionInfo =
@@ -472,6 +473,8 @@ List<_i1.WidgetPreview> previews() => [];
 const String kWidgetPreviewDtdUri = '$dtdUri';
 const String kWidgetPreviewService = 'widget-preview-service';
 const String kWidgetPreviewScaffoldStream = 'widget-preview-stream';
+const String kProjectRootPath =
+    '${project.directory.absolute.path}';
 ''';
         expect(generatedDtdConnectionInfoFile.readAsStringSync(), expectedDtdConnectionInfo);
       },

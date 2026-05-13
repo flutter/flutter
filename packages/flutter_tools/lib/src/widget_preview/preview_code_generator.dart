@@ -60,6 +60,7 @@ class PreviewCodeGenerator {
     required Uri dtdUri,
     required String widgetPreviewServiceName,
     required String widgetPreviewScaffoldStreamName,
+    required String projectRootPath,
   }) {
     final emitter = cb.DartEmitter.scoped(useNullSafetySyntax: true);
     final lib = cb.Library(
@@ -86,6 +87,13 @@ class PreviewCodeGenerator {
               ..modifier = cb.FieldModifier.constant
               ..type = cb.refer('String')
               ..assignment = cb.literalString(widgetPreviewScaffoldStreamName).code;
+          }),
+          cb.Field((b) {
+            b
+              ..name = 'kProjectRootPath'
+              ..modifier = cb.FieldModifier.constant
+              ..type = cb.refer('String')
+              ..assignment = cb.literalString(projectRootPath).code;
           }),
         ]),
     );

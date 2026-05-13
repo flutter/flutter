@@ -64,6 +64,7 @@ extension StringExtension on String {
   bool get isDartFile => endsWith('.dart');
   bool get isPubspec => endsWith('pubspec.yaml');
   bool get doesContainDartTool => contains('.dart_tool');
+  bool get doesContainWidgetPreview => contains('.widget_preview');
 }
 
 extension LibraryElementExtension on LibraryElement {
