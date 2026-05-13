@@ -226,15 +226,6 @@ source_set("flutter_framework_source") {
 }
 
 if (enable_ios_unittests) {
-  config("ios_test_config") {
-    swiftflags = [
-      "--deployment-target",
-      ios_testing_deployment_target,
-    ]
-    cflags = [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
-    ldflags = [ "-mios-simulator-version-min=$ios_testing_deployment_target" ]
-  }
-
   source_set("flutter_engine_bindings_test_helpers") {
     testonly = true
     visibility = [ ":*" ]
@@ -253,10 +244,7 @@ if (enable_ios_unittests) {
   source_set("ios_test_flutter_swift") {
     testonly = true
     visibility = [ ":*" ]
-    configs += [
-      "//flutter/shell/platform/darwin/common:test_config",
-      ":ios_test_config",
-    ]
+    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
     include_dirs = [
       "//flutter/shell/platform/darwin/common/framework/Headers",
       "//flutter/shell/platform/darwin/ios/framework/Headers",
@@ -295,10 +283,7 @@ if (enable_ios_unittests) {
     frameworks = [ "XCTest.framework" ]
     include_dirs = [ target_gen_dir ]
 
-    configs += [
-      "//flutter/shell/platform/darwin/common:test_config",
-      ":ios_test_config",
-    ]
+    configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
 
     sources = [
       "framework/Source/FlutterAppDelegateTest.mm",
