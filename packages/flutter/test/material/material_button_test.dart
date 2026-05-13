@@ -635,8 +635,6 @@ void main() {
   testWidgets(
     'Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics',
     (WidgetTester tester) async {
-      addTearDown(tester.ensureSemantics().dispose);
-
       const Size expectedButtonSize = Size(116.0, 48.0);
       // Button is in center of screen.
       final Matrix4 expectedButtonTransform = Matrix4.identity()
