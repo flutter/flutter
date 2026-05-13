@@ -7,8 +7,10 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:web/web.dart' as web;
 
 // Method to convert degrees to radians
 double degToRad(num deg) => deg * (math.pi / 180.0);
@@ -97,6 +99,28 @@ final class SplitPane extends StatefulWidget {
 
 final class _SplitPaneState extends State<SplitPane> {
   late final List<double> fractions;
+
+  /// Toggles the `pointer-events` CSS property on all `iframe` elements in the document.
+  ///
+  /// On Flutter Web, platform views (like WebViews/iframes) reside in their own HTML
+  /// DOM trees above the WebGL canvas. This means they capture native mouse events
+  /// and prevent them from reaching the parent window, causing the resize drag
+  /// interaction to lose focus if the cursor passes over the iframe.
+  ///
+  /// Setting `pointer-events: none` on the iframe DOM elements during a drag
+  /// operation bypasses this issue, causing the browser to ignore the iframe and
+  /// deliver all mouse movements to the parent window where the splitter's drag
+  /// listener can continue smoothly.
+  void _toggleIframePointerEvents(bool disable) {
+    if (!kIsWeb) {
+      return;
+    }
+    final iframes = web.document.querySelectorAll('iframe');
+    for (int i = 0; i < iframes.length; i++) {
+      final iframe = iframes.item(i) as web.HTMLElement;
+      iframe.style.pointerEvents = disable ? 'none' : '';
+    }
+  }
 
   bool get isHorizontal => widget.axis == Axis.horizontal;
 
@@ -270,7 +294,16 @@ final class _SplitPaneState extends State<SplitPane> {
             child: GestureDetector(
               key: widget.dividerKey(i),
               behavior: HitTestBehavior.translucent,
+              onPanStart: (details) {
+                _toggleIframePointerEvents(true);
+              },
               onPanUpdate: (details) => updateSpacing(details, i),
+              onPanEnd: (details) {
+                _toggleIframePointerEvents(false);
+              },
+              onPanCancel: () {
+                _toggleIframePointerEvents(false);
+              },
               // DartStartBehavior.down is needed to keep the mouse pointer stuck to
               // the drag bar. There still appears to be a few frame lag before the
               // drag action triggers which is't ideal but isn't a launch blocker.
