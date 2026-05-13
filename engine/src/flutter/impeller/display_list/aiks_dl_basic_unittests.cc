@@ -2507,45 +2507,45 @@ TEST_P(AiksTest, CanRenderAsymmetricRoundSuperellipses) {
 
   builder.DrawRoundSuperellipse(
       DlRoundSuperellipse::MakeRectRadii(
-          /*rect=*/DlRect::MakeXYWH(50, 50, 220, 220), /*radii=*/
+          /*rect=*/DlRect::MakeXYWH(50, 50, 440, 440), /*radii=*/
           {
-              .top_left = Size(30.0f, 120.0f),
-              .top_right = Size(100.0f, 20.0f),
-              .bottom_left = Size(90.0f, 10.0f),
-              .bottom_right = Size(20.0f, 100.0f),
+              .top_left = Size(60.0f, 240.0f),
+              .top_right = Size(200.0f, 40.0f),
+              .bottom_left = Size(180.0f, 20.0f),
+              .bottom_right = Size(40.0f, 200.0f),
           }),
       paint);
 
   builder.DrawRoundSuperellipse(
       DlRoundSuperellipse::MakeRectRadii(
-          /*rect=*/DlRect::MakeXYWH(350, 50, 220, 220), /*radii=*/
+          /*rect=*/DlRect::MakeXYWH(550, 50, 440, 440), /*radii=*/
           {
-              .top_left = Size(120.0f, 20.0f),
-              .top_right = Size(20.0f, 120.0f),
-              .bottom_left = Size(20.0f, 120.0f),
-              .bottom_right = Size(120.0f, 20.0f),
+              .top_left = Size(240.0f, 40.0f),
+              .top_right = Size(40.0f, 240.0f),
+              .bottom_left = Size(40.0f, 240.0f),
+              .bottom_right = Size(240.0f, 40.0f),
           }),
       paint);
 
   builder.DrawRoundSuperellipse(
       DlRoundSuperellipse::MakeRectRadii(
-          /*rect=*/DlRect::MakeXYWH(50, 350, 200, 200), /*radii=*/
+          /*rect=*/DlRect::MakeXYWH(50, 550, 400, 400), /*radii=*/
           {
-              .top_left = Size(120.0f, 120.0f),
-              .top_right = Size(20.0f, 20.0f),
-              .bottom_left = Size(20.0f, 20.0f),
-              .bottom_right = Size(20.0f, 20.0f),
+              .top_left = Size(240.0f, 240.0f),
+              .top_right = Size(40.0f, 40.0f),
+              .bottom_left = Size(40.0f, 40.0f),
+              .bottom_right = Size(40.0f, 40.0f),
           }),
       paint);
 
   builder.DrawRoundSuperellipse(
       DlRoundSuperellipse::MakeRectRadii(
-          /*rect=*/DlRect::MakeXYWH(350, 350, 200, 200), /*radii=*/
+          /*rect=*/DlRect::MakeXYWH(550, 550, 400, 400), /*radii=*/
           {
-              .top_left = Size(120.0f, 120.0f),
-              .top_right = Size(20.0f, 20.0f),
-              .bottom_left = Size(20.0f, 20.0f),
-              .bottom_right = Size(120.0f, 120.0f),
+              .top_left = Size(240.0f, 240.0f),
+              .top_right = Size(40.0f, 40.0f),
+              .bottom_left = Size(40.0f, 40.0f),
+              .bottom_right = Size(240.0f, 240.0f),
           }),
       paint);
 

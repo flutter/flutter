@@ -121,19 +121,8 @@ float getComponent(vec4 v, int index) {
   return v.w;
 }
 
-float smax(float a, float b, float k) {
-  float m = max(a, b);
-  // Taper the smoothing factor to 0 outside the shape to prevent
-  // bloat/overdraw.
-  float effective_k = k * smoothstep(0.0, -k, m);
-  if (effective_k < 0.001)
-    return m;
-
-  float h = clamp(0.5 + 0.5 * (b - a) / effective_k, 0.0, 1.0);
-  return mix(a, b, h) + effective_k * h * (1.0 - h);
-}
-
 float getQuadrantDistance(vec2 p, int quadrant_index) {
+  // Unpack the parameters for the quadrant.
   float se_degree_top =
       getComponent(frag_info.superellipse_degrees_top, quadrant_index);
   float se_degree_right =
@@ -175,19 +164,30 @@ float getQuadrantDistance(vec2 p, int quadrant_index) {
   else
     q_sign = vec2(-1.0, -1.0);
 
+  // Transform the point into the quadrant's local space
   vec2 p_local = (p - q_center) * q_sign;
 
+  // Clamp the point to positive values - this avoids issues with the sdf
+  // calculations below. This also means that interior distances for this
+  // function are not totally accurate.
   vec2 p_clamped = max(p_local, 0.0);
 
+  // Map p in to a square.
   vec2 p_norm = p_clamped / scale;
 
+  // Declare all RSE params for a single octant.
   float se_degree;
   float span;
   float radius;
   vec2 circle_center;
   float axis_length;
+
+  // 'p_norm' in the coordinate system of the octant.
   vec2 p_oct;
 
+  // We split the quadrant along the diagonal of the transition (p_norm.y + c ==
+  // p_norm.x). This allows us to grab the correct set of parameters for the
+  // "top" and "right" halves of the corner.
   if (p_norm.y + c > p_norm.x) {
     p_oct = p_norm + vec2(0.0, c);
     se_degree = se_degree_top;
@@ -204,38 +204,54 @@ float getQuadrantDistance(vec2 p, int quadrant_index) {
     axis_length = se_a_right;
   }
 
+  // Move the point to the corner circle's coordinate system.
   vec2 p_rel = p_oct - circle_center;
+  // Grab the angle offset of the point.
   float theta = atan(p_rel.y, p_rel.x);
 
+  // The angular distance between the point and the 45 degree midline.
   float d_theta = theta - PI_OVER_FOUR;
   d_theta = mod(d_theta + PI, TWO_PI) - PI;
 
-  float d_scaled;
+  float dist_raw;
   vec2 grad_oct;
+
+  // If the point is within the span of the corner circle's arc,
+  // use a circle SDF.
+  // This works because the normals of the circular and superelliptical sections
+  // agree at the transition angle, the total RSE curve is continuous and
+  // the closest point on a continuous curve to a point lies along the normal.
+
+  // We also compute the gradient of the distance function for normalization.
   if (abs(d_theta) < abs(span)) {
-    d_scaled = distanceFromCircle(p_rel, radius);
+    dist_raw = distanceFromCircle(p_rel, radius);
     grad_oct = normalize(p_rel);
   } else {
-    d_scaled = sdSuperellipse(p_oct / axis_length, se_degree) * axis_length;
+    dist_raw = sdSuperellipse(p_oct / axis_length, se_degree) * axis_length;
+    // Clamp the coordinate to avoid division by zero
     vec2 p_oct_clamped = max(p_oct, vec2(0.001));
     float max_p = max(p_oct_clamped.x, p_oct_clamped.y);
     vec2 p_safe = p_oct_clamped / max_p;
+    // Approximation of the gradient
     grad_oct = normalize(pow(p_safe, vec2(se_degree - 1.0)));
   }
 
   vec2 grad_norm;
-  if (p_norm.y + c > p_norm.x) {
-    grad_norm = grad_oct;
-  } else {
-    grad_norm = grad_oct.yx;
+  if (p_norm.y + c <= p_norm.x) {
+    grad_oct = grad_oct.yx;
   }
 
-  float corner_dist = d_scaled / length(grad_norm / scale);
+  // Divide the distance by the length of the gradient.
+  // This ensures that the resulting distance has a gradient magnitude of 1
+  // everywhere, allowing to be mixed cleanly with other SDFs.
+  float corner_dist = dist_raw / length(grad_norm / scale);
 
   return corner_dist;
 }
 
 float distanceFromRoundedSuperellipse(vec2 p) {
+  // An RSE is constructed by four different quadrant curves,
+  // take the max distance from all four curves.
   float d0 = getQuadrantDistance(p, 0);
   float d1 = getQuadrantDistance(p, 1);
   float d2 = getQuadrantDistance(p, 2);
@@ -495,44 +511,6 @@ void main() {
   float fade_size = pixel_size * frag_info.aa_pixels * 0.5;
   float alpha = 1.0 - smoothstep(-fade_size, fade_size, sdf);
 
-  if (frag_info.type > 3.5) {  // Rounded Superellipse
-    // Base visualizer
-    vec3 col = (sdf < 0.0) ? vec3(0.9, 0.6, 0.3) : vec3(0.4, 0.7, 0.85);
-    col *= 1.0 - exp(-3.0 * abs(sdf / 100.0));
-    col *= 0.8 + 0.2 * cos(1.2 * sdf);
-    col = mix(col, vec3(1.0), 1.0 - smoothstep(0.0, 1.5, abs(sdf)));
-
-    // 1. Quadrant centers TR (Red), BR (Green), BL (Blue), TL (Yellow)
-    float dot_radius = 3.5;
-    vec2 C_TR =
-        vec2(frag_info.quadrant_centers_x[0], frag_info.quadrant_centers_y[0]);
-    vec2 C_BR =
-        vec2(frag_info.quadrant_centers_x[1], frag_info.quadrant_centers_y[1]);
-    vec2 C_BL =
-        vec2(frag_info.quadrant_centers_x[2], frag_info.quadrant_centers_y[2]);
-    vec2 C_TL =
-        vec2(frag_info.quadrant_centers_x[3], frag_info.quadrant_centers_y[3]);
-
-    float dt_ctr_TR = length(p - C_TR) - dot_radius;
-    float dt_ctr_BR = length(p - C_BR) - dot_radius;
-    float dt_ctr_BL = length(p - C_BL) - dot_radius;
-    float dt_ctr_TL = length(p - C_TL) - dot_radius;
-
-    float alpha_ctr_TR = max(0.0, 1.0 - smoothstep(-1.0, 1.0, dt_ctr_TR));
-    float alpha_ctr_BR = max(0.0, 1.0 - smoothstep(-1.0, 1.0, dt_ctr_BR));
-    float alpha_ctr_BL = max(0.0, 1.0 - smoothstep(-1.0, 1.0, dt_ctr_BL));
-    float alpha_ctr_TL = max(0.0, 1.0 - smoothstep(-1.0, 1.0, dt_ctr_TL));
-
-    col = mix(col, vec3(1.0, 0.0, 0.0), alpha_ctr_TR);  // Red
-    col = mix(col, vec3(0.0, 1.0, 0.0), alpha_ctr_BR);  // Green
-    col = mix(col, vec3(0.0, 0.0, 1.0), alpha_ctr_BL);  // Blue
-    col = mix(col, vec3(1.0, 1.0, 0.0), alpha_ctr_TL);  // Yellow
-
-    frag_color = vec4(col, frag_info.color.a);
-    frag_color = IPPremultiply(frag_color);
-  }
-  {
-    frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
-    frag_color = IPPremultiply(frag_color);
-  }
+  frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
+  frag_color = IPPremultiply(frag_color);
 }
