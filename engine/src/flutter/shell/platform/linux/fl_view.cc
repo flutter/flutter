@@ -34,6 +34,12 @@ struct _FlView {
   // Event box the render area goes inside.
   GtkWidget* event_box;
 
+  // Handle zoom gestures.
+  GtkGesture* zoom_gesture;
+
+  // Handle rotation gestures.
+  GtkGesture* rotate_gesture;
+
   // The widget rendering the Flutter view.
   GtkDrawingArea* render_area;
 
@@ -594,6 +600,8 @@ static void fl_view_dispose(GObject* object) {
 
   g_cancellable_cancel(self->cancellable);
 
+  g_clear_object(&self->zoom_gesture);
+  g_clear_object(&self->rotate_gesture);
   if (self->engine != nullptr) {
     FlMouseCursorHandler* handler =
         fl_engine_get_mouse_cursor_handler(self->engine);
@@ -772,19 +780,20 @@ static void fl_view_init(FlView* self) {
                            G_CALLBACK(enter_notify_event_cb), self);
   g_signal_connect_swapped(self->event_box, "leave-notify-event",
                            G_CALLBACK(leave_notify_event_cb), self);
-  GtkGesture* zoom = gtk_gesture_zoom_new(self->event_box);
-  g_signal_connect_swapped(zoom, "begin", G_CALLBACK(gesture_zoom_begin_cb),
-                           self);
-  g_signal_connect_swapped(zoom, "scale-changed",
+  self->zoom_gesture = gtk_gesture_zoom_new(self->event_box);
+  g_signal_connect_swapped(self->zoom_gesture, "begin",
+                           G_CALLBACK(gesture_zoom_begin_cb), self);
+  g_signal_connect_swapped(self->zoom_gesture, "scale-changed",
                            G_CALLBACK(gesture_zoom_update_cb), self);
-  g_signal_connect_swapped(zoom, "end", G_CALLBACK(gesture_zoom_end_cb), self);
-  GtkGesture* rotate = gtk_gesture_rotate_new(self->event_box);
-  g_signal_connect_swapped(rotate, "begin",
+  g_signal_connect_swapped(self->zoom_gesture, "end",
+                           G_CALLBACK(gesture_zoom_end_cb), self);
+  self->rotate_gesture = gtk_gesture_rotate_new(self->event_box);
+  g_signal_connect_swapped(self->rotate_gesture, "begin",
                            G_CALLBACK(gesture_rotation_begin_cb), self);
-  g_signal_connect_swapped(rotate, "angle-changed",
+  g_signal_connect_swapped(self->rotate_gesture, "angle-changed",
                            G_CALLBACK(gesture_rotation_update_cb), self);
-  g_signal_connect_swapped(rotate, "end", G_CALLBACK(gesture_rotation_end_cb),
-                           self);
+  g_signal_connect_swapped(self->rotate_gesture, "end",
+                           G_CALLBACK(gesture_rotation_end_cb), self);
   g_signal_connect_swapped(self->event_box, "touch-event",
                            G_CALLBACK(touch_event_cb), self);
 

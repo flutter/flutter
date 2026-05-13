@@ -1021,10 +1021,6 @@ enum BlendMode {
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/filter_quality.png)
 ///
-/// When building for the web using the `--web-renderer=html` option, filter
-/// quality has no effect. All images are rendered using the respective
-/// browser's default setting.
-///
 /// See also:
 ///
 ///  * [Paint.filterQuality], which is used to pass [FilterQuality] to the
@@ -2523,13 +2519,6 @@ Future<Codec> instantiateImageCodec(
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
-///
-/// ## Compatibility note on the web
-///
-/// When running Flutter on the web, only the CanvasKit renderer supports image
-/// resizing capabilities (not the HTML renderer). So if image resizing is
-/// critical to your use case, and you're deploying to the web, you should
-/// build using the CanvasKit renderer.
 Future<Codec> instantiateImageCodecFromBuffer(
   ImmutableBuffer buffer, {
   int? targetWidth,
@@ -2580,13 +2569,6 @@ Future<Codec> instantiateImageCodecFromBuffer(
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
-///
-/// ## Compatibility note on the web
-///
-/// When running Flutter on the web, only the CanvasKit renderer supports image
-/// resizing capabilities (not the HTML renderer). So if image resizing is
-/// critical to your use case, and you're deploying to the web, you should
-/// build using the CanvasKit renderer.
 Future<Codec> instantiateImageCodecWithSize(
   ImmutableBuffer buffer, {
   TargetImageSizeCallback? getTargetSize,
