@@ -1064,7 +1064,7 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _typographyMeasurementElement!.text = 'flutter typography measurement';
     // The element should be hidden from screen readers.
     _typographyMeasurementElement!.setAttribute('aria-hidden', 'true');
-    const spacingDefault = 9999.0;
+    const spacingDefault = 100.0;
     _typographyMeasurementElement!.style
       // The element should be positioned off-screen above
       // the window and not visible.
@@ -1084,9 +1084,16 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       ..wordSpacing = '${spacingDefault}px'
       ..margin = '0px 0px ${spacingDefault}px 0px';
     domDocument.body!.append(_typographyMeasurementElement!);
+
+    // Measure baseline font size to calculate the default line-height factor.
     final double typographyMeasurementElementFontSize =
         parseFontSize(_typographyMeasurementElement!)?.toDouble() ?? _defaultRootFontSize;
-    final double defaultLineHeightFactor = spacingDefault / typographyMeasurementElementFontSize;
+
+    // The factor that we expect for line-height if no override is present.
+    // This factor is constant regardless of browser zoom because both
+    // lineHeight and fontSize scale proportionally.
+    final double defaultLineHeightFactor = spacingDefault / (typographyMeasurementElementFontSize / findBrowserTextScaleFactor());
+
     _typographySettingsObserver = createDomResizeObserver((
       List<DomResizeObserverEntry> entries,
       DomResizeObserver observer,
@@ -1097,9 +1104,24 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
         'line-height',
       )?.toDouble();
       final double? fontSize = parseFontSize(_typographyMeasurementElement!)?.toDouble();
+
+      // A property is considered "default" (not overridden) if it matches either
+      // the specified value or the zoomed specified value.
+      bool isDefault(double? value, double defaultValue) {
+        if (value == null) {
+          return true;
+        }
+        return (value - defaultValue).abs() < 1e-4 ||
+               (value - defaultValue * computedTextScaleFactor).abs() < 1e-4;
+      }
+
+      // We only consider it an override if the line-height factor deviates from
+      // our baseline. Both lineHeight and fontSize scale with browser zoom,
+      // so their ratio should remain equal to defaultLineHeightFactor unless
+      // an external CSS rule overrides it.
       final double? computedLineHeightScaleFactor =
-          fontSize != null && lineHeight != null && lineHeight != spacingDefault
-          ? lineHeight / fontSize
+          (fontSize != null && !isDefault(lineHeight, spacingDefault))
+          ? lineHeight! / fontSize
           : null;
       final double? computedWordSpacing = parseNumericStyleProperty(
         _typographyMeasurementElement!,
@@ -1126,18 +1148,18 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
 
       computedTextScaleFactorChanged = _updateTextScaleFactor(computedTextScaleFactor);
       computedLineHeightScaleFactorChanged = _updateLineHeightScaleFactorOverride(
-        computedLineHeightScaleFactor == defaultLineHeightFactor
+        (computedLineHeightScaleFactor != null && (computedLineHeightScaleFactor - defaultLineHeightFactor).abs() < 1e-4)
             ? null
             : computedLineHeightScaleFactor,
       );
       computedLetterSpacingChanged = _updateLetterSpacingOverride(
-        computedLetterSpacing == spacingDefault ? null : computedLetterSpacing,
+        isDefault(computedLetterSpacing, spacingDefault) ? null : computedLetterSpacing,
       );
       computedWordSpacingChanged = _updateWordSpacingOverride(
-        computedWordSpacing == spacingDefault ? null : computedWordSpacing,
+        isDefault(computedWordSpacing, spacingDefault) ? null : computedWordSpacing,
       );
       computedParagraphSpacingChanged = _updateParagraphSpacingOverride(
-        computedParagraphSpacing == spacingDefault ? null : computedParagraphSpacing,
+        isDefault(computedParagraphSpacing, spacingDefault) ? null : computedParagraphSpacing,
       );
 
       final bool metricsChanged =
