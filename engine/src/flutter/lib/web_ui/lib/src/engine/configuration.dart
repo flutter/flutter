@@ -63,12 +63,6 @@ enum CanvasKitVariant {
   /// WARNING: In most cases, you should use [auto] instead of this variant. Using
   /// this variant in a non-Chromium browser will result in a broken app.
   chromium,
-
-  /// The variant that contains the new WebParagraph implementation on top of Chrome's Text Clusters
-  /// API: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
-  ///
-  /// WARNING: This is an experimental variant that's not yet ready for production use.
-  experimentalWebParagraph,
 }
 
 /// The Web Engine configuration for the current application.
@@ -310,6 +304,12 @@ class FlutterConfiguration {
     return maxSurfaces;
   }
 
+  /// Enables the new WebParagraph implementation built on top of Chrome's Text Clusters
+  /// API: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
+  ///
+  /// WARNING: This is an experimental feature.
+  bool get enableWebParagraph => _configuration?.enableWebParagraph ?? false;
+
   /// Set this flag to `true` to cause the engine to visualize the semantics tree
   /// on the screen for debugging.
   ///
@@ -400,6 +400,7 @@ extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
   external bool? get canvasKitForceCpuOnly;
   external bool? get canvasKitForceMultiSurfaceRasterizer;
   external double? get canvasKitMaximumSurfaces;
+  external bool? get enableWebParagraph;
   external bool? get debugShowSemanticsNodes;
   external DomElement? get hostElement;
   external bool? get multiViewEnabled;

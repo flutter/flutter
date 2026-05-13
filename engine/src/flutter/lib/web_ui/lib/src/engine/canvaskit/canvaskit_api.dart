@@ -95,9 +95,16 @@ extension type CanvasKit(JSObject _) implements JSObject {
     Uint16List? indices,
   ) => _MakeVertices(mode, positions.toJS, textureCoordinates?.toJS, colors?.toJS, indices?.toJS);
 
-  external BidiNamespace get Bidi;
+  @JS('Bidi')
+  external BidiNamespace? get _Bidi;
+  BidiNamespace get Bidi {
+    if (_Bidi == null) {
+      throw StateError('The downloaded CanvasKit version does not support WebParagraph');
+    }
+    return _Bidi!;
+  }
 
-  external CodeUnitsNamespace get CodeUnits;
+  bool get isWebParagraphEnabled => _Bidi != null;
 
   external SkParagraphBuilderNamespace get ParagraphBuilder;
   external SkParagraphStyle ParagraphStyle(SkParagraphStyleProperties properties);
@@ -1849,16 +1856,6 @@ extension type BidiNamespace(JSObject _) implements JSObject {
       _reorderVisual(visuals.toJS).toDart.cast<BidiIndex>();
 }
 
-extension type CodeUnitInfo(JSObject _) implements JSObject {
-  external int get flags;
-}
-
-extension type CodeUnitsNamespace(JSObject _) implements JSObject {
-  @JS('compute')
-  external JSArray<JSAny?> _compute(String text);
-  List<CodeUnitInfo> compute(String text) => _compute(text).toDart.cast<CodeUnitInfo>();
-}
-
 extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
   external SkParagraphBuilder MakeFromFontCollection(
     SkParagraphStyle paragraphStyle,
@@ -2431,15 +2428,21 @@ String get _canvasKitBaseUrl => configuration.canvasKitBaseUrl;
 
 @visibleForTesting
 List<String> getCanvasKitJsFileNames(CanvasKitVariant variant) {
-  return switch (variant) {
-    CanvasKitVariant.auto => <String>[
-      if (_enableCanvasKitChromiumInAutoMode) _kChromiumCanvasKitJsFileName,
-      _kFullCanvasKitJsFileName,
-    ],
-    CanvasKitVariant.full => <String>[_kFullCanvasKitJsFileName],
-    CanvasKitVariant.chromium => <String>[_kChromiumCanvasKitJsFileName],
-    CanvasKitVariant.experimentalWebParagraph => <String>[_kWebParagraphCanvasKitJsFileName],
-  };
+  final bool useWebParagraph = configuration.enableWebParagraph && browserSupportsWebParagraph;
+  return [
+    ...switch (variant) {
+      CanvasKitVariant.auto => <String>[
+        if (useWebParagraph) _kWebParagraphCanvasKitJsFileName,
+        if (_enableCanvasKitChromiumInAutoMode) _kChromiumCanvasKitJsFileName,
+        _kFullCanvasKitJsFileName,
+      ],
+      CanvasKitVariant.full => <String>[_kFullCanvasKitJsFileName],
+      CanvasKitVariant.chromium => <String>[
+        if (useWebParagraph) _kWebParagraphCanvasKitJsFileName,
+        _kChromiumCanvasKitJsFileName,
+      ],
+    },
+  ];
 }
 
 Iterable<String> get _canvasKitJsUrls {

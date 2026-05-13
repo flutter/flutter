@@ -32,7 +32,7 @@ class TestBundle {
   final List<CompileConfiguration> compileConfigs;
 }
 
-enum CanvasKitVariant { full, chromium, experimentalWebParagraph }
+enum CanvasKitVariant { full, chromium }
 
 enum BrowserName { chrome, edge, firefox, safari }
 
