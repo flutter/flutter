@@ -1044,7 +1044,6 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
       !paint.mask_blur_descriptor.has_value()) {
-
     auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
         round_superellipse.GetBounds(), round_superellipse.GetRadii());
 

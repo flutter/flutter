@@ -2499,6 +2499,59 @@ TEST_P(AiksTest, CanRenderFilledRoundSuperellipses) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderAsymmetricRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(50, 50, 220, 220), /*radii=*/
+          {
+              .top_left = Size(30.0f, 120.0f),
+              .top_right = Size(100.0f, 20.0f),
+              .bottom_left = Size(90.0f, 10.0f),
+              .bottom_right = Size(20.0f, 100.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(350, 50, 220, 220), /*radii=*/
+          {
+              .top_left = Size(120.0f, 20.0f),
+              .top_right = Size(20.0f, 120.0f),
+              .bottom_left = Size(20.0f, 120.0f),
+              .bottom_right = Size(120.0f, 20.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(50, 350, 200, 200), /*radii=*/
+          {
+              .top_left = Size(120.0f, 120.0f),
+              .top_right = Size(20.0f, 20.0f),
+              .bottom_left = Size(20.0f, 20.0f),
+              .bottom_right = Size(20.0f, 20.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(350, 350, 200, 200), /*radii=*/
+          {
+              .top_left = Size(120.0f, 120.0f),
+              .top_right = Size(20.0f, 20.0f),
+              .bottom_left = Size(20.0f, 20.0f),
+              .bottom_right = Size(120.0f, 120.0f),
+          }),
+      paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderStrokedRoundSuperellipses) {
   DisplayListBuilder builder;
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);

@@ -112,57 +112,68 @@ float sdSuperellipse(vec2 p, float n) {
 }
 
 float getComponent(vec4 v, int index) {
-  if (index == 0) return v.x;
-  if (index == 1) return v.y;
-  if (index == 2) return v.z;
+  if (index == 0)
+    return v.x;
+  if (index == 1)
+    return v.y;
+  if (index == 2)
+    return v.z;
   return v.w;
 }
 
 float smax(float a, float b, float k) {
-    float m = max(a, b);
-    // Taper the smoothing factor to 0 outside the shape to prevent bloat/overdraw.
-    float effective_k = k * smoothstep(0.0, -k, m);
-    if (effective_k < 0.001) return m;
-    
-    float h = clamp(0.5 + 0.5 * (b - a) / effective_k, 0.0, 1.0);
-    return mix(a, b, h) + effective_k * h * (1.0 - h);
+  float m = max(a, b);
+  // Taper the smoothing factor to 0 outside the shape to prevent
+  // bloat/overdraw.
+  float effective_k = k * smoothstep(0.0, -k, m);
+  if (effective_k < 0.001)
+    return m;
+
+  float h = clamp(0.5 + 0.5 * (b - a) / effective_k, 0.0, 1.0);
+  return mix(a, b, h) + effective_k * h * (1.0 - h);
 }
 
 float getQuadrantDistance(vec2 p, int quadrant_index) {
-  float se_degree_top = getComponent(frag_info.superellipse_degrees_top, quadrant_index);
-  float se_degree_right = getComponent(frag_info.superellipse_degrees_right, quadrant_index);
-  float se_a_top = getComponent(frag_info.superellipse_semi_axes_top, quadrant_index);
-  float se_a_right = getComponent(frag_info.superellipse_semi_axes_right, quadrant_index);
-  float angle_span_top = getComponent(frag_info.angle_spans_top, quadrant_index);
-  float angle_span_right = getComponent(frag_info.angle_spans_right, quadrant_index);
+  float se_degree_top =
+      getComponent(frag_info.superellipse_degrees_top, quadrant_index);
+  float se_degree_right =
+      getComponent(frag_info.superellipse_degrees_right, quadrant_index);
+  float se_a_top =
+      getComponent(frag_info.superellipse_semi_axes_top, quadrant_index);
+  float se_a_right =
+      getComponent(frag_info.superellipse_semi_axes_right, quadrant_index);
+  float angle_span_top =
+      getComponent(frag_info.angle_spans_top, quadrant_index);
+  float angle_span_right =
+      getComponent(frag_info.angle_spans_right, quadrant_index);
   float c = getComponent(frag_info.octant_offsets_c, quadrant_index);
   float radius_top = getComponent(frag_info.radii_width, quadrant_index);
   float radius_right = getComponent(frag_info.radii_height, quadrant_index);
 
-  vec2 circle_center_top = vec2(
-      getComponent(frag_info.circle_centers_top_x, quadrant_index),
-      getComponent(frag_info.circle_centers_top_y, quadrant_index)
-  );
-  vec2 circle_center_right = vec2(
-      getComponent(frag_info.circle_centers_right_x, quadrant_index),
-      getComponent(frag_info.circle_centers_right_y, quadrant_index)
-  );
+  vec2 circle_center_top =
+      vec2(getComponent(frag_info.circle_centers_top_x, quadrant_index),
+           getComponent(frag_info.circle_centers_top_y, quadrant_index));
+  vec2 circle_center_right =
+      vec2(getComponent(frag_info.circle_centers_right_x, quadrant_index),
+           getComponent(frag_info.circle_centers_right_y, quadrant_index));
 
-  vec2 scale = vec2(
-      getComponent(frag_info.superellipse_scales_x, quadrant_index),
-      getComponent(frag_info.superellipse_scales_y, quadrant_index)
-  );
+  vec2 scale =
+      vec2(getComponent(frag_info.superellipse_scales_x, quadrant_index),
+           getComponent(frag_info.superellipse_scales_y, quadrant_index));
 
-  vec2 q_center = vec2(
-      getComponent(frag_info.quadrant_centers_x, quadrant_index),
-      getComponent(frag_info.quadrant_centers_y, quadrant_index)
-  );
+  vec2 q_center =
+      vec2(getComponent(frag_info.quadrant_centers_x, quadrant_index),
+           getComponent(frag_info.quadrant_centers_y, quadrant_index));
 
   vec2 q_sign = vec2(1.0);
-  if (quadrant_index == 0) q_sign = vec2(1.0, -1.0);
-  else if (quadrant_index == 1) q_sign = vec2(1.0, 1.0);
-  else if (quadrant_index == 2) q_sign = vec2(-1.0, 1.0);
-  else q_sign = vec2(-1.0, -1.0);
+  if (quadrant_index == 0)
+    q_sign = vec2(1.0, -1.0);
+  else if (quadrant_index == 1)
+    q_sign = vec2(1.0, 1.0);
+  else if (quadrant_index == 2)
+    q_sign = vec2(-1.0, 1.0);
+  else
+    q_sign = vec2(-1.0, -1.0);
 
   vec2 p_local = (p - q_center) * q_sign;
 
@@ -192,8 +203,6 @@ float getQuadrantDistance(vec2 p, int quadrant_index) {
     circle_center = circle_center_right;
     axis_length = se_a_right;
   }
-
-
 
   vec2 p_rel = p_oct - circle_center;
   float theta = atan(p_rel.y, p_rel.x);
@@ -485,7 +494,7 @@ void main() {
   // (pixel_size * aa_pixels) in each direction.
   float fade_size = pixel_size * frag_info.aa_pixels * 0.5;
   float alpha = 1.0 - smoothstep(-fade_size, fade_size, sdf);
-  
+
   if (frag_info.type > 3.5) {  // Rounded Superellipse
     // Base visualizer
     vec3 col = (sdf < 0.0) ? vec3(0.9, 0.6, 0.3) : vec3(0.4, 0.7, 0.85);
@@ -495,10 +504,14 @@ void main() {
 
     // 1. Quadrant centers TR (Red), BR (Green), BL (Blue), TL (Yellow)
     float dot_radius = 3.5;
-    vec2 C_TR = vec2(frag_info.quadrant_centers_x[0], frag_info.quadrant_centers_y[0]);
-    vec2 C_BR = vec2(frag_info.quadrant_centers_x[1], frag_info.quadrant_centers_y[1]);
-    vec2 C_BL = vec2(frag_info.quadrant_centers_x[2], frag_info.quadrant_centers_y[2]);
-    vec2 C_TL = vec2(frag_info.quadrant_centers_x[3], frag_info.quadrant_centers_y[3]);
+    vec2 C_TR =
+        vec2(frag_info.quadrant_centers_x[0], frag_info.quadrant_centers_y[0]);
+    vec2 C_BR =
+        vec2(frag_info.quadrant_centers_x[1], frag_info.quadrant_centers_y[1]);
+    vec2 C_BL =
+        vec2(frag_info.quadrant_centers_x[2], frag_info.quadrant_centers_y[2]);
+    vec2 C_TL =
+        vec2(frag_info.quadrant_centers_x[3], frag_info.quadrant_centers_y[3]);
 
     float dt_ctr_TR = length(p - C_TR) - dot_radius;
     float dt_ctr_BR = length(p - C_BR) - dot_radius;
@@ -510,16 +523,16 @@ void main() {
     float alpha_ctr_BL = max(0.0, 1.0 - smoothstep(-1.0, 1.0, dt_ctr_BL));
     float alpha_ctr_TL = max(0.0, 1.0 - smoothstep(-1.0, 1.0, dt_ctr_TL));
 
-    col = mix(col, vec3(1.0, 0.0, 0.0), alpha_ctr_TR); // Red
-    col = mix(col, vec3(0.0, 1.0, 0.0), alpha_ctr_BR); // Green
-    col = mix(col, vec3(0.0, 0.0, 1.0), alpha_ctr_BL); // Blue
-    col = mix(col, vec3(1.0, 1.0, 0.0), alpha_ctr_TL); // Yellow
+    col = mix(col, vec3(1.0, 0.0, 0.0), alpha_ctr_TR);  // Red
+    col = mix(col, vec3(0.0, 1.0, 0.0), alpha_ctr_BR);  // Green
+    col = mix(col, vec3(0.0, 0.0, 1.0), alpha_ctr_BL);  // Blue
+    col = mix(col, vec3(1.0, 1.0, 0.0), alpha_ctr_TL);  // Yellow
 
     frag_color = vec4(col, frag_info.color.a);
     frag_color = IPPremultiply(frag_color);
-  }  {
+  }
+  {
     frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
     frag_color = IPPremultiply(frag_color);
   }
-  
 }

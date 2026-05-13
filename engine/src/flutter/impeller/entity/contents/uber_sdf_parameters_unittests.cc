@@ -123,5 +123,27 @@ TEST(UberSDFParametersTest, MakeRoundedRect) {
   EXPECT_FALSE(params.stroke.has_value());
 }
 
+TEST(UberSDFParametersTest, MakeRoundedSuperellipse) {
+  Rect rect = Rect::MakeXYWH(10, 20, 100, 100);
+  RoundingRadii radii = {
+      .top_left = Size(10.0f, 10.0f),
+      .top_right = Size(20.0f, 20.0f),
+      .bottom_left = Size(40.0f, 40.0f),
+      .bottom_right = Size(30.0f, 30.0f),
+  };
+  auto round_superellipse_params =
+      RoundSuperellipseParam::MakeBoundsRadii(rect, radii);
+  auto params = UberSDFParameters::MakeRoundedSuperellipse(
+      /*color=*/Color::Red(), /*bounds=*/rect,
+      /*round_superellipse_params=*/round_superellipse_params,
+      /*stroke=*/std::nullopt);
+
+  EXPECT_EQ(params.type, UberSDFParameters::Type::kRoundedSuperellipse);
+  EXPECT_EQ(params.color, Color::Red());
+  EXPECT_EQ(params.center, Point(60, 70));
+  EXPECT_EQ(params.size, Point(50, 50));
+  EXPECT_FALSE(params.stroke.has_value());
+}
+
 }  // namespace testing
 }  // namespace impeller
