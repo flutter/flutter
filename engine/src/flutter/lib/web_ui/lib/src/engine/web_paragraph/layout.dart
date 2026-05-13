@@ -71,6 +71,8 @@ class TextLayout {
     wrapText(width);
     formatLines(width);
 
+    // TODO(jlavrova): Optimize. If lines are the same as the previous layout, we don't need to
+    // clear the paint cache.
     paragraph.clearPaintCache();
   }
 

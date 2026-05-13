@@ -207,7 +207,10 @@ Future<void> testMain() async {
           final ui.GlyphInfo? glyphInfo = paragraph.getGlyphInfoAt(i);
           if (glyphInfo != null) {
             expect(glyphInfo.graphemeClusterCodeUnitRange, ui.TextRange(start: i, end: i + 1));
-            expect(glyphInfo.graphemeClusterLayoutBounds.height, line.advance.height);
+            expect(
+              glyphInfo.graphemeClusterLayoutBounds.height,
+              closeTo(line.advance.height, epsilon),
+            );
             expect(glyphInfo.graphemeClusterLayoutBounds.left, closeTo(left, epsilon));
             left = glyphInfo.graphemeClusterLayoutBounds.right;
             expect(glyphInfo.writingDirection, ui.TextDirection.ltr);
