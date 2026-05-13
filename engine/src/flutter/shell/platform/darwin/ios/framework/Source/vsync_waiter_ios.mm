@@ -5,7 +5,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient+FML.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient.h"
 
 FLUTTER_ASSERT_ARC
@@ -17,13 +17,18 @@ namespace flutter {
 
 VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners)
     : VsyncWaiter(task_runners) {
-  auto callback = [this](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
-    const fml::TimePoint start_time = recorder->GetVsyncStartTime();
-    const fml::TimePoint target_time = recorder->GetVsyncTargetTime();
+  auto vsyncCallback = ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+    fml::TimePoint start_time = fml::TimePoint() + fml::TimeDelta::FromSecondsF(startTime);
+    fml::TimePoint target_time = fml::TimePoint() + fml::TimeDelta::FromSecondsF(targetTime);
     FireCallback(start_time, target_time, true);
   };
-  client_ = [[FlutterVSyncClient alloc] initWithTaskRunnerPtr:task_runners_.GetUITaskRunner()
-                                                     callback:callback];
+  FlutterFMLTaskRunner* uiTaskRunner =
+      [[FlutterFMLTaskRunner alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()];
+  client_ = [[FlutterVSyncClient alloc]
+                initWithTaskRunner:uiTaskRunner
+      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+                          callback:vsyncCallback];
   max_refresh_rate_ = FlutterDisplayLinkManager.displayRefreshRate;
 }
 
