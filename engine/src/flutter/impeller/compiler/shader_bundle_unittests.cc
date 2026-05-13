@@ -219,6 +219,57 @@ TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferProducesCorrectResult) {
   ASSERT_EQ(fragment->metal_desktop->inputs.size(), 0u);
 }
 
+TEST(ShaderBundleTest,
+     GenerateShaderBundleFlatbufferReportsSourceFilesAsDependencies) {
+  std::string fixtures_path = flutter::testing::GetFixturesPath();
+  const std::string fragment_path = fixtures_path + "/flutter_gpu_unlit.frag";
+  const std::string vertex_path = fixtures_path + "/flutter_gpu_unlit.vert";
+  std::string config =
+      "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\":\"" +
+      fragment_path +
+      "\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"" +
+      vertex_path + "\"}}";
+
+  SourceOptions options;
+  options.target_platform = TargetPlatform::kRuntimeStageMetal;
+  options.source_language = SourceLanguage::kGLSL;
+
+  std::set<std::string> dependencies;
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
+      GenerateShaderBundleFlatbuffer(config, options, &dependencies);
+  ASSERT_TRUE(bundle.has_value());
+
+  // Every primary source file referenced by the bundle config should
+  // appear in the dependency set, deduplicated across the multiple
+  // target-platform compiles of each shader. The fixtures used here
+  // don't contain `#include` directives, so the dependency set
+  // contains exactly the two source files.
+  EXPECT_NE(dependencies.find(fragment_path), dependencies.end());
+  EXPECT_NE(dependencies.find(vertex_path), dependencies.end());
+}
+
+TEST(ShaderBundleTest,
+     GenerateShaderBundleFlatbufferIgnoresNullDependencyCollector) {
+  // Passing nullptr as the dependency collector is supported and is
+  // the default behaviour for callers that don't need a depfile.
+  std::string fixtures_path = flutter::testing::GetFixturesPath();
+  std::string config =
+      "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"" +
+      fixtures_path +
+      "/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", "
+      "\"file\": \"" +
+      fixtures_path + "/flutter_gpu_unlit.vert\"}}";
+
+  SourceOptions options;
+  options.target_platform = TargetPlatform::kRuntimeStageMetal;
+  options.source_language = SourceLanguage::kGLSL;
+
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
+      GenerateShaderBundleFlatbuffer(config, options, /*out_dependencies=*/
+                                     nullptr);
+  ASSERT_TRUE(bundle.has_value());
+}
+
 TEST(ShaderBundleTest, DeriveShaderFloatTypeFromDimensions) {
   // Non-float types always map to nullopt.
   EXPECT_EQ(DeriveShaderFloatType(ShaderType::kSignedInt, 1, 1), std::nullopt);

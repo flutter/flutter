@@ -129,6 +129,9 @@ local.properties
 **/macos/Flutter/ephemeral
 **/xcuserdata/
 
+# Swift package manager (for code indexing)
+**/.build/
+
 # Windows
 **/windows/flutter/ephemeral/
 **/windows/flutter/generated_plugin_registrant.cc

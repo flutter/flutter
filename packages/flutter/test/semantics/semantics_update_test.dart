@@ -5,9 +5,11 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/button_tester.dart';
 
 typedef SemanticsNodeUpdateObservation = ({
   String label,
@@ -208,20 +210,20 @@ void main() {
       builder: (BuildContext context) {
         return OverlayPortal(
           controller: controller1,
-          child: TextButton(onPressed: () {}, child: const Text('a')),
+          child: TestButton(onPressed: () {}, child: const Text('a')),
           overlayChildBuilder: (BuildContext context) {
             return Positioned(
               left: 10,
               top: 11,
               child: OverlayPortal(
                 controller: controller2,
-                child: TextButton(onPressed: () {}, child: const Text('b')),
+                child: TestButton(onPressed: () {}, child: const Text('b')),
                 overlayChildBuilder: (BuildContext context) {
                   // (100, 200) in 'b's coordinates.
                   return Positioned(
                     left: 110,
                     top: 211,
-                    child: TextButton(onPressed: () {}, child: const Text('c')),
+                    child: TestButton(onPressed: () {}, child: const Text('c')),
                   );
                 },
               ),
