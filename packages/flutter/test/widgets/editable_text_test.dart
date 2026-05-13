@@ -330,26 +330,42 @@ void main() {
     );
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Explicit selectionWidthStyle is honored for multiline EditableText', (
+  testWidgets('Tight selectionWidthStyle does not expand to a longer next line', (
     WidgetTester tester,
   ) async {
+    controller.text = 'abc\nabcdefghij';
+
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: EditableText(
-          controller: controller,
-          focusNode: focusNode,
-          maxLines: null,
-          selectionWidthStyle: BoxWidthStyle.max,
-          style: textStyle,
-          cursorColor: cursorColor,
-          backgroundCursorColor: Colors.grey,
+      TestWidgetsApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            maxLines: null,
+            selectionWidthStyle: BoxWidthStyle.tight,
+            style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0, height: 1.0),
+            cursorColor: cursorColor,
+            backgroundCursorColor: Colors.grey,
+            selectionColor: Colors.black,
+          ),
         ),
       ),
     );
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    expect(renderEditable.selectionWidthStyle, BoxWidthStyle.max);
+    expect(renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
+
+    // Select the last character of the first line. The second line is longer,
+    // but BoxWidthStyle.tight should not expand the highlight to the second
+    // line's width.
+    controller.selection = const TextSelection(baseOffset: 2, extentOffset: 3);
+    await tester.pump();
+
+    expect(
+      renderEditable,
+      paints..rect(color: Colors.black, rect: const Rect.fromLTRB(20.0, 0.0, 30.0, 10.0)),
+    );
   });
 
   group('Check the passed groupId value', () {
