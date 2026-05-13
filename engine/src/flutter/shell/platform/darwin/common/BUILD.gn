@@ -124,6 +124,23 @@ config("framework_relative_headers") {
   include_dirs = [ "framework/Headers" ]
 }
 
+source_set("flutter_engine_bindings") {
+  cflags_objc = flutter_cflags_objc
+  cflags_objcc = flutter_cflags_objcc
+  defines = [ "FLUTTER_FRAMEWORK" ]
+  configs += [ ":config" ]
+  sources = [
+    "framework/Headers/FlutterMacros.h",
+    "framework/Source/FlutterTracing.h",
+    "framework/Source/FlutterTracing.mm",
+  ]
+  deps = [ "//flutter/fml" ]
+  public_configs = [
+    "//flutter:config",
+    ":framework_relative_headers",
+  ]
+}
+
 source_set("InternalFlutterSwiftCommon") {
   # Targets should only ever depend on the framework target.
   # This allows code in this target to use types declared in the bridging
@@ -131,8 +148,12 @@ source_set("InternalFlutterSwiftCommon") {
   visibility = [ ":framework_common" ]
   configs += [ ":config" ]
   bridge_header = "InternalFlutterSwiftCommon-Bridging-Header.h"
-  sources = [ "framework/Source/Logger.swift" ]
+  sources = [
+    "framework/Source/Logger.swift",
+    "framework/Source/Tracing+TraceScope.swift",
+  ]
   public = framework_common_headers
+  deps = [ ":flutter_engine_bindings" ]
 }
 
 # Framework code shared between iOS and macOS.
@@ -164,7 +185,10 @@ source_set("framework_common") {
   ]
 
   deps = [ "//flutter/fml" ]
-  public_deps = [ ":InternalFlutterSwiftCommon" ]
+  public_deps = [
+    ":InternalFlutterSwiftCommon",
+    ":flutter_engine_bindings",
+  ]
 }
 
 test_fixtures("framework_common_fixtures") {
@@ -204,7 +228,10 @@ executable("framework_common_swift_unittests") {
     ":test_config",
     ":swift_testing_config",
   ]
-  sources = [ "framework/Source/LoggerTest.swift" ]
+  sources = [
+    "framework/Source/LoggerTest.swift",
+    "framework/Source/TracingTest.swift",
+  ]
   deps = [
     ":framework_common",
     ":swift_testing_main",
