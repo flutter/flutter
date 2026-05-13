@@ -599,10 +599,12 @@ class FlutterPluginUtilsTest {
         every { project.afterEvaluate(any<Action<Project>>()) } returns Unit
         every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
         every { project.extensions.findByType(BaseExtension::class.java)!!.ndkVersion } returns "26.3.11579264"
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every { project.rootProject.findProject(":${cameraDependency["name"]}") } returns cameraPluginProject
         every { cameraPluginProject.afterEvaluate(capture(cameraPluginProjectActionSlot)) } returns Unit
         every { cameraPluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
         every { cameraPluginProject.extensions.findByType(BaseExtension::class.java)!!.ndkVersion } returns "26.3.11579264"
+        every { cameraPluginProject.extensions.findByType(ApplicationExtension::class.java) } returns null
 
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(project, listOf(cameraDependency))
 
@@ -640,12 +642,14 @@ class FlutterPluginUtilsTest {
         every { project.afterEvaluate(any<Action<Project>>()) } returns Unit
         every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-33"
         every { project.extensions.findByType(BaseExtension::class.java)!!.ndkVersion } returns "24.3.11579264"
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every { project.rootProject.findProject(":${cameraDependency["name"]}") } returns cameraPluginProject
         every { project.rootProject.findProject(":${flutterPluginAndroidLifecycleDependency["name"]}") } returns
             flutterPluginAndroidLifecycleDependencyPluginProject
         every { cameraPluginProject.afterEvaluate(capture(cameraPluginProjectActionSlot)) } returns Unit
         every { cameraPluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
         every { cameraPluginProject.extensions.findByType(BaseExtension::class.java)!!.ndkVersion } returns "26.3.11579264"
+        every { cameraPluginProject.extensions.findByType(ApplicationExtension::class.java) } returns null
         every {
             flutterPluginAndroidLifecycleDependencyPluginProject.afterEvaluate(
                 capture(
@@ -667,6 +671,11 @@ class FlutterPluginUtilsTest {
                 )!!
                 .ndkVersion
         } returns "25.3.11579264"
+        every {
+            flutterPluginAndroidLifecycleDependencyPluginProject.extensions.findByType(
+                ApplicationExtension::class.java
+            )
+        } returns null
 
         val dependencyList: List<Map<String?, Any?>> =
             listOf(cameraDependency, flutterPluginAndroidLifecycleDependency)
@@ -750,12 +759,77 @@ class FlutterPluginUtilsTest {
     }
 
     @Test
+    fun `detectLowCompileSdkVersionOrNdkVersion reads ndkVersion from ApplicationExtension when available`(
+        @TempDir tempDir: Path
+    ) {
+        val buildGradleFile =
+            tempDir
+                .resolve("app")
+                .createDirectory()
+                .resolve("build.gradle")
+                .toFile()
+        buildGradleFile.createNewFile()
+        val projectDir = tempDir.resolve("app").toFile()
+
+        val project = mockk<Project>()
+        val mockLogger = mockk<Logger>()
+        val projectBaseExtension = mockk<BaseExtension>()
+        val projectApplicationExtension = mockk<ApplicationExtension>()
+        val cameraPluginProject = mockk<Project>()
+        val cameraBaseExtension = mockk<BaseExtension>()
+        val cameraApplicationExtension = mockk<ApplicationExtension>()
+        val projectActionSlot = slot<Action<Project>>()
+        val cameraPluginProjectActionSlot = slot<Action<Project>>()
+
+        every { project.logger } returns mockLogger
+        every { mockLogger.error(any()) } returns Unit
+        every { project.projectDir } returns projectDir
+        every { project.afterEvaluate(any<Action<Project>>()) } returns Unit
+        every { project.extensions.findByType(BaseExtension::class.java) } returns projectBaseExtension
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns projectApplicationExtension
+        every { projectBaseExtension.compileSdkVersion } returns "android-35"
+        every { projectBaseExtension.ndkVersion } answers {
+            throw AssertionError("legacy project ndkVersion should not be read when ApplicationExtension is available")
+        }
+        every { projectApplicationExtension.ndkVersion } returns "24.3.11579264"
+        every { project.rootProject.findProject(":${cameraDependency["name"]}") } returns cameraPluginProject
+
+        every { cameraPluginProject.afterEvaluate(capture(cameraPluginProjectActionSlot)) } returns Unit
+        every { cameraPluginProject.extensions.findByType(BaseExtension::class.java) } returns cameraBaseExtension
+        every { cameraPluginProject.extensions.findByType(ApplicationExtension::class.java) } returns cameraApplicationExtension
+        every { cameraBaseExtension.compileSdkVersion } returns "android-35"
+        every { cameraBaseExtension.ndkVersion } answers {
+            throw AssertionError("legacy plugin ndkVersion should not be read when ApplicationExtension is available")
+        }
+        every { cameraApplicationExtension.ndkVersion } returns "26.3.11579264"
+
+        FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(project, listOf(cameraDependency))
+
+        verify { project.afterEvaluate(capture(projectActionSlot)) }
+        projectActionSlot.captured.execute(project)
+        verify { cameraPluginProject.afterEvaluate(capture(cameraPluginProjectActionSlot)) }
+        cameraPluginProjectActionSlot.captured.execute(cameraPluginProject)
+
+        verify {
+            mockLogger.error(
+                "Your project is configured with Android NDK 24.3.11579264, but the following plugin(s) depend on a different Android NDK version:"
+            )
+        }
+        verify {
+            mockLogger.error(
+                "- ${cameraDependency["name"]} requires Android NDK 26.3.11579264"
+            )
+        }
+    }
+
+    @Test
     fun `detectLowCompileSdkVersionOrNdkVersion throws IllegalArgumentException when plugin has no name`() {
         val project = mockk<Project>()
         val projectActionSlot = slot<Action<Project>>()
         every { project.afterEvaluate(any<Action<Project>>()) } returns Unit
         every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
         every { project.extensions.findByType(BaseExtension::class.java)!!.ndkVersion } returns "26.3.11579264"
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
 
         val pluginWithoutName: MutableMap<String?, Any?> = cameraDependency.toMutableMap()
         pluginWithoutName.remove("name")
@@ -1694,7 +1768,6 @@ class FlutterPluginUtilsTest {
     @Test
     fun `forceNdkDownload skips sdkmanager install when the requested ndk is already installed`() {
         val project = mockk<Project>()
-        val projectActionSlot = slot<Action<Project>>()
         val mockCmakeOptions = mockk<CmakeOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockBaseExtension = mockk<BaseExtension>()
@@ -1708,13 +1781,64 @@ class FlutterPluginUtilsTest {
         every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns "29.0.13846066"
         every { project.gradle.startParameter.taskNames } returns emptyList()
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
-        every { project.afterEvaluate(capture(projectActionSlot)) } returns Unit
 
         FlutterPluginUtils.forceNdkDownload(project, "/base/path")
 
-        verify { project.afterEvaluate(capture(projectActionSlot)) }
-        projectActionSlot.captured.execute(project)
+        verify(exactly = 0) { project.afterEvaluate(any<Action<Project>>()) }
+        verify(exactly = 0) { project.exec(any<Action<ExecSpec>>()) }
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
 
+    @Test
+    fun `forceNdkDownload skips fallback when sdkmanager is unavailable but the requested ndk is already installed`() {
+        val project = mockk<Project>()
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockBaseExtension.ndkVersion } returns "29.0.13846066"
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns "/sdk/root"
+        every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns "29.0.13846066"
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+
+        verify(exactly = 0) { project.afterEvaluate(any<Action<Project>>()) }
+        verify(exactly = 0) { project.exec(any<Action<ExecSpec>>()) }
+        verify(exactly = 0) { mockCmakeOptions.path(any()) }
+        verify { mockDefaultConfig wasNot called }
+    }
+
+    @Test
+    fun `forceNdkDownload reads ndkVersion from ApplicationExtension when legacy extension does not expose it`() {
+        val project = mockk<Project>()
+        val mockCmakeOptions = mockk<CmakeOptions>()
+        val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockBaseExtension = mockk<BaseExtension>()
+        val mockApplicationExtension = mockk<ApplicationExtension>()
+        every { project.extensions.findByType(BaseExtension::class.java) } returns mockBaseExtension
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns mockApplicationExtension
+        every { mockBaseExtension.externalNativeBuild.cmake } returns mockCmakeOptions
+        every { mockBaseExtension.defaultConfig } returns mockDefaultConfig
+        every { mockBaseExtension.ndkVersion } answers {
+            throw AssertionError("legacy ndkVersion should not be read when ApplicationExtension is available")
+        }
+        every { mockApplicationExtension.ndkVersion } returns "29.0.13846066"
+        every { mockCmakeOptions.path } returns null
+        every { project.findProperty(FlutterPluginUtils.PROP_SDK_MANAGER_PATH) } returns "/sdkmanager"
+        every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns "/sdk/root"
+        every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns "29.0.13846066"
+        every { project.gradle.startParameter.taskNames } returns emptyList()
+
+        FlutterPluginUtils.forceNdkDownload(project, "/base/path")
+
+        verify(exactly = 0) { project.afterEvaluate(any<Action<Project>>()) }
         verify(exactly = 0) { project.exec(any<Action<ExecSpec>>()) }
         verify(exactly = 0) { mockCmakeOptions.path(any()) }
         verify { mockDefaultConfig wasNot called }
@@ -1780,7 +1904,6 @@ class FlutterPluginUtilsTest {
     @Test
     fun `forceNdkDownload falls back when tool properties are present but sdkmanager is unavailable`() {
         val project = mockk<Project>()
-        val projectActionSlot = slot<Action<Project>>()
         val mockCmakeOptions = mockk<CmakeOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockDirectoryProperty = mockk<DirectoryProperty>()
@@ -1798,7 +1921,6 @@ class FlutterPluginUtilsTest {
         every { project.findProperty(FlutterPluginUtils.PROP_ANDROID_SDK_ROOT) } returns "/sdk/root"
         every { project.findProperty(FlutterPluginUtils.PROP_INSTALLED_NDK_VERSIONS) } returns ""
         every { project.gradle.startParameter.taskNames } returns emptyList()
-        every { project.afterEvaluate(capture(projectActionSlot)) } returns Unit
         every { project.layout.buildDirectory } returns mockDirectoryProperty
         every { mockDirectoryProperty.dir(any<String>()) } returns mockDirectoryProperty
         every { mockDirectoryProperty.get() } returns mockDirectory
@@ -1812,9 +1934,7 @@ class FlutterPluginUtilsTest {
 
         FlutterPluginUtils.forceNdkDownload(project, basePath)
 
-        verify { project.afterEvaluate(capture(projectActionSlot)) }
-        projectActionSlot.captured.execute(project)
-
+        verify(exactly = 0) { project.afterEvaluate(any<Action<Project>>()) }
         verify(exactly = 0) { project.exec(any<Action<ExecSpec>>()) }
         verify(exactly = 1) {
             mockCmakeOptions.path("$basePath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt")

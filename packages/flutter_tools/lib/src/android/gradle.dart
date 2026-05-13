@@ -832,6 +832,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       command.add('-Ptarget=$target');
     }
     command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
+    command.addAll(_getAndroidNdkProvisioningProperties());
     if (buildInfo.dartObfuscation && buildInfo.mode != BuildMode.release) {
       _logger.printStatus(
         'Dart obfuscation is not supported in ${buildInfo.mode.uppercaseFriendlyName}'
@@ -1407,7 +1408,10 @@ List<String> _getInstalledNdkVersionsForGradle(AndroidSdk androidSdk) {
           .listSync()
           .whereType<Directory>()
           .map((Directory dir) => dir.basename)
-          .where((String version) => androidSdk.hasNdkVersion(version))
+          .where(
+            (String version) =>
+                ndkDir.childDirectory(version).childFile('source.properties').existsSync(),
+          )
           .toList()
         ..sort();
   return installedNdkVersions;

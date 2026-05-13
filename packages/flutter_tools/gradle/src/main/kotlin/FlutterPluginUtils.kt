@@ -511,6 +511,10 @@ object FlutterPluginUtils {
     internal fun getAndroidApplicationExtension(project: Project): ApplicationExtension =
         project.extensions.getByType(ApplicationExtension::class.java)
 
+    internal fun getConfiguredNdkVersion(project: Project): String? =
+        project.extensions.findByType(ApplicationExtension::class.java)?.ndkVersion
+            ?: getLegacyAndroidExtension(project).ndkVersion
+
     /**
      * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
      * `android-` followed by either the numeric version, e.g. `android-35`, or a preview version,
@@ -714,9 +718,8 @@ object FlutterPluginUtils {
             // TODO(gmackall): We can remove this elvis when our minimum AGP is >= 8.2.
             //  This value (ndkVersion) is nullable on AGP versions below that.
             //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
-            @Suppress("USELESS_ELVIS")
             val projectNdkVersion: String =
-                getLegacyAndroidExtension(project).ndkVersion ?: ndkVersionIfUnspecified
+                getConfiguredNdkVersion(project) ?: ndkVersionIfUnspecified
             var maxPluginNdkVersion = projectNdkVersion
             var numProcessedPlugins = pluginList.size
             val pluginsWithHigherSdkVersion = mutableListOf<PluginVersionPair>()
@@ -745,9 +748,8 @@ object FlutterPluginUtils {
                     // TODO(gmackall): We can remove this elvis when our minimum AGP is >= 8.2.
                     //  This value (ndkVersion) is nullable on AGP versions below that.
                     //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
-                    @Suppress("USELESS_ELVIS")
                     val pluginNdkVersion: String =
-                        getLegacyAndroidExtension(pluginProject).ndkVersion ?: ndkVersionIfUnspecified
+                        getConfiguredNdkVersion(pluginProject) ?: ndkVersionIfUnspecified
                     maxPluginNdkVersion =
                         VersionUtils.mostRecentSemanticVersion(
                             pluginNdkVersion,
@@ -812,6 +814,20 @@ object FlutterPluginUtils {
 
         val toolNdkProvisioningProperties = getToolNdkProvisioningProperties(gradleProject)
         if (toolNdkProvisioningProperties != null) {
+            val configuredNdkVersion = getConfiguredNdkVersion(gradleProject)
+            if (
+                !configuredNdkVersion.isNullOrBlank() &&
+                toolNdkProvisioningProperties.installedNdkVersions.contains(configuredNdkVersion)
+            ) {
+                return
+            }
+            if (toolNdkProvisioningProperties.sdkManagerPath == null) {
+                configureSyntheticExternalNativeBuildFallback(
+                    gradleProject = gradleProject,
+                    flutterSdkRootPath = flutterSdkRootPath
+                )
+                return
+            }
             gradleProject.afterEvaluate {
                 val handledByToolProvisioning = maybeHandleToolNdkProvisioning(
                     gradleProject = gradleProject,
@@ -854,7 +870,7 @@ object FlutterPluginUtils {
         gradleProject: Project,
         toolNdkProvisioningProperties: ToolNdkProvisioningProperties
     ): Boolean {
-        val configuredNdkVersion = getLegacyAndroidExtension(gradleProject).ndkVersion
+        val configuredNdkVersion = getConfiguredNdkVersion(gradleProject)
         if (configuredNdkVersion.isNullOrBlank()) {
             return false
         }
