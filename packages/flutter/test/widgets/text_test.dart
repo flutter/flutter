@@ -487,9 +487,10 @@ void main() {
   testWidgets('semantics label is in order with nested rich text widget spans', (
     WidgetTester tester,
   ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/176570.
     await tester.pumpWidget(
       const Directionality(
-        textDirection: TextDirection.ltr,
+        textDirection: .ltr,
         child: Text.rich(
           TextSpan(
             children: <InlineSpan>[
