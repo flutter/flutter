@@ -303,7 +303,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Center(
           child: EditableText(
             showSelectionHandles: true,
@@ -325,7 +325,7 @@ void main() {
     await tester.pumpAndSettle();
 
     await expectLater(
-      find.byType(MaterialApp),
+      find.byType(TestWidgetsApp),
       matchesGoldenFile('editable_text_golden.TextSelectionWidthStyle.1.png'),
     );
   }, variant: TargetPlatformVariant.all());
