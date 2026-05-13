@@ -200,6 +200,7 @@ class TestRenderingFlutterBinding extends BindingBase
 
   @override
   void drawFrame() {
+    _reset();
     assert(
       phase != EnginePhase.build,
       'rendering_tester does not support testing the build phase; use flutter_test instead',
