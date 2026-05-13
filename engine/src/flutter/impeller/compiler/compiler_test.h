@@ -17,8 +17,6 @@ namespace testing {
 
 class CompilerTestBase : public ::testing::TestWithParam<TargetPlatform> {
  public:
-  enum class ESSLLanguageVersion : uint32_t { kEssl100 = 100, kEssl310 = 310 };
-
   CompilerTestBase();
 
   ~CompilerTestBase();
@@ -34,9 +32,7 @@ class CompilerTestBase : public ::testing::TestWithParam<TargetPlatform> {
       const char* fixture_name,
       SourceType source_type = SourceType::kUnknown,
       SourceLanguage source_language = SourceLanguage::kGLSL,
-      const char* entry_point_name = "main",
-      ESSLLanguageVersion gles_language_version =
-          ESSLLanguageVersion::kEssl100);
+      const char* entry_point_name = "main");
 
   const Compiler* GetCompiler() const;
 

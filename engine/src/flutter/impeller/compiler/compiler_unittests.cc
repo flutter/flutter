@@ -110,8 +110,7 @@ TEST_P(CompilerTest, CanCompileHLSLWithMultipleStages) {
 
 TEST_P(CompilerTest, CanCompileComputeShader) {
   ASSERT_TRUE(CanCompileAndReflect("sample.comp", SourceType::kComputeShader,
-                                   SourceLanguage::kGLSL, "main",
-                                   ESSLLanguageVersion::kEssl310));
+                                   SourceLanguage::kGLSL, "main"));
 }
 
 TEST_P(CompilerTest, MustFailDueToExceedingResourcesLimit) {
