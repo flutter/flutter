@@ -757,69 +757,73 @@ void main() {
     }),
   );
 
-  testWidgets('Tapping the status bar scrolls to top with ease out curve animation', (
-    WidgetTester tester,
-  ) async {
-    const duration = 1000;
-    final stops = <double>[0.842, 0.959, 0.993, 1.0];
-    const double scrollOffset = 1000;
+  testWidgets(
+    'Tapping the status bar scrolls to top with ease out curve animation',
+    (WidgetTester tester) async {
+      const duration = 1000;
+      final stops = <double>[0.842, 0.959, 0.993, 1.0];
+      const double scrollOffset = 1000;
 
-    await tester.pumpWidget(buildStatusBarTestApp());
-    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    scrollable.position.jumpTo(scrollOffset);
+      await tester.pumpWidget(buildStatusBarTestApp());
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+      scrollable.position.jumpTo(scrollOffset);
 
-    tester.simulateStatusBarTap();
-    await tester.pump(Duration.zero);
-    expect(scrollable.position.pixels, equals(scrollOffset));
+      tester.simulateStatusBarTap();
+      await tester.pump(Duration.zero);
+      expect(scrollable.position.pixels, equals(scrollOffset));
 
-    for (var i = 0; i < stops.length; i++) {
-      await tester.pump(Duration(milliseconds: duration ~/ stops.length));
-      // Scroll pixel position is very long double, compare with floored int
-      // pixel position
-      expect(
-        scrollable.position.pixels.toInt(),
-        equals((scrollOffset * (1 - stops[i])).toInt()),
-        reason: 'stop $i',
+      for (var i = 0; i < stops.length; i++) {
+        await tester.pump(Duration(milliseconds: duration ~/ stops.length));
+        // Scroll pixel position is very long double, compare with floored int
+        // pixel position
+        expect(
+          scrollable.position.pixels.toInt(),
+          equals((scrollOffset * (1 - stops[i])).toInt()),
+          reason: 'stop $i',
+        );
+      }
+
+      // Finally stops at the top.
+      expect(scrollable.position.pixels, equals(0.0));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'status bar tap only scrolls the foregrounded primary controller',
+    (WidgetTester tester) async {
+      final app = MaterialApp(
+        initialRoute: 'a',
+        onGenerateInitialRoutes: (initialRoute) {
+          return [
+            MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
+            MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
+          ];
+        },
+        onGenerateRoute: (_) => throw UnimplementedError(),
       );
-    }
+      await tester.pumpWidget(app);
 
-    // Finally stops at the top.
-    expect(scrollable.position.pixels, equals(0.0));
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+      final Iterable<ScrollableState> scrollables = tester.stateList<ScrollableState>(
+        find.descendant(
+          of: find.byType(_ScaffoldWithPrimaryScrollView, skipOffstage: false),
+          matching: find.byType(Scrollable, skipOffstage: false),
+          skipOffstage: false,
+        ),
+      );
 
-  testWidgets('status bar tap only scrolls the foregrounded primary controller', (
-    WidgetTester tester,
-  ) async {
-    final app = MaterialApp(
-      initialRoute: 'a',
-      onGenerateInitialRoutes: (initialRoute) {
-        return [
-          MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
-          MaterialPageRoute(builder: (context) => _ScaffoldWithPrimaryScrollView()),
-        ];
-      },
-      onGenerateRoute: (_) => throw UnimplementedError(),
-    );
-    await tester.pumpWidget(app);
+      final [ScrollableState scrollable1, ScrollableState scrollable2] = scrollables.toList();
+      expect(scrollable1.position.pixels, 1000);
+      expect(scrollable2.position.pixels, 1000);
 
-    final Iterable<ScrollableState> scrollables = tester.stateList<ScrollableState>(
-      find.descendant(
-        of: find.byType(_ScaffoldWithPrimaryScrollView, skipOffstage: false),
-        matching: find.byType(Scrollable, skipOffstage: false),
-        skipOffstage: false,
-      ),
-    );
+      tester.simulateStatusBarTap();
+      await tester.pumpAndSettle();
 
-    final [ScrollableState scrollable1, ScrollableState scrollable2] = scrollables.toList();
-    expect(scrollable1.position.pixels, 1000);
-    expect(scrollable2.position.pixels, 1000);
-
-    tester.simulateStatusBarTap();
-    await tester.pumpAndSettle();
-
-    expect(scrollable1.position.pixels, 1000);
-    expect(scrollable2.position.pixels, 0);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+      expect(scrollable1.position.pixels, 1000);
+      expect(scrollable2.position.pixels, 0);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 
   testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
     final Key sheetKey = UniqueKey();
@@ -2185,61 +2189,63 @@ void main() {
     expect(scaffoldState.isDrawerOpen, true);
   });
 
-  testWidgets('Drawer does not open with a drag gesture when it is disabled on mobile', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          drawer: const Drawer(child: Text('Drawer')),
-          body: const Text('Scaffold Body'),
-          appBar: AppBar(centerTitle: true, title: const Text('Title')),
+  testWidgets(
+    'Drawer does not open with a drag gesture when it is disabled on mobile',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            drawer: const Drawer(child: Text('Drawer')),
+            body: const Text('Scaffold Body'),
+            appBar: AppBar(centerTitle: true, title: const Text('Title')),
+          ),
         ),
-      ),
-    );
-    ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
-    expect(scaffoldState.isDrawerOpen, false);
+      );
+      ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+      expect(scaffoldState.isDrawerOpen, false);
 
-    // Test that we can open the drawer with a drag gesture when
-    // `Scaffold.drawerEnableDragGesture` is true.
-    await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
-    await tester.pumpAndSettle();
-    expect(scaffoldState.isDrawerOpen, true);
+      // Test that we can open the drawer with a drag gesture when
+      // `Scaffold.drawerEnableDragGesture` is true.
+      await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
+      await tester.pumpAndSettle();
+      expect(scaffoldState.isDrawerOpen, true);
 
-    await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
-    await tester.pumpAndSettle();
-    expect(scaffoldState.isDrawerOpen, false);
+      await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
+      await tester.pumpAndSettle();
+      expect(scaffoldState.isDrawerOpen, false);
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          drawer: const Drawer(child: Text('Drawer')),
-          drawerEnableOpenDragGesture: false,
-          body: const Text('Scaffold body'),
-          appBar: AppBar(centerTitle: true, title: const Text('Title')),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            drawer: const Drawer(child: Text('Drawer')),
+            drawerEnableOpenDragGesture: false,
+            body: const Text('Scaffold body'),
+            appBar: AppBar(centerTitle: true, title: const Text('Title')),
+          ),
         ),
-      ),
-    );
-    scaffoldState = tester.state(find.byType(Scaffold));
-    expect(scaffoldState.isDrawerOpen, false);
+      );
+      scaffoldState = tester.state(find.byType(Scaffold));
+      expect(scaffoldState.isDrawerOpen, false);
 
-    // Test that we cannot open the drawer with a drag gesture when
-    // `Scaffold.drawerEnableDragGesture` is false.
-    await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
-    await tester.pumpAndSettle();
-    expect(scaffoldState.isDrawerOpen, false);
+      // Test that we cannot open the drawer with a drag gesture when
+      // `Scaffold.drawerEnableDragGesture` is false.
+      await tester.dragFrom(const Offset(0, 100), const Offset(300, 0));
+      await tester.pumpAndSettle();
+      expect(scaffoldState.isDrawerOpen, false);
 
-    // Test that we can close drawer with a drag gesture when
-    // `Scaffold.drawerEnableDragGesture` is false.
-    final Finder drawerOpenButton = find.byType(IconButton).first;
-    await tester.tap(drawerOpenButton);
-    await tester.pumpAndSettle();
-    expect(scaffoldState.isDrawerOpen, true);
+      // Test that we can close drawer with a drag gesture when
+      // `Scaffold.drawerEnableDragGesture` is false.
+      final Finder drawerOpenButton = find.byType(IconButton).first;
+      await tester.tap(drawerOpenButton);
+      await tester.pumpAndSettle();
+      expect(scaffoldState.isDrawerOpen, true);
 
-    await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
-    await tester.pumpAndSettle();
-    expect(scaffoldState.isDrawerOpen, false);
-  }, variant: TargetPlatformVariant.mobile());
+      await tester.dragFrom(const Offset(300, 100), const Offset(-300, 0));
+      await tester.pumpAndSettle();
+      expect(scaffoldState.isDrawerOpen, false);
+    },
+    variant: TargetPlatformVariant.mobile(),
+  );
 
   testWidgets('Drawer does not open with a drag gesture on desktop', (WidgetTester tester) async {
     await tester.pumpWidget(

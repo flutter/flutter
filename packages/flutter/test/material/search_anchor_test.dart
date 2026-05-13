@@ -3495,49 +3495,51 @@ void main() {
     expect(box.size.height, 32);
   });
 
-  testWidgets('Tapping outside searchbar should unfocus the searchbar on mobile', (
-    WidgetTester tester,
-  ) async {
-    final focusNode = FocusNode(debugLabel: 'Test Node');
-    addTearDown(focusNode.dispose);
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SearchAnchor(
-            builder: (BuildContext context, SearchController controller) {
-              return SearchBar(
-                controller: controller,
-                onTap: () {
-                  controller.openView();
-                },
-                onTapOutside: (PointerDownEvent event) {
-                  focusNode.unfocus();
-                },
-                onChanged: (_) {
-                  controller.openView();
-                },
-                autoFocus: true,
-                focusNode: focusNode,
-              );
-            },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return List<ListTile>.generate(5, (int index) {
-                final item = 'item $index';
-                return ListTile(title: Text(item));
-              });
-            },
+  testWidgets(
+    'Tapping outside searchbar should unfocus the searchbar on mobile',
+    (WidgetTester tester) async {
+      final focusNode = FocusNode(debugLabel: 'Test Node');
+      addTearDown(focusNode.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SearchAnchor(
+              builder: (BuildContext context, SearchController controller) {
+                return SearchBar(
+                  controller: controller,
+                  onTap: () {
+                    controller.openView();
+                  },
+                  onTapOutside: (PointerDownEvent event) {
+                    focusNode.unfocus();
+                  },
+                  onChanged: (_) {
+                    controller.openView();
+                  },
+                  autoFocus: true,
+                  focusNode: focusNode,
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return List<ListTile>.generate(5, (int index) {
+                  final item = 'item $index';
+                  return ListTile(title: Text(item));
+                });
+              },
+            ),
           ),
         ),
-      ),
-    );
-    await tester.pump();
-    expect(focusNode.hasPrimaryFocus, isTrue);
+      );
+      await tester.pump();
+      expect(focusNode.hasPrimaryFocus, isTrue);
 
-    await tester.tapAt(const Offset(50, 50));
-    await tester.pump();
+      await tester.tapAt(const Offset(50, 50));
+      await tester.pump();
 
-    expect(focusNode.hasPrimaryFocus, isFalse);
-  }, variant: TargetPlatformVariant.mobile());
+      expect(focusNode.hasPrimaryFocus, isFalse);
+    },
+    variant: TargetPlatformVariant.mobile(),
+  );
 
   testWidgets('The default clear button only shows when text input is not empty '
       'on the search view', (WidgetTester tester) async {

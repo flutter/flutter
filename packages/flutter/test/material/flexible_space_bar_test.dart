@@ -10,7 +10,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'semantics_tester.dart';
 
 void main() {
@@ -1541,45 +1540,47 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/135698.
-  testWidgets('_FlexibleSpaceHeaderOpacity with near zero opacity avoids compositing', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: NestedScrollView(
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-              return <Widget>[
-                SliverOverlapAbsorber(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                  sliver: const SliverAppBar(
-                    pinned: true,
-                    expandedHeight: 200.0,
-                    collapsedHeight: 56.0,
-                    flexibleSpace: FlexibleSpaceBar(background: SizedBox()),
+  testWidgets(
+    '_FlexibleSpaceHeaderOpacity with near zero opacity avoids compositing',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: NestedScrollView(
+              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  SliverOverlapAbsorber(
+                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                    sliver: const SliverAppBar(
+                      pinned: true,
+                      expandedHeight: 200.0,
+                      collapsedHeight: 56.0,
+                      flexibleSpace: FlexibleSpaceBar(background: SizedBox()),
+                    ),
                   ),
-                ),
-              ];
-            },
-            body: const SingleChildScrollView(
-              child: Column(children: <Widget>[Placeholder(fallbackHeight: 300.0)]),
+                ];
+              },
+              body: const SingleChildScrollView(
+                child: Column(children: <Widget>[Placeholder(fallbackHeight: 300.0)]),
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Drag the scroll view to the top to collapse the sliver app bar.
-    // Ensure collapsed height - current extent is near zero for the
-    // FlexibleSpaceBar to avoid compositing.
-    await tester.drag(
-      find.byType(SingleChildScrollView),
-      const Offset(0, -(200.0 - 56.08787892026129)),
-    );
-    await tester.pumpAndSettle();
+      // Drag the scroll view to the top to collapse the sliver app bar.
+      // Ensure collapsed height - current extent is near zero for the
+      // FlexibleSpaceBar to avoid compositing.
+      await tester.drag(
+        find.byType(SingleChildScrollView),
+        const Offset(0, -(200.0 - 56.08787892026129)),
+      );
+      await tester.pumpAndSettle();
 
-    expect(tester.takeException(), isNull);
-  }, variant: TargetPlatformVariant.mobile());
+      expect(tester.takeException(), isNull);
+    },
+    variant: TargetPlatformVariant.mobile(),
+  );
 
   // This is a regression test for https://github.com/flutter/flutter/issues/138608.
   testWidgets('FlexibleSpaceBar centers title with a leading widget', (WidgetTester tester) async {

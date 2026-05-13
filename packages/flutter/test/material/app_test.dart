@@ -1334,136 +1334,151 @@ void main() {
     );
   });
 
-  testWidgets('Material2 - ScrollBehavior default android overscroll indicator', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        scrollBehavior: const MaterialScrollBehavior(),
-        home: ListView(
-          children: const <Widget>[SizedBox(height: 1000.0, width: 1000.0, child: Text('Test'))],
-        ),
-      ),
-    );
-
-    expect(find.byType(StretchingOverscrollIndicator), findsNothing);
-    expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
-
-  testWidgets('Material3 - ScrollBehavior default android overscroll indicator', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        scrollBehavior: const MaterialScrollBehavior(),
-        home: ListView(
-          children: const <Widget>[SizedBox(height: 1000.0, width: 1000.0, child: Text('Test'))],
-        ),
-      ),
-    );
-
-    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
-    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
-
-  testWidgets('MaterialScrollBehavior default stretch android overscroll indicator', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: ListView(
-          children: const <Widget>[SizedBox(height: 1000.0, width: 1000.0, child: Text('Test'))],
-        ),
-      ),
-    );
-
-    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
-    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
-
-  testWidgets('Overscroll indicator can be set by theme', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        // The current default is M3 and stretch overscroll, setting via the theme should override.
-        theme: ThemeData().copyWith(useMaterial3: false),
-        home: ListView(
-          children: const <Widget>[SizedBox(height: 1000.0, width: 1000.0, child: Text('Test'))],
-        ),
-      ),
-    );
-
-    expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
-    expect(find.byType(StretchingOverscrollIndicator), findsNothing);
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
-
-  testWidgets('Material3 - ListView clip behavior updates overscroll indicator clip behavior', (
-    WidgetTester tester,
-  ) async {
-    Widget buildFrame(Clip clipBehavior) {
-      return MaterialApp(
-        home: Column(
-          children: <Widget>[
-            SizedBox(
-              height: 300,
-              child: ListView.builder(
-                itemCount: 20,
-                clipBehavior: clipBehavior,
-                itemBuilder: (BuildContext context, int index) {
-                  return Padding(padding: const EdgeInsets.all(10.0), child: Text('Index $index'));
-                },
-              ),
-            ),
-            Opacity(opacity: 0.5, child: Container(color: const Color(0xD0FF0000), height: 100)),
-          ],
+  testWidgets(
+    'Material2 - ScrollBehavior default android overscroll indicator',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          scrollBehavior: const MaterialScrollBehavior(),
+          home: ListView(
+            children: const <Widget>[SizedBox(height: 1000.0, width: 1000.0, child: Text('Test'))],
+          ),
         ),
       );
-    }
 
-    // Test default clip behavior.
-    await tester.pumpWidget(buildFrame(Clip.hardEdge));
+      expect(find.byType(StretchingOverscrollIndicator), findsNothing);
+      expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 
-    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
-    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
-    expect(find.text('Index 1'), findsOneWidget);
+  testWidgets(
+    'Material3 - ScrollBehavior default android overscroll indicator',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          scrollBehavior: const MaterialScrollBehavior(),
+          home: ListView(
+            children: const <Widget>[SizedBox(height: 1000.0, width: 1000.0, child: Text('Test'))],
+          ),
+        ),
+      );
 
-    RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
-    // Currently not clipping
-    expect(renderClip.clipBehavior, equals(Clip.none));
+      expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+      expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 
-    TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
-    // Overscroll the start.
-    await gesture.moveBy(const Offset(0.0, 200.0));
-    await tester.pumpAndSettle();
-    expect(find.text('Index 1'), findsOneWidget);
-    expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
-    renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
-    // Now clipping
-    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+  testWidgets(
+    'MaterialScrollBehavior default stretch android overscroll indicator',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ListView(
+            children: const <Widget>[SizedBox(height: 1000.0, width: 1000.0, child: Text('Test'))],
+          ),
+        ),
+      );
 
-    await gesture.up();
-    await tester.pumpAndSettle();
+      expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+      expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 
-    // Test custom clip behavior.
-    await tester.pumpWidget(buildFrame(Clip.none));
+  testWidgets(
+    'Overscroll indicator can be set by theme',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          // The current default is M3 and stretch overscroll, setting via the theme should override.
+          theme: ThemeData().copyWith(useMaterial3: false),
+          home: ListView(
+            children: const <Widget>[SizedBox(height: 1000.0, width: 1000.0, child: Text('Test'))],
+          ),
+        ),
+      );
 
-    renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
-    // Currently not clipping
-    expect(renderClip.clipBehavior, equals(Clip.none));
+      expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
+      expect(find.byType(StretchingOverscrollIndicator), findsNothing);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 
-    gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
-    // Overscroll the start.
-    await gesture.moveBy(const Offset(0.0, 200.0));
-    await tester.pumpAndSettle();
-    expect(find.text('Index 1'), findsOneWidget);
-    expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
-    renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
-    // Now clipping
-    expect(renderClip.clipBehavior, equals(Clip.none));
+  testWidgets(
+    'Material3 - ListView clip behavior updates overscroll indicator clip behavior',
+    (WidgetTester tester) async {
+      Widget buildFrame(Clip clipBehavior) {
+        return MaterialApp(
+          home: Column(
+            children: <Widget>[
+              SizedBox(
+                height: 300,
+                child: ListView.builder(
+                  itemCount: 20,
+                  clipBehavior: clipBehavior,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text('Index $index'),
+                    );
+                  },
+                ),
+              ),
+              Opacity(opacity: 0.5, child: Container(color: const Color(0xD0FF0000), height: 100)),
+            ],
+          ),
+        );
+      }
 
-    await gesture.up();
-    await tester.pumpAndSettle();
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+      // Test default clip behavior.
+      await tester.pumpWidget(buildFrame(Clip.hardEdge));
+
+      expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+      expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+      expect(find.text('Index 1'), findsOneWidget);
+
+      RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      // Currently not clipping
+      expect(renderClip.clipBehavior, equals(Clip.none));
+
+      TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
+      // Overscroll the start.
+      await gesture.moveBy(const Offset(0.0, 200.0));
+      await tester.pumpAndSettle();
+      expect(find.text('Index 1'), findsOneWidget);
+      expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
+      renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      // Now clipping
+      expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      // Test custom clip behavior.
+      await tester.pumpWidget(buildFrame(Clip.none));
+
+      renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      // Currently not clipping
+      expect(renderClip.clipBehavior, equals(Clip.none));
+
+      gesture = await tester.startGesture(tester.getCenter(find.text('Index 1')));
+      // Overscroll the start.
+      await gesture.moveBy(const Offset(0.0, 200.0));
+      await tester.pumpAndSettle();
+      expect(find.text('Index 1'), findsOneWidget);
+      expect(tester.getCenter(find.text('Index 1')).dy, greaterThan(0));
+      renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+      // Now clipping
+      expect(renderClip.clipBehavior, equals(Clip.none));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 
   testWidgets(
     'When `useInheritedMediaQuery` is true an existing MediaQuery is used if one is available',
@@ -1488,95 +1503,99 @@ void main() {
     },
   );
 
-  testWidgets('Assert in buildScrollbar that controller != null when using it (vertical)', (
-    WidgetTester tester,
-  ) async {
-    const ScrollBehavior defaultBehavior = MaterialScrollBehavior();
-    late BuildContext capturedContext;
+  testWidgets(
+    'Assert in buildScrollbar that controller != null when using it (vertical)',
+    (WidgetTester tester) async {
+      const ScrollBehavior defaultBehavior = MaterialScrollBehavior();
+      late BuildContext capturedContext;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: ScrollConfiguration(
-          // Avoid the default ones here.
-          behavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
-          child: SingleChildScrollView(
-            child: Builder(
-              builder: (BuildContext context) {
-                capturedContext = context;
-                return Container(height: 1000.0);
-              },
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ScrollConfiguration(
+            // Avoid the default ones here.
+            behavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
+            child: SingleChildScrollView(
+              child: Builder(
+                builder: (BuildContext context) {
+                  capturedContext = context;
+                  return Container(height: 1000.0);
+                },
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    const details = ScrollableDetails(direction: AxisDirection.down);
-    final Widget child = Container();
+      const details = ScrollableDetails(direction: AxisDirection.down);
+      final Widget child = Container();
 
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-        // Does not throw if we aren't using it.
-        defaultBehavior.buildScrollbar(capturedContext, child, details);
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        expect(
-          () {
-            defaultBehavior.buildScrollbar(capturedContext, child, details);
-          },
-          throwsA(
-            isA<AssertionError>().having(
-              (AssertionError error) => error.toString(),
-              'description',
-              contains('details.controller != null'),
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+          // Does not throw if we aren't using it.
+          defaultBehavior.buildScrollbar(capturedContext, child, details);
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          expect(
+            () {
+              defaultBehavior.buildScrollbar(capturedContext, child, details);
+            },
+            throwsA(
+              isA<AssertionError>().having(
+                (AssertionError error) => error.toString(),
+                'description',
+                contains('details.controller != null'),
+              ),
             ),
-          ),
-        );
-    }
-  }, variant: TargetPlatformVariant.all());
+          );
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 
-  testWidgets('Assert in buildScrollbar that controller != null when using it (horizontal)', (
-    WidgetTester tester,
-  ) async {
-    const ScrollBehavior defaultBehavior = MaterialScrollBehavior();
-    late BuildContext capturedContext;
+  testWidgets(
+    'Assert in buildScrollbar that controller != null when using it (horizontal)',
+    (WidgetTester tester) async {
+      const ScrollBehavior defaultBehavior = MaterialScrollBehavior();
+      late BuildContext capturedContext;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: ScrollConfiguration(
-          // Avoid the default ones here.
-          behavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Builder(
-              builder: (BuildContext context) {
-                capturedContext = context;
-                return Container(height: 1000.0);
-              },
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ScrollConfiguration(
+            // Avoid the default ones here.
+            behavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Builder(
+                builder: (BuildContext context) {
+                  capturedContext = context;
+                  return Container(height: 1000.0);
+                },
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    const details = ScrollableDetails(direction: AxisDirection.left);
-    final Widget child = Container();
+      const details = ScrollableDetails(direction: AxisDirection.left);
+      final Widget child = Container();
 
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.iOS:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        // Does not throw if we aren't using it.
-        // Horizontal axis gets no scrollbars for all platforms.
-        defaultBehavior.buildScrollbar(capturedContext, child, details);
-    }
-  }, variant: TargetPlatformVariant.all());
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.iOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          // Does not throw if we aren't using it.
+          // Horizontal axis gets no scrollbars for all platforms.
+          defaultBehavior.buildScrollbar(capturedContext, child, details);
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 
   testWidgets('Override theme animation using AnimationStyle', (WidgetTester tester) async {
     final lightTheme = ThemeData();

@@ -8,8 +8,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'app_bar_utils.dart';
 import 'semantics_tester.dart';
+import 'app_bar_utils.dart';
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
   final RichText iconRichText = tester.widget<RichText>(

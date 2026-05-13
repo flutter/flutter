@@ -1876,23 +1876,27 @@ void main() {
     });
     // TODO(djshuckerow): figure out how to write a test for scrolling the list.
 
-    testWidgets('ReorderableListView on desktop platforms should have drag handles', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(build());
-      // All four items should have drag handles and not delayed listeners.
-      expect(find.byIcon(Icons.drag_handle), findsNWidgets(4));
-      expect(find.byType(ReorderableDelayedDragStartListener), findsNothing);
-    }, variant: TargetPlatformVariant.desktop());
+    testWidgets(
+      'ReorderableListView on desktop platforms should have drag handles',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(build());
+        // All four items should have drag handles and not delayed listeners.
+        expect(find.byIcon(Icons.drag_handle), findsNWidgets(4));
+        expect(find.byType(ReorderableDelayedDragStartListener), findsNothing);
+      },
+      variant: TargetPlatformVariant.desktop(),
+    );
 
-    testWidgets('ReorderableListView on mobile platforms should not have drag handles', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(build());
-      // All four items should have delayed listeners and not drag handles.
-      expect(find.byType(ReorderableDelayedDragStartListener), findsNWidgets(4));
-      expect(find.byIcon(Icons.drag_handle), findsNothing);
-    }, variant: TargetPlatformVariant.mobile());
+    testWidgets(
+      'ReorderableListView on mobile platforms should not have drag handles',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(build());
+        // All four items should have delayed listeners and not drag handles.
+        expect(find.byType(ReorderableDelayedDragStartListener), findsNWidgets(4));
+        expect(find.byIcon(Icons.drag_handle), findsNothing);
+      },
+      variant: TargetPlatformVariant.mobile(),
+    );
 
     testWidgets('Vertical list renders drag handle in correct position', (
       WidgetTester tester,
@@ -2695,54 +2699,57 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Mouse cursor behavior on the drag handle can be provided', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: ReorderableListView.builder(
-            mouseCursor: const WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
-              WidgetState.dragged: SystemMouseCursors.copy,
-              WidgetState.any: SystemMouseCursors.resizeColumn,
-            }),
-            itemBuilder: (BuildContext context, int index) {
-              return ReorderableDragStartListener(
-                key: ValueKey<int>(index),
-                index: index,
-                child: Text('$index'),
-              );
-            },
-            itemCount: 5,
-            onReorderItem: (_, _) {},
+  testWidgets(
+    'Mouse cursor behavior on the drag handle can be provided',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ReorderableListView.builder(
+              mouseCursor:
+                  const WidgetStateMouseCursor.fromMap(<WidgetStatesConstraint, MouseCursor>{
+                    WidgetState.dragged: SystemMouseCursors.copy,
+                    WidgetState.any: SystemMouseCursors.resizeColumn,
+                  }),
+              itemBuilder: (BuildContext context, int index) {
+                return ReorderableDragStartListener(
+                  key: ValueKey<int>(index),
+                  index: index,
+                  child: Text('$index'),
+                );
+              },
+              itemCount: 5,
+              onReorderItem: (_, _) {},
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
-    await gesture.addPointer(location: tester.getCenter(find.byIcon(Icons.drag_handle).first));
-    await tester.pump();
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.resizeColumn,
-    );
-    await gesture.down(tester.getCenter(find.byIcon(Icons.drag_handle).first));
-    await tester.pump(kLongPressTimeout);
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.copy,
-    );
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.resizeColumn,
-    );
-  }, variant: TargetPlatformVariant.desktop());
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+        pointer: 1,
+      );
+      await gesture.addPointer(location: tester.getCenter(find.byIcon(Icons.drag_handle).first));
+      await tester.pump();
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.resizeColumn,
+      );
+      await gesture.down(tester.getCenter(find.byIcon(Icons.drag_handle).first));
+      await tester.pump(kLongPressTimeout);
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.copy,
+      );
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.resizeColumn,
+      );
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
 
   testWidgets('ReorderableListView does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(

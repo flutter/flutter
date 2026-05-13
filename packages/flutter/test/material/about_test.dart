@@ -1221,42 +1221,44 @@ void main() {
     expect(materialDones[1].color, cardColor);
   });
 
-  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to _PackageLicensePage', (
-    WidgetTester tester,
-  ) async {
-    // Regression test for https://github.com/flutter/flutter/issues/83819
-    LicenseRegistry.addLicense(() {
-      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
-      ]);
-    });
+  testWidgets(
+    'Conflicting scrollbars are not applied by ScrollBehavior to _PackageLicensePage',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/83819
+      LicenseRegistry.addLicense(() {
+        return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+          const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
+        ]);
+      });
 
-    await tester.pumpWidget(const MaterialApp(home: Center(child: LicensePage())));
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(const MaterialApp(home: Center(child: LicensePage())));
+      await tester.pumpAndSettle();
 
-    // Check for packages.
-    expect(find.text('AAA'), findsOneWidget);
-    // Check license is displayed after entering into license page for 'AAA'.
-    await tester.tap(find.text('AAA'));
-    await tester.pumpAndSettle();
+      // Check for packages.
+      expect(find.text('AAA'), findsOneWidget);
+      // Check license is displayed after entering into license page for 'AAA'.
+      await tester.tap(find.text('AAA'));
+      await tester.pumpAndSettle();
 
-    // The inherited ScrollBehavior should not apply Scrollbars since they are
-    // already built in to the widget.
-    switch (debugDefaultTargetPlatformOverride) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        expect(find.byType(CupertinoScrollbar), findsNothing);
-      case TargetPlatform.iOS:
-        expect(find.byType(CupertinoScrollbar), findsOneWidget);
-      case null:
-        break;
-    }
-    expect(find.byType(Scrollbar), findsOneWidget);
-    expect(find.byType(RawScrollbar), findsNothing);
-  }, variant: TargetPlatformVariant.all());
+      // The inherited ScrollBehavior should not apply Scrollbars since they are
+      // already built in to the widget.
+      switch (debugDefaultTargetPlatformOverride) {
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          expect(find.byType(CupertinoScrollbar), findsNothing);
+        case TargetPlatform.iOS:
+          expect(find.byType(CupertinoScrollbar), findsOneWidget);
+        case null:
+          break;
+      }
+      expect(find.byType(Scrollbar), findsOneWidget);
+      expect(find.byType(RawScrollbar), findsNothing);
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 
   testWidgets('ListView of license entries is primary', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/120710

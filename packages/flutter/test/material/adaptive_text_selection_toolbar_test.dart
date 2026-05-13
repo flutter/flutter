@@ -390,59 +390,61 @@ void main() {
       skip: kIsWeb, // [intended]
     );
 
-    testWidgets('getAdaptiveButtons builds the correct button widgets per-platform', (
-      WidgetTester tester,
-    ) async {
-      const buttonText = 'Click me';
+    testWidgets(
+      'getAdaptiveButtons builds the correct button widgets per-platform',
+      (WidgetTester tester) async {
+        const buttonText = 'Click me';
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: Builder(
-                builder: (BuildContext context) {
-                  final buttonItems = <ContextMenuButtonItem>[
-                    ContextMenuButtonItem(label: buttonText, onPressed: () {}),
-                  ];
-                  return ListView(
-                    children: AdaptiveTextSelectionToolbar.getAdaptiveButtons(
-                      context,
-                      buttonItems,
-                    ).toList(),
-                  );
-                },
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: Builder(
+                  builder: (BuildContext context) {
+                    final buttonItems = <ContextMenuButtonItem>[
+                      ContextMenuButtonItem(label: buttonText, onPressed: () {}),
+                    ];
+                    return ListView(
+                      children: AdaptiveTextSelectionToolbar.getAdaptiveButtons(
+                        context,
+                        buttonItems,
+                      ).toList(),
+                    );
+                  },
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text(buttonText), findsOneWidget);
+        expect(find.text(buttonText), findsOneWidget);
 
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.fuchsia:
-        case TargetPlatform.android:
-          expect(find.byType(TextSelectionToolbarTextButton), findsOneWidget);
-          expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
-          expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
-          expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
-        case TargetPlatform.iOS:
-          expect(find.byType(TextSelectionToolbarTextButton), findsNothing);
-          expect(find.byType(CupertinoTextSelectionToolbarButton), findsOneWidget);
-          expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
-          expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
-        case TargetPlatform.macOS:
-          expect(find.byType(TextSelectionToolbarTextButton), findsNothing);
-          expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
-          expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
-          expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
-          expect(find.byType(TextSelectionToolbarTextButton), findsNothing);
-          expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
-          expect(find.byType(DesktopTextSelectionToolbarButton), findsOneWidget);
-          expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
-      }
-    }, variant: TargetPlatformVariant.all());
+        switch (defaultTargetPlatform) {
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.android:
+            expect(find.byType(TextSelectionToolbarTextButton), findsOneWidget);
+            expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
+            expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
+            expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
+          case TargetPlatform.iOS:
+            expect(find.byType(TextSelectionToolbarTextButton), findsNothing);
+            expect(find.byType(CupertinoTextSelectionToolbarButton), findsOneWidget);
+            expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
+            expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
+          case TargetPlatform.macOS:
+            expect(find.byType(TextSelectionToolbarTextButton), findsNothing);
+            expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
+            expect(find.byType(DesktopTextSelectionToolbarButton), findsNothing);
+            expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsOneWidget);
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            expect(find.byType(TextSelectionToolbarTextButton), findsNothing);
+            expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
+            expect(find.byType(DesktopTextSelectionToolbarButton), findsOneWidget);
+            expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNothing);
+        }
+      },
+      variant: TargetPlatformVariant.all(),
+    );
   });
 }

@@ -1572,30 +1572,32 @@ void main() {
     }
   });
 
-  testWidgets('TextButton uses InkSparkle only for Android non-web when useMaterial3 is true', (
-    WidgetTester tester,
-  ) async {
-    final theme = ThemeData();
+  testWidgets(
+    'TextButton uses InkSparkle only for Android non-web when useMaterial3 is true',
+    (WidgetTester tester) async {
+      final theme = ThemeData();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: Center(
-          child: TextButton(onPressed: () {}, child: const Text('button')),
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Center(
+            child: TextButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
-      ),
-    );
+      );
 
-    final InkWell buttonInkWell = tester.widget<InkWell>(
-      find.descendant(of: find.byType(TextButton), matching: find.byType(InkWell)),
-    );
+      final InkWell buttonInkWell = tester.widget<InkWell>(
+        find.descendant(of: find.byType(TextButton), matching: find.byType(InkWell)),
+      );
 
-    if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
-      expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
-    } else {
-      expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
-    }
-  }, variant: TargetPlatformVariant.all());
+      if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
+        expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
+      } else {
+        expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 
   testWidgets('TextButton uses InkRipple when useMaterial3 is false', (WidgetTester tester) async {
     final theme = ThemeData(useMaterial3: false);

@@ -4055,45 +4055,47 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   // Regression test for https://github.com/flutter/flutter/issues/143505.
-  testWidgets('Using keyboard navigation to select and without setting the FocusNode parameter', (
-    WidgetTester tester,
-  ) async {
-    TestMenu? selectedMenu;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: DropdownMenu<TestMenu>(
-              dropdownMenuEntries: menuChildren,
-              onSelected: (TestMenu? menu) {
-                selectedMenu = menu;
-              },
+  testWidgets(
+    'Using keyboard navigation to select and without setting the FocusNode parameter',
+    (WidgetTester tester) async {
+      TestMenu? selectedMenu;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                onSelected: (TestMenu? menu) {
+                  selectedMenu = menu;
+                },
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Adding FocusNode to IconButton causes the IconButton to receive focus.
-    // Thus it does not matter if the TextField has a FocusNode or not.
-    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-    await tester.pump();
+      // Adding FocusNode to IconButton causes the IconButton to receive focus.
+      // Thus it does not matter if the TextField has a FocusNode or not.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pump();
 
-    // Now the focus is on the icon button.
-    final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
-    expect(Focus.of(iconButton).hasPrimaryFocus, isTrue);
+      // Now the focus is on the icon button.
+      final Element iconButton = tester.firstElement(find.byIcon(Icons.arrow_drop_down));
+      expect(Focus.of(iconButton).hasPrimaryFocus, isTrue);
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
 
-    expect(selectedMenu, TestMenu.mainMenu0);
-  }, variant: TargetPlatformVariant.all());
+      expect(selectedMenu, TestMenu.mainMenu0);
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 
   // Regression test for https://github.com/flutter/flutter/issues/177993.
   testWidgets('Pressing ESC key closes the menu when requestFocusOnTap is false', (
@@ -4150,39 +4152,41 @@ void main() {
     expect(findMenuPanel(), findsNothing);
   });
 
-  testWidgets('Pressing ESC key after changing the selected item closes the menu', (
-    WidgetTester tester,
-  ) async {
-    final themeData = ThemeData();
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: themeData,
-        home: Material(
-          child: Center(
-            child: DropdownMenu<TestMenu>(
-              dropdownMenuEntries: menuChildren,
-              initialSelection: menuChildren[2].value,
+  testWidgets(
+    'Pressing ESC key after changing the selected item closes the menu',
+    (WidgetTester tester) async {
+      final themeData = ThemeData();
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: themeData,
+          home: Material(
+            child: Center(
+              child: DropdownMenu<TestMenu>(
+                dropdownMenuEntries: menuChildren,
+                initialSelection: menuChildren[2].value,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    // Move focus to the TextField and open the menu.
-    await tester.tap(find.byType(TextField));
-    await tester.pump();
-    expect(findMenuPanel(), findsOne);
+      // Move focus to the TextField and open the menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      expect(findMenuPanel(), findsOne);
 
-    // Move the selection.
-    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.pump();
-    expect(isItemHighlighted(tester, themeData, menuChildren[3].label), isTrue);
+      // Move the selection.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(isItemHighlighted(tester, themeData, menuChildren[3].label), isTrue);
 
-    // Press ESC to close the menu.
-    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-    await tester.pump();
-    expect(findMenuPanel(), findsNothing);
-  }, variant: TargetPlatformVariant.all());
+      // Press ESC to close the menu.
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(findMenuPanel(), findsNothing);
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 
   testWidgets('DropdownMenu passes maxLines to TextField', (WidgetTester tester) async {
     await tester.pumpWidget(

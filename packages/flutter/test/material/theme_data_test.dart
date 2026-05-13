@@ -949,29 +949,31 @@ void main() {
     expect(theme.applyElevationOverlayColor, isTrue);
   });
 
-  testWidgets('splashFactory is InkSparkle only for Android non-web when useMaterial3 is true', (
-    WidgetTester tester,
-  ) async {
-    final theme = ThemeData();
+  testWidgets(
+    'splashFactory is InkSparkle only for Android non-web when useMaterial3 is true',
+    (WidgetTester tester) async {
+      final theme = ThemeData();
 
-    // Basic check that this theme is in fact using material 3.
-    expect(theme.useMaterial3, true);
+      // Basic check that this theme is in fact using material 3.
+      expect(theme.useMaterial3, true);
 
-    switch (debugDefaultTargetPlatformOverride!) {
-      case TargetPlatform.android:
-        if (kIsWeb) {
+      switch (debugDefaultTargetPlatformOverride!) {
+        case TargetPlatform.android:
+          if (kIsWeb) {
+            expect(theme.splashFactory, equals(InkRipple.splashFactory));
+          } else {
+            expect(theme.splashFactory, equals(InkSparkle.splashFactory));
+          }
+        case TargetPlatform.iOS:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
           expect(theme.splashFactory, equals(InkRipple.splashFactory));
-        } else {
-          expect(theme.splashFactory, equals(InkSparkle.splashFactory));
-        }
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        expect(theme.splashFactory, equals(InkRipple.splashFactory));
-    }
-  }, variant: TargetPlatformVariant.all());
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 
   testWidgets(
     'splashFactory is InkSplash for every platform scenario, including Android non-web, when useMaterial3 is false',
@@ -991,41 +993,45 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgets('VisualDensity.adaptivePlatformDensity returns adaptive values', (
-    WidgetTester tester,
-  ) async {
-    switch (debugDefaultTargetPlatformOverride!) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        expect(VisualDensity.adaptivePlatformDensity, equals(VisualDensity.standard));
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        expect(VisualDensity.adaptivePlatformDensity, equals(VisualDensity.compact));
-    }
-  }, variant: TargetPlatformVariant.all());
+  testWidgets(
+    'VisualDensity.adaptivePlatformDensity returns adaptive values',
+    (WidgetTester tester) async {
+      switch (debugDefaultTargetPlatformOverride!) {
+        case TargetPlatform.android:
+        case TargetPlatform.iOS:
+        case TargetPlatform.fuchsia:
+          expect(VisualDensity.adaptivePlatformDensity, equals(VisualDensity.standard));
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          expect(VisualDensity.adaptivePlatformDensity, equals(VisualDensity.compact));
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 
-  testWidgets('VisualDensity.getDensityForPlatform returns adaptive values', (
-    WidgetTester tester,
-  ) async {
-    switch (debugDefaultTargetPlatformOverride!) {
-      case TargetPlatform.android:
-      case TargetPlatform.iOS:
-      case TargetPlatform.fuchsia:
-        expect(
-          VisualDensity.defaultDensityForPlatform(debugDefaultTargetPlatformOverride!),
-          equals(VisualDensity.standard),
-        );
-      case TargetPlatform.linux:
-      case TargetPlatform.macOS:
-      case TargetPlatform.windows:
-        expect(
-          VisualDensity.defaultDensityForPlatform(debugDefaultTargetPlatformOverride!),
-          equals(VisualDensity.compact),
-        );
-    }
-  }, variant: TargetPlatformVariant.all());
+  testWidgets(
+    'VisualDensity.getDensityForPlatform returns adaptive values',
+    (WidgetTester tester) async {
+      switch (debugDefaultTargetPlatformOverride!) {
+        case TargetPlatform.android:
+        case TargetPlatform.iOS:
+        case TargetPlatform.fuchsia:
+          expect(
+            VisualDensity.defaultDensityForPlatform(debugDefaultTargetPlatformOverride!),
+            equals(VisualDensity.standard),
+          );
+        case TargetPlatform.linux:
+        case TargetPlatform.macOS:
+        case TargetPlatform.windows:
+          expect(
+            VisualDensity.defaultDensityForPlatform(debugDefaultTargetPlatformOverride!),
+            equals(VisualDensity.compact),
+          );
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 
   testWidgets(
     'VisualDensity in ThemeData defaults to "compact" on desktop and "standard" on mobile',
