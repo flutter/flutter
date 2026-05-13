@@ -326,7 +326,62 @@ void main() async {
     expect(!texture.enableShaderWriteUsage, true);
     expect(texture.bytesPerTexel, 4);
     expect(texture.getBaseMipLevelSizeInBytes(), 40000);
+    expect(texture.mipLevelCount, 1);
+    expect(texture.sliceCount, 1);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Texture.fullMipCount', () async {
+    // Matches Impeller's `ISize::MipCount`: `floor(log2(min(w, h)))`,
+    // clamped to a minimum of 1.
+    expect(gpu.Texture.fullMipCount(1, 1), 1);
+    expect(gpu.Texture.fullMipCount(2, 1), 1);
+    expect(gpu.Texture.fullMipCount(2, 2), 1);
+    expect(gpu.Texture.fullMipCount(4, 4), 2);
+    expect(gpu.Texture.fullMipCount(8, 8), 3);
+    expect(gpu.Texture.fullMipCount(100, 100), 6);
+    expect(gpu.Texture.fullMipCount(1024, 1024), 10);
+    // Non-square: count uses the smaller dimension.
+    expect(gpu.Texture.fullMipCount(1024, 1), 1);
+    expect(gpu.Texture.fullMipCount(1, 256), 1);
+  });
+
+  test(
+    'GpuContext.createTexture with mipLevelCount allocates a mip chain',
+    () async {
+      final gpu.Texture texture = gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        8,
+        8,
+        mipLevelCount: 3,
+      );
+      expect(texture.mipLevelCount, 3);
+      // Per-level sizes: 8*8*4=256, 4*4*4=64, 2*2*4=16.
+      expect(texture.getMipLevelSizeInBytes(0), 256);
+      expect(texture.getMipLevelSizeInBytes(1), 64);
+      expect(texture.getMipLevelSizeInBytes(2), 16);
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
+
+  test(
+    'GpuContext.createTexture rejects out-of-range mipLevelCount',
+    () async {
+      try {
+        gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 8, 8, mipLevelCount: 0);
+        fail('Exception not thrown for mipLevelCount=0.');
+      } catch (e) {
+        expect(e.toString(), contains('mipLevelCount'));
+      }
+      try {
+        // Max for 8x8 is 3.
+        gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 8, 8, mipLevelCount: 4);
+        fail('Exception not thrown for mipLevelCount above the maximum.');
+      } catch (e) {
+        expect(e.toString(), contains('mipLevelCount'));
+      }
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
 
   test(
     'GpuContext.createTexture fails if invalid sampleCount and texture type is passed.',
@@ -370,9 +425,89 @@ void main() async {
       expect(
         e.toString(),
         contains(
-          'The length of sourceBytes (bytes: 16) must exactly match the size of the base mip level (bytes: 40000)',
+          'The length of sourceBytes (bytes: 16) must exactly match the size of mip level 0 (bytes: 40000)',
         ),
       );
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Texture.overwrite writes to a non-zero mip level', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      8,
+      8,
+      mipLevelCount: 3,
+    );
+    const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
+    const blue = ui.Color.fromARGB(0xFF, 0, 0, 0xFF);
+
+    // Mip 0: 8x8 = 64 texels.
+    texture.overwrite(Int32List.fromList(List<int>.filled(64, red.value)).buffer.asByteData());
+    // Mip 1: 4x4 = 16 texels.
+    texture.overwrite(
+      Int32List.fromList(List<int>.filled(16, blue.value)).buffer.asByteData(),
+      mipLevel: 1,
+    );
+    // Mip 2: 2x2 = 4 texels.
+    texture.overwrite(
+      Int32List.fromList(List<int>.filled(4, red.value)).buffer.asByteData(),
+      mipLevel: 2,
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test(
+    'Texture.overwrite throws for an out-of-range mipLevel',
+    () async {
+      final gpu.Texture texture = gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        4,
+        4,
+        mipLevelCount: 2,
+      );
+      const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
+      try {
+        texture.overwrite(Int32List.fromList(<int>[red.value]).buffer.asByteData(), mipLevel: 2);
+        fail('Exception not thrown for out-of-range mipLevel.');
+      } catch (e) {
+        expect(e.toString(), contains('mipLevel (2) must be in the range [0, 2)'));
+      }
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
+
+  test('Texture.overwrite throws for an out-of-range slice', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);
+    const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
+    try {
+      texture.overwrite(
+        Int32List.fromList(List<int>.filled(4, red.value)).buffer.asByteData(),
+        slice: 1,
+      );
+      fail('Exception not thrown for out-of-range slice.');
+    } catch (e) {
+      expect(e.toString(), contains('slice (1) must be in the range [0, 1)'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Texture.overwrite writes each face of a cubemap', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      2,
+      2,
+      textureType: gpu.TextureType.textureCube,
+    );
+    expect(texture.sliceCount, 6);
+    const colors = <ui.Color>[
+      ui.Color.fromARGB(0xFF, 0xFF, 0, 0),
+      ui.Color.fromARGB(0xFF, 0, 0xFF, 0),
+      ui.Color.fromARGB(0xFF, 0, 0, 0xFF),
+      ui.Color.fromARGB(0xFF, 0xFF, 0xFF, 0),
+      ui.Color.fromARGB(0xFF, 0xFF, 0, 0xFF),
+      ui.Color.fromARGB(0xFF, 0, 0xFF, 0xFF),
+    ];
+    for (var slice = 0; slice < 6; slice++) {
+      final int v = colors[slice].value;
+      texture.overwrite(Int32List.fromList(<int>[v, v, v, v]).buffer.asByteData(), slice: slice);
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 

@@ -121,7 +121,7 @@ abstract class FeatureFlags {
   }
 
   /// All Flutter feature flags that are enabled.
-  // This member is overriden in google3.
+  // This member is overridden in google3.
   Iterable<Feature> get allEnabledFeatures {
     return allFeatures.where(isEnabled);
   }
