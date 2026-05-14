@@ -97,6 +97,12 @@ class _IndexedStackExampleState extends State<IndexedStackExample> {
       ],
     );
   }
+  @override
+  void dispose() {
+    fieldText.dispose();
+    super.dispose();
+  }
+
 }
 
 class PersonTracker extends StatefulWidget {
