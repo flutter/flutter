@@ -1756,7 +1756,7 @@ class SelectionOverlay {
       viewSize.width - padding.right,
       visibleBottom,
     );
-    final rootToOverlay = Matrix4.copy(overlay.getTransformTo(null));
+    final Matrix4 rootToOverlay = overlay.getTransformTo(null);
     if (rootToOverlay.invert() == 0.0) {
       return null;
     }
