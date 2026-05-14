@@ -51,7 +51,7 @@ template("skwasm_variant") {
       "-sALLOW_MEMORY_GROWTH",
       "-sALLOW_TABLE_GROWTH",
       "-lexports.js",
-      "-sEXPORTED_FUNCTIONS=[stackAlloc]",
+      "-sEXPORTED_FUNCTIONS=[stackAlloc,_emscripten_stack_get_free,_emscripten_builtin_malloc,_emscripten_builtin_free]",
       "-sEXPORTED_RUNTIME_METHODS=[addFunction,wasmExports,wasmMemory,stackAlloc]",
       "-sINCOMING_MODULE_JS_API=[instantiateWasm,locateFile,noExitRuntime,mainScriptUrlOrBlob,wasmMemory,wasm,skwasmSingleThreaded]",
       "-sUSE_ES6_IMPORT_META=0",

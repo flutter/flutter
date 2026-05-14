@@ -61,6 +61,9 @@ source_set("gpu") {
     "//flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
     "//flutter/lib/ui",
     "//flutter/third_party/tonic",
+    "//third_party/abseil-cpp/absl/status",
+    "//third_party/abseil-cpp/absl/status:statusor",
+    "//third_party/abseil-cpp/absl/strings",
   ]
 
   if (impeller_supports_rendering) {

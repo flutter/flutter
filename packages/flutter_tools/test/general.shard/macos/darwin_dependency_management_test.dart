@@ -1681,7 +1681,7 @@ class FakePluginPlatform extends Fake implements PluginPlatform {}
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
   @override
   Future<void> prefetchSwiftPackages(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
     bool quiet = true,
     bool waitForCompletion = true,
