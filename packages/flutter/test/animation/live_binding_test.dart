@@ -7,8 +7,10 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/widgets_app_tester.dart';
 
 void main() {
   /*
@@ -25,7 +27,7 @@ void main() {
     Widget target({bool recording = true}) => Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
       child: animationSheet.record(
-        MaterialApp(
+        TestWidgetsApp(
           home: Container(
             decoration: BoxDecoration(
               color: const Color.fromARGB(255, 128, 128, 128),
@@ -35,7 +37,7 @@ void main() {
               child: Container(
                 width: 40,
                 height: 40,
-                color: Colors.black,
+                color: const Color(0xFF000000),
                 child: GestureDetector(
                   onTapDown: (TapDownDetails details) {
                     taps.add(details.globalPosition);
@@ -89,7 +91,7 @@ void main() {
       Widget target({bool recording = true}) => Container(
         padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
         child: animationSheet.record(
-          MaterialApp(
+          TestWidgetsApp(
             home: Container(
               decoration: BoxDecoration(
                 color: const Color.fromARGB(255, 128, 128, 128),
@@ -99,7 +101,7 @@ void main() {
                 child: Container(
                   width: 40,
                   height: 40,
-                  color: Colors.black,
+                  color: const Color(0xFF000000),
                   child: GestureDetector(
                     onTapDown: (TapDownDetails details) {
                       taps.add(details.globalPosition);
