@@ -1740,6 +1740,19 @@ abstract class FlutterCommand extends Command<void> {
         try {
           // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
           (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, Object? value) {
+            if (key.contains('\n') || key.contains('\r')) {
+              throwToolExit(
+                'Keys in "--${FlutterOptions.kDartDefineFromFileOption}" must not contain newline characters.\n'
+                'A key in "$path" contains a newline.',
+              );
+            }
+            final stringValue = '$value';
+            if (stringValue.contains('\n') || stringValue.contains('\r')) {
+              throwToolExit(
+                'Values in "--${FlutterOptions.kDartDefineFromFileOption}" must not contain newline characters.\n'
+                'The value for "$key" in "$path" contains a newline.',
+              );
+            }
             dartDefineConfigJsonMap[key] = value;
           });
         } on FormatException catch (err) {

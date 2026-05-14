@@ -848,6 +848,66 @@ void main() {
       );
 
       testUsingContext(
+        'throws a ToolExit when a JSON file contains a newline value',
+        () async {
+          fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+          await fileSystem.file('config.json').writeAsString(r'''
+            {
+              "MY_ENV_VALUE": "json \n foo \n"
+            }
+          ''');
+
+          await dummyCommandRunner.run(<String>['dummy', '--dart-define-from-file=config.json']);
+          expect(
+            () => dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
+            throwsToolExit(
+              message:
+                  'Values in "--${FlutterOptions.kDartDefineFromFileOption}" must not contain newline characters.\n'
+                  'The value for "MY_ENV_VALUE" in "config.json" contains a newline.',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          Logger: () => logger,
+          FileSystemUtils: () => fileSystemUtils,
+          Platform: () => platform,
+          ProcessManager: () => processManager,
+        },
+      );
+
+      testUsingContext(
+        'throws a ToolExit when a JSON file contains a newline key',
+        () async {
+          fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
+          await fileSystem.file('config.json').writeAsString(r'''
+            {
+              "MY\nENV\nKEY": "value"
+            }
+          ''');
+
+          await dummyCommandRunner.run(<String>['dummy', '--dart-define-from-file=config.json']);
+          expect(
+            () => dummyCommand.getBuildInfo(forcedBuildMode: BuildMode.debug),
+            throwsToolExit(
+              message:
+                  'Keys in "--${FlutterOptions.kDartDefineFromFileOption}" must not contain newline characters.\n'
+                  'A key in "config.json" contains a newline.',
+            ),
+          );
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          Logger: () => logger,
+          FileSystemUtils: () => fileSystemUtils,
+          Platform: () => platform,
+          ProcessManager: () => processManager,
+        },
+      );
+
+      testUsingContext(
         'has values with identical keys from --dart-define take precedence',
         () async {
           fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
