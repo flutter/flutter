@@ -2158,15 +2158,15 @@ class EditableText extends StatefulWidget {
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
   ///   Widgets for the current platform given [ContextMenuButtonItem]s.
   static List<ContextMenuButtonItem> getEditableButtonItems({
-    required final ClipboardStatus? clipboardStatus,
-    required final VoidCallback? onCopy,
-    required final VoidCallback? onCut,
-    required final VoidCallback? onPaste,
-    required final VoidCallback? onSelectAll,
-    required final VoidCallback? onLookUp,
-    required final VoidCallback? onSearchWeb,
-    required final VoidCallback? onShare,
-    required final VoidCallback? onLiveTextInput,
+    required ClipboardStatus? clipboardStatus,
+    required VoidCallback? onCopy,
+    required VoidCallback? onCut,
+    required VoidCallback? onPaste,
+    required VoidCallback? onSelectAll,
+    required VoidCallback? onLookUp,
+    required VoidCallback? onSearchWeb,
+    required VoidCallback? onShare,
+    required VoidCallback? onLiveTextInput,
   }) {
     final resultButtonItem = <ContextMenuButtonItem>[];
 
@@ -3447,8 +3447,29 @@ class EditableTextState extends State<EditableText>
       _updateRemoteEditingValueIfNeeded();
     }
 
+    // If only the identity of the context menu builder closure changed (e.g.
+    // an inline lambda on every rebuild), the [TextSelectionOverlay] does
+    // not need to be recreated.
+    //
+    // We just need to trigger a rebuild of the currently-shown toolbar so its
+    // overlay entry picks up the new closure.
+    final TextSelectionOverlay? selectionOverlay = _selectionOverlay;
+    if (selectionOverlay != null &&
+        selectionOverlay.toolbarIsVisible &&
+        widget.contextMenuBuilder != oldWidget.contextMenuBuilder &&
+        (widget.contextMenuBuilder == null) == (oldWidget.contextMenuBuilder == null)) {
+      // Deferred to the next frame because showToolbar() calls
+      // renderBox.localToGlobal(), which requires a fully laid-out render
+      // tree, and didUpdateWidget is called before layout.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && (_selectionOverlay?.toolbarIsVisible ?? false)) {
+          _selectionOverlay!.showToolbar();
+        }
+      });
+    }
+
     if (_selectionOverlay != null &&
-        (widget.contextMenuBuilder != oldWidget.contextMenuBuilder ||
+        ((widget.contextMenuBuilder == null) != (oldWidget.contextMenuBuilder == null) ||
             widget.selectionControls != oldWidget.selectionControls ||
             widget.onSelectionHandleTapped != oldWidget.onSelectionHandleTapped ||
             widget.dragStartBehavior != oldWidget.dragStartBehavior ||
@@ -4439,8 +4460,17 @@ class EditableTextState extends State<EditableText>
     return true;
   }
 
+  // Stable method reference that dispatches to the current
+  // widget.contextMenuBuilder.
+  //
+  // The identity of this method is constant across rebuilds, so passing it to
+  // the TextSelectionOverlay means the overlay never has to be recreated when
+  // only the builder closure changes.
+  Widget _contextMenuBuilder(BuildContext context) {
+    return widget.contextMenuBuilder!(context, this);
+  }
+
   TextSelectionOverlay _createSelectionOverlay() {
-    final EditableTextContextMenuBuilder? contextMenuBuilder = widget.contextMenuBuilder;
     final selectionOverlay = TextSelectionOverlay(
       clipboardStatus: clipboardStatus,
       context: context,
@@ -4454,11 +4484,9 @@ class EditableTextState extends State<EditableText>
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      contextMenuBuilder: contextMenuBuilder == null || _webContextMenuEnabled
+      contextMenuBuilder: widget.contextMenuBuilder == null || _webContextMenuEnabled
           ? null
-          : (BuildContext context) {
-              return contextMenuBuilder(context, this);
-            },
+          : _contextMenuBuilder,
       magnifierConfiguration: widget.magnifierConfiguration,
       rootOverlay: !widget.useRouteLocalSelectionOverlay,
     );
@@ -4632,7 +4660,7 @@ class EditableTextState extends State<EditableText>
     _lastBottomViewInset = view.viewInsets.bottom;
   }
 
-  Future<void> _performSpellCheck(final String text) async {
+  Future<void> _performSpellCheck(String text) async {
     try {
       final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
 
@@ -5213,9 +5241,7 @@ class EditableTextState extends State<EditableText>
   /// available for click-and-replace.
   bool showSpellCheckSuggestionsToolbar() {
     // Spell check suggestions toolbars are intended to be shown on non-web
-    // platforms. Additionally, the Cupertino style toolbar can't be drawn on
-    // the web with the HTML renderer due to
-    // https://github.com/flutter/flutter/issues/123560.
+    // platforms.
     if (!spellCheckEnabled ||
         _webContextMenuEnabled ||
         widget.readOnly ||

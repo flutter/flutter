@@ -27,6 +27,7 @@ import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../project.dart';
 import 'application_package.dart';
 import 'cocoapod_utils.dart';
+import 'darwin_dependency_management.dart';
 import 'migrations/flutter_application_migration.dart';
 import 'migrations/macos_deployment_target_migration.dart';
 import 'migrations/nsapplicationmain_deprecation_migration.dart';
@@ -81,7 +82,7 @@ Future<void> buildMacOS({
       'to learn about adding macOS support to a project.',
     );
   }
-
+  const FlutterDarwinPlatform darwinPlatform = FlutterDarwinPlatform.macos;
   final migrators = <ProjectMigrator>[
     RemoveMacOSFrameworkLinkAndEmbeddingMigration(
       flutterProject.macos,
@@ -97,7 +98,7 @@ Future<void> buildMacOS({
     SecureRestorableStateMigration(flutterProject.macos, globals.logger),
     SwiftPackageManagerIntegrationMigration(
       flutterProject.macos,
-      FlutterDarwinPlatform.macos,
+      darwinPlatform,
       buildInfo,
       xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       logger: globals.logger,
@@ -112,6 +113,15 @@ Future<void> buildMacOS({
   final migration = ProjectMigration(migrators);
   await migration.run();
 
+  await DarwinDependencyManagement.validatePluginSupport(
+    platform: darwinPlatform,
+    xcodeProject: flutterProject.macos,
+    plugins: await flutterProject.macos.getPlugins(),
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    cocoapods: globals.cocoaPods,
+  );
+
   final String buildDirectoryPath = getMacOSBuildDirectory();
   final Directory flutterBuildDir = flutterProject.directory.childDirectory(buildDirectoryPath);
   if (!flutterBuildDir.existsSync()) {
@@ -125,7 +135,7 @@ Future<void> buildMacOS({
   // regardless of the project name so long as there is exactly one project.
   final String? xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
   final XcodeProjectInfo? projectInfo = await globals.xcodeProjectInterpreter?.getInfo(
-    xcodeProject.parent.path,
+    flutterProject.macos,
     projectFilename: xcodeProjectName,
     buildDirectory: flutterBuildDir,
   );
@@ -158,7 +168,7 @@ Future<void> buildMacOS({
     final String? macOSDeploymentTarget = buildSettings['MACOSX_DEPLOYMENT_TARGET'];
     if (macOSDeploymentTarget != null) {
       SwiftPackageManager.updateMinimumDeployment(
-        platform: FlutterDarwinPlatform.macos,
+        platform: darwinPlatform,
         project: flutterProject.macos,
         deploymentTarget: macOSDeploymentTarget,
       );
@@ -217,7 +227,7 @@ Future<void> buildMacOS({
   try {
     final List<String> xcodebuildCommandArgs = await globals.xcode!
         .fetchDependenciesAndGenerateXcodebuildArgs(
-          flutterProject.macos.hostAppRoot.path,
+          flutterProject.macos,
           globals.fs.directory(buildDirectoryPath),
           skipPackageUpdatesAndValidation: false,
         );

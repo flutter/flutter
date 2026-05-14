@@ -635,5 +635,111 @@ TEST(AccessibilityBridgeTest, IsSelectedAttribute) {
       ax::mojom::BoolAttribute::kSelected));
 }
 
+TEST(AccessibilityBridgeTest, DisabledButtonHasDisabledRestriction) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
+  auto flags = FlutterSemanticsFlags{
+      .is_enabled = FlutterTristate::kFlutterTristateFalse,
+      .is_button = true,
+  };
+  root.flags2 = &flags;
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kButton);
+  EXPECT_EQ(root_node->GetData().GetRestriction(),
+            ax::mojom::Restriction::kDisabled);
+}
+
+TEST(AccessibilityBridgeTest, EnabledButtonHasNoRestriction) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
+  auto flags = FlutterSemanticsFlags{
+      .is_enabled = FlutterTristate::kFlutterTristateTrue,
+      .is_button = true,
+  };
+  root.flags2 = &flags;
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kButton);
+  EXPECT_EQ(root_node->GetData().GetRestriction(),
+            ax::mojom::Restriction::kNone);
+}
+
+TEST(AccessibilityBridgeTest, ReadOnlyTextFieldHasReadOnlyRestriction) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
+  auto flags = FlutterSemanticsFlags{
+      .is_enabled = FlutterTristate::kFlutterTristateTrue,
+      .is_text_field = true,
+      .is_read_only = true,
+  };
+  root.flags2 = &flags;
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  EXPECT_EQ(root_node->GetData().GetRestriction(),
+            ax::mojom::Restriction::kReadOnly);
+}
+
+TEST(AccessibilityBridgeTest, ReadOnlyTextFieldHasTextFieldRole) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
+  auto flags = FlutterSemanticsFlags{
+      .is_enabled = FlutterTristate::kFlutterTristateTrue,
+      .is_text_field = true,
+      .is_read_only = true,
+  };
+  root.flags2 = &flags;
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kTextField);
+}
+
+TEST(AccessibilityBridgeTest, EditableTextFieldHasTextFieldRole) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
+  auto flags = FlutterSemanticsFlags{
+      .is_enabled = FlutterTristate::kFlutterTristateTrue,
+      .is_text_field = true,
+      .is_read_only = false,
+  };
+  root.flags2 = &flags;
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  EXPECT_EQ(root_node->GetData().role, ax::mojom::Role::kTextField);
+  EXPECT_TRUE(root_node->GetData().HasState(ax::mojom::State::kEditable));
+}
+
+TEST(AccessibilityBridgeTest, ReadOnlyTextFieldIsNotEditable) {
+  std::shared_ptr<TestAccessibilityBridge> bridge =
+      std::make_shared<TestAccessibilityBridge>();
+  FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
+  auto flags = FlutterSemanticsFlags{
+      .is_enabled = FlutterTristate::kFlutterTristateTrue,
+      .is_text_field = true,
+      .is_read_only = true,
+  };
+  root.flags2 = &flags;
+  bridge->AddFlutterSemanticsNodeUpdate(root);
+  bridge->CommitUpdates();
+
+  auto root_node = bridge->GetFlutterPlatformNodeDelegateFromID(0).lock();
+  EXPECT_FALSE(root_node->GetData().HasState(ax::mojom::State::kEditable));
+}
+
 }  // namespace testing
 }  // namespace flutter

@@ -29,8 +29,7 @@ static TextureDescriptor ToSwapchainTextureDescriptor(
 }
 
 AHBFrameSynchronizerVK::AHBFrameSynchronizerVK(const vk::Device& device) {
-  auto acquire_res = device.createFenceUnique(
-      vk::FenceCreateInfo{vk::FenceCreateFlagBits::eSignaled});
+  auto acquire_res = device.createFenceUnique({});
   if (acquire_res.result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not create synchronizer.";
     return;
@@ -46,6 +45,9 @@ bool AHBFrameSynchronizerVK::IsValid() const {
 }
 
 bool AHBFrameSynchronizerVK::WaitForFence(const vk::Device& device) {
+  if (!acquire_fence_pending) {
+    return true;
+  }
   if (auto result = device.waitForFences(
           *acquire,                             // fence
           true,                                 // wait all
@@ -55,6 +57,7 @@ bool AHBFrameSynchronizerVK::WaitForFence(const vk::Device& device) {
     VALIDATION_LOG << "Fence wait failed: " << vk::to_string(result);
     return false;
   }
+  acquire_fence_pending = false;
   if (auto result = device.resetFences(*acquire);
       result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not reset fence: " << vk::to_string(result);
@@ -266,6 +269,7 @@ AHBSwapchainImplVK::SubmitSignalForPresentReady(
   if (result != vk::Result::eSuccess) {
     return nullptr;
   }
+  sync->acquire_fence_pending = true;
   return present_ready;
 }
 
