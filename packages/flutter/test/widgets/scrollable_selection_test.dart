@@ -1445,6 +1445,66 @@ void main() {
     await gesture.up();
   });
 
+  testWidgets(
+    'drag-select edge auto-scroll respects NeverScrollableScrollPhysics',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/140654.
+      // A Scrollable whose physics refuses user offset (e.g.
+      // NeverScrollableScrollPhysics) must not be advanced by the selection
+      // edge auto-scroller, and the auto-scroller must not trip its drag-target
+      // size assertion in the process.
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectionArea(
+            selectionControls: materialTextSelectionControls,
+            child: ListView.builder(
+              controller: controller,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return Text('Item $index');
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(
+        find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
+      );
+      final TestGesture gesture = await tester.startGesture(
+        textOffsetToPosition(paragraph0, 2),
+        kind: ui.PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      expect(controller.offset, 0.0);
+
+      // Drag past the bottom of the scrollable; this would normally trigger
+      // edge auto-scroll.
+      await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      // The scroll position must not have advanced, and no exception (e.g. the
+      // "Drag target size is larger than scrollable size" assertion) must have
+      // been thrown.
+      expect(controller.offset, 0.0);
+      expect(tester.takeException(), isNull);
+
+      await tester.pump(const Duration(seconds: 1));
+      expect(controller.offset, 0.0);
+      expect(tester.takeException(), isNull);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   group('Complex cases', () {
     testWidgets('selection starts outside of the scrollable', (WidgetTester tester) async {
       final controller = ScrollController();
