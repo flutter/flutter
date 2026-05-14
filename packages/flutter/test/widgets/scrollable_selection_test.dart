@@ -1456,7 +1456,7 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SelectionArea(
             selectionControls: materialTextSelectionControls,
             child: ListView.builder(
