@@ -279,9 +279,9 @@ void main() {
       builder: (BuildContext context) {
         return OverlayPortal(
           controller: controller,
-          child: TextButton(onPressed: () {}, child: const Text('anchor')),
+          child: TestButton(onPressed: () {}, child: const Text('anchor')),
           overlayChildBuilder: (BuildContext context) {
-            return TextButton(onPressed: () {}, child: const Text('menu item'));
+            return TestButton(onPressed: () {}, child: const Text('menu item'));
           },
         );
       },
@@ -331,6 +331,7 @@ void main() {
       }),
       isTrue,
     );
+    SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   }, skip: kIsWeb); // intended: the web engine handles the traversal order itself.
 }

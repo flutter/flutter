@@ -4053,7 +4053,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   }
 
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
-    assert(_dirty || _isTraversalParent);
+    assert(_dirty);
     final SemanticsData data = getSemanticsData();
     assert(() {
       final FlutterError? error = _DebugSemanticsRoleChecks._checkSemanticsData(this);
@@ -4957,7 +4957,6 @@ class SemanticsOwner extends ChangeNotifier {
           .toList();
       _dirtyNodes.clear();
       _detachedNodes.clear();
-      localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
       visitedNodes.addAll(localDirtyNodes);
       for (final node in localDirtyNodes) {
         assert(node._dirty);
@@ -4981,39 +4980,9 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
 
-    visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    final SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
-
-    final updatedVisitedNodes = <SemanticsNode>[];
-
     for (final node in visitedNodes) {
       final bool isTraversalParent = node._isTraversalParent;
       final bool isTraversalChild = node._isTraversalChild;
-
-      if (kIsWeb) {
-        updatedVisitedNodes.add(node);
-      } else {
-        if (!isTraversalParent && !isTraversalChild) {
-          updatedVisitedNodes.add(node);
-          continue;
-        }
-
-        if (isTraversalChild) {
-          // If the node has a non-null `_traversalChildIdentifier`, it indicates
-          // that its hit-test parent and traversal parent are different, and
-          // its traversal parent should update its children to include this node.
-          // Therefore, its traversal parent node should be added to the
-          // `updatedVisitedNodes` list for later grafting, in order to generate
-          // a correct `childrenIntraversalOrder`. This is typically used in
-          // `OverlayPortal` widget.
-          final SemanticsNode? parentNode = _traversalParentNodes[node.traversalChildIdentifier];
-          if (parentNode != null && !updatedVisitedNodes.contains(parentNode)) {
-            updatedVisitedNodes.add(parentNode);
-          }
-        }
-
-        updatedVisitedNodes.add(node);
-      }
 
       // If the node is a traversal parent, then add it to the
       // _traversalParentNodes map for later grafting. Similarly, add the node
@@ -5031,16 +5000,29 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
 
-    for (final node in updatedVisitedNodes) {
-      assert(
-        node.parent?._dirty != true || node._isTraversalParent,
-      ); // could be null (no parent) or false (not dirty)
+    if (!kIsWeb) {
+      for (int index = 0; index < visitedNodes.length; index += 1) {
+        final SemanticsNode node = visitedNodes[index];
+        if (node._isTraversalChild) {
+          // If the node has a non-null `_traversalChildIdentifier`, it indicates
+          // that its hit-test parent and traversal parent are different, and
+          // its traversal parent should update its children to include this node.
+          // Therefore, its traversal parent node should be visited for later
+          // grafting, in order to generate a correct `childrenInTraversalOrder`.
+          // This is typically used in `OverlayPortal` widget.
+          final SemanticsNode? parentNode = _traversalParentNodes[node.traversalChildIdentifier];
+          if (parentNode != null && !visitedNodes.contains(parentNode)) {
+            parentNode._markDirty();
+            visitedNodes.add(parentNode);
+          }
+        }
+      }
+    }
+    visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
+    final SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
 
-      // The traversalParentNode is added to updatedVisitedNodes for later
-      // grafting; its traversalChildren should be grafted to its children in
-      // the traversal order. This grafting process is skipped on web because
-      // the traversal order will be handled in the web engine.
-      final bool needUpdateTraversalParent = !kIsWeb && node._isTraversalParent;
+    for (final node in visitedNodes) {
+      assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
       // recurses through the tree to do a deep serialization of all
       // contiguous dirty nodes. This means that when we return here,
@@ -5051,7 +5033,7 @@ class SemanticsOwner extends ChangeNotifier {
       // calls reset() on its SemanticsNode if onlyChanges isn't set,
       // which happens e.g. when the node is no longer contributing
       // semantics).
-      if ((node._dirty || needUpdateTraversalParent) && node.attached) {
+      if (node._dirty && node.attached) {
         node._addToUpdate(builder, customSemanticsActionIds);
       }
     }
