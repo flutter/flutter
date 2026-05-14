@@ -59,10 +59,8 @@ constexpr auto kFlutterAotRunnerUrl =
     "flutter_aot_runner#meta/flutter_aot_runner.cm";
 constexpr auto kFlutterAotProductRunnerUrl =
     "flutter_aot_product_runner#meta/flutter_aot_product_runner.cm";
-constexpr char kChildViewUrl[] =
-    "fuchsia-pkg://fuchsia.com/child-view#meta/child-view.cm";
-constexpr char kParentViewUrl[] =
-    "fuchsia-pkg://fuchsia.com/parent-view#meta/parent-view.cm";
+constexpr char kChildViewUrl[] = "child-view#meta/child-view.cm";
+constexpr char kParentViewUrl[] = "parent-view#meta/parent-view.cm";
 static constexpr auto kTestUiStackUrl =
     "fuchsia-pkg://fuchsia.com/flatland-scene-manager-test-ui-stack#meta/"
     "test-ui-stack.cm";
