@@ -88,11 +88,24 @@ void PipelineCompileQueue::DoOneJob() {
 
 void PipelineCompileQueue::FlushPendingJobs() {
   wait_until_rendering_ = false;
+  ProcessJobsSequentially();
+}
+
+void PipelineCompileQueue::ProcessJobsSequentially() {
   PostJob([weak_queue = weak_from_this()]() {
     if (auto queue = weak_queue.lock()) {
-      queue->FinishAllJobs();
+      queue->DoOneJob();
+      if (!queue->HasPendingJobs()) {
+        return;
+      }
+      queue->ProcessJobsSequentially();
     }
   });
+}
+
+bool PipelineCompileQueue::HasPendingJobs() {
+  Lock lock(pending_jobs_mutex_);
+  return !pending_jobs_.empty();
 }
 
 void PipelineCompileQueue::FinishAllJobs() {
