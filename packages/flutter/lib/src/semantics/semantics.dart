@@ -5001,7 +5001,7 @@ class SemanticsOwner extends ChangeNotifier {
     }
 
     if (!kIsWeb) {
-      for (int index = 0; index < visitedNodes.length; index += 1) {
+      for (var index = 0; index < visitedNodes.length; index += 1) {
         final SemanticsNode node = visitedNodes[index];
         if (node._isTraversalChild) {
           // If the node has a non-null `_traversalChildIdentifier`, it indicates
