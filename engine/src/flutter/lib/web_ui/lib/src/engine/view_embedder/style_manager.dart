@@ -20,6 +20,13 @@ class StyleManager {
   static const String defaultCssFont =
       '$defaultFontStyle $defaultFontWeight ${defaultFontSize}px $defaultFontFamily';
 
+  /// CSS class applied to the keyboard focus-ring overlay element.
+  ///
+  /// The overlay is a sibling of `flt-semantics-host` inside `flutter-view`,
+  /// positioned outside the `filter: opacity(0%)` subtree so the ring is
+  /// always visible to sighted keyboard users (WCAG 2.4.7).
+  static const String focusRingClass = 'flt-focus-ring';
+
   static void attachGlobalStyles({
     required DomNode node,
     required String styleId,
@@ -110,6 +117,17 @@ void applyGlobalCssRulesToSheet(
     // Hide outline when the flutter-view root element is focused.
     '$cssSelectorPrefix:focus {'
     ' outline: rgb(0, 0, 0) none 0px;'
+    '}'
+    // Visible focus ring for keyboard-navigated semantics nodes (WCAG 2.4.7).
+    // Positioned as a sibling of flt-semantics-host, outside the
+    // filter:opacity(0%) subtree, so it is always visible.
+    '$cssSelectorPrefix .${StyleManager.focusRingClass} {'
+    '  position: fixed;'
+    '  pointer-events: none;'
+    '  box-sizing: border-box;'
+    '  outline: 3px solid Highlight;'
+    '  outline-offset: 2px;'
+    '  z-index: 9999;'
     '}',
   );
 
