@@ -2955,7 +2955,7 @@ void main() {
           cacheHeight: 100,
           useLogicalCacheSize: flag,
         ).image,
-        isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+        isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
       );
     }
   });
@@ -2971,7 +2971,7 @@ void main() {
           cacheHeight: 100,
           useLogicalCacheSize: flag,
         ).image,
-        isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+        isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
       );
     }
   });
@@ -2983,7 +2983,7 @@ void main() {
     for (final flag in <bool>[false, true]) {
       expect(
         Image.memory(bytes, cacheWidth: 100, cacheHeight: 100, useLogicalCacheSize: flag).image,
-        isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+        isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
       );
     }
   });
@@ -2995,7 +2995,7 @@ void main() {
     for (final flag in <bool>[false, true]) {
       expect(
         Image.file(file, cacheWidth: 100, cacheHeight: 100, useLogicalCacheSize: flag).image,
-        isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+        isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
       );
     }
   }, skip: kIsWeb); // Image.file is not supported on Flutter Web.

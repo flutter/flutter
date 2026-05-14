@@ -1263,24 +1263,28 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// use less memory if resized to a size smaller than the native size.
   ///
   /// At least one of `width` and `height` must be non-null.
+  ///
+  /// Set [useLogicalSize] to specify `width` and `height` in logical pixels.
   const ResizeImage(
     this.imageProvider, {
     this.width,
     this.height,
     this.policy = ResizeImagePolicy.exact,
     this.allowUpscaling = false,
-    this.useLogicalPixels = false,
+    this.useLogicalSize = false,
   }) : assert(width != null || height != null);
 
   /// The [ImageProvider] that this class wraps.
   final ImageProvider imageProvider;
 
-  /// The width the image should decode to and cache.
+  /// The width the image should decode to and cache, in physical pixels unless
+  /// [useLogicalSize] is true.
   ///
   /// At least one of this and [height] must be non-null.
   final int? width;
 
-  /// The height the image should decode to and cache.
+  /// The height the image should decode to and cache, in physical pixels unless
+  /// [useLogicalSize] is true.
   ///
   /// At least one of this and [width] must be non-null.
   final int? height;
@@ -1304,26 +1308,26 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   ///
   /// Set this to true when [width] and [height] describe the image's on-screen
   /// size in logical pixels.
-  final bool useLogicalPixels;
+  final bool useLogicalSize;
 
   /// Composes the `provider` in a [ResizeImage] only when `cacheWidth` and
   /// `cacheHeight` are not both null.
   ///
   /// When `cacheWidth` and `cacheHeight` are both null, this will return the
-  /// `provider` directly. If `useLogicalPixels` is true, the cache dimensions
+  /// `provider` directly. If `useLogicalSize` is true, the cache dimensions
   /// are interpreted as logical pixels instead of physical pixels.
   static ImageProvider<Object> resizeIfNeeded(
     int? cacheWidth,
     int? cacheHeight,
     ImageProvider<Object> provider, {
-    bool useLogicalPixels = false,
+    bool useLogicalSize = false,
   }) {
     if (cacheWidth != null || cacheHeight != null) {
       return ResizeImage(
         provider,
         width: cacheWidth,
         height: cacheHeight,
-        useLogicalPixels: useLogicalPixels,
+        useLogicalSize: useLogicalSize,
       );
     }
     return provider;
@@ -1461,7 +1465,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
   @override
   Future<ResizeImageKey> obtainKey(ImageConfiguration configuration) {
-    final double devicePixelRatio = useLogicalPixels
+    final double devicePixelRatio = useLogicalSize
         ? (configuration.devicePixelRatio ?? 1.0)
         : 1.0;
     final int? effectiveWidth = width != null ? (width! * devicePixelRatio).ceil() : null;
@@ -1507,12 +1511,12 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
         height == other.height &&
         policy == other.policy &&
         allowUpscaling == other.allowUpscaling &&
-        useLogicalPixels == other.useLogicalPixels;
+        useLogicalSize == other.useLogicalSize;
   }
 
   @override
   int get hashCode =>
-      Object.hash(imageProvider, width, height, policy, allowUpscaling, useLogicalPixels);
+      Object.hash(imageProvider, width, height, policy, allowUpscaling, useLogicalSize);
 }
 
 /// The strategy for [Image.network] and [NetworkImage] to decide whether to

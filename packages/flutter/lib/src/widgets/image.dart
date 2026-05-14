@@ -483,7 +483,7 @@ class Image extends StatefulWidget {
            headers: headers,
            webHtmlElementStrategy: webHtmlElementStrategy,
          ),
-         useLogicalPixels: useLogicalCacheSize,
+         useLogicalSize: useLogicalCacheSize,
        ),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0);
@@ -559,7 +559,7 @@ class Image extends StatefulWidget {
          cacheWidth,
          cacheHeight,
          FileImage(file, scale: scale),
-         useLogicalPixels: useLogicalCacheSize,
+         useLogicalSize: useLogicalCacheSize,
        ),
        loadingBuilder = null,
        assert(cacheWidth == null || cacheWidth > 0),
@@ -729,7 +729,7 @@ class Image extends StatefulWidget {
          scale != null
              ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
              : AssetImage(name, bundle: bundle, package: package),
-         useLogicalPixels: useLogicalCacheSize,
+         useLogicalSize: useLogicalCacheSize,
        ),
        loadingBuilder = null,
        assert(cacheWidth == null || cacheWidth > 0),
@@ -796,7 +796,7 @@ class Image extends StatefulWidget {
          cacheWidth,
          cacheHeight,
          MemoryImage(bytes, scale: scale),
-         useLogicalPixels: useLogicalCacheSize,
+         useLogicalSize: useLogicalCacheSize,
        ),
        loadingBuilder = null,
        assert(cacheWidth == null || cacheWidth > 0),

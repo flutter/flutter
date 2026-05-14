@@ -168,13 +168,13 @@ class FadeInImage extends StatefulWidget {
          placeholderCacheWidth,
          placeholderCacheHeight,
          MemoryImage(placeholder, scale: placeholderScale),
-         useLogicalPixels: useLogicalCacheSize,
+         useLogicalSize: useLogicalCacheSize,
        ),
        image = ResizeImage.resizeIfNeeded(
          imageCacheWidth,
          imageCacheHeight,
          NetworkImage(image, scale: imageScale),
-         useLogicalPixels: useLogicalCacheSize,
+         useLogicalSize: useLogicalCacheSize,
        );
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
@@ -247,19 +247,19 @@ class FadeInImage extends StatefulWidget {
                placeholderCacheWidth,
                placeholderCacheHeight,
                ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale),
-               useLogicalPixels: useLogicalCacheSize,
+               useLogicalSize: useLogicalCacheSize,
              )
            : ResizeImage.resizeIfNeeded(
                placeholderCacheWidth,
                placeholderCacheHeight,
                AssetImage(placeholder, bundle: bundle),
-               useLogicalPixels: useLogicalCacheSize,
+               useLogicalSize: useLogicalCacheSize,
              ),
        image = ResizeImage.resizeIfNeeded(
          imageCacheWidth,
          imageCacheHeight,
          NetworkImage(image, scale: imageScale),
-         useLogicalPixels: useLogicalCacheSize,
+         useLogicalSize: useLogicalCacheSize,
        );
 
   /// Image displayed while the target [image] is loading.

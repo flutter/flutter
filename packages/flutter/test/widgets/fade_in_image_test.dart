@@ -530,11 +530,11 @@ void main() {
           );
           expect(
             image.placeholder,
-            isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+            isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
           );
           expect(
             image.image,
-            isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+            isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
           );
         }
       });
@@ -552,11 +552,11 @@ void main() {
           );
           expect(
             image.placeholder,
-            isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+            isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
           );
           expect(
             image.image,
-            isA<ResizeImage>().having((r) => r.useLogicalPixels, 'useLogicalPixels', flag),
+            isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
           );
         }
       });
