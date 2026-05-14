@@ -79,7 +79,7 @@ void main() {
       );
 
       expect(
-        testLogger.warningText,
+        testLogger.traceText,
         contains('.gitignore does not ignore .widget_preview/ directory, updating.'),
       );
     });

@@ -27,7 +27,7 @@ class WidgetPreviewGitignoreMigration extends ProjectMigrator {
       return;
     }
 
-    logger.printWarning('.gitignore does not ignore .widget_preview/ directory, updating.');
+    logger.printTrace('.gitignore does not ignore .widget_preview/ directory, updating.');
 
     final newContent = StringBuffer(originalContent);
     if (!originalContent.endsWith('\n')) {
