@@ -22,30 +22,64 @@ class AbsorbPointerApp extends StatelessWidget {
   }
 }
 
-class AbsorbPointerExample extends StatelessWidget {
+/// An example of using [AbsorbPointer] to disable a group of buttons.
+class AbsorbPointerExample extends StatefulWidget {
   const AbsorbPointerExample({super.key});
 
   @override
+  State<AbsorbPointerExample> createState() => _AbsorbPointerExampleState();
+}
+
+class _AbsorbPointerExampleState extends State<AbsorbPointerExample> {
+  bool absorbing = false;
+  String lastPressed = 'none';
+
+  void setAbsorbing(bool newValue) {
+    setState(() {
+      absorbing = newValue;
+    });
+  }
+
+  void setLastPressed(String label) {
+    setState(() {
+      lastPressed = label;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: .center,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        SizedBox(
-          width: 200.0,
-          height: 100.0,
-          child: ElevatedButton(onPressed: () {}, child: null),
-        ),
-        SizedBox(
-          width: 100.0,
-          height: 200.0,
-          child: AbsorbPointer(
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade200,
+        Text('Absorbing: $absorbing'),
+        AbsorbPointer(
+          absorbing: absorbing,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  setLastPressed('Button 1');
+                },
+                child: const Text('Button 1'),
               ),
-              onPressed: () {},
-              child: null,
-            ),
+              const SizedBox(width: 16.0),
+              ElevatedButton(
+                onPressed: () {
+                  setLastPressed('Button 2');
+                },
+                child: const Text('Button 2'),
+              ),
+            ],
+          ),
+        ),
+        Text('Last button pressed: $lastPressed'),
+        FilledButton(
+          onPressed: () {
+            setAbsorbing(!absorbing);
+          },
+          child: Text(
+            absorbing ? 'Set absorbing to false' : 'Set absorbing to true',
           ),
         ),
       ],

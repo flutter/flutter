@@ -2,39 +2,41 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_api_samples/widgets/basic/absorb_pointer.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AbsorbPointer prevents hit testing on its child', (
+  testWidgets('AbsorbPointer prevents taps on its subtree', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const example.AbsorbPointerApp());
 
-    // Get the center of the stack.
-    final Offset center = tester.getCenter(find.byType(Stack).first);
+    expect(find.text('Absorbing: false'), findsOneWidget);
+    expect(find.text('Last button pressed: none'), findsOneWidget);
 
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-      pointer: 1,
-    );
-    // Add the point to the center of the stack where the AbsorbPointer is.
-    await gesture.addPointer(location: center);
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
-    );
+    await tester.tap(find.text('Button 1'));
+    await tester.pump();
+    expect(find.text('Last button pressed: Button 1'), findsOneWidget);
 
-    // Move the pointer to the left of the stack where the AbsorbPointer is not.
-    await gesture.moveTo(center + const Offset(-100, 0));
-    expect(
-      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
-    );
+    await tester.tap(find.text('Button 2'));
+    await tester.pump();
+    expect(find.text('Last button pressed: Button 2'), findsOneWidget);
+
+    await tester.tap(find.text('Set absorbing to true'));
+    await tester.pump();
+    expect(find.text('Absorbing: true'), findsOneWidget);
+
+    await tester.tap(find.text('Button 1'), warnIfMissed: false);
+    await tester.pump();
+    expect(find.text('Last button pressed: Button 2'), findsOneWidget);
+
+    await tester.tap(find.text('Set absorbing to false'));
+    await tester.pump();
+    expect(find.text('Absorbing: false'), findsOneWidget);
+
+    await tester.tap(find.text('Button 1'));
+    await tester.pump();
+    expect(find.text('Last button pressed: Button 1'), findsOneWidget);
   });
 }

@@ -7630,9 +7630,8 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=65HoWqBboI8}
 ///
 /// {@tool dartpad}
-/// The following sample has an [AbsorbPointer] widget wrapping the button on
-/// top of the stack, which absorbs pointer events, preventing its child button
-/// __and__ the button below it in the stack from receiving the pointer events.
+/// The following sample has an [AbsorbPointer] widget wrapping a button row.
+/// When [absorbing] is true, the buttons stop receiving pointer events.
 ///
 /// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
 /// {@end-tool}
