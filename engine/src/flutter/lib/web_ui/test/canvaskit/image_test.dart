@@ -91,6 +91,16 @@ void testMain() {
     image3.dispose();
     expect(imageSource.debugIsClosed, isTrue);
   });
+
+  test('ImageElementImageSource clears src on closure', () async {
+    final DomHTMLImageElement imageElement = createDomHTMLImageElement();
+    imageElement.src = 'sample_image1.png';
+    final ImageSource imageSource = ImageElementImageSource(imageElement);
+
+    expect(imageElement.src, contains('sample_image1.png'));
+    imageSource.close();
+    expect(imageElement.src, isNot(contains('sample_image1.png')));
+  });
 }
 
 Future<ui.Image> _createImage() => _createPicture().toImage(10, 10);

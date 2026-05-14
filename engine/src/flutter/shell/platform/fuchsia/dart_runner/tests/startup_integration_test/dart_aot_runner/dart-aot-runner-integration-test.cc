@@ -29,15 +29,12 @@ constexpr auto kDartRunnerEnvironment = "dart_runner_env";
 
 constexpr auto kDartAotRunner = "dart_aot_runner";
 constexpr auto kDartAotRunnerRef = ChildRef{kDartAotRunner};
-constexpr auto kDartAotRunnerUrl =
-    "fuchsia-pkg://fuchsia.com/oot_dart_aot_runner#meta/"
-    "dart_aot_runner.cm";
+constexpr auto kDartAotRunnerUrl = "dart_aot_runner#meta/dart_aot_runner.cm";
 
 constexpr auto kDartAotEchoServer = "dart_aot_echo_server";
 constexpr auto kDartAotEchoServerRef = ChildRef{kDartAotEchoServer};
 constexpr auto kDartAotEchoServerUrl =
-    "fuchsia-pkg://fuchsia.com/dart_aot_echo_server#meta/"
-    "dart_aot_echo_server.cm";
+    "dart_aot_echo_server#meta/dart_aot_echo_server.cm";
 
 class RealmBuilderTest : public ::loop_fixture::RealLoop,
                          public ::testing::Test {
