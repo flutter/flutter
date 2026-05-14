@@ -932,6 +932,67 @@ void main() async {
     skip: !(impellerEnabled && flutterGpuEnabled),
   );
 
+  // Two distinct shader bundles can ship the same entrypoint names without
+  // colliding in the shared shader registry. `test.shaderbundle` and
+  // `test_alt.shaderbundle` both export `UnlitFragment` and `UnlitVertex`
+  // entrypoints; without the per-bundle namespacing they would register at
+  // the same registry key and the second load would evict the first. With
+  // namespacing the asset paths (the bundle library_ids) make the keys
+  // distinct, so both bundles can be loaded and used in the same process.
+  test(
+    'Two shader bundles with the same entrypoint names do not collide',
+    () async {
+      final gpu.ShaderLibrary? libraryA = gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+      final gpu.ShaderLibrary? libraryB = gpu.ShaderLibrary.fromAsset('test_alt.shaderbundle');
+      expect(libraryA, isNotNull);
+      expect(libraryB, isNotNull);
+
+      final gpu.Shader? unlitVertexA = libraryA!['UnlitVertex'];
+      final gpu.Shader? unlitFragmentA = libraryA['UnlitFragment'];
+      final gpu.Shader? unlitVertexB = libraryB!['UnlitVertex'];
+      final gpu.Shader? unlitFragmentB = libraryB['UnlitFragment'];
+      expect(unlitVertexA, isNotNull);
+      expect(unlitFragmentA, isNotNull);
+      expect(unlitVertexB, isNotNull);
+      expect(unlitFragmentB, isNotNull);
+
+      // Both pipelines must register and remain usable. Without namespacing,
+      // `RuntimeEffectContents::RegisterShader`-style eviction would tear one
+      // of these pipelines down at registration time and the second draw
+      // would render against invalid state. With namespacing they coexist.
+      final gpu.RenderPipeline pipelineA = gpu.gpuContext.createRenderPipeline(
+        unlitVertexA!,
+        unlitFragmentA!,
+      );
+      final gpu.RenderPipeline pipelineB = gpu.gpuContext.createRenderPipeline(
+        unlitVertexB!,
+        unlitFragmentB!,
+      );
+
+      void drawWithPipeline(RenderPassState state, gpu.RenderPipeline pipeline, Vector4 color) {
+        state.renderPass.bindPipeline(pipeline);
+        final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+        final gpu.BufferView vertices = transients.emplace(
+          float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
+        );
+        final gpu.BufferView vertInfoData = transients.emplace(unlitUBO(Matrix4.identity(), color));
+        state.renderPass.bindVertexBuffer(vertices, 3);
+        final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+        state.renderPass.bindUniform(vertInfo, vertInfoData);
+        state.renderPass.draw();
+      }
+
+      final RenderPassState stateA = createSimpleRenderPass();
+      drawWithPipeline(stateA, pipelineA, Colors.lime);
+      stateA.commandBuffer.submit();
+
+      final RenderPassState stateB = createSimpleRenderPass();
+      drawWithPipeline(stateB, pipelineB, Colors.lime);
+      stateB.commandBuffer.submit();
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
+
   // Renders a green triangle pointing downwards using polygon mode line.
   test('Can render triangle with polygon mode line.', () async {
     final RenderPassState state = createSimpleRenderPass();
