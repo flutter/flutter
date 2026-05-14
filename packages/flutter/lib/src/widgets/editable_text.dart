@@ -46,6 +46,7 @@ import 'localizations.dart';
 import 'magnifier.dart';
 import 'media_query.dart';
 import 'notification_listener.dart';
+import 'routes.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_notification.dart';
@@ -860,6 +861,7 @@ class EditableText extends StatefulWidget {
     this.autofocus = false,
     bool? showCursor,
     this.showSelectionHandles = false,
+    this.useRouteLocalSelectionOverlay = false,
     this.selectionColor,
     this.selectionControls,
     TextInputType? keyboardType,
@@ -1047,6 +1049,22 @@ class EditableText extends StatefulWidget {
   ///
   ///  * [showCursor], which controls the visibility of the cursor.
   final bool showSelectionHandles;
+
+  /// Whether to insert text selection handles, toolbar, and magnifier into the
+  /// nearest enclosing [Overlay] instead of the root overlay.
+  ///
+  /// When false (the default), selection UI uses [Overlay.of] with
+  /// `rootOverlay: true`, matching the historical Flutter behavior.
+  ///
+  /// When true, selection UI uses the same overlay stack as the closest
+  /// [Navigator] route that contains this widget. This can fix z-order issues
+  /// when using nested [Navigator]s or route-local overlays.
+  ///
+  /// See also:
+  ///
+  ///  * [showSelectionHandles], which controls whether handles are shown when
+  ///    a selection exists.
+  final bool useRouteLocalSelectionOverlay;
 
   /// {@template flutter.widgets.editableText.showCursor}
   /// Whether to show cursor.
@@ -2376,6 +2394,13 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    properties.add(
+      DiagnosticsProperty<bool>(
+        'useRouteLocalSelectionOverlay',
+        useRouteLocalSelectionOverlay,
+        defaultValue: false,
+      ),
+    );
     properties.add(DiagnosticsProperty<bool>('readOnly', readOnly, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: null));
     properties.add(
@@ -2529,6 +2554,10 @@ class EditableTextState extends State<EditableText>
   bool get _hasInputConnection => _textInputConnection?.attached ?? false;
 
   TextSelectionOverlay? _selectionOverlay;
+
+  /// Last observed [ModalRoute.isCurrent] for this context, for restoring
+  /// selection overlay after a modal route above this one is popped.
+  bool? _modalRouteIsCurrentCache;
   ScrollNotificationObserverState? _scrollNotificationObserver;
   ({TextEditingValue value, Rect selectionBounds})? _dataWhenToolbarShowScheduled;
   bool _listeningToScrollNotificationObserver = false;
@@ -3318,6 +3347,16 @@ class EditableTextState extends State<EditableText>
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    final bool nowModalCurrent = ModalRoute.isCurrentOf(context) ?? true;
+    if (_modalRouteIsCurrentCache != nowModalCurrent) {
+      final bool? previousModalCurrent = _modalRouteIsCurrentCache;
+      _modalRouteIsCurrentCache = nowModalCurrent;
+      _updateOrDisposeSelectionOverlayIfNeeded();
+      if (previousModalCurrent == false && nowModalCurrent) {
+        _resumeSelectionOverlayIfNeededAfterRouteBecameCurrent();
+      }
+    }
+
     _style = MediaQuery.boldTextOf(context)
         ? widget.style.merge(const TextStyle(fontWeight: FontWeight.bold))
         : widget.style;
@@ -3413,7 +3452,8 @@ class EditableTextState extends State<EditableText>
             widget.selectionControls != oldWidget.selectionControls ||
             widget.onSelectionHandleTapped != oldWidget.onSelectionHandleTapped ||
             widget.dragStartBehavior != oldWidget.dragStartBehavior ||
-            widget.magnifierConfiguration != oldWidget.magnifierConfiguration)) {
+            widget.magnifierConfiguration != oldWidget.magnifierConfiguration ||
+            widget.useRouteLocalSelectionOverlay != oldWidget.useRouteLocalSelectionOverlay)) {
       final bool shouldShowToolbar = _selectionOverlay!.toolbarIsVisible;
       final bool shouldShowHandles = _selectionOverlay!.handlesVisible;
       _selectionOverlay!.dispose();
@@ -4179,14 +4219,31 @@ class EditableTextState extends State<EditableText>
   }
 
   void _updateOrDisposeSelectionOverlayIfNeeded() {
+    final bool routeIsCurrent = ModalRoute.isCurrentOf(context) ?? true;
     if (_selectionOverlay != null) {
-      if (_hasFocus) {
+      if (_hasFocus && routeIsCurrent) {
         _selectionOverlay!.update(_value);
       } else {
         _selectionOverlay!.dispose();
         _selectionOverlay = null;
       }
     }
+  }
+
+  void _resumeSelectionOverlayIfNeededAfterRouteBecameCurrent() {
+    if (!_hasFocus || _selectionOverlay != null) {
+      return;
+    }
+    if (widget.selectionControls == null && widget.contextMenuBuilder == null) {
+      return;
+    }
+    if (!_value.selection.isValid) {
+      return;
+    }
+    _selectionOverlay = _createSelectionOverlay();
+    _selectionOverlay!.update(_value);
+    _selectionOverlay!.handlesVisible = widget.showSelectionHandles;
+    _selectionOverlay!.showHandles();
   }
 
   final bool _platformSupportsFadeOnScroll = switch (defaultTargetPlatform) {
@@ -4403,6 +4460,7 @@ class EditableTextState extends State<EditableText>
               return contextMenuBuilder(context, this);
             },
       magnifierConfiguration: widget.magnifierConfiguration,
+      rootOverlay: !widget.useRouteLocalSelectionOverlay,
     );
 
     return selectionOverlay;

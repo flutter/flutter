@@ -1286,6 +1286,7 @@ class SelectableRegionState extends State<SelectableRegion>
     final SelectionPoint? end = _selectionDelegate.value.endSelectionPoint;
     _selectionOverlay = SelectionOverlay(
       context: context,
+      viewportBoundsScope: _selectable is RenderObject ? _selectable! as RenderObject : null,
       debugRequiredFor: widget,
       startHandleType: start?.handleType ?? TextSelectionHandleType.collapsed,
       lineHeightAtStart: start?.lineHeight ?? end!.lineHeight,

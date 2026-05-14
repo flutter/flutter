@@ -49,16 +49,18 @@ class ContextMenuController {
     required BuildContext context,
     required WidgetBuilder contextMenuBuilder,
     Widget? debugRequiredFor,
+    bool rootOverlay = true,
+    OverlayEntry? insertBelow,
   }) {
     removeAny();
     final OverlayState overlayState = Overlay.of(
       context,
-      rootOverlay: true,
+      rootOverlay: rootOverlay,
       debugRequiredFor: debugRequiredFor,
     );
     final CapturedThemes capturedThemes = InheritedTheme.capture(
       from: context,
-      to: Navigator.maybeOf(context)?.context,
+      to: Navigator.maybeOf(context, rootNavigator: rootOverlay)?.context,
     );
 
     _menuOverlayEntry = OverlayEntry(
@@ -66,7 +68,7 @@ class ContextMenuController {
         return capturedThemes.wrap(contextMenuBuilder(context));
       },
     );
-    overlayState.insert(_menuOverlayEntry!);
+    overlayState.insert(_menuOverlayEntry!, below: insertBelow);
     _shownInstance = this;
   }
 

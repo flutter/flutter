@@ -1615,6 +1615,234 @@ void main() {
     expect(handles[1].localToGlobal(Offset.zero), const Offset(197.0, 17.0));
   });
 
+  group('EditableText useRouteLocalSelectionOverlay', () {
+    const nestedRouteOverlayKey = ValueKey<String>('editable_text_test.nested_route_overlay');
+
+    /// Material selection handles: padded hit targets on [CompositedTransformFollower]s.
+    Finder materialSelectionHandlePaddingUnder(Finder scope) {
+      return find.descendant(
+        of: scope,
+        matching: find.descendant(
+          of: find.byType(CompositedTransformFollower),
+          matching: find.byType(Padding),
+        ),
+      );
+    }
+
+    Future<void> pumpEditableTextInNestedOverlay(
+      WidgetTester tester, {
+      required bool useRouteLocalSelectionOverlay,
+    }) async {
+      final localController = TextEditingController(text: 'abc def');
+      addTearDown(localController.dispose);
+      final localFocus = FocusNode();
+      addTearDown(localFocus.dispose);
+
+      late final OverlayEntry entry;
+      addTearDown(() {
+        entry.remove();
+        entry.dispose();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: SizedBox(
+              width: 400,
+              height: 400,
+              child: Overlay(
+                key: nestedRouteOverlayKey,
+                initialEntries: <OverlayEntry>[
+                  entry = OverlayEntry(
+                    builder: (BuildContext context) {
+                      return EditableText(
+                        controller: localController,
+                        focusNode: localFocus,
+                        style: const TextStyle(fontSize: 20),
+                        cursorColor: cursorColor,
+                        backgroundCursorColor: Colors.grey,
+                        selectionControls: materialTextSelectionControls,
+                        showSelectionHandles: true,
+                        useRouteLocalSelectionOverlay: useRouteLocalSelectionOverlay,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets(
+      'selection handles paint in the root overlay by default (historical Overlay.of behavior)',
+      (WidgetTester tester) async {
+        await pumpEditableTextInNestedOverlay(tester, useRouteLocalSelectionOverlay: false);
+        await tester.tap(find.byType(EditableText));
+        await tester.pump();
+        final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+        state.renderEditable.selectWordsInRange(
+          from: const Offset(10, 10),
+          cause: SelectionChangedCause.longPress,
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(Overlay), findsNWidgets(2));
+
+        final Finder nestedScopedHandlePadding = materialSelectionHandlePaddingUnder(
+          find.byKey(nestedRouteOverlayKey),
+        );
+        final Finder globalHandlePadding = find.descendant(
+          of: find.byType(CompositedTransformFollower),
+          matching: find.byType(Padding),
+        );
+
+        expect(globalHandlePadding, findsAtLeastNWidgets(2));
+        expect(nestedScopedHandlePadding, findsNothing);
+      },
+    );
+
+    testWidgets(
+      'selection handles paint in the nearest overlay when useRouteLocalSelectionOverlay is true',
+      (WidgetTester tester) async {
+        await pumpEditableTextInNestedOverlay(tester, useRouteLocalSelectionOverlay: true);
+        await tester.tap(find.byType(EditableText));
+        await tester.pump();
+        final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+        state.renderEditable.selectWordsInRange(
+          from: const Offset(10, 10),
+          cause: SelectionChangedCause.longPress,
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(Overlay), findsNWidgets(2));
+
+        final Finder nestedScopedHandlePadding = materialSelectionHandlePaddingUnder(
+          find.byKey(nestedRouteOverlayKey),
+        );
+        final Finder globalHandlePadding = find.descendant(
+          of: find.byType(CompositedTransformFollower),
+          matching: find.byType(Padding),
+        );
+
+        expect(globalHandlePadding, findsAtLeastNWidgets(2));
+        expect(nestedScopedHandlePadding, findsAtLeastNWidgets(2));
+      },
+    );
+
+    testWidgets('debugFillProperties surfaces useRouteLocalSelectionOverlay when non-default', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+
+      final defaultBuilder = DiagnosticPropertiesBuilder();
+      EditableText(
+        controller: controller,
+        focusNode: focusNode,
+        style: const TextStyle(),
+        cursorColor: cursorColor,
+        backgroundCursorColor: Colors.grey,
+      ).debugFillProperties(defaultBuilder);
+      expect(
+        defaultBuilder.properties
+            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+            .map((DiagnosticsNode node) => node.toString()),
+        isNot(contains(matches(RegExp(r'useRouteLocalSelectionOverlay')))),
+      );
+
+      final overriddenBuilder = DiagnosticPropertiesBuilder();
+      EditableText(
+        controller: controller,
+        focusNode: focusNode,
+        style: const TextStyle(),
+        cursorColor: cursorColor,
+        backgroundCursorColor: Colors.grey,
+        useRouteLocalSelectionOverlay: true,
+      ).debugFillProperties(overriddenBuilder);
+      expect(
+        overriddenBuilder.properties
+            .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+            .map((DiagnosticsNode node) => node.toString()),
+        contains('useRouteLocalSelectionOverlay: true'),
+      );
+    });
+
+    testWidgets('toggling useRouteLocalSelectionOverlay rebuilds the selection overlay', (
+      WidgetTester tester,
+    ) async {
+      final controller = TextEditingController(text: 'abc def');
+      addTearDown(controller.dispose);
+      final focusNode = FocusNode();
+      addTearDown(focusNode.dispose);
+      final useRouteLocal = ValueNotifier<bool>(false);
+      addTearDown(useRouteLocal.dispose);
+
+      final overlayEntry = OverlayEntry(
+        builder: (BuildContext context) {
+          return ValueListenableBuilder<bool>(
+            valueListenable: useRouteLocal,
+            builder: (BuildContext context, bool value, _) {
+              return EditableText(
+                controller: controller,
+                focusNode: focusNode,
+                style: const TextStyle(fontSize: 20),
+                cursorColor: cursorColor,
+                backgroundCursorColor: Colors.grey,
+                selectionControls: materialTextSelectionControls,
+                showSelectionHandles: true,
+                useRouteLocalSelectionOverlay: value,
+              );
+            },
+          );
+        },
+      );
+      addTearDown(() {
+        overlayEntry.remove();
+        overlayEntry.dispose();
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: SizedBox(
+              width: 400,
+              height: 400,
+              child: Overlay(
+                key: nestedRouteOverlayKey,
+                initialEntries: <OverlayEntry>[overlayEntry],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.pump();
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.renderEditable.selectWordsInRange(
+        from: const Offset(10, 10),
+        cause: SelectionChangedCause.longPress,
+      );
+      await tester.pumpAndSettle();
+
+      Finder nestedHandles() =>
+          materialSelectionHandlePaddingUnder(find.byKey(nestedRouteOverlayKey));
+      expect(nestedHandles(), findsNothing);
+
+      useRouteLocal.value = true;
+      await tester.pumpAndSettle();
+      expect(nestedHandles(), findsAtLeastNWidgets(2));
+
+      useRouteLocal.value = false;
+      await tester.pumpAndSettle();
+      expect(nestedHandles(), findsNothing);
+    });
+  });
+
   testWidgets('can update style of previous activated EditableText', (WidgetTester tester) async {
     final controller1 = TextEditingController();
     addTearDown(controller1.dispose);

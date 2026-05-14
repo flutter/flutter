@@ -4128,6 +4128,34 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// The overlay this navigator uses for its visual presentation.
   OverlayState? get overlay => _overlayKey.currentState;
 
+  /// Returns the first [OverlayEntry] of the shallowest route stacked strictly
+  /// above [subordinateRoute] in this navigator's history, or null if
+  /// [subordinateRoute] is not in this navigator, is already the topmost route,
+  /// or no overlay entries exist for routes above it.
+  ///
+  /// When inserting floating UI (such as text selection handles) into this
+  /// navigator's [Overlay], pass the result as the `below` argument to
+  /// [OverlayState.insert] or [OverlayState.insertAll] so that the new entries
+  /// are composited underneath routes that sit above [subordinateRoute], similar
+  /// to native Android keeping selection affordances below modal surfaces.
+  OverlayEntry? getOverlayEntryBelowRoutesStackedAbove(Route<dynamic> subordinateRoute) {
+    final int index = _history.indexWhere(_RouteEntry.isRoutePredicate(subordinateRoute));
+    if (index < 0 || index >= _history.length - 1) {
+      return null;
+    }
+    for (int i = index + 1; i < _history.length; i++) {
+      final _RouteEntry entry = _history[i];
+      if (!entry.isPresent) {
+        continue;
+      }
+      final List<OverlayEntry> entries = entry.route.overlayEntries;
+      if (entries.isNotEmpty) {
+        return entries.first;
+      }
+    }
+    return null;
+  }
+
   Iterable<OverlayEntry> get _allRouteOverlayEntries {
     return <OverlayEntry>[for (final _RouteEntry entry in _history) ...entry.route.overlayEntries];
   }

@@ -237,19 +237,20 @@ class MagnifierController {
     required WidgetBuilder builder,
     Widget? debugRequiredFor,
     OverlayEntry? below,
+    bool rootOverlay = true,
   }) async {
     _overlayEntry?.remove();
     _overlayEntry?.dispose();
 
     final OverlayState overlayState = Overlay.of(
       context,
-      rootOverlay: true,
+      rootOverlay: rootOverlay,
       debugRequiredFor: debugRequiredFor,
     );
 
     final CapturedThemes capturedThemes = InheritedTheme.capture(
       from: context,
-      to: Navigator.maybeOf(context)?.context,
+      to: Navigator.maybeOf(context, rootNavigator: rootOverlay)?.context,
     );
 
     _overlayEntry = OverlayEntry(

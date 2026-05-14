@@ -99,7 +99,181 @@ void main() {
     });
   });
 
+  group('Selection overlay viewport clipping', () {
+    Iterable<CustomClipper<Rect>> selectionViewportClippers(WidgetTester tester) {
+      return tester
+          .widgetList<ClipRect>(find.byType(ClipRect))
+          .map((ClipRect c) => c.clipper)
+          .whereType<CustomClipper<Rect>>()
+          .where(
+            (CustomClipper<Rect> clipper) =>
+                clipper.runtimeType.toString() == '_SelectionOverlayViewportClipper',
+          );
+    }
+
+    testWidgets(
+      'handle clip rect top sits below an ancestor viewport (e.g. fixed header above ListView)',
+      (WidgetTester tester) async {
+        const appBarHeight = 100.0;
+        final controller = TextEditingController(text: 'abc def ghi');
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(platform: TargetPlatform.android),
+            home: Scaffold(
+              appBar: AppBar(toolbarHeight: appBarHeight, title: const Text('Header')),
+              body: ListView(
+                padding: EdgeInsets.zero,
+                children: <Widget>[
+                  TextField(controller: controller),
+                  const SizedBox(height: 1000.0),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        await tester.longPressAt(textOffsetToPosition(tester, 1));
+        await tester.pumpAndSettle();
+
+        final List<CustomClipper<Rect>> clippers = selectionViewportClippers(tester).toList();
+        expect(clippers, isNotEmpty);
+        final double appBarBottom = tester.getBottomLeft(find.byType(AppBar)).dy;
+        for (final clipper in clippers) {
+          final Rect bounds = clipper.getClip(Size.zero);
+          expect(
+            bounds.top,
+            greaterThanOrEqualTo(appBarBottom),
+            reason: 'Handle/toolbar clip top should not paint over the AppBar.',
+          );
+        }
+      },
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+    );
+
+    testWidgets(
+      'handle clip rect bottom contracts to make room for IME viewInsets',
+      (WidgetTester tester) async {
+        const imeHeight = 300.0;
+        tester.view.viewInsets = FakeViewPadding(bottom: imeHeight * tester.view.devicePixelRatio);
+        addTearDown(tester.view.reset);
+
+        final double screenHeight =
+            tester.view.physicalSize.height / tester.view.devicePixelRatio;
+        final double visibleBottom = screenHeight - imeHeight;
+
+        final controller = TextEditingController(text: 'abc def ghi');
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(platform: TargetPlatform.android),
+            home: Scaffold(
+              body: Center(child: TextField(controller: controller)),
+            ),
+          ),
+        );
+
+        await tester.longPressAt(textOffsetToPosition(tester, 1));
+        await tester.pumpAndSettle();
+
+        final List<CustomClipper<Rect>> clippers = selectionViewportClippers(tester).toList();
+        expect(clippers, isNotEmpty);
+        for (final clipper in clippers) {
+          final Rect bounds = clipper.getClip(Size.zero);
+          expect(
+            bounds.bottom,
+            lessThanOrEqualTo(visibleBottom),
+            reason: 'Clip bottom should be inside the visible region above the IME.',
+          );
+        }
+      },
+      skip: isBrowser,
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+    );
+
+    testWidgets(
+      'toolbar is positioned above the IME viewInsets',
+      (WidgetTester tester) async {
+        const imeHeight = 300.0;
+        tester.view.viewInsets = FakeViewPadding(bottom: imeHeight * tester.view.devicePixelRatio);
+        addTearDown(tester.view.reset);
+
+        final double screenHeight =
+            tester.view.physicalSize.height / tester.view.devicePixelRatio;
+        final double visibleBottom = screenHeight - imeHeight;
+
+        final controller = TextEditingController(text: 'abc def ghi');
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(platform: TargetPlatform.android),
+            home: Scaffold(
+              body: Center(child: TextField(controller: controller)),
+            ),
+          ),
+        );
+
+        await tester.longPressAt(textOffsetToPosition(tester, 1));
+        await tester.pumpAndSettle();
+
+        final Finder toolbar = find.byWidgetPredicate(
+          (Widget widget) => '${widget.runtimeType}' == '_TextSelectionToolbarOverflowable',
+        );
+        expect(toolbar, findsOneWidget);
+        expect(
+          tester.getBottomLeft(toolbar).dy,
+          lessThanOrEqualTo(visibleBottom),
+          reason: 'Toolbar bottom should sit above the IME.',
+        );
+      },
+      skip: isBrowser,
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+    );
+  });
+
   group('Text selection menu overflow (Android)', () {
+    testWidgets(
+      'Positions the menu inside the surrounding scrollable viewport.',
+      (WidgetTester tester) async {
+        final controller = TextEditingController(text: 'abc def ghi');
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(platform: TargetPlatform.android),
+            home: Scaffold(
+              appBar: AppBar(toolbarHeight: 100.0, title: const Text('Flutter Demo Home Page')),
+              body: ListView(
+                padding: EdgeInsets.zero,
+                children: <Widget>[
+                  TextField(controller: controller),
+                  const SizedBox(height: 1000.0),
+                ],
+              ),
+            ),
+          ),
+        );
+
+        await tester.longPressAt(textOffsetToPosition(tester, 1));
+        await tester.pumpAndSettle();
+
+        final Finder toolbar = find.byWidgetPredicate(
+          (Widget widget) => '${widget.runtimeType}' == '_TextSelectionToolbarOverflowable',
+        );
+        expect(toolbar, findsOneWidget);
+        expect(
+          tester.getTopLeft(toolbar).dy,
+          greaterThanOrEqualTo(tester.getBottomLeft(find.byType(AppBar)).dy),
+        );
+      },
+      skip: isBrowser, // [intended] We do not use Flutter-rendered context menu on the Web.
+      variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.android}),
+    );
+
     testWidgets(
       'All menu items show when they fit.',
       (WidgetTester tester) async {

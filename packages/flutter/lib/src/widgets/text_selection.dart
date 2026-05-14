@@ -27,7 +27,10 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'inherited_theme.dart';
 import 'magnifier.dart';
+import 'media_query.dart';
+import 'navigator.dart';
 import 'overlay.dart';
+import 'routes.dart';
 import 'scrollable.dart';
 import 'selectable_region.dart';
 import 'tap_region.dart';
@@ -347,6 +350,7 @@ class TextSelectionOverlay {
     ClipboardStatusNotifier? clipboardStatus,
     this.contextMenuBuilder,
     required TextMagnifierConfiguration magnifierConfiguration,
+    this.rootOverlay = true,
   }) : _handlesVisible = handlesVisible,
        _value = value {
     assert(debugMaybeDispatchCreated('widgets', 'TextSelectionOverlay', this));
@@ -356,6 +360,7 @@ class TextSelectionOverlay {
     _selectionOverlay = SelectionOverlay(
       magnifierConfiguration: magnifierConfiguration,
       context: context,
+      viewportBoundsScope: renderObject,
       debugRequiredFor: debugRequiredFor,
       // The metrics will be set when show handles.
       startHandleType: TextSelectionHandleType.collapsed,
@@ -381,8 +386,15 @@ class TextSelectionOverlay {
       onSelectionHandleTapped: onSelectionHandleTapped,
       dragStartBehavior: dragStartBehavior,
       toolbarLocation: renderObject.lastSecondaryTapDownPosition,
+      rootOverlay: rootOverlay,
     );
   }
+
+  /// When true (the default), selection UI is inserted using [Overlay.of] with
+  /// `rootOverlay: true`, matching historical Flutter behavior.
+  ///
+  /// When false, the nearest enclosing overlay is used (`rootOverlay: false`).
+  final bool rootOverlay;
 
   /// {@template flutter.widgets.SelectionOverlay.context}
   /// The context in which the selection UI should appear.
@@ -667,7 +679,8 @@ class TextSelectionOverlay {
       renderEditable.getLocalRectForCaret(positionAtBeginningOfLine).topCenter,
       renderEditable.getLocalRectForCaret(positionAtEndOfLine).bottomCenter,
     );
-    final overlay = Overlay.of(context, rootOverlay: true).context.findRenderObject() as RenderBox?;
+    final overlay =
+        Overlay.of(context, rootOverlay: rootOverlay).context.findRenderObject() as RenderBox?;
     final Matrix4 transformToOverlay = renderEditable.getTransformTo(overlay);
     final Rect overlayLineBoundaries = MatrixUtils.transformRect(
       transformToOverlay,
@@ -1042,14 +1055,18 @@ class TextSelectionOverlay {
 
 /// An object that manages a pair of selection handles and a toolbar.
 ///
-/// The selection handles are displayed in the [Overlay] that most closely
-/// encloses the given [BuildContext].
+/// By default, selection handles are displayed in the root [Overlay] (see
+/// [Overlay.of] with `rootOverlay: true`), matching historical Flutter behavior.
+/// Pass [rootOverlay] false to use the [Overlay] that most closely encloses
+/// the given [BuildContext].
 class SelectionOverlay {
   /// Creates an object that manages overlay entries for selection handles.
   ///
   /// The [context] must have an [Overlay] as an ancestor.
   SelectionOverlay({
     required this.context,
+    this.viewportBoundsScope,
+    this.rootOverlay = true,
     this.debugRequiredFor,
     required TextSelectionHandleType startHandleType,
     required double lineHeightAtStart,
@@ -1096,6 +1113,22 @@ class SelectionOverlay {
   /// {@macro flutter.widgets.SelectionOverlay.context}
   final BuildContext context;
 
+  /// Whether to use the root [Overlay] from [Overlay.of] when inserting
+  /// selection handles, toolbars, and magnifiers.
+  ///
+  /// When true (the default), [Overlay.of] is called with `rootOverlay: true`,
+  /// matching historical Flutter behavior.
+  ///
+  /// When false, the nearest enclosing overlay is used (`rootOverlay: false`) so
+  /// that selection UI stays in the same compositing stack as the owning route.
+  final bool rootOverlay;
+
+  /// Optional render object used to walk [RenderAbstractViewport] ancestors when
+  /// computing overlay clip bounds for selection handles and toolbars.
+  ///
+  /// When null, [context]'s [BuildContext.findRenderObject] is used instead.
+  final RenderObject? viewportBoundsScope;
+
   final ValueNotifier<MagnifierInfo> _magnifierInfo = ValueNotifier<MagnifierInfo>(
     MagnifierInfo.empty,
   );
@@ -1113,6 +1146,19 @@ class SelectionOverlay {
   ///
   /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration magnifierConfiguration;
+
+  OverlayState _hostOverlayState() {
+    return Overlay.of(context, rootOverlay: rootOverlay, debugRequiredFor: debugRequiredFor);
+  }
+
+  OverlayEntry? _selectionInsertBelowTarget() {
+    final ModalRoute<Object?>? modalRoute = ModalRoute.of(context);
+    if (modalRoute == null) {
+      return null;
+    }
+    final NavigatorState? nav = Navigator.maybeOf(context, rootNavigator: rootOverlay);
+    return nav?.getOverlayEntryBelowRoutesStackedAbove(modalRoute);
+  }
 
   /// {@template flutter.widgets.SelectionOverlay.toolbarIsVisible}
   /// Whether the toolbar is currently visible.
@@ -1163,20 +1209,30 @@ class SelectionOverlay {
     // Pre-build the magnifiers so we can tell if we've built something
     // or not. If we don't build a magnifiers, then we should not
     // insert anything in the overlay.
-    final Widget? builtMagnifier = magnifierConfiguration.magnifierBuilder(
-      context,
-      _magnifierController,
-      _magnifierInfo,
-    );
-
-    if (builtMagnifier == null) {
+    if (magnifierConfiguration.magnifierBuilder(context, _magnifierController, _magnifierInfo) ==
+        null) {
       return;
     }
 
     _magnifierController.show(
       context: context,
       below: magnifierConfiguration.shouldDisplayHandlesInMagnifier ? null : _handles?.start,
-      builder: (_) => builtMagnifier,
+      builder: (BuildContext overlayCtx) {
+        final Widget? builtMagnifier = magnifierConfiguration.magnifierBuilder(
+          context,
+          _magnifierController,
+          _magnifierInfo,
+        );
+        if (builtMagnifier == null) {
+          return const SizedBox.shrink();
+        }
+        // NOTE: Do NOT wrap the magnifier in _SelectionOverlayViewportClip.
+        // TextMagnifier/CupertinoTextMagnifier use AnimatedPositioned which
+        // requires a direct Stack ancestor. ClipRect breaks this parent data
+        // contract. The magnifier already self-adjusts via shiftWithinBounds.
+        return builtMagnifier;
+      },
+      rootOverlay: rootOverlay,
     );
   }
 
@@ -1584,16 +1640,14 @@ class SelectionOverlay {
       return;
     }
 
-    final OverlayState overlay = Overlay.of(
-      context,
-      rootOverlay: true,
-      debugRequiredFor: debugRequiredFor,
-    );
+    final OverlayState overlay = _hostOverlayState();
 
     final CapturedThemes capturedThemes = InheritedTheme.capture(
       from: context,
       to: overlay.context,
     );
+
+    final OverlayEntry? insertBelow = _selectionInsertBelowTarget();
 
     _handles = (
       start: OverlayEntry(
@@ -1607,7 +1661,7 @@ class SelectionOverlay {
         },
       ),
     );
-    overlay.insertAll(<OverlayEntry>[_handles!.start, _handles!.end]);
+    overlay.insertAll(<OverlayEntry>[_handles!.start, _handles!.end], below: insertBelow);
   }
 
   /// {@template flutter.widgets.SelectionOverlay.hideHandles}
@@ -1632,11 +1686,7 @@ class SelectionOverlay {
         return;
       }
       _toolbar = OverlayEntry(builder: _buildToolbar);
-      Overlay.of(
-        this.context,
-        rootOverlay: true,
-        debugRequiredFor: debugRequiredFor,
-      ).insert(_toolbar!, above: _handles?.end);
+      _hostOverlayState().insert(_toolbar!, above: _handles?.end);
       return;
     }
 
@@ -1648,13 +1698,17 @@ class SelectionOverlay {
     _contextMenuController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
+        final Rect? viewportBounds = _getRootOverlayViewportBounds(renderBox, context);
         return _SelectionToolbarWrapper(
           visibility: toolbarVisible,
           layerLink: toolbarLayerLink,
           offset: -renderBox.localToGlobal(Offset.zero),
+          viewportBounds: viewportBounds,
           child: contextMenuBuilder(context),
         );
       },
+      rootOverlay: rootOverlay,
+      insertBelow: _selectionInsertBelowTarget(),
     );
   }
 
@@ -1669,13 +1723,94 @@ class SelectionOverlay {
     _spellCheckToolbarController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
+        final Rect? viewportBounds = _getRootOverlayViewportBounds(renderBox, context);
         return _SelectionToolbarWrapper(
           layerLink: toolbarLayerLink,
           offset: -renderBox.localToGlobal(Offset.zero),
+          viewportBounds: viewportBounds,
           child: builder(context),
         );
       },
+      rootOverlay: rootOverlay,
+      insertBelow: _selectionInsertBelowTarget(),
     );
+  }
+
+  /// The region of the view not covered by [MediaQueryData.padding] or
+  /// [MediaQueryData.viewInsets] (for example the IME), expressed in [overlay]'s
+  /// local coordinate system.
+  ///
+  /// Returns null when [overlay]'s paint transform is non-invertible (for
+  /// example a [FittedBox] collapsed to zero size), since no meaningful clip
+  /// can be projected back into the overlay's local space.
+  Rect? _mediaQueryVisibleRectInOverlaySpace(RenderBox overlay, MediaQueryData mq) {
+    final Size viewSize = mq.size;
+    final EdgeInsets padding = mq.padding;
+    final double visibleBottom = viewSize.height - padding.bottom - mq.viewInsets.bottom;
+    if (visibleBottom <= padding.top) {
+      return Rect.zero;
+    }
+    final visibleInRootSpace = Rect.fromLTRB(
+      padding.left,
+      padding.top,
+      viewSize.width - padding.right,
+      visibleBottom,
+    );
+    final rootToOverlay = Matrix4.copy(overlay.getTransformTo(null));
+    if (rootToOverlay.invert() == 0.0) {
+      return null;
+    }
+    return MatrixUtils.transformRect(rootToOverlay, visibleInRootSpace);
+  }
+
+  /// Returns the intersection of every [RenderAbstractViewport] ancestor of
+  /// [anchorObject] (or [viewportBoundsScope], or [context]'s render object),
+  /// further intersected with the unobstructed view rectangle from
+  /// [MediaQuery.maybeOf] on [mediaQueryContext] (when non-null and mounted),
+  /// expressed in the coordinate system of the host [Overlay].
+  ///
+  /// Used to clip selection handles, toolbars, and magnifiers so they stay inside
+  /// scrollable viewports and above the keyboard, matching platform text selection
+  /// behavior.
+  Rect? _getRootOverlayViewportBounds([
+    RenderObject? anchorObject,
+    BuildContext? mediaQueryContext,
+  ]) {
+    final RenderObject? subject = anchorObject ?? viewportBoundsScope ?? context.findRenderObject();
+    if (subject == null) {
+      return null;
+    }
+
+    final overlay = _hostOverlayState().context.findRenderObject() as RenderBox?;
+    if (overlay == null) {
+      return null;
+    }
+
+    Rect? bounds;
+    RenderAbstractViewport? viewport = RenderAbstractViewport.maybeOf(subject);
+    while (viewport != null) {
+      if (viewport is RenderBox) {
+        final Rect viewportBounds = MatrixUtils.transformRect(
+          viewport.getTransformTo(overlay),
+          viewport.paintBounds,
+        );
+        bounds = bounds == null ? viewportBounds : bounds.intersect(viewportBounds);
+      }
+      viewport = RenderAbstractViewport.maybeOf(viewport.parent);
+    }
+
+    final BuildContext mqContext = mediaQueryContext ?? context;
+    if (mqContext.mounted) {
+      final MediaQueryData? mq = MediaQuery.maybeOf(mqContext);
+      if (mq != null) {
+        final Rect? windowInOverlay = _mediaQueryVisibleRectInOverlaySpace(overlay, mq);
+        if (windowInOverlay != null) {
+          bounds = bounds == null ? windowInOverlay : bounds.intersect(windowInOverlay);
+        }
+      }
+    }
+
+    return bounds;
   }
 
   bool _buildScheduled = false;
@@ -1756,6 +1891,7 @@ class SelectionOverlay {
   }
 
   Widget _buildStartHandle(BuildContext context) {
+    final Rect? viewportBounds = _getRootOverlayViewportBounds(null, context);
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null ||
@@ -1775,6 +1911,7 @@ class SelectionOverlay {
         visibility: startHandlesVisible,
         preferredLineHeight: _lineHeightAtStart,
         dragStartBehavior: dragStartBehavior,
+        viewportBounds: viewportBounds,
       );
     }
     return TapRegion(
@@ -1784,6 +1921,7 @@ class SelectionOverlay {
   }
 
   Widget _buildEndHandle(BuildContext context) {
+    final Rect? viewportBounds = _getRootOverlayViewportBounds(null, context);
     final Widget handle;
     final TextSelectionControls? selectionControls = this.selectionControls;
     if (selectionControls == null ||
@@ -1806,6 +1944,7 @@ class SelectionOverlay {
         visibility: endHandlesVisible,
         preferredLineHeight: _lineHeightAtEnd,
         dragStartBehavior: dragStartBehavior,
+        viewportBounds: viewportBounds,
       );
     }
     return TapRegion(
@@ -1850,6 +1989,7 @@ class SelectionOverlay {
       visibility: toolbarVisible,
       layerLink: toolbarLayerLink,
       offset: -editingRegion.topLeft,
+      viewportBounds: _getRootOverlayViewportBounds(null, context),
       child: Builder(
         builder: (BuildContext context) {
           return selectionControls!.buildToolbar(
@@ -1897,12 +2037,14 @@ class _SelectionToolbarWrapper extends StatefulWidget {
     this.visibility,
     required this.layerLink,
     required this.offset,
+    this.viewportBounds,
     required this.child,
   });
 
   final Widget child;
   final Offset offset;
   final LayerLink layerLink;
+  final Rect? viewportBounds;
   final ValueListenable<bool>? visibility;
 
   @override
@@ -1952,23 +2094,67 @@ class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper>
 
   @override
   Widget build(BuildContext context) {
+    Widget child = widget.child;
+    final Rect? viewportBounds = widget.viewportBounds;
+    if (viewportBounds != null) {
+      final MediaQueryData mediaQuery = MediaQuery.of(context);
+      final double adjustedTopPadding = math.max(mediaQuery.padding.top, viewportBounds.top);
+      child = MediaQuery(
+        data: mediaQuery.copyWith(padding: mediaQuery.padding.copyWith(top: adjustedTopPadding)),
+        child: child,
+      );
+    }
+
     return TapRegion(
       groupId: SelectableRegion,
       child: TextFieldTapRegion(
         child: Directionality(
           textDirection: Directionality.of(this.context),
-          child: FadeTransition(
-            opacity: _opacity,
-            child: CompositedTransformFollower(
-              link: widget.layerLink,
-              showWhenUnlinked: false,
-              offset: widget.offset,
-              child: widget.child,
+          child: _SelectionOverlayViewportClip(
+            viewportBounds: widget.viewportBounds,
+            child: FadeTransition(
+              opacity: _opacity,
+              child: CompositedTransformFollower(
+                link: widget.layerLink,
+                showWhenUnlinked: false,
+                offset: widget.offset,
+                child: child,
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+class _SelectionOverlayViewportClip extends StatelessWidget {
+  const _SelectionOverlayViewportClip({required this.viewportBounds, required this.child});
+
+  final Widget child;
+  final Rect? viewportBounds;
+
+  @override
+  Widget build(BuildContext context) {
+    final Rect? viewportBounds = this.viewportBounds;
+    if (viewportBounds == null) {
+      return child;
+    }
+    return ClipRect(clipper: _SelectionOverlayViewportClipper(viewportBounds), child: child);
+  }
+}
+
+class _SelectionOverlayViewportClipper extends CustomClipper<Rect> {
+  const _SelectionOverlayViewportClipper(this.viewportBounds);
+
+  final Rect viewportBounds;
+
+  @override
+  Rect getClip(Size size) => viewportBounds;
+
+  @override
+  bool shouldReclip(_SelectionOverlayViewportClipper oldClipper) {
+    return viewportBounds != oldClipper.viewportBounds;
   }
 }
 
@@ -1986,6 +2172,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
     this.visibility,
     required this.preferredLineHeight,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.viewportBounds,
   });
 
   final LayerLink handleLayerLink;
@@ -1995,6 +2182,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
   final ValueChanged<DragEndDetails>? onSelectionHandleDragEnd;
   final TextSelectionControls selectionControls;
   final ValueListenable<bool>? visibility;
+  final Rect? viewportBounds;
   final double preferredLineHeight;
   final TextSelectionHandleType type;
   final DragStartBehavior dragStartBehavior;
@@ -2084,55 +2272,58 @@ class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
         widget.type == TextSelectionHandleType.collapsed &&
         defaultTargetPlatform == TargetPlatform.iOS;
 
-    return CompositedTransformFollower(
-      link: widget.handleLayerLink,
-      // Put the handle's anchor point on the leader's anchor point.
-      offset: -handleAnchor - Offset(padding.left, padding.top),
-      showWhenUnlinked: false,
-      child: FadeTransition(
-        opacity: _opacity,
-        child: SizedBox(
-          width: interactiveRect.width,
-          height: interactiveRect.height,
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: RawGestureDetector(
-              behavior: HitTestBehavior.translucent,
-              gestures: <Type, GestureRecognizerFactory>{
-                PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
-                  () => PanGestureRecognizer(
-                    debugOwner: this,
-                    // Mouse events select the text and do not drag the cursor.
-                    supportedDevices: <PointerDeviceKind>{
-                      PointerDeviceKind.touch,
-                      PointerDeviceKind.stylus,
-                      PointerDeviceKind.unknown,
+    return _SelectionOverlayViewportClip(
+      viewportBounds: widget.viewportBounds,
+      child: CompositedTransformFollower(
+        link: widget.handleLayerLink,
+        // Put the handle's anchor point on the leader's anchor point.
+        offset: -handleAnchor - Offset(padding.left, padding.top),
+        showWhenUnlinked: false,
+        child: FadeTransition(
+          opacity: _opacity,
+          child: SizedBox(
+            width: interactiveRect.width,
+            height: interactiveRect.height,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: RawGestureDetector(
+                behavior: HitTestBehavior.translucent,
+                gestures: <Type, GestureRecognizerFactory>{
+                  PanGestureRecognizer: GestureRecognizerFactoryWithHandlers<PanGestureRecognizer>(
+                    () => PanGestureRecognizer(
+                      debugOwner: this,
+                      // Mouse events select the text and do not drag the cursor.
+                      supportedDevices: <PointerDeviceKind>{
+                        PointerDeviceKind.touch,
+                        PointerDeviceKind.stylus,
+                        PointerDeviceKind.unknown,
+                      },
+                    ),
+                    (PanGestureRecognizer instance) {
+                      instance
+                        ..dragStartBehavior = widget.dragStartBehavior
+                        ..gestureSettings = eagerlyAcceptDragWhenCollapsed
+                            ? const DeviceGestureSettings(touchSlop: 1.0)
+                            : null
+                        ..onStart = widget.onSelectionHandleDragStart
+                        ..onUpdate = widget.onSelectionHandleDragUpdate
+                        ..onEnd = widget.onSelectionHandleDragEnd;
                     },
                   ),
-                  (PanGestureRecognizer instance) {
-                    instance
-                      ..dragStartBehavior = widget.dragStartBehavior
-                      ..gestureSettings = eagerlyAcceptDragWhenCollapsed
-                          ? const DeviceGestureSettings(touchSlop: 1.0)
-                          : null
-                      ..onStart = widget.onSelectionHandleDragStart
-                      ..onUpdate = widget.onSelectionHandleDragUpdate
-                      ..onEnd = widget.onSelectionHandleDragEnd;
-                  },
-                ),
-              },
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: padding.left,
-                  top: padding.top,
-                  right: padding.right,
-                  bottom: padding.bottom,
-                ),
-                child: widget.selectionControls.buildHandle(
-                  context,
-                  widget.type,
-                  widget.preferredLineHeight,
-                  widget.onSelectionHandleTapped,
+                },
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: padding.left,
+                    top: padding.top,
+                    right: padding.right,
+                    bottom: padding.bottom,
+                  ),
+                  child: widget.selectionControls.buildHandle(
+                    context,
+                    widget.type,
+                    widget.preferredLineHeight,
+                    widget.onSelectionHandleTapped,
+                  ),
                 ),
               ),
             ),
