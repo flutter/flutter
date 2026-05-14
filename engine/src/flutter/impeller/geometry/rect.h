@@ -302,6 +302,16 @@ struct TRect {
                             o.bottom_ <= bottom_));
   }
 
+  template <class U, class FT = T>
+  [[nodiscard]] constexpr std::enable_if_t<std::is_floating_point_v<FT>, bool>
+  Contains(const TRect<U>& o) const {
+    return !this->IsEmpty() &&                         //
+           (o.IsEmpty() || (o.GetLeft() >= left_ &&    //
+                            o.GetTop() >= top_ &&      //
+                            o.GetRight() <= right_ &&  //
+                            o.GetBottom() <= bottom_));
+  }
+
   /// @brief  Returns true if all of the fields of this floating point
   ///         rectangle are finite.
   ///

@@ -36,15 +36,8 @@
     facets: {
         "fuchsia.test": {
             "deprecated-allowed-packages": [
-                "child-view",
                 "flatland-scene-manager-test-ui-stack",
-                "oot_flutter_aot_runner",
-                "oot_flutter_jit_runner",
-                "oot_flutter_jit_product_runner",
-                "oot_flutter_aot_product_runner",
-                "parent-view",
-                "test-ui-stack",
-                "test_manager",
+                "test_manager"
             ],
         },
     },
