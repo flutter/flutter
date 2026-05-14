@@ -689,11 +689,17 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
     if (widget.removedSeparatorBuilder == null) {
       _sliverAnimatedMultiBoxKey.currentState!.insertItem(index, duration: duration);
     } else {
-      final int itemIndex = _computeItemIndex(index);
+      // Snapshot the visible count *before* the first insertItem call. The
+      // call increments _itemsCount, so reading it afterwards would also
+      // count the just-inserted item and any in-flight outgoing items,
+      // producing a stale decision about whether a separator is needed.
+      final int visibleCount = _sliverAnimatedMultiBoxKey.currentState!._visibleItemsCount;
+      final int itemIndex = _computeItemIndex(index, visibleCount);
       _sliverAnimatedMultiBoxKey.currentState!.insertItem(itemIndex, duration: duration);
-      if (_itemsCount > 1) {
-        // Because `insertItem` moves the items after the index, we need to insert the separator
-        // at the same index as the item. If there is only one item, we don't need to insert a separator.
+      if (visibleCount > 0) {
+        // There was at least one visible item before this insertion, so the
+        // new item needs a separator alongside it. `insertItem` shifted the
+        // following items by one, so the separator goes at the same index.
         _sliverAnimatedMultiBoxKey.currentState!.insertItem(itemIndex, duration: duration);
       }
     }
@@ -713,8 +719,13 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
     if (widget.removedSeparatorBuilder == null) {
       _sliverAnimatedMultiBoxKey.currentState!.insertAllItems(index, length, duration: duration);
     } else {
-      final int itemIndex = _computeItemIndex(index);
-      final int lengthWithSeparators = _itemsCount == 0 ? length * 2 - 1 : length * 2;
+      // Snapshot the visible count once and reuse it for both the index
+      // computation and the leading-separator decision; reading _itemsCount
+      // would include in-flight outgoing items and could wrongly suppress
+      // the leading separator when no items are visible.
+      final int visibleCount = _sliverAnimatedMultiBoxKey.currentState!._visibleItemsCount;
+      final int itemIndex = _computeItemIndex(index, visibleCount);
+      final int lengthWithSeparators = visibleCount == 0 ? length * 2 - 1 : length * 2;
       _sliverAnimatedMultiBoxKey.currentState!.insertAllItems(
         itemIndex,
         lengthWithSeparators,
@@ -748,20 +759,23 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
       // There are no separators. Remove only the item.
       _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
     } else {
-      final int itemIndex = _computeItemIndex(index);
-      // Remove the item
+      // Snapshot the visible count *before* issuing the first removeItem,
+      // because that call appends to _outgoingItems and would skew the value.
+      final int visibleCount = _sliverAnimatedMultiBoxKey.currentState!._visibleItemsCount;
+      final int itemIndex = _computeItemIndex(index, visibleCount);
+      // Remove the item.
       _sliverAnimatedMultiBoxKey.currentState!.removeItem(itemIndex, builder, duration: duration);
-      if (_itemsCount > 1) {
-        if (itemIndex == _itemsCount - 1) {
-          // The item was removed from the end of the list, so the separator to remove is the one at `last index` - 1.
+      if (visibleCount > 1) {
+        if (itemIndex == visibleCount - 1) {
+          // Removed the last visible item: also remove the separator before it.
           _sliverAnimatedMultiBoxKey.currentState!.removeItem(
             itemIndex - 1,
             _toRemovedItemBuilder(removedSeparatorBuilder, index - 1),
             duration: duration,
           );
         } else {
-          // The item was removed from the middle or beginning of the list,
-          // so the corresponding separator took its place and needs to be removed at `itemIndex`.
+          // Removed an item from the beginning or middle: the corresponding
+          // separator has taken its place; remove it at `itemIndex`.
           _sliverAnimatedMultiBoxKey.currentState!.removeItem(
             itemIndex,
             _toRemovedItemBuilder(removedSeparatorBuilder, index),
@@ -816,14 +830,13 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
 
   int get _itemsCount => _sliverAnimatedMultiBoxKey.currentState!._itemsCount;
 
-  // Helper method to compute the index for the item to insert or remove considering the separators in between.
-  int _computeItemIndex(int index) {
+  /// Helper method to compute the index for the item to insert or remove considering the separators in between.
+  int _computeItemIndex(int index, int visibleItemsAndSeparatorsCount) {
     if (index == 0) {
       return index;
     }
-    final int itemsAndSeparatorsCount = _itemsCount;
-    final int separatorsCount = itemsAndSeparatorsCount ~/ 2;
-    final int separatedItemsCount = _itemsCount - separatorsCount;
+    final int separatorsCount = visibleItemsAndSeparatorsCount ~/ 2;
+    final int separatedItemsCount = visibleItemsAndSeparatorsCount - separatorsCount;
 
     final isNewLastIndex = index == separatedItemsCount;
     final int indexAdjustedForSeparators = index * 2;
@@ -1274,6 +1287,10 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
   int _itemsCount = 0;
+
+  /// Number of items+separators currently visible to the user, i.e. excluding
+  /// entries whose remove animation is still running.
+  int get _visibleItemsCount => _itemsCount - _outgoingItems.length;
 
   _ActiveItem? _removeActiveItemAt(List<_ActiveItem> items, int itemIndex) {
     final int i = binarySearch(items, _ActiveItem.index(itemIndex));

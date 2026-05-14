@@ -1225,6 +1225,96 @@ void main() {
     );
     await tester.pump();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/186361
+  //
+  // AnimatedList.separated.removeItem used `_itemsCount` (which still counts
+  // items whose remove animation is in flight) when computing the sliver index
+  // for the separator removal. Calling removeItem again before the previous
+  // animation settled therefore landed on the wrong slot, leaving stale items
+  // visible or removing the wrong separator.
+  testWidgets(
+    'AnimatedList.separated.removeItem uses visible item count when a previous remove is still animating',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(600, 1800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      Widget itemBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
+      }
+
+      Widget separatorBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 100.0, child: Center(child: Text('separator after item $index')));
+      }
+
+      Widget removedItemBuilder(BuildContext context, Animation<double> animation) {
+        return const SizedBox(height: 100.0, child: Center(child: Text('removing item')));
+      }
+
+      Widget removedSeparatorBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(
+          height: 100.0,
+          child: Center(child: Text('removing separator after item $index')),
+        );
+      }
+
+      List<String?> visibleTexts() {
+        return find
+            .descendant(of: find.byType(SliverAnimatedList), matching: find.byType(Text))
+            .allCandidates
+            .map((Element e) => e.widget)
+            .whereType<Text>()
+            .map((Text t) => t.data)
+            .toList();
+      }
+
+      final listKey = GlobalKey<AnimatedListState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: AnimatedList.separated(
+            key: listKey,
+            initialItemCount: 4,
+            itemBuilder: itemBuilder,
+            separatorBuilder: separatorBuilder,
+            removedSeparatorBuilder: removedSeparatorBuilder,
+          ),
+        ),
+      );
+
+      // Sanity: 4 items + 3 separators visible at start.
+      expect(visibleTexts(), <String>[
+        'item 0',
+        'separator after item 0',
+        'item 1',
+        'separator after item 1',
+        'item 2',
+        'separator after item 2',
+        'item 3',
+      ]);
+
+      // Start removing the last item. Pump a frame so the animation begins but
+      // intentionally do NOT pumpAndSettle: we want the next call to land
+      // while the first removal is still in flight.
+      listKey.currentState!.removeItem(3, removedItemBuilder);
+      await tester.pump();
+
+      // Now remove what is currently the last visible item. Without the fix,
+      // _computeItemIndex still saw 7 entries (4 items + 3 separators) and the
+      // separator-removal branch chose the wrong slot.
+      listKey.currentState!.removeItem(2, removedItemBuilder);
+      await tester.pump();
+
+      // Let every animation finish and verify the surviving items are correct:
+      // items 2 and 3 are gone along with their separators; items 0 and 1
+      // remain with exactly one separator between them.
+      await tester.pumpAndSettle();
+
+      expect(visibleTexts(), <String>['item 0', 'separator after item 0', 'item 1']);
+    },
+  );
 }
 
 class _StatefulListItem extends StatefulWidget {
