@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/cupertino.dart' show CupertinoScrollbar;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -221,6 +222,46 @@ void main() {
     }),
   );
 
+  testWidgets('Scrollbar uses compatible ScrollbarTheme values on iOS', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.iOS,
+          scrollbarTheme: ScrollbarThemeData(
+            thumbVisibility: WidgetStateProperty.all(true),
+            thickness: WidgetStateProperty.all(12.0),
+            thumbColor: WidgetStateProperty.all(Colors.blue),
+            radius: const Radius.circular(8.0),
+          ),
+        ),
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: Scrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoScrollbar scrollbar = tester.widget<CupertinoScrollbar>(
+      find.byType(CupertinoScrollbar),
+    );
+    expect(scrollbar.thumbVisibility, isTrue);
+    expect(scrollbar.thickness, 12.0);
+    expect(scrollbar.thicknessWhileDragging, 12.0);
+    expect(scrollbar.thumbColor, Colors.blue);
+    expect(scrollbar.radius, const Radius.circular(8.0));
+    expect(scrollbar.radiusWhileDragging, const Radius.circular(8.0));
+  });
+
   testWidgets('Scrollbar uses values from ScrollbarTheme if exists instead of values from Theme', (
     WidgetTester tester,
   ) async {
@@ -263,113 +304,107 @@ void main() {
     scrollController.dispose();
   });
 
-  testWidgets(
-    'ScrollbarTheme can disable gestures',
-    (WidgetTester tester) async {
-      final scrollController = ScrollController();
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            useMaterial3: false,
-            scrollbarTheme: const ScrollbarThemeData(interactive: false),
-          ),
-          home: Scrollbar(
-            thumbVisibility: true,
+  testWidgets('ScrollbarTheme can disable gestures', (WidgetTester tester) async {
+    final scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          useMaterial3: false,
+          scrollbarTheme: const ScrollbarThemeData(interactive: false),
+        ),
+        home: Scrollbar(
+          thumbVisibility: true,
+          controller: scrollController,
+          child: SingleChildScrollView(
             controller: scrollController,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: const SizedBox(width: 4000.0, height: 4000.0),
-            ),
+            child: const SizedBox(width: 4000.0, height: 4000.0),
           ),
         ),
-      );
-      await tester.pumpAndSettle();
-      // Idle scrollbar behavior
-      expect(
-        find.byType(Scrollbar),
-        paints..rrect(
-          rrect: RRect.fromRectAndRadius(_kMaterialDesignInitialThumbRect, _kDefaultThumbRadius),
-          color: _kDefaultIdleThumbColor,
+      ),
+    );
+    await tester.pumpAndSettle();
+    // Idle scrollbar behavior
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(_kMaterialDesignInitialThumbRect, _kDefaultThumbRadius),
+        color: _kDefaultIdleThumbColor,
+      ),
+    );
+
+    // Try to drag scrollbar.
+    const scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+    // Expect no change
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(_kMaterialDesignInitialThumbRect, _kDefaultThumbRadius),
+        color: _kDefaultIdleThumbColor,
+      ),
+    );
+
+    scrollController.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.fuchsia}));
+
+  testWidgets('Scrollbar.interactive takes priority over ScrollbarTheme', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          useMaterial3: false,
+          scrollbarTheme: const ScrollbarThemeData(interactive: false),
         ),
-      );
-
-      // Try to drag scrollbar.
-      const scrollAmount = 10.0;
-      final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
-      await tester.pumpAndSettle();
-      await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
-      await tester.pumpAndSettle();
-      await dragScrollbarGesture.up();
-      await tester.pumpAndSettle();
-      // Expect no change
-      expect(
-        find.byType(Scrollbar),
-        paints..rrect(
-          rrect: RRect.fromRectAndRadius(_kMaterialDesignInitialThumbRect, _kDefaultThumbRadius),
-          color: _kDefaultIdleThumbColor,
-        ),
-      );
-
-      scrollController.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.fuchsia}),
-  );
-
-  testWidgets(
-    'Scrollbar.interactive takes priority over ScrollbarTheme',
-    (WidgetTester tester) async {
-      final scrollController = ScrollController();
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(
-            useMaterial3: false,
-            scrollbarTheme: const ScrollbarThemeData(interactive: false),
-          ),
-          home: Scrollbar(
-            interactive: true,
-            thumbVisibility: true,
+        home: Scrollbar(
+          interactive: true,
+          thumbVisibility: true,
+          controller: scrollController,
+          child: SingleChildScrollView(
             controller: scrollController,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: const SizedBox(width: 4000.0, height: 4000.0),
-            ),
+            child: const SizedBox(width: 4000.0, height: 4000.0),
           ),
         ),
-      );
-      await tester.pumpAndSettle();
-      // Idle scrollbar behavior
-      expect(
-        find.byType(Scrollbar),
-        paints..rrect(
-          rrect: RRect.fromRectAndRadius(_kMaterialDesignInitialThumbRect, _kDefaultThumbRadius),
-          color: _kDefaultIdleThumbColor,
-        ),
-      );
+      ),
+    );
+    await tester.pumpAndSettle();
+    // Idle scrollbar behavior
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(_kMaterialDesignInitialThumbRect, _kDefaultThumbRadius),
+        color: _kDefaultIdleThumbColor,
+      ),
+    );
 
-      // Drag scrollbar.
-      const scrollAmount = 10.0;
-      final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
-      await tester.pumpAndSettle();
-      await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
-      await tester.pumpAndSettle();
-      await dragScrollbarGesture.up();
-      await tester.pumpAndSettle();
-      // Gestures handled by Scrollbar.
-      expect(
-        find.byType(Scrollbar),
-        paints..rrect(
-          rrect: RRect.fromRectAndRadius(
-            const Rect.fromLTRB(790.0, 10.0, 798.0, 100.0),
-            _kDefaultThumbRadius,
-          ),
-          color: _kDefaultIdleThumbColor,
+    // Drag scrollbar.
+    const scrollAmount = 10.0;
+    final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(797.0, 45.0));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
+    await tester.pumpAndSettle();
+    await dragScrollbarGesture.up();
+    await tester.pumpAndSettle();
+    // Gestures handled by Scrollbar.
+    expect(
+      find.byType(Scrollbar),
+      paints..rrect(
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTRB(790.0, 10.0, 798.0, 100.0),
+          _kDefaultThumbRadius,
         ),
-      );
+        color: _kDefaultIdleThumbColor,
+      ),
+    );
 
-      scrollController.dispose();
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.fuchsia}),
-  );
+    scrollController.dispose();
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.fuchsia}));
 
   testWidgets(
     'Scrollbar widget properties take priority over theme',

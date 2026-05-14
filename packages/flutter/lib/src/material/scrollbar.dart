@@ -151,13 +151,24 @@ class Scrollbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
+    final ThemeData theme = Theme.of(context);
+    if (theme.platform == TargetPlatform.iOS) {
+      final ScrollbarThemeData scrollbarTheme = ScrollbarTheme.of(context);
+      const states = <WidgetState>{};
+      const draggedStates = <WidgetState>{WidgetState.dragged};
+      final double? resolvedThickness = thickness ?? scrollbarTheme.thickness?.resolve(states);
+      final double? resolvedThicknessWhileDragging =
+          thickness ?? scrollbarTheme.thickness?.resolve(draggedStates);
+      final Radius? resolvedRadius = radius ?? scrollbarTheme.radius;
       return CupertinoScrollbar(
-        thumbVisibility: thumbVisibility ?? false,
-        thickness: thickness ?? CupertinoScrollbar.defaultThickness,
-        thicknessWhileDragging: thickness ?? CupertinoScrollbar.defaultThicknessWhileDragging,
-        radius: radius ?? CupertinoScrollbar.defaultRadius,
-        radiusWhileDragging: radius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
+        thumbVisibility:
+            thumbVisibility ?? scrollbarTheme.thumbVisibility?.resolve(states) ?? false,
+        thickness: resolvedThickness ?? CupertinoScrollbar.defaultThickness,
+        thicknessWhileDragging:
+            resolvedThicknessWhileDragging ?? CupertinoScrollbar.defaultThicknessWhileDragging,
+        thumbColor: scrollbarTheme.thumbColor?.resolve(states),
+        radius: resolvedRadius ?? CupertinoScrollbar.defaultRadius,
+        radiusWhileDragging: resolvedRadius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
         controller: controller,
         notificationPredicate: notificationPredicate,
         scrollbarOrientation: scrollbarOrientation,

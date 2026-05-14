@@ -54,6 +54,32 @@ void main() {
     );
   });
 
+  testWidgets('Paints custom thumb color', (WidgetTester tester) async {
+    const thumbColor = Color(0xff0000ff);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(),
+          child: CupertinoScrollbar(
+            thumbColor: thumbColor,
+            child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(SingleChildScrollView)),
+    );
+    await gesture.moveBy(_kGestureOffset);
+    await gesture.moveBy(Offset.zero.translate(-_kGestureOffset.dx, -_kGestureOffset.dy));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byType(CupertinoScrollbar), paints..rrect(color: thumbColor));
+  });
+
   testWidgets('Paints iOS spec with nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(

@@ -79,6 +79,7 @@ class CupertinoScrollbar extends RawScrollbar {
     super.controller,
     bool? thumbVisibility,
     double super.thickness = defaultThickness,
+    super.thumbColor,
     this.thicknessWhileDragging = defaultThicknessWhileDragging,
     Radius super.radius = defaultRadius,
     this.radiusWhileDragging = defaultRadiusWhileDragging,
@@ -159,7 +160,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   @override
   void updateScrollbarPainter() {
     scrollbarPainter
-      ..color = CupertinoDynamicColor.resolve(_kScrollbarColor, context)
+      ..color = widget.thumbColor ?? CupertinoDynamicColor.resolve(_kScrollbarColor, context)
       ..textDirection = Directionality.of(context)
       ..thickness = _thickness
       ..mainAxisMargin = widget.mainAxisMargin
