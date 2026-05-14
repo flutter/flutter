@@ -11,7 +11,7 @@ import 'package:test/test.dart';
 
 import 'check_backticks_relative_paths_rule.dart';
 
-const String _configFilePath = 'dev/tools/dart_skills_lint.yaml';
+const String _configFileName = 'dart_skills_lint.yaml';
 
 Directory _findSkillsDir() {
   Directory dir = Directory.current;
@@ -49,7 +49,9 @@ void main() {
   });
 
   test('Validate Flutter Skills', () async {
-    final Configuration config = await ConfigParser.loadConfig(path: _configFilePath);
+    final Configuration config = await ConfigParser.loadConfig(
+      path: path.join(repoRoot.path, 'dev', 'tools', _configFileName),
+    );
     final bool isValid = await validateSkills(skillDirPaths: [skillsDirectory], config: config);
     expect(isValid, isTrue, reason: 'Skills validation failed. See above for details.');
   });
