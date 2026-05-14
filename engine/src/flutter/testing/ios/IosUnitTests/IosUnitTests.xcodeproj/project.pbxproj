@@ -73,7 +73,7 @@
 		0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = FlutterEngineConfig.xcconfig; sourceTree = "<group>"; };
 		3DD7D38C27D2B81000DA365C /* FlutterUndoManagerPluginTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterUndoManagerPluginTest.mm; sourceTree = "<group>"; };
 		689EC1E2281B30D3008FEB58 /* FlutterSpellCheckPluginTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterSpellCheckPluginTest.mm; sourceTree = "<group>"; };
-		68B6091227F62F990036AC78 /* VsyncWaiterIosTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = VsyncWaiterIosTest.mm; sourceTree = "<group>"; };
+		68B6091227F62F990036AC78 /* FlutterVSyncClientTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterVSyncClientTest.mm; sourceTree = "<group>"; };
 		7802C4F12E67A0CC002C7D6D /* FlutterSceneDelegateTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FlutterSceneDelegateTest.m; sourceTree = "<group>"; };
 		78136AF72E68D14D00900DCE /* FlutterSceneLifeCycleTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterSceneLifeCycleTest.mm; sourceTree = "<group>"; };
 		78A9D2512E6F56DA00BEE2FC /* FlutterViewTest.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterViewTest.mm; sourceTree = "<group>"; };
@@ -112,7 +112,7 @@
 				78E4ED342D88A77C00FD954E /* FlutterSharedApplicationTest.mm */,
 				F76A3A892BE48F2F00A654F1 /* FlutterPlatformViewsTest.mm */,
 				689EC1E2281B30D3008FEB58 /* FlutterSpellCheckPluginTest.mm */,
-				68B6091227F62F990036AC78 /* VsyncWaiterIosTest.mm */,
+				68B6091227F62F990036AC78 /* FlutterVSyncClientTest.mm */,
 				3DD7D38C27D2B81000DA365C /* FlutterUndoManagerPluginTest.mm */,
 				F7A3FDE026B9E0A300EADD61 /* FlutterAppDelegateTest.mm */,
 				0AC232F424BA71D300A85907 /* SemanticsObjectTest.mm */,

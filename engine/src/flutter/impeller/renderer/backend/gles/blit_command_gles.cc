@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/gles/blit_command_gles.h"
 
+#include <algorithm>
+
 #include "flutter/fml/closure.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
@@ -225,19 +227,27 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
   const GLvoid* tex_data =
       source.GetBuffer()->OnGetContents() + source.GetRange().offset;
 
-  // GL_INVALID_OPERATION if the texture array has not been
-  // defined by a previous glTexImage2D operation.
-  if (!texture_gles.IsSliceInitialized(slice)) {
+  // GL_INVALID_OPERATION if the requested mip level has not been defined by
+  // a previous glTexImage2D operation. Allocate the requested mip lazily on
+  // first write, only for the level the upload is actually targeting. The
+  // snapshot pipeline (single base-level allocation followed by
+  // glGenerateMipmap) keeps its existing GL footprint, and per-level uploads
+  // pay only for the levels they touch.
+  if (!texture_gles.IsSliceMipLevelInitialized(slice, mip_level)) {
+    const auto level_width =
+        std::max<int32_t>(1, tex_descriptor.size.width >> mip_level);
+    const auto level_height =
+        std::max<int32_t>(1, tex_descriptor.size.height >> mip_level);
     gl.TexImage2D(texture_target,                // target
                   mip_level,                     // LOD level
                   gles_format->internal_format,  // internal format
-                  tex_descriptor.size.width,     // width
-                  tex_descriptor.size.height,    // height
+                  level_width,                   // width
+                  level_height,                  // height
                   0u,                            // border
                   gles_format->external_format,  // format
                   gles_format->type,             // type
                   nullptr);                      // data
-    texture_gles.MarkSliceInitialized(slice);
+    texture_gles.MarkSliceMipLevelInitialized(slice, mip_level);
   }
 
   {

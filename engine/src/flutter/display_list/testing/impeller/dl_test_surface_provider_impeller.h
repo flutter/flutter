@@ -20,12 +20,18 @@ class DlSurfaceProviderImpeller : public DlSurfaceProvider {
                          size_t height,
                          PixelFormat format) override;
   std::shared_ptr<DlSurfaceInstance> GetPrimarySurface() const override;
-  std::shared_ptr<DlSurfaceInstance> MakeOffscreenSurface(
+  std::unique_ptr<DlSurfaceInstance> MakeOffscreenSurface(
       size_t width,
       size_t height,
       PixelFormat format) const override;
   bool SupportsPixelFormat(PixelFormat format) const override;
-  bool SupportsImpeller() const override;
+  bool TargetsImpeller() const override;
+
+  static std::unique_ptr<DlSurfaceInstanceImpeller> MakeOffscreenSurface(
+      std::shared_ptr<impeller::Context> context,
+      size_t width,
+      size_t height,
+      PixelFormat format);
 
  protected:
   DlSurfaceProviderImpeller();
@@ -33,7 +39,8 @@ class DlSurfaceProviderImpeller : public DlSurfaceProvider {
   virtual impeller::PlaygroundImpl* GetPlayground() const = 0;
 
   static std::unique_ptr<impeller::PlaygroundImpl> MakePlayground(
-      impeller::PlaygroundBackend backend);
+      impeller::PlaygroundBackend backend,
+      const impeller::PlaygroundSwitches& switches);
 
  private:
   std::shared_ptr<DlSurfaceInstance> primary_;

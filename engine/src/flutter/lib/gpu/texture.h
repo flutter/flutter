@@ -27,7 +27,10 @@ class Texture : public RefCountedDartWrappable<Texture> {
 
   void SetCoordinateSystem(impeller::TextureCoordinateSystem coordinate_system);
 
-  bool Overwrite(Context& gpu_context, const tonic::DartByteData& source_bytes);
+  bool Overwrite(Context& gpu_context,
+                 const tonic::DartByteData& source_bytes,
+                 uint32_t mip_level,
+                 uint32_t slice);
 
   size_t GetBytesPerTexel();
 
@@ -61,7 +64,8 @@ extern bool InternalFlutterGpu_Texture_Initialize(
     int texture_type,
     bool enable_render_target_usage,
     bool enable_shader_read_usage,
-    bool enable_shader_write_usage);
+    bool enable_shader_write_usage,
+    int mip_level_count);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_Texture_SetCoordinateSystem(
@@ -72,7 +76,9 @@ FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_Texture_Overwrite(
     flutter::gpu::Texture* wrapper,
     flutter::gpu::Context* gpu_context,
-    Dart_Handle source_byte_data);
+    Dart_Handle source_byte_data,
+    int mip_level,
+    int slice);
 
 FLUTTER_GPU_EXPORT
 extern int InternalFlutterGpu_Texture_BytesPerTexel(
