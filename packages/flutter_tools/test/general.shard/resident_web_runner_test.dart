@@ -1609,6 +1609,81 @@ name: my_app
   );
 
   testUsingContext(
+    'generates project-relative imports for non-package web entrypoints',
+    () async {
+      final String target = fileSystem.path.join('integration_test', 'foo', 'bar_test.dart');
+      fileSystem.file(target).createSync(recursive: true);
+      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, target: target);
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[...kAttachExpectations],
+      );
+      setupMocks();
+
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+
+      expect(webDevFS.mainUri, isNotNull);
+      final String entrypointContents = fileSystem.file(webDevFS.mainUri).readAsStringSync();
+      expect(
+        entrypointContents,
+        contains("import 'org-dartlang-app:/integration_test/foo/bar_test.dart' as entrypoint;"),
+      );
+      expect(residentCompiler.fileSystemRoots, contains(fileSystem.currentDirectory.absolute.path));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'keeps fallback filesystem roots for entrypoints outside the project',
+    () async {
+      final Directory projectDirectory = fileSystem.systemTempDirectory.childDirectory('project')
+        ..createSync(recursive: true);
+      fileSystem.currentDirectory = projectDirectory;
+      fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+''');
+      writePackageConfigFiles(directory: projectDirectory, mainLibName: 'my_app');
+
+      final Directory externalDirectory = fileSystem.systemTempDirectory.childDirectory(
+        'external-entrypoint',
+      )..createSync(recursive: true);
+      final String target = externalDirectory.childFile('bar_test.dart').path;
+      fileSystem.file(target).createSync();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, target: target);
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[...kAttachExpectations],
+      );
+      setupMocks();
+
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+
+      expect(webDevFS.mainUri, isNotNull);
+      final String entrypointContents = fileSystem.file(webDevFS.mainUri).readAsStringSync();
+      expect(
+        entrypointContents,
+        contains("import 'org-dartlang-app:/bar_test.dart' as entrypoint;"),
+      );
+      expect(residentCompiler.fileSystemRoots, contains(externalDirectory.path));
+      expect(
+        residentCompiler.fileSystemRoots,
+        contains(projectDirectory.childDirectory('test').absolute.path),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'Sends launched app.webLaunchUrl event for Chrome device',
     () async {
       final logger = BufferLogger.test();
@@ -2004,9 +2079,11 @@ ResidentRunner setUpResidentRunner(
   Logger? logger,
   SystemClock? systemClock,
   DebuggingOptions? debuggingOptions,
+  String? target,
 }) {
   return ResidentWebRunner(
     flutterDevice,
+    target: target,
     flutterProject: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
     debuggingOptions: debuggingOptions ?? DebuggingOptions.enabled(BuildInfo.debug),
     analytics: globals.analytics,
@@ -2111,6 +2188,8 @@ class FakeChromeDevice extends Fake implements ChromiumDevice {}
 class FakeWipDebugger extends Fake implements WipDebugger {}
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
+  final List<String> fileSystemRoots = <String>[];
+
   @override
   Future<CompilerOutput> recompile(
     Uri mainUri,
@@ -2140,7 +2219,9 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   }
 
   @override
-  void addFileSystemRoot(String root) {}
+  void addFileSystemRoot(String root) {
+    fileSystemRoots.add(root);
+  }
 }
 
 class FakeWebDevFS extends Fake implements WebDevFS {

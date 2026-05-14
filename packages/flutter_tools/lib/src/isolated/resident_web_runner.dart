@@ -25,6 +25,7 @@ import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../compile.dart';
 import '../dart/language_version.dart';
 import '../devfs.dart';
 import '../device.dart';
@@ -739,15 +740,26 @@ class ResidentWebRunner extends ResidentRunner {
       Uri? importedEntrypoint = packageConfig!.toPackageUri(mainUri);
       // Special handling for entrypoints that are not under lib, such as test scripts.
       if (importedEntrypoint == null) {
-        final String parent = _fileSystem.file(mainUri).parent.path;
-        flutterDevices.first.generator!
-          ..addFileSystemRoot(parent)
-          ..addFileSystemRoot(_fileSystem.directory('test').absolute.path);
-        importedEntrypoint = Uri(
-          scheme: 'org-dartlang-app',
-          host: '',
-          path: '/${mainUri.pathSegments.last}',
-        );
+        final File mainFile = _fileSystem.file(mainUri).absolute;
+        final String projectRoot = flutterProject.directory.absolute.path;
+        final ResidentCompiler generator = flutterDevices.first.generator!;
+        if (_fileSystem.path.isWithin(projectRoot, mainFile.path)) {
+          generator.addFileSystemRoot(projectRoot);
+          final String relativeMainPath = _fileSystem.path.relative(
+            mainFile.path,
+            from: projectRoot,
+          );
+          final String uriPath = _fileSystem.path.toUri(relativeMainPath).path;
+          importedEntrypoint = Uri(scheme: 'org-dartlang-app', path: '/$uriPath');
+        } else {
+          generator
+            ..addFileSystemRoot(mainFile.parent.path)
+            ..addFileSystemRoot(flutterProject.directory.childDirectory('test').absolute.path);
+          importedEntrypoint = Uri(
+            scheme: 'org-dartlang-app',
+            path: '/${mainUri.pathSegments.last}',
+          );
+        }
       }
       final LanguageVersion languageVersion = determineLanguageVersion(
         _fileSystem.file(mainUri),
