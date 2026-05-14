@@ -117,6 +117,8 @@ class TabController extends ChangeNotifier {
        _index = initialIndex,
        _previousIndex = initialIndex,
        _animationDuration = animationDuration ?? kTabScrollDuration,
+       _indexChangeDuration = animationDuration ?? kTabScrollDuration,
+       _indexChangeCurve = Curves.ease,
        _animationController = AnimationController.unbounded(
          value: initialIndex.toDouble(),
          vsync: vsync,
@@ -133,11 +135,15 @@ class TabController extends ChangeNotifier {
     required int previousIndex,
     required AnimationController? animationController,
     required Duration animationDuration,
+    required Duration indexChangeDuration,
+    required Curve indexChangeCurve,
     required this.length,
   }) : _index = index,
        _previousIndex = previousIndex,
        _animationController = animationController,
-       _animationDuration = animationDuration {
+       _animationDuration = animationDuration,
+       _indexChangeDuration = indexChangeDuration,
+       _indexChangeCurve = indexChangeCurve {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
@@ -167,6 +173,8 @@ class TabController extends ChangeNotifier {
       animationController: _animationController,
       previousIndex: previousIndex ?? _previousIndex,
       animationDuration: animationDuration ?? _animationDuration,
+      indexChangeDuration: animationDuration ?? _animationDuration,
+      indexChangeCurve: _indexChangeCurve,
     );
     _animationController = null;
     dispose();
@@ -192,6 +200,20 @@ class TabController extends ChangeNotifier {
   Duration get animationDuration => _animationDuration;
   final Duration _animationDuration;
 
+  /// The duration selected for the current or most recent tab index change.
+  ///
+  /// This is [animationDuration] when [animateTo] is called without a custom
+  /// duration, and when [index] is changed directly.
+  Duration get indexChangeDuration => _indexChangeDuration;
+  Duration _indexChangeDuration;
+
+  /// The curve selected for the current or most recent [animateTo] animation.
+  ///
+  /// Defaults to [Curves.ease] unless [animateTo] was called with a custom
+  /// curve.
+  Curve get indexChangeCurve => _indexChangeCurve;
+  Curve _indexChangeCurve;
+
   /// The total number of tabs.
   ///
   /// Typically greater than one. Must match [TabBar.tabs]'s and
@@ -205,6 +227,8 @@ class TabController extends ChangeNotifier {
     if (value == _index || length < 2) {
       return;
     }
+    _indexChangeDuration = duration ?? _animationDuration;
+    _indexChangeCurve = curve ?? Curves.ease;
     _previousIndex = index;
     _index = value;
     if (duration != null && duration > Duration.zero) {
