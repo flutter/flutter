@@ -32,9 +32,15 @@ class ShaderLibrary : public RefCountedDartWrappable<ShaderLibrary> {
 
   static fml::RefPtr<ShaderLibrary> MakeFromShaders(ShaderMap shaders);
 
+  /// `library_id` is a stable identifier (typically the asset path the
+  /// bundle was loaded from) used to namespace the shaders' entrypoints in
+  /// the shared shader registry, so they cannot collide with engine-internal
+  /// shaders or with shaders from a different bundle. If empty, a
+  /// process-unique fallback is generated.
   static fml::RefPtr<ShaderLibrary> MakeFromFlatbuffer(
       impeller::Context::BackendType backend_type,
-      std::shared_ptr<fml::Mapping> payload);
+      std::shared_ptr<fml::Mapping> payload,
+      std::string library_id = "");
 
   /// Sets a return override for `MakeFromAsset` for testing purposes.
   static void SetOverride(fml::RefPtr<ShaderLibrary> override_shader_library);

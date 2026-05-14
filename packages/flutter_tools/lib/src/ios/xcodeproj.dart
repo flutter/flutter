@@ -22,6 +22,7 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../reporting/reporting.dart';
+import '../xcode_project.dart';
 
 final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final _varExpr = RegExp(r'\$\(([^)]*)\)');
@@ -186,14 +187,14 @@ class XcodeProjectInterpreter {
   /// Using this method when running `xcodebuild` commands ensures that `xcrun` is used properly
   /// and that the Swift package cache is properly configured.
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
-    String projectPath,
+    XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
     bool skipPackageUpdatesAndValidation = true,
   }) async {
     // All `xcodebuild` project commands will download and resolve Swift packages.
     // We should always prefetch Swift packages before running any `xcodebuild` project command
     // to control the output.
-    await prefetchSwiftPackages(projectPath, buildDirectory: buildDirectory, quiet: false);
+    await prefetchSwiftPackages(xcodeProject, buildDirectory: buildDirectory, quiet: false);
 
     return _xcodebuildProjectCommandArguments(
       buildDirectory,
@@ -234,7 +235,7 @@ class XcodeProjectInterpreter {
   /// If [XcodeProjectBuildContext.scheme] is `null`, `xcodebuild` will
   /// return build settings for the first discovered target (by default this is Runner).
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
@@ -249,9 +250,10 @@ class XcodeProjectInterpreter {
       XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
     };
     final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
-      projectPath,
+      xcodeProject,
       _fileSystem.directory(buildDir),
     );
+    final String projectPath = xcodeProject.xcodeProject.path;
     final showBuildSettingsCommand = <String>[
       ...xcodebuildCommandArgs,
       '-project',
@@ -362,6 +364,7 @@ class XcodeProjectInterpreter {
   }
 
   Future<void> cleanWorkspace(
+    XcodeBasedProject xcodeProject,
     String workspacePath,
     String scheme, {
     required Directory buildDirectory,
@@ -369,7 +372,7 @@ class XcodeProjectInterpreter {
   }) async {
     final String projectPath = _fileSystem.currentDirectory.path;
     final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
-      projectPath,
+      xcodeProject,
       buildDirectory,
     );
     await _processUtils.run(<String>[
@@ -402,11 +405,12 @@ class XcodeProjectInterpreter {
   /// If [quiet] is false, it will print a spinner while the command is running and print logs of
   /// what Swift packages are being fetched.
   Future<void> prefetchSwiftPackages(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
     bool quiet = true,
     bool waitForCompletion = true,
   }) async {
+    final String projectPath = xcodeProject.hostAppRoot.path;
     Status? status;
     try {
       final command = <String>[
@@ -497,7 +501,7 @@ class XcodeProjectInterpreter {
   }
 
   Future<XcodeProjectInfo?> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
   }) async {
@@ -509,7 +513,7 @@ class XcodeProjectInterpreter {
     const corruptedProjectExitCode = 74;
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
-      projectPath,
+      xcodeProject,
       buildDirectory,
     );
     final RunResult result = await _processUtils.run(
@@ -520,7 +524,7 @@ class XcodeProjectInterpreter {
       ],
       throwOnError: true,
       allowedFailures: allowedFailures,
-      workingDirectory: projectPath,
+      workingDirectory: xcodeProject.hostAppRoot.path,
     );
     if (allowedFailures(result.exitCode)) {
       // User configuration error, tool exit instead of crashing.

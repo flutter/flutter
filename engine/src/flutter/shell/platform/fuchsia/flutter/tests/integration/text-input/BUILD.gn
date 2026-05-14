@@ -41,7 +41,6 @@ executable("text-input-test-bin") {
     "${fuchsia_sdk}/pkg/fidl_cpp",
     "${fuchsia_sdk}/pkg/sys_component_cpp_testing",
     "${fuchsia_sdk}/pkg/zx",
-    "text-input-view:package",
     "//flutter/fml",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:check_view",
     "//flutter/shell/platform/fuchsia/flutter/tests/integration/utils:portable_ui_test",
@@ -52,6 +51,8 @@ executable("text-input-test-bin") {
 
 fuchsia_test_archive("text-input-test") {
   deps = [ ":text-input-test-bin" ]
-  subpackages =
-      [ "//flutter/shell/platform/fuchsia/flutter:flutter_jit_runner" ]
+  subpackages = [
+    "text-input-view:package",
+    "//flutter/shell/platform/fuchsia/flutter:flutter_jit_runner",
+  ]
 }
