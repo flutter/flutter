@@ -369,25 +369,30 @@ class DestinationView extends StatefulWidget {
 class _DestinationViewState extends State<DestinationView> {
   @override
   Widget build(BuildContext context) {
-    return Navigator(
-      key: widget.navigatorKey,
-      onGenerateRoute: (RouteSettings settings) {
-        return MaterialPageRoute<void>(
-          settings: settings,
-          builder: (BuildContext context) {
-            switch (settings.name) {
-              case '/':
-                return RootPage(destination: widget.destination);
-              case '/list':
-                return ListPage(destination: widget.destination);
-              case '/text':
-                return TextPage(destination: widget.destination);
-            }
-            assert(false);
-            return const SizedBox();
-          },
-        );
-      },
+    // The nested Navigator has its own Scaffolds, so it also needs its own
+    // ScaffoldMessenger to present SnackBars and MaterialBanners inside the
+    // destination instead of above the root Scaffold.
+    return ScaffoldMessenger(
+      child: Navigator(
+        key: widget.navigatorKey,
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              switch (settings.name) {
+                case '/':
+                  return RootPage(destination: widget.destination);
+                case '/list':
+                  return ListPage(destination: widget.destination);
+                case '/text':
+                  return TextPage(destination: widget.destination);
+              }
+              assert(false);
+              return const SizedBox();
+            },
+          );
+        },
+      ),
     );
   }
 }
