@@ -836,22 +836,34 @@ class _ScaledLayoutRenderObject extends RenderShiftedBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return super.computeMinIntrinsicWidth(height) * scale;
+    if (child == null) {
+      return 0.0;
+    }
+    return child!.getMinIntrinsicWidth(height / scale) * scale;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    return super.computeMaxIntrinsicWidth(height) * scale;
+    if (child == null) {
+      return 0.0;
+    }
+    return child!.getMaxIntrinsicWidth(height / scale) * scale;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    return super.computeMinIntrinsicHeight(width) * scale;
+    if (child == null) {
+      return 0.0;
+    }
+    return child!.getMinIntrinsicHeight(width / scale) * scale;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    return super.computeMaxIntrinsicHeight(width) * scale;
+    if (child == null) {
+      return 0.0;
+    }
+    return child!.getMaxIntrinsicHeight(width / scale) * scale;
   }
 
   @override
