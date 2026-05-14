@@ -1543,7 +1543,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     // are <=32pt. 40pt sits safely in the gap between them.
     // See: https://github.com/flutter/flutter/issues/175520
     constexpr CGFloat kNotchStatusBarThreshold = 40.0;
-    if (self.flutterPrefersStatusBarHidden && _statusBarHeightBeforeHiding > 0 &&
+    UIWindowScene* scene = (UIWindowScene*)self.view.window.windowScene;
+    if (scene.statusBarManager.isStatusBarHidden && _statusBarHeightBeforeHiding > 0 &&
         _statusBarHeightBeforeHiding < kNotchStatusBarThreshold) {
       topPadding = MAX(0.0, topPadding - _statusBarHeightBeforeHiding);
     }
@@ -1975,7 +1976,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
         // Capture the status bar height now, before setNeedsStatusBarAppearanceUpdate
         // causes UIKit to process the change. On iOS 26+, statusBarFrame.size.height
         // returns 0 once the bar is hidden, so this is the only reliable moment.
-        UIWindowScene* scene = (UIWindowScene*)self.view.window.windowScene;
+        UIWindowScene* scene = (UIWindowScene*)self.viewIfLoaded.window.windowScene;
         _statusBarHeightBeforeHiding = scene.statusBarManager.statusBarFrame.size.height;
       } else {
         _statusBarHeightBeforeHiding = 0;
@@ -1984,13 +1985,12 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
     self.flutterPrefersStatusBarHidden = hidden;
     [self setNeedsStatusBarAppearanceUpdate];
     if (@available(iOS 26.0, *)) {
-      // On iOS 26+, setNeedsStatusBarAppearanceUpdate no longer triggers
-      // viewSafeAreaInsetsDidChange. Schedule a layout pass so
-      // viewDidLayoutSubviews calls setViewportMetricsPaddings with the
-      // updated flutterPrefersStatusBarHidden state.
+      // Schedule a layout pass so that viewDidLayoutSubviews invokes
+      // setViewportMetricsPaddings, which will then read the updated
+      // status bar visibility state.
       // See: https://github.com/flutter/flutter/issues/175520
       dispatch_async(dispatch_get_main_queue(), ^{
-        [self.view setNeedsLayout];
+        [self.viewIfLoaded setNeedsLayout];
       });
     }
   }
