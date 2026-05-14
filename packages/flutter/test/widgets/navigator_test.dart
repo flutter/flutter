@@ -6342,6 +6342,105 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
+
+  testWidgets(
+    'Navigator.pop and maybePop throw Flutter error when popped with mismatched type via showDialog',
+    experimentalLeakTesting: LeakTesting.settings.withIgnoredAll(),
+    (WidgetTester tester) async {
+      Object? popException;
+      Object? maybePopException;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                try {
+                                  Navigator.pop(context, 'NO');
+                                } catch (e) {
+                                  popException = e;
+                                }
+                              },
+                              child: const Text('NO'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.maybePop(context, 'YES').catchError((Object e) {
+                                  maybePopException = e;
+                                  return false;
+                                });
+                              },
+                              child: const Text('YES'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  child: const Text('Open Dialog'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('Open Dialog'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('NO'));
+      expect(popException, isFlutterError);
+      final popError = popException! as FlutterError;
+      expect(
+        popError.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   A request was made to pop a route with a result of type String,\n'
+          '   but the route expected a value of type bool.\n'
+          '   This usually happens when the type provided to Navigator.pop() is\n'
+          '   not a subtype of the type expected by the Route (e.g.\n'
+          '   DialogRoute<Null>), or when a generic type is explicitly provided\n'
+          '   to a route creation method (such as showDialog<T>()) but the\n'
+          '   popped value does not match this type.\n'
+          '   The route was: DialogRoute<bool>(RouteSettings(none, null),\n'
+          '     animation: AnimationController#00000(⏭ 1.000; paused; for\n'
+          '     DialogRoute<bool>))\n'
+          '   The provided result was: NO\n'
+          '',
+        ),
+      );
+
+      await tester.tap(find.text('YES'));
+      await tester.pumpAndSettle();
+      expect(maybePopException, isFlutterError);
+      final maybePopError = maybePopException! as FlutterError;
+      expect(
+        maybePopError.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   A request was made to pop a route with a result of type String,\n'
+          '   but the route expected a value of type bool.\n'
+          '   This usually happens when the type provided to\n'
+          '   Navigator.maybePop() is not a subtype of the type expected by the\n'
+          '   Route (e.g. DialogRoute<Null>), or when a generic type is\n'
+          '   explicitly provided to a route creation method (such as\n'
+          '   showDialog<T>()) but the popped value does not match this type.\n'
+          '   The route was: DialogRoute<bool>(RouteSettings(none, null),\n'
+          '     animation: AnimationController#00000(⏭ 1.000; paused; for\n'
+          '     DialogRoute<bool>))\n'
+          '   The provided result was: YES\n'
+          '',
+        ),
+      );
+    },
+  );
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
