@@ -17,6 +17,16 @@ export const loadSkwasm = async (deps, config, browserEnvironment, baseUrl) => {
   }
   const wasmInstantiator = createWasmInstantiator(resolveUrlWithSegments(baseUrl, `${fileStem}.wasm`));
   const skwasm = await import(skwasmUrl);
+  if (!browserEnvironment.crossOriginIsolated && !config.forceSingleThreadedSkwasm) {
+    console.warn(
+      'Flutter Web: SharedArrayBuffer is not available because the hosting page ' +
+      'is not cross-origin isolated. Skwasm will run in single-threaded mode.\n' +
+      'To enable multithreading, serve your app with these HTTP response headers:\n' +
+      '  Cross-Origin-Opener-Policy: same-origin\n' +
+      '  Cross-Origin-Embedder-Policy: require-corp\n' +
+      'See https://web.dev/articles/coop-coep for guidance.'
+    );
+  }
   return await skwasm.default({
     // Chrome extensions enforce strict CSP that blocks the dynamic script
     // loading required for multi-threaded workers. We force single-threaded

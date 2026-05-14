@@ -160,69 +160,39 @@ export class FlutterEntrypointLoader {
       if (this._ttPolicy != null) {
         jsSupportRuntimeUri = this._ttPolicy.createScriptURL(jsSupportRuntimeUri);
       }
-      try {
-        const jsSupportRuntime = await import(jsSupportRuntimeUri);
+      const jsSupportRuntime = await import(jsSupportRuntimeUri);
 
-        const compiledDartAppPromise = jsSupportRuntime.compileStreaming(fetch(moduleUri));
+      const compiledDartAppPromise = jsSupportRuntime.compileStreaming(fetch(moduleUri));
 
-        let importsPromise;
-        if (build.renderer === "skwasm") {
-          importsPromise = (async () => {
-            const skwasmInstance = await deps.skwasm;
-            window._flutter_skwasmInstance = skwasmInstance;
-            return {
-              skwasm: skwasmInstance.wasmExports,
-              skwasmWrapper: skwasmInstance,
-              ffi: {
-                memory: skwasmInstance.wasmMemory,
-              },
-            };
-          })();
-        } else {
-          importsPromise = Promise.resolve({});
-        }
-        const compiledDartApp = await compiledDartAppPromise;
-        const dartApp = await compiledDartApp.instantiate(await importsPromise, {
-          loadDynamicModule: async (wasmUri, mjsUri) => {
-            const wasmBytes = fetch(resolveUrlWithSegments(entrypointBaseUrl, wasmUri));
-            let mjsRuntimeUri = resolveUrlWithSegments(entrypointBaseUrl, mjsUri);
-            if (this._ttPolicy != null) {
-              mjsRuntimeUri = this._ttPolicy.createScriptURL(mjsRuntimeUri);
-            }
-            const mjsModule = import(mjsRuntimeUri);
-            return [await wasmBytes, await mjsModule];
-          }
-        });
-        await dartApp.invokeMain();
-      } catch (error) {
-        // A common WASM-load failure mode is that the hosting page is not
-        // crossOriginIsolated. WASM features such as SharedArrayBuffer and
-        // shared-memory threading require the page to opt into cross-origin
-        // isolation via the Cross-Origin-Opener-Policy and
-        // Cross-Origin-Embedder-Policy HTTP response headers.
-        //
-        // Without those headers, the underlying WebAssembly error is often
-        // a low-level message ("SharedArrayBuffer is not defined", "shared
-        // memory not enabled", etc.) that doesn't point the developer to
-        // the actual configuration problem. Detect the case and emit a
-        // single actionable warning before re-throwing the original error.
-        //
-        // See https://github.com/flutter/flutter/issues/142822
-        if (typeof window !== "undefined" && window.crossOriginIsolated === false) {
-          console.warn(
-            "Flutter Web (WASM) failed to load and the hosting page is not " +
-            "cross-origin isolated. Some WASM features (SharedArrayBuffer, " +
-            "shared-memory threading) require cross-origin isolation, which " +
-            "the server enables by sending these HTTP response headers:\n" +
-            "  Cross-Origin-Opener-Policy: same-origin\n" +
-            "  Cross-Origin-Embedder-Policy: require-corp\n" +
-            "If you can't change these headers, build with the JavaScript " +
-            "compile target instead of dart2wasm. " +
-            "See https://web.dev/articles/coop-coep for details."
-          );
-        }
-        throw error;
+      let importsPromise;
+      if (build.renderer === "skwasm") {
+        importsPromise = (async () => {
+          const skwasmInstance = await deps.skwasm;
+          window._flutter_skwasmInstance = skwasmInstance;
+          return {
+            skwasm: skwasmInstance.wasmExports,
+            skwasmWrapper: skwasmInstance,
+            ffi: {
+              memory: skwasmInstance.wasmMemory,
+            },
+          };
+        })();
+      } else {
+        importsPromise = Promise.resolve({});
       }
+      const compiledDartApp = await compiledDartAppPromise;
+      const dartApp = await compiledDartApp.instantiate(await importsPromise, {
+        loadDynamicModule: async (wasmUri, mjsUri) => {
+          const wasmBytes = fetch(resolveUrlWithSegments(entrypointBaseUrl, wasmUri));
+          let mjsRuntimeUri = resolveUrlWithSegments(entrypointBaseUrl, mjsUri);
+          if (this._ttPolicy != null) {
+            mjsRuntimeUri = this._ttPolicy.createScriptURL(mjsRuntimeUri);
+          }
+          const mjsModule = import(mjsRuntimeUri);
+          return [await wasmBytes, await mjsModule];
+        }
+      });
+      await dartApp.invokeMain();
     }
   }
 
