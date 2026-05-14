@@ -1,0 +1,8 @@
+{
+  "version": "6_1_0",
+
+  "md.comp.bottom-app-bar.container.color": "surfaceContainer",
+  "md.comp.bottom-app-bar.container.elevation": "md.sys.elevation.level2",
+  "md.comp.bottom-app-bar.container.height": 80.0,
+  "md.comp.bottom-app-bar.container.shape": "md.sys.shape.corner.none"
+}

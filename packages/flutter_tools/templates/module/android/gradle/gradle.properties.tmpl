@@ -1,0 +1,6 @@
+org.gradle.jvmargs=-Xmx8G -XX:MaxMetaspaceSize=4G -XX:ReservedCodeCacheSize=512m -XX:+HeapDumpOnOutOfMemoryError
+android.useAndroidX=true
+# This newDsl flag was added by the Flutter template
+android.newDsl=false
+# This builtInKotlin flag was added by the Flutter template
+android.builtInKotlin=false

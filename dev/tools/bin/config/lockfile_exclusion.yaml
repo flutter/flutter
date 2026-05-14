@@ -1,0 +1,12 @@
+# Tests that are excluded from batch Gradle updating and lockfile generation.
+# Each exclusion must have an associated reason. Please avoid adding to this list unless necessary,
+# as each exclusion must be updated by hand.
+
+# There are currently no entries :) but if you wanted to add one, the format would be
+# - made/up/path/flutter_create_name/android
+
+# The following files must also be manually updated at the moment, because they don't use a
+# lib/main.dart (but they don't need exclusion, as we already skip that case).
+# dev/benchmarks/microbenchmarks/android/build.gradle
+# dev/tracing_tests/android/build.gradle
+# dev/integration_tests/external_textures/android/build.gradle

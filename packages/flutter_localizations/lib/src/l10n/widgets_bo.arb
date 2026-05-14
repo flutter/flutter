@@ -1,0 +1,18 @@
+{
+  "reorderItemToStart": "འགོ་འཛུགས་སར་འགྲོ།",
+  "reorderItemToEnd": "མཇུག་བསྡུ་སར་འགྲོ།",
+  "reorderItemUp": "སྒང་ལ་འགྲོ།",
+  "reorderItemDown": "འོག་ལ་འགྲོ།",
+  "reorderItemLeft": "གཡོན་ལ་འགྲོ།",
+  "reorderItemRight": "གཡས་ལ་འགྲོ།",
+  "searchResultsFound": "འཚོལ་ཞིབ·གྲུབ་འབྲས·རྙེད་ཡོད",
+  "noResultsFound": "འཚོལ་ཞིབ·གྲུབ་འབྲས·མེད",
+  "copyButtonLabel": "བཤུས།",
+  "cutButtonLabel": "གཅོད།",
+  "lookUpButtonLabel": "འཚོལ་བ།",
+  "searchWebButtonLabel": "དྲ་ཐོག་འཚོལ་བཤེར།",
+  "shareButtonLabel": "མཉམ་སྤྱོད།",
+  "pasteButtonLabel": "འཕོས་པ།",
+  "selectAllButtonLabel": "ཚང་འདེམས།",
+  "radioButtonUnselectedLabel": "འདེམ་སྒྲུག·མེད"
+}

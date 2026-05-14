@@ -1,0 +1,151 @@
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# For details regarding the *Flutter Fix* feature, see
+# https://flutter.dev/to/flutter-fix
+
+# Please add new fixes to the top of the file, separated by one blank line
+# from other fixes. In a comment, include a link to the PR where the change
+# requiring the fix was made.
+
+# Every fix must be tested. See the flutter/packages/flutter/test_fixes/README.md
+# file for instructions on testing these data driven fixes.
+
+# For documentation about this file format, see
+# https://dart.dev/go/data-driven-fixes.
+
+# * Fixes in this file are for AppBar from the Material library. *
+#   For fixes to
+#     * AppBarTheme: fix_app_bar_theme.yaml
+#     * ColorScheme: fix_color_scheme.yaml
+#     * Material (general): fix_material.yaml
+#     * SliverAppBar: fix_sliver_app_bar.yaml
+#     * TextTheme: fix_text_theme.yaml
+#     * ThemeData: fix_theme_data.yaml
+#     * WidgetState: fix_widget_state.yaml
+version: 1
+transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Remove 'backwardsCompatibility'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBar'
+    changes:
+    - kind: 'removeParameter'
+      name: 'backwardsCompatibility'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle' & 'titleTextStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBar'
+    changes:
+      - kind: 'addParameter'
+        index: 24
+        name: 'toolbarTextStyle'
+        style: optional_named
+        argumentValue:
+          expression: '{% textTheme %}.bodyText2'
+          requiredIf: "textTheme != ''"
+      - kind: 'addParameter'
+        index: 25
+        name: 'titleTextStyle'
+        style: optional_named
+        argumentValue:
+          expression: '{% textTheme %}.headline6'
+          requiredIf: "textTheme != ''"
+      - kind: 'removeParameter'
+        name: 'textTheme'
+    variables:
+      textTheme:
+        kind: 'fragment'
+        value: 'arguments[textTheme]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'toolbarTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'toolbarTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'titleTextStyle'"
+    date: 2021-07-12
+    # TODO(Piinks): Add tests when `bulkApply:false` testing is supported, https://github.com/dart-lang/sdk/issues/44639
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      field: 'textTheme'
+      inClass: 'AppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'titleTextStyle'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2020-07-12
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'AppBar'
+    oneOf:
+    - if: "brightness == 'Brightness.dark'"
+      changes:
+        - kind: 'addParameter'
+          index: 27
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.light'
+            requiredIf: "brightness == 'Brightness.dark'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    - if: "brightness == 'Brightness.light'"
+      changes:
+        - kind: 'addParameter'
+          index: 27
+          name: 'systemOverlayStyle'
+          style: optional_named
+          argumentValue:
+            expression: '{% SystemUiOverlayStyle %}.dark'
+            requiredIf: "brightness == 'Brightness.light'"
+            variables:
+              SystemUiOverlayStyle:
+                kind: 'import'
+                uris: [ 'services.dart' ]
+                name: 'SystemUiOverlayStyle'
+        - kind: 'removeParameter'
+          name: 'brightness'
+    variables:
+      brightness:
+        kind: 'fragment'
+        value: 'arguments[brightness]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/86198
+  - title: "Migrate to 'systemOverlayStyle'"
+    date: 2021-07-12
+    element:
+      uris: [ 'material.dart' ]
+      field: 'brightness'
+      inClass: 'AppBar'
+    changes:
+      - kind: 'rename'
+        newName: 'systemOverlayStyle'
+
+# Before adding a new fix: read instructions at the top of this file.

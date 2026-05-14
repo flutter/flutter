@@ -1,0 +1,19 @@
+// Generated file. Do not edit.
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: "com.android.library"
+
+android {
+    namespace = "{{androidIdentifier}}"
+    compileSdk = {{compileSdkVersion}}
+    defaultConfig {
+        minSdk = {{minSdkVersion}}
+        targetSdk = {{targetSdkVersion}}
+    }
+}

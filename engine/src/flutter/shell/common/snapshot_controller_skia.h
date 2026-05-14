@@ -1,0 +1,68 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef FLUTTER_SHELL_COMMON_SNAPSHOT_CONTROLLER_SKIA_H_
+#define FLUTTER_SHELL_COMMON_SNAPSHOT_CONTROLLER_SKIA_H_
+
+#if !SLIMPELLER
+
+#include "flutter/shell/common/snapshot_controller.h"
+#include "third_party/skia/include/core/SkSurface.h"
+
+namespace flutter {
+
+class SnapshotControllerSkia : public SnapshotController {
+ public:
+  explicit SnapshotControllerSkia(const SnapshotController::Delegate& delegate)
+      : SnapshotController(delegate) {}
+
+  void MakeSkiaSnapshot(sk_sp<DisplayList> display_list,
+                        DlISize picture_size,
+                        std::function<void(const sk_sp<SkImage>&)> callback,
+                        SnapshotPixelFormat pixel_format) override;
+
+  sk_sp<SkImage> MakeSkiaSnapshotSync(
+      sk_sp<DisplayList> display_list,
+      DlISize size,
+      SnapshotPixelFormat pixel_format) override;
+
+  void MakeImpellerSnapshot(
+      sk_sp<DisplayList> display_list,
+      DlISize picture_size,
+      std::function<void(const std::shared_ptr<impeller::Texture>&)> callback,
+      SnapshotPixelFormat pixel_format) override;
+
+  std::shared_ptr<impeller::Texture> MakeImpellerSnapshotSync(
+      sk_sp<DisplayList> display_list,
+      DlISize size,
+      SnapshotPixelFormat pixel_format) override;
+
+  sk_sp<SkImage> MakeSkiaTextureImage(
+      sk_sp<SkImage> image,
+      SnapshotPixelFormat pixel_format) override;
+
+  std::shared_ptr<impeller::Texture> MakeImpellerTextureImage(
+      sk_sp<SkImage> image,
+      SnapshotPixelFormat pixel_format) override;
+
+  virtual sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
+
+  void CacheRuntimeStage(
+      const std::shared_ptr<impeller::RuntimeStage>& runtime_stage) override;
+
+  bool MakeRenderContextCurrent() override;
+
+ private:
+  sk_sp<SkImage> DoMakeRasterSnapshot(
+      DlISize size,
+      std::function<void(SkCanvas*)> draw_callback);
+
+  FML_DISALLOW_COPY_AND_ASSIGN(SnapshotControllerSkia);
+};
+
+}  // namespace flutter
+
+#endif  //  !SLIMPELLER
+
+#endif  // FLUTTER_SHELL_COMMON_SNAPSHOT_CONTROLLER_SKIA_H_

@@ -1,0 +1,39 @@
+name: dev_tools
+description: Various repository development tools for flutter.
+
+environment:
+  sdk: ^3.10.0-0
+
+resolution: workspace
+
+dependencies:
+  archive: any
+  args: any
+  http: any
+  intl: any
+  meta: any
+  path: any
+  process: any
+  process_runner: any
+  pub_semver: any
+  yaml: any
+
+  collection: any
+  file: any
+  platform: any
+  yaml_edit: any
+  dart_skills_lint:
+    git:
+      url: https://github.com/flutter/skills
+      path: tool/dart_skills_lint
+      ref: 9eff6bbcfa27c2724ea9ad67a611c19fe77057ea
+  logging: ^1.3.0
+
+dev_dependencies:
+  test: any
+  test_api: any
+
+
+  matcher: any
+
+# PUBSPEC CHECKSUM: oojo9a

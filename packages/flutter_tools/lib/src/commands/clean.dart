@@ -1,0 +1,188 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:meta/meta.dart';
+
+import '../base/common.dart';
+import '../base/error_handling_io.dart';
+import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../build_info.dart';
+import '../globals.dart' as globals;
+import '../ios/xcodeproj.dart';
+import '../macos/xcode.dart';
+import '../project.dart';
+import '../runner/flutter_command.dart';
+
+class CleanCommand extends FlutterCommand {
+  CleanCommand({bool verbose = false}) : _verbose = verbose {
+    requiresPubspecYaml();
+    argParser.addOption(
+      'scheme',
+      help: 'When cleaning Xcode schemes, clean only the specified scheme.',
+    );
+    argParser.addFlag(
+      'include-example',
+      negatable: false,
+      help:
+          'Also clean the example directory, if one exists. '
+          'Useful when developing in a package project.',
+    );
+  }
+
+  final bool _verbose;
+
+  @override
+  final name = 'clean';
+
+  @override
+  final description = 'Delete the build/ and .dart_tool/ directories.';
+
+  @override
+  String get category => FlutterCommandCategory.project;
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    final FlutterProject flutterProject = FlutterProject.current();
+    final Xcode? xcode = globals.xcode;
+    final bool cleanXcode = xcode != null && xcode.isInstalledAndMeetsVersionCheck;
+
+    await _cleanProject(flutterProject, cleanXcode: cleanXcode);
+    if (boolArg('include-example')) {
+      if (flutterProject.hasExampleApp) {
+        await _cleanProject(flutterProject.example, cleanXcode: cleanXcode);
+      } else {
+        globals.printStatus('No example app found, skipping example cleaning.');
+      }
+    }
+
+    return const FlutterCommandResult(ExitStatus.success);
+  }
+
+  /// Cleans all build artifacts, Xcode workspaces, and ephemeral files for
+  /// the given [flutterProject]. When [cleanXcode] is true, also cleans
+  /// Xcode's DerivedData for iOS and macOS workspaces.
+  Future<void> _cleanProject(FlutterProject flutterProject, {required bool cleanXcode}) async {
+    // Clean Xcode's intermediate DerivedData artifacts before removing
+    // ephemeral directory, which would delete the xcworkspace.
+    if (cleanXcode) {
+      await _cleanXcode(flutterProject.ios);
+      await _cleanXcode(flutterProject.macos);
+    }
+
+    final Directory buildDir = flutterProject.directory.childDirectory(getBuildDirectory());
+    deleteFile(buildDir);
+
+    deleteFile(flutterProject.dartTool);
+
+    deleteFile(flutterProject.android.ephemeralDirectory);
+
+    deleteFile(flutterProject.ios.ephemeralDirectory);
+    deleteFile(flutterProject.ios.ephemeralModuleDirectory);
+    deleteFile(flutterProject.ios.generatedXcodePropertiesFile);
+    deleteFile(flutterProject.ios.generatedEnvironmentVariableExportScript);
+    deleteFile(flutterProject.ios.deprecatedCompiledDartFramework);
+    deleteFile(flutterProject.ios.deprecatedProjectFlutterFramework);
+    deleteFile(flutterProject.ios.flutterPodspec);
+
+    deleteFile(flutterProject.linux.ephemeralDirectory);
+    deleteFile(flutterProject.macos.ephemeralDirectory);
+    deleteFile(flutterProject.windows.ephemeralDirectory);
+    deleteFile(flutterProject.flutterPluginsDependenciesFile);
+  }
+
+  Future<void> _cleanXcode(XcodeBasedProject xcodeProject) async {
+    final Directory? xcodeWorkspace = xcodeProject.xcodeWorkspace;
+    if (xcodeWorkspace == null) {
+      return;
+    }
+    final Status xcodeStatus = globals.logger.startProgress('Cleaning Xcode workspace...');
+    try {
+      final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter!;
+      final XcodeProjectInfo projectInfo = (await xcodeProjectInterpreter.getInfo(
+        xcodeProject,
+        buildDirectory: globals.fs.directory(xcodeProject.darwinPlatform.buildDirectory()),
+      ))!;
+      if (argResults?.wasParsed('scheme') ?? false) {
+        final scheme = argResults!['scheme'] as String;
+        if (scheme.isEmpty) {
+          throwToolExit('No scheme was specified for --scheme');
+        }
+        if (!projectInfo.schemes.contains(scheme)) {
+          throwToolExit('Scheme "$scheme" not found in ${projectInfo.schemes}');
+        }
+        await xcodeProjectInterpreter.cleanWorkspace(
+          xcodeProject,
+          xcodeWorkspace.path,
+          scheme,
+          verbose: _verbose,
+          buildDirectory: globals.fs.directory(xcodeProject.darwinPlatform.buildDirectory()),
+        );
+      } else {
+        for (final String scheme in projectInfo.schemes) {
+          await xcodeProjectInterpreter.cleanWorkspace(
+            xcodeProject,
+            xcodeWorkspace.path,
+            scheme,
+            verbose: _verbose,
+            buildDirectory: globals.fs.directory(xcodeProject.darwinPlatform.buildDirectory()),
+          );
+        }
+      }
+    } on Exception catch (error) {
+      final message = 'Could not clean Xcode workspace: $error';
+      if (argResults?.wasParsed('scheme') ?? false) {
+        throwToolExit(message);
+      } else {
+        globals.printTrace(message);
+      }
+    } finally {
+      xcodeStatus.stop();
+    }
+  }
+
+  @visibleForTesting
+  void deleteFile(FileSystemEntity file) {
+    try {
+      ErrorHandlingFileSystem.noExitOnFailure(() {
+        _deleteFile(file);
+      });
+    } on Exception catch (e) {
+      globals.printError('Failed to remove ${file.path}: $e');
+    }
+  }
+
+  void _deleteFile(FileSystemEntity file) {
+    // This will throw a FileSystemException if the directory is missing permissions.
+    try {
+      if (!file.existsSync()) {
+        return;
+      }
+    } on FileSystemException catch (err) {
+      globals.printError('Cannot clean ${file.path}.\n$err');
+      return;
+    }
+    final Status deletionStatus = globals.logger.startProgress('Deleting ${file.basename}...');
+    try {
+      file.deleteSync(recursive: true);
+    } on FileSystemException catch (error) {
+      final String path = file.path;
+      if (globals.platform.isWindows) {
+        globals.printError(
+          'Failed to remove $path. '
+          'A program may still be using a file in the directory or the directory itself. '
+          'To find and stop such a program, see: '
+          'https://superuser.com/questions/1333118/cant-delete-empty-folder-because-it-is-used',
+        );
+      } else {
+        globals.printError('Failed to remove $path: $error');
+      }
+    } finally {
+      deletionStatus.stop();
+    }
+  }
+}
