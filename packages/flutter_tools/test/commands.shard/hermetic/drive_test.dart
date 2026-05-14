@@ -878,27 +878,23 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'flutter drive --help explains how to use the command',
-    () async {
-      final command = DriveCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-        terminal: terminal,
-        outputPreferences: outputPreferences,
-        signals: signals,
-      );
+  testUsingContext('flutter drive --help explains how to use the command', () async {
+    final command = DriveCommand(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      terminal: terminal,
+      outputPreferences: outputPreferences,
+      signals: signals,
+    );
 
-      await createTestCommandRunner(command).run(<String>['drive', '--help']);
+    await createTestCommandRunner(command).run(<String>['drive', '--help']);
 
-      expect(
-        logger.statusText,
-        stringContainsInOrder(<String>['flutter drive', '--target', '--driver']),
-      );
-    },
-    overrides: <Type, Generator>{Logger: () => logger},
-  );
+    expect(
+      logger.statusText,
+      stringContainsInOrder(<String>['flutter drive', '--target', '--driver']),
+    );
+  }, overrides: <Type, Generator>{Logger: () => logger});
 }
 
 class ThrowingScreenshotDevice extends ScreenshotDevice {
