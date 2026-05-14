@@ -41,7 +41,7 @@ bool debugAssertAllFoundationVarsUnset(
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null ||
         debugDoublePrecision != null ||
-        debugBrightnessOverride != null) {
+        !debugDeviceMetricsOverrides.isEmpty) {
       throw FlutterError(reason);
     }
     return true;
@@ -119,14 +119,51 @@ String debugFormatDouble(double? value) {
   return value.toStringAsFixed(1);
 }
 
+/// A class that holds overrides for device metrics in debug mode.
+///
+/// This is used to customize or simulate specific device profiles during development
+/// and testing.
+class DebugDeviceMetricsOverrides {
+  /// Creates a [DebugDeviceMetricsOverrides] configuration.
+  DebugDeviceMetricsOverrides();
+
+  /// The [Brightness] to override the platform brightness with.
+  ui.Brightness? brightness;
+
+  /// Whether all fields of this override configuration are null.
+  bool get isEmpty => brightness == null;
+}
+
+/// The active configuration of device metrics overrides.
+///
+/// In debug mode, this can be set to customize or simulate specific device
+/// metrics (such as platform brightness).
+///
+/// This has no effect in release builds.
+final DebugDeviceMetricsOverrides debugDeviceMetricsOverrides = DebugDeviceMetricsOverrides();
+
 /// A setting that can be used to override the platform [Brightness] exposed
 /// from [BindingBase.platformDispatcher].
+///
+/// This is a deprecated wrapper around [debugDeviceMetricsOverrides]. Use
+/// [debugDeviceMetricsOverrides] instead.
 ///
 /// See also:
 ///
 ///  * [WidgetsApp], which uses the [debugBrightnessOverride] setting in debug mode
 ///    to construct a [MediaQueryData].
-ui.Brightness? debugBrightnessOverride;
+@Deprecated(
+  'Use debugDeviceMetricsOverrides.brightness instead. '
+  'This feature was deprecated after v3.33.0-0.0.pre.',
+)
+ui.Brightness? get debugBrightnessOverride => debugDeviceMetricsOverrides.brightness;
+@Deprecated(
+  'Use debugDeviceMetricsOverrides.brightness instead. '
+  'This feature was deprecated after v3.33.0-0.0.pre.',
+)
+set debugBrightnessOverride(ui.Brightness? value) {
+  debugDeviceMetricsOverrides.brightness = value;
+}
 
 /// The address for the active DevTools server used for debugging this
 /// application.

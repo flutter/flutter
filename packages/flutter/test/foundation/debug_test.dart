@@ -100,4 +100,46 @@ void main() {
       }
     });
   });
+
+  group('DebugDeviceMetricsOverrides', () {
+    tearDown(() {
+      debugDeviceMetricsOverrides.brightness = null;
+    });
+
+    test('defaults to null', () {
+      expect(debugDeviceMetricsOverrides.brightness, isNull);
+      expect(debugBrightnessOverride, isNull);
+    });
+
+    test('setting debugBrightnessOverride affects debugDeviceMetricsOverrides.brightness', () {
+      debugBrightnessOverride = Brightness.dark;
+      expect(debugDeviceMetricsOverrides.brightness, Brightness.dark);
+      expect(debugBrightnessOverride, Brightness.dark);
+    });
+
+    test('setting debugDeviceMetricsOverrides.brightness affects debugBrightnessOverride', () {
+      debugDeviceMetricsOverrides.brightness = Brightness.light;
+      expect(debugBrightnessOverride, Brightness.light);
+    });
+
+    test('isEmpty behaves correctly', () {
+      expect(debugDeviceMetricsOverrides.isEmpty, isTrue);
+
+      debugDeviceMetricsOverrides.brightness = Brightness.dark;
+      expect(debugDeviceMetricsOverrides.isEmpty, isFalse);
+
+      debugDeviceMetricsOverrides.brightness = null;
+      expect(debugDeviceMetricsOverrides.isEmpty, isTrue);
+    });
+
+    test('debugAssertAllFoundationVarsUnset detects non-empty debugDeviceMetricsOverrides', () {
+      expect(() => debugAssertAllFoundationVarsUnset('reason'), returnsNormally);
+
+      debugDeviceMetricsOverrides.brightness = Brightness.dark;
+      expect(() => debugAssertAllFoundationVarsUnset('reason'), throwsA(isA<FlutterError>()));
+
+      debugDeviceMetricsOverrides.brightness = null;
+      expect(() => debugAssertAllFoundationVarsUnset('reason'), returnsNormally);
+    });
+  });
 }

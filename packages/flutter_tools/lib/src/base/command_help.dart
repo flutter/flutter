@@ -76,7 +76,7 @@ class CommandHelp {
   late final CommandHelpOption b = _makeOption(
     'b',
     'Toggle platform brightness (dark and light mode).',
-    'debugBrightnessOverride',
+    'debugDeviceMetricsOverrides',
   );
 
   late final CommandHelpOption c = _makeOption('c', 'Clear the screen');

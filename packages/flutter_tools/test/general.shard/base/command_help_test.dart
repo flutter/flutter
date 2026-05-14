@@ -122,7 +122,7 @@ void main() {
         expect(commandHelp.S.toString(), contains('\x1B[90m(debugDumpSemantics)\x1B[39m'));
         expect(commandHelp.U.toString(), contains('\x1B[90m(debugDumpSemantics)\x1B[39m'));
         expect(commandHelp.a.toString(), contains('\x1B[90m(debugProfileWidgetBuilds)\x1B[39m'));
-        expect(commandHelp.b.toString(), contains('\x1B[90m(debugBrightnessOverride)\x1B[39m'));
+        expect(commandHelp.b.toString(), contains('\x1B[90m(debugDeviceMetricsOverrides)\x1B[39m'));
         expect(commandHelp.f.toString(), contains('\x1B[90m(debugDumpFocusTree)\x1B[39m'));
         expect(
           commandHelp.i.toString(),
@@ -222,7 +222,7 @@ void main() {
         expect(
           commandHelp.b.toString(),
           equals(
-            '\x1B[1mb\x1B[22m Toggle platform brightness (dark and light mode).        \x1B[90m(debugBrightnessOverride)\x1B[39m\x1B[22m',
+            '\x1B[1mb\x1B[22m Toggle platform brightness (dark and light mode).    \x1B[90m(debugDeviceMetricsOverrides)\x1B[39m\x1B[22m',
           ),
         );
         expect(commandHelp.c.toString(), equals('\x1B[1mc\x1B[22m Clear the screen'));
@@ -332,7 +332,7 @@ void main() {
         expect(
           commandHelp.b.toString(),
           equals(
-            'b Toggle platform brightness (dark and light mode).        (debugBrightnessOverride)',
+            'b Toggle platform brightness (dark and light mode).    (debugDeviceMetricsOverrides)',
           ),
         );
         expect(commandHelp.c.toString(), equals('c Clear the screen'));
