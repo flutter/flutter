@@ -252,6 +252,48 @@ void main() async {
     expect(view0.buffer, equals(view1.buffer));
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('HostBuffer.emplace allocates a new block when the upcoming write '
+      'would extend past the current block end', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/186526.
+    //
+    // The previous bounds check in `_allocateEmplacement` only considered
+    // the post-padding cursor, ignoring the size of the data about to be
+    // written. When the cursor landed inside
+    // `[blockLengthInBytes - bytes.lengthInBytes, blockLengthInBytes)`
+    // the check passed, and the subsequent `DeviceBuffer.overwrite` then
+    // failed because the write extended past the block end.
+    //
+    // Use a small `blockLengthInBytes` so the test does not need to
+    // allocate megabytes. The chosen sizes are constructed to be aligned
+    // for any `minimumUniformByteAlignment` value the platform might
+    // return (16/32/64/128/256), so the test is platform-independent.
+    const int blockLength = 1024;
+    final gpu.HostBuffer hostBuffer = gpu.gpuContext.createHostBuffer(
+      blockLengthInBytes: blockLength,
+    );
+
+    // First emplace: fill the cursor to (blockLength - 256). The size is
+    // a multiple of every alignment up to 256, so the next emplace's
+    // padding will be zero on every supported platform.
+    const int fillSize = blockLength - 256;
+    final gpu.BufferView fillView = hostBuffer.emplace(Uint8List(fillSize).buffer.asByteData());
+    expect(fillView.offsetInBytes, 0);
+    expect(fillView.lengthInBytes, fillSize);
+    expect(fillView.buffer.sizeInBytes, blockLength);
+
+    // Second emplace: 728 bytes. With the cursor at `fillSize` and zero
+    // padding, the write would extend to `fillSize + 728 = 1496 bytes`,
+    // overflowing the 1024-byte block. The fixed `_allocateEmplacement`
+    // must allocate a new block instead.
+    const int overflowingSize = 728;
+    final gpu.BufferView view = hostBuffer.emplace(Uint8List(overflowingSize).buffer.asByteData());
+
+    // The new view must reference a freshly-allocated block, not the
+    // original one, and start at offset 0 of that block.
+    expect(view.buffer, isNot(equals(fillView.buffer)));
+    expect(view.offsetInBytes, 0);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('GpuContext.createDeviceBuffer', () async {
     final gpu.DeviceBuffer deviceBuffer = gpu.gpuContext.createDeviceBuffer(
       gpu.StorageMode.hostVisible,

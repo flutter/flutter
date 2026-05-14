@@ -266,7 +266,13 @@ base class HostBuffer {
     // If the padding is the full alignment size, then we're already aligned.
     // So reset the padding to zero.
     padding %= _gpuContext.minimumUniformByteAlignment;
-    if (_offsetCursor + padding >= blockLengthInBytes) {
+    // Allocate a new block if the upcoming write (cursor + padding +
+    // payload size) would extend past the end of the current block.
+    // Checking only `_offsetCursor + padding` is insufficient: if the
+    // cursor lands inside `[blockLengthInBytes - bytes.lengthInBytes,
+    // blockLengthInBytes)` the check would pass, but the subsequent
+    // `DeviceBuffer.overwrite` would reject the out-of-bounds write.
+    if (_offsetCursor + padding + bytes.lengthInBytes > blockLengthInBytes) {
       DeviceBuffer buffer = _allocateNewBlock(blockLengthInBytes);
       _buffers[_frameCursor].add(buffer);
       _bufferCursor++;
