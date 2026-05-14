@@ -16,7 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/semantics_tester.dart';
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Overall appearance is correct for the light theme', (WidgetTester tester) async {
@@ -1821,42 +1821,40 @@ void main() {
     expect(find.byType(CupertinoAlertDialog), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgets(
-    'Conflicting scrollbars are not applied by ScrollBehavior to CupertinoAlertDialog',
-    (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/83819
-      final actionScrollController = ScrollController();
-      addTearDown(actionScrollController.dispose);
-      await tester.pumpWidget(
-        createAppWithButtonThatLaunchesDialog(
-          dialogBuilder: (BuildContext context) {
-            return MediaQuery.withNoTextScaling(
-              child: CupertinoAlertDialog(
-                title: const Text('Test Title'),
-                content: const Text('Test Content'),
-                actions: const <Widget>[
-                  CupertinoDialogAction(child: Text('One')),
-                  CupertinoDialogAction(child: Text('Two')),
-                ],
-                actionScrollController: actionScrollController,
-              ),
-            );
-          },
-        ),
-      );
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoAlertDialog', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/83819
+    final actionScrollController = ScrollController();
+    addTearDown(actionScrollController.dispose);
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesDialog(
+        dialogBuilder: (BuildContext context) {
+          return MediaQuery.withNoTextScaling(
+            child: CupertinoAlertDialog(
+              title: const Text('Test Title'),
+              content: const Text('Test Content'),
+              actions: const <Widget>[
+                CupertinoDialogAction(child: Text('One')),
+                CupertinoDialogAction(child: Text('Two')),
+              ],
+              actionScrollController: actionScrollController,
+            ),
+          );
+        },
+      ),
+    );
 
-      await tester.tap(find.text('Go'));
-      await tester.pump();
+    await tester.tap(find.text('Go'));
+    await tester.pump();
 
-      // The inherited ScrollBehavior should not apply scrollbars since they are
-      // already built in to the widget.
-      expect(find.byType(RawScrollbar), findsNothing);
-      // Built in CupertinoScrollbars should only number 2: one for the actions,
-      // one for the content.
-      expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    // The inherited ScrollBehavior should not apply scrollbars since they are
+    // already built in to the widget.
+    expect(find.byType(RawScrollbar), findsNothing);
+    // Built in CupertinoScrollbars should only number 2: one for the actions,
+    // one for the content.
+    expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('CupertinoAlertDialog scrollbars controllers should be different', (
     WidgetTester tester,

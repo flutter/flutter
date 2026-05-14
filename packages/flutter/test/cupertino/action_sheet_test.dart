@@ -16,7 +16,7 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/semantics_tester.dart';
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Overall appearance is correct for the light theme', (WidgetTester tester) async {
@@ -1813,46 +1813,44 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets(
-    'Conflicting scrollbars are not applied by ScrollBehavior to CupertinoActionSheet',
-    (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/83819
-      final actionScrollController = ScrollController();
-      addTearDown(actionScrollController.dispose);
-      await tester.pumpWidget(
-        createAppWithButtonThatLaunchesActionSheet(
-          Builder(
-            builder: (BuildContext context) {
-              return MediaQuery.withClampedTextScaling(
-                minScaleFactor: 3.0,
-                maxScaleFactor: 3.0,
-                child: CupertinoActionSheet(
-                  title: const Text('The title'),
-                  message: const Text('The message.'),
-                  actions: <Widget>[
-                    CupertinoActionSheetAction(child: const Text('One'), onPressed: () {}),
-                    CupertinoActionSheetAction(child: const Text('Two'), onPressed: () {}),
-                  ],
-                  actionScrollController: actionScrollController,
-                ),
-              );
-            },
-          ),
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoActionSheet', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/83819
+    final actionScrollController = ScrollController();
+    addTearDown(actionScrollController.dispose);
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        Builder(
+          builder: (BuildContext context) {
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: 3.0,
+              maxScaleFactor: 3.0,
+              child: CupertinoActionSheet(
+                title: const Text('The title'),
+                message: const Text('The message.'),
+                actions: <Widget>[
+                  CupertinoActionSheetAction(child: const Text('One'), onPressed: () {}),
+                  CupertinoActionSheetAction(child: const Text('Two'), onPressed: () {}),
+                ],
+                actionScrollController: actionScrollController,
+              ),
+            );
+          },
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.text('Go'));
-      await tester.pump();
+    await tester.tap(find.text('Go'));
+    await tester.pump();
 
-      // The inherited ScrollBehavior should not apply scrollbars since they are
-      // already built in to the widget.
-      expect(find.byType(RawScrollbar), findsNothing);
-      // Built in CupertinoScrollbars should only number 2: one for the actions,
-      // one for the content.
-      expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    // The inherited ScrollBehavior should not apply scrollbars since they are
+    // already built in to the widget.
+    expect(find.byType(RawScrollbar), findsNothing);
+    // Built in CupertinoScrollbars should only number 2: one for the actions,
+    // one for the content.
+    expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('Hovering over Cupertino action sheet action updates cursor to clickable on Web', (
     WidgetTester tester,
@@ -1927,55 +1925,53 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), customCursor);
   });
 
-  testWidgets(
-    'Action sheets emits haptic vibration on sliding into a button',
-    (WidgetTester tester) async {
-      var vibrationCount = 0;
+  testWidgets('Action sheets emits haptic vibration on sliding into a button', (
+    WidgetTester tester,
+  ) async {
+    var vibrationCount = 0;
 
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
-        MethodCall methodCall,
-      ) async {
-        if (methodCall.method == 'HapticFeedback.vibrate') {
-          expect(methodCall.arguments, 'HapticFeedbackType.selectionClick');
-          vibrationCount += 1;
-        }
-        return null;
-      });
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+      MethodCall methodCall,
+    ) async {
+      if (methodCall.method == 'HapticFeedback.vibrate') {
+        expect(methodCall.arguments, 'HapticFeedbackType.selectionClick');
+        vibrationCount += 1;
+      }
+      return null;
+    });
 
-      await tester.pumpWidget(
-        createAppWithButtonThatLaunchesActionSheet(
-          CupertinoActionSheet(
-            title: const Text('The title'),
-            actions: <Widget>[
-              CupertinoActionSheetAction(child: const Text('One'), onPressed: () {}),
-              CupertinoActionSheetAction(child: const Text('Two'), onPressed: () {}),
-              CupertinoActionSheetAction(child: const Text('Three'), onPressed: () {}),
-            ],
-          ),
+    await tester.pumpWidget(
+      createAppWithButtonThatLaunchesActionSheet(
+        CupertinoActionSheet(
+          title: const Text('The title'),
+          actions: <Widget>[
+            CupertinoActionSheetAction(child: const Text('One'), onPressed: () {}),
+            CupertinoActionSheetAction(child: const Text('Two'), onPressed: () {}),
+            CupertinoActionSheetAction(child: const Text('Three'), onPressed: () {}),
+          ],
         ),
-      );
+      ),
+    );
 
-      await tester.tap(find.text('Go'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
 
-      final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('One')));
-      await tester.pumpAndSettle();
-      // Tapping down on a button should not emit vibration.
-      expect(vibrationCount, 0);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('One')));
+    await tester.pumpAndSettle();
+    // Tapping down on a button should not emit vibration.
+    expect(vibrationCount, 0);
 
-      await gesture.moveTo(tester.getCenter(find.text('Two')));
-      await tester.pumpAndSettle();
-      expect(vibrationCount, 1);
+    await gesture.moveTo(tester.getCenter(find.text('Two')));
+    await tester.pumpAndSettle();
+    expect(vibrationCount, 1);
 
-      await gesture.moveTo(tester.getCenter(find.text('Three')));
-      await tester.pumpAndSettle();
-      expect(vibrationCount, 2);
+    await gesture.moveTo(tester.getCenter(find.text('Three')));
+    await tester.pumpAndSettle();
+    expect(vibrationCount, 2);
 
-      await gesture.up();
-      expect(vibrationCount, 2);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    await gesture.up();
+    expect(vibrationCount, 2);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets(
     'CupertinoActionSheet appearance changes correctly when actions or cancel button is focused',
