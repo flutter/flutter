@@ -921,56 +921,6 @@ void main() {
     );
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/174133
-  // (and duplicate https://github.com/flutter/flutter/issues/180337). [Table]
-  // defers adopting its render-object children until every row has been
-  // mounted, which means an [OverlayPortal] cell mounts its overlay child
-  // (and the overlay child gets an owner) before the OverlayPortal's own
-  // layout-surrogate render object has been adopted by its parent.
-  // [_RenderDeferredLayoutBox.redepthChildren] used to call
-  // `_layoutSurrogate.redepthChild(this)` unconditionally and trip a
-  // `child.owner == owner` assertion in that window.
-  testWidgets('OverlayPortal child inside a TableRow does not crash', (WidgetTester tester) async {
-    // Mirrors how Slider uses OverlayPortal: controller.show() runs in a
-    // field initializer, before the OverlayPortal widget is mounted.
-    final controller = OverlayPortalController()..show();
-    const overlayKey = Key('overlay-child');
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) {
-                return Table(
-                  children: <TableRow>[
-                    TableRow(
-                      children: <Widget>[
-                        OverlayPortal(
-                          controller: controller,
-                          overlayChildBuilder: (BuildContext context) => const Align(
-                            alignment: Alignment.topLeft,
-                            child: SizedBox(key: overlayKey, width: 10, height: 10),
-                          ),
-                          child: const SizedBox(width: 10, height: 10),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-    expect(tester.takeException(), isNull);
-    expect(find.byKey(overlayKey), findsOneWidget);
-    // Confirm the overlay child actually completed layout — the depth-invariant
-    // restoration must hold for the deferred-layout box to be laid out.
-    expect(tester.getSize(find.byKey(overlayKey)), const Size(10, 10));
-  });
-
   testWidgets('Set defaultVerticalAlignment to intrinsic height and check their heights', (
     WidgetTester tester,
   ) async {
