@@ -3,7 +3,7 @@
     "Stop": [
       {
         "type": "command",
-        "command": "../bin/cache/dart-sdk/bin/dart run dart_hooks:agent_dart_format --source hook --log",
+        "command": "../bin/cache/dart-sdk/bin/dart --packages=../.dart_tool/package_config.json run dart_hooks:agent_dart_format --source hook --log",
         "timeout": 90
       }
     ]
@@ -12,8 +12,8 @@
     "Stop": [
       {
         "type": "command",
-        "command": "../bin/cache/dart-sdk/bin/dart run dart_hooks:agent_dart_analyze --source hook --log",
-        "timeout": 120
+        "command": "../bin/cache/dart-sdk/bin/dart --packages=../.dart_tool/package_config.json run dart_hooks:agent_dart_analyze --source hook --log",
+        "timeout": 300
       }
     ]
   }
