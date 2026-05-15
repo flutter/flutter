@@ -1465,9 +1465,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
 
   @override
   Future<ResizeImageKey> obtainKey(ImageConfiguration configuration) {
-    final double devicePixelRatio = useLogicalSize
-        ? (configuration.devicePixelRatio ?? 1.0)
-        : 1.0;
+    final double devicePixelRatio = useLogicalSize ? (configuration.devicePixelRatio ?? 1.0) : 1.0;
     final int? effectiveWidth = width != null ? (width! * devicePixelRatio).ceil() : null;
     final int? effectiveHeight = height != null ? (height! * devicePixelRatio).ceil() : null;
     Completer<ResizeImageKey>? completer;
