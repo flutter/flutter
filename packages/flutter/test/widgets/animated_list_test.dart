@@ -1331,6 +1331,153 @@ void main() {
     },
   );
 
+  testWidgets(
+    'AnimatedList.separated keeps separators correct when inserting while removals are outgoing',
+    (WidgetTester tester) async {
+      late GlobalKey<AnimatedListState> listKey;
+
+      Widget itemBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 40.0, child: Text('item $index'));
+      }
+
+      Widget separatorBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 8.0, child: Text('sep $index'));
+      }
+
+      AnimatedRemovedItemBuilder removedBuilder(String text) {
+        return (BuildContext context, Animation<double> animation) {
+          return SizedBox(height: 40.0, child: Text(text));
+        };
+      }
+
+      Future<void> pumpSeparatedList(int initialItemCount) async {
+        listKey = GlobalKey<AnimatedListState>();
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: AnimatedList.separated(
+              key: listKey,
+              initialItemCount: initialItemCount,
+              itemBuilder: itemBuilder,
+              separatorBuilder: separatorBuilder,
+              removedSeparatorBuilder: separatorBuilder,
+            ),
+          ),
+        );
+      }
+
+      List<String> visibleText() {
+        return tester
+            .widgetList<Text>(
+              find.descendant(of: find.byType(SliverAnimatedList), matching: find.byType(Text)),
+            )
+            .map((Text text) => text.data!)
+            .toList();
+      }
+
+      await pumpSeparatedList(1);
+      listKey.currentState!.removeItem(
+        0,
+        removedBuilder('removed item'),
+        duration: const Duration(milliseconds: 100),
+      );
+      listKey.currentState!.insertItem(0, duration: const Duration(milliseconds: 100));
+
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(visibleText(), <String>['item 0']);
+
+      await pumpSeparatedList(1);
+      listKey.currentState!.removeItem(
+        0,
+        removedBuilder('removed item'),
+        duration: const Duration(milliseconds: 100),
+      );
+      listKey.currentState!.insertAllItems(0, 2, duration: const Duration(milliseconds: 100));
+
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(visibleText(), <String>['item 0', 'sep 0', 'item 1']);
+    },
+  );
+
+  testWidgets(
+    'AnimatedList.separated removes remaining visible entries while removals are outgoing',
+    (WidgetTester tester) async {
+      late GlobalKey<AnimatedListState> listKey;
+
+      Widget itemBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 40.0, child: Text('item $index'));
+      }
+
+      Widget separatorBuilder(BuildContext context, int index, Animation<double> animation) {
+        return SizedBox(height: 8.0, child: Text('sep $index'));
+      }
+
+      AnimatedRemovedItemBuilder removedBuilder(String text) {
+        return (BuildContext context, Animation<double> animation) {
+          return SizedBox(height: 40.0, child: Text(text));
+        };
+      }
+
+      Future<void> pumpSeparatedList() async {
+        listKey = GlobalKey<AnimatedListState>();
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: AnimatedList.separated(
+              key: listKey,
+              initialItemCount: 2,
+              itemBuilder: itemBuilder,
+              separatorBuilder: separatorBuilder,
+              removedSeparatorBuilder: separatorBuilder,
+            ),
+          ),
+        );
+      }
+
+      List<String> visibleText() {
+        return tester
+            .widgetList<Text>(
+              find.descendant(of: find.byType(SliverAnimatedList), matching: find.byType(Text)),
+            )
+            .map((Text text) => text.data!)
+            .toList();
+      }
+
+      await pumpSeparatedList();
+      listKey.currentState!.removeItem(
+        1,
+        removedBuilder('removed item 1'),
+        duration: const Duration(milliseconds: 100),
+      );
+      listKey.currentState!.removeItem(
+        0,
+        removedBuilder('removed item 0'),
+        duration: const Duration(milliseconds: 100),
+      );
+
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(visibleText(), isEmpty);
+
+      await pumpSeparatedList();
+      listKey.currentState!.removeItem(
+        1,
+        removedBuilder('removed item 1'),
+        duration: const Duration(milliseconds: 100),
+      );
+      listKey.currentState!.removeAllItems(
+        removedBuilder('removed all items'),
+        duration: const Duration(milliseconds: 100),
+      );
+
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(visibleText(), isEmpty);
+    },
+  );
+
   testWidgets('AnimatedList does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     final controller = ScrollController();
