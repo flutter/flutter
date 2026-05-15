@@ -10,12 +10,17 @@ library [GLFW](https://www.glfw.org/).  For more information about using the
 embedder you can read the wiki article [Custom Flutter Engine Embedders](/docs/engine/Custom-Flutter-Engine-Embedders.md).
 
 ## Running Instructions
-The following example was tested on MacOSX but with a bit of tweaking should be
-able to run on other *nix platforms and Windows.
+
+This example is built and tested on Linux. It uses GLFW with the Flutter
+Engine's OpenGL ES embedder path, which is not enabled for macOS builds because
+Metal is the recommended rendering API on macOS. The macOS dependency commands
+below are useful if you are experimenting with an OpenGL-on-Metal layer such as
+ANGLE or MoltenVK, or with a different Metal-backed embedder implementation, but
+the example is not expected to build or run on macOS as-is.
 
 The example has the following dependencies:
- * [GLFW](https://www.glfw.org/) - This can be installed with [Homebrew](https://brew.sh/) - `brew install glfw`
- * [CMake](https://cmake.org/) - This can be installed with [Homebrew](https://brew.sh/) - `brew install cmake`
+ * [GLFW](https://www.glfw.org/) - This can be installed with your system package manager, such as `sudo apt install libglfw3-dev` on Ubuntu or `brew install glfw` on macOS.
+ * [CMake](https://cmake.org/) - This can be installed with your system package manager, such as `sudo apt install cmake` on Ubuntu or `brew install cmake` on macOS.
  * [Flutter](https://flutter.dev/) - This can be installed from the [Flutter webpage](https://docs.flutter.dev/get-started)
  * [Flutter Engine](https://flutter.dev) - This can be built or downloaded, see [Custom Flutter Engine Embedders](/docs/engine/Custom-Flutter-Engine-Embedders.md) for more information.
 
