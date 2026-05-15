@@ -2307,10 +2307,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   // before layout.
   (RenderObject, bool)? get _debugClosestMutationRoot {
     return switch (this) {
-      // Detached nodes are allowed to mutate as their layout will be recomputed
-      // when they re-attach.
-      //
-      RenderObject(attached: false) => (this, true),
       // This subtree is being mutated in a layout callback.
       RenderObject(_doingThisLayoutWithCallback: true) => (this, true),
       // A different part of the render tree is doing a layout callback,
@@ -2321,6 +2317,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
         _needsLayout: true,
       ) =>
         (this, true),
+      // This is the node currently doing layout.
       RenderObject(_debugMutationsLocked: true) => (this, false),
       RenderObject() => debugLayoutParent?._debugClosestMutationRoot,
     };
