@@ -3232,6 +3232,55 @@ void main() {
     expect(tester.getSize(find.byType(OverlayPortal)), Size.zero);
     controller.show();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/180569.
+  testWidgets(
+    'OverlayPortal does not throw when reparenting and overlay child requests re-layout',
+    (WidgetTester tester) async {
+      late StateSetter setState;
+
+      final portal = OverlayPortal(
+        key: GlobalKey(debugLabel: 'OverlayPortal'),
+        controller: OverlayPortalController()..show(),
+        overlayChildBuilder: (BuildContext context) => const MetaData(),
+        child: const Placeholder(),
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      return StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setter) {
+                          setState = setter;
+                          // This subtree re-inflates whenever it rebuilds,
+                          // because of the new GlobalKey.
+                          return KeyedSubtree(key: GlobalKey(), child: portal);
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Overlay child calls markNeedsLayout.
+      tester.renderObject(find.byType(MetaData)).markNeedsLayout();
+      // Triggers reparent.
+      setState(() {});
+
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
 
 class OverlayStatefulEntry extends OverlayEntry {
