@@ -11,7 +11,6 @@ import { loadSkwasm } from './skwasm_loader.js';
 import { getCanvaskitBaseUrl } from './utils.js';
 
 const supportsDart2Wasm = browserEnvironment.supportsWasmGC;
-const supportsSkwasm = supportsDart2Wasm && browserEnvironment.webGLVersion > 0;
 
 /**
  * The public interface of _flutter.loader. Exposes two methods:
@@ -88,8 +87,11 @@ export class FlutterLoader {
     const rendererIncompatibilityReason = (renderer) => {
       switch (renderer) {
         case "skwasm":
-          if (!supportsSkwasm) {
-            return "Skwasm requires both WasmGC and WebGL; this browser does not provide both.";
+          if (!supportsDart2Wasm) {
+            return "Skwasm requires WasmGC support; this browser does not implement it yet.";
+          }
+          if (!(browserEnvironment.webGLVersion > 0)) {
+            return "Skwasm requires WebGL support; this browser does not provide it.";
           }
           if (!enableWasm) {
             return `Skwasm is disabled by the loader's WASM allowlist for browser engine "${browserEnvironment.browserEngine}".`;
@@ -135,21 +137,6 @@ export class FlutterLoader {
         );
       }
       throw "FlutterLoader could not find a build compatible with configuration and environment.";
-    }
-
-    // If we had to skip preferred builds before finding a compatible one,
-    // log a single info-level explanation so developers understand why
-    // their app silently fell back (e.g. wasm -> js on an older browser).
-    // See https://github.com/flutter/flutter/issues/143603.
-    if (skippedBuilds.length > 0) {
-      const skippedSummary = skippedBuilds
-        .map(({ candidate, reason }) =>
-          `  - ${candidate.compileTarget}/${candidate.renderer}: ${reason}`)
-        .join("\n");
-      console.info(
-        `Flutter Web: using ${build.compileTarget} with the ${build.renderer} ` +
-        `renderer. Earlier candidates were skipped:\n${skippedSummary}`
-      );
     }
 
     const deps = {};
