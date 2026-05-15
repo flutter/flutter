@@ -93,7 +93,7 @@ class PreviewCodeGenerator {
               ..name = 'kProjectRootPath'
               ..modifier = cb.FieldModifier.constant
               ..type = cb.refer('String')
-              ..assignment = cb.literalString(projectRootPath).code;
+              ..assignment = cb.literalString(projectRootPath, raw: true).code;
           }),
         ]),
     );

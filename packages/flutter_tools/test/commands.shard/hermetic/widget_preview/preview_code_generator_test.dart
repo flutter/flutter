@@ -474,7 +474,7 @@ const String kWidgetPreviewDtdUri = '$dtdUri';
 const String kWidgetPreviewService = 'widget-preview-service';
 const String kWidgetPreviewScaffoldStream = 'widget-preview-stream';
 const String kProjectRootPath =
-    '${project.directory.absolute.path}';
+    r'${project.directory.absolute.path}';
 ''';
         expect(generatedDtdConnectionInfoFile.readAsStringSync(), expectedDtdConnectionInfo);
       },
