@@ -11,11 +11,7 @@ class GenL10nProject extends Project {
   GenL10nProject({required this.useNamedParameters});
 
   @override
-  Future<void> setUpIn(
-    Directory dir, {
-    bool useDeferredLoading = false,
-    bool generateMain = true,
-  }) {
+  Future<void> setUpIn(Directory dir, {bool useDeferredLoading = false, bool generateMain = true}) {
     this.dir = dir;
     writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
     writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en_CA.arb'), appEnCa);
