@@ -4063,7 +4063,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       if (child != null) {
         _debugRemoveGlobalKeyReservation(child);
       }
-      final Key? key = newWidget.key;
+      final Object? key = newWidget.key;
       if (key is GlobalKey) {
         assert(owner != null);
         owner!._debugReserveGlobalKeyFor(this, newChild, key);
@@ -4214,9 +4214,9 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
     // Scan the old children in the middle of the list.
     final bool haveOldChildren = oldChildrenTop <= oldChildrenBottom;
-    Map<Key, Element>? oldKeyedChildren;
+    Map<Object, Element>? oldKeyedChildren;
     if (haveOldChildren) {
-      oldKeyedChildren = <Key, Element>{};
+      oldKeyedChildren = <Object, Element>{};
       while (oldChildrenTop <= oldChildrenBottom) {
         final Element? oldChild = replaceWithNullIfForgotten(oldChildren[oldChildrenTop]);
         assert(oldChild == null || oldChild._lifecycleState == _ElementLifecycle.active);
@@ -4236,7 +4236,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       Element? oldChild;
       final Widget newWidget = newWidgets[newChildrenTop];
       if (haveOldChildren) {
-        final Key? key = newWidget.key;
+        final Object? key = newWidget.key;
         if (key != null) {
           oldChild = oldKeyedChildren![key];
           if (oldChild != null) {
@@ -4351,7 +4351,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       _parentBuildScope = parent.buildScope;
     }
     assert(owner != null);
-    final Key? key = widget.key;
+    final Object? key = widget.key;
     if (key is GlobalKey) {
       owner!._registerGlobalKey(key, this);
     }
@@ -4567,7 +4567,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }
 
     try {
-      final Key? key = newWidget.key;
+      final Object? key = newWidget.key;
       final Element? inactiveChild = key is GlobalKey
           ? _retakeInactiveElement(key, newWidget)
           : null;
@@ -4854,7 +4854,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(owner != null);
     assert(debugMaybeDispatchDisposed(this));
     // Use the private property to avoid a CastError during hot reload.
-    final Key? key = _widget?.key;
+    final Object? key = _widget?.key;
     if (key is GlobalKey) {
       owner!._unregisterGlobalKey(key, this);
     }
@@ -5270,7 +5270,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }
     properties.add(ObjectFlagProperty<Widget>('widget', _widget, ifNull: 'no widget'));
     properties.add(
-      DiagnosticsProperty<Key>(
+      DiagnosticsProperty<Object>(
         'key',
         _widget?.key,
         showName: false,

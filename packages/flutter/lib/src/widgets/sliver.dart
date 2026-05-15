@@ -1000,8 +1000,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
       }
 
       for (final int index in _childElements.keys.toList()) {
-        final Key? key = _childElements[index]!.widget.key;
-        final int? newIndex = key == null ? null : adaptorWidget.delegate.findIndexByKey(key);
+        final Object? key = _childElements[index]!.widget.key;
+        final int? newIndex = (key == null || key is! Key) ? null : adaptorWidget.delegate.findIndexByKey(key);
         final childParentData =
             _childElements[index]!.renderObject?.parentData as SliverMultiBoxAdaptorParentData?;
 

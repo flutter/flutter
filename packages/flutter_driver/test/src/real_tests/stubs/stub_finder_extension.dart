@@ -13,7 +13,7 @@ class StubFinderExtension extends FinderExtension {
   @override
   Finder createFinder(SerializableFinder finder, CreateFinderFactory finderFactory) {
     return find.byWidgetPredicate((Widget widget) {
-      final Key? key = widget.key;
+      final Object? key = widget.key;
       if (key is! ValueKey<String>) {
         return false;
       }
