@@ -138,6 +138,7 @@ class DapTestSession {
     final DapTestClient client = await DapTestClient.connect(
       server,
       captureVmServiceTraffic: verboseLogging,
+      // ignore: avoid_print
       logger: verboseLogging ? print : null,
     );
     return DapTestSession._(server, client);

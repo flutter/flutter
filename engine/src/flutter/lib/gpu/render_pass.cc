@@ -94,7 +94,10 @@ void RenderPass::ClearBindings() {
   vertex_texture_bindings.clear();
   fragment_uniform_bindings.clear();
   fragment_texture_bindings.clear();
-  vertex_buffer = {};
+  for (auto& buffer : vertex_buffers) {
+    buffer = {};
+  }
+  vertex_buffer_count = 0;
   index_buffer = {};
   index_buffer_type = impeller::IndexType::kNone;
   element_count = 0;
@@ -213,7 +216,7 @@ bool RenderPass::Draw() {
         texture.texture.resource, texture.sampler);
   }
 
-  render_pass_->SetVertexBuffer(vertex_buffer);
+  render_pass_->SetVertexBuffer(vertex_buffers.data(), vertex_buffer_count);
   render_pass_->SetIndexBuffer(index_buffer, index_buffer_type);
   render_pass_->SetElementCount(element_count);
 
@@ -331,19 +334,30 @@ static void BindVertexBuffer(
     const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
     int offset_in_bytes,
     int length_in_bytes,
-    int vertex_count) {
-  wrapper->vertex_buffer = impeller::BufferView(
+    int vertex_count,
+    int slot) {
+  if (slot < 0 || static_cast<size_t>(slot) >=
+                      flutter::gpu::RenderPass::kMaxVertexBufferSlots) {
+    return;
+  }
+  wrapper->vertex_buffers[slot] = impeller::BufferView(
       buffer, impeller::Range(offset_in_bytes, length_in_bytes));
+  if (static_cast<size_t>(slot) >= wrapper->vertex_buffer_count) {
+    wrapper->vertex_buffer_count = static_cast<size_t>(slot) + 1;
+  }
 
-  // If the index type is set, then the `vertex_count` becomes the index
-  // count... So don't overwrite the count if it's already been set when binding
-  // the index buffer.
+  // `vertex_count` is only meaningful for slot 0: the Dart-side docstring
+  // for `bindVertexBuffer` states that for slots > 0 the value is ignored
+  // (the slot-0 binding determines the draw range). When the index type is
+  // set, `vertex_count` would become the index count and is already set by
+  // the index-buffer binding path, so we only assign it here if no index
+  // buffer has been bound.
   // TODO(bdero): Consider just doing a more traditional API with
   //              draw(vertexCount) and drawIndexed(indexCount). This is fine,
   //              but overall it would be a bit more explicit and we wouldn't
   //              have to document this behavior where the presence of the index
   //              buffer always takes precedent.
-  if (!wrapper->has_index_buffer) {
+  if (slot == 0 && !wrapper->has_index_buffer) {
     wrapper->element_count = vertex_count;
   }
 }
@@ -353,9 +367,10 @@ void InternalFlutterGpu_RenderPass_BindVertexBufferDevice(
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes,
-    int vertex_count) {
+    int vertex_count,
+    int slot) {
   BindVertexBuffer(wrapper, device_buffer->GetBuffer(), offset_in_bytes,
-                   length_in_bytes, vertex_count);
+                   length_in_bytes, vertex_count, slot);
 }
 
 static void BindIndexBuffer(

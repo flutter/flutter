@@ -69,7 +69,9 @@ void TextContents::SetTextProperties(
   if (frame_->HasColor()) {
     // Alpha is always applied when rendering, remove it here so
     // we do not double-apply the alpha.
-    properties_.color = color.WithAlpha(1.0);
+    properties_.tone_or_color = color.WithAlpha(1.0);
+  } else {
+    properties_.tone_or_color = GlyphProperties::ComputeTone(color);
   }
   properties_.stroke = stroke;
 }
@@ -90,14 +92,13 @@ Scalar AttractToOne(Scalar x) {
 
 }  // namespace
 
-void TextContents::ComputeVertexData(
-    VS::PerVertexData* vtx_contents,
-    const Matrix& entity_transform,
-    const std::shared_ptr<TextFrame>& frame,
-    Point position,
-    const Matrix& screen_transform,
-    std::optional<GlyphProperties> glyph_properties,
-    const std::shared_ptr<GlyphAtlas>& atlas) {
+void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
+                                     const Matrix& entity_transform,
+                                     const std::shared_ptr<TextFrame>& frame,
+                                     Point position,
+                                     const Matrix& screen_transform,
+                                     GlyphProperties glyph_properties,
+                                     const std::shared_ptr<GlyphAtlas>& atlas) {
   // Common vertex information for all glyphs.
   // All glyphs are given the same vertex information in the form of a
   // unit-sized quad. The size of the glyph is specified in per instance data
@@ -334,7 +335,7 @@ bool TextContents::Render(const ContentContext& renderer,
                           /*frame=*/frame_,
                           /*position=*/position_,
                           /*screen_transform=*/screen_transform_,
-                          /*glyph_properties=*/GetGlyphProperties(),
+                          /*glyph_properties=*/properties_,
                           /*atlas=*/atlas);
       });
   BufferView index_buffer_view = indexes_host_buffer.Emplace(
@@ -357,12 +358,6 @@ bool TextContents::Render(const ContentContext& renderer,
   pass.SetElementCount(index_count);
 
   return pass.Draw().ok();
-}
-
-std::optional<GlyphProperties> TextContents::GetGlyphProperties() const {
-  return (properties_.stroke || frame_->HasColor())
-             ? std::optional<GlyphProperties>(properties_)
-             : std::nullopt;
 }
 
 }  // namespace impeller

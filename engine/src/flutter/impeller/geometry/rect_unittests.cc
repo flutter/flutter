@@ -175,6 +175,130 @@ TEST(RectTest, RectFromIRect) {
   // IRect irect2 = IRect::Make(irect);
 }
 
+TEST(RectTest, RectMakeCircleBounds) {
+  Rect rect = Rect::MakeCircleBounds(Point(100.0f, 200.0f), 20.0f);
+
+  EXPECT_FALSE(rect.IsEmpty());
+  EXPECT_EQ(rect.GetLeft(), 80.0f);
+  EXPECT_EQ(rect.GetRight(), 120.0f);
+  EXPECT_EQ(rect.GetTop(), 180.0f);
+  EXPECT_EQ(rect.GetBottom(), 220.0f);
+}
+
+TEST(RectTest, RectMakeCircleBoundsNegativeRadius) {
+  Rect rect = Rect::MakeCircleBounds(Point(100.0f, 200.0f), -20.0f);
+
+  EXPECT_TRUE(rect.IsEmpty());
+  EXPECT_EQ(rect.GetLeft(), 120.0f);
+  EXPECT_EQ(rect.GetRight(), 80.0f);
+  EXPECT_EQ(rect.GetTop(), 220.0f);
+  EXPECT_EQ(rect.GetBottom(), 180.0f);
+}
+
+TEST(RectTest, IRectMakeCircleBounds) {
+  IRect rect = IRect::MakeCircleBounds(IPoint(100, 200), 20);
+
+  EXPECT_FALSE(rect.IsEmpty());
+  EXPECT_EQ(rect.GetLeft(), 80);
+  EXPECT_EQ(rect.GetRight(), 120);
+  EXPECT_EQ(rect.GetTop(), 180);
+  EXPECT_EQ(rect.GetBottom(), 220);
+}
+
+TEST(RectTest, IRectMakeCircleBoundsNegativeRadius) {
+  IRect rect = IRect::MakeCircleBounds(IPoint(100, 200), -20);
+
+  EXPECT_TRUE(rect.IsEmpty());
+  EXPECT_EQ(rect.GetLeft(), 120);
+  EXPECT_EQ(rect.GetRight(), 80);
+  EXPECT_EQ(rect.GetTop(), 220);
+  EXPECT_EQ(rect.GetBottom(), 180);
+}
+
+TEST(RectTest, RectMakeEllipseBoundsSize) {
+  Rect rect =
+      Rect::MakeEllipseBounds(Point(100.0f, 200.0f), Size(20.0f, 30.0f));
+
+  EXPECT_FALSE(rect.IsEmpty());
+  EXPECT_EQ(rect.GetLeft(), 80.0f);
+  EXPECT_EQ(rect.GetRight(), 120.0f);
+  EXPECT_EQ(rect.GetTop(), 170.0f);
+  EXPECT_EQ(rect.GetBottom(), 230.0f);
+}
+
+TEST(RectTest, RectMakeEllipseBoundsNegativeSize) {
+  Rect rect =
+      Rect::MakeEllipseBounds(Point(100.0f, 200.0f), Size(-20.0f, -30.0f));
+
+  EXPECT_TRUE(rect.IsEmpty());
+  EXPECT_EQ(rect.GetLeft(), 120.0f);
+  EXPECT_EQ(rect.GetRight(), 80.0f);
+  EXPECT_EQ(rect.GetTop(), 230.0f);
+  EXPECT_EQ(rect.GetBottom(), 170.0f);
+}
+
+TEST(RectTest, RectMakeEllipseBoundsPoint) {
+  Rect rect =
+      Rect::MakeEllipseBounds(Point(100.0f, 200.0f), Point(20.0f, 30.0f));
+
+  EXPECT_FALSE(rect.IsEmpty());
+  EXPECT_EQ(rect.GetLeft(), 80.0f);
+  EXPECT_EQ(rect.GetRight(), 120.0f);
+  EXPECT_EQ(rect.GetTop(), 170.0f);
+  EXPECT_EQ(rect.GetBottom(), 230.0f);
+}
+
+TEST(RectTest, RectMakeEllipseBoundsNegativePoint) {
+  Rect rect =
+      Rect::MakeEllipseBounds(Point(100.0f, 200.0f), Point(-20.0f, -30.0f));
+
+  EXPECT_TRUE(rect.IsEmpty());
+  EXPECT_EQ(rect.GetLeft(), 120.0f);
+  EXPECT_EQ(rect.GetRight(), 80.0f);
+  EXPECT_EQ(rect.GetTop(), 230.0f);
+  EXPECT_EQ(rect.GetBottom(), 170.0f);
+}
+
+TEST(RectTest, IRectMakeEllipseBoundsSize) {
+  IRect rect = IRect::MakeEllipseBounds(IPoint(100, 200), ISize(20, 30));
+
+  EXPECT_FALSE(rect.IsEmpty());
+  EXPECT_EQ(rect.GetLeft(), 80);
+  EXPECT_EQ(rect.GetRight(), 120);
+  EXPECT_EQ(rect.GetTop(), 170);
+  EXPECT_EQ(rect.GetBottom(), 230);
+}
+
+TEST(RectTest, IRectMakeEllipseBoundsNegativeSize) {
+  IRect rect = IRect::MakeEllipseBounds(IPoint(100, 200), ISize(-20, -30));
+
+  EXPECT_TRUE(rect.IsEmpty());
+  EXPECT_EQ(rect.GetLeft(), 120);
+  EXPECT_EQ(rect.GetRight(), 80);
+  EXPECT_EQ(rect.GetTop(), 230);
+  EXPECT_EQ(rect.GetBottom(), 170);
+}
+
+TEST(RectTest, IRectMakeEllipseBoundsPoint) {
+  IRect rect = IRect::MakeEllipseBounds(IPoint(100, 200), IPoint(20, 30));
+
+  EXPECT_FALSE(rect.IsEmpty());
+  EXPECT_EQ(rect.GetLeft(), 80);
+  EXPECT_EQ(rect.GetRight(), 120);
+  EXPECT_EQ(rect.GetTop(), 170);
+  EXPECT_EQ(rect.GetBottom(), 230);
+}
+
+TEST(RectTest, IRectMakeEllipseBoundsNegativePoint) {
+  IRect rect = IRect::MakeEllipseBounds(IPoint(100, 200), IPoint(-20, -30));
+
+  EXPECT_TRUE(rect.IsEmpty());
+  EXPECT_EQ(rect.GetLeft(), 120);
+  EXPECT_EQ(rect.GetRight(), 80);
+  EXPECT_EQ(rect.GetTop(), 230);
+  EXPECT_EQ(rect.GetBottom(), 170);
+}
+
 TEST(RectTest, RectOverflowXYWH) {
   auto min = std::numeric_limits<Scalar>::lowest();
   auto max = std::numeric_limits<Scalar>::max();
@@ -1318,6 +1442,18 @@ TEST(RectTest, ContainsFloatingPoint) {
       Rect::MakeXYWH(472.599945f, 440.999969f, 1102.80005f, 654.000061f);
   auto rect2 = Rect::MakeXYWH(724.f, 618.f, 600.f, 300.f);
   EXPECT_TRUE(rect1.Contains(rect2));
+}
+
+TEST(RectTest, FloatContainsInteger) {
+  auto rect1 =
+      Rect::MakeLTRB(472.599945f, 440.999969f, 1574.80005f, 1094.000000f);
+  EXPECT_TRUE(rect1.Contains(IRect::MakeLTRB(473, 441, 1574, 1094)));
+
+  // Now test failure to contain same rect expanded by 1 on each side
+  EXPECT_FALSE(rect1.Contains(IRect::MakeLTRB(472, 441, 1574, 1094)));
+  EXPECT_FALSE(rect1.Contains(IRect::MakeLTRB(473, 440, 1574, 1094)));
+  EXPECT_FALSE(rect1.Contains(IRect::MakeLTRB(473, 441, 1575, 1094)));
+  EXPECT_FALSE(rect1.Contains(IRect::MakeLTRB(473, 441, 1574, 1095)));
 }
 
 template <typename R>
