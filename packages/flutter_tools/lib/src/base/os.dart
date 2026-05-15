@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ffi' show Abi;
+import 'dart:convert' show utf8;
 
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
@@ -505,7 +506,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       );
     }
     // `where` always returns all matches, not just the first one.
-    final ProcessResult result = _processManager.runSync(<String>['where', execName]);
+    final ProcessResult result = _processManager.runSync(<String>['chcp', '65001', '&&', 'where', execName], stdoutEncoding: utf8);
     if (result.exitCode != 0) {
       return const <File>[];
     }
