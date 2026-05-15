@@ -506,7 +506,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       );
     }
     // `where` always returns all matches, not just the first one.
-    final ProcessResult result = _processManager.runSync(<String>['chcp', '65001', '&&', 'where', execName], stdoutEncoding: utf8);
+    final ProcessResult result = _processManager.runSync(<String>['chcp', '65001', '>', 'nul', '&&', 'where', execName], runInShell: true, stdoutEncoding: utf8);
     if (result.exitCode != 0) {
       return const <File>[];
     }
