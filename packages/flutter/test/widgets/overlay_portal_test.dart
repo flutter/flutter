@@ -367,6 +367,55 @@ void main() {
     await tester.pumpWidget(SizedBox(child: widget));
   });
 
+  testWidgets('Safe to deactivate and re-activate OverlayPortal', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    final Widget portal = OverlayPortal(
+      key: key,
+      controller: controller1,
+      overlayChildBuilder: (BuildContext context) => const SizedBox(),
+      child: const SizedBox(),
+    );
+
+    var children = <Widget>[portal, const SizedBox()];
+    late StateSetter setState;
+
+    late final OverlayEntry overlayEntry;
+    addTearDown(
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setter) {
+                    setState = setter;
+                    return Column(children: children);
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    controller1.show();
+    await tester.pump();
+
+    setState(() {
+      children = <Widget>[const SizedBox(), portal];
+    });
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Safe to hide overlay child and remove OverlayPortal in the same frame', (
     WidgetTester tester,
   ) async {

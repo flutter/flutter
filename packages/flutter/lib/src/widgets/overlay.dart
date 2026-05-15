@@ -2686,6 +2686,11 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
 
 // A RenderProxyBox that makes sure its `deferredLayoutChild` has a greater
 // depth than itself.
+//
+// This RenderObject also conditionally attaches and detaches the associated
+// [_RenderDeferredLayoutBox] when itself attaches and detaches from its
+// [PipelineOwner] to make sure when this RenderObject is detached the
+// associated [_RenderDeferredLayoutBox] is also attached.
 class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   _RenderLayoutSurrogateProxyBox(this.overlayLocation);
   // This variable is set as soon as the _DeferredLayout widget creates it, and
@@ -2698,12 +2703,13 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    // If _deferredLayoutChild is not null, _DeferredLayout widget must have been created
-    // which happens after this RenderObject's first `attach`.
-    // So detach must be called before and we must undo the effect of that.
-    if (_deferredLayoutChild case final deferredChild? when _didDeactivate) {
+    // If attach is called after _didDeactivate then it is always safe to put deferred child
+    // back because the theater must an ancestor of both render objects.
+    if (_didDeactivate) {
+      _didDeactivate = false;
+      assert(_deferredLayoutChild != null);
       assert(!_debugIsFirstAttach);
-      overlayLocation!._activate(deferredChild);
+      overlayLocation!._activate(_deferredLayoutChild!);
     }
     assert(() {
       _debugIsFirstAttach = false;
@@ -2714,6 +2720,8 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   bool _didDeactivate = false;
   @override
   void detach() {
+    // Detaches the deferred child if this node is being detached, but only if the theater isn't
+    // already detached (so the deferred child will be detached by the theater).
     if (_deferredLayoutChild case final deferredChild? when deferredChild.theater.attached) {
       overlayLocation!._deactivate(deferredChild);
       _didDeactivate = true;
