@@ -88,7 +88,6 @@ void main() {
   });
 
   testWidgets('Card can take semantic text from multiple children', (WidgetTester tester) async {
-    addTearDown(tester.ensureSemantics().dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -133,7 +132,6 @@ void main() {
   });
 
   testWidgets('Card merges children when it is a semanticContainer', (WidgetTester tester) async {
-    addTearDown(tester.ensureSemantics().dispose);
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
