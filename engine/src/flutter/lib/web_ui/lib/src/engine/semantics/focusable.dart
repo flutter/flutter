@@ -122,18 +122,19 @@ class AccessibilityFocusManager {
 
   AccessibilityFocusManagerEvent _lastEvent = AccessibilityFocusManagerEvent.nothing;
 
-  /// The single focus-ring overlay element shared across all managers.
+  /// The focus-ring overlay element for this view.
   ///
   /// It is appended to `flutter-view` (the parent of `flt-semantics-host`) so
   /// it is outside the `filter: opacity(0%)` subtree and always remains visible
-  /// to sighted keyboard users.
-  static DomElement? _focusRing;
+  /// to sighted keyboard users. Each [AccessibilityFocusManager] owns its own
+  /// ring so that multi-view setups keep rings in their respective DOM trees.
+  DomElement? _focusRing;
 
-  static void _ensureFocusRing(EngineSemanticsOwner owner) {
+  void _ensureFocusRing() {
     if (_focusRing != null) {
       return;
     }
-    final DomElement? parent = owner.semanticsHost.parent;
+    final DomElement? parent = _owner.semanticsHost.parent;
     if (parent == null) {
       return;
     }
@@ -145,7 +146,7 @@ class AccessibilityFocusManager {
   }
 
   void _showFocusRing(DomElement element) {
-    _ensureFocusRing(_owner);
+    _ensureFocusRing();
     final DomElement? ring = _focusRing;
     if (ring == null) {
       return;
@@ -237,7 +238,9 @@ class AccessibilityFocusManager {
 
     target.element.removeEventListener('focus', target.domFocusListener);
     target.element.removeEventListener('blur', target.domBlurListener);
-    _hideFocusRing();
+    if (domDocument.activeElement == target.element) {
+      _hideFocusRing();
+    }
   }
 
   void _didReceiveDomFocus() {
