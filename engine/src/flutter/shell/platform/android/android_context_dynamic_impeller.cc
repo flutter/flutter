@@ -6,6 +6,7 @@
 
 #include <android/api-level.h>
 #include <sys/system_properties.h>
+#include <cstdlib>
 #include <memory>
 
 #include "flutter/impeller/base/validation.h"
@@ -79,7 +80,7 @@ static std::shared_ptr<AndroidContextVKImpeller>
 GetActualRenderingAPIForImpeller(
     int api_level,
     const AndroidContext::ContextSettings& settings) {
-  constexpr int kMinimumAndroidApiLevelForMediaTekVulkan = 31;
+  constexpr int kMinimumAndroidApiLevelForMediaTekVulkan = 32;
 
   // have requisite features to support platform views.
   //
@@ -99,9 +100,14 @@ GetActualRenderingAPIForImpeller(
     return nullptr;
   }
 
-  if (api_level < kMinimumAndroidApiLevelForMediaTekVulkan &&
+  int vendor_api_level = api_level;
+  if (__system_property_get("ro.vendor.build.version.sdk", property) > 0) {
+    vendor_api_level = std::atoi(property);
+  }
+
+  if (vendor_api_level < kMinimumAndroidApiLevelForMediaTekVulkan &&
       __system_property_find("ro.vendor.mediatek.platform") != nullptr) {
-    // Probably MediaTek. Avoid Vulkan if older than 34 to work around
+    // Probably MediaTek. Avoid Vulkan if older than 32 to work around
     // crashes when importing AHB.
     return nullptr;
   }

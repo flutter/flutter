@@ -622,6 +622,9 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
   String get appName => '';
 
   @override
+  List<String> get workspace => <String>[];
+
+  @override
   PluginPlatformConfig? get ios => null;
 
   @override
