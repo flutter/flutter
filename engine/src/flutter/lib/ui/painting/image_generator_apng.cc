@@ -497,10 +497,10 @@ APNGImageGenerator::DemuxNextImage(const void* buffer_p,
       // sequence number prepended to its data, so subtract that space from
       // the buffer.
       if (chunk->get_type() == kFrameDataChunkType) {
-        if (chunk->get_data_length() < 4) {
+        if (chunk->get_data_length() < kFrameDataSequenceNumberSize) {
           return std::make_pair(std::nullopt, nullptr);
         }
-        chunk_space -= 4;
+        chunk_space -= kFrameDataSequenceNumberSize;
       }
     }
 
@@ -536,21 +536,21 @@ APNGImageGenerator::DemuxNextImage(const void* buffer_p,
     // Copy the image data/ancillary chunks.
     for (const ChunkHeader* c : image_chunks) {
       if (c->get_type() == kFrameDataChunkType) {
-        if (c->get_data_length() < 4) {
-          return std::make_pair(std::nullopt, nullptr);
-        }
+        FML_DCHECK(c->get_data_length() >= kFrameDataSequenceNumberSize);
 
         // Write a new IDAT chunk header.
         ChunkHeader* write_header =
             reinterpret_cast<ChunkHeader*>(write_cursor);
-        write_header->set_data_length(c->get_data_length() - 4);
+        write_header->set_data_length(c->get_data_length() -
+                                      kFrameDataSequenceNumberSize);
         write_header->set_type(kImageDataChunkType);
         write_cursor += sizeof(ChunkHeader);
 
         // Copy all of the data except for the 4 byte sequence number at the
         // beginning of the fdAT data.
         memcpy(write_cursor,
-               reinterpret_cast<const uint8_t*>(c) + sizeof(ChunkHeader) + 4,
+               reinterpret_cast<const uint8_t*>(c) + sizeof(ChunkHeader) +
+                   kFrameDataSequenceNumberSize,
                write_header->get_data_length());
         write_cursor += write_header->get_data_length();
 
@@ -658,8 +658,13 @@ void APNGImageGenerator::ChunkHeader::UpdateChunkCrc32() {
 uint32_t APNGImageGenerator::ChunkHeader::ComputeChunkCrc32() {
   // Exclude the length field at the beginning of the chunk header.
   size_t length = sizeof(ChunkHeader) - 4 + get_data_length();
-  uint8_t* chunk_data_p = reinterpret_cast<uint8_t*>(this) + 4;
+  uint8_t* chunk_data = reinterpret_cast<uint8_t*>(this) + 4;
+  return ComputeCrc32(chunk_data, length);
+}
+
+uint32_t APNGImageGenerator::ComputeCrc32(uint8_t* data, size_t length) {
   uint32_t crc = 0;
+  uint8_t* data_p = data;
 
   // zlib's crc32 can only take 16 bits at a time for the length, but PNG
   // supports a 32 bit chunk length, so looping is necessary here.
@@ -671,9 +676,9 @@ uint32_t APNGImageGenerator::ChunkHeader::ComputeChunkCrc32() {
       length16 = std::numeric_limits<uint16_t>::max();
     }
 
-    crc = crc32(crc, chunk_data_p, length16);
+    crc = crc32(crc, data_p, length16);
     length -= length16;
-    chunk_data_p += length16;
+    data_p += length16;
   } while (length > 0);
 
   return crc;

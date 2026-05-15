@@ -8,6 +8,7 @@
 #include <cstring>
 #include <vector>
 
+#include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "flutter/testing/testing.h"
 #include "third_party/skia/include/core/SkData.h"
 
@@ -30,18 +31,6 @@ void WriteBE16(std::vector<uint8_t>& buf, uint16_t val) {
   buf.push_back(val & 0xFF);
 }
 
-// Computes CRC32 over chunk type + data (standard PNG CRC).
-uint32_t ComputePngCrc32(const uint8_t* data, size_t length) {
-  uint32_t crc = 0xFFFFFFFF;
-  for (size_t i = 0; i < length; i++) {
-    crc ^= data[i];
-    for (int j = 0; j < 8; j++) {
-      crc = (crc >> 1) ^ (0xEDB88320 & (-(crc & 1)));
-    }
-  }
-  return crc ^ 0xFFFFFFFF;
-}
-
 // Appends a PNG chunk (length + type + data + CRC) to the buffer.
 void AppendChunk(std::vector<uint8_t>& buf,
                  const char type[4],
@@ -50,8 +39,8 @@ void AppendChunk(std::vector<uint8_t>& buf,
   size_t type_start = buf.size();
   buf.insert(buf.end(), type, type + 4);
   buf.insert(buf.end(), data.begin(), data.end());
-  uint32_t crc =
-      ComputePngCrc32(buf.data() + type_start, 4 + data.size());
+  uint32_t crc = APNGImageGenerator::ComputeCrc32(buf.data() + type_start,
+                                                  4 + data.size());
   WriteBE32(buf, crc);
 }
 
@@ -78,10 +67,10 @@ std::vector<uint8_t> BuildMaliciousApng(uint32_t fdat_data_length) {
     AppendChunk(apng, "IHDR", ihdr);
   }
 
-  // acTL: 2 frames, loop forever
+  // acTL: 1 frame, loop forever
   {
     std::vector<uint8_t> actl;
-    WriteBE32(actl, 2);  // num_frames
+    WriteBE32(actl, 1);  // num_frames
     WriteBE32(actl, 0);  // num_plays (0 = infinite)
     AppendChunk(apng, "acTL", actl);
   }
@@ -89,44 +78,19 @@ std::vector<uint8_t> BuildMaliciousApng(uint32_t fdat_data_length) {
   // fcTL for frame 0
   {
     std::vector<uint8_t> fctl;
-    WriteBE32(fctl, 0);  // sequence_number
-    WriteBE32(fctl, 1);  // width
-    WriteBE32(fctl, 1);  // height
-    WriteBE32(fctl, 0);  // x_offset
-    WriteBE32(fctl, 0);  // y_offset
-    WriteBE16(fctl, 1);  // delay_num
-    WriteBE16(fctl, 10); // delay_den
-    fctl.push_back(0);   // dispose_op
-    fctl.push_back(0);   // blend_op
+    WriteBE32(fctl, 0);   // sequence_number
+    WriteBE32(fctl, 1);   // width
+    WriteBE32(fctl, 1);   // height
+    WriteBE32(fctl, 0);   // x_offset
+    WriteBE32(fctl, 0);   // y_offset
+    WriteBE16(fctl, 1);   // delay_num
+    WriteBE16(fctl, 10);  // delay_den
+    fctl.push_back(0);    // dispose_op
+    fctl.push_back(0);    // blend_op
     AppendChunk(apng, "fcTL", fctl);
   }
 
-  // IDAT for frame 0: minimal valid zlib-compressed 1x1 RGBA
-  {
-    // zlib header (78 01) + deflate block for filter_byte(0) + RGBA(0,0,0,255)
-    const uint8_t idat_data[] = {0x78, 0x01, 0x62, 0x60, 0x60, 0x60,
-                                  0xF8, 0x0F, 0x00, 0x00, 0x05, 0x00,
-                                  0x01};
-    std::vector<uint8_t> idat(idat_data, idat_data + sizeof(idat_data));
-    AppendChunk(apng, "IDAT", idat);
-  }
-
-  // fcTL for frame 1
-  {
-    std::vector<uint8_t> fctl;
-    WriteBE32(fctl, 1);  // sequence_number
-    WriteBE32(fctl, 1);  // width
-    WriteBE32(fctl, 1);  // height
-    WriteBE32(fctl, 0);  // x_offset
-    WriteBE32(fctl, 0);  // y_offset
-    WriteBE16(fctl, 1);  // delay_num
-    WriteBE16(fctl, 10); // delay_den
-    fctl.push_back(0);   // dispose_op
-    fctl.push_back(0);   // blend_op
-    AppendChunk(apng, "fcTL", fctl);
-  }
-
-  // MALICIOUS fdAT for frame 1: data_length < 4
+  // Malicious fdAT for frame 0: data_length < 4
   // An fdAT chunk must have at least 4 bytes (sequence number).
   // With data_length < 4, the subtraction in DemuxNextImage() underflows.
   {
@@ -145,55 +109,23 @@ std::vector<uint8_t> BuildMaliciousApng(uint32_t fdat_data_length) {
 
 }  // namespace
 
-// Verify that an APNG with an fdAT chunk of data_length=0 does not crash.
-// Without the fix, this would cause a uint32_t underflow (0 - 4 = 0xFFFFFFFC)
-// leading to a heap buffer overflow in DemuxNextImage().
-TEST(APNGImageGeneratorTest, FdATWithZeroDataLengthDoesNotCrash) {
-  auto apng_bytes = BuildMaliciousApng(0);
-  auto data = SkData::MakeWithCopy(apng_bytes.data(), apng_bytes.size());
-  auto generator = APNGImageGenerator::MakeFromData(data);
-
-  // The generator may fail to create (if the malformed fdAT is caught during
-  // initial parsing) or may create successfully but fail during frame decode.
-  // Either way, it must NOT crash.
-  if (generator) {
-    // If the generator was created, try to decode frame 1 which references
-    // the malicious fdAT. This must not crash.
-    auto info = generator->GetInfo();
-    std::vector<uint8_t> pixels(info.computeMinByteSize());
-    generator->GetPixels(info, pixels.data(), info.minRowBytes(), 1,
-                         std::nullopt);
-  }
-}
-
-// Verify that an fdAT chunk with data_length=2 (less than the required 4-byte
-// sequence number) also does not crash.
+// Verify that the APNG decoder can handle fdAT chunks whose length is shorter
+// that the required 4-byte sequence number.
 TEST(APNGImageGeneratorTest, FdATWithShortDataLengthDoesNotCrash) {
-  auto apng_bytes = BuildMaliciousApng(2);
-  auto data = SkData::MakeWithCopy(apng_bytes.data(), apng_bytes.size());
-  auto generator = APNGImageGenerator::MakeFromData(data);
+  ImageGeneratorRegistry registry;
 
-  if (generator) {
-    auto info = generator->GetInfo();
-    std::vector<uint8_t> pixels(info.computeMinByteSize());
-    generator->GetPixels(info, pixels.data(), info.minRowBytes(), 1,
-                         std::nullopt);
-  }
-}
+  auto make_generator = [](uint32_t fdat_length) -> auto {
+    auto apng_bytes = BuildMaliciousApng(fdat_length);
+    auto data = SkData::MakeWithCopy(apng_bytes.data(), apng_bytes.size());
+    return APNGImageGenerator::MakeFromData(data);
+  };
 
-// Verify that a valid fdAT chunk (data_length >= 4) still works correctly.
-TEST(APNGImageGeneratorTest, ValidFdATIsAccepted) {
-  // data_length=8: 4 bytes sequence number + 4 bytes compressed data
-  auto apng_bytes = BuildMaliciousApng(8);
-  auto data = SkData::MakeWithCopy(apng_bytes.data(), apng_bytes.size());
-  auto generator = APNGImageGenerator::MakeFromData(data);
+  // The decoder should reject fdAT chunks that are less than 4 bytes long.
+  EXPECT_EQ(make_generator(0), nullptr);
+  EXPECT_EQ(make_generator(2), nullptr);
 
-  // A valid APNG with proper fdAT should create a generator successfully.
-  // Frame decode may still fail due to invalid compressed data, but the
-  // generator creation should not be rejected by the data_length check.
-  if (generator) {
-    EXPECT_GE(generator->GetFrameCount(), 1u);
-  }
+  // Creating the generator should succeed if the fdAT has sufficient length.
+  EXPECT_NE(make_generator(4), nullptr);
 }
 
 }  // namespace testing
