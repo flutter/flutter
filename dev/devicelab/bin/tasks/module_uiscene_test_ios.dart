@@ -609,11 +609,9 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
 
-    // When using an implicit FlutterEngine, created by the FlutterViewController in another
-    // ViewController, we expect plugins to be registered after the FlutterViewController is
-    // created, which results in the `application:didFinishLaunchingWithOptions:` and
-    // `scene:willConnectToSession:options:` events being missed. This is not a expected use case
-    // but it could be utilized.
+    // When using an implicit FlutterEngine inside another ViewController, the engine is created
+    // after scene:willConnectToSession:options: and application:didFinishLaunchingWithOptions:
+    // have already fired. Flutter now replays these events to plugins after registration.
     'FlutterImplicitEngineDelegate-AppMigrated-ImplicitFlutterEngine': <String, String>{
       ...sharedAppLifecycleFiles,
       ...sharedPluginLifecycleFiles,
@@ -625,7 +623,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/AppDelegate.swift',
       r'$TEMPLATE_DIR/native/ViewController-ImplicitFlutterEngine.swift':
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/ViewController.swift',
-      r'$TEMPLATE_DIR/native/UITests-SceneEventsNoConnect-NoApplicationEvents.swift':
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents-ApplicationLaunchEvents.swift':
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
   };

@@ -321,17 +321,33 @@ typedef struct MouseState {
     [pluginRegistrant registerWithRegistry:self];
     performedCallback = YES;
   }
-  // When migrated to scenes, the FlutterViewController from the storyboard is initialized after the
-  // application launch events. Therefore, plugins may not be registered yet since they're expected
-  // to be registered during the implicit engine callbacks. As a workaround, send the app launch
-  // events after the application callbacks.
-  if (self.awokenFromNib && performedCallback && FlutterSharedApplication.hasSceneDelegate &&
+  // When migrated to scenes, the FlutterViewController may be initialized after the application
+  // launch events fire (storyboard-based VCs load before scene connect; programmatic VCs created
+  // inside another VC load even later). Plugins registered via the implicit engine callback will
+  // have missed didFinishLaunching. Forward it here if it hasn't been sent yet.
+  if (performedCallback && FlutterSharedApplication.hasSceneDelegate &&
       [appDelegate isKindOfClass:[FlutterAppDelegate class]]) {
     id applicationLifeCycleDelegate = ((FlutterAppDelegate*)appDelegate).lifeCycleDelegate;
     [applicationLifeCycleDelegate
         sceneFallbackWillFinishLaunchingApplication:FlutterSharedApplication.application];
     [applicationLifeCycleDelegate
         sceneFallbackDidFinishLaunchingApplication:FlutterSharedApplication.application];
+  }
+  // For implicit engines created programmatically inside another view controller, the
+  // UISceneWillConnectNotification fires before the engine exists. Manually register the engine
+  // with any already-connected scene so its plugins receive scene:willConnectToSession:options:.
+  // The storyboard (awokenFromNib) case does not need this: the scene connects after awakeFromNib
+  // runs, so the engine gets added via the normal notification path.
+  if (!self.awokenFromNib && performedCallback &&
+      !FlutterSharedApplication.application.supportsMultipleScenes) {
+    for (UIScene* scene in FlutterSharedApplication.application.connectedScenes) {
+      FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate =
+          [FlutterPluginSceneLifeCycleDelegate fromScene:scene];
+      if (sceneLifeCycleDelegate != nil) {
+        [sceneLifeCycleDelegate engine:_engine receivedConnectNotificationFor:scene];
+        break;
+      }
+    }
   }
 
   _engineNeedsLaunch = YES;
