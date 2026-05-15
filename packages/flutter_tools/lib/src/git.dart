@@ -27,13 +27,17 @@ interface class Git {
   /// Automatically injects the arguments `-c log.showSignature=false` in order
   /// to ignore user settings that will break the expected output for this call;
   /// otherwise this call is identical to using [Git.runSync] directly.
-  RunResult logSync(List<String> arguments, {String? workingDirectory}) {
+  RunResult logSync(
+    List<String> arguments, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+  }) {
     assert(arguments.isEmpty || arguments.first != 'log');
-    return runSync([
-      ..._ignoreLogShowSignature,
-      'log',
-      ...arguments,
-    ], workingDirectory: workingDirectory);
+    return runSync(
+      [..._ignoreLogShowSignature, 'log', ...arguments],
+      workingDirectory: workingDirectory,
+      environment: environment,
+    );
   }
 
   static const _ignoreLogShowSignature = ['-c', 'log.showSignature=false'];
