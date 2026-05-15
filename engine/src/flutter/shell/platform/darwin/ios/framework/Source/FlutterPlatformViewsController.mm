@@ -8,6 +8,7 @@
 
 #include "flutter/common/constants.h"
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/utils/dl_matrix_clip_tracker.h"
 #include "flutter/flow/surface_frame.h"
 #include "flutter/flow/view_slicer.h"
@@ -104,6 +105,74 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                     clipDlRect.GetHeight());
 }
 
+static bool HasNonRectClipForUnderlayCutout(const flutter::EmbeddedViewParams& params) {
+  auto iter = params.mutatorsStack().Begin();
+  while (iter != params.mutatorsStack().End()) {
+    switch ((*iter)->GetType()) {
+      case flutter::MutatorType::kClipRRect:
+      case flutter::MutatorType::kClipRSE:
+      case flutter::MutatorType::kClipPath:
+        return true;
+      default:
+        break;
+    }
+    ++iter;
+  }
+  return false;
+}
+
+// Overlay canvas needs to be clipped to the shape of platform view to ensure
+// underlay shows up correctly, so that when there's backdrop filter, the region outside of platform
+// view's shape is blurred. See: https://github.com/flutter/flutter/issues/150660
+static void ApplyNonRectClipToOverlayCanvas(flutter::DlCanvas* overlay_canvas,
+                                            const flutter::EmbeddedViewParams& params) {
+  flutter::DlMatrix transform;
+  auto iter = params.mutatorsStack().Begin();
+  while (iter != params.mutatorsStack().End()) {
+    switch ((*iter)->GetType()) {
+      case flutter::MutatorType::kTransform:
+        transform = transform * (*iter)->GetMatrix();
+        break;
+      case flutter::MutatorType::kClipRRect: {
+        if (transform.IsIdentity()) {
+          overlay_canvas->ClipRoundRect((*iter)->GetRRect(), flutter::DlClipOp::kIntersect, true);
+        } else {
+          auto path = flutter::DlPath::MakeRoundRect((*iter)->GetRRect());
+          auto transformed_path =
+              flutter::DlPath(path.GetSkPath().makeTransform(flutter::ToSkMatrix(transform)));
+          overlay_canvas->ClipPath(transformed_path, flutter::DlClipOp::kIntersect, true);
+        }
+        break;
+      }
+      case flutter::MutatorType::kClipRSE: {
+        if (transform.IsIdentity()) {
+          overlay_canvas->ClipRoundSuperellipse((*iter)->GetRSE(), flutter::DlClipOp::kIntersect,
+                                                true);
+        } else {
+          auto path = flutter::DlPath::MakeRoundSuperellipse((*iter)->GetRSE());
+          auto transformed_path =
+              flutter::DlPath(path.GetSkPath().makeTransform(flutter::ToSkMatrix(transform)));
+          overlay_canvas->ClipPath(transformed_path, flutter::DlClipOp::kIntersect, true);
+        }
+        break;
+      }
+      case flutter::MutatorType::kClipPath: {
+        if (transform.IsIdentity()) {
+          overlay_canvas->ClipPath((*iter)->GetPath(), flutter::DlClipOp::kIntersect, true);
+        } else {
+          auto transformed_path = flutter::DlPath(
+              (*iter)->GetPath().GetSkPath().makeTransform(flutter::ToSkMatrix(transform)));
+          overlay_canvas->ClipPath(transformed_path, flutter::DlClipOp::kIntersect, true);
+        }
+        break;
+      }
+      default:
+        break;
+    }
+    ++iter;
+  }
+}
+
 @interface FlutterPlatformViewsController ()
 
 // The pool of reusable view layers. The pool allows to recycle layer in each frame.
@@ -130,7 +199,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 @property(nonatomic, assign) DlISize frameSize;
 
 /// The task runner for posting tasks to the platform thread.
-@property(nonatomic, readonly) const fml::RefPtr<fml::TaskRunner>& platformTaskRunner;
+@property(nonatomic, readonly) FlutterFMLTaskRunner* platformTaskRunner;
 
 /// This data must only be accessed on the platform thread.
 @property(nonatomic, readonly) std::unordered_map<int64_t, PlatformViewData>& platformViews;
@@ -288,7 +357,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::unordered_map<std::string, NSObject<FlutterPlatformViewFactory>*> _factories;
   std::unordered_map<std::string, FlutterPlatformViewGestureRecognizersBlockingPolicy>
       _gestureRecognizersBlockingPoliciesByType;
-  fml::RefPtr<fml::TaskRunner> _platformTaskRunner;
+  FlutterFMLTaskRunner* _platformTaskRunner;
   std::unordered_map<int64_t, PlatformViewData> _platformViews;
   std::unordered_map<int64_t, flutter::EmbeddedViewParams> _currentCompositionParams;
   std::unordered_set<int64_t> _viewsToDispose;
@@ -310,11 +379,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   return self;
 }
 
-- (const fml::RefPtr<fml::TaskRunner>&)taskRunner {
+- (FlutterFMLTaskRunner*)taskRunner {
   return _platformTaskRunner;
 }
 
-- (void)setTaskRunner:(const fml::RefPtr<fml::TaskRunner>&)platformTaskRunner {
+- (void)setTaskRunner:(FlutterFMLTaskRunner*)platformTaskRunner {
   _platformTaskRunner = platformTaskRunner;
 }
 
@@ -816,13 +885,13 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   // Reset will only be called from the raster thread or a merged raster/platform thread.
   // _platformViews must only be modified on the platform thread, and any operations that
   // read or modify platform views should occur there.
-  fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner, [self]() {
+  [self.taskRunner runNowOrPostTask:^{
     for (const auto& entry : self.platformViews) {
       [entry.second.root_view removeFromSuperview];
     }
     self.platformViews.clear();
     self.flutterViewPreviousCompositionOrder.clear();
-  });
+  }];
 
   [self resetFrameState];
   self.currentCompositionParams.clear();
@@ -849,16 +918,17 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   if (frameContext.composition_order.empty() && !hadPlatformViews) {
     // No platform views to render but the FlutterView may need to be resized.
     __weak FlutterPlatformViewsController* weakSelf = self;
-    fml::TaskRunner::RunNowOrPostTask(
-        weakSelf.platformTaskRunner,
-        fml::MakeCopyable([weakSelf, frameSize = frameContext.frame_size,
-                           currentFlutterViewId = frameContext.flutter_view_id]() {
-          FlutterPlatformViewsController* strongSelf = weakSelf;
-          if (!strongSelf) {
-            return;
-          }
-          [strongSelf performResize:frameSize currentFlutterViewId:currentFlutterViewId];
-        }));
+    // Pass frameSize and flutterViewId by value since the current frame context can be replaced
+    // before the platform task runs.
+    const flutter::DlISize frameSize = frameContext.frame_size;
+    const int64_t currentFlutterViewId = frameContext.flutter_view_id;
+    [self.taskRunner runNowOrPostTask:^{
+      FlutterPlatformViewsController* strongSelf = weakSelf;
+      if (!strongSelf) {
+        return;
+      }
+      [strongSelf performResize:frameSize currentFlutterViewId:currentFlutterViewId];
+    }];
 
     self.flutterViewHadPlatformViews[frameContext.flutter_view_id] = NO;
     return background_frame->Submit();
@@ -871,13 +941,19 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::vector<std::unique_ptr<flutter::SurfaceFrame>> surfaceFrames;
   surfaceFrames.reserve(frameContext.composition_order.size());
   std::unordered_map<int64_t, DlRect> viewRects;
+  std::unordered_set<int64_t> viewsWithUnderlayPreserved;
 
   for (int64_t viewId : frameContext.composition_order) {
-    viewRects[viewId] = self.currentCompositionParams[viewId].finalBoundingRect();
+    const flutter::EmbeddedViewParams& params = self.currentCompositionParams[viewId];
+    viewRects[viewId] = params.finalBoundingRect();
+    if (HasNonRectClipForUnderlayCutout(params)) {
+      viewsWithUnderlayPreserved.insert(viewId);
+    }
   }
 
-  std::unordered_map<int64_t, DlRect> overlayLayers = SliceViews(
-      background_frame->Canvas(), frameContext.composition_order, frameContext.slices, viewRects);
+  std::unordered_map<int64_t, DlRect> overlayLayers =
+      SliceViews(background_frame->Canvas(), frameContext.composition_order, frameContext.slices,
+                 viewRects, viewsWithUnderlayPreserved);
 
   size_t requiredOverlayLayers = 0;
   for (int64_t viewId : frameContext.composition_order) {
@@ -917,6 +993,9 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     int restoreCount = overlayCanvas->GetSaveCount();
     overlayCanvas->Save();
     overlayCanvas->ClipRect(overlay->second);
+    if (viewsWithUnderlayPreserved.find(viewId) != viewsWithUnderlayPreserved.end()) {
+      ApplyNonRectClipToOverlayCanvas(overlayCanvas, self.currentCompositionParams[viewId]);
+    }
     overlayCanvas->Clear(flutter::DlColor::kTransparent());
     frameContext.slices[viewId]->render_into(overlayCanvas);
     overlayCanvas->RestoreToCount(restoreCount);
@@ -953,14 +1032,14 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   std::vector<std::shared_ptr<flutter::OverlayLayer>> unusedLayers =
       layerPool->RemoveUnusedLayers();
   layerPool->RecycleLayers();
-  auto task = [self,                                                      //
-               platformViewLayers = std::move(platformViewLayers),        //
-               currentCompositionParams = self.currentCompositionParams,  //
-               viewsToRecomposite = frameContext.views_to_recomposite,    //
-               compositionOrder = frameContext.composition_order,         //
-               unusedLayers = std::move(unusedLayers),                    //
-               surfaceFrames = std::move(surfaceFrames),                  //
-               currentFlutterViewId = frameContext.flutter_view_id        //
+  auto task = fml::MakeCopyable([self,                                                      //
+                                 platformViewLayers = std::move(platformViewLayers),        //
+                                 currentCompositionParams = self.currentCompositionParams,  //
+                                 viewsToRecomposite = frameContext.views_to_recomposite,    //
+                                 compositionOrder = frameContext.composition_order,         //
+                                 unusedLayers = std::move(unusedLayers),                    //
+                                 surfaceFrames = std::move(surfaceFrames),                  //
+                                 currentFlutterViewId = frameContext.flutter_view_id        //
   ]() mutable {
     [self performSubmit:platformViewLayers
         currentCompositionParams:currentCompositionParams
@@ -969,9 +1048,11 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                     unusedLayers:unusedLayers
                    surfaceFrames:surfaceFrames
             currentFlutterViewId:currentFlutterViewId];
-  };
+  });
 
-  fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner, fml::MakeCopyable(std::move(task)));
+  [self.taskRunner runNowOrPostTask:^{
+    task();
+  }];
   return didEncode;
 }
 
@@ -986,10 +1067,10 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   auto missingLayerCount = requiredOverlayLayers - layerPool->size();
 
   // If the raster thread isn't merged, create layers on the platform thread and block until
-  // complete.
+  // complete. The self-capture here is fine since this is effectively synchronous (we block on the
+  // latch right below).
   auto latch = std::make_shared<fml::CountDownLatch>(1u);
-  fml::TaskRunner::RunNowOrPostTask(self.platformTaskRunner, [self, missingLayerCount, iosContext,
-                                                              latch, currentFlutterViewId]() {
+  [self.taskRunner runNowOrPostTask:^{
     UIView* flutterView = [self flutterViewForIdentifier:currentFlutterViewId];
     if (flutterView == nil) {
       latch->CountDown();
@@ -1001,7 +1082,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
                  currentFlutterViewId:currentFlutterViewId];
     }
     latch->CountDown();
-  });
+  }];
   if (![[NSThread currentThread] isMainThread]) {
     latch->Wait();
   }

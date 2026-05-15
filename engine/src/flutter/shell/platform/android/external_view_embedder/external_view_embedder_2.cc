@@ -99,7 +99,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
       SliceViews(frame->Canvas(),     //
                  composition_order_,  //
                  slices_,             //
-                 view_rects           //
+                 view_rects,          //
+                 {}                   //
       );
 
   // If there is no overlay Surface, initialize one on the platform thread. This

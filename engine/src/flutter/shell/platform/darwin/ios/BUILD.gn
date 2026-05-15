@@ -50,7 +50,10 @@ source_set("InternalFlutterSwift") {
     ":ios_test_flutter",
   ]
   configs += [ "//flutter/shell/platform/darwin/common:config" ]
-  deps = [ ":flutter_engine_bindings" ]
+  deps = [
+    ":flutter_engine_bindings",
+    "//flutter/shell/platform/darwin/common:framework_common",
+  ]
   include_dirs = [
     "//flutter/shell/platform/darwin/common/framework/Headers",
     "//flutter/shell/platform/darwin/ios/framework/Headers",
@@ -95,6 +98,7 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterDartVMServicePublisher.mm",
     "framework/Source/FlutterEmbedderKeyResponder.h",
     "framework/Source/FlutterEmbedderKeyResponder.mm",
+    "framework/Source/FlutterEngine+TaskRunners.h",
     "framework/Source/FlutterEngine.mm",
     "framework/Source/FlutterEngineGroup.mm",
     "framework/Source/FlutterEngine_Internal.h",
@@ -228,6 +232,7 @@ if (enable_ios_unittests) {
     sources = [
       "framework/Source/FlutterFMLTaskRunnerTestHelper.h",
       "framework/Source/FlutterFMLTaskRunnerTestHelper.mm",
+      "framework/Source/FlutterVSyncClient+Testing.h",
     ]
     deps = [
       ":flutter_engine_bindings",
@@ -252,6 +257,7 @@ if (enable_ios_unittests) {
       "framework/Source/LaunchEngineTest.swift",
       "framework/Source/SplashScreenManagerTests.swift",
       "framework/Source/TaskRunnerTests.swift",
+      "framework/Source/VSyncClientTest.swift",
     ]
     frameworks = [ "XCTest.framework" ]
     deps = [
@@ -298,6 +304,8 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterMetalLayerTest.mm",
       "framework/Source/FlutterPlatformPluginTest.mm",
       "framework/Source/FlutterPlatformViewsTest.mm",
+      "framework/Source/FlutterPlatformViewsTestHelper.h",
+      "framework/Source/FlutterPlatformViewsTestHelper.mm",
       "framework/Source/FlutterPluginAppLifeCycleDelegateTest.mm",
       "framework/Source/FlutterRestorationPluginTest.mm",
       "framework/Source/FlutterSceneDelegateTest.m",
@@ -306,10 +314,8 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterSpellCheckPluginTest.mm",
       "framework/Source/FlutterTextInputPluginTest.mm",
       "framework/Source/FlutterTextureRegistryRelayTest.mm",
-      "framework/Source/FlutterTouchInterceptingView_Test.h",
+      "framework/Source/FlutterTouchInterceptingView+Test.h",
       "framework/Source/FlutterUndoManagerPluginTest.mm",
-      "framework/Source/FlutterVSyncClient+Testing.h",
-      "framework/Source/FlutterVSyncClientTest.mm",
       "framework/Source/FlutterViewControllerTest.mm",
       "framework/Source/FlutterViewTest.mm",
       "framework/Source/SemanticsObjectTest.mm",
@@ -367,7 +373,6 @@ source_set("flutter_engine_bindings") {
     "framework/Source/FlutterFMLTaskRunner.mm",
     "framework/Source/FlutterFMLTaskRunners.h",
     "framework/Source/FlutterFMLTaskRunners.mm",
-    "framework/Source/FlutterVSyncClient+FML.h",
     "framework/Source/FlutterVSyncClient.h",
     "framework/Source/FlutterVSyncClient.mm",
     "framework/Source/vsync_waiter_ios.h",

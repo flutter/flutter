@@ -52,9 +52,27 @@ if (enable_unittests) {
     iplr = true
   }
 
-  test_fixtures("fixtures") {
+  # An aliased copy of `no_uniforms.frag.iplr` published under a distinct
+  # asset name. The two assets have identical bytes (and therefore identical
+  # embedded entrypoint names), but FragmentProgram tracks them under
+  # different `library_id`s (the asset paths), so they must register at
+  # distinct scoped keys in the shared shader registry. Used by
+  # `fragment_shader_test.dart` to verify the no-collision behavior.
+  # `no_uniforms.frag` is used so the test does not need to thread sampler
+  # or uniform setup through the FragmentShader to validate it.
+  copy("no_uniforms_alt") {
+    sources = [ "$target_gen_dir/iplr/no_uniforms.frag.iplr" ]
+    outputs = [ "$target_gen_dir/iplr/no_uniforms_alt.frag.iplr" ]
     deps = [ ":compile_general_shaders" ]
-    fixtures = get_target_outputs(":compile_general_shaders")
+  }
+
+  test_fixtures("fixtures") {
+    deps = [
+      ":compile_general_shaders",
+      ":no_uniforms_alt",
+    ]
+    fixtures = get_target_outputs(":compile_general_shaders") +
+               get_target_outputs(":no_uniforms_alt")
     dest = "$root_gen_dir/flutter/lib/ui"
   }
 }

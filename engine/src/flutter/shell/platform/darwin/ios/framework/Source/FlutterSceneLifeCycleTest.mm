@@ -8,12 +8,12 @@
 #import <XCTest/XCTest.h>
 #include <objc/NSObject.h>
 
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
 FLUTTER_ASSERT_ARC
