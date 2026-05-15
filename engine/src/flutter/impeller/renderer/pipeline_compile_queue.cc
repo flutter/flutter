@@ -9,43 +9,20 @@
 
 namespace impeller {
 
-PipelineCompileQueue::PipelineCompileQueue(bool wait_until_rendering)
-    : wait_until_rendering_(wait_until_rendering) {}
-
 PipelineCompileQueue::~PipelineCompileQueue() {
   FinishAllJobs();
 }
 
-bool PipelineCompileQueue::PostJobForDescriptor(const PipelineDescriptor& desc,
-                                                const fml::closure& job) {
-  if (!job) {
-    return false;
-  }
+bool PipelineCompileQueue::AddJob(const PipelineDescriptor& desc,
+                                  const fml::closure& job) {
+  Lock lock(pending_jobs_mutex_);
+  auto insertion_result = pending_jobs_.insert(std::make_pair(desc, job));
+  return insertion_result.second;
+}
 
-  {
-    Lock lock(pending_jobs_mutex_);
-    auto insertion_result = pending_jobs_.insert(std::make_pair(desc, job));
-    if (!insertion_result.second) {
-      // This bit is being extremely conservative. If insertion did not take
-      // place, someone gave the compile queue a job for the same description.
-      // This is highly unusual but technically not impossible. Just run the job
-      // eagerly.
-      FML_LOG(ERROR) << "Got multiple compile jobs for the same descriptor. "
-                        "Running eagerly.";
-      // Don't invoke the job here has there are we have currently acquired a
-      // mutex.
-      PostJob(job);
-      return true;
-    }
-  }
-  if (!WaitUntilRendering()) {
-    PostJob([weak_queue = weak_from_this()]() {
-      if (auto queue = weak_queue.lock()) {
-        queue->DoOneJob();
-      }
-    });
-  }
-  return true;
+bool PipelineCompileQueue::HasPendingJobs() {
+  Lock lock(pending_jobs_mutex_);
+  return !pending_jobs_.empty();
 }
 
 fml::closure PipelineCompileQueue::TakeNextJob() {
@@ -84,28 +61,6 @@ void PipelineCompileQueue::DoOneJob() {
   if (auto job = TakeNextJob()) {
     job();
   }
-}
-
-void PipelineCompileQueue::FlushPendingJobs() {
-  wait_until_rendering_ = false;
-  ProcessJobsSequentially();
-}
-
-void PipelineCompileQueue::ProcessJobsSequentially() {
-  PostJob([weak_queue = weak_from_this()]() {
-    if (auto queue = weak_queue.lock()) {
-      queue->DoOneJob();
-      if (!queue->HasPendingJobs()) {
-        return;
-      }
-      queue->ProcessJobsSequentially();
-    }
-  });
-}
-
-bool PipelineCompileQueue::HasPendingJobs() {
-  Lock lock(pending_jobs_mutex_);
-  return !pending_jobs_.empty();
 }
 
 void PipelineCompileQueue::FinishAllJobs() {
