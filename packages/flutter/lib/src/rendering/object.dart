@@ -6069,9 +6069,13 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     if (parentData == newParentData) {
       return;
     }
+    final bool wasParentDataDirty = parentDataDirty;
     // Parent data changes may result in node formation changes.
     markNeedsBuild();
     parentData = newParentData;
+    if (wasParentDataDirty) {
+      geometry = null;
+    }
     updateChildren();
   }
 

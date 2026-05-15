@@ -1257,6 +1257,22 @@ class _RenderTheater extends RenderBox
   }
 
   @override
+  void adoptChild(RenderObject child) {
+    super.adoptChild(child);
+    if (child is _RenderAccessibilityFocusBlocker) {
+      child.addListener(_updateAccessibilityFocusBlockers);
+    }
+  }
+
+  @override
+  void dropChild(RenderObject child) {
+    if (child is _RenderAccessibilityFocusBlocker) {
+      child.removeListener(_updateAccessibilityFocusBlockers);
+    }
+    super.dropChild(child);
+  }
+
+  @override
   void redepthChildren() => visitChildren(redepthChild);
 
   Alignment? _alignmentCache;
@@ -1325,6 +1341,7 @@ class _RenderTheater extends RenderBox
     // skipped when the `_skipMarkNeedsLayout` flag is set.
     markNeedsPaint();
     _skipMarkNeedsLayout = false;
+    _updateAccessibilityFocusBlockers();
 
     // After adding `child` to the render tree, we want to make sure it will be
     // laid out in the same frame. This is done by calling markNeedsLayout on the
@@ -1341,6 +1358,7 @@ class _RenderTheater extends RenderBox
     // the comment in `_addDeferredChild`.
     markNeedsPaint();
     _skipMarkNeedsLayout = false;
+    _updateAccessibilityFocusBlockers();
   }
 
   @override
@@ -1512,29 +1530,17 @@ class _RenderTheater extends RenderBox
         layoutChild(child, nonPositionedChildConstraints);
       }
     }
+    _updateAccessibilityFocusBlockers();
+  }
 
-    // Compute blockFocus for semantics.
+  void _updateAccessibilityFocusBlockers() {
     var isOpaque = false;
-
-    void processChild(RenderBox child) {
+    for (final RenderBox child in _childrenInHitTestOrder()) {
       if (child is _RenderAccessibilityFocusBlocker) {
         final blocker = child as _RenderAccessibilityFocusBlocker;
         blocker.blockFocus = isOpaque;
         isOpaque |= blocker.accessibilityOpaque;
       }
-    }
-
-    RenderBox? child = lastChild;
-    while (child != null) {
-      final childParentData = child.parentData! as _TheaterParentData;
-      final Iterator<RenderBox>? innerIterator = childParentData.hitTestOrderIterator;
-      if (innerIterator != null) {
-        while (innerIterator.moveNext()) {
-          processChild(innerIterator.current);
-        }
-      }
-      processChild(child);
-      child = childParentData.previousSibling;
     }
   }
 
@@ -2628,6 +2634,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
     with
         _RenderTheaterMixin,
         LinkedListEntry<_RenderDeferredLayoutBox>,
+        ChangeNotifier,
         _RenderAccessibilityFocusBlocker {
   _RenderDeferredLayoutBox(
     this._layoutSurrogate,
@@ -2635,8 +2642,9 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
     required bool accessibilityOpaque,
     required OverlayEntry hostEntry,
   }) : _childIdentifier = childIdentifier,
-       _accessibilityOpaque = accessibilityOpaque,
-       _hostEntry = hostEntry;
+       _hostEntry = hostEntry {
+    _accessibilityOpaque = accessibilityOpaque;
+  }
 
   final _RenderLayoutSurrogateProxyBox _layoutSurrogate;
 
@@ -2647,17 +2655,6 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
       return;
     }
     _childIdentifier = value;
-  }
-
-  @override
-  bool get accessibilityOpaque => _accessibilityOpaque;
-  bool _accessibilityOpaque;
-  set accessibilityOpaque(bool value) {
-    if (_accessibilityOpaque == value) {
-      return;
-    }
-    _accessibilityOpaque = value;
-    theater.markNeedsSemanticsUpdate();
   }
 
   OverlayEntry get hostEntry => _hostEntry;
@@ -3106,19 +3103,9 @@ class _AccessibilityBarrier extends SingleChildRenderObjectWidget {
 }
 
 final class _RenderAccessibilityBarrier extends RenderProxyBox
-    with _RenderAccessibilityFocusBlocker {
-  _RenderAccessibilityBarrier({required bool accessibilityOpaque})
-    : _accessibilityOpaque = accessibilityOpaque;
-
-  @override
-  bool get accessibilityOpaque => _accessibilityOpaque;
-  bool _accessibilityOpaque;
-  set accessibilityOpaque(bool value) {
-    if (_accessibilityOpaque == value) {
-      return;
-    }
-    _accessibilityOpaque = value;
-    markNeedsSemanticsUpdate();
+    with _RenderAccessibilityFocusBlocker, ChangeNotifier {
+  _RenderAccessibilityBarrier({required bool accessibilityOpaque}) {
+    _accessibilityOpaque = accessibilityOpaque;
   }
 
   @override
@@ -3129,7 +3116,7 @@ final class _RenderAccessibilityBarrier extends RenderProxyBox
   }
 }
 
-mixin _RenderAccessibilityFocusBlocker on RenderObject {
+mixin _RenderAccessibilityFocusBlocker on RenderObject implements ChangeNotifier {
   bool get blockFocus => _blockFocus;
   bool _blockFocus = false;
   set blockFocus(bool value) {
@@ -3140,7 +3127,15 @@ mixin _RenderAccessibilityFocusBlocker on RenderObject {
     markNeedsSemanticsUpdate();
   }
 
-  bool get accessibilityOpaque;
+  bool get accessibilityOpaque => _accessibilityOpaque;
+  bool _accessibilityOpaque = false;
+  set accessibilityOpaque(bool value) {
+    if (_accessibilityOpaque == value) {
+      return;
+    }
+    _accessibilityOpaque = value;
+    notifyListeners();
+  }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {

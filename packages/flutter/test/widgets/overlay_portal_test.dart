@@ -3302,11 +3302,7 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             flags: SemanticsFlags(isAccessibilityFocusBlocked: true),
-            children: <TestSemantics>[
-              TestSemantics(
-                label: 'Background',
-              ),
-            ],
+            label: 'Background',
           ),
           TestSemantics(
             label: 'Anchor',
