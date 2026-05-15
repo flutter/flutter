@@ -64,6 +64,12 @@ import io.flutter.view.TextureRegistry;
  * for background behavior. Additionally, all plugins must respect that a {@code Activity}s may come
  * and go over time, thus requiring plugins to cleanup resources and recreate those resources as the
  * {@code Activity} comes and goes.
+ *
+ * <p>{@code ActivityAware} callbacks are invoked by the v2 Android embedding. The deprecated v1
+ * embedding invokes a plugin's static {@code registerWith} method instead and does not invoke
+ * {@code ActivityAware} callbacks. Plugins that support pre-1.12 Android projects should keep
+ * their v1 {@code registerWith} implementation for any {@code Activity} access needed by that
+ * embedding.
  */
 public interface FlutterPlugin {
 

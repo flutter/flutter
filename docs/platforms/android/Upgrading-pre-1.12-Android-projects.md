@@ -12,6 +12,8 @@ Your existing full-Flutter projects aren't immediately affected and will continu
 
 However, the new Android wrappers also introduce a new set of Android plugin development APIs. Plugins developed exclusively on the new plugins API will not work on older pre-1.12 Android projects. Building a pre-1.12 Android project that uses plugins created after 1.12 will yield a build-time error unless the plugin developer explicitly opted to create a second backward compatible implementation.
 
+Plugins that implement the new `ActivityAware` interface receive its callbacks only when the plugin is registered with the new Android embedding. Pre-1.12 Android projects that still use the old embedding invoke the plugin's v1 `registerWith` implementation instead, and do not invoke `ActivityAware` callbacks. Plugin authors who need to support those projects should keep a v1 `registerWith` path for any `Activity` access they need.
+
 Add-to-app was not officially supported on the old Android APIs. If you followed the experimental instructions in the wiki for add-to-app prior to 1.12, you should follow the migration steps under the [add-to-app section](#add-to-app-migration) below.
 
 # Full-Flutter app migration
