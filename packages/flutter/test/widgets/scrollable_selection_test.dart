@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
+import 'editable_text_tester.dart' show testTextSelectionHandleControls;
 import 'keyboard_utils.dart';
 import 'widgets_app_tester.dart';
 
@@ -1446,19 +1447,19 @@ void main() {
   });
 
   testWidgets(
-    'drag-select edge auto-scroll respects NeverScrollableScrollPhysics',
+    'automatic edge scrolling respects NeverScrollableScrollPhysics',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/140654.
-      // A Scrollable whose physics refuses user offset (e.g.
-      // NeverScrollableScrollPhysics) must not be advanced by the selection
-      // edge auto-scroller, and the auto-scroller must not trip its drag-target
-      // size assertion in the process.
+      // When a scrollable view with non-scrollable physics (e.g.,
+      // NeverScrollableScrollPhysics) is wrapped in a SelectableRegion, dragging
+      // a selection past the viewport boundary must not advance the scroll offset
+      // or throw exceptions.
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
         TestWidgetsApp(
-          home: SelectionArea(
-            selectionControls: materialTextSelectionControls,
+          home: SelectableRegion(
+            selectionControls: testTextSelectionHandleControls,
             child: ListView.builder(
               controller: controller,
               physics: const NeverScrollableScrollPhysics(),
@@ -1472,11 +1473,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final RenderParagraph paragraph0 = tester.renderObject<RenderParagraph>(
-        find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)),
-      );
       final TestGesture gesture = await tester.startGesture(
-        textOffsetToPosition(paragraph0, 2),
+        tester.getCenter(find.text('Item 0')),
         kind: ui.PointerDeviceKind.mouse,
       );
       addTearDown(gesture.removePointer);
@@ -1485,12 +1483,11 @@ void main() {
 
       // Drag past the bottom of the scrollable; this would normally trigger
       // edge auto-scroll.
-      await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0, 40));
+      await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0.0, 40.0));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
-      // The scroll position must not have advanced, and no exception (e.g. the
-      // "Drag target size is larger than scrollable size" assertion) must have
+      // The scroll position must not have advanced, and no exception must have
       // been thrown.
       expect(controller.offset, 0.0);
       expect(tester.takeException(), isNull);
@@ -1501,6 +1498,7 @@ void main() {
 
       await gesture.up();
       await tester.pumpAndSettle();
+      expect(controller.offset, 0.0);
       expect(tester.takeException(), isNull);
     },
   );
