@@ -79,6 +79,66 @@ TEST(CompilerTest, Defines) {
   EXPECT_NE(compiler_2.GetSPIRVAssembly(), nullptr);
 }
 
+TEST(CompilerTest, YFlipInjectionForGLESVertexShaders) {
+  // Compiles `fixture_name` for `platform` and returns the generated SL
+  // source. See https://github.com/flutter/flutter/issues/186554.
+  auto compile = [](const char* fixture_name, SourceType type,
+                    TargetPlatform platform) -> std::string {
+    std::shared_ptr<fml::Mapping> fixture =
+        flutter::testing::OpenFixtureAsMapping(fixture_name);
+    FML_CHECK(fixture);
+
+    SourceOptions options(fixture_name, type);
+    options.source_language = SourceLanguage::kGLSL;
+    options.target_platform = platform;
+    options.working_directory = std::make_shared<fml::UniqueFD>(
+        flutter::testing::OpenFixturesDirectory());
+    options.entry_point_name = "main";
+
+    Reflector::Options reflector_options;
+    reflector_options.target_platform = platform;
+    reflector_options.header_file_name = "y_flip_injection.h";
+    reflector_options.shader_name = "shader";
+
+    Compiler compiler(fixture, options, reflector_options);
+    if (!compiler.IsValid()) {
+      return "";
+    }
+    auto sl = compiler.GetSLShaderSource();
+    if (!sl || !sl->GetMapping()) {
+      return "";
+    }
+    return std::string(reinterpret_cast<const char*>(sl->GetMapping()),
+                       sl->GetSize());
+  };
+
+  // GL vertex shader: gets both the declaration and the epilogue.
+  const std::string gl_vert = compile(
+      "sample.vert", SourceType::kVertexShader, TargetPlatform::kOpenGLES);
+  EXPECT_NE(gl_vert.find("uniform float _impeller_y_flip"),
+            std::string::npos)
+      << "GLES vertex shader is missing the y-flip uniform declaration:\n"
+      << gl_vert;
+  EXPECT_NE(gl_vert.find("gl_Position.y *= _impeller_y_flip"),
+            std::string::npos)
+      << "GLES vertex shader is missing the y-flip epilogue:\n"
+      << gl_vert;
+
+  // GL fragment shader: not injected.
+  const std::string gl_frag = compile(
+      "sample.frag", SourceType::kFragmentShader, TargetPlatform::kOpenGLES);
+  EXPECT_EQ(gl_frag.find("_impeller_y_flip"), std::string::npos)
+      << "GLES fragment shader was unexpectedly injected:\n"
+      << gl_frag;
+
+  // Metal vertex shader: not injected.
+  const std::string mtl_vert = compile(
+      "sample.vert", SourceType::kVertexShader, TargetPlatform::kMetalIOS);
+  EXPECT_EQ(mtl_vert.find("_impeller_y_flip"), std::string::npos)
+      << "Metal vertex shader was unexpectedly injected:\n"
+      << mtl_vert;
+}
+
 TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
   ASSERT_EQ(SourceTypeFromFileName("hello.vert"), SourceType::kVertexShader);
   ASSERT_EQ(SourceTypeFromFileName("hello.frag"), SourceType::kFragmentShader);

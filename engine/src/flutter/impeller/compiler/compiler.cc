@@ -33,6 +33,72 @@ constexpr const char* kEGLImageExternalExtension = "GL_OES_EGL_image_external";
 constexpr const char* kEGLImageExternalExtension300 =
     "GL_OES_EGL_image_external_essl3";
 constexpr int kVerboseErrorLineThreshold = 6;
+
+// HAL-populated per pass: +1.0 swapchain, -1.0 offscreen FBO. See
+// https://github.com/flutter/flutter/issues/186554.
+constexpr const char* kYFlipUniformName = "_impeller_y_flip";
+
+bool IsGLTargetPlatform(TargetPlatform platform) {
+  return platform == TargetPlatform::kOpenGLES ||
+         platform == TargetPlatform::kOpenGLDesktop ||
+         platform == TargetPlatform::kRuntimeStageGLES ||
+         platform == TargetPlatform::kRuntimeStageGLES3;
+}
+
+// Appends `gl_Position.y *= _impeller_y_flip;` to main() and declares
+// the uniform, into a GLSL vertex shader emitted by spirv-cross.
+std::string InjectYFlipForGLESVertexShader(std::string source) {
+  // Scan main()'s body tracking brace depth to find its closing `}`.
+  const std::string epilogue =
+      std::string("    gl_Position.y *= ") + kYFlipUniformName + ";\n";
+
+  const size_t main_pos = source.find("void main");
+  if (main_pos == std::string::npos) {
+    return source;
+  }
+  const size_t open_brace = source.find('{', main_pos);
+  if (open_brace == std::string::npos) {
+    return source;
+  }
+  int depth = 1;
+  for (size_t i = open_brace + 1; i < source.size(); ++i) {
+    const char c = source[i];
+    if (c == '{') {
+      ++depth;
+    } else if (c == '}') {
+      --depth;
+      if (depth == 0) {
+        source.insert(i, epilogue);
+        break;
+      }
+    }
+  }
+
+  // Insert the uniform after the last `precision` directive, falling
+  // back to right after `#version`.
+  const std::string declaration =
+      std::string("\nuniform float ") + kYFlipUniformName + ";\n";
+  size_t inject_at = std::string::npos;
+  for (size_t pos = source.find("\nprecision "); pos != std::string::npos;
+       pos = source.find("\nprecision ", pos + 1)) {
+    const size_t eol = source.find('\n', pos + 1);
+    if (eol == std::string::npos) {
+      break;
+    }
+    inject_at = eol;
+  }
+  if (inject_at == std::string::npos) {
+    const size_t version_pos = source.find("#version");
+    if (version_pos != std::string::npos) {
+      inject_at = source.find('\n', version_pos);
+    }
+  }
+  if (inject_at == std::string::npos) {
+    inject_at = 0;
+  }
+  source.insert(inject_at, declaration);
+  return source;
+}
 }  // namespace
 
 // This value should be <= 7372. UBOs can be larger on some devices but a
@@ -451,6 +517,15 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
   // for Vulkan. The reflector needs information that is only valid after a
   // successful compilation call.
   auto sl_compilation_result_str = sl_compiler.GetCompiler()->compile();
+
+  // GL vertex shaders get a y-flip epilogue; see
+  // https://github.com/flutter/flutter/issues/186554.
+  if (IsGLTargetPlatform(source_options.target_platform) &&
+      source_options.type == SourceType::kVertexShader) {
+    sl_compilation_result_str =
+        InjectYFlipForGLESVertexShader(std::move(sl_compilation_result_str));
+  }
+
   auto sl_compilation_result =
       CreateMappingWithString(sl_compilation_result_str);
 
