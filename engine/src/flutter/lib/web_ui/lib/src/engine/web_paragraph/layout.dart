@@ -970,8 +970,6 @@ abstract class WebCluster {
 
   WebTextStyle get style;
 
-  void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y});
-
   void addToContext(DomCanvasRenderingContext2D context, double x, double y);
 
   @override
@@ -998,17 +996,6 @@ class TextCluster extends WebCluster {
   late final ui.Rect advance = span.getClusterSelection(this);
 
   final DomTextCluster _cluster;
-
-  @override
-  void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y}) {
-    context.fillTextCluster(
-      _cluster,
-      /*left:*/ 0,
-      /*top:*/ span.fontBoundingBoxAscent,
-      // TODO(mdebbar): Create a JS TextClusterOptions object instead of a Dart Map
-      <String, double>{'x': x, 'y': y},
-    );
-  }
 
   @override
   void addToContext(DomCanvasRenderingContext2D context, double x, double y) {
@@ -1041,11 +1028,6 @@ class EmptyCluster extends WebCluster {
   late final ui.Rect advance = ui.Rect.fromLTWH(0, 0, 0, height);
 
   @override
-  void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y}) {
-    throw UnsupportedError('We should not call "fillOnContext" on an EmptyCluster');
-  }
-
-  @override
   String toString() {
     return 'EmptyCluster [$start:$end)';
   }
@@ -1072,11 +1054,6 @@ class PlaceholderCluster extends WebCluster {
 
   @override
   late final ui.Rect advance = ui.Rect.fromLTWH(0, 0, span.width, span.height);
-
-  @override
-  void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y}) {
-    // No-op. Placeholders don't draw anything.
-  }
 
   @override
   void addToContext(DomCanvasRenderingContext2D context, double x, double y) {
