@@ -133,10 +133,10 @@ export class FlutterLoader {
       // build" failure can see exactly which constraint blocked each.
       for (const skipped of skippedBuilds) {
         console.warn(
-          `Flutter Web: build ${JSON.stringify(skipped.candidate)} was rejected: ${skipped.reason}`
+          `Flutter Web: build ${skipped.candidate.compileTarget}/${skipped.candidate.renderer} was rejected: ${skipped.reason}`
         );
       }
-      throw "FlutterLoader could not find a build compatible with configuration and environment.";
+      throw new Error("FlutterLoader could not find a build compatible with configuration and environment.");
     }
 
     const deps = {};
