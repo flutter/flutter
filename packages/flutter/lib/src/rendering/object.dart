@@ -2299,7 +2299,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
 
   bool _debugMutationsLocked = false;
 
-  // Returns the closest ancestor that detemines whether this RenderObject is
+  // Returns the closest ancestor that determines whether this RenderObject is
   // currently allowed to mutate, and a boolean indicating whether this
   // RenderObject is allowed to mutate.
   //

@@ -2704,7 +2704,7 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   void attach(PipelineOwner owner) {
     super.attach(owner);
     // If attach is called after _didDeactivate then it is always safe to put deferred child
-    // back because the theater must an ancestor of both render objects.
+    // back because the theater must be an ancestor of both render objects.
     if (_didDeactivate) {
       _didDeactivate = false;
       assert(_deferredLayoutChild != null);
