@@ -109,7 +109,9 @@ class ZoomControls extends StatelessWidget {
                 onPressed: scale > _minScale ? _zoomOut : null,
                 icon: const Icon(Icons.zoom_out),
                 color: theme.colorScheme.onSurface,
-                disabledColor: theme.colorScheme.onSurface.withValues(alpha: 0.38),
+                disabledColor: theme.colorScheme.onSurface.withValues(
+                  alpha: 0.38,
+                ),
               ),
               SizedBox(
                 width: 100,
@@ -127,7 +129,9 @@ class ZoomControls extends StatelessWidget {
                 onPressed: scale < _maxScale ? _zoomIn : null,
                 icon: const Icon(Icons.zoom_in_sharp),
                 color: theme.colorScheme.onSurface,
-                disabledColor: theme.colorScheme.onSurface.withValues(alpha: 0.38),
+                disabledColor: theme.colorScheme.onSurface.withValues(
+                  alpha: 0.38,
+                ),
               ),
               IconButton(
                 tooltip: 'Reset zoom',
@@ -135,7 +139,9 @@ class ZoomControls extends StatelessWidget {
                 onPressed: scale != _minScale ? _reset : null,
                 icon: const Icon(Icons.zoom_out_map),
                 color: theme.colorScheme.onSurface,
-                disabledColor: theme.colorScheme.onSurface.withValues(alpha: 0.38),
+                disabledColor: theme.colorScheme.onSurface.withValues(
+                  alpha: 0.38,
+                ),
               ),
               SizedBox(
                 width: 36,
