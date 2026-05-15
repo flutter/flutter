@@ -36,7 +36,8 @@ void main() {
       expect(
         find.byWidgetPredicate(
           (Widget widget) =>
-              widget is Text && widget.data!.startsWith('Waiting for message...'),
+              widget is Text &&
+              widget.data!.startsWith('Waiting for message...'),
         ),
         findsOneWidget,
       );
@@ -58,28 +59,34 @@ void main() {
       expect(
         find.byWidgetPredicate(
           (Widget widget) =>
-              widget is Text && widget.data!.startsWith('Waiting for message...'),
+              widget is Text &&
+              widget.data!.startsWith('Waiting for message...'),
         ),
         findsOneWidget,
       );
 
-      const channelName = 'com.example.android_hardware_smoke_test/test_channel';
+      // Simulate a message from the java side
+      print("example_test: simulating message 'fooTest' on channel");
+      const channelName =
+          'com.example.android_hardware_smoke_test/test_channel';
+      final message = const StringCodec().encodeMessage("fooTest");
+      final replyFuture = tester.binding.defaultBinaryMessenger
+          .handlePlatformMessage(channelName, message, null);
 
-      // Set mock handler to intercept messages
-      // tester.binding.defaultBinaryMessenger.setMockMessageHandler(channelName,
-      // (ByteData? data) {
-      //   final String message = utf8.decode(data!.buffer.asUint8List());
-      //   print("mock message handler received message: $message");
-      //   //expect(value, equals("Rendered foo"));
-      //   final Uint8List responseBytes = utf8.encode('Mocked $message');
-      //   return Future.value(responseBytes.buffer.asByteData());
-      // });
+      //const channel = BasicMessageChannel<String>(channelName, StringCodec());
+      // print("example_test sending 'fooTest' on message channel");
+      // final responseFuture = channel.send("fooTest");
 
-      const channel = BasicMessageChannel<String>(channelName, StringCodec());
-      final responseFuture = channel.send("fooTest");
-      await tester.pumpAndSettle();
-      final response = await responseFuture;
-      expect(response, 'Rendered fooTest');
+      // Pump so the app can handle the message and return a reply.
+      print("example_test: pump");
+      await tester.pump();
+      print("example_test: pump completed, awaiting channel reply");
+      final ByteData? replyData = await replyFuture;
+      expect(replyData, isNotNull);
+      final reply = const StringCodec().decodeMessage(replyData);
+      print("example_test: received channel reply, decoded to: $reply");
+      expect(reply, equals("Rendered fooTest"));
+
       expect(
         find.byWidgetPredicate(
           (Widget widget) =>
@@ -87,11 +94,21 @@ void main() {
         ),
         findsOneWidget,
       );
+
+      await expectLater(find.byKey(app.targetKey), matchesGoldenFile('goldens/fooTest.png'));
+
+      // final response = await responseFuture;
+      // print("example_test received channel reply $response");
+      // expect(response, 'Rendered fooTest');
+      // expect(
+      //   find.byWidgetPredicate(
+      //     (Widget widget) =>
+      //         widget is Text && widget.data!.startsWith('fooTest'),
+      //   ),
+      //   findsOneWidget,
+      // );
       //expect(response, 'Mocked fooTest');
       //await Future.delayed(Duration(seconds: 3));
-
-      // clean up
-      tester.binding.defaultBinaryMessenger.setMockMessageHandler(channelName, null);
     });
   });
 }

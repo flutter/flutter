@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:async';
 
+GlobalKey targetKey = GlobalKey();
+
 void main() {
   runApp(const MyApp());
 }
@@ -64,9 +66,12 @@ class _MyState extends State<MyWidget> {
     return SafeArea(
       child: Stack(
         children: <Widget>[
-          CustomPaint(
-            size: const Size(200, 200),
-            painter: MyPainter(message: _message),
+          RepaintBoundary(
+            key: targetKey,
+            child: CustomPaint(
+              size: const Size(200, 200),
+              painter: MyPainter(message: _message),
+            ),
           ),
           Align(alignment: Alignment.center, child: Text(_message)),
         ],
