@@ -44,20 +44,22 @@ interface class Git {
 
   /// Environment variables that can interfere with git commands when targeting
   /// the Flutter SDK.
-  static const List<String> _kGitEnvironmentVariables = <String>[
+  static const Set<String> _kGitEnvironmentVariables = <String>{
     'GIT_DIR',
     'GIT_INDEX_FILE',
     'GIT_WORK_TREE',
     'GIT_OBJECT_DIRECTORY',
     'GIT_ALTERNATE_OBJECT_DIRECTORIES',
     'GIT_QUARANTINE_PATH',
-  ];
+    'GIT_COMMON_DIR',
+  };
 
-  Map<String, String> _filterEnvironment(Map<String, String>? environment, bool includeGitEnv) {
+  Map<String, String> _filterEnvironment(Map<String, String>? environment) {
     final result = Map<String, String>.from(environment ?? _platform.environment);
-    if (!includeGitEnv) {
-      _kGitEnvironmentVariables.forEach(result.remove);
-    }
+    result.removeWhere(
+      // Doing toUpperCase because windows environment vars are case-insensitive
+      (String key, String value) => _kGitEnvironmentVariables.contains(key.toUpperCase()),
+    );
     if (_platform.isWindows) {
       result.addAll(_useNoGlobCygwinGit);
     }
@@ -70,9 +72,6 @@ interface class Git {
   ///
   /// - [arguments] does _not_ include the executable (it is implicit);
   /// - [environment] may include additional (implicit) platform-specific variables
-  /// - [includeGitEnv] whether to include inherited GIT_* environment variables.
-  ///   Defaults to false to avoid poisoning SDK-related commands with app-repo
-  ///   context.
   Future<RunResult> run(
     List<String> arguments, {
     bool throwOnError = false,
@@ -80,7 +79,6 @@ interface class Git {
     String? workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String>? environment,
-    bool includeGitEnv = false,
     Duration? timeout,
     int timeoutRetries = 0,
   }) {
@@ -90,7 +88,7 @@ interface class Git {
       allowedFailures: allowedFailures,
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
-      environment: _filterEnvironment(environment, includeGitEnv),
+      environment: _filterEnvironment(environment),
       timeout: timeout,
       timeoutRetries: timeoutRetries,
     );
@@ -102,9 +100,6 @@ interface class Git {
   ///
   /// - [arguments] does _not_ include the executable (it is implicit);
   /// - [environment] may include additional (implicit) platform-specific variables
-  /// - [includeGitEnv] whether to include inherited GIT_* environment variables.
-  ///   Defaults to false to avoid poisoning SDK-related commands with app-repo
-  ///   context.
   RunResult runSync(
     List<String> arguments, {
     bool throwOnError = false,
@@ -113,7 +108,6 @@ interface class Git {
     bool hideStdout = false,
     String? workingDirectory,
     Map<String, String>? environment,
-    bool includeGitEnv = false,
     bool allowReentrantFlutter = false,
     Encoding encoding = systemEncoding,
   }) {
@@ -124,7 +118,7 @@ interface class Git {
       allowedFailures: allowedFailures,
       hideStdout: hideStdout,
       workingDirectory: workingDirectory,
-      environment: _filterEnvironment(environment, includeGitEnv),
+      environment: _filterEnvironment(environment),
       allowReentrantFlutter: allowReentrantFlutter,
       encoding: encoding,
     );
@@ -136,9 +130,6 @@ interface class Git {
   ///
   /// - [arguments] does _not_ include the executable (it is implicit);
   /// - [environment] may include additional (implicit) platform-specific variables
-  /// - [includeGitEnv] whether to include inherited GIT_* environment variables.
-  ///   Defaults to false to avoid poisoning SDK-related commands with app-repo
-  ///   context.
   Future<int> stream(
     List<String> arguments, {
     String? workingDirectory,
@@ -149,7 +140,6 @@ interface class Git {
     RegExp? stdoutErrorMatcher,
     StringConverter? mapFunction,
     Map<String, String>? environment,
-    bool includeGitEnv = false,
   }) {
     assert(arguments.isEmpty || arguments.first != 'git');
     return _processUtils.stream(
@@ -161,7 +151,7 @@ interface class Git {
       filter: filter,
       stdoutErrorMatcher: stdoutErrorMatcher,
       mapFunction: mapFunction,
-      environment: _filterEnvironment(environment, includeGitEnv),
+      environment: _filterEnvironment(environment),
     );
   }
 

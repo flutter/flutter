@@ -624,11 +624,11 @@ class FlutterValidator extends DoctorValidator {
 
   String get flutterUnknownChannel =>
       'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
-      r"If that doesn't fix the issue, try deleting the version cache: `rm $FLUTTER_ROOT/bin/cache/flutter.version.json` and then reinstall Flutter by following instructions at https://flutter.dev/setup.";
+      r"If that doesn't fix the issue, try deleting the 'bin/cache/flutter.version.json' file in your Flutter SDK directory and then reinstall Flutter by following instructions at https://flutter.dev/setup.";
 
   String get flutterUnknownVersion =>
       'Cannot resolve current version, possibly due to local changes.\n'
-      r"If that doesn't fix the issue, try deleting the version cache: `rm $FLUTTER_ROOT/bin/cache/flutter.version.json` and then reinstall Flutter by following instructions at https://flutter.dev/setup.";
+      r"If that doesn't fix the issue, try deleting the 'bin/cache/flutter.version.json' file in your Flutter SDK directory and then reinstall Flutter by following instructions at https://flutter.dev/setup.";
 
   String flutterRevision(String revision, String age, String date) =>
       'Framework revision $revision ($age), $date';
