@@ -539,9 +539,7 @@ void main() {
             );
             _createProjectFiles(project, platform, schemeMigrated: false);
             project.xcodeWorkspace = null;
-            project.xcodeProjectSchemeFile().writeAsStringSync(
-              _validBuildActions(platform),
-            );
+            project.xcodeProjectSchemeFile().writeAsStringSync(_validBuildActions(platform));
 
             final plistParser = FakePlistParser.multiple(<String>[
               _plutilOutput(_allSectionsMigratedAsJson(platform)),

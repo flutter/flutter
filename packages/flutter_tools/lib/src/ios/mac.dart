@@ -392,10 +392,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final Directory? workspacePath = app.project.xcodeWorkspace;
   if (workspacePath != null) {
-    buildCommands.addAll(<String>[
-      '-workspace',
-      workspacePath.basename,
-    ]);
+    buildCommands.addAll(<String>['-workspace', workspacePath.basename]);
   }
   buildCommands.addAll(<String>[
     '-scheme',
