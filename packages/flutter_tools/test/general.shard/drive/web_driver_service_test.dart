@@ -238,81 +238,65 @@ void main() {
     );
   });
 
-  testUsingContext(
-    'WebDriverService starts and stops an app',
-    () async {
-      final WebDriverService service = setUpDriverService();
-      final device = FakeDevice();
-      await service.start(
+  testUsingContext('WebDriverService starts and stops an app', () async {
+    final WebDriverService service = setUpDriverService();
+    final device = FakeDevice();
+    await service.start(
+      BuildInfo.profile,
+      device,
+      DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
+    );
+    await service.stop();
+    expect(FakeResidentRunner.instance.callLog, <String>['run', 'exitApp', 'cleanupAtFinish']);
+  }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
+
+  testUsingContext('WebDriverService can start an app with a launch url provided', () async {
+    final WebDriverService service = setUpDriverService();
+    final device = FakeDevice();
+    const testUrl = 'http://localhost:1234/test';
+    await service.start(
+      BuildInfo.profile,
+      device,
+      DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: testUrl, ipv6: true),
+    );
+    await service.stop();
+    expect(service.webUri, Uri.parse(testUrl));
+  }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
+
+  testUsingContext('WebDriverService starts an app with provided web headers', () async {
+    final WebDriverService service = setUpDriverService();
+    final device = FakeDevice();
+    final webHeaders = <String, String>{'test-header': 'test-value'};
+    final webDevServerConfig = WebDevServerConfig(headers: webHeaders);
+    await service.start(
+      BuildInfo.profile,
+      device,
+      DebuggingOptions.enabled(
+        BuildInfo.profile,
+        webDevServerConfig: webDevServerConfig,
+        ipv6: true,
+      ),
+    );
+    await service.stop();
+    expect(
+      FakeResidentRunner.instance.debuggingOptions.webDevServerConfig?.headers,
+      equals(webHeaders),
+    );
+  }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
+
+  testUsingContext('WebDriverService will throw when an invalid launch url is provided', () async {
+    final WebDriverService service = setUpDriverService();
+    final device = FakeDevice();
+    const invalidTestUrl = '::INVALID_URL::';
+    await expectLater(
+      service.start(
         BuildInfo.profile,
         device,
-        DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
-      );
-      await service.stop();
-      expect(FakeResidentRunner.instance.callLog, <String>['run', 'exitApp', 'cleanupAtFinish']);
-    },
-    overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()},
-  );
-
-  testUsingContext(
-    'WebDriverService can start an app with a launch url provided',
-    () async {
-      final WebDriverService service = setUpDriverService();
-      final device = FakeDevice();
-      const testUrl = 'http://localhost:1234/test';
-      await service.start(
-        BuildInfo.profile,
-        device,
-        DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: testUrl, ipv6: true),
-      );
-      await service.stop();
-      expect(service.webUri, Uri.parse(testUrl));
-    },
-    overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()},
-  );
-
-  testUsingContext(
-    'WebDriverService starts an app with provided web headers',
-    () async {
-      final WebDriverService service = setUpDriverService();
-      final device = FakeDevice();
-      final webHeaders = <String, String>{'test-header': 'test-value'};
-      final webDevServerConfig = WebDevServerConfig(headers: webHeaders);
-      await service.start(
-        BuildInfo.profile,
-        device,
-        DebuggingOptions.enabled(
-          BuildInfo.profile,
-          webDevServerConfig: webDevServerConfig,
-          ipv6: true,
-        ),
-      );
-      await service.stop();
-      expect(
-        FakeResidentRunner.instance.debuggingOptions.webDevServerConfig?.headers,
-        equals(webHeaders),
-      );
-    },
-    overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()},
-  );
-
-  testUsingContext(
-    'WebDriverService will throw when an invalid launch url is provided',
-    () async {
-      final WebDriverService service = setUpDriverService();
-      final device = FakeDevice();
-      const invalidTestUrl = '::INVALID_URL::';
-      await expectLater(
-        service.start(
-          BuildInfo.profile,
-          device,
-          DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: invalidTestUrl, ipv6: true),
-        ),
-        throwsA(isA<FormatException>()),
-      );
-    },
-    overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()},
-  );
+        DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: invalidTestUrl, ipv6: true),
+      ),
+      throwsA(isA<FormatException>()),
+    );
+  }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
 
   testUsingContext(
     'WebDriverService forwards exception when run future fails before app starts',
