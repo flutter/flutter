@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -70,33 +71,45 @@ void main() {
         ' │ skipCount: 0\n'
         ' │ textDirection: ltr\n'
         ' │\n'
-        ' ├─onstage 1: RenderLimitedBox#bb803\n'
+        ' ├─onstage 1: _RenderAccessibilityBarrier#b9528\n'
         ' │ │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
         ' │ │   size)\n'
         ' │ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ │ size: Size(800.0, 600.0)\n'
-        ' │ │ maxWidth: 0.0\n'
-        ' │ │ maxHeight: 0.0\n'
         ' │ │\n'
-        ' │ └─child: RenderConstrainedBox#62707\n'
-        ' │     parentData: <none> (can use size)\n'
-        ' │     constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        ' │     size: Size(800.0, 600.0)\n'
-        ' │     additionalConstraints: BoxConstraints(biggest)\n'
+        ' │ └─child: RenderLimitedBox#39c1a\n'
+        ' │   │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
+        ' │   │   size)\n'
+        ' │   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' │   │ size: Size(800.0, 600.0)\n'
+        ' │   │ maxWidth: 0.0\n'
+        ' │   │ maxHeight: 0.0\n'
+        ' │   │\n'
+        ' │   └─child: RenderConstrainedBox#7c7f9\n'
+        ' │       parentData: <none> (can use size)\n'
+        ' │       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' │       size: Size(800.0, 600.0)\n'
+        ' │       additionalConstraints: BoxConstraints(biggest)\n'
         ' │\n'
-        ' ├─onstage 2: RenderLimitedBox#af5f1\n'
+        ' ├─onstage 2: _RenderAccessibilityBarrier#dbea5\n'
         ' ╎ │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
         ' ╎ │   size)\n'
         ' ╎ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' ╎ │ size: Size(800.0, 600.0)\n'
-        ' ╎ │ maxWidth: 0.0\n'
-        ' ╎ │ maxHeight: 0.0\n'
         ' ╎ │\n'
-        ' ╎ └─child: RenderConstrainedBox#69c48\n'
-        ' ╎     parentData: <none> (can use size)\n'
-        ' ╎     constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        ' ╎     size: Size(800.0, 600.0)\n'
-        ' ╎     additionalConstraints: BoxConstraints(biggest)\n'
+        ' ╎ └─child: RenderLimitedBox#c4a8a\n'
+        ' ╎   │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
+        ' ╎   │   size)\n'
+        ' ╎   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎   │ size: Size(800.0, 600.0)\n'
+        ' ╎   │ maxWidth: 0.0\n'
+        ' ╎   │ maxHeight: 0.0\n'
+        ' ╎   │\n'
+        ' ╎   └─child: RenderConstrainedBox#2deab\n'
+        ' ╎       parentData: <none> (can use size)\n'
+        ' ╎       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎       size: Size(800.0, 600.0)\n'
+        ' ╎       additionalConstraints: BoxConstraints(biggest)\n'
         ' ╎\n'
         ' └╌no offstage children\n',
       ),
@@ -150,7 +163,6 @@ void main() {
       ),
     );
     final RenderObject theater = overlayKey.currentContext!.findRenderObject()!;
-
     expect(theater, hasAGoodToStringDeep);
     expect(
       theater.toStringDeep(minLevel: DiagnosticLevel.info),
@@ -162,45 +174,61 @@ void main() {
         ' │ skipCount: 2\n'
         ' │ textDirection: ltr\n'
         ' │\n'
-        ' ├─onstage 1: RenderLimitedBox#0a77a\n'
+        ' ├─onstage 1: _RenderAccessibilityBarrier#0a77a\n'
         ' ╎ │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
         ' ╎ │   size)\n'
         ' ╎ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' ╎ │ size: Size(800.0, 600.0)\n'
-        ' ╎ │ maxWidth: 0.0\n'
-        ' ╎ │ maxHeight: 0.0\n'
         ' ╎ │\n'
-        ' ╎ └─child: RenderConstrainedBox#21f3a\n'
-        ' ╎     parentData: <none> (can use size)\n'
-        ' ╎     constraints: BoxConstraints(w=800.0, h=600.0)\n'
-        ' ╎     size: Size(800.0, 600.0)\n'
-        ' ╎     additionalConstraints: BoxConstraints(biggest)\n'
+        ' ╎ └─child: RenderLimitedBox#0a77a\n'
+        ' ╎   │ parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
+        ' ╎   │   size)\n'
+        ' ╎   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎   │ size: Size(800.0, 600.0)\n'
+        ' ╎   │ maxWidth: 0.0\n'
+        ' ╎   │ maxHeight: 0.0\n'
+        ' ╎   │\n'
+        ' ╎   └─child: RenderConstrainedBox#21f3a\n'
+        ' ╎       parentData: <none> (can use size)\n'
+        ' ╎       constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' ╎       size: Size(800.0, 600.0)\n'
+        ' ╎       additionalConstraints: BoxConstraints(biggest)\n'
         ' ╎\n'
-        ' ╎╌offstage 1: RenderLimitedBox#62c8c NEEDS-LAYOUT NEEDS-PAINT\n'
+        ' ╎╌offstage 1: _RenderAccessibilityBarrier#62c8c NEEDS-LAYOUT NEEDS-PAINT\n'
         ' ╎ │ parentData: not positioned; offset=Offset(0.0, 0.0)\n'
         ' ╎ │ constraints: MISSING\n'
         ' ╎ │ size: MISSING\n'
-        ' ╎ │ maxWidth: 0.0\n'
-        ' ╎ │ maxHeight: 0.0\n'
         ' ╎ │\n'
-        ' ╎ └─child: RenderConstrainedBox#425fa NEEDS-LAYOUT NEEDS-PAINT\n'
-        ' ╎     parentData: <none>\n'
-        ' ╎     constraints: MISSING\n'
-        ' ╎     size: MISSING\n'
-        ' ╎     additionalConstraints: BoxConstraints(biggest)\n'
+        ' ╎ └─child: RenderLimitedBox#62c8c NEEDS-LAYOUT NEEDS-PAINT\n'
+        ' ╎   │ parentData: not positioned; offset=Offset(0.0, 0.0)\n'
+        ' ╎   │ constraints: MISSING\n'
+        ' ╎   │ size: MISSING\n'
+        ' ╎   │ maxWidth: 0.0\n'
+        ' ╎   │ maxHeight: 0.0\n'
+        ' ╎   │\n'
+        ' ╎   └─child: RenderConstrainedBox#425fa NEEDS-LAYOUT NEEDS-PAINT\n'
+        ' ╎       parentData: <none>\n'
+        ' ╎       constraints: MISSING\n'
+        ' ╎       size: MISSING\n'
+        ' ╎       additionalConstraints: BoxConstraints(biggest)\n'
         ' ╎\n'
-        ' └╌offstage 2: RenderLimitedBox#03ae2 NEEDS-LAYOUT NEEDS-PAINT\n'
+        ' └╌offstage 2: _RenderAccessibilityBarrier#03ae2 NEEDS-LAYOUT NEEDS-PAINT\n'
         '   │ parentData: not positioned; offset=Offset(0.0, 0.0)\n'
         '   │ constraints: MISSING\n'
         '   │ size: MISSING\n'
-        '   │ maxWidth: 0.0\n'
-        '   │ maxHeight: 0.0\n'
         '   │\n'
-        '   └─child: RenderConstrainedBox#b4d48 NEEDS-LAYOUT NEEDS-PAINT\n'
-        '       parentData: <none>\n'
-        '       constraints: MISSING\n'
-        '       size: MISSING\n'
-        '       additionalConstraints: BoxConstraints(biggest)\n',
+        '   └─child: RenderLimitedBox#03ae2 NEEDS-LAYOUT NEEDS-PAINT\n'
+        '     │ parentData: not positioned; offset=Offset(0.0, 0.0)\n'
+        '     │ constraints: MISSING\n'
+        '     │ size: MISSING\n'
+        '     │ maxWidth: 0.0\n'
+        '     │ maxHeight: 0.0\n'
+        '     │\n'
+        '     └─child: RenderConstrainedBox#b4d48 NEEDS-LAYOUT NEEDS-PAINT\n'
+        '         parentData: <none>\n'
+        '         constraints: MISSING\n'
+        '         size: MISSING\n'
+        '         additionalConstraints: BoxConstraints(biggest)\n',
       ),
     );
   });
@@ -1301,6 +1329,57 @@ void main() {
     expect(semantics, isNot(includesNodeWith(label: 'bottom')));
 
     semantics.dispose();
+  });
+
+  testWidgets('Semantics of entries below accessibilityOpaque entries are blocked', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final overlayKey = GlobalKey<OverlayState>();
+    late final OverlayEntry bottomEntry;
+    addTearDown(
+      () => bottomEntry
+        ..remove()
+        ..dispose(),
+    );
+    late final OverlayEntry topEntry;
+    addTearDown(
+      () => topEntry
+        ..remove()
+        ..dispose(),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            bottomEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return const Text('bottom');
+              },
+            ),
+            topEntry = OverlayEntry(
+              accessibilityOpaque: true,
+              builder: (BuildContext context) {
+                return const Text('top');
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(find.text('bottom'), findsOneWidget);
+    expect(find.text('top'), findsOneWidget);
+    
+    final SemanticsNode bottomNode = tester.semantics.find(find.text('bottom'));
+    expect(bottomNode.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, isTrue);
+
+    final SemanticsNode topNode = tester.semantics.find(find.text('top'));
+    expect(topNode.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, isFalse);
+
+    handle.dispose();
   });
 
   testWidgets('Can use Positioned within OverlayEntry', (WidgetTester tester) async {

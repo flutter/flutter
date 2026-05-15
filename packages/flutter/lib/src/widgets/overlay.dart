@@ -117,6 +117,7 @@ class OverlayEntry implements Listenable {
     bool opaque = false,
     bool maintainState = false,
     this.canSizeOverlay = false,
+    this.accessibilityOpaque = false,
   }) : _opaque = opaque,
        _maintainState = maintainState {
     assert(debugMaybeDispatchCreated('widgets', 'OverlayEntry', this));
@@ -128,6 +129,12 @@ class OverlayEntry implements Listenable {
   /// To cause this builder to be called again, call [markNeedsBuild] on this
   /// overlay entry.
   final WidgetBuilder builder;
+
+  /// Whether this entry is accessibility opaque.
+  ///
+  /// If true, this entry prevents accessibility focus from entering any entries
+  /// below it.
+  final bool accessibilityOpaque;
 
   /// Whether this entry occludes the entire overlay.
   ///
@@ -422,9 +429,12 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
       child: _RenderTheaterMarker(
         theater: _theater,
         overlayEntryWidgetState: this,
-        // Use a Builder so that the `widget.entry.builder` can have access to
-        // _RenderTheaterMarker.of
-        child: Builder(builder: widget.entry.builder),
+        child: _AccessibilityBarrier(
+          accessibilityOpaque: widget.entry.accessibilityOpaque,
+          // Use a Builder so that the `widget.entry.builder` can have access to
+          // _RenderTheaterMarker.of
+          child: Builder(builder: widget.entry.builder),
+        ),
       ),
     );
   }
@@ -1247,6 +1257,22 @@ class _RenderTheater extends RenderBox
   }
 
   @override
+  void adoptChild(RenderObject child) {
+    super.adoptChild(child);
+    if (child is _RenderAccessibilityFocusBlocker) {
+      child.addListener(_updateAccessibilityFocusBlockers);
+    }
+  }
+
+  @override
+  void dropChild(RenderObject child) {
+    if (child is _RenderAccessibilityFocusBlocker) {
+      child.removeListener(_updateAccessibilityFocusBlockers);
+    }
+    super.dropChild(child);
+  }
+
+  @override
   void redepthChildren() => visitChildren(redepthChild);
 
   Alignment? _alignmentCache;
@@ -1315,6 +1341,7 @@ class _RenderTheater extends RenderBox
     // skipped when the `_skipMarkNeedsLayout` flag is set.
     markNeedsPaint();
     _skipMarkNeedsLayout = false;
+    _updateAccessibilityFocusBlockers();
 
     // After adding `child` to the render tree, we want to make sure it will be
     // laid out in the same frame. This is done by calling markNeedsLayout on the
@@ -1331,6 +1358,7 @@ class _RenderTheater extends RenderBox
     // the comment in `_addDeferredChild`.
     markNeedsPaint();
     _skipMarkNeedsLayout = false;
+    _updateAccessibilityFocusBlockers();
   }
 
   @override
@@ -1476,9 +1504,42 @@ class _RenderTheater extends RenderBox
 
     // Equivalent to BoxConstraints used by RenderStack for StackFit.expand.
     final nonPositionedChildConstraints = BoxConstraints.tight(size);
+
+    // Forward parent data from child to self for _RenderAccessibilityBarrier
+    // to support Positioned children.
+    for (final RenderBox child in _childrenInPaintOrder()) {
+      if (child is _RenderAccessibilityBarrier) {
+        final RenderBox? innerChild = child.child;
+        if (innerChild != null) {
+          final ParentData? innerParentData = innerChild.parentData;
+          if (innerParentData is StackParentData) {
+            final myParentData = child.parentData! as StackParentData;
+            myParentData.left = innerParentData.left;
+            myParentData.top = innerParentData.top;
+            myParentData.right = innerParentData.right;
+            myParentData.bottom = innerParentData.bottom;
+            myParentData.width = innerParentData.width;
+            myParentData.height = innerParentData.height;
+          }
+        }
+      }
+    }
+
     for (final RenderBox child in _childrenInPaintOrder()) {
       if (child != sizeDeterminingChild) {
         layoutChild(child, nonPositionedChildConstraints);
+      }
+    }
+    _updateAccessibilityFocusBlockers();
+  }
+
+  void _updateAccessibilityFocusBlockers() {
+    var isOpaque = false;
+    for (final RenderBox child in _childrenInHitTestOrder()) {
+      if (child is _RenderAccessibilityFocusBlocker) {
+        final blocker = child as _RenderAccessibilityFocusBlocker;
+        blocker.blockFocus = isOpaque;
+        isOpaque |= blocker.accessibilityOpaque;
       }
     }
   }
@@ -1566,7 +1627,6 @@ class _RenderTheater extends RenderBox
     while (child != null) {
       visitor(child);
       final childParentData = child.parentData! as _TheaterParentData;
-
       childParentData.visitOverlayPortalChildrenOnOverlayEntry(visitor);
       child = childParentData.nextSibling;
     }
@@ -1879,6 +1939,7 @@ class OverlayPortal extends StatefulWidget {
     required this.overlayChildBuilder,
     this.overlayLocation = OverlayChildLocation.nearestOverlay,
     this.child,
+    this.accessibilityOpaque = false,
   });
 
   /// Creates an [OverlayPortal] that renders the widget [overlayChildBuilder]
@@ -1893,6 +1954,7 @@ class OverlayPortal extends StatefulWidget {
     required this.controller,
     required this.overlayChildBuilder,
     this.child,
+    this.accessibilityOpaque = false,
   }) : overlayLocation = OverlayChildLocation.rootOverlay;
 
   /// Creates an [OverlayPortal] that renders the widget `overlayChildBuilder`
@@ -1926,12 +1988,14 @@ class OverlayPortal extends StatefulWidget {
     required OverlayChildLayoutBuilder overlayChildBuilder,
     OverlayChildLocation overlayLocation = OverlayChildLocation.nearestOverlay,
     required Widget? child,
+    bool accessibilityOpaque = false,
   }) : this(
          key: key,
          controller: controller,
          overlayChildBuilder: (_) => _OverlayChildLayoutBuilder(builder: overlayChildBuilder),
          child: child,
          overlayLocation: overlayLocation,
+         accessibilityOpaque: accessibilityOpaque,
        );
 
   /// The controller to show, hide and bring to top the overlay child.
@@ -1961,6 +2025,12 @@ class OverlayPortal extends StatefulWidget {
   /// The [Overlay] that the widget returns from [overlayChildBuilder] is
   /// attached to.
   final OverlayChildLocation overlayLocation;
+
+  /// Whether this overlay portal is accessibility opaque.
+  ///
+  /// If true, this portal's overlay child prevents accessibility focus from
+  /// entering any entries or portals below it.
+  final bool accessibilityOpaque;
 
   @override
   State<OverlayPortal> createState() => _OverlayPortalState();
@@ -2006,6 +2076,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
       zOrderIndex,
       marker.overlayEntryWidgetState,
       marker.theater,
+      accessibilityOpaque: widget.accessibilityOpaque,
     );
     assert(newLocation._zOrderIndex == zOrderIndex);
     return _locationCache = newLocation;
@@ -2088,6 +2159,7 @@ class _OverlayPortalState extends State<OverlayPortal> {
   @override
   Widget build(BuildContext context) {
     final int? zOrderIndex = _zOrderIndex;
+
     if (zOrderIndex == null) {
       return _OverlayPortal(
         overlayLocation: null,
@@ -2103,10 +2175,13 @@ class _OverlayPortalState extends State<OverlayPortal> {
       viewInsets: overlayData.viewInsets,
       viewPadding: overlayData.viewPadding,
     );
+
     return _OverlayPortal(
       overlayLocation: overlayLocation,
       overlayChild: _DeferredLayout(
         childIdentifier: this,
+        accessibilityOpaque: widget.accessibilityOpaque,
+        hostEntry: overlayLocation._childModel.widget.entry,
         child: MediaQuery(
           data: data,
           child: Builder(builder: widget.overlayChildBuilder),
@@ -2150,11 +2225,17 @@ class _OverlayPortalState extends State<OverlayPortal> {
 // Since it can't implement operator== (it's mutable), the same `_OverlayEntryLocation`
 // instance must not be used to represent more than one locations.
 final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation> {
-  _OverlayEntryLocation(this._zOrderIndex, this._childModel, this._theater);
+  _OverlayEntryLocation(
+    this._zOrderIndex,
+    this._childModel,
+    this._theater, {
+    this.accessibilityOpaque = false,
+  });
 
   final int _zOrderIndex;
   final _OverlayEntryWidgetState _childModel;
   final _RenderTheater _theater;
+  final bool accessibilityOpaque;
 
   _RenderDeferredLayoutBox? _overlayChildRenderBox;
   void _addToChildModel(_RenderDeferredLayoutBox child) {
@@ -2493,9 +2574,13 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
     // reparenting between the overlayChild and child.
     required Widget child,
     this.childIdentifier,
+    this.accessibilityOpaque = false,
+    required this.hostEntry,
   }) : super(child: child);
 
   final Object? childIdentifier;
+  final bool accessibilityOpaque;
+  final OverlayEntry hostEntry;
 
   _RenderLayoutSurrogateProxyBox getLayoutParent(BuildContext context) {
     return context.findAncestorRenderObjectOfType<_RenderLayoutSurrogateProxyBox>()!;
@@ -2504,7 +2589,12 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
   @override
   _RenderDeferredLayoutBox createRenderObject(BuildContext context) {
     final _RenderLayoutSurrogateProxyBox parent = getLayoutParent(context);
-    final renderObject = _RenderDeferredLayoutBox(parent, childIdentifier);
+    final renderObject = _RenderDeferredLayoutBox(
+      parent,
+      childIdentifier,
+      accessibilityOpaque: accessibilityOpaque,
+      hostEntry: hostEntry,
+    );
     parent._deferredLayoutChild = renderObject;
     return renderObject;
   }
@@ -2513,7 +2603,10 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, _RenderDeferredLayoutBox renderObject) {
     assert(renderObject._layoutSurrogate == getLayoutParent(context));
     assert(getLayoutParent(context)._deferredLayoutChild == renderObject);
-    renderObject.childIdentifier = childIdentifier;
+    renderObject
+      ..childIdentifier = childIdentifier
+      ..accessibilityOpaque = accessibilityOpaque
+      ..hostEntry = hostEntry;
   }
 }
 
@@ -2538,11 +2631,21 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 //  When invoked from `PipelineOwner.flushLayout`, this `RenderObject` behaves
 //  like an `Overlay` that has only one entry.
 final class _RenderDeferredLayoutBox extends RenderProxyBox
-    with _RenderTheaterMixin, LinkedListEntry<_RenderDeferredLayoutBox> {
-  _RenderDeferredLayoutBox(this._layoutSurrogate, Object? childIdentifier)
-    : _childIdentifier = childIdentifier;
+    with
+        _RenderTheaterMixin,
+        LinkedListEntry<_RenderDeferredLayoutBox>,
+        ChangeNotifier,
+        _RenderAccessibilityFocusBlocker {
+  _RenderDeferredLayoutBox(
+    this._layoutSurrogate,
+    Object? childIdentifier, {
+    required bool accessibilityOpaque,
+    required OverlayEntry hostEntry,
+  }) : _childIdentifier = childIdentifier,
+       _hostEntry = hostEntry {
+    _accessibilityOpaque = accessibilityOpaque;
+  }
 
-  StackParentData get stackParentData => parentData! as StackParentData;
   final _RenderLayoutSurrogateProxyBox _layoutSurrogate;
 
   Object? get childIdentifier => _childIdentifier;
@@ -2552,6 +2655,33 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
       return;
     }
     _childIdentifier = value;
+  }
+
+  OverlayEntry get hostEntry => _hostEntry;
+  OverlayEntry _hostEntry;
+  set hostEntry(OverlayEntry value) {
+    if (_hostEntry == value) {
+      return;
+    }
+    _hostEntry = value;
+    theater.markNeedsSemanticsUpdate();
+  }
+
+  @override
+  bool get blockFocus {
+    final RenderBox? childOfDeferred = child;
+    if (childOfDeferred is _RenderAccessibilityBarrier) {
+      return childOfDeferred.blockFocus;
+    }
+    return false;
+  }
+
+  @override
+  set blockFocus(bool value) {
+    final RenderBox? childOfDeferred = child;
+    if (childOfDeferred is _RenderAccessibilityBarrier) {
+      childOfDeferred.blockFocus = value;
+    }
   }
 
   @override
@@ -2792,10 +2922,16 @@ class _RenderLayoutBuilder extends RenderProxyBox
   Iterable<RenderBox> _childrenInHitTestOrder() => _childrenInPaintOrder();
 
   @override
-  _RenderTheater get theater => switch (parent) {
-    final _RenderDeferredLayoutBox parent => parent.theater,
-    _ => throw FlutterError('$parent of $this is not a _RenderDeferredLayoutBox'),
-  };
+  _RenderTheater get theater {
+    RenderObject? node = parent;
+    while (node != null) {
+      if (node is _RenderDeferredLayoutBox) {
+        return node.theater;
+      }
+      node = node.parent;
+    }
+    throw FlutterError('Could not find a _RenderDeferredLayoutBox ancestor for $this');
+  }
 
   @override
   bool get sizedByParent => true;
@@ -2818,8 +2954,15 @@ class _RenderLayoutBuilder extends RenderProxyBox
 
   OverlayChildLayoutInfo _computeNewLayoutInfo() {
     final _RenderTheater theater = this.theater;
-    final parent = this.parent! as _RenderDeferredLayoutBox;
-    final _RenderLayoutSurrogateProxyBox layoutSurrogate = parent._layoutSurrogate;
+    RenderObject? node = parent;
+    while (node != null && node is! _RenderDeferredLayoutBox) {
+      node = node.parent;
+    }
+    if (node == null) {
+      throw FlutterError('Could not find a _RenderDeferredLayoutBox ancestor for $this');
+    }
+    final deferredParent = node as _RenderDeferredLayoutBox;
+    final _RenderLayoutSurrogateProxyBox layoutSurrogate = deferredParent._layoutSurrogate;
     assert(() {
       for (
         RenderObject? node = layoutSurrogate;
@@ -2852,7 +2995,7 @@ class _RenderLayoutBuilder extends RenderProxyBox
     // The paint transform we're about to compute is only useful if this RenderBox
     // uses the same coordinates as the theater.
     assert(getTransformTo(theater).isIdentity());
-    final Size overlayPortalSize = parent._layoutSurrogate.size;
+    final Size overlayPortalSize = deferredParent._layoutSurrogate.size;
     final Matrix4 paintTransform = layoutSurrogate.getTransformTo(theater);
     return OverlayChildLayoutInfo._((overlayPortalSize, paintTransform, size));
   }
@@ -2940,5 +3083,65 @@ class _RenderLayoutBuilder extends RenderProxyBox
       SchedulerBinding.instance.cancelFrameCallbackWithId(callbackId);
     }
     super.dispose();
+  }
+}
+
+class _AccessibilityBarrier extends SingleChildRenderObjectWidget {
+  const _AccessibilityBarrier({required super.child, required this.accessibilityOpaque});
+
+  final bool accessibilityOpaque;
+
+  @override
+  _RenderAccessibilityBarrier createRenderObject(BuildContext context) {
+    return _RenderAccessibilityBarrier(accessibilityOpaque: accessibilityOpaque);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderAccessibilityBarrier renderObject) {
+    renderObject.accessibilityOpaque = accessibilityOpaque;
+  }
+}
+
+final class _RenderAccessibilityBarrier extends RenderProxyBox
+    with _RenderAccessibilityFocusBlocker, ChangeNotifier {
+  _RenderAccessibilityBarrier({required bool accessibilityOpaque}) {
+    _accessibilityOpaque = accessibilityOpaque;
+  }
+
+  @override
+  void setupParentData(RenderBox child) {
+    if (child.parentData is! _TheaterParentData) {
+      child.parentData = _TheaterParentData();
+    }
+  }
+}
+
+mixin _RenderAccessibilityFocusBlocker on RenderObject implements ChangeNotifier {
+  bool get blockFocus => _blockFocus;
+  bool _blockFocus = false;
+  set blockFocus(bool value) {
+    if (_blockFocus == value) {
+      return;
+    }
+    _blockFocus = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  bool get accessibilityOpaque => _accessibilityOpaque;
+  bool _accessibilityOpaque = false;
+  set accessibilityOpaque(bool value) {
+    if (_accessibilityOpaque == value) {
+      return;
+    }
+    _accessibilityOpaque = value;
+    notifyListeners();
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    if (blockFocus) {
+      config.accessibilityFocusBlockType = AccessibilityFocusBlockType.blockSubtree;
+    }
   }
 }
