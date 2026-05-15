@@ -1,0 +1,20 @@
+{
+  "dart-format": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "../bin/cache/dart-sdk/bin/dart run dart_hooks:agent_dart_format --source hook --log",
+        "timeout": 90
+      }
+    ]
+  },
+  "dart-analyze": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "../bin/cache/dart-sdk/bin/dart run dart_hooks:agent_dart_analyze --source hook --log",
+        "timeout": 120
+      }
+    ]
+  }
+}

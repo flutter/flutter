@@ -226,6 +226,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  dart_hooks:
+    dependency: transitive
+    description:
+      path: "tool/dart_hooks"
+      ref: f6996f5cebf06377cd75076c49484e47436f65f4
+      resolved-ref: f6996f5cebf06377cd75076c49484e47436f65f4
+      url: "https://github.com/flutter/skills"
+    source: git
+    version: "0.0.1"
   dart_service_protocol_shared:
     dependency: transitive
     description:
@@ -446,10 +455,10 @@ packages:
     dependency: transitive
     description:
       name: google_cloud
-      sha256: fbcde933b2d8600c3cdb2328f8f4c47628ec29a39e9cef85dee535c7868993c4
+      sha256: b385e20726ef5315d302c5933bfb728103116c5be2d3d17094b01a82da538c1f
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.1"
+    version: "0.5.0"
   google_fonts:
     dependency: "direct main"
     description:
