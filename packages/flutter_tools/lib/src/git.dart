@@ -42,12 +42,37 @@ interface class Git {
 
   static const _ignoreLogShowSignature = ['-c', 'log.showSignature=false'];
 
+  /// Environment variables that can interfere with git commands when targeting
+  /// the Flutter SDK.
+  static const List<String> _kGitEnvironmentVariables = <String>[
+    'GIT_DIR',
+    'GIT_INDEX_FILE',
+    'GIT_WORK_TREE',
+    'GIT_OBJECT_DIRECTORY',
+    'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+    'GIT_QUARANTINE_PATH',
+  ];
+
+  Map<String, String> _filterEnvironment(Map<String, String>? environment, bool includeGitEnv) {
+    final result = Map<String, String>.from(environment ?? _platform.environment);
+    if (!includeGitEnv) {
+      _kGitEnvironmentVariables.forEach(result.remove);
+    }
+    if (_platform.isWindows) {
+      result.addAll(_useNoGlobCygwinGit);
+    }
+    return result;
+  }
+
   /// Spawns a child process to run `git`.
   ///
   /// The arguments are the same as [ProcessUtils.run], except:
   ///
   /// - [arguments] does _not_ include the executable (it is implicit);
   /// - [environment] may include additional (implicit) platform-specific variables
+  /// - [includeGitEnv] whether to include inherited GIT_* environment variables.
+  ///   Defaults to false to avoid poisoning SDK-related commands with app-repo
+  ///   context.
   Future<RunResult> run(
     List<String> arguments, {
     bool throwOnError = false,
@@ -55,6 +80,7 @@ interface class Git {
     String? workingDirectory,
     bool allowReentrantFlutter = false,
     Map<String, String>? environment,
+    bool includeGitEnv = false,
     Duration? timeout,
     int timeoutRetries = 0,
   }) {
@@ -64,7 +90,7 @@ interface class Git {
       allowedFailures: allowedFailures,
       workingDirectory: workingDirectory,
       allowReentrantFlutter: allowReentrantFlutter,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: _filterEnvironment(environment, includeGitEnv),
       timeout: timeout,
       timeoutRetries: timeoutRetries,
     );
@@ -76,6 +102,9 @@ interface class Git {
   ///
   /// - [arguments] does _not_ include the executable (it is implicit);
   /// - [environment] may include additional (implicit) platform-specific variables
+  /// - [includeGitEnv] whether to include inherited GIT_* environment variables.
+  ///   Defaults to false to avoid poisoning SDK-related commands with app-repo
+  ///   context.
   RunResult runSync(
     List<String> arguments, {
     bool throwOnError = false,
@@ -84,6 +113,7 @@ interface class Git {
     bool hideStdout = false,
     String? workingDirectory,
     Map<String, String>? environment,
+    bool includeGitEnv = false,
     bool allowReentrantFlutter = false,
     Encoding encoding = systemEncoding,
   }) {
@@ -94,7 +124,7 @@ interface class Git {
       allowedFailures: allowedFailures,
       hideStdout: hideStdout,
       workingDirectory: workingDirectory,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: _filterEnvironment(environment, includeGitEnv),
       allowReentrantFlutter: allowReentrantFlutter,
       encoding: encoding,
     );
@@ -106,6 +136,9 @@ interface class Git {
   ///
   /// - [arguments] does _not_ include the executable (it is implicit);
   /// - [environment] may include additional (implicit) platform-specific variables
+  /// - [includeGitEnv] whether to include inherited GIT_* environment variables.
+  ///   Defaults to false to avoid poisoning SDK-related commands with app-repo
+  ///   context.
   Future<int> stream(
     List<String> arguments, {
     String? workingDirectory,
@@ -116,6 +149,7 @@ interface class Git {
     RegExp? stdoutErrorMatcher,
     StringConverter? mapFunction,
     Map<String, String>? environment,
+    bool includeGitEnv = false,
   }) {
     assert(arguments.isEmpty || arguments.first != 'git');
     return _processUtils.stream(
@@ -127,7 +161,7 @@ interface class Git {
       filter: filter,
       stdoutErrorMatcher: stdoutErrorMatcher,
       mapFunction: mapFunction,
-      environment: {if (_platform.isWindows) ..._useNoGlobCygwinGit, ...?environment},
+      environment: _filterEnvironment(environment, includeGitEnv),
     );
   }
 

@@ -67,22 +67,6 @@ Channel? getChannelForName(String name) {
   return null;
 }
 
-/// Environment variables that can interfere with git commands when targeting
-/// the Flutter SDK.
-const Set<String> _kGitEnvironmentVariables = <String>{
-  'GIT_DIR',
-  'GIT_INDEX_FILE',
-  'GIT_WORK_TREE',
-  'GIT_OBJECT_DIRECTORY',
-  'GIT_ALTERNATE_OBJECT_DIRECTORIES',
-  'GIT_QUARANTINE_PATH',
-};
-
-Map<String, String> _filterGitEnvironment(Platform platform, [Map<String, String>? environment]) {
-  return Map<String, String>.from(environment ?? platform.environment)
-    ..removeWhere((String key, String value) => _kGitEnvironmentVariables.contains(key));
-}
-
 abstract class FlutterVersion {
   /// Parses the Flutter version from currently available tags in the local
   /// repo.
@@ -126,11 +110,7 @@ abstract class FlutterVersion {
     }
 
     final String frameworkRevision = git
-        .logSync(
-          ['-n', '1', '--pretty=format:%H'],
-          workingDirectory: flutterRoot,
-          environment: _filterGitEnvironment(globals.platform),
-        )
+        .logSync(['-n', '1', '--pretty=format:%H'], workingDirectory: flutterRoot)
         .stdout
         .trim();
 
@@ -253,11 +233,7 @@ abstract class FlutterVersion {
 
   String _getTimeSinceCommit({String? revision}) {
     return _git
-        .logSync(
-          ['-n', '1', '--pretty=format:%ar', ?revision],
-          workingDirectory: flutterRoot,
-          environment: _filterGitEnvironment(globals.platform),
-        )
+        .logSync(['-n', '1', '--pretty=format:%ar', ?revision], workingDirectory: flutterRoot)
         .stdout
         .trim();
   }
@@ -469,11 +445,7 @@ abstract class FlutterVersion {
   String getBranchName({bool redactUnknownBranches = false}) {
     _branch ??= () {
       final String branch = _git
-          .runSync(
-            ['symbolic-ref', '--short', 'HEAD'],
-            workingDirectory: flutterRoot,
-            environment: _filterGitEnvironment(globals.platform),
-          )
+          .runSync(['symbolic-ref', '--short', 'HEAD'], workingDirectory: flutterRoot)
           .stdout
           .trim();
       return branch == 'HEAD' ? '' : branch;
@@ -513,11 +485,13 @@ String _gitCommitDate({
   required Git git,
   required String? workingDirectory,
 }) {
-  final RunResult result = git.logSync(
-    [gitRef, '-n', '1', '--pretty=format:%ad', '--date=iso'],
-    workingDirectory: workingDirectory,
-    environment: _filterGitEnvironment(globals.platform),
-  );
+  final RunResult result = git.logSync([
+    gitRef,
+    '-n',
+    '1',
+    '--pretty=format:%ad',
+    '--date=iso',
+  ], workingDirectory: workingDirectory);
   if (result.exitCode == 0) {
     return result.stdout.trim();
   }
@@ -687,22 +661,19 @@ class _FlutterVersionGit extends FlutterVersion {
   String? get repositoryUrl {
     if (_repositoryUrl == null) {
       final String gitChannel = _git
-          .runSync(
-            ['rev-parse', '--abbrev-ref', '--symbolic', kGitTrackingUpstream],
-            workingDirectory: flutterRoot,
-            environment: _filterGitEnvironment(globals.platform),
-          )
+          .runSync([
+            'rev-parse',
+            '--abbrev-ref',
+            '--symbolic',
+            kGitTrackingUpstream,
+          ], workingDirectory: flutterRoot)
           .stdout
           .trim();
       final int slash = gitChannel.indexOf('/');
       if (slash != -1) {
         final String remote = gitChannel.substring(0, slash);
         _repositoryUrl = _git
-            .runSync(
-              ['ls-remote', '--get-url', remote],
-              workingDirectory: flutterRoot,
-              environment: _filterGitEnvironment(globals.platform),
-            )
+            .runSync(['ls-remote', '--get-url', remote], workingDirectory: flutterRoot)
             .stdout
             .trim();
       }
@@ -982,11 +953,7 @@ class VersionCheckError implements Exception {
 /// If the command fails, throws a [ToolExit] exception.
 Future<String> _run(Git git, List<String> command) async {
   // TODO(matanlurey): Inline this in the single place it's called in this file.
-  final RunResult results = await git.run(
-    command,
-    workingDirectory: Cache.flutterRoot,
-    environment: _filterGitEnvironment(globals.platform),
-  );
+  final RunResult results = await git.run(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0) {
     return results.stdout.trim();
@@ -1065,11 +1032,7 @@ class GitTagVersion {
   }) {
     if (fetchTags) {
       final String channel = git
-          .runSync(
-            ['symbolic-ref', '--short', 'HEAD'],
-            workingDirectory: workingDirectory,
-            environment: _filterGitEnvironment(platform),
-          )
+          .runSync(['symbolic-ref', '--short', 'HEAD'], workingDirectory: workingDirectory)
           .stdout
           .trim();
       if (!kDevelopmentChannels.contains(channel) && kOfficialChannels.contains(channel)) {
@@ -1077,21 +1040,13 @@ class GitTagVersion {
       } else {
         final String flutterGit =
             platform.environment['FLUTTER_GIT_URL'] ?? 'https://github.com/flutter/flutter.git';
-        git.runSync(
-          ['fetch', flutterGit, '--tags', '-f'],
-          workingDirectory: workingDirectory,
-          environment: _filterGitEnvironment(platform),
-        );
+        git.runSync(['fetch', flutterGit, '--tags', '-f'], workingDirectory: workingDirectory);
       }
     }
     // find all tags attached to the given [gitRef]. These are returned in alphabetical order, so
     // we reverse the set of tags to examine the most recent tag versions first.
     final List<String> tags = git
-        .runSync(
-          ['tag', '--points-at', gitRef],
-          workingDirectory: workingDirectory,
-          environment: _filterGitEnvironment(platform),
-        )
+        .runSync(['tag', '--points-at', gitRef], workingDirectory: workingDirectory)
         .stdout
         .trim()
         .split('\n')
@@ -1127,35 +1082,27 @@ class GitTagVersion {
     required String gitRef,
   }) {
     final String latestTag = git
-        .runSync(
-          [
-            'for-each-ref',
-            '--sort=-v:refname',
-            '--count=1',
-            '--format=%(refname:short)',
-            'refs/tags/[0-9]*.*.*',
-          ],
-          workingDirectory: workingDirectory,
-          environment: _filterGitEnvironment(globals.platform),
-        )
+        .runSync([
+          'for-each-ref',
+          '--sort=-v:refname',
+          '--count=1',
+          '--format=%(refname:short)',
+          'refs/tags/[0-9]*.*.*',
+        ], workingDirectory: workingDirectory)
         .stdout
         .trim();
 
     final String ancestorRef = git
-        .runSync(
-          ['merge-base', gitRef, latestTag],
-          workingDirectory: workingDirectory,
-          environment: _filterGitEnvironment(globals.platform),
-        )
+        .runSync(['merge-base', gitRef, latestTag], workingDirectory: workingDirectory)
         .stdout
         .trim();
 
     final String commitCount = git
-        .runSync(
-          ['rev-list', '--count', '$ancestorRef..$gitRef'],
-          workingDirectory: workingDirectory,
-          environment: _filterGitEnvironment(globals.platform),
-        )
+        .runSync([
+          'rev-list',
+          '--count',
+          '$ancestorRef..$gitRef',
+        ], workingDirectory: workingDirectory)
         .stdout
         .trim();
 
