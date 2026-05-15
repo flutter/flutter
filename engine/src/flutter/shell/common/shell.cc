@@ -1032,7 +1032,6 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     if (should_post_raster_task) {
       fml::TaskRunner::RunNowOrPostTask(raster_task_runner, raster_task);
     }
-
     latch.Signal();
   };
 
