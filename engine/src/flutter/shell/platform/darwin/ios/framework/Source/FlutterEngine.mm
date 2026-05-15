@@ -233,7 +233,7 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   // View identifier for the next view to be created.
   // Only used when multiview is enabled.
   FlutterViewIdentifier _nextViewIdentifier;
-  
+
   FlutterFMLTaskRunner* _platformTaskRunnerWrapper;
   FlutterFMLTaskRunner* _uiTaskRunnerWrapper;
   FlutterFMLTaskRunner* _rasterTaskRunnerWrapper;
