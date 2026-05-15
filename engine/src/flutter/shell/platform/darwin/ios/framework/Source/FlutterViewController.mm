@@ -338,7 +338,7 @@ typedef struct MouseState {
   // with any already-connected scene so its plugins receive scene:willConnectToSession:options:.
   // The storyboard (awokenFromNib) case does not need this: the scene connects after awakeFromNib
   // runs, so the engine gets added via the normal notification path.
-  if (!self.awokenFromNib && performedCallback &&
+  if (!self.awokenFromNib && performedCallback && FlutterSharedApplication.hasSceneDelegate &&
       !FlutterSharedApplication.application.supportsMultipleScenes) {
     for (UIScene* scene in FlutterSharedApplication.application.connectedScenes) {
       FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate =
