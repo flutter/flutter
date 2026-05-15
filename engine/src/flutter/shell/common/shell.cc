@@ -1006,20 +1006,6 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     }
   };
 
-  auto flush_task = [io_manager = io_manager_->GetWeakPtr()] {
-    if (io_manager) {
-      if (auto impeller_context = io_manager->GetImpellerContext()) {
-        if (auto pipeline_library = impeller_context->GetPipelineLibrary()) {
-          if (auto pipeline_compile_queue =
-                  pipeline_library->GetPipelineCompileQueue())
-            if (pipeline_compile_queue->WaitUntilRendering()) {
-              pipeline_compile_queue->FlushPendingJobs();
-            }
-        }
-      }
-    }
-  };
-
   // Threading: Capture platform view by raw pointer and not the weak pointer.
   // We are going to use the pointer on the IO thread which is not safe with a
   // weak pointer. However, we are preventing the platform view from being
@@ -1031,7 +1017,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   auto io_task = [io_manager = io_manager_->GetWeakPtr(), platform_view,
                   ui_task_runner = task_runners_.GetUITaskRunner(), ui_task,
                   raster_task_runner = task_runners_.GetRasterTaskRunner(),
-                  raster_task, should_post_raster_task, &latch, flush_task] {
+                  raster_task, should_post_raster_task, &latch] {
     if (io_manager && !io_manager->GetResourceContext()) {
       sk_sp<GrDirectContext> resource_context =
           platform_view->CreateResourceContext();
@@ -1046,9 +1032,6 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     if (should_post_raster_task) {
       fml::TaskRunner::RunNowOrPostTask(raster_task_runner, raster_task);
     }
-
-    // Step 3: Flush pending pipeline compilation jobs.
-    fml::TaskRunner::RunNowOrPostTask(raster_task_runner, flush_task);
 
     latch.Signal();
   };
