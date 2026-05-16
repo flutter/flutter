@@ -3287,6 +3287,11 @@ void main() {
     'OverlayPortal does not throw when reparenting and overlay child requests re-layout',
     (WidgetTester tester) async {
       late StateSetter setState;
+      late final OverlayEntry entry;
+      addTearDown(() {
+        entry.remove();
+        entry.dispose();
+      });
 
       final portal = OverlayPortal(
         key: GlobalKey(debugLabel: 'OverlayPortal'),
@@ -3300,7 +3305,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Overlay(
             initialEntries: <OverlayEntry>[
-              OverlayEntry(
+              entry = OverlayEntry(
                 builder: (BuildContext context) {
                   return LayoutBuilder(
                     builder: (BuildContext context, BoxConstraints constraints) {
