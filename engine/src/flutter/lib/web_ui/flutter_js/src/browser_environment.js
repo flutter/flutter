@@ -6,7 +6,7 @@
 export const defaultWasmSupport = {
   "blink": true,
   "gecko": false,
-  "webkit": false,
+  "webkit": true,
   "unknown": false,
 }
 
@@ -30,6 +30,25 @@ const getBrowserEngine = () => {
 /** @type {import("./types").BrowserEngine} */
 const browserEngine = getBrowserEngine();
 
+const getWebKitVersion = () => {
+  const ua = navigator.userAgent;
+  const versionMatch = ua.match(/Version\/(\d+)(?:\.(\d+))?/);
+  if (versionMatch) {
+    return {
+      major: parseInt(versionMatch[1], 10),
+      minor: parseInt(versionMatch[2] || "0", 10),
+    };
+  }
+  const iosMatch = ua.match(/(?:CPU iPhone OS|CPU OS) (\d+)(?:_(\d+))?/);
+  if (iosMatch) {
+    return {
+      major: parseInt(iosMatch[1], 10),
+      minor: parseInt(iosMatch[2] || "0", 10),
+    };
+  }
+  return null;
+};
+
 const hasImageCodecs = () => {
   if (typeof ImageDecoder === "undefined") {
     return false;
@@ -49,13 +68,22 @@ const hasChromiumBreakIterators = () => {
     (typeof Intl.Segmenter !== "undefined");
 }
 
-const supportsWasmGC = () => {
+export const supportsWasmGC = () => {
   // This attempts to instantiate a wasm module that only will validate if the
   // final WasmGC spec is implemented in the browser.
   //
   // Copied from https://github.com/GoogleChromeLabs/wasm-feature-detect/blob/main/src/detectors/gc/index.js
   const bytes = [0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 95, 1, 120, 0];
-  return WebAssembly.validate(new Uint8Array(bytes));
+  if (!WebAssembly.validate(new Uint8Array(bytes))) {
+    return false;
+  }
+  if (getBrowserEngine() === "webkit") {
+    const version = getWebKitVersion();
+    if (!version || version.major < 26) {
+      return false;
+    }
+  }
+  return true;
 }
 
 const detectWebGLVersion = () => {

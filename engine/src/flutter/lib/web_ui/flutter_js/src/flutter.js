@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import { FlutterLoader } from './loader.js';
+import { supportsWasmGC } from './browser_environment.js';
 
 if (!window._flutter) {
   window._flutter = {};
@@ -11,3 +12,5 @@ if (!window._flutter) {
 if (!window._flutter.loader) {
   window._flutter.loader = new FlutterLoader();
 }
+
+window._flutter._supportsWasmGC = supportsWasmGC;
