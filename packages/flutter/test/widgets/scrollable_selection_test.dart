@@ -1446,62 +1446,61 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets(
-    'automatic edge scrolling respects NeverScrollableScrollPhysics',
-    (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/140654.
-      // When a scrollable view with non-scrollable physics (e.g.,
-      // NeverScrollableScrollPhysics) is wrapped in a SelectableRegion, dragging
-      // a selection past the viewport boundary must not advance the scroll offset
-      // or throw exceptions.
-      final controller = ScrollController();
-      addTearDown(controller.dispose);
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          home: SelectableRegion(
-            selectionControls: testTextSelectionHandleControls,
-            child: ListView.builder(
-              controller: controller,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) {
-                return Text('Item $index');
-              },
-            ),
+  testWidgets('automatic edge scrolling respects NeverScrollableScrollPhysics', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/140654.
+    // When a scrollable view with non-scrollable physics (e.g.,
+    // NeverScrollableScrollPhysics) is wrapped in a SelectableRegion, dragging
+    // a selection past the viewport boundary must not advance the scroll offset
+    // or throw exceptions.
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: testTextSelectionHandleControls,
+          child: ListView.builder(
+            controller: controller,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
           ),
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      final TestGesture gesture = await tester.startGesture(
-        tester.getCenter(find.text('Item 0')),
-        kind: ui.PointerDeviceKind.mouse,
-      );
-      addTearDown(gesture.removePointer);
-      await tester.pump();
-      expect(controller.offset, 0.0);
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.text('Item 0')),
+      kind: ui.PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    expect(controller.offset, 0.0);
 
-      // Drag past the bottom of the scrollable; this would normally trigger
-      // edge auto-scroll.
-      await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0.0, 40.0));
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+    // Drag past the bottom of the scrollable; this would normally trigger
+    // edge auto-scroll.
+    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0.0, 40.0));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
-      // The scroll position must not have advanced, and no exception must have
-      // been thrown.
-      expect(controller.offset, 0.0);
-      expect(tester.takeException(), isNull);
+    // The scroll position must not have advanced, and no exception must have
+    // been thrown.
+    expect(controller.offset, 0.0);
+    expect(tester.takeException(), isNull);
 
-      await tester.pump(const Duration(seconds: 1));
-      expect(controller.offset, 0.0);
-      expect(tester.takeException(), isNull);
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset, 0.0);
+    expect(tester.takeException(), isNull);
 
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(controller.offset, 0.0);
-      expect(tester.takeException(), isNull);
-    },
-  );
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
+    expect(tester.takeException(), isNull);
+  });
 
   group('Complex cases', () {
     testWidgets('selection starts outside of the scrollable', (WidgetTester tester) async {
