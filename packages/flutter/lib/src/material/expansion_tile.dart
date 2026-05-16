@@ -636,7 +636,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
         // blockNode prevents this node from being part of the focus traversal.
         label: semanticsHint,
         liveRegion: true,
-        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
         child: Semantics(hint: semanticsHint, onTapHint: onTapHint, child: child),
       );
     }

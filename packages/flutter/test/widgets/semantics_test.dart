@@ -879,13 +879,13 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockSubtree,
+        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockSubtree,
         child: Column(
           children: <Widget>[
             // If the child set blockSubTreeAccessibilityFocus to `none`, it's still blcok because its parent.
             Semantics(
               container: true,
-              accessibilityFocusBlockType: AccessibilityFocusBlockType.none,
+              accessiblityFocusBlockType: AccessiblityFocusBlockType.none,
               customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
                 const CustomSemanticsAction(label: 'action1'): () {},
               },
@@ -944,12 +944,12 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
         child: Column(
           children: <Widget>[
             Semantics(
               container: true,
-              accessibilityFocusBlockType: AccessibilityFocusBlockType.none,
+              accessiblityFocusBlockType: AccessiblityFocusBlockType.none,
               customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
                 const CustomSemanticsAction(label: 'action1'): () {},
               },
@@ -1004,7 +1004,7 @@ void main() {
             children: <Widget>[
               Semantics(
                 container: true,
-                accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+                accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
                 label: 'node1',
                 child: const SizedBox(width: 10, height: 10),
               ),
@@ -1050,7 +1050,7 @@ void main() {
         child: Semantics(
           label: 'root',
           child: Semantics(
-            accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
+            accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
             label: 'semantics label 0',
             child: Column(
               children: <Widget>[
@@ -1105,7 +1105,7 @@ void main() {
         child: Semantics(
           label: 'root',
           child: Semantics(
-            accessibilityFocusBlockType: AccessibilityFocusBlockType.blockSubtree,
+            accessiblityFocusBlockType: AccessiblityFocusBlockType.blockSubtree,
             label: 'semantics label 0',
             child: Column(
               children: <Widget>[
@@ -1151,7 +1151,7 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockSubtree,
+        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockSubtree,
         focused: true,
         customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
           const CustomSemanticsAction(label: 'action1'): () {},
