@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestIntent extends Intent {
@@ -20,6 +20,38 @@ class TestAction extends Action<Intent> {
   void invoke(Intent intent) {
     calls += 1;
   }
+}
+
+class _TestActivatable extends StatelessWidget {
+  const _TestActivatable({required this.value, required this.onChanged});
+
+  final bool? value;
+  final ValueChanged<bool?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (ActivateIntent intent) {
+            onChanged(!(value ?? false));
+            return null;
+          },
+        ),
+      },
+      child: const Focus(autofocus: true, child: SizedBox.shrink()),
+    );
+  }
+}
+
+PageRoute<T> _testPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
+  return PageRouteBuilder<T>(
+    settings: settings,
+    pageBuilder:
+        (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return builder(context);
+        },
+  );
 }
 
 void main() {
@@ -44,14 +76,11 @@ void main() {
       WidgetsApp(
         key: key,
         builder: (BuildContext context, Widget? child) {
-          return Material(
-            child: Checkbox(
-              value: checked,
-              autofocus: true,
-              onChanged: (bool? value) {
-                checked = value;
-              },
-            ),
+          return _TestActivatable(
+            value: checked,
+            onChanged: (bool? value) {
+              checked = value;
+            },
           );
         },
         color: const Color(0xFF123456),
@@ -76,14 +105,11 @@ void main() {
           SingleActivator(LogicalKeyboardKey.space): TestIntent(),
         },
         builder: (BuildContext context, Widget? child) {
-          return Material(
-            child: Checkbox(
-              value: checked,
-              autofocus: true,
-              onChanged: (bool? value) {
-                checked = value;
-              },
-            ),
+          return _TestActivatable(
+            value: checked,
+            onChanged: (bool? value) {
+              checked = value;
+            },
           );
         },
         color: const Color(0xFF123456),
@@ -105,14 +131,11 @@ void main() {
     await tester.pumpWidget(
       WidgetsApp(
         builder: (BuildContext context, Widget? child) {
-          return Material(
-            child: Checkbox(
-              value: checked,
-              autofocus: true,
-              onChanged: (bool? value) {
-                checked = value;
-              },
-            ),
+          return _TestActivatable(
+            value: checked,
+            onChanged: (bool? value) {
+              checked = value;
+            },
           );
         },
         color: const Color(0xFF123456),
@@ -189,7 +212,13 @@ void main() {
       await expectFlutterError(
         key: key,
         tester: tester,
-        widget: MaterialApp(navigatorKey: key, home: Container(), onGenerateRoute: (_) => null),
+        widget: WidgetsApp(
+          navigatorKey: key,
+          home: Container(),
+          onGenerateRoute: (_) => null,
+          pageRouteBuilder: _testPageRouteBuilder,
+          color: const Color(0xFF123456),
+        ),
         errorMessage:
             'FlutterError\n'
             '   Could not find a generator for route RouteSettings("/path", null)\n'
@@ -213,11 +242,13 @@ void main() {
       await expectFlutterError(
         key: key,
         tester: tester,
-        widget: MaterialApp(
+        widget: WidgetsApp(
           navigatorKey: key,
           home: Container(),
           onGenerateRoute: (_) => null,
           onUnknownRoute: (_) => null,
+          pageRouteBuilder: _testPageRouteBuilder,
+          color: const Color(0xFF123456),
         ),
         errorMessage:
             'FlutterError\n'
@@ -555,8 +586,10 @@ void main() {
     late final List<Locale>? localesArg;
     late final Iterable<Locale> supportedLocalesArg;
     await tester.pumpWidget(
-      MaterialApp(
-        // This uses a MaterialApp because it introduces some actual localizations.
+      WidgetsApp(
+        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+          _TestUnsupportedLocalizationsDelegate(),
+        ],
         localeListResolutionCallback: (List<Locale>? locales, Iterable<Locale> supportedLocales) {
           localesArg = locales;
           supportedLocalesArg = supportedLocales;
@@ -820,6 +853,37 @@ class PasteSpy extends Action<PasteTextIntent> {
   }
 }
 
+class _TestPage<T> extends Page<T> {
+  const _TestPage({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Route<T> createRoute(BuildContext context) {
+    return PageRouteBuilder<T>(settings: this, pageBuilder: (_, _, _) => child);
+  }
+}
+
+class _TestUnsupportedLocalizations {
+  const _TestUnsupportedLocalizations();
+}
+
+class _TestUnsupportedLocalizationsDelegate
+    extends LocalizationsDelegate<_TestUnsupportedLocalizations> {
+  const _TestUnsupportedLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => locale == const Locale('en', 'US');
+
+  @override
+  Future<_TestUnsupportedLocalizations> load(Locale locale) {
+    return SynchronousFuture<_TestUnsupportedLocalizations>(const _TestUnsupportedLocalizations());
+  }
+
+  @override
+  bool shouldReload(_TestUnsupportedLocalizationsDelegate old) => false;
+}
+
 class SimpleRouteInformationParser extends RouteInformationParser<RouteInformation> {
   SimpleRouteInformationParser();
 
@@ -869,8 +933,8 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation>
       pages: <Page<void>>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        const MaterialPage<void>(child: Text('base')),
-        MaterialPage<void>(
+        const _TestPage<void>(child: Text('base')),
+        _TestPage<void>(
           key: ValueKey<String>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),
