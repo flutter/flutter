@@ -1113,7 +1113,15 @@ class WidgetStatePropertyAll<T> implements WidgetStateProperty<T> {
 ///
 /// The controller's [value] is its current set of states. Listeners
 /// are notified whenever the [value] changes. The [value] should only be
-/// changed with [update]; it should not be modified directly.
+/// changed with [update]; it should not be modified directly. The controller
+/// mutates the current [value] set when applying updates. To retain a snapshot
+/// that will not change with later controller updates, create a copy:
+///
+/// {@tool snippet}
+/// ```dart
+/// final Set<WidgetState> states = controller.value.toSet();
+/// ```
+/// {@end-tool}
 ///
 /// The controller's [value] represents the set of states that a
 /// widget's visual properties, typically [WidgetStateProperty]
@@ -1143,6 +1151,9 @@ class WidgetStatesController extends ValueNotifier<Set<WidgetState>> {
 
   /// Adds [state] to [value] if [add] is true, and removes it otherwise,
   /// and notifies listeners if [value] has changed.
+  ///
+  /// This mutates the existing [value] set. It does not replace [value] with a
+  /// new set.
   void update(WidgetState state, bool add) {
     final bool valueChanged = add ? value.add(state) : value.remove(state);
     if (valueChanged) {
