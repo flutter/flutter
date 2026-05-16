@@ -7315,7 +7315,7 @@ abstract class Canvas {
   ///     super.initState();
   ///     _createImage();
   ///   }
-  /// 
+  ///
   ///   @override
   ///   void dispose() {
   ///     _image?.dispose();
@@ -7439,6 +7439,12 @@ abstract class Canvas {
   ///     loadImage();
   ///   }
   ///
+  ///   @override
+  ///   void dispose() {
+  ///     _image?.dispose();
+  ///     super.dispose();
+  ///   }
+  ///
   ///   Future<void> loadImage() async {
   ///     // Load image bytes from assets
   ///     final byteData = await rootBundle.load('assets/flutter.png');
@@ -7451,9 +7457,11 @@ abstract class Canvas {
   ///
   ///     final frame = await codec.getNextFrame();
   ///
-  ///     setState(() {
-  ///       image = frame.image;
-  ///     });
+  ///     if (!mounted) {
+  ///       frame.image.dispose();
+  ///       return;
+  ///     }
+  ///     setState(() { _image = frame.image; });
   ///   }
   ///
   ///   @override
