@@ -230,7 +230,8 @@ void main() {
     semantics = SemanticsTester(tester); // enables semantics tree generation
 
     const kItemHeight = 100.0;
-    const kExpandedAppBarHeight = 56.0;
+    const kCollapsedAppBarHeight = 56.0;
+    const kExpandedAppBarHeight = kCollapsedAppBarHeight;
 
     final containers = List<Widget>.generate(
       80,
@@ -256,7 +257,7 @@ void main() {
                   const SliverPersistentHeader(
                     pinned: true,
                     delegate: _PinnedHeaderDelegate(
-                      minExtent: kExpandedAppBarHeight,
+                      minExtent: kCollapsedAppBarHeight,
                       maxExtent: kExpandedAppBarHeight,
                     ),
                   ),
@@ -841,7 +842,9 @@ Rect nodeGlobalRect(SemanticsNode node) {
   return MatrixUtils.transformRect(globalTransform, node.rect);
 }
 
+/// A simple pinned sliver header used to avoid depending on Material widgets.
 class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
+  /// Creates a pinned header delegate with fixed collapsed and expanded extents.
   const _PinnedHeaderDelegate({required this.minExtent, required this.maxExtent});
 
   @override
