@@ -289,9 +289,9 @@ typedef _CheckContext = bool Function(BuildContext context);
 ///
 /// If this is not possible for some reason, e.g. because you are using an
 /// opaque [CustomPaint] widget, alternatively consider using a second
-/// [Material] above the opaque widget but below the [InkResponse] (as an
-/// ancestor to the ink response). The [MaterialType.transparency] material
-/// kind can be used for this purpose.
+/// [Material] with [MaterialType.transparency] on top of the opaque widget.
+/// The [InkResponse] must be a descendant of this [Material] so the ink effects
+/// are painted on the transparent [Material] over the opaque widget.
 ///
 /// See also:
 ///
@@ -1465,9 +1465,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
 ///
 /// If this is not possible for some reason, e.g. because you are using an
 /// opaque [CustomPaint] widget, alternatively consider using a second
-/// [Material] above the opaque widget but below the [InkWell] (as an
-/// ancestor to the ink well). The [MaterialType.transparency] material
-/// kind can be used for this purpose.
+/// [Material] with [MaterialType.transparency] on top of the opaque widget.
+/// The [InkWell] must be a descendant of this [Material] so the ink effects are
+/// painted on the transparent [Material] over the opaque widget.
 ///
 /// ### InkWell isn't clipping properly
 ///
