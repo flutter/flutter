@@ -7281,6 +7281,221 @@ abstract class Canvas {
 
   /// Draws the given [Image] into the canvas with its top-left corner at the
   /// given [Offset]. The image is composited into the canvas using the given [Paint].
+  ///
+  /// The following example demonstrates how to use [Canvas.drawImage]
+  /// to draw a programmatically generated [ui.Image] onto a [Canvas]
+  /// inside a [CustomPainter].
+  ///
+  /// The image is first created using a separate [Canvas] and
+  /// [ui.PictureRecorder], then converted into a [ui.Image].
+  /// Finally, the image is rendered at a fixed position using
+  /// [Canvas.drawImage].
+  ///
+  /// ```dart
+  /// import 'dart:ui' as ui;
+  ///
+  /// import 'package:flutter/material.dart';
+  ///
+  /// void main() {
+  ///   runApp(const MaterialApp(home: DrawImageExample()));
+  /// }
+  ///
+  /// class DrawImageExample extends StatefulWidget {
+  ///   const DrawImageExample({super.key});
+  ///
+  ///   @override
+  ///   State<DrawImageExample> createState() => _DrawImageExampleState();
+  /// }
+  ///
+  /// class _DrawImageExampleState extends State<DrawImageExample> {
+  ///   ui.Image? image;
+  ///
+  ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     _createImage();
+  ///   }
+  ///
+  ///   Future<void> _createImage() async {
+  ///     // Create a simple image programmatically
+  ///     final recorder = ui.PictureRecorder();
+  ///     final canvas = Canvas(recorder);
+  ///
+  ///     final paint = Paint()
+  ///       ..color = Colors.blue
+  ///       ..style = PaintingStyle.fill;
+  ///
+  ///     // Blue circle
+  ///     canvas.drawCircle(const Offset(50, 50), 40, paint);
+  ///
+  ///     // White letter
+  ///     final textPainter = TextPainter(
+  ///       text: const TextSpan(
+  ///         text: 'A',
+  ///         style: TextStyle(color: Colors.white, fontSize: 50, fontWeight: FontWeight.bold),
+  ///       ),
+  ///       textDirection: TextDirection.ltr,
+  ///     );
+  ///
+  ///     textPainter.layout();
+  ///     textPainter.paint(canvas, const Offset(35, 20));
+  ///
+  ///     final picture = recorder.endRecording();
+  ///
+  ///     final generatedImage = await picture.toImage(100, 100);
+  ///
+  ///     setState(() {
+  ///       image = generatedImage;
+  ///     });
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Scaffold(
+  ///       appBar: AppBar(title: const Text('Canvas.drawImage Example')),
+  ///       body: Center(
+  ///         child: image == null
+  ///             ? const CircularProgressIndicator()
+  ///             : CustomPaint(size: const Size(300, 300), painter: ImagePainter(image!)),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  ///
+  /// class ImagePainter extends CustomPainter {
+  ///   const ImagePainter(this.image);
+  ///   final ui.Image image;
+  ///
+  ///   @override
+  ///   void paint(Canvas canvas, Size size) {
+  ///     // Background
+  ///     canvas.drawColor(Colors.black12, BlendMode.srcOver);
+  ///
+  ///     // Draw the image at a specific position
+  ///     canvas.drawImage(image, const Offset(100, 100), Paint());
+  ///
+  ///     // Optional border around image
+  ///     canvas.drawRect(
+  ///       const Rect.fromLTWH(100, 100, 100, 100),
+  ///       Paint()
+  ///         ..color = Colors.red
+  ///         ..style = PaintingStyle.stroke
+  ///         ..strokeWidth = 3,
+  ///     );
+  ///   }
+  ///
+  ///   @override
+  ///   bool shouldRepaint(covariant CustomPainter oldDelegate) {
+  ///     return false;
+  ///   }
+  /// }
+  /// ```
+  /// See also:
+  ///
+  ///  * [Canvas.drawImageRect], which draws a scaled portion of an image.
+  ///  * [CustomPainter], which is commonly used for custom canvas drawing.
+  ///  * [ui.PictureRecorder], which records drawing commands into an image.
+  ///
+  /// The following example demonstrates how to load an asset image
+  /// and render it using [Canvas.drawImage].
+  ///
+  /// The asset is loaded from the Flutter asset bundle using
+  /// [rootBundle.load], decoded into a [ui.Image] using
+  /// [ui.instantiateImageCodec], and then painted onto the canvas
+  /// inside a [CustomPainter].
+  ///
+  /// This approach is useful when performing low-level custom rendering
+  /// with Flutter's canvas APIs.
+  ///
+  /// ```dart
+  /// import 'dart:ui' as ui;
+  ///
+  /// import 'package:flutter/material.dart';
+  /// import 'package:flutter/services.dart';
+  ///
+  /// void main() {
+  ///   runApp(const MaterialApp(home: DrawAssetImageExample()));
+  /// }
+  ///
+  /// class DrawAssetImageExample extends StatefulWidget {
+  ///   const DrawAssetImageExample({super.key});
+  ///
+  ///   @override
+  ///   State<DrawAssetImageExample> createState() => _DrawAssetImageExampleState();
+  /// }
+  ///
+  /// class _DrawAssetImageExampleState extends State<DrawAssetImageExample> {
+  ///   ui.Image? image;
+  ///
+  ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     loadImage();
+  ///   }
+  ///
+  ///   Future<void> loadImage() async {
+  ///     // Load image bytes from assets
+  ///     final byteData = await rootBundle.load('assets/flutter.png');
+  ///
+  ///     // Convert to Uint8List
+  ///     final bytes = byteData.buffer.asUint8List();
+  ///
+  ///     // Decode image
+  ///     final codec = await ui.instantiateImageCodec(bytes);
+  ///
+  ///     final frame = await codec.getNextFrame();
+  ///
+  ///     setState(() {
+  ///       image = frame.image;
+  ///     });
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Scaffold(
+  ///       appBar: AppBar(title: const Text('Canvas.drawImage Asset Example')),
+  ///       body: Center(
+  ///         child: image == null
+  ///             ? const CircularProgressIndicator()
+  ///             : CustomPaint(size: const Size(400, 400), painter: AssetPainter(image!)),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  ///
+  /// class AssetPainter extends CustomPainter {
+  ///   const AssetPainter(this.image);
+  ///   final ui.Image image;
+  ///
+  ///   @override
+  ///   void paint(Canvas canvas, Size size) {
+  ///     // Background
+  ///     canvas.drawColor(Colors.grey.shade200, BlendMode.srcOver);
+  ///
+  ///     // Draw the asset image
+  ///     canvas.drawImage(image, const Offset(100, 100), Paint());
+  ///
+  ///     // Border around image
+  ///     canvas.drawRect(
+  ///       Rect.fromLTWH(100, 100, image.width.toDouble(), image.height.toDouble()),
+  ///       Paint()
+  ///         ..color = Colors.red
+  ///         ..style = PaintingStyle.stroke
+  ///         ..strokeWidth = 2,
+  ///     );
+  ///   }
+  ///
+  ///   @override
+  ///   bool shouldRepaint(covariant CustomPainter oldDelegate) {
+  ///     return false;
+  ///   }
+  /// }
+  /// ```
+  /// See also:
+  ///
+  ///  * [Canvas.drawImageRect], which supports scaling and cropping.
+  ///  * [rootBundle], for loading asset resources.
+  ///  * [CustomPainter], for creating custom painting behavior.
   void drawImage(Image image, Offset offset, Paint paint);
 
   /// Draws the subset of the given image described by the `src` argument into
