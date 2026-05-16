@@ -78,8 +78,7 @@ class PaintParagraph extends TextPaint {
     ui.Canvas canvas,
     TextLayout layout,
     Painter painter,
-    double x,
-    double y,
+    ui.Offset offset,
   ) {
     for (final TextLine line in layout.lines) {
       for (final LineBlock block in line.visualBlocks) {
@@ -94,9 +93,9 @@ class PaintParagraph extends TextPaint {
           block as TextBlock,
           ui.Offset(
             line.advance.left + line.formattingShift + block.shiftFromLineStart,
-            line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent,
+            line.advance.top + line.fontBoundingBoxAscent - block.multipliedFontBoundingBoxAscent,
           ),
-          ui.Offset(x, y),
+          offset,
           ui.window.devicePixelRatio,
         );
 
@@ -108,7 +107,16 @@ class PaintParagraph extends TextPaint {
 
         switch (styleElement) {
           case StyleElements.background:
-            painter.drawBackground(canvas, block, sourceRect, targetRect);
+            // TODO(jlavrova): We use calculateBlock in several places and it may need to calculate the rect height
+            // differently for background blocks (to include the entire line height instead of just the text height).
+            // I correct the value in place for now, but it may need to be fixed in calculateBlock itself.
+            final correctedTargetRect = ui.Rect.fromLTWH(
+              targetRect.left,
+              targetRect.top,
+              targetRect.width,
+              block.multipliedHeight,
+            );
+            painter.drawBackground(canvas, correctedTargetRect, block.style.background!);
           case StyleElements.decorations:
             throw Exception(
               'Decorations are painted on the canvas2D and then drawn as an image on the output canvas, not drawn directly on the output canvas',
@@ -201,29 +209,37 @@ class PaintParagraph extends TextPaint {
   }
 
   @override
-  void paint(ui.Canvas canvas, TextLayout layout, Painter painter, double x, double y) {
+  void paint(ui.Canvas canvas, TextLayout layout, Painter painter, ui.Offset offset) {
     final (ui.Rect sourceRect, ui.Rect targetRect) = calculateParagraph(
       layout,
-      ui.Offset(x, y),
+      offset,
       ui.window.devicePixelRatio,
     );
-    // TODO(jlavrova): Test how the image cache works after zooming in or out.
-    painter.resizePaintCanvas(ui.window.devicePixelRatio, sourceRect.width, sourceRect.height);
 
-    if (!painter.hasSingleImageCache) {
-      // Fill out all the blocks on Canvas2D canvas
-      _fillAllBlocks(StyleElements.shadows, layout);
-      _fillAllBlocks(StyleElements.text, layout);
-      _fillAllBlocks(StyleElements.decorations, layout);
+    painter.drawParagraph(
+      canvas,
+      sourceRect,
+      targetRect,
+      generateParagraphImage: () {
+        resizePaintCanvas(ui.window.devicePixelRatio, sourceRect);
 
-      // Draw background blocks directly on the output canvas
-      // so it will be cached together with the text blocks on Canvas2D canvas
-      _drawAllBlocks(StyleElements.background, canvas, layout, painter, x, y);
-    } else {
-      // We already have cached image for the entire paragraph (including the backgrounds)
-    }
+        // Fill out all the blocks on Canvas2D canvas
+        _fillAllBlocks(StyleElements.shadows, layout);
+        _fillAllBlocks(StyleElements.text, layout);
+        _fillAllBlocks(StyleElements.decorations, layout);
 
-    // Draw the content of Canvas2D on the output canvas
-    painter.drawParagraph(canvas, sourceRect, targetRect);
+        // Draw background blocks directly on the output canvas
+        // so it will be cached together with the text blocks on Canvas2D canvas
+        _drawAllBlocks(StyleElements.background, canvas, layout, painter, offset);
+
+        final DomImageData imageData = paintContext.getImageData(
+          0,
+          0,
+          sourceRect.width.ceil(),
+          sourceRect.height.ceil(),
+        );
+        return imageData.data.buffer.asUint8List();
+      },
+    );
   }
 }
