@@ -43,9 +43,12 @@ void main(List<String> arguments) {
       ? p.join(p.dirname(outPath), 'flutter', 'buildtools')
       : arguments[1];
 
-  final arch = Process.runSync('uname', <String>['-m']).stdout.toString().trim() == 'x86_64'
-      ? 'x64'
-      : 'arm64';
+  final ProcessResult unameResult = Process.runSync('uname', <String>['-m']);
+  if (unameResult.exitCode != 0) {
+    print('ERROR: failed to execute "uname -m":\n${unameResult.stderr}');
+    exit(1);
+  }
+  final arch = unameResult.stdout.toString().trim() == 'x86_64' ? 'x64' : 'arm64';
   String platform;
   if (Platform.isLinux) {
     platform = 'linux-x64';
