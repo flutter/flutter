@@ -12,7 +12,8 @@ declare_args() {
   # Must be of the form x.x.x for Info.plist files.
   mac_deployment_target = ""
 
-  # Path to the host Xcode toolchain (XcodeDefault.xctoolchain).
+  # Path to the host machine's system Xcode toolchain (XcodeDefault.xctoolchain).
+  # (Distinct from the bundled prebuilt Clang toolchain in //buildtools).
   mac_host_toolchain_path = ""
 
   # Path to the macOS platform.
@@ -174,3 +175,23 @@ if (is_ios) {
     }
   }
 }
+
+# ==============================================================================
+# Prebuilt Clang Toolchain Paths
+# ==============================================================================
+# Paths to the bundled LLVM/Clang toolchain downloaded by DEPS into //buildtools
+# (distinct from the system Xcode toolchain paths configured above).
+mac_clang_base_path = "$buildtools_path/mac-${host_cpu}/clang"
+
+_get_runtime_dir_script = "//build/toolchain/mac/get_clang_runtime_dir.py"
+_clang_bin = rebase_path("$mac_clang_base_path/bin/clang", root_build_dir)
+
+# Dynamically queries Clang for its runtime library directory.
+# (e.g., .../lib/clang/23/lib/darwin)
+mac_clang_runtime_dir =
+    exec_script(_get_runtime_dir_script,
+                [
+                  "--clang",
+                  _clang_bin,
+                ],
+                "trim string")

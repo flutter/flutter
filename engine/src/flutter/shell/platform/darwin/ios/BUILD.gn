@@ -413,16 +413,13 @@ copy("copy_dylib") {
 copy("copy_asan_runtime_dylib") {
   visibility = [ ":*" ]
 
-  _libclang_base_path =
-      "$buildtools_path/mac-x64/clang/lib/clang/13.0.0/lib/darwin/"
-
   if (defined(use_ios_simulator) && use_ios_simulator) {
     _dylib_name = "libclang_rt.asan_iossim_dynamic.dylib"
   } else {
     _dylib_name = "libclang_rt.asan_ios_dynamic.dylib"
   }
 
-  sources = [ "$_libclang_base_path/$_dylib_name" ]
+  sources = [ "$mac_clang_runtime_dir/$_dylib_name" ]
   outputs = [ "$root_out_dir/$_dylib_name" ]
 
   deps = [ ":create_flutter_framework_dylib" ]
