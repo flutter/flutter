@@ -53,6 +53,11 @@ bool PipelineGLES::BuildVertexDescriptor(const ProcTableGLES& gl,
   if (!vtx_desc->ReadUniformsBindings(gl, program)) {
     return false;
   }
+  // Resolve the injected y-flip uniform once at link time. If the vertex
+  // shader doesn't declare it (fragment-only program, non-vertex pipeline,
+  // or future opt-out), `glGetUniformLocation` returns -1 and the render
+  // pass skips the write.
+  y_flip_uniform_location_ = gl.GetUniformLocation(program, "_impeller_y_flip");
   buffer_bindings_ = std::move(vtx_desc);
   return true;
 }

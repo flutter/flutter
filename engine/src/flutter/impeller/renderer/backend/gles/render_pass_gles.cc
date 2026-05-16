@@ -207,14 +207,13 @@ static void EncodeViewport(const ProcTableGLES& gl,
 
   // FBO passes flip in the vertex shader; swapchain keeps the old
   // top-down -> bottom-up viewport conversion.
-  const auto viewport_y_gl =
-      flip_y ? new_viewport.rect.GetY()
-             : target_size.height - new_viewport.rect.GetY() -
-                   new_viewport.rect.GetHeight();
+  const auto viewport_y_gl = flip_y ? new_viewport.rect.GetY()
+                                    : target_size.height -
+                                          new_viewport.rect.GetY() -
+                                          new_viewport.rect.GetHeight();
   gl.Viewport(new_viewport.rect.GetX(),  // x
               viewport_y_gl,             // y
-              new_viewport.rect.GetWidth(),
-              new_viewport.rect.GetHeight());
+              new_viewport.rect.GetWidth(), new_viewport.rect.GetHeight());
   if (pass_data.depth_attachment) {
     if (gl.DepthRangef.IsAvailable()) {
       gl.DepthRangef(new_viewport.depth_range.z_near,
@@ -417,10 +416,9 @@ static void EncodeViewport(const ProcTableGLES& gl,
       const auto scissor_y_gl =
           flip_y ? scissor.GetY()
                  : target_size.height - scissor.GetY() - scissor.GetHeight();
-      gl.Scissor(scissor.GetX(),     // x
-                 scissor_y_gl,       // y
-                 scissor.GetWidth(),
-                 scissor.GetHeight());
+      gl.Scissor(scissor.GetX(),  // x
+                 scissor_y_gl,    // y
+                 scissor.GetWidth(), scissor.GetHeight());
     }
 
     //--------------------------------------------------------------------------
@@ -487,17 +485,14 @@ static void EncodeViewport(const ProcTableGLES& gl,
     }
 
     //--------------------------------------------------------------------------
-    /// Bind the hidden y-flip uniform if the vertex shader declares it.
-    {
-      const auto program_handle =
-          reactor.GetGLHandle(pipeline.GetProgramHandle());
-      if (program_handle.has_value()) {
-        const GLint y_flip_loc =
-            gl.GetUniformLocation(*program_handle, "_impeller_y_flip");
-        if (y_flip_loc >= 0) {
-          gl.Uniform1fv(y_flip_loc, 1, &y_flip_value);
-        }
-      }
+    /// Bind the hidden y-flip uniform if the vertex shader declares it. The
+    /// location is resolved once at pipeline link time (see
+    /// `PipelineGLES::GetYFlipUniformLocation`), so the inner command loop
+    /// does a single `Uniform1fv` instead of a per-draw
+    /// `glGetUniformLocation`.
+    const GLint y_flip_loc = pipeline.GetYFlipUniformLocation();
+    if (y_flip_loc >= 0) {
+      gl.Uniform1fv(y_flip_loc, 1, &y_flip_value);
     }
 
     //--------------------------------------------------------------------------

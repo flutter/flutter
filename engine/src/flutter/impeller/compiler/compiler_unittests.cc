@@ -113,10 +113,9 @@ TEST(CompilerTest, YFlipInjectionForGLESVertexShaders) {
   };
 
   // GL vertex shader: gets both the declaration and the epilogue.
-  const std::string gl_vert = compile(
-      "sample.vert", SourceType::kVertexShader, TargetPlatform::kOpenGLES);
-  EXPECT_NE(gl_vert.find("uniform float _impeller_y_flip"),
-            std::string::npos)
+  const std::string gl_vert = compile("sample.vert", SourceType::kVertexShader,
+                                      TargetPlatform::kOpenGLES);
+  EXPECT_NE(gl_vert.find("uniform float _impeller_y_flip"), std::string::npos)
       << "GLES vertex shader is missing the y-flip uniform declaration:\n"
       << gl_vert;
   EXPECT_NE(gl_vert.find("gl_Position.y *= _impeller_y_flip"),
@@ -132,11 +131,63 @@ TEST(CompilerTest, YFlipInjectionForGLESVertexShaders) {
       << gl_frag;
 
   // Metal vertex shader: not injected.
-  const std::string mtl_vert = compile(
-      "sample.vert", SourceType::kVertexShader, TargetPlatform::kMetalIOS);
+  const std::string mtl_vert = compile("sample.vert", SourceType::kVertexShader,
+                                       TargetPlatform::kMetalIOS);
   EXPECT_EQ(mtl_vert.find("_impeller_y_flip"), std::string::npos)
       << "Metal vertex shader was unexpectedly injected:\n"
       << mtl_vert;
+}
+
+TEST(CompilerTest, YFlipInjectionHandlesEarlyReturnsInGLESVertexShader) {
+  // `y_flip_early_return.vert` has an `if (...) { ...; return; }` before the
+  // implicit final return at the end of `main`. The wrap-`main` injection
+  // strategy must move the user's body into a renamed inner function and
+  // emit a wrapper that applies the y-flip after the call, so both the
+  // early and the implicit return paths run through the flip.
+  std::shared_ptr<fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping("y_flip_early_return.vert");
+  FML_CHECK(fixture);
+
+  SourceOptions options("y_flip_early_return.vert", SourceType::kVertexShader);
+  options.source_language = SourceLanguage::kGLSL;
+  options.target_platform = TargetPlatform::kOpenGLES;
+  options.working_directory = std::make_shared<fml::UniqueFD>(
+      flutter::testing::OpenFixturesDirectory());
+  options.entry_point_name = "main";
+
+  Reflector::Options reflector_options;
+  reflector_options.target_platform = TargetPlatform::kOpenGLES;
+  reflector_options.header_file_name = "y_flip_early_return.h";
+  reflector_options.shader_name = "shader";
+
+  Compiler compiler(fixture, options, reflector_options);
+  ASSERT_TRUE(compiler.IsValid());
+  auto sl = compiler.GetSLShaderSource();
+  ASSERT_TRUE(sl && sl->GetMapping());
+  const std::string gl_vert(reinterpret_cast<const char*>(sl->GetMapping()),
+                            sl->GetSize());
+
+  // The user's `void main(...)` should have been renamed to
+  // `void _impeller_user_main(...)`, with a new entry point appended at the
+  // end of the source.
+  EXPECT_NE(gl_vert.find("void _impeller_user_main("), std::string::npos)
+      << "Expected user entry-point rename:\n"
+      << gl_vert;
+  EXPECT_NE(gl_vert.find("_impeller_user_main();"), std::string::npos)
+      << "Expected wrapper to call the renamed user entry point:\n"
+      << gl_vert;
+  EXPECT_NE(gl_vert.find("gl_Position.y *= _impeller_y_flip"),
+            std::string::npos)
+      << "Expected y-flip in the wrapper:\n"
+      << gl_vert;
+
+  // Exactly one definition of `void main(` should remain (the wrapper);
+  // the original was renamed.
+  const size_t first_main = gl_vert.find("\nvoid main(");
+  ASSERT_NE(first_main, std::string::npos);
+  EXPECT_EQ(gl_vert.find("\nvoid main(", first_main + 1), std::string::npos)
+      << "Expected only the wrapper's `void main(` to remain after rename:\n"
+      << gl_vert;
 }
 
 TEST(CompilerTest, ShaderKindMatchingIsSuccessful) {
