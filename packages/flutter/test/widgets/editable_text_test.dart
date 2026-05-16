@@ -4068,54 +4068,55 @@ void main() {
     },
   );
 
-  testWidgets(
-    'Dragging selection base handle upwards scrolls the viewport',
-    (WidgetTester tester) async {
-      final controller = TextEditingController(text: 'Line 1\n' * 100);
+  testWidgets('Dragging selection base handle upwards scrolls the viewport', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(text: 'Line 1\n' * 100);
+    final focusNode = FocusNode();
 
-      await tester.pumpWidget(
-        TestWidgetsApp(home: TestTextField(controller: controller, maxLines: null)),
-      );
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: TestTextField(controller: controller, focusNode: focusNode, maxLines: null),
+      ),
+    );
 
-      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
 
-      // Populate the viewport and scroll to the bottom to prepare for an upward drag.
-      scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
-      await tester.pumpAndSettle();
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
 
-      // Establish an initial selection at the end of the text.
-      controller.selection = const TextSelection(baseOffset: 500, extentOffset: 600);
-      await tester.pumpAndSettle();
+    // Populate the viewport and scroll to the bottom to prepare for an upward drag.
+    scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
+    await tester.pumpAndSettle();
 
-      // Capture the offset after the selection is established but before the drag.
-      final double offsetBeforeDrag = scrollable.position.pixels;
+    // Establish an initial selection at the end of the text.
+    controller.selection = const TextSelection(baseOffset: 500, extentOffset: 600);
+    await tester.pumpAndSettle();
 
-      final EditableTextState state = tester.state(find.byType(EditableText));
+    final EditableTextState state = tester.state(find.byType(EditableText));
 
-      // Simulate a drag that moves the base (start) handle toward the beginning
-      // of the text while keeping the extent (end) handle stationary.
-      state.userUpdateTextEditingValue(
-        TextEditingValue(
-          text: 'Line 1\n' * 100,
-          selection: const TextSelection(baseOffset: 10, extentOffset: 600),
-        ),
-        SelectionChangedCause.drag,
-      );
+    // Simulate a drag that moves the base (start) handle toward the beginning
+    // of the text while keeping the extent (end) handle stationary.
+    state.userUpdateTextEditingValue(
+      TextEditingValue(
+        text: 'Line 1\n' * 100,
+        selection: const TextSelection(baseOffset: 0, extentOffset: 600),
+      ),
+      SelectionChangedCause.drag,
+    );
 
-      await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
 
-      // The scroll offset remains stationary during a drag because automated
-      // scrolling is disabled. This prevents the viewport from snapping to
-      // the selection extent.
-      expect(
-        scrollable.position.pixels,
-        lessThan(offsetBeforeDrag),
-        reason:
-            'The viewport should follow the base handle upwards instead of snapping to the extent.',
-      );
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
-  );
+    // The scroll offset remains stationary during a drag because automated
+    // scrolling is disabled. This prevents the viewport from snapping to
+    // the selection extent.
+    expect(
+      scrollable.position.pixels,
+      0.0,
+      reason:
+          'The viewport should follow the base handle upwards instead of snapping to the extent.',
+    );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('Mouse drag selection from bottom to top does not snap to extent', (
     WidgetTester tester,
