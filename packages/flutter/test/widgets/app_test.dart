@@ -22,10 +22,15 @@ class TestAction extends Action<Intent> {
   }
 }
 
+/// A test widget that can be activated via [ActivateIntent].
 class _TestActivatable extends StatelessWidget {
+  /// Creates a test widget that reports activation through [onChanged].
   const _TestActivatable({required this.value, required this.onChanged});
 
+  /// The current activation state.
   final bool? value;
+
+  /// Called with the toggled activation state.
   final ValueChanged<bool?> onChanged;
 
   @override
@@ -44,6 +49,7 @@ class _TestActivatable extends StatelessWidget {
   }
 }
 
+/// Creates a page route for [WidgetsApp] tests without depending on Material.
 PageRoute<T> _testPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
   return PageRouteBuilder<T>(
     settings: settings,
@@ -597,6 +603,7 @@ void main() {
         },
         builder: (BuildContext context, Widget? child) => const Placeholder(),
         color: const Color(0xFF000000),
+        pageRouteBuilder: _testPageRouteBuilder,
       ),
     );
     if (!kIsWeb) {
@@ -853,9 +860,12 @@ class PasteSpy extends Action<PasteTextIntent> {
   }
 }
 
+/// A test page that creates a route without depending on Material.
 class _TestPage<T> extends Page<T> {
+  /// Creates a test page that builds [child].
   const _TestPage({super.key, required this.child});
 
+  /// The widget built by this page's route.
   final Widget child;
 
   @override
@@ -864,12 +874,16 @@ class _TestPage<T> extends Page<T> {
   }
 }
 
+/// A test localization type used to exercise unsupported locale reporting.
 class _TestUnsupportedLocalizations {
+  /// Creates test localizations.
   const _TestUnsupportedLocalizations();
 }
 
+/// A test delegate that intentionally supports only US English.
 class _TestUnsupportedLocalizationsDelegate
     extends LocalizationsDelegate<_TestUnsupportedLocalizations> {
+  /// Creates a delegate for [_TestUnsupportedLocalizations].
   const _TestUnsupportedLocalizationsDelegate();
 
   @override
