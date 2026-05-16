@@ -16,7 +16,7 @@ def main():
     output = subprocess.check_output([args.clang, '-print-runtime-dir'], text=True).strip()
     print(output)
     return 0
-  except subprocess.CalledProcessError as e:
+  except (subprocess.CalledProcessError, OSError) as e:
     sys.stderr.write(f"Error running clang: {e}\n")
     return 1
 
