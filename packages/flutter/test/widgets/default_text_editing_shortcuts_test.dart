@@ -7,11 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_tester.dart';
 import 'keyboard_utils.dart';
 import 'widgets_app_tester.dart';
 
-const _cursorColor = Color(0xFF0000FF);
-const _backgroundCursorColor = Color(0xFF9E9E9E);
+const Color _blue = Color(0xFF0000FF);
+const Color _grey = Color(0xFF9E9E9E);
 
 void main() {
   Widget buildSpyAboveEditableText({
@@ -39,9 +40,9 @@ void main() {
               textScaleFactor: 1,
               // Avoid the cursor from taking up width.
               cursorWidth: 0,
-              cursorColor: _cursorColor,
-              backgroundCursorColor: _backgroundCursorColor,
-              selectionControls: emptyTextSelectionControls,
+              cursorColor: _blue,
+              backgroundCursorColor: _grey,
+              selectionControls: testTextSelectionHandleControls,
               keyboardType: TextInputType.text,
               maxLines: null,
               textAlign: TextAlign.left,
@@ -837,8 +838,8 @@ void main() {
                 autofocus: true,
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 10.0),
-                cursorColor: _cursorColor,
-                backgroundCursorColor: _backgroundCursorColor,
+                cursorColor: _blue,
+                backgroundCursorColor: _grey,
               ),
             ),
           ),
@@ -878,8 +879,8 @@ void main() {
                 autofocus: true,
                 focusNode: focusNode,
                 style: const TextStyle(fontSize: 10.0),
-                cursorColor: _cursorColor,
-                backgroundCursorColor: _backgroundCursorColor,
+                cursorColor: _blue,
+                backgroundCursorColor: _grey,
               ),
             ),
           ),
