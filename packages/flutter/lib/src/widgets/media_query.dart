@@ -645,11 +645,6 @@ class MediaQueryData {
   /// This flag indicates an OS-level user preference (such as "Reduce Motion"
   /// on iOS or "Remove animations" on Android).
   ///
-  /// Flutter's built-in animation systems, such as [AnimationController],
-  /// automatically check this flag. When true, standard transitions and
-  /// animations will typically bypass their duration and snap directly to
-  /// their end state.
-  ///
   /// Manually overriding this value in a [MediaQuery] widget will not
   /// globally stop animations across the framework, but it can be used to
   /// test how custom widgets respond to a reduced-motion request. If you are
@@ -661,7 +656,7 @@ class MediaQueryData {
   ///  * [AnimationController], which adjusts its playback behavior based on this setting.
   ///  * [AnimationBehavior], which defines how animations behave when this setting is active.
   ///  * [dart:ui.AccessibilityFeatures.disableAnimations], the underlying primitive
-  ///  flag provided by the platform.
+  ///    flag provided by the platform.
   ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
   ///    originates.
   final bool disableAnimations;
