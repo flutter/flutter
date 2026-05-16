@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Vertex shader with multiple `return` paths. Used by
-// `YFlipInjectionHandlesEarlyReturnsInGLESVertexShader` in
-// `compiler_unittests.cc` to confirm the y-flip wrapper applies on every
-// control-flow exit, not only the implicit one at the end of `main`. See
-// https://github.com/flutter/flutter/issues/186554.
+// Vertex shader with an early return; exercises the y-flip wrap-main
+// path. See flutter/flutter#186554.
 
 uniform UniformBufferObject {
   float discard_flag;

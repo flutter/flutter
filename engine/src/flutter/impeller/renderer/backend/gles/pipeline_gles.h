@@ -39,13 +39,8 @@ class PipelineGLES final
   [[nodiscard]] bool BuildVertexDescriptor(const ProcTableGLES& gl,
                                            GLuint program);
 
-  // GL location of the `_impeller_y_flip` uniform injected into vertex
-  // shaders by `impellerc` (see
-  // https://github.com/flutter/flutter/issues/186554). Resolved once at link
-  // time so the hot render-pass command loop can do a single
-  // `gl.Uniform1fv` instead of a per-command `glGetUniformLocation`. -1 if
-  // the shader does not declare the uniform (e.g. a fragment-only pipeline
-  // or a pipeline built before the injection landed).
+  // GL location of the `_impeller_y_flip` uniform (flutter/flutter#186554),
+  // cached at link time. -1 if the shader doesn't declare it.
   GLint GetYFlipUniformLocation() const { return y_flip_uniform_location_; }
 
  private:

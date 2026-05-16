@@ -485,11 +485,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
     }
 
     //--------------------------------------------------------------------------
-    /// Bind the hidden y-flip uniform if the vertex shader declares it. The
-    /// location is resolved once at pipeline link time (see
-    /// `PipelineGLES::GetYFlipUniformLocation`), so the inner command loop
-    /// does a single `Uniform1fv` instead of a per-draw
-    /// `glGetUniformLocation`.
+    /// Bind the y-flip uniform if the vertex shader declares it.
     const GLint y_flip_loc = pipeline.GetYFlipUniformLocation();
     if (y_flip_loc >= 0) {
       gl.Uniform1fv(y_flip_loc, 1, &y_flip_value);

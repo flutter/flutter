@@ -139,11 +139,8 @@ TEST(CompilerTest, YFlipInjectionForGLESVertexShaders) {
 }
 
 TEST(CompilerTest, YFlipInjectionHandlesEarlyReturnsInGLESVertexShader) {
-  // `y_flip_early_return.vert` has an `if (...) { ...; return; }` before the
-  // implicit final return at the end of `main`. The wrap-`main` injection
-  // strategy must move the user's body into a renamed inner function and
-  // emit a wrapper that applies the y-flip after the call, so both the
-  // early and the implicit return paths run through the flip.
+  // `y_flip_early_return.vert` has an early `return` before main's implicit
+  // exit; the wrap-main injection must flip on both paths.
   std::shared_ptr<fml::Mapping> fixture =
       flutter::testing::OpenFixtureAsMapping("y_flip_early_return.vert");
   FML_CHECK(fixture);
@@ -167,26 +164,18 @@ TEST(CompilerTest, YFlipInjectionHandlesEarlyReturnsInGLESVertexShader) {
   const std::string gl_vert(reinterpret_cast<const char*>(sl->GetMapping()),
                             sl->GetSize());
 
-  // The user's `void main(...)` should have been renamed to
-  // `void _impeller_user_main(...)`, with a new entry point appended at the
-  // end of the source.
   EXPECT_NE(gl_vert.find("void _impeller_user_main("), std::string::npos)
-      << "Expected user entry-point rename:\n"
       << gl_vert;
   EXPECT_NE(gl_vert.find("_impeller_user_main();"), std::string::npos)
-      << "Expected wrapper to call the renamed user entry point:\n"
       << gl_vert;
   EXPECT_NE(gl_vert.find("gl_Position.y *= _impeller_y_flip"),
             std::string::npos)
-      << "Expected y-flip in the wrapper:\n"
       << gl_vert;
 
-  // Exactly one definition of `void main(` should remain (the wrapper);
-  // the original was renamed.
+  // Only the wrapper's `void main(` should remain after the rename.
   const size_t first_main = gl_vert.find("\nvoid main(");
   ASSERT_NE(first_main, std::string::npos);
   EXPECT_EQ(gl_vert.find("\nvoid main(", first_main + 1), std::string::npos)
-      << "Expected only the wrapper's `void main(` to remain after rename:\n"
       << gl_vert;
 }
 

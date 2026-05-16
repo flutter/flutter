@@ -34,12 +34,9 @@ constexpr const char* kEGLImageExternalExtension300 =
     "GL_OES_EGL_image_external_essl3";
 constexpr int kVerboseErrorLineThreshold = 6;
 
-// HAL-populated per pass: +1.0 swapchain, -1.0 offscreen FBO. See
-// https://github.com/flutter/flutter/issues/186554.
+// Set per pass by RenderPassGLES: +1.0 swapchain, -1.0 offscreen FBO. See
+// flutter/flutter#186554.
 constexpr const char* kYFlipUniformName = "_impeller_y_flip";
-
-// Renamed entry point for the user's original `main` after wrapping. See
-// `InjectYFlipForGLESVertexShader` below.
 constexpr const char* kUserMainName = "_impeller_user_main";
 
 bool IsGLTargetPlatform(TargetPlatform platform) {
@@ -49,30 +46,13 @@ bool IsGLTargetPlatform(TargetPlatform platform) {
          platform == TargetPlatform::kRuntimeStageGLES3;
 }
 
-// Declares `uniform float _impeller_y_flip;` and wraps the vertex
-// shader's entry point so that `gl_Position.y *= _impeller_y_flip;`
-// applies to every code path through the shader, including early returns.
-//
-// Implementation: rename the SPIRV-Cross-emitted `void main(` to
-// `void _impeller_user_main(`, then append a new `main()` that calls the
-// renamed user entry point and applies the flip. Wrapping the entry
-// point this way (instead of inserting an epilogue before the closing
-// brace) handles early `return`s automatically: any return inside the
-// user's original `main` exits that function, control returns to the
-// new wrapper, and the wrapper applies the flip before returning.
-//
-// SPIRV-Cross's output is mechanical (comment-free, deterministic
-// indentation, exactly one `void main(` per shader), so the rename is
-// unambiguous. Long-term we could push this into SPIRV-Cross itself via
-// `SPIRFunction::fixup_hooks_out` (the same mechanism `flip_vert_y`
-// uses) but that requires subclassing CompilerGLSL and reaching into
-// protected emit machinery; the wrap-main approach is functionally
-// equivalent for our needs.
+// Wraps the SPIRV-Cross-emitted entry point so `gl_Position.y *=
+// _impeller_y_flip;` runs on every exit, including early returns. Renames
+// `void main(` to `void _impeller_user_main(` and appends a wrapper that
+// calls it then applies the flip.
 std::string InjectYFlipForGLESVertexShader(std::string source) {
-  // Rename the user's `void main(...)` to `void _impeller_user_main(...)`.
-  // We anchor on `\nvoid main(` to avoid matching the substring inside an
-  // unlikely declaration; SPIRV-Cross emits the entry point as a
-  // top-level function so the leading newline is reliable.
+  // Anchor on leading newline; spirv-cross emits the entry point at file
+  // scope, so the match is unambiguous in its comment-free output.
   constexpr std::string_view kMainPattern = "\nvoid main(";
   const size_t main_pos = source.find(kMainPattern);
   if (main_pos == std::string::npos) {
@@ -82,8 +62,6 @@ std::string InjectYFlipForGLESVertexShader(std::string source) {
       std::string("\nvoid ") + kUserMainName + "(";
   source.replace(main_pos, kMainPattern.size(), user_main_decl);
 
-  // Append the wrapper at the end of the file. Always finishes with a
-  // trailing newline so adjacent output stays clean.
   std::string wrapper = "\nvoid main() {\n  ";
   wrapper += kUserMainName;
   wrapper += "();\n  gl_Position.y *= ";
@@ -91,8 +69,8 @@ std::string InjectYFlipForGLESVertexShader(std::string source) {
   wrapper += ";\n}\n";
   source.append(wrapper);
 
-  // Inject the uniform declaration after the last `precision` directive,
-  // falling back to right after `#version`, falling back to the top.
+  // Declare the uniform after the last `precision` directive, falling
+  // back to right after `#version`, falling back to the top.
   const std::string declaration =
       std::string("\nuniform float ") + kYFlipUniformName + ";\n";
   size_t inject_at = std::string::npos;
