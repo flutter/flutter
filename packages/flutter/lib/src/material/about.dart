@@ -73,6 +73,7 @@ class AboutListTile extends StatelessWidget {
     this.applicationLegalese,
     this.aboutBoxChildren,
     this.dense,
+    this.excludePackages,
   });
 
   /// The icon to show for this drawer item.
@@ -138,6 +139,15 @@ class AboutListTile extends StatelessWidget {
   /// Dense list tiles default to a smaller height.
   final bool? dense;
 
+  /// The names of packages to exclude from the license list.
+  ///
+  /// If non-null, packages whose names appear in this list will be omitted
+  /// from the license page shown by the "View licenses" button in the about
+  /// dialog.
+  ///
+  /// Defaults to null, meaning all packages from [LicenseRegistry] are shown.
+  final List<String>? excludePackages;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -160,6 +170,7 @@ class AboutListTile extends StatelessWidget {
           applicationIcon: applicationIcon,
           applicationLegalese: applicationLegalese,
           children: aboutBoxChildren,
+          excludePackages: excludePackages,
         );
       },
     );
@@ -196,6 +207,7 @@ void showAboutDialog({
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
+  List<String>? excludePackages,
 }) {
   showDialog<void>(
     context: context,
@@ -210,6 +222,7 @@ void showAboutDialog({
         applicationIcon: applicationIcon,
         applicationLegalese: applicationLegalese,
         children: children,
+        excludePackages: excludePackages,
       );
     },
     routeSettings: routeSettings,
@@ -252,6 +265,7 @@ void showAdaptiveAboutDialog({
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
+  List<String>? excludePackages,
 }) {
   showAdaptiveDialog<void>(
     context: context,
@@ -266,6 +280,7 @@ void showAdaptiveAboutDialog({
         applicationIcon: applicationIcon,
         applicationLegalese: applicationLegalese,
         children: children,
+        excludePackages: excludePackages,
       );
     },
     routeSettings: routeSettings,
@@ -299,6 +314,7 @@ void showLicensePage({
   Widget? applicationIcon,
   String? applicationLegalese,
   bool useRootNavigator = false,
+  List<String>? excludePackages,
 }) {
   final CapturedThemes themes = InheritedTheme.capture(
     from: context,
@@ -312,6 +328,7 @@ void showLicensePage({
           applicationVersion: applicationVersion,
           applicationIcon: applicationIcon,
           applicationLegalese: applicationLegalese,
+          excludePackages: excludePackages,
         ),
       ),
     ),
@@ -350,6 +367,7 @@ class AboutDialog extends StatelessWidget {
     this.applicationIcon,
     this.applicationLegalese,
     this.children,
+    this.excludePackages,
   });
 
   /// Creates an adaptive [AboutDialog] based on whether the target platform is
@@ -372,6 +390,7 @@ class AboutDialog extends StatelessWidget {
     Widget? applicationIcon,
     String? applicationLegalese,
     List<Widget>? children,
+    List<String>? excludePackages,
   }) = _AdaptiveAboutDialog;
 
   /// The name of the application.
@@ -409,6 +428,14 @@ class AboutDialog extends StatelessWidget {
   ///
   /// Defaults to nothing.
   final List<Widget>? children;
+
+  /// The names of packages to exclude from the license list.
+  ///
+  /// If non-null, packages whose names appear in this list will be omitted
+  /// from the license page shown by the "View licenses" button.
+  ///
+  /// Defaults to null, meaning all packages from [LicenseRegistry] are shown.
+  final List<String>? excludePackages;
 
   @override
   Widget build(BuildContext context) {
@@ -457,6 +484,7 @@ class AboutDialog extends StatelessWidget {
               applicationVersion: applicationVersion,
               applicationIcon: applicationIcon,
               applicationLegalese: applicationLegalese,
+              excludePackages: excludePackages,
             );
           },
         ),
@@ -484,6 +512,7 @@ class _AdaptiveAboutDialog extends AboutDialog {
     super.applicationIcon,
     super.applicationLegalese,
     super.children,
+    super.excludePackages,
   });
 
   List<Widget>? _actions(BuildContext context) {
@@ -507,6 +536,7 @@ class _AdaptiveAboutDialog extends AboutDialog {
                 applicationVersion: applicationVersion,
                 applicationIcon: applicationIcon,
                 applicationLegalese: applicationLegalese,
+                excludePackages: excludePackages,
               );
             },
           ),
@@ -539,6 +569,7 @@ class _AdaptiveAboutDialog extends AboutDialog {
                 applicationVersion: applicationVersion,
                 applicationIcon: applicationIcon,
                 applicationLegalese: applicationLegalese,
+                excludePackages: excludePackages,
               );
             },
           ),
@@ -621,6 +652,7 @@ class LicensePage extends StatefulWidget {
     this.applicationVersion,
     this.applicationIcon,
     this.applicationLegalese,
+    this.excludePackages,
   });
 
   /// The name of the application.
@@ -650,6 +682,16 @@ class LicensePage extends StatefulWidget {
   ///
   /// Defaults to the empty string.
   final String? applicationLegalese;
+
+  /// The names of packages to exclude from the license list.
+  ///
+  /// If non-null, packages whose names appear in this list will be omitted
+  /// from the displayed license page. This can be used to exclude
+  /// dev dependencies or other packages whose licenses should not be shown
+  /// to end users.
+  ///
+  /// Defaults to null, meaning all packages from [LicenseRegistry] are shown.
+  final List<String>? excludePackages;
 
   @override
   State<LicensePage> createState() => _LicensePageState();
@@ -691,7 +733,12 @@ class _LicensePageState extends State<LicensePage> {
       version: widget.applicationVersion ?? _defaultApplicationVersion(context),
       legalese: widget.applicationLegalese,
     );
-    return _PackagesView(about: about, isLateral: isLateral, selectedId: selectedId);
+    return _PackagesView(
+      about: about,
+      isLateral: isLateral,
+      selectedId: selectedId,
+      excludePackages: widget.excludePackages?.toSet(),
+    );
   }
 }
 
@@ -739,23 +786,41 @@ class _AboutProgram extends StatelessWidget {
 }
 
 class _PackagesView extends StatefulWidget {
-  const _PackagesView({required this.about, required this.isLateral, required this.selectedId});
+  const _PackagesView({
+    required this.about,
+    required this.isLateral,
+    required this.selectedId,
+    this.excludePackages,
+  });
 
   final Widget about;
   final bool isLateral;
   final ValueNotifier<int?> selectedId;
+  final Set<String>? excludePackages;
 
   @override
   _PackagesViewState createState() => _PackagesViewState();
 }
 
 class _PackagesViewState extends State<_PackagesView> {
-  final Future<_LicenseData> licenses = LicenseRegistry.licenses
-      .fold<_LicenseData>(
-        _LicenseData(),
-        (_LicenseData prev, LicenseEntry license) => prev..addLicense(license),
-      )
-      .then((_LicenseData licenseData) => licenseData..sortPackages());
+  late final Future<_LicenseData> licenses;
+
+  @override
+  void initState() {
+    super.initState();
+    licenses = LicenseRegistry.licenses
+        .fold<_LicenseData>(
+          _LicenseData(),
+          (_LicenseData prev, LicenseEntry license) => prev..addLicense(license),
+        )
+        .then((_LicenseData licenseData) {
+          licenseData.sortPackages();
+          if (widget.excludePackages != null && widget.excludePackages!.isNotEmpty) {
+            return licenseData.filtered(widget.excludePackages!);
+          }
+          return licenseData;
+        });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -960,6 +1025,31 @@ class _LicenseData {
             return a.toLowerCase().compareTo(b.toLowerCase());
           },
     );
+  }
+
+  /// Returns a copy of this data with all packages in [excludePackages] removed,
+  /// along with their orphaned licenses (licenses with no remaining package references).
+  _LicenseData filtered(Set<String> excludePackages) {
+    final _LicenseData result = _LicenseData()
+      ..firstPackage = firstPackage;
+    for (final String package in packages) {
+      if (excludePackages.contains(package)) {
+        continue;
+      }
+      result.packages.add(package);
+      final List<int> bindings = packageLicenseBindings[package]!;
+      result.packageLicenseBindings[package] = <int>[];
+      for (final int licenseIndex in bindings) {
+        final LicenseEntry license = licenses[licenseIndex];
+        int newIndex = result.licenses.indexOf(license);
+        if (newIndex == -1) {
+          newIndex = result.licenses.length;
+          result.licenses.add(license);
+        }
+        result.packageLicenseBindings[package]!.add(newIndex);
+      }
+    }
+    return result;
   }
 }
 

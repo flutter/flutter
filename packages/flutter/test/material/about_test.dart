@@ -2000,6 +2000,174 @@ void main() {
     final Finder xText = find.text('X');
     expect(tester.getSize(xText).isEmpty, isTrue);
   });
+
+  testWidgets('LicensePage excludePackages hides packages', (WidgetTester tester) async {
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
+      ]);
+    });
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license'),
+      ]);
+    });
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Center(
+          child: LicensePage(excludePackages: <String>['AAA']),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // AAA is excluded, Another package is shown.
+    expect(find.text('AAA'), findsNothing);
+    expect(find.text('Another package'), findsOneWidget);
+
+    // Tapping Another package still works.
+    await tester.tap(find.text('Another package'));
+    await tester.pumpAndSettle();
+    expect(find.text('Another license'), findsOneWidget);
+  });
+
+  testWidgets('LicensePage excludePackages null includes all', (WidgetTester tester) async {
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
+      ]);
+    });
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license'),
+      ]);
+    });
+
+    await tester.pumpWidget(const MaterialApp(home: Center(child: LicensePage())));
+
+    await tester.pumpAndSettle();
+
+    // All packages shown when excludePackages is null.
+    expect(find.text('AAA'), findsOneWidget);
+    expect(find.text('Another package'), findsOneWidget);
+  });
+
+  testWidgets('showLicensePage passes excludePackages to LicensePage', (WidgetTester tester) async {
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
+      ]);
+    });
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license'),
+      ]);
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) => ElevatedButton(
+            onPressed: () {
+              showLicensePage(
+                context: context,
+                excludePackages: <String>['AAA'],
+              );
+            },
+            child: const Text('Show Licenses'),
+          ),
+        ),
+      ),
+    );
+
+    // Open the license page.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+
+    // AAA excluded, Another package shown.
+    expect(find.text('AAA'), findsNothing);
+    expect(find.text('Another package'), findsOneWidget);
+  });
+
+  testWidgets('AboutDialog excludePackages flows to license page', (WidgetTester tester) async {
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
+      ]);
+    });
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license'),
+      ]);
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) => ElevatedButton(
+            onPressed: () {
+              showAboutDialog(
+                context: context,
+                useRootNavigator: false,
+                excludePackages: <String>['AAA'],
+              );
+            },
+            child: const Text('Show About'),
+          ),
+        ),
+      ),
+    );
+
+    // Open the about dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+
+    // Tap "View licenses" button.
+    await tester.tap(find.text('VIEW LICENSES'));
+    await tester.pumpAndSettle();
+
+    // AAA excluded, Another package shown.
+    expect(find.text('AAA'), findsNothing);
+    expect(find.text('Another package'), findsOneWidget);
+  });
+
+  testWidgets('AboutListTile excludePackages flows to dialog', (WidgetTester tester) async {
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
+      ]);
+    });
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license'),
+      ]);
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: const Material(
+          child: AboutListTile(
+            applicationName: 'TestApp',
+            excludePackages: <String>['AAA'],
+          ),
+        ),
+      ),
+    );
+
+    // Tap the AboutListTile.
+    await tester.tap(find.byType(ListTile));
+    await tester.pumpAndSettle();
+
+    // Tap "View licenses" button in the about dialog.
+    await tester.tap(find.text('VIEW LICENSES'));
+    await tester.pumpAndSettle();
+
+    // AAA excluded, Another package shown.
+    expect(find.text('AAA'), findsNothing);
+    expect(find.text('Another package'), findsOneWidget);
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {

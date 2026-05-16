@@ -37,13 +37,17 @@ class LicenseCollector {
   /// of the current applications dependencies.
   LicenseResult obtainLicenses(
     PackageConfig packageConfig,
-    Map<String, List<File>> additionalLicenses,
-  ) {
+    Map<String, List<File>> additionalLicenses, {
+    Set<String>? allowedPackageNames,
+  }) {
     final packageLicenses = <String, Set<String>>{};
     final allPackages = <String>{};
     final dependencies = <File>[];
 
     for (final Package package in packageConfig.packages) {
+      if (allowedPackageNames != null && !allowedPackageNames.contains(package.name)) {
+        continue;
+      }
       final Uri packageUri = package.packageUriRoot;
       if (packageUri.scheme != 'file') {
         continue;
@@ -90,6 +94,9 @@ class LicenseCollector {
     final additionalLicenseText = <String>[];
     final errorMessages = <String>[];
     for (final String package in additionalLicenses.keys) {
+      if (allowedPackageNames != null && !allowedPackageNames.contains(package)) {
+        continue;
+      }
       for (final File license in additionalLicenses[package]!) {
         if (!license.existsSync()) {
           errorMessages.add(
