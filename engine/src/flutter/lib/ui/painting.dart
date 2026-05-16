@@ -7315,6 +7315,12 @@ abstract class Canvas {
   ///     super.initState();
   ///     _createImage();
   ///   }
+  /// 
+  ///   @override
+  ///   void dispose() {
+  ///     _image?.dispose();
+  ///     super.dispose();
+  ///   }
   ///
   ///   Future<void> _createImage() async {
   ///     // Create a simple image programmatically
