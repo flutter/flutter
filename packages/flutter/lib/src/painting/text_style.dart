@@ -325,6 +325,12 @@ const String _kColorBackgroundWarning =
 /// outlines in the file are `italic` or `normal`. These values correspond to
 /// the [FontStyle] class and can be used in the [fontStyle] argument.
 ///
+/// For non-web font selection, these `weight` and `style` entries are
+/// descriptive: Flutter uses the weight and style metadata embedded in each
+/// font file when selecting the best match for [fontWeight] and [fontStyle].
+/// Set the `weight` and `style` entries to match the font files' metadata;
+/// these entries do not override incorrect metadata in the font files.
+///
 /// To select a custom font, create [TextStyle] using the [fontFamily]
 /// argument as shown in the example below:
 ///
