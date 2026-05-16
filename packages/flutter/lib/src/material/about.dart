@@ -1030,8 +1030,8 @@ class _LicenseData {
   /// Returns a copy of this data with all packages in [excludePackages] removed,
   /// along with their orphaned licenses (licenses with no remaining package references).
   _LicenseData filtered(Set<String> excludePackages) {
-    final _LicenseData result = _LicenseData()
-      ..firstPackage = firstPackage;
+    final _LicenseData result = _LicenseData();
+    final Map<LicenseEntry, int> seenLicenses = <LicenseEntry, int>{};
     for (final String package in packages) {
       if (excludePackages.contains(package)) {
         continue;
@@ -1041,13 +1041,17 @@ class _LicenseData {
       result.packageLicenseBindings[package] = <int>[];
       for (final int licenseIndex in bindings) {
         final LicenseEntry license = licenses[licenseIndex];
-        int newIndex = result.licenses.indexOf(license);
-        if (newIndex == -1) {
-          newIndex = result.licenses.length;
+        final int newIndex = seenLicenses.putIfAbsent(license, () => result.licenses.length);
+        if (newIndex == result.licenses.length) {
           result.licenses.add(license);
         }
         result.packageLicenseBindings[package]!.add(newIndex);
       }
+    }
+    if (firstPackage != null && excludePackages.contains(firstPackage)) {
+      result.firstPackage = null;
+    } else {
+      result.firstPackage = firstPackage;
     }
     return result;
   }
