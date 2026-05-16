@@ -142,7 +142,7 @@ abstract class FlutterVersion {
   }) {
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
       globals.platform,
-      git: globals.git,
+      git: git,
       gitRef: frameworkRevision,
       workingDirectory: flutterRoot,
       fetchTags: fetchTags,
