@@ -15,7 +15,7 @@ esac
 
 case "$(uname -s)" in
   Linux)
-    BUILDTOOLS_DIRECTORY="${ENGINE_BUILDROOT}/flutter/buildtools/linux-${ARCH}"
+    BUILDTOOLS_DIRECTORY="${ENGINE_BUILDROOT}/flutter/buildtools/linux-x64"
     ;;
   Darwin)
     BUILDTOOLS_DIRECTORY="${ENGINE_BUILDROOT}/flutter/buildtools/mac-${ARCH}"

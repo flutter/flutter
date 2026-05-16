@@ -43,11 +43,14 @@ void main(List<String> arguments) {
       ? p.join(p.dirname(outPath), 'flutter', 'buildtools')
       : arguments[1];
 
+  final arch = Process.runSync('uname', <String>['-m']).stdout.toString().trim() == 'x86_64'
+      ? 'x64'
+      : 'arm64';
   String platform;
   if (Platform.isLinux) {
     platform = 'linux-x64';
   } else if (Platform.isMacOS) {
-    platform = 'mac-x64';
+    platform = 'mac-$arch';
   } else {
     throw UnimplementedError('Script only support running on Linux or MacOS.');
   }

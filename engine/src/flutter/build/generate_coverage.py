@@ -18,7 +18,7 @@ def get_llvm_bin_directory():
   arch = 'arm64' if platform.machine() in ('arm64', 'aarch64') else 'x64'
   platform_dir = ''
   if sys.platform.startswith('linux'):
-    platform_dir = f'linux-{arch}'
+    platform_dir = 'linux-x64'
   elif sys.platform == 'darwin':
     platform_dir = f'mac-{arch}'
   else:
