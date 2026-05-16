@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/ios/xcode_build_settings.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -306,7 +307,7 @@ void main() {
 
       expect(
         await xcodeProjectInterpreter.getBuildSettings(
-          '',
+          FakeXcodeBasedProject('', fileSystem),
           buildContext: const XcodeProjectBuildContext(deviceId: '123', scheme: 'Free'),
         ),
         const <String, String>{},
@@ -353,7 +354,7 @@ void main() {
 
       expect(
         await xcodeProjectInterpreter.getBuildSettings(
-          '',
+          FakeXcodeBasedProject('', fileSystem),
           buildContext: const XcodeProjectBuildContext(sdk: XcodeSdk.IPhoneSimulator),
         ),
         const <String, String>{},
@@ -398,7 +399,7 @@ void main() {
 
       expect(
         await xcodeProjectInterpreter.getBuildSettings(
-          '',
+          FakeXcodeBasedProject('', fileSystem),
           buildContext: const XcodeProjectBuildContext(),
         ),
         const <String, String>{},
@@ -447,7 +448,7 @@ void main() {
       ]);
       expect(
         await xcodeProjectInterpreter.getBuildSettings(
-          '',
+          FakeXcodeBasedProject('', fileSystem),
           buildContext: const XcodeProjectBuildContext(scheme: 'Free'),
         ),
         const <String, String>{},
@@ -492,7 +493,7 @@ void main() {
 
       expect(
         await xcodeProjectInterpreter.getBuildSettings(
-          '',
+          FakeXcodeBasedProject('', fileSystem),
           buildContext: const XcodeProjectBuildContext(sdk: XcodeSdk.WatchOS),
         ),
         const <String, String>{},
@@ -537,7 +538,7 @@ void main() {
 
       expect(
         await xcodeProjectInterpreter.getBuildSettings(
-          '',
+          FakeXcodeBasedProject('', fileSystem),
           buildContext: const XcodeProjectBuildContext(sdk: XcodeSdk.WatchSimulator),
         ),
         const <String, String>{},
@@ -598,7 +599,7 @@ void main() {
 
       expect(
         await xcodeProjectInterpreter.getBuildSettings(
-          '',
+          FakeXcodeBasedProject('', fileSystem),
           buildContext: const XcodeProjectBuildContext(sdk: XcodeSdk.MacOSX),
         ),
         const <String, String>{},
@@ -645,6 +646,7 @@ void main() {
     ]);
 
     await xcodeProjectInterpreter.cleanWorkspace(
+      FakeXcodeBasedProject('', fileSystem),
       'workspace_path',
       'Free',
       buildDirectory: buildDirectory,
@@ -685,7 +687,10 @@ void main() {
       );
 
       expect(
-        await xcodeProjectInterpreter.getInfo(workingDirectory, buildDirectory: buildDirectory),
+        await xcodeProjectInterpreter.getInfo(
+          FakeXcodeBasedProject(workingDirectory, fileSystem),
+          buildDirectory: buildDirectory,
+        ),
         isNotNull,
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -729,7 +734,10 @@ void main() {
       );
 
       await expectLater(
-        () => xcodeProjectInterpreter.getInfo(workingDirectory, buildDirectory: buildDirectory),
+        () => xcodeProjectInterpreter.getInfo(
+          FakeXcodeBasedProject(workingDirectory, fileSystem),
+          buildDirectory: buildDirectory,
+        ),
         throwsToolExit(message: stderr),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -773,7 +781,10 @@ void main() {
       );
 
       await expectLater(
-        () => xcodeProjectInterpreter.getInfo(workingDirectory, buildDirectory: buildDirectory),
+        () => xcodeProjectInterpreter.getInfo(
+          FakeXcodeBasedProject(workingDirectory, fileSystem),
+          buildDirectory: buildDirectory,
+        ),
         throwsToolExit(message: stderr),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -2550,7 +2561,7 @@ Resolved source packages:
         analytics: const NoOpAnalytics(),
       );
       await xcodeProjectInterpreter.prefetchSwiftPackages(
-        projectPath,
+        FakeXcodeBasedProject(projectPath, fs),
         buildDirectory: buildDirectory,
         quiet: false,
       );
@@ -2608,7 +2619,7 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
       analytics: const NoOpAnalytics(),
     );
     await xcodeProjectInterpreter.prefetchSwiftPackages(
-      projectPath,
+      FakeXcodeBasedProject(projectPath, fs),
       buildDirectory: buildDirectory,
       quiet: false,
     );
@@ -2656,7 +2667,7 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
         analytics: const NoOpAnalytics(),
       );
       await xcodeProjectInterpreter.prefetchSwiftPackages(
-        projectPath,
+        FakeXcodeBasedProject(projectPath, fs),
         buildDirectory: buildDirectory,
         quiet: false,
       );
@@ -2705,14 +2716,14 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
     );
 
     await xcodeProjectInterpreter.prefetchSwiftPackages(
-      projectPath,
+      FakeXcodeBasedProject(projectPath, fs),
       buildDirectory: buildDirectory,
       quiet: false,
     );
     expect(fakeProcessManager, hasNoRemainingExpectations);
 
     await xcodeProjectInterpreter.prefetchSwiftPackages(
-      projectPath,
+      FakeXcodeBasedProject(projectPath, fs),
       buildDirectory: buildDirectory,
       quiet: false,
     );
@@ -2781,7 +2792,7 @@ Resolved source packages:
       analytics: const NoOpAnalytics(),
     );
     await xcodeProjectInterpreter.prefetchSwiftPackages(
-      projectPath,
+      FakeXcodeBasedProject(projectPath, fs),
       buildDirectory: buildDirectory,
     );
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -2855,7 +2866,7 @@ Resolved source packages:
         analytics: const NoOpAnalytics(),
       );
       await xcodeProjectInterpreter.prefetchSwiftPackages(
-        projectPath,
+        FakeXcodeBasedProject(projectPath, fs),
         buildDirectory: buildDirectory,
         waitForCompletion: false,
       );
@@ -2907,7 +2918,7 @@ Resolved source packages:
     );
     await expectLater(
       xcodeProjectInterpreter.prefetchSwiftPackages(
-        projectPath,
+        FakeXcodeBasedProject(projectPath, fs),
         buildDirectory: buildDirectory,
         quiet: false,
       ),
@@ -2930,4 +2941,18 @@ Resolved source packages:
       '/build/ios/SourcePackages',
     );
   });
+}
+
+class FakeXcodeBasedProject extends Fake implements XcodeBasedProject {
+  FakeXcodeBasedProject(this.path, [FileSystem? fileSystem])
+    : fs = fileSystem ?? MemoryFileSystem.test();
+
+  final String path;
+  final FileSystem fs;
+
+  @override
+  Directory get hostAppRoot => fs.directory(path);
+
+  @override
+  Directory get xcodeProject => fs.directory(path);
 }
