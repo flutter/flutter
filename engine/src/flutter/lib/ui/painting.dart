@@ -7318,7 +7318,7 @@ abstract class Canvas {
   ///
   ///   @override
   ///   void dispose() {
-  ///     _image?.dispose();
+  ///     image?.dispose();
   ///     super.dispose();
   ///   }
   ///
@@ -7349,6 +7349,10 @@ abstract class Canvas {
   ///     final picture = recorder.endRecording();
   ///
   ///     final generatedImage = await picture.toImage(100, 100);
+  ///     if (!mounted) {
+  ///       generatedImage.dispose();
+  ///       return;
+  ///     }
   ///
   ///     setState(() {
   ///       image = generatedImage;
@@ -7441,7 +7445,7 @@ abstract class Canvas {
   ///
   ///   @override
   ///   void dispose() {
-  ///     _image?.dispose();
+  ///     image?.dispose();
   ///     super.dispose();
   ///   }
   ///
@@ -7456,12 +7460,13 @@ abstract class Canvas {
   ///     final codec = await ui.instantiateImageCodec(bytes);
   ///
   ///     final frame = await codec.getNextFrame();
+  ///     codec.dispose();
   ///
   ///     if (!mounted) {
   ///       frame.image.dispose();
   ///       return;
   ///     }
-  ///     setState(() { _image = frame.image; });
+  ///     setState(() { image = frame.image; });
   ///   }
   ///
   ///   @override
