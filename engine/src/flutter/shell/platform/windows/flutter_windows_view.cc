@@ -264,11 +264,13 @@ void FlutterWindowsView::OnPointerMove(double x,
                                        double y,
                                        FlutterPointerDeviceKind device_kind,
                                        int32_t device_id,
+                                       uint64_t buttons,
                                        uint32_t rotation,
                                        uint32_t pressure,
                                        int modifiers_state) {
   engine_->keyboard_key_handler()->SyncModifiersIfNeeded(modifiers_state);
   auto state = GetOrCreatePointerState(device_kind, device_id);
+  state->buttons = buttons;
   state->rotation = rotation;
   state->pressure = pressure;
   SendPointerMove(x, y, state);
@@ -278,12 +280,12 @@ void FlutterWindowsView::OnPointerDown(double x,
                                        double y,
                                        FlutterPointerDeviceKind device_kind,
                                        int32_t device_id,
-                                       uint64_t button,
+                                       uint64_t buttons,
                                        uint32_t rotation,
                                        uint32_t pressure) {
-  if (button != 0) {
+  if (buttons != 0) {
     auto state = GetOrCreatePointerState(device_kind, device_id);
-    state->buttons |= button;
+    state->buttons |= buttons;
     state->rotation = rotation;
     state->pressure = pressure;
     SendPointerDown(x, y, state);
@@ -294,10 +296,11 @@ void FlutterWindowsView::OnPointerUp(double x,
                                      double y,
                                      FlutterPointerDeviceKind device_kind,
                                      int32_t device_id,
-                                     uint64_t button) {
-  if (button != 0) {
-    auto state = GetOrCreatePointerState(device_kind, device_id);
-    state->buttons &= ~button;
+                                     uint64_t buttons) {
+  auto state = GetOrCreatePointerState(device_kind, device_id);
+  const uint64_t released_buttons = buttons == 0 ? state->buttons : buttons;
+  if (released_buttons != 0) {
+    state->buttons &= ~released_buttons;
     SendPointerUp(x, y, state);
   }
 }

@@ -192,15 +192,15 @@ TEST_F(FlutterWindowTest, OnPointerStarSendsDeviceType) {
   // Move
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindMouse,
-                            kDefaultPointerDeviceId, 0, 0, 0))
+                            kDefaultPointerDeviceId, 0, 0, 0, 0))
       .Times(1);
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindTouch,
-                            kDefaultPointerDeviceId, 0, 0, 0))
+                            kDefaultPointerDeviceId, 0, 0, 0, 0))
       .Times(1);
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
-                            kDefaultPointerDeviceId, 0, 0, 0))
+                            kDefaultPointerDeviceId, 0, 0, 0, 0))
       .Times(1);
 
   // Down
@@ -249,7 +249,7 @@ TEST_F(FlutterWindowTest, OnPointerStarSendsDeviceType) {
       .Times(1);
 
   win32window.OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindMouse,
-                            kDefaultPointerDeviceId, 0, 0, 0);
+                            kDefaultPointerDeviceId, 0, 0, 0, 0);
   win32window.OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindMouse,
                             kDefaultPointerDeviceId,
                             kFlutterPointerButtonMousePrimary, 0, 0);
@@ -261,7 +261,7 @@ TEST_F(FlutterWindowTest, OnPointerStarSendsDeviceType) {
 
   // Touch
   win32window.OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindTouch,
-                            kDefaultPointerDeviceId, 0, 0, 0);
+                            kDefaultPointerDeviceId, 0, 0, 0, 0);
   win32window.OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindTouch,
                             kDefaultPointerDeviceId,
                             kFlutterPointerButtonMousePrimary, 0, 0);
@@ -273,7 +273,7 @@ TEST_F(FlutterWindowTest, OnPointerStarSendsDeviceType) {
 
   // Pen
   win32window.OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
-                            kDefaultPointerDeviceId, 0, 0, 0);
+                            kDefaultPointerDeviceId, 0, 0, 0, 0);
   win32window.OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                             kDefaultPointerDeviceId,
                             kFlutterPointerButtonMousePrimary, 0, 0);
@@ -360,8 +360,10 @@ TEST_F(FlutterWindowTest, OnStylusPointerMove) {
   MockWindowBindingHandlerDelegate delegate;
   win32window.SetView(&delegate);
 
-  EXPECT_CALL(delegate, OnPointerMove(15, 20, kFlutterPointerDeviceKindStylus,
-                                      kDefaultPointerDeviceId, 10, 720, 0))
+  EXPECT_CALL(delegate,
+              OnPointerMove(15, 20, kFlutterPointerDeviceKindStylus,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonStylusContact, 10, 720, 0))
       .Times(1);
 
   UINT32 pointerId = 1;
@@ -411,8 +413,7 @@ TEST_F(FlutterWindowTest, OnStylusPointerUp) {
                             kFlutterPointerButtonStylusContact, 720, 0))
       .Times(1);
   EXPECT_CALL(delegate, OnPointerUp(25, 30, kFlutterPointerDeviceKindStylus,
-                                    kDefaultPointerDeviceId,
-                                    kFlutterPointerButtonStylusContact))
+                                    kDefaultPointerDeviceId, 0))
       .Times(1);
 
   UINT32 pointerId = 1;
@@ -508,10 +509,6 @@ TEST_F(FlutterWindowTest, OnStylusPointerHover) {
                             kFlutterPointerButtonStylusContact, 0, 0))
       .Times(1);
 
-  EXPECT_CALL(delegate, OnPointerUp(45, 50, kFlutterPointerDeviceKindStylus, 0,
-                                    kFlutterPointerButtonStylusContact))
-      .Times(1);
-
   UINT32 pointerId = 1;
   WPARAM wparam = static_cast<WPARAM>(pointerId);
   InjectPointerMessageWithClientPoint(win32window, WM_POINTERDOWN, wparam, 45,
@@ -519,7 +516,7 @@ TEST_F(FlutterWindowTest, OnStylusPointerHover) {
 
   // Now expect OnPointerMove to be called for hover events
   EXPECT_CALL(delegate, OnPointerMove(45, 50, kFlutterPointerDeviceKindStylus,
-                                      0, 0, 0, 0))
+                                      0, 0, 0, 0, 0))
       .Times(1);
 
   // Inject WM_POINTERUPDATE message (hover event)
@@ -576,12 +573,11 @@ TEST_F(FlutterWindowTest, OnStylusHoverAfterPointerUp) {
                             kFlutterPointerButtonStylusContact, 720, 0))
       .Times(1);
   EXPECT_CALL(delegate, OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindStylus,
-                                    kDefaultPointerDeviceId,
-                                    kFlutterPointerButtonStylusContact))
+                                    kDefaultPointerDeviceId, 0))
       .Times(1);
   EXPECT_CALL(delegate,
               OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
-                            kDefaultPointerDeviceId, 0, 720, 0))
+                            kDefaultPointerDeviceId, 0, 0, 720, 0))
       .Times(1);
 
   UINT32 pointerId = 1;
@@ -715,7 +711,7 @@ TEST_F(FlutterWindowTest, OnInvertedStylusPointerDownUsesDeviceKind) {
                                       10);
 }
 
-TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateEmitsTransition) {
+TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateMovesWithUpdatedButtons) {
   auto mock_proc_table = std::make_shared<MockWindowsProcTable>();
 
   EXPECT_CALL(*mock_proc_table, GetPointerInfo(_, _))
@@ -756,9 +752,11 @@ TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateEmitsTransition) {
                             kFlutterPointerButtonStylusContact, 720, 0))
       .Times(1);
   EXPECT_CALL(delegate,
-              OnPointerDown(10.0, 10.0, kFlutterPointerDeviceKindStylus,
+              OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
                             kDefaultPointerDeviceId,
-                            kFlutterPointerButtonStylusPrimary, 720, 0))
+                            kFlutterPointerButtonStylusContact |
+                                kFlutterPointerButtonStylusPrimary,
+                            0, 720, 0))
       .Times(1);
 
   UINT32 pointerId = 1;
@@ -769,7 +767,7 @@ TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateEmitsTransition) {
                                       10);
 }
 
-TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateEmitsReleaseTransition) {
+TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateMovesWithReleasedButton) {
   auto mock_proc_table = std::make_shared<MockWindowsProcTable>();
 
   EXPECT_CALL(*mock_proc_table, GetPointerInfo(_, _))
@@ -811,9 +809,10 @@ TEST_F(FlutterWindowTest, OnStylusBarrelButtonUpdateEmitsReleaseTransition) {
                                 kFlutterPointerButtonStylusPrimary,
                             720, 0))
       .Times(1);
-  EXPECT_CALL(delegate, OnPointerUp(10.0, 10.0, kFlutterPointerDeviceKindStylus,
-                                    kDefaultPointerDeviceId,
-                                    kFlutterPointerButtonStylusPrimary))
+  EXPECT_CALL(delegate,
+              OnPointerMove(10.0, 10.0, kFlutterPointerDeviceKindStylus,
+                            kDefaultPointerDeviceId,
+                            kFlutterPointerButtonStylusContact, 0, 720, 0))
       .Times(1);
 
   UINT32 pointerId = 1;

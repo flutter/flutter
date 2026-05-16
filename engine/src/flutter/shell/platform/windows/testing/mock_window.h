@@ -44,6 +44,7 @@ class MockWindow : public FlutterWindow {
                double,
                FlutterPointerDeviceKind,
                int32_t,
+               uint64_t,
                uint32_t,
                uint32_t,
                int),

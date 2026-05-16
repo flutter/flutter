@@ -5,7 +5,6 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOW_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOW_H_
 
-#include <map>
 #include <string>
 #include <vector>
 
@@ -85,6 +84,7 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
+                             uint64_t buttons,
                              uint32_t rotation,
                              uint32_t pressure,
                              int modifiers_state);
@@ -94,7 +94,7 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
-                             uint64_t button,
+                             uint64_t buttons,
                              uint32_t rotation,
                              uint32_t pressure);
 
@@ -104,7 +104,7 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
                            double y,
                            FlutterPointerDeviceKind device_kind,
                            int32_t device_id,
-                           uint64_t button);
+                           uint64_t buttons);
 
   // Called when the mouse leaves the window.
   virtual void OnPointerLeave(double x,
@@ -366,9 +366,6 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
 
   // Generates touch point IDs for touch events.
   SequentialIdGenerator touch_id_generator_;
-
-  // Tracks the most recent button mask reported for each native pointer id.
-  std::map<UINT32, uint64_t> pointer_buttons_;
 
   // Provides access to the list of available displays.
   std::shared_ptr<DisplayManagerWin32> display_manager_;

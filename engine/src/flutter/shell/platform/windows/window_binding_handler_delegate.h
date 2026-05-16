@@ -37,6 +37,7 @@ class WindowBindingHandlerDelegate {
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
+                             uint64_t buttons,
                              uint32_t rotation,
                              uint32_t pressure,
                              int modifiers_state) = 0;
@@ -47,7 +48,7 @@ class WindowBindingHandlerDelegate {
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
-                             uint64_t button,
+                             uint64_t buttons,
                              uint32_t rotation,
                              uint32_t pressure) = 0;
 
@@ -57,7 +58,7 @@ class WindowBindingHandlerDelegate {
                            double y,
                            FlutterPointerDeviceKind device_kind,
                            int32_t device_id,
-                           uint64_t button) = 0;
+                           uint64_t buttons) = 0;
 
   // Notifies delegate that backing window mouse pointer has left the window.
   // Typically called by currently configured WindowBindingHandler.
