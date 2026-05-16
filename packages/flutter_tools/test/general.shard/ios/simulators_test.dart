@@ -798,6 +798,66 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       );
 
       testUsingContext(
+        'log reader restores ANSI escape sequences rewritten by unified logging',
+        () async {
+          const logPredicate =
+              'eventType = logEvent AND processImagePath ENDSWITH "My Super Awesome App" '
+              'AND (senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
+              'OR processImageUUID == senderImageUUID OR eventMessage CONTAINS "`UIScene` lifecycle '
+              'will soon be required" OR eventMessage CONTAINS "This process does not adopt UIScene '
+              'lifecycle.") AND NOT(eventMessage CONTAINS ": could not find icon '
+              'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
+              'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
+          fakeProcessManager.addCommand(
+            const FakeCommand(
+              command: <String>[
+                'xcrun',
+                'simctl',
+                'spawn',
+                '123456',
+                'log',
+                'stream',
+                '--style',
+                'json',
+                '--predicate',
+                logPredicate,
+              ],
+              stdout: '''
+},{
+  "traceID" : 37579774151491588,
+  "eventMessage" : "\\\\^[[32m       test   <\u{2026}>[0m",
+  "eventType" : "logEvent"
+},{
+  "traceID" : 37579774151491588,
+  "eventMessage" : "<\u{2026}>[0mreset only",
+  "eventType" : "logEvent"
+},{
+''',
+            ),
+          );
+
+          final device = IOSSimulator(
+            '123456',
+            name: 'iPhone 11',
+            simulatorCategory: 'iOS 11.0',
+            simControl: simControl,
+            logger: logger,
+          );
+          final DeviceLogReader logReader = device.getLogReader(
+            app: await BuildableIOSApp.fromProject(mockIosProject, null),
+          );
+
+          final List<String> lines = await logReader.logLines.toList();
+          expect(lines, <String>['\x1B[32m       test   \x1B[0m', '\x1B[0mreset only']);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        },
+        overrides: <Type, Generator>{
+          ProcessManager: () => fakeProcessManager,
+          FileSystem: () => fileSystem,
+        },
+      );
+
+      testUsingContext(
         'log reader handles bad output',
         () async {
           const logPredicate =

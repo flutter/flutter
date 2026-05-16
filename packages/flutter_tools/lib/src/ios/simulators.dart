@@ -982,6 +982,26 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
 
   //   "eventMessage" : "flutter: 21",
   static final _unifiedLoggingEventMessageRegex = RegExp(r'.*"eventMessage" : (".*")');
+  static final _appleEscapedAnsiSequenceRegex = RegExp(r'\\\^\[\[([0-9;?]*[ -/]*[@-~])');
+  static const _appleEscapedAnsiEscape = '<\u{2026}>';
+
+  /// Restores ANSI ESC bytes rendered as printable text by Apple unified logging.
+  ///
+  /// CSI introducers are reported as r'\^[[' and some later ESC bytes as
+  /// '<\u{2026}>'.
+  static String _restoreAppleEscapedAnsiSequences(String message) {
+    if (!_appleEscapedAnsiSequenceRegex.hasMatch(message) &&
+        !message.contains(_appleEscapedAnsiEscape)) {
+      return message;
+    }
+
+    final String restoredCsiSequences = message.replaceAllMapped(
+      _appleEscapedAnsiSequenceRegex,
+      (Match match) => '\x1B[${match.group(1)}',
+    );
+    return restoredCsiSequences.replaceAll(_appleEscapedAnsiEscape, '\x1B');
+  }
+
   void _onUnifiedLoggingLine(String line) {
     // The log command predicate handles filtering, so every log eventMessage should be decoded and added.
     final Match? eventMessageMatch = _unifiedLoggingEventMessageRegex.firstMatch(line);
@@ -990,7 +1010,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
       try {
         final Object? decodedJson = jsonDecode(message);
         if (decodedJson is String) {
-          addLogToStream(decodedJson);
+          addLogToStream(_restoreAppleEscapedAnsiSequences(decodedJson));
         }
       } on FormatException {
         globals.printError('Logger returned non-JSON response: $message');
