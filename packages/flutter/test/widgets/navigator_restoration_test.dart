@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
@@ -1076,14 +1076,16 @@ void main() {
         .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          restorationScopeId: 'material_app',
+        WidgetsApp(
+          restorationScopeId: 'widgets_app',
+          color: const Color(0xFF123456),
           initialRoute: '/',
           routes: <String, WidgetBuilder>{'/': (BuildContext context) => Container()},
           onGenerateInitialRoutes: (String initialRoute) {
-            return <MaterialPageRoute<void>>[
-              MaterialPageRoute<void>(builder: (BuildContext context) => Container()),
-            ];
+            return <Route<void>>[_pageRoute<void>(builder: (BuildContext context) => Container())];
+          },
+          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+            return _pageRoute<T>(settings: settings, builder: builder);
           },
         ),
       );
@@ -1100,7 +1102,7 @@ void main() {
 
 @pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
-  return MaterialPageRoute<void>(
+  return _pageRoute<void>(
     builder: (BuildContext context) {
       return RouteWidget(name: arguments! as String);
     },
@@ -1109,7 +1111,7 @@ Route<void> _routeBuilder(BuildContext context, Object? arguments) {
 
 @pragma('vm:entry-point')
 Route<void> _routeFutureBuilder(BuildContext context, Object? arguments) {
-  return MaterialPageRoute<void>(
+  return _pageRoute<void>(
     builder: (BuildContext context) {
       return const RouteFutureWidget();
     },
@@ -1193,7 +1195,7 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
               return TestPage(name: name, key: ValueKey<String>(name));
             }).toList(),
       onGenerateRoute: (RouteSettings settings) {
-        return MaterialPageRoute<int>(
+        return _pageRoute<int>(
           settings: settings,
           builder: (BuildContext context) {
             return RouteWidget(name: settings.name!, arguments: settings.arguments);
@@ -1223,7 +1225,7 @@ class TestPage extends Page<void> {
 
   @override
   Route<void> createRoute(BuildContext context) {
-    return MaterialPageRoute<void>(
+    return _pageRoute<void>(
       settings: this,
       builder: (BuildContext context) {
         return RouteWidget(name: name!);
@@ -1249,7 +1251,7 @@ class TestWidget extends StatelessWidget {
             initialRoute: 'home',
             restorationScopeId: 'app',
             onGenerateRoute: (RouteSettings settings) {
-              return MaterialPageRoute<int>(
+              return _pageRoute<int>(
                 settings: settings,
                 builder: (BuildContext context) {
                   return RouteWidget(name: settings.name!, arguments: settings.arguments);
@@ -1261,6 +1263,17 @@ class TestWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Creates a test page route without depending on Material.
+PageRouteBuilder<T> _pageRoute<T>({RouteSettings? settings, required WidgetBuilder builder}) {
+  return PageRouteBuilder<T>(
+    settings: settings,
+    pageBuilder:
+        (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          return builder(context);
+        },
+  );
 }
 
 class RouteWidget extends StatefulWidget {
