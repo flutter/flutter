@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -245,30 +245,25 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Localizations(
-          locale: const Locale('en', 'us'),
-          delegates: const <LocalizationsDelegate<dynamic>>[
-            DefaultWidgetsLocalizations.delegate,
-            DefaultMaterialLocalizations.delegate,
-          ],
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: Scrollable(
-              controller: scrollController,
-              viewportBuilder: (BuildContext context, ViewportOffset offset) {
-                return Viewport(
-                  offset: offset,
-                  slivers: <Widget>[
-                    const SliverAppBar(
-                      pinned: true,
-                      expandedHeight: kExpandedAppBarHeight,
-                      flexibleSpace: FlexibleSpaceBar(title: Text('App Bar')),
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: Scrollable(
+            controller: scrollController,
+            viewportBuilder: (BuildContext context, ViewportOffset offset) {
+              return Viewport(
+                offset: offset,
+                slivers: <Widget>[
+                  const SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _PinnedHeaderDelegate(
+                      minExtent: kExpandedAppBarHeight,
+                      maxExtent: kExpandedAppBarHeight,
                     ),
-                    SliverList.list(children: containers),
-                  ],
-                );
-              },
-            ),
+                  ),
+                  SliverList.list(children: containers),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -298,6 +293,7 @@ void main() {
 
     const kItemHeight = 100.0;
     const kExpandedAppBarHeight = 256.0;
+    const kCollapsedAppBarHeight = 56.0;
 
     final children = <Widget>[];
     final slivers = List<Widget>.generate(30, (int i) {
@@ -314,28 +310,23 @@ void main() {
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: const MediaQueryData(),
-          child: Localizations(
-            locale: const Locale('en', 'us'),
-            delegates: const <LocalizationsDelegate<dynamic>>[
-              DefaultWidgetsLocalizations.delegate,
-              DefaultMaterialLocalizations.delegate,
-            ],
-            child: Scrollable(
-              controller: scrollController,
-              viewportBuilder: (BuildContext context, ViewportOffset offset) {
-                return Viewport(
-                  offset: offset,
-                  slivers: <Widget>[
-                    const SliverAppBar(
-                      pinned: true,
-                      expandedHeight: kExpandedAppBarHeight,
-                      flexibleSpace: FlexibleSpaceBar(title: Text('App Bar')),
+          child: Scrollable(
+            controller: scrollController,
+            viewportBuilder: (BuildContext context, ViewportOffset offset) {
+              return Viewport(
+                offset: offset,
+                slivers: <Widget>[
+                  const SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _PinnedHeaderDelegate(
+                      minExtent: kCollapsedAppBarHeight,
+                      maxExtent: kExpandedAppBarHeight,
                     ),
-                    ...slivers,
-                  ],
-                );
-              },
-            ),
+                  ),
+                  ...slivers,
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -347,7 +338,7 @@ void main() {
     tester.binding.pipelineOwner.semanticsOwner!.performAction(id0, SemanticsAction.showOnScreen);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
-    expect(tester.getTopLeft(find.byWidget(children[0])).dy, kToolbarHeight);
+    expect(tester.getTopLeft(find.byWidget(children[0])).dy, kCollapsedAppBarHeight);
 
     semantics.dispose();
   });
@@ -848,6 +839,26 @@ Rect nodeGlobalRect(SemanticsNode node) {
     }
   }
   return MatrixUtils.transformRect(globalTransform, node.rect);
+}
+
+class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
+  const _PinnedHeaderDelegate({required this.minExtent, required this.maxExtent});
+
+  @override
+  final double minExtent;
+
+  @override
+  final double maxExtent;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return const SizedBox.expand(child: Text('App Bar'));
+  }
+
+  @override
+  bool shouldRebuild(_PinnedHeaderDelegate oldDelegate) {
+    return minExtent != oldDelegate.minExtent || maxExtent != oldDelegate.maxExtent;
+  }
 }
 
 class _NoImplicitScrollingScrollPhysics extends ScrollPhysics {
