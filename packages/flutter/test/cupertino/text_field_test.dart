@@ -10943,4 +10943,71 @@ void main() {
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.enableInlinePrediction, true);
   });
+
+  testWidgets('Dragging selection base handle upwards scrolls the viewport smoothly to zero', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(text: 'Line 1\n' * 100);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              child: CupertinoTextField(
+                controller: controller,
+                maxLines: null,
+                style: const TextStyle(color: CupertinoColors.black, fontSize: 24),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable).last);
+
+    // Scroll to the bottom of the long text viewport.
+    scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
+    await tester.pumpAndSettle();
+
+    // Establish an initial selection near the bottom of the text view.
+    controller.selection = const TextSelection(baseOffset: 650, extentOffset: 680);
+    await tester.pumpAndSettle();
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Simulate an incremental drag gesture by moving the base selection offset
+    // upwards frame-by-frame toward the beginning of the text.
+    var currentBase = 650;
+    while (currentBase > 0) {
+      currentBase -= 50;
+      if (currentBase < 0) {
+        currentBase = 0;
+      }
+
+      state.userUpdateTextEditingValue(
+        TextEditingValue(
+          text: controller.text,
+          selection: TextSelection(baseOffset: currentBase, extentOffset: 680),
+        ),
+        SelectionChangedCause.drag,
+      );
+
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+
+    await tester.pumpAndSettle();
+
+    // The viewport must follow the continuous drag gesture and scroll smoothly
+    // all the way to the top without being blocked or snapping back down.
+    expect(
+      scrollable.position.pixels,
+      equals(0.0),
+      reason:
+          'The viewport should successfully follow the incremental drag all the way to the top.',
+    );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }
