@@ -7,6 +7,8 @@
 /// @docImport 'selectable_text.dart';
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 
@@ -54,6 +56,8 @@ class SelectionArea extends StatefulWidget {
     this.contextMenuBuilder = _defaultContextMenuBuilder,
     this.magnifierConfiguration,
     this.onSelectionChanged,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
     required this.child,
   });
 
@@ -94,6 +98,18 @@ class SelectionArea extends StatefulWidget {
   /// Called when the selected content changes.
   final ValueChanged<SelectedContent?>? onSelectionChanged;
 
+  /// The [ui.BoxHeightStyle] to use when painting selection highlights.
+  ///
+  /// Applied to all [Text] and [RichText] widgets within this selection area
+  /// via [DefaultSelectionStyle]. If null, defaults to [ui.BoxHeightStyle.tight].
+  final ui.BoxHeightStyle? selectionHeightStyle;
+
+  /// The [ui.BoxWidthStyle] to use when painting selection highlights.
+  ///
+  /// Applied to all [Text] and [RichText] widgets within this selection area
+  /// via [DefaultSelectionStyle]. If null, defaults to [ui.BoxWidthStyle.tight].
+  final ui.BoxWidthStyle? selectionWidthStyle;
+
   /// The child widget this selection area applies to.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -131,15 +147,19 @@ class SelectionAreaState extends State<SelectionArea> {
           TargetPlatform.iOS => cupertinoTextSelectionHandleControls,
           TargetPlatform.macOS => cupertinoDesktopTextSelectionHandleControls,
         };
-    return SelectableRegion(
-      key: _selectableRegionKey,
-      selectionControls: controls,
-      focusNode: widget.focusNode,
-      contextMenuBuilder: widget.contextMenuBuilder,
-      magnifierConfiguration:
-          widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
-      onSelectionChanged: widget.onSelectionChanged,
-      child: widget.child,
+    return DefaultSelectionStyle.merge(
+      selectionHeightStyle: widget.selectionHeightStyle,
+      selectionWidthStyle: widget.selectionWidthStyle,
+      child: SelectableRegion(
+        key: _selectableRegionKey,
+        selectionControls: controls,
+        focusNode: widget.focusNode,
+        contextMenuBuilder: widget.contextMenuBuilder,
+        magnifierConfiguration:
+            widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
+        onSelectionChanged: widget.onSelectionChanged,
+        child: widget.child,
+      ),
     );
   }
 }

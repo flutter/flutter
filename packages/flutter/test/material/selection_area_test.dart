@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -705,5 +707,62 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(SelectionArea)), Size.zero);
+  });
+
+  testWidgets('SelectionArea passes selectionHeightStyle to child Text via DefaultSelectionStyle', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectionArea(
+          selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+          selectionWidthStyle: ui.BoxWidthStyle.max,
+          child: const Text(
+            'Lorem ipsum dolor sit amet',
+            style: TextStyle(height: 1.5),
+          ),
+        ),
+      ),
+    );
+
+    // Find the RenderParagraph inside the SelectionArea.
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(
+        of: find.byType(SelectionArea),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    // Verify the styles were propagated to the RenderParagraph.
+    expect(paragraph.selectionHeightStyle, ui.BoxHeightStyle.includeLineSpacingTop);
+    expect(paragraph.selectionWidthStyle, ui.BoxWidthStyle.max);
+
+    // Verify the DefaultSelectionStyle was set correctly in the tree.
+    final DefaultSelectionStyle style = DefaultSelectionStyle.of(
+      tester.element(find.text('Lorem ipsum dolor sit amet')),
+    );
+    expect(style.selectionHeightStyle, ui.BoxHeightStyle.includeLineSpacingTop);
+    expect(style.selectionWidthStyle, ui.BoxWidthStyle.max);
+  });
+
+  testWidgets('SelectionArea with null height style defaults to tight', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SelectionArea(
+          child: Text('Hello'),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(
+        of: find.byType(SelectionArea),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    // Default should be tight.
+    expect(paragraph.selectionHeightStyle, ui.BoxHeightStyle.tight);
+    expect(paragraph.selectionWidthStyle, ui.BoxWidthStyle.tight);
   });
 }

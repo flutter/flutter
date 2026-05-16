@@ -1458,6 +1458,34 @@ void main() {
       expect(selection.start, 28);
       expect(selection.end, 31);
     });
+
+    test('selectionHeightStyle and selectionWidthStyle are passed to getBoxesForSelection', () async {
+      final registrar = TestSelectionRegistrar();
+      const selectionColor = Color(0xAF6694e8);
+      final paragraph = RenderParagraph(
+        const TextSpan(text: '1234567'),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+        selectionColor: selectionColor,
+        selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+        selectionWidthStyle: ui.BoxWidthStyle.max,
+      );
+      paragraph.selectionHeightStyle = ui.BoxHeightStyle.includeLineSpacingTop;
+      paragraph.selectionWidthStyle = ui.BoxWidthStyle.max;
+      expect(paragraph.selectionHeightStyle, ui.BoxHeightStyle.includeLineSpacingTop);
+      expect(paragraph.selectionWidthStyle, ui.BoxWidthStyle.max);
+      layout(paragraph);
+      selectionParagraph(paragraph, const TextPosition(offset: 0), const TextPosition(offset: 7));
+
+      final paintingContext = MockPaintingContext();
+      paintingContext.canvas.clear();
+      paragraph.paint(paintingContext, Offset.zero);
+      expect(paintingContext.canvas.drawnRect, isNotNull);
+      expect(paintingContext.canvas.drawnRectPaint!.style, PaintingStyle.fill);
+      // Verify the selection rect is painted (non-null indicates the style was used).
+      expect(paintingContext.canvas.drawnRectPaint!.color, isSameColorAs(selectionColor));
+      expect(paintingContext.canvas.drawnItemTypes, contains(Rect));
+    });
   });
 
   test('can just update the gesture recognizer', () async {
