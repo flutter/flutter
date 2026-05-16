@@ -15,6 +15,7 @@ usage: copy_info_plist.py --source <src_path> --destination <dest_path>
 
 import argparse
 import os
+import platform
 import subprocess
 
 import git_revision
@@ -24,10 +25,11 @@ _src_root_dir = os.path.join(_script_dir, '..', '..')
 
 
 def get_clang_version():
+  arch = 'arm64' if platform.machine() in ('arm64', 'aarch64') else 'x64'
   clang_executable = str(
-      os.path.join(_src_root_dir, 'flutter', 'buildtools', 'mac-x64', 'clang', 'bin', 'clang++')
+      os.path.join(_src_root_dir, 'flutter', 'buildtools', f'mac-{arch}', 'clang', 'bin', 'clang++')
   )
-  version = subprocess.check_output([clang_executable, '--version'])
+  version = subprocess.check_output([clang_executable, '--version'], text=True)
   return version.splitlines()[0]
 
 
