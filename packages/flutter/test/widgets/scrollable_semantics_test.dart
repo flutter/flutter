@@ -847,9 +847,11 @@ class _PinnedHeaderDelegate extends SliverPersistentHeaderDelegate {
   /// Creates a pinned header delegate with fixed collapsed and expanded extents.
   const _PinnedHeaderDelegate({required this.minExtent, required this.maxExtent});
 
+  /// The header's height when fully collapsed.
   @override
   final double minExtent;
 
+  /// The header's height when fully expanded.
   @override
   final double maxExtent;
 
