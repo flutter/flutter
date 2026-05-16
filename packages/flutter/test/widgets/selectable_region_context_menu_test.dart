@@ -110,7 +110,7 @@ void main() {
       TestWidgetsApp(
         home: SelectableRegion(
           focusNode: focusNode,
-          selectionControls: EmptyTextSelectionControls(),
+          selectionControls: emptyTextSelectionControls,
           child: SelectionSpy(key: spy),
         ),
       ),
@@ -150,7 +150,7 @@ void main() {
     await tester.pumpWidget(
       TestWidgetsApp(
         home: SelectableRegion(
-          selectionControls: EmptyTextSelectionControls(),
+          selectionControls: emptyTextSelectionControls,
           child: const SizedBox.shrink(),
         ),
       ),
