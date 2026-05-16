@@ -1050,6 +1050,22 @@ void main() {
         ),
       );
     });
+
+    testWidgets('ConstraintsTransformBox does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: ConstraintsTransformBox(
+              constraintsTransform: ConstraintsTransformBox.widthUnconstrained,
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(ConstraintsTransformBox)), Size.zero);
+    });
   });
 
   group('ColoredBox', () {
