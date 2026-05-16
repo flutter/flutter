@@ -181,6 +181,9 @@ void testWidgets(
           semanticsHandle = tester.ensureSemantics();
         }
         test_package.addTearDown(binding.postTest);
+        // This internal hook must run after user addTearDown callbacks and before postTest.
+        // ignore: invalid_use_of_protected_member
+        test_package.addTearDown(binding.verifyInvariantsAfterTestTearDown);
         return binding.runTest(
           () async {
             debugResetSemanticsIdCounter();
