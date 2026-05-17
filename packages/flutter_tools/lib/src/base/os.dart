@@ -546,12 +546,17 @@ class _WindowsUtils extends OperatingSystemUtils {
       // Validate that the destFile is within the targetDirectory we want to
       // extract to.
       //
+      // The previous string `startsWith` check was vulnerable to path prefix
+      // confusion: a path like `<target>-sibling/x.txt` starts with the
+      // canonical target path, but escapes it. Use [path.isWithin] which
+      // compares full path components.
+      //
       // See https://snyk.io/research/zip-slip-vulnerability for more context.
       final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(destFile.path);
       final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(
         targetDirectory.path,
       );
-      if (!destinationFileCanonicalPath.startsWith(targetDirectoryCanonicalPath)) {
+      if (!_fileSystem.path.isWithin(targetDirectoryCanonicalPath, destinationFileCanonicalPath)) {
         throw StateError(
           'Tried to extract the file $destinationFileCanonicalPath outside of the '
           'target directory $targetDirectoryCanonicalPath',
