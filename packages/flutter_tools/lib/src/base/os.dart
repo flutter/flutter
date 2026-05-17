@@ -531,6 +531,9 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   void _unpackArchive(Archive archive, Directory targetDirectory) {
+    // The target directory does not change across entries, so compute its
+    // canonical form once instead of per file.
+    final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(targetDirectory.path);
     for (final ArchiveFile archiveFile in archive.files) {
       // The archive package doesn't correctly set isFile.
       if (!archiveFile.isFile || archiveFile.name.endsWith('/')) {
@@ -553,9 +556,6 @@ class _WindowsUtils extends OperatingSystemUtils {
       //
       // See https://snyk.io/research/zip-slip-vulnerability for more context.
       final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(destFile.path);
-      final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(
-        targetDirectory.path,
-      );
       if (!_fileSystem.path.isWithin(targetDirectoryCanonicalPath, destinationFileCanonicalPath)) {
         throw StateError(
           'Tried to extract the file $destinationFileCanonicalPath outside of the '
