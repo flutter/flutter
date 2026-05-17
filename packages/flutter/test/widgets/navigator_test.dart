@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:ui' show FlutterView;
 
 import 'package:flutter/foundation.dart';
@@ -135,6 +136,42 @@ class SlideInOutPageRoute<T> extends PageRouteBuilder<T> {
 }
 
 void main() {
+  // Regression test for https://github.com/flutter/flutter/issues/158182.
+  // When pop() removes the last remaining route — for example because a
+  // pushReplacement() callback has already replaced the underlying route and
+  // a subsequent pop runs against the new (now top-most) one — the Navigator
+  // rebuilds with an empty `_history`. The previous bare assertion just said
+  // `_history.isNotEmpty is not true`; this test pins the upgraded error
+  // message that explains the cause and how to avoid it.
+  testWidgets('Navigator rebuild with empty history surfaces an actionable error', (
+    WidgetTester tester,
+  ) async {
+    final navKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(navigatorKey: navKey, home: const Text('A')));
+    expect(find.text('A'), findsOneWidget);
+
+    // Replace the initial route with a new one. After this, `_history`
+    // contains only the replacement route.
+    unawaited(
+      navKey.currentState!.pushReplacement(
+        MaterialPageRoute<void>(builder: (_) => const Text('B')),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('B'), findsOneWidget);
+
+    // Pop the replacement route. The Navigator now has nothing left to show,
+    // mirroring the user-reported `pushReplacement() -> pop()` pattern from
+    // issue #158182.
+    navKey.currentState!.pop();
+    await tester.pumpAndSettle();
+
+    final error = tester.takeException() as FlutterError;
+    expect(error.toString(), contains('no remaining routes to display'));
+    expect(error.toString(), contains('pushReplacement'));
+    expect(error.toString(), contains('158182'));
+  });
+
   testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const FirstWidget(), // X

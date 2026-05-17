@@ -5923,7 +5923,29 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   @override
   Widget build(BuildContext context) {
     assert(!_debugLocked);
-    assert(_history.isNotEmpty);
+    assert(() {
+      if (_history.isEmpty) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('The Navigator has no remaining routes to display.'),
+          ErrorDescription(
+            'A Navigator must always have at least one route in its history '
+            'while it is mounted, but this Navigator rebuilt with an empty '
+            'history.',
+          ),
+          ErrorHint(
+            'This typically happens when more routes are popped from the '
+            'Navigator than were pushed. A common cause is calling '
+            'Navigator.pop() from a callback that runs after '
+            'Navigator.pushReplacement() (or another *Replacement API) has '
+            'already removed the underlying route — the follow-up pop then '
+            'removes the new route as well, leaving the Navigator empty. '
+            'Avoid popping the result of a replacement call. See '
+            'https://github.com/flutter/flutter/issues/158182.',
+          ),
+        ]);
+      }
+      return true;
+    }());
 
     // Hides the HeroControllerScope for the widget subtree so that the other
     // nested navigator underneath will not pick up the hero controller above
