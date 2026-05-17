@@ -195,7 +195,8 @@ bool BufferBindingsGLES::ReadUniformsBindingsV2(const ProcTableGLES& gl,
 
 bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
                                               size_t binding,
-                                              size_t vertex_offset) {
+                                              size_t vertex_offset,
+                                              size_t instance) {
   if (binding >= vertex_attrib_arrays_.size()) {
     return false;
   }
@@ -208,13 +209,21 @@ bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
 
   for (const auto& array : vertex_attrib_arrays_[binding]) {
     gl.EnableVertexAttribArray(array.index);
+    // For an emulated instanced draw, an instance-rate attribute is
+    // re-pointed at instance `instance`, since there is no hardware divisor
+    // to advance it. A non-instanced or hardware-instanced draw passes
+    // instance 0 and lets the divisor (if any) do the stepping.
+    size_t attribute_offset = vertex_offset + array.offset;
+    if (array.divisor != 0u) {
+      attribute_offset += instance * static_cast<size_t>(array.stride);
+    }
     gl.VertexAttribPointer(array.index,       // index
                            array.size,        // size (must be 1, 2, 3, or 4)
                            array.type,        // type
                            array.normalized,  // normalized
                            array.stride,      // stride
-                           reinterpret_cast<const GLvoid*>(static_cast<GLsizei>(
-                               vertex_offset + array.offset))  // pointer
+                           reinterpret_cast<const GLvoid*>(
+                               static_cast<GLsizei>(attribute_offset))  // ptr
     );
     // Set the instancing divisor when the driver supports it. It is core
     // on ES 3.0+ and comes from GL_EXT_instanced_arrays on ES 2.0. When

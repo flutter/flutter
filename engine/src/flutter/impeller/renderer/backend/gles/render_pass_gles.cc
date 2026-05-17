@@ -148,7 +148,8 @@ struct RenderPassData {
 static bool BindVertexBuffer(const ProcTableGLES& gl,
                              BufferBindingsGLES* vertex_desc_gles,
                              const BufferView& vertex_buffer_view,
-                             size_t buffer_index) {
+                             size_t buffer_index,
+                             size_t instance = 0) {
   if (!vertex_buffer_view) {
     return false;
   }
@@ -169,7 +170,7 @@ static bool BindVertexBuffer(const ProcTableGLES& gl,
   /// Bind the vertex attributes associated with vertex buffer.
   ///
   if (!vertex_desc_gles->BindVertexAttributes(
-          gl, buffer_index, vertex_buffer_view.GetRange().offset)) {
+          gl, buffer_index, vertex_buffer_view.GetRange().offset, instance)) {
     return false;
   }
 
@@ -520,10 +521,23 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Finally! Invoke the draw call.
     ///
-    if (command.index_type == IndexType::kNone) {
-      gl.DrawArrays(mode, command.base_vertex, command.element_count);
-    } else {
-      // Bind the index buffer if necessary.
+    /// An instanced draw uses the hardware instanced entry points when the
+    /// driver exposes them (ES 3.0 core, or GL_EXT_instanced_arrays on ES
+    /// 2.0). When it does not, the draw is emulated by repeating it once per
+    /// instance, re-pointing the instance-rate vertex attributes at each
+    /// instance in between.
+    ///
+    const bool instanced = command.instance_count > 1u;
+    const bool hardware_instanced = instanced &&  //
+                                    gl.DrawArraysInstancedEXT.IsAvailable() &&
+                                    gl.DrawElementsInstancedEXT.IsAvailable() &&
+                                    gl.VertexAttribDivisorEXT.IsAvailable();
+    const bool emulate_instanced = instanced && !hardware_instanced;
+    const GLsizei instance_count = static_cast<GLsizei>(command.instance_count);
+
+    // Bind the index buffer once, before any (possibly repeated) draw.
+    const GLvoid* index_offset = nullptr;
+    if (command.index_type != IndexType::kNone) {
       auto index_buffer_view = command.index_buffer;
       const DeviceBuffer* index_buffer = index_buffer_view.GetBuffer();
       const auto& index_buffer_gles = DeviceBufferGLES::Cast(*index_buffer);
@@ -531,12 +545,42 @@ static void EncodeViewport(const ProcTableGLES& gl,
               DeviceBufferGLES::BindingType::kElementArrayBuffer)) {
         return false;
       }
-      gl.DrawElements(mode,                             // mode
-                      command.element_count,            // count
-                      ToIndexType(command.index_type),  // type
-                      reinterpret_cast<const GLvoid*>(static_cast<GLsizei>(
-                          index_buffer_view.GetRange().offset))  // indices
-      );
+      index_offset = reinterpret_cast<const GLvoid*>(
+          static_cast<GLsizei>(index_buffer_view.GetRange().offset));
+    }
+
+    const size_t draw_count = emulate_instanced ? command.instance_count : 1u;
+    for (size_t instance = 0; instance < draw_count; instance++) {
+      // The vertex buffers were already bound above for instance 0. When
+      // emulating, re-point the instance-rate attributes at each subsequent
+      // instance.
+      if (emulate_instanced && instance > 0u) {
+        for (size_t i = 0; i < command.vertex_buffers.length; i++) {
+          if (!BindVertexBuffer(
+                  gl, vertex_desc_gles,
+                  vertex_buffers[i + command.vertex_buffers.offset], i,
+                  instance)) {
+            return false;
+          }
+        }
+      }
+      if (command.index_type == IndexType::kNone) {
+        if (hardware_instanced) {
+          gl.DrawArraysInstancedEXT(mode, command.base_vertex,
+                                    command.element_count, instance_count);
+        } else {
+          gl.DrawArrays(mode, command.base_vertex, command.element_count);
+        }
+      } else {
+        if (hardware_instanced) {
+          gl.DrawElementsInstancedEXT(mode, command.element_count,
+                                      ToIndexType(command.index_type),
+                                      index_offset, instance_count);
+        } else {
+          gl.DrawElements(mode, command.element_count,
+                          ToIndexType(command.index_type), index_offset);
+        }
+      }
     }
 
     //--------------------------------------------------------------------------
