@@ -4853,14 +4853,14 @@
               "load_store"
             ],
             "total_cycles": [
-              3.6666669845581055,
+              3.6666667461395264,
               4.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
           "uniform_registers_used": 9,
-          "work_registers_used": 2
+          "work_registers_used": 3
         }
       }
     }
@@ -5874,7 +5874,7 @@
           },
           "thread_occupancy": 100,
           "uniform_registers_used": 6,
-          "work_registers_used": 2
+          "work_registers_used": 3
         }
       }
     }
