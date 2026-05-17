@@ -262,13 +262,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(_rootTransform != null);
   }
 
-  /// Whether [prepareInitialFrame] has been called on this render view.
-  ///
-  /// This is true after the first call to [prepareInitialFrame], which sets up
-  /// the initial layout and paint for the view. Before this is true, the view
-  /// cannot be composited.
-  bool get hasPreparedInitialFrame => _rootTransform != null;
-
   Matrix4? _rootTransform;
 
   /// Whether this view must be composited on the next frame regardless of
@@ -286,12 +279,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     _requiresCompositing = true;
   }
 
-  /// Clears the [requiresCompositing] flag.
-  ///
-  /// Called by the binding once this view has been composited in a
-  /// non-warm-up frame.
-  void clearRequiresCompositing() {
-    _requiresCompositing = false;
+  /// Whether the given [RenderView] needs to be composited during this frame.
+  /// A [RenderView] needs to be composited of it was marked as requiring compositing,
+  /// or if the owner has any dirty render objects.
+  bool shouldBeComposited() {
+    if (requiresCompositing) {
+      return true;
+    }
+    return owner?.needsPaint ?? false;
   }
 
   TransformLayer _updateMatricesAndCreateNewRootLayer() {
@@ -402,6 +397,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       if (!kReleaseMode) {
         FlutterTimeline.finishSync();
       }
+      _requiresCompositing = false;
     }
   }
 
