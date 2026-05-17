@@ -433,15 +433,17 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
   }
 
   void _announceExpansionChange() {
+    final bool supportsAnnounce = MediaQuery.maybeSupportsAnnounceOf(context) ?? false;
+    if (!supportsAnnounce) {
+      return;
+    }
+
     final WidgetsLocalizations localizations = WidgetsLocalizations.of(context);
     final TextDirection textDirection = localizations.textDirection;
     final String stateHint = widget.controller.isExpanded
         ? localizations.collapsedHint
         : localizations.expandedHint;
 
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return;
-    }
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       // Match ExpansionTile's delayed VoiceOver announcement behavior.
       _timer?.cancel();
@@ -533,7 +535,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
       ),
     );
 
-    if (defaultTargetPlatform == TargetPlatform.android) {
+    if (MediaQuery.maybeSupportsAnnounceOf(context) ?? false) {
       return Semantics(
         label: semanticsHint,
         liveRegion: true,
