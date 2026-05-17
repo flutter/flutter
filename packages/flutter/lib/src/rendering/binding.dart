@@ -757,6 +757,9 @@ mixin RendererBinding
           renderView.compositeFrame(); // this sends the bits to the GPU
         }
         if (isWarmUpFrame) {
+          // Warm-up frame does not guarantee that the content is actually
+          // painted (see [SchedulerBinding.scheduleWarmUpFrame]). This is to
+          // ensure that on the subsequent real frame the view is recomposited.
           renderView.markRequiresCompositing();
         }
       }
