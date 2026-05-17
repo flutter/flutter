@@ -18,6 +18,8 @@
 #include "impeller/fixtures/impeller.vert.h"
 #include "impeller/fixtures/inactive_uniforms.frag.h"
 #include "impeller/fixtures/inactive_uniforms.vert.h"
+#include "impeller/fixtures/instanced_attributes.frag.h"
+#include "impeller/fixtures/instanced_attributes.vert.h"
 #include "impeller/fixtures/instanced_draw.frag.h"
 #include "impeller/fixtures/instanced_draw.vert.h"
 #include "impeller/fixtures/mipmaps.frag.h"
@@ -420,7 +422,13 @@ TEST_P(RendererTest, CanRenderToTexture) {
 
 TEST_P(RendererTest, CanRenderInstanced) {
   if (GetParam() == PlaygroundBackend::kOpenGLES) {
-    GTEST_SKIP() << "Instancing is not supported on OpenGL.";
+    // This test drives instancing through gl_InstanceIndex and a storage
+    // buffer, both of which require OpenGL ES 3.1. The portable instance-rate
+    // vertex attribute path, which works down to OpenGL ES 2.0, is covered by
+    // CanRenderInstancedWithVertexAttributes.
+    GTEST_SKIP() << "This test's instance-ID mechanism requires OpenGL ES 3.1; "
+                    "CanRenderInstancedWithVertexAttributes covers the "
+                    "portable instance-rate path.";
   }
   using VS = InstancedDrawVertexShader;
   using FS = InstancedDrawFragmentShader;
@@ -476,6 +484,107 @@ TEST_P(RendererTest, CanRenderInstanced) {
     data_host_buffer->Reset();
     return true;
   }));
+}
+
+// Renders an instanced draw whose per-instance data arrives through an
+// instance-rate vertex buffer binding rather than an instance-ID builtin.
+// This exercises the instance-rate vertex input path on every backend,
+// including OpenGL ES, where it is the only portable instancing mechanism.
+TEST_P(RendererTest, CanRenderInstancedWithVertexAttributes) {
+  using VS = InstancedAttributesVertexShader;
+  using FS = InstancedAttributesFragmentShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+  desc->SetSampleCount(SampleCount::kCount4);
+  desc->SetStencilAttachmentDescriptors(std::nullopt);
+
+  // Per-instance data is laid out contiguously, one record per instance.
+  struct InstanceData {
+    Vector2 offset;
+    Vector4 color;
+  };
+
+  // Two vertex bindings: binding 0 carries per-vertex geometry and advances
+  // once per vertex; binding 1 carries per-instance data and advances once
+  // per instance.
+  auto vertex_desc = std::make_shared<VertexDescriptor>();
+  ShaderStageIOSlot position_slot = VS::kInputVertexPosition;
+  ShaderStageIOSlot offset_slot = VS::kInputInstanceOffset;
+  ShaderStageIOSlot color_slot = VS::kInputInstanceColor;
+  position_slot.binding = 0;
+  position_slot.offset = 0;
+  offset_slot.binding = 1;
+  offset_slot.offset = offsetof(InstanceData, offset);
+  color_slot.binding = 1;
+  color_slot.offset = offsetof(InstanceData, color);
+  const std::vector<ShaderStageIOSlot> io_slots = {position_slot, offset_slot,
+                                                   color_slot};
+  const std::vector<ShaderStageBufferLayout> layouts = {
+      ShaderStageBufferLayout{.stride = sizeof(Vector2),
+                              .binding = 0,
+                              .input_rate = VertexInputRate::kVertex},
+      ShaderStageBufferLayout{.stride = sizeof(InstanceData),
+                              .binding = 1,
+                              .input_rate = VertexInputRate::kInstance},
+  };
+  vertex_desc->RegisterDescriptorSetLayouts(VS::kDescriptorSetLayouts);
+  vertex_desc->RegisterDescriptorSetLayouts(FS::kDescriptorSetLayouts);
+  vertex_desc->SetStageInputs(io_slots, layouts);
+  desc->SetVertexDescriptor(std::move(vertex_desc));
+  auto pipeline =
+      context->GetPipelineLibrary()->GetPipeline(std::move(desc)).Get();
+  ASSERT_TRUE(pipeline);
+
+  // A single triangle, drawn once per instance.
+  std::array<Vector2, 3> geometry = {
+      Vector2{0, 0},
+      Vector2{0, 100},
+      Vector2{100, 0},
+  };
+
+  static constexpr size_t kInstanceCount = 4u;
+  std::array<InstanceData, kInstanceCount> instances = {
+      InstanceData{Vector2{0, 0}, Vector4{1, 0, 0, 1}},
+      InstanceData{Vector2{120, 0}, Vector4{0, 1, 0, 1}},
+      InstanceData{Vector2{0, 120}, Vector4{0, 0, 1, 1}},
+      InstanceData{Vector2{120, 120}, Vector4{1, 1, 0, 1}},
+  };
+
+  auto geometry_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
+      reinterpret_cast<uint8_t*>(geometry.data()),
+      geometry.size() * sizeof(Vector2));
+  auto instance_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
+      reinterpret_cast<uint8_t*>(instances.data()),
+      instances.size() * sizeof(InstanceData));
+  ASSERT_TRUE(geometry_buffer && instance_buffer);
+
+  auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
+  SinglePassCallback callback = [&](RenderPass& pass) -> bool {
+    pass.SetCommandLabel("InstancedAttributes");
+    pass.SetPipeline(pipeline);
+
+    std::array<BufferView, 2> vertex_buffers = {
+        BufferView(geometry_buffer,
+                   Range(0, geometry.size() * sizeof(Vector2))),
+        BufferView(instance_buffer,
+                   Range(0, instances.size() * sizeof(InstanceData))),
+    };
+    pass.SetVertexBuffer(vertex_buffers.data(), vertex_buffers.size());
+    pass.SetElementCount(geometry.size());
+    pass.SetInstanceCount(kInstanceCount);
+
+    VS::FrameInfo frame_info;
+    frame_info.mvp =
+        pass.GetOrthographicTransform() * Matrix::MakeScale(GetContentScale());
+    VS::BindFrameInfo(pass, data_host_buffer->EmplaceUniform(frame_info));
+
+    bool result = pass.Draw().ok();
+    data_host_buffer->Reset();
+    return result;
+  };
+  OpenPlaygroundHere(callback);
 }
 
 TEST_P(RendererTest, CanBlitTextureToTexture) {
