@@ -749,15 +749,13 @@ mixin RendererBinding
   void drawFrame() {
     rootPipelineOwner.flushLayout();
     rootPipelineOwner.flushCompositingBits();
-
-    final List<RenderView> viewsToComposite = renderViews
-        .where((v) => v.shouldBeComposited())
-        .toList(growable: false);
-
     rootPipelineOwner.flushPaint();
+
     if (sendFramesToEngine) {
-      for (final renderView in viewsToComposite) {
-        renderView.compositeFrame(); // this sends the bits to the GPU
+      for (final RenderView renderView in renderViews) {
+        if (renderView.requiresCompositing) {
+          renderView.compositeFrame(); // this sends the bits to the GPU
+        }
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;
