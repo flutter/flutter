@@ -131,7 +131,7 @@ class ViewConfiguration {
 ///
 /// After the bootstrapping is complete, the [compositeFrame] method may be used
 /// to obtain the rendered output.
-class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
+class RenderView extends RenderObject with RootRenderObject, RenderObjectWithChildMixin<RenderBox> {
   /// Creates the root of the render tree.
   ///
   /// Typically created by the binding (e.g., [RendererBinding]).
@@ -264,17 +264,19 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   Matrix4? _rootTransform;
 
-  /// Whether this view must be composited on the next frame regardless of
-  /// whether any of its descendant render objects are dirty.
+  /// Whether this view must be composited on the next frame.
   ///
-  /// The binding sets this to true when the view is added, after a hot
-  /// reload, and when the app returns from a backgrounded lifecycle state.
-  /// It is cleared after a successful composite in a non-warm-up frame.
+  /// This flag is cleared once the view gets successfully composited.
   bool get requiresCompositing => _requiresCompositing;
   bool _requiresCompositing = false;
 
-  /// Marks this view as requiring a composite on the next frame even if no
-  /// descendant render objects are dirty.
+  /// Marks this view required to be composited on the next frame.
+  ///
+  /// This happens by the [PipelineOwner] during [PipelineOwner.flushPaint] if
+  /// there are any render objects that need to be painted. It is also set for
+  /// warmup frame or any frame requested by the engine (i.e. during return from
+  /// background).
+  @override
   void markRequiresCompositing() {
     _requiresCompositing = true;
   }
@@ -283,10 +285,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// A [RenderView] needs to be composited of it was marked as requiring compositing,
   /// or if the owner has any dirty render objects.
   bool shouldBeComposited() {
-    if (requiresCompositing) {
-      return true;
-    }
-    return owner?.needsPaint ?? false;
+    return requiresCompositing;
   }
 
   TransformLayer _updateMatricesAndCreateNewRootLayer() {

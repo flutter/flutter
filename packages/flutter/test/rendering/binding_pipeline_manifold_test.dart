@@ -25,7 +25,7 @@ void main() {
       final child = PipelineOwner();
       RendererBinding.instance.rootPipelineOwner.adoptChild(child);
 
-      final RenderObject renderObject = TestRenderObject();
+      final RootRenderObject renderObject = TestRenderObject();
       child.rootNode = renderObject;
       renderObject.scheduleInitialLayout();
       RendererBinding.instance.rootPipelineOwner.flushLayout();
@@ -78,7 +78,7 @@ class MyTestRenderingFlutterBinding extends TestRenderingFlutterBinding {
   }
 }
 
-class TestRenderObject extends RenderObject {
+class TestRenderObject extends RenderObject with RootRenderObject {
   @override
   void debugAssertDoesMeetConstraints() {}
 
@@ -93,4 +93,7 @@ class TestRenderObject extends RenderObject {
 
   @override
   Rect get semanticBounds => Rect.zero;
+
+  @override
+  void markRequiresCompositing() {}
 }
