@@ -127,7 +127,13 @@ List<String> generateMethodParameters(
         'the "type" attribute to "${placeholder.type}".',
       );
     }
-    return '${useNamedParameters ? 'required ' : ''}${placeholder.type} ${placeholder.name}';
+    // When `optional: true` is set on the placeholder, declare the parameter
+    // as nullable and (for named parameters) drop the `required` keyword so
+    // the caller can pass `null` or omit the argument. See
+    // https://github.com/flutter/flutter/issues/177158.
+    final String requiredKeyword = (useNamedParameters && !placeholder.optional) ? 'required ' : '';
+    final String typeSuffix = placeholder.optional ? '?' : '';
+    return '$requiredKeyword${placeholder.type}$typeSuffix ${placeholder.name}';
   }).toList();
 }
 

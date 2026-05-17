@@ -235,7 +235,8 @@ class Placeholder {
       type = _stringAttribute(resourceId, name, attributes, 'type'),
       format = _stringAttribute(resourceId, name, attributes, 'format'),
       optionalParameters = _optionalParameters(resourceId, name, attributes),
-      isCustomDateFormat = _boolAttribute(resourceId, name, attributes, 'isCustomDateFormat');
+      isCustomDateFormat = _boolAttribute(resourceId, name, attributes, 'isCustomDateFormat'),
+      optional = _boolAttribute(resourceId, name, attributes, 'optional') ?? false;
 
   final String resourceId;
   final String name;
@@ -243,6 +244,15 @@ class Placeholder {
   final String? format;
   final List<OptionalParameter> optionalParameters;
   final bool? isCustomDateFormat;
+
+  /// Whether this placeholder is optional. When `true`, the generated method
+  /// signature declares the parameter as nullable and (for named parameters)
+  /// omits the `required` keyword, so callers may pass `null` or omit the
+  /// argument entirely.
+  ///
+  /// Set via the `"optional": true` entry on a placeholder in the ARB
+  /// `@<resource>.placeholders` map.
+  final bool optional;
   // The following will be initialized after all messages are parsed in the Message constructor.
   String? type;
   bool isPlural = false;

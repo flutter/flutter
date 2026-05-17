@@ -1687,6 +1687,47 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(getGeneratedFileContent(locale: 'es'), contains('String helloWorld(Object name) {'));
       });
 
+      // Regression test for https://github.com/flutter/flutter/issues/177158.
+      //
+      // A placeholder marked `"optional": true` in the ARB metadata should
+      // produce a nullable parameter in the generated method signature.
+      testWithoutContext('marks placeholder as nullable when "optional": true', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "greet": "Hi {name}",
+  "@greet": {
+    "placeholders": {
+      "name": { "type": "String", "optional": true }
+    }
+  }
+}''',
+        });
+        expect(getGeneratedFileContent(locale: 'en'), contains('String greet(String? name) {'));
+      });
+
+      // Regression test for https://github.com/flutter/flutter/issues/177158.
+      //
+      // Same as above but with `use-named-parameters`: an optional placeholder
+      // should drop the `required` keyword and be nullable.
+      testWithoutContext(
+        'marks placeholder as nullable and drops `required` when "optional": true with named parameters',
+        () {
+          setupLocalizations(<String, String>{
+            'en': '''
+{
+  "greet": "Hi {name}",
+  "@greet": {
+    "placeholders": {
+      "name": { "type": "String", "optional": true }
+    }
+  }
+}''',
+          }, useNamedParameters: true);
+          expect(getGeneratedFileContent(locale: 'en'), contains('String greet({String? name}) {'));
+        },
+      );
+
       testWithoutContext(
         'braces are ignored as special characters if placeholder does not exist',
         () {
