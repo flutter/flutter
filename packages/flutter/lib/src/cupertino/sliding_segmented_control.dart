@@ -340,6 +340,13 @@ class _SegmentSeparatorState extends State<_SegmentSeparator>
 /// [thumbColor], [backgroundColor] arguments can be used to override the
 /// segmented control's colors from its defaults.
 ///
+/// The default [backgroundColor], [CupertinoColors.tertiarySystemFill], is
+/// intentionally translucent (alpha 0.12 in light mode) to match the native
+/// `UISegmentedControl`. As a result, content placed behind the segmented
+/// control — for example a [Stack] child beneath it — will show through the
+/// unselected segments. To get an opaque background, pass an opaque [Color]
+/// to [backgroundColor].
+///
 /// {@tool dartpad}
 /// This example shows a [CupertinoSlidingSegmentedControl] with an enum type.
 ///
@@ -461,8 +468,13 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
 
   /// The color used to paint the rounded rect behind the [children] and the separators.
   ///
-  /// The default value is [CupertinoColors.tertiarySystemFill]. The background
-  /// will not be painted if null is specified.
+  /// The default value is [CupertinoColors.tertiarySystemFill], which is
+  /// translucent (alpha 0.12 in light mode) to match the native
+  /// `UISegmentedControl`. Content placed behind the segmented control is
+  /// therefore visible through the unselected segments unless an opaque
+  /// [Color] is supplied here.
+  ///
+  /// The background will not be painted if null is specified.
   final Color backgroundColor;
 
   /// Determine whether segments have proportional widths based on their content.
