@@ -756,6 +756,9 @@ mixin RendererBinding
         if (renderView.requiresCompositing) {
           renderView.compositeFrame(); // this sends the bits to the GPU
         }
+        if (isWarmUpFrame) {
+          renderView.markRequiresCompositing();
+        }
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
       _firstFrameSent = true;
