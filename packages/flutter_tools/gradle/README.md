@@ -33,10 +33,7 @@ overridden by setting the `JAVA_HOME` environment variable.
 This example sets the java version to 17 downloaded with brew and then runs the tests:
 `JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home/ ./gradlew test`
 
-If your environment cannot resolve Flutter Gradle Plugin dependencies from the public Google Maven
-or Maven Central repositories, set `FLUTTER_ANDROID_GRADLE_PLUGIN_REPOSITORY` to the URL of a Maven
-repository that mirrors those dependencies. When set, this repository is checked before the public
-repositories for plugin and dependency resolution.
+If your environment is restricted and cannot resolve public dependencies, set `FLUTTER_GRADLE_PLUGIN_REPOSITORY_URL` to your custom Maven repository URL that mirrors the required Flutter Gradle Plugin dependencies.
 
 You can run all the tests in one file by passing in the fully qualified class name,
 e.g. `./gradlew test --tests com.flutter.gradle.BaseApplicationNameHandlerTest`, or one test in

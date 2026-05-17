@@ -1,7 +1,7 @@
 pluginManagement {
     repositories {
         val flutterAndroidGradlePluginRepository: String? =
-            System.getenv("FLUTTER_ANDROID_GRADLE_PLUGIN_REPOSITORY")
+            System.getenv("FLUTTER_GRADLE_PLUGIN_REPOSITORY_URL")
                 ?.trim()
                 ?.takeIf { it.isNotEmpty() }
         if (flutterAndroidGradlePluginRepository != null) {
@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         val flutterAndroidGradlePluginRepository: String? =
-            System.getenv("FLUTTER_ANDROID_GRADLE_PLUGIN_REPOSITORY")
+            System.getenv("FLUTTER_GRADLE_PLUGIN_REPOSITORY_URL")
                 ?.trim()
                 ?.takeIf { it.isNotEmpty() }
         if (flutterAndroidGradlePluginRepository != null) {
