@@ -117,4 +117,72 @@ void main() {
 
     expect(events.single, same(transformedEvent));
   });
+
+  group('multiple registrations with keys', () {
+    test('different keys: both callbacks are called', () {
+      final resolver = PointerSignalResolver();
+      final event = PointerScrollEvent();
+      final calledKeys = <Object?>[];
+
+      resolver.register(event, (_) { calledKeys.add('a'); }, key: 'a');
+      resolver.register(event, (_) { calledKeys.add('b'); }, key: 'b');
+
+      resolver.resolve(event);
+
+      expect(calledKeys, unorderedEquals(<Object?>['a', 'b']));
+    });
+
+    test('same key: only first callback is called', () {
+      final resolver = PointerSignalResolver();
+      final event = PointerScrollEvent();
+      final calledKeys = <Object?>[];
+
+      resolver.register(event, (_) { calledKeys.add('a'); }, key: 'x');
+      resolver.register(event, (_) { calledKeys.add('b'); }, key: 'x');
+
+      resolver.resolve(event);
+
+      expect(calledKeys, equals(<Object?>['a']));
+    });
+
+    test('key and keyless: both are called', () {
+      final resolver = PointerSignalResolver();
+      final event = PointerScrollEvent();
+      final calledKeys = <Object?>[];
+
+      resolver.register(event, (_) { calledKeys.add('keyed'); }, key: 'axis');
+      resolver.register(event, (_) { calledKeys.add('keyless'); });
+
+      resolver.resolve(event);
+
+      expect(calledKeys, unorderedEquals(<Object?>['keyed', 'keyless']));
+    });
+
+    test('respond(false) called when registrations exist', () {
+      final resolver = PointerSignalResolver();
+      bool? respondValue;
+      final event = PointerScrollEvent(
+        onRespond: ({required bool allowPlatformDefault}) {
+          respondValue = allowPlatformDefault;
+        },
+      );
+      resolver.register(event, (_) {}, key: 'axis');
+      resolver.resolve(event);
+
+      expect(respondValue, isFalse);
+    });
+
+    test('multiple keyless: only first wins', () {
+      final resolver = PointerSignalResolver();
+      final event = PointerScrollEvent();
+      final callOrder = <int>[];
+
+      resolver.register(event, (_) { callOrder.add(1); });
+      resolver.register(event, (_) { callOrder.add(2); });
+
+      resolver.resolve(event);
+
+      expect(callOrder, equals(<int>[1]));
+    });
+  });
 }

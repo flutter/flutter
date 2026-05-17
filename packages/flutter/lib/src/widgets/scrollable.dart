@@ -960,7 +960,11 @@ class ScrollableState extends State<Scrollable>
       final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
       // Only express interest in the event if it would actually result in a scroll.
       if (delta != 0.0 && targetScrollOffset != position.pixels) {
-        GestureBinding.instance.pointerSignalResolver.register(event, _handlePointerScroll);
+        GestureBinding.instance.pointerSignalResolver.register(
+          event,
+          _handlePointerScroll,
+          key: widget.axis,
+        );
         return;
       }
     } else if (event is PointerScrollInertiaCancelEvent) {
@@ -976,9 +980,6 @@ class ScrollableState extends State<Scrollable>
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
     if (delta != 0.0 && targetScrollOffset != position.pixels) {
       position.pointerScroll(delta);
-      // Tell engine this scrollable handled the event.
-      // This prevents parent page from scrolling when nested scrollables exist.
-      scrollEvent.respond(allowPlatformDefault: false);
     }
   }
 

@@ -1791,6 +1791,266 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'Diagonal scroll in nested scrollables: both axes scroll when both can move',
+    (WidgetTester tester) async {
+      final verticalController = ScrollController();
+      final horizontalController = ScrollController();
+
+      addTearDown(verticalController.dispose);
+      addTearDown(horizontalController.dispose);
+
+      final onRespondCalls = <bool>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView(
+            controller: verticalController,
+            children: <Widget>[
+              SizedBox(
+                height: 200,
+                child: ListView(
+                  controller: horizontalController,
+                  scrollDirection: Axis.horizontal,
+                  children: <Widget>[
+                    Container(width: 2000, height: 200),
+                  ],
+                ),
+              ),
+              Container(height: 2000),
+            ],
+          ),
+        ),
+      );
+
+      expect(verticalController.offset, 0.0);
+      expect(horizontalController.offset, 0.0);
+
+      final Offset location = tester.getCenter(find.byType(ListView).last);
+
+      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      testPointer.hover(location);
+
+      // Diagonal scroll down-right: both axes should move.
+      final event = PointerScrollEvent(
+        position: location,
+        scrollDelta: const Offset(20.0, 20.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          onRespondCalls.add(allowPlatformDefault);
+        },
+      );
+
+      await tester.sendEventToBinding(event);
+
+      expect(horizontalController.offset, 20.0);
+      expect(verticalController.offset, 20.0);
+
+      expect(
+        onRespondCalls,
+        equals([false]),
+        reason:
+            'respond(false) should be called once by the resolver after both axes handled the event',
+      );
+    },
+  );
+
+  testWidgets(
+    'Diagonal scroll: vertical component reaches parent when horizontal inner scrolls',
+    (WidgetTester tester) async {
+      final verticalController = ScrollController();
+      final horizontalController = ScrollController();
+
+      addTearDown(verticalController.dispose);
+      addTearDown(horizontalController.dispose);
+
+      final onRespondCalls = <bool>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView(
+            controller: verticalController,
+            children: <Widget>[
+              SizedBox(
+                height: 200,
+                child: ListView(
+                  controller: horizontalController,
+                  scrollDirection: Axis.horizontal,
+                  children: <Widget>[
+                    Container(width: 2000, height: 200),
+                  ],
+                ),
+              ),
+              Container(height: 2000),
+            ],
+          ),
+        ),
+      );
+
+      expect(verticalController.offset, 0.0);
+      expect(horizontalController.offset, 0.0);
+
+      final Offset location = tester.getCenter(find.byType(ListView).last);
+
+      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      testPointer.hover(location);
+
+      // Scroll mostly vertical with small horizontal component.
+      final event = PointerScrollEvent(
+        position: location,
+        scrollDelta: const Offset(3.0, 30.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          onRespondCalls.add(allowPlatformDefault);
+        },
+      );
+
+      await tester.sendEventToBinding(event);
+
+      expect(horizontalController.offset, 3.0);
+      expect(verticalController.offset, 30.0);
+
+      expect(
+        onRespondCalls,
+        equals([false]),
+        reason: 'Both axes handled, respond(false) called once by the resolver',
+      );
+    },
+  );
+
+  testWidgets(
+    'Diagonal scroll: horizontal at edge still lets vertical handle diagonal scroll',
+    (WidgetTester tester) async {
+      final verticalController = ScrollController();
+      final horizontalController = ScrollController(initialScrollOffset: 0);
+
+      addTearDown(verticalController.dispose);
+      addTearDown(horizontalController.dispose);
+
+      final onRespondCalls = <bool>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView(
+            controller: verticalController,
+            children: <Widget>[
+              SizedBox(
+                height: 200,
+                child: SizedBox(
+                  width: 200,
+                  child: ListView(
+                    controller: horizontalController,
+                    scrollDirection: Axis.horizontal,
+                    children: <Widget>[
+                      Container(width: 100, height: 200),
+                    ],
+                  ),
+                ),
+              ),
+              Container(height: 2000),
+            ],
+          ),
+        ),
+      );
+
+      expect(verticalController.offset, 0.0);
+      expect(horizontalController.offset, 0.0);
+
+      final Offset location = tester.getCenter(find.byType(ListView).last);
+
+      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      testPointer.hover(location);
+
+      // Diagonal scroll up-left: horizontal tries to go negative but is at edge (0).
+      final event = PointerScrollEvent(
+        position: location,
+        scrollDelta: const Offset(-20.0, 20.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          onRespondCalls.add(allowPlatformDefault);
+        },
+      );
+
+      await tester.sendEventToBinding(event);
+
+      // Horizontal is at edge (scrolls to min of 0), shouldn't scroll.
+      expect(horizontalController.offset, 0.0);
+      // Vertical should still scroll down.
+      expect(verticalController.offset, 20.0);
+
+      expect(
+        onRespondCalls,
+        equals([false]),
+        reason:
+            'Only the vertical component handled the event, respond(false) called once by the resolver',
+      );
+    },
+  );
+
+  testWidgets(
+    'PointerScrollEvent with single-axis delta still handled by innermost',
+    (WidgetTester tester) async {
+      final verticalController = ScrollController();
+      final horizontalController = ScrollController();
+
+      addTearDown(verticalController.dispose);
+      addTearDown(horizontalController.dispose);
+
+      final onRespondCalls = <bool>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView(
+            controller: verticalController,
+            children: <Widget>[
+              SizedBox(
+                height: 200,
+                child: ListView(
+                  controller: horizontalController,
+                  scrollDirection: Axis.horizontal,
+                  children: <Widget>[
+                    Container(width: 2000, height: 200),
+                  ],
+                ),
+              ),
+              Container(height: 2000),
+            ],
+          ),
+        ),
+      );
+
+      expect(verticalController.offset, 0.0);
+      expect(horizontalController.offset, 0.0);
+
+      final Offset location = tester.getCenter(find.byType(ListView).last);
+
+      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      testPointer.hover(location);
+
+      // Pure horizontal scroll: only horizontal should handle it.
+      final event = PointerScrollEvent(
+        position: location,
+        scrollDelta: const Offset(20.0, 0.0),
+        onRespond: ({required bool allowPlatformDefault}) {
+          onRespondCalls.add(allowPlatformDefault);
+        },
+      );
+
+      await tester.sendEventToBinding(event);
+
+      expect(horizontalController.offset, 20.0);
+      expect(verticalController.offset, 0.0);
+
+      expect(
+        onRespondCalls,
+        equals([false]),
+        reason:
+            'Only the horizontal scrollable handled the event, respond(false) called once by the resolver',
+      );
+    },
+  );
 }
 
 // ignore: must_be_immutable

@@ -2202,7 +2202,11 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         final double delta = _pointerSignalEventDelta(event);
         final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
         if (delta != 0.0 && targetScrollOffset != position.pixels) {
-          GestureBinding.instance.pointerSignalResolver.register(event, _handlePointerScroll);
+          GestureBinding.instance.pointerSignalResolver.register(
+            event,
+            _handlePointerScroll,
+            key: position.axis,
+          );
         }
       } else if (event is PointerScrollInertiaCancelEvent) {
         position.jumpTo(position.pixels);

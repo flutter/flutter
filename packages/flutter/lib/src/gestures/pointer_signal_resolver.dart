@@ -21,6 +21,13 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
   return (event1.original ?? event1) == (event2.original ?? event2);
 }
 
+class _Registration {
+  const _Registration({required this.callback, this.key});
+
+  final PointerSignalResolvedCallback callback;
+  final Object? key;
+}
+
 /// Mediates disputes over which listener should handle pointer signal events
 /// when multiple listeners wish to handle those events.
 ///
@@ -29,9 +36,8 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 /// resolve at the end of event dispatch. Yet if objects interested in handling
 /// these signal events were to handle them directly, it would cause issues
 /// such as multiple [Scrollable] widgets in the widget hierarchy responding
-/// to the same mouse wheel event. Using this class, these events will only
-/// be dispatched to the first registered handler, which will in turn
-/// correspond to the widget that's deepest in the widget hierarchy.
+/// to the same mouse wheel event. Using this class, these events can be
+/// dispatched to multiple handlers, each identified by an optional [key].
 ///
 /// To use this class, objects should register their event handler like so:
 ///
@@ -42,6 +48,13 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 ///   });
 /// }
 /// ```
+///
+/// When multiple callbacks are registered for the same event, only one per
+/// distinct `key` is kept. The deepest widget with a given key receives the
+/// event. This allows nested scrollables on perpendicular axes (e.g. a
+/// horizontal [CarouselView] inside a vertical [ListView]) to each scroll
+/// their respective axis from a single diagonal trackpad gesture, by using
+/// their scroll axis as the registration key.
 ///
 /// {@tool dartpad}
 /// Here is an example that demonstrates the effect of not using the resolver
@@ -60,17 +73,22 @@ bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
 /// ** See code in examples/api/lib/gestures/pointer_signal_resolver/pointer_signal_resolver.0.dart **
 /// {@end-tool}
 class PointerSignalResolver {
-  PointerSignalResolvedCallback? _firstRegisteredCallback;
-
   PointerSignalEvent? _currentEvent;
+  final List<_Registration> _registrations = <_Registration>[];
 
   /// Registers interest in handling [event].
   ///
   /// This method may be called multiple times (typically from different parts
   /// of the widget hierarchy) for the same `event`, with different `callback`s,
   /// as the event is being dispatched across the tree. Once the dispatching is
-  /// complete, the [GestureBinding] calls [resolve], and the first registered
-  /// callback is called.
+  /// complete, the [GestureBinding] calls [resolve], and all registered
+  /// callbacks are called in registration order.
+  ///
+  /// An optional [key] can be provided for deduplication. When a registration
+  /// with the same `key` already exists, the new registration is ignored. This
+  /// allows multiple scrollables on the same axis to be deduplicated (only the
+  /// deepest one handles the event) while scrollables on different axes each
+  /// receive the event.
   ///
   /// The `callback` is invoked with one argument, the `event`.
   ///
@@ -83,55 +101,64 @@ class PointerSignalResolver {
   ///
   /// See the documentation for the [PointerSignalResolver] class for an example
   /// of using this method.
-  void register(PointerSignalEvent event, PointerSignalResolvedCallback callback) {
+  void register(PointerSignalEvent event, PointerSignalResolvedCallback callback, {Object? key}) {
     assert(_currentEvent == null || _isSameEvent(_currentEvent!, event));
-    if (_firstRegisteredCallback != null) {
+    _currentEvent ??= event;
+    // Only keep one registration per key (or one key-less registration).
+    if (_registrations.any((_Registration r) => r.key == key)) {
       return;
     }
-    _currentEvent = event;
-    _firstRegisteredCallback = callback;
+    _registrations.add(_Registration(callback: callback, key: key));
   }
 
-  /// Resolves the event, calling the first registered callback if there was
-  /// one.
+  /// Resolves the event, calling all registered callbacks.
   ///
   /// This is called by the [GestureBinding] after the framework has finished
-  /// dispatching the pointer signal event.
+  /// dispatching the pointer signal event. All callbacks previously registered
+  /// via [register] are called in registration order. If at least one callback
+  /// was registered, [PointerSignalEvent.respond] is called with
+  /// `allowPlatformDefault: false` to prevent the platform from performing
+  /// default actions. Otherwise, `respond(true)` is called to allow the
+  /// platform default.
   @pragma('vm:notify-debugger-on-exception')
   void resolve(PointerSignalEvent event) {
-    if (_firstRegisteredCallback == null) {
+    if (_registrations.isEmpty) {
       assert(_currentEvent == null);
-      // Nothing in the framework/app wants to handle the `event`. Allow the
-      // platform to trigger any default native actions.
+      _currentEvent = null;
       event.respond(allowPlatformDefault: true);
       return;
     }
     assert(_isSameEvent(_currentEvent!, event));
-    try {
-      _firstRegisteredCallback!(_currentEvent!);
-    } catch (exception, stack) {
-      InformationCollector? collector;
-      assert(() {
-        collector = () => <DiagnosticsNode>[
-          DiagnosticsProperty<PointerSignalEvent>(
-            'Event',
-            event,
-            style: DiagnosticsTreeStyle.errorProperty,
-          ),
-        ];
-        return true;
-      }());
-      FlutterError.reportError(
-        FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'gesture library',
-          context: ErrorDescription('while resolving a PointerSignalEvent'),
-          informationCollector: collector,
-        ),
-      );
-    }
-    _firstRegisteredCallback = null;
+    final PointerSignalEvent registeredEvent = _currentEvent!;
+    final List<_Registration> registrations = List<_Registration>.of(_registrations);
+    _registrations.clear();
     _currentEvent = null;
+    for (final _Registration reg in registrations) {
+      try {
+        reg.callback(registeredEvent);
+      } catch (exception, stack) {
+        InformationCollector? collector;
+        assert(() {
+          collector = () => <DiagnosticsNode>[
+            DiagnosticsProperty<PointerSignalEvent>(
+              'Event',
+              event,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ];
+          return true;
+        }());
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'gesture library',
+            context: ErrorDescription('while resolving a PointerSignalEvent'),
+            informationCollector: collector,
+          ),
+        );
+      }
+    }
+    event.respond(allowPlatformDefault: false);
   }
 }
