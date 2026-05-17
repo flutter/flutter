@@ -116,6 +116,17 @@ class CupertinoTabController extends ChangeNotifier {
 /// `Navigator.of(rootNavigator: true)` from inside the [BuildContext] of a
 /// [CupertinoTabView].
 ///
+/// ## Combining with a navigation bar
+///
+/// [CupertinoTabScaffold] does not itself host a navigation bar. To show a
+/// [CupertinoNavigationBar] or [CupertinoSliverNavigationBar] inside a tab,
+/// have that tab's [tabBuilder] return a [CupertinoPageScaffold] (or push
+/// routes whose pages are [CupertinoPageScaffold]s, typically through a
+/// [CupertinoTabView]). Wrapping a tab's content in [CupertinoPageScaffold]
+/// allows features such as the sliver navigation bar's translucent background
+/// to render correctly; placing a [CupertinoSliverNavigationBar] inside a tab
+/// that is not under a [CupertinoPageScaffold] can suppress that effect.
+///
 /// See also:
 ///
 ///  * [CupertinoTabBar], the bottom tab bar inserted in the scaffold.
