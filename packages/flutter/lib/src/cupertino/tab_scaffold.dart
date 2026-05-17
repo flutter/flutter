@@ -124,8 +124,8 @@ class CupertinoTabController extends ChangeNotifier {
 /// routes whose pages are [CupertinoPageScaffold]s, typically through a
 /// [CupertinoTabView]). Wrapping a tab's content in [CupertinoPageScaffold]
 /// allows features such as the sliver navigation bar's translucent background
-/// to render correctly; placing a [CupertinoSliverNavigationBar] inside a tab
-/// that is not under a [CupertinoPageScaffold] can suppress that effect.
+/// to render correctly. Placing a [CupertinoSliverNavigationBar] inside a tab
+/// without a [CupertinoPageScaffold] ancestor can suppress that effect.
 ///
 /// See also:
 ///
