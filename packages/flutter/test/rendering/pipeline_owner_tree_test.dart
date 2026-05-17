@@ -178,6 +178,7 @@ void main() {
 
     root.flushPaint();
     expect(log, <String>['paint parent', 'paint child']);
+    expect(rootRenderObject.requiresCompositing, isTrue);
   });
 
   test("child paint cannot dirty parent's render object", () {
@@ -210,6 +211,7 @@ void main() {
     root.flushLayout(); // Can't paint with invalid layout.
     root.flushPaint();
     expect(childPaintExecuted, isTrue);
+    expect(rootRenderObject.requiresCompositing, isTrue);
   });
 
   test("parent's render objects do semantics before child's render objects", () {
@@ -867,7 +869,7 @@ class TestPipelineManifold extends ChangeNotifier implements PipelineManifold {
   }
 }
 
-class TestRenderObject extends RenderObject {
+class TestRenderObject extends RenderObject with RootRenderObject {
   TestRenderObject({this.onLayout, this.onPaint, this.onSemantics});
 
   final VoidCallback? onLayout;
@@ -903,6 +905,13 @@ class TestRenderObject extends RenderObject {
 
   @override
   Rect get semanticBounds => Rect.zero;
+
+  bool requiresCompositing = false;
+
+  @override
+  void markRequiresCompositing() {
+    requiresCompositing = true;
+  }
 }
 
 List<PipelineOwner> _treeWalk(PipelineOwner root) {
@@ -917,4 +926,7 @@ List<PipelineOwner> _treeWalk(PipelineOwner root) {
   return results;
 }
 
-class FakeRenderView extends RenderBox {}
+class FakeRenderView extends RenderBox with RootRenderObject {
+  @override
+  void markRequiresCompositing() {}
+}
