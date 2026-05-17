@@ -974,6 +974,14 @@ class _LocalSemanticsHandle implements SemanticsHandle {
   }
 }
 
+/// Render object that can be used as a root for a [PipelineOwner].
+mixin RootRenderObject on RenderObject {
+  /// Marks this render object as needing to be composited.
+  /// This happens inside [PipelineOwner.flushPaint] if there are any
+  /// render objects that need to be painted.
+  void markRequiresCompositing();
+}
+
 /// The pipeline owner manages the rendering pipeline.
 ///
 /// The pipeline owner provides an interface for driving the rendering pipeline
@@ -1075,9 +1083,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   }
 
   /// The unique object managed by this pipeline that has no parent.
-  RenderObject? get rootNode => _rootNode;
-  RenderObject? _rootNode;
-  set rootNode(RenderObject? value) {
+  RootRenderObject? get rootNode => _rootNode;
+  RootRenderObject? _rootNode;
+  set rootNode(RootRenderObject? value) {
     if (_rootNode == value) {
       return;
     }
@@ -1320,6 +1328,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         return true;
       }());
       final List<RenderObject> dirtyNodes = _nodesNeedingPaint;
+      if (dirtyNodes.isNotEmpty) {
+        rootNode?.markRequiresCompositing();
+      }
       _nodesNeedingPaint = <RenderObject>[];
 
       // Sort the dirty nodes in reverse order (deepest first).
