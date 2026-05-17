@@ -603,7 +603,9 @@ class TestRenderObjectParentData extends ParentData
     with ContainerParentDataMixin<TestRenderObject> {}
 
 class TestRenderObject extends RenderObject
-    with ContainerRenderObjectMixin<TestRenderObject, TestRenderObjectParentData> {
+    with
+        ContainerRenderObjectMixin<TestRenderObject, TestRenderObjectParentData>,
+        RootRenderObject {
   TestRenderObject({this.allowPaintBounds = false});
 
   final bool allowPaintBounds;
@@ -651,6 +653,9 @@ class TestRenderObject extends RenderObject
     config.isSemanticBoundary = true;
     describeSemanticsConfigurationCallCount++;
   }
+
+  @override
+  void markRequiresCompositing() {}
 }
 
 class TestRenderObjectWithoutSetupParentData extends TestRenderObject {
