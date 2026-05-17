@@ -5939,8 +5939,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
             'Navigator.pushReplacement() (or another *Replacement API) has '
             'already removed the underlying route — the follow-up pop then '
             'removes the new route as well, leaving the Navigator empty. '
-            'Avoid popping the result of a replacement call. See '
-            'https://github.com/flutter/flutter/issues/158182.',
+            'Avoid calling pop() after a replacement call has already '
+            'happened. See https://github.com/flutter/flutter/issues/158182.',
           ),
         ]);
       }
