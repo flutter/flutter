@@ -787,6 +787,15 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   @override
   bool get opaque => false;
+
+  /// {@macro flutter.widgets.PageRoute.fullscreenDialog}
+  ///
+  /// For [CupertinoSheetRoute] this is always `false`. A Cupertino sheet
+  /// always slides up from the bottom of the screen; it is never presented
+  /// as a full-screen dialog, so this inherited property has no configurable
+  /// effect on the sheet's behavior or appearance.
+  @override
+  bool get fullscreenDialog => false;
 }
 
 // Internally used to see if another sheet is in the tree already.
