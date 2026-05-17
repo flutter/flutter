@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1238,5 +1239,151 @@ void main() {
       true,
       reason: 'Button tap was not consumed by a TapRegion on a non-current route',
     );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/167487.
+  //
+  // When semantics are enabled on web, clicks are delivered as
+  // SemanticsAction.tap rather than pointer events.  TapRegionSurface now
+  // listens to semantics actions so that onTapOutside fires even when the tap
+  // came through the semantics channel.
+  testWidgets('TapRegionSurface calls onTapOutside for semantics tap outside region', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final outsideCalls = <String>[];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TapRegionSurface(
+          child: Row(
+            children: <Widget>[
+              // Button outside the TapRegion.
+              const SizedBox(width: 100, height: 50, child: Text('Outside Button')),
+              TapRegion(
+                onTapOutside: (_) => outsideCalls.add('region'),
+                child: const SizedBox(width: 100, height: 50, child: Text('Inside')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    // Find the semantics node for the button outside the TapRegion and
+    // simulate a SemanticsAction.tap arriving via the semantics channel.
+    final SemanticsNode outsideNode = tester.semantics.find(
+      find.bySemanticsLabel('Outside Button'),
+    );
+
+    expect(outsideCalls, isEmpty);
+
+    // Deliver the tap via the platform dispatcher, which goes through
+    // SemanticsBinding._handleSemanticsActionEvent and notifies all
+    // addSemanticsActionListener listeners (including TapRegionSurface).
+    tester.binding.platformDispatcher.onSemanticsActionEvent!(
+      SemanticsActionEvent(
+        type: SemanticsAction.tap,
+        nodeId: outsideNode.id,
+        viewId: tester.view.viewId,
+      ),
+    );
+    await tester.pump();
+
+    expect(outsideCalls, equals(<String>['region']));
+    handle.dispose();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/167487.
+  testWidgets('TapRegionSurface does not call onTapOutside for semantics tap inside region', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final outsideCalls = <String>[];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TapRegionSurface(
+          child: Row(
+            children: <Widget>[
+              const SizedBox(width: 100, height: 50, child: Text('Outside')),
+              TapRegion(
+                onTapOutside: (_) => outsideCalls.add('region'),
+                child: const SizedBox(width: 100, height: 50, child: Text('Inside Button')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    final SemanticsNode insideNode = tester.semantics.find(find.bySemanticsLabel('Inside Button'));
+
+    tester.binding.platformDispatcher.onSemanticsActionEvent!(
+      SemanticsActionEvent(
+        type: SemanticsAction.tap,
+        nodeId: insideNode.id,
+        viewId: tester.view.viewId,
+      ),
+    );
+    await tester.pump();
+
+    // Tap was inside the region; onTapOutside should not fire.
+    expect(outsideCalls, isEmpty);
+    handle.dispose();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/167487.
+  //
+  // SemanticsAction.longPress should also trigger onTapOutside, not just
+  // SemanticsAction.tap.
+  testWidgets('TapRegionSurface calls onTapOutside for semantics longPress outside region', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final outsideCalls = <String>[];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TapRegionSurface(
+          child: Row(
+            children: <Widget>[
+              const SizedBox(width: 100, height: 50, child: Text('Outside LongPress')),
+              TapRegion(
+                onTapOutside: (_) => outsideCalls.add('region'),
+                child: const SizedBox(width: 100, height: 50, child: Text('Inside')),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    final SemanticsNode outsideNode = tester.semantics.find(
+      find.bySemanticsLabel('Outside LongPress'),
+    );
+
+    expect(outsideCalls, isEmpty);
+
+    tester.binding.platformDispatcher.onSemanticsActionEvent!(
+      SemanticsActionEvent(
+        type: SemanticsAction.longPress,
+        nodeId: outsideNode.id,
+        viewId: tester.view.viewId,
+      ),
+    );
+    await tester.pump();
+
+    expect(outsideCalls, equals(<String>['region']));
+    handle.dispose();
   });
 }

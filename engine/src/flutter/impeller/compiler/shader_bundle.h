@@ -5,6 +5,8 @@
 #ifndef FLUTTER_IMPELLER_COMPILER_SHADER_BUNDLE_H_
 #define FLUTTER_IMPELLER_COMPILER_SHADER_BUNDLE_H_
 
+#include <set>
+
 #include "impeller/compiler/source_options.h"
 #include "impeller/compiler/switches.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
@@ -25,9 +27,16 @@ std::optional<ShaderBundleConfig> ParseShaderBundleConfig(
 ///
 /// @note   Exposed only for testing purposes. Use `GenerateShaderBundle`
 ///         directly.
+///
+/// @param  out_dependencies  Optional. When non-null, populated with the
+///                           set of source files (including transitive
+///                           `#include`s) that contributed to the
+///                           generated bundle. Used by `GenerateShaderBundle`
+///                           to emit a depfile when `--depfile` is set.
 std::optional<fb::shaderbundle::ShaderBundleT> GenerateShaderBundleFlatbuffer(
     const std::string& bundle_config_json,
-    const SourceOptions& options);
+    const SourceOptions& options,
+    std::set<std::string>* out_dependencies = nullptr);
 
 /// @brief  Parses the JSON shader bundle configuration and invokes the
 ///         compiler multiple times to produce a shader bundle flatbuffer, which
