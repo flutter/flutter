@@ -931,7 +931,14 @@ class TextStyle with Diagnosticable {
       debugLabel: newDebugLabel,
       fontFamily: fontFamily ?? _fontFamily,
       fontFamilyFallback: fontFamilyFallback ?? _fontFamilyFallback,
-      package: package ?? _package,
+      // The `package` argument prefixes the [fontFamily] (and
+      // [fontFamilyFallback]) with `packages/$package/`. When the caller
+      // supplies a new [fontFamily] without an explicit [package], the
+      // original style's package was prefixing the new family — almost
+      // always wrong, because the new family is unrelated to the original
+      // package. Only inherit `_package` when [fontFamily] is unchanged.
+      // See https://github.com/flutter/flutter/issues/108230.
+      package: package ?? (fontFamily == null ? _package : null),
       overflow: overflow ?? this.overflow,
     );
   }
@@ -1046,7 +1053,10 @@ class TextStyle with Diagnosticable {
           ? null
           : decorationThickness! * decorationThicknessFactor + decorationThicknessDelta,
       overflow: overflow ?? this.overflow,
-      package: package ?? _package,
+      // See the matching comment in [copyWith]. When [apply] receives a new
+      // [fontFamily] but no explicit [package], the original style's package
+      // must not prefix the new family.
+      package: package ?? (fontFamily == null ? _package : null),
       debugLabel: modifiedDebugLabel,
     );
   }

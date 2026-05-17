@@ -374,6 +374,38 @@ void main() {
     expect(lerp2.fontFamilyFallback, <String>['packages/p/fallback2']);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/108230.
+  //
+  // `TextStyle.merge(otherStyle)` (and the `copyWith` / `apply` paths it
+  // builds on) used to keep the original style's `package` even when
+  // [otherStyle] supplied a brand-new `fontFamily` with no package. That
+  // produced fontFamily strings like `packages/wiredash/Roboto`, where
+  // `Roboto` has nothing to do with the `wiredash` package.
+  test('TextStyle merge/copyWith/apply drop stale package when fontFamily changes', () {
+    const TextStyle baseStyle = TextStyle(fontFamily: 'Inter', package: 'wiredash');
+    expect(baseStyle.fontFamily, 'packages/wiredash/Inter');
+
+    // merge with a style that supplies a new fontFamily and no package.
+    final TextStyle merged = baseStyle.merge(const TextStyle(fontFamily: 'Roboto'));
+    expect(merged.fontFamily, 'Roboto');
+
+    // copyWith only changing fontFamily should also drop the stale package.
+    final TextStyle copied = baseStyle.copyWith(fontFamily: 'Roboto');
+    expect(copied.fontFamily, 'Roboto');
+
+    // apply only changing fontFamily should also drop the stale package.
+    final TextStyle applied = baseStyle.apply(fontFamily: 'Roboto');
+    expect(applied.fontFamily, 'Roboto');
+
+    // copyWith that does NOT change fontFamily keeps the original package.
+    final TextStyle untouched = baseStyle.copyWith(fontSize: 12);
+    expect(untouched.fontFamily, 'packages/wiredash/Inter');
+
+    // copyWith that supplies BOTH fontFamily and package uses the new package.
+    final TextStyle bothExplicit = baseStyle.copyWith(fontFamily: 'Roboto', package: 'other_pkg');
+    expect(bothExplicit.fontFamily, 'packages/other_pkg/Roboto');
+  });
+
   test('TextStyle font family fallback', () {
     const s1 = TextStyle(fontFamilyFallback: <String>['Roboto', 'test']);
     expect(s1.fontFamilyFallback![0], 'Roboto');
