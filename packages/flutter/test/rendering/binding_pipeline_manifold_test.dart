@@ -19,19 +19,22 @@ void main() {
     children.forEach(RendererBinding.instance.rootPipelineOwner.dropChild);
   });
 
-  test("BindingPipelineManifold notifies binding if render object managed by binding's PipelineOwner tree needs visual update", () {
-    final child = PipelineOwner();
-    RendererBinding.instance.rootPipelineOwner.adoptChild(child);
+  test(
+    "BindingPipelineManifold notifies binding if render object managed by binding's PipelineOwner tree needs visual update",
+    () {
+      final child = PipelineOwner();
+      RendererBinding.instance.rootPipelineOwner.adoptChild(child);
 
-    final RenderObject renderObject = TestRenderObject();
-    child.rootNode = renderObject;
-    renderObject.scheduleInitialLayout();
-    RendererBinding.instance.rootPipelineOwner.flushLayout();
+      final RootRenderObject renderObject = TestRenderObject();
+      child.rootNode = renderObject;
+      renderObject.scheduleInitialLayout();
+      RendererBinding.instance.rootPipelineOwner.flushLayout();
 
-    MyTestRenderingFlutterBinding.instance.ensureVisualUpdateCount = 0;
-    renderObject.markNeedsLayout();
-    expect(MyTestRenderingFlutterBinding.instance.ensureVisualUpdateCount, 1);
-  });
+      MyTestRenderingFlutterBinding.instance.ensureVisualUpdateCount = 0;
+      renderObject.markNeedsLayout();
+      expect(MyTestRenderingFlutterBinding.instance.ensureVisualUpdateCount, 1);
+    },
+  );
 
   test('Turning global semantics on/off creates semantics owners in PipelineOwner tree', () {
     final child = PipelineOwner(onSemanticsUpdate: (_) {});
@@ -75,7 +78,7 @@ class MyTestRenderingFlutterBinding extends TestRenderingFlutterBinding {
   }
 }
 
-class TestRenderObject extends RenderObject {
+class TestRenderObject extends RenderObject with RootRenderObject {
   @override
   void debugAssertDoesMeetConstraints() {}
 
@@ -90,4 +93,7 @@ class TestRenderObject extends RenderObject {
 
   @override
   Rect get semanticBounds => Rect.zero;
+
+  @override
+  void markRequiresCompositing() {}
 }
