@@ -156,6 +156,56 @@ void main() {
     // The drag stops the animation, and the drag extent is respected.
     expect(controller.position.pixels, (animationExtent / 2) - dragExtent);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/172174.
+  // When the gesture arena cancels a vertical drag while the scroll position
+  // is still animating ballistically (e.g. a PageView swipe takes over from
+  // a SingleChildScrollView that was flick-scrolling), `_handleDragCancel`
+  // previously tripped `assert(_hold == null)` because `_hold.cancel()` did
+  // not run the dispose callback synchronously.
+  testWidgets('Drag cancel during ballistic activity leaves _hold/_drag cleaned up', (
+    WidgetTester tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: controller,
+          dragStartBehavior: DragStartBehavior.down,
+          children: List<Widget>.generate(
+            80,
+            (int i) => Text('$i', textDirection: TextDirection.ltr),
+          ),
+        ),
+      ),
+    );
+
+    // Kick off an animation so a ballistic activity is in flight when the
+    // next pointer arrives.
+    controller.position.animateTo(
+      100.0,
+      duration: const Duration(seconds: 1),
+      curve: Curves.linear,
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    // Pointer-down begins a HoldScrollActivity (`_handleDragDown`).
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(Scrollable)),
+    );
+
+    // Cancel the gesture before it ever becomes a drag (`_handleDragCancel`).
+    await gesture.cancel();
+    await tester.pump();
+
+    // The bug previously tripped `assert(_hold == null)` here. As a stricter
+    // post-condition, a fresh drag should be possible immediately after.
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -50.0));
+    await tester.pumpAndSettle();
+  });
 }
 
 void expectNoAnimation() {

@@ -904,8 +904,26 @@ class ScrollableState extends State<Scrollable>
     assert(_hold == null || _drag == null);
     _hold?.cancel();
     _drag?.cancel();
-    assert(_hold == null);
-    assert(_drag == null);
+    // _hold and _drag are normally nulled out by the dispose callbacks that
+    // [HoldScrollActivity] / [DragScrollActivity] invoke (through
+    // `position.hold(_disposeHold)` / `position.drag(_, _disposeDrag)`).
+    // Those callbacks fire when `beginActivity` disposes the previous
+    // activity. However, when the cancel comes in *while another activity
+    // transition is already in flight* (e.g. another widget takes over the
+    // gesture arena via a horizontal PageView swipe), `beginActivity` may
+    // be skipped and the dispose callbacks never run.
+    //
+    // Defensively null out the references so the next drag-down on this
+    // scrollable does not trip `assert(_hold == null)` in [_handleDragDown]
+    // or `assert(_drag == null)` in [_handleDragStart].
+    //
+    // Regression test for https://github.com/flutter/flutter/issues/172174.
+    if (_hold != null) {
+      _disposeHold();
+    }
+    if (_drag != null) {
+      _disposeDrag();
+    }
   }
 
   void _disposeHold() {
