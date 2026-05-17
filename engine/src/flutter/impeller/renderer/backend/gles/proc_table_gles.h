@@ -286,7 +286,8 @@ void(glDepthRange)(GLdouble n, GLdouble f);
   PROC(BeginQueryEXT);                      \
   PROC(EndQueryEXT);                        \
   PROC(GetQueryObjectuivEXT);               \
-  PROC(BlitFramebufferANGLE);
+  PROC(BlitFramebufferANGLE);               \
+  PROC(VertexAttribDivisorEXT);
 
 enum class DebugResourceType {
   kTexture,

@@ -59,6 +59,8 @@ bool BufferBindingsGLES::RegisterVertexStageInput(
       attrib.normalized = GL_FALSE;
       attrib.offset = input.offset;
       attrib.stride = layout.stride;
+      attrib.divisor =
+          layout.input_rate == VertexInputRate::kInstance ? 1u : 0u;
       vertex_attrib_arrays[layout_i].push_back(attrib);
     }
   }
@@ -214,6 +216,15 @@ bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
                            reinterpret_cast<const GLvoid*>(static_cast<GLsizei>(
                                vertex_offset + array.offset))  // pointer
     );
+    // Set the instancing divisor when the driver supports it. It is core
+    // on ES 3.0+ and comes from GL_EXT_instanced_arrays on ES 2.0. When
+    // unavailable, only per-vertex (divisor 0) bindings are possible,
+    // which is the default. Setting it for every attribute (including
+    // divisor 0) also clears any stale divisor left by a prior pipeline,
+    // which matters on ES, where there is no vertex array object.
+    if (gl.VertexAttribDivisorEXT.IsAvailable()) {
+      gl.VertexAttribDivisorEXT(array.index, array.divisor);
+    }
   }
 
   return true;
