@@ -178,7 +178,6 @@ void main() {
 
     root.flushPaint();
     expect(log, <String>['paint parent', 'paint child']);
-    expect(rootRenderObject.requiresCompositing, isTrue);
   });
 
   test("child paint cannot dirty parent's render object", () {
@@ -211,7 +210,6 @@ void main() {
     root.flushLayout(); // Can't paint with invalid layout.
     root.flushPaint();
     expect(childPaintExecuted, isTrue);
-    expect(rootRenderObject.requiresCompositing, isTrue);
   });
 
   test("parent's render objects do semantics before child's render objects", () {
@@ -905,8 +903,6 @@ class TestRenderObject extends RenderObject {
 
   @override
   Rect get semanticBounds => Rect.zero;
-
-  bool requiresCompositing = false;
 }
 
 List<PipelineOwner> _treeWalk(PipelineOwner root) {
