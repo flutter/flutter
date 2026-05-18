@@ -2424,6 +2424,7 @@ class _OverlayPortalElement extends RenderObjectElement {
   void insertRenderObjectChild(RenderBox child, _OverlayEntryLocation? slot) {
     assert(child.parent == null, "$child's parent is not null: ${child.parent}");
     if (slot != null) {
+      // _deferredLayoutChild is assigned in createRenderObject.
       assert(renderObject._deferredLayoutChild == child);
       slot._addChild(child as _RenderDeferredLayoutBox);
       renderObject.markNeedsSemanticsUpdate();
