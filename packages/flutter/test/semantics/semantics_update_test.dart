@@ -331,6 +331,14 @@ void main() {
       }),
       isTrue,
     );
+    expect(
+      SemanticsUpdateBuilderSpy.observations.values.any((
+        SemanticsNodeUpdateObservation observation,
+      ) {
+        return observation.childrenInTraversalOrder.contains(menuItemId);
+      }),
+      isFalse,
+    );
     SemanticsUpdateBuilderSpy.observations.clear();
     handle.dispose();
   }, skip: kIsWeb); // intended: the web engine handles the traversal order itself.
