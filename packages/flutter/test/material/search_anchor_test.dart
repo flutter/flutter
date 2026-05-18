@@ -2299,13 +2299,15 @@ void main() {
 
   testWidgets('SearchAnchor.bar respects SearchBarThemeData.padding', (WidgetTester tester) async {
     const themePadding = EdgeInsets.all(24.0);
+    const themePaddingProperty = WidgetStatePropertyAll<EdgeInsetsGeometry>(themePadding);
+    const searchBarsForAnchorAndView = 2;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: SearchBarTheme(
             data: const SearchBarThemeData(
-              padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(themePadding),
+              padding: themePaddingProperty,
             ),
             child: SearchAnchor.bar(
               suggestionsBuilder: (BuildContext context, SearchController controller) {
@@ -2324,7 +2326,7 @@ void main() {
           (Widget widget) => widget is Padding && widget.padding == themePadding,
         ),
       ),
-      findsNWidgets(2),
+      findsNWidgets(searchBarsForAnchorAndView),
     );
   });
 
@@ -2333,13 +2335,15 @@ void main() {
   ) async {
     const themePadding = EdgeInsets.all(24.0);
     const barPadding = EdgeInsets.symmetric(horizontal: 12.0);
+    const themePaddingProperty = WidgetStatePropertyAll<EdgeInsetsGeometry>(themePadding);
+    const searchBarsForAnchorAndView = 2;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: SearchBarTheme(
             data: const SearchBarThemeData(
-              padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(themePadding),
+              padding: themePaddingProperty,
             ),
             child: SearchAnchor.bar(
               barPadding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(barPadding),
@@ -2368,7 +2372,7 @@ void main() {
           (Widget widget) => widget is Padding && widget.padding == barPadding,
         ),
       ),
-      findsNWidgets(2),
+      findsNWidgets(searchBarsForAnchorAndView),
     );
   });
 
