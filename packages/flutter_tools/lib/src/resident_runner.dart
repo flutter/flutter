@@ -1486,7 +1486,8 @@ abstract class ResidentRunner extends ResidentHandlers {
       if (devFS.assetPathsToEvict.isEmpty && devFS.shaderPathsToEvict.isEmpty) {
         continue;
       }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
+      final FlutterVmService vmService = device.vmService!;
+      final List<FlutterView> views = await vmService.getFlutterViews();
 
       final FlutterView? firstViewWithIsolate = views
           .where((FlutterView v) => v.uiIsolate != null)
@@ -1502,7 +1503,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       // 2. Perform font manifest reloading if it was updated.
       if (devFS.didUpdateFontManifest) {
         futures.add(
-          device.vmService!.reloadAssetFonts(
+          vmService.reloadAssetFonts(
             isolateId: firstUiIsolate.id!,
             viewId: firstViewWithIsolate!.id,
           ),
@@ -1511,7 +1512,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
       // 3. Perform the standard, cross-platform eviction calls!
       for (final String assetPath in devFS.assetPathsToEvict) {
-        futures.add(device.vmService!.flutterEvictAsset(assetPath, isolateId: firstUiIsolate.id!));
+        futures.add(vmService.flutterEvictAsset(assetPath, isolateId: firstUiIsolate.id!));
       }
       // Shaders are not supported during hot reload on the web yet. Attempting
       // to evict shaders will call the `ext.ui.window.reinitializeShader` service
@@ -1520,9 +1521,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       // error, which would break the hot reload.
       if (device.targetPlatform != TargetPlatform.web_javascript) {
         for (final String assetPath in devFS.shaderPathsToEvict) {
-          futures.add(
-            device.vmService!.flutterEvictShader(assetPath, isolateId: firstUiIsolate.id!),
-          );
+          futures.add(vmService.flutterEvictShader(assetPath, isolateId: firstUiIsolate.id!));
         }
       }
 
