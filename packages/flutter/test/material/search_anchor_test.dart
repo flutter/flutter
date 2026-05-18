@@ -2297,6 +2297,81 @@ void main() {
     expect(searchViewRect.width, anchorRect.width);
   });
 
+  testWidgets('SearchAnchor.bar respects SearchBarThemeData.padding', (WidgetTester tester) async {
+    const themePadding = EdgeInsets.all(24.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchBarTheme(
+            data: const SearchBarThemeData(
+              padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(themePadding),
+            ),
+            child: SearchAnchor.bar(
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.descendant(
+        of: find.byType(SearchBar),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is Padding && widget.padding == themePadding,
+        ),
+      ),
+      findsNWidgets(2),
+    );
+  });
+
+  testWidgets('SearchAnchor.bar barPadding overrides SearchBarThemeData.padding', (
+    WidgetTester tester,
+  ) async {
+    const themePadding = EdgeInsets.all(24.0);
+    const barPadding = EdgeInsets.symmetric(horizontal: 12.0);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SearchBarTheme(
+            data: const SearchBarThemeData(
+              padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(themePadding),
+            ),
+            child: SearchAnchor.bar(
+              barPadding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(barPadding),
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.descendant(
+        of: find.byType(SearchBar),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is Padding && widget.padding == themePadding,
+        ),
+      ),
+      findsNothing,
+    );
+    expect(
+      find.descendant(
+        of: find.byType(SearchBar),
+        matching: find.byWidgetPredicate(
+          (Widget widget) => widget is Padding && widget.padding == barPadding,
+        ),
+      ),
+      findsNWidgets(2),
+    );
+  });
+
   testWidgets('SearchController can open/close view', (WidgetTester tester) async {
     final controller = SearchController();
     addTearDown(controller.dispose);

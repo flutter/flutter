@@ -1295,9 +1295,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
              overlayColor: barOverlayColor,
              side: barSide,
              shape: barShape,
-             padding:
-                 barPadding ??
-                 const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
+             padding: barPadding,
              leading: barLeading ?? const Icon(Icons.search),
              trailing: barTrailing,
              textCapitalization: textCapitalization,
