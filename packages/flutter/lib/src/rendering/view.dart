@@ -267,8 +267,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// Whether this view must be composited on the next frame.
   ///
   /// This flag is cleared once the view gets successfully composited.
-  bool get requiresCompositing => _requiresCompositing;
-  bool _requiresCompositing = false;
+  bool get needsCompositeFrame => _needsCompositeFrame;
+  bool _needsCompositeFrame = false;
 
   /// Marks this view required to be composited on the next frame.
   ///
@@ -276,8 +276,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// there are any render objects that need to be painted. It is also set for
   /// warmup frame or any frame requested by the engine (i.e. during return from
   /// background).
-  void markRequiresCompositing() {
-    _requiresCompositing = true;
+  void markNeedsCompositeFrame() {
+    _needsCompositeFrame = true;
   }
 
   TransformLayer _updateMatricesAndCreateNewRootLayer() {
@@ -361,7 +361,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// the [configuration] must be set to a non-null value, and the
   /// [prepareInitialFrame] method must have been called.
   void compositeFrame() {
-    if (!kReleaseMode && _requiresCompositing) {
+    if (!kReleaseMode && _needsCompositeFrame) {
       FlutterTimeline.startSync('COMPOSITING');
     }
     try {
@@ -385,10 +385,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         return true;
       }());
     } finally {
-      if (!kReleaseMode && _requiresCompositing) {
+      if (!kReleaseMode && _needsCompositeFrame) {
         FlutterTimeline.finishSync();
       }
-      _requiresCompositing = false;
+      _needsCompositeFrame = false;
     }
   }
 
