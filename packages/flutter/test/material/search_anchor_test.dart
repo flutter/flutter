@@ -2300,6 +2300,7 @@ void main() {
   testWidgets('SearchAnchor.bar respects SearchBarThemeData.padding', (WidgetTester tester) async {
     const themePadding = EdgeInsets.all(24.0);
     const themePaddingProperty = WidgetStatePropertyAll<EdgeInsetsGeometry>(themePadding);
+    // SearchAnchor.bar builds one SearchBar for the anchor and one for the open view.
     const searchBarsForAnchorAndView = 2;
 
     await tester.pumpWidget(
@@ -2336,6 +2337,7 @@ void main() {
     const themePadding = EdgeInsets.all(24.0);
     const barPadding = EdgeInsets.symmetric(horizontal: 12.0);
     const themePaddingProperty = WidgetStatePropertyAll<EdgeInsetsGeometry>(themePadding);
+    // SearchAnchor.bar builds one SearchBar for the anchor and one for the open view.
     const searchBarsForAnchorAndView = 2;
 
     await tester.pumpWidget(
