@@ -2265,6 +2265,13 @@ extension type SkParagraph(JSObject _) implements JSObject {
   ui.GlyphInfo? getClosestGlyphInfoAt(double x, double y) =>
       _getClosestGlyphInfoAtCoordinate(x, y)?._glyphInfo;
 
+  @JS('unresolvedCodepoints')
+  external JSArray<JSNumber> _getUnresolvedCodePoints();
+  List<int> getUnresolvedCodePoints() {
+    final List<JSNumber> jsNumbers = _getUnresolvedCodePoints().toDart;
+    return List<int>.generate(jsNumbers.length, (int i) => jsNumbers[i].toDartInt);
+  }
+
   external SkTextRange getWordBoundary(double position);
   external void layout(double width);
   external void delete();

@@ -6,8 +6,6 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 import '../../engine.dart';
 
-// TODO(jlavrova): We use it to paint shadows (with vertical shifts) so we need to make it tall enough as well.
-double? currentDevicePixelRatio;
 //final DomOffscreenCanvas paintCanvas = createDomOffscreenCanvas(0, 0);
 //final paintContext =
 //    paintCanvas.getContext('2d', {'willReadFrequently': true})! as DomCanvasRenderingContext2D;
@@ -16,6 +14,18 @@ final DomHTMLCanvasElement paintCanvas =
     domDocument.createElement('canvas') as DomHTMLCanvasElement;
 final paintContext =
     paintCanvas.getContext('2d', {'willReadFrequently': true})! as DomCanvasRenderingContext2D;
+
+/// Resizes the global paint canvas to the given width and height and updates the device pixel ratio.
+///
+/// The paint canvas is scaled by the device pixel ratio to avoid pixelation
+/// that would happen if it wasn't resized.
+void resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
+  paintCanvas.width = rect.width;
+  paintCanvas.height = rect.height;
+  paintCanvas.style.width = '${rect.width / devicePixelRatio}px';
+  paintCanvas.style.height = '${rect.height / devicePixelRatio}px';
+  paintContext.scale(devicePixelRatio, devicePixelRatio);
+}
 
 /// Paints on a [WebParagraph].
 ///
@@ -56,11 +66,10 @@ abstract class TextPaint {
     // We shift the target rect to the correct x position inside the line and
     // the correct y position of the line itself
     // (and then to the paragraph.paint x and y)
-
-    // TODO(jlavrova): Make translation in a single operation so it's actually an integer
-    final ui.Rect targetRect = zeroRect
-        .translate(clusterOffset.dx + webTextCluster.advance.left, clusterOffset.dy)
-        .translate(lineOffset.dx, lineOffset.dy);
+    final ui.Rect targetRect = zeroRect.translate(
+      lineOffset.dx + clusterOffset.dx + webTextCluster.advance.left,
+      lineOffset.dy + clusterOffset.dy,
+    );
 
     if (WebParagraphDebug.logging) {
       final String text = block is EllipsisBlock
@@ -102,12 +111,10 @@ abstract class TextPaint {
     // We shift the target rect to the correct x position inside the line and
     // the correct y position of the line itself
     // (and then to the paragraph.paint x and y)
-    // TODO(jlavrova): Make translation in a single operation so it's actually an integer
-    final ui.Rect targetRect = zeroRect
-        // TODO(jlavrova): Can we use `block.advance.left` instead of the cluster? That way
-        //                 we don't have to worry about LTR vs RTL to get first cluster.
-        .translate(blockOffset.dx, blockOffset.dy)
-        .translate(paragraphOffset.dx, paragraphOffset.dy);
+    final ui.Rect targetRect = zeroRect.translate(
+      paragraphOffset.dx + blockOffset.dx,
+      paragraphOffset.dy + blockOffset.dy,
+    );
 
     if (WebParagraphDebug.logging) {
       WebParagraphDebug.log(
@@ -144,13 +151,12 @@ abstract class TextPaint {
       (layout.paragraph.height * devicePixelRatio).ceilToDouble(),
     );
     // Target rect will be scaled by the canvas transform, so we don't scale it here
-    final zeroRect = ui.Rect.fromLTWH(
-      0,
-      0,
+    final targetRect = ui.Rect.fromLTWH(
+      offset.dx,
+      offset.dy,
       maxWidth.ceilToDouble(),
       layout.paragraph.height.ceilToDouble(),
     );
-    final ui.Rect targetRect = zeroRect.translate(offset.dx, offset.dy);
 
     if (WebParagraphDebug.logging) {
       WebParagraphDebug.log(
@@ -223,8 +229,7 @@ abstract class TextPaint {
     paintContext.stroke();
   }
 
-  // TODO(jlavrova): implement decorations entirely on the resulting Canvas
-  /// Paints text decorations on Canvas2D
+  // TODO(jlavrova): Implement decorations entirely on the CanvasKit Canvas
   void fillDecorations(TextBlock block, ui.Rect sourceRect) {
     if (!block.style.hasElement(StyleElements.decorations) || block.style.decoration == null) {
       return;
@@ -301,5 +306,5 @@ abstract class TextPaint {
   void fillShadowCluster(WebCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr);
 
   /// Paints the entire paragraph on Canvas2D
-  void paint(ui.Canvas canvas, TextLayout layout, Painter painter, double x, double y);
+  void paint(ui.Canvas canvas, TextLayout layout, Painter painter, ui.Offset offset);
 }

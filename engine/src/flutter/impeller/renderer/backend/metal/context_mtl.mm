@@ -444,6 +444,20 @@ void ContextMTL::FlushTasksAwaitingGPU() {
   }
 }
 
+bool ContextMTL::FinishQueue() {
+  id<MTLCommandBuffer> command_buffer =
+      ContextMTL::Cast(this)->CreateMTLCommandBuffer("Finish Queue Waiter");
+  [command_buffer commit];
+  // clang-format off
+  // This isn't documented in the method, but there are places where they
+  // imply that they will wait even for an empty buffer...
+  //
+  // See https://developer.apple.com/documentation/metalperformanceshaders/tuning-hints
+  // clang-format on
+  [command_buffer waitUntilCompleted];
+  return true;
+}
+
 ContextMTL::SyncSwitchObserver::SyncSwitchObserver(ContextMTL& parent)
     : parent_(parent) {}
 
@@ -474,6 +488,8 @@ ImpellerMetalCaptureManager::ImpellerMetalCaptureManager(id<MTLDevice> device) {
   current_capture_scope_ = [[MTLCaptureManager sharedCaptureManager]
       newCaptureScopeWithDevice:device];
   [current_capture_scope_ setLabel:@"Impeller Frame"];
+  [[MTLCaptureManager sharedCaptureManager]
+      setDefaultCaptureScope:current_capture_scope_];
 }
 
 bool ImpellerMetalCaptureManager::CaptureScopeActive() const {
