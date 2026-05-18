@@ -25,6 +25,7 @@ import 'package:flutter/semantics.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
+import 'view.dart';
 
 export 'package:flutter/foundation.dart'
     show
@@ -973,14 +974,6 @@ class _LocalSemanticsHandle implements SemanticsHandle {
   }
 }
 
-/// Render object that can be used as a root for a [PipelineOwner].
-mixin RootRenderObject on RenderObject {
-  /// Marks this render object as needing to be composited.
-  /// This happens inside [PipelineOwner.flushPaint] if there are any
-  /// render objects that need to be painted.
-  void markRequiresCompositing();
-}
-
 /// The pipeline owner manages the rendering pipeline.
 ///
 /// The pipeline owner provides an interface for driving the rendering pipeline
@@ -1082,9 +1075,9 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   }
 
   /// The unique object managed by this pipeline that has no parent.
-  RootRenderObject? get rootNode => _rootNode;
-  RootRenderObject? _rootNode;
-  set rootNode(RootRenderObject? value) {
+  RenderObject? get rootNode => _rootNode;
+  RenderObject? _rootNode;
+  set rootNode(RenderObject? value) {
     if (_rootNode == value) {
       return;
     }
@@ -1327,8 +1320,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
         return true;
       }());
       final List<RenderObject> dirtyNodes = _nodesNeedingPaint;
-      if (dirtyNodes.isNotEmpty) {
-        rootNode?.markRequiresCompositing();
+      if (dirtyNodes.isNotEmpty && rootNode is RenderView) {
+        (rootNode! as RenderView).markRequiresCompositing();
       }
       _nodesNeedingPaint = <RenderObject>[];
 
