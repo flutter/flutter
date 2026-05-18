@@ -35,6 +35,7 @@ import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'icon_data.dart';
+import 'media_query.dart';
 import 'service_extensions.dart';
 import 'view.dart';
 
@@ -687,16 +688,12 @@ class _DiagnosticsPathNode {
   final int? childIndex;
 }
 
-List<_DiagnosticsPathNode>? _followDiagnosticableChain(
-  List<Diagnosticable> chain, {
-  String? name,
-  DiagnosticsTreeStyle? style,
-}) {
+List<_DiagnosticsPathNode>? _followDiagnosticableChain(List<Diagnosticable> chain) {
   final path = <_DiagnosticsPathNode>[];
   if (chain.isEmpty) {
     return path;
   }
-  DiagnosticsNode diagnostic = chain.first.toDiagnosticsNode(name: name, style: style);
+  DiagnosticsNode diagnostic = chain.first.toDiagnosticsNode();
   for (var i = 1; i < chain.length; i += 1) {
     final Diagnosticable target = chain[i];
     var foundMatch = false;
@@ -3834,6 +3831,11 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
 
   @override
   Widget build(BuildContext context) {
+    final double bottomPadding = math.max(
+      _kExitWidgetSelectionButtonMargin,
+      MediaQuery.viewPaddingOf(context).bottom,
+    );
+
     final Widget selectionModeButtons = Column(
       children: <Widget>[?_tapBehaviorButton, _exitWidgetSelectionButton],
     );
@@ -3864,7 +3866,7 @@ class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup
       textDirection: Directionality.of(context),
       start: _usesDefaultAlignment ? _kExitWidgetSelectionButtonMargin : null,
       end: _usesDefaultAlignment ? null : _kExitWidgetSelectionButtonMargin,
-      bottom: _kExitWidgetSelectionButtonMargin,
+      bottom: bottomPadding,
       child: buttonGroup,
     );
   }

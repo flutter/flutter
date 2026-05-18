@@ -16,7 +16,7 @@ import 'theme.dart';
 /// Defines default property values for descendant [BottomAppBar] widgets.
 ///
 /// Descendant widgets obtain the current [BottomAppBarThemeData] object using
-/// `[BottomAppBarTheme.of]`. Instances of [BottomAppBarThemeData] can be
+/// [BottomAppBarTheme.of]. Instances of [BottomAppBarThemeData] can be
 /// customized with [BottomAppBarThemeData.copyWith].
 ///
 /// Typically a [BottomAppBarThemeData] is specified as part of the overall [Theme]

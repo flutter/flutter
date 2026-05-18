@@ -60,6 +60,18 @@ enum class ShaderType {
   kSampler,
 };
 
+// This is a separate type from ShaderType because ShaderType is used for
+// OpenGLES's attrib type which doesn't map to things like vec4.
+enum class ShaderFloatType {
+  kFloat,
+  kVec2,
+  kVec3,
+  kVec4,
+  kMat2,
+  kMat3,
+  kMat4,
+};
+
 struct ShaderStructMemberMetadata {
   ShaderType type;
   std::string name;
@@ -67,7 +79,50 @@ struct ShaderStructMemberMetadata {
   size_t size;
   size_t byte_length;
   std::optional<size_t> array_elements;
+  std::optional<ShaderFloatType> float_type;
 };
+
+/// @brief Derive the `ShaderFloatType` from the base `ShaderType` and
+///        the (vec_size, columns) dimensions reported by SPIR-V Cross.
+///
+/// `vec_size` is the component count of a single column (the vector length
+/// for non-matrix types, the row count for matrices). `columns` is 1 for
+/// vectors and N for an NxN matrix. Returns `std::nullopt` for non-float
+/// types and for shapes that don't map to a `ShaderFloatType`.
+constexpr std::optional<ShaderFloatType> DeriveShaderFloatType(ShaderType type,
+                                                               size_t vec_size,
+                                                               size_t columns) {
+  if (type != ShaderType::kFloat) {
+    return std::nullopt;
+  }
+  if (columns == 1) {
+    switch (vec_size) {
+      case 1:
+        return ShaderFloatType::kFloat;
+      case 2:
+        return ShaderFloatType::kVec2;
+      case 3:
+        return ShaderFloatType::kVec3;
+      case 4:
+        return ShaderFloatType::kVec4;
+      default:
+        return std::nullopt;
+    }
+  }
+  if (vec_size == columns) {
+    switch (vec_size) {
+      case 2:
+        return ShaderFloatType::kMat2;
+      case 3:
+        return ShaderFloatType::kMat3;
+      case 4:
+        return ShaderFloatType::kMat4;
+      default:
+        return std::nullopt;
+    }
+  }
+  return std::nullopt;
+}
 
 struct ShaderMetadata {
   // This must match the uniform name in the shader program.

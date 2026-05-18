@@ -12,7 +12,7 @@
   "shareButtonLabel": "共有",
   "pasteButtonLabel": "貼り付け",
   "selectAllButtonLabel": "すべてを選択",
-  "searchResultsFound": "Search results found",
-  "noResultsFound": "No results found",
-  "radioButtonUnselectedLabel": "Not selected"
+  "searchResultsFound": "検索結果が見つかりました",
+  "noResultsFound": "一致する検索結果はありません",
+  "radioButtonUnselectedLabel": "選択されていません"
 }

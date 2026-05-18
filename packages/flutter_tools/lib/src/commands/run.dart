@@ -36,6 +36,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   RunCommandBase({required bool verboseHelp}) {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
+    usesWebDefineOption();
     usesFlavorOption();
     usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
@@ -241,6 +242,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
+    addEnableHcppFlag(verboseHelp: verboseHelp);
+    addTestFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -248,8 +251,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
   bool get cacheStartupProfile => boolArg('cache-startup-profile');
-  bool get runningWithPrebuiltApplication =>
-      argResults![FlutterOptions.kUseApplicationBinary] != null;
+  bool get runningWithPrebuiltApplication => prebuiltApplicationBinaryPath != null;
+  String? get prebuiltApplicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
   bool get trackWidgetCreation => boolArg('track-widget-creation');
   ImpellerStatus get enableImpeller =>
       ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?);
@@ -257,6 +260,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
+  bool get enableHcpp => boolArg('enable-hcpp');
+  bool get testFlag => boolArg('test-flag');
 
   @override
   bool get refreshWirelessDevices => true;
@@ -291,6 +296,9 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ? stringsArg(FlutterOptions.kWebBrowserFlag)
         : const <String>[];
 
+    final bool? webCrossOriginIsolation = argResults!.wasParsed('cross-origin-isolation')
+        ? boolArg('cross-origin-isolation')
+        : null;
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
@@ -306,6 +314,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && boolArg('web-run-headless'),
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
+        webCrossOriginIsolation: webCrossOriginIsolation,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         enableImpeller: enableImpeller,
@@ -317,6 +326,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
+        enableHcpp: enableHcpp,
+        testFlag: testFlag,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -362,6 +373,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webEnableExpressionEvaluation:
             featureFlags.isWebEnabled && boolArg('web-enable-expression-evaluation'),
         webLaunchUrl: featureFlags.isWebEnabled ? stringArg('web-launch-url') : null,
+        webCrossOriginIsolation: webCrossOriginIsolation,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
         vmserviceOutFile: stringArg('vmservice-out-file'),
@@ -378,9 +390,44 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
         ipv6: boolArg(FlutterCommand.ipv6Flag),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
+        enableHcpp: enableHcpp,
         webDevServerConfig: webDevServerConfig,
+        testFlag: testFlag,
       );
     }
+  }
+
+  Future<WebDevServerConfig> webDevServerConfigCore() async {
+    final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    );
+
+    final String? webPortArg = stringArg('web-port');
+    final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
+
+    // Determine HTTPS config with CLI > file precedence
+    final HttpsConfig? httpsConfig = HttpsConfig.parse(
+      stringArg('web-tls-cert-path') ?? fileConfig.https?.certPath,
+      stringArg('web-tls-cert-key-path') ?? fileConfig.https?.certKeyPath,
+    );
+
+    final String? baseHref = stringArg('base-href') ?? fileConfig.baseHref;
+    if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
+      throwToolExit(
+        'Received a --base-href value of "$baseHref"\n'
+        '--base-href should start and end with /',
+      );
+    }
+
+    final WebDevServerConfig webDevServerConfig = fileConfig.copyWith(
+      host: stringArg('web-hostname'),
+      port: webPort,
+      https: httpsConfig,
+      headers: extractWebHeaders(),
+      baseHref: baseHref,
+    );
+    return webDevServerConfig;
   }
 }
 
@@ -487,25 +534,7 @@ class RunCommand extends RunCommandBase {
         devices != null &&
         devices!.length == 1 &&
         await devices!.single.targetPlatform == TargetPlatform.web_javascript) {
-      final String? webPortArg = stringArg('web-port');
-      final int? webPort = webPortArg != null ? int.tryParse(webPortArg) : null;
-
-      final WebDevServerConfig fileConfig = await WebDevServerConfig.loadFromFile(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-      );
-
-      final HttpsConfig? httpsConfig = fileConfig.https?.copyWith(
-        certPath: stringArg('web-tls-cert-path'),
-        certKeyPath: stringArg('web-tls-cert-key-path'),
-      );
-
-      final WebDevServerConfig webDevServerConfig = fileConfig.copyWith(
-        host: stringArg('web-hostname'),
-        port: webPort,
-        https: httpsConfig,
-        headers: extractWebHeaders(),
-      );
+      final WebDevServerConfig webDevServerConfig = await webDevServerConfigCore();
       return webDevServerConfig;
     }
     return null;
@@ -546,6 +575,7 @@ class RunCommand extends RunCommandBase {
       runEnableImpeller: record.runEnableImpeller,
       runIOSInterfaceType: record.runIOSInterfaceType,
       runIsTest: record.runIsTest,
+      runEnableHcpp: record.runEnableHcpp,
     );
   }
 
@@ -626,6 +656,7 @@ class RunCommand extends RunCommandBase {
       runEnableImpeller: enableImpeller.asBool,
       runIOSInterfaceType: iOSInterfaceType,
       runIsTest: targetFile.endsWith('_test.dart'),
+      runEnableHcpp: enableHcpp,
     );
   })();
 
@@ -687,6 +718,26 @@ class RunCommand extends RunCommandBase {
       throwToolExit('Skwasm renderer requires --wasm');
     }
 
+    if (argResults?.wasParsed(FlutterOptions.kWebExperimentalHotReload) ?? false) {
+      final bool webEnableHotReload = boolArg(FlutterOptions.kWebExperimentalHotReload);
+      if (webEnableHotReload) {
+        globals.printWarning(
+          'Hot reload on the web is now enabled by default. '
+          'The "--${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
+          'and will be removed in an upcoming release.',
+        );
+      } else {
+        globals.printWarning(
+          'Hot reload on the web is now enabled by default. '
+          'The "--no-${FlutterOptions.kWebExperimentalHotReload}" flag is deprecated '
+          'and will be removed in an upcoming release. '
+          'If your web development workflow depends on disabling hot reload, '
+          'please open an issue explaining why at '
+          'https://github.com/dart-lang/sdk/issues/new?template=5_web_hot_reload.yml.',
+        );
+      }
+    }
+
     final String? flavor = stringArg('flavor');
     final bool flavorsSupportedOnEveryDevice = devices!.every(
       (Device device) => device.supportsFlavors,
@@ -744,6 +795,7 @@ class RunCommand extends RunCommandBase {
         platform: globals.platform,
         outputPreferences: globals.outputPreferences,
         systemClock: globals.systemClock,
+        webDefines: extractWebDefines(),
       );
     }
     return ColdRunner(
@@ -771,7 +823,7 @@ class RunCommand extends RunCommandBase {
     // Enable hot mode by default if `--no-hot` was not passed and we are in
     // debug mode.
     final bool hotMode = shouldUseHotMode(buildInfo);
-    final String? applicationBinaryPath = stringArg(FlutterOptions.kUseApplicationBinary);
+    final String? applicationBinaryPath = prebuiltApplicationBinaryPath;
     final WebDevServerConfig? webDevServerConfig = await getWebDevServerConfig();
 
     if (outputMachineFormat) {
@@ -792,6 +844,7 @@ class RunCommand extends RunCommandBase {
           route,
           debuggingOptions,
           hotMode,
+          webDefines: extractWebDefines(),
           applicationBinary: applicationBinaryPath == null
               ? null
               : globals.fs.file(applicationBinaryPath),
@@ -835,16 +888,10 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    List<String>? expFlags;
-    if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
-        stringsArg(FlutterOptions.kEnableExperiment).isNotEmpty) {
-      expFlags = stringsArg(FlutterOptions.kEnableExperiment);
-    }
     final flutterDevices = <FlutterDevice>[
       for (final Device device in devices!)
         await FlutterDevice.create(
           device,
-          experimentalFlags: expFlags,
           target: targetFile,
           buildInfo: buildInfo,
           userIdentifier: userIdentifier,
@@ -940,4 +987,5 @@ typedef AnalyticsUsageValuesRecord = ({
   bool runProjectModule,
   String runTargetName,
   String runTargetOsVersion,
+  bool? runEnableHcpp,
 });

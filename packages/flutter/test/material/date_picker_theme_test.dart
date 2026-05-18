@@ -27,7 +27,7 @@ void main() {
     dayShape: MaterialStatePropertyAll<OutlinedBorder>(RoundedRectangleBorder()),
     todayForegroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff8)),
     todayBackgroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff9)),
-    todayBorder: BorderSide(width: 3),
+    todayBorder: BorderSide(width: 3, color: Color(0x00000000)),
     yearStyle: TextStyle(fontSize: 13),
     yearForegroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffffa)),
     yearBackgroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffffb)),
@@ -171,7 +171,10 @@ void main() {
     expect(m3.elevation, 6);
     expect(m3.shadowColor, const Color(0x00000000)); // Colors.transparent
     expect(m3.surfaceTintColor, Colors.transparent);
-    expect(m3.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)));
+    expect(
+      m3.shape,
+      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28))),
+    );
     expect(m3.headerBackgroundColor, const Color(0x00000000)); // Colors.transparent
     expect(m3.headerForegroundColor, colorScheme.onSurfaceVariant);
     expect(m3.headerHeadlineStyle, textTheme.headlineLarge);
@@ -509,7 +512,7 @@ void main() {
         'dayShape: WidgetStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero))',
         'todayForegroundColor: WidgetStatePropertyAll(${const Color(0xfffffff8)})',
         'todayBackgroundColor: WidgetStatePropertyAll(${const Color(0xfffffff9)})',
-        'todayBorder: BorderSide(width: 3.0)',
+        'todayBorder: BorderSide(color: Color(alpha: 0.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB), width: 3.0)',
         'yearStyle: TextStyle(inherit: true, size: 13.0)',
         'yearForegroundColor: WidgetStatePropertyAll(${const Color(0xfffffffa)})',
         'yearBackgroundColor: WidgetStatePropertyAll(${const Color(0xfffffffb)})',

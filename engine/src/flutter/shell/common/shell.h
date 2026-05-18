@@ -608,6 +608,10 @@ class Shell final : public PlatformView::Delegate,
   void OnPlatformViewDispatchPointerDataPacket(
       std::unique_ptr<PointerDataPacket> packet) override;
 
+  HitTestResponse OnPlatformViewHitTest(
+      int64_t view_id,
+      const flutter::PointData offset) override;
+
   // |PlatformView::Delegate|
   void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
                                              int32_t node_id,
@@ -795,6 +799,11 @@ class Shell final : public PlatformView::Delegate,
   // Forces the FontCollection to reload the font manifest. Used to support
   // hot reload for fonts.
   bool OnServiceProtocolReloadAssetFonts(
+      const ServiceProtocol::Handler::ServiceProtocolMap& params,
+      rapidjson::Document* response);
+
+  // Service protocol handler
+  bool OnServiceProtocolGetPipelineUsage(
       const ServiceProtocol::Handler::ServiceProtocolMap& params,
       rapidjson::Document* response);
 

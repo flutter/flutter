@@ -8,7 +8,7 @@ const kWasmMoreInfo = 'See https://flutter.dev/to/wasm for more information.';
 ///
 /// See https://developer.chrome.com/blog/coep-credentialless-origin-trial
 /// for more information.
-const kMultiThreadedHeaders = <String, String>{
+const kCrossOriginIsolationHeaders = <String, String>{
   'Cross-Origin-Opener-Policy': 'same-origin',
   'Cross-Origin-Embedder-Policy': 'credentialless',
 };

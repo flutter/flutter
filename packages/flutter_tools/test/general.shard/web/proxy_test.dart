@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show HttpServer;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/isolated/proxy_middleware.dart';
 import 'package:flutter_tools/src/web/devfs_proxy.dart';
 import 'package:shelf/shelf.dart';
+import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 
@@ -403,5 +405,44 @@ void main() {
       expect(response.statusCode, 200);
       expect(await response.readAsString(), 'Inner Handler Response');
     });
+
+    test(
+      'should forward 404 response from backend instead of falling back to inner handler',
+      () async {
+        HttpServer? mockServer;
+        try {
+          mockServer = await shelf_io.serve(
+            (Request request) => Response.notFound(
+              '{"error": "Not found"}',
+              headers: {'content-type': 'application/json'},
+            ),
+            'localhost',
+            0,
+          );
+          final int port = mockServer.port;
+
+          final rules = <ProxyRule>[
+            PrefixProxyRule(prefix: '/api/', target: 'http://localhost:$port/'),
+          ];
+
+          final Middleware middleware = proxyMiddleware(rules, logger);
+
+          var innerHandlerCalled = false;
+          FutureOr<Response> innerHandler(Request request) {
+            innerHandlerCalled = true;
+            return Response.ok('<!DOCTYPE html><html>index.html</html>');
+          }
+
+          final request = Request('GET', Uri.parse('http://localhost:8080/api/missing'));
+          final Response response = await middleware(innerHandler)(request);
+
+          expect(innerHandlerCalled, isFalse);
+          expect(response.statusCode, 404);
+          expect(await response.readAsString(), '{"error": "Not found"}');
+        } finally {
+          await mockServer?.close();
+        }
+      },
+    );
   });
 }

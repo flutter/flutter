@@ -375,13 +375,17 @@ EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
   return bool_success();
 }
 
-EGLImage _eglCreateImage(EGLDisplay dpy,
-                         EGLContext ctx,
-                         EGLenum target,
-                         EGLClientBuffer buffer,
-                         const EGLAttrib* attrib_list) {
-  mock->eglCreateImage(dpy, ctx, target, buffer, attrib_list);
+EGLImageKHR _eglCreateImageKHR(EGLDisplay dpy,
+                               EGLContext ctx,
+                               EGLenum target,
+                               EGLClientBuffer buffer,
+                               const EGLint* attrib_list) {
+  mock->eglCreateImageKHR(dpy, ctx, target, buffer, attrib_list);
   return &mock_image;
+}
+
+EGLBoolean _eglDestroyImageKHR(EGLDisplay dpy, EGLImage image) {
+  return mock->eglDestroyImageKHR(dpy, image);
 }
 
 static GLuint bound_texture_2d;
@@ -658,11 +662,12 @@ EGLBoolean (*epoxy_eglMakeCurrent)(EGLDisplay dpy,
                                    EGLSurface read,
                                    EGLContext ctx);
 EGLBoolean (*epoxy_eglSwapBuffers)(EGLDisplay dpy, EGLSurface surface);
-EGLImage (*epoxy_eglCreateImage)(EGLDisplay dpy,
-                                 EGLContext ctx,
-                                 EGLenum target,
-                                 EGLClientBuffer buffer,
-                                 const EGLAttrib* attrib_list);
+EGLImageKHR (*epoxy_eglCreateImageKHR)(EGLDisplay dpy,
+                                       EGLContext ctx,
+                                       EGLenum target,
+                                       EGLClientBuffer buffer,
+                                       const EGLint* attrib_list);
+EGLBoolean (*epoxy_eglDestroyImageKHR)(EGLDisplay dpy, EGLImage image);
 
 void (*epoxy_glAttachShader)(GLuint program, GLuint shader);
 void (*epoxy_glBindFramebuffer)(GLenum target, GLuint framebuffer);
@@ -738,7 +743,8 @@ static void library_init() {
   epoxy_eglMakeCurrent = _eglMakeCurrent;
   epoxy_eglQueryContext = _eglQueryContext;
   epoxy_eglSwapBuffers = _eglSwapBuffers;
-  epoxy_eglCreateImage = _eglCreateImage;
+  epoxy_eglCreateImageKHR = _eglCreateImageKHR;
+  epoxy_eglDestroyImageKHR = _eglDestroyImageKHR;
 
   epoxy_glAttachShader = _glAttachShader;
   epoxy_glBindFramebuffer = _glBindFramebuffer;

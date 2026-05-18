@@ -44,6 +44,9 @@ const EdgeInsetsGeometry _kUnalignedMenuMargin = EdgeInsetsDirectional.only(star
 /// A builder to customize dropdown buttons.
 ///
 /// Used by [DropdownButton.selectedItemBuilder].
+///
+/// The list of widgets returned by this builder must be exactly the same length
+/// as the [DropdownButton.items] list.
 typedef DropdownButtonBuilder = List<Widget> Function(BuildContext context);
 
 class _DropdownMenuPainter extends CustomPainter {
@@ -1157,6 +1160,9 @@ class DropdownButton<T> extends StatefulWidget {
   ///
   /// If this callback is null, the [DropdownMenuItem] from [items]
   /// that matches [value] will be displayed.
+  ///
+  /// The list of widgets returned by this builder must be exactly the same length
+  /// as the [items] list.
   final DropdownButtonBuilder? selectedItemBuilder;
 
   /// The z-coordinate at which to place the menu when open.
@@ -1395,7 +1401,6 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   void _removeDropdownRoute() {
     _dropdownRoute?._dismiss();
-    _isMenuExpanded = false;
     _dropdownRoute = null;
     _lastOrientation = null;
   }
@@ -1499,6 +1504,11 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     focusNode.requestFocus();
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
+      if (mounted) {
+        setState(() {
+          _isMenuExpanded = false;
+        });
+      }
       if (!mounted || newValue == null) {
         return;
       }
@@ -1506,7 +1516,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     });
 
     widget.onTap?.call();
-    _isMenuExpanded = true;
+    setState(() {
+      _isMenuExpanded = true;
+    });
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to
@@ -1569,9 +1581,19 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // We should explicitly type the items list to be a list of <Widget>,
     // otherwise, no explicit type adding items maybe trigger a crash/failure
     // when hint and selectedItemBuilder are provided.
-    final items = widget.selectedItemBuilder == null
-        ? (widget.items != null ? List<Widget>.of(widget.items!) : <Widget>[])
-        : List<Widget>.of(widget.selectedItemBuilder!(context));
+    final List<Widget> items;
+    if (widget.selectedItemBuilder != null) {
+      final List<Widget> selectedItems = widget.selectedItemBuilder!(context);
+      assert(
+        widget.items == null || selectedItems.length == widget.items!.length,
+        'The selectedItemBuilder must return a list of widgets with the same length as the items list.\n'
+        'Currently, selectedItemBuilder returns a list of length ${selectedItems.length}, '
+        'but items has length ${widget.items!.length}.',
+      );
+      items = List<Widget>.of(selectedItems);
+    } else {
+      items = widget.items != null ? List<Widget>.of(widget.items!) : <Widget>[];
+    }
 
     int? hintIndex;
     if (widget.hint != null || (!_enabled && widget.disabledHint != null)) {
@@ -1840,6 +1862,10 @@ class DropdownButtonFormField<T> extends FormField<T> {
          'with the same value',
        ),
        assert(itemHeight == null || itemHeight >= kMinInteractiveDimension),
+       assert(
+         errorBuilder == null || decoration?.errorText == null,
+         'Declaring both errorBuilder and decoration.errorText is not supported.',
+       ),
        decoration = decoration ?? const InputDecoration(),
        super(
          initialValue: initialValue ?? value,

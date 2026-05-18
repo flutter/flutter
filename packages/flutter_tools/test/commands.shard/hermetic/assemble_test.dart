@@ -28,9 +28,13 @@ void main() {
   final StackTrace stackTrace = StackTrace.current;
   late FakeAnalytics fakeAnalytics;
 
+  late MemoryFileSystem fileSystem;
+
   setUp(() {
+    fileSystem = MemoryFileSystem.test();
+    fileSystem.file('pubspec.yaml').createSync();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
-      fs: MemoryFileSystem.test(),
+      fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
     );
   });
@@ -51,7 +55,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -80,7 +84,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -109,7 +113,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -138,7 +142,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -160,7 +164,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     },
@@ -192,7 +196,7 @@ void main() {
     overrides: <Type, Generator>{
       Analytics: () => fakeAnalytics,
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -224,7 +228,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       Analytics: () => fakeAnalytics,
@@ -245,7 +249,31 @@ void main() {
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'flutter assemble can run a build if dart-defines are base64 encoded',
+    () async {
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(buildSystem: TestBuildSystem.all(BuildResult(success: true))),
+      );
+
+      await commandRunner.run([
+        'assemble',
+        '--output',
+        'Output',
+        '--dart-define=${base64.encode(utf8.encode('flutter.inspector.structuredErrors=true'))}',
+        'debug_macos_bundle_flutter_assets',
+      ]);
+
+      expect(testLogger.traceText, contains('build succeeded.'));
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -257,24 +285,56 @@ void main() {
         AssembleCommand(buildSystem: TestBuildSystem.all(BuildResult(success: true))),
       );
 
-      final command = <String>[
-        'assemble',
-        '--output',
-        'Output',
-        '-DartDefines=flutter.inspector.structuredErrors%3Dtrue',
-        'debug_macos_bundle_flutter_assets',
+      const invalidDartDefines = [
+        'flutter.inspector.structuredErrors%3Dtrue',
+        '///',
+        '@@@@',
+        "'",
+        '"',
+        '`',
+        r'\',
+        r'$',
+        ';',
+        '/*',
+        '*/',
+        '//',
+        '\n',
+        '\r',
+        '<',
+        '>',
+        '{',
+        '}',
+        '[',
+        ']',
+        '(',
+        ')',
+        '%',
+        '=',
+        '&',
+        '?',
+        '#',
       ];
-      expect(
-        commandRunner.run(command),
-        throwsToolExit(
-          message:
-              'Error parsing assemble command: your generated configuration may be out of date',
-        ),
-      );
+      for (final invalidDartDefine in invalidDartDefines) {
+        final command = <String>[
+          'assemble',
+          '--output',
+          'Output',
+          '-DartDefines=$invalidDartDefine',
+          'debug_macos_bundle_flutter_assets',
+        ];
+        expect(
+          commandRunner.run(command),
+          throwsToolExit(
+            message:
+                'Error parsing assemble command: The -Pdart-defines argument contains non-base64 encoded data. '
+                'Check your build command and try again.',
+          ),
+        );
+      }
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -290,7 +350,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -320,7 +380,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -362,7 +422,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -392,7 +452,7 @@ void main() {
         localEngineHost: 'out/host_release',
       ),
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -465,7 +525,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
@@ -521,6 +581,24 @@ void main() {
     await commandRunner.run(['--help' /* -- verbose omitted (verboseHelp: true) is set above */]);
     expect(testLogger.statusText, contains('assemble'));
   });
+
+  testUsingContext(
+    'flutter assemble fails if pubspec.yaml is missing',
+    () async {
+      final CommandRunner<void> commandRunner = createTestCommandRunner(
+        AssembleCommand(buildSystem: TestBuildSystem.error(null)),
+      );
+
+      await expectLater(
+        commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
+        throwsToolExit(message: 'No pubspec.yaml file found'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
 }
 
 final class _StubCommand extends FlutterCommand {

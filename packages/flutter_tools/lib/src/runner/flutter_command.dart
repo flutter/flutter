@@ -129,6 +129,7 @@ abstract final class FlutterOptions {
   static const kDartObfuscationOption = 'obfuscate';
   static const kDartDefinesOption = 'dart-define';
   static const kDartDefineFromFileOption = 'dart-define-from-file';
+  static const kWebDefinesOption = 'web-define';
   static const kPerformanceMeasurementFile = 'performance-measurement-file';
   static const kDeviceUser = 'device-user';
   static const kDeviceTimeout = 'device-timeout';
@@ -150,6 +151,8 @@ abstract final class FlutterOptions {
   static const kWebWasmFlag = 'wasm';
   static const kWebExperimentalHotReload = 'web-experimental-hot-reload';
   static const kEnableImpeller = 'enable-impeller';
+  static const kCodesignIdentity = 'codesign-identity';
+  static const kCodesign = 'codesign';
 }
 
 /// flutter command categories for usage.
@@ -371,7 +374,9 @@ abstract class FlutterCommand extends Command<void> {
     );
     argParser.addFlag(
       FlutterOptions.kWebExperimentalHotReload,
-      help: 'Enables new module format that supports hot reload.',
+      help:
+          '(deprecated; will be removed in a future release) '
+          'Enables new module format that supports hot reload.',
       defaultsTo: true,
       hide: !verboseHelp,
     );
@@ -390,6 +395,28 @@ abstract class FlutterCommand extends Command<void> {
           'Multiple flags can be passed by repeating "--${FlutterOptions.kWebBrowserFlag}" multiple times.',
       valueHelp: '--foo=bar',
       hide: !verboseHelp,
+    );
+    argParser.addFlag(
+      'cross-origin-isolation',
+      help:
+          'Adds the Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy '
+          'headers to the web server. These headers are required for using APIs like '
+          'SharedArrayBuffer. This is on by default for the "skwasm" web renderer, '
+          'and this flag can be used to override the default. To disable this for the '
+          'skwasm renderer, use "--no-cross-origin-isolation".',
+      hide: !verboseHelp,
+    );
+    usesBaseHrefOption();
+  }
+
+  void usesBaseHrefOption() {
+    argParser.addOption(
+      'base-href',
+      help:
+          'Overrides the href attribute of the <base> tag in web/index.html. '
+          'No change is made to web/index.html file if this flag is not provided. '
+          'The value must start and end with "/". '
+          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base',
     );
   }
 
@@ -547,23 +574,28 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addDevToolsOptions({required bool verboseHelp}) {
-    argParser.addFlag(
-      kEnableDevTools,
-      hide: !verboseHelp,
-      defaultsTo: true,
-      help:
-          'Enable (or disable, with "--no-$kEnableDevTools") the launching of the '
-          'Flutter DevTools debugger and profiler. '
-          'If "--no-$kEnableDevTools" is specified, "--$kDevToolsServerAddress" is ignored.',
-    );
+  void addDevToolsOptions({required bool verboseHelp, bool includeEnableDevTools = true}) {
+    if (includeEnableDevTools) {
+      argParser.addFlag(
+        kEnableDevTools,
+        hide: !verboseHelp,
+        defaultsTo: true,
+        help:
+            'Enable (or disable, with "--no-$kEnableDevTools") the launching of the '
+            'Flutter DevTools debugger and profiler. '
+            'If "--no-$kEnableDevTools" is specified, "--$kDevToolsServerAddress" is ignored.',
+      );
+    }
+    final ignoredMessage = includeEnableDevTools
+        ? ' Ignored if "--no-$kEnableDevTools" is specified.'
+        : '';
     argParser.addOption(
       kDevToolsServerAddress,
       hide: !verboseHelp,
       help:
           'When this value is provided, the Flutter tool will not spin up a '
           'new DevTools server instance, and will instead use the one provided '
-          'at the given address. Ignored if "--no-$kEnableDevTools" is specified.',
+          'at the given address.$ignoredMessage',
     );
   }
 
@@ -745,6 +777,21 @@ abstract class FlutterCommand extends Command<void> {
       splitCommas: false,
     );
     _usesDartDefineFromFileOption();
+  }
+
+  void usesWebDefineOption() {
+    argParser.addMultiOption(
+      FlutterOptions.kWebDefinesOption,
+      help:
+          'Additional key-value pairs that will be available as template variables '
+          'in web/index.html and web/flutter_bootstrap.js files during development and build.\n'
+          'Variables are replaced in the format {{VARIABLE_NAME}}.\n'
+          'Multiple defines can be passed by repeating "--${FlutterOptions.kWebDefinesOption}" multiple times.\n'
+          'If a template contains a variable placeholder but no corresponding "--web-define" is provided, '
+          'it will warn that you have an unhandled variable.',
+      valueHelp: 'API_URL=https://api.example.com',
+      splitCommas: false,
+    );
   }
 
   void _usesDartDefineFromFileOption() {
@@ -1172,6 +1219,22 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
+  void usesDarwinCodeSignXCFrameworksOption() {
+    argParser.addFlag(
+      FlutterOptions.kCodesign,
+      defaultsTo: true,
+      help: 'Whether to code-sign XCFrameworks.',
+    );
+    argParser.addOption(
+      FlutterOptions.kCodesignIdentity,
+      help:
+          'The identity to use for code-signing XCFrameworks. If an identity is not provided and '
+          '"${FlutterOptions.kCodesign}" is enabled, a code signing identity will be selected '
+          "automatically from the Flutter app's Xcode project settings or Flutter config. To see "
+          'a list of valid identities run "security find-identity -p codesigning -v".',
+    );
+  }
+
   void usesTrackWidgetCreation({bool hasEffect = true, required bool verboseHelp}) {
     argParser.addFlag(
       'track-widget-creation',
@@ -1256,6 +1319,22 @@ abstract class FlutterCommand extends Command<void> {
       negatable: false,
       help: 'Outputs in a machine readable structured JSON format.',
       hide: !verboseHelp,
+    );
+  }
+
+  void addEnableHcppFlag({required bool verboseHelp}) {
+    argParser.addFlag(
+      'enable-hcpp',
+      hide: !verboseHelp,
+      help: 'Whether to enable the HCPP platform view mode on the Impeller rendering backend.',
+    );
+  }
+
+  void addTestFlag({required bool verboseHelp}) {
+    argParser.addFlag(
+      'test-flag',
+      hide: !verboseHelp,
+      help: 'No-op flag for testing purposes; use for testing flag priorities only.',
     );
   }
 
@@ -1612,6 +1691,28 @@ abstract class FlutterCommand extends Command<void> {
     return dartDefines;
   }
 
+  Map<String, String> extractWebDefines() {
+    final webDefines = <String, String>{};
+
+    if (argParser.options.containsKey(FlutterOptions.kWebDefinesOption)) {
+      final List<String> defines = stringsArg(FlutterOptions.kWebDefinesOption);
+      for (final define in defines) {
+        final int separatorIndex = define.indexOf('=');
+        if (separatorIndex == -1 || separatorIndex == 0) {
+          throwToolExit(
+            'Invalid web-define format: $define\n'
+            'Expected format: KEY=VALUE (e.g., API_URL=https://api.example.com)',
+          );
+        }
+        final String key = define.substring(0, separatorIndex);
+        final String value = define.substring(separatorIndex + 1);
+        webDefines[key] = value;
+      }
+    }
+
+    return webDefines;
+  }
+
   Map<String, Object?> extractDartDefineConfigJsonMap() {
     final dartDefineConfigJsonMap = <String, Object?>{};
 
@@ -1838,35 +1939,11 @@ abstract class FlutterCommand extends Command<void> {
       );
     }
 
-    // Populate the cache. We call this before pub get below so that the
-    // sky_engine package is available in the flutter cache for pub to find.
-    if (shouldUpdateCache) {
-      // First always update universal artifacts, as some of these (e.g.
-      // ios-deploy on macOS) are required to determine `requiredArtifacts`.
-      final bool offline;
-      if (argParser.options.containsKey('offline')) {
-        offline = boolArg('offline');
-      } else {
-        offline = false;
-      }
-      await globals.cache.updateAll(<DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
-      }, offline: offline);
-      await globals.cache.updateAll(await requiredArtifacts, offline: offline);
-    }
-    globals.cache.releaseLock();
-
-    await validateCommand();
-
-    final FlutterProject project = FlutterProject.current();
-    project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
-
-    if (shouldRunPub) {
-      await pub.get(
-        context: PubContext.getVerifyContext(name),
-        project: project,
-        checkUpToDate: cachePubGet,
-      );
+    final FlutterProject project;
+    try {
+      project = await _updateCacheAndRunPubGet();
+    } finally {
+      globals.cache.releaseLock();
     }
 
     if (regeneratePlatformSpecificToolingDuringVerify) {
@@ -1883,6 +1960,38 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     return runCommand();
+  }
+
+  Future<FlutterProject> _updateCacheAndRunPubGet() async {
+    // Populate the cache. We call this before pub get below so that the
+    // sky_engine package is available in the flutter cache for pub to find.
+    if (shouldUpdateCache) {
+      // First always update universal artifacts, as some of these (e.g.
+      // ios-deploy on macOS) are required to determine `requiredArtifacts`.
+      final bool offline;
+      if (argParser.options.containsKey('offline')) {
+        offline = boolArg('offline');
+      } else {
+        offline = false;
+      }
+      await globals.cache.updateAll(<DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+      }, offline: offline);
+      await globals.cache.updateAll(await requiredArtifacts, offline: offline);
+    }
+    await validateCommand();
+
+    final FlutterProject project = FlutterProject.current();
+    project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
+
+    if (shouldRunPub) {
+      await pub.get(
+        context: PubContext.getVerifyContext(name),
+        project: project,
+        checkUpToDate: cachePubGet,
+      );
+    }
+    return project;
   }
 
   /// Whether to run [FlutterProject.regeneratePlatformSpecificTooling] in [verifyThenRunCommand].
@@ -2090,6 +2199,7 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
       return null;
     case TargetPlatform.linux_x64:
     case TargetPlatform.linux_arm64:
+    case TargetPlatform.linux_riscv64:
       if (featureFlags.isLinuxEnabled) {
         return DevelopmentArtifact.linux;
       }

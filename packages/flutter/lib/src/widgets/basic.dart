@@ -9,7 +9,9 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Image, ImageFilter, SemanticsInputType, TextHeightBehavior;
+import 'dart:ui'
+    as ui
+    show Image, ImageFilter, SemanticsHitTestBehavior, SemanticsInputType, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -20,8 +22,8 @@ import 'package:flutter/services.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
+import 'indexed_stack.dart';
 import 'localizations.dart';
-import 'visibility.dart';
 import 'widget_span.dart';
 
 export 'package:flutter/animation.dart';
@@ -46,6 +48,7 @@ export 'package:flutter/rendering.dart'
         FlowPaintingContext,
         FractionalOffsetTween,
         HitTestBehavior,
+        ImageFilterConfig,
         LayerLink,
         MainAxisAlignment,
         MainAxisSize,
@@ -633,14 +636,26 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   ///
   /// The [blendMode] argument will default to [BlendMode.srcOver] and must not be
   /// null if provided.
+  ///
+  /// Exactly one of [filter] or [filterConfig] must be provided.
+  /// Providing both or neither will result in an assertion error.
   const BackdropFilter({
     super.key,
-    required this.filter,
+    this.filter,
+    this.filterConfig,
     super.child,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
     this.backdropGroupKey,
-  }) : _useSharedKey = false;
+  }) : assert(
+         filter != null || filterConfig != null,
+         'Either filter or filterConfig must be provided.',
+       ),
+       assert(
+         filter == null || filterConfig == null,
+         'Cannot provide both a filter and a filterConfig.',
+       ),
+       _useSharedKey = false;
 
   /// Creates a backdrop filter that groups itself with the nearest parent
   /// [BackdropGroup].
@@ -651,20 +666,48 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   /// This constructor will automatically look up the nearest [BackdropGroup]
   /// and will share the backdrop input with sibling and child [BackdropFilter]
   /// widgets.
+  ///
+  /// Exactly one of [filter] or [filterConfig] must be provided.
+  /// Providing both or neither will result in an assertion error.
   const BackdropFilter.grouped({
     super.key,
-    required this.filter,
+    this.filter,
+    this.filterConfig,
     super.child,
     this.blendMode = BlendMode.srcOver,
     this.enabled = true,
-  }) : backdropGroupKey = null,
+  }) : assert(
+         filter != null || filterConfig != null,
+         'Either filter or filterConfig must be provided.',
+       ),
+       assert(
+         filter == null || filterConfig == null,
+         'Cannot provide both a filter and a filterConfig.',
+       ),
+       backdropGroupKey = null,
        _useSharedKey = true;
 
   /// The image filter to apply to the existing painted content before painting the child.
   ///
   /// For example, consider using [ImageFilter.blur] to create a backdrop
   /// blur effect.
-  final ui.ImageFilter filter;
+  ///
+  /// The [filter] parameter is equivalent to [filterConfig] (with the help of
+  /// the [ImageFilterConfig.new] constructor), except for features only
+  /// supported by [ImageFilterConfig] (such as the `bounds` parameter in
+  /// [ImageFilterConfig.blur]).
+  final ui.ImageFilter? filter;
+
+  /// The configuration for the image filter to apply to the existing painted content.
+  ///
+  /// For example, consider using [ImageFilterConfig.blur] to create a backdrop
+  /// blur effect.
+  ///
+  /// The [filterConfig] parameter is equivalent to [filter] (with the help of
+  /// the [ImageFilterConfig.new] constructor), except for features only
+  /// supported by [ImageFilterConfig] (such as the `bounds` parameter in
+  /// [ImageFilterConfig.blur]).
+  final ImageFilterConfig? filterConfig;
 
   /// The blend mode to use to apply the filtered background content onto the background
   /// surface.
@@ -694,10 +737,14 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
     return backdropGroupKey;
   }
 
+  ImageFilterConfig get _effectiveFilterConfig {
+    return filterConfig ?? ImageFilterConfig(filter!);
+  }
+
   @override
   RenderBackdropFilter createRenderObject(BuildContext context) {
     return RenderBackdropFilter(
-      filter: filter,
+      filterConfig: _effectiveFilterConfig,
       blendMode: blendMode,
       enabled: enabled,
       backdropKey: _getBackdropGroupKey(context),
@@ -707,10 +754,21 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderBackdropFilter renderObject) {
     renderObject
-      ..filter = filter
+      ..filterConfig = _effectiveFilterConfig
       ..enabled = enabled
       ..blendMode = blendMode
       ..backdropKey = _getBackdropGroupKey(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('filter', filter, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<ImageFilterConfig>('filterConfig', filterConfig, defaultValue: null),
+    );
+    properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
+    properties.add(FlagProperty('enabled', value: enabled, ifTrue: 'enabled'));
   }
 }
 
@@ -3990,7 +4048,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required bool? readOnly,
     required bool? focusable,
     required bool? focused,
-    required AccessiblityFocusBlockType? accessiblityFocusBlockType,
+    required AccessibilityFocusBlockType? accessibilityFocusBlockType,
     required bool? inMutuallyExclusiveGroup,
     required bool? obscured,
     required bool? multiline,
@@ -4047,8 +4105,11 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required SemanticsRole? role,
     required Set<String>? controlsNodes,
     required SemanticsValidationResult validationResult,
+    required ui.SemanticsHitTestBehavior? hitTestBehavior,
     required ui.SemanticsInputType? inputType,
     required Locale? localeForSubtree,
+    required String? minValue,
+    required String? maxValue,
   }) : this.fromProperties(
          key: key,
          child: child,
@@ -4075,7 +4136,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            readOnly: readOnly,
            focusable: focusable,
            focused: focused,
-           accessiblityFocusBlockType: accessiblityFocusBlockType,
+           accessibilityFocusBlockType: accessibilityFocusBlockType,
            inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
            obscured: obscured,
            multiline: multiline,
@@ -4132,7 +4193,10 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
            role: role,
            controlsNodes: controlsNodes,
            validationResult: validationResult,
+           hitTestBehavior: hitTestBehavior,
            inputType: inputType,
+           minValue: minValue,
+           maxValue: maxValue,
          ),
        );
 
@@ -4150,11 +4214,7 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
     required this.blockUserActions,
     required this.localeForSubtree,
     required this.properties,
-  }) : assert(
-         localeForSubtree == null || container,
-         'To assign locale for subtree, this widget needs to be a '
-         'container',
-       );
+  });
 
   /// Contains properties used by assistive technologies to make the application
   /// more accessible.
@@ -4163,6 +4223,9 @@ sealed class _SemanticsBase extends SingleChildRenderObjectWidget {
   /// If [container] is true, this widget will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors (if the ancestor allows that).
+  ///
+  /// Setting [SemanticsProperties.identifier] also implicitly introduces a new
+  /// node, even if [container] is false.
   ///
   /// Whether descendants of this widget can add their semantic information to the
   /// [SemanticsNode] introduced by this configuration is controlled by
@@ -4324,7 +4387,7 @@ class SliverSemantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
-    super.accessiblityFocusBlockType,
+    super.accessibilityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -4381,8 +4444,11 @@ class SliverSemantics extends _SemanticsBase {
     super.role,
     super.controlsNodes,
     super.validationResult = SemanticsValidationResult.none,
+    super.hitTestBehavior,
     super.inputType,
     super.localeForSubtree,
+    super.minValue,
+    super.maxValue,
   }) : super(child: sliver);
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}
@@ -4743,165 +4809,6 @@ class Stack extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<StackFit>('fit', fit));
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
-  }
-}
-
-/// A [Stack] that shows a single child from a list of children.
-///
-/// The displayed child is the one with the given [index]. The stack is
-/// always as big as the largest child.
-///
-/// If value is null, then nothing is displayed.
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=_O0PPD1Xfbk}
-///
-/// {@tool dartpad}
-/// This example shows a [IndexedStack] widget being used to lay out one card
-/// at a time from a series of cards, each keeping their respective states.
-///
-/// ** See code in examples/api/lib/widgets/basic/indexed_stack.0.dart **
-/// {@end-tool}
-///
-/// See also:
-///
-///  * [Stack], for more details about stacks.
-///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class IndexedStack extends StatelessWidget {
-  /// Creates a [Stack] widget that paints a single child.
-  const IndexedStack({
-    super.key,
-    this.alignment = AlignmentDirectional.topStart,
-    this.textDirection,
-    this.clipBehavior = Clip.hardEdge,
-    this.sizing = StackFit.loose,
-    this.index = 0,
-    this.children = const <Widget>[],
-  });
-
-  /// How to align the non-positioned and partially-positioned children in the
-  /// stack.
-  ///
-  /// Defaults to [AlignmentDirectional.topStart].
-  ///
-  /// See [Stack.alignment] for more information.
-  final AlignmentGeometry alignment;
-
-  /// The text direction with which to resolve [alignment].
-  ///
-  /// Defaults to the ambient [Directionality].
-  final TextDirection? textDirection;
-
-  /// {@macro flutter.material.Material.clipBehavior}
-  ///
-  /// Defaults to [Clip.hardEdge].
-  final Clip clipBehavior;
-
-  /// How to size the non-positioned children in the stack.
-  ///
-  /// Defaults to [StackFit.loose].
-  ///
-  /// See [Stack.fit] for more information.
-  final StackFit sizing;
-
-  /// The index of the child to show.
-  ///
-  /// If this is null, none of the children will be shown.
-  final int? index;
-
-  /// The child widgets of the stack.
-  ///
-  /// Only the child at index [index] will be shown.
-  ///
-  /// See [Stack.children] for more information.
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final wrappedChildren = List<Widget>.generate(children.length, (int i) {
-      return Visibility(
-        visible: i == index,
-        maintainInteractivity: true,
-        maintainSize: true,
-        maintainState: true,
-        maintainAnimation: true,
-        child: children[i],
-      );
-    });
-    return _RawIndexedStack(
-      alignment: alignment,
-      textDirection: textDirection,
-      clipBehavior: clipBehavior,
-      sizing: sizing,
-      index: index,
-      children: wrappedChildren,
-    );
-  }
-}
-
-/// The render object widget that backs [IndexedStack].
-class _RawIndexedStack extends Stack {
-  /// Creates a [Stack] widget that paints a single child.
-  const _RawIndexedStack({
-    super.alignment,
-    super.textDirection,
-    super.clipBehavior,
-    StackFit sizing = StackFit.loose,
-    this.index = 0,
-    super.children,
-  }) : assert(
-         index == null ||
-             (index == 0 && children.length == 0) ||
-             (index >= 0 && index < children.length),
-         'The index must be null or within the range of children.',
-       ),
-       super(fit: sizing);
-
-  /// The index of the child to show.
-  final int? index;
-
-  @override
-  RenderIndexedStack createRenderObject(BuildContext context) {
-    assert(_debugCheckHasDirectionality(context));
-    return RenderIndexedStack(
-      index: index,
-      fit: fit,
-      clipBehavior: clipBehavior,
-      alignment: alignment,
-      textDirection: textDirection ?? Directionality.maybeOf(context),
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderIndexedStack renderObject) {
-    assert(_debugCheckHasDirectionality(context));
-    renderObject
-      ..index = index
-      ..fit = fit
-      ..clipBehavior = clipBehavior
-      ..alignment = alignment
-      ..textDirection = textDirection ?? Directionality.maybeOf(context);
-  }
-
-  @override
-  MultiChildRenderObjectElement createElement() {
-    return _IndexedStackElement(this);
-  }
-}
-
-class _IndexedStackElement extends MultiChildRenderObjectElement {
-  _IndexedStackElement(_RawIndexedStack super.widget);
-
-  @override
-  _RawIndexedStack get widget => super.widget as _RawIndexedStack;
-
-  @override
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
-    final int? index = widget.index;
-    // If the index is null, no child is onstage. Otherwise, only the child at
-    // the selected index is.
-    if (index != null && children.isNotEmpty) {
-      visitor(children.elementAt(index));
-    }
   }
 }
 
@@ -7906,7 +7813,7 @@ class Semantics extends _SemanticsBase {
     super.readOnly,
     super.focusable,
     super.focused,
-    super.accessiblityFocusBlockType,
+    super.accessibilityFocusBlockType,
     super.inMutuallyExclusiveGroup,
     super.obscured,
     super.multiline,
@@ -7963,8 +7870,11 @@ class Semantics extends _SemanticsBase {
     super.role,
     super.controlsNodes,
     super.validationResult = SemanticsValidationResult.none,
+    super.hitTestBehavior,
     super.inputType,
     super.localeForSubtree,
+    super.minValue,
+    super.maxValue,
   });
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}
@@ -8350,8 +8260,6 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// This example shows using an inline StatefulBuilder that rebuilds and that
 /// also has state.
 ///
-// TODO(loic-sharma): Migrate to RadioGroup.
-// https://github.com/flutter/flutter/issues/179088
 /// ```dart
 /// await showDialog<void>(
 ///   context: context,
@@ -8360,19 +8268,17 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 ///     return AlertDialog(
 ///       content: StatefulBuilder(
 ///         builder: (BuildContext context, StateSetter setState) {
-///           return Column(
-///             mainAxisSize: MainAxisSize.min,
-///             children: List<Widget>.generate(4, (int index) {
-///               return Radio<int>(
-///                 value: index,
-///                 // ignore: deprecated_member_use
-///                 groupValue: selectedRadio,
-///                 // ignore: deprecated_member_use
-///                 onChanged: (int? value) {
-///                   setState(() => selectedRadio = value);
-///                 },
-///               );
-///             }),
+///           return RadioGroup<int>(
+///             groupValue: selectedRadio,
+///             onChanged: (int? value) {
+///               setState(() => selectedRadio = value);
+///             },
+///             child: Column(
+///               mainAxisSize: MainAxisSize.min,
+///               children: List<Widget>.generate(4, (int index) {
+///                 return Radio<int>(value: index);
+///               }),
+///             ),
 ///           );
 ///         },
 ///       ),

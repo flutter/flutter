@@ -13,7 +13,7 @@ group("backend") {
   }
 
   if (impeller_enable_opengles) {
-    assert(is_mac || is_linux || is_win || is_android || is_qnx)
+    assert(is_mac || is_linux || is_win || is_android || is_qnx || is_wasm)
     public_deps += [ "gles" ]
   }
 

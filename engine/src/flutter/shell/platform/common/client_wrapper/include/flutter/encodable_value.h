@@ -9,6 +9,7 @@
 #include <cassert>
 #include <cstdint>
 #include <map>
+#include <optional>
 #include <string>
 #include <utility>
 #include <variant>
@@ -214,6 +215,23 @@ class EncodableValue : public internal::EncodableValueVariant {
       return std::get<int32_t>(*this);
     }
     return std::get<int64_t>(*this);
+  }
+
+  // Convenience method to simplify handling objects received from Flutter
+  // where the values may be larger than 32-bit, since they have the same type
+  // on the Dart side, but will be either 32-bit or 64-bit here depending on
+  // the value.
+  //
+  // Calling this method if the value doesn't contain either an int32_t or an
+  // int64_t will return std::nullopt.
+  std::optional<int64_t> TryGetLongValue() const {
+    if (std::holds_alternative<int32_t>(*this)) {
+      return std::get<int32_t>(*this);
+    }
+    if (std::holds_alternative<int64_t>(*this)) {
+      return std::get<int64_t>(*this);
+    }
+    return std::nullopt;
   }
 
 // The C++ Standard Library implementations can get into issues with recursive

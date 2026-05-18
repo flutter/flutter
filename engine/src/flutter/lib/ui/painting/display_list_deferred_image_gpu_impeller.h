@@ -13,7 +13,9 @@
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
+#include "flutter/shell/common/snapshot_pixel_format.h"
 #include "impeller/core/texture.h"
+#include "impeller/display_list/dl_image_impeller.h"
 
 namespace flutter {
 
@@ -21,7 +23,7 @@ namespace testing {
 FML_TEST_CLASS(DlDeferredImageGPUImpeller, TrashesDisplayList);
 }  // namespace testing
 
-class DlDeferredImageGPUImpeller final : public DlImage {
+class DlDeferredImageGPUImpeller final : public impeller::DlImageImpeller {
  public:
   static sk_sp<DlDeferredImageGPUImpeller> Make(
       std::unique_ptr<LayerTree> layer_tree,
@@ -31,23 +33,22 @@ class DlDeferredImageGPUImpeller final : public DlImage {
   static sk_sp<DlDeferredImageGPUImpeller> Make(
       sk_sp<DisplayList> display_list,
       const DlISize& size,
+      SnapshotPixelFormat pixel_format,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
   // |DlImage|
   ~DlDeferredImageGPUImpeller() override;
 
-  // |DlImage|
-  sk_sp<SkImage> skia_image() const override;
+  // |DlImageImpeller|
+  std::shared_ptr<impeller::Texture> GetImpellerTexture(
+      const std::shared_ptr<impeller::Context>& context) const override;
 
   // |DlImage|
-  std::shared_ptr<impeller::Texture> impeller_texture() const override;
+  flutter::DlColorSpace GetColorSpace() const override;
 
   // |DlImage|
   bool isOpaque() const override;
-
-  // |DlImage|
-  bool isTextureBacked() const override;
 
   // |DlImage|
   bool isUIThreadSafe() const override;
@@ -74,6 +75,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
     static std::shared_ptr<ImageWrapper> Make(
         sk_sp<DisplayList> display_list,
         const DlISize& size,
+        SnapshotPixelFormat pixel_format,
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
@@ -82,11 +84,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 
-    bool isTextureBacked() const;
-
-    const std::shared_ptr<impeller::Texture> texture() const {
-      return texture_;
-    }
+    std::shared_ptr<impeller::Texture> texture() const;
 
     const DlISize size() const { return size_; }
 
@@ -95,6 +93,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
    private:
     FML_FRIEND_TEST(testing::DlDeferredImageGPUImpeller, TrashesDisplayList);
     DlISize size_;
+    SnapshotPixelFormat pixel_format_;
     std::shared_ptr<impeller::Texture> texture_;
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate_;
     fml::RefPtr<fml::TaskRunner> raster_task_runner_;
@@ -104,6 +103,7 @@ class DlDeferredImageGPUImpeller final : public DlImage {
 
     ImageWrapper(
         const DlISize& size,
+        SnapshotPixelFormat pixel_format,
         fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
         fml::RefPtr<fml::TaskRunner> raster_task_runner);
 

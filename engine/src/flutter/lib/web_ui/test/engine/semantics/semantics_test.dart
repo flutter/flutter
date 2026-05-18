@@ -160,6 +160,12 @@ void runSemanticsTests() {
   group('forms', () {
     _testForms();
   });
+  group('progressBar', () {
+    _testProgressBar();
+  });
+  group('loadingSpinner', () {
+    _testLoadingSpinner();
+  });
 }
 
 void _testSemanticRole() {
@@ -339,7 +345,7 @@ void _testRoleLifecycle() {
 }
 
 void _testEngineAccessibilityBuilder() {
-  final builder = EngineAccessibilityFeaturesBuilder(0);
+  final builder = EngineAccessibilityFeaturesBuilder();
   EngineAccessibilityFeatures features = builder.build();
 
   test('accessible navigation', () {
@@ -397,6 +403,29 @@ void _testEngineAccessibilityBuilder() {
     builder.reduceMotion = true;
     features = builder.build();
     expect(features.reduceMotion, isTrue);
+  });
+
+  test('autoPlayAnimatedImages', () {
+    // By default this starts off true, see EngineAccessibilityFeatures.autoPlayAnimatedImages.
+    expect(features.autoPlayAnimatedImages, isTrue);
+    builder.autoPlayAnimatedImages = false;
+    features = builder.build();
+    expect(features.autoPlayAnimatedImages, isFalse);
+  });
+
+  test('autoPlayVideos', () {
+    // By default this starts off true, see EngineAccessibilityFeatures.autoPlayVideos.
+    expect(features.autoPlayVideos, isTrue);
+    builder.autoPlayVideos = false;
+    features = builder.build();
+    expect(features.autoPlayVideos, isFalse);
+  });
+
+  test('deterministicCursor', () {
+    expect(features.deterministicCursor, isFalse);
+    builder.deterministicCursor = true;
+    features = builder.build();
+    expect(features.deterministicCursor, isTrue);
   });
 }
 
@@ -484,9 +513,7 @@ void _testEngineSemanticsOwner() {
   });
 
   test('accessibilityFeatures copyWith function works', () {
-    // Announce is an inverted check, see EngineAccessibilityFeatures.announce.
-    // Therefore, we need to ensure that the original copy starts with false (1 << 7).
-    const original = EngineAccessibilityFeatures(0 | 1 << 7);
+    final EngineAccessibilityFeatures original = EngineAccessibilityFeaturesBuilder(0).build();
 
     EngineAccessibilityFeatures copy = original.copyWith(accessibleNavigation: true);
     expect(copy.accessibleNavigation, true);
@@ -497,6 +524,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, false);
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(boldText: true);
     expect(copy.accessibleNavigation, false);
@@ -506,6 +536,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, false);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(disableAnimations: true);
     expect(copy.accessibleNavigation, false);
@@ -516,6 +549,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, false);
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(highContrast: true);
     expect(copy.accessibleNavigation, false);
@@ -526,6 +562,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, false);
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(invertColors: true);
     expect(copy.accessibleNavigation, false);
@@ -536,6 +575,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, false);
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(onOffSwitchLabels: true);
     expect(copy.accessibleNavigation, false);
@@ -545,6 +587,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.invertColors, false);
     expect(copy.onOffSwitchLabels, true);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(supportsAnnounce: true);
     expect(copy.accessibleNavigation, false);
@@ -555,6 +600,9 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, false);
     expect(copy.supportsAnnounce, true);
     expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
 
     copy = original.copyWith(reduceMotion: true);
     expect(copy.accessibleNavigation, false);
@@ -565,6 +613,48 @@ void _testEngineSemanticsOwner() {
     expect(copy.onOffSwitchLabels, false);
     expect(copy.supportsAnnounce, false);
     expect(copy.reduceMotion, true);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
+
+    copy = original.copyWith(autoPlayAnimatedImages: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.supportsAnnounce, false);
+    expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, true);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, false);
+
+    copy = original.copyWith(autoPlayVideos: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.supportsAnnounce, false);
+    expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, true);
+    expect(copy.deterministicCursor, false);
+
+    copy = original.copyWith(deterministicCursor: true);
+    expect(copy.accessibleNavigation, false);
+    expect(copy.boldText, false);
+    expect(copy.disableAnimations, false);
+    expect(copy.highContrast, false);
+    expect(copy.invertColors, false);
+    expect(copy.onOffSwitchLabels, false);
+    expect(copy.supportsAnnounce, false);
+    expect(copy.reduceMotion, false);
+    expect(copy.autoPlayAnimatedImages, false);
+    expect(copy.autoPlayVideos, false);
+    expect(copy.deterministicCursor, true);
   });
 
   test('makes the semantic DOM tree invisible', () {
@@ -1521,9 +1611,8 @@ void _testContainer() {
       semantics().semanticsEnabled = false;
     });
 
-    test('non-interactive leaf nodes do not accept pointer events', () async {
+    test('non-interactive leaf nodes defer to browser hit testing', () async {
       final builder = ui.SemanticsUpdateBuilder();
-      // Create a non-interactive leaf node (no actions, no interactive flags)
       updateNode(builder);
 
       owner().updateSemantics(builder.build());
@@ -1533,8 +1622,8 @@ void _testContainer() {
       )!;
       expect(
         element.style.pointerEvents,
-        'none',
-        reason: 'Non-interactive leaf nodes should not intercept pointer events',
+        'auto',
+        reason: 'Non-interactive leaf nodes should defer to browser z-index hit testing',
       );
     });
 
@@ -1576,7 +1665,11 @@ void _testContainer() {
 
     test('checkable leaf nodes accept pointer events', () async {
       final builder = ui.SemanticsUpdateBuilder();
-      updateNode(builder, flags: const ui.SemanticsFlags(isChecked: ui.CheckedState.isFalse));
+      updateNode(
+        builder,
+        flags: const ui.SemanticsFlags(isChecked: ui.CheckedState.isFalse),
+        actions: ui.SemanticsAction.tap.index,
+      );
 
       owner().updateSemantics(builder.build());
 
@@ -1608,7 +1701,11 @@ void _testContainer() {
 
     test('link leaf nodes accept pointer events', () async {
       final builder = ui.SemanticsUpdateBuilder();
-      updateNode(builder, flags: const ui.SemanticsFlags(isLink: true));
+      updateNode(
+        builder,
+        flags: const ui.SemanticsFlags(isLink: true),
+        actions: ui.SemanticsAction.tap.index,
+      );
 
       owner().updateSemantics(builder.build());
 
@@ -1636,7 +1733,6 @@ void _testContainer() {
 
     test('non-interactive containers do not accept pointer events', () async {
       final builder = ui.SemanticsUpdateBuilder();
-      // Create a container with children but no explicit hitTestBehavior
       updateNode(
         builder,
         childrenInTraversalOrder: Int32List.fromList(<int>[1]),
@@ -1652,8 +1748,7 @@ void _testContainer() {
       expect(
         container.style.pointerEvents,
         'none',
-        reason:
-            'Non-interactive containers should not accept pointer events when hitTestBehavior is defer',
+        reason: 'Non-interactive containers should not intercept pointer events',
       );
     });
 
@@ -1708,6 +1803,102 @@ void _testContainer() {
         'none',
         reason:
             'Framework declaration (Tier 1) should take precedence over interactive behaviors (Tier 2)',
+      );
+    });
+
+    test('opaque containers with children accept pointer events', () async {
+      final builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.opaque,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(builder, id: 1);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement container = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        container.style.pointerEvents,
+        'all',
+        reason: 'Opaque containers should accept pointer events regardless of children',
+      );
+    });
+
+    test('transparent containers with children do not accept pointer events', () async {
+      final builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.transparent,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(builder, id: 1);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement container = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        container.style.pointerEvents,
+        'none',
+        reason: 'Transparent containers should not accept pointer events',
+      );
+    });
+
+    test('platform view leaf with transparent does not accept pointer events', () async {
+      final builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        platformViewId: 99,
+        hitTestBehavior: ui.SemanticsHitTestBehavior.transparent,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement element = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        element.style.pointerEvents,
+        'none',
+        reason:
+            'Platform view semantics nodes should let events pass through to the native element',
+      );
+    });
+
+    test('non-interactive leaf child gets auto while container parent gets none', () async {
+      final builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(builder, id: 1);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement parent = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}0',
+      )!;
+      expect(
+        parent.style.pointerEvents,
+        'none',
+        reason: 'Container parent should not intercept pointer events',
+      );
+
+      final DomElement child = owner().semanticsHost.querySelector(
+        '#${kFlutterSemanticNodePrefix}1',
+      )!;
+      expect(
+        child.style.pointerEvents,
+        'auto',
+        reason: 'Non-interactive leaf child should defer to browser z-index hit testing',
       );
     });
   });
@@ -2070,6 +2261,7 @@ void _testVerticalScrolling() {
     updateNode(
       builder,
       flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+      actions: ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
     );
@@ -2094,6 +2286,7 @@ void _testVerticalScrolling() {
     updateNode(
       builder,
       flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+      actions: ui.SemanticsAction.scrollLeft.index, // Only have a horizontal scroll action.
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
     );
@@ -3186,7 +3379,6 @@ void _testSelectables() {
 
     final SemanticsObject node = owner().debugSemanticsTree![0]!;
     expect(node.semanticRole!.kind, EngineSemanticsRole.checkable);
-    expect(node.semanticRole!.debugSemanticBehaviorTypes, isNot(contains(Selectable)));
     expect(node.element.getAttribute('aria-selected'), isNull);
 
     semantics().semanticsEnabled = false;
@@ -3793,7 +3985,12 @@ void _testPlatformView() {
       ..semanticsEnabled = true;
 
     final builder = ui.SemanticsUpdateBuilder();
-    updateNode(builder, platformViewId: 5, rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
+    updateNode(
+      builder,
+      platformViewId: 5,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      hitTestBehavior: ui.SemanticsHitTestBehavior.transparent,
+    );
     owner().updateSemantics(builder.build());
 
     expectSemanticsTree(owner(), '<sem aria-owns="flt-pv-5"></sem>');
@@ -3866,6 +4063,7 @@ void _testPlatformView() {
       // This has to match the values passed to `addPlatformView` above.
       rect: const ui.Rect.fromLTRB(0, 15, 20, 45),
       platformViewId: 0,
+      hitTestBehavior: ui.SemanticsHitTestBehavior.transparent,
     );
     updateNode(
       builder,
@@ -6151,6 +6349,82 @@ void _testForms() {
   semantics().semanticsEnabled = false;
 }
 
+void _testProgressBar() {
+  test('nodes with progress bar role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.progressBar,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.progressBar);
+    expect(object.element.getAttribute('role'), 'progressbar');
+  });
+
+  test('progress bar extrapolates percentages via min/max', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.progressBar,
+        value: '50%',
+        minValue: '0',
+        maxValue: '5',
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.progressBar);
+    expect(object.element.getAttribute('aria-valuenow'), '2.5');
+    expect(object.element.getAttribute('aria-valuetext'), '50%');
+    expect(object.element.getAttribute('aria-valuemin'), '0');
+    expect(object.element.getAttribute('aria-valuemax'), '5');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testLoadingSpinner() {
+  test('nodes with loading spinner role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.loadingSpinner,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.loadingSpinner);
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
 /// supplies default values for semantics attributes.
 void updateNode(
@@ -6195,6 +6469,8 @@ void updateNode(
   ui.SemanticsHitTestBehavior hitTestBehavior = ui.SemanticsHitTestBehavior.defer,
   ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
   ui.Locale? locale,
+  String minValue = '0',
+  String maxValue = '0',
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   hitTestTransform ??= Float64List.fromList(Matrix4.identity().storage);
@@ -6242,6 +6518,8 @@ void updateNode(
     hitTestBehavior: hitTestBehavior,
     inputType: inputType,
     locale: locale,
+    minValue: minValue,
+    maxValue: maxValue,
   );
 }
 

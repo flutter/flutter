@@ -1252,9 +1252,8 @@ void main() {
               child: SingleChildScrollView(
                 child: GestureDetector(
                   onTap: () => onTap = true,
-                  child: const SizedBox(
-                    width: 4000.0,
-                    height: 4000.0,
+                  child: const SizedBox.square(
+                    dimension: 4000.0,
                     child: ColoredBox(color: Color(0x00000000)),
                   ),
                 ),
@@ -1803,16 +1802,10 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(
       find.byType(RawScrollbar),
       paints
-        ..path(
-          includes: const <Offset>[
-            Offset(782.0, 180.0),
-            Offset(782.0, 180.0 - 18.0),
-            Offset(782.0 + 18.0, 180),
-            Offset(782.0, 180.0 + 18.0),
-            Offset(782.0 - 18.0, 180),
-          ],
-        )
-        ..circle(x: 782.0, y: 180.0, radius: 17.0, strokeWidth: 2.0),
+        // Scrollbar thumb background fill.
+        ..circle(x: 782.0, y: 180.0, radius: 18.0, style: PaintingStyle.fill)
+        // Scrollbar thumb border (stroke).
+        ..circle(x: 782.0, y: 180.0, radius: 17.0, style: PaintingStyle.stroke, strokeWidth: 2.0),
     );
   });
 
@@ -1874,10 +1867,14 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     expect(
       find.byType(RawScrollbar),
       paints
+        // Scrollbar track.
         ..rect(rect: const Rect.fromLTRB(780.0, 0.0, 800.0, 600.0))
-        ..path(
-          includes: const <Offset>[Offset(800.0, 0.0)],
-          excludes: const <Offset>[Offset(780.0, 0.0)],
+        // Scrollbar thumb background fill.
+        ..rrect(
+          rrect: RRect.fromRectAndCorners(
+            const Rect.fromLTRB(780.0, 0.0, 800.0, 360.0),
+            topLeft: const Radius.circular(8.0),
+          ),
         ),
     );
   });
@@ -3464,6 +3461,100 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       expect(getScrollbarGestureDetector().gestures.length, greaterThan(1));
     },
   );
+
+  testWidgets('Scrollbar gestures disabled when maxScrollExtent == minScrollExtent', (
+    WidgetTester tester,
+  ) async {
+    // Test for the condition: maxScrollExtent > minScrollExtent
+    // When maxScrollExtent == minScrollExtent, gestures should be disabled.
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    RawGestureDetector getScrollbarGestureDetector() {
+      return tester.widget<RawGestureDetector>(
+        find
+            .descendant(of: find.byType(RawScrollbar), matching: find.byType(RawGestureDetector))
+            .first,
+      );
+    }
+
+    // Content that fits exactly (maxScrollExtent == minScrollExtent == 0.0)
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: RawScrollbar(
+            interactive: true,
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(height: 600.0, width: 800.0),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // When maxScrollExtent == minScrollExtent, gestures should be disabled.
+    expect(getScrollbarGestureDetector().gestures.length, 0);
+  });
+
+  testWidgets('Scrollbar gestures enabled when maxScrollExtent > minScrollExtent by any amount', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    RawGestureDetector getScrollbarGestureDetector() {
+      return tester.widget<RawGestureDetector>(
+        find
+            .descendant(of: find.byType(RawScrollbar), matching: find.byType(RawGestureDetector))
+            .first,
+      );
+    }
+
+    // Use CustomScrollView with center to create negative minScrollExtent.
+    final uniqueKey = UniqueKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: ScrollConfiguration(
+            behavior: const ScrollBehavior().copyWith(scrollbars: false),
+            child: PrimaryScrollController(
+              controller: scrollController,
+              child: RawScrollbar(
+                interactive: true,
+                controller: scrollController,
+                child: CustomScrollView(
+                  center: uniqueKey,
+                  slivers: <Widget>[
+                    SliverToBoxAdapter(child: Container(height: 300.0)),
+                    SliverToBoxAdapter(key: uniqueKey, child: Container(height: 300.0)),
+                    SliverToBoxAdapter(child: Container(height: 300.0)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(scrollController.position.minScrollExtent, lessThan(0.0));
+    expect(
+      scrollController.position.maxScrollExtent,
+      greaterThan(scrollController.position.minScrollExtent),
+    );
+
+    expect(scrollController.position.maxScrollExtent, lessThanOrEqualTo(0.0));
+
+    expect(getScrollbarGestureDetector().gestures.length, greaterThan(0));
+  });
 
   testWidgets('Drag horizontal and vertical scrollbars', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/87697

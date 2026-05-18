@@ -365,7 +365,7 @@ void main() {
   });
 
   test('RenderAnimatedOpacity does not composite if it is transparent', () async {
-    final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
       ..value = 0.0;
 
     final renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -378,7 +378,7 @@ void main() {
   });
 
   test('RenderAnimatedOpacity does composite if it is opaque', () {
-    final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
       ..value = 1.0;
 
     final renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -391,7 +391,7 @@ void main() {
   });
 
   test('RenderAnimatedOpacity does composite if it is partially opaque', () {
-    final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
       ..value = 0.5;
 
     final renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -404,7 +404,7 @@ void main() {
   });
 
   test('RenderAnimatedOpacity reuses its layer', () {
-    final Animation<double> opacityAnimation = AnimationController(vsync: FakeTickerProvider())
+    final Animation<double> opacityAnimation = AnimationController(vsync: const TestVSync())
       ..value = 0.5; // must not be 0 or 1.0. Otherwise, it won't create a layer
 
     _testLayerReuse<OpacityLayer>(
@@ -886,7 +886,7 @@ void main() {
     final RenderBox box = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 20),
     );
-    final opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final opacityAnimation = AnimationController(value: 1, vsync: const TestVSync());
     final opacity = RenderAnimatedOpacity(opacity: opacityAnimation, child: box);
 
     // Make it listen to the animation.
@@ -903,7 +903,7 @@ void main() {
     final RenderSliver sliver = RenderSliverToBoxAdapter(
       child: RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 20)),
     );
-    final opacityAnimation = AnimationController(value: 1, vsync: FakeTickerProvider());
+    final opacityAnimation = AnimationController(value: 1, vsync: const TestVSync());
     final opacity = RenderSliverAnimatedOpacity(opacity: opacityAnimation, sliver: sliver);
 
     // Make it listen to the animation.
@@ -1042,6 +1042,33 @@ void main() {
     final box = RenderBoxWithTestConstraints();
     const constraints = TestConstraints(testValue: 6);
     expect(box.computeDryLayout(constraints), const Size.square(6));
+  });
+
+  test('RenderBackdropFilter handles mix uses of .filter and .filterConfig', () {
+    final filter1 = ui.ImageFilter.blur();
+    final filter2 = ui.ImageFilter.matrix(Float64List.fromList(Matrix4.identity().storage));
+    final filter3 = ui.ImageFilter.compose(outer: filter1, inner: filter2);
+
+    final backdropFilter = RenderBackdropFilter(filter: filter1);
+
+    expect(backdropFilter.filter, filter1);
+    expect(backdropFilter.filterConfig, equals(ImageFilterConfig(filter1)));
+
+    backdropFilter.filterConfig = ImageFilterConfig(filter2);
+
+    expect(backdropFilter.filter, filter2);
+    expect(backdropFilter.filterConfig, equals(ImageFilterConfig(filter2)));
+
+    backdropFilter.filter = filter3;
+
+    expect(backdropFilter.filter, filter3);
+    expect(backdropFilter.filterConfig, equals(ImageFilterConfig(filter3)));
+
+    const filterConfig1 = ImageFilterConfig.blur(sigmaX: 10.0, sigmaY: 10.0);
+    backdropFilter.filterConfig = filterConfig1;
+
+    expect(backdropFilter.filterConfig, equals(filterConfig1));
+    expect(() => backdropFilter.filter, throwsAssertionError);
   });
 }
 

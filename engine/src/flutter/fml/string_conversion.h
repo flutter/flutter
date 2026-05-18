@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FML_STRING_CONVERSION_H_
 #define FLUTTER_FML_STRING_CONVERSION_H_
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -18,6 +19,9 @@ std::string Utf16ToUtf8(const std::u16string_view string);
 
 // Returns a UTF-16 encoded equivalent of a UTF-8 encoded input string.
 std::u16string Utf8ToUtf16(const std::string_view string);
+
+// Returns the pathname encoded in UTF-8.
+std::string PathToUtf8(const std::filesystem::path& path);
 
 }  // namespace fml
 

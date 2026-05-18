@@ -251,7 +251,14 @@ size_t CapabilitiesGLES::GetMinimumUniformAlignment() const {
 }
 
 bool CapabilitiesGLES::NeedsPartitionedHostBuffer() const {
+#ifdef FML_OS_EMSCRIPTEN
+  // WebGL has special requirements here to keep indexes and other data
+  // separate. See
+  // https://registry.khronos.org/webgl/specs/latest/2.0/#BUFFER_OBJECT_BINDING
+  return true;
+#else
   return false;
+#endif
 }
 
 }  // namespace impeller

@@ -27,7 +27,7 @@ void testMain() {
 
   test('toImage succeeds', () async {
     final ui.Image image = await _createImage();
-    expect(image.runtimeType.toString(), equals('CkImage'));
+    expect(image, isA<CkImage>());
     image.dispose();
   });
 
@@ -65,7 +65,7 @@ void testMain() {
 
   test('CkImage does not close image source too early', () async {
     final ImageSource imageSource = ImageBitmapImageSource(
-      await domWindow.createImageBitmap(createBlankDomImageData(4, 4)),
+      await createImageBitmap(createBlankDomImageData(4, 4)),
     );
 
     final SkImage skImage1 = (await createImageFromBytes(k4x4PngImage)).skImage;
@@ -86,6 +86,16 @@ void testMain() {
 
     image3.dispose();
     expect(imageSource.debugIsClosed, isTrue);
+  });
+
+  test('ImageElementImageSource clears src on closure', () async {
+    final DomHTMLImageElement imageElement = createDomHTMLImageElement();
+    imageElement.src = 'sample_image1.png';
+    final ImageSource imageSource = ImageElementImageSource(imageElement);
+
+    expect(imageElement.src, contains('sample_image1.png'));
+    imageSource.close();
+    expect(imageElement.src, isNot(contains('sample_image1.png')));
   });
 }
 

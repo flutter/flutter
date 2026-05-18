@@ -51,14 +51,9 @@ class ColorSourceContents : public Contents {
   ~ColorSourceContents() override;
 
   //----------------------------------------------------------------------------
-  /// @brief  Set the geometry that this contents will use to render.
-  ///
-  void SetGeometry(const Geometry* geometry);
-
-  //----------------------------------------------------------------------------
   /// @brief  Get the geometry that this contents will use to render.
   ///
-  const Geometry* GetGeometry() const;
+  virtual const Geometry* GetGeometry() const = 0;
 
   //----------------------------------------------------------------------------
   /// @brief  Set the effect transform for this color source.
@@ -216,15 +211,12 @@ class ColorSourceContents : public Contents {
     // values.
     frame_info.mvp = geometry_result.transform;
 
-    // If overdraw prevention is enabled (like when drawing stroke paths), we
-    // increment the stencil buffer as we draw, preventing overlapping fragments
-    // from drawing. Afterwards, we need to append another draw call to clean up
-    // the stencil buffer (happens below in this method). This can be skipped
-    // for draws that are fully opaque or use src blend mode.
-    if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw &&
-        options.blend_mode != BlendMode::kSrc) {
-      options.stencil_mode =
-          ContentContextOptions::StencilMode::kOverdrawPreventionIncrement;
+    // If overdraw prevention is requested (like when drawing stroke paths), set
+    // up the depth buffer and depth comparison function to prevent the same
+    // pixel from being painted multiple times.
+    if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw) {
+      options.depth_write_enabled = true;
+      options.depth_compare = CompareFunction::kGreater;
     }
     pass.SetStencilReference(0);
 
@@ -241,19 +233,7 @@ class ColorSourceContents : public Contents {
 
     pass.SetPipeline(pipeline_callback(options));
 
-    if (!pass.Draw().ok()) {
-      return false;
-    }
-
-    // If we performed overdraw prevention, a subsection of the clip heightmap
-    // was incremented by 1 in order to self-clip. So simply append a clip
-    // restore to clean it up.
-    if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw &&
-        options.blend_mode != BlendMode::kSrc) {
-      return RenderClipRestore(renderer, pass, entity.GetClipDepth(),
-                               contents->GetCoverage(entity));
-    }
-    return true;
+    return pass.Draw().ok();
   }
 
  protected:
@@ -293,7 +273,6 @@ class ColorSourceContents : public Contents {
   }
 
  private:
-  const Geometry* geometry_ = nullptr;
   Matrix inverse_matrix_;
   Scalar opacity_ = 1.0;
   Scalar inherited_opacity_ = 1.0;

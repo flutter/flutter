@@ -72,8 +72,8 @@ Finder _findOverflowBar() {
 const ShapeBorder _defaultM2DialogShape = RoundedRectangleBorder(
   borderRadius: BorderRadius.all(Radius.circular(4.0)),
 );
-final ShapeBorder _defaultM3DialogShape = RoundedRectangleBorder(
-  borderRadius: BorderRadius.circular(28.0),
+const ShapeBorder _defaultM3DialogShape = RoundedRectangleBorder(
+  borderRadius: BorderRadius.all(Radius.circular(28.0)),
 );
 
 void main() {
@@ -293,6 +293,71 @@ void main() {
 
     final Material materialWidget = _getMaterialFromDialog(tester);
     expect(materialWidget.clipBehavior, Clip.antiAlias);
+  });
+
+  testWidgets('SimpleDialog Custom Content Text Style', (WidgetTester tester) async {
+    const contentText = 'Content';
+    const contentTextStyle = TextStyle(color: Colors.pink);
+    const dialog = SimpleDialog(
+      contentTextStyle: contentTextStyle,
+      children: <Widget>[Text(contentText)],
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(content.text.style, contentTextStyle);
+  });
+
+  testWidgets('SimpleDialog Custom Content Text Style - DialogTheme', (WidgetTester tester) async {
+    const contentText = 'Content';
+    const contentTextStyle = TextStyle(color: Colors.orange);
+    const dialog = SimpleDialog(children: <Widget>[Text(contentText)]);
+    final theme = ThemeData(dialogTheme: const DialogThemeData(contentTextStyle: contentTextStyle));
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(content.text.style, contentTextStyle);
+  });
+
+  testWidgets('Material3 - SimpleDialog Custom Content Text Style - Theme', (
+    WidgetTester tester,
+  ) async {
+    const contentText = 'Content';
+    const contentTextStyle = TextStyle(color: Colors.purple);
+    const dialog = SimpleDialog(children: <Widget>[Text(contentText)]);
+    final theme = ThemeData(textTheme: const TextTheme(bodyMedium: contentTextStyle));
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(content.text.style!.color, contentTextStyle.color);
+  });
+
+  testWidgets('Material2 - SimpleDialog Custom Content Text Style - Theme', (
+    WidgetTester tester,
+  ) async {
+    const contentText = 'Content';
+    const contentTextStyle = TextStyle(color: Colors.teal);
+    const dialog = SimpleDialog(children: <Widget>[Text(contentText)]);
+    final theme = ThemeData(
+      useMaterial3: false,
+      textTheme: const TextTheme(titleMedium: contentTextStyle),
+    );
+    await tester.pumpWidget(_buildAppWithDialog(dialog, theme: theme));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
+    expect(content.text.style!.color, contentTextStyle.color);
   });
 
   testWidgets('Custom dialog shape', (WidgetTester tester) async {
@@ -3310,6 +3375,95 @@ void main() {
 
       semantics.dispose();
     }, variant: TargetPlatformVariant.all());
+  });
+
+  testWidgets('Dialog has hitTestBehavior.opaque to prevent dismissal on empty areas', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  showDialog<void>(
+                    context: context,
+                    builder: (BuildContext context) =>
+                        const Dialog(child: SizedBox(width: 200, height: 200)),
+                  );
+                },
+                child: const Text('Show Dialog'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Show Dialog'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Dialog), findsOneWidget);
+
+    final Semantics routeSemantics = tester.widget<Semantics>(
+      find.ancestor(of: find.byType(Dialog), matching: find.byType(Semantics)).first,
+    );
+
+    expect(routeSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+
+    semantics.dispose();
+  });
+
+  testWidgets('AlertDialog has hitTestBehavior.opaque via Dialog', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                onPressed: () {
+                  showDialog<void>(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                      title: const Text('Test Dialog'),
+                      content: const SizedBox(width: 200, height: 100),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: const Text('Show Dialog'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Show Dialog'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.byType(Dialog), findsOneWidget);
+
+    // Find the route-level Semantics with hitTestBehavior.opaque
+    // (wraps the entire dialog content, above the Dialog widget)
+    final Semantics routeSemantics = tester.widget<Semantics>(
+      find.ancestor(of: find.byType(Dialog), matching: find.byType(Semantics)).first,
+    );
+
+    expect(routeSemantics.properties.hitTestBehavior, SemanticsHitTestBehavior.opaque);
+
+    semantics.dispose();
   });
 }
 

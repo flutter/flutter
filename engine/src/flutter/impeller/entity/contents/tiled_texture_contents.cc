@@ -34,9 +34,14 @@ static std::optional<SamplerAddressMode> TileModeToAddressMode(
   }
 }
 
-TiledTextureContents::TiledTextureContents() = default;
+TiledTextureContents::TiledTextureContents(const Geometry* geometry)
+    : geometry_(geometry) {}
 
 TiledTextureContents::~TiledTextureContents() = default;
+
+const Geometry* TiledTextureContents::GetGeometry() const {
+  return geometry_;
+}
 
 void TiledTextureContents::SetTexture(std::shared_ptr<Texture> texture) {
   texture_ = std::move(texture);
@@ -130,7 +135,7 @@ bool TiledTextureContents::Render(const ContentContext& renderer,
       Rect::MakeSize(texture_size).GetNormalizingTransform() *
       GetInverseEffectTransform();
 
-#ifdef IMPELLER_ENABLE_OPENGLES
+#if defined(IMPELLER_ENABLE_OPENGLES) && !defined(FML_OS_EMSCRIPTEN)
   using FSExternal = TiledTextureFillExternalFragmentShader;
   if (texture_->GetTextureDescriptor().type ==
       TextureType::kTextureExternalOES) {

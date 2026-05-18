@@ -4,7 +4,7 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/web_paragraph/paragraph.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 import 'package:web_engine_tester/golden_tester.dart';
 
@@ -94,6 +94,7 @@ Future<void> testMain() async {
     final arialStyle = WebParagraphStyle(
       fontFamily: 'Arial',
       fontSize: 50,
+      textDirection: TextDirection.rtl,
       color: const Color(0xFF000000),
     );
     final builder = WebParagraphBuilder(arialStyle);
@@ -119,7 +120,11 @@ Future<void> testMain() async {
     );
     final builder = WebParagraphBuilder(arialStyle);
     builder.pushStyle(WebTextStyle(color: const Color(0xFF000000)));
-    builder.addText('لABC لم def لل لم ghi');
+    builder.addText('ABC لم def');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 300));
+    paragraph.paint(canvas, Offset.zero);
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_mix_1_ltr.png', region: region);
   });
 
@@ -383,15 +388,15 @@ Future<void> testMain() async {
       fontSize: 40,
       shadows: const [
         Shadow(color: Color(0xFF00FF00), offset: Offset(0, -10), blurRadius: 2.0),
-        Shadow(color: Color(0xFFFF0000), offset: Offset(-10, 0), blurRadius: 2.0),
-        Shadow(color: Color(0xFF0000FF), offset: Offset(10, 0), blurRadius: 2.0),
-        Shadow(color: Color(0xFF888888), offset: Offset(0, 10), blurRadius: 2.0),
+        Shadow(color: Color(0xFFFF0000), offset: Offset(-15, 0), blurRadius: 2.0),
+        Shadow(color: Color(0xFF0000FF), offset: Offset(20, 0), blurRadius: 2.0),
+        Shadow(color: Color(0xFFFF00FF), offset: Offset(0, 25), blurRadius: 2.0),
       ],
     );
     final leftShadow = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
-      shadows: const [Shadow(color: Color(0xFFFF0000), offset: Offset(-10, 0), blurRadius: 2.0)],
+      shadows: const [Shadow(color: Color(0xFFFF0000), offset: Offset(-15, 0), blurRadius: 2.0)],
     );
     final topShadow = WebTextStyle(
       fontFamily: 'Roboto',
@@ -401,13 +406,20 @@ Future<void> testMain() async {
     final rightShadow = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
-      shadows: const [Shadow(color: Color(0xFF0000FF), offset: Offset(10, 0), blurRadius: 2.0)],
+      shadows: const [Shadow(color: Color(0xFF0000FF), offset: Offset(20, 0), blurRadius: 2.0)],
     );
     final bottomShadow = WebTextStyle(
       fontFamily: 'Roboto',
       fontSize: 40,
-      shadows: const [Shadow(color: Color(0xFFFF00FF), offset: Offset(0, 10), blurRadius: 2.0)],
+      shadows: const [Shadow(color: Color(0xFFFF00FF), offset: Offset(0, 25), blurRadius: 2.0)],
     );
+
+    final goodShadow = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      shadows: const [Shadow(color: Color(0xFF444444), offset: Offset(5, 5), blurRadius: 5.0)],
+    );
+
     final builder = WebParagraphBuilder(paragraphStyle);
     builder.pushStyle(defaultStyle);
 
@@ -418,19 +430,23 @@ Future<void> testMain() async {
     builder.addText('Text without shadows. ');
 
     builder.pushStyle(leftShadow);
-    builder.addText('Left Shadow. ');
+    builder.addText('Left Shadow. -15, 0. ');
     builder.pop();
 
     builder.pushStyle(topShadow);
-    builder.addText('Top Shadow. ');
+    builder.addText('Top Shadow. 0, -10. ');
     builder.pop();
 
     builder.pushStyle(rightShadow);
-    builder.addText('Right Shadow. ');
+    builder.addText('Right Shadow. 20, 0. ');
     builder.pop();
 
     builder.pushStyle(bottomShadow);
-    builder.addText('Bottom Shadow. ');
+    builder.addText('Bottom Shadow. 0, 25. ');
+    builder.pop();
+
+    builder.pushStyle(goodShadow);
+    builder.addText('Good Shadow. 5, 5. ');
     builder.pop();
 
     final WebParagraph paragraph = builder.build();
@@ -450,7 +466,11 @@ Future<void> testMain() async {
     const greenColor = Color(0xFF00FF00);
     const grayColor = Color(0xFF888888);
 
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40);
+    final paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      color: const Color(0xFF000000),
+    );
 
     final defaultStyle = WebTextStyle(foreground: blackPaint);
 
@@ -658,6 +678,7 @@ Future<void> testMain() async {
         canvas.drawRect(rect.toRect(), bluePaint);
       }
     }
+
     {
       final List<TextBox> rects = paragraph.getBoxesForRange(
         0,
@@ -669,6 +690,7 @@ Future<void> testMain() async {
         canvas.drawRect(rect.toRect(), redPaint);
       }
     }
+
     {
       final List<TextBox> rects = paragraph.getBoxesForRange(
         0,
@@ -952,5 +974,278 @@ Future<void> testMain() async {
     }
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('pixels.png', region: region);
+  });
+
+  test('Ellipsis LTR', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 15,
+      color: const Color(0xFF000000),
+      ellipsis: '...',
+      maxLines: 1,
+    );
+    final style30 = WebTextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 30,
+      fontFamily: 'Roboto',
+    );
+
+    {
+      final builder = WebParagraphBuilder(paragraphStyle);
+      builder.pushStyle(style30);
+      builder.addText('This is a long text that should be ellipsized at the end');
+      builder.pop();
+      final WebParagraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 300));
+      paragraph.paint(canvas, const Offset(100, 100));
+    }
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('ellipsisLTR.png', region: region);
+  });
+
+  test('Ellipsis RTL', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 15,
+      color: const Color(0xFF000000),
+      ellipsis: '...',
+      maxLines: 1,
+      textDirection: TextDirection.rtl,
+    );
+    final style30 = WebTextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 30,
+      fontFamily: 'Roboto',
+    );
+
+    {
+      final builder = WebParagraphBuilder(paragraphStyle);
+
+      builder.pushStyle(style30);
+      builder.addText('إنالسيطرةعلىالعالمعبارةقبيحةللغاية-أفضلأنأسميهاتحسينالعالم');
+      builder.pop();
+      final WebParagraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 300));
+      paragraph.paint(canvas, const Offset(100, 100));
+    }
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('ellipsisRTL.png', region: region);
+  });
+
+  test('MaxLines, no ellipsis', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 15,
+      color: const Color(0xFF000000),
+      maxLines: 2,
+    );
+    final style30 = WebTextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 30,
+      fontFamily: 'Roboto',
+    );
+
+    {
+      final builder = WebParagraphBuilder(paragraphStyle);
+
+      builder.pushStyle(style30);
+      builder.addText(
+        'This is a long text cut on the second line and starting from "and" it should show up.',
+      );
+      builder.pop();
+      final WebParagraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: 300));
+      paragraph.paint(canvas, const Offset(100, 100));
+    }
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('maxLines2.png', region: region);
+  });
+
+  test('Paragraph with different locales for the same language', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Noto Sans', fontSize: 20);
+    final styleCN = WebTextStyle(locale: const Locale('zh', 'CN'));
+    final styleTW = WebTextStyle(locale: const Locale('zh', 'TW'));
+    final styleHK = WebTextStyle(locale: const Locale('zh', 'HK'));
+    final styleJP = WebTextStyle(locale: const Locale('ja', 'JP'));
+    const text = 'Command 刃';
+
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.pushStyle(styleCN);
+    builder.addText('$text in ${styleCN.locale?.languageCode}-${styleCN.locale?.countryCode}.\n');
+    builder.pop();
+    builder.pushStyle(styleTW);
+    builder.addText('$text in ${styleTW.locale?.languageCode}-${styleTW.locale?.countryCode}.\n');
+    builder.pop();
+    builder.pushStyle(styleJP);
+    builder.addText('$text in ${styleJP.locale?.languageCode}-${styleJP.locale?.countryCode}.\n');
+    builder.pop();
+
+    builder.pushStyle(styleHK);
+    builder.addText('$text in ${styleHK.locale?.languageCode}-${styleHK.locale?.countryCode}.');
+    builder.pop();
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 500));
+    paragraph.paint(canvas, const Offset(100, 100));
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('locales.png', region: region);
+  });
+
+  test('NoHeightMultiplier', () async {
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = ParagraphStyle();
+    final style = TextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 40,
+      fontFamily: 'sans-serif',
+      height: 1.0,
+    );
+
+    final builder = ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(style);
+    builder.addText('Some text long enough to be on two lines');
+    builder.pop();
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 500));
+    //printParagraphMetrics(paragraph);
+    canvas.drawParagraph(paragraph, Offset.zero);
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('NoHeightMultiplier.png', region: region);
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+  });
+
+  test('HeightMultiplier143', () async {
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = ParagraphStyle();
+    final style = TextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 40,
+      fontFamily: 'Arial',
+      height: 1.43,
+    );
+
+    final builder = ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(style);
+    builder.addText('Some text long enough to be on two lines');
+    builder.pop();
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 500));
+    //printParagraphMetrics(paragraph);
+    canvas.drawParagraph(paragraph, Offset.zero);
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('HeightMultiplier143.png', region: region);
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+  });
+
+  test('Zoom2', () async {
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(2.0);
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = ParagraphStyle();
+    final style = TextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 40,
+      fontFamily: 'Arial',
+      height: 1.43,
+    );
+
+    final builder = ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(style);
+    builder.addText('Some text long enough to be on two lines');
+    builder.pop();
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 500));
+    canvas.drawParagraph(paragraph, Offset.zero);
+    //printParagraphMetrics(paragraph);
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('zoom2.png', region: region);
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+  });
+
+  test('Zoom05', () async {
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(0.5);
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+
+    canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final paragraphStyle = ParagraphStyle();
+    final style = TextStyle(
+      foreground: blackPaint,
+      background: whitePaint,
+      fontSize: 40,
+      fontFamily: 'Arial',
+      height: 1.43,
+    );
+
+    final builder = ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(style);
+    builder.addText('Some text long enough to be on two lines');
+    builder.pop();
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 500));
+    //printParagraphMetrics(paragraph);
+    canvas.drawParagraph(paragraph, Offset.zero);
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('zoom05.png', region: region);
+    EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
   });
 }

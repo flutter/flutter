@@ -14,9 +14,14 @@
 
 namespace impeller {
 
-RadialGradientContents::RadialGradientContents() = default;
+RadialGradientContents::RadialGradientContents(const Geometry* geometry)
+    : geometry_(geometry) {}
 
 RadialGradientContents::~RadialGradientContents() = default;
+
+const Geometry* RadialGradientContents::GetGeometry() const {
+  return geometry_;
+}
 
 void RadialGradientContents::SetCenterAndRadius(Point center, Scalar radius) {
   center_ = center;

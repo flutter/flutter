@@ -13,6 +13,7 @@ import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
+import '../../features.dart';
 import '../../globals.dart' as globals show xcode;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
@@ -39,6 +40,7 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
+    Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     ...IconTreeShaker.inputs,
     ...ShaderCompiler.inputs,
   ];
@@ -48,6 +50,7 @@ class CopyFlutterBundle extends Target {
     Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
+    Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
   ];
 
   @override
@@ -84,7 +87,7 @@ class CopyFlutterBundle extends Target {
           .file(isolateSnapshotData)
           .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
     }
-    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
+    final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
       environment,
       environment.outputDir,
@@ -106,7 +109,7 @@ class CopyFlutterBundle extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    DartBuildForNative(),
+    LinkHooks(),
     KernelSnapshot(),
     InstallCodeAssets(),
   ];
@@ -152,9 +155,10 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/${KernelSnapshot.dillName}'),
-    // TODO(mosuem): Should output resources.json. https://github.com/flutter/flutter/issues/146263
+  List<Source> get outputs => <Source>[
+    const Source.pattern('{BUILD_DIR}/${KernelSnapshot.dillName}'),
+    if (featureFlags.isRecordUseEnabled)
+      const Source.pattern('{BUILD_DIR}/${KernelSnapshot.recordedUsesFileName}'),
   ];
 
   static const depfile = 'kernel_snapshot_program.d';
@@ -169,6 +173,13 @@ class KernelSnapshot extends Target {
   ];
 
   static const dillName = 'app.dill';
+  static const recordedUsesFileName = 'recorded_uses.json';
+
+  /// The content of an empty recorded uses file.
+  ///
+  /// We always write this file even if no resources are recorded to prevent
+  /// tripping up the Flutter build system (which expects declared outputs to exist).
+  static const recordedUsesEmptyContent = '{}';
 
   @override
   Future<void> build(Environment environment) async {
@@ -202,6 +213,18 @@ class KernelSnapshot extends Target {
       environment.defines,
       kExtraFrontEndOptions,
     );
+    final File recordedUsesFile = environment.buildDir.childFile(
+      KernelSnapshot.recordedUsesFileName,
+    );
+    if (featureFlags.isRecordUseEnabled) {
+      if (buildMode.isPrecompiled) {
+        extraFrontEndOptions.add('--recorded-uses=${recordedUsesFile.path}');
+      } else {
+        // Produce an empty file to satisfy the build system in JIT mode.
+        // Always overwrite to avoid stale data.
+        recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
+      }
+    }
     final List<String>? fileSystemRoots = environment.defines[kFileSystemRoots]?.split(',');
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
 
@@ -228,6 +251,7 @@ class KernelSnapshot extends Target {
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         forceLinkPlatform = false;
@@ -243,7 +267,9 @@ class KernelSnapshot extends Target {
       TargetPlatform.android_x64 => 'android',
       TargetPlatform.darwin => 'macos',
       TargetPlatform.ios => 'ios',
-      TargetPlatform.linux_arm64 || TargetPlatform.linux_x64 => 'linux',
+      TargetPlatform.linux_arm64 ||
+      TargetPlatform.linux_riscv64 ||
+      TargetPlatform.linux_x64 => 'linux',
       TargetPlatform.windows_arm64 || TargetPlatform.windows_x64 => 'windows',
       TargetPlatform.tester || TargetPlatform.web_javascript => null,
       TargetPlatform.unsupported => TargetPlatform.throwUnsupportedTarget(),

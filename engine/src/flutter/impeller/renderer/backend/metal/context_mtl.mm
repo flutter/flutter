@@ -40,8 +40,11 @@ static bool DeviceSupportsComputeSubgroups(id<MTLDevice> device) {
          [device supportsFamily:MTLGPUFamilyMac2];
 }
 
-// See "Extended Range and wide color pixel formats" in the metal feature set
-// tables.
+// See "Extended Range and wide color pixel formats" in the Metal Feature Set
+// Tables: https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
+// Wide gamut requires Apple3+ GPU family (supports 10-bit and F16 formats).
+// This includes all iOS devices with A9+ chip and Apple Silicon Macs (M1+).
+// Intel Macs (Mac2 family) do not support wide gamut.
 static bool DeviceSupportsExtendedRangeFormats(id<MTLDevice> device) {
   return [device supportsFamily:MTLGPUFamilyApple3];
 }
@@ -441,6 +444,20 @@ void ContextMTL::FlushTasksAwaitingGPU() {
   }
 }
 
+bool ContextMTL::FinishQueue() {
+  id<MTLCommandBuffer> command_buffer =
+      ContextMTL::Cast(this)->CreateMTLCommandBuffer("Finish Queue Waiter");
+  [command_buffer commit];
+  // clang-format off
+  // This isn't documented in the method, but there are places where they
+  // imply that they will wait even for an empty buffer...
+  //
+  // See https://developer.apple.com/documentation/metalperformanceshaders/tuning-hints
+  // clang-format on
+  [command_buffer waitUntilCompleted];
+  return true;
+}
+
 ContextMTL::SyncSwitchObserver::SyncSwitchObserver(ContextMTL& parent)
     : parent_(parent) {}
 
@@ -471,6 +488,8 @@ ImpellerMetalCaptureManager::ImpellerMetalCaptureManager(id<MTLDevice> device) {
   current_capture_scope_ = [[MTLCaptureManager sharedCaptureManager]
       newCaptureScopeWithDevice:device];
   [current_capture_scope_ setLabel:@"Impeller Frame"];
+  [[MTLCaptureManager sharedCaptureManager]
+      setDefaultCaptureScope:current_capture_scope_];
 }
 
 bool ImpellerMetalCaptureManager::CaptureScopeActive() const {

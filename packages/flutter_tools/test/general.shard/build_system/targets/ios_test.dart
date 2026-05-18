@@ -11,11 +11,13 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -136,6 +138,9 @@ void main() {
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
         ),
         FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', appFrameworkPath],
+        ),
+        FakeCommand(
           command: <String>[
             'codesign',
             '--force',
@@ -186,6 +191,9 @@ void main() {
         ),
         FakeCommand(
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', appFrameworkPath],
+        ),
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', appFrameworkPath],
         ),
         FakeCommand(
           command: <String>[
@@ -258,6 +266,9 @@ void main() {
           command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', frameworkBinary.path],
         ),
         FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', frameworkBinary.path],
+        ),
+        FakeCommand(
           command: <String>[
             'codesign',
             '--force',
@@ -327,6 +338,15 @@ void main() {
             '-r',
             '-d',
             'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -419,6 +439,15 @@ void main() {
             '-r',
             '-d',
             'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -526,6 +555,15 @@ void main() {
         ),
         FakeCommand(
           command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
             'codesign',
             '--force',
             '--sign',
@@ -602,6 +640,15 @@ void main() {
         ),
         FakeCommand(
           command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
             'codesign',
             '--force',
             '--sign',
@@ -667,6 +714,15 @@ void main() {
             '-r',
             '-d',
             'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
             frameworkDirectoryBinary.path,
           ],
         ),
@@ -1551,15 +1607,26 @@ flutter:
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter({this.isInstalled = true, this.schemes = const <String>['Runner']});
+  FakeXcodeProjectInterpreter({
+    this.isInstalled = true,
+    this.version,
+    this.schemes = const <String>['Runner'],
+  });
 
   @override
   final bool isInstalled;
 
+  @override
+  final Version? version;
+
   List<String> schemes;
 
   @override
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(
+    XcodeBasedProject xcodeProject, {
+    required Directory buildDirectory,
+    String? projectFilename,
+  }) async {
     return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
   }
 }

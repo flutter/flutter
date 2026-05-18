@@ -80,6 +80,10 @@ source_set("display") {
   deps = [ "//flutter/fml" ]
 }
 
+source_set("snapshot_pixel_format") {
+  sources = [ "snapshot_pixel_format.h" ]
+}
+
 source_set("common") {
   sources = [
     "animator.cc",
@@ -132,6 +136,7 @@ source_set("common") {
   public_deps = [
     ":display",
     ":platform_message_handler",
+    ":snapshot_pixel_format",
     "//flutter/shell/version",
     "//flutter/third_party/rapidjson",
     "//flutter/third_party/tonic",

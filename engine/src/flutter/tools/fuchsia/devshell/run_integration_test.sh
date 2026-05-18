@@ -46,21 +46,19 @@ shift # past argument
 # Ensure we know about the test and look up its packages.
 # The first package listed here should be the main package for the test
 # (the package that gets passed to `ffx test run`).
-# Note: You do not need to include oot_flutter_jit_runner-0.far, the script
-# automatically publishes it.
 test_packages=
 case $test_name in
   embedder)
-    test_packages=("flutter-embedder-test-0.far" "parent-view.far" "child-view.far")
+    test_packages=("flutter-embedder-test-0.far")
     ;;
   text-input)
-    test_packages=("text-input-test-0.far" "text-input-view.far")
+    test_packages=("text-input-test-0.far")
     ;;
   touch-input)
-    test_packages=("touch-input-test-0.far" "touch-input-view.far" "embedding-flutter-view.far")
+    test_packages=("touch-input-test-0.far")
     ;;
   mouse-input)
-    test_packages=("mouse-input-test-0.far" "mouse-input-view.far")
+    test_packages=("mouse-input-test-0.far")
     ;;
   *)
     engine-error "Unknown test name $test_name. You may need to add it to $0"
@@ -179,13 +177,13 @@ then
   "$jiri_bin"/fx build
 fi
 
-test_package_paths=( "$fuchsia_out_dir"/oot_flutter_jit_runner-0.far )
+test_package_paths=()
 for test_package in "${test_packages[@]}"
 do
   test_package_paths+=( $(find "$fuchsia_out_dir" -name "$test_package") )
 done
 
-fx_build_dir="$FUCHSIA_DIR/$(cat $FUCHSIA_DIR/.fx-build-dir)"
+fx_build_dir="$FUCHSIA_DIR/$(< $FUCHSIA_DIR/.fx-build-dir)"
 if [[ "$skip_fuchsia_emu" -eq 0 ]]
 then
   engine-info "Starting the Fuchsia terminal.x64 emulator... (to skip this, run with --skip-fuchsia-emu)"

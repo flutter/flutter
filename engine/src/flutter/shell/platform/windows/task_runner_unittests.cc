@@ -116,5 +116,46 @@ TEST(TaskRunnerTest, TimerThreadDoesNotCancelEarlierScheduledTasks) {
   timer_thread.Stop();
 }
 
+class TestTaskRunnerWindow : public TaskRunnerWindow {
+ public:
+  TestTaskRunnerWindow() : TaskRunnerWindow() {}
+};
+
+TEST(TaskRunnerTest, EmptyTaskRunnerReturnsNanoSecondsMax) {
+  TaskRunner runner(MockGetCurrentTime, [](const FlutterTask*) {});
+  auto res = runner.ProcessTasks();
+  EXPECT_EQ(res, std::chrono::nanoseconds::max());
+}
+
+TEST(TaskRunnerTest, TaskRunnerWindowCoalescesWakeUpMessages) {
+  class Delegate : public TaskRunnerWindow::Delegate {
+   public:
+    Delegate() {}
+
+    std::chrono::nanoseconds ProcessTasks() override {
+      process_tasks_call_count_++;
+      return std::chrono::nanoseconds::max();
+    }
+
+    int process_tasks_call_count_ = 0;
+  };
+
+  Delegate delegate;
+  TestTaskRunnerWindow window;
+
+  window.AddDelegate(&delegate);
+
+  window.WakeUp();
+  window.WakeUp();
+
+  ::MSG msg;
+  while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+    TranslateMessage(&msg);
+    DispatchMessage(&msg);
+  }
+
+  EXPECT_EQ(delegate.process_tasks_call_count_, 1);
+}
+
 }  // namespace testing
 }  // namespace flutter

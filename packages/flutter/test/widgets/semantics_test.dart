@@ -6,10 +6,11 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'button_tester.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -181,6 +182,43 @@ void main() {
       ),
     );
 
+    semantics.dispose();
+  });
+
+  testWidgets('different locale will not merge', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+    final GlobalKey key = GlobalKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          localeForSubtree: const Locale('AB', 'CD'),
+          child: Semantics(
+            key: key,
+            localeForSubtree: const Locale('DE', 'FG'),
+            child: const SizedBox(width: 10, height: 10),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              locale: const Locale('AB', 'CD'),
+              children: <TestSemantics>[TestSemantics(locale: const Locale('DE', 'FG'))],
+            ),
+          ],
+        ),
+        ignoreId: true,
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
     semantics.dispose();
   });
 
@@ -842,13 +880,13 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockSubtree,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockSubtree,
         child: Column(
           children: <Widget>[
             // If the child set blockSubTreeAccessibilityFocus to `none`, it's still blcok because its parent.
             Semantics(
               container: true,
-              accessiblityFocusBlockType: AccessiblityFocusBlockType.none,
+              accessibilityFocusBlockType: AccessibilityFocusBlockType.none,
               customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
                 const CustomSemanticsAction(label: 'action1'): () {},
               },
@@ -907,12 +945,12 @@ void main() {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
         child: Column(
           children: <Widget>[
             Semantics(
               container: true,
-              accessiblityFocusBlockType: AccessiblityFocusBlockType.none,
+              accessibilityFocusBlockType: AccessibilityFocusBlockType.none,
               customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
                 const CustomSemanticsAction(label: 'action1'): () {},
               },
@@ -967,7 +1005,7 @@ void main() {
             children: <Widget>[
               Semantics(
                 container: true,
-                accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
+                accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
                 label: 'node1',
                 child: const SizedBox(width: 10, height: 10),
               ),
@@ -1013,7 +1051,7 @@ void main() {
         child: Semantics(
           label: 'root',
           child: Semantics(
-            accessiblityFocusBlockType: AccessiblityFocusBlockType.blockNode,
+            accessibilityFocusBlockType: AccessibilityFocusBlockType.blockNode,
             label: 'semantics label 0',
             child: Column(
               children: <Widget>[
@@ -1068,7 +1106,7 @@ void main() {
         child: Semantics(
           label: 'root',
           child: Semantics(
-            accessiblityFocusBlockType: AccessiblityFocusBlockType.blockSubtree,
+            accessibilityFocusBlockType: AccessibilityFocusBlockType.blockSubtree,
             label: 'semantics label 0',
             child: Column(
               children: <Widget>[
@@ -1108,13 +1146,11 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('semantics node cant be keyboard focusable but accessibility unfocusable', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('accessibilityBlockType also blocks keyboard focus', (WidgetTester tester) async {
     await tester.pumpWidget(
       Semantics(
         container: true,
-        accessiblityFocusBlockType: AccessiblityFocusBlockType.blockSubtree,
+        accessibilityFocusBlockType: AccessibilityFocusBlockType.blockSubtree,
         focused: true,
         customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
           const CustomSemanticsAction(label: 'action1'): () {},
@@ -1122,13 +1158,10 @@ void main() {
         child: const SizedBox(width: 10, height: 10),
       ),
     );
-    final Object? exception = tester.takeException();
-    expect(exception, isFlutterError);
-    final error = exception! as FlutterError;
-    expect(
-      error.message,
-      startsWith('A node that is keyboard focusable cannot be set to accessibility unfocusable'),
-    );
+
+    final SemanticsNode node = tester.getSemantics(find.byType(Semantics));
+    expect(node.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, true);
+    expect(node.getSemanticsData().flagsCollection.isFocused, Tristate.none);
   });
 
   testWidgets('Increased/decreased values are annotated', (WidgetTester tester) async {
@@ -1843,8 +1876,9 @@ void main() {
     final key1 = UniqueKey();
     final key2 = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Semantics(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
           blockUserActions: true,
           explicitChildNodes: true,
           child: Column(
@@ -1881,8 +1915,9 @@ void main() {
   testWidgets('blocking user interaction on a merged child', (WidgetTester tester) async {
     final key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Semantics(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
           key: key,
           container: true,
           child: Column(
@@ -1915,8 +1950,9 @@ void main() {
   ) async {
     final key = UniqueKey();
     await tester.pumpWidget(
-      MaterialApp(
-        home: Semantics(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
           key: key,
           container: true,
           child: Column(
@@ -1942,8 +1978,8 @@ void main() {
       node,
       matchesSemantics(
         children: <Matcher>[
-          containsSemantics(label: 'label1'),
-          containsSemantics(label: 'label2'),
+          isSemantics(label: 'label1'),
+          isSemantics(label: 'label2'),
         ],
       ),
     );
@@ -2038,20 +2074,18 @@ void main() {
     final semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          appBar: AppBar(title: const Text('Headings')),
-          body: ListView(
-            children: <Widget>[
-              for (int level = 1; level <= 6; level++)
-                Semantics(
-                  key: ValueKey<String>('heading-$level'),
-                  headingLevel: level,
-                  child: Text('Heading level $level'),
-                ),
-              const Text('This is not a heading'),
-            ],
-          ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          children: <Widget>[
+            for (int level = 1; level <= 6; level++)
+              Semantics(
+                key: ValueKey<String>('heading-$level'),
+                headingLevel: level,
+                child: Text('Heading level $level'),
+              ),
+            const Text('This is not a heading'),
+          ],
         ),
       ),
     );
@@ -2131,7 +2165,7 @@ void main() {
       final SemanticsNode result = tester.getSemantics(find.byKey(key));
       expect(
         result,
-        containsSemantics(label: 'Outer = $outer; inner = $inner', validationResult: expected),
+        isSemantics(label: 'Outer = $outer; inner = $inner', validationResult: expected),
       );
     }
 
@@ -2195,20 +2229,18 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Scaffold(
-          body: Column(
-            children: <Widget>[
-              Semantics(
-                traversalParentIdentifier: identifier,
-                child: const SizedBox.square(dimension: 10),
-              ),
-              Semantics(
-                traversalChildIdentifier: identifier,
-                child: const SizedBox.square(dimension: 10),
-              ),
-              const SizedBox.square(dimension: 10),
-            ],
-          ),
+        child: Column(
+          children: <Widget>[
+            Semantics(
+              traversalParentIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            Semantics(
+              traversalChildIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            const SizedBox.square(dimension: 10),
+          ],
         ),
       ),
     );
@@ -2271,24 +2303,22 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: Scaffold(
-          body: Column(
-            children: <Widget>[
-              Semantics(
-                traversalParentIdentifier: identifier,
-                child: const SizedBox.square(dimension: 10),
-              ),
-              Semantics(
-                traversalChildIdentifier: identifier,
-                child: const SizedBox.square(dimension: 10),
-              ),
-              Semantics(
-                traversalChildIdentifier: identifier,
-                child: const SizedBox.square(dimension: 10),
-              ),
-              const SizedBox.square(dimension: 10),
-            ],
-          ),
+        child: Column(
+          children: <Widget>[
+            Semantics(
+              traversalParentIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            Semantics(
+              traversalChildIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            Semantics(
+              traversalChildIdentifier: identifier,
+              child: const SizedBox.square(dimension: 10),
+            ),
+            const SizedBox.square(dimension: 10),
+          ],
         ),
       ),
     );
@@ -2354,14 +2384,20 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Scaffold(
-            body: Column(
+          child: Semantics(
+            container: true,
+            child: Column(
               children: <Widget>[
                 Semantics(
+                  label: 'child_node',
                   traversalChildIdentifier: identifier,
-                  child: TextButton(
+                  child: TestButton(
                     onPressed: () {},
-                    child: Semantics(traversalParentIdentifier: identifier),
+                    child: Semantics(
+                      label: 'parent_node',
+                      traversalParentIdentifier: identifier,
+                      child: const Text('Button Text'),
+                    ),
                   ),
                 ),
                 const SizedBox.square(dimension: 10),
@@ -2376,8 +2412,13 @@ void main() {
       final error = exception! as FlutterError;
       expect(
         error.message,
-        'The traversalParent 2 cannot be the child of the traversalChild 1 in hit-test order',
+        matches(
+          RegExp(
+            r'The traversalParent \d+ cannot be the child of the traversalChild \d+ in hit-test order',
+          ),
+        ),
       );
+
       semantics.dispose();
     },
     skip: kIsWeb, // [intended] the web traversal order by using ARIA-OWNS.

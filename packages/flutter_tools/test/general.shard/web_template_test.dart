@@ -4,9 +4,12 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/web_template.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 
 const htmlSample1 = '''
 <!DOCTYPE html>
@@ -285,6 +288,7 @@ String htmlSampleStaticAssetsUrlReplaced({required String staticAssetsUrl}) =>
 
 void main() {
   final fs = MemoryFileSystem();
+  final logger = BufferLogger.test();
   final File flutterJs = fs.file('flutter.js');
   flutterJs.writeAsStringSync('(flutter.js content)');
 
@@ -316,6 +320,7 @@ void main() {
         baseHref: '/foo/333/',
         serviceWorkerVersion: 'v123xyz',
         flutterJsFile: flutterJs,
+        logger: logger,
       ),
       htmlSample2Replaced(baseHref: '/foo/333/', serviceWorkerVersion: 'v123xyz'),
     );
@@ -328,6 +333,7 @@ void main() {
         baseHref: '/foo/333/',
         serviceWorkerVersion: 'v123xyz',
         flutterJsFile: flutterJs,
+        logger: logger,
       ),
       htmlSample2Replaced(baseHref: '/foo/333/', serviceWorkerVersion: 'v123xyz'),
     );
@@ -343,6 +349,7 @@ void main() {
         serviceWorkerVersion: '(service worker version)',
         flutterJsFile: flutterJs,
         buildConfig: '(build config)',
+        logger: logger,
       ),
       htmlSampleInlineFlutterJsBootstrapOutput,
     );
@@ -359,6 +366,7 @@ void main() {
         flutterJsFile: flutterJs,
         buildConfig: '(build config)',
         flutterBootstrapJs: '(flutter bootstrap script)',
+        logger: logger,
       ),
       htmlSampleFullFlutterBootstrapReplacementOutput,
     );
@@ -374,6 +382,7 @@ void main() {
         serviceWorkerVersion: 'v123xyz',
         flutterJsFile: flutterJs,
         staticAssetsUrl: expectedStaticAssetsUrl,
+        logger: logger,
       ),
       htmlSampleStaticAssetsUrlReplaced(staticAssetsUrl: expectedStaticAssetsUrl),
     );
@@ -387,6 +396,7 @@ void main() {
       baseHref: '/foo/333/',
       serviceWorkerVersion: 'v123xyz',
       flutterJsFile: flutterJs,
+      logger: logger,
     );
     // The parsed base href should be updated after substitutions.
     expect(WebTemplate.baseHref(substituted), 'foo/333');
@@ -421,5 +431,165 @@ void main() {
 
     expect(warnings.length, 1);
     expect(warnings.single.lineNumber, 14);
+  });
+
+  test('applies web-define variable substitutions', () {
+    const htmlWithWebDefines = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    window.config = {
+      apiUrl: '{{API_URL}}',
+      environment: '{{ENV}}',
+      debugMode: {{DEBUG_MODE}}
+    };
+  </script>
+</body>
+</html>''';
+
+    const indexHtml = WebTemplate(htmlWithWebDefines);
+    final String result = indexHtml.withSubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: null,
+      flutterJsFile: flutterJs,
+      webDefines: <String, String>{
+        'API_URL': 'https://api.example.com',
+        'ENV': 'production',
+        'DEBUG_MODE': 'false',
+      },
+      logger: logger,
+    );
+
+    expect(result, contains("apiUrl: 'https://api.example.com'"));
+    expect(result, contains("environment: 'production'"));
+    expect(result, contains('debugMode: false'));
+  });
+
+  testUsingContext('logs warning when user defined web-define variable is missing', () {
+    const htmlWithMissingVar = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    const apiUrl = '{{API_URL}}';
+  </script>
+</body>
+</html>''';
+
+    const indexHtml = WebTemplate(htmlWithMissingVar);
+    final String result = indexHtml.withSubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: null,
+      flutterJsFile: flutterJs,
+      webDefines: <String, String>{}, // Missing API_URL
+      logger: testLogger,
+    );
+
+    expect(testLogger.warningText, contains('Missing web-define variable: API_URL'));
+    // Verify the placeholder is preserved
+    expect(result, contains("const apiUrl = '{{API_URL}}';"));
+  });
+
+  testUsingContext('logs warning with multiple missing user defined variables', () {
+    const htmlWithMultipleMissingVars = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    window.config = {
+      api: '{{API_URL}}',
+      env: '{{ENV}}',
+      version: '{{VERSION}}'
+    };
+  </script>
+</body>
+</html>''';
+
+    const indexHtml = WebTemplate(htmlWithMultipleMissingVars);
+    final String result = indexHtml.withSubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: null,
+      flutterJsFile: flutterJs,
+      webDefines: <String, String>{'API_URL': 'test'}, // Missing ENV, VERSION
+      logger: testLogger,
+    );
+
+    expect(testLogger.warningText, contains('Missing web-define variables: ENV, VERSION'));
+    expect(result, contains("env: '{{ENV}}'"));
+    expect(result, contains("version: '{{VERSION}}'"));
+  });
+
+  testUsingContext(
+    'ignores Flutter built-in variables and logs warning for missing user variables',
+    () {
+      const htmlWithBuiltInVars = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    {{flutter_js}}
+    {{flutter_build_config}}
+    const customVar = '{{CUSTOM_VAR}}';
+  </script>
+</body>
+</html>''';
+
+      const indexHtml = WebTemplate(htmlWithBuiltInVars);
+      final String result = indexHtml.withSubstitutions(
+        baseHref: '/',
+        serviceWorkerVersion: null,
+        flutterJsFile: flutterJs,
+        buildConfig: 'test config',
+        webDefines: <String, String>{}, // Missing CUSTOM_VAR but built-in vars should be ignored
+        logger: testLogger,
+      );
+
+      expect(testLogger.warningText, contains('Missing web-define variable: CUSTOM_VAR'));
+      expect(result, contains("const customVar = '{{CUSTOM_VAR}}';"));
+    },
+  );
+
+  test('allows empty web-define variables', () {
+    const htmlWithEmptyVar = '''
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+  <base href="/">
+</head>
+<body>
+  <script>
+    const value = '{{EMPTY_VAR}}';
+  </script>
+</body>
+</html>''';
+
+    const indexHtml = WebTemplate(htmlWithEmptyVar);
+    final String result = indexHtml.withSubstitutions(
+      baseHref: '/',
+      serviceWorkerVersion: null,
+      flutterJsFile: flutterJs,
+      webDefines: <String, String>{'EMPTY_VAR': ''},
+      logger: logger,
+    );
+
+    expect(result, contains("const value = '';"));
   });
 }

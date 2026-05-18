@@ -4,10 +4,13 @@
 
 import 'dart:math';
 
+import 'package:crypto/crypto.dart' as crypto;
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../artifacts.dart';
+import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/process.dart';
 import '../../build_info.dart';
@@ -15,6 +18,7 @@ import '../../cache.dart';
 import '../../convert.dart';
 import '../../dart/language_version.dart';
 import '../../dart/package_map.dart';
+import '../../features.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
 import '../../isolated/native_assets/dart_hook_result.dart';
@@ -28,8 +32,13 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
 import 'assets.dart';
+import 'common.dart';
 import 'localizations.dart';
 import 'native_assets.dart';
+
+const String _kBundledFallbackRobotoFamily = 'Roboto';
+const String _kBundledFallbackRobotoAsset = 'fonts/fallback/Roboto-Regular.ttf';
+const String _kFontManifestJsonFile = 'FontManifest.json';
 
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
@@ -183,6 +192,10 @@ class Dart2JSTarget extends Dart2WebTarget {
       else if (buildMode == BuildMode.release)
         '-Ddart.vm.product=true',
       for (final String dartDefine in computeDartDefines(environment)) '-D$dartDefine',
+      if (featureFlags.isRecordUseEnabled) ...<String>[
+        '--write-resources',
+        '--enable-experiment=record-use',
+      ],
     ];
 
     // NOTE: most args should be populated in [toSharedCommandOptions].
@@ -214,6 +227,14 @@ class Dart2JSTarget extends Dart2WebTarget {
       outputJSFile.path,
       environment.buildDir.childFile('app.dill').path, // dartfile
     ]);
+
+    final File resourcesFile = environment.buildDir.childFile('main.dart.js.resources.json');
+    final File recordedUsesFile = environment.buildDir.childFile(LinkHooks.recordedUsesJsFileName);
+    if (resourcesFile.existsSync()) {
+      resourcesFile.renameSync(recordedUsesFile.path);
+    } else if (featureFlags.isRecordUseEnabled) {
+      recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
+    }
     final File dart2jsDeps = environment.buildDir.childFile('app.dill.deps');
     if (!dart2jsDeps.existsSync()) {
       environment.logger.printWarning(
@@ -271,6 +292,7 @@ class Dart2JSTarget extends Dart2WebTarget {
     'main.dart.js',
     'main.dart.js_*.part.js',
     if (compilerConfig.sourceMaps) ...<String>['main.dart.js.map', 'main.dart.js_*.part.js.map'],
+    if (featureFlags.isRecordUseEnabled) LinkHooks.recordedUsesJsFileName,
   ];
 }
 
@@ -345,6 +367,10 @@ class Dart2WasmTarget extends Dart2WebTarget {
       ...decodeCommaSeparated(environment.defines, kExtraFrontEndOptions),
       for (final String dartDefine in dartDefines) '-D$dartDefine',
       '--extra-compiler-option=--depfile=${depFile.path}',
+      if (featureFlags.isRecordUseEnabled) ...<String>[
+        '--recorded-uses=${environment.buildDir.childFile(LinkHooks.recordedUsesWasmFileName).path}',
+        '--enable-experiment=record-use',
+      ],
       ...compilerConfig.toCommandOptions(buildMode),
       '-o',
       outputWasmFile.path,
@@ -361,7 +387,13 @@ class Dart2WasmTarget extends Dart2WebTarget {
       compilationArgs,
     );
     if (compilerConfig.dryRun) {
-      _handleDryRunResult(environment, runResult);
+      await _handleDryRunResult(environment, runResult);
+    }
+    final File recordedUsesFile = environment.buildDir.childFile(
+      LinkHooks.recordedUsesWasmFileName,
+    );
+    if (!recordedUsesFile.existsSync() && featureFlags.isRecordUseEnabled) {
+      recordedUsesFile.writeAsStringSync(KernelSnapshot.recordedUsesEmptyContent);
     }
   }
 
@@ -402,14 +434,18 @@ class Dart2WasmTarget extends Dart2WebTarget {
           'main.dart.wasm',
           'main.dart.mjs',
           if (compilerConfig.sourceMaps) 'main.dart.wasm.map',
+          if (featureFlags.isRecordUseEnabled) LinkHooks.recordedUsesWasmFileName,
         ];
 
-  void _handleDryRunResult(Environment environment, RunResult runResult) {
+  @visibleForTesting
+  Random? dryRunRandom;
+
+  Future<void> _handleDryRunResult(Environment environment, RunResult runResult) async {
     final int exitCode = runResult.exitCode;
     final String stdout = runResult.stdout;
     final String stderr = runResult.stderr;
-    final String result;
-    String? findingsSummary;
+    String? result;
+    final Map<String, String> findingsInfo = {};
 
     if (exitCode != 0 && exitCode != 254) {
       environment.logger.printWarning('Unexpected wasm dry run failure ($exitCode):');
@@ -438,16 +474,98 @@ class Dart2WasmTarget extends Dart2WebTarget {
         'https://docs.flutter.dev/platform-integration/web/wasm\n',
       );
       result = 'findings';
-      findingsSummary = RegExp(
-        r'\(([0-9]+)\)',
-      ).allMatches(stdout).map((RegExpMatch f) => f.group(1)).join(',');
-    } else {
-      result = 'unknown';
+      final Map<String, Set<Uri>> errorCodeToImportUris = {};
+      for (final String line in stdout.split('\n')) {
+        final Uri uri = Uri.parse(line.split(' ')[0]);
+        final String? errorCode = RegExp(r'\(([0-9]+)\)\s*$').firstMatch(line)?.group(1);
+        if (errorCode != null) {
+          (errorCodeToImportUris[errorCode] ??= {}).add(uri);
+        }
+      }
+
+      final PackageConfig packageConfigPackages;
+      try {
+        packageConfigPackages = await loadPackageConfigWithLogging(
+          findPackageConfigFileOrDefault(environment.projectDir),
+          logger: environment.logger,
+        );
+      } on ToolExit {
+        _analytics.send(
+          Event.flutterWasmDryRunPackage(
+            result: result,
+            exitCode: exitCode,
+            findingsInfo: {
+              'error': 'packageConfigNotLoaded',
+              'findings': errorCodeToImportUris.keys.join(','),
+            },
+          ),
+        );
+        return;
+      }
+
+      final Map<String, String> hostedPackages = {};
+      final Set<String> privatePackages = {};
+      for (final Package package in packageConfigPackages.packages) {
+        final String packageName = package.name;
+        if (package.root.toString().contains('hosted/pub.dev')) {
+          final String? packageVersion = RegExp(
+            r'([0-9]+\.[0-9]+\.[0-9]+(?:-[\w\.-]+)?)',
+          ).firstMatch(package.root.toString())?.group(1);
+          hostedPackages[packageName] = packageVersion ?? '?';
+        } else {
+          privatePackages.add(packageName);
+        }
+      }
+
+      errorCodeToImportUris.forEach((String errorCode, Set<Uri> uris) {
+        final Set<String> hostedPackageFindings = {};
+        // Randomize the URI order so that we
+        final urisList = <Uri>[...uris]..shuffle(dryRunRandom);
+        var hostApp = false;
+        var privatePackage = false;
+        for (final uri in urisList) {
+          final String packageName = uri.pathSegments.first;
+          final String? hostedPackageVersion = hostedPackages[packageName];
+          if (uri.scheme == 'package') {
+            if (hostedPackageVersion != null) {
+              hostedPackageFindings.add('$packageName:$hostedPackageVersion');
+              continue;
+            } else if (privatePackages.contains(packageName)) {
+              privatePackage = true;
+              continue;
+            }
+          }
+          hostApp = true;
+        }
+        final String? hpHint = switch ((hostApp, privatePackage)) {
+          (true, true) => '-hp',
+          (true, false) => '-h',
+          (false, true) => '-p',
+          _ => null,
+        };
+
+        final findingsBuffer = StringBuffer(hpHint ?? '');
+        for (final hostedPackageFinding in hostedPackageFindings) {
+          // Try to fit as many findings as we can into the 100 character limit imposed
+          // by google analytics.
+          final pendingString = '${findingsBuffer.isNotEmpty ? ',' : ''}$hostedPackageFinding';
+          if (findingsBuffer.length + pendingString.length <= 100) {
+            findingsBuffer.write(pendingString);
+          }
+        }
+        findingsInfo['E$errorCode'] = findingsBuffer.toString();
+      });
     }
+    result ??= 'unknown';
+
     environment.logger.printWarning('Use --no-wasm-dry-run to disable these warnings.');
 
     _analytics.send(
-      Event.flutterWasmDryRun(result: result, exitCode: exitCode, findingsSummary: findingsSummary),
+      Event.flutterWasmDryRunPackage(
+        result: result,
+        exitCode: exitCode,
+        findingsInfo: findingsInfo,
+      ),
     );
   }
 }
@@ -482,7 +600,7 @@ class WebReleaseBundle extends Target {
   List<Target> get dependencies => <Target>[
     ...compileTargets,
     templatedFilesTarget,
-    const DartBuild(specifiedTargetPlatform: TargetPlatform.web_javascript),
+    LinkHooks(platform: HookPlatform.web, extraDependencies: compileTargets),
   ];
 
   Iterable<String> get buildPatternStems =>
@@ -491,6 +609,7 @@ class WebReleaseBundle extends Target {
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    const Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
     ...buildPatternStems.map((String file) => Source.pattern('{BUILD_DIR}/$file')),
   ];
 
@@ -523,7 +642,7 @@ class WebReleaseBundle extends Target {
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
 
-    final DartHooksResult dartHookResult = await DartBuild.loadHookResult(environment);
+    final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
       environment.outputDir.childDirectory('assets'),
@@ -531,8 +650,9 @@ class WebReleaseBundle extends Target {
       targetPlatform: TargetPlatform.web_javascript,
       buildMode: buildMode,
     );
+    final Depfile bundledDepfile = _bundleLocalRobotoFallback(environment, depfile);
     final DepfileService depfileService = environment.depFileService;
-    depfileService.writeToFile(depfile, environment.buildDir.childFile('flutter_assets.d'));
+    depfileService.writeToFile(bundledDepfile, environment.buildDir.childFile('flutter_assets.d'));
 
     final Directory webResources = environment.projectDir.childDirectory('web');
     final List<File> inputResourceFiles = webResources
@@ -576,6 +696,62 @@ class WebReleaseBundle extends Target {
 
     environment.outputDir.childFile('version.json').writeAsStringSync(jsonEncode(versionInfo));
   }
+
+  Depfile _bundleLocalRobotoFallback(Environment environment, Depfile depfile) {
+    if (environment.defines[kUseLocalCanvasKitFlag] != 'true') {
+      return depfile;
+    }
+
+    final File fontManifestFile = environment.outputDir
+        .childDirectory('assets')
+        .childFile(_kFontManifestJsonFile);
+    final manifestJson = fontManifestFile.existsSync()
+        ? (jsonDecode(fontManifestFile.readAsStringSync()) as List<Object?>)
+        : <Object?>[];
+
+    final bool hasRobotoFamily = manifestJson.any((Object? entry) {
+      return entry is Map<String, dynamic> && entry['family'] == _kBundledFallbackRobotoFamily;
+    });
+    if (hasRobotoFamily) {
+      return depfile;
+    }
+
+    final File sourceRobotoFont = environment.fileSystem.file(
+      environment.fileSystem.path.join(
+        Cache.flutterRoot!,
+        'engine',
+        'src',
+        'flutter',
+        'txt',
+        'third_party',
+        'fonts',
+        'Roboto-Regular.ttf',
+      ),
+    );
+    if (!sourceRobotoFont.existsSync()) {
+      throwToolExit('Failed to find the bundled Roboto font at ${sourceRobotoFont.path}.');
+    }
+
+    manifestJson.add(<String, Object>{
+      'family': _kBundledFallbackRobotoFamily,
+      'fonts': <Map<String, String>>[
+        <String, String>{'asset': _kBundledFallbackRobotoAsset},
+      ],
+    });
+    fontManifestFile.parent.createSync(recursive: true);
+    fontManifestFile.writeAsStringSync(jsonEncode(manifestJson));
+
+    final File bundledRobotoFont = environment.outputDir
+        .childDirectory('assets')
+        .childFile(_kBundledFallbackRobotoAsset);
+    bundledRobotoFont.parent.createSync(recursive: true);
+    sourceRobotoFont.copySync(bundledRobotoFont.path);
+
+    return Depfile(
+      <File>[...depfile.inputs, sourceRobotoFont],
+      <File>[...depfile.outputs, fontManifestFile, bundledRobotoFont],
+    );
+  }
 }
 
 class WebTemplatedFiles extends Target {
@@ -597,8 +773,46 @@ class WebTemplatedFiles extends Target {
   }
 
   String buildConfigString(Environment environment) {
+    // Calculate SHA-256 hashes for WASM assets to support Cross-Origin Storage
+    // (https://wicg.github.io/cross-origin-storage/). This assumes that the files will exist in
+    // the output directory at this point.
+    final wasmHashes = <String, String>{};
+    final String canvasKitPath = globals.artifacts!
+        .getHostArtifact(HostArtifact.flutterWebSdk)
+        .path;
+    final Directory canvasKitDirectory = globals.fs.directory(
+      globals.fs.path.join(canvasKitPath, 'canvaskit'),
+    );
+    if (canvasKitDirectory.existsSync()) {
+      for (final File file in canvasKitDirectory.listSync(recursive: true).whereType<File>()) {
+        if (file.path.endsWith('.wasm')) {
+          final String relativePath = globals.fs.path
+              .relative(file.path, from: canvasKitDirectory.path)
+              .replaceAll(r'\', '/');
+          wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+        }
+      }
+    }
+
+    final Directory outputDirectory = environment.outputDir;
+    for (final File file in outputDirectory.listSync(recursive: true).whereType<File>()) {
+      if (file.path.endsWith('.wasm')) {
+        final String relativePath = globals.fs.path
+            .relative(file.path, from: outputDirectory.path)
+            .replaceAll(r'\', '/');
+        // Skip files under the canvaskit/ subdirectory — they are already
+        // covered by the canvasKit SDK directory scan above with keys that
+        // match what the JS lookup code actually uses.
+        if (relativePath.startsWith('canvaskit/')) {
+          continue;
+        }
+        wasmHashes[relativePath] = crypto.sha256.convert(file.readAsBytesSync()).toString();
+      }
+    }
+
     final buildConfig = <String, Object>{
       'engineRevision': globals.flutterVersion.engineRevision,
+      'wasmHashes': wasmHashes,
       'builds': buildDescriptions,
       if (environment.defines[kUseLocalCanvasKitFlag] == 'true') 'useLocalCanvasKit': true,
     };
@@ -617,7 +831,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         environment.serviceWorkerStrategy == ServiceWorkerStrategy.offlineFirst;
     final File inputFlutterBootstrapJs = webResources.childFile('flutter_bootstrap.js');
     final String inputBootstrapContent;
-    if (await inputFlutterBootstrapJs.exists()) {
+    if (inputFlutterBootstrapJs.existsSync()) {
       inputBootstrapContent = await inputFlutterBootstrapJs.readAsString();
     } else {
       inputBootstrapContent = generateDefaultFlutterBootstrapScript(
@@ -639,6 +853,13 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
     final String buildConfig = buildConfigString(environment);
 
+    // Extract web-define variables from the environment. These are stored with
+    // the [kWebDefinePrefix] prefix by [WebBuilder.buildWeb].
+    final webDefines = <String, String>{
+      for (final MapEntry(:key, :value) in environment.defines.entries)
+        if (key.startsWith(kWebDefinePrefix)) key.substring(kWebDefinePrefix.length): value,
+    };
+
     // Insert a random hash into the requests for service_worker.js. This is not a content hash,
     // because it would need to be the hash for the entire bundle and not just the resource
     // in question.
@@ -650,6 +871,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       serviceWorkerVersion: serviceWorkerVersion,
       flutterJsFile: flutterJsFile,
       buildConfig: buildConfig,
+      logger: environment.logger,
+      webDefines: webDefines,
     );
 
     final File outputFlutterBootstrapJs = fileSystem.file(
@@ -673,6 +896,8 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
           flutterJsFile: flutterJsFile,
           buildConfig: buildConfig,
           flutterBootstrapJs: bootstrapContent,
+          logger: environment.logger,
+          webDefines: webDefines,
         );
         final File outputIndexHtml = fileSystem.file(
           fileSystem.path.join(environment.outputDir.path, relativePath),

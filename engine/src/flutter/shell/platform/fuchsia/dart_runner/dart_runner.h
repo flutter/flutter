@@ -9,8 +9,8 @@
 #include <lib/fidl/cpp/binding_set.h>
 #include <lib/sys/cpp/component_context.h>
 
-#include "dart_test_component_controller.h"
-#include "runtime/dart/utils/mapped_resource.h"
+#include "flutter/shell/platform/fuchsia/dart_runner/dart_test_component_controller.h"
+#include "flutter/shell/platform/fuchsia/runtime/dart/utils/mapped_resource.h"
 
 namespace dart_runner {
 

@@ -117,9 +117,7 @@ TaskRunnerWindow::~TaskRunnerWindow() {
 }
 
 void TaskRunnerWindow::OnTimer() {
-  if (!PostMessage(window_handle_, WM_NULL, 0, 0)) {
-    FML_LOG(ERROR) << "Failed to post message to main thread.";
-  }
+  WakeUp();
 }
 
 void TaskRunnerWindow::TimerProc(PTP_CALLBACK_INSTANCE instance,
@@ -140,20 +138,14 @@ std::shared_ptr<TaskRunnerWindow> TaskRunnerWindow::GetSharedInstance() {
 }
 
 void TaskRunnerWindow::WakeUp() {
-  // When waking up from main thread while there are messages in the message
-  // queue use timer to post the WM_NULL message from background thread. This
-  // gives message loop chance to process input events before WM_NULL is
-  // processed - which is necessary because messages scheduled through
-  // PostMessage take precedence over input event messages. Otherwise await
-  // Future.delayed(Duration.zero) deadlocks the main thread. (See
-  // https://github.com/flutter/flutter/issues/173843)
-  if (thread_id_ == GetCurrentThreadId() && GetQueueStatus(QS_ALLEVENTS) != 0) {
-    SetTimer(std::chrono::milliseconds(1));
-    return;
-  }
-
-  if (!PostMessage(window_handle_, WM_NULL, 0, 0)) {
-    FML_LOG(ERROR) << "Failed to post message to main thread.";
+  bool expected = false;
+  // Only post wake up message if needed otherwise the message queue will
+  // get flooded possibly resulting in application stopping to respond.
+  // https://github.com/flutter/flutter/issues/173843
+  if (wake_up_posted_.compare_exchange_strong(expected, true)) {
+    if (!PostMessage(window_handle_, WM_NULL, 0, 0)) {
+      FML_LOG(ERROR) << "Failed to post message to main thread.";
+    }
   }
 }
 
@@ -193,12 +185,11 @@ void TaskRunnerWindow::ProcessTasks() {
 }
 
 void TaskRunnerWindow::SetTimer(std::chrono::nanoseconds when) {
-  if (when == std::chrono::nanoseconds::max()) {
-    timer_thread_.ScheduleAt(
-        std::chrono::time_point<std::chrono::high_resolution_clock>::max());
-  } else {
-    timer_thread_.ScheduleAt(std::chrono::high_resolution_clock::now() + when);
-  }
+  auto now = std::chrono::high_resolution_clock::now();
+  auto remaining_to_max =
+      std::chrono::nanoseconds::max() - now.time_since_epoch();
+  when = std::min(when, remaining_to_max);
+  timer_thread_.ScheduleAt(now + when);
 }
 
 WNDCLASS TaskRunnerWindow::RegisterWindowClass() {
@@ -225,6 +216,9 @@ TaskRunnerWindow::HandleMessage(UINT const message,
                                 LPARAM const lparam) noexcept {
   switch (message) {
     case WM_NULL:
+      // After this point, WakeUp() needs to post new message to ensure
+      // that the wake-up request is not lost.
+      wake_up_posted_ = false;
       ProcessTasks();
       return 0;
   }

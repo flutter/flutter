@@ -91,7 +91,7 @@ class ElevatedButton extends ButtonStyleButton {
   /// If [icon] is null, this constructor will create an [ElevatedButton]
   /// that doesn't display an icon.
   ///
-  /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  /// {@macro flutter.material.ButtonStyle.iconAlignment}
   ///
   ElevatedButton.icon({
     super.key,

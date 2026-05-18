@@ -84,12 +84,11 @@ config("disable_warnings") {
 source_set("flutter_linux_sources") {
   public = _public_headers + [
              "fl_binary_messenger_private.h",
-             "fl_dart_project_private.h",
              "fl_engine_private.h",
              "fl_key_channel_responder.h",
              "fl_key_embedder_responder.h",
-             "fl_key_embedder_responder_private.h",
              "fl_key_event.h",
+             "fl_key_mapping.h",
              "fl_keyboard_handler.h",
              "fl_keyboard_manager.h",
              "fl_method_call_private.h",
@@ -98,10 +97,10 @@ source_set("flutter_linux_sources") {
              "fl_plugin_registrar_private.h",
              "fl_pointer_manager.h",
              "fl_task_runner.h",
+             "fl_view_monitor.h",
              "fl_view_private.h",
              "fl_window_monitor.h",
              "fl_window_state_monitor.h",
-             "key_mapping.h",
            ]
 
   configs += [ "//flutter/shell/platform/linux/config:gtk" ]
@@ -109,6 +108,8 @@ source_set("flutter_linux_sources") {
   public_configs = [ ":disable_warnings" ]
 
   sources = [
+    "fl_accessibility_channel.cc",
+    "fl_accessibility_handler.cc",
     "fl_accessible_node.cc",
     "fl_accessible_text_field.cc",
     "fl_application.cc",
@@ -120,6 +121,7 @@ source_set("flutter_linux_sources") {
     "fl_compositor_software.cc",
     "fl_dart_project.cc",
     "fl_display_monitor.cc",
+    "fl_egl_image.cc",
     "fl_engine.cc",
     "fl_event_channel.cc",
     "fl_framebuffer.cc",
@@ -130,6 +132,7 @@ source_set("flutter_linux_sources") {
     "fl_key_embedder_responder.cc",
     "fl_key_event.cc",
     "fl_key_event_channel.cc",
+    "fl_key_mapping.g.cc",
     "fl_keyboard_channel.cc",
     "fl_keyboard_handler.cc",
     "fl_keyboard_layout.cc",
@@ -168,11 +171,9 @@ source_set("flutter_linux_sources") {
     "fl_value.cc",
     "fl_view.cc",
     "fl_view_accessible.cc",
+    "fl_view_monitor.cc",
     "fl_window_monitor.cc",
     "fl_window_state_monitor.cc",
-    "fl_windowing_channel.cc",
-    "fl_windowing_handler.cc",
-    "key_mapping.g.cc",
   ]
 
   # Set flag to stop headers being directly included (library users should not do this)
@@ -221,6 +222,7 @@ executable("flutter_linux_unittests") {
   testonly = true
 
   sources = [
+    "fl_accessibility_handler_test.cc",
     "fl_accessible_node_test.cc",
     "fl_accessible_text_field_test.cc",
     "fl_application_test.cc",
@@ -231,6 +233,7 @@ executable("flutter_linux_unittests") {
     "fl_compositor_software_test.cc",
     "fl_dart_project_test.cc",
     "fl_display_monitor_test.cc",
+    "fl_egl_image_test.cc",
     "fl_engine_test.cc",
     "fl_event_channel_test.cc",
     "fl_framebuffer_test.cc",
@@ -239,6 +242,7 @@ executable("flutter_linux_unittests") {
     "fl_json_method_codec_test.cc",
     "fl_key_channel_responder_test.cc",
     "fl_key_embedder_responder_test.cc",
+    "fl_key_mapping_test.cc",
     "fl_keyboard_handler_test.cc",
     "fl_keyboard_layout_test.cc",
     "fl_keyboard_manager_test.cc",
@@ -265,8 +269,6 @@ executable("flutter_linux_unittests") {
     "fl_view_accessible_test.cc",
     "fl_view_test.cc",
     "fl_window_state_monitor_test.cc",
-    "fl_windowing_handler_test.cc",
-    "key_mapping_test.cc",
     "testing/fl_mock_binary_messenger.cc",
     "testing/fl_test.cc",
     "testing/fl_test_gtk_logs.cc",

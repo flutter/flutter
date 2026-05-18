@@ -57,6 +57,27 @@ Flutter engine uses `gclient` to manage dependencies.
     2. Everyone else: copy `standard.gclient`
 2. Run `gclient sync` from the root folder
 
+> [!NOTE]
+> If `gclient sync` fails with errors such as:
+>
+> ```
+> fatal: early EOF
+> fatal: the remote end hung up unexpectedly
+> error: RPC failed; curl 18 transfer closed with outstanding read data remaining
+> ```
+>
+> This is often caused by network instability during large repository fetches.
+>
+> As a workaround, you can run:
+>
+> ```
+> gclient sync --no-history
+> ```
+>
+> This performs a shallow sync, reducing download size and improving reliability.
+>
+> Note that this omits full Git history, which may limit certain development workflows.
+
 ### Add `et` to `PATH`
 
 The "Engine Tool" called `et` is useful when working with the engine. It is located in the [`flutter/engine/src/flutter/bin`](https://github.com/flutter/flutter/tree/0c3359df8c8342c8907316488b1404a216f215b6/engine/src/flutter/bin) directory. Add this to your `$PATH` in your `.rc` file: e.g. on UNIX, using `export PATH=/path/to/flutter/engine/src/flutter/bin:$PATH`.

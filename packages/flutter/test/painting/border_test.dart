@@ -363,7 +363,10 @@ void main() {
     );
 
     await tester.pumpWidget(
-      buildWidget(border: allowedBorderVariations, borderRadius: BorderRadius.circular(25)),
+      buildWidget(
+        border: allowedBorderVariations,
+        borderRadius: const BorderRadius.all(Radius.circular(25)),
+      ),
     );
     expect(tester.takeException(), isNull);
 
@@ -380,7 +383,7 @@ void main() {
           right: BorderSide(width: 15),
           bottom: BorderSide(width: 20),
         ),
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: const BorderRadius.all(Radius.circular(25)),
       ),
     );
     expect(
@@ -397,7 +400,7 @@ void main() {
           right: BorderSide(width: 15),
           bottom: BorderSide(width: 20),
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
       ),
     );
     expect(
@@ -421,7 +424,7 @@ void main() {
     await tester.pumpWidget(
       buildWidget(
         border: const Border(bottom: BorderSide(width: 0)),
-        borderRadius: BorderRadius.circular(40),
+        borderRadius: const BorderRadius.all(Radius.circular(40)),
       ),
     );
     expect(
@@ -444,7 +447,7 @@ void main() {
     await tester.pumpWidget(
       buildWidget(
         border: allowedBorderDirectionalVariations,
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: const BorderRadius.all(Radius.circular(25)),
       ),
     );
     expect(

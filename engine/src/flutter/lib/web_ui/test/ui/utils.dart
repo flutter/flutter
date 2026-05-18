@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart'
+    // ignore: deprecated_web_configuration
     if (dart.library.html) 'package:ui/src/engine/skwasm/skwasm_stub.dart';
 import 'package:ui/ui.dart';
 
@@ -75,5 +76,7 @@ FlutterView get implicitView => EnginePlatformDispatcher.instance.implicitView!;
 bool get isCanvasKit => renderer is CanvasKitRenderer;
 
 bool get isSkwasm => renderer is SkwasmRenderer;
+
+bool get isWimp => isSkwasm && (renderer as SkwasmRenderer).isWimp;
 
 bool get isMultiThreaded => isSkwasm && (renderer as SkwasmRenderer).isMultiThreaded;

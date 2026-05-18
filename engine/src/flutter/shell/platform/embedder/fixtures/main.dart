@@ -200,6 +200,8 @@ Future<void> a11y_main() async {
       controlsNodes: null,
       inputType: SemanticsInputType.none,
       locale: null,
+      minValue: '0',
+      maxValue: '0',
     )
     ..updateNode(
       id: 84,
@@ -238,6 +240,8 @@ Future<void> a11y_main() async {
       controlsNodes: null,
       inputType: SemanticsInputType.none,
       locale: null,
+      minValue: '0',
+      maxValue: '0',
     )
     ..updateNode(
       id: 96,
@@ -276,6 +280,8 @@ Future<void> a11y_main() async {
       controlsNodes: null,
       inputType: SemanticsInputType.none,
       locale: null,
+      minValue: '0',
+      maxValue: '0',
     )
     ..updateNode(
       id: 128,
@@ -314,6 +320,8 @@ Future<void> a11y_main() async {
       controlsNodes: null,
       inputType: SemanticsInputType.none,
       locale: null,
+      minValue: '0',
+      maxValue: '0',
     )
     ..updateCustomAction(id: 21, label: 'Archive', hint: 'archive message');
 
@@ -399,6 +407,8 @@ Future<void> a11y_string_attributes() async {
       controlsNodes: null,
       inputType: SemanticsInputType.none,
       locale: null,
+      minValue: '0',
+      maxValue: '0',
     );
 
   PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
@@ -1568,20 +1578,49 @@ void render_impeller_test() {
 
 @pragma('vm:entry-point')
 // ignore: non_constant_identifier_names
+void render_texture_impeller_test() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    const size = Size(800.0, 600.0);
+
+    final builder = SceneBuilder();
+
+    builder.pushOffset(0.0, 0.0);
+
+    builder.addTexture(/*textureId*/ 1, width: size.width, height: size.height);
+
+    builder.pop();
+
+    PlatformDispatcher.instance.views.first.render(builder.build());
+  };
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
 void render_impeller_text_test() {
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
     final builder = SceneBuilder();
     builder.pushOffset(0.0, 0.0);
-    final paint = Paint();
-    paint.color = const Color.fromARGB(255, 0, 0, 255);
+    const darkColor = Color.fromARGB(255, 25, 25, 25);
+    const lightColor = Color.fromARGB(255, 230, 230, 230);
     final baseRecorder = PictureRecorder();
     final canvas = Canvas(baseRecorder);
 
-    final paragraphBuilder = ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
+    final paragraphBuilder1 = ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
+      ..pushStyle(TextStyle(color: darkColor, background: Paint()..color = lightColor))
       ..addText('Flutter is the best!');
-    final Paragraph paragraph = paragraphBuilder.build()
+    final Paragraph paragraph1 = paragraphBuilder1.build()
       ..layout(const ParagraphConstraints(width: 400));
-    canvas.drawParagraph(paragraph, const Offset(20, 20));
+    canvas.drawParagraph(paragraph1, const Offset(20, 20));
+
+    canvas.translate(0, 40);
+
+    final paragraphBuilder2 = ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
+      ..pushStyle(TextStyle(color: lightColor, background: Paint()..color = darkColor))
+      ..addText('Flutter is the best!');
+    final Paragraph paragraph2 = paragraphBuilder2.build()
+      ..layout(const ParagraphConstraints(width: 400));
+    canvas.drawParagraph(paragraph2, const Offset(20, 20));
 
     builder.addPicture(Offset.zero, baseRecorder.endRecording());
     builder.pop();
@@ -1689,6 +1728,8 @@ Future<void> a11y_main_multi_view() async {
       controlsNodes: null,
       inputType: SemanticsInputType.none,
       locale: null,
+      minValue: '0',
+      maxValue: '0',
     );
   }
 

@@ -36,7 +36,8 @@ TEST(DlDeferredImageGPUImpeller, GetSize) {
   });
 
   auto image = DlDeferredImageGPUImpeller::Make(
-      builder.Build(), size, snapshot_delegate_weak_ptr, task_runner);
+      builder.Build(), size, SnapshotPixelFormat::kDontCare,
+      snapshot_delegate_weak_ptr, task_runner);
   ASSERT_EQ(image->GetSize(), size);
 
   PostTaskSync(task_runner, [&]() { snapshot_delegate.reset(); });
@@ -56,33 +57,37 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
     ON_CALL(*snapshot_delegate, GetTextureRegistry())
         .WillByDefault(
             ::testing::Return(snapshot_delegate->GetMockTextureRegistry()));
-
-    auto mock_image = sk_make_sp<MockDlImage>();
     impeller::TextureDescriptor desc;
     desc.size = {1, 1};
     auto mock_texture = std::make_shared<impeller::testing::MockTexture>(desc);
-    EXPECT_CALL(*mock_image, impeller_texture)
+    EXPECT_CALL(*mock_texture, IsValid())
+        .WillRepeatedly(::testing::Return(true));
+    EXPECT_CALL(
+        *snapshot_delegate,
+        MakeImpellerSnapshotSync(::testing::_, ::testing::_, ::testing::_))
         .WillOnce(::testing::Return(mock_texture));
-    EXPECT_CALL(*snapshot_delegate,
-                MakeRasterSnapshotSync(::testing::_, ::testing::_))
-        .WillOnce(::testing::Return(mock_image));
     snapshot_delegate_weak_ptr = snapshot_delegate->GetWeakPtr();
   });
 
+  sk_sp<DlDeferredImageGPUImpeller> image;
   // Pause raster thread.
   fml::AutoResetWaitableEvent latch;
-  task_runner->PostTask([&latch]() { latch.Wait(); });
+  task_runner->PostTask([&latch, &image]() {
+    latch.Wait();
+    auto context = std::make_shared<impeller::testing::MockImpellerContext>();
+    EXPECT_EQ(image->GetImpellerTexture(context), nullptr);
+  });
 
-  auto image = DlDeferredImageGPUImpeller::Make(
-      builder.Build(), size, snapshot_delegate_weak_ptr, task_runner);
-
-  EXPECT_FALSE(image->impeller_texture());
+  image = DlDeferredImageGPUImpeller::Make(
+      builder.Build(), size, SnapshotPixelFormat::kDontCare,
+      snapshot_delegate_weak_ptr, task_runner);
 
   // Unpause raster thread.
   latch.Signal();
 
   PostTaskSync(task_runner, [&]() {
-    EXPECT_TRUE(image->impeller_texture());
+    auto context = std::make_shared<impeller::testing::MockImpellerContext>();
+    EXPECT_NE(image->GetImpellerTexture(context), nullptr);
     snapshot_delegate.reset();
   });
 }

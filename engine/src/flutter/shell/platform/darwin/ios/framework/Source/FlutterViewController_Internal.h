@@ -7,9 +7,9 @@
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 
-#include "flutter/fml/time/time_point.h"
 #import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeySecondaryResponder.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardInsetManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPlugin.h"
@@ -40,14 +40,14 @@ typedef NS_ENUM(NSInteger, FlutterKeyboardMode) {
   // NOLINTEND(readability-identifier-naming)
 };
 
-typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
+typedef void (^FlutterKeyboardAnimationCallback)(NSTimeInterval);
 
 @interface FlutterViewController () <FlutterViewResponder>
 
-@property(class, nonatomic, readonly) BOOL accessibilityIsOnOffSwitchLabelsEnabled;
 @property(nonatomic, readonly) BOOL isPresentingViewController;
 @property(nonatomic, readonly) BOOL isVoiceOverRunning;
 @property(nonatomic, strong) FlutterKeyboardManager* keyboardManager;
+@property(nonatomic, strong) FlutterKeyboardInsetManager* keyboardInsetManager;
 @property(nonatomic, readwrite) NSString* applicationLocale;
 
 /**
@@ -61,6 +61,8 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 
 @property(nonatomic, readonly) FlutterPlatformViewsController* platformViewsController;
 
+@property(nonatomic, strong) FlutterAccessibilityFeatures* accessibilityFeatures;
+
 - (FlutterRestorationPlugin*)restorationPlugin;
 - (FlutterTextInputPlugin*)textInputPlugin;
 
@@ -70,7 +72,6 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
               nextAction:(void (^)())nextAction API_AVAILABLE(ios(13.4));
 - (void)addInternalPlugins;
 - (void)deregisterNotifications;
-- (int32_t)accessibilityFlags;
 
 - (BOOL)supportsShowingSystemContextMenu;
 - (BOOL)stateIsActive;

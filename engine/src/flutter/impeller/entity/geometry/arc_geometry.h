@@ -23,7 +23,7 @@ class ArcGeometry final : public Geometry {
   ~ArcGeometry() override;
 
   // |Geometry|
-  bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+  bool CoversArea(const Matrix& transform, const IRect& rect) const override;
 
   // |Geometry|
   bool IsAxisAlignedRect() const override;
@@ -39,6 +39,9 @@ class ArcGeometry final : public Geometry {
 
   // |Geometry|
   std::optional<Rect> GetCoverage(const Matrix& transform) const override;
+
+  // Whether the arc has overlapping stroke caps
+  bool CapsOverlap() const;
 
   Arc arc_;
   Scalar stroke_width_;

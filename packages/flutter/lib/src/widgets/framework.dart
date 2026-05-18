@@ -2212,8 +2212,8 @@ typedef ConditionalElementVisitor = bool Function(Element element);
 /// (And similarly, the parent of any children for [RenderObjectWidget]s.)
 ///
 /// In particular, this means that within a build method, the build context of
-/// the widget of the build method is not the same as the build context of the
-/// widgets returned by that build method. This can lead to some tricky cases.
+/// the widget which has the build method is not the same as the build context
+/// of the widgets returned by the build method. This can lead to some tricky cases.
 /// For example, [Theme.of(context)] looks for the nearest enclosing [Theme] of
 /// the given build context. If a build method for a widget Q includes a [Theme]
 /// within its returned widget tree, and attempts to use [Theme.of] passing its

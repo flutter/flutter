@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class StateMarker extends StatefulWidget {
@@ -47,6 +47,8 @@ class DeactivateLoggerState extends State<DeactivateLogger> {
 }
 
 void main() {
+  const green = Color(0xff00ff00);
+
   testWidgets('can reparent state', (WidgetTester tester) async {
     final GlobalKey left = GlobalKey();
     final GlobalKey right = GlobalKey();
@@ -57,11 +59,11 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           ColoredBox(
-            color: Colors.green,
+            color: green,
             child: StateMarker(key: left),
           ),
           ColoredBox(
-            color: Colors.green,
+            color: green,
             child: StateMarker(key: right, child: grandchild),
           ),
         ],
@@ -83,11 +85,11 @@ void main() {
         textDirection: TextDirection.ltr,
         children: <Widget>[
           ColoredBox(
-            color: Colors.green,
+            color: green,
             child: StateMarker(key: right, child: newGrandchild),
           ),
           ColoredBox(
-            color: Colors.green,
+            color: green,
             child: StateMarker(key: left),
           ),
         ],
@@ -107,7 +109,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: ColoredBox(
-          color: Colors.green,
+          color: green,
           child: StateMarker(key: left, child: Container()),
         ),
       ),
@@ -166,7 +168,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: ColoredBox(
-          color: Colors.green,
+          color: green,
           child: StateMarker(key: left, child: Container()),
         ),
       ),

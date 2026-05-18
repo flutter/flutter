@@ -14,6 +14,12 @@ layout(location = 0) uniform float iFloatUniform;
 layout(location = 1) uniform float iInserted;
 layout(location = 2) uniform vec2 iVec2Uniform;
 layout(location = 3) uniform mat2 iMat2Uniform;
+layout(location = 4) uniform vec3 iVec3Uniform;
+layout(location = 5) uniform vec4 iVec4Uniform;
+layout(location = 6) uniform float[10] iFloatArrayUniform;
+layout(location = 16) uniform vec2[3] iVec2ArrayUniform;
+layout(location = 22) uniform vec3[3] iVec3ArrayUniform;
+layout(location = 31) uniform vec4[3] iVec4ArrayUniform;
 
 void main() {
   oColor = vec4(iInserted * iFloatUniform, iVec2Uniform, iMat2Uniform[1][1]);

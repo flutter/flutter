@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:matcher/expect.dart' as matcher;
 import 'package:matcher/src/expect/async_matcher.dart';
 
@@ -24,6 +25,7 @@ void main() {
       final completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer));
       String? result;
+      // ignore: unawaited_futures
       future.then<void>((void value) {
         result = '123';
       });
@@ -43,6 +45,7 @@ void main() {
         skip: 'testing skip',
       ); // [intended] API testing
       var completed = false;
+      // ignore: unawaited_futures
       future.then<void>((_) {
         completed = true;
       });
@@ -88,6 +91,7 @@ void main() {
       int count;
 
       final test = AnimationController(duration: const Duration(milliseconds: 5100), vsync: tester);
+      addTearDown(test.dispose);
       count = await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(count, 1); // it always pumps at least one frame
 
@@ -242,6 +246,7 @@ void main() {
       duration: const Duration(seconds: 1),
       vsync: const TestVSync(),
     );
+    addTearDown(controller.dispose);
     expect(tester.hasRunningAnimations, isFalse);
     controller.forward();
     expect(tester.hasRunningAnimations, isTrue);
@@ -258,6 +263,7 @@ void main() {
       duration: const Duration(minutes: 525600),
       vsync: const TestVSync(),
     );
+    addTearDown(controller.dispose);
     expect(await tester.pumpAndSettle(), 1);
     controller.forward();
     try {
@@ -374,7 +380,10 @@ void main() {
     });
 
     testWidgets('disallows re-entry', (WidgetTester tester) async {
+      // This test requires the first runAsync to not have finished
+      // in order to test re-entry.
       final completer = Completer<void>();
+      // ignore: unawaited_futures
       tester.runAsync<void>(() => completer.future);
       expect(() => tester.runAsync(() async {}), throwsA(isA<TestFailure>()));
       completer.complete();
@@ -522,6 +531,7 @@ void main() {
   testWidgets('verifyTickersWereDisposed control test', (WidgetTester tester) async {
     late FlutterError error;
     final Ticker ticker = tester.createTicker((Duration duration) {});
+    addTearDown(ticker.dispose);
     ticker.start();
     try {
       tester.verifyTickersWereDisposed('');
@@ -704,24 +714,21 @@ void main() {
       );
       await SemanticsService.sendAnnouncement(tester.view, 'announcement 3', TextDirection.rtl);
 
-      final List<CapturedAccessibilityAnnouncement> list = tester.takeAnnouncements();
-      expect(list, hasLength(3));
-      final CapturedAccessibilityAnnouncement first = list[0];
-      expect(first.message, 'announcement 1');
-      expect(first.textDirection, TextDirection.ltr);
+      expect(tester.takeAnnouncements(), [
+        isAccessibilityAnnouncement('announcement 1', textDirection: TextDirection.ltr),
+        isAccessibilityAnnouncement(
+          'announcement 2',
+          textDirection: TextDirection.rtl,
+          assertiveness: Assertiveness.assertive,
+        ),
+        isAccessibilityAnnouncement(
+          'announcement 3',
+          textDirection: TextDirection.rtl,
+          assertiveness: Assertiveness.polite,
+        ),
+      ]);
 
-      final CapturedAccessibilityAnnouncement second = list[1];
-      expect(second.message, 'announcement 2');
-      expect(second.textDirection, TextDirection.rtl);
-      expect(second.assertiveness, Assertiveness.assertive);
-
-      final CapturedAccessibilityAnnouncement third = list[2];
-      expect(third.message, 'announcement 3');
-      expect(third.textDirection, TextDirection.rtl);
-      expect(third.assertiveness, Assertiveness.polite);
-
-      final List<CapturedAccessibilityAnnouncement> emptyList = tester.takeAnnouncements();
-      expect(emptyList, <CapturedAccessibilityAnnouncement>[]);
+      expect(tester.takeAnnouncements(), <CapturedAccessibilityAnnouncement>[]);
     });
 
     testWidgets('New test API is not breaking existing tests', (WidgetTester tester) async {
@@ -795,19 +802,22 @@ void main() {
     expect(find.byType(View), findsNothing);
   });
 
-  testWidgets('passing a view to pumpWidget with wrapWithView: true throws', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(View(view: FakeView(tester.view), child: const SizedBox.shrink()));
-    expect(
-      tester.takeException(),
-      isFlutterError.having(
-        (FlutterError e) => e.message,
-        'message',
-        contains('consider setting the "wrapWithView" parameter of that method to false'),
-      ),
-    );
-  });
+  testWidgets(
+    'passing a view to pumpWidget with wrapWithView: true throws',
+    experimentalLeakTesting: LeakTesting.settings
+        .withIgnoredAll(), // leaking by design because of exception
+    (WidgetTester tester) async {
+      await tester.pumpWidget(View(view: FakeView(tester.view), child: const SizedBox.shrink()));
+      expect(
+        tester.takeException(),
+        isFlutterError.having(
+          (FlutterError e) => e.message,
+          'message',
+          contains('consider setting the "wrapWithView" parameter of that method to false'),
+        ),
+      );
+    },
+  );
 
   testWidgets('can pass a View to pumpWidget when wrapWithView: false', (
     WidgetTester tester,
@@ -817,6 +827,27 @@ void main() {
       View(view: tester.view, child: const SizedBox.shrink()),
     );
     expect(find.byType(View), findsOne);
+  });
+
+  group('Leak tests', () {
+    // Regression test for https://github.com/flutter/flutter/issues/169119.
+    testWidgets('Does not leak if restorationManager is accessed', (WidgetTester tester) async {
+      var counterByWidgets = 0;
+      final RestorationManager managerByWidgets = WidgetsBinding.instance.restorationManager;
+      expect(managerByWidgets, isA<TestRestorationManager>());
+      managerByWidgets.addListener(() => counterByWidgets++);
+      managerByWidgets.notifyListeners();
+      expect(counterByWidgets, 1);
+
+      var counterByServices = 0;
+      final RestorationManager managerByServices = ServicesBinding.instance.restorationManager;
+      expect(managerByServices, isA<TestRestorationManager>());
+      managerByServices.addListener(() => counterByServices++);
+      managerByServices.notifyListeners();
+      expect(counterByServices, 1);
+
+      // Passes if no leaks are detected.
+    });
   });
 }
 

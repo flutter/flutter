@@ -45,11 +45,15 @@ struct Snapshot {
   /// capture the padding.
   bool needs_rasterization_for_runtime_effects = false;
 
-  /// Any snapshot that is scaled should rerasterize because we should be
+  /// Any snapshot that is scaled should re-rasterize because we should be
   /// performing the RuntimeEffect at the resolution of the screen, not the
   /// scaled up or scaled down version of the snapshot.
   bool ShouldRasterizeForRuntimeEffects() const {
-    return !transform.IsTranslationOnly() ||
+    // If the transform has a rotation we don't re-rasterize because we'll lose
+    // the rotation.
+    // TODO(tbd): We should re-rasterize scaled and rotated snapshots.
+    return (!transform.IsTranslationOnly() &&
+            transform.IsTranslationScaleOnly()) ||
            needs_rasterization_for_runtime_effects;
   }
 

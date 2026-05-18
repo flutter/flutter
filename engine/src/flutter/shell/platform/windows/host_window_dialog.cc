@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/host_window_dialog.h"
 
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
+#include "flutter/shell/platform/windows/window_proc_delegate_manager.h"
 
 namespace {
 DWORD GetWindowStyleForDialog(std::optional<HWND> const& owner_window) {
@@ -38,16 +39,17 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
                                    const BoxConstraints& constraints,
                                    LPCWSTR title,
                                    std::optional<HWND> const& owner_window)
-    : HostWindow(
-          window_manager,
-          engine,
-          WindowArchetype::kDialog,
-          GetWindowStyleForDialog(owner_window),
-          GetExtendedWindowStyleForDialog(owner_window),
-          constraints,
+    : HostWindow(window_manager, engine) {
+  InitializeFlutterView(HostWindowInitializationParams{
+      .archetype = WindowArchetype::kDialog,
+      .window_style = GetWindowStyleForDialog(owner_window),
+      .extended_window_style = GetExtendedWindowStyleForDialog(owner_window),
+      .box_constraints = constraints,
+      .initial_window_rect =
           GetInitialRect(engine, preferred_size, constraints, owner_window),
-          title,
-          owner_window) {
+      .title = title,
+      .owner_window = owner_window,
+  });
   auto hwnd = window_handle_;
   if (owner_window == nullptr) {
     if (HMENU hMenu = GetSystemMenu(hwnd, FALSE)) {
@@ -102,6 +104,15 @@ LRESULT HostWindowDialog::HandleMessage(HWND hwnd,
       break;
 
     case WM_ACTIVATE:
+      // Forward the message to Dart before handling it on the C++ side.
+      // This ensures that Dart-side handlers (e.g. popup dismiss logic)
+      // can observe activation changes caused by dialog windows.
+      if (auto const result =
+              engine_->window_proc_delegate_manager()->OnTopLevelWindowProc(
+                  window_handle_, message, wparam, lparam)) {
+        return *result;
+      }
+
       if (LOWORD(wparam) != WA_INACTIVE) {
         // Prevent disabled window from being activated using the task
         // switcher.

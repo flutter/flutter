@@ -435,24 +435,56 @@ std::unique_ptr<Rasterizer::GpuImageResult> Rasterizer::MakeSkiaGpuImage(
 #endif  //  !SLIMPELLER
 }
 
-void Rasterizer::MakeRasterSnapshot(
-    sk_sp<DisplayList> display_list,
-    DlISize picture_size,
-    std::function<void(sk_sp<DlImage>)> callback) {
-  return snapshot_controller_->MakeRasterSnapshot(display_list, picture_size,
-                                                  callback);
+void Rasterizer::MakeSkiaSnapshot(sk_sp<DisplayList> display_list,
+                                  DlISize picture_size,
+                                  std::function<void(sk_sp<SkImage>)> callback,
+                                  SnapshotPixelFormat pixel_format) {
+  return snapshot_controller_->MakeSkiaSnapshot(
+      display_list, picture_size, std::move(callback), pixel_format);
 }
 
-sk_sp<DlImage> Rasterizer::MakeRasterSnapshotSync(
+sk_sp<SkImage> Rasterizer::MakeSkiaSnapshotSync(
     sk_sp<DisplayList> display_list,
-    DlISize picture_size) {
-  return snapshot_controller_->MakeRasterSnapshotSync(display_list,
-                                                      picture_size);
+    DlISize picture_size,
+    SnapshotPixelFormat pixel_format) {
+  return snapshot_controller_->MakeSkiaSnapshotSync(std::move(display_list),
+                                                    picture_size, pixel_format);
+}
+
+void Rasterizer::MakeImpellerSnapshot(
+    sk_sp<DisplayList> display_list,
+    DlISize picture_size,
+    std::function<void(std::shared_ptr<impeller::Texture>)> callback,
+    SnapshotPixelFormat pixel_format) {
+  return snapshot_controller_->MakeImpellerSnapshot(
+      display_list, picture_size, std::move(callback), pixel_format);
+}
+
+std::shared_ptr<impeller::Texture> Rasterizer::MakeImpellerSnapshotSync(
+    sk_sp<DisplayList> display_list,
+    DlISize picture_size,
+    SnapshotPixelFormat pixel_format) {
+  return snapshot_controller_->MakeImpellerSnapshotSync(
+      std::move(display_list), picture_size, pixel_format);
 }
 
 sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {
   TRACE_EVENT0("flutter", __FUNCTION__);
   return snapshot_controller_->ConvertToRasterImage(image);
+}
+
+sk_sp<SkImage> Rasterizer::MakeSkiaTextureImage(
+    sk_sp<SkImage> image,
+    SnapshotPixelFormat pixel_format) {
+  TRACE_EVENT0("flutter", __FUNCTION__);
+  return snapshot_controller_->MakeSkiaTextureImage(image, pixel_format);
+}
+
+std::shared_ptr<impeller::Texture> Rasterizer::MakeImpellerTextureImage(
+    sk_sp<SkImage> image,
+    SnapshotPixelFormat pixel_format) {
+  TRACE_EVENT0("flutter", __FUNCTION__);
+  return snapshot_controller_->MakeImpellerTextureImage(image, pixel_format);
 }
 
 // |SnapshotDelegate|
@@ -854,7 +886,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
 #else
   SkSerialProcs procs = {0};
   procs.fTypefaceProc = SerializeTypefaceWithData;
-  procs.fImageProc = [](SkImage* img, void*) -> sk_sp<SkData> {
+  procs.fImageProc = [](SkImage* img, void*) -> SkSerialReturnType {
     return SkPngEncoder::Encode(nullptr, img, SkPngEncoder::Options{});
   };
 #endif

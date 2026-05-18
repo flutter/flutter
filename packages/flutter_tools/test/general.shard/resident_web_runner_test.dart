@@ -271,6 +271,24 @@ name: my_app
   );
 
   testUsingContext(
+    'Does not crash if the application exits during DDS startup',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/178151
+      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+      setupMocks();
+      webDevFS.exception = DartDevelopmentServiceException.failedToStart();
+
+      await expectLater(residentWebRunner.run(), throwsToolExit());
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'WebRunner copies compiled app.dill to cache during startup',
     () async {
       final debuggingOptions = DebuggingOptions.enabled(
@@ -665,6 +683,39 @@ name: my_app
       expect(
         testLogger.errorText,
         'Received an invalid Flutter.Error message from app: {other: bad stuff}\n',
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'Outputs DTD URI when --print-dtd is provided',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/182052
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: testLogger,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, printDtd: true),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+
+      setupMocks();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+
+      expect(
+        testLogger.statusText,
+        'Launching lib/main.dart on FakeDevice in debug mode...\n'
+        'Waiting for connection from debug service on FakeDevice...\n'
+        'Debug service listening on ws://127.0.0.1/abcd/\n'
+        'A Dart VM Service on FakeDevice is available at: http://127.0.0.1/abcd/\n'
+        'The Dart Tooling Daemon is available at: ws://127.0.0.1/efgh/\n'
+        'The Flutter DevTools debugger and profiler on FakeDevice is available at: http://127.0.0.1/abcd/\n',
       );
     },
     overrides: <Type, Generator>{

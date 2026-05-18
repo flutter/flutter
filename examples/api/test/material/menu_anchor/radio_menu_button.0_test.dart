@@ -61,15 +61,9 @@ void main() {
 
     expect(
       tester
-          .widget<Radio<Color>>(
-            find.descendant(
-              of: find.byType(RadioMenuButton<Color>).at(0),
-              matching: find.byType(Radio<Color>),
-            ),
+          .widget<RadioMenuButton<Color>>(
+            find.byType(RadioMenuButton<Color>).at(0),
           )
-          // TODO(loic-sharma): Migrate to RadioGroup.
-          // https://github.com/flutter/flutter/issues/179088
-          // ignore: deprecated_member_use
           .groupValue,
       equals(Colors.green),
     );
@@ -86,15 +80,9 @@ void main() {
 
     expect(
       tester
-          .widget<Radio<Color>>(
-            find.descendant(
-              of: find.byType(RadioMenuButton<Color>).at(1),
-              matching: find.byType(Radio<Color>),
-            ),
+          .widget<RadioMenuButton<Color>>(
+            find.byType(RadioMenuButton<Color>).at(0),
           )
-          // TODO(loic-sharma): Migrate to RadioGroup.
-          // https://github.com/flutter/flutter/issues/179088
-          // ignore: deprecated_member_use
           .groupValue,
       equals(Colors.red),
     );
@@ -111,15 +99,9 @@ void main() {
 
     expect(
       tester
-          .widget<Radio<Color>>(
-            find.descendant(
-              of: find.byType(RadioMenuButton<Color>).at(2),
-              matching: find.byType(Radio<Color>),
-            ),
+          .widget<RadioMenuButton<Color>>(
+            find.byType(RadioMenuButton<Color>).at(0),
           )
-          // TODO(loic-sharma): Migrate to RadioGroup.
-          // https://github.com/flutter/flutter/issues/179088
-          // ignore: deprecated_member_use
           .groupValue,
       equals(Colors.blue),
     );
@@ -135,9 +117,7 @@ void main() {
     const double safeAreaPadding = 100.0;
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(
-          padding: EdgeInsets.symmetric(vertical: safeAreaPadding),
-        ),
+        data: MediaQueryData(padding: .symmetric(vertical: safeAreaPadding)),
         child: example.MenuApp(),
       ),
     );

@@ -43,6 +43,10 @@ typedef enum {
   // This falls back to a high performance GPU if no low power GPU is
   // available.
   LowPowerPreference,
+  // Prefer performance over energy efficiency, such as a discrete GPU or
+  // dedicated GPU.
+  // This falls back to a low power GPU if no high performance GPU is available.
+  HighPerformancePreference,
 } FlutterDesktopGpuPreference;
 
 // Configures the thread policy for running the UI isolate.
@@ -55,6 +59,17 @@ typedef enum {
   // Run the UI isolate on a separate thread.
   RunOnSeparateThread,
 } FlutterDesktopUIThreadPolicy;
+
+// Configures the accessibility implementation used by Flutter.
+typedef enum {
+  // Default value. Flutter will automatically select the best available
+  // implementation.
+  DefaultAccessibilityMode,
+  // Use the IAccessible implementation.
+  IAccessibleMode,
+  // Use the experimental IAccessibleEx implementation.
+  IAccessibleExMode,
+} FlutterDesktopAccessibilityMode;
 
 // Properties for configuring a Flutter engine instance.
 typedef struct {
@@ -94,6 +109,10 @@ typedef struct {
 
   // Policy for the thread that runs UI isolate.
   FlutterDesktopUIThreadPolicy ui_thread_policy;
+
+  // The accessibility mode.
+  // This can be used to enable the experimental IAccessibleEx implementation.
+  FlutterDesktopAccessibilityMode accessibility_mode;
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========
@@ -242,8 +261,18 @@ FLUTTER_EXPORT void FlutterDesktopEngineSetNextFrameCallback(
 FLUTTER_EXPORT HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view);
 
 // Returns the DXGI adapter used for rendering or nullptr in case of error.
+// The caller must release the adapter.
+// DEPRECATED: Use |FlutterDesktopEngineGetGraphicsAdapter| instead.
 FLUTTER_EXPORT IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(
     FlutterDesktopViewRef view);
+
+// Retrieves the DXGI adapter used for rendering. Returns true if the adapter
+// was successfully retrieved, or false if an error occured.
+// The caller must provide a valid pointer to an IDXGIAdapter* and is
+// responsible for releasing the adapter.
+FLUTTER_EXPORT bool FlutterDesktopEngineGetGraphicsAdapter(
+    FlutterDesktopEngineRef engine,
+    IDXGIAdapter** adapter_out);
 
 // Called to pass an external window message to the engine for lifecycle
 // state updates. Non-Flutter windows must call this method in their WndProc
@@ -301,6 +330,14 @@ FLUTTER_EXPORT void
 FlutterDesktopPluginRegistrarUnregisterTopLevelWindowProcDelegate(
     FlutterDesktopPluginRegistrarRef registrar,
     FlutterDesktopWindowProcCallback delegate);
+
+// Retrieves the DXGI adapter used for rendering. Returns true if the adapter
+// was successfully retrieved, or false if an error occured.
+// The caller must provide a valid pointer to an IDXGIAdapter* and is
+// responsible for releasing the adapter.
+FLUTTER_EXPORT bool FlutterDesktopPluginRegistrarGetGraphicsAdapter(
+    FlutterDesktopPluginRegistrarRef registrar,
+    IDXGIAdapter** adapter_out);
 
 // ========== Freestanding Utilities ==========
 

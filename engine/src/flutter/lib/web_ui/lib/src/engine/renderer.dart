@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart'
+    // ignore: deprecated_web_configuration
     if (dart.library.html) 'package:ui/src/engine/skwasm/skwasm_stub.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
@@ -44,6 +45,9 @@ abstract class Renderer {
 
   late Rasterizer rasterizer;
 
+  /// A surface used specifically for `Picture.toImage`.
+  Surface get pictureToImageSurface;
+
   /// Resets the [Rasterizer] to the default value. Used in tests.
   @visibleForTesting
   void debugResetRasterizer();
@@ -64,6 +68,10 @@ abstract class Renderer {
 
   @mustCallSuper
   FutureOr<void> initialize() {
+    _setUpViewListeners();
+  }
+
+  void _setUpViewListeners() {
     // Views may have been registered before this renderer was initialized.
     // Create rasterizers for them and then start listening for new view
     // creation/disposal events.
@@ -150,6 +158,7 @@ abstract class Renderer {
     double sigmaX = 0.0,
     double sigmaY = 0.0,
     ui.TileMode? tileMode,
+    ui.Rect? bounds,
   });
   ui.ImageFilter createDilateImageFilter({double radiusX = 0.0, double radiusY = 0.0});
   ui.ImageFilter createErodeImageFilter({double radiusX = 0.0, double radiusY = 0.0});
@@ -206,9 +215,7 @@ abstract class Renderer {
   void clearFragmentProgramCache();
   Future<ui.FragmentProgram> createFragmentProgram(String assetKey);
 
-  ui.Path createPath();
-  ui.Path copyPath(ui.Path src);
-  ui.Path combinePaths(ui.PathOperation op, ui.Path path1, ui.Path path2);
+  DisposablePathConstructors get pathConstructors;
 
   ui.LineMetrics createLineMetrics({
     required bool hardBreak,
@@ -336,18 +343,19 @@ abstract class Renderer {
   void dispose() {
     _onViewCreatedListener.cancel();
     _onViewDisposedListener.cancel();
-    for (final ViewRasterizer rasterizer in rasterizers.values) {
-      rasterizer.dispose();
-    }
-    rasterizers.clear();
     rasterizer.dispose();
+    pictureToImageSurface.dispose();
   }
 
   /// Clears the state of this renderer. Used in tests.
   @mustCallSuper
   void debugClear() {
+    _onViewCreatedListener.cancel();
+    _onViewDisposedListener.cancel();
     for (final ViewRasterizer rasterizer in rasterizers.values) {
-      rasterizer.debugClear();
+      rasterizer.dispose();
     }
+    rasterizers.clear();
+    _setUpViewListeners();
   }
 }

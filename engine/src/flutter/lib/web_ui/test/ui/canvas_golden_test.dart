@@ -251,9 +251,11 @@ Future<void> drawTestPicture(LayerCanvas canvas) async {
   );
 
   canvas.translate(60, 0);
+
   canvas.drawImage(await generateTestImage(), const ui.Offset(20, 20), ui.Paint());
 
   canvas.translate(60, 0);
+
   final transform = ui.RSTransform.fromComponents(
     rotation: 0,
     scale: 1,

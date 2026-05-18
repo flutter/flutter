@@ -110,6 +110,7 @@ class BuildApkCommand extends BuildSubCommand {
       buildApkTargetPlatform: _targetArchs.join(','),
       buildApkBuildMode: _buildMode.cliName,
       buildApkSplitPerAbi: boolArg('split-per-abi'),
+      buildApkEnableHcpp: FlutterProject.current().android.computeHcppEnabled(),
     );
   }
 
@@ -135,9 +136,6 @@ class BuildApkCommand extends BuildSubCommand {
       configOnly: configOnly,
     );
 
-    // When an app is successfully built, record to analytics whether Impeller
-    // is enabled or disabled. Note that 'computeImpellerEnabled' will default
-    // to false if not enabled explicitly in the manifest.
     final bool impellerEnabled = project.android.computeImpellerEnabled();
     final buildLabel = impellerEnabled ? 'manifest-impeller-enabled' : 'manifest-impeller-disabled';
     globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));

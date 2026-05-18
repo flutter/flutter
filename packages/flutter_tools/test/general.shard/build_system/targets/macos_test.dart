@@ -7,10 +7,13 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -909,18 +912,53 @@ void main() {
       ProcessManager: () => processManager,
     },
   );
+
+  group('FlutterMacOS output', () {
+    late MemoryFileSystem testFileSystem;
+
+    setUp(() {
+      testFileSystem = MemoryFileSystem.test();
+      testFileSystem.file('pubspec.yaml').createSync(recursive: true);
+      testFileSystem.directory('macos').createSync(recursive: true);
+      testFileSystem
+          .directory('macos/Flutter/ephemeral/Packages/.packages/FlutterFramework')
+          .createSync(recursive: true);
+    });
+    testUsingContext(
+      'included when not using SwiftPM',
+      () async {
+        const Target target = ReleaseUnpackMacOS();
+        expect(target.outputs.contains(kFlutterMacOSFrameworkBinarySource), isTrue);
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(),
+        XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(version: Version(15, 0, 0)),
+      },
+    );
+  });
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  FakeXcodeProjectInterpreter({this.isInstalled = true, this.schemes = const <String>['Runner']});
+  FakeXcodeProjectInterpreter({
+    this.isInstalled = true,
+    this.version,
+    this.schemes = const <String>['Runner'],
+  });
 
   @override
   final bool isInstalled;
 
+  @override
+  final Version? version;
+
   List<String> schemes;
 
   @override
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(
+    XcodeBasedProject xcodeProject, {
+    required Directory buildDirectory,
+    String? projectFilename,
+  }) async {
     return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
   }
 }

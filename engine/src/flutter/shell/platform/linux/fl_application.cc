@@ -32,15 +32,6 @@ G_DEFINE_TYPE_WITH_CODE(FlApplication,
                         GTK_TYPE_APPLICATION,
                         G_ADD_PRIVATE(FlApplication))
 
-// Called when the platform creates a window.
-static GtkWindow* create_window_cb(FlApplication* self, FlView* view) {
-  GtkWindow* window;
-  g_signal_emit(self, fl_application_signals[SIGNAL_CREATE_WINDOW], 0, view,
-                &window);
-
-  return window;
-}
-
 // Called when the first frame is received.
 static void first_frame_cb(FlApplication* self, FlView* view) {
   GtkWidget* window = gtk_widget_get_toplevel(GTK_WIDGET(view));
@@ -103,11 +94,6 @@ static void fl_application_activate(GApplication* application) {
   g_signal_connect_swapped(view, "first-frame", G_CALLBACK(first_frame_cb),
                            self);
   gtk_widget_show(GTK_WIDGET(view));
-
-  FlWindowingHandler* windowing_handler =
-      fl_engine_get_windowing_handler(fl_view_get_engine(view));
-  g_signal_connect_swapped(windowing_handler, "create_window",
-                           G_CALLBACK(create_window_cb), self);
 
   GtkWindow* window;
   g_signal_emit(self, fl_application_signals[SIGNAL_CREATE_WINDOW], 0, view,

@@ -639,8 +639,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         return;
       }
       // Custom-shaped thumb
-      final Path outerPath = shape!.getOuterPath(_thumbRect!);
-      canvas.drawPath(outerPath, _paintThumb);
+      if (shape!.preferPaintInterior) {
+        shape!.paintInterior(canvas, _thumbRect!, _paintThumb);
+      } else {
+        final Path outerPath = shape!.getOuterPath(_thumbRect!);
+        canvas.drawPath(outerPath, _paintThumb);
+      }
       shape!.paint(canvas, _thumbRect!);
     }
   }
@@ -2027,7 +2031,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         _effectiveScrollController != null &&
         _effectiveScrollController!.positions.length == 1 &&
         _effectiveScrollController!.position.hasContentDimensions &&
-        _effectiveScrollController!.position.maxScrollExtent > 0.0;
+        _effectiveScrollController!.position.maxScrollExtent -
+                _effectiveScrollController!.position.minScrollExtent >
+            precisionErrorTolerance;
   }
 
   Map<Type, GestureRecognizerFactory> get _gestures {

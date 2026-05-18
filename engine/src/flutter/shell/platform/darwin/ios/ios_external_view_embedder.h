@@ -72,6 +72,20 @@ class IOSExternalViewEmbedder : public ExternalViewEmbedder {
       const DlRect& filter_rect) override;
 
   // |ExternalViewEmbedder|
+  void PushClipRectToVisitedPlatformViews(const DlRect& clip_rect) override;
+
+  // |ExternalViewEmbedder|
+  void PushClipRRectToVisitedPlatformViews(
+      const DlRoundRect& clip_rrect) override;
+
+  // |ExternalViewEmbedder|
+  void PushClipRSuperellipseToVisitedPlatformViews(
+      const DlRoundSuperellipse& clip_rse) override;
+
+  // |ExternalViewEmbedder|
+  void PushClipPathToVisitedPlatformViews(const DlPath& clip_path) override;
+
+  // |ExternalViewEmbedder|
   void PushVisitedPlatformView(int64_t view_id) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(IOSExternalViewEmbedder);

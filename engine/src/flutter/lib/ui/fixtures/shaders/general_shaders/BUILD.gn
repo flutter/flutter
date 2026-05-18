@@ -10,6 +10,7 @@ if (enable_unittests) {
   test_shaders = [
     "blue_green_sampler.frag",
     "children_and_uniforms.frag",
+    "circle_sdf.frag",
     "double_sampler_swapped.frag",
     "double_sampler.frag",
     "filter_shader.frag",
@@ -18,14 +19,17 @@ if (enable_unittests) {
     "missing_texture.frag",
     "no_builtin_redefinition.frag",
     "no_uniforms.frag",
+    "sdf.frag",
     "simple.frag",
+    "texture.frag",
     "uniform_arrays.frag",
+    "uniform_mat2.frag",
     "uniform_ordering.frag",
     "uniforms_inserted.frag",
+    "uniforms_renamed.frag",
     "uniforms_reordered.frag",
     "uniforms_sorted.frag",
     "uniforms.frag",
-    "vec3_uniform.frag",
   ]
 
   group("general_shaders") {
@@ -36,15 +40,39 @@ if (enable_unittests) {
   impellerc("compile_general_shaders") {
     mnemonic = "IMPELLERC_SKSL"
     shaders = test_shaders
-    shader_target_flags = [ "--sksl" ]
+    shader_target_flags = [
+      "--sksl",
+      "--runtime-stage-metal",
+      "--runtime-stage-gles",
+      "--runtime-stage-gles3",
+      "--runtime-stage-vulkan",
+    ]
     intermediates_subdir = "iplr"
     sl_file_extension = "iplr"
     iplr = true
   }
 
-  test_fixtures("fixtures") {
+  # An aliased copy of `no_uniforms.frag.iplr` published under a distinct
+  # asset name. The two assets have identical bytes (and therefore identical
+  # embedded entrypoint names), but FragmentProgram tracks them under
+  # different `library_id`s (the asset paths), so they must register at
+  # distinct scoped keys in the shared shader registry. Used by
+  # `fragment_shader_test.dart` to verify the no-collision behavior.
+  # `no_uniforms.frag` is used so the test does not need to thread sampler
+  # or uniform setup through the FragmentShader to validate it.
+  copy("no_uniforms_alt") {
+    sources = [ "$target_gen_dir/iplr/no_uniforms.frag.iplr" ]
+    outputs = [ "$target_gen_dir/iplr/no_uniforms_alt.frag.iplr" ]
     deps = [ ":compile_general_shaders" ]
-    fixtures = get_target_outputs(":compile_general_shaders")
+  }
+
+  test_fixtures("fixtures") {
+    deps = [
+      ":compile_general_shaders",
+      ":no_uniforms_alt",
+    ]
+    fixtures = get_target_outputs(":compile_general_shaders") +
+               get_target_outputs(":no_uniforms_alt")
     dest = "$root_gen_dir/flutter/lib/ui"
   }
 }

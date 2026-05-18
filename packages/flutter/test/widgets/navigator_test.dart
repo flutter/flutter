@@ -12,8 +12,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'list_tile_tester.dart';
 import 'navigator_utils.dart';
 import 'observer_tester.dart';
+import 'route_tester.dart';
 import 'semantics_tester.dart';
 
 @pragma('vm:entry-point')
@@ -355,8 +357,8 @@ void main() {
     WidgetTester tester,
   ) async {
     final pages = <Page<void>>[
-      const ZeroTransitionPage(name: 'Page 1'),
-      const ZeroTransitionPage(name: 'Page 2'),
+      const ZeroTransitionPage(name: 'Page 1', child: Text('Page 1')),
+      const ZeroTransitionPage(name: 'Page 2', child: Text('Page 2')),
     ];
     final observations = <NavigatorObservation>[];
 
@@ -4099,8 +4101,9 @@ void main() {
         return TestDependencies(
           child: Navigator(
             pages: <Page<void>>[
-              const ZeroDurationPage(child: Text('page1')),
-              if (secondPage) const ZeroDurationPage(child: Text('page2')),
+              const ZeroTransitionPage<void>(allowSnapshotting: false, child: Text('page1')),
+              if (secondPage)
+                const ZeroTransitionPage<void>(allowSnapshotting: false, child: Text('page2')),
             ],
             onPopPage: (Route<dynamic> route, dynamic result) => false,
           ),
@@ -5085,9 +5088,9 @@ void main() {
             '/one': (BuildContext context) => Scaffold(
               body: Column(
                 children: <Widget>[
-                  const ListTile(title: Text('Title 1')),
-                  const ListTile(title: Text('Title 2')),
-                  const ListTile(title: Text('Title 3')),
+                  const TestListTile(title: Text('Title 1')),
+                  const TestListTile(title: Text('Title 2')),
+                  const TestListTile(title: Text('Title 3')),
                   ElevatedButton(
                     key: openSheetKey,
                     onPressed: () {
@@ -5121,7 +5124,7 @@ void main() {
       final ByteData? fakeMessage = SystemChannels.accessibility.codec.encodeMessage(
         <String, dynamic>{'type': 'didGainFocus', 'nodeId': 5},
       );
-      tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.accessibility.name,
         fakeMessage,
         (ByteData? data) {},
@@ -6260,6 +6263,85 @@ void main() {
     expect(focus, orderedEquals(<bool?>[null, false, null, null]));
     clear();
   });
+
+  testWidgets(
+    'Navigator focus restoration reports error to FlutterError',
+    (WidgetTester tester) async {
+      final errorDetails = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        errorDetails.add(details);
+      };
+
+      try {
+        // Mock accessibility channel to throw error.
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (
+              dynamic message,
+            ) async {
+              final map = message as Map<dynamic, dynamic>;
+              if (map['type'] == 'focus') {
+                throw Exception('Focus restoration failed');
+              }
+              return null;
+            });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Builder(
+                builder: (BuildContext context) {
+                  return ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        NoAnimationPageRoute(
+                          pageBuilder: (BuildContext context) => Scaffold(
+                            appBar: AppBar(title: const Text('Second Route')),
+                            body: ElevatedButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Pop'),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text('Push'),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+
+        // Record the last focus in route entry.
+        ServicesBinding.instance.accessibilityFocus.value = 123;
+        await tester.pump();
+
+        // Push second route.
+        await tester.tap(find.text('Push'));
+        await tester.pumpAndSettle();
+
+        // Now we are on the second route.
+        // Pop it.
+        await tester.tap(find.text('Pop'));
+        await tester.pumpAndSettle();
+
+        expect(errorDetails.length, 1);
+        expect(errorDetails[0].exception.toString(), contains('Focus restoration failed'));
+        expect(errorDetails[0].library, 'widgets library');
+        expect(
+          errorDetails[0].context.toString(),
+          contains('while restoring focus in the navigator'),
+        );
+      } finally {
+        FlutterError.onError = oldHandler;
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
+      }
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
@@ -6378,15 +6460,6 @@ class AlwaysRemoveTransitionDelegate extends TransitionDelegate<void> {
   }
 }
 
-class ZeroTransitionPage extends Page<void> {
-  const ZeroTransitionPage({super.key, super.arguments, required String super.name});
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return NoAnimationPageRoute(settings: this, pageBuilder: (BuildContext context) => Text(name!));
-  }
-}
-
 typedef CanPopPageInvoke = (bool didPop, Object? result);
 
 class CanPopPage<T> extends Page<T> {
@@ -6473,55 +6546,6 @@ class BuilderPage extends Page<void> {
   Route<void> createRoute(BuildContext context) {
     return PageRouteBuilder<void>(settings: this, pageBuilder: pageBuilder);
   }
-}
-
-class ZeroDurationPage extends Page<void> {
-  const ZeroDurationPage({required this.child});
-
-  final Widget child;
-
-  @override
-  Route<void> createRoute(BuildContext context) {
-    return ZeroDurationPageRoute(page: this);
-  }
-}
-
-class ZeroDurationPageRoute extends PageRoute<void> {
-  ZeroDurationPageRoute({required ZeroDurationPage page})
-    : super(settings: page, allowSnapshotting: false);
-
-  @override
-  Duration get transitionDuration => Duration.zero;
-
-  ZeroDurationPage get _page => settings as ZeroDurationPage;
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return _page.child;
-  }
-
-  @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return child;
-  }
-
-  @override
-  bool get maintainState => false;
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  String? get barrierLabel => null;
 }
 
 class _MockNavigatorObserver implements NavigatorObserver {

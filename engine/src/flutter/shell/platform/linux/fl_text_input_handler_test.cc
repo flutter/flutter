@@ -1177,3 +1177,331 @@ TEST(FlTextInputHandlerTest, NonComposingDelta) {
 
   fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
+
+TEST(FlTextInputHandlerTest, InputPurposeNumber) {
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  g_autoptr(FlTextInputHandler) handler =
+      fl_text_input_handler_new(FL_BINARY_MESSENGER(messenger));
+  EXPECT_NE(handler, nullptr);
+
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-purpose"),
+                           GTK_INPUT_PURPOSE_NUMBER));
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-hints"),
+                           GTK_INPUT_HINT_NONE));
+
+  set_client(messenger, {
+                            .client_id = 1,
+                            .input_type = "TextInputType.number",
+                        });
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
+
+TEST(FlTextInputHandlerTest, InputPurposePhone) {
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  g_autoptr(FlTextInputHandler) handler =
+      fl_text_input_handler_new(FL_BINARY_MESSENGER(messenger));
+  EXPECT_NE(handler, nullptr);
+
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-purpose"),
+                           GTK_INPUT_PURPOSE_PHONE));
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-hints"),
+                           GTK_INPUT_HINT_NONE));
+
+  set_client(messenger, {
+                            .client_id = 1,
+                            .input_type = "TextInputType.phone",
+                        });
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
+
+TEST(FlTextInputHandlerTest, InputPurposeEmail) {
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  g_autoptr(FlTextInputHandler) handler =
+      fl_text_input_handler_new(FL_BINARY_MESSENGER(messenger));
+  EXPECT_NE(handler, nullptr);
+
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-purpose"),
+                           GTK_INPUT_PURPOSE_EMAIL));
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-hints"),
+                           GTK_INPUT_HINT_NONE));
+
+  set_client(messenger, {
+                            .client_id = 1,
+                            .input_type = "TextInputType.emailAddress",
+                        });
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
+
+TEST(FlTextInputHandlerTest, InputPurposeUrl) {
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  g_autoptr(FlTextInputHandler) handler =
+      fl_text_input_handler_new(FL_BINARY_MESSENGER(messenger));
+  EXPECT_NE(handler, nullptr);
+
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-purpose"),
+                           GTK_INPUT_PURPOSE_URL));
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-hints"),
+                           GTK_INPUT_HINT_NONE));
+
+  set_client(messenger, {
+                            .client_id = 1,
+                            .input_type = "TextInputType.url",
+                        });
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
+
+TEST(FlTextInputHandlerTest, InputPurposePassword) {
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  g_autoptr(FlTextInputHandler) handler =
+      fl_text_input_handler_new(FL_BINARY_MESSENGER(messenger));
+  EXPECT_NE(handler, nullptr);
+
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-purpose"),
+                           GTK_INPUT_PURPOSE_PASSWORD));
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-hints"),
+                           GTK_INPUT_HINT_NONE));
+
+  set_client(messenger, {
+                            .client_id = 1,
+                            .input_type = "TextInputType.visiblePassword",
+                        });
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
+
+TEST(FlTextInputHandlerTest, InputPurposeName) {
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  g_autoptr(FlTextInputHandler) handler =
+      fl_text_input_handler_new(FL_BINARY_MESSENGER(messenger));
+  EXPECT_NE(handler, nullptr);
+
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-purpose"),
+                           GTK_INPUT_PURPOSE_NAME));
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-hints"),
+                           GTK_INPUT_HINT_UPPERCASE_WORDS));
+
+  set_client(messenger, {
+                            .client_id = 1,
+                            .input_type = "TextInputType.name",
+                        });
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
+
+TEST(FlTextInputHandlerTest, InputHintsAddress) {
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  g_autoptr(FlTextInputHandler) handler =
+      fl_text_input_handler_new(FL_BINARY_MESSENGER(messenger));
+  EXPECT_NE(handler, nullptr);
+
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-purpose"),
+                           GTK_INPUT_PURPOSE_FREE_FORM));
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-hints"),
+                           GTK_INPUT_HINT_UPPERCASE_WORDS));
+
+  set_client(messenger, {
+                            .client_id = 1,
+                            .input_type = "TextInputType.address",
+                        });
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
+
+TEST(FlTextInputHandlerTest, InputHintsMultiline) {
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  g_autoptr(FlTextInputHandler) handler =
+      fl_text_input_handler_new(FL_BINARY_MESSENGER(messenger));
+  EXPECT_NE(handler, nullptr);
+
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-purpose"),
+                           GTK_INPUT_PURPOSE_FREE_FORM));
+  EXPECT_CALL(
+      mock_gtk,
+      g_object_set(::testing::_, ::testing::StrEq("input-hints"),
+                   static_cast<gint>(GTK_INPUT_HINT_SPELLCHECK |
+                                     GTK_INPUT_HINT_UPPERCASE_SENTENCES)));
+
+  set_client(messenger, {
+                            .client_id = 1,
+                            .input_type = "TextInputType.multiline",
+                        });
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
+
+TEST(FlTextInputHandlerTest, InputHintsWebSearch) {
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  g_autoptr(FlTextInputHandler) handler =
+      fl_text_input_handler_new(FL_BINARY_MESSENGER(messenger));
+  EXPECT_NE(handler, nullptr);
+
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-purpose"),
+                           GTK_INPUT_PURPOSE_FREE_FORM));
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-hints"),
+                           GTK_INPUT_HINT_LOWERCASE));
+
+  set_client(messenger, {
+                            .client_id = 1,
+                            .input_type = "TextInputType.webSearch",
+                        });
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
+
+TEST(FlTextInputHandlerTest, InputHintsTwitter) {
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  g_autoptr(FlTextInputHandler) handler =
+      fl_text_input_handler_new(FL_BINARY_MESSENGER(messenger));
+  EXPECT_NE(handler, nullptr);
+
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-purpose"),
+                           GTK_INPUT_PURPOSE_FREE_FORM));
+  EXPECT_CALL(
+      mock_gtk,
+      g_object_set(::testing::_, ::testing::StrEq("input-hints"),
+                   static_cast<gint>(GTK_INPUT_HINT_SPELLCHECK |
+                                     GTK_INPUT_HINT_UPPERCASE_SENTENCES)));
+
+  set_client(messenger, {
+                            .client_id = 1,
+                            .input_type = "TextInputType.twitter",
+                        });
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
+
+TEST(FlTextInputHandlerTest, DefaultInputPurposeAndHints) {
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  g_autoptr(FlTextInputHandler) handler =
+      fl_text_input_handler_new(FL_BINARY_MESSENGER(messenger));
+  EXPECT_NE(handler, nullptr);
+
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-purpose"),
+                           GTK_INPUT_PURPOSE_FREE_FORM));
+  EXPECT_CALL(mock_gtk,
+              g_object_set(::testing::_, ::testing::StrEq("input-hints"),
+                           GTK_INPUT_HINT_NONE));
+
+  set_client(messenger, {
+                            .client_id = 1,
+                            .input_type = "TextInputType.text",
+                        });
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
+
+TEST(FlTextInputHandlerTest, UpdateConfig) {
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ::testing::NiceMock<flutter::testing::MockGtk> mock_gtk;
+
+  g_autoptr(FlTextInputHandler) handler =
+      fl_text_input_handler_new(FL_BINARY_MESSENGER(messenger));
+  EXPECT_NE(handler, nullptr);
+
+  set_client(messenger, {
+                            .client_id = 1,
+                            .input_action = "TextInputAction.none",
+                        });
+
+  // Update config with a different input action
+  gboolean called = FALSE;
+  g_autoptr(FlValue) config = build_map({
+      {"inputAction", fl_value_new_string("TextInputAction.send")},
+      {"inputType", build_map({
+                        {"name", fl_value_new_string("TextInputType.text")},
+                    })},
+      {"enableDeltaModel", fl_value_new_bool(false)},
+  });
+  fl_mock_binary_messenger_invoke_json_method(
+      messenger, "flutter/textinput", "TextInput.updateConfig", config,
+      [](FlMockBinaryMessenger* messenger, FlMethodResponse* response,
+         gpointer user_data) {
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
+
+        EXPECT_TRUE(FL_IS_METHOD_SUCCESS_RESPONSE(response));
+
+        g_autoptr(FlValue) expected_result = fl_value_new_null();
+        EXPECT_TRUE(fl_value_equal(fl_method_success_response_get_result(
+                                       FL_METHOD_SUCCESS_RESPONSE(response)),
+                                   expected_result));
+      },
+      &called);
+  EXPECT_TRUE(called);
+
+  set_editing_state(messenger, {
+                                   .text = "Flutter",
+                                   .selection_base = 7,
+                                   .selection_extent = 7,
+                               });
+
+  // Verify the action was updated by checking perform action call
+  int call_count = 0;
+  fl_mock_binary_messenger_set_json_method_channel(
+      messenger, "flutter/textinput",
+      [](FlMockBinaryMessenger* messenger, GTask* task, const gchar* name,
+         FlValue* args, gpointer user_data) {
+        int* call_count = static_cast<int*>(user_data);
+
+        EXPECT_STREQ(name, "TextInputClient.performAction");
+        g_autoptr(FlValue) expected_args = build_list({
+            fl_value_new_int(1),  // client_id
+            fl_value_new_string("TextInputAction.send"),
+        });
+        EXPECT_TRUE(fl_value_equal(args, expected_args));
+        (*call_count)++;
+
+        return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+      },
+      &call_count);
+
+  send_key_event(handler, GDK_KEY_Return);
+  EXPECT_EQ(call_count, 1);
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}

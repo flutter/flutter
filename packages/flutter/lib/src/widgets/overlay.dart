@@ -26,6 +26,7 @@ import 'basic.dart';
 import 'framework.dart';
 import 'layout_builder.dart';
 import 'lookup_boundary.dart';
+import 'media_query.dart';
 import 'ticker_provider.dart';
 
 /// The signature of the widget builder callback used in
@@ -488,6 +489,7 @@ class Overlay extends StatefulWidget {
     super.key,
     this.initialEntries = const <OverlayEntry>[],
     this.clipBehavior = Clip.hardEdge,
+    this.alwaysSizeToContent = false,
   });
 
   /// Wrap the provided `child` in an [Overlay] to allow other visual elements
@@ -496,8 +498,18 @@ class Overlay extends StatefulWidget {
   /// This is a convenience method over the regular [Overlay] constructor: It
   /// creates an [Overlay] and puts the provided `child` in an [OverlayEntry]
   /// at the bottom of that newly created Overlay.
-  static Widget wrap({Key? key, Clip clipBehavior = Clip.hardEdge, required Widget child}) {
-    return _WrappingOverlay(key: key, clipBehavior: clipBehavior, child: child);
+  static Widget wrap({
+    Key? key,
+    Clip clipBehavior = Clip.hardEdge,
+    bool alwaysSizeToContent = false,
+    required Widget child,
+  }) {
+    return _WrappingOverlay(
+      key: key,
+      clipBehavior: clipBehavior,
+      alwaysSizeToContent: alwaysSizeToContent,
+      child: child,
+    );
   }
 
   /// The entries to include in the overlay initially.
@@ -519,6 +531,18 @@ class Overlay extends StatefulWidget {
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
+
+  /// Determines that the overlay should always size itself to content.
+  ///
+  /// Normally overlay will only size itself to content if the incoming
+  /// constraints are infinite and there is a [OverlayEntry] that can size
+  /// the overlay. Setting this to `true` will force this behavior even for
+  /// finite (but possibly loose) constraints.
+  ///
+  /// Setting this to true requires an [OverlayEntry] that can size the overlay
+  /// based on itself ([OverlayEntry.canSizeOverlay] set to true). If not provided
+  /// an exception is thrown.
+  final bool alwaysSizeToContent;
 
   /// The [OverlayState] from the closest instance of [Overlay] that encloses
   /// the given context within the closest [LookupBoundary], and, in debug mode,
@@ -888,6 +912,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     return _Theater(
       skipCount: children.length - onstageCount,
       clipBehavior: widget.clipBehavior,
+      alwaysSizeToContent: widget.alwaysSizeToContent,
       children: children.reversed.toList(growable: false),
     );
   }
@@ -903,9 +928,15 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 }
 
 class _WrappingOverlay extends StatefulWidget {
-  const _WrappingOverlay({super.key, this.clipBehavior = Clip.hardEdge, required this.child});
+  const _WrappingOverlay({
+    super.key,
+    this.clipBehavior = Clip.hardEdge,
+    required this.alwaysSizeToContent,
+    required this.child,
+  });
 
   final Clip clipBehavior;
+  final bool alwaysSizeToContent;
   final Widget child;
 
   @override
@@ -937,7 +968,11 @@ class _WrappingOverlayState extends State<_WrappingOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    return Overlay(clipBehavior: widget.clipBehavior, initialEntries: <OverlayEntry>[_entry]);
+    return Overlay(
+      clipBehavior: widget.clipBehavior,
+      alwaysSizeToContent: widget.alwaysSizeToContent,
+      initialEntries: <OverlayEntry>[_entry],
+    );
   }
 }
 
@@ -949,6 +984,7 @@ class _Theater extends MultiChildRenderObjectWidget {
   const _Theater({
     this.skipCount = 0,
     this.clipBehavior = Clip.hardEdge,
+    required this.alwaysSizeToContent,
     required List<_OverlayEntryWidget> super.children,
   }) : assert(skipCount >= 0),
        assert(children.length >= skipCount);
@@ -956,6 +992,8 @@ class _Theater extends MultiChildRenderObjectWidget {
   final int skipCount;
 
   final Clip clipBehavior;
+
+  final bool alwaysSizeToContent;
 
   @override
   _TheaterElement createElement() => _TheaterElement(this);
@@ -966,6 +1004,7 @@ class _Theater extends MultiChildRenderObjectWidget {
       skipCount: skipCount,
       textDirection: Directionality.of(context),
       clipBehavior: clipBehavior,
+      alwaysSizeToContent: alwaysSizeToContent,
     );
   }
 
@@ -974,7 +1013,8 @@ class _Theater extends MultiChildRenderObjectWidget {
     renderObject
       ..skipCount = skipCount
       ..textDirection = Directionality.of(context)
-      ..clipBehavior = clipBehavior;
+      ..clipBehavior = clipBehavior
+      ..alwaysSizeToContent = alwaysSizeToContent;
   }
 
   @override
@@ -1158,10 +1198,12 @@ class _RenderTheater extends RenderBox
     required TextDirection textDirection,
     int skipCount = 0,
     Clip clipBehavior = Clip.hardEdge,
+    required bool alwaysSizeToContent,
   }) : assert(skipCount >= 0),
        _textDirection = textDirection,
        _skipCount = skipCount,
-       _clipBehavior = clipBehavior {
+       _clipBehavior = clipBehavior,
+       _alwaysSizeToContent = alwaysSizeToContent {
     addAll(children);
   }
 
@@ -1247,6 +1289,16 @@ class _RenderTheater extends RenderBox
       markNeedsSemanticsUpdate();
     }
   }
+
+  bool get alwaysSizeToContent => _alwaysSizeToContent;
+  set alwaysSizeToContent(bool value) {
+    if (_alwaysSizeToContent != value) {
+      _alwaysSizeToContent = value;
+      markNeedsLayout();
+    }
+  }
+
+  bool _alwaysSizeToContent;
 
   // Adding/removing deferred child does not affect the layout of other children,
   // or that of the Overlay, so there's no need to invalidate the layout of the
@@ -1337,7 +1389,7 @@ class _RenderTheater extends RenderBox
 
   @override
   double? computeDryBaseline(BoxConstraints constraints, TextBaseline baseline) {
-    final Size size = constraints.biggest.isFinite
+    final Size size = !alwaysSizeToContent && constraints.biggest.isFinite
         ? constraints.biggest
         : _findSizeDeterminingChild().getDryLayout(constraints);
     final nonPositionedChildConstraints = BoxConstraints.tight(size);
@@ -1362,7 +1414,7 @@ class _RenderTheater extends RenderBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    if (constraints.biggest.isFinite) {
+    if (!alwaysSizeToContent && constraints.biggest.isFinite) {
       return constraints.biggest;
     }
     return _findSizeDeterminingChild().getDryLayout(constraints);
@@ -1412,7 +1464,7 @@ class _RenderTheater extends RenderBox
   @override
   void performLayout() {
     RenderBox? sizeDeterminingChild;
-    if (constraints.biggest.isFinite) {
+    if (!alwaysSizeToContent && constraints.biggest.isFinite) {
       size = constraints.biggest;
     } else {
       sizeDeterminingChild = _findSizeDeterminingChild();
@@ -1440,6 +1492,20 @@ class _RenderTheater extends RenderBox
         return child;
       }
       child = childParentData.previousSibling;
+    }
+    if (alwaysSizeToContent) {
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          'Overlay was asked to size itself to content but does not have a suitable child.',
+        ),
+        ErrorDescription(
+          'When `alwaysSizeToContent` is true, the Overlay requires at least one '
+          'non-positioned `OverlayEntry` with `canSizeOverlay` set to true to determine its size.',
+        ),
+        ErrorHint(
+          'Try removing alwaysSizeToContent=true or provide a suitable child that can size the Overlay',
+        ),
+      ]);
     }
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary(
@@ -1834,7 +1900,7 @@ class OverlayPortal extends StatefulWidget {
   /// called.
   ///
   /// Developers can use `overlayChildBuilder` to configure the overlay child
-  /// based on the the size and the location of [OverlayPortal.child] within the
+  /// based on the size and the location of [OverlayPortal.child] within the
   /// target [Overlay], as well as the size of the [Overlay] itself. This allows
   /// the overlay child to, for example, always follow [OverlayPortal.child] and
   /// at the same time resize itself base on how close it is to the edges of
@@ -2029,11 +2095,22 @@ class _OverlayPortalState extends State<OverlayPortal> {
         child: Semantics(traversalParentIdentifier: this, child: widget.child),
       );
     }
+
+    final _OverlayEntryLocation overlayLocation = _getLocation(zOrderIndex, widget.overlayLocation);
+    final MediaQueryData overlayData = MediaQuery.of(overlayLocation._childModel.context);
+    final MediaQueryData data = MediaQuery.of(context).copyWith(
+      padding: overlayData.padding,
+      viewInsets: overlayData.viewInsets,
+      viewPadding: overlayData.viewPadding,
+    );
     return _OverlayPortal(
-      overlayLocation: _getLocation(zOrderIndex, widget.overlayLocation),
+      overlayLocation: overlayLocation,
       overlayChild: _DeferredLayout(
         childIdentifier: this,
-        child: Builder(builder: widget.overlayChildBuilder),
+        child: MediaQuery(
+          data: data,
+          child: Builder(builder: widget.overlayChildBuilder),
+        ),
       ),
       child: Semantics(traversalParentIdentifier: this, child: widget.child),
     );
@@ -2414,9 +2491,9 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
   const _DeferredLayout({
     // This widget must not be given a key: we currently do not support
     // reparenting between the overlayChild and child.
-    required Widget child,
+    required Widget super.child,
     this.childIdentifier,
-  }) : super(child: child);
+  });
 
   final Object? childIdentifier;
 

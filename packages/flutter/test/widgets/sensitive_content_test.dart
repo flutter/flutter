@@ -4,8 +4,8 @@
 
 import 'dart:async' show Completer;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'sensitive_content_utils.dart';
@@ -19,6 +19,17 @@ void main() {
       null,
     );
   });
+
+  testWidgets('SensitiveContent widget can be tested without mocking method channels', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container()),
+    );
+
+    expect(find.byType(SensitiveContent), findsOneWidget);
+  });
+
   testWidgets(
     'while SensitiveContent widget is being registered, SizedBox.shrink is built initially, then child widget is built upon completion',
     (WidgetTester tester) async {

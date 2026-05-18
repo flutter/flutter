@@ -14,6 +14,7 @@ import '../view_embedder/style_manager.dart';
 import 'debug.dart';
 import 'layout.dart';
 import 'paint.dart';
+import 'paint_paragraph.dart';
 import 'painter.dart';
 
 @visibleForTesting
@@ -133,7 +134,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
   }
 }
 
-// TODO(mdebbar): Rename to `PaintElements`?
+// TODO(mdebbar): Rename to 'PaintElements'?
 enum StyleElements {
   // Background for a text clusters block
   background,
@@ -144,6 +145,8 @@ enum StyleElements {
   // Text cluster
   text,
 }
+
+enum ShadowDirection { left, right, top, bottom }
 
 class WebTextStyle implements ui.TextStyle {
   factory WebTextStyle({
@@ -418,14 +421,16 @@ class WebTextStyle implements ui.TextStyle {
     return (wordSpacing != null) ? '${wordSpacing}px' : '0px';
   }
 
+  String _buildLangString() {
+    return locale != null ? '${locale!.languageCode}-${locale!.countryCode}' : '';
+  }
+
   void _applyFontFeatures(DomCanvasRenderingContext2D context) {
     if (fontFeatures == null) {
       return;
     }
 
     final fontFeatureSettings = <ui.FontFeature>[];
-    var optimizeLegibility = false;
-
     for (final ui.FontFeature feature in fontFeatures!) {
       switch (feature.feature) {
         case 'smcp':
@@ -442,25 +447,21 @@ class WebTextStyle implements ui.TextStyle {
           context.fontVariantCaps = feature.value != 0 ? 'titling-caps' : 'normal';
         default:
           fontFeatureSettings.add(feature);
-          if (feature.value != 0) {
-            optimizeLegibility = true;
-          }
       }
     }
 
     if (fontFeatureSettings.isNotEmpty) {
-      // TODO(jlavrova): Do we really need to set this?
-      context.textRendering = optimizeLegibility ? 'optimizeLegibility' : 'optimizeSpeed';
       context.canvas!.style.fontFeatureSettings = fontFeatureListToCss(fontFeatureSettings);
     }
   }
 
   void applyToContext(DomCanvasRenderingContext2D context) {
     // Setup all the font-affecting attributes
-    // TODO(jlavrova): set 'lang' attribute as a combination of locale+language
+    // Set 'lang' attribute as a combination of locale+language
     context.font = _buildCssFontString();
     context.letterSpacing = _buildLetterSpacingString();
     context.wordSpacing = _buildWordSpacingString();
+    context.lang = _buildLangString();
     _applyFontFeatures(context);
   }
 
@@ -614,9 +615,19 @@ class PlaceholderSpan extends ParagraphSpan {
 }
 
 class TextSpan extends ParagraphSpan {
-  TextSpan({required super.start, required super.end, required super.style, required this.text});
+  TextSpan({
+    required super.start,
+    required super.end,
+    required super.style,
+    required this.text,
+    required this.textDirection,
+  });
 
   final String text;
+  // We use TextSpan to get metrics from Chrome in many places,
+  // including empty spans (for example when measuring strut) and
+  // ellipsis span (which inherits textDirection from the span it attaches to).
+  final ui.TextDirection? textDirection;
 
   late final DomTextMetrics _metrics = _getMetrics();
 
@@ -627,10 +638,17 @@ class TextSpan extends ParagraphSpan {
   late final double fontBoundingBoxDescent = _metrics.fontBoundingBoxDescent;
 
   DomTextMetrics _getMetrics() {
-    // TODO(jlavrova): Is this necessary?
-    // layoutContext.direction = isDefaultLtr ? 'ltr' : 'rtl';
     style.applyToContext(layoutContext);
+
+    // We need to set in up because we otherwise in RTL text without textDirection
+    // Canvas2D will return all clusters placed right to left starting from 0.
+    // Also, we have a separate (possibly, different) textDirection for the ellipsis.
+    layoutContext.direction = textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
     return layoutContext.measureText(text);
+  }
+
+  double? advanceWidth() {
+    return _metrics.width;
   }
 
   @override
@@ -724,7 +742,7 @@ class WebStrutStyle implements ui.StrutStyle {
     this.fontFamilyFallback,
     this.fontSize,
     double? height,
-    // TODO(mdebbar): implement leadingDistribution.
+    // TODO(jlavrova): Implement leadingDistribution.
     this.leadingDistribution,
     this.leading,
     this.fontWeight,
@@ -827,18 +845,15 @@ class WebParagraph implements ui.Paragraph {
   final List<ParagraphSpan> spans;
   final String text;
 
-  // TODO(jlavrova): Implement.
   @override
   double alphabeticBaseline = 0;
 
-  // TODO(jlavrova): Implement.
   @override
   bool didExceedMaxLines = false;
 
   @override
   double height = 0;
 
-  // TODO(jlavrova): Implement. Maybe use the same hack from the HTML renderer?
   @override
   double ideographicBaseline = 0;
 
@@ -942,11 +957,6 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
-    // We need to set in up because we otherwise in RTL text without textDirection
-    // Canvas2D will return all clusters placed right to left starting from 0.
-    // If we go with that we will have to take it in account EVERYWHERE (lots of places)
-    layoutContext.direction = paragraphStyle.textDirection == ui.TextDirection.ltr ? 'ltr' : 'rtl';
-
     _layout.performLayout(constraints.width);
     WebParagraphDebug.apiTrace(
       'layout("$text", ${constraints.width.toStringAsFixed(4)}}): '
@@ -958,10 +968,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
-    _paint.painter.resizePaintCanvas(ui.window.devicePixelRatio);
-    for (final TextLine line in _layout.lines) {
-      _paint.paintLine(canvas, _layout, line, offset.dx, offset.dy);
-    }
+    _paint.paint(canvas, _layout, _painter, offset);
   }
 
   @override
@@ -1034,11 +1041,16 @@ class WebParagraph implements ui.Paragraph {
     return null;
   }
 
+  void clearPaintCache() {
+    _painter.clearCache();
+  }
+
   bool _disposed = false;
 
   @override
   void dispose() {
     assert(!_disposed, 'Paragraph has been disposed.');
+    clearPaintCache();
     _disposed = true;
   }
 
@@ -1061,12 +1073,7 @@ class WebParagraph implements ui.Paragraph {
     return _layout;
   }
 
-  // TODO(mdebbar): Remove this in favor of `getText1`.
-  String getText(ui.TextRange textRange) {
-    return getText1(textRange.start, textRange.end);
-  }
-
-  String getText1(int start, int end) {
+  String getText(int start, int end) {
     if (text.isEmpty) {
       return text;
     }
@@ -1076,7 +1083,8 @@ class WebParagraph implements ui.Paragraph {
   }
 
   late final TextLayout _layout = TextLayout(this);
-  late final TextPaint _paint = TextPaint(this, CanvasKitPainter());
+  late final TextPaint _paint = PaintParagraph(this);
+  late final Painter _painter = CanvasKitPainter();
 }
 
 class WebLineMetrics implements ui.LineMetrics {
@@ -1265,6 +1273,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
         end: _fullTextBuffer.length,
         style: _spanStyle!,
         text: _spanTextBuffer.toString(),
+        textDirection: _paragraphStyle.textDirection,
       ),
     );
 
@@ -1282,9 +1291,11 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     final text = _fullTextBuffer.toString();
 
     final paragraph = WebParagraph(_paragraphStyle, _spans, text);
-    WebParagraphDebug.apiTrace('WebParagraphBuilder.build(): "$text" ${_spans.length}');
-    for (var i = 0; i < _spans.length; ++i) {
-      WebParagraphDebug.log('$i: ${_spans[i]}');
+    if (WebParagraphDebug.apiLogging) {
+      WebParagraphDebug.apiTrace('WebParagraphBuilder.build(): "$text" ${_spans.length}');
+      for (var i = 0; i < _spans.length; ++i) {
+        WebParagraphDebug.log('$i: ${_spans[i]}');
+      }
     }
     return paragraph;
   }

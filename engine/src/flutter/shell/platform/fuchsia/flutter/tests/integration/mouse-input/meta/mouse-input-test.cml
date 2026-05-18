@@ -32,6 +32,7 @@
             protocol: [
                 "fuchsia.kernel.RootJobForInspect",
                 "fuchsia.kernel.Stats",
+                "fuchsia.kernel.VmexResource",
                 "fuchsia.scheduler.ProfileProvider",
                 "fuchsia.sysmem.Allocator",
                 "fuchsia.sysmem2.Allocator",
@@ -66,16 +67,8 @@
     facets: {
         "fuchsia.test": {
             "deprecated-allowed-packages": [
-                "child-view",
-                "cursor",
                 "flatland-scene-manager-test-ui-stack",
-                "mouse-input-view",
-                "oot_flutter_aot_runner",
-                "oot_flutter_jit_runner",
-                "oot_flutter_jit_product_runner",
-                "oot_flutter_aot_product_runner",
-                "test_manager",
-                "test-ui-stack",
+                "test_manager"
             ],
         },
     },

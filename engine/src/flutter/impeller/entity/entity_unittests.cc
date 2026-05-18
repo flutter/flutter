@@ -34,6 +34,8 @@
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/tiled_texture_contents.h"
+#include "impeller/entity/contents/uber_sdf_contents.h"
+#include "impeller/entity/contents/uber_sdf_parameters.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_playground.h"
 #include "impeller/entity/geometry/geometry.h"
@@ -41,6 +43,7 @@
 #include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/entity/geometry/superellipse_geometry.h"
+#include "impeller/entity/geometry/uber_sdf_geometry.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/geometry/point.h"
@@ -54,6 +57,7 @@
 #include "impeller/renderer/render_target.h"
 #include "impeller/renderer/testing/mocks.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 #include "third_party/imgui/imgui.h"
 
 // TODO(zanderso): https://github.com/flutter/flutter/issues/127701
@@ -64,10 +68,6 @@ namespace testing {
 
 using EntityTest = EntityPlayground;
 INSTANTIATE_PLAYGROUND_SUITE(EntityTest);
-
-Rect RectMakeCenterSize(Point center, Size size) {
-  return Rect::MakeSize(size).Shift(center - size / 2);
-}
 
 TEST_P(EntityTest, CanCreateEntity) {
   Entity entity;
@@ -119,11 +119,9 @@ TEST_P(EntityTest, ThreeStrokesInOnePath) {
 
   Entity entity;
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));
-  auto contents = std::make_unique<SolidColorContents>();
-
   std::unique_ptr<Geometry> geom =
       Geometry::MakeStrokePath(path, {.width = 5.0f});
-  contents->SetGeometry(geom.get());
+  auto contents = std::make_unique<SolidColorContents>(geom.get());
   contents->SetColor(Color::Red());
   entity.SetContents(std::move(contents));
   ASSERT_TRUE(OpenPlaygroundHere(std::move(entity)));
@@ -142,10 +140,9 @@ TEST_P(EntityTest, StrokeWithTextureContents) {
 
   Entity entity;
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));
-  auto contents = std::make_unique<TiledTextureContents>();
   std::unique_ptr<Geometry> geom =
       Geometry::MakeStrokePath(path, {.width = 100.0f});
-  contents->SetGeometry(geom.get());
+  auto contents = std::make_unique<TiledTextureContents>(geom.get());
   contents->SetTexture(bridge);
   contents->SetTileModes(Entity::TileMode::kClamp, Entity::TileMode::kClamp);
   entity.SetContents(std::move(contents));
@@ -185,10 +182,9 @@ TEST_P(EntityTest, TriangleInsideASquare) {
 
     Entity entity;
     entity.SetTransform(Matrix::MakeScale(GetContentScale()));
-    auto contents = std::make_unique<SolidColorContents>();
     std::unique_ptr<Geometry> geom =
         Geometry::MakeStrokePath(path, {.width = 20.0});
-    contents->SetGeometry(geom.get());
+    auto contents = std::make_unique<SolidColorContents>(geom.get());
     contents->SetColor(Color::Red());
     entity.SetContents(std::move(contents));
 
@@ -222,7 +218,6 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     auto render_path = [width = width, &context, &pass, &world_matrix](
                            const flutter::DlPath& path, Cap cap, Join join) {
-      auto contents = std::make_unique<SolidColorContents>();
       std::unique_ptr<Geometry> geom =
           Geometry::MakeStrokePath(path, {
                                              .width = width,
@@ -230,7 +225,7 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
                                              .join = join,
                                              .miter_limit = miter_limit,
                                          });
-      contents->SetGeometry(geom.get());
+      auto contents = std::make_unique<SolidColorContents>(geom.get());
       contents->SetColor(Color::Red());
 
       Entity entity;
@@ -239,12 +234,10 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
 
       auto coverage = entity.GetCoverage();
       if (coverage.has_value()) {
-        auto bounds_contents = std::make_unique<SolidColorContents>();
-
         std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(
             flutter::DlPath::MakeRect(entity.GetCoverage().value()));
 
-        bounds_contents->SetGeometry(geom.get());
+        auto bounds_contents = std::make_unique<SolidColorContents>(geom.get());
         bounds_contents->SetColor(Color::Green().WithAlpha(0.5));
         Entity bounds_entity;
         bounds_entity.SetContents(std::move(bounds_contents));
@@ -388,9 +381,8 @@ TEST_P(EntityTest, CubicCurveTest) {
 
   std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
 
-  auto contents = std::make_shared<SolidColorContents>();
+  auto contents = std::make_shared<SolidColorContents>(geom.get());
   contents->SetColor(Color::Red());
-  contents->SetGeometry(geom.get());
 
   entity.SetContents(contents);
   ASSERT_TRUE(OpenPlaygroundHere(std::move(entity)));
@@ -439,9 +431,8 @@ TEST_P(EntityTest, CanDrawCorrectlyWithRotatedTransform) {
 
     std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
 
-    auto contents = std::make_shared<SolidColorContents>();
+    auto contents = std::make_shared<SolidColorContents>(geom.get());
     contents->SetColor(Color::Red());
-    contents->SetGeometry(geom.get());
 
     entity.SetContents(contents);
     return entity.Render(context, pass);
@@ -676,9 +667,8 @@ TEST_P(EntityTest, CubicCurveAndOverlapTest) {
 
   std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
 
-  auto contents = std::make_shared<SolidColorContents>();
+  auto contents = std::make_shared<SolidColorContents>(geom.get());
   contents->SetColor(Color::Red());
-  contents->SetGeometry(geom.get());
 
   entity.SetContents(contents);
   ASSERT_TRUE(OpenPlaygroundHere(std::move(entity)));
@@ -907,9 +897,8 @@ TEST_P(EntityTest, BezierCircleScaled) {
 
     std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
 
-    auto contents = std::make_shared<SolidColorContents>();
+    auto contents = std::make_shared<SolidColorContents>(geom.get());
     contents->SetColor(Color::Red());
-    contents->SetGeometry(geom.get());
 
     entity.SetContents(contents);
     return entity.Render(context, pass);
@@ -1046,12 +1035,10 @@ TEST_P(EntityTest, GaussianBlurFilter) {
       input = texture;
       input_size = input_rect.GetSize();
     } else {
-      auto fill = std::make_shared<SolidColorContents>();
-      fill->SetColor(input_color);
       solid_color_input =
           Geometry::MakeFillPath(flutter::DlPath::MakeRect(input_rect));
-
-      fill->SetGeometry(solid_color_input.get());
+      auto fill = std::make_shared<SolidColorContents>(solid_color_input.get());
+      fill->SetColor(input_color);
 
       input = fill;
       input_size = input_rect.GetSize();
@@ -1062,14 +1049,16 @@ TEST_P(EntityTest, GaussianBlurFilter) {
       case 0:
         blur = std::make_shared<GaussianBlurFilterContents>(
             blur_sigma_x.sigma, blur_sigma_y.sigma,
-            tile_modes[selected_tile_mode], blur_styles[selected_blur_style],
+            tile_modes[selected_tile_mode], /*bounds=*/std::nullopt,
+            blur_styles[selected_blur_style],
             /*geometry=*/nullptr);
         blur->SetInputs({FilterInput::Make(input)});
         break;
       case 1:
         blur = FilterContents::MakeGaussianBlur(
             FilterInput::Make(input), blur_sigma_x, blur_sigma_y,
-            tile_modes[selected_tile_mode], blur_styles[selected_blur_style]);
+            tile_modes[selected_tile_mode],
+            /*bounds=*/std::nullopt, blur_styles[selected_blur_style]);
         break;
     };
     FML_CHECK(blur);
@@ -1096,11 +1085,9 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     // Renders a red "cover" rectangle that shows the original position of the
     // unfiltered input.
     Entity cover_entity;
-    std::unique_ptr<Geometry> geom =
-        Geometry::MakeFillPath(flutter::DlPath::MakeRect(input_rect));
-    auto contents = std::make_shared<SolidColorContents>();
+    auto geom = Geometry::MakeFillPath(flutter::DlPath::MakeRect(input_rect));
+    auto contents = std::make_shared<SolidColorContents>(geom.get());
     contents->SetColor(cover_color);
-    contents->SetGeometry(geom.get());
     cover_entity.SetContents(std::move(contents));
     cover_entity.SetTransform(ctm);
     cover_entity.Render(context, pass);
@@ -1113,9 +1100,8 @@ TEST_P(EntityTest, GaussianBlurFilter) {
       std::unique_ptr<Geometry> geom =
           Geometry::MakeFillPath(flutter::DlPath::MakeRect(
               target_contents->GetCoverage(entity).value()));
-      auto contents = std::make_shared<SolidColorContents>();
+      auto contents = std::make_shared<SolidColorContents>(geom.get());
       contents->SetColor(bounds_color);
-      contents->SetGeometry(geom.get());
 
       bounds_entity.SetContents(contents);
       bounds_entity.SetTransform(Matrix());
@@ -1207,11 +1193,9 @@ TEST_P(EntityTest, MorphologyFilter) {
     // Renders a red "cover" rectangle that shows the original position of  the
     // unfiltered input.
     Entity cover_entity;
-    std::unique_ptr<Geometry> geom =
-        Geometry::MakeFillPath(flutter::DlPath::MakeRect(input_rect));
-    auto cover_contents = std::make_shared<SolidColorContents>();
+    auto geom = Geometry::MakeFillPath(flutter::DlPath::MakeRect(input_rect));
+    auto cover_contents = std::make_shared<SolidColorContents>(geom.get());
     cover_contents->SetColor(cover_color);
-    cover_contents->SetGeometry(geom.get());
     cover_entity.SetContents(cover_contents);
     cover_entity.SetTransform(ctm);
     cover_entity.Render(context, pass);
@@ -1220,9 +1204,9 @@ TEST_P(EntityTest, MorphologyFilter) {
     Entity bounds_entity;
     std::unique_ptr<Geometry> bounds_geom = Geometry::MakeFillPath(
         flutter::DlPath::MakeRect(contents->GetCoverage(entity).value()));
-    auto bounds_contents = std::make_shared<SolidColorContents>();
+    auto bounds_contents =
+        std::make_shared<SolidColorContents>(bounds_geom.get());
     bounds_contents->SetColor(bounds_color);
-    bounds_contents->SetGeometry(bounds_geom.get());
     bounds_entity.SetContents(std::move(bounds_contents));
     bounds_entity.SetTransform(Matrix());
 
@@ -1242,8 +1226,68 @@ TEST_P(EntityTest, SetBlendMode) {
 
 TEST_P(EntityTest, ContentsGetBoundsForEmptyPathReturnsNullopt) {
   Entity entity;
-  entity.SetContents(std::make_shared<SolidColorContents>());
+  entity.SetContents(std::make_shared<SolidColorContents>(nullptr));
   ASSERT_FALSE(entity.GetCoverage().has_value());
+}
+
+TEST(EntityTest, UberSDFContentsCoverageFillRect) {
+  auto rect = Rect::MakeXYWH(100, 100, 200, 200);
+  auto params =
+      UberSDFParameters::MakeRect(Color::Red(), rect, /*stroke=*/std::nullopt);
+  auto geometry = std::make_unique<UberSDFGeometry>(params);
+  auto contents = UberSDFContents::Make(params, std::move(geometry));
+
+  Entity entity;
+  auto coverage = contents->GetCoverage(entity);
+  ASSERT_TRUE(coverage.has_value());
+  ASSERT_RECT_NEAR(
+      coverage.value(),
+      Rect::MakeXYWH(100, 100, 200, 200).Expand(1.0f));  // expanded by AA
+}
+
+TEST(EntityTest, UberSDFContentsCoverageStrokeRect) {
+  auto rect = Rect::MakeXYWH(100, 100, 200, 200);
+  auto params = UberSDFParameters::MakeRect(Color::Red(), rect,
+                                            StrokeParameters{.width = 4.0f});
+  auto geometry = std::make_unique<UberSDFGeometry>(params);
+  auto contents = UberSDFContents::Make(params, std::move(geometry));
+
+  Entity entity;
+  auto coverage = contents->GetCoverage(entity);
+  ASSERT_TRUE(coverage.has_value());
+  ASSERT_RECT_NEAR(coverage.value(),
+                   Rect::MakeXYWH(100, 100, 200, 200)
+                       .Expand(3.0f));  // expanded by half stroke width + AA
+}
+
+TEST(EntityTest, UberSDFContentsCoverageFillCircle) {
+  auto params =
+      UberSDFParameters::MakeCircle(Color::Red(), /*center=*/{50, 50},
+                                    /*radius=*/10.0f, /*stroke=*/std::nullopt);
+  auto geometry = std::make_unique<UberSDFGeometry>(params);
+  auto contents = UberSDFContents::Make(params, std::move(geometry));
+
+  Entity entity;
+  auto coverage = contents->GetCoverage(entity);
+  ASSERT_TRUE(coverage.has_value());
+  ASSERT_RECT_NEAR(
+      coverage.value(),
+      Rect::MakeXYWH(40, 40, 20, 20).Expand(1.0f));  // expanded by AA
+}
+
+TEST(EntityTest, UberSDFContentsCoverageStrokeCircle) {
+  auto params = UberSDFParameters::MakeCircle(Color::Red(), /*center=*/{50, 50},
+                                              /*radius=*/10.0f,
+                                              StrokeParameters{.width = 4.0f});
+  auto geometry = std::make_unique<UberSDFGeometry>(params);
+  auto contents = UberSDFContents::Make(params, std::move(geometry));
+
+  Entity entity;
+  auto coverage = contents->GetCoverage(entity);
+  ASSERT_TRUE(coverage.has_value());
+  ASSERT_RECT_NEAR(coverage.value(),
+                   Rect::MakeXYWH(40, 40, 20, 20)
+                       .Expand(3.0f));  // expanded by half stroke width + AA
 }
 
 TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
@@ -1258,8 +1302,7 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
         });
 
     Entity entity;
-    auto contents = std::make_unique<SolidColorContents>();
-    contents->SetGeometry(geometry.get());
+    auto contents = std::make_unique<SolidColorContents>(geometry.get());
     contents->SetColor(Color::Black());
     entity.SetContents(std::move(contents));
     auto actual = entity.GetCoverage();
@@ -1281,8 +1324,7 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
         });
 
     Entity entity;
-    auto contents = std::make_unique<SolidColorContents>();
-    contents->SetGeometry(geometry.get());
+    auto contents = std::make_unique<SolidColorContents>(geometry.get());
     contents->SetColor(Color::Black());
     entity.SetContents(std::move(contents));
     auto actual = entity.GetCoverage();
@@ -1305,8 +1347,7 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
         });
 
     Entity entity;
-    auto contents = std::make_unique<SolidColorContents>();
-    contents->SetGeometry(geometry.get());
+    auto contents = std::make_unique<SolidColorContents>(geometry.get());
     contents->SetColor(Color::Black());
     entity.SetContents(std::move(contents));
     auto actual = entity.GetCoverage();
@@ -1318,10 +1359,9 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
 }
 
 TEST_P(EntityTest, BorderMaskBlurCoverageIsCorrect) {
-  auto fill = std::make_shared<SolidColorContents>();
   auto geom = Geometry::MakeFillPath(
       flutter::DlPath::MakeRect(Rect::MakeXYWH(0, 0, 300, 400)));
-  fill->SetGeometry(geom.get());
+  auto fill = std::make_shared<SolidColorContents>(geom.get());
   fill->SetColor(Color::CornflowerBlue());
   auto border_mask_blur = FilterContents::MakeBorderMaskBlur(
       FilterInput::Make(fill), Radius{3}, Radius{4});
@@ -1348,11 +1388,10 @@ TEST_P(EntityTest, BorderMaskBlurCoverageIsCorrect) {
 TEST_P(EntityTest, SolidFillCoverageIsCorrect) {
   // No transform
   {
-    auto fill = std::make_shared<SolidColorContents>();
-    fill->SetColor(Color::CornflowerBlue());
     auto expected = Rect::MakeLTRB(100, 110, 200, 220);
     auto geom = Geometry::MakeFillPath(flutter::DlPath::MakeRect(expected));
-    fill->SetGeometry(geom.get());
+    auto fill = std::make_shared<SolidColorContents>(geom.get());
+    fill->SetColor(Color::CornflowerBlue());
 
     auto coverage = fill->GetCoverage({});
     ASSERT_TRUE(coverage.has_value());
@@ -1361,11 +1400,10 @@ TEST_P(EntityTest, SolidFillCoverageIsCorrect) {
 
   // Entity transform
   {
-    auto fill = std::make_shared<SolidColorContents>();
     auto geom = Geometry::MakeFillPath(
         flutter::DlPath::MakeRect(Rect::MakeLTRB(100, 110, 200, 220)));
+    auto fill = std::make_shared<SolidColorContents>(geom.get());
     fill->SetColor(Color::CornflowerBlue());
-    fill->SetGeometry(geom.get());
 
     Entity entity;
     entity.SetTransform(Matrix::MakeTranslation(Vector2(4, 5)));
@@ -1379,11 +1417,10 @@ TEST_P(EntityTest, SolidFillCoverageIsCorrect) {
 
   // No coverage for fully transparent colors
   {
-    auto fill = std::make_shared<SolidColorContents>();
     auto geom = Geometry::MakeFillPath(
         flutter::DlPath::MakeRect(Rect::MakeLTRB(100, 110, 200, 220)));
+    auto fill = std::make_shared<SolidColorContents>(geom.get());
     fill->SetColor(Color::WhiteTransparent());
-    fill->SetGeometry(geom.get());
 
     auto coverage = fill->GetCoverage({});
     ASSERT_FALSE(coverage.has_value());
@@ -1429,10 +1466,9 @@ TEST_P(EntityTest, RRectShadowTest) {
 
     auto coverage = entity.GetCoverage();
     if (show_coverage && coverage.has_value()) {
-      auto bounds_contents = std::make_unique<SolidColorContents>();
       auto geom = Geometry::MakeFillPath(
           flutter::DlPath::MakeRect(entity.GetCoverage().value()));
-      bounds_contents->SetGeometry(geom.get());
+      auto bounds_contents = std::make_unique<SolidColorContents>(geom.get());
       bounds_contents->SetColor(coverage_color.Premultiply());
       Entity bounds_entity;
       bounds_entity.SetContents(std::move(bounds_contents));
@@ -1446,10 +1482,9 @@ TEST_P(EntityTest, RRectShadowTest) {
 
 TEST_P(EntityTest, ColorMatrixFilterCoverageIsCorrect) {
   // Set up a simple color background.
-  auto fill = std::make_shared<SolidColorContents>();
   auto geom = Geometry::MakeFillPath(
       flutter::DlPath::MakeRect(Rect::MakeXYWH(0, 0, 300, 400)));
-  fill->SetGeometry(geom.get());
+  auto fill = std::make_shared<SolidColorContents>(geom.get());
   fill->SetColor(Color::Coral());
 
   // Set the color matrix filter.
@@ -1536,8 +1571,7 @@ TEST_P(EntityTest, LinearToSrgbFilterCoverageIsCorrect) {
   // Set up a simple color background.
   auto geom = Geometry::MakeFillPath(
       flutter::DlPath::MakeRect(Rect::MakeXYWH(0, 0, 300, 400)));
-  auto fill = std::make_shared<SolidColorContents>();
-  fill->SetGeometry(geom.get());
+  auto fill = std::make_shared<SolidColorContents>(geom.get());
   fill->SetColor(Color::MintCream());
 
   auto filter =
@@ -1587,10 +1621,9 @@ TEST_P(EntityTest, LinearToSrgbFilter) {
 
 TEST_P(EntityTest, SrgbToLinearFilterCoverageIsCorrect) {
   // Set up a simple color background.
-  auto fill = std::make_shared<SolidColorContents>();
   auto geom = Geometry::MakeFillPath(
       flutter::DlPath::MakeRect(Rect::MakeXYWH(0, 0, 300, 400)));
-  fill->SetGeometry(geom.get());
+  auto fill = std::make_shared<SolidColorContents>(geom.get());
   fill->SetColor(Color::DeepPink());
 
   auto filter =
@@ -1752,10 +1785,11 @@ TEST_P(EntityTest, YUVToRGBFilter) {
 }
 
 TEST_P(EntityTest, RuntimeEffect) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
@@ -1767,8 +1801,7 @@ TEST_P(EntityTest, RuntimeEffect) {
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     EXPECT_EQ(runtime_stage->IsDirty(), expect_dirty);
 
-    auto contents = std::make_shared<RuntimeEffectContents>();
-    contents->SetGeometry(geom.get());
+    auto contents = std::make_shared<RuntimeEffectContents>(geom.get());
     contents->SetRuntimeStage(runtime_stage);
 
     struct FragUniforms {
@@ -1808,9 +1841,10 @@ TEST_P(EntityTest, RuntimeEffect) {
     callback(*content_context, mock_pass);
 
     // Dirty the runtime stage.
-    runtime_stages = OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-    runtime_stage =
-        runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+    auto runtime_stages_result =
+        OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
+    ABSL_ASSERT_OK(runtime_stages_result);
+    runtime_stage = runtime_stages_result.value()[GetRuntimeStageBackend()];
 
     ASSERT_TRUE(runtime_stage->IsDirty());
     expect_dirty = true;
@@ -1820,16 +1854,15 @@ TEST_P(EntityTest, RuntimeEffect) {
 }
 
 TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(runtime_stages_result);
+  auto runtime_stage = runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
-  auto contents = std::make_shared<RuntimeEffectContents>();
   auto geom = Geometry::MakeCover();
-  contents->SetGeometry(geom.get());
+  auto contents = std::make_shared<RuntimeEffectContents>(geom.get());
   contents->SetRuntimeStage(runtime_stage);
 
   struct FragUniforms {
@@ -1867,14 +1900,16 @@ TEST_P(EntityTest, RuntimeEffectCanSuccessfullyRender) {
 }
 
 TEST_P(EntityTest, RuntimeEffectCanPrecache) {
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
-  auto contents = std::make_shared<RuntimeEffectContents>();
+  auto geom = Geometry::MakeCover();
+  auto contents = std::make_shared<RuntimeEffectContents>(geom.get());
   contents->SetRuntimeStage(runtime_stage);
 
   EXPECT_TRUE(contents->BootstrapShader(*GetContentContext()));
@@ -1885,16 +1920,15 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
     GTEST_SKIP() << "Test only applies to Vulkan";
   }
 
-  auto runtime_stages =
+  auto runtime_stages_result =
       OpenAssetAsRuntimeStage("runtime_stage_example.frag.iplr");
-  auto runtime_stage =
-      runtime_stages[PlaygroundBackendToRuntimeStageBackend(GetBackend())];
+  ABSL_ASSERT_OK(runtime_stages_result);
+  auto runtime_stage = runtime_stages_result.value()[GetRuntimeStageBackend()];
   ASSERT_TRUE(runtime_stage);
   ASSERT_TRUE(runtime_stage->IsDirty());
 
-  auto contents = std::make_shared<RuntimeEffectContents>();
   auto geom = Geometry::MakeCover();
-  contents->SetGeometry(geom.get());
+  auto contents = std::make_shared<RuntimeEffectContents>(geom.get());
   contents->SetRuntimeStage(runtime_stage);
 
   struct FragUniforms {
@@ -1908,12 +1942,9 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
   uniform_data->resize(sizeof(FragUniforms));
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
-  auto buffer_view = RuntimeEffectContents::EmplaceVulkanUniform(
-      uniform_data, GetContentContext()->GetTransientsDataBuffer(),
-      runtime_stage->GetUniforms()[0],
-      GetContentContext()
-          ->GetTransientsDataBuffer()
-          .GetMinimumUniformAlignment());
+  auto buffer_view = RuntimeEffectContents::EmplaceUniform(
+      uniform_data->data(), GetContentContext()->GetTransientsDataBuffer(),
+      runtime_stage->GetUniforms()[0]);
 
   // 16 bytes:
   //   8 bytes for iResolution
@@ -2029,9 +2060,8 @@ TEST_P(EntityTest, CoverageForStrokePathWithNegativeValuesInTransform) {
 
 TEST_P(EntityTest, SolidColorContentsIsOpaque) {
   Matrix matrix;
-  SolidColorContents contents;
   auto geom = Geometry::MakeRect(Rect::MakeLTRB(0, 0, 10, 10));
-  contents.SetGeometry(geom.get());
+  SolidColorContents contents(geom.get());
 
   contents.SetColor(Color::CornflowerBlue());
   EXPECT_TRUE(contents.IsOpaque(matrix));
@@ -2039,19 +2069,18 @@ TEST_P(EntityTest, SolidColorContentsIsOpaque) {
   EXPECT_FALSE(contents.IsOpaque(matrix));
 
   // Create stroked path that required alpha coverage.
-  geom = Geometry::MakeStrokePath(flutter::DlPath::MakeLine({0, 0}, {100, 100}),
-                                  {.width = 0.05});
-  contents.SetGeometry(geom.get());
-  contents.SetColor(Color::CornflowerBlue());
+  auto geom2 = Geometry::MakeStrokePath(
+      flutter::DlPath::MakeLine({0, 0}, {100, 100}), {.width = 0.05});
+  SolidColorContents contents2(geom2.get());
+  contents2.SetColor(Color::CornflowerBlue());
 
-  EXPECT_FALSE(contents.IsOpaque(matrix));
+  EXPECT_FALSE(contents2.IsOpaque(matrix));
 }
 
 TEST_P(EntityTest, ConicalGradientContentsIsOpaque) {
   Matrix matrix;
-  ConicalGradientContents contents;
   auto geom = Geometry::MakeRect(Rect::MakeLTRB(0, 0, 10, 10));
-  contents.SetGeometry(geom.get());
+  ConicalGradientContents contents(geom.get());
 
   contents.SetColors({Color::CornflowerBlue()});
   EXPECT_FALSE(contents.IsOpaque(matrix));
@@ -2059,20 +2088,19 @@ TEST_P(EntityTest, ConicalGradientContentsIsOpaque) {
   EXPECT_FALSE(contents.IsOpaque(matrix));
 
   // Create stroked path that required alpha coverage.
-  geom = Geometry::MakeStrokePath(
+  auto geom2 = Geometry::MakeStrokePath(
       flutter::DlPathBuilder{}.MoveTo({0, 0}).LineTo({100, 100}).TakePath(),
       {.width = 0.05f});
-  contents.SetGeometry(geom.get());
-  contents.SetColors({Color::CornflowerBlue()});
+  ConicalGradientContents contents2(geom2.get());
+  contents2.SetColors({Color::CornflowerBlue()});
 
-  EXPECT_FALSE(contents.IsOpaque(matrix));
+  EXPECT_FALSE(contents2.IsOpaque(matrix));
 }
 
 TEST_P(EntityTest, LinearGradientContentsIsOpaque) {
   Matrix matrix;
-  LinearGradientContents contents;
   auto geom = Geometry::MakeRect(Rect::MakeLTRB(0, 0, 10, 10));
-  contents.SetGeometry(geom.get());
+  LinearGradientContents contents(geom.get());
 
   contents.SetColors({Color::CornflowerBlue()});
   EXPECT_TRUE(contents.IsOpaque(matrix));
@@ -2083,20 +2111,19 @@ TEST_P(EntityTest, LinearGradientContentsIsOpaque) {
   EXPECT_FALSE(contents.IsOpaque(matrix));
 
   // Create stroked path that required alpha coverage.
-  geom = Geometry::MakeStrokePath(
+  auto geom2 = Geometry::MakeStrokePath(
       flutter::DlPathBuilder{}.MoveTo({0, 0}).LineTo({100, 100}).TakePath(),
       {.width = 0.05f});
-  contents.SetGeometry(geom.get());
-  contents.SetColors({Color::CornflowerBlue()});
+  LinearGradientContents contents2(geom2.get());
+  contents2.SetColors({Color::CornflowerBlue()});
 
-  EXPECT_FALSE(contents.IsOpaque(matrix));
+  EXPECT_FALSE(contents2.IsOpaque(matrix));
 }
 
 TEST_P(EntityTest, RadialGradientContentsIsOpaque) {
   Matrix matrix;
-  RadialGradientContents contents;
   auto geom = Geometry::MakeRect(Rect::MakeLTRB(0, 0, 10, 10));
-  contents.SetGeometry(geom.get());
+  RadialGradientContents contents(geom.get());
 
   contents.SetColors({Color::CornflowerBlue()});
   EXPECT_TRUE(contents.IsOpaque(matrix));
@@ -2107,20 +2134,19 @@ TEST_P(EntityTest, RadialGradientContentsIsOpaque) {
   EXPECT_FALSE(contents.IsOpaque(matrix));
 
   // Create stroked path that required alpha coverage.
-  geom = Geometry::MakeStrokePath(
+  auto geom2 = Geometry::MakeStrokePath(
       flutter::DlPathBuilder{}.MoveTo({0, 0}).LineTo({100, 100}).TakePath(),
       {.width = 0.05});
-  contents.SetGeometry(geom.get());
-  contents.SetColors({Color::CornflowerBlue()});
+  RadialGradientContents contents2(geom2.get());
+  contents2.SetColors({Color::CornflowerBlue()});
 
-  EXPECT_FALSE(contents.IsOpaque(matrix));
+  EXPECT_FALSE(contents2.IsOpaque(matrix));
 }
 
 TEST_P(EntityTest, SweepGradientContentsIsOpaque) {
   Matrix matrix;
-  RadialGradientContents contents;
   auto geom = Geometry::MakeRect(Rect::MakeLTRB(0, 0, 10, 10));
-  contents.SetGeometry(geom.get());
+  SweepGradientContents contents(geom.get());
 
   contents.SetColors({Color::CornflowerBlue()});
   EXPECT_TRUE(contents.IsOpaque(matrix));
@@ -2131,19 +2157,20 @@ TEST_P(EntityTest, SweepGradientContentsIsOpaque) {
   EXPECT_FALSE(contents.IsOpaque(matrix));
 
   // Create stroked path that required alpha coverage.
-  geom = Geometry::MakeStrokePath(
+  auto geom2 = Geometry::MakeStrokePath(
       flutter::DlPathBuilder{}.MoveTo({0, 0}).LineTo({100, 100}).TakePath(),
       {.width = 0.05f});
-  contents.SetGeometry(geom.get());
-  contents.SetColors({Color::CornflowerBlue()});
+  SweepGradientContents contents2(geom2.get());
+  contents2.SetColors({Color::CornflowerBlue()});
 
-  EXPECT_FALSE(contents.IsOpaque(matrix));
+  EXPECT_FALSE(contents2.IsOpaque(matrix));
 }
 
 TEST_P(EntityTest, TiledTextureContentsIsOpaque) {
   Matrix matrix;
   auto bay_bridge = CreateTextureForFixture("bay_bridge.jpg");
-  TiledTextureContents contents;
+  auto geom = Geometry::MakeCover();
+  TiledTextureContents contents(geom.get());
   contents.SetTexture(bay_bridge);
   // This is a placeholder test. Images currently never decompress as opaque
   // (whether in Flutter or the playground), and so this should currently always
@@ -2162,14 +2189,12 @@ TEST_P(EntityTest, PointFieldGeometryCoverage) {
 TEST_P(EntityTest, ColorFilterContentsWithLargeGeometry) {
   Entity entity;
   entity.SetTransform(Matrix::MakeScale(GetContentScale()));
-  auto src_contents = std::make_shared<SolidColorContents>();
   auto src_geom = Geometry::MakeRect(Rect::MakeLTRB(-300, -500, 30000, 50000));
-  src_contents->SetGeometry(src_geom.get());
+  auto src_contents = std::make_shared<SolidColorContents>(src_geom.get());
   src_contents->SetColor(Color::Red());
 
-  auto dst_contents = std::make_shared<SolidColorContents>();
   auto dst_geom = Geometry::MakeRect(Rect::MakeLTRB(300, 500, 20000, 30000));
-  dst_contents->SetGeometry(dst_geom.get());
+  auto dst_contents = std::make_shared<SolidColorContents>(dst_geom.get());
   dst_contents->SetColor(Color::Blue());
 
   auto contents = ColorFilterContents::MakeBlend(
@@ -2301,6 +2326,117 @@ TEST_P(EntityTest, FillPathGeometryGetPositionBufferReturnsExpectedMode) {
   }
 }
 
+TEST_P(EntityTest, StrokeArcGeometryGetPositionBufferReturnsExpectedMode) {
+  RenderTarget target;
+  testing::MockRenderPass mock_pass(GetContext(), target);
+  Rect oval_bounds = Rect::MakeLTRB(100, 100, 200, 200);
+
+  // Butt caps never overlap
+  {
+    StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kButt};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+            << "start: " << start << " sweep: " << sweep;
+      }
+    }
+  }
+
+  // Round caps with 10 stroke width overlap starting at 348.6 degrees
+  {
+    StrokeParameters stroke = {.width = 10.0f, .cap = Cap::kRound};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        if (sweep < 348.6) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
+      }
+    }
+  }
+
+  // Round caps with 50 stroke width overlap starting at 300.1 degrees
+  {
+    StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kRound};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        if (sweep < 300.0) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
+      }
+    }
+  }
+
+  // Square caps with 10 stroke width overlap starting at 347.4 degrees
+  {
+    StrokeParameters stroke = {.width = 10.0f, .cap = Cap::kSquare};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        if (sweep < 347.4) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
+      }
+    }
+  }
+
+  // Square caps with 50 stroke width overlap starting at 270.1 degrees
+  {
+    StrokeParameters stroke = {.width = 50.0f, .cap = Cap::kSquare};
+    for (auto start = 0; start < 360; start += 60) {
+      for (auto sweep = 0; sweep < 360; sweep += 12) {
+        auto geometry = Geometry::MakeStrokedArc(oval_bounds, Degrees(start),
+                                                 Degrees(sweep), stroke);
+
+        GeometryResult result =
+            geometry->GetPositionBuffer(*GetContentContext(), {}, mock_pass);
+
+        if (sweep < 270.1) {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kNormal)
+              << "start: " << start << " sweep: " << sweep;
+        } else {
+          EXPECT_EQ(result.mode, GeometryResult::Mode::kPreventOverdraw)
+              << "start: " << start << " sweep: " << sweep;
+        }
+      }
+    }
+  }
+}
+
 TEST_P(EntityTest, FailOnValidationError) {
   if (GetParam() != PlaygroundBackend::kVulkan) {
     GTEST_SKIP() << "Validation is only fatal on Vulkan backend.";
@@ -2340,9 +2476,8 @@ TEST_P(EntityTest, CanRenderEmptyPathsWithoutCrashing) {
 
   EXPECT_TRUE(path.GetBounds().IsEmpty());
 
-  auto contents = std::make_shared<SolidColorContents>();
   std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(path);
-  contents->SetGeometry(geom.get());
+  auto contents = std::make_shared<SolidColorContents>(geom.get());
   contents->SetColor(Color::Red());
 
   Entity entity;
@@ -2369,12 +2504,11 @@ TEST_P(EntityTest, DrawSuperEllipse) {
     ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&color));
     ImGui::End();
 
-    auto contents = std::make_shared<SolidColorContents>();
     std::unique_ptr<SuperellipseGeometry> geom =
         std::make_unique<SuperellipseGeometry>(Point{400, 400}, radius, degree,
                                                alpha, beta);
+    auto contents = std::make_shared<SolidColorContents>(geom.get());
     contents->SetColor(color);
-    contents->SetGeometry(geom.get());
 
     Entity entity;
     entity.SetContents(contents);
@@ -2389,8 +2523,8 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     // UI state.
     static int style_index = 0;
-    static float center[2] = {830, 830};
-    static float size[2] = {600, 600};
+    static Point center = {830, 830};
+    static Point size = {600, 600};
     static bool horizontal_symmetry = true;
     static bool vertical_symmetry = true;
     static bool corner_symmetry = true;
@@ -2434,8 +2568,8 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
     {
       ImGui::Combo("Style", &style_index, style_options,
                    sizeof(style_options) / sizeof(char*));
-      ImGui::SliderFloat2("Center", center, 0, 1000);
-      ImGui::SliderFloat2("Size", size, 0, 1000);
+      ImGui::SliderFloat2("Center", &center.x, 0, 1000);
+      ImGui::SliderFloat2("Size", &size.x, 0, 1000);
       ImGui::Checkbox("Symmetry: Horizontal", &horizontal_symmetry);
       ImGui::Checkbox("Symmetry: Vertical", &vertical_symmetry);
       ImGui::Checkbox("Symmetry: Corners", &corner_symmetry);
@@ -2471,27 +2605,121 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
     };
 
     auto rse = RoundSuperellipse::MakeRectRadii(
-        RectMakeCenterSize({center[0], center[1]}, {size[0], size[1]}), radii);
+        Rect::MakeEllipseBounds(center, size * 0.5f), radii);
 
     flutter::DlPath path;
     std::unique_ptr<Geometry> geom;
     if (style_index == 0) {
       geom = std::make_unique<RoundSuperellipseGeometry>(
-          RectMakeCenterSize({center[0], center[1]}, {size[0], size[1]}),
-          radii);
+          Rect::MakeEllipseBounds(center, size * 0.5f), radii);
     } else {
       path = flutter::DlPath::MakeRoundSuperellipse(rse);
       geom = Geometry::MakeStrokePath(path, {.width = 2.0f});
     }
 
-    auto contents = std::make_shared<SolidColorContents>();
+    auto contents = std::make_shared<SolidColorContents>(geom.get());
     contents->SetColor(Color::Red());
-    contents->SetGeometry(geom.get());
 
     Entity entity;
     entity.SetContents(contents);
 
     return entity.Render(context, pass);
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
+  // This playground shows the enlarged corner of a rounded superellipse to
+  // compare pathing algorithm against the filling algorithm (benchmark) at very
+  // large ratio.
+  auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
+    constexpr float corner_radius = 100.0;
+
+    // UI state.
+    static float logarithm_of_ratio = 1.5;  // ratio = size / corner_radius
+
+    float ratio = std::exp(logarithm_of_ratio);
+
+    float rect_size = corner_radius * ratio;
+    Rect rect = Rect::MakeLTRB(0, 0, rect_size, rect_size);
+    constexpr float screen_canvas_padding = 200.0f;
+    constexpr float screen_canvas_size = 1000.0f;
+
+    // Scale so that "corner radius" is as long as half the canvas.
+    float scale = screen_canvas_size / 2 / corner_radius;
+
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    {
+      ImGui::SliderFloat("log(Ratio)", &logarithm_of_ratio, 1.0, 8.0);
+      ImGui::LabelText("Ratio", "%.2g", static_cast<double>(ratio));
+      ImGui::Text("  where Ratio = RectSize / CornerRadius");
+    }
+    ImGui::End();
+
+    auto top_right = Vector2(screen_canvas_size * 1.3f, screen_canvas_padding);
+    auto transform = Matrix::MakeTranslation(top_right) *
+                     Matrix::MakeScale(Vector2(scale, scale)) *
+                     Matrix::MakeTranslation(Vector2(-rect_size, 0));
+    bool success = true;
+
+    auto fill_geom =
+        std::make_unique<RoundSuperellipseGeometry>(rect, corner_radius);
+    // Fill
+    {
+      auto contents = std::make_shared<SolidColorContents>(fill_geom.get());
+      contents->SetColor(Color::Red());
+
+      Entity entity;
+      entity.SetContents(contents);
+      entity.SetTransform(transform);
+
+      success = success && entity.Render(context, pass);
+    }
+
+    // Stroke
+    auto path = flutter::DlPath::MakeRoundSuperellipse(
+        RoundSuperellipse::MakeRectRadius(rect, corner_radius));
+    auto stroke_geom = Geometry::MakeStrokePath(path, {.width = 2 / scale});
+    {
+      auto contents = std::make_shared<SolidColorContents>(stroke_geom.get());
+      contents->SetColor(Color::Blue());
+
+      Entity entity;
+      entity.SetContents(contents);
+      entity.SetTransform(transform);
+
+      success = success && entity.Render(context, pass);
+    }
+
+    // Draw a ruler to show the length in portion of rect size.
+    auto screen_top_right =
+        Matrix::MakeScale(GetContentScale()).Invert() * top_right;
+    constexpr float font_size = 13.0f;
+    for (int i = -1; i < 100; i++) {
+      float screen_offset_y = static_cast<float>(i) * 20.0f;
+      std::string label;
+      if (i == -1) {
+        label = "Ruler: (in portion of rect size)";
+      } else if (i == 0) {
+        label = "- 0.0";
+      } else {
+        float portion_of_rect =
+            screen_offset_y * GetContentScale().y / scale / rect_size;
+        label = std::format("- {:.2g}", portion_of_rect);
+      }
+      ImGui::GetBackgroundDrawList()->AddText(
+          nullptr, font_size,
+          // Draw the ruler at around the flat part of the curve, which is
+          // somewhere to the left of the top right corner.
+          //
+          // Offset vertically by font_size/2 so that the hyphen aligns with the
+          // top of shape.
+          {screen_top_right.x - 500,
+           screen_top_right.y + screen_offset_y - font_size / 2},
+          IM_COL32_WHITE, label.c_str());
+    }
+    return success;
   };
 
   ASSERT_TRUE(OpenPlaygroundHere(callback));
@@ -2574,7 +2802,8 @@ TEST_P(EntityTest, CanDrawRoundSuperEllipseWithJustEnoughRadius) {
 }
 
 TEST_P(EntityTest, SolidColorApplyColorFilter) {
-  auto contents = SolidColorContents();
+  auto geom = Geometry::MakeCover();
+  auto contents = SolidColorContents(geom.get());
   contents.SetColor(Color::CornflowerBlue().WithAlpha(0.75));
   auto result = contents.ApplyColorFilter([](const Color& color) {
     return color.Blend(Color::LimeGreen().WithAlpha(0.75), BlendMode::kScreen);
@@ -2586,7 +2815,8 @@ TEST_P(EntityTest, SolidColorApplyColorFilter) {
 
 #define APPLY_COLOR_FILTER_GRADIENT_TEST(name)                                 \
   TEST_P(EntityTest, name##GradientApplyColorFilter) {                         \
-    auto contents = name##GradientContents();                                  \
+    auto geom = Geometry::MakeCover();                                         \
+    auto contents = name##GradientContents(geom.get());                        \
     contents.SetColors({Color::CornflowerBlue().WithAlpha(0.75)});             \
     auto result = contents.ApplyColorFilter([](const Color& color) {           \
       return color.Blend(Color::LimeGreen().WithAlpha(0.75),                   \

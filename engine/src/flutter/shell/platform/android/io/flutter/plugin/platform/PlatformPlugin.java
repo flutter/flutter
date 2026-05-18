@@ -25,6 +25,7 @@ import androidx.activity.OnBackPressedDispatcherOwner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
@@ -42,6 +43,7 @@ public class PlatformPlugin {
   @Nullable private final PlatformPluginDelegate platformPluginDelegate;
   private PlatformChannel.SystemChromeStyle currentTheme;
   private int mEnabledOverlays;
+  private boolean isEdgeToEdge = false;
   private static final String TAG = "PlatformPlugin";
 
   /**
@@ -202,9 +204,7 @@ public class PlatformPlugin {
         view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP);
         break;
       case HEAVY_IMPACT:
-        if (Build.VERSION.SDK_INT >= API_LEVELS.API_23) {
-          view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
-        }
+        view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK);
         break;
       case SELECTION_CLICK:
         view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
@@ -257,7 +257,7 @@ public class PlatformPlugin {
             // `onSystemUiVisibilityChange` is received though.
             //
             // As such, post `platformChannel.systemChromeChanged` to the view handler to ensure
-            // that downstream callbacks are trigged on the next frame.
+            // that downstream callbacks are triggered on the next frame.
             decorView.post(
                 () -> {
                   if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
@@ -280,6 +280,12 @@ public class PlatformPlugin {
 
   private void setSystemChromeEnabledSystemUIMode(PlatformChannel.SystemUiMode systemUiMode) {
     int enabledOverlays;
+
+    // If we were previously in edge-to-edge mode and are switching to a different mode,
+    // restore the default window inset behavior.
+    if (systemUiMode != PlatformChannel.SystemUiMode.EDGE_TO_EDGE) {
+      disableEdgeToEdge();
+    }
 
     if (systemUiMode == PlatformChannel.SystemUiMode.LEAN_BACK) {
       // LEAN BACK
@@ -360,13 +366,18 @@ public class PlatformPlugin {
       // If the Flutter app targets Android SDK 15 (API 35) or later (Flutter does this by default),
       // then this mode is used by default.
       //
+      // Uses WindowCompat.setDecorFitsSystemWindows (from AndroidX core) instead of deprecated
+      // View.SYSTEM_UI_FLAG_LAYOUT_* flags.
+      //
       // SDK 29 and up will apply a translucent body scrim behind 2/3 button navigation bars
       // to ensure contrast with buttons on the nav and status bars, unless the contrast is not
       // enforced in the overlay styling.
-      enabledOverlays =
-          View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-              | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+      isEdgeToEdge = true;
+      enableEdgeToEdge();
+      if (currentTheme != null) {
+        setSystemChromeSystemUIOverlayStyle(currentTheme);
+      }
+      return;
     } else {
       // When none of the conditions are matched, return without updating the system UI overlays.
       return;
@@ -378,6 +389,10 @@ public class PlatformPlugin {
 
   private void setSystemChromeEnabledSystemUIOverlays(
       List<PlatformChannel.SystemUiOverlay> overlaysToShow) {
+    // If we were in edge-to-edge mode, restore normal inset behavior since this
+    // older API sets specific overlay flags that are incompatible with edge-to-edge.
+    disableEdgeToEdge();
+
     // Start by assuming we want to hide all system overlays (like an immersive
     // game).
     int enabledOverlays =
@@ -417,7 +432,13 @@ public class PlatformPlugin {
    * PlatformPlugin}.
    */
   public void updateSystemUiOverlays() {
-    activity.getWindow().getDecorView().setSystemUiVisibility(mEnabledOverlays);
+    if (isEdgeToEdge) {
+      // In edge-to-edge mode, re-apply the modern API instead of using deprecated
+      // setSystemUiVisibility(), which could interfere with WindowCompat on API < 30.
+      enableEdgeToEdge();
+    } else {
+      activity.getWindow().getDecorView().setSystemUiVisibility(mEnabledOverlays);
+    }
     if (currentTheme != null) {
       setSystemChromeSystemUIOverlayStyle(currentTheme);
     }
@@ -428,10 +449,34 @@ public class PlatformPlugin {
   }
 
   /**
+   * Enables edge-to-edge mode using {@link WindowCompat#setDecorFitsSystemWindows}, which is the
+   * modern replacement for the deprecated {@code View.SYSTEM_UI_FLAG_LAYOUT_*} flags. This works
+   * with any {@link Activity} type, including both {@link
+   * io.flutter.embedding.android.FlutterActivity} and {@link
+   * io.flutter.embedding.android.FlutterFragmentActivity}.
+   */
+  private void enableEdgeToEdge() {
+    WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), false);
+  }
+
+  /**
+   * Disables edge-to-edge mode when switching to a different {@link PlatformChannel.SystemUiMode}.
+   * Restores the default decor-fits-system-windows behavior.
+   */
+  private void disableEdgeToEdge() {
+    if (isEdgeToEdge) {
+      isEdgeToEdge = false;
+      WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), true);
+    }
+  }
+
+  /**
    * @deprecated This method is outdated because it calls {@code setStatusBarColor}, {@code
    *     setNavigationBarColor} and {@code setNavigationBarDividerColor}, which are deprecated in
-   *     Android 15 and above. Consider using the new WindowInsetsController or other Android 15+
-   *     APIs for system UI styling.
+   *     Android 15 and above, meaning calls to this method will have no effect on those versions.
+   *     Consider using the
+   *     [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
+   *     or other Android 15+ APIs for system UI styling.
    */
   @Deprecated
   private void setSystemChromeSystemUIOverlayStyle(
@@ -463,23 +508,28 @@ public class PlatformPlugin {
     // If transparent, SDK 29 and higher may apply a translucent scrim behind the bar to ensure
     // proper contrast. This can be overridden with
     // SystemChromeStyle.systemStatusBarContrastEnforced.
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_23) {
-      if (systemChromeStyle.statusBarIconBrightness != null) {
-        switch (systemChromeStyle.statusBarIconBrightness) {
-          case DARK:
-            // Dark status bar icon brightness.
-            // Light status bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightStatusBars(true);
-            break;
-          case LIGHT:
-            // Light status bar icon brightness.
-            // Dark status bar appearance.
-            windowInsetsControllerCompat.setAppearanceLightStatusBars(false);
-            break;
-        }
+    if (systemChromeStyle.statusBarIconBrightness != null) {
+      switch (systemChromeStyle.statusBarIconBrightness) {
+        case DARK:
+          // Dark status bar icon brightness.
+          // Light status bar appearance.
+          windowInsetsControllerCompat.setAppearanceLightStatusBars(true);
+          break;
+        case LIGHT:
+          // Light status bar icon brightness.
+          // Dark status bar appearance.
+          windowInsetsControllerCompat.setAppearanceLightStatusBars(false);
+          break;
       }
+    }
 
-      if (systemChromeStyle.statusBarColor != null) {
+    if (systemChromeStyle.statusBarColor != null) {
+      // setStatusBarColor has no effect on Android 15 and above, meaning calls to this method will
+      // have no effect on those versions.
+      // Consider using the
+      // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
+      // or other Android 15+ APIs for system UI styling.
+      if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
         window.setStatusBarColor(systemChromeStyle.statusBarColor);
       }
     }
@@ -515,12 +565,26 @@ public class PlatformPlugin {
       }
 
       if (systemChromeStyle.systemNavigationBarColor != null) {
-        window.setNavigationBarColor(systemChromeStyle.systemNavigationBarColor);
+        // setNavigationBarColor has no effect on Android 15 and above, meaning calls to this method
+        // will have no effect on those versions.
+        // Consider using the
+        // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
+        // or other Android 15+ APIs for system UI styling.
+        if (Build.VERSION.SDK_INT < API_LEVELS.API_35) {
+          window.setNavigationBarColor(systemChromeStyle.systemNavigationBarColor);
+        }
       }
     }
     // You can't change the color of the navigation bar divider color until SDK 28.
+
+    // setNavigationBarDividerColor has no effect on Android 15 and above, meaning calls to this
+    // method will have no effect on those versions.
+    // Consider using the
+    // [WindowInsetsController](https://developer.android.com/reference/android/view/WindowInsetsController)
+    // or other Android 15+ APIs for system UI styling.
     if (systemChromeStyle.systemNavigationBarDividerColor != null
-        && Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
+        && Build.VERSION.SDK_INT >= API_LEVELS.API_28
+        && Build.VERSION.SDK_INT < API_LEVELS.API_35) {
       window.setNavigationBarDividerColor(systemChromeStyle.systemNavigationBarDividerColor);
     }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/src/foundation/diagnostics.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -670,6 +670,49 @@ void main() {
     expect(tester.widget<CustomScrollView>(find.byType(CustomScrollView)).shrinkWrap, true);
   });
 
+  testWidgets('AnimatedList.scrollCacheExtent is forwarded to its inner CustomScrollView', (
+    WidgetTester tester,
+  ) async {
+    const scrollCacheExtent = ScrollCacheExtent.viewport(2.0);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList(
+          initialItemCount: 2,
+          scrollCacheExtent: scrollCacheExtent,
+          itemBuilder: (BuildContext context, int index, Animation<double> _) {
+            return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
+          },
+        ),
+      ),
+    );
+
+    expect(
+      tester.widget<CustomScrollView>(find.byType(CustomScrollView)).scrollCacheExtent,
+      scrollCacheExtent,
+    );
+  });
+
+  testWidgets('AnimatedList.scrollCacheExtent defaults to null', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList(
+          initialItemCount: 2,
+          itemBuilder: (BuildContext context, int index, Animation<double> _) {
+            return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
+          },
+        ),
+      ),
+    );
+
+    expect(
+      tester.widget<CustomScrollView>(find.byType(CustomScrollView)).scrollCacheExtent,
+      isNull,
+    );
+  });
+
   testWidgets('AnimatedList applies MediaQuery padding', (WidgetTester tester) async {
     const padding = EdgeInsets.all(30.0);
     EdgeInsets? innerMediaQueryPadding;
@@ -1159,6 +1202,28 @@ void main() {
     expect(itemsSeparatorsTexts[0].data, 'item 0');
     expect(itemsSeparatorsTexts[1].data, 'separator after item 0');
     expect(itemsSeparatorsTexts[2].data, 'item 1');
+  });
+
+  testWidgets('AnimatedList does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = ScrollController();
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: AnimatedList(controller: controller, itemBuilder: (_, i, _) => Text('$i')),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(AnimatedList)), Size.zero);
+    await controller.animateTo(
+      0,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.bounceIn,
+    );
+    await tester.pump();
   });
 }
 

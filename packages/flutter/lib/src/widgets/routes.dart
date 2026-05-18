@@ -679,6 +679,32 @@ abstract interface class PredictiveBackRoute {
 }
 
 /// An entry in the history of a [LocalHistoryRoute].
+///
+/// A [LocalHistoryEntry] represents a "mini" navigation state within a route.
+/// It allows widgets or UI components to handle the back button or pop
+/// operations locally without affecting the main navigator stack.
+///
+/// It is typically used for widgets such as dialogs, bottom sheets, or
+/// inline expandable panels that can be dismissed independently
+/// of the surrounding route.
+///
+/// When a local history entry is removed (e.g., via the back button),
+/// the [onRemove] callback is called first. Only after all local history
+/// entries have been removed will the route itself be popped.
+///
+/// {@tool sample}
+/// This sample demonstrates how to use a [LocalHistoryEntry] to show a panel that can be
+/// dismissed with the back button.
+///
+/// ** See code in examples/api/lib/widgets/routes/local_history_entry.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+/// * [LocalHistoryRoute], which manages a stack of local history entries.
+/// * [ModalRoute.addLocalHistoryEntry], which adds an entry to a route.
+/// * [showModalBottomSheet], which internally uses local history entries
+///   to handle back button behavior.
 class LocalHistoryEntry {
   /// Creates an entry in the history of a [LocalHistoryRoute].
   ///
@@ -1072,10 +1098,7 @@ class _ModalScopeState<T> extends State<_ModalScope<T>> {
   @override
   void initState() {
     super.initState();
-    final animations = <Listenable>[
-      if (widget.route.animation != null) widget.route.animation!,
-      if (widget.route.secondaryAnimation != null) widget.route.secondaryAnimation!,
-    ];
+    final animations = <Listenable>[?widget.route.animation, ?widget.route.secondaryAnimation];
     _listenable = Listenable.merge(animations);
   }
 
@@ -2250,7 +2273,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier = buildModalBarrier();
     if (filter != null) {
-      barrier = BackdropFilter(filter: filter!, child: barrier);
+      barrier = BackdropFilter(filter: filter, child: barrier);
     }
     barrier = IgnorePointer(
       ignoring: !animation!
@@ -2502,8 +2525,24 @@ abstract mixin class RouteAware {
   /// Called when the current route has been popped off.
   void didPop() {}
 
-  /// Called when a new route has been pushed, and the current route is no
-  /// longer visible.
+  /// Called when a new route has been pushed on top of this route, temporarily
+  /// obscuring it.
+  ///
+  /// This method is called synchronously during the push operation, before the
+  /// transition animation completes. The current route may still be partially
+  /// visible as it animates out. To perform actions after the route is fully
+  /// obscured, consider using [ModalRoute.secondaryAnimation] to listen for
+  /// animation completion, for example:
+  ///
+  /// {@tool snippet}
+  /// ```dart
+  /// ModalRoute.of(context)?.secondaryAnimation?.addStatusListener((AnimationStatus status) {
+  ///   if (status == AnimationStatus.completed) {
+  ///     // This route is now fully obscured by the new route.
+  ///   }
+  /// });
+  /// ```
+  /// {@end-tool}
   void didPushNext() {}
 }
 
@@ -2717,6 +2756,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
+@awaitNotRequired
 Future<T?> showGeneralDialog<T extends Object?>({
   required BuildContext context,
   required RoutePageBuilder pageBuilder,

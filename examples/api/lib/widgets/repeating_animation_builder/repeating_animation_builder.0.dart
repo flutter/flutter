@@ -19,9 +19,8 @@ class RepeatingAnimationBuilderExampleApp extends StatelessWidget {
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.purple,
-          brightness: Brightness.dark,
+          brightness: .dark,
         ),
-        useMaterial3: true,
       ),
       home: const RepeatingAnimationBuilderExample(),
     );
@@ -77,11 +76,10 @@ class _RepeatingAnimationBuilderExampleState
 
   /// Builds the layered visual of the flower and the gem.
   Widget _buildFlowerGem(ColorScheme colors) {
-    return SizedBox(
-      width: 250,
-      height: 250,
+    return SizedBox.square(
+      dimension: 250,
       child: Stack(
-        alignment: Alignment.center,
+        alignment: .center,
         children: <Widget>[
           Container(
             decoration: ShapeDecoration(
@@ -98,7 +96,7 @@ class _RepeatingAnimationBuilderExampleState
             animatable: Tween<double>(begin: 0.8, end: 1.0),
             duration: const Duration(seconds: 2),
             paused: _isPaused,
-            repeatMode: RepeatMode.reverse,
+            repeatMode: .reverse,
             curve: Curves.easeInOutSine,
             builder: (BuildContext context, double value, Widget? child) {
               return Transform.scale(
@@ -129,7 +127,7 @@ class _RepeatingAnimationBuilderExampleState
       width: 100,
       height: 100,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: .circular(25),
         gradient: LinearGradient(
           colors: <Color>[colors.primary, colors.secondary],
           begin: Alignment.topLeft,
@@ -146,7 +144,7 @@ class _RepeatingAnimationBuilderExampleState
       left: 0,
       right: 0,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         children: <Widget>[
           _buildPlayPauseButton(colors, animationValue),
           const SizedBox(height: 24),
@@ -159,15 +157,14 @@ class _RepeatingAnimationBuilderExampleState
   /// Builds the custom Play/Pause button with a progress indicator border.
   Widget _buildPlayPauseButton(ColorScheme colors, double animationValue) {
     const double buttonSize = 88.0;
-    return SizedBox(
-      width: buttonSize,
-      height: buttonSize,
+    return SizedBox.square(
+      dimension: buttonSize,
       // InkWell provides the ripple effect on tap.
       child: InkWell(
-        borderRadius: BorderRadius.circular(buttonSize / 2),
+        borderRadius: .circular(buttonSize / 2),
         onTap: () => setState(() => _isPaused = !_isPaused),
         child: Stack(
-          alignment: Alignment.center,
+          alignment: .center,
           children: <Widget>[
             // The progress indicator is the bottom layer, acting as a border.
             SizedBox.expand(
@@ -183,11 +180,8 @@ class _RepeatingAnimationBuilderExampleState
             ),
             // The solid button core is the middle layer.
             Container(
-              margin: const EdgeInsets.all(8), // Inset from the progress ring
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colors.primary,
-              ),
+              margin: const .all(8), // Inset from the progress ring
+              decoration: BoxDecoration(shape: .circle, color: colors.primary),
             ),
             // The icon is the top layer.
             Icon(
@@ -207,13 +201,13 @@ class _RepeatingAnimationBuilderExampleState
       // The entire area is clickable.
       onTap: () => setState(() => _isReversing = !_isReversing),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        padding: const .symmetric(horizontal: 16.0, vertical: 8.0),
         decoration: BoxDecoration(
           color: colors.surfaceContainerHighest.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(24.0),
+          borderRadius: .circular(24.0),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
           children: <Widget>[
             Icon(
               _isReversing ? Icons.sync : Icons.sync_disabled,
@@ -223,10 +217,7 @@ class _RepeatingAnimationBuilderExampleState
             const SizedBox(width: 8),
             Text(
               _isReversing ? 'Back & Forth' : 'Forward Only',
-              style: TextStyle(
-                color: colors.onSurface,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(color: colors.onSurface, fontWeight: .w500),
             ),
             const SizedBox(width: 8),
             Switch(

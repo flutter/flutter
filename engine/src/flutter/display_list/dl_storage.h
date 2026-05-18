@@ -5,6 +5,7 @@
 #ifndef FLUTTER_DISPLAY_LIST_DL_STORAGE_H_
 #define FLUTTER_DISPLAY_LIST_DL_STORAGE_H_
 
+#include <cstdint>
 #include <memory>
 
 #include "flutter/fml/logging.h"

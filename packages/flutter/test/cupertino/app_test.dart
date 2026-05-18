@@ -5,7 +5,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -579,25 +578,6 @@ void main() {
     debugBrightnessOverride = null;
   });
 
-  testWidgets('CupertinoApp creates a Material theme with colors based off of Cupertino theme', (
-    WidgetTester tester,
-  ) async {
-    late ThemeData appliedTheme;
-    await tester.pumpWidget(
-      CupertinoApp(
-        theme: const CupertinoThemeData(primaryColor: CupertinoColors.activeGreen),
-        home: Builder(
-          builder: (BuildContext context) {
-            appliedTheme = Theme.of(context);
-            return const SizedBox();
-          },
-        ),
-      ),
-    );
-
-    expect(appliedTheme.colorScheme.primary, CupertinoColors.activeGreen);
-  });
-
   testWidgets('Cursor color is resolved when CupertinoThemeData.brightness is null', (
     WidgetTester tester,
   ) async {
@@ -704,6 +684,15 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('CupertinoApp does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Center(
+        child: SizedBox.shrink(child: CupertinoApp(home: Text('X'))),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoApp)), Size.zero);
+  });
 }
 
 class MockScrollBehavior extends ScrollBehavior {

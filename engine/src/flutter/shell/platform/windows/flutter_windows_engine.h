@@ -133,7 +133,10 @@ class FlutterWindowsEngine {
   //
   // Returns null on failure.
   std::unique_ptr<FlutterWindowsView> CreateView(
-      std::unique_ptr<WindowBindingHandler> window);
+      std::unique_ptr<WindowBindingHandler> window,
+      bool is_sized_to_content,
+      const BoxConstraints& box_constraints,
+      FlutterWindowsViewSizingDelegate* sizing_delegate = nullptr);
 
   // Remove a view. The engine will no longer render into it.
   virtual void RemoveView(FlutterViewId view_id);
@@ -256,6 +259,11 @@ class FlutterWindowsEngine {
 
   // Returns true if the semantics tree is enabled.
   bool semantics_enabled() const { return semantics_enabled_; }
+
+  bool iaccessibleex_enabled() const {
+    return project_->accessibility_mode() ==
+           FlutterAccessibilityMode::IAccessibleEx;
+  }
 
   // Refresh accessibility features and send them to the engine.
   void UpdateAccessibilityFeatures();

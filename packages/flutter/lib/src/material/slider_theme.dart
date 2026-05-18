@@ -112,7 +112,8 @@ class SliderTheme extends InheritedTheme {
 }
 
 /// Describes the conditions under which the value indicator on a [Slider]
-/// will be shown. Used with [SliderThemeData.showValueIndicator].
+/// will be shown. Used in [Slider.showValueIndicator] and
+/// [SliderThemeData.showValueIndicator].
 ///
 /// See also:
 ///
@@ -138,7 +139,8 @@ enum ShowValueIndicator {
   /// The value indicator is shown while dragging.
   onDrag,
 
-  /// The value indicator is always displayed.
+  /// The value indicator is always displayed as long as the slider has a
+  /// [Slider.onChanged] callback.
   alwaysVisible,
 
   /// The value indicator will never be shown.
@@ -160,13 +162,15 @@ enum Thumb {
   end,
 }
 
-/// Holds the color, shape, and typography values for a Material Design slider
-/// theme.
+/// Overrides the default values of visual properties for descendant
+/// [Slider] widgets.
 ///
-/// Use this class to configure a [SliderTheme] widget, or to set the
-/// [ThemeData.sliderTheme] for a [Theme] widget.
+/// Descendant widgets obtain the current [SliderThemeData] object with
+/// [SliderTheme.of]. Instances of [SliderThemeData] can
+/// be customized with [SliderThemeData.copyWith].
 ///
-/// To obtain the current ambient slider theme, use [SliderTheme.of].
+/// Typically a [SliderThemeData] is specified as part of the overall
+/// [Theme] with [ThemeData.sliderTheme].
 ///
 /// This theme is for both the [Slider] and the [RangeSlider]. The properties
 /// that are only for the [Slider] are: [tickMarkShape], [thumbShape],

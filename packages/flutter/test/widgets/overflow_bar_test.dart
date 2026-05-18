@@ -361,4 +361,16 @@ void main() {
       }
     }
   });
+
+  testWidgets('OverflowBar does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: OverflowBar(children: [Text('X'), Text('Y')])),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(OverflowBar)), Size.zero);
+  });
 }

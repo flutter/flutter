@@ -575,6 +575,13 @@ extension DurationAgo on Duration {
   }
 }
 
+extension UriParseExtension on String {
+  /// Convenience method for parsing [Uri]s from a [String].
+  ///
+  /// Allows for use of null-aware operators when building [Uri]s.
+  Uri toUri() => Uri.parse(this);
+}
+
 extension UriExtension on Uri {
   /// Returns this [Uri] with its query parameters removed.
   Uri withoutQueryParameters() {
@@ -604,3 +611,48 @@ extension StackTraceTransform<T> on Stream<T> {
 final utf8LineDecoder = StreamTransformer<List<int>, String>.fromBind(
   (stream) => stream.transformWithCallSite(utf8.decoder).transform(const LineSplitter()),
 );
+
+/// A line decoder that permits malformed UTF-8 bytes.
+///
+/// Used for displaying tool output (compiler, tests, debuggers) where invalid
+/// UTF-8 is expected from external sources. Invalid UTF-8 sequences are decoded
+/// to replacement characters (U+FFFD) without warnings.
+final utf8AllowMalformedLineDecoder = StreamTransformer<List<int>, String>.fromBind(
+  (stream) =>
+      stream.transformWithCallSite(utf8AllowMalformed.decoder).transform(const LineSplitter()),
+);
+
+/// Formats a list of rows into a table with aligned columns.
+///
+/// [table] is a list of rows, where each row is a list of strings.
+/// [separator] is the string used to separate columns (default is ' • ').
+///
+/// Returns a list of strings, where each string is a formatted row.
+List<String> formatTable(List<List<String>> table, {String separator = ' • ', int indent = 0}) {
+  if (table.isEmpty) {
+    return <String>[];
+  }
+
+  // Calculate column widths
+  if (table.first.isEmpty) {
+    throw Exception('Table header cannot be empty');
+  }
+  final indices = List<int>.generate(table.first.length - 1, (int i) => i);
+  final widths = List<int>.filled(indices.length, 0);
+  for (final row in table) {
+    for (final i in indices) {
+      widths[i] = math.max(widths[i], row[i].length);
+    }
+  }
+
+  final String indentString = ' ' * indent;
+
+  // Join columns into lines of text
+  return table.map<String>((List<String> row) {
+    final String formatted = indices
+        .map<String>((int i) => row[i].padRight(widths[i]))
+        .followedBy(<String>[row.last])
+        .join(separator);
+    return '$indentString$formatted';
+  }).toList();
+}

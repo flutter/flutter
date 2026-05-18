@@ -21,7 +21,7 @@ class FillPathSourceGeometry : public Geometry {
   ~FillPathSourceGeometry() override;
 
   // |Geometry|
-  bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+  bool CoversArea(const Matrix& transform, const IRect& rect) const override;
 
  protected:
   explicit FillPathSourceGeometry(std::optional<Rect> inner_rect);
@@ -47,6 +47,19 @@ class FillPathSourceGeometry : public Geometry {
   FillPathSourceGeometry(const FillPathSourceGeometry&) = delete;
 
   FillPathSourceGeometry& operator=(const FillPathSourceGeometry&) = delete;
+};
+
+/// @brief A Geometry that produces fillable vertices from a |PathSource| object
+///        using the |FillPathSourceGeometry|.
+class FillPathFromSourceGeometry final : public FillPathSourceGeometry {
+ public:
+  explicit FillPathFromSourceGeometry(const PathSource& source);
+
+ protected:
+  const PathSource& GetSource() const override;
+
+ private:
+  const PathSource& source_;
 };
 
 /// @brief A Geometry that produces fillable vertices from a |DlPath| object

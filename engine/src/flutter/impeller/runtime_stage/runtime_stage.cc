@@ -5,7 +5,11 @@
 #include "impeller/runtime_stage/runtime_stage.h"
 
 #include <array>
+#include <atomic>
+#include <cstdint>
 #include <memory>
+#include <sstream>
+#include <string>
 
 #include "fml/mapping.h"
 #include "impeller/base/validation.h"
@@ -15,6 +19,19 @@
 #include "runtime_stage_types_flatbuffers.h"
 
 namespace impeller {
+
+namespace {
+// Process-unique fallback library id for runtime stages decoded without an
+// asset path (e.g. tests, future in-memory APIs). Kept local to this
+// translation unit because `impeller::renderer` (where the equivalent
+// `ShaderKey::MakeFallbackLibraryId` lives) already depends on
+// `impeller::runtime_stage`, so it is not reachable from here.
+std::string MakeFallbackLibraryId() {
+  static std::atomic<uint64_t> counter{0};
+  return "auto:" +
+         std::to_string(counter.fetch_add(1, std::memory_order_relaxed));
+}
+}  // namespace
 
 static RuntimeUniformType ToType(fb::UniformDataType type) {
   switch (type) {
@@ -47,49 +64,17 @@ static RuntimeShaderStage ToShaderStage(fb::Stage stage) {
 const char* RuntimeStage::kVulkanUBOName =
     "_RESERVED_IDENTIFIER_FIXUP_gl_DefaultUniformBlock";
 
-std::unique_ptr<RuntimeStage> RuntimeStage::RuntimeStageIfPresent(
+absl::StatusOr<RuntimeStage> RuntimeStage::Create(
     const fb::RuntimeStage* runtime_stage,
     const std::shared_ptr<fml::Mapping>& payload) {
   if (!runtime_stage) {
-    return nullptr;
+    return absl::InvalidArgumentError("Runtime stage is null.");
   }
 
-  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-  return std::unique_ptr<RuntimeStage>(
-      new RuntimeStage(runtime_stage, payload));
-}
-
-RuntimeStage::Map RuntimeStage::DecodeRuntimeStages(
-    const std::shared_ptr<fml::Mapping>& payload) {
-  if (payload == nullptr || !payload->GetMapping()) {
-    return {};
-  }
-  if (!fb::RuntimeStagesBufferHasIdentifier(payload->GetMapping())) {
-    return {};
-  }
-
-  auto raw_stages = fb::GetRuntimeStages(payload->GetMapping());
-  return {
-      {RuntimeStageBackend::kSkSL,
-       RuntimeStageIfPresent(raw_stages->sksl(), payload)},
-      {RuntimeStageBackend::kMetal,
-       RuntimeStageIfPresent(raw_stages->metal(), payload)},
-      {RuntimeStageBackend::kOpenGLES,
-       RuntimeStageIfPresent(raw_stages->opengles(), payload)},
-      {RuntimeStageBackend::kOpenGLES3,
-       RuntimeStageIfPresent(raw_stages->opengles3(), payload)},
-      {RuntimeStageBackend::kVulkan,
-       RuntimeStageIfPresent(raw_stages->vulkan(), payload)},
-  };
-}
-
-RuntimeStage::RuntimeStage(const fb::RuntimeStage* runtime_stage,
-                           const std::shared_ptr<fml::Mapping>& payload)
-    : payload_(payload) {
-  FML_DCHECK(runtime_stage);
-
-  stage_ = ToShaderStage(runtime_stage->stage());
-  entrypoint_ = runtime_stage->entrypoint()->str();
+  RuntimeStage stage(payload);
+  stage.stage_ = ToShaderStage(runtime_stage->stage());
+  stage.entrypoint_ = runtime_stage->entrypoint()->str();
+  stage.library_id_ = MakeFallbackLibraryId();
 
   auto* uniforms = runtime_stage->uniforms();
 
@@ -113,27 +98,43 @@ RuntimeStage::RuntimeStage(const fb::RuntimeStage* runtime_stage,
           static_cast<size_t>(i->rows()), static_cast<size_t>(i->columns())};
       desc.bit_width = i->bit_width();
       desc.array_elements = i->array_elements();
-      if (i->struct_layout()) {
-        for (const auto& byte_type : *i->struct_layout()) {
-          desc.struct_layout.push_back(static_cast<uint8_t>(byte_type));
+      if (i->padding_layout()) {
+        for (const auto& byte_type : *i->padding_layout()) {
+          impeller::RuntimePaddingType type;
+          switch (byte_type) {
+            case fb::PaddingType::kPadding:
+              type = impeller::RuntimePaddingType::kPadding;
+              break;
+            case fb::PaddingType::kFloat:
+              type = impeller::RuntimePaddingType::kFloat;
+              break;
+          }
+          desc.padding_layout.push_back(type);
+        }
+      }
+      if (i->struct_fields()) {
+        for (const auto& elem : *i->struct_fields()) {
+          desc.struct_fields.emplace_back(
+              StructField{.name = elem->name()->str(),
+                          .byte_size = static_cast<size_t>(elem->byte_size())});
         }
       }
       desc.struct_float_count = i->struct_float_count();
-      uniforms_.push_back(std::move(desc));
+      stage.uniforms_.push_back(std::move(desc));
     }
   }
 
-  code_mapping_ = std::make_shared<fml::NonOwnedMapping>(
-      runtime_stage->shader()->data(),     //
-      runtime_stage->shader()->size(),     //
-      [payload = payload_](auto, auto) {}  //
+  stage.code_mapping_ = std::make_shared<fml::NonOwnedMapping>(
+      runtime_stage->shader()->data(),           //
+      runtime_stage->shader()->size(),           //
+      [payload = stage.payload_](auto, auto) {}  //
   );
 
   size_t binding = 64;
   if (ubo_id.has_value() && ubo_id.value() == binding) {
     binding++;
   }
-  for (auto& uniform : uniforms_) {
+  for (auto& uniform : stage.uniforms_) {
     if (uniform.type == kSampledImage) {
       uniform.binding = binding;
       binding++;
@@ -143,31 +144,80 @@ RuntimeStage::RuntimeStage(const fb::RuntimeStage* runtime_stage,
     }
   }
 
-  for (const auto& uniform : GetUniforms()) {
+  for (const auto& uniform : stage.GetUniforms()) {
     if (uniform.type == kStruct) {
-      descriptor_set_layouts_.push_back(DescriptorSetLayout{
+      stage.descriptor_set_layouts_.push_back(DescriptorSetLayout{
           static_cast<uint32_t>(uniform.location),
           DescriptorType::kUniformBuffer,
           ShaderStage::kFragment,
       });
     } else if (uniform.type == kSampledImage) {
-      descriptor_set_layouts_.push_back(DescriptorSetLayout{
+      stage.descriptor_set_layouts_.push_back(DescriptorSetLayout{
           static_cast<uint32_t>(uniform.binding),
           DescriptorType::kSampledImage,
           ShaderStage::kFragment,
       });
     }
   }
-  is_valid_ = true;
+
+  return stage;
 }
+
+std::unique_ptr<RuntimeStage> RuntimeStage::RuntimeStageIfPresent(
+    const fb::RuntimeStage* runtime_stage,
+    const std::shared_ptr<fml::Mapping>& payload) {
+  auto stage = Create(runtime_stage, payload);
+  if (!stage.ok()) {
+    return nullptr;
+  }
+  return std::make_unique<RuntimeStage>(std::move(*stage));
+}
+
+absl::StatusOr<RuntimeStage::Map> RuntimeStage::DecodeRuntimeStages(
+    const std::shared_ptr<fml::Mapping>& payload) {
+  if (payload == nullptr || !payload->GetMapping()) {
+    return absl::InvalidArgumentError("Payload is null or empty.");
+  }
+  if (!fb::RuntimeStagesBufferHasIdentifier(payload->GetMapping())) {
+    return absl::InvalidArgumentError(
+        "Payload does not have valid identifier.");
+  }
+
+  auto raw_stages = fb::GetRuntimeStages(payload->GetMapping());
+  if (!raw_stages) {
+    return absl::InvalidArgumentError("Failed to get runtime stages.");
+  }
+
+  const uint32_t version = raw_stages->format_version();
+  const auto expected =
+      static_cast<uint32_t>(fb::RuntimeStagesFormatVersion::kVersion);
+  if (version != expected) {
+    std::stringstream stream;
+    stream << "Unsupported runtime stages format version. Expected " << expected
+           << ", got " << version << ".";
+    return absl::InvalidArgumentError(stream.str());
+  }
+
+  return Map{
+      {RuntimeStageBackend::kSkSL,
+       RuntimeStageIfPresent(raw_stages->sksl(), payload)},
+      {RuntimeStageBackend::kMetal,
+       RuntimeStageIfPresent(raw_stages->metal(), payload)},
+      {RuntimeStageBackend::kOpenGLES,
+       RuntimeStageIfPresent(raw_stages->opengles(), payload)},
+      {RuntimeStageBackend::kOpenGLES3,
+       RuntimeStageIfPresent(raw_stages->opengles3(), payload)},
+      {RuntimeStageBackend::kVulkan,
+       RuntimeStageIfPresent(raw_stages->vulkan(), payload)},
+  };
+}
+
+RuntimeStage::RuntimeStage(std::shared_ptr<fml::Mapping> payload)
+    : payload_(std::move(payload)) {}
 
 RuntimeStage::~RuntimeStage() = default;
 RuntimeStage::RuntimeStage(RuntimeStage&&) = default;
 RuntimeStage& RuntimeStage::operator=(RuntimeStage&&) = default;
-
-bool RuntimeStage::IsValid() const {
-  return is_valid_;
-}
 
 const std::shared_ptr<fml::Mapping>& RuntimeStage::GetCodeMapping() const {
   return code_mapping_;
@@ -202,6 +252,14 @@ bool RuntimeStage::IsDirty() const {
 
 void RuntimeStage::SetClean() {
   is_dirty_ = false;
+}
+
+void RuntimeStage::SetLibraryId(std::string library_id) {
+  library_id_ = std::move(library_id);
+}
+
+const std::string& RuntimeStage::GetLibraryId() const {
+  return library_id_;
 }
 
 const std::vector<DescriptorSetLayout>& RuntimeStage::GetDescriptorSetLayouts()

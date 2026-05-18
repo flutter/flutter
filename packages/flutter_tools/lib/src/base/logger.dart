@@ -10,7 +10,7 @@ import 'package:meta/meta.dart';
 import '../convert.dart';
 import 'common.dart';
 import 'io.dart';
-import 'terminal.dart' show OutputPreferences, Terminal, TerminalColor;
+import 'terminal.dart' show AnsiTerminal, OutputPreferences, Terminal, TerminalColor;
 import 'utils.dart';
 
 const kDefaultStatusPadding = 59;
@@ -32,6 +32,9 @@ typedef VoidCallback = void Function();
 abstract class Logger {
   /// Whether or not this logger should print [printTrace] messages.
   bool get isVerbose => false;
+
+  /// Whether this logger is used for machine readable output.
+  bool get isMachine => false;
 
   /// If true, silences the logger output.
   bool quiet = false;
@@ -268,6 +271,9 @@ class DelegatingLogger implements Logger {
   bool get isVerbose => _delegate.isVerbose;
 
   @override
+  bool get isMachine => _delegate.isMachine;
+
+  @override
   bool get hadErrorOutput => _delegate.hadErrorOutput;
 
   @override
@@ -405,7 +411,6 @@ class DelegatingLogger implements Logger {
 /// the first delegate with the matching type.
 ///
 /// Throws a [StateError] if no matching delegate is found.
-@override
 T asLogger<T extends Logger>(Logger logger) {
   final original = logger;
   while (true) {
@@ -1405,7 +1410,7 @@ class AnonymousSpinnerStatus extends Status {
     assert(_timer != null);
     assert(_timer!.isActive);
     if (_terminal.supportsColor) {
-      _writeToStdOut('\r\x1B[K'); // go to start of line and clear line
+      _writeToStdOut(AnsiTerminal.clearAndReturnCode);
     } else {
       _clear(_currentLineLength);
     }

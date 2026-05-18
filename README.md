@@ -1,8 +1,8 @@
 <a href="https://flutter.dev/">
   <h1 align="center">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://storage.googleapis.com/cms-storage-bucket/6e19fee6b47b36ca613f.png">
-      <img alt="Flutter" src="https://storage.googleapis.com/cms-storage-bucket/c823e53b3a1a7b0d36a9.png">
+      <source media="(prefers-color-scheme: dark)" srcset="https://docs.flutter.dev/logo_dark.png">
+      <img alt="Flutter" src="https://docs.flutter.dev/logo.png">
     </picture>
   </h1>
 </a>
@@ -12,6 +12,7 @@
 [![Twitter handle][]][Twitter badge]
 [![BlueSky badge][]][BlueSky handle]
 [![codecov](https://codecov.io/gh/flutter/flutter/branch/master/graph/badge.svg?token=11yDrJU2M2)](https://codecov.io/gh/flutter/flutter)
+[![LFX Health Score](https://insights.linuxfoundation.org/api/badge/health-score?project=flutter)](https://insights.linuxfoundation.org/project/flutter)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5631/badge)](https://bestpractices.coreinfrastructure.org/projects/5631)
 [![SLSA 1](https://slsa.dev/images/gh-badge-level1.svg)](https://slsa.dev)
 
@@ -27,8 +28,8 @@ open source.
 * [Development wiki](./docs/README.md)
 * [Contributing to Flutter](https://github.com/flutter/flutter/blob/main/CONTRIBUTING.md)
 
-For announcements about new releases, follow the
-[flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce)
+For release and other announcements, join the
+[flutter-announce](https://groups.google.com/g/flutter-announce)
 mailing list. Our documentation also tracks [breaking
 changes](https://docs.flutter.dev/release/breaking-changes) across releases.
 
@@ -71,7 +72,7 @@ libraries like [Skia] (which underpins Chrome and Android) and
 [Impeller]. We architected Flutter to
 support glitch-free, jank-free graphics at the native speed of your device.
 
-Flutter code is powered by the world-class [Dart platform], which enables
+Flutter code is powered by the world-class [Dart programming language], which enables
 compilation to 32-bit and 64-bit ARM machine code for iOS and Android,
 JavaScript and WebAssembly for the web, as well as Intel x64 and ARM
 for desktop devices.
@@ -108,20 +109,20 @@ Information on how to get started can be found in our
 [BlueSky handle]: https://bsky.app/profile/flutter.dev
 [layered architecture]: https://docs.flutter.dev/resources/inside-flutter
 [architectural overview]: https://docs.flutter.dev/resources/architectural-overview
-[widget catalog]: https://flutter.dev/widgets/
-[Cupertino]: https://docs.flutter.dev/development/ui/widgets/cupertino
-[Material]: https://docs.flutter.dev/development/ui/widgets/material
+[widget catalog]: https://docs.flutter.dev/ui/widgets
+[Cupertino]: https://docs.flutter.dev/ui/widgets/cupertino
+[Material]: https://docs.flutter.dev/ui/widgets/material
 [Skia]: https://skia.org/
-[Dart platform]: https://dart.dev/
+[Dart programming language]: https://dart.dev/
 [Hot reload animation]: https://github.com/flutter/website/blob/main/site/web/assets/images/docs/tools/android-studio/hot-reload.gif?raw=true
-[Hot reload]: https://docs.flutter.dev/development/tools/hot-reload
+[Hot reload]: https://docs.flutter.dev/tools/hot-reload
 [Visual Studio Code]: https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter
 [IntelliJ / Android Studio]: https://plugins.jetbrains.com/plugin/9212-flutter
 [Flutter packages]: https://pub.dev/flutter
-[Android FFI]: https://docs.flutter.dev/development/platform-integration/android/c-interop
-[iOS FFI]: https://docs.flutter.dev/development/platform-integration/ios/c-interop
-[macOS FFI]: https://docs.flutter.dev/development/platform-integration/macos/c-interop
-[Windows FFI]: https://docs.flutter.dev/development/platform-integration/windows/building#integrating-with-windows
-[platform channels]: https://docs.flutter.dev/development/platform-integration/platform-channels
+[Android FFI]: https://docs.flutter.dev/platform-integration/android/c-interop
+[iOS FFI]: https://docs.flutter.dev/platform-integration/ios/c-interop
+[macOS FFI]: https://docs.flutter.dev/platform-integration/macos/c-interop
+[Windows FFI]: https://docs.flutter.dev/platform-integration/windows/building#integrating-with-windows
+[platform channels]: https://docs.flutter.dev/platform-integration/platform-channels
 [interop example]: https://github.com/flutter/flutter/tree/main/examples/platform_channel
 [Impeller]: https://docs.flutter.dev/perf/impeller

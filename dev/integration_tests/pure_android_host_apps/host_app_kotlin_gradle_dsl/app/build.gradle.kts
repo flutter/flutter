@@ -1,20 +1,13 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "com.example.myapplication"
     compileSdk = 36
-
-    // Flutter's CI installs the NDK at a non-standard path.
-    // This non-standard structure is initially created by
-    // https://github.com/flutter/engine/blob/3.27.0/tools/android_sdk/create_cipd_packages.sh.
-    val systemNdkPath: String? = System.getenv("ANDROID_NDK_PATH")
-    if (systemNdkPath != null) {
-        ndkVersion = "26.3.11579264" // This version must exactly match the version of the NDK that the recipe pulls from CIPD.
-        ndkPath = systemNdkPath
-    }
+    ndkVersion = "28.2.13676358" // This version must exactly match the version of the NDK that the recipe pulls from CIPD.
 
     defaultConfig {
         applicationId = "com.example.myapplication"
@@ -42,9 +35,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
     buildFeatures {
         compose = true
     }
@@ -55,6 +45,12 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 

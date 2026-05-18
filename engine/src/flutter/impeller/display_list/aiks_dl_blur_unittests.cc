@@ -13,6 +13,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
+#include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
@@ -361,6 +362,48 @@ TEST_P(AiksTest, CanRenderBackdropBlurHugeSigma) {
   auto backdrop_filter =
       DlImageFilter::MakeBlur(999999, 999999, DlTileMode::kClamp);
   builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderBoundedBlur) {
+  auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
+
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  builder.DrawImage(image, DlPoint(0.0, 0.0), DlImageSampling::kNearestNeighbor,
+                    &paint);
+
+  DlPaint save_paint;
+  save_paint.setBlendMode(DlBlendMode::kSrcOver);
+  builder.Save();
+
+  // Subcase 1: The 1st branch of downsampling, where the coverage hint is
+  // non-null but was ignored during snapshotting.
+
+  builder.Scale(1.1, 1.2);
+  builder.Rotate(10);
+  DlRect rect1 = DlRect::MakeLTRB(70, 70, 313, 170);
+  builder.ClipRect(rect1);
+  auto backdrop_filter1 =
+      DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal, /*bounds=*/rect1);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter1.get());
+  builder.Restore();
+  builder.Restore();
+
+  // Subcase 2: The 2nd branch of downsampling, where the coverage hint is null
+  // or was already used during snapshotting.
+
+  builder.Scale(1.1, 1.2);
+  builder.Rotate(10);
+  DlRect rect2 = DlRect::MakeLTRB(55, 190, 298, 290);
+  builder.ClipRect(rect2);
+  auto backdrop_filter2 =
+      DlBlurImageFilter::Make(20, 20, DlTileMode::kDecal, /*bounds=*/rect2);
+  builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter2.get());
+  builder.Restore();
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -1069,8 +1112,7 @@ TEST_P(AiksTest, GaussianBlurScaledAndClipped) {
   Vector2 center = Vector2(1024, 768) / 2;
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
-  auto rect =
-      Rect::MakeLTRB(center.x, center.y, center.x, center.y).Expand(clip_size);
+  auto rect = Rect::MakeEllipseBounds(center, clip_size);
   builder.ClipRect(DlRect::MakeLTRB(rect.GetLeft(), rect.GetTop(),
                                     rect.GetRight(), rect.GetBottom()));
   builder.Translate(center.x, center.y);
@@ -1180,8 +1222,7 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClipped) {
   Vector2 center = Vector2(1024, 768) / 2;
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
-  auto clip_bounds =
-      Rect::MakeLTRB(center.x, center.y, center.x, center.y).Expand(clip_size);
+  auto clip_bounds = Rect::MakeEllipseBounds(center, clip_size);
   builder.ClipRect(DlRect::MakeLTRB(clip_bounds.GetLeft(), clip_bounds.GetTop(),
                                     clip_bounds.GetRight(),
                                     clip_bounds.GetBottom()));
@@ -1235,7 +1276,7 @@ TEST_P(AiksTest, GaussianBlurRotatedNonUniform) {
     builder.Rotate(rotation);
 
     DlRoundRect rrect =
-        DlRoundRect::MakeRectXY(DlRect::MakeXYWH(-100, -100, 200, 200), 10, 10);
+        DlRoundRect::MakeRectXY(DlRect::MakeCircleBounds({0, 0}, 100), 10, 10);
     builder.DrawRoundRect(rrect, paint);
     return builder.Build();
   };
@@ -1464,6 +1505,26 @@ TEST_P(AiksTest, CanRenderNestedBackdropBlur) {
     return builder.Build();
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, GaussianBlurFlipped) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  builder.DrawRect(DlRect::MakeXYWH(0, 0, 350, 350),
+                   DlPaint().setColor(DlColor::kWhite()));
+
+  builder.Save();
+  builder.Scale(-1, 1);
+  DlPaint paint;
+  paint.setImageFilter(DlBlurImageFilter::Make(10, 10, DlTileMode::kDecal));
+  builder.SaveLayer(DlRect::MakeLTRB(-150, 100, 150, 200), &paint);
+  builder.DrawRect(DlRect::MakeLTRB(-150, 0, 150, 300),
+                   DlPaint().setColor(DlColor::kRed()));
+  builder.Restore();
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 }  // namespace testing

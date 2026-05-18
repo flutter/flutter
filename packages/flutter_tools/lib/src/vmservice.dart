@@ -982,7 +982,8 @@ bool isPauseEvent(String kind) {
       kind == vm_service.EventKind.kNone;
 }
 
-/// A brightness enum that matches the values https://github.com/flutter/engine/blob/3a96741247528133c0201ab88500c0c3c036e64e/lib/ui/window.dart#L1328
+/// A brightness enum that matches the values defined in
+/// https://github.com/flutter/flutter/blob/230240c56880f2c19bf92d2c32203b064054f173/engine/src/flutter/lib/ui/window.dart#L1073
 /// Describes the contrast of a theme or color palette.
 enum Brightness {
   /// The color is dark and will require a light text color to achieve readable
@@ -999,8 +1000,12 @@ enum Brightness {
 }
 
 /// Process a VM service log event into a string message.
+///
+/// Uses a permissive UTF-8 decoder because app-generated logs may contain
+/// invalid UTF-8 from external sources (Bluetooth devices, network APIs, etc.).
 String processVmServiceMessage(vm_service.Event event) {
-  final String message = utf8.decode(base64.decode(event.bytes!));
+  // Use permissive decoder for app logs that may have invalid UTF-8
+  final String message = utf8AllowMalformed.decode(base64.decode(event.bytes!));
   // Remove extra trailing newlines appended by the vm service.
   if (message.endsWith('\n')) {
     return message.substring(0, message.length - 1);

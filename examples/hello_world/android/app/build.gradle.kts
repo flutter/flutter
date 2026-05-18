@@ -10,15 +10,7 @@ plugins {
 android {
     namespace = "io.flutter.examples.hello_world"
     compileSdk = flutter.compileSdkVersion
-
-    // Flutter's CI installs the NDK at a non-standard path.
-    // This non-standard structure is initially created by
-    // https://github.com/flutter/engine/blob/3.27.0/tools/android_sdk/create_cipd_packages.sh.
-    val systemNdkPath: String? = System.getenv("ANDROID_NDK_PATH")
-    if (systemNdkPath != null) {
-        ndkVersion = flutter.ndkVersion
-        ndkPath = systemNdkPath
-    }
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8

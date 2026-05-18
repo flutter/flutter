@@ -47,10 +47,6 @@ Future<shelf.Response> _applyProxyRules(
       final shelf.Response proxyResponse = await handler(proxyBackendRequest);
       logger.printStatus('$_kLogEntryPrefix Matched "$requestPath". Requesting "$finalTargetUrl"');
       logger.printTrace('$_kLogEntryPrefix Matched with proxy rule: $rule');
-      if (proxyResponse.statusCode == 404) {
-        logger.printTrace('$_kLogEntryPrefix "$finalTargetUrl" responded with status 404');
-        return innerHandler(request);
-      }
       return proxyResponse;
     } on Exception catch (e) {
       logger.printError('$_kLogEntryPrefix Error for $finalTargetUrl: $e. Allowing fall-through.');

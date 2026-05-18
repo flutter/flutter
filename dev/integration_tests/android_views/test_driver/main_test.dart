@@ -12,8 +12,8 @@ Future<void> main() async {
     driver = await FlutterDriver.connect();
   });
 
-  tearDownAll(() {
-    driver?.close();
+  tearDownAll(() async {
+    await driver?.close();
   });
 
   // Each test below must return back to the home page after finishing.
@@ -22,7 +22,7 @@ Future<void> main() async {
     final SerializableFinder motionEventsListTile = find.byValueKey('MotionEventsListTile');
     await driver?.tap(motionEventsListTile);
     await driver?.runUnsynchronized(() async {
-      driver?.waitFor(find.byValueKey('PlatformView'));
+      await driver?.waitFor(find.byValueKey('PlatformView'));
     });
     final String errorMessage = (await driver?.requestData('run test'))!;
     expect(errorMessage, '');

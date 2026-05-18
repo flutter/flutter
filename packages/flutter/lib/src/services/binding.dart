@@ -39,8 +39,9 @@ export 'restoration.dart' show RestorationManager;
 /// Listens for platform messages and directs them to the [defaultBinaryMessenger].
 ///
 /// The [ServicesBinding] also registers a [LicenseEntryCollector] that exposes
-/// the licenses found in the `LICENSE` file stored at the root of the asset
-/// bundle, and implements the `ext.flutter.evict` service extension (see
+/// the licenses found in the `NOTICES` file (or its compressed variant,
+/// `NOTICES.Z`) stored at the root of the asset bundle, and implements the
+/// `ext.flutter.evict` service extension (see
 /// [evict]).
 mixin ServicesBinding on BindingBase, SchedulerBinding {
   @override
@@ -436,9 +437,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         _systemContextMenuClient!.handleCustomContextMenuAction(callbackId);
       case 'SystemChrome.systemUIChange':
         final args = methodCall.arguments as List<dynamic>;
-        if (_systemUiChangeCallback != null) {
-          await _systemUiChangeCallback!(args[0] as bool);
-        }
+        await _systemUiChangeCallback?.call(args[0] as bool);
       case 'System.requestAppExit':
         return <String, dynamic>{'response': (await handleRequestAppExit()).name};
       default:

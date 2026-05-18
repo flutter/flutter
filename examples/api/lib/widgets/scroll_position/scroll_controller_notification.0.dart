@@ -69,10 +69,7 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
           itemCount: 50,
           itemBuilder: (_, int index) {
             return Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 8.0,
-                horizontal: 20.0,
-              ),
+              padding: const .symmetric(vertical: 8.0, horizontal: 20.0),
               child: Text('Item $index'),
             );
           },
@@ -102,40 +99,24 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(70),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: .spaceAround,
               children: <Widget>[
                 if (!_useController)
                   Text('Last notification: ${_lastNotification.runtimeType}'),
                 if (!_useController) const SizedBox.square(dimension: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    const Text('with:'),
-                    Radio<bool>(
-                      value: true,
-                      // TODO(loic-sharma): Migrate to RadioGroup.
-                      // https://github.com/flutter/flutter/issues/179088
-                      // ignore: deprecated_member_use
-                      groupValue: _useController,
-                      // TODO(loic-sharma): Migrate to RadioGroup.
-                      // https://github.com/flutter/flutter/issues/179088
-                      // ignore: deprecated_member_use
-                      onChanged: _handleRadioChange,
-                    ),
-                    const Text('ScrollController'),
-                    Radio<bool>(
-                      value: false,
-                      // TODO(loic-sharma): Migrate to RadioGroup.
-                      // https://github.com/flutter/flutter/issues/179088
-                      // ignore: deprecated_member_use
-                      groupValue: _useController,
-                      // TODO(loic-sharma): Migrate to RadioGroup.
-                      // https://github.com/flutter/flutter/issues/179088
-                      // ignore: deprecated_member_use
-                      onChanged: _handleRadioChange,
-                    ),
-                    const Text('NotificationListener'),
-                  ],
+                RadioGroup<bool>(
+                  groupValue: _useController,
+                  onChanged: _handleRadioChange,
+                  child: Row(
+                    mainAxisAlignment: .center,
+                    children: <Widget>[
+                      const Text('with:'),
+                      Radio<bool>(value: true),
+                      const Text('ScrollController'),
+                      Radio<bool>(value: false),
+                      const Text('NotificationListener'),
+                    ],
+                  ),
                 ),
               ],
             ),

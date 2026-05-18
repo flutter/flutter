@@ -48,9 +48,11 @@ class Context {
     final TargetPlatform platform = parsePlatform(platformName);
     switch (subCommand) {
       case 'build':
-        buildApp(platform);
+        buildApp(platform, 'build');
       case 'prepare':
-        prepare(platform);
+        unpackFor(platform, 'prepare');
+      case 'build-add-to-app':
+        buildForNativeApp(platform);
       case 'thin':
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
@@ -73,6 +75,7 @@ class Context {
       case 'thin':
       case 'embed':
       case 'embed_and_thin':
+      case 'build-add-to-app':
       case 'test_vm_service_bonjour_service':
         return command;
       default:
@@ -222,6 +225,10 @@ class Context {
     // Use FLUTTER_BUILD_MODE if it's set, otherwise use the Xcode build configuration name
     // This means that if someone wants to use an Xcode build config other than Debug/Profile/Release,
     // they _must_ set FLUTTER_BUILD_MODE so we know what type of artifact to build.
+
+    // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+    // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterToolHelper.swift.tmpl
+
     final String? buildMode = (environment['FLUTTER_BUILD_MODE'] ?? environment['CONFIGURATION'])
         ?.toLowerCase();
 
@@ -269,6 +276,14 @@ class Context {
     ]);
   }
 
+  /// Call `flutter assemble` from a build script in a native app (add-to-app).
+  /// After building the App.framework, embed it and the Flutter framework into the app.
+  /// This does a combination of the `build` and `embed_and_thin` commands in a single build script.
+  void buildForNativeApp(TargetPlatform platform) {
+    buildApp(platform, 'build-add-to-app');
+    embedFlutterFrameworks(platform);
+  }
+
   /// Embeds the App.framework, Flutter/FlutterMacOS.framework, and any native
   /// asset frameworks into the app.
   ///
@@ -283,19 +298,21 @@ class Context {
     final xcodeFrameworksDir =
         '${environment['TARGET_BUILD_DIR']}/${environment['FRAMEWORKS_FOLDER_PATH']}';
     runSync('mkdir', <String>['-p', '--', xcodeFrameworksDir]);
-    runRsync('${environment['BUILT_PRODUCTS_DIR']}/App.framework', xcodeFrameworksDir);
 
     final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
-
     final bool codesign =
         platform == TargetPlatform.macos &&
         expandedCodeSignIdentity != null &&
         expandedCodeSignIdentity.isNotEmpty &&
         environment['CODE_SIGNING_REQUIRED'] != 'NO';
 
+    _embedAppFramework(xcodeFrameworksDir, codesign ? expandedCodeSignIdentity : null);
+
     // Embed the actual Flutter.framework that the Flutter app expects to run against,
-    // which could be a local build or an arch/type specific build.
+    // which could be a local build or an arch/type-specific build.
     switch (platform) {
+      // NOTE: If you modify the rsync logic here, you should likely also update the equivalent implementation in
+      // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
       case TargetPlatform.ios:
         runRsync('${environment['BUILT_PRODUCTS_DIR']}/Flutter.framework', '$xcodeFrameworksDir/');
       case TargetPlatform.macos:
@@ -306,7 +323,6 @@ class Context {
         );
 
         if (codesign) {
-          _codesignFramework(expandedCodeSignIdentity, '$xcodeFrameworksDir/App.framework/App');
           _codesignFramework(
             expandedCodeSignIdentity,
             '$xcodeFrameworksDir/FlutterMacOS.framework/FlutterMacOS',
@@ -326,22 +342,25 @@ class Context {
     }
   }
 
+  void _embedAppFramework(String xcodeFrameworksDir, String? expandedCodeSignIdentity) {
+    runRsync('${environment['BUILT_PRODUCTS_DIR']}/App.framework', xcodeFrameworksDir);
+    if (expandedCodeSignIdentity != null) {
+      _codesignFramework(expandedCodeSignIdentity, '$xcodeFrameworksDir/App.framework/App');
+    }
+  }
+
   void _embedNativeAssets(
     TargetPlatform platform, {
     required String xcodeFrameworksDir,
     required bool codesign,
     String? expandedCodeSignIdentity,
   }) {
-    // Copy the native assets.
-    final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
-    var projectPath = '$sourceRoot/..';
-    if (environment['FLUTTER_APPLICATION_PATH'] != null) {
-      projectPath = environment['FLUTTER_APPLICATION_PATH']!;
-    }
-    final String flutterBuildDir = environment['FLUTTER_BUILD_DIR']!;
-    final nativeAssetsPath = '$projectPath/$flutterBuildDir/native_assets/${platform.name}/';
-    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
+    // Copy native assets referenced in the native_assets.json file for the
+    // current build.
+    final String builtProductsDir = environment['BUILT_PRODUCTS_DIR']!;
+    final nativeAssetsPath = '$builtProductsDir/native_assets/';
     final Directory nativeAssetsDir = directoryFromPath(nativeAssetsPath);
+    final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     if (!nativeAssetsDir.existsSync()) {
       if (verbose) {
         print("♦ No native assets to bundle. $nativeAssetsPath doesn't exist.");
@@ -349,35 +368,42 @@ class Context {
       return;
     }
 
+    final Iterable<String> frameworks = nativeAssetsDir
+        .listSync()
+        .whereType<Directory>()
+        .where((Directory d) => !d.path.endsWith('.dSYM'))
+        .map(_parseFrameworkNameFromDirectory)
+        .whereType<String>();
+
     if (verbose) {
-      print('♦ Copying native assets from $nativeAssetsPath.');
+      print('♦ Copying native assets ${frameworks.join(', ')} from $nativeAssetsPath.');
     }
-    for (final FileSystemEntity entity in nativeAssetsDir.listSync()) {
-      if (entity is Directory) {
-        final String? frameworkName = parseFrameworkNameFromDirectory(entity);
-        if (frameworkName != null) {
-          runRsync(
-            extraArgs: <String>[
-              '--filter',
-              '- native_assets.yaml',
-              '--filter',
-              '- native_assets.json',
-            ],
-            entity.path,
-            xcodeFrameworksDir,
-          );
-          if (codesign && expandedCodeSignIdentity != null) {
-            _codesignFramework(
-              expandedCodeSignIdentity,
-              '$xcodeFrameworksDir/$frameworkName.framework/$frameworkName',
-            );
-          }
-        }
+
+    for (final framework in frameworks) {
+      final Directory frameworkDirectory = directoryFromPath(
+        '$nativeAssetsPath$framework.framework',
+      );
+
+      runRsync(frameworkDirectory.path, xcodeFrameworksDir);
+      if (codesign && expandedCodeSignIdentity != null) {
+        _codesignFramework(
+          expandedCodeSignIdentity,
+          '$xcodeFrameworksDir/$framework.framework/$framework',
+        );
+      }
+
+      final Directory dsymDirectory = directoryFromPath(
+        '$nativeAssetsPath$framework.framework.dSYM',
+      );
+      if (dsymDirectory.existsSync()) {
+        runRsync(dsymDirectory.path, '${environment['BUILT_PRODUCTS_DIR']}/');
       }
     }
   }
 
   void _codesignFramework(String expandedCodeSignIdentity, String frameworkPath) {
+    // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+    // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
     runSync('codesign', <String>[
       '--force',
       '--verbose',
@@ -386,28 +412,6 @@ class Context {
       '--',
       frameworkPath,
     ]);
-  }
-
-  /// Parse the [dir]'s path to get the framework name. For example,
-  /// `/path/to/framework_name.framework/` would parse to `framework_name`.
-  ///
-  /// Returns null if [dir] is not a `.framework`.
-  static String? parseFrameworkNameFromDirectory(Directory dir) {
-    final List<String> pathSegments = dir.uri.pathSegments;
-    if (pathSegments.isEmpty) {
-      return null;
-    }
-    final String basename;
-    if (pathSegments.last.isEmpty && pathSegments.length > 1) {
-      basename = pathSegments[pathSegments.length - 2];
-    } else {
-      basename = pathSegments.last;
-    }
-    final int extensionIndex = basename.indexOf('.framework');
-    if (extensionIndex == -1) {
-      return null;
-    }
-    return basename.substring(0, extensionIndex);
   }
 
   /// Add the vmService publisher Bonjour service to the produced app bundle Info.plist.
@@ -493,7 +497,7 @@ class Context {
   }
 
   /// Calls `flutter assemble [buildMode]_unpack_[platform]` (e.g. `debug_unpack_ios`, `debug_unpack_macos`)
-  void prepare(TargetPlatform platform) {
+  void unpackFor(TargetPlatform platform, String command) {
     // The "prepare" command runs in a pre-action script, which also runs when
     // using the Xcode/xcodebuild clean command. Skip if cleaning.
     if (environment['ACTION'] == 'clean') {
@@ -504,9 +508,8 @@ class Context {
     final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
 
     final String buildMode = parseFlutterBuildMode();
-
     final List<String> flutterArgs = _generateFlutterArgsForAssemble(
-      command: 'prepare',
+      command: command,
       buildMode: buildMode,
       sourceRoot: sourceRoot,
       platform: platform,
@@ -533,7 +536,7 @@ class Context {
 
   /// Calls `flutter assemble [buildMode]_[platform]_bundle_flutter_assets`
   /// (e.g. `debug_ios_bundle_flutter_assets`, `debug_macos_bundle_flutter_assets`)
-  void buildApp(TargetPlatform platform) {
+  void buildApp(TargetPlatform platform, String command) {
     final bool verbose = (environment['VERBOSE_SCRIPT_LOGGING'] ?? '').isNotEmpty;
     final String sourceRoot = environment['SOURCE_ROOT'] ?? '';
     final String projectPath = environment['FLUTTER_APPLICATION_PATH'] ?? '$sourceRoot/..';
@@ -541,7 +544,7 @@ class Context {
     final String buildMode = parseFlutterBuildMode();
 
     final List<String> flutterArgs = _generateFlutterArgsForAssemble(
-      command: 'build',
+      command: command,
       buildMode: buildMode,
       sourceRoot: sourceRoot,
       platform: platform,
@@ -660,6 +663,7 @@ class Context {
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
       '-dSrcRoot=${environment['SRCROOT'] ?? ''}',
+      '-dXcodeBuildScript=$command',
     ]);
 
     if (platform == TargetPlatform.ios) {
@@ -681,14 +685,6 @@ class Context {
       ]);
     }
 
-    if (command == 'prepare') {
-      // Use the PreBuildAction define flag to force the tool to use a different
-      // filecache file for the "prepare" command. This will make the environment
-      // buildPrefix for the "prepare" command unique from the "build" command.
-      // This will improve caching since the "build" command has more target dependencies.
-      flutterArgs.add('-dPreBuildAction=PrepareFramework');
-    }
-
     if (environment['PERFORMANCE_MEASUREMENT_FILE'] != null &&
         environment['PERFORMANCE_MEASUREMENT_FILE']!.isNotEmpty) {
       flutterArgs.add(
@@ -706,3 +702,21 @@ class Context {
 }
 
 enum TargetPlatform { ios, macos }
+
+String? _parseFrameworkNameFromDirectory(Directory dir) {
+  final List<String> pathSegments = dir.uri.pathSegments;
+  if (pathSegments.isEmpty) {
+    return null;
+  }
+  final String basename;
+  if (pathSegments.last.isEmpty && pathSegments.length > 1) {
+    basename = pathSegments[pathSegments.length - 2];
+  } else {
+    basename = pathSegments.last;
+  }
+  final int extensionIndex = basename.indexOf('.framework');
+  if (extensionIndex == -1) {
+    return null;
+  }
+  return basename.substring(0, extensionIndex);
+}

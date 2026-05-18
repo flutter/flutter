@@ -57,5 +57,77 @@ void main() {
       expect(scaler1, scaler3);
       expect(scaler1, isNot(scaler2));
     });
+
+    testWidgets('Reclamping', (WidgetTester tester) async {
+      final TextScaler defaultScaler = MediaQueryData.fromView(tester.view).textScaler;
+
+      // Does not raise maxScale > minScale
+      final TextScaler scaler1 = defaultScaler.clamp(minScaleFactor: 1, maxScaleFactor: 1.5);
+      final TextScaler scaler2 = scaler1.clamp(minScaleFactor: 0.5, maxScaleFactor: 1);
+      expect(scaler2, TextScaler.noScaling);
+
+      // No overlap, first scaler < second scaler. uses new minScale of last clamp
+      final TextScaler scaler3 = defaultScaler.clamp(minScaleFactor: 1, maxScaleFactor: 2);
+      final TextScaler scaler4 = scaler3.clamp(minScaleFactor: 3, maxScaleFactor: 4);
+      expect(scaler4, const TextScaler.linear(3));
+
+      // No overlap, first scaler > second scaler. uses new maxScale of last clamp
+      final TextScaler scaler5 = defaultScaler.clamp(minScaleFactor: 5, maxScaleFactor: 6);
+      final TextScaler scaler6 = scaler5.clamp(minScaleFactor: 3, maxScaleFactor: 4);
+      expect(scaler6, const TextScaler.linear(4));
+
+      // Overlap, combine clamps
+      final TextScaler scaler7 = defaultScaler.clamp(minScaleFactor: 1, maxScaleFactor: 3);
+      final TextScaler scaler8 = scaler7.clamp(minScaleFactor: 2, maxScaleFactor: 4);
+      expect(scaler8, defaultScaler.clamp(minScaleFactor: 2, maxScaleFactor: 3));
+    });
+  });
+
+  testWidgets('ClampedScaler asserts', (WidgetTester tester) async {
+    final TextScaler defaultScaler = MediaQueryData.fromView(tester.view).textScaler;
+    final TextScaler clampedScaler = defaultScaler.clamp(minScaleFactor: 1, maxScaleFactor: 5);
+    expect(
+      () => clampedScaler.clamp(minScaleFactor: 3, maxScaleFactor: 2),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'message',
+          contains('maxScaleFactor >= minScaleFactor'),
+        ),
+      ),
+    );
+
+    expect(
+      () => clampedScaler.clamp(minScaleFactor: 3, maxScaleFactor: double.nan),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'message',
+          contains('maxScaleFactor >= minScaleFactor'),
+        ),
+      ),
+    );
+
+    expect(
+      () => clampedScaler.clamp(minScaleFactor: -1, maxScaleFactor: 2),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'message',
+          contains('minScaleFactor >= 0'),
+        ),
+      ),
+    );
+
+    expect(
+      () => clampedScaler.clamp(minScaleFactor: double.infinity),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'message',
+          contains('minScaleFactor.isFinite'),
+        ),
+      ),
+    );
   });
 }

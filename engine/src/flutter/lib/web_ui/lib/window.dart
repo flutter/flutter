@@ -24,6 +24,7 @@ abstract class FlutterView {
   GestureSettings get gestureSettings;
   List<DisplayFeature> get displayFeatures;
   Display get display;
+  DisplayCornerRadii? get displayCornerRadii;
   void render(Scene scene, {Size? size});
   void updateSemantics(SemanticsUpdate update) => platformDispatcher.updateSemantics(update);
 }
@@ -116,6 +117,9 @@ abstract class AccessibilityFeatures {
   bool get highContrast;
   bool get onOffSwitchLabels;
   bool get supportsAnnounce;
+  bool get autoPlayAnimatedImages;
+  bool get autoPlayVideos;
+  bool get deterministicCursor;
 }
 
 enum Brightness { dark, light }

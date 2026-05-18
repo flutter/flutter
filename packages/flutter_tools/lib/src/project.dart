@@ -4,11 +4,12 @@
 
 import 'dart:collection';
 
+import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
-import '../src/convert.dart';
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
@@ -20,11 +21,13 @@ import 'base/version.dart';
 import 'base/yaml.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'package_graph.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
 import 'template.dart';
@@ -86,7 +89,9 @@ class FlutterProjectFactory {
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(this.directory, this._manifest, this._exampleManifest);
+  FlutterProject(this.directory, FlutterManifest manifest, this._exampleManifest) {
+    _setManifest(manifest);
+  }
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -130,13 +135,26 @@ class FlutterProject {
   final FlutterManifest _exampleManifest;
 
   /// List of [FlutterProject]s corresponding to the workspace entries.
-  List<FlutterProject> get workspaceProjects => manifest.workspace
-      .map(
-        (String entry) => FlutterProject.fromDirectory(
-          directory.childDirectory(directory.fileSystem.path.normalize(entry)),
-        ),
-      )
-      .toList();
+  List<FlutterProject> get workspaceProjects => _workspaceProjects;
+  late List<FlutterProject> _workspaceProjects;
+
+  void _setManifest(FlutterManifest manifest) {
+    _manifest = manifest;
+
+    // Update the workspace projects based on the new manifest.
+    _workspaceProjects = <FlutterProject>[];
+    for (final String entry in manifest.workspace) {
+      final glob = Glob(entry);
+      for (final Directory globResult
+          in glob
+              .listFileSystemSync(directory.fileSystem, root: directory.path)
+              .whereType<Directory>()) {
+        if (globResult.childFile('pubspec.yaml').existsSync()) {
+          _workspaceProjects.add(FlutterProject.fromDirectory(globResult));
+        }
+      }
+    }
+  }
 
   /// The set of organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
@@ -335,7 +353,7 @@ class FlutterProject {
 
   /// Reloads the content of [pubspecFile] and updates the contents of [manifest].
   void reloadManifest({required Logger logger, required FileSystem fs}) {
-    _manifest = _readManifest(pubspecFile.path, logger: logger, fileSystem: fs);
+    _setManifest(_readManifest(pubspecFile.path, logger: logger, fileSystem: fs));
   }
 
   /// Returns the MD5 hash of the contents of [manifest], ensuring [manifest] is up to date before
@@ -350,7 +368,7 @@ class FlutterProject {
   void replacePubspec(FlutterManifest updated) {
     final YamlMap updatedPubspecContents = updated.toYaml();
     pubspecFile.writeAsStringSync(encodeYamlAsString(updatedPubspecContents));
-    _manifest = updated;
+    _setManifest(updated);
   }
 
   /// Reapplies template files and regenerates project files and plugin
@@ -364,6 +382,9 @@ class FlutterProject {
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     required bool releaseMode,
+    PubspecCache? pubspecCache,
+    PackageGraph? packageGraph,
+    PackageConfig? packageConfig,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
@@ -376,6 +397,9 @@ class FlutterProject {
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
       releaseMode: releaseMode,
+      pubspecCache: pubspecCache,
+      packageGraph: packageGraph,
+      packageConfig: packageConfig,
     );
   }
 
@@ -394,11 +418,21 @@ class FlutterProject {
     bool windowsPlatform = false,
     bool webPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    PubspecCache? pubspecCache,
+    PackageGraph? packageGraph,
+    PackageConfig? packageConfig,
   }) async {
     if (!directory.existsSync() || isPlugin) {
       return;
     }
-    await refreshPluginsList(this, iosPlatform: iosPlatform, macOSPlatform: macOSPlatform);
+    await refreshPluginsList(
+      this,
+      iosPlatform: iosPlatform,
+      macOSPlatform: macOSPlatform,
+      pubspecCache: pubspecCache,
+      packageGraph: packageGraph,
+      packageConfig: packageConfig,
+    );
     if (androidPlatform) {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
@@ -425,6 +459,9 @@ class FlutterProject {
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
       releaseMode: releaseMode,
+      pubspecCache: pubspecCache,
+      packageGraph: packageGraph,
+      packageConfig: packageConfig,
     );
   }
 
@@ -501,6 +538,10 @@ class AndroidProject extends FlutterProjectPlatform {
   static final _applicationIdPattern = RegExp('^\\s*applicationId\\s*=?\\s*[\'"](.*)[\'"]\\s*\$');
   static final _imperativeKotlinPluginPattern = RegExp(
     '^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$',
+  );
+
+  static final _kotlinCompilerOptionsPattern = RegExp(
+    r'kotlin\s*\{[\s\S]*?compilerOptions\s*\{[^}]*\}',
   );
 
   /// Examples of strings that this regex matches:
@@ -609,11 +650,30 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
-    final bool declarativeMatch = _declarativeKotlinPluginPatterns.any((RegExp pattern) {
-      return (firstMatchInFile(appGradleFile, pattern) != null);
-    });
-    return imperativeMatch || declarativeMatch;
+    if (appGradleFile.existsSync()) {
+      if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+        return true;
+      }
+      for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
+        if (firstMatchInFile(appGradleFile, pattern) != null) {
+          return true;
+        }
+      }
+      try {
+        final String content = appGradleFile.readAsStringSync();
+        if (_kotlinCompilerOptionsPattern.hasMatch(content)) {
+          return true;
+        }
+      } on FileSystemException {
+        // Ignore and continue with other checks.
+      }
+    }
+    final Directory kotlinSrc = hostAppGradleRoot
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('kotlin');
+    return kotlinSrc.existsSync();
   }
 
   /// Gets top-level Gradle build file.
@@ -695,14 +755,6 @@ class AndroidProject extends FlutterProjectPlatform {
         .childDirectory('flutter')
         .childDirectory('plugins')
         .childFile('GeneratedPluginRegistrant.java');
-  }
-
-  File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');
-
-  Directory get gradleAppOutV1Directory {
-    return globals.fs.directory(
-      globals.fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'),
-    );
   }
 
   /// Whether the current flutter project has an Android sub-project.
@@ -1022,10 +1074,21 @@ See the link below for more information:
 
   /// Returns the `io.flutter.embedding.android.EnableImpeller` manifest value.
   ///
-  /// If there is no manifest file, or the key is not present, returns `false`.
+  /// If there is no manifest file, or the key is not present, returns [_impellerEnabledByDefault].
   bool computeImpellerEnabled() {
+    return _computeManifestMetadataBoolValue(
+      'io.flutter.embedding.android.EnableImpeller',
+      _impellerEnabledByDefault,
+    );
+  }
+
+  bool computeHcppEnabled() {
+    return _computeManifestMetadataBoolValue('io.flutter.embedding.android.EnableHcpp', false);
+  }
+
+  bool _computeManifestMetadataBoolValue(String metadataKey, bool defaultValue) {
     if (!appManifestFile.existsSync()) {
-      return _impellerEnabledByDefault;
+      return defaultValue;
     }
     final XmlDocument document;
     try {
@@ -1043,17 +1106,20 @@ See the link below for more information:
     }
     for (final XmlElement metaData in document.findAllElements('meta-data')) {
       final String? name = metaData.getAttribute('android:name');
-      if (name == 'io.flutter.embedding.android.EnableImpeller') {
+      if (name == metadataKey) {
         final String? value = metaData.getAttribute('android:value');
-        if (value == 'true') {
+        if (value == null) {
+          continue;
+        }
+        if (value.toLowerCase() == 'true') {
           return true;
         }
-        if (value == 'false') {
+        if (value.toLowerCase() == 'false') {
           return false;
         }
       }
     }
-    return _impellerEnabledByDefault;
+    return defaultValue;
   }
 }
 

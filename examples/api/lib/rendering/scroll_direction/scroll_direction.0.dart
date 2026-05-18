@@ -55,8 +55,8 @@ class _MyWidgetState extends State<MyWidget> {
     'Z',
   ];
   final Widget spacer = const SizedBox.square(dimension: 10);
-  ScrollDirection scrollDirection = ScrollDirection.idle;
-  AxisDirection _axisDirection = AxisDirection.down;
+  ScrollDirection scrollDirection = .idle;
+  AxisDirection _axisDirection = .down;
 
   Widget _getArrows() {
     final Widget arrow = switch (_axisDirection) {
@@ -67,7 +67,7 @@ class _MyWidgetState extends State<MyWidget> {
     };
     return Flex(
       direction: flipAxis(axisDirectionToAxis(_axisDirection)),
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: .center,
       children: <Widget>[arrow, arrow],
     );
   }
@@ -84,9 +84,9 @@ class _MyWidgetState extends State<MyWidget> {
   Widget _getLeading() {
     return Container(
       color: Colors.blue[100],
-      padding: const EdgeInsets.all(8.0),
+      padding: const .all(8.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: .spaceBetween,
         children: <Widget>[
           Text(axisDirectionToAxis(_axisDirection).toString()),
           spacer,
@@ -104,69 +104,33 @@ class _MyWidgetState extends State<MyWidget> {
 
   Widget _getRadioRow() {
     return DefaultTextStyle(
-      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+      style: const TextStyle(fontWeight: .bold, color: Colors.white),
       child: RadioTheme(
         data: RadioThemeData(
           fillColor: WidgetStateProperty.all<Color>(Colors.white),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Radio<AxisDirection>(
-                value: AxisDirection.up,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                groupValue: _axisDirection,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('up'),
-              spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.down,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                groupValue: _axisDirection,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('down'),
-              spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.left,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                groupValue: _axisDirection,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('left'),
-              spacer,
-              Radio<AxisDirection>(
-                value: AxisDirection.right,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                groupValue: _axisDirection,
-                // TODO(loic-sharma): Migrate to RadioGroup.
-                // https://github.com/flutter/flutter/issues/179088
-                // ignore: deprecated_member_use
-                onChanged: _onAxisDirectionChanged,
-              ),
-              const Text('right'),
-              spacer,
-            ],
+          padding: const .all(8.0),
+          child: RadioGroup<AxisDirection>(
+            groupValue: _axisDirection,
+            onChanged: _onAxisDirectionChanged,
+            child: Row(
+              mainAxisAlignment: .spaceAround,
+              children: <Widget>[
+                Radio<AxisDirection>(value: AxisDirection.up),
+                const Text('up'),
+                spacer,
+                Radio<AxisDirection>(value: AxisDirection.down),
+                const Text('down'),
+                spacer,
+                Radio<AxisDirection>(value: AxisDirection.left),
+                const Text('left'),
+                spacer,
+                Radio<AxisDirection>(value: AxisDirection.right),
+                const Text('right'),
+                spacer,
+              ],
+            ),
           ),
         ),
       ),
@@ -189,10 +153,7 @@ class _MyWidgetState extends State<MyWidget> {
         title: const Text('ScrollDirections'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _getRadioRow(),
-          ),
+          child: Padding(padding: const .all(8.0), child: _getRadioRow()),
         ),
       ),
       body: NotificationListener<UserScrollNotification>(
@@ -218,14 +179,11 @@ class _MyWidgetState extends State<MyWidget> {
                     color: index.isEven
                         ? Colors.amber[100]
                         : Colors.amberAccent,
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const .all(8.0),
                     child: Center(child: Text(alphabet[index - 1])),
                   );
                 }
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: child,
-                );
+                return Padding(padding: const .all(8.0), child: child);
               },
             ),
           ],

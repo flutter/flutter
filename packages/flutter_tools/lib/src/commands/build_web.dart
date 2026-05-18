@@ -31,6 +31,7 @@ class BuildWebCommand extends BuildSubCommand {
     usesBuildNameOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     usesDartDefineOption();
+    usesWebDefineOption();
     addEnableExperimentation(hide: !verboseHelp);
     addNativeNullAssertions();
 
@@ -38,14 +39,7 @@ class BuildWebCommand extends BuildSubCommand {
     // Flutter web-specific options
     //
     argParser.addSeparator('Flutter web options');
-    argParser.addOption(
-      'base-href',
-      help:
-          'Overrides the href attribute of the <base> tag in web/index.html. '
-          'No change is done to web/index.html file if this flag is not provided. '
-          'The value has to start and end with a slash "/". '
-          'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base',
-    );
+    usesBaseHrefOption();
     argParser.addOption(
       'static-assets-url',
       help:
@@ -222,7 +216,7 @@ class BuildWebCommand extends BuildSubCommand {
           dumpInfo: boolArg('dump-info'),
           minify: minifyJs,
           nativeNullAssertions: boolArg('native-null-assertions'),
-          noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
+          useFrequencyBasedMinification: !boolArg('no-frequency-based-minification'),
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
         ),
@@ -234,7 +228,7 @@ class BuildWebCommand extends BuildSubCommand {
           dumpInfo: boolArg('dump-info'),
           minify: minifyJs,
           nativeNullAssertions: boolArg('native-null-assertions'),
-          noFrequencyBasedMinification: boolArg('no-frequency-based-minification'),
+          useFrequencyBasedMinification: !boolArg('no-frequency-based-minification'),
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
           renderer: webRenderer,
@@ -287,6 +281,7 @@ class BuildWebCommand extends BuildSubCommand {
     // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
+    final Map<String, String> webDefines = extractWebDefines();
     final webBuilder = WebBuilder(
       logger: globals.logger,
       processManager: globals.processManager,
@@ -304,6 +299,7 @@ class BuildWebCommand extends BuildSubCommand {
       baseHref: baseHref,
       staticAssetsUrl: staticAssetsUrl,
       outputDirectoryPath: outputDirectoryPath,
+      webDefines: webDefines,
     );
     return FlutterCommandResult.success();
   }

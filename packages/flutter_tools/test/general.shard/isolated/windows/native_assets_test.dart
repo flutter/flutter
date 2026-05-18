@@ -101,6 +101,9 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             buildRunner: buildRunner,
+            buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
+            buildDataAssets: true,
+            recordedUsesFile: null,
           );
           final expectedDirectory = flutterTester ? code_assets.OS.current.toString() : 'windows';
           final Uri nativeAssetsFileUri = flutterTester
@@ -115,14 +118,19 @@ void main() {
             projectUri: projectUri,
             fileSystem: fileSystem,
             nativeAssetsFileUri: nativeAssetsFileUri,
+            targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/windows/'),
           );
           final expectedOS = flutterTester ? OS.current.toString() : 'windows';
           final expectedArch = flutterTester ? Architecture.current.toString() : 'x64';
           expect(
             (globals.logger as BufferLogger).traceText,
             stringContainsInOrder(<String>[
-              'Building native assets for ${expectedOS}_$expectedArch.',
-              'Building native assets for ${expectedOS}_$expectedArch done.',
+              'Running build hooks for ${expectedOS}_$expectedArch.',
+              'Running build hooks for ${expectedOS}_$expectedArch done.',
+              if (buildMode == BuildMode.release) ...<String>[
+                'Running link hooks for ${expectedOS}_$expectedArch.',
+                'Running link hooks for ${expectedOS}_$expectedArch done.',
+              ],
             ]),
           );
           expect(

@@ -19,6 +19,101 @@
 
 namespace flutter {
 
+namespace {
+
+// Returns a stroked RoundRect that is equivalent to a provided DiffRoundRect,
+// if one exists.
+//
+// A DiffRoundRect has an equivalent stroked RoundRect if all of the following
+// conditions are met:
+// - Its paint style is kFill.
+// - The bounds of its inner RoundRect is equal to the bounds of its outer
+//   RoundRect inset by the same amount on each side. This inset amount is
+//   the stroke width of the equivalent stroked RoundRect.
+// - Its outer and inner RoundRects both have circular corners.
+// - Each corner radius of the inner RoundRect is equal to the corresponding
+//   outer RoundRect corner radius subtracting the stroke width.
+//
+// If all conditions are met, the equivalent stroked RoundRect is created by
+// expanding the inner RoundRect's sides and corner radii by half the stroke
+// width. (Or equivalently by insetting the outer RoundRect's sides and corner
+// radii by half the stroke width.)
+std::optional<std::pair<DlRoundRect, DlPaint>> DiffRoundRectToRoundRect(
+    const DlRoundRect& outer,
+    const DlRoundRect& inner,
+    const DlPaint& paint) {
+  if (paint.getDrawStyle() != DlDrawStyle::kFill) {
+    return std::nullopt;
+  }
+
+  // The stroke width is equal to the inset of the inner bounds from the outer
+  // bounds on each side. Arbitrarily pick the left side to initialize
+  // stroke_width.
+  const DlRect& outer_bounds = outer.GetBounds();
+  const DlRect& inner_bounds = inner.GetBounds();
+  const DlScalar stroke_width = inner_bounds.GetLeft() - outer_bounds.GetLeft();
+
+  // There are behavior differences between DiffRoundRect and stroked RoundRect
+  // when the calculated stroke width is 0 or negative. It's not clear what the
+  // right behavior is for this case, but we exit here and don't return a
+  // RoundRect to preserve the existing DiffRoundRect behavior.
+  if (stroke_width <= 0) {
+    return std::nullopt;
+  }
+
+  // Verify the other sides are inset by the same amount.
+  if (!DlScalarNearlyEqual(inner_bounds.GetTop() - outer_bounds.GetTop(),
+                           stroke_width) ||
+      !DlScalarNearlyEqual(outer_bounds.GetRight() - inner_bounds.GetRight(),
+                           stroke_width) ||
+      !DlScalarNearlyEqual(outer_bounds.GetBottom() - inner_bounds.GetBottom(),
+                           stroke_width)) {
+    return std::nullopt;
+  }
+
+  // Verify the outer and inner RoundRects have circular corners.
+  const DlRoundingRadii& outer_radii = outer.GetRadii();
+  const DlRoundingRadii& inner_radii = inner.GetRadii();
+  if (!outer_radii.AreAllCornersCircular() ||
+      !inner_radii.AreAllCornersCircular()) {
+    return std::nullopt;
+  }
+
+  // Verify the corner radii are consistent with the stroke width.
+  if (!DlScalarNearlyEqual(
+          outer_radii.top_left.width - inner_radii.top_left.width,
+          stroke_width) ||
+      !DlScalarNearlyEqual(
+          outer_radii.top_right.width - inner_radii.top_right.width,
+          stroke_width) ||
+      !DlScalarNearlyEqual(
+          outer_radii.bottom_left.width - inner_radii.bottom_left.width,
+          stroke_width) ||
+      !DlScalarNearlyEqual(
+          outer_radii.bottom_right.width - inner_radii.bottom_right.width,
+          stroke_width)) {
+    return std::nullopt;
+  }
+
+  DlPaint stroke_paint = paint;
+  stroke_paint.setDrawStyle(DlDrawStyle::kStroke);
+  stroke_paint.setStrokeWidth(stroke_width);
+
+  const DlScalar half_stroke_width = stroke_width * 0.5f;
+  const DlRoundRect stroked_rrect = DlRoundRect::MakeRectRadii(
+      inner_bounds.Expand(half_stroke_width),
+      {
+          DlSize(inner_radii.top_left.width + half_stroke_width),
+          DlSize(inner_radii.top_right.width + half_stroke_width),
+          DlSize(inner_radii.bottom_left.width + half_stroke_width),
+          DlSize(inner_radii.bottom_right.width + half_stroke_width),
+      });
+
+  return std::make_pair(stroked_rrect, stroke_paint);
+}
+
+}  // namespace
+
 // CopyV(dst, src,n, src,n, ...) copies any number of typed srcs into dst.
 static void CopyV(void* dst) {}
 
@@ -145,6 +240,14 @@ void DisplayListBuilder::Init(bool prepare_rtree) {
 
 DisplayListBuilder::~DisplayListBuilder() {
   DisplayList::DisposeOps(storage_, offsets_);
+}
+
+size_t DisplayListBuilder::GetRecordCount() const {
+  return offsets_.size();
+}
+
+bool DisplayListBuilder::IsEmpty() const {
+  return offsets_.empty();
 }
 
 DlISize DisplayListBuilder::GetBaseLayerDimensions() const {
@@ -1197,8 +1300,7 @@ void DisplayListBuilder::drawCircle(const DlPoint& center, DlScalar radius) {
   DisplayListAttributeFlags flags = kDrawCircleFlags;
   OpResult result = PaintResult(current_, flags);
   if (result != OpResult::kNoEffect) {
-    DlRect bounds = DlRect::MakeLTRB(center.x - radius, center.y - radius,
-                                     center.x + radius, center.y + radius);
+    DlRect bounds = DlRect::MakeCircleBounds(center, radius);
     if (AccumulateOpBounds(bounds, flags)) {
       Push<DrawCircleOp>(0, center, radius);
       CheckLayerOpacityCompatibility();
@@ -1247,6 +1349,10 @@ void DisplayListBuilder::drawDiffRoundRect(const DlRoundRect& outer,
 void DisplayListBuilder::DrawDiffRoundRect(const DlRoundRect& outer,
                                            const DlRoundRect& inner,
                                            const DlPaint& paint) {
+  if (auto rrect_and_paint = DiffRoundRectToRoundRect(outer, inner, paint)) {
+    DrawRoundRect(rrect_and_paint->first, rrect_and_paint->second);
+    return;
+  }
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawDRRectFlags);
   drawDiffRoundRect(outer, inner);
 }
@@ -1293,6 +1399,33 @@ void DisplayListBuilder::drawPath(const DlPath& path) {
   }
 }
 void DisplayListBuilder::DrawPath(const DlPath& path, const DlPaint& paint) {
+  DlRect rect;
+  bool closed;
+  if (path.IsRect(&rect, &closed) &&
+      (paint.getDrawStyle() == DlDrawStyle::kFill || closed)) {
+    DrawRect(rect, paint);
+    return;
+  }
+
+  DlRoundRect rrect;
+  if (path.IsRoundRect(&rrect)) {
+    DrawRoundRect(rrect, paint);
+    return;
+  }
+
+  DlRect oval_bounds;
+  if (path.IsOval(&oval_bounds)) {
+    DrawOval(oval_bounds, paint);
+    return;
+  }
+
+  DlPoint start;
+  DlPoint end;
+  if (path.IsLine(&start, &end)) {
+    DrawLine(start, end, paint);
+    return;
+  }
+
   SetAttributesFromPaint(paint, DisplayListOpFlags::kDrawPathFlags);
   drawPath(path);
 }

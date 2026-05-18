@@ -28,6 +28,7 @@ import 'dart:ui'
         StringAttribute,
         TextDirection,
         Tristate;
+import 'dart:ui' as ui show SemanticsHitTestBehavior;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
@@ -116,9 +117,13 @@ typedef ChildSemanticsConfigurationsDelegate =
 
 /// Controls how accessibility focus is blocked.
 ///
-/// This is typically used to prevent screen readers
-/// from focusing on parts of the UI.
-enum AccessiblityFocusBlockType {
+/// This is typically used to prevent screen readers from focusing on parts
+/// of the UI.
+///
+/// Setting this property also blocks the reporting of keyboard focusability
+/// for the semantics node, but it does not affect the actual keyboard focus
+/// handled by [FocusNode].
+enum AccessibilityFocusBlockType {
   /// Accessibility focus is **not blocked**.
   none,
 
@@ -129,22 +134,22 @@ enum AccessiblityFocusBlockType {
   /// may still be focusable.
   blockNode;
 
-  /// The AccessiblityFocusBlockType when two nodes get merged.
-  AccessiblityFocusBlockType _merge(AccessiblityFocusBlockType other) {
+  /// The AccessibilityFocusBlockType when two nodes get merged.
+  AccessibilityFocusBlockType _merge(AccessibilityFocusBlockType other) {
     // 1. If either is blockSubtree, the result is blockSubtree.
-    if (this == AccessiblityFocusBlockType.blockSubtree ||
-        other == AccessiblityFocusBlockType.blockSubtree) {
-      return AccessiblityFocusBlockType.blockSubtree;
+    if (this == AccessibilityFocusBlockType.blockSubtree ||
+        other == AccessibilityFocusBlockType.blockSubtree) {
+      return AccessibilityFocusBlockType.blockSubtree;
     }
 
     // 2. If either is blockNode, the result is blockNode
-    if (this == AccessiblityFocusBlockType.blockNode ||
-        other == AccessiblityFocusBlockType.blockNode) {
-      return AccessiblityFocusBlockType.blockNode;
+    if (this == AccessibilityFocusBlockType.blockNode ||
+        other == AccessibilityFocusBlockType.blockNode) {
+      return AccessibilityFocusBlockType.blockNode;
     }
 
     // 3. If neither is blockSubtree nor blockNode, both must be none.
-    return AccessiblityFocusBlockType.none;
+    return AccessibilityFocusBlockType.none;
   }
 }
 
@@ -182,14 +187,14 @@ sealed class _DebugSemanticsRoleChecks {
       SemanticsRole.navigation => _semanticsNavigation,
       SemanticsRole.region => _semanticsRegion,
       SemanticsRole.form => _noCheckRequired,
+      SemanticsRole.loadingSpinner => _noCheckRequired,
+      SemanticsRole.progressBar => _semanticsProgressBar,
       // TODO(chunhtai): add checks when the roles are used in framework.
       // https://github.com/flutter/flutter/issues/159741.
       SemanticsRole.dragHandle => _unimplemented,
       SemanticsRole.spinButton => _unimplemented,
       SemanticsRole.comboBox => _unimplemented,
       SemanticsRole.tooltip => _unimplemented,
-      SemanticsRole.loadingSpinner => _unimplemented,
-      SemanticsRole.progressBar => _unimplemented,
       SemanticsRole.hotKey => _unimplemented,
     }(node);
 
@@ -204,6 +209,58 @@ sealed class _DebugSemanticsRoleChecks {
       FlutterError('Missing checks for role ${node.getSemanticsData().role}');
 
   static FlutterError? _noCheckRequired(SemanticsNode node) => null;
+
+  static FlutterError? _semanticsProgressBar(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+
+    // Check if value is present
+    if (data.value.isEmpty ||
+        (data.minValue?.isEmpty ?? true) ||
+        (data.maxValue?.isEmpty ?? true)) {
+      return FlutterError('A progress bar must have a value, a minValue, a maxValue.');
+    }
+
+    final double? minVal = double.tryParse(data.minValue!);
+    final double? maxVal = double.tryParse(data.maxValue!);
+    // The value can either be a direct number fall within the min and max range
+    // or a percentage number between 0% and 100%
+    final double? currentValue = double.tryParse(data.value);
+    final double? percentValue = data.value.endsWith('%')
+        ? double.tryParse(data.value.substring(0, data.value.length - 1))
+        : null;
+
+    if (minVal == null || maxVal == null || (currentValue == null && percentValue == null)) {
+      return FlutterError(
+        'Progress bar value, minValue, and maxValue must be valid numbers. '
+        'value: "${data.value}", minValue: "${data.minValue}", maxValue: "${data.maxValue}"',
+      );
+    }
+
+    // Validate min/max relation since both are guaranteed to be valid numbers.
+    if (minVal >= maxVal) {
+      return FlutterError(
+        'Progress bar minValue (${data.minValue}) must be less than maxValue (${data.maxValue})',
+      );
+    }
+    // If the value is a number, it must be between min and max.
+    if (currentValue != null) {
+      if (currentValue < minVal || currentValue > maxVal) {
+        return FlutterError(
+          'Progress bar value (${data.value}) must be between minValue (${data.minValue}) and maxValue (${data.maxValue})',
+        );
+      }
+      return null;
+    }
+
+    // If the value is a percentage string (e.g., "50%"), it must be between 0% and 100%.
+    if (percentValue != null && (percentValue < 0 || percentValue > 100)) {
+      return FlutterError(
+        'Progress bar percentage value (${data.value}) must be between 0% and 100%',
+      );
+    }
+
+    return null;
+  }
 
   static FlutterError? _semanticsTab(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
@@ -1020,8 +1077,11 @@ class SemanticsData with Diagnosticable {
     required this.role,
     required this.controlsNodes,
     required this.validationResult,
+    required this.hitTestBehavior,
     required this.inputType,
     required this.locale,
+    required this.minValue,
+    required this.maxValue,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -1288,6 +1348,9 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsProperties.validationResult}
   final SemanticsValidationResult validationResult;
 
+  /// {@macro flutter.semantics.SemanticsProperties.hitTestBehavior}
+  final ui.SemanticsHitTestBehavior hitTestBehavior;
+
   /// {@macro flutter.semantics.SemanticsNode.inputType}
   final SemanticsInputType inputType;
 
@@ -1296,6 +1359,12 @@ class SemanticsData with Diagnosticable {
   /// Assistive technologies uses this property to correctly interpret the
   /// content of this semantics node.
   final Locale? locale;
+
+  /// {@macro flutter.semantics.SemanticsProperties.maxValue}
+  final String? maxValue;
+
+  /// {@macro flutter.semantics.SemanticsProperties.minValue}
+  final String? minValue;
 
   /// Whether [flags] contains the given flag.
   @Deprecated(
@@ -1381,6 +1450,8 @@ class SemanticsData with Diagnosticable {
         ),
       );
     }
+    properties.add(StringProperty('minValue', minValue, defaultValue: null));
+    properties.add(StringProperty('maxValue', maxValue, defaultValue: null));
   }
 
   @override
@@ -1415,8 +1486,13 @@ class SemanticsData with Diagnosticable {
         other.role == role &&
         other.validationResult == validationResult &&
         other.inputType == inputType &&
+        other.hitTestBehavior == hitTestBehavior &&
         _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds) &&
-        setEquals<String>(controlsNodes, other.controlsNodes);
+        setEquals<String>(controlsNodes, other.controlsNodes) &&
+        other.traversalParentIdentifier == traversalParentIdentifier &&
+        other.traversalChildIdentifier == traversalChildIdentifier &&
+        other.minValue == minValue &&
+        other.maxValue == maxValue;
   }
 
   @override
@@ -1451,8 +1527,11 @@ class SemanticsData with Diagnosticable {
       validationResult,
       controlsNodes == null ? null : Object.hashAll(controlsNodes!),
       inputType,
+      hitTestBehavior,
       traversalParentIdentifier,
       traversalChildIdentifier,
+      minValue,
+      maxValue,
     ),
   );
 
@@ -1577,7 +1656,7 @@ class SemanticsProperties extends DiagnosticableTree {
     )
     this.focusable,
     this.focused,
-    this.accessiblityFocusBlockType,
+    this.accessibilityFocusBlockType,
     this.inMutuallyExclusiveGroup,
     this.hidden,
     this.obscured,
@@ -1611,6 +1690,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.controlsNodes,
     this.inputType,
     this.validationResult = SemanticsValidationResult.none,
+    this.hitTestBehavior,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -1635,6 +1715,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onExpand,
     this.onCollapse,
     this.customSemanticsActions,
+    this.minValue,
+    this.maxValue,
   }) : assert(
          label == null || attributedLabel == null,
          'Only one of label or attributedLabel should be provided',
@@ -1729,9 +1811,8 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, indicates that this subtree represents a header.
   ///
-  /// A header divides into sections. For example, an address book application
-  /// might define headers A, B, C, etc. to divide the list of alphabetically
-  /// sorted contacts into sections.
+  /// A header is typically the top element of a page or section, such as a
+  /// page title or app bar title.
   final bool? header;
 
   /// If non-null, indicates that this subtree represents a text field.
@@ -1773,7 +1854,7 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node currently holds input focus.
   ///
-  /// If null, the node is not fosusable.
+  /// If null, the node is not focusable.
   ///
   /// At most one node in the tree should hold input focus at any point in time,
   /// and it should not be set to true if [focusable] is false.
@@ -1789,7 +1870,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// This is for accessibility focus, which is the focus used by screen readers
   /// like TalkBack and VoiceOver. It is different from input focus, which is
   /// usually held by the element that currently responds to keyboard inputs.
-  final AccessiblityFocusBlockType? accessiblityFocusBlockType;
+  final AccessibilityFocusBlockType? accessibilityFocusBlockType;
 
   /// If non-null, whether a semantic node is in a mutually exclusive group.
   ///
@@ -1921,6 +2002,11 @@ class SemanticsProperties extends DiagnosticableTree {
   /// It's usually used for UI testing with tools that work by querying the
   /// native accessibility, like UIAutomator, XCUITest, or Appium. It can be
   /// matched with [CommonFinders.bySemanticsIdentifier].
+  ///
+  /// When set, this property implicitly forces the creation of a new
+  /// [SemanticsNode] (equivalent to setting `container` to true in
+  /// [Semantics]). This ensures the identifier is always attached to its
+  /// own node and is not merged into an ancestor.
   ///
   /// On Android, this is used for `AccessibilityNodeInfo.setViewIdResourceName`.
   /// It'll be appear in accessibility hierarchy as `resource-id`.
@@ -2150,15 +2236,19 @@ class SemanticsProperties extends DiagnosticableTree {
   /// [Directionality] or an explicit [textDirection] should be provided.
   final String? tooltip;
 
-  /// The heading level in the DOM document structure.
+  /// The heading level in the document structure.
   ///
-  /// This is only applied to web semantics and is ignored on other platforms.
+  /// A heading divides content into sections. For example, an address book
+  /// application might define headings A, B, C, etc. to divide the list of
+  /// alphabetically sorted contacts into sections.
   ///
-  /// Screen readers will use this value to determine which part of the page
-  /// structure this heading represents. A level 1 heading, indicated
-  /// with aria-level="1", usually indicates the main heading of a page,
-  /// a level 2 heading, defined with aria-level="2" the first subsection,
+  /// Screen readers use this value to determine which part of the page
+  /// structure this heading represents. A level 1 heading usually indicates
+  /// the main heading of a page, a level 2 heading the first subsection,
   /// a level 3 is a subsection of that, and so on.
+  ///
+  /// On web, this sets the `aria-level` attribute (e.g., `aria-level="1"`).
+  /// On Android, this sets the `isHeading` property for accessibility.
   final int? headingLevel;
 
   /// Overrides the default accessibility hints provided by the platform.
@@ -2555,6 +2645,13 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@endtemplate}
   final SemanticsValidationResult validationResult;
 
+  /// {@template flutter.semantics.SemanticsProperties.hitTestBehavior}
+  /// Describes how the semantic node should behave during hit testing.
+  ///
+  /// See [ui.SemanticsHitTestBehavior] for more details.
+  /// {@endtemplate}
+  final ui.SemanticsHitTestBehavior? hitTestBehavior;
+
   /// {@template flutter.semantics.SemanticsProperties.inputType}
   /// The input type for of a editable widget.
   ///
@@ -2565,6 +2662,28 @@ class SemanticsProperties extends DiagnosticableTree {
   /// when focused.
   /// {@endtemplate}
   final SemanticsInputType? inputType;
+
+  /// {@template flutter.semantics.SemanticsProperties.maxValue}
+  /// The maximum value of the node.
+  ///
+  /// Used in conjunction with [value] to define the current value and range
+  /// of a node. A typical usage is for progress indicators, where [value]
+  /// represents the current progress and [maxValue] defines the maximum
+  /// possible value.
+  ///
+  /// {@endtemplate}
+  final String? maxValue;
+
+  /// {@template flutter.semantics.SemanticsProperties.minValue}
+  /// The minimum value of the node.
+  ///
+  /// Used in conjunction with [value] to define the current value and range
+  /// of a node. A typical usage is for progress indicators, where [value]
+  /// represents the current progress and [minValue] defines the minimum
+  /// possible value.
+  ///
+  /// {@endtemplate}
+  final String? minValue;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -3235,7 +3354,16 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _headingLevel != config._headingLevel ||
         _linkUrl != config._linkUrl ||
         _role != config.role ||
-        _validationResult != config.validationResult;
+        _validationResult != config.validationResult ||
+        _hitTestBehavior != config.hitTestBehavior ||
+        _traversalChildIdentifier != config._traversalChildIdentifier ||
+        _traversalParentIdentifier != config._traversalParentIdentifier ||
+        _minValue != config._minValue ||
+        _maxValue != config._maxValue ||
+        !mapEquals<CustomSemanticsAction, VoidCallback>(
+          _customSemanticsActions,
+          config._customSemanticsActions,
+        );
   }
 
   // TAGS, LABELS, ACTIONS
@@ -3525,9 +3653,21 @@ class SemanticsNode with DiagnosticableTreeMixin {
   Set<String>? get controlsNodes => _controlsNodes;
   Set<String>? _controlsNodes = _kEmptyConfig.controlsNodes;
 
+  /// {@macro flutter.semantics.SemanticsProperties.minValue}
+  String? get minValue => _minValue;
+  String? _minValue;
+
+  /// {@macro flutter.semantics.SemanticsProperties.maxValue}
+  String? get maxValue => _maxValue;
+  String? _maxValue;
+
   /// {@macro flutter.semantics.SemanticsProperties.validationResult}
   SemanticsValidationResult get validationResult => _validationResult;
   SemanticsValidationResult _validationResult = _kEmptyConfig.validationResult;
+
+  /// {@macro flutter.semantics.SemanticsProperties.hitTestBehavior}
+  ui.SemanticsHitTestBehavior get hitTestBehavior => _hitTestBehavior;
+  ui.SemanticsHitTestBehavior _hitTestBehavior = ui.SemanticsHitTestBehavior.defer;
 
   /// {@template flutter.semantics.SemanticsNode.inputType}
   /// The input type for of a editable node.
@@ -3542,6 +3682,23 @@ class SemanticsNode with DiagnosticableTreeMixin {
   SemanticsInputType _inputType = _kEmptyConfig.inputType;
 
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
+
+  /// Whether this node can perform the specific [CustomSemanticsAction]
+  /// identified by [actionId].
+  bool _canPerformCustomAction(int actionId) {
+    final CustomSemanticsAction? customAction = CustomSemanticsAction.getAction(actionId);
+    return customAction != null && _customSemanticsActions.containsKey(customAction);
+  }
+
+  /// Whether this node can handle [action], taking [args] into account for
+  /// custom actions so that nodes which only have *other* custom actions
+  /// registered are not treated as candidates.
+  bool _canHandleAction(SemanticsAction action, Object? args) {
+    if (action == SemanticsAction.customAction) {
+      return args is int && _canPerformCustomAction(args);
+    }
+    return _canPerformAction(action);
+  }
 
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
 
@@ -3609,9 +3766,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _role = config._role;
     _controlsNodes = config._controlsNodes;
     _validationResult = config._validationResult;
+    _hitTestBehavior = config._hitTestBehavior;
     _inputType = config._inputType;
     _locale = config.locale;
 
+    _minValue = config.minValue;
+    _maxValue = config.maxValue;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -3663,9 +3823,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
     SemanticsRole role = _role;
     Set<String>? controlsNodes = _controlsNodes;
     SemanticsValidationResult validationResult = _validationResult;
+    ui.SemanticsHitTestBehavior hitTestBehavior = _hitTestBehavior;
     SemanticsInputType inputType = _inputType;
     final Locale? locale = _locale;
     final customSemanticsActionIds = <int>{};
+    String? minValue = _minValue;
+    String? maxValue = _maxValue;
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
     }
@@ -3727,6 +3890,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         if (inputType == SemanticsInputType.none) {
           inputType = node._inputType;
         }
+        if (hitTestBehavior == ui.SemanticsHitTestBehavior.defer) {
+          hitTestBehavior = node._hitTestBehavior;
+        }
         if (tooltip == '') {
           tooltip = node._tooltip;
         }
@@ -3771,6 +3937,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         } else if (node._controlsNodes != null) {
           controlsNodes = <String>{...controlsNodes!, ...node._controlsNodes!};
         }
+
+        minValue ??= node._minValue;
+        maxValue ??= node._maxValue;
 
         if (validationResult == SemanticsValidationResult.none) {
           validationResult = node._validationResult;
@@ -3818,8 +3987,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
       role: role,
       controlsNodes: controlsNodes,
       validationResult: validationResult,
+      hitTestBehavior: hitTestBehavior,
       inputType: inputType,
       locale: locale,
+      minValue: minValue,
+      maxValue: maxValue,
     );
   }
 
@@ -3989,8 +4161,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
       role: data.role,
       controlsNodes: data.controlsNodes?.toList(),
       validationResult: data.validationResult,
+      hitTestBehavior: data.hitTestBehavior,
       inputType: data.inputType,
       locale: data.locale,
+      minValue: data.minValue ?? '',
+      maxValue: data.maxValue ?? '',
     );
     _dirty = false;
   }
@@ -4135,7 +4310,25 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (!attached) {
       return;
     }
-    SystemChannels.accessibility.send(event.toMap(nodeId: id));
+    SystemChannels.accessibility
+        .send(event.toMap(nodeId: id))
+        .then(
+          (dynamic _) {},
+          onError: (Object error, StackTrace stack) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stack,
+                library: 'semantics library',
+                context: ErrorDescription('while sending accessibility event'),
+                informationCollector: () => <DiagnosticsNode>[
+                  DiagnosticsProperty<SemanticsEvent>('event', event),
+                  DiagnosticsProperty<SemanticsNode>('node', this),
+                ],
+              ),
+            );
+          },
+        );
   }
 
   bool _debugIsActionBlocked(SemanticsAction action) {
@@ -4283,6 +4476,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
         ),
       );
     }
+    properties.add(StringProperty('minValue', _minValue, defaultValue: null));
+    properties.add(StringProperty('maxValue', _maxValue, defaultValue: null));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -4669,6 +4864,9 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the semantics tree is empty, returns null.
   SemanticsNode? get rootSemanticsNode => _nodes[0];
 
+  /// Returns the [SemanticsNode] with the given [id], if any.
+  SemanticsNode? getSemanticsNode(int id) => _nodes[id];
+
   @override
   void dispose() {
     assert(debugMaybeDispatchDisposed(this));
@@ -4867,21 +5065,34 @@ class SemanticsOwner extends ChangeNotifier {
     notifyListeners();
   }
 
-  SemanticsActionHandler? _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
+  SemanticsActionHandler? _getSemanticsActionHandlerForId(
+    int id,
+    SemanticsAction action, [
+    Object? args,
+  ]) {
     SemanticsNode? result = _nodes[id];
-    if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
+    if (result == null) {
+      return null;
+    }
+    // For merged nodes, walk descendants whenever the merge root itself does
+    // not handle the specific (action, args) pair. Without the args check,
+    // a merge root that owns *some* custom action would short-circuit the
+    // walk and we'd dispatch to the wrong handler.
+    if (result.isPartOfNodeMerging && !result._canHandleAction(action, args)) {
+      SemanticsNode? found;
       result._visitDescendants((SemanticsNode node) {
-        if (node._canPerformAction(action)) {
-          result = node;
+        if (node._canHandleAction(action, args)) {
+          found = node;
           return false; // found node, abort walk
         }
         return true; // continue walk
       });
+      result = found;
     }
-    if (result == null || !result!._canPerformAction(action)) {
+    if (result == null || !result._canHandleAction(action, args)) {
       return null;
     }
-    return result!._actions[action];
+    return result._actions[action];
   }
 
   /// Asks the [SemanticsNode] with the given id to perform the given action.
@@ -4892,7 +5103,7 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
   void performAction(int id, SemanticsAction action, [Object? args]) {
-    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action);
+    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action, args);
     if (handler != null) {
       handler(args);
       return;
@@ -4907,8 +5118,9 @@ class SemanticsOwner extends ChangeNotifier {
   SemanticsActionHandler? _getSemanticsActionHandlerForPosition(
     SemanticsNode node,
     Offset position,
-    SemanticsAction action,
-  ) {
+    SemanticsAction action, [
+    Object? args,
+  ]) {
     if (node.transform != null) {
       final inverse = Matrix4.identity();
       if (inverse.copyInverse(node.transform!) == 0.0) {
@@ -4920,12 +5132,12 @@ class SemanticsOwner extends ChangeNotifier {
       return null;
     }
     if (node.mergeAllDescendantsIntoThisNode) {
-      if (node._canPerformAction(action)) {
+      if (node._canHandleAction(action, args)) {
         return node._actions[action];
       }
       SemanticsNode? result;
       node._visitDescendants((SemanticsNode child) {
-        if (child._canPerformAction(action)) {
+        if (child._canHandleAction(action, args)) {
           result = child;
           return false;
         }
@@ -4939,6 +5151,7 @@ class SemanticsOwner extends ChangeNotifier {
           child,
           position,
           action,
+          args,
         );
         if (handler != null) {
           return handler;
@@ -4964,6 +5177,7 @@ class SemanticsOwner extends ChangeNotifier {
       node,
       position,
       action,
+      args,
     );
     if (handler != null) {
       handler(args);
@@ -5006,12 +5220,9 @@ class SemanticsConfiguration {
   Locale? get localeForSubtree => _localeForSubtree;
   Locale? _localeForSubtree;
   set localeForSubtree(Locale? value) {
-    assert(
-      value == null || _isSemanticBoundary,
-      'to set locale for subtree, this configuration must also be a semantics '
-      'boundary.',
-    );
+    assert(value != null);
     _localeForSubtree = value;
+    _hasBeenAnnotated = true;
   }
 
   /// The locale of the resulting semantics node if this configuration formed
@@ -6175,14 +6386,16 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  AccessiblityFocusBlockType _accessiblityFocusBlockType = AccessiblityFocusBlockType.none;
+  AccessibilityFocusBlockType _accessibilityFocusBlockType = AccessibilityFocusBlockType.none;
 
   /// Whether the owning [RenderObject] and its subtree
   /// is blocked in the a11y focus (different from input focus).
-  AccessiblityFocusBlockType get accessiblityFocusBlockType => _accessiblityFocusBlockType;
-  set accessiblityFocusBlockType(AccessiblityFocusBlockType value) {
-    _accessiblityFocusBlockType = value;
-    _flags = _flags.copyWith(isAccessibilityFocusBlocked: value != AccessiblityFocusBlockType.none);
+  AccessibilityFocusBlockType get accessibilityFocusBlockType => _accessibilityFocusBlockType;
+  set accessibilityFocusBlockType(AccessibilityFocusBlockType value) {
+    _accessibilityFocusBlockType = value;
+    _flags = _flags.copyWith(
+      isAccessibilityFocusBlocked: value != AccessibilityFocusBlockType.none,
+    );
     _hasBeenAnnotated = true;
   }
 
@@ -6415,11 +6628,35 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// {@macro flutter.semantics.SemanticsProperties.hitTestBehavior}
+  ui.SemanticsHitTestBehavior get hitTestBehavior => _hitTestBehavior;
+  ui.SemanticsHitTestBehavior _hitTestBehavior = ui.SemanticsHitTestBehavior.defer;
+  set hitTestBehavior(ui.SemanticsHitTestBehavior value) {
+    _hitTestBehavior = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// {@macro flutter.semantics.SemanticsProperties.inputType}
   SemanticsInputType get inputType => _inputType;
   SemanticsInputType _inputType = SemanticsInputType.none;
   set inputType(SemanticsInputType value) {
     _inputType = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// {@macro flutter.semantics.SemanticsProperties.maxValue}
+  String? get maxValue => _maxValue;
+  String? _maxValue;
+  set maxValue(String? value) {
+    _maxValue = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// {@macro flutter.semantics.SemanticsProperties.minValue}
+  String? get minValue => _minValue;
+  String? _minValue;
+  set minValue(String? value) {
+    _minValue = value;
     _hasBeenAnnotated = true;
   }
 
@@ -6520,7 +6757,20 @@ class SemanticsConfiguration {
     if (_attributedValue.string.isNotEmpty && other._attributedValue.string.isNotEmpty) {
       return false;
     }
+    if (_localeForSubtree != other._localeForSubtree) {
+      return false;
+    }
     if (_hasExplicitRole && other._hasExplicitRole) {
+      return false;
+    }
+    if (_hitTestBehavior != ui.SemanticsHitTestBehavior.defer ||
+        other._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
+      return false;
+    }
+    if (_minValue != null && other._minValue != null) {
+      return false;
+    }
+    if (_maxValue != null && other._maxValue != null) {
       return false;
     }
     return true;
@@ -6629,9 +6879,16 @@ class SemanticsConfiguration {
         _validationResult = child._validationResult;
       }
     }
-    _accessiblityFocusBlockType = _accessiblityFocusBlockType._merge(
-      child._accessiblityFocusBlockType,
+    _accessibilityFocusBlockType = _accessibilityFocusBlockType._merge(
+      child._accessibilityFocusBlockType,
     );
+    _minValue ??= child._minValue;
+    _maxValue ??= child._maxValue;
+
+    if (_hitTestBehavior == ui.SemanticsHitTestBehavior.defer &&
+        child._hitTestBehavior != ui.SemanticsHitTestBehavior.defer) {
+      _hitTestBehavior = child._hitTestBehavior;
+    }
 
     _hasBeenAnnotated = hasBeenAnnotated || child.hasBeenAnnotated;
   }
@@ -6654,7 +6911,7 @@ class SemanticsConfiguration {
       .._attributedValue = _attributedValue
       .._attributedDecreasedValue = _attributedDecreasedValue
       .._attributedHint = _attributedHint
-      .._accessiblityFocusBlockType = _accessiblityFocusBlockType
+      .._accessibilityFocusBlockType = _accessibilityFocusBlockType
       .._hintOverrides = _hintOverrides
       .._tooltip = _tooltip
       .._flags = _flags
@@ -6678,7 +6935,12 @@ class SemanticsConfiguration {
       .._role = _role
       .._controlsNodes = _controlsNodes
       .._validationResult = _validationResult
-      .._inputType = _inputType;
+      .._inputType = _inputType
+      .._hitTestBehavior = _hitTestBehavior
+      .._traversalChildIdentifier = _traversalChildIdentifier
+      .._traversalParentIdentifier = _traversalParentIdentifier
+      .._minValue = _minValue
+      .._maxValue = _maxValue;
   }
 }
 
@@ -6852,7 +7114,7 @@ class OrdinalSortKey extends SemanticsSortKey {
 /// Argument [sourceLevel] is the heading level of the source node that is being
 /// merged into a target node, which has heading level [targetLevel].
 ///
-/// If the target node is not a heading, the the source heading level is used.
+/// If the target node is not a heading, the source heading level is used.
 /// Otherwise, the target heading level is used irrespective of the source
 /// heading level.
 int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {

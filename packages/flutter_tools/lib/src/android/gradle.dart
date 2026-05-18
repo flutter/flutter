@@ -37,6 +37,8 @@ import 'gradle_utils.dart' as gradle;
 import 'java.dart';
 import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/cmake_android_16k_pages_migration.dart';
+import 'migrations/disable_built_in_kotlin_migration.dart';
+import 'migrations/disable_new_dsl_migration.dart';
 import 'migrations/min_sdk_version_migration.dart';
 import 'migrations/multidex_removal_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
@@ -460,6 +462,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
       MinSdkVersionMigration(project.android, _logger),
       MultidexRemovalMigration(project.android, _logger),
       CmakeAndroid16kPagesMigration(project.android, _logger),
+      DisableBuiltInKotlinMigration(project.android, _logger),
+      DisableNewDslMigration(project.android, _logger),
     ];
 
     final migration = ProjectMigration(migrators);
@@ -475,7 +479,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     // All automatically created files should exist.
     if (configOnly) {
-      _logger.printStatus('Config complete.');
       return;
     }
 
@@ -705,17 +708,24 @@ class AndroidGradleBuilder implements AndroidBuilder {
       return false;
     }
 
-    // As long as libflutter.so.sym or libflutter.so.dbg is present for at least one architecture,
-    // assume AGP succeeded in stripping.
-    if (result.stdout.contains('libflutter.so.sym') ||
-        result.stdout.contains('libflutter.so.dbg')) {
-      return true;
+    // As long as libflutter.so.sym/dbg and libapp.so.sym/dbg are present for at least
+    // one architecture, assume AGP succeeded in stripping.
+    if (!(result.stdout.contains('libflutter.so.sym') ||
+        result.stdout.contains('libflutter.so.dbg'))) {
+      _logger.printTrace(
+        'libflutter.so.sym or libflutter.so.dbg not present when checking final appbundle for debug symbols.',
+      );
+      return false;
     }
 
-    _logger.printTrace(
-      'libflutter.so.sym or libflutter.so.dbg not present when checking final appbundle for debug symbols.',
-    );
-    return false;
+    if (!(result.stdout.contains('libapp.so.sym') || result.stdout.contains('libapp.so.dbg'))) {
+      _logger.printTrace(
+        'libapp.so.sym or libapp.so.dbg not present when checking final appbundle for debug symbols.',
+      );
+      return false;
+    }
+
+    return true;
   }
 
   Future<void> _performCodeSizeAnalysis(

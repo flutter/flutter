@@ -4,11 +4,13 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:dtd/dtd.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
+import 'package:uuid/uuid.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -19,9 +21,11 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../convert.dart';
+import '../dart/analysis.dart';
 import '../dart/package_map.dart';
 import '../project.dart';
 import 'analytics.dart';
+import 'dtd_types.dart';
 import 'persistent_preferences.dart';
 
 typedef DtdService = (String, DTDServiceCallback);
@@ -36,6 +40,7 @@ class WidgetPreviewDtdServices {
     required this.dtdLauncher,
     required this.onHotRestartPreviewerRequest,
     required this.project,
+    required this.addUuidToServiceName,
   }) {
     shutdownHooks.addShutdownHook(() async {
       await _dtd?.close();
@@ -43,19 +48,48 @@ class WidgetPreviewDtdServices {
     });
   }
 
+  /// The name of the widget preview service, without a UUID.
+  @visibleForTesting
+  static const kWidgetPreviewServiceRoot = 'widget-preview';
+
+  /// The actual name of the registered widget preview service.
+  late final String widgetPreviewService = _withUuid(kWidgetPreviewServiceRoot);
+
+  /// The name of the widget preview stream, without a UUID.
+  @visibleForTesting
+  static const kWidgetPreviewScaffoldStreamRoot = 'WidgetPreviewScaffold';
+
+  /// The actual name of the widget preview stream.
+  late final String widgetPreviewScaffoldStream = _withUuid(kWidgetPreviewScaffoldStreamRoot);
+
+  /// The unique identifier added to registered service and stream names if [addUuidToServiceName]
+  /// is true.
+  late final String serviceUuid = const Uuid().v4();
+
+  /// Adds a unique identifier to the service and stream registered by the widget previewer to
+  /// avoid conflicts with other widget previewer instances connected to DTD.
+  ///
+  /// If false, no UUID is added to the registered service and stream names.
+  final bool addUuidToServiceName;
+
+  /// The name of the language server protocol stream written to by the analysis server.
+  static const kLspStream = 'Lsp';
+
+  /// The name of the event sent from the analysis server for widget preview updates.
+  static const kLspWidgetPreviewEventKind = 'dart/textDocument/publishFlutterWidgetPreviews';
+
   // WARNING: Keep these constants and services in sync with those defined in the widget preview
   // scaffold's dtd_services.dart.
   //
   // START KEEP SYNCED
 
-  static const kWidgetPreviewService = 'widget-preview';
   static const kIsWindows = 'isWindows';
   static const kHotRestartPreviewer = 'hotRestartPreviewer';
   static const kResolveUri = 'resolveUri';
   static const kSetPreference = 'setPreference';
   static const kGetPreference = 'getPreference';
+  static const kGetDevToolsUri = 'getDevToolsUri';
 
-  static const kWidgetPreviewScaffoldStream = 'WidgetPreviewScaffold';
   static const kWidgetPreviewConnectedEvent = 'Connected';
 
   /// Error code for RpcException thrown when attempting to load a key from
@@ -69,6 +103,7 @@ class WidgetPreviewDtdServices {
     (kResolveUri, _resolveUri),
     (kSetPreference, _setPreference),
     (kGetPreference, _getPreference),
+    (kGetDevToolsUri, _getDevToolsUri),
   ];
 
   // END KEEP SYNCED
@@ -93,42 +128,171 @@ class WidgetPreviewDtdServices {
 
   DartToolingDaemon? _dtd;
 
+  @visibleForTesting
+  Future<Uri> get devToolsServerAddress => _devToolsServerAddress.future;
+  final _devToolsServerAddress = Completer<Uri>();
+
   /// The [Uri] pointing to the currently connected DTD instance.
   ///
   /// Returns `null` if there is no DTD connection.
   Uri? get dtdUri => _dtdUri;
   Uri? _dtdUri;
 
+  /// Returns true if the LSP service is registered with the connected DTD instance.
+  bool get lspServiceAvailable => _lspServiceAvailable;
+  bool _lspServiceAvailable = false;
+
   /// Starts DTD in a child process before invoking [connect] with a [Uri] pointing to the new
   /// DTD instance.
-  Future<void> launchAndConnect() async {
+  Future<void> launchAndConnect({required AnalysisServer analysisServer}) async {
+    final Uri dtdUri = await dtdLauncher.launch();
+    logger.printStatus('Connecting to DTD');
+    await analysisServer.connectToDtd(dtdUri: dtdUri);
+    logger.printStatus('Connected to DTD');
     // Connect to the new DTD instance.
-    await connect(dtdWsUri: await dtdLauncher.launch());
+    await connect(dtdWsUri: dtdUri);
   }
 
   /// Connects to an existing DTD instance and registers any relevant services.
   Future<void> connect({required Uri dtdWsUri}) async {
     _dtdUri = dtdWsUri;
     _dtd = await DartToolingDaemon.connect(dtdWsUri);
+
+    _lspServiceAvailable = false;
+    final RegisteredServicesResponse registeredServices = await _dtd!.getRegisteredServices();
+    _lspServiceAvailable =
+        registeredServices.dtdServices.contains(kLspStream) ||
+        registeredServices.clientServices.any((service) => service.name == kLspStream);
+
     await _registerServices();
     logger.printTrace('Connected to DTD and registered services.');
   }
 
+  Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async {
+    await _waitForLspService();
+    var attempts = 0;
+    while (attempts < 5) {
+      try {
+        final DTDResponse result = await _dtd!.call(
+          'Lsp',
+          'dart/workspace/getFlutterWidgetPreviews',
+        );
+        return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
+      } on RpcException catch (e) {
+        if (e.code == -32601 && attempts < 4) {
+          // Method not found
+          attempts++;
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+          continue;
+        }
+        rethrow;
+      }
+    }
+    throw StateError('Failed to call getFlutterWidgetPreviews after $attempts attempts.');
+  }
+
+  Future<FlutterWidgetPreviews> getFlutterWidgetPreviewsForFile({required String filePath}) async {
+    await _waitForLspService();
+    var attempts = 0;
+    while (attempts < 5) {
+      try {
+        final DTDResponse result = await _dtd!.call(
+          'Lsp',
+          'dart/textDocument/getFlutterWidgetPreviews',
+          params: {'uri': Uri.file(filePath).toString()},
+        );
+        return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
+      } on RpcException catch (e) {
+        if (e.code == -32601 && attempts < 4) {
+          // Method not found
+          attempts++;
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+          continue;
+        }
+        rethrow;
+      }
+    }
+    throw StateError('Failed to call getFlutterWidgetPreviewsForFile after $attempts attempts.');
+  }
+
+  Future<void> _waitForLspService() async {
+    if (_lspServiceAvailable) {
+      return;
+    }
+
+    final lspRegisteredCompleter = Completer<void>();
+
+    const kServiceStream = 'Service';
+    await _dtd!.streamListen(kServiceStream);
+    final StreamSubscription<DTDEvent> serviceSubscription = _dtd!.onEvent(kServiceStream).listen((
+      DTDEvent event,
+    ) {
+      if (lspRegisteredCompleter.isCompleted) {
+        return;
+      }
+      if (event case DTDEvent(kind: 'ServiceRegistered', data: {'service': kLspStream})) {
+        _lspServiceAvailable = true;
+        lspRegisteredCompleter.complete();
+      }
+    });
+
+    try {
+      final RegisteredServicesResponse registeredServices = await _dtd!.getRegisteredServices();
+      final bool alreadyRegistered =
+          registeredServices.dtdServices.contains(kLspStream) ||
+          registeredServices.clientServices.any((service) => service.name == kLspStream);
+      if (alreadyRegistered) {
+        _lspServiceAvailable = true;
+        lspRegisteredCompleter.complete();
+      } else {
+        logger.printStatus('Waiting for analysis server to register Lsp service with DTD...');
+        await lspRegisteredCompleter.future.timeout(const Duration(seconds: 30));
+      }
+    } on TimeoutException {
+      logger.printWarning('Timed out waiting for the Lsp service to be registered with DTD.');
+      rethrow;
+    } finally {
+      await serviceSubscription.cancel();
+    }
+  }
+
+  /// Set the DevTools server URI to be used to embed the widget inspector within the
+  /// widget previewer.
+  ///
+  /// This must be called, otherwise the widget previewer will hang waiting for a DevTools URI.
+  void setDevToolsServerAddress({required Uri devToolsServerAddress, required Uri applicationUri}) {
+    if (_devToolsServerAddress.isCompleted) {
+      throw StateError('DevTools server address has already been set.');
+    }
+    _devToolsServerAddress.complete(
+      devToolsServerAddress.replace(
+        pathSegments: [
+          ...devToolsServerAddress.pathSegments.whereNot((s) => s.isEmpty),
+          'inspector',
+        ],
+        queryParameters: {
+          ...devToolsServerAddress.queryParameters,
+          'embedMode': 'one',
+          'uri': applicationUri.toString(),
+        },
+      ),
+    );
+  }
+
+  String _withUuid(String name) => addUuidToServiceName ? '$name-$serviceUuid' : name;
+
   Future<void> _registerServices() async {
     final DartToolingDaemon dtd = _dtd!;
-    dtd.onEvent(kWidgetPreviewScaffoldStream).listen((DTDEvent event) {
-      if (event case DTDEvent(
-        stream: kWidgetPreviewScaffoldStream,
-        kind: kWidgetPreviewConnectedEvent,
-      )) {
+    dtd.onEvent(widgetPreviewScaffoldStream).listen((DTDEvent event) {
+      if (event.kind == kWidgetPreviewConnectedEvent) {
         previewAnalytics.reportPreviewerConnected();
       }
     });
     await Future.wait(<Future<void>>[
-      dtd.streamListen(kWidgetPreviewScaffoldStream),
+      dtd.streamListen(widgetPreviewScaffoldStream),
       for (final (String method, DTDServiceCallback callback) in services)
         dtd
-            .registerService(kWidgetPreviewService, method, callback)
+            .registerService(widgetPreviewService, method, callback)
             .then((_) => logger.printTrace('Registered DTD method: $method')),
     ]);
   }
@@ -161,13 +325,15 @@ class WidgetPreviewDtdServices {
     if (value == null) {
       throw RpcException(kNoValueForKey, 'No entry for $key in preferences.');
     }
-    if (value is String) {
-      return StringResponse(value).toJson();
-    }
-    if (value is bool) {
-      return BoolResponse(value).toJson();
-    }
-    throw UnimplementedError('Unexpected preference value: ${value.runtimeType}');
+    return switch (value) {
+      final String s => StringResponse(s).toJson(),
+      final bool b => BoolResponse(b).toJson(),
+      _ => throw UnimplementedError('Unexpected preference value: ${value.runtimeType}'),
+    };
+  }
+
+  Future<Map<String, Object?>> _getDevToolsUri(Parameters _) async {
+    return StringResponse((await _devToolsServerAddress.future).toString()).toJson();
   }
 }
 

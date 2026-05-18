@@ -189,9 +189,36 @@ base class FixedSizePreview extends Preview {
   }
 }
 
+base class CollectionsPreview extends Preview {
+  const CollectionsPreview({
+    required super.name,
+    this.list = const [1, 2],
+    this.map = const {'a': 1},
+    this.set = const {1},
+    this.record = (1, 'a', named: 'b', nested: (2, 'c')),
+  });
+
+  final List<int> list;
+  final Map<String, int> map;
+  final Set<int> set;
+  final (int, String, {String named, (int, String) nested}) record;
+
+  @override
+  Preview transform() => this;
+}
+
 @BrightnessPreview(name: 'Foo')
 @FixedSizePreview(name: 'Bar')
 Widget preview() => Text('Brightness Preview');
+
+@CollectionsPreview(
+  name: 'Collections',
+  list: [1, 2],
+  map: {'a': 1},
+  set: {1},
+  record: (1, 'a', named: 'b', nested: (2, 'c')),
+)
+Widget collectionPreview() => Text('Collections Preview');
 ''';
 
 // Note: this test isn't under the general.shard since tests under that directory
@@ -245,7 +272,12 @@ void main() {
         onChangeDetected: (_) {},
         onPubspecChangeDetected: (String path) {},
       );
-      codeGenerator = PreviewCodeGenerator(widgetPreviewScaffoldProject: project, fs: fs);
+      codeGenerator = PreviewCodeGenerator(
+        widgetPreviewScaffoldProject: FlutterProject.fromDirectoryTest(
+          project.widgetPreviewScaffold,
+        ),
+        fs: fs,
+      );
       final pub = Pub.test(
         fileSystem: fs,
         logger: logger,
@@ -261,21 +293,22 @@ void main() {
       // There shouldn't be any state to clean up, but this doesn't hurt.
       await previewDetector.dispose();
       project.directory.deleteSync(recursive: true);
+      await fs.dispose();
     });
 
     testUsingContext(
       'correctly generates ${PreviewCodeGenerator.getGeneratedPreviewFilePath(fs)}',
       () async {
         // Check that the generated preview file doesn't exist yet.
-        final File generatedPreviewFile = project.directory.childFile(
+        final File generatedPreviewFile = project.widgetPreviewScaffold.childFile(
           PreviewCodeGenerator.getGeneratedPreviewFilePath(fs),
         );
         expect(generatedPreviewFile, isNot(exists));
+        generatedPreviewFile.createSync(recursive: true);
         final PreviewDependencyGraph details = await previewDetector.initialize();
 
         // Populate the generated preview file.
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(details);
-        expect(generatedPreviewFile, exists);
 
         const expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: implementation_imports
@@ -294,87 +327,99 @@ import 'package:foo_project/src/localizations.dart' as _i10;
 import 'package:foo_project/src/custom_previews.dart' as _i11;
 
 List<_i1.WidgetPreview> previews() => [
-      _i2.buildWidgetPreview(
-        packageName: 'foo_project',
-        scriptUri: 'STRIPPED',
-        line: 4,
-        column: 1,
-        previewFunction: () => _i3.preview(),
-        transformedPreview: const _i4.Preview().transform(),
-      ),
-      _i2.buildWidgetPreview(
-        packageName: 'foo_project',
-        scriptUri: 'STRIPPED',
-        line: 10,
-        column: 1,
-        previewFunction: () => _i5.barPreview1(),
-        transformedPreview: const _i4.Preview(group: 'group').transform(),
-      ),
-      _i2.buildWidgetPreview(
-        packageName: 'foo_project',
-        scriptUri: 'STRIPPED',
-        line: 13,
-        column: 1,
-        previewFunction: () => _i5.barPreview2(),
-        transformedPreview:
-            const _i4.Preview(brightness: _i6.brightnessConstant).transform(),
-      ),
-      _i2.buildWidgetPreview(
-        packageName: 'foo_project',
-        scriptUri: 'STRIPPED',
-        line: 16,
-        column: 1,
-        previewFunction: () => _i5.barPreview3(),
-        transformedPreview: const _i4.Preview(
+  _i2.buildWidgetPreview(
+    packageName: 'foo_project',
+    scriptUri: 'STRIPPED',
+    line: 4,
+    column: 1,
+    previewFunction: () => _i3.preview(),
+    transformedPreview: const _i4.Preview().transform(),
+  ),
+  _i2.buildWidgetPreview(
+    packageName: 'foo_project',
+    scriptUri: 'STRIPPED',
+    line: 10,
+    column: 1,
+    previewFunction: () => _i5.barPreview1(),
+    transformedPreview: const _i4.Preview(group: 'group').transform(),
+  ),
+  _i2.buildWidgetPreview(
+    packageName: 'foo_project',
+    scriptUri: 'STRIPPED',
+    line: 13,
+    column: 1,
+    previewFunction: () => _i5.barPreview2(),
+    transformedPreview:
+        const _i4.Preview(brightness: _i6.brightnessConstant).transform(),
+  ),
+  _i2.buildWidgetPreview(
+    packageName: 'foo_project',
+    scriptUri: 'STRIPPED',
+    line: 16,
+    column: 1,
+    previewFunction: () => _i5.barPreview3(),
+    transformedPreview:
+        const _i4.Preview(
           group: 'group',
           name: 'Foo',
-          size: _i7.Size(
-            123.0,
-            456.0,
-          ),
+          size: _i7.Size(123.0, 456.0),
           textScaleFactor: 50.0,
           wrapper: _i8.wrapper,
           brightness: _i7.Brightness.dark,
           theme: _i9.myThemeData,
           localizations: _i10.myLocalizations,
         ).transform(),
-      ),
-      ..._i2.buildMultiWidgetPreview(
-        packageName: 'foo_project',
-        scriptUri: 'STRIPPED',
-        line: 51,
-        column: 1,
-        previewFunction: () => _i11.preview(),
-        preview: const _i11.BrightnessPreview(name: 'Foo'),
-      ),
-      _i2.buildWidgetPreview(
-        packageName: 'foo_project',
-        scriptUri: 'STRIPPED',
-        line: 52,
-        column: 1,
-        previewFunction: () => _i11.preview(),
-        transformedPreview:
-            const _i11.FixedSizePreview(name: 'Bar').transform(),
-      ),
-      _i2.buildWidgetPreviewError(
-        packageName: 'foo_project',
-        scriptUri: 'STRIPPED',
-        line: 6,
-        column: 1,
-        packageUri: 'package:foo_project/src/error.dart',
-        functionName: 'preview',
-        dependencyHasErrors: false,
-      ),
-      _i2.buildWidgetPreviewError(
-        packageName: 'foo_project',
-        scriptUri: 'STRIPPED',
-        line: 6,
-        column: 1,
-        packageUri: 'package:foo_project/src/transitive_error.dart',
-        functionName: 'preview',
-        dependencyHasErrors: true,
-      ),
-    ];
+  ),
+  ..._i2.buildMultiWidgetPreview(
+    packageName: 'foo_project',
+    scriptUri: 'STRIPPED',
+    line: 69,
+    column: 1,
+    previewFunction: () => _i11.preview(),
+    preview: const _i11.BrightnessPreview(name: 'Foo'),
+  ),
+  _i2.buildWidgetPreview(
+    packageName: 'foo_project',
+    scriptUri: 'STRIPPED',
+    line: 70,
+    column: 1,
+    previewFunction: () => _i11.preview(),
+    transformedPreview: const _i11.FixedSizePreview(name: 'Bar').transform(),
+  ),
+  _i2.buildWidgetPreview(
+    packageName: 'foo_project',
+    scriptUri: 'STRIPPED',
+    line: 73,
+    column: 1,
+    previewFunction: () => _i11.collectionPreview(),
+    transformedPreview:
+        const _i11.CollectionsPreview(
+          name: 'Collections',
+          list: [1, 2],
+          map: {'a': 1},
+          set: {1},
+          record: (1, 'a', named: 'b', nested: (2, 'c')),
+        ).transform(),
+  ),
+  _i2.buildWidgetPreviewError(
+    packageName: 'foo_project',
+    scriptUri: 'STRIPPED',
+    line: 6,
+    column: 1,
+    packageUri: 'package:foo_project/src/error.dart',
+    functionName: 'preview',
+    dependencyHasErrors: false,
+  ),
+  _i2.buildWidgetPreviewError(
+    packageName: 'foo_project',
+    scriptUri: 'STRIPPED',
+    line: 6,
+    column: 1,
+    packageUri: 'package:foo_project/src/transitive_error.dart',
+    functionName: 'preview',
+    dependencyHasErrors: true,
+  ),
+];
 ''';
         expect(
           generatedPreviewFile.readAsStringSync().stripScriptUris,
@@ -385,7 +430,6 @@ List<_i1.WidgetPreview> previews() => [
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(
           const <PreviewPath, LibraryPreviewNode>{},
         );
-        expect(generatedPreviewFile, exists);
 
         // The generated file should only contain:
         // - An import of the widget preview library
@@ -399,6 +443,37 @@ import 'widget_preview.dart' as _i1;
 List<_i1.WidgetPreview> previews() => [];
 ''';
         expect(generatedPreviewFile.readAsStringSync(), emptyGeneratedPreviewFileContents);
+      },
+    );
+
+    testUsingContext(
+      'correctly generates ${PreviewCodeGenerator.getGeneratedDtdConnectionInfoFilePath(fs)}',
+      () async {
+        await previewDetector.initialize();
+        // Check that the generated preview file doesn't exist yet.
+        final File generatedDtdConnectionInfoFile = project.widgetPreviewScaffold.childFile(
+          PreviewCodeGenerator.getGeneratedDtdConnectionInfoFilePath(fs),
+        );
+        expect(generatedDtdConnectionInfoFile, isNot(exists));
+        generatedDtdConnectionInfoFile.createSync(recursive: true);
+
+        // Populate the DTD connection info.
+        final Uri dtdUri = Uri.parse('ws://localhost:1234');
+        codeGenerator.populateDtdConnectionInfo(
+          dtdUri: dtdUri,
+          widgetPreviewServiceName: 'widget-preview-service',
+          widgetPreviewScaffoldStreamName: 'widget-preview-stream',
+        );
+
+        final expectedDtdConnectionInfo =
+            '''
+// ignore_for_file: implementation_imports
+
+const String kWidgetPreviewDtdUri = '$dtdUri';
+const String kWidgetPreviewService = 'widget-preview-service';
+const String kWidgetPreviewScaffoldStream = 'widget-preview-stream';
+''';
+        expect(generatedDtdConnectionInfoFile.readAsStringSync(), expectedDtdConnectionInfo);
       },
     );
   });

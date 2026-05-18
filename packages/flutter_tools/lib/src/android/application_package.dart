@@ -29,6 +29,9 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     required this.launchActivity,
   });
 
+  static String get _aaptNotFound =>
+      'Could not locate aapt. Please ensure you have the Android buildtools installed.';
+
   /// Creates a new AndroidApk from an existing APK.
   ///
   /// Returns `null` if the APK was invalid or any required tooling was missing.
@@ -42,7 +45,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   }) {
     final String? aaptPath = androidSdk.latestVersion?.aaptPath;
     if (aaptPath == null || !processManager.canRun(aaptPath)) {
-      logger.printError(userMessages.aaptNotFound);
+      logger.printError(_aaptNotFound);
       return null;
     }
 

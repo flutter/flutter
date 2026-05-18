@@ -11,12 +11,12 @@
 #include "flutter/display_list/effects/dl_color_sources.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/effects/dl_runtime_effect_skia.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/testing/testing.h"
 
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/effects/SkImageFilters.h"
 #include "third_party/skia/include/effects/SkRuntimeEffect.h"
 
@@ -74,7 +74,8 @@ static DlImageSampling kLinearSampling = DlImageSampling::kLinear;
 
 static auto kTestImage1 = MakeTestImage(40, 40, 5);
 static auto kTestImage2 = MakeTestImage(50, 50, 5);
-static auto kTestSkImage = MakeTestImage(30, 30, 5)->skia_image();
+static auto kTestSkImage =
+    MakeTestImage(30, 30, 5)->asSkiaImage()->skia_image();
 
 static const std::shared_ptr<DlColorSource> kTestSource1 =
     DlColorSource::MakeImage(kTestImage1,

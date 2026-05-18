@@ -14,29 +14,17 @@
 namespace impeller {
 namespace compiler {
 
-static bool StringEndWith(const std::string& string,
-                          const std::string& suffix) {
-  if (suffix.size() > string.size()) {
-    return false;
-  }
-
-  if (suffix.empty() || suffix.empty()) {
-    return false;
-  }
-
-  return string.rfind(suffix) == (string.size() - suffix.size());
-}
-
-SourceType SourceTypeFromFileName(const std::string& file_name) {
-  if (StringEndWith(file_name, ".vert")) {
+SourceType SourceTypeFromFileName(const std::filesystem::path& file_name) {
+  std::string extension = file_name.extension().string();
+  if (extension == ".vert") {
     return SourceType::kVertexShader;
   }
 
-  if (StringEndWith(file_name, ".frag")) {
+  if (extension == ".frag") {
     return SourceType::kFragmentShader;
   }
 
-  if (StringEndWith(file_name, ".comp")) {
+  if (extension == ".comp") {
     return SourceType::kComputeShader;
   }
 
@@ -111,7 +99,7 @@ std::string SourceLanguageToString(SourceLanguage source_language) {
 }
 
 std::string EntryPointFunctionNameFromSourceName(
-    const std::string& file_name,
+    const std::filesystem::path& file_name,
     SourceType type,
     SourceLanguage source_language,
     const std::string& entry_point_name) {
@@ -120,8 +108,7 @@ std::string EntryPointFunctionNameFromSourceName(
   }
 
   std::stringstream stream;
-  std::filesystem::path file_path(file_name);
-  stream << ConvertToEntrypointName(Utf8FromPath(file_path.stem())) << "_";
+  stream << ConvertToEntrypointName(Utf8FromPath(file_name.stem())) << "_";
   switch (type) {
     case SourceType::kUnknown:
       stream << "unknown";
@@ -138,25 +125,6 @@ std::string EntryPointFunctionNameFromSourceName(
   }
   stream << "_main";
   return stream.str();
-}
-
-bool TargetPlatformNeedsReflection(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform::kMetalIOS:
-    case TargetPlatform::kMetalDesktop:
-    case TargetPlatform::kOpenGLES:
-    case TargetPlatform::kOpenGLDesktop:
-    case TargetPlatform::kRuntimeStageMetal:
-    case TargetPlatform::kRuntimeStageGLES:
-    case TargetPlatform::kRuntimeStageGLES3:
-    case TargetPlatform::kRuntimeStageVulkan:
-    case TargetPlatform::kVulkan:
-      return true;
-    case TargetPlatform::kUnknown:
-    case TargetPlatform::kSkSL:
-      return false;
-  }
-  FML_UNREACHABLE();
 }
 
 std::string ShaderCErrorToString(shaderc_compilation_status status) {
@@ -320,25 +288,6 @@ bool TargetPlatformIsVulkan(TargetPlatform platform) {
     case TargetPlatform::kOpenGLDesktop:
     case TargetPlatform::kRuntimeStageGLES:
     case TargetPlatform::kRuntimeStageGLES3:
-      return false;
-  }
-  FML_UNREACHABLE();
-}
-
-bool TargetPlatformBundlesSkSL(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform::kSkSL:
-    case TargetPlatform::kRuntimeStageMetal:
-    case TargetPlatform::kRuntimeStageGLES:
-    case TargetPlatform::kRuntimeStageGLES3:
-    case TargetPlatform::kRuntimeStageVulkan:
-      return true;
-    case TargetPlatform::kMetalDesktop:
-    case TargetPlatform::kMetalIOS:
-    case TargetPlatform::kUnknown:
-    case TargetPlatform::kOpenGLES:
-    case TargetPlatform::kOpenGLDesktop:
-    case TargetPlatform::kVulkan:
       return false;
   }
   FML_UNREACHABLE();

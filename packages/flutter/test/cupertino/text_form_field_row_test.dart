@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/spell_check.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/editable_text_utils.dart';
+import 'editable_text_utils.dart';
 
 void main() {
   testWidgets('Passes textAlign to underlying CupertinoTextField', (WidgetTester tester) async {
@@ -652,4 +652,19 @@ void main() {
     variant: TargetPlatformVariant.all(),
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
   );
+
+  testWidgets('CupertinoTextFormFieldRow does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final controller = TextEditingController(text: 'X');
+    addTearDown(tester.view.reset);
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(child: CupertinoTextFormFieldRow(controller: controller)),
+      ),
+    );
+    expect(tester.getSize(find.byType(CupertinoTextFormFieldRow)), Size.zero);
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+  });
 }

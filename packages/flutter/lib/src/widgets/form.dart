@@ -243,6 +243,9 @@ class FormState extends State<Form> {
   bool _hasInteractedByUser = false;
   final Set<FormFieldState<dynamic>> _fields = <FormFieldState<dynamic>>{};
 
+  /// The [FormFieldState] objects that are currently registered with this [Form].
+  Iterable<FormFieldState<dynamic>> get fields => _fields;
+
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
   void _fieldDidChange() {
@@ -251,6 +254,7 @@ class FormState extends State<Form> {
     _hasInteractedByUser = _fields.any(
       (FormFieldState<dynamic> field) => field._hasInteractedByUser.value,
     );
+
     _forceRebuild();
   }
 
@@ -271,11 +275,17 @@ class FormState extends State<Form> {
   @protected
   @override
   Widget build(BuildContext context) {
+    final bool hasError = _fields.any((FormFieldState<dynamic> field) => field.hasError);
+
     switch (widget.autovalidateMode) {
       case AutovalidateMode.always:
         _validate(View.of(context));
       case AutovalidateMode.onUserInteraction:
         if (_hasInteractedByUser) {
+          _validate(View.of(context));
+        }
+      case AutovalidateMode.onUserInteractionIfError:
+        if (_hasInteractedByUser && hasError) {
           _validate(View.of(context));
         }
       case AutovalidateMode.onUnfocus:
@@ -323,6 +333,19 @@ class FormState extends State<Form> {
       field.reset();
     }
     _hasInteractedByUser = false;
+    _fieldDidChange();
+  }
+
+  /// Clears the validation errors for all [FormField]s in this [Form]
+  /// without resetting their values.
+  ///
+  /// See also:
+  ///
+  ///  * [FormFieldState.clearError], which clears the error for a single form field.
+  void clearError() {
+    for (final FormFieldState<dynamic> field in _fields) {
+      field._clearErrorInternal();
+    }
     _fieldDidChange();
   }
 
@@ -385,12 +408,23 @@ class FormState extends State<Form> {
         unawaited(
           Future<void>(() async {
             await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
-            SemanticsService.sendAnnouncement(
-              view,
-              errorMessage,
-              directionality,
-              assertiveness: Assertiveness.assertive,
-            );
+            try {
+              await SemanticsService.sendAnnouncement(
+                view,
+                errorMessage,
+                directionality,
+                assertiveness: Assertiveness.assertive,
+              );
+            } catch (exception, stack) {
+              FlutterError.reportError(
+                FlutterErrorDetails(
+                  exception: exception,
+                  stack: stack,
+                  library: 'widgets library',
+                  context: ErrorDescription('while sending semantics announcement'),
+                ),
+              );
+            }
           }),
         );
       } else {
@@ -399,7 +433,16 @@ class FormState extends State<Form> {
           errorMessage,
           directionality,
           assertiveness: Assertiveness.assertive,
-        );
+        ).catchError((Object exception, StackTrace stack) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: exception,
+              stack: stack,
+              library: 'widgets library',
+              context: ErrorDescription('while sending semantics announcement'),
+            ),
+          );
+        });
       }
     }
 
@@ -642,10 +685,25 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   void reset() {
     setState(() {
       _value = widget.initialValue;
-      _hasInteractedByUser.value = false;
-      _errorText.value = null;
+      _clearErrorInternal();
     });
     widget.onReset?.call();
+    Form.maybeOf(context)?._fieldDidChange();
+  }
+
+  /// Clears any visible validation error for this field without resetting the field's value.
+  ///
+  /// This sets [errorText] to null and [hasInteractedByUser] to false.
+  ///
+  /// If [AutovalidateMode.always] is used, the error may reappear immediately
+  /// because the field will trigger a new validation cycle during the next build.
+  /// See also:
+  ///
+  ///  * [FormState.clearError], which clears errors across all fields in the form.
+  void clearError() {
+    setState(() {
+      _clearErrorInternal();
+    });
     Form.maybeOf(context)?._fieldDidChange();
   }
 
@@ -662,6 +720,11 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _validate();
     });
     return !hasError;
+  }
+
+  void _clearErrorInternal() {
+    _errorText.value = null;
+    _hasInteractedByUser.value = false;
   }
 
   void _validate() {
@@ -751,6 +814,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
         });
       case AutovalidateMode.onUnfocus:
       case AutovalidateMode.onUserInteraction:
+      case AutovalidateMode.onUserInteractionIfError:
       case AutovalidateMode.disabled:
       case null:
         break;
@@ -774,6 +838,10 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
           _validate();
         case AutovalidateMode.onUserInteraction:
           if (_hasInteractedByUser.value) {
+            _validate();
+          }
+        case AutovalidateMode.onUserInteractionIfError:
+          if (_hasInteractedByUser.value && hasError) {
             _validate();
           }
         case AutovalidateMode.onUnfocus:
@@ -831,4 +899,11 @@ enum AutovalidateMode {
   /// In order to validate all fields of a [Form] after the first time the user interacts
   /// with one, use [always] instead.
   onUnfocus,
+
+  /// Used to auto-validate [Form] and [FormField] after each user
+  /// interaction, only if the field already has an error.
+  ///
+  /// This is useful for reducing unnecessary validation calls while
+  /// still ensuring errors are re-checked when the user attempts to fix them.
+  onUserInteractionIfError,
 }

@@ -5,67 +5,21 @@
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/src/widgets/_window.dart';
+import 'package:flutter/src/widgets/_window_positioner.dart';
+import 'package:flutter/widgets.dart';
 
-class KeyedWindow {
-  KeyedWindow({
-    this.parent,
-    this.isMainWindow = false,
-    required this.key,
-    required this.controller,
-  });
-
-  final BaseWindowController? parent;
-  final bool isMainWindow;
-  final UniqueKey key;
-  final BaseWindowController controller;
-}
-
-/// Provides access to the windows created by the application.
-///
-/// The window manager manages a flat list of all of the [BaseWindowController]s
-/// that have been created by the application as well as which controller is
-/// currently selected by the UI.
-class WindowManager extends ChangeNotifier {
-  WindowManager({required List<KeyedWindow> initialWindows})
-    : _windows = initialWindows;
-
-  final List<KeyedWindow> _windows;
-  List<KeyedWindow> get windows => _windows;
-
-  void add(KeyedWindow window) {
-    _windows.add(window);
-    notifyListeners();
-  }
-
-  void remove(UniqueKey key) {
-    _windows.removeWhere((KeyedWindow window) => window.key == key);
-    notifyListeners();
-  }
-}
-
-/// Provides access to the [WindowManager] from the widget tree.
-class WindowManagerAccessor extends InheritedNotifier<WindowManager> {
-  const WindowManagerAccessor({
-    super.key,
-    required super.child,
-    required WindowManager windowManager,
-  }) : super(notifier: windowManager);
-
-  static WindowManager of(BuildContext context) {
-    final WindowManagerAccessor? result = context
-        .dependOnInheritedWidgetOfExactType<WindowManagerAccessor>();
-    assert(result != null, 'No WindowManager found in context');
-    return result!.notifier!;
-  }
-}
+class TooltipSettings {}
 
 /// Settings that control the behavior of newly created windows.
 class WindowSettings {
   WindowSettings({
-    this.regularSize = const Size(400, 300),
-    this.dialogSize = const Size(200, 200),
+    this.regularSize = const Size(800, 600),
+    this.dialogSize = const Size(400, 400),
+    this.positioner = const WindowPositioner(
+      parentAnchor: WindowPositionerAnchor.right,
+      childAnchor: WindowPositionerAnchor.left,
+    ),
   });
 
   /// The initial size for newly created regular windows.
@@ -73,15 +27,14 @@ class WindowSettings {
 
   /// The initial size of the dialog window.
   Size dialogSize;
+
+  /// The positioner used to determine where new tooltips and popups are placed.
+  WindowPositioner positioner;
 }
 
 /// Provides access to the [WindowSettings] from the widget tree.
 class WindowSettingsAccessor extends InheritedWidget {
-  const WindowSettingsAccessor({
-    super.key,
-    required super.child,
-    required this.windowSettings,
-  });
+  const WindowSettingsAccessor({super.key, required super.child, required this.windowSettings});
 
   final WindowSettings windowSettings;
 
@@ -98,8 +51,7 @@ class WindowSettingsAccessor extends InheritedWidget {
   }
 }
 
-class CallbackDialogWindowControllerDelegate
-    with DialogWindowControllerDelegate {
+class CallbackDialogWindowControllerDelegate with DialogWindowControllerDelegate {
   CallbackDialogWindowControllerDelegate({required this.onDestroyed});
 
   @override
@@ -109,4 +61,18 @@ class CallbackDialogWindowControllerDelegate
   }
 
   final VoidCallback onDestroyed;
+}
+
+String anchorToString(WindowPositionerAnchor anchor) {
+  return switch (anchor) {
+    WindowPositionerAnchor.center => 'Center',
+    WindowPositionerAnchor.top => 'Top',
+    WindowPositionerAnchor.bottom => 'Bottom',
+    WindowPositionerAnchor.left => 'Left',
+    WindowPositionerAnchor.right => 'Right',
+    WindowPositionerAnchor.topLeft => 'Top Left',
+    WindowPositionerAnchor.bottomLeft => 'Bottom Left',
+    WindowPositionerAnchor.topRight => 'Top Right',
+    WindowPositionerAnchor.bottomRight => 'Bottom Right',
+  };
 }

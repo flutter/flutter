@@ -722,7 +722,7 @@ class SemanticsUpdateBuilder {
     required int platformViewId,
     required int scrollChildren,
     required int scrollIndex,
-    required int? traversalParent,
+    required int traversalParent,
     required double scrollPosition,
     required double scrollExtentMax,
     required double scrollExtentMin,
@@ -738,7 +738,7 @@ class SemanticsUpdateBuilder {
     required List<StringAttribute> decreasedValueAttributes,
     required String hint,
     required List<StringAttribute> hintAttributes,
-    String? tooltip,
+    required String tooltip,
     TextDirection? textDirection,
     required Float64List transform,
     required Float64List hitTestTransform,
@@ -753,6 +753,8 @@ class SemanticsUpdateBuilder {
     SemanticsHitTestBehavior hitTestBehavior = SemanticsHitTestBehavior.defer,
     required SemanticsInputType inputType,
     required Locale? locale,
+    required String minValue,
+    required String maxValue,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');
@@ -800,6 +802,8 @@ class SemanticsUpdateBuilder {
         hitTestBehavior: hitTestBehavior,
         inputType: inputType,
         locale: locale,
+        minValue: minValue,
+        maxValue: maxValue,
       ),
     );
   }

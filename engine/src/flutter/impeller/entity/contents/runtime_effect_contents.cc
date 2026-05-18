@@ -20,44 +20,79 @@
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/shader_function.h"
+#include "impeller/renderer/shader_key.h"
 #include "impeller/renderer/vertex_descriptor.h"
 
 namespace impeller {
 
-namespace {
-constexpr char kPaddingType = 0;
-constexpr char kFloatType = 1;
-}  // namespace
-
 // static
-BufferView RuntimeEffectContents::EmplaceVulkanUniform(
-    const std::shared_ptr<const std::vector<uint8_t>>& input_data,
+BufferView RuntimeEffectContents::EmplaceUniform(
+    const uint8_t* source_data,
     HostBuffer& data_host_buffer,
-    const RuntimeUniformDescription& uniform,
-    size_t minimum_uniform_alignment) {
-  // TODO(jonahwilliams): rewrite this to emplace directly into
-  // HostBuffer.
-  std::vector<float> uniform_buffer;
-  uniform_buffer.reserve(uniform.struct_layout.size());
-  size_t uniform_byte_index = 0u;
-  for (char byte_type : uniform.struct_layout) {
-    if (byte_type == kPaddingType) {
-      uniform_buffer.push_back(0.f);
-    } else {
-      FML_DCHECK(byte_type == kFloatType);
-      uniform_buffer.push_back(reinterpret_cast<const float*>(
-          input_data->data())[uniform_byte_index++]);
-    }
+    const RuntimeUniformDescription& uniform) {
+  size_t minimum_uniform_alignment =
+      data_host_buffer.GetMinimumUniformAlignment();
+  size_t alignment = std::max(uniform.bit_width / 8, minimum_uniform_alignment);
+
+  if (uniform.padding_layout.empty()) {
+    return data_host_buffer.Emplace(source_data, uniform.GetGPUSize(),
+                                    alignment);
   }
 
+  // If the uniform has a padding layout, we need to repack the data.
+  // We can do this by using the EmplaceProc to write directly to the
+  // HostBuffer.
   return data_host_buffer.Emplace(
-      reinterpret_cast<const void*>(uniform_buffer.data()),
-      sizeof(float) * uniform_buffer.size(), minimum_uniform_alignment);
+      uniform.GetGPUSize(), alignment,
+      [&uniform, source_data](uint8_t* destination) {
+        size_t count = uniform.array_elements.value_or(1);
+        if (count == 0) {
+          // Make sure to run at least once.
+          count = 1;
+        }
+        size_t uniform_byte_index = 0u;
+        size_t struct_float_index = 0u;
+        auto* float_destination = reinterpret_cast<float*>(destination);
+        auto* float_source = reinterpret_cast<const float*>(source_data);
+
+        for (size_t i = 0; i < count; i++) {
+          for (RuntimePaddingType byte_type : uniform.padding_layout) {
+            if (byte_type == RuntimePaddingType::kPadding) {
+              float_destination[struct_float_index++] = 0.f;
+            } else {
+              FML_DCHECK(byte_type == RuntimePaddingType::kFloat);
+              float_destination[struct_float_index++] =
+                  float_source[uniform_byte_index++];
+            }
+          }
+        }
+      });
+}
+
+RuntimeEffectContents::RuntimeEffectContents(const Geometry* geometry)
+    : geometry_(geometry) {}
+
+RuntimeEffectContents::~RuntimeEffectContents() = default;
+
+const Geometry* RuntimeEffectContents::GetGeometry() const {
+  return geometry_;
 }
 
 void RuntimeEffectContents::SetRuntimeStage(
     std::shared_ptr<RuntimeStage> runtime_stage) {
   runtime_stage_ = std::move(runtime_stage);
+  // Precompute the scoped registry name now so that the hot per-frame
+  // `Render` path does not re-allocate it on every call. The name is keyed
+  // on the stage's library id and entrypoint, both of which are stable for
+  // a given `runtime_stage_` value, so this stays valid until the next
+  // `SetRuntimeStage`.
+  if (runtime_stage_) {
+    scoped_fragment_name_ = ShaderKey::MakeUserScopedName(
+        ShaderKey::kScopeRuntimeEffect, runtime_stage_->GetLibraryId(),
+        runtime_stage_->GetEntrypoint());
+  } else {
+    scoped_fragment_name_.clear();
+  }
 }
 
 void RuntimeEffectContents::SetUniformData(
@@ -85,13 +120,27 @@ static std::unique_ptr<ShaderMetadata> MakeShaderMetadata(
     const RuntimeUniformDescription& uniform) {
   std::unique_ptr<ShaderMetadata> metadata = std::make_unique<ShaderMetadata>();
   metadata->name = uniform.name;
+
+  // If the element is not an array, then the runtime stage flatbuffer will
+  // represent the unspecified array_elements as the default value of 0.
+  std::optional<size_t> array_elements;
+  if (uniform.array_elements.value_or(0) > 0) {
+    array_elements = uniform.array_elements;
+  }
+
+  size_t member_size = uniform.dimensions.rows * uniform.dimensions.cols *
+                       (uniform.bit_width / 8u);
+
+  const ShaderType shader_type = GetShaderType(uniform.type);
+  const std::optional<ShaderFloatType> float_type = DeriveShaderFloatType(
+      shader_type, uniform.dimensions.rows, uniform.dimensions.cols);
+
   metadata->members.emplace_back(ShaderStructMemberMetadata{
-      .type = GetShaderType(uniform.type),  //
-      .size = uniform.dimensions.rows * uniform.dimensions.cols *
-              (uniform.bit_width / 8u),  //
-      .byte_length =
-          (uniform.bit_width / 8u) * uniform.array_elements.value_or(1),  //
-      .array_elements = uniform.array_elements                            //
+      .type = shader_type,                                      //
+      .size = member_size,                                      //
+      .byte_length = member_size * array_elements.value_or(1),  //
+      .array_elements = array_elements,                         //
+      .float_type = float_type,                                 //
   });
 
   return metadata;
@@ -114,18 +163,17 @@ bool RuntimeEffectContents::RegisterShader(
   const std::shared_ptr<Context>& context = renderer.GetContext();
   const std::shared_ptr<ShaderLibrary>& library = context->GetShaderLibrary();
 
-  std::shared_ptr<const ShaderFunction> function = library->GetFunction(
-      runtime_stage_->GetEntrypoint(), ShaderStage::kFragment);
+  std::shared_ptr<const ShaderFunction> function =
+      library->GetFunction(scoped_fragment_name_, ShaderStage::kFragment);
 
   //--------------------------------------------------------------------------
   /// Resolve runtime stage function.
   ///
 
   if (function && runtime_stage_->IsDirty()) {
-    renderer.ClearCachedRuntimeEffectPipeline(runtime_stage_->GetEntrypoint());
+    renderer.ClearCachedRuntimeEffectPipeline(scoped_fragment_name_);
     context->GetPipelineLibrary()->RemovePipelinesWithEntryPoint(function);
-    library->UnregisterFunction(runtime_stage_->GetEntrypoint(),
-                                ShaderStage::kFragment);
+    library->UnregisterFunction(scoped_fragment_name_, ShaderStage::kFragment);
 
     function = nullptr;
   }
@@ -135,8 +183,7 @@ bool RuntimeEffectContents::RegisterShader(
     auto future = promise.get_future();
 
     library->RegisterFunction(
-        runtime_stage_->GetEntrypoint(),
-        ToShaderStage(runtime_stage_->GetShaderStage()),
+        scoped_fragment_name_, ToShaderStage(runtime_stage_->GetShaderStage()),
         runtime_stage_->GetCodeMapping(),
         fml::MakeCopyable([promise = std::move(promise)](bool result) mutable {
           promise.set_value(result);
@@ -148,8 +195,8 @@ bool RuntimeEffectContents::RegisterShader(
       return false;
     }
 
-    function = library->GetFunction(runtime_stage_->GetEntrypoint(),
-                                    ShaderStage::kFragment);
+    function =
+        library->GetFunction(scoped_fragment_name_, ShaderStage::kFragment);
     if (!function) {
       VALIDATION_LOG
           << "Failed to fetch runtime effect function immediately after "
@@ -180,8 +227,8 @@ RuntimeEffectContents::CreatePipeline(const ContentContext& renderer,
   desc.SetLabel("Runtime Stage");
   desc.AddStageEntrypoint(
       library->GetFunction(VS::kEntrypointName, ShaderStage::kVertex));
-  desc.AddStageEntrypoint(library->GetFunction(runtime_stage_->GetEntrypoint(),
-                                               ShaderStage::kFragment));
+  desc.AddStageEntrypoint(
+      library->GetFunction(scoped_fragment_name_, ShaderStage::kFragment));
 
   std::shared_ptr<VertexDescriptor> vertex_descriptor =
       std::make_shared<VertexDescriptor>();
@@ -276,12 +323,8 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
               << "Uniform " << uniform.name
               << " had unexpected type kFloat for Vulkan backend.";
 
-          size_t alignment =
-              std::max(uniform.bit_width / 8,
-                       data_host_buffer.GetMinimumUniformAlignment());
-          BufferView buffer_view =
-              data_host_buffer.Emplace(uniform_data_->data() + buffer_offset,
-                                       uniform.GetSize(), alignment);
+          BufferView buffer_view = EmplaceUniform(
+              uniform_data_->data() + buffer_offset, data_host_buffer, uniform);
 
           ShaderUniformSlot uniform_slot;
           uniform_slot.name = uniform.name.c_str();
@@ -290,7 +333,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
                                    DescriptorType::kUniformBuffer, uniform_slot,
                                    std::move(metadata), std::move(buffer_view));
           buffer_index++;
-          buffer_offset += uniform.GetSize();
+          buffer_offset += uniform.GetDartSize();
           buffer_location++;
           break;
         }
@@ -301,12 +344,10 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
           uniform_slot.binding = uniform.location;
           uniform_slot.name = uniform.name.c_str();
 
-          pass.BindResource(ShaderStage::kFragment,
-                            DescriptorType::kUniformBuffer, uniform_slot,
-                            nullptr,
-                            EmplaceVulkanUniform(
-                                uniform_data_, data_host_buffer, uniform,
-                                data_host_buffer.GetMinimumUniformAlignment()));
+          pass.BindResource(
+              ShaderStage::kFragment, DescriptorType::kUniformBuffer,
+              uniform_slot, nullptr,
+              EmplaceUniform(uniform_data_->data(), data_host_buffer, uniform));
         }
       }
     }
@@ -321,7 +362,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
       [&](ContentContextOptions options) {
         // Pipeline creation callback for the cache handler to call.
         return renderer.GetCachedRuntimeEffectPipeline(
-            runtime_stage_->GetEntrypoint(), options, [&]() {
+            scoped_fragment_name_, options, [&]() {
               return CreatePipeline(renderer, options, /*async=*/false);
             });
       };

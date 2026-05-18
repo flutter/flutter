@@ -21,7 +21,9 @@ class LicenseParagraph {
   /// Creates a string for a license entry paragraph.
   const LicenseParagraph(this.text, this.indent);
 
-  /// The text of the paragraph. Should not have any leading or trailing whitespace.
+  /// The text of the paragraph.
+  ///
+  /// Should not have any leading or trailing whitespace.
   final String text;
 
   /// How many steps of indentation the paragraph has.
@@ -47,26 +49,30 @@ class LicenseParagraph {
 /// demand in [LicenseEntryCollector] callbacks passed to
 /// [LicenseRegistry.addLicense].
 abstract class LicenseEntry {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
+  /// This constructor enables subclasses to provide const constructors so that
+  /// they can be used in const expressions.
   const LicenseEntry();
 
   /// The names of the packages that this license entry applies to.
   Iterable<String> get packages;
 
   /// The paragraphs of the license, each as a [LicenseParagraph] consisting of
-  /// a string and some formatting information. Paragraphs can include newline
-  /// characters, but this is discouraged as it results in ugliness.
+  /// a string and some formatting information.
+  ///
+  /// Paragraphs can include newline characters, but this is discouraged as it
+  /// results in ugliness.
   Iterable<LicenseParagraph> get paragraphs;
 }
 
 enum _LicenseEntryWithLineBreaksParserState { beforeParagraph, inParagraph }
 
 /// Variant of [LicenseEntry] for licenses that separate paragraphs with blank
-/// lines and that hard-wrap text within paragraphs. Lines that begin with one
-/// or more space characters are also assumed to introduce new paragraphs,
-/// unless they start with the same number of spaces as the previous line, in
-/// which case it's assumed they are a continuation of an indented paragraph.
+/// lines and that hard-wrap text within paragraphs.
+///
+/// Lines that begin with one or more space characters are also assumed to
+/// introduce new paragraphs, unless they start with the same number of spaces
+/// as the previous line, in which case it's assumed they are a continuation of
+/// an indented paragraph.
 ///
 /// {@tool snippet}
 ///
@@ -267,10 +273,11 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 /// that wish to show all the licenses can obtain them by calling [licenses].
 ///
 /// The flutter tool will automatically collect the contents of all the LICENSE
-/// files found at the root of each package into a single LICENSE file in the
-/// default asset bundle. Each license in that file is separated from the next
+/// files found at the root of each package into a single NOTICES file (or its
+/// compressed variant, `NOTICES.Z`) in the default asset bundle. Each license
+/// in that file is separated from the next
 /// by a line of eighty hyphens (`-`), and begins with a list of package names
-/// that the license applies to, one to a line, separated from the next by a
+/// that the license applies to, one to a line, separated from the license text by a
 /// blank line. The `services` package registers a license collector that splits
 /// that file and adds each entry to the registry.
 ///
@@ -320,8 +327,9 @@ abstract final class LicenseRegistry {
     return controller.stream;
   }
 
-  /// Resets the internal state of [LicenseRegistry]. Intended for use in
-  /// testing.
+  /// Resets the internal state of [LicenseRegistry].
+  ///
+  /// Intended for use in testing.
   @visibleForTesting
   static void reset() {
     _collectors = null;

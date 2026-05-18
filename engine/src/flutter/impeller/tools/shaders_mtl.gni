@@ -44,6 +44,10 @@ template("impeller_shaders_metal") {
     } else {
       assert(false, "Metal not supported on this platform.")
     }
+
+    if (defined(invoker.entry_point_prefix)) {
+      entry_point_prefix = invoker.entry_point_prefix
+    }
   }
 
   mtl_lib = "genlib_$target_name"

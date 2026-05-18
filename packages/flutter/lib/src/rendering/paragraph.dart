@@ -218,10 +218,25 @@ mixin RenderInlineChildrenContainerDefaults
     RenderBox? child = firstChild;
     for (final box in boxes) {
       if (child == null) {
-        assert(
-          false,
-          'The length of boxes (${boxes.length}) should be greater than childCount ($childCount)',
-        );
+        assert(() {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Invalid number of boxes provided to positionInlineChildren.'),
+            ErrorDescription(
+              'The number of boxes (${boxes.length}) exceeds the number of child render objects ($childCount). '
+              'Each box corresponds to a child, but there are not enough children to position all boxes.',
+            ),
+            ErrorHint(
+              'This error typically occurs when a custom InlineSpan implementation returns a list of boxes '
+              'that is longer than the number of inline children. Ensure that the number of boxes returned '
+              'by `computeLineMetrics` or similar methods does not exceed the number of children.',
+            ),
+            DiagnosticsProperty<RenderObject>(
+              'The RenderParagraph receiving the boxes',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            ),
+          ]);
+        }());
         return;
       }
       final textParentData = child.parentData! as TextParentData;
@@ -299,6 +314,7 @@ mixin RenderInlineChildrenContainerDefaults
 
 class _UnspecifiedTextScaler extends TextScaler {
   const _UnspecifiedTextScaler();
+
   @override
   Never get textScaleFactor => throw UnimplementedError();
 
@@ -377,6 +393,7 @@ class RenderParagraph extends RenderBox
   // TODO(abarth): Make computing the min/max intrinsic width/height a
   //  non-destructive operation.
   TextPainter? _textIntrinsicsCache;
+
   TextPainter get _textIntrinsics {
     return (_textIntrinsicsCache ??= TextPainter())
       ..text = _textPainter.text
@@ -397,6 +414,7 @@ class RenderParagraph extends RenderBox
 
   /// The text to display.
   InlineSpan get text => _textPainter.text!;
+
   set text(InlineSpan value) {
     switch (_textPainter.text!.compareTo(value)) {
       case RenderComparison.identical:
@@ -454,6 +472,7 @@ class RenderParagraph extends RenderBox
   /// The [SelectionRegistrar] this paragraph will be, or is, registered to.
   SelectionRegistrar? get registrar => _registrar;
   SelectionRegistrar? _registrar;
+
   set registrar(SelectionRegistrar? value) {
     if (value == _registrar) {
       return;
@@ -550,6 +569,7 @@ class RenderParagraph extends RenderBox
 
   /// How the text should be aligned horizontally.
   TextAlign get textAlign => _textPainter.textAlign;
+
   set textAlign(TextAlign value) {
     if (_textPainter.textAlign == value) {
       return;
@@ -570,6 +590,7 @@ class RenderParagraph extends RenderBox
   /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   TextDirection get textDirection => _textPainter.textDirection!;
+
   set textDirection(TextDirection value) {
     if (_textPainter.textDirection == value) {
       return;
@@ -587,6 +608,7 @@ class RenderParagraph extends RenderBox
   /// effects.
   bool get softWrap => _softWrap;
   bool _softWrap;
+
   set softWrap(bool value) {
     if (_softWrap == value) {
       return;
@@ -598,6 +620,7 @@ class RenderParagraph extends RenderBox
   /// How visual overflow should be handled.
   TextOverflow get overflow => _overflow;
   TextOverflow _overflow;
+
   set overflow(TextOverflow value) {
     if (_overflow == value) {
       return;
@@ -620,6 +643,7 @@ class RenderParagraph extends RenderBox
     'This feature was deprecated after v3.12.0-2.0.pre.',
   )
   double get textScaleFactor => _textPainter.textScaleFactor;
+
   @Deprecated(
     'Use textScaler instead. '
     'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
@@ -631,6 +655,7 @@ class RenderParagraph extends RenderBox
 
   /// {@macro flutter.painting.textPainter.textScaler}
   TextScaler get textScaler => _textPainter.textScaler;
+
   set textScaler(TextScaler value) {
     if (_textPainter.textScaler == value) {
       return;
@@ -691,6 +716,7 @@ class RenderParagraph extends RenderBox
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
+
   set textWidthBasis(TextWidthBasis value) {
     if (_textPainter.textWidthBasis == value) {
       return;
@@ -702,6 +728,7 @@ class RenderParagraph extends RenderBox
 
   /// {@macro dart.ui.textHeightBehavior}
   ui.TextHeightBehavior? get textHeightBehavior => _textPainter.textHeightBehavior;
+
   set textHeightBehavior(ui.TextHeightBehavior? value) {
     if (_textPainter.textHeightBehavior == value) {
       return;
@@ -716,6 +743,7 @@ class RenderParagraph extends RenderBox
   /// Ignored if the text is not selectable (e.g. if [registrar] is null).
   Color? get selectionColor => _selectionColor;
   Color? _selectionColor;
+
   set selectionColor(Color? value) {
     if (_selectionColor == value) {
       return;
@@ -989,6 +1017,19 @@ class RenderParagraph extends RenderBox
       return true;
     }());
 
+    if (_lastSelectableFragments != null) {
+      if (_needsClipping) {
+        context.canvas.save();
+        context.canvas.clipRect(offset & size);
+      }
+      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+        fragment.paintSelection(context, offset);
+      }
+      if (_needsClipping) {
+        context.canvas.restore();
+      }
+    }
+
     if (_needsClipping) {
       final Rect bounds = offset & size;
       if (_overflowShader != null) {
@@ -999,12 +1040,6 @@ class RenderParagraph extends RenderBox
         context.canvas.save();
       }
       context.canvas.clipRect(bounds);
-    }
-
-    if (_lastSelectableFragments != null) {
-      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
-        fragment.paint(context, offset);
-      }
     }
 
     assert(() {
@@ -1025,6 +1060,12 @@ class RenderParagraph extends RenderBox
         context.canvas.drawRect(Offset.zero & size, paint);
       }
       context.canvas.restore();
+    }
+
+    if (_lastSelectableFragments != null) {
+      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+        fragment.paintHandles(context, offset);
+      }
     }
   }
 
@@ -1206,37 +1247,45 @@ class RenderParagraph extends RenderBox
     var placeholderIndex = 0;
     var childConfigsIndex = 0;
     var attributedLabelCacheIndex = 0;
-    InlineSpanSemanticsInformation? seenTextInfo;
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
       if (info.isPlaceholder) {
-        if (seenTextInfo != null) {
-          builder.markAsMergeUp(
-            _createSemanticsConfigForTextInfo(seenTextInfo, attributedLabelCacheIndex),
-          );
-          attributedLabelCacheIndex += 1;
-        }
         // Mark every childConfig belongs to this placeholder to merge up group.
         while (childConfigsIndex < childConfigs.length &&
-            childConfigs[childConfigsIndex].tagsChildrenWith(
-              PlaceholderSpanIndexSemanticsTag(placeholderIndex),
-            )) {
+            _childConfigBelongsToPlaceholder(childConfigs[childConfigsIndex], placeholderIndex)) {
           builder.markAsMergeUp(childConfigs[childConfigsIndex]);
           childConfigsIndex += 1;
         }
         placeholderIndex += 1;
       } else {
-        seenTextInfo = info;
+        builder.markAsMergeUp(_createSemanticsConfigForTextInfo(info, attributedLabelCacheIndex));
+        attributedLabelCacheIndex += 1;
       }
     }
-
-    // Handle plain text info at the end.
-    if (seenTextInfo != null) {
-      builder.markAsMergeUp(
-        _createSemanticsConfigForTextInfo(seenTextInfo, attributedLabelCacheIndex),
-      );
-    }
     return builder.build();
+  }
+
+  /// Returns whether [childConfig] belongs to the placeholder at
+  /// [placeholderIndex] in this paragraph.
+  ///
+  /// Nested paragraphs may inherit [PlaceholderSpanIndexSemanticsTag]s from
+  /// ancestors with colliding indexes. The first placeholder tag is the one
+  /// added by this paragraph, so later inherited tags must not decide ownership
+  /// here.
+  static bool _childConfigBelongsToPlaceholder(
+    SemanticsConfiguration childConfig,
+    int placeholderIndex,
+  ) {
+    final Iterable<SemanticsTag>? tags = childConfig.tagsForChildren;
+    if (tags == null) {
+      return false;
+    }
+    for (final SemanticsTag tag in tags) {
+      if (tag is PlaceholderSpanIndexSemanticsTag) {
+        return tag.index == placeholderIndex;
+      }
+    }
+    return false;
   }
 
   SemanticsConfiguration _createSemanticsConfigForTextInfo(
@@ -1462,6 +1511,7 @@ class _SelectableFragment
   @override
   SelectionGeometry get value => _selectionGeometry;
   late SelectionGeometry _selectionGeometry;
+
   void _updateSelectionGeometry() {
     final SelectionGeometry newValue = _getSelectionGeometry();
 
@@ -1481,11 +1531,11 @@ class _SelectableFragment
     final int selectionEnd = _textSelectionEnd!.offset;
     final bool isReversed = selectionStart > selectionEnd;
     final Offset startOffsetInParagraphCoordinates = paragraph._getOffsetForPosition(
-      TextPosition(offset: selectionStart),
+      _textSelectionStart!,
     );
     final Offset endOffsetInParagraphCoordinates = selectionStart == selectionEnd
         ? startOffsetInParagraphCoordinates
-        : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
+        : paragraph._getOffsetForPosition(_textSelectionEnd!);
     final flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
     final selection = TextSelection(baseOffset: selectionStart, extentOffset: selectionEnd);
     final selectionRects = <Rect>[];
@@ -1831,7 +1881,14 @@ class _SelectableFragment
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
     if (_rect.isEmpty) {
-      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      final SelectionResult result = SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      _setSelectionPosition(
+        result == SelectionResult.next
+            ? TextPosition(offset: range.end)
+            : TextPosition(offset: range.start, affinity: TextAffinity.upstream),
+        isEnd: isEnd,
+      );
+      return result;
     }
     final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
       _rect,
@@ -1897,7 +1954,14 @@ class _SelectableFragment
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
     if (_rect.isEmpty) {
-      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      final SelectionResult result = SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      _setSelectionPosition(
+        result == SelectionResult.next
+            ? TextPosition(offset: range.end)
+            : TextPosition(offset: range.start, affinity: TextAffinity.upstream),
+        isEnd: isEnd,
+      );
+      return result;
     }
     final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
       _rect,
@@ -2283,6 +2347,7 @@ class _SelectableFragment
     PlaceholderSpan.placeholderCodeUnit,
   );
   static final int _placeholderLength = _placeholderCharacter.length;
+
   // This method handles updating the start edge by a text boundary that may
   // not be contained within this selectable fragment. It is possible
   // that a boundary spans multiple selectable fragments when the text contains
@@ -2804,7 +2869,14 @@ class _SelectableFragment
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
     if (_rect.isEmpty) {
-      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      final SelectionResult result = SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      _setSelectionPosition(
+        result == SelectionResult.next
+            ? TextPosition(offset: range.end)
+            : TextPosition(offset: range.start, affinity: TextAffinity.upstream),
+        isEnd: isEnd,
+      );
+      return result;
     }
     final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
       _rect,
@@ -3463,12 +3535,13 @@ class _SelectableFragment
   }
 
   List<Rect>? _cachedBoundingBoxes;
+
   @override
   List<Rect> get boundingBoxes {
     if (_cachedBoundingBoxes == null) {
       final List<TextBox> boxes = paragraph.getBoxesForSelection(
         TextSelection(baseOffset: range.start, extentOffset: range.end),
-        boxHeightStyle: ui.BoxHeightStyle.max,
+        boxHeightStyle: .max,
       );
       if (boxes.isNotEmpty) {
         _cachedBoundingBoxes = <Rect>[];
@@ -3488,10 +3561,12 @@ class _SelectableFragment
   }
 
   Rect? _cachedRect;
+
   Rect get _rect {
     if (_cachedRect == null) {
       final List<TextBox> boxes = paragraph.getBoxesForSelection(
         TextSelection(baseOffset: range.start, extentOffset: range.end),
+        boxHeightStyle: .max,
       );
       if (boxes.isNotEmpty) {
         Rect result = boxes.first.toRect();
@@ -3523,7 +3598,7 @@ class _SelectableFragment
     return _rect.size;
   }
 
-  void paint(PaintingContext context, Offset offset) {
+  void paintSelection(PaintingContext context, Offset offset) {
     if (_textSelectionStart == null || _textSelectionEnd == null) {
       return;
     }
@@ -3538,6 +3613,12 @@ class _SelectableFragment
       for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
         context.canvas.drawRect(textBox.toRect().shift(offset), selectionPaint);
       }
+    }
+  }
+
+  void paintHandles(PaintingContext context, Offset offset) {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return;
     }
     if (_startHandleLayerLink != null && value.startSelectionPoint != null) {
       context.pushLayer(

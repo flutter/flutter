@@ -5,12 +5,14 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:package_config/package_config_types.dart';
 
-import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../cache.dart';
 import '../compile.dart';
+import '../dart/language_version.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -103,7 +105,7 @@ class TestCompiler {
   ///
   /// If [testTimeRecorder] is passed, times will be recorded in it.
   TestCompiler(
-    this.buildInfo,
+    BuildInfo buildInfo,
     this.flutterProject, {
     String? precompiledDillPath,
     this.testTimeRecorder,
@@ -114,12 +116,15 @@ class TestCompiler {
              getBuildDirectory(),
              'test_cache',
              getDefaultCachedKernelPath(
+               config: globals.config,
+               fileSystem: globals.fs,
                trackWidgetCreation: buildInfo.trackWidgetCreation,
                dartDefines: buildInfo.dartDefines,
                extraFrontEndOptions: buildInfo.extraFrontEndOptions,
              ),
            ),
        shouldCopyDillFile = precompiledDillPath == null {
+    this.buildInfo = buildInfo.copyWith(initializeFromDill: testFilePath);
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -143,13 +148,20 @@ class TestCompiler {
   final compilerController = StreamController<_CompilationRequest>();
   final compilationQueue = <_CompilationRequest>[];
   final FlutterProject? flutterProject;
-  final BuildInfo buildInfo;
+  late final BuildInfo buildInfo;
   final String testFilePath;
   final bool shouldCopyDillFile;
   final TestTimeRecorder? testTimeRecorder;
 
   ResidentCompiler? compiler;
   late File outputDill;
+
+  /// The language version the plugin registrant was last generated for, or
+  /// `null` if it hasn't been generated yet. The plugin set is stable for the
+  /// lifetime of a single `flutter test` run, so the registrant only needs to
+  /// be regenerated when the language version of the entrypoint changes (e.g.
+  /// when test files come from packages with different `// @dart =` versions).
+  LanguageVersion? _registrantLanguageVersion;
 
   /// Compiles the Dart program (an entrypoint containing `main()`).
   Future<TestCompilerResult> compile(Uri dartEntrypointPath) {
@@ -178,24 +190,17 @@ class TestCompiler {
   /// Create the resident compiler used to compile the test.
   @visibleForTesting
   Future<ResidentCompiler?> createCompiler() async {
-    final residentCompiler = ResidentCompiler(
-      globals.artifacts!.getArtifactPath(Artifact.flutterPatchedSdkPath),
+    final ResidentCompiler residentCompiler = residentCompilerFactory.create(
       artifacts: globals.artifacts!,
       logger: globals.logger,
       processManager: globals.processManager,
-      buildMode: buildInfo.mode,
-      trackWidgetCreation: buildInfo.trackWidgetCreation,
-      initializeFromDill: testFilePath,
-      dartDefines: buildInfo.dartDefines,
-      packagesPath: buildInfo.packageConfigPath,
-      frontendServerStarterPath: buildInfo.frontendServerStarterPath,
-      extraFrontEndOptions: buildInfo.extraFrontEndOptions,
+      buildInfo: buildInfo,
       platform: globals.platform,
       testCompilation: true,
       fileSystem: globals.fs,
-      fileSystemRoots: buildInfo.fileSystemRoots,
-      fileSystemScheme: buildInfo.fileSystemScheme,
       shutdownHooks: globals.shutdownHooks,
+      config: globals.config,
+      targetPlatform: .tester,
     );
     return residentCompiler;
   }
@@ -223,17 +228,25 @@ class TestCompiler {
 
       final invalidatedRegistrantFiles = <Uri>[];
       if (flutterProject != null) {
-        // Update the generated registrant to use the test target's main.
-        final String mainUriString =
-            buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString() ??
-            request.mainUri.toString();
-        await generateMainDartWithPluginRegistrant(
-          flutterProject!,
-          buildInfo.packageConfig,
-          mainUriString,
-          globals.fs.file(request.mainUri),
+        final File mainFile = globals.fs.file(request.mainUri);
+        final LanguageVersion languageVersion = determineLanguageVersion(
+          mainFile,
+          buildInfo.packageConfig.packageOf(request.mainUri),
+          Cache.flutterRoot!,
         );
-        invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
+        if (languageVersion != _registrantLanguageVersion) {
+          // (Re)generate the registrant. The output is keyed only on the plugin
+          // set (stable for one `flutter test` run) and the entrypoint's
+          // language version, so we can skip this work when the language
+          // version matches the previous compilation.
+          await generateMainDartWithPluginRegistrant(
+            flutterProject!,
+            buildInfo.packageConfig,
+            mainFile,
+          );
+          invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
+          _registrantLanguageVersion = languageVersion;
+        }
       }
 
       final CompilerOutput? compilerOutput = await compiler!.recompile(

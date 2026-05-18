@@ -33,7 +33,7 @@ void main() {
       );
 
       expect(
-        find.descendant(of: find.byType(Tooltip), matching: find.byType(MouseRegion)),
+        find.descendant(of: find.byType(RawTooltip), matching: find.byType(MouseRegion)),
         findsNothing,
       );
     },

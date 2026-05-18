@@ -18,8 +18,8 @@ MethodChannel channel = const MethodChannel('android_views_integration');
 const String kEventsFileName = 'touchEvents';
 
 class MotionEventsPage extends PageWidget {
-  const MotionEventsPage({Key? key})
-    : super('Motion Event Tests', const ValueKey<String>('MotionEventsListTile'), key: key);
+  const MotionEventsPage({super.key})
+    : super('Motion Event Tests', const ValueKey<String>('MotionEventsListTile'));
 
   @override
   Widget build(BuildContext context) {
@@ -213,11 +213,11 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   }
 
   void listenToFlutterViewEvents() {
-    channel.invokeMethod<void>('pipeFlutterViewEvents');
-    viewChannel?.invokeMethod<void>('pipeTouchEvents');
+    channel.invokeMethod<void>('pipeFlutterViewEvents'); // ignore: unawaited_futures
+    viewChannel?.invokeMethod<void>('pipeTouchEvents'); // ignore: unawaited_futures
     Timer(const Duration(seconds: 3), () {
-      channel.invokeMethod<void>('stopFlutterViewEvents');
-      viewChannel?.invokeMethod<void>('stopTouchEvents');
+      channel.invokeMethod<void>('stopFlutterViewEvents'); // ignore: unawaited_futures
+      viewChannel?.invokeMethod<void>('stopTouchEvents'); // ignore: unawaited_futures
     });
   }
 

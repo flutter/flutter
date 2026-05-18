@@ -7,13 +7,16 @@ import '../utils.dart';
 import 'use_cases.dart';
 
 class DialogUseCase extends UseCase {
-  DialogUseCase() : super(useCaseCategory: UseCaseCategory.core);
+  DialogUseCase();
 
   @override
   String get name => 'Dialog';
 
   @override
   String get route => '/dialog';
+
+  @override
+  List<Tag> get tags => <Tag>[Tag.batch1, Tag.core];
 
   @override
   Widget build(BuildContext context) => _MainWidget();
@@ -27,10 +30,7 @@ class _MainWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo')),
-      ),
+      appBar: AppBar(title: Semantics(headingLevel: 1, child: Text('$pageTitle Demo'))),
       body: Center(
         child: TextButton(
           onPressed: () => showDialog<String>(

@@ -18,6 +18,7 @@
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/canvas.h"
 #include "impeller/display_list/dl_atlas_geometry.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_text_impeller.h"
 #include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"
@@ -148,7 +149,7 @@ static std::optional<const Rect> ToOptRect(const flutter::DlRect* rect) {
 void DlDispatcherBase::setAntiAlias(bool aa) {
   AUTO_DEPTH_WATCHER(0u);
 
-  // Nothing to do because AA is implicit.
+  paint_.anti_alias = aa;
 }
 
 static Paint::Style ToStyle(flutter::DlDrawStyle style) {
@@ -590,7 +591,7 @@ void DlDispatcherBase::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
 void DlDispatcherBase::drawPath(const DlPath& path) {
   AUTO_DEPTH_WATCHER(1u);
 
-  SimplifyOrDrawPath(GetCanvas(), path, paint_);
+  GetCanvas().DrawPath(path, paint_);
 }
 
 void DlDispatcherBase::SimplifyOrDrawPath(Canvas& canvas,
@@ -678,6 +679,14 @@ void DlDispatcherBase::drawPoints(flutter::DlPointMode mode,
   }
 }
 
+std::shared_ptr<Texture> DlDispatcherBase::GetTexture(
+    const sk_sp<flutter::DlImage>& image) {
+  if (!image) {
+    return nullptr;
+  }
+  return image->asImpellerImage()->GetCachedTexture(GetContentContext());
+}
+
 void DlDispatcherBase::drawVertices(
     const std::shared_ptr<flutter::DlVertices>& vertices,
     flutter::DlBlendMode dl_mode) {}
@@ -693,7 +702,7 @@ void DlDispatcherBase::drawImage(const sk_sp<flutter::DlImage> image,
     return;
   }
 
-  auto texture = image->impeller_texture();
+  auto texture = GetTexture(image);
   if (!texture) {
     return;
   }
@@ -722,7 +731,7 @@ void DlDispatcherBase::drawImageRect(const sk_sp<flutter::DlImage> image,
   AUTO_DEPTH_WATCHER(1u);
 
   GetCanvas().DrawImageRect(
-      image->impeller_texture(),                       // image
+      GetTexture(image),                               // image
       src,                                             // source rect
       dst,                                             // destination rect
       render_with_attributes ? paint_ : Paint(),       // paint
@@ -739,7 +748,7 @@ void DlDispatcherBase::drawImageNine(const sk_sp<flutter::DlImage> image,
   AUTO_DEPTH_WATCHER(9u);
 
   NinePatchConverter converter = {};
-  converter.DrawNinePatch(image->impeller_texture(),
+  converter.DrawNinePatch(GetTexture(image),
                           Rect::MakeLTRB(center.GetLeft(), center.GetTop(),
                                          center.GetRight(), center.GetBottom()),
                           dst, ToSamplerDescriptor(filter), &GetCanvas(),
@@ -759,7 +768,7 @@ void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
   AUTO_DEPTH_WATCHER(1u);
 
   auto geometry =
-      DlAtlasGeometry(atlas->impeller_texture(),                        //
+      DlAtlasGeometry(GetTexture(atlas),                                //
                       xform,                                            //
                       tex,                                              //
                       colors,                                           //
@@ -933,7 +942,8 @@ CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
                                        bool has_root_backdrop_filter,
                                        flutter::DlBlendMode max_root_blend_mode,
                                        IRect32 cull_rect)
-    : canvas_(renderer,
+    : DlDispatcherBase(),
+      canvas_(renderer,
               render_target,
               is_onscreen,
               has_root_backdrop_filter ||
@@ -943,6 +953,10 @@ CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
 
 Canvas& CanvasDlDispatcher::GetCanvas() {
   return canvas_;
+}
+
+const ContentContext& CanvasDlDispatcher::GetContentContext() const {
+  return renderer_;
 }
 
 void CanvasDlDispatcher::drawVertices(
@@ -1085,26 +1099,20 @@ void FirstPassDispatcher::drawText(const std::shared_ptr<flutter::DlText>& text,
     return;
   }
 
-  if (paint_.style == Paint::Style::kStroke) {
-    properties.stroke = paint_.stroke;
-  }
+  properties.stroke = paint_.GetStroke();
 
   if (text_frame->HasColor()) {
     // Alpha is always applied when rendering, remove it here so
     // we do not double-apply the alpha.
-    properties.color = paint_.color.WithAlpha(1.0);
+    properties.tone_or_color = paint_.color.WithAlpha(1.0);
+  } else {
+    properties.tone_or_color = GlyphProperties::ComputeTone(paint_.color);
   }
-  auto scale = TextFrame::RoundScaledFontSize(
-      (matrix_ * Matrix::MakeTranslation(Point(x, y))).GetMaxBasisLengthXY());
 
-  renderer_.GetLazyGlyphAtlas()->AddTextFrame(
-      text_frame,   //
-      scale,        //
-      Point(x, y),  //
-      matrix_,
-      (properties.stroke.has_value() || text_frame->HasColor())  //
-          ? std::optional<GlyphProperties>(properties)           //
-          : std::nullopt                                         //
+  renderer_.GetLazyGlyphAtlas()->AddTextFrame(text_frame,   //
+                                              Point(x, y),  //
+                                              matrix_,      //
+                                              properties    //
   );
 }
 
@@ -1204,6 +1212,12 @@ void FirstPassDispatcher::setImageFilter(const flutter::DlImageFilter* filter) {
   }
 }
 
+namespace {
+bool PixelFormatSupportsMSAA(std::optional<PixelFormat> pixel_format) {
+  return !pixel_format.has_value();
+}
+}  // namespace
+
 std::pair<std::unordered_map<int64_t, BackdropData>, size_t>
 FirstPassDispatcher::TakeBackdropData() {
   std::unordered_map<int64_t, BackdropData> temp;
@@ -1216,7 +1230,8 @@ std::shared_ptr<Texture> DisplayListToTexture(
     ISize size,
     AiksContext& context,
     bool reset_host_buffer,
-    bool generate_mips) {
+    bool generate_mips,
+    std::optional<PixelFormat> target_pixel_format) {
   int mip_count = 1;
   if (generate_mips) {
     mip_count = size.MipCount();
@@ -1227,14 +1242,20 @@ std::shared_ptr<Texture> DisplayListToTexture(
       impeller::RenderTargetAllocator(
           context.GetContext()->GetResourceAllocator());
   impeller::RenderTarget target;
-  if (context.GetContext()->GetCapabilities()->SupportsOffscreenMSAA()) {
+  if (context.GetContext()->GetCapabilities()->SupportsOffscreenMSAA() &&
+      PixelFormatSupportsMSAA(target_pixel_format)) {
     target = render_target_allocator.CreateOffscreenMSAA(
         *context.GetContext(),  // context
         size,                   // size
         /*mip_count=*/mip_count,
         "Picture Snapshot MSAA",  // label
         impeller::RenderTarget::
-            kDefaultColorAttachmentConfigMSAA  // color_attachment_config
+            kDefaultColorAttachmentConfigMSAA,  // color_attachment_config
+        std::nullopt,                           // stencil_attachment_config
+        nullptr,                                // existing_color_msaa_texture
+        nullptr,             // existing_color_resolve_texture
+        nullptr,             // existing_depth_stencil_texture
+        target_pixel_format  // target_format
     );
   } else {
     target = render_target_allocator.CreateOffscreen(
@@ -1243,7 +1264,11 @@ std::shared_ptr<Texture> DisplayListToTexture(
         /*mip_count=*/mip_count,
         "Picture Snapshot",  // label
         impeller::RenderTarget::
-            kDefaultColorAttachmentConfig  // color_attachment_config
+            kDefaultColorAttachmentConfig,  // color_attachment_config
+        std::nullopt,                       // stencil_attachment_config
+        nullptr,                            // existing_color_texture
+        nullptr,                            // existing_depth_stencil_texture
+        target_pixel_format                 // target_format
     );
   }
   if (!target.IsValid()) {

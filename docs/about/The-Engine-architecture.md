@@ -70,7 +70,7 @@ library called `dart:ui` to provide low-level access to Skia features and the
 shell. The shells can also communicate directly to Dart code via [Platform
 Channels](https://flutter.io/platform-channels/) which bypass the engine.
 
-![Flutter Architecture Diagram](https://github.com/flutter/flutter/tree/main/docs/engine/flutter_overview.svg?sanitize=true)
+![Flutter Architecture Diagram](https://raw.githubusercontent.com/flutter/flutter/main/docs/engine/flutter_overview.svg?sanitize=true)
 
 ## Threading
 

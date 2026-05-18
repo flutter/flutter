@@ -143,6 +143,7 @@ interface class FlutterTestRunner {
           testTimeRecorder: testTimeRecorder,
           webRenderer: debuggingOptions.webRenderer,
           useWasm: debuggingOptions.webUseWasm,
+          crossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
         );
       });
       await testWrapper.main(testArgs);
@@ -209,7 +210,7 @@ interface class FlutterTestRunner {
         .childDirectory('.dart_tool')
         .childFile('package_config.json');
     PackageConfig? projectPackageConfig;
-    if (await packageConfigFile.exists()) {
+    if (packageConfigFile.existsSync()) {
       projectPackageConfig = PackageConfig.parseBytes(
         packageConfigFile.readAsBytesSync(),
         Uri.file(flutterProject.directory.path),
@@ -276,10 +277,7 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
     String pathToImport(String path) {
       assert(path.endsWith('.dart'));
       return path
-          .replaceAll('.', '_')
-          .replaceAll(':', '_')
-          .replaceAll('/', '_')
-          .replaceAll(r'\', '_')
+          .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')
           .replaceRange(path.length - '.dart'.length, null, '');
     }
 
@@ -498,10 +496,7 @@ String pathToImport(String path) {
   assert(path.endsWith('.dart'));
   return path
       .replaceRange(path.length - '.dart'.length, null, '')
-      .replaceAll('.', '_')
-      .replaceAll(':', '_')
-      .replaceAll('/', '_')
-      .replaceAll(r'\', '_');
+      .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
 }
 
 class SpawnPlugin extends PlatformPlugin {
@@ -545,9 +540,7 @@ class SpawnPlugin extends PlatformPlugin {
   }
 
   static Future<void> _compileFile({
-    required DebuggingOptions debuggingOptions,
-    required File packageConfigFile,
-    required PackageConfig packageConfig,
+    required BuildInfo buildInfo,
     required File sourceFile,
     required File outputDillFile,
     required TestTimeRecorder? testTimeRecorder,
@@ -557,30 +550,24 @@ class SpawnPlugin extends PlatformPlugin {
     final compilerTime = Stopwatch()..start();
     final Stopwatch? testTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.Compile);
 
-    final residentCompiler = ResidentCompiler(
-      globals.artifacts!.getArtifactPath(Artifact.flutterPatchedSdkPath),
+    final ResidentCompiler residentCompiler = residentCompilerFactory.create(
+      targetPlatform: .tester,
       artifacts: globals.artifacts!,
       logger: globals.logger,
       processManager: globals.processManager,
-      buildMode: debuggingOptions.buildInfo.mode,
-      trackWidgetCreation: debuggingOptions.buildInfo.trackWidgetCreation,
-      dartDefines: debuggingOptions.buildInfo.dartDefines,
-      packagesPath: packageConfigFile.path,
-      frontendServerStarterPath: debuggingOptions.buildInfo.frontendServerStarterPath,
-      extraFrontEndOptions: debuggingOptions.buildInfo.extraFrontEndOptions,
+      buildInfo: buildInfo,
       platform: globals.platform,
       testCompilation: true,
       fileSystem: globals.fs,
-      fileSystemRoots: debuggingOptions.buildInfo.fileSystemRoots,
-      fileSystemScheme: debuggingOptions.buildInfo.fileSystemScheme,
       shutdownHooks: globals.shutdownHooks,
+      config: globals.config,
     );
 
     await residentCompiler.recompile(
       sourceFile.absolute.uri,
       null,
       outputPath: outputDillFile.absolute.path,
-      packageConfig: packageConfig,
+      packageConfig: buildInfo.packageConfig,
       fs: globals.fs,
       nativeAssetsYaml: nativeAssetsYaml,
     );
@@ -688,19 +675,19 @@ class SpawnPlugin extends PlatformPlugin {
       rootTestIsolateSpawnerSourceFile: rootTestIsolateSpawnerSourceFile,
     );
 
-    await _compileFile(
-      debuggingOptions: debuggingOptions,
-      packageConfigFile: isolateSpawningTesterPackageConfigFile,
+    final BuildInfo buildInfo = debuggingOptions.buildInfo.copyWith(
       packageConfig: isolateSpawningTesterPackageConfig,
+      packageConfigPath: isolateSpawningTesterPackageConfigFile.path,
+    );
+    await _compileFile(
+      buildInfo: buildInfo,
       sourceFile: childTestIsolateSpawnerSourceFile,
       outputDillFile: childTestIsolateSpawnerDillFile,
       testTimeRecorder: testTimeRecorder,
     );
 
     await _compileFile(
-      debuggingOptions: debuggingOptions,
-      packageConfigFile: isolateSpawningTesterPackageConfigFile,
-      packageConfig: isolateSpawningTesterPackageConfig,
+      buildInfo: buildInfo,
       sourceFile: rootTestIsolateSpawnerSourceFile,
       outputDillFile: rootTestIsolateSpawnerDillFile,
       testTimeRecorder: testTimeRecorder,
@@ -750,7 +737,8 @@ class SpawnPlugin extends PlatformPlugin {
     globals.logger.printTrace('Started flutter_tester process at pid ${process.pid}');
 
     for (final stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
-      stream.transform<String>(utf8.decoder).listen(globals.stdio.stdoutWrite);
+      // Use permissive decoder for test output which may contain invalid UTF-8
+      stream.transform<String>(utf8AllowMalformed.decoder).listen(globals.stdio.stdoutWrite);
     }
 
     return process.exitCode.then((int exitCode) {

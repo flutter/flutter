@@ -14,8 +14,10 @@ import android.content.res.AssetManager;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
 import android.util.SparseArray;
+import android.view.AttachedSurfaceControl;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -504,6 +506,51 @@ public class PlatformViewsController2Test {
     // Simulate dispose call from the framework.
     disposePlatformView(jni, PlatformViewsController2, platformViewId);
     verify(platformView, times(1)).dispose();
+  }
+
+  // Class member variable
+  private SurfaceControl.Transaction mCapturedTx;
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void showOverlaySurfaceDefersTransactionUntilEndFrame() {
+
+    PlatformViewsController2 controller =
+        new PlatformViewsController2() {
+          @Override
+          public SurfaceControl.Transaction createTransaction() {
+            // Call super to ensure the real transaction is added to the private
+            // 'pendingTransactions' list
+            SurfaceControl.Transaction realTx = super.createTransaction();
+            // Spy on it so we can verify calls like 'apply()'
+            mCapturedTx = spy(realTx);
+            return mCapturedTx;
+          }
+        };
+
+    PlatformViewRegistryImpl registry = new PlatformViewRegistryImpl();
+    controller.setRegistry(registry);
+
+    // Mocks
+    FlutterView mockFlutterView = mock(FlutterView.class);
+    AttachedSurfaceControl mockAttachedSurfaceControl = mock(AttachedSurfaceControl.class);
+
+    when(mockFlutterView.getRootSurfaceControl()).thenReturn(mockAttachedSurfaceControl);
+    when(mockAttachedSurfaceControl.buildReparentTransaction(any()))
+        .thenReturn(new SurfaceControl.Transaction());
+
+    controller.attachToView(mockFlutterView);
+    controller.createOverlaySurface();
+
+    controller.showOverlaySurface();
+    assertNotNull("Transaction should have been created", mCapturedTx);
+    verify(mCapturedTx, never()).apply();
+
+    controller.swapTransactions();
+    controller.onEndFrame();
+
+    verify(mockAttachedSurfaceControl, times(1))
+        .applyTransactionOnDraw(any(SurfaceControl.Transaction.class));
   }
 
   private static ByteBuffer encodeMethodCall(MethodCall call) {
