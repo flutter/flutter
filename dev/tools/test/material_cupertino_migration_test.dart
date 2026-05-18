@@ -191,6 +191,102 @@ class RestrictiveWidgets extends StatelessWidget {
 ''');
   });
 
+  test('adds framework imports for non-widgets umbrella symbols', () {
+    final file = File('${tempDir.path}/lib/framework_symbols.dart')
+      ..writeAsStringSync('''
+import 'package:flutter/material.dart';
+
+class FrameworkSymbols extends StatelessWidget {
+  const FrameworkSymbols({
+    required this.animation,
+    required this.color,
+    required this.details,
+    required this.formatter,
+    required this.onPressed,
+    required this.renderObject,
+    super.key,
+  });
+
+  final Animation<double> animation;
+  final Color color;
+  final DragStartDetails details;
+  final TextInputFormatter formatter;
+  final VoidCallback onPressed;
+  final RenderObject renderObject;
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('Hello');
+  }
+}
+''');
+
+    final migration.MigrationResult result = migration.migratePaths(<String>[tempDir.path]);
+
+    expect(result.changedDartFiles, 1);
+    expect(file.readAsStringSync(), '''
+import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/animation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
+import 'package:material_ui/material_ui.dart';
+
+class FrameworkSymbols extends StatelessWidget {
+  const FrameworkSymbols({
+    required this.animation,
+    required this.color,
+    required this.details,
+    required this.formatter,
+    required this.onPressed,
+    required this.renderObject,
+    super.key,
+  });
+
+  final Animation<double> animation;
+  final Color color;
+  final DragStartDetails details;
+  final TextInputFormatter formatter;
+  final VoidCallback onPressed;
+  final RenderObject renderObject;
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('Hello');
+  }
+}
+''');
+  });
+
+  test('splits show combinators across framework libraries', () {
+    final file = File('${tempDir.path}/lib/framework_show.dart')
+      ..writeAsStringSync('''
+import 'package:flutter/material.dart'
+    show Animation, Color, MaterialApp, TextInputFormatter, Widget;
+
+Widget buildApp(Animation<double> animation, Color color, TextInputFormatter formatter) {
+  return const MaterialApp();
+}
+''');
+
+    final migration.MigrationResult result = migration.migratePaths(<String>[tempDir.path]);
+
+    expect(result.changedDartFiles, 1);
+    expect(file.readAsStringSync(), '''
+import 'package:flutter/widgets.dart' show Widget;
+import 'package:flutter/painting.dart' show Color;
+import 'package:flutter/services.dart' show TextInputFormatter;
+import 'package:flutter/animation.dart' show Animation;
+import 'package:material_ui/material_ui.dart' show MaterialApp;
+
+Widget buildApp(Animation<double> animation, Color color, TextInputFormatter formatter) {
+  return const MaterialApp();
+}
+''');
+  });
+
   test('adds a prefixed widgets import when prefixed framework symbols are used', () {
     final file = File('${tempDir.path}/lib/prefixed.dart')
       ..writeAsStringSync('''

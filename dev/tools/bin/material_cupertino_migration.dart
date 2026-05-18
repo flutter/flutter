@@ -4,8 +4,6 @@
 
 import 'dart:io';
 
-const String _frameworkUri = 'package:flutter/widgets.dart';
-
 const List<_DesignLibrary> _designLibraries = <_DesignLibrary>[
   _DesignLibrary(
     dependency: 'material_ui',
@@ -19,68 +17,152 @@ const List<_DesignLibrary> _designLibraries = <_DesignLibrary>[
   ),
 ];
 
-const Set<String> _frameworkSymbols = <String>{
-  'Action',
-  'Alignment',
-  'AnimatedBuilder',
-  'AnimatedWidget',
-  'AspectRatio',
-  'AutomaticKeepAliveClientMixin',
-  'BuildContext',
-  'Builder',
-  'Center',
-  'Column',
-  'ConnectionState',
-  'Container',
-  'DefaultTextStyle',
-  'Directionality',
-  'EdgeInsets',
-  'Expanded',
-  'Flexible',
-  'FocusNode',
-  'Form',
-  'FormState',
-  'GestureDetector',
-  'GlobalKey',
-  'GridView',
-  'Icon',
-  'IconData',
-  'Image',
-  'IndexedWidgetBuilder',
-  'InheritedWidget',
-  'Key',
-  'LayoutBuilder',
-  'ListView',
-  'LocalKey',
-  'MediaQuery',
-  'Navigator',
-  'Padding',
-  'Page',
-  'PageRoute',
-  'Positioned',
-  'Route',
-  'RouteSettings',
-  'Row',
-  'SafeArea',
-  'ScrollController',
-  'ScrollPhysics',
-  'SingleChildScrollView',
-  'SizedBox',
-  'SliverList',
-  'Spacer',
-  'Stack',
-  'State',
-  'StatefulBuilder',
-  'StatefulWidget',
-  'StatelessWidget',
-  'StreamBuilder',
-  'Text',
-  'TextEditingController',
-  'ValueKey',
-  'Widget',
-  'WidgetBuilder',
-  'WidgetsApp',
-  'runApp',
+const List<_FrameworkLibrary> _frameworkLibraries = <_FrameworkLibrary>[
+  _FrameworkLibrary(
+    uri: 'package:flutter/widgets.dart',
+    symbols: <String>{
+      'Action',
+      'Alignment',
+      'AnimatedBuilder',
+      'AnimatedWidget',
+      'AspectRatio',
+      'AutomaticKeepAliveClientMixin',
+      'BuildContext',
+      'Builder',
+      'Center',
+      'Column',
+      'ConnectionState',
+      'Container',
+      'DefaultTextStyle',
+      'Directionality',
+      'EdgeInsets',
+      'Expanded',
+      'Flexible',
+      'FocusNode',
+      'Form',
+      'FormState',
+      'GestureDetector',
+      'GlobalKey',
+      'GridView',
+      'Icon',
+      'IconData',
+      'Image',
+      'IndexedWidgetBuilder',
+      'InheritedWidget',
+      'Key',
+      'LayoutBuilder',
+      'ListView',
+      'LocalKey',
+      'MediaQuery',
+      'Navigator',
+      'Padding',
+      'Page',
+      'PageRoute',
+      'Positioned',
+      'Route',
+      'RouteSettings',
+      'Row',
+      'SafeArea',
+      'ScrollController',
+      'ScrollPhysics',
+      'SingleChildScrollView',
+      'SizedBox',
+      'SliverList',
+      'Spacer',
+      'Stack',
+      'State',
+      'StatefulBuilder',
+      'StatefulWidget',
+      'StatelessWidget',
+      'StreamBuilder',
+      'Text',
+      'TextEditingController',
+      'ValueKey',
+      'Widget',
+      'WidgetBuilder',
+      'WidgetsApp',
+      'runApp',
+    },
+  ),
+  _FrameworkLibrary(
+    uri: 'package:flutter/foundation.dart',
+    symbols: <String>{
+      'ChangeNotifier',
+      'Diagnosticable',
+      'Key',
+      'Listenable',
+      'ValueChanged',
+      'ValueGetter',
+      'ValueListenable',
+      'ValueNotifier',
+      'VoidCallback',
+      'immutable',
+      'protected',
+      'visibleForTesting',
+    },
+  ),
+  _FrameworkLibrary(
+    uri: 'package:flutter/painting.dart',
+    symbols: <String>{
+      'Border',
+      'BorderRadius',
+      'BoxDecoration',
+      'BoxFit',
+      'BoxShadow',
+      'Color',
+      'Decoration',
+      'Gradient',
+      'ImageProvider',
+      'LinearGradient',
+      'NetworkImage',
+      'Radius',
+      'RoundedRectangleBorder',
+      'TextAlign',
+      'TextDirection',
+      'TextStyle',
+    },
+  ),
+  _FrameworkLibrary(
+    uri: 'package:flutter/services.dart',
+    symbols: <String>{
+      'Clipboard',
+      'HapticFeedback',
+      'LogicalKeyboardKey',
+      'PlatformException',
+      'SystemChrome',
+      'TextInputAction',
+      'TextInputFormatter',
+    },
+  ),
+  _FrameworkLibrary(
+    uri: 'package:flutter/animation.dart',
+    symbols: <String>{
+      'Animation',
+      'AnimationController',
+      'AnimationStatus',
+      'CurvedAnimation',
+      'Curves',
+      'Tween',
+    },
+  ),
+  _FrameworkLibrary(
+    uri: 'package:flutter/gestures.dart',
+    symbols: <String>{
+      'DragStartDetails',
+      'DragUpdateDetails',
+      'GestureRecognizer',
+      'PointerDownEvent',
+      'TapGestureRecognizer',
+    },
+  ),
+  _FrameworkLibrary(
+    uri: 'package:flutter/rendering.dart',
+    symbols: <String>{'BoxConstraints', 'CustomPainter', 'RenderBox', 'RenderObject', 'Size'},
+  ),
+];
+
+final Set<String> _frameworkSymbols = <String>{
+  for (final _FrameworkLibrary library in _frameworkLibraries) ...library.symbols,
 };
 
 final RegExp _directivePattern = RegExp(
@@ -219,8 +301,8 @@ _RewriteResult _rewriteFile(File file, List<File> parts) {
   final String maskedSource = _maskCommentsAndStrings(source);
   final String maskedPartSource = _maskCommentsAndStrings(partSource);
   final state = _RewriteState(
-    widgetsImports: _widgetsDirectives(source, 'import'),
-    widgetsExports: _widgetsDirectives(source, 'export'),
+    frameworkImports: _frameworkDirectives(source, 'import'),
+    frameworkExports: _frameworkDirectives(source, 'export'),
     frameworkUsage: _scanFrameworkUsage('$maskedSource\n$maskedPartSource'),
     maskedSource: '$maskedSource\n$maskedPartSource',
   );
@@ -262,12 +344,21 @@ _RewriteResult _rewriteFile(File file, List<File> parts) {
   return _RewriteResult(changed: changed, dependencies: dependencies, source: buffer.toString());
 }
 
-List<_DirectiveInfo> _widgetsDirectives(String source, String kind) {
-  return _directivePattern
-      .allMatches(source)
-      .where((RegExpMatch match) => match.group(2) == kind && match.group(4) == _frameworkUri)
-      .map((RegExpMatch match) => _DirectiveInfo.parse(match.group(5) ?? ''))
-      .toList();
+Map<String, List<_DirectiveInfo>> _frameworkDirectives(String source, String kind) {
+  final directives = <String, List<_DirectiveInfo>>{};
+  for (final RegExpMatch match in _directivePattern.allMatches(source)) {
+    if (match.group(2) != kind) {
+      continue;
+    }
+    final String uri = match.group(4)!;
+    if (_frameworkLibraryForUri(uri) == null) {
+      continue;
+    }
+    directives
+        .putIfAbsent(uri, () => <_DirectiveInfo>[])
+        .add(_DirectiveInfo.parse(match.group(5) ?? ''));
+  }
+  return directives;
 }
 
 _DesignLibrary? _libraryFor(String uri) {
@@ -296,20 +387,20 @@ String _rewriteDirective({
   }
 
   final directives = <String>[];
-  final Set<String> requiredFrameworkNames = info.prefix == null
+  final Map<String, Set<String>> requiredFrameworkNames = info.prefix == null
       ? state.frameworkUsage
       : state.frameworkUsageForPrefix(info.prefix!);
   final bool needsFrameworkDirective = kind == 'export' || requiredFrameworkNames.isNotEmpty;
   if (needsFrameworkDirective) {
-    final String? widgets = _takeWidgetsDirective(
-      kind,
-      state,
-      prefix: info.prefix,
-      requiredNames: requiredFrameworkNames.toList(),
+    directives.addAll(
+      _takeFrameworkDirectives(
+        kind,
+        state,
+        prefix: info.prefix,
+        requiredNames: requiredFrameworkNames,
+        includeAll: kind == 'export',
+      ),
     );
-    if (widgets != null) {
-      directives.add(widgets);
-    }
   }
   directives.add(_formatDirective(kind, library.packageUri, prefix: info.prefix));
   return directives.join('\n');
@@ -334,15 +425,14 @@ String _rewriteShowDirective(
 
   final directives = <String>[];
   if (frameworkNames.isNotEmpty) {
-    final String? widgets = _takeWidgetsDirective(
-      kind,
-      state,
-      prefix: info.prefix,
-      showNames: frameworkNames,
+    directives.addAll(
+      _takeFrameworkDirectives(
+        kind,
+        state,
+        prefix: info.prefix,
+        showNames: _groupFrameworkNames(frameworkNames),
+      ),
     );
-    if (widgets != null) {
-      directives.add(widgets);
-    }
   }
   if (designNames.isNotEmpty) {
     directives.add(
@@ -369,19 +459,20 @@ String _rewriteHideDirective(
   }
 
   final directives = <String>[];
-  final Set<String> requiredFrameworkNames = info.prefix == null
+  final Map<String, Set<String>> requiredFrameworkNames = info.prefix == null
       ? state.frameworkUsage
       : state.frameworkUsageForPrefix(info.prefix!);
   if (kind == 'export' || requiredFrameworkNames.isNotEmpty) {
-    final String? widgets = _takeWidgetsDirective(
-      kind,
-      state,
-      prefix: info.prefix,
-      hideNames: frameworkHidden,
+    directives.addAll(
+      _takeFrameworkDirectives(
+        kind,
+        state,
+        prefix: info.prefix,
+        requiredNames: requiredFrameworkNames,
+        hideNames: _groupFrameworkNames(frameworkHidden),
+        includeAll: kind == 'export',
+      ),
     );
-    if (widgets != null) {
-      directives.add(widgets);
-    }
   }
   directives.add(
     _formatDirective(kind, library.packageUri, prefix: info.prefix, hideNames: designHidden),
@@ -389,38 +480,42 @@ String _rewriteHideDirective(
   return directives.join('\n');
 }
 
-String? _takeWidgetsDirective(
+List<String> _takeFrameworkDirectives(
   String kind,
   _RewriteState state, {
   String? prefix,
-  List<String> requiredNames = const <String>[],
-  List<String> showNames = const <String>[],
-  List<String> hideNames = const <String>[],
+  Map<String, Set<String>> requiredNames = const <String, Set<String>>{},
+  Map<String, List<String>> showNames = const <String, List<String>>{},
+  Map<String, List<String>> hideNames = const <String, List<String>>{},
+  bool includeAll = false,
 }) {
-  final _WidgetsDirectiveTracker tracker = kind == 'import'
-      ? state.widgetsImports
-      : state.widgetsExports;
-  if (kind == 'import') {
-    final String? directive = tracker.take(
-      kind,
-      prefix: prefix,
-      requiredNames: requiredNames,
-      showNames: showNames,
-      hideNames: hideNames,
-    );
-    if (directive == null) {
-      return null;
+  final _FrameworkDirectiveTrackers trackers = kind == 'import'
+      ? state.frameworkImports
+      : state.frameworkExports;
+  final directives = <String>[];
+  for (final _FrameworkLibrary library in _frameworkLibraries) {
+    final Set<String> required = requiredNames[library.uri] ?? const <String>{};
+    final List<String> show = showNames[library.uri] ?? const <String>[];
+    final List<String> hide = hideNames[library.uri] ?? const <String>[];
+    if (kind == 'import' && required.isEmpty && show.isEmpty) {
+      continue;
     }
-    return directive;
+    if (!includeAll && required.isEmpty && show.isEmpty && hide.isEmpty) {
+      continue;
+    }
+    final String? directive = trackers.take(
+      kind,
+      library.uri,
+      prefix: prefix,
+      requiredNames: required.toList(),
+      showNames: show,
+      hideNames: hide,
+    );
+    if (directive != null) {
+      directives.add(directive);
+    }
   }
-
-  return tracker.take(
-    kind,
-    prefix: prefix,
-    requiredNames: requiredNames,
-    showNames: showNames,
-    hideNames: hideNames,
-  );
+  return directives;
 }
 
 String _formatDirective(
@@ -466,26 +561,61 @@ List<String> _effectiveShowNames(_DirectiveInfo info) {
   return info.showNames.where((String name) => !info.hideNames.contains(name)).toList();
 }
 
-Set<String> _scanFrameworkUsage(String source) {
-  final usage = <String>{};
+Map<String, Set<String>> _scanFrameworkUsage(String source) {
+  final usage = <String, Set<String>>{};
   for (final String symbol in _frameworkSymbols) {
     if (RegExp('\\b${RegExp.escape(symbol)}\\b').hasMatch(source)) {
-      usage.add(symbol);
+      final _FrameworkLibrary? library = _frameworkLibraryForSymbol(symbol);
+      if (library != null) {
+        usage.putIfAbsent(library.uri, () => <String>{}).add(symbol);
+      }
     }
   }
   return usage;
 }
 
-Set<String> _scanPrefixedFrameworkUsage(String source, String prefix) {
-  final usage = <String>{};
+Map<String, Set<String>> _scanPrefixedFrameworkUsage(String source, String prefix) {
+  final usage = <String, Set<String>>{};
   for (final String symbol in _frameworkSymbols) {
     if (RegExp(
       '\\b${RegExp.escape(prefix)}\\s*\\.\\s*${RegExp.escape(symbol)}\\b',
     ).hasMatch(source)) {
-      usage.add(symbol);
+      final _FrameworkLibrary? library = _frameworkLibraryForSymbol(symbol);
+      if (library != null) {
+        usage.putIfAbsent(library.uri, () => <String>{}).add(symbol);
+      }
     }
   }
   return usage;
+}
+
+Map<String, List<String>> _groupFrameworkNames(Iterable<String> names) {
+  final grouped = <String, List<String>>{};
+  for (final name in names) {
+    final _FrameworkLibrary? library = _frameworkLibraryForSymbol(name);
+    if (library != null) {
+      grouped.putIfAbsent(library.uri, () => <String>[]).add(name);
+    }
+  }
+  return grouped;
+}
+
+_FrameworkLibrary? _frameworkLibraryForSymbol(String symbol) {
+  for (final _FrameworkLibrary library in _frameworkLibraries) {
+    if (library.symbols.contains(symbol)) {
+      return library;
+    }
+  }
+  return null;
+}
+
+_FrameworkLibrary? _frameworkLibraryForUri(String uri) {
+  for (final _FrameworkLibrary library in _frameworkLibraries) {
+    if (library.uri == uri) {
+      return library;
+    }
+  }
+  return null;
 }
 
 String _maskCommentsAndStrings(String source) {
@@ -622,14 +752,45 @@ class _DirectiveInfo {
   }
 }
 
-class _WidgetsDirectiveTracker {
-  _WidgetsDirectiveTracker(List<_DirectiveInfo> existing)
+class _FrameworkDirectiveTrackers {
+  _FrameworkDirectiveTrackers(Map<String, List<_DirectiveInfo>> existing)
+    : _trackers = <String, _FrameworkDirectiveTracker>{
+        for (final _FrameworkLibrary library in _frameworkLibraries)
+          library.uri: _FrameworkDirectiveTracker(
+            existing[library.uri] ?? const <_DirectiveInfo>[],
+          ),
+      };
+
+  final Map<String, _FrameworkDirectiveTracker> _trackers;
+
+  String? take(
+    String kind,
+    String uri, {
+    String? prefix,
+    List<String> requiredNames = const <String>[],
+    List<String> showNames = const <String>[],
+    List<String> hideNames = const <String>[],
+  }) {
+    return _trackers[uri]?.take(
+      kind,
+      uri,
+      prefix: prefix,
+      requiredNames: requiredNames,
+      showNames: showNames,
+      hideNames: hideNames,
+    );
+  }
+}
+
+class _FrameworkDirectiveTracker {
+  _FrameworkDirectiveTracker(List<_DirectiveInfo> existing)
     : _directives = <_DirectiveInfo>[...existing];
 
   final List<_DirectiveInfo> _directives;
 
   String? take(
-    String kind, {
+    String kind,
+    String uri, {
     String? prefix,
     List<String> requiredNames = const <String>[],
     List<String> showNames = const <String>[],
@@ -643,7 +804,7 @@ class _WidgetsDirectiveTracker {
       _directives.add(
         _DirectiveInfo(prefix: prefix, showNames: missing, hideNames: const <String>[]),
       );
-      return _formatDirective(kind, _frameworkUri, prefix: prefix, showNames: missing);
+      return _formatDirective(kind, uri, prefix: prefix, showNames: missing);
     }
 
     if (hideNames.isNotEmpty) {
@@ -653,7 +814,7 @@ class _WidgetsDirectiveTracker {
       _directives.add(
         _DirectiveInfo(prefix: prefix, showNames: const <String>[], hideNames: hideNames),
       );
-      return _formatDirective(kind, _frameworkUri, prefix: prefix, hideNames: hideNames);
+      return _formatDirective(kind, uri, prefix: prefix, hideNames: hideNames);
     }
 
     if (hasBroad(prefix)) {
@@ -668,12 +829,12 @@ class _WidgetsDirectiveTracker {
       _directives.add(
         _DirectiveInfo(prefix: prefix, showNames: missing, hideNames: const <String>[]),
       );
-      return _formatDirective(kind, _frameworkUri, prefix: prefix, showNames: missing);
+      return _formatDirective(kind, uri, prefix: prefix, showNames: missing);
     }
     _directives.add(
       _DirectiveInfo(prefix: prefix, showNames: const <String>[], hideNames: const <String>[]),
     );
-    return _formatDirective(kind, _frameworkUri, prefix: prefix);
+    return _formatDirective(kind, uri, prefix: prefix);
   }
 
   bool allows(String? prefix, String symbol) {
@@ -706,22 +867,30 @@ class _DesignLibrary {
   final String packageUri;
 }
 
+class _FrameworkLibrary {
+  const _FrameworkLibrary({required this.uri, required this.symbols});
+
+  final String uri;
+  final Set<String> symbols;
+}
+
 class _RewriteState {
   _RewriteState({
-    required List<_DirectiveInfo> widgetsImports,
-    required List<_DirectiveInfo> widgetsExports,
+    required Map<String, List<_DirectiveInfo>> frameworkImports,
+    required Map<String, List<_DirectiveInfo>> frameworkExports,
     required this.frameworkUsage,
     required this.maskedSource,
-  }) : widgetsImports = _WidgetsDirectiveTracker(widgetsImports),
-       widgetsExports = _WidgetsDirectiveTracker(widgetsExports);
+  }) : frameworkImports = _FrameworkDirectiveTrackers(frameworkImports),
+       frameworkExports = _FrameworkDirectiveTrackers(frameworkExports);
 
-  final _WidgetsDirectiveTracker widgetsImports;
-  final _WidgetsDirectiveTracker widgetsExports;
-  final Set<String> frameworkUsage;
+  final _FrameworkDirectiveTrackers frameworkImports;
+  final _FrameworkDirectiveTrackers frameworkExports;
+  final Map<String, Set<String>> frameworkUsage;
   final String maskedSource;
-  final Map<String, Set<String>> _frameworkUsageByPrefix = <String, Set<String>>{};
+  final Map<String, Map<String, Set<String>>> _frameworkUsageByPrefix =
+      <String, Map<String, Set<String>>>{};
 
-  Set<String> frameworkUsageForPrefix(String prefix) {
+  Map<String, Set<String>> frameworkUsageForPrefix(String prefix) {
     return _frameworkUsageByPrefix.putIfAbsent(
       prefix,
       () => _scanPrefixedFrameworkUsage(maskedSource, prefix),
