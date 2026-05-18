@@ -16,9 +16,10 @@ import 'framework.dart';
 /// on top of other content. This enum defines whether the content underneath
 /// that overlap should be clipped out, and if so, how the shape of the clip
 /// handles the dynamic boundary of the overlapping region.
-///
+
 /// See also:
-///  * [SliverClipRRect.clipOverlap], which uses this behavior.
+///
+/// * [SliverClipRRect.clipOverlap], which uses this behavior.
 enum ClipOverlapBehavior {
   /// The clip ignores any overlap.
   ///
@@ -151,9 +152,18 @@ class SliverClipRect extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A sliver render object that clips its child.
+/// A sliver render object that clips its child using a rectangle.
+///
+/// By default, [RenderSliverClipRect] uses its own bounds as the base
+/// rectangle for the clip, but the size and location of the clip can be
+/// customized using a custom [clipper].
 class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
-  /// Creates a sliver render object for clipping.
+  /// Creates a rectangular clip.
+  ///
+  /// If [clipper] is null, the clip will match the layout size and position of
+  /// the child.
+  ///
+  /// If [clipBehavior] is [Clip.none], no clipping will be applied.
   RenderSliverClipRect({super.clipper, super.clipBehavior = Clip.hardEdge, bool clipOverlap = true})
     : super(clipOverlap: clipOverlap ? ClipOverlapBehavior.followEdge : ClipOverlapBehavior.none);
 
@@ -354,12 +364,16 @@ class SliverClipRRect extends SingleChildRenderObjectWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(
-      DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null),
+      DiagnosticsProperty<BorderRadiusGeometry>(
+        'borderRadius',
+        borderRadius,
+        defaultValue: BorderRadius.zero,
+      ),
     );
     properties.add(
       DiagnosticsProperty<CustomClipper<RRect>>('clipper', clipper, defaultValue: null),
     );
-    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.antiAlias));
+    properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
     properties.add(
       EnumProperty<ClipOverlapBehavior>(
         'clipOverlap',
@@ -377,6 +391,13 @@ class SliverClipRRect extends SingleChildRenderObjectWidget {
 /// customized using a custom [clipper].
 class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
   /// Creates a sliver render object for clipping with a rounded rectangle.
+  ///
+  /// The [borderRadius] defaults to [BorderRadius.zero], i.e. a rectangle with
+  /// right-angled corners.
+  ///
+  /// If [clipper] is non-null, then [borderRadius] is ignored.
+  ///
+  /// If [clipBehavior] is [Clip.none], no clipping will be applied.
   RenderSliverClipRRect({
     BorderRadiusGeometry borderRadius = BorderRadius.zero,
     super.clipper,
@@ -529,30 +550,36 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     }
   }
 
+  /// {@macro flutter.rendering.ClipRectLayer.clipBehavior}
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
-    if (value != _clipBehavior) {
-      _clipBehavior = value;
-      markNeedsPaint();
+    if (_clipBehavior == value) {
+      return;
     }
+    _clipBehavior = value;
+    markNeedsPaint();
   }
 
   /// Whether to clip starting from the overlap area.
   ClipOverlapBehavior get clipOverlap => _clipOverlap;
   ClipOverlapBehavior _clipOverlap;
   set clipOverlap(ClipOverlapBehavior value) {
-    if (_clipOverlap != value) {
-      _clipOverlap = value;
-      markNeedsPaint();
+    if (_clipOverlap == value) {
+      return;
     }
+    _clipOverlap = value;
+    markNeedsPaint();
   }
 
   T? _clip;
+
+  /// Builds the clip to apply to the child. This method is called lazily from
+  /// [getClip] and the result is cached until the next time the render object is marked as needing paint.
   @protected
   T buildClip();
 
-  @visibleForTesting
+  /// Returns the clip to apply to the child, or null if no clipping is necessary.
   T? getClip() {
     if (clipBehavior == Clip.none) {
       _clip = null;
@@ -563,6 +590,8 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     return _clip;
   }
 
+  /// Returns whether the given offset is contained within the clip. This is used for hit testing and should be
+  /// implemented by subclasses to match the shape of the clip.
   bool clipContains(Offset offset, T clip);
 
   @override
