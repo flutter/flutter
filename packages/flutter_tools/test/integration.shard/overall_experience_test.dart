@@ -445,7 +445,7 @@ void main() {
         'p Toggle the display of construction lines.                                  (debugPaintSizeEnabled)',
         'I Toggle oversized image inversion.                                     (debugInvertOversizedImages)',
         'o Simulate different operating systems.                                      (defaultTargetPlatform)',
-        'b Toggle platform brightness (dark and light mode).                    (debugDeviceMetricsOverrides)',
+        'b Toggle platform brightness (dark and light mode).                         (debugPlatformOverrides)',
         'P Toggle performance overlay.                                    (WidgetsApp.showPerformanceOverlay)',
         'a Toggle timeline events for all widget build methods.                    (debugProfileWidgetBuilds)',
         'g Run source code generators.',

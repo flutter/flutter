@@ -609,21 +609,21 @@ abstract class BindingBase {
         name: FoundationServiceExtensions.brightnessOverride.name,
         callback: (Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
-            debugDeviceMetricsOverrides.brightness = switch (parameters['value']) {
+            debugPlatformOverrides.platformBrightness = switch (parameters['value']) {
               'Brightness.light' => ui.Brightness.light,
               'Brightness.dark' => ui.Brightness.dark,
               _ => null,
             };
             _postExtensionStateChangedEvent(
               FoundationServiceExtensions.brightnessOverride.name,
-              (debugDeviceMetricsOverrides.brightness ?? platformDispatcher.platformBrightness)
+              (debugPlatformOverrides.platformBrightness ?? platformDispatcher.platformBrightness)
                   .toString(),
             );
             await reassembleApplication();
           }
           return <String, dynamic>{
             'value':
-                (debugDeviceMetricsOverrides.brightness ?? platformDispatcher.platformBrightness)
+                (debugPlatformOverrides.platformBrightness ?? platformDispatcher.platformBrightness)
                     .toString(),
           };
         },

@@ -101,44 +101,44 @@ void main() {
     });
   });
 
-  group('DebugDeviceMetricsOverrides', () {
+  group('DebugPlatformOverrides', () {
     tearDown(() {
-      debugDeviceMetricsOverrides.brightness = null;
+      debugPlatformOverrides.platformBrightness = null;
     });
 
     test('defaults to null', () {
-      expect(debugDeviceMetricsOverrides.brightness, isNull);
+      expect(debugPlatformOverrides.platformBrightness, isNull);
       expect(debugBrightnessOverride, isNull);
     });
 
-    test('setting debugBrightnessOverride affects debugDeviceMetricsOverrides.brightness', () {
+    test('setting debugBrightnessOverride affects debugPlatformOverrides.platformBrightness', () {
       debugBrightnessOverride = Brightness.dark;
-      expect(debugDeviceMetricsOverrides.brightness, Brightness.dark);
+      expect(debugPlatformOverrides.platformBrightness, Brightness.dark);
       expect(debugBrightnessOverride, Brightness.dark);
     });
 
-    test('setting debugDeviceMetricsOverrides.brightness affects debugBrightnessOverride', () {
-      debugDeviceMetricsOverrides.brightness = Brightness.light;
+    test('setting debugPlatformOverrides.platformBrightness affects debugBrightnessOverride', () {
+      debugPlatformOverrides.platformBrightness = Brightness.light;
       expect(debugBrightnessOverride, Brightness.light);
     });
 
     test('isEmpty behaves correctly', () {
-      expect(debugDeviceMetricsOverrides.isEmpty, isTrue);
+      expect(debugPlatformOverrides.isEmpty, isTrue);
 
-      debugDeviceMetricsOverrides.brightness = Brightness.dark;
-      expect(debugDeviceMetricsOverrides.isEmpty, isFalse);
+      debugPlatformOverrides.platformBrightness = Brightness.dark;
+      expect(debugPlatformOverrides.isEmpty, isFalse);
 
-      debugDeviceMetricsOverrides.brightness = null;
-      expect(debugDeviceMetricsOverrides.isEmpty, isTrue);
+      debugPlatformOverrides.platformBrightness = null;
+      expect(debugPlatformOverrides.isEmpty, isTrue);
     });
 
-    test('debugAssertAllFoundationVarsUnset detects non-empty debugDeviceMetricsOverrides', () {
+    test('debugAssertAllFoundationVarsUnset detects non-empty debugPlatformOverrides', () {
       expect(() => debugAssertAllFoundationVarsUnset('reason'), returnsNormally);
 
-      debugDeviceMetricsOverrides.brightness = Brightness.dark;
+      debugPlatformOverrides.platformBrightness = Brightness.dark;
       expect(() => debugAssertAllFoundationVarsUnset('reason'), throwsA(isA<FlutterError>()));
 
-      debugDeviceMetricsOverrides.brightness = null;
+      debugPlatformOverrides.platformBrightness = null;
       expect(() => debugAssertAllFoundationVarsUnset('reason'), returnsNormally);
     });
   });

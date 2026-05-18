@@ -41,7 +41,7 @@ bool debugAssertAllFoundationVarsUnset(
     if (debugPrint != debugPrintOverride ||
         debugDefaultTargetPlatformOverride != null ||
         debugDoublePrecision != null ||
-        !debugDeviceMetricsOverrides.isEmpty) {
+        !debugPlatformOverrides.isEmpty) {
       throw FlutterError(reason);
     }
     return true;
@@ -119,50 +119,49 @@ String debugFormatDouble(double? value) {
   return value.toStringAsFixed(1);
 }
 
-/// A class that holds overrides for device metrics in debug mode.
+/// A class that holds overrides for platform metrics in debug mode.
 ///
-/// This is used to customize or simulate specific device profiles during development
+/// This is used to customize or simulate specific platform profiles during development
 /// and testing.
-class DebugDeviceMetricsOverrides {
-  /// Creates a [DebugDeviceMetricsOverrides] configuration.
-  DebugDeviceMetricsOverrides();
+class DebugPlatformOverrides {
+  DebugPlatformOverrides._();
 
   /// The [Brightness] to override the platform brightness with.
-  ui.Brightness? brightness;
+  ui.Brightness? platformBrightness;
 
   /// Whether all fields of this override configuration are null.
-  bool get isEmpty => brightness == null;
+  bool get isEmpty => platformBrightness == null;
 }
 
-/// The active configuration of device metrics overrides.
+/// The active configuration of platform overrides.
 ///
-/// In debug mode, this can be set to customize or simulate specific device
+/// In debug mode, this can be set to customize or simulate specific platform
 /// metrics (such as platform brightness).
 ///
 /// This has no effect in release builds.
-final DebugDeviceMetricsOverrides debugDeviceMetricsOverrides = DebugDeviceMetricsOverrides();
+final DebugPlatformOverrides debugPlatformOverrides = DebugPlatformOverrides._();
 
 /// A setting that can be used to override the platform [Brightness] exposed
 /// from [BindingBase.platformDispatcher].
 ///
-/// This is a deprecated wrapper around [debugDeviceMetricsOverrides]. Use
-/// [debugDeviceMetricsOverrides] instead.
+/// This is a deprecated wrapper around [debugPlatformOverrides]. Use
+/// [debugPlatformOverrides] instead.
 ///
 /// See also:
 ///
 ///  * [WidgetsApp], which uses the [debugBrightnessOverride] setting in debug mode
 ///    to construct a [MediaQueryData].
 @Deprecated(
-  'Use debugDeviceMetricsOverrides.brightness instead. '
+  'Use debugPlatformOverrides.platformBrightness instead. '
   'This feature was deprecated after v3.33.0-0.0.pre.',
 )
-ui.Brightness? get debugBrightnessOverride => debugDeviceMetricsOverrides.brightness;
+ui.Brightness? get debugBrightnessOverride => debugPlatformOverrides.platformBrightness;
 @Deprecated(
-  'Use debugDeviceMetricsOverrides.brightness instead. '
+  'Use debugPlatformOverrides.platformBrightness instead. '
   'This feature was deprecated after v3.33.0-0.0.pre.',
 )
 set debugBrightnessOverride(ui.Brightness? value) {
-  debugDeviceMetricsOverrides.brightness = value;
+  debugPlatformOverrides.platformBrightness = value;
 }
 
 /// The address for the active DevTools server used for debugging this
