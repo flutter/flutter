@@ -427,7 +427,7 @@ Future<void> testMain() async {
       // For the sake of completeness, test codec fallback logic on browsers that support
       // `ImageDecoder`.
       //
-      // We skip this on Canvaskit Chromium because there there is no fallback; the
+      // We skip this on Canvaskit Chromium because there is no fallback; the
       // `ImageDecoder`-based codec is always used.
       group('Codecs (browserSupportsImageDecoder=false)', () {
         setUpAll(() {
