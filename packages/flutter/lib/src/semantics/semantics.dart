@@ -3286,6 +3286,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     for (final Set<SemanticsNode> childSet in owner!._traversalChildNodes.values) {
       childSet.removeWhere((SemanticsNode node) => node == this);
     }
+    owner!._traversalChildNodes.removeWhere(
+      (Object key, Set<SemanticsNode> value) => value.isEmpty,
+    );
 
     _owner = null;
     assert(parent == null || attached == parent!.attached);
@@ -4957,6 +4960,7 @@ class SemanticsOwner extends ChangeNotifier {
           .toList();
       _dirtyNodes.clear();
       _detachedNodes.clear();
+      localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
       visitedNodes.addAll(localDirtyNodes);
       for (final node in localDirtyNodes) {
         assert(node._dirty);
@@ -4977,47 +4981,42 @@ class SemanticsOwner extends ChangeNotifier {
         for (final Set<SemanticsNode> childSet in _traversalChildNodes.values) {
           childSet.removeWhere((SemanticsNode oldNode) => node == oldNode);
         }
-      }
-    }
+        _traversalChildNodes.removeWhere((Object key, Set<SemanticsNode> value) => value.isEmpty);
+        final bool isTraversalParent = node._isTraversalParent;
+        final bool isTraversalChild = node._isTraversalChild;
 
-    for (final node in visitedNodes) {
-      final bool isTraversalParent = node._isTraversalParent;
-      final bool isTraversalChild = node._isTraversalChild;
+        // If the node is a traversal parent, then add it to the
+        // _traversalParentNodes map for later grafting. Similarly, add the node
+        // to the _traversalChildNodes map if it is a traversal child.
+        if (isTraversalParent) {
+          assert(
+            !_traversalParentNodes.containsKey(node._traversalParentIdentifier) ||
+                _traversalParentNodes[node.traversalParentIdentifier!] == node,
+            'The traversalParentIdentifier must be unique. No two semantics nodes can share the same traversalParentIdentifier.',
+          );
+          _traversalParentNodes[node.traversalParentIdentifier!] = node;
+        } else if (isTraversalChild) {
+          _traversalChildNodes[node.traversalChildIdentifier!] ??= <SemanticsNode>{};
+          _traversalChildNodes[node.traversalChildIdentifier!]!.add(node);
+        }
 
-      // If the node is a traversal parent, then add it to the
-      // _traversalParentNodes map for later grafting. Similarly, add the node
-      // to the _traversalChildNodes map if it is a traversal child.
-      if (isTraversalParent) {
-        assert(
-          !_traversalParentNodes.containsKey(node._traversalParentIdentifier) ||
-              _traversalParentNodes[node.traversalParentIdentifier!] == node,
-          'The traversalParentIdentifier must be unique. No two semantics nodes can share the same traversalParentIdentifier.',
-        );
-        _traversalParentNodes[node.traversalParentIdentifier!] = node;
-      } else if (isTraversalChild) {
-        _traversalChildNodes[node.traversalChildIdentifier!] ??= <SemanticsNode>{};
-        _traversalChildNodes[node.traversalChildIdentifier!]!.add(node);
-      }
-    }
-
-    if (!kIsWeb) {
-      for (var index = 0; index < visitedNodes.length; index += 1) {
-        final SemanticsNode node = visitedNodes[index];
-        if (node._isTraversalChild) {
-          // If the node has a non-null `_traversalChildIdentifier`, it indicates
-          // that its hit-test parent and traversal parent are different, and
-          // its traversal parent should update its children to include this node.
-          // Therefore, its traversal parent node should be visited for later
-          // grafting, in order to generate a correct `childrenInTraversalOrder`.
-          // This is typically used in `OverlayPortal` widget.
-          final SemanticsNode? parentNode = _traversalParentNodes[node.traversalChildIdentifier];
-          if (parentNode != null && !visitedNodes.contains(parentNode)) {
-            parentNode._markDirty();
-            visitedNodes.add(parentNode);
+        if (!kIsWeb) {
+          if (node._isTraversalChild) {
+            // If the node has a non-null `_traversalChildIdentifier`, it indicates
+            // that its hit-test parent and traversal parent are different, and
+            // its traversal parent should update its children to include this node.
+            // Therefore, its traversal parent node should be visited for later
+            // grafting, in order to generate a correct `childrenInTraversalOrder`.
+            // This is typically used in `OverlayPortal` widget.
+            final SemanticsNode? parentNode = _traversalParentNodes[node.traversalChildIdentifier];
+            if (parentNode != null && !visitedNodes.contains(parentNode)) {
+              parentNode._markDirty();
+            }
           }
         }
       }
     }
+
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
     final SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
 
