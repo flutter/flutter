@@ -1980,10 +1980,10 @@ void main() {
       text: 'abc مرحبا',
       selectionBase: 0,
       selectionExtent: 9,
-      expectedStartEndpointDirection: TextDirection.ltr,
-      expectedEndEndpointDirection: TextDirection.rtl,
-      expectedStartHandleType: TextSelectionHandleType.left,
-      expectedEndHandleType: TextSelectionHandleType.left,
+      expectedStartEndpointDirection: TextDirection.rtl,
+      expectedEndEndpointDirection: TextDirection.ltr,
+      expectedStartHandleType: TextSelectionHandleType.right,
+      expectedEndHandleType: TextSelectionHandleType.right,
     ),
   ];
 
@@ -2028,7 +2028,7 @@ void main() {
         final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
           controller.selection,
         );
-        expect(endpoints.length, 2);
+        expect(endpoints, hasLength(2));
         expect(endpoints.first.direction, testCase.expectedStartEndpointDirection);
         expect(endpoints.last.direction, testCase.expectedEndEndpointDirection);
         expect(customControls.builtHandleTypes.length, greaterThanOrEqualTo(2));
