@@ -131,7 +131,7 @@ class ViewConfiguration {
 ///
 /// After the bootstrapping is complete, the [compositeFrame] method may be used
 /// to obtain the rendered output.
-class RenderView extends RenderObject with RootRenderObject, RenderObjectWithChildMixin<RenderBox> {
+class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox> {
   /// Creates the root of the render tree.
   ///
   /// Typically created by the binding (e.g., [RendererBinding]).
@@ -276,7 +276,6 @@ class RenderView extends RenderObject with RootRenderObject, RenderObjectWithChi
   /// there are any render objects that need to be painted. It is also set for
   /// warmup frame or any frame requested by the engine (i.e. during return from
   /// background).
-  @override
   void markRequiresCompositing() {
     _requiresCompositing = true;
   }

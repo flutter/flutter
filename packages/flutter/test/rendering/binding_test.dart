@@ -7,11 +7,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _RootRenderObject extends RenderProxyBox with RootRenderObject {
-  @override
-  void markRequiresCompositing() {}
-}
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -55,7 +50,7 @@ void main() {
   });
 
   test('root pipeline owner cannot manage root node', () {
-    final rootNode = _RootRenderObject();
+    final rootNode = RenderProxyBox();
     expect(
       () => RendererBinding.instance.rootPipelineOwner.rootNode = rootNode,
       throwsA(
