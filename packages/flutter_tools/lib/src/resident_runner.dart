@@ -1497,7 +1497,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         continue;
       }
 
-      // 1. Delegate platform-specific asset directory setup to the subclass!
+      // 1. Delegate platform-specific asset directory setup to the subclass.
       await confirmAssetDirectory(device, views);
 
       // 2. Perform font manifest reloading if it was updated.
@@ -1510,7 +1510,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         );
       }
 
-      // 3. Perform the standard, cross-platform eviction calls!
+      // 3. Perform the standard, cross-platform eviction calls.
       for (final String assetPath in devFS.assetPathsToEvict) {
         futures.add(vmService.flutterEvictAsset(assetPath, isolateId: firstUiIsolate.id!));
       }
