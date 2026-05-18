@@ -2215,8 +2215,11 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
   ///
   /// This is called when the OverlayPortal is activated.
   /// This call is allowed even when this location is invalidated.
-  void _activate(_RenderDeferredLayoutBox child) {
-    assert(_overlayChildRenderBox == null, '$_overlayChildRenderBox');
+  void _reattachFromLayoutSurrogate(_RenderDeferredLayoutBox child) {
+    assert(
+      _overlayChildRenderBox == null,
+      '$this failed to reattach: _detachFromLayoutSurrogate must be called before _reattachFromLayoutSurrogate.',
+    );
     _theater._addDeferredChild(child);
     _overlayChildRenderBox = child;
   }
@@ -2224,13 +2227,13 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
   /// Removes the given `child` from the `_theater` but keeps it in the child list
   /// (unlike `_removeChild`).
   ///
-  /// This is typically called when the [OverlayPortal] deactivates (thus the name).
-  /// Since every [RenderObject] in the render tree must be attached, when an
-  /// [OverlayPortal] deactivates, it must remove the overlay child from the render
-  /// tree instead of just detaching it.
+  /// This is typically called when the [OverlayPortal] deactivates. Since every
+  /// [RenderObject] in the render tree must be attached, when an [OverlayPortal]
+  /// deactivates, it must remove the overlay child from the render tree instead
+  /// of just detaching it.
   ///
   /// This call is allowed even when this location is invalidated.
-  void _deactivate(_RenderDeferredLayoutBox child) {
+  void _detachFromLayoutSurrogate(_RenderDeferredLayoutBox child) {
     _theater._removeDeferredChild(child);
     _overlayChildRenderBox = null;
   }
@@ -2723,7 +2726,7 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
       _didDetachDeferredChild = false;
       assert(_deferredLayoutChild != null);
       assert(!_debugIsFirstAttach);
-      overlayLocation!._activate(_deferredLayoutChild!);
+      overlayLocation!._reattachFromLayoutSurrogate(_deferredLayoutChild!);
     }
     assert(() {
       _debugIsFirstAttach = false;
@@ -2737,7 +2740,7 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     // Detaches the deferred child if this node is being detached, but only if the theater isn't
     // already detached (so the deferred child will be detached by the theater).
     if (_deferredLayoutChild case final deferredChild? when deferredChild.theater.attached) {
-      overlayLocation!._deactivate(deferredChild);
+      overlayLocation!._detachFromLayoutSurrogate(deferredChild);
       _didDetachDeferredChild = true;
     }
     super.detach();
