@@ -97,7 +97,7 @@ dependencies:
   checked_yaml: 2.0.4
   cli_config: 0.2.0
   clock: ^1.1.2
-  code_assets: 1.0.0
+  code_assets: 1.1.0
   collection: ^1.19.1
   convert: 3.1.2
   coverage: 1.15.0
@@ -121,8 +121,8 @@ dependencies:
   google_mobile_ads: 8.0.0
   googleapis: 14.0.0
   googleapis_auth: 2.3.1
-  hooks: 1.0.3
-  data_assets: 0.19.6
+  hooks: 2.0.0
+  data_assets: 0.20.0
   record_use: 0.6.0
   html: 0.15.6
   http: 1.6.0
@@ -142,7 +142,7 @@ dependencies:
   meta: ^1.18.2
   metrics_center: 1.0.15
   mime: 2.0.0
-  native_toolchain_c: 0.17.6
+  native_toolchain_c: 0.19.0
   nested: 1.0.0
   node_preamble: 2.0.2
   package_config: 2.2.0
@@ -224,4 +224,13 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: f49okb
+# Because objective_c >=9.2.3 depends on native_toolchain_c ^0.17.4 and
+# objective_c >=9.2.1 <9.2.3 depends on native_toolchain_c ^0.17.2, objective_c
+# >=9.2.1 requires native_toolchain_c ^0.17.2. And because
+# >path_provider_foundation 2.6.0 depends on objective_c ^9.2.1,
+# >path_provider_foundation 2.6.0 requires native_toolchain_c ^0.17.2.
+dependency_overrides:
+  native_toolchain_c: 0.19.0
+  hooks: 2.0.0
+
+# PUBSPEC CHECKSUM: tnpcec
