@@ -210,9 +210,9 @@ class EdgeDraggingAutoScroller {
   /// If the scrollable is already scrolling, calling this method updates the
   /// previous dragTarget to the new value and continues scrolling if necessary.
   ///
-  /// If the [scrollable]'s [ScrollableState.resolvedPhysics] refuses user
-  /// offset (for example [NeverScrollableScrollPhysics]), no auto scroll is
-  /// started and any in-flight auto scroll is stopped.
+  /// If the [scrollable]'s [ScrollableState.resolvedPhysics] refuses
+  /// user-driven scrolling (for example [NeverScrollableScrollPhysics]), no
+  /// auto scroll is started and any in-flight auto scroll is stopped.
   void startAutoScrollIfNecessary(Rect dragTarget) {
     final ScrollPhysics? physics = scrollable.resolvedPhysics;
     if (physics != null && !physics.shouldAcceptUserOffset(scrollable.position)) {
