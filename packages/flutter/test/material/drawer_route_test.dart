@@ -320,9 +320,7 @@ void main() {
     }),
   );
 
-  testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (
-    WidgetTester tester,
-  ) async {
+  Future<void> testDismissibleModalBarrierHiddenOnAndroid(WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
     final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -349,7 +347,13 @@ void main() {
     expect(semantics, isNot(includesNodeWith(label: 'Dismiss')));
 
     semantics.dispose();
-  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  }
+
+  testWidgets(
+    'Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)',
+    testDismissibleModalBarrierHiddenOnAndroid,
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
 
   testWidgets('Drawer contains route semantics flags', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
