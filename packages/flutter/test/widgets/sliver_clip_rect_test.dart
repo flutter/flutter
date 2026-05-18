@@ -16,7 +16,7 @@ Widget _buildOverlapScenario({
   CustomClipper<Rect>? clipper,
   Axis scrollDirection = Axis.vertical,
   bool reverse = false,
-  double childExtent = 100,
+  double childExtent = 100.0,
 }) {
   final isHorizontal = scrollDirection == Axis.horizontal;
 
@@ -32,14 +32,17 @@ Widget _buildOverlapScenario({
           clipper: clipper,
           sliver: SliverToBoxAdapter(
             child: Container(
-              height: isHorizontal ? 100 : childExtent,
+              height: isHorizontal ? 100.0 : childExtent,
               width: isHorizontal ? childExtent : null,
               color: const Color(0xFF2196F3),
             ),
           ),
         ),
         SliverToBoxAdapter(
-          child: SizedBox(height: isHorizontal ? null : 1000, width: isHorizontal ? 1000 : null),
+          child: SizedBox(
+            height: isHorizontal ? null : 1000.0,
+            width: isHorizontal ? 1000.0 : null,
+          ),
         ),
       ],
     ),
@@ -70,7 +73,7 @@ void main() {
               SliverClipRect(
                 clipper: const _HalfHeightClipper(),
                 sliver: SliverToBoxAdapter(
-                  child: Container(height: 100, color: const Color(0xFFF44336)),
+                  child: Container(height: 100.0, color: const Color(0xFFF44336)),
                 ),
               ),
             ],
@@ -81,12 +84,20 @@ void main() {
       final RenderSliver renderSliver = tester.renderObject(find.byType(SliverClipRect));
 
       expect(
-        renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 25, crossAxisPosition: 400),
+        renderSliver.hitTest(
+          SliverHitTestResult(),
+          mainAxisPosition: 25.0,
+          crossAxisPosition: 400.0,
+        ),
         isTrue,
         reason: 'Should hit inside the clipped area',
       );
       expect(
-        renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 75, crossAxisPosition: 400),
+        renderSliver.hitTest(
+          SliverHitTestResult(),
+          mainAxisPosition: 75.0,
+          crossAxisPosition: 400.0,
+        ),
         isFalse,
         reason: 'Should NOT hit outside the clipped area',
       );
@@ -116,7 +127,7 @@ void main() {
               SliverClipRect(
                 clipOverlap: false,
                 clipBehavior: Clip.antiAlias,
-                sliver: SliverToBoxAdapter(child: SizedBox(height: 100)),
+                sliver: SliverToBoxAdapter(child: SizedBox(height: 100.0)),
               ),
             ],
           ),
@@ -141,13 +152,13 @@ void main() {
                 delegate: _SliverPersistentHeaderDelegate(),
                 pinned: true,
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 100)), // Spacer
+              const SliverToBoxAdapter(child: SizedBox(height: 100.0)), // Spacer
               SliverClipRect(
                 sliver: SliverToBoxAdapter(
-                  child: Container(height: 100, color: const Color(0xFF2196F3)),
+                  child: Container(height: 100.0, color: const Color(0xFF2196F3)),
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 1000)),
+              const SliverToBoxAdapter(child: SizedBox(height: 1000.0)),
             ],
           ),
         ),
@@ -163,7 +174,7 @@ void main() {
       // Scroll by 150.
       // Spacer is scrolled off. ClipRect starts at y=50.
       // Since Header is pinned at 0..100, it overlaps ClipRect by 50px.
-      controller.jumpTo(150);
+      controller.jumpTo(150.0);
       await tester.pump();
 
       expect(renderSliver.constraints.overlap, 50.0);
@@ -233,7 +244,7 @@ void main() {
             ),
           );
 
-          controller.jumpTo(50);
+          controller.jumpTo(50.0);
           await tester.pump();
 
           final RenderSliverClipRect renderSliver = tester.renderObject(
@@ -279,7 +290,7 @@ void main() {
                 SliverClipRect(
                   clipper: const _HalfWidthClipper(),
                   sliver: SliverToBoxAdapter(
-                    child: Container(width: 100, height: 100, color: const Color(0xFFF44336)),
+                    child: Container(width: 100.0, height: 100.0, color: const Color(0xFFF44336)),
                   ),
                 ),
               ],
@@ -294,7 +305,11 @@ void main() {
           reason: 'Should hit inside the clipped area',
         );
         expect(
-          renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 75, crossAxisPosition: 50),
+          renderSliver.hitTest(
+            SliverHitTestResult(),
+            mainAxisPosition: 75.0,
+            crossAxisPosition: 50.0,
+          ),
           isFalse,
           reason: 'Should NOT hit outside the clipped area',
         );
@@ -309,7 +324,7 @@ void main() {
                 SliverClipRect(
                   clipper: const _HalfHeightClipper(),
                   sliver: SliverToBoxAdapter(
-                    child: Container(height: 100, color: const Color(0xFFF44336)),
+                    child: Container(height: 100.0, color: const Color(0xFFF44336)),
                   ),
                 ),
               ],
@@ -319,12 +334,20 @@ void main() {
 
         final RenderSliver renderSliver = tester.renderObject(find.byType(SliverClipRect));
         expect(
-          renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 75, crossAxisPosition: 400),
+          renderSliver.hitTest(
+            SliverHitTestResult(),
+            mainAxisPosition: 75.0,
+            crossAxisPosition: 400.0,
+          ),
           isTrue,
           reason: 'Should hit inside the clipped area',
         );
         expect(
-          renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 25, crossAxisPosition: 400),
+          renderSliver.hitTest(
+            SliverHitTestResult(),
+            mainAxisPosition: 25.0,
+            crossAxisPosition: 400.0,
+          ),
           isFalse,
           reason: 'Should NOT hit outside the clipped area',
         );
@@ -337,7 +360,7 @@ class _HalfHeightClipper extends CustomClipper<Rect> {
   const _HalfHeightClipper();
 
   @override
-  Rect getClip(Size size) => Rect.fromLTWH(0, 0, size.width, size.height / 2);
+  Rect getClip(Size size) => Rect.fromLTWH(0.0, 0.0, size.width, size.height / 2.0);
 
   @override
   bool shouldReclip(covariant CustomClipper<Rect> oldClipper) => false;
@@ -347,7 +370,7 @@ class _HalfWidthClipper extends CustomClipper<Rect> {
   const _HalfWidthClipper();
 
   @override
-  Rect getClip(Size size) => Rect.fromLTWH(0, 0, size.width / 2, size.height);
+  Rect getClip(Size size) => Rect.fromLTWH(0.0, 0.0, size.width / 2.0, size.height);
 
   @override
   bool shouldReclip(covariant CustomClipper<Rect> oldClipper) => false;
@@ -360,10 +383,10 @@ class _SliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
       SizedBox(height: maxExtent, width: maxExtent, child: const Text('Header'));
 
   @override
-  double get maxExtent => 100;
+  double get maxExtent => 100.0;
 
   @override
-  double get minExtent => 100;
+  double get minExtent => 100.0;
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
