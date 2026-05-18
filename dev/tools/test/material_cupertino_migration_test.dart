@@ -432,6 +432,52 @@ Widget buildApp() {
 ''');
   });
 
+  test('rewrites directives that follow same-line block comments', () {
+    final file = File('${tempDir.path}/lib/block_comment_directive.dart')
+      ..writeAsStringSync('''
+/* keep */ import 'package:flutter/material.dart';
+
+Widget buildText() {
+  return const Text('Hello');
+}
+''');
+
+    final migration.MigrationResult result = migration.migratePaths(<String>[tempDir.path]);
+
+    expect(result.changedDartFiles, 1);
+    expect(file.readAsStringSync(), '''
+/* keep */ import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart';
+
+Widget buildText() {
+  return const Text('Hello');
+}
+''');
+  });
+
+  test('rewrites multiple directives on the same line', () {
+    final file = File('${tempDir.path}/lib/same_line_directives.dart')
+      ..writeAsStringSync('''
+import 'dart:async'; import 'package:flutter/material.dart' show MaterialApp, Widget;
+
+Widget buildApp() {
+  return const MaterialApp();
+}
+''');
+
+    final migration.MigrationResult result = migration.migratePaths(<String>[tempDir.path]);
+
+    expect(result.changedDartFiles, 1);
+    expect(file.readAsStringSync(), '''
+import 'dart:async'; import 'package:flutter/widgets.dart' show Widget;
+import 'package:material_ui/material_ui.dart' show MaterialApp;
+
+Widget buildApp() {
+  return const MaterialApp();
+}
+''');
+  });
+
   test('ignores design directives inside comments and strings', () {
     final file = File('${tempDir.path}/lib/comments.dart')
       ..writeAsStringSync(r'''

@@ -166,7 +166,7 @@ final Set<String> _frameworkSymbols = <String>{
 };
 
 final RegExp _directivePattern = RegExp(
-  r"""^([ \t]*)(import|export)\s+(['"])([^'"]+)\3([^;]*);""",
+  r"""\b(import|export)\s+(['"])([^'"]+)\2([^;]*);""",
   multiLine: true,
 );
 final RegExp _partPattern = RegExp(r"""^\s*part\s+['"]([^'"]+)['"]\s*;""", multiLine: true);
@@ -315,9 +315,9 @@ _RewriteResult _rewriteFile(File file, List<File> parts) {
     if (!_isActiveDirective(maskedSource, match)) {
       continue;
     }
-    final String kind = match.group(2)!;
-    final String uri = match.group(4)!;
-    final String rest = match.group(5) ?? '';
+    final String kind = match.group(1)!;
+    final String uri = match.group(3)!;
+    final String rest = match.group(4) ?? '';
     final _DesignLibrary? library = _libraryFor(uri);
     if (library == null) {
       continue;
@@ -359,24 +359,37 @@ Map<String, List<_DirectiveInfo>> _frameworkDirectives(
     if (!_isActiveDirective(maskedSource, match)) {
       continue;
     }
-    if (match.group(2) != kind) {
+    if (match.group(1) != kind) {
       continue;
     }
-    final String uri = match.group(4)!;
+    final String uri = match.group(3)!;
     if (_frameworkLibraryForUri(uri) == null) {
       continue;
     }
     directives
         .putIfAbsent(uri, () => <_DirectiveInfo>[])
-        .add(_DirectiveInfo.parse(match.group(5) ?? ''));
+        .add(_DirectiveInfo.parse(match.group(4) ?? ''));
   }
   return directives;
 }
 
 bool _isActiveDirective(String maskedSource, RegExpMatch match) {
-  final String indent = match.group(1)!;
-  final String kind = match.group(2)!;
-  return maskedSource.startsWith(kind, match.start + indent.length);
+  final String kind = match.group(1)!;
+  if (!maskedSource.startsWith(kind, match.start)) {
+    return false;
+  }
+  return _canStartDirective(maskedSource, match.start);
+}
+
+bool _canStartDirective(String maskedSource, int offset) {
+  int index = offset - 1;
+  while (index >= 0 && (maskedSource[index] == ' ' || maskedSource[index] == '\t')) {
+    index -= 1;
+  }
+  if (index < 0) {
+    return true;
+  }
+  return maskedSource[index] == '\n' || maskedSource[index] == '\r' || maskedSource[index] == ';';
 }
 
 _DesignLibrary? _libraryFor(String uri) {
