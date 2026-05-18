@@ -513,5 +513,27 @@ TEST_F(RenderPassGLESCommandTest, NonInstancedDrawIssuesSingleDrawArrays) {
   EXPECT_TRUE(reactor->React());
 }
 
+// A command with an explicit instance count of zero draws nothing, matching
+// the Metal and Vulkan backends.
+TEST_F(RenderPassGLESCommandTest, ZeroInstanceCountIssuesNoDraw) {
+  auto ctx = CreateRenderPassGLESContext();
+  testing::NiceMock<MockGLESImpl>& mock_gl_impl_ref = ctx.mock_gl_impl_ref;
+  std::shared_ptr<RenderPass>& render_pass = ctx.render_pass;
+  std::shared_ptr<PipelineGLES>& pipeline = ctx.pipeline;
+  std::shared_ptr<ReactorGLES>& reactor = ctx.reactor;
+
+  render_pass->SetPipeline(PipelineRef(pipeline));
+  render_pass->SetElementCount(3);
+  render_pass->SetIndexBuffer({}, IndexType::kNone);
+  render_pass->SetInstanceCount(0);
+  EXPECT_TRUE(render_pass->Draw().ok());
+
+  EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, _, _)).Times(0);
+  EXPECT_CALL(mock_gl_impl_ref, DrawArraysInstancedEXT(_, _, _, _)).Times(0);
+
+  EXPECT_TRUE(render_pass->EncodeCommands());
+  EXPECT_TRUE(reactor->React());
+}
+
 }  // namespace testing
 }  // namespace impeller

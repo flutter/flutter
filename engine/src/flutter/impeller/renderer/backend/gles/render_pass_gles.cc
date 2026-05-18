@@ -549,7 +549,16 @@ static void EncodeViewport(const ProcTableGLES& gl,
           static_cast<GLsizei>(index_buffer_view.GetRange().offset));
     }
 
-    const size_t draw_count = emulate_instanced ? command.instance_count : 1u;
+    // An instance count of zero draws nothing, matching the Metal and Vulkan
+    // backends. The hardware path issues a single instanced call; the
+    // emulation path repeats the draw once per instance; every other case is
+    // a single ordinary draw.
+    size_t draw_count = 1u;
+    if (command.instance_count == 0u) {
+      draw_count = 0u;
+    } else if (emulate_instanced) {
+      draw_count = command.instance_count;
+    }
     for (size_t instance = 0; instance < draw_count; instance++) {
       // The vertex buffers were already bound above for instance 0. When
       // emulating, re-point the instance-rate attributes at each subsequent
