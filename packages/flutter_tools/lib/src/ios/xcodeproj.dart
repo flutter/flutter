@@ -539,6 +539,14 @@ class XcodeProjectInterpreter {
     );
   }
 
+  /// Returns scheme-name candidates that cannot be a watch companion (or other
+  /// host build target) and should be excluded from
+  /// [XcodeProjectInfo.schemes] to avoid expensive `xcodebuild
+  /// -showBuildSettings -destination generic/platform=watchOS` probes
+  /// against them.
+  ///
+  /// Covers Flutter's generated SwiftPM packages, plugin names in snake_case
+  /// and dashed forms, and transitive SwiftPM checkout schemes.
   Future<Set<String>> _ignoredSwiftPackageSchemes(
     XcodeBasedProject xcodeProject,
     Directory buildDirectory,
@@ -550,11 +558,8 @@ class XcodeProjectInterpreter {
     };
     try {
       for (final Plugin plugin in await xcodeProject.getPlugins()) {
-        final String dashedPluginName = plugin.name.replaceAll('_', '-');
         ignoredSchemes.add(plugin.name);
-        ignoredSchemes.add(sentenceCase(plugin.name));
-        ignoredSchemes.add(dashedPluginName);
-        ignoredSchemes.add(sentenceCase(dashedPluginName));
+        ignoredSchemes.add(plugin.name.replaceAll('_', '-'));
       }
     } on Object catch (error) {
       _logger.printTrace('Failed to get plugins while filtering Xcode schemes: $error');
@@ -562,6 +567,13 @@ class XcodeProjectInterpreter {
     return ignoredSchemes;
   }
 
+  /// Returns scheme names contributed by resolved Swift package checkouts.
+  ///
+  /// When a Swift package ships its own `.swiftpm/xcode/xcshareddata/xcschemes/`
+  /// directory, Xcode auto-merges those schemes into the host project's scheme
+  /// list, so they appear in `xcodebuild -list` despite not being declared in
+  /// the host `.xcodeproj`. See
+  /// https://www.jessesquires.com/blog/2025/03/10/swiftpm-schemes-in-xcode/.
   Set<String> _swiftPackageCheckoutSchemes(Directory buildDirectory) {
     final Directory checkoutsDirectory = buildDirectory
         .childDirectory(kSwiftPackageCacheDirectoryName)
@@ -703,11 +715,17 @@ class XcodeProjectInfo {
   const XcodeProjectInfo(this.targets, this.buildConfigurations, this.schemes, Logger logger)
     : _logger = logger;
 
+  /// Parses the output of `xcodebuild -list`.
+  ///
+  /// [ignoredSchemes] is matched case-insensitively against parsed schemes.
   factory XcodeProjectInfo.fromXcodeBuildOutput(
     String output,
     Logger logger, {
     Set<String> ignoredSchemes = const <String>{},
   }) {
+    final ignoredSchemeLookup = <String>{
+      for (final String scheme in ignoredSchemes) scheme.toLowerCase(),
+    };
     final targets = <String>[];
     final buildConfigurations = <String>[];
     final schemes = <String>[];
@@ -728,7 +746,7 @@ class XcodeProjectInfo {
       }
       collector?.add(line.trim());
     }
-    schemes.removeWhere(ignoredSchemes.contains);
+    schemes.removeWhere((String scheme) => ignoredSchemeLookup.contains(scheme.toLowerCase()));
     if (schemes.isEmpty) {
       schemes.add('Runner');
     }
