@@ -110,7 +110,7 @@ std::vector<uint8_t> BuildMaliciousApng(uint32_t fdat_data_length) {
 }  // namespace
 
 // Verify that the APNG decoder can handle fdAT chunks whose length is shorter
-// that the required 4-byte sequence number.
+// than the required 4-byte sequence number.
 TEST(APNGImageGeneratorTest, FdATWithShortDataLengthDoesNotCrash) {
   ImageGeneratorRegistry registry;
 

@@ -53,12 +53,14 @@ class APNGImageGenerator : public ImageGenerator {
 
   static std::unique_ptr<ImageGenerator> MakeFromData(sk_sp<SkData> data);
 
-  static uint32_t ComputeCrc32(uint8_t* data, size_t length);
+  /// Computes the CRC of the data in a PNG chunk.
+  static uint32_t ComputeCrc32(const uint8_t* data, size_t length);
 
  private:
   static constexpr uint8_t kPngSignature[8] = {137, 80, 78, 71, 13, 10, 26, 10};
   static constexpr size_t kChunkCrcSize = 4;
 
+  /// The size of the sequence number at the beginning of an fdAT chunk.
   static constexpr size_t kFrameDataSequenceNumberSize = 4;
 
   enum ChunkType {

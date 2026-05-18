@@ -658,13 +658,13 @@ void APNGImageGenerator::ChunkHeader::UpdateChunkCrc32() {
 uint32_t APNGImageGenerator::ChunkHeader::ComputeChunkCrc32() {
   // Exclude the length field at the beginning of the chunk header.
   size_t length = sizeof(ChunkHeader) - 4 + get_data_length();
-  uint8_t* chunk_data = reinterpret_cast<uint8_t*>(this) + 4;
+  const uint8_t* chunk_data = reinterpret_cast<const uint8_t*>(this) + 4;
   return ComputeCrc32(chunk_data, length);
 }
 
-uint32_t APNGImageGenerator::ComputeCrc32(uint8_t* data, size_t length) {
+uint32_t APNGImageGenerator::ComputeCrc32(const uint8_t* data, size_t length) {
   uint32_t crc = 0;
-  uint8_t* data_p = data;
+  const uint8_t* data_p = data;
 
   // zlib's crc32 can only take 16 bits at a time for the length, but PNG
   // supports a 32 bit chunk length, so looping is necessary here.
