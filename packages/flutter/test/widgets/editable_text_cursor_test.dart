@@ -26,9 +26,9 @@ const Color _blue = Color(0xff2196f3);
 const Color _grey = Color(0xff9e9e9e);
 const Color _textFieldBackgroundCursorColor = Color(0xff999999);
 const Color _black87 = Color(0xdd000000);
-// These mirror the platform-specific titleMedium styles from
-// Typography.material2018(), which intentionally leave geometry to the
-// surrounding text style.
+// These mirror the platform-specific titleMedium color and font-family layer
+// from Typography.material2018(). Leave geometry such as fontSize to the
+// surrounding text style; the cursor goldens rely on that inherited geometry.
 const TextStyle _materialTitleMediumStyle = TextStyle(
   fontFamily: 'Roboto',
   color: _black87,
