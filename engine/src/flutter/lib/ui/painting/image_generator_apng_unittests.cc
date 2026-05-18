@@ -35,6 +35,7 @@ void WriteBE16(std::vector<uint8_t>& buf, uint16_t val) {
 void AppendChunk(std::vector<uint8_t>& buf,
                  const char type[4],
                  const std::vector<uint8_t>& data) {
+  FML_CHECK(data.size() <= std::numeric_limits<uint32_t>::max());
   WriteBE32(buf, static_cast<uint32_t>(data.size()));
   size_t type_start = buf.size();
   buf.insert(buf.end(), type, type + 4);
