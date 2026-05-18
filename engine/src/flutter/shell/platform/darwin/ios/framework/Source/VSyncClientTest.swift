@@ -17,6 +17,69 @@ class VSyncClientTest: XCTestCase {
     super.tearDown()
   }
 
+  /// Verifies that the vsync client safely synthesizes a target timestamp when the display link's
+  /// `targetTimestamp` is invalid (i.e. evaluates to 0.0).
+  ///
+  /// Apple's `CADisplayLink` documentation specifies:
+  /// > "The targetTimestamp value is only valid after the display link has delivered at least one
+  /// > frame. Before the first frame is delivered, or when the display link is paused, the value
+  /// > of targetTimestamp is 0."
+  ///
+  /// Our vsync waiter operates on-demand in a request-and-pause cycle. This means every new frame
+  /// sequence begins (e.g. in response to a gesture) with a paused-to-unpaused transition, causing
+  /// the first callback to receive `targetTimestamp = 0.0`.
+  ///
+  /// Without a fallback, passing `targetTime = 0.0` downstream causes a negative presentation time
+  /// when subtracted from the start time.
+  ///
+  /// This test passes a newly created, paused `CADisplayLink` (whose properties both evaluate to
+  /// 0.0) and asserts that the client intercepts the invalid state and synthesizes a safe, positive
+  /// next-frame target timestamp based on the display's maximum refresh rate.
+  func testRealDisplayLinkVsyncTimestampsCorrect() {
+    var callbackStartTime: CFTimeInterval = -1
+    var callbackTargetTime: CFTimeInterval = -1
+    let vsyncClient = VSyncClient(
+      taskRunner: threadTaskRunner,
+      isVariableRefreshRateEnabled: false,
+      maxRefreshRate: 60.0
+    ) { startTime, targetTime in
+      callbackStartTime = startTime
+      callbackTargetTime = targetTime
+    }!
+    let link = vsyncClient.displayLink
+
+    vsyncClient.onDisplayLink(link)
+
+    // Since the display link is paused and has not delivered a frame yet, both timestamp and
+    // targetTimestamp are 0.0. Verify the client synthesizes a valid target timestamp using the max
+    // refresh rate.
+    XCTAssertGreaterThan(callbackStartTime, 0.0)
+    XCTAssertEqual(callbackTargetTime - callbackStartTime, 1.0 / 60.0, accuracy: 0.0001)
+  }
+
+  func testVsyncClientPreventsZeroRefreshRateDivision() {
+    var callbackStartTime: CFTimeInterval = -1
+    var callbackTargetTime: CFTimeInterval = -1
+    // Initialize with maxRefreshRate = 0.0 to simulate uninitialized/zero max refresh rate.
+    let vsyncClient = VSyncClient(
+      taskRunner: threadTaskRunner,
+      isVariableRefreshRateEnabled: false,
+      maxRefreshRate: 0.0
+    ) { startTime, targetTime in
+      callbackStartTime = startTime
+      callbackTargetTime = targetTime
+    }!
+    let link = vsyncClient.displayLink
+
+    vsyncClient.onDisplayLink(link)
+
+    XCTAssertGreaterThan(callbackStartTime, 0.0)
+    // Should fallback to effectiveRefreshRate of 60.0.
+    XCTAssertEqual(callbackTargetTime - callbackStartTime, 1.0 / 60.0, accuracy: 0.0001)
+    XCTAssertFalse(callbackTargetTime.isNaN)
+    XCTAssertFalse(callbackTargetTime.isInfinite)
+  }
+
   func testSetAllowPauseAfterVsyncCorrect() {
     let vsyncClient = VSyncClient(
       taskRunner: threadTaskRunner,
