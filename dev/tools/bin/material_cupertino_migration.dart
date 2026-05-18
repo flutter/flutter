@@ -301,8 +301,8 @@ _RewriteResult _rewriteFile(File file, List<File> parts) {
   final String maskedSource = _maskCommentsAndStrings(source);
   final String maskedPartSource = _maskCommentsAndStrings(partSource);
   final state = _RewriteState(
-    frameworkImports: _frameworkDirectives(source, 'import'),
-    frameworkExports: _frameworkDirectives(source, 'export'),
+    frameworkImports: _frameworkDirectives(source, maskedSource, 'import'),
+    frameworkExports: _frameworkDirectives(source, maskedSource, 'export'),
     frameworkUsage: _scanFrameworkUsage('$maskedSource\n$maskedPartSource'),
     maskedSource: '$maskedSource\n$maskedPartSource',
   );
@@ -312,6 +312,9 @@ _RewriteResult _rewriteFile(File file, List<File> parts) {
   var changed = false;
 
   for (final RegExpMatch match in _directivePattern.allMatches(source)) {
+    if (!_isActiveDirective(maskedSource, match)) {
+      continue;
+    }
     final String kind = match.group(2)!;
     final String uri = match.group(4)!;
     final String rest = match.group(5) ?? '';
@@ -346,9 +349,16 @@ _RewriteResult _rewriteFile(File file, List<File> parts) {
   return _RewriteResult(changed: changed, dependencies: dependencies, source: buffer.toString());
 }
 
-Map<String, List<_DirectiveInfo>> _frameworkDirectives(String source, String kind) {
+Map<String, List<_DirectiveInfo>> _frameworkDirectives(
+  String source,
+  String maskedSource,
+  String kind,
+) {
   final directives = <String, List<_DirectiveInfo>>{};
   for (final RegExpMatch match in _directivePattern.allMatches(source)) {
+    if (!_isActiveDirective(maskedSource, match)) {
+      continue;
+    }
     if (match.group(2) != kind) {
       continue;
     }
@@ -361,6 +371,12 @@ Map<String, List<_DirectiveInfo>> _frameworkDirectives(String source, String kin
         .add(_DirectiveInfo.parse(match.group(5) ?? ''));
   }
   return directives;
+}
+
+bool _isActiveDirective(String maskedSource, RegExpMatch match) {
+  final String indent = match.group(1)!;
+  final String kind = match.group(2)!;
+  return maskedSource.startsWith(kind, match.start + indent.length);
 }
 
 _DesignLibrary? _libraryFor(String uri) {

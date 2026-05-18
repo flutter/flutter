@@ -348,6 +348,41 @@ class Prefixed extends m.StatelessWidget {
 ''');
   });
 
+  test('preserves prefixes when splitting show combinators', () {
+    final file = File('${tempDir.path}/lib/prefixed_show.dart')
+      ..writeAsStringSync('''
+import 'package:flutter/material.dart' as m
+    show BuildContext, MaterialApp, StatelessWidget, Text, Widget;
+
+class PrefixedShow extends m.StatelessWidget {
+  const PrefixedShow({super.key});
+
+  @override
+  m.Widget build(m.BuildContext context) {
+    return const m.MaterialApp(home: m.Text('Hello'));
+  }
+}
+''');
+
+    final migration.MigrationResult result = migration.migratePaths(<String>[tempDir.path]);
+
+    expect(result.changedDartFiles, 1);
+    expect(file.readAsStringSync(), '''
+import 'package:flutter/widgets.dart' as m
+    show BuildContext, StatelessWidget, Text, Widget;
+import 'package:material_ui/material_ui.dart' as m show MaterialApp;
+
+class PrefixedShow extends m.StatelessWidget {
+  const PrefixedShow({super.key});
+
+  @override
+  m.Widget build(m.BuildContext context) {
+    return const m.MaterialApp(home: m.Text('Hello'));
+  }
+}
+''');
+  });
+
   test('preserves framework symbols from multiple design library show imports', () {
     final file = File('${tempDir.path}/lib/multiple_show.dart')
       ..writeAsStringSync('''
@@ -395,5 +430,48 @@ Widget buildApp() {
   return const MaterialApp();
 }
 ''');
+  });
+
+  test('ignores design directives inside comments and strings', () {
+    final file = File('${tempDir.path}/lib/comments.dart')
+      ..writeAsStringSync(r'''
+/*
+import 'package:flutter/cupertino.dart';
+*/
+
+const String sample = """
+import 'package:flutter/cupertino.dart';
+""";
+
+import 'package:flutter/material.dart';
+
+Widget buildText() {
+  return const Text('Hello');
+}
+''');
+
+    final migration.MigrationResult result = migration.migratePaths(<String>[tempDir.path]);
+
+    expect(result.changedDartFiles, 1);
+    expect(file.readAsStringSync(), r'''
+/*
+import 'package:flutter/cupertino.dart';
+*/
+
+const String sample = """
+import 'package:flutter/cupertino.dart';
+""";
+
+import 'package:flutter/widgets.dart';
+import 'package:material_ui/material_ui.dart';
+
+Widget buildText() {
+  return const Text('Hello');
+}
+''');
+    expect(
+      File('${tempDir.path}/pubspec.yaml').readAsStringSync(),
+      isNot(contains('  cupertino_ui: any\n')),
+    );
   });
 }
