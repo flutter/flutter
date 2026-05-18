@@ -2468,9 +2468,6 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   ///
   /// This becomes true during the call to [attach] and becomes false during the
   /// call to [detach].
-  ///
-  /// A child [RenderObject] must have the same [attached] value as its parent (however
-  /// they can be attached to different owners).
   bool get attached => _owner != null;
 
   /// Mark this render object as attached to the given owner.
