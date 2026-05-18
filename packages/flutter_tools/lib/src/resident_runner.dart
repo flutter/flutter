@@ -1513,8 +1513,17 @@ abstract class ResidentRunner extends ResidentHandlers {
       for (final String assetPath in devFS.assetPathsToEvict) {
         futures.add(device.vmService!.flutterEvictAsset(assetPath, isolateId: firstUiIsolate.id!));
       }
-      for (final String assetPath in devFS.shaderPathsToEvict) {
-        futures.add(device.vmService!.flutterEvictShader(assetPath, isolateId: firstUiIsolate.id!));
+      // Shaders are not supported during hot reload on the web yet. Attempting
+      // to evict shaders will call the `ext.ui.window.reinitializeShader` service
+      // extension which is not registered/supported by the Web engine. On web clients,
+      // this throws an internal RPCError (-32603) instead of a standard MethodNotFound
+      // error, which would break the hot reload.
+      if (device.targetPlatform != TargetPlatform.web_javascript) {
+        for (final String assetPath in devFS.shaderPathsToEvict) {
+          futures.add(
+            device.vmService!.flutterEvictShader(assetPath, isolateId: firstUiIsolate.id!),
+          );
+        }
       }
 
       devFS.assetPathsToEvict.clear();
