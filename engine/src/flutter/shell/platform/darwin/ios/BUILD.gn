@@ -270,6 +270,12 @@ if (enable_ios_unittests) {
     ]
   }
 
+  # The tests here are run in a host application on an iOS simulator thus
+  # considerably slower to start than the tests in
+  # "//flutter/shell/platform/darwin/common:framework_common_swift_unittests".
+  # If your tests do not have to be run on a simulator (no UIKit dependencies
+  # for example), consider adding them to the ":framework_common_swift_unittests"
+  # target.
   shared_library("ios_test_flutter") {
     testonly = true
     visibility = [ "*" ]
