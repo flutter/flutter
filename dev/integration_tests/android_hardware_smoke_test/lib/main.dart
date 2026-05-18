@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:async';
+import 'dart:ui' as ui;
+//import 'dart:io' as io;
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:android_driver_extensions/native_driver.dart';
 
 GlobalKey targetKey = GlobalKey();
 
@@ -42,10 +48,45 @@ class _MyState extends State<MyWidget> {
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      completer.complete("Rendered $testName");
+      autoUpdateGoldenFiles = true;
+      // kick off an attempt to match the golden file.
+      getApplicationSupportDirectory().then((directory) {
+        var goldenPath = path.join(directory.path, '$testName.png');
+        print("App postFrameCallback, comparing golden at $goldenPath");
+        matchesGoldenFile(goldenPath).matchAsync(_capturePng(testName)).then((
+          String? result,
+        ) {
+          if (result == null) {
+            completer.complete("Rendered $testName");
+          } else {
+            completer.complete(
+              "Failed to render $testName, match result: $result",
+            );
+            return;
+          }
+        });
+      });
     }, debugLabel: 'Rendered $testName');
 
     return completer.future;
+  }
+
+  Future<Uint8List> _capturePng(String testName) async {
+    try {
+      print('_capturePng for $testName');
+      RenderRepaintBoundary boundary =
+          targetKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+      var pngBytes = byteData!.buffer.asUint8List();
+      if (pngBytes.isEmpty) throw Exception('pngBytes should not be null');
+      return pngBytes;
+    } catch (e) {
+      print(e);
+      return Uint8List(0);
+    }
   }
 
   @override
@@ -66,11 +107,13 @@ class _MyState extends State<MyWidget> {
     return SafeArea(
       child: Stack(
         children: <Widget>[
-          RepaintBoundary(
-            key: targetKey,
-            child: CustomPaint(
-              size: const Size(200, 200),
-              painter: MyPainter(message: _message),
+          SizedBox(
+            child: RepaintBoundary(
+              key: targetKey,
+              child: CustomPaint(
+                size: const Size(200, 200),
+                painter: MyPainter(message: _message),
+              ),
             ),
           ),
           Align(alignment: Alignment.center, child: Text(_message)),
