@@ -154,4 +154,122 @@ class Owner extends StatelessWidget {
 }
 ''');
   });
+
+  test('adds missing widgets symbols when an existing widgets import is restrictive', () {
+    final file = File('${tempDir.path}/lib/restrictive_widgets.dart')
+      ..writeAsStringSync('''
+import 'package:flutter/widgets.dart' show Text;
+import 'package:flutter/material.dart';
+
+class RestrictiveWidgets extends StatelessWidget {
+  const RestrictiveWidgets({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(home: Text('Hello'));
+  }
+}
+''');
+
+    final migration.MigrationResult result = migration.migratePaths(<String>[tempDir.path]);
+
+    expect(result.changedDartFiles, 1);
+    expect(file.readAsStringSync(), '''
+import 'package:flutter/widgets.dart' show Text;
+import 'package:flutter/widgets.dart'
+    show BuildContext, StatelessWidget, Widget;
+import 'package:material_ui/material_ui.dart';
+
+class RestrictiveWidgets extends StatelessWidget {
+  const RestrictiveWidgets({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(home: Text('Hello'));
+  }
+}
+''');
+  });
+
+  test('adds a prefixed widgets import when prefixed framework symbols are used', () {
+    final file = File('${tempDir.path}/lib/prefixed.dart')
+      ..writeAsStringSync('''
+import 'package:flutter/material.dart' as m;
+
+class Prefixed extends m.StatelessWidget {
+  const Prefixed({super.key});
+
+  @override
+  m.Widget build(m.BuildContext context) {
+    return const m.MaterialApp(home: m.Text('Hello'));
+  }
+}
+''');
+
+    final migration.MigrationResult result = migration.migratePaths(<String>[tempDir.path]);
+
+    expect(result.changedDartFiles, 1);
+    expect(file.readAsStringSync(), '''
+import 'package:flutter/widgets.dart' as m;
+import 'package:material_ui/material_ui.dart' as m;
+
+class Prefixed extends m.StatelessWidget {
+  const Prefixed({super.key});
+
+  @override
+  m.Widget build(m.BuildContext context) {
+    return const m.MaterialApp(home: m.Text('Hello'));
+  }
+}
+''');
+  });
+
+  test('preserves framework symbols from multiple design library show imports', () {
+    final file = File('${tempDir.path}/lib/multiple_show.dart')
+      ..writeAsStringSync('''
+import 'package:flutter/cupertino.dart' show CupertinoButton, Text;
+import 'package:flutter/material.dart' show MaterialApp, Widget;
+
+Widget buildButton() {
+  return const MaterialApp(home: CupertinoButton(onPressed: null, child: Text('Hello')));
+}
+''');
+
+    final migration.MigrationResult result = migration.migratePaths(<String>[tempDir.path]);
+
+    expect(result.changedDartFiles, 1);
+    expect(file.readAsStringSync(), '''
+import 'package:flutter/widgets.dart' show Text;
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoButton;
+import 'package:flutter/widgets.dart' show Widget;
+import 'package:material_ui/material_ui.dart' show MaterialApp;
+
+Widget buildButton() {
+  return const MaterialApp(home: CupertinoButton(onPressed: null, child: Text('Hello')));
+}
+''');
+  });
+
+  test('rewrites directives that combine show and hide combinators', () {
+    final file = File('${tempDir.path}/lib/show_hide.dart')
+      ..writeAsStringSync('''
+import 'package:flutter/material.dart' show MaterialApp, Text, Widget hide Text;
+
+Widget buildApp() {
+  return const MaterialApp();
+}
+''');
+
+    final migration.MigrationResult result = migration.migratePaths(<String>[tempDir.path]);
+
+    expect(result.changedDartFiles, 1);
+    expect(file.readAsStringSync(), '''
+import 'package:flutter/widgets.dart' show Widget;
+import 'package:material_ui/material_ui.dart' show MaterialApp;
+
+Widget buildApp() {
+  return const MaterialApp();
+}
+''');
+  });
 }

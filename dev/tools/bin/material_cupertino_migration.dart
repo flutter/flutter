@@ -114,6 +114,9 @@ void _printUsage() {
   );
 }
 
+/// Migrates the Dart files and pubspecs under [paths].
+///
+/// Returns the number of Dart files and pubspecs that were changed.
 MigrationResult migratePaths(Iterable<String> paths) {
   final List<FileSystemEntity> roots = paths.map(_pathToEntity).toList();
   for (final root in roots) {
@@ -213,12 +216,13 @@ _RewriteResult _rewriteFile(File file, List<File> parts) {
   }
 
   final String partSource = parts.map((File part) => part.readAsStringSync()).join('\n');
+  final String maskedSource = _maskCommentsAndStrings(source);
+  final String maskedPartSource = _maskCommentsAndStrings(partSource);
   final state = _RewriteState(
-    hasWidgetsImport: _hasDirective(source, 'import', _frameworkUri),
-    hasWidgetsExport: _hasDirective(source, 'export', _frameworkUri),
-    frameworkUsage: _scanFrameworkUsage(
-      '${_maskCommentsAndStrings(source)}\n${_maskCommentsAndStrings(partSource)}',
-    ),
+    widgetsImports: _widgetsDirectives(source, 'import'),
+    widgetsExports: _widgetsDirectives(source, 'export'),
+    frameworkUsage: _scanFrameworkUsage('$maskedSource\n$maskedPartSource'),
+    maskedSource: '$maskedSource\n$maskedPartSource',
   );
   final dependencies = <String>{};
   final buffer = StringBuffer();
@@ -258,10 +262,12 @@ _RewriteResult _rewriteFile(File file, List<File> parts) {
   return _RewriteResult(changed: changed, dependencies: dependencies, source: buffer.toString());
 }
 
-bool _hasDirective(String source, String kind, String uri) {
+List<_DirectiveInfo> _widgetsDirectives(String source, String kind) {
   return _directivePattern
       .allMatches(source)
-      .any((RegExpMatch match) => match.group(2) == kind && match.group(4) == uri);
+      .where((RegExpMatch match) => match.group(2) == kind && match.group(4) == _frameworkUri)
+      .map((RegExpMatch match) => _DirectiveInfo.parse(match.group(5) ?? ''))
+      .toList();
 }
 
 _DesignLibrary? _libraryFor(String uri) {
@@ -279,36 +285,40 @@ String _rewriteDirective({
   required _DesignLibrary library,
   required _RewriteState state,
 }) {
-  final String? prefix = _asPattern.firstMatch(rest)?.group(1);
-  if (prefix != null) {
-    return "$kind '${library.packageUri}'$rest;";
+  final info = _DirectiveInfo.parse(rest);
+  final List<String> effectiveShowNames = _effectiveShowNames(info);
+  if (effectiveShowNames.isNotEmpty) {
+    return _rewriteShowDirective(kind, library, info, effectiveShowNames, state);
   }
 
-  final List<String> showNames = _parseCombinatorNames(_showPattern, rest);
-  if (showNames.isNotEmpty) {
-    return _rewriteShowDirective(kind, library, showNames, state);
-  }
-
-  final List<String> hideNames = _parseCombinatorNames(_hidePattern, rest);
-  if (hideNames.isNotEmpty) {
-    return _rewriteHideDirective(kind, library, hideNames, state);
+  if (info.hideNames.isNotEmpty) {
+    return _rewriteHideDirective(kind, library, info, state);
   }
 
   final directives = <String>[];
-  final bool needsFrameworkDirective = kind == 'export' || state.frameworkUsage.isNotEmpty;
+  final Set<String> requiredFrameworkNames = info.prefix == null
+      ? state.frameworkUsage
+      : state.frameworkUsageForPrefix(info.prefix!);
+  final bool needsFrameworkDirective = kind == 'export' || requiredFrameworkNames.isNotEmpty;
   if (needsFrameworkDirective) {
-    final String? widgets = _takeWidgetsDirective(kind, state);
+    final String? widgets = _takeWidgetsDirective(
+      kind,
+      state,
+      prefix: info.prefix,
+      requiredNames: requiredFrameworkNames.toList(),
+    );
     if (widgets != null) {
       directives.add(widgets);
     }
   }
-  directives.add(_formatDirective(kind, library.packageUri));
+  directives.add(_formatDirective(kind, library.packageUri, prefix: info.prefix));
   return directives.join('\n');
 }
 
 String _rewriteShowDirective(
   String kind,
   _DesignLibrary library,
+  _DirectiveInfo info,
   List<String> names,
   _RewriteState state,
 ) {
@@ -324,13 +334,20 @@ String _rewriteShowDirective(
 
   final directives = <String>[];
   if (frameworkNames.isNotEmpty) {
-    final String? widgets = _takeWidgetsDirective(kind, state, showNames: frameworkNames);
+    final String? widgets = _takeWidgetsDirective(
+      kind,
+      state,
+      prefix: info.prefix,
+      showNames: frameworkNames,
+    );
     if (widgets != null) {
       directives.add(widgets);
     }
   }
   if (designNames.isNotEmpty) {
-    directives.add(_formatDirective(kind, library.packageUri, showNames: designNames));
+    directives.add(
+      _formatDirective(kind, library.packageUri, prefix: info.prefix, showNames: designNames),
+    );
   }
   return directives.join('\n');
 }
@@ -338,12 +355,12 @@ String _rewriteShowDirective(
 String _rewriteHideDirective(
   String kind,
   _DesignLibrary library,
-  List<String> names,
+  _DirectiveInfo info,
   _RewriteState state,
 ) {
   final frameworkHidden = <String>[];
   final designHidden = <String>[];
-  for (final name in names) {
+  for (final String name in info.hideNames) {
     if (_frameworkSymbols.contains(name)) {
       frameworkHidden.add(name);
     } else {
@@ -352,40 +369,64 @@ String _rewriteHideDirective(
   }
 
   final directives = <String>[];
-  if (kind == 'export' || state.frameworkUsage.isNotEmpty) {
-    final String? widgets = _takeWidgetsDirective(kind, state, hideNames: frameworkHidden);
+  final Set<String> requiredFrameworkNames = info.prefix == null
+      ? state.frameworkUsage
+      : state.frameworkUsageForPrefix(info.prefix!);
+  if (kind == 'export' || requiredFrameworkNames.isNotEmpty) {
+    final String? widgets = _takeWidgetsDirective(
+      kind,
+      state,
+      prefix: info.prefix,
+      hideNames: frameworkHidden,
+    );
     if (widgets != null) {
       directives.add(widgets);
     }
   }
-  directives.add(_formatDirective(kind, library.packageUri, hideNames: designHidden));
+  directives.add(
+    _formatDirective(kind, library.packageUri, prefix: info.prefix, hideNames: designHidden),
+  );
   return directives.join('\n');
 }
 
 String? _takeWidgetsDirective(
   String kind,
   _RewriteState state, {
+  String? prefix,
+  List<String> requiredNames = const <String>[],
   List<String> showNames = const <String>[],
   List<String> hideNames = const <String>[],
 }) {
+  final _WidgetsDirectiveTracker tracker = kind == 'import'
+      ? state.widgetsImports
+      : state.widgetsExports;
   if (kind == 'import') {
-    if (state.hasWidgetsImport || state.addedWidgetsImport) {
+    final String? directive = tracker.take(
+      kind,
+      prefix: prefix,
+      requiredNames: requiredNames,
+      showNames: showNames,
+      hideNames: hideNames,
+    );
+    if (directive == null) {
       return null;
     }
-    state.addedWidgetsImport = true;
-    return _formatDirective(kind, _frameworkUri, showNames: showNames, hideNames: hideNames);
+    return directive;
   }
 
-  if (state.hasWidgetsExport || state.addedWidgetsExport) {
-    return null;
-  }
-  state.addedWidgetsExport = true;
-  return _formatDirective(kind, _frameworkUri, showNames: showNames, hideNames: hideNames);
+  return tracker.take(
+    kind,
+    prefix: prefix,
+    requiredNames: requiredNames,
+    showNames: showNames,
+    hideNames: hideNames,
+  );
 }
 
 String _formatDirective(
   String kind,
   String uri, {
+  String? prefix,
   List<String> showNames = const <String>[],
   List<String> hideNames = const <String>[],
 }) {
@@ -397,12 +438,12 @@ String _formatDirective(
     combinators.add('hide ${hideNames.join(', ')}');
   }
   if (combinators.isEmpty) {
-    return "$kind '$uri';";
+    return "$kind '$uri'${prefix == null ? '' : ' as $prefix'};";
   }
   if (showNames.length + hideNames.length == 1) {
-    return "$kind '$uri' ${combinators.join(' ')};";
+    return "$kind '$uri'${prefix == null ? '' : ' as $prefix'} ${combinators.join(' ')};";
   }
-  return "$kind '$uri'\n    ${combinators.join(' ')};";
+  return "$kind '$uri'${prefix == null ? '' : ' as $prefix'}\n    ${combinators.join(' ')};";
 }
 
 List<String> _parseCombinatorNames(RegExp pattern, String rest) {
@@ -418,10 +459,29 @@ List<String> _parseCombinatorNames(RegExp pattern, String rest) {
       .toList();
 }
 
+List<String> _effectiveShowNames(_DirectiveInfo info) {
+  if (info.showNames.isEmpty) {
+    return const <String>[];
+  }
+  return info.showNames.where((String name) => !info.hideNames.contains(name)).toList();
+}
+
 Set<String> _scanFrameworkUsage(String source) {
   final usage = <String>{};
   for (final String symbol in _frameworkSymbols) {
     if (RegExp('\\b${RegExp.escape(symbol)}\\b').hasMatch(source)) {
+      usage.add(symbol);
+    }
+  }
+  return usage;
+}
+
+Set<String> _scanPrefixedFrameworkUsage(String source, String prefix) {
+  final usage = <String>{};
+  for (final String symbol in _frameworkSymbols) {
+    if (RegExp(
+      '\\b${RegExp.escape(prefix)}\\s*\\.\\s*${RegExp.escape(symbol)}\\b',
+    ).hasMatch(source)) {
       usage.add(symbol);
     }
   }
@@ -527,11 +587,111 @@ bool _updatePubspec(Directory root, Set<String> dependencies) {
   return true;
 }
 
+/// The result of a Material/Cupertino package migration run.
 class MigrationResult {
+  /// Creates a migration result.
   const MigrationResult({required this.changedDartFiles, required this.changedPubspecs});
 
+  /// The number of Dart files rewritten by the migration.
   final int changedDartFiles;
+
+  /// The number of pubspec files updated by the migration.
   final int changedPubspecs;
+}
+
+class _DirectiveInfo {
+  const _DirectiveInfo({required this.prefix, required this.showNames, required this.hideNames});
+
+  factory _DirectiveInfo.parse(String rest) {
+    return _DirectiveInfo(
+      prefix: _asPattern.firstMatch(rest)?.group(1),
+      showNames: _parseCombinatorNames(_showPattern, rest),
+      hideNames: _parseCombinatorNames(_hidePattern, rest),
+    );
+  }
+
+  final String? prefix;
+  final List<String> showNames;
+  final List<String> hideNames;
+
+  bool allows(String symbol) {
+    if (showNames.isNotEmpty && !showNames.contains(symbol)) {
+      return false;
+    }
+    return !hideNames.contains(symbol);
+  }
+}
+
+class _WidgetsDirectiveTracker {
+  _WidgetsDirectiveTracker(List<_DirectiveInfo> existing)
+    : _directives = <_DirectiveInfo>[...existing];
+
+  final List<_DirectiveInfo> _directives;
+
+  String? take(
+    String kind, {
+    String? prefix,
+    List<String> requiredNames = const <String>[],
+    List<String> showNames = const <String>[],
+    List<String> hideNames = const <String>[],
+  }) {
+    if (showNames.isNotEmpty) {
+      final List<String> missing = showNames.where((String name) => !allows(prefix, name)).toList();
+      if (missing.isEmpty) {
+        return null;
+      }
+      _directives.add(
+        _DirectiveInfo(prefix: prefix, showNames: missing, hideNames: const <String>[]),
+      );
+      return _formatDirective(kind, _frameworkUri, prefix: prefix, showNames: missing);
+    }
+
+    if (hideNames.isNotEmpty) {
+      if (hasBroad(prefix)) {
+        return null;
+      }
+      _directives.add(
+        _DirectiveInfo(prefix: prefix, showNames: const <String>[], hideNames: hideNames),
+      );
+      return _formatDirective(kind, _frameworkUri, prefix: prefix, hideNames: hideNames);
+    }
+
+    if (hasBroad(prefix)) {
+      return null;
+    }
+    final List<String> missing =
+        requiredNames.where((String name) => !allows(prefix, name)).toList()..sort();
+    if (_hasDirectiveForPrefix(prefix) && missing.isEmpty) {
+      return null;
+    }
+    if (_hasDirectiveForPrefix(prefix)) {
+      _directives.add(
+        _DirectiveInfo(prefix: prefix, showNames: missing, hideNames: const <String>[]),
+      );
+      return _formatDirective(kind, _frameworkUri, prefix: prefix, showNames: missing);
+    }
+    _directives.add(
+      _DirectiveInfo(prefix: prefix, showNames: const <String>[], hideNames: const <String>[]),
+    );
+    return _formatDirective(kind, _frameworkUri, prefix: prefix);
+  }
+
+  bool allows(String? prefix, String symbol) {
+    return _directives.any(
+      (_DirectiveInfo directive) => directive.prefix == prefix && directive.allows(symbol),
+    );
+  }
+
+  bool hasBroad(String? prefix) {
+    return _directives.any(
+      (_DirectiveInfo directive) =>
+          directive.prefix == prefix && directive.showNames.isEmpty && directive.hideNames.isEmpty,
+    );
+  }
+
+  bool _hasDirectiveForPrefix(String? prefix) {
+    return _directives.any((_DirectiveInfo directive) => directive.prefix == prefix);
+  }
 }
 
 class _DesignLibrary {
@@ -548,16 +708,25 @@ class _DesignLibrary {
 
 class _RewriteState {
   _RewriteState({
-    required this.hasWidgetsImport,
-    required this.hasWidgetsExport,
+    required List<_DirectiveInfo> widgetsImports,
+    required List<_DirectiveInfo> widgetsExports,
     required this.frameworkUsage,
-  });
+    required this.maskedSource,
+  }) : widgetsImports = _WidgetsDirectiveTracker(widgetsImports),
+       widgetsExports = _WidgetsDirectiveTracker(widgetsExports);
 
-  final bool hasWidgetsImport;
-  final bool hasWidgetsExport;
+  final _WidgetsDirectiveTracker widgetsImports;
+  final _WidgetsDirectiveTracker widgetsExports;
   final Set<String> frameworkUsage;
-  bool addedWidgetsImport = false;
-  bool addedWidgetsExport = false;
+  final String maskedSource;
+  final Map<String, Set<String>> _frameworkUsageByPrefix = <String, Set<String>>{};
+
+  Set<String> frameworkUsageForPrefix(String prefix) {
+    return _frameworkUsageByPrefix.putIfAbsent(
+      prefix,
+      () => _scanPrefixedFrameworkUsage(maskedSource, prefix),
+    );
+  }
 }
 
 class _RewriteResult {
