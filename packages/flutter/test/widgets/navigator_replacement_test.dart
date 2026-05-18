@@ -230,6 +230,7 @@ void main() {
   });
 }
 
+/// Builds a [TestWidgetsApp] for navigator replacement tests.
 Widget _buildApp({
   Widget? home,
   String? initialRoute,
@@ -246,6 +247,7 @@ Widget _buildApp({
   );
 }
 
+/// Creates a page route with the transition used by the replacement tests.
 PageRoute<T> _pageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
   return PageRouteBuilder<T>(
     settings: settings,
