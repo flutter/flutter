@@ -1082,10 +1082,7 @@ void main() {
     );
 
     // Set up two stacked modal barriers: lower route is dismissible, upper route is not.
-    final Future<void> bottomRoutePopped = pushDialog(
-      routeName: 'bottom-route',
-      dismissible: true,
-    );
+    final Future<void> bottomRoutePopped = pushDialog(routeName: 'bottom-route', dismissible: true);
     await tester.pumpAndSettle();
     expect(find.byKey(bottomRouteKey), findsOneWidget);
 
