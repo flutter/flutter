@@ -117,7 +117,7 @@ mixin RendererBinding
   @visibleForTesting
   void markAllViewsDirty() {
     for (final RenderView view in renderViews) {
-      view.markRequiresCompositing();
+      view.markNeedsCompositeFrame();
     }
   }
 
@@ -403,7 +403,7 @@ mixin RendererBinding
     view.configuration = createViewConfigurationFor(view);
     // Ensure the view composites at least once in a non-warm-up frame after
     // being added, so its contents appear even if no descendants are dirty.
-    view.markRequiresCompositing();
+    view.markNeedsCompositeFrame();
   }
 
   /// Removes a [RenderView] previously added with [addRenderView] from the
@@ -753,14 +753,14 @@ mixin RendererBinding
 
     if (sendFramesToEngine) {
       for (final RenderView renderView in renderViews) {
-        if (renderView.requiresCompositing) {
+        if (renderView.needsCompositeFrame) {
           renderView.compositeFrame(); // this sends the bits to the GPU
         }
         if (isWarmUpFrame) {
           // Warm-up frame does not guarantee that the content is actually
           // painted (see [SchedulerBinding.scheduleWarmUpFrame]). This is to
           // ensure that on the subsequent real frame the view is recomposited.
-          renderView.markRequiresCompositing();
+          renderView.markNeedsCompositeFrame();
         }
       }
       rootPipelineOwner.flushSemantics(); // this sends the semantics to the OS.
@@ -784,7 +784,7 @@ mixin RendererBinding
       }
     }
     for (final RenderView renderView in renderViews) {
-      renderView.markRequiresCompositing();
+      renderView.markNeedsCompositeFrame();
     }
     scheduleWarmUpFrame();
     await endOfFrame;
