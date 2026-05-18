@@ -4,8 +4,10 @@
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/widgets_app_tester.dart';
 
 class TestResult {
   bool dragStarted = false;
@@ -20,30 +22,28 @@ class NestedScrollableCase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverFixedExtentList.builder(
-            itemExtent: 50.0,
-            itemBuilder: (BuildContext context, int index) {
-              return Container(
-                alignment: Alignment.center,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onVerticalDragDown: (DragDownDetails details) {
-                    testResult.dragStarted = true;
-                  },
-                  onVerticalDragUpdate: (DragUpdateDetails details) {
-                    testResult.dragUpdate = true;
-                  },
-                  onVerticalDragEnd: (_) {},
-                  child: Text('List Item $index', key: ValueKey<int>(index)),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverFixedExtentList.builder(
+          itemExtent: 50.0,
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+              alignment: Alignment.center,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onVerticalDragDown: (DragDownDetails details) {
+                  testResult.dragStarted = true;
+                },
+                onVerticalDragUpdate: (DragUpdateDetails details) {
+                  testResult.dragUpdate = true;
+                },
+                onVerticalDragEnd: (_) {},
+                child: Text('List Item $index', key: ValueKey<int>(index)),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -55,33 +55,31 @@ class NestedDraggableCase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverFixedExtentList.builder(
-            itemExtent: 50.0,
-            itemBuilder: (BuildContext context, int index) {
-              return Container(
-                alignment: Alignment.center,
-                child: Draggable<Object>(
-                  key: ValueKey<int>(index),
-                  feedback: const Text('Dragging'),
-                  child: Text('List Item $index'),
-                  onDragStarted: () {
-                    testResult.dragStarted = true;
-                  },
-                  onDragUpdate: (DragUpdateDetails details) {
-                    testResult.dragUpdate = true;
-                  },
-                  onDragEnd: (_) {
-                    testResult.dragEnd = true;
-                  },
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverFixedExtentList.builder(
+          itemExtent: 50.0,
+          itemBuilder: (BuildContext context, int index) {
+            return Container(
+              alignment: Alignment.center,
+              child: Draggable<Object>(
+                key: ValueKey<int>(index),
+                feedback: const Text('Dragging'),
+                child: Text('List Item $index'),
+                onDragStarted: () {
+                  testResult.dragStarted = true;
+                },
+                onDragUpdate: (DragUpdateDetails details) {
+                  testResult.dragUpdate = true;
+                },
+                onDragEnd: (_) {
+                  testResult.dragEnd = true;
+                },
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -96,9 +94,9 @@ void main() {
     final result = TestResult();
 
     await tester.pumpWidget(
-      MaterialApp(
-        title: 'Scroll Bug',
-        home: NestedScrollableCase(testResult: result),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NestedScrollableCase(testResult: result),
       ),
     );
 
@@ -122,12 +120,7 @@ void main() {
 
     final result = TestResult();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        title: 'Scroll Bug',
-        home: NestedDraggableCase(testResult: result),
-      ),
-    );
+    await tester.pumpWidget(TestWidgetsApp(home: NestedDraggableCase(testResult: result)));
 
     // By dragging the scroll view more than the configured touch slop above but less than
     // the framework default value, we demonstrate that this causes gesture detectors

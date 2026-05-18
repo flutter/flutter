@@ -24,13 +24,14 @@ extension on web.CSSRuleList {
       Iterable<web.CSSRule?>.generate(length, (int index) => item(index));
 }
 
-bool _browserContextMenuEnabled() {
-  // TODO(Renzo-Olivares): Remove this when the web context menu
-  // for Android and iOS is re-enabled.
-  // See: https://github.com/flutter/flutter/issues/177123.
-  return kIsWeb &&
-      !<TargetPlatform>{TargetPlatform.android, TargetPlatform.iOS}.contains(defaultTargetPlatform);
-}
+// TODO(Renzo-Olivares): Remove this when the web context menu
+// for Android and iOS is re-enabled.
+// See: https://github.com/flutter/flutter/issues/177123.
+final TargetPlatformVariant _browserContextMenuEnabledVariants = TargetPlatformVariant(
+  TargetPlatform.values
+      .where((platform) => platform != TargetPlatform.android && platform != TargetPlatform.iOS)
+      .toSet(),
+);
 
 void main() {
   late FakePlatformViewRegistry fakePlatformViewRegistry;
@@ -47,141 +48,125 @@ void main() {
     PlatformSelectableRegionContextMenu.debugResetRegistry();
   });
 
-  testWidgets(
-    'DOM element is set up correctly',
-    (WidgetTester tester) async {
-      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+  testWidgets('DOM element is set up correctly', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: EmptyTextSelectionControls(),
-            child: const Placeholder(),
-          ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          selectionControls: EmptyTextSelectionControls(),
+          child: const Placeholder(),
         ),
-      );
+      ),
+    );
 
-      final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
 
-      expect(element, isNotNull);
-      expect(element.style.width, '100%');
-      expect(element.style.height, '100%');
-      expect(element.classList.length, 1);
+    expect(element, isNotNull);
+    expect(element.style.width, '100%');
+    expect(element.style.height, '100%');
+    expect(element.classList.length, 1);
 
-      final int numberOfStyleElements = getNumberOfStyleElements();
-      expect(numberOfStyleElements, 1);
-    },
-    skip: !_browserContextMenuEnabled(), // [intended]
-  );
+    final int numberOfStyleElements = getNumberOfStyleElements();
+    expect(numberOfStyleElements, 1);
+  }, variant: _browserContextMenuEnabledVariants);
 
-  testWidgets(
-    'only one <style> is inserted into the DOM',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: ListView(
-            children: <Widget>[
-              SelectableRegion(
-                selectionControls: EmptyTextSelectionControls(),
-                child: const Placeholder(),
-              ),
-              SelectableRegion(
-                selectionControls: EmptyTextSelectionControls(),
-                child: const Placeholder(),
-              ),
-              SelectableRegion(
-                selectionControls: EmptyTextSelectionControls(),
-                child: const Placeholder(),
-              ),
-            ],
-          ),
+  testWidgets('only one <style> is inserted into the DOM', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListView(
+          children: <Widget>[
+            SelectableRegion(
+              selectionControls: EmptyTextSelectionControls(),
+              child: const Placeholder(),
+            ),
+            SelectableRegion(
+              selectionControls: EmptyTextSelectionControls(),
+              child: const Placeholder(),
+            ),
+            SelectableRegion(
+              selectionControls: EmptyTextSelectionControls(),
+              child: const Placeholder(),
+            ),
+          ],
         ),
-      );
-      await tester.pumpAndSettle();
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.pumpAndSettle();
 
-      final int numberOfStyleElements = getNumberOfStyleElements();
-      expect(numberOfStyleElements, 1);
-    },
-    skip: !_browserContextMenuEnabled(), // [intended]
-  );
+    final int numberOfStyleElements = getNumberOfStyleElements();
+    expect(numberOfStyleElements, 1);
+  }, variant: _browserContextMenuEnabledVariants);
 
-  testWidgets(
-    'right click can trigger select word',
-    (WidgetTester tester) async {
-      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+  testWidgets('right click can trigger select word', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
 
-      final focusNode = FocusNode();
-      addTearDown(focusNode.dispose);
-      final spy = UniqueKey();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            focusNode: focusNode,
-            selectionControls: materialTextSelectionControls,
-            child: SelectionSpy(key: spy),
-          ),
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    final spy = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: materialTextSelectionControls,
+          child: SelectionSpy(key: spy),
         ),
-      );
+      ),
+    );
 
-      final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
-      expect(element, isNotNull);
+    final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    expect(element, isNotNull);
 
-      focusNode.requestFocus();
-      await tester.pump();
+    focusNode.requestFocus();
+    await tester.pump();
 
-      // Dispatch right click.
-      element.dispatchEvent(
-        web.MouseEvent('mousedown', web.MouseEventInit(button: 2, clientX: 200, clientY: 300)),
-      );
-      final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(
-        find.byKey(spy),
-      );
-      expect(renderSelectionSpy.events, isNotEmpty);
+    // Dispatch right click.
+    element.dispatchEvent(
+      web.MouseEvent('mousedown', web.MouseEventInit(button: 2, clientX: 200, clientY: 300)),
+    );
+    final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(
+      find.byKey(spy),
+    );
+    expect(renderSelectionSpy.events, isNotEmpty);
 
-      SelectWordSelectionEvent? selectWordEvent;
-      for (final SelectionEvent event in renderSelectionSpy.events) {
-        if (event is SelectWordSelectionEvent) {
-          selectWordEvent = event;
-          break;
-        }
+    SelectWordSelectionEvent? selectWordEvent;
+    for (final SelectionEvent event in renderSelectionSpy.events) {
+      if (event is SelectWordSelectionEvent) {
+        selectWordEvent = event;
+        break;
       }
-      expect(selectWordEvent, isNotNull);
-      expect((selectWordEvent!.globalPosition.dx - 200).abs() < precisionErrorTolerance, isTrue);
-      expect((selectWordEvent.globalPosition.dy - 300).abs() < precisionErrorTolerance, isTrue);
-    },
-    skip: !_browserContextMenuEnabled(), // [intended]
-  );
+    }
+    expect(selectWordEvent, isNotNull);
+    expect((selectWordEvent!.globalPosition.dx - 200).abs() < precisionErrorTolerance, isTrue);
+    expect((selectWordEvent.globalPosition.dy - 300).abs() < precisionErrorTolerance, isTrue);
+  }, variant: _browserContextMenuEnabledVariants);
 
   // Regression test for https://github.com/flutter/flutter/issues/157579
-  testWidgets(
-    'prevents default action of mousedown events',
-    (WidgetTester tester) async {
-      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+  testWidgets('prevents default action of mousedown events', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SelectableRegion(
-            selectionControls: emptyTextSelectionControls,
-            child: const SizedBox.shrink(),
-          ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const SizedBox.shrink(),
         ),
+      ),
+    );
+
+    final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    expect(element, isNotNull);
+
+    for (var i = 0; i <= 4; i++) {
+      final event = web.MouseEvent(
+        'mousedown',
+        web.MouseEventInit(button: i, clientX: 200, clientY: 300, cancelable: true),
       );
-
-      final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
-      expect(element, isNotNull);
-
-      for (var i = 0; i <= 4; i++) {
-        final event = web.MouseEvent(
-          'mousedown',
-          web.MouseEventInit(button: i, clientX: 200, clientY: 300, cancelable: true),
-        );
-        element.dispatchEvent(event);
-        expect(event.defaultPrevented, isTrue);
-      }
-    },
-    skip: !_browserContextMenuEnabled(), // [intended]
-  );
+      element.dispatchEvent(event);
+      expect(event.defaultPrevented, isTrue);
+    }
+  }, variant: _browserContextMenuEnabledVariants);
 }
 
 void removeAllStyleElements() {

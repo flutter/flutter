@@ -46,10 +46,10 @@ abstract class Project {
   /// (Used by [HotReloadProject].)
   final String indexHtml;
 
-  Future<void> setUpIn(Directory dir) async {
+  Future<void> setUpIn(Directory dir, {bool generateMain = true}) async {
     this.dir = dir;
     writeFile(fileSystem.path.join(dir.path, 'pubspec.yaml'), pubspec);
-    if (main.isNotEmpty) {
+    if (main.isNotEmpty && generateMain) {
       writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), main);
     }
     if (test.isNotEmpty) {

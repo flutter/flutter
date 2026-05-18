@@ -14,7 +14,7 @@ import '../utils.dart';
 
 Future<void> verifyCodesignedTestRunner() async {
   printProgress('${green}Running binaries codesign verification$reset');
-  await runCommand('flutter', <String>[
+  await runCommand(path.join(flutterRoot, 'bin', 'flutter'), <String>[
     'precache',
     '--android',
     '--ios',
@@ -23,13 +23,14 @@ Future<void> verifyCodesignedTestRunner() async {
 
   await verifyExist(flutterRoot);
   await verifySignatures(flutterRoot);
+  await verifyFatBinaries(flutterRoot);
 }
 
 /// Some binaries should always be codesigned, even on master. Verify that they
 /// are codesigned and have the correct entitlements.
 Future<void> verifyPreCodesignedTestRunner() async {
   printProgress('${green}Running binaries codesign verification$reset');
-  await runCommand('flutter', <String>[
+  await runCommand(path.join(flutterRoot, 'bin', 'flutter'), <String>[
     'precache',
     '--android',
     '--ios',
@@ -38,6 +39,7 @@ Future<void> verifyPreCodesignedTestRunner() async {
 
   await verifyExist(flutterRoot);
   await verifySignatures(flutterRoot, forRelease: false);
+  await verifyFatBinaries(flutterRoot);
 }
 
 const List<String> expectedEntitlements = <String>[
@@ -333,6 +335,43 @@ Future<void> verifySignatures(
     throw Exception('Test failed because unexpected files found in the cache.');
   }
   print('Verified that files are codesigned and have expected entitlements.');
+}
+
+/// Verify that specific binaries are fat binaries containing both x86_64 and arm64 slices.
+Future<void> verifyFatBinaries(
+  String flutterRoot, {
+  @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
+}) async {
+  final List<String> fatBinaries =
+      presignedBinariesWithEntitlements(flutterRoot) +
+      presignedBinariesWithoutEntitlements(flutterRoot);
+  final failedBinaries = <String>[];
+
+  for (final binaryPath in fatBinaries) {
+    print('Verifying fat binary architectures for $binaryPath');
+    final io.ProcessResult result = await processManager.run(<String>['file', binaryPath]);
+
+    if (result.exitCode != 0) {
+      print('Failed to run file command on $binaryPath: \n${result.stderr}');
+      failedBinaries.add(binaryPath);
+      continue;
+    }
+
+    final output = result.stdout as String;
+    final bool containsX86_64 = output.contains('x86_64');
+    final bool containsArm64 = output.contains('arm64');
+
+    if (!containsX86_64 || !containsArm64) {
+      print('Binary $binaryPath is not a fat binary containing both x86_64 and arm64.');
+      print('Output: $output');
+      failedBinaries.add(binaryPath);
+    }
+  }
+
+  if (failedBinaries.isNotEmpty) {
+    throw Exception('Failed fat binary verification for:\n${failedBinaries.join('\n')}');
+  }
+  print('All expected fat binaries verified.');
 }
 
 /// Find every binary file in the given [rootDirectory].
