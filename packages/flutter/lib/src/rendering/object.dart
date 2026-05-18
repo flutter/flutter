@@ -1322,7 +1322,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
       }());
       final List<RenderObject> dirtyNodes = _nodesNeedingPaint;
       if (dirtyNodes.isNotEmpty && rootNode is RenderView) {
-        (rootNode! as RenderView).markRequiresCompositing();
+        (rootNode! as RenderView).markNeedsCompositeFrame();
       }
       _nodesNeedingPaint = <RenderObject>[];
 
