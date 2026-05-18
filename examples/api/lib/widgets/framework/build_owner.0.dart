@@ -62,7 +62,7 @@ Size measureWidget(Widget widget) {
 }
 
 class MeasurementView extends RenderBox
-    with RenderObjectWithChildMixin<RenderBox>, RootRenderObject {
+    with RenderObjectWithChildMixin<RenderBox> {
   @override
   void performLayout() {
     assert(child != null);
@@ -72,7 +72,4 @@ class MeasurementView extends RenderBox
 
   @override
   void debugAssertDoesMeetConstraints() => true;
-
-  @override
-  void markRequiresCompositing() {}
 }
