@@ -3749,6 +3749,24 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   bool get _usingPagesAPI => widget.pages != const <Page<dynamic>>[];
 
   void _handleHistoryChanged() {
+    // Avoid dispatching a notification in the middle of a build.
+    switch (SchedulerBinding.instance.schedulerPhase) {
+      case SchedulerPhase.postFrameCallbacks:
+        NavigationNotification(canHandlePop: _getNavigatorCanHandlePop()).dispatch(context);
+      case SchedulerPhase.idle:
+      case SchedulerPhase.midFrameMicrotasks:
+      case SchedulerPhase.persistentCallbacks:
+      case SchedulerPhase.transientCallbacks:
+        SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+          if (!mounted) {
+            return;
+          }
+          NavigationNotification(canHandlePop: _getNavigatorCanHandlePop()).dispatch(context);
+        }, debugLabel: 'Navigator.dispatchNotification');
+    }
+  }
+
+  bool _getNavigatorCanHandlePop() {
     final bool navigatorCanPop = canPop();
     final bool routeBlocksPop;
     if (!navigatorCanPop) {
@@ -3758,22 +3776,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     } else {
       routeBlocksPop = false;
     }
-    final notification = NavigationNotification(canHandlePop: navigatorCanPop || routeBlocksPop);
-    // Avoid dispatching a notification in the middle of a build.
-    switch (SchedulerBinding.instance.schedulerPhase) {
-      case SchedulerPhase.postFrameCallbacks:
-        notification.dispatch(context);
-      case SchedulerPhase.idle:
-      case SchedulerPhase.midFrameMicrotasks:
-      case SchedulerPhase.persistentCallbacks:
-      case SchedulerPhase.transientCallbacks:
-        SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-          if (!mounted) {
-            return;
-          }
-          notification.dispatch(context);
-        }, debugLabel: 'Navigator.dispatchNotification');
-    }
+    return navigatorCanPop || routeBlocksPop;
   }
 
   bool _debugCheckPageApiParameters() {
@@ -5933,7 +5936,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         onNotification: (NavigationNotification notification) {
           // If the state of this Navigator does not change whether or not the
           // whole framework can pop, propagate the Notification as-is.
-          if (notification.canHandlePop || !canPop()) {
+          if (notification.canHandlePop || !_getNavigatorCanHandlePop()) {
             return false;
           }
           // Otherwise, dispatch a new Notification with the correct canPop and
