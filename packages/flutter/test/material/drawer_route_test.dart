@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'semantics_tester.dart';
+import '../widgets/semantics_tester.dart';
 
 void main() {
   testWidgets('Drawer control test', (WidgetTester tester) async {
@@ -320,38 +320,36 @@ void main() {
     }),
   );
 
-  testWidgets(
-    'Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)',
-    (WidgetTester tester) async {
-      final semantics = SemanticsTester(tester);
-      final scaffoldKey = GlobalKey<ScaffoldState>();
+  testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    final scaffoldKey = GlobalKey<ScaffoldState>();
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (BuildContext context) {
-              return Scaffold(key: scaffoldKey, drawer: const Drawer(), body: Container());
-            },
-          ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(key: scaffoldKey, drawer: const Drawer(), body: Container());
+          },
         ),
-      );
+      ),
+    );
 
-      // Open the drawer.
-      scaffoldKey.currentState!.openDrawer();
-      await tester.pump(const Duration(milliseconds: 100));
+    // Open the drawer.
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pump(const Duration(milliseconds: 100));
 
-      expect(
-        semantics,
-        isNot(
-          includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus]),
-        ),
-      );
-      expect(semantics, isNot(includesNodeWith(label: 'Dismiss')));
+    expect(
+      semantics,
+      isNot(
+        includesNodeWith(actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus]),
+      ),
+    );
+    expect(semantics, isNot(includesNodeWith(label: 'Dismiss')));
 
-      semantics.dispose();
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
-  );
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   testWidgets('Drawer contains route semantics flags', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
