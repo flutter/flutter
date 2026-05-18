@@ -21,6 +21,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../macos/swift_package_manager.dart';
 import '../plugins.dart';
 import '../reporting/reporting.dart';
 import '../xcode_project.dart';
@@ -28,8 +29,6 @@ import '../xcode_project.dart';
 final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final _varExpr = RegExp(r'\$\(([^)]*)\)');
 const kSwiftPackageCacheDirectoryName = 'SourcePackages';
-const _flutterGeneratedPluginSwiftPackageSchemeName = 'FlutterGeneratedPluginSwiftPackage';
-const _flutterFrameworkSchemeName = 'FlutterFramework';
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
@@ -545,8 +544,8 @@ class XcodeProjectInterpreter {
     Directory buildDirectory,
   ) async {
     final ignoredSchemes = <String>{
-      _flutterGeneratedPluginSwiftPackageSchemeName,
-      _flutterFrameworkSchemeName,
+      kFlutterGeneratedPluginSwiftPackageName,
+      kFlutterGeneratedFrameworkSwiftPackageTargetName,
       ..._swiftPackageCheckoutSchemes(buildDirectory),
     };
     try {
