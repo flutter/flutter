@@ -26,6 +26,9 @@ const Color _blue = Color(0xff2196f3);
 const Color _grey = Color(0xff9e9e9e);
 const Color _textFieldBackgroundCursorColor = Color(0xff999999);
 const Color _black87 = Color(0xdd000000);
+// These mirror the platform-specific titleMedium styles from
+// Typography.material2018(), which intentionally leave geometry to the
+// surrounding text style.
 const TextStyle _materialTitleMediumStyle = TextStyle(
   fontFamily: 'Roboto',
   color: _black87,
@@ -955,7 +958,7 @@ void main() {
       expect(
         find.byType(EditableText),
         paints
-          ..rect(color: const Color(0xff999999))
+          ..rect(color: _textFieldBackgroundCursorColor)
           ..rrect(
             rrect: RRect.fromRectAndRadius(
               const Rect.fromLTRB(800.5, -5.0, 803.5, 15.0),
