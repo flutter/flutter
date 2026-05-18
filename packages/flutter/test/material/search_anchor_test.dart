@@ -4434,6 +4434,74 @@ void main() {
     expect(rotatedSize.width, landscapeModeWidth);
     expect(rotatedSize.height, landscapeModeHeight);
   });
+
+  testWidgets('SearchAnchor full-screen height matches resized parent height', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(tester.view.reset);
+
+    var parentHeight = 400.0;
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return Scaffold(
+            body: StatefulBuilder(
+              builder: (BuildContext context, StateSetter stateSetter) {
+                setState = stateSetter;
+                return SizedBox(height: parentHeight, width: 800.0, child: child);
+              },
+            ),
+          );
+        },
+        home: Material(
+          child: SearchAnchor(
+            isFullScreen: true,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Open search view.
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    // Verify search view height matches parent height (400.0).
+    Size size = getSearchViewSize(tester);
+    expect(size.height, 400.0);
+
+    // Resize the parent container to 500.0.
+    setState(() {
+      parentHeight = 500.0;
+    });
+    await tester.pumpAndSettle();
+
+    // Verify the view expands to 500.0.
+    size = getSearchViewSize(tester);
+    expect(size.height, 500.0);
+
+    // Resize the parent container to 300.0.
+    setState(() {
+      parentHeight = 300.0;
+    });
+    await tester.pumpAndSettle();
+
+    // Verify the view shrinks to 300.0.
+    size = getSearchViewSize(tester);
+    expect(size.height, 300.0);
+  });
 }
 
 Future<void> checkSearchBarDefaults(
