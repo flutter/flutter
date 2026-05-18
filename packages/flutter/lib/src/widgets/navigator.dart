@@ -645,7 +645,7 @@ abstract class Route<T> extends _RoutePlaceholder {
   /// Asserts that the given result is of a type that can be consumed by this route.
   ///
   /// This is used by [Navigator] to provide a clear error message when route is popped with mismatched result type.
-  bool _debugCheckCanConsumeResult(dynamic result, {required String methodName}) {
+  bool _debugCheckCanConsumeResult(Object? result, {required String methodName}) {
     if (result is! T?) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
@@ -657,7 +657,7 @@ abstract class Route<T> extends _RoutePlaceholder {
           'or when a generic type is explicitly provided to a route creation method '
           '(such as showDialog<T>()) but the popped value does not match this type.',
         ),
-        DiagnosticsProperty<Route<dynamic>>('The route was', this),
+        DiagnosticsProperty<Route<Object?>>('The route was', this),
         DiagnosticsProperty<Object?>('The provided result was', result),
       ]);
     }
@@ -5644,8 +5644,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   void pop<T extends Object?>([T? result]) {
     assert(!_debugLocked);
     assert(() {
-      final _RouteEntry entry = _history.lastWhere(_RouteEntry.isPresentPredicate);
-      return entry.route._debugCheckCanConsumeResult(result, methodName: 'pop');
+      final _RouteEntry? entry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+      return entry?.route._debugCheckCanConsumeResult(result, methodName: 'pop') ?? true;
     }());
     assert(() {
       _debugLocked = true;
