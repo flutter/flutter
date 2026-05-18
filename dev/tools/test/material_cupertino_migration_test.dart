@@ -105,6 +105,34 @@ class ShowCase extends StatelessWidget {
     );
   });
 
+  test('skips design dependency when show contains only framework symbols', () {
+    final file = File('${tempDir.path}/lib/framework_only_show.dart')
+      ..writeAsStringSync('''
+import 'package:flutter/material.dart' show Text, Widget;
+
+Widget buildText() {
+  return const Text('Hello');
+}
+''');
+
+    final migration.MigrationResult result = migration.migratePaths(<String>[tempDir.path]);
+
+    expect(result.changedDartFiles, 1);
+    expect(result.changedPubspecs, 0);
+    expect(file.readAsStringSync(), '''
+import 'package:flutter/widgets.dart'
+    show Text, Widget;
+
+Widget buildText() {
+  return const Text('Hello');
+}
+''');
+    expect(
+      File('${tempDir.path}/pubspec.yaml').readAsStringSync(),
+      isNot(contains('  material_ui: any\n')),
+    );
+  });
+
   test('includes framework usage from part files', () {
     final owner = File('${tempDir.path}/lib/owner.dart')
       ..writeAsStringSync('''

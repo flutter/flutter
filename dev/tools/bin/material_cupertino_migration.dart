@@ -320,13 +320,15 @@ _RewriteResult _rewriteFile(File file, List<File> parts) {
       continue;
     }
 
-    dependencies.add(library.dependency);
     final String replacement = _rewriteDirective(
       kind: kind,
       rest: rest,
       library: library,
       state: state,
     );
+    if (replacement.contains(library.packageUri)) {
+      dependencies.add(library.dependency);
+    }
     final String original = match.group(0)!;
 
     buffer
