@@ -51,10 +51,12 @@ class _Registration {
 ///
 /// When multiple callbacks are registered for the same event, only one per
 /// distinct `key` is kept. The deepest widget with a given key receives the
-/// event. This allows nested scrollables on perpendicular axes (e.g. a
-/// horizontal [CarouselView] inside a vertical [ListView]) to each scroll
-/// their respective axis from a single diagonal trackpad gesture, by using
-/// their scroll axis as the registration key.
+/// event. When callbacks with different keys are registered, the resolver
+/// gives priority to the **outermost** (last-registered) key. This ensures
+/// that a diagonal trackpad gesture over nested perpendicular scrollables
+/// (e.g. a horizontal [CarouselView] inside a vertical [ListView]) scrolls
+/// only the outer scrollable, matching user expectations for two-finger
+/// diagonal scrolling.
 ///
 /// {@tool dartpad}
 /// Here is an example that demonstrates the effect of not using the resolver
@@ -81,8 +83,8 @@ class PointerSignalResolver {
   /// This method may be called multiple times (typically from different parts
   /// of the widget hierarchy) for the same `event`, with different `callback`s,
   /// as the event is being dispatched across the tree. Once the dispatching is
-  /// complete, the [GestureBinding] calls [resolve], and all registered
-  /// callbacks are called in registration order.
+  /// complete, the [GestureBinding] calls [resolve], and callbacks are invoked
+  /// with the **outermost** (last-registered) key winning when keys differ.
   ///
   /// An optional [key] can be provided for deduplication. When a registration
   /// with the same `key` already exists, the new registration is ignored. This
@@ -133,9 +135,16 @@ class PointerSignalResolver {
     final List<_Registration> registrations = List<_Registration>.of(_registrations);
     _registrations.clear();
     _currentEvent = null;
-    for (final _Registration reg in registrations) {
+    Object? winningKey;
+    for (final _Registration reg in registrations.reversed) {
+      if (winningKey != null && reg.key != null && reg.key != winningKey) {
+        continue;
+      }
       try {
         reg.callback(registeredEvent);
+        if (winningKey == null) {
+          winningKey = reg.key;
+        }
       } catch (exception, stack) {
         InformationCollector? collector;
         assert(() {

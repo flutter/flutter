@@ -1793,7 +1793,7 @@ void main() {
   );
 
   testWidgets(
-    'Diagonal scroll in nested scrollables: both axes scroll when both can move',
+    'Diagonal scroll in nested scrollables: outer axis (vertical) wins over inner (horizontal)',
     (WidgetTester tester) async {
       final verticalController = ScrollController();
       final horizontalController = ScrollController();
@@ -1833,7 +1833,7 @@ void main() {
       final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
       testPointer.hover(location);
 
-      // Diagonal scroll down-right: both axes should move.
+      // Diagonal scroll down-right: outer (vertical) should move, inner (horizontal) should NOT.
       final event = PointerScrollEvent(
         position: location,
         scrollDelta: const Offset(20.0, 20.0),
@@ -1844,14 +1844,16 @@ void main() {
 
       await tester.sendEventToBinding(event);
 
-      expect(horizontalController.offset, 20.0);
-      expect(verticalController.offset, 20.0);
+      expect(horizontalController.offset, 0.0,
+          reason: 'Inner horizontal should NOT scroll when outer vertical can.');
+      expect(verticalController.offset, 20.0,
+          reason: 'Outer vertical should scroll its component.');
 
       expect(
         onRespondCalls,
         equals([false]),
         reason:
-            'respond(false) should be called once by the resolver after both axes handled the event',
+            'respond(false) should be called once by the resolver after the outer axis handled the event',
       );
     },
   );
@@ -1898,6 +1900,7 @@ void main() {
       testPointer.hover(location);
 
       // Scroll mostly vertical with small horizontal component.
+      // Outer (vertical) should win; inner (horizontal) should NOT scroll.
       final event = PointerScrollEvent(
         position: location,
         scrollDelta: const Offset(3.0, 30.0),
@@ -1908,13 +1911,15 @@ void main() {
 
       await tester.sendEventToBinding(event);
 
-      expect(horizontalController.offset, 3.0);
-      expect(verticalController.offset, 30.0);
+      expect(horizontalController.offset, 0.0,
+          reason: 'Inner horizontal should NOT scroll when outer vertical can.');
+      expect(verticalController.offset, 30.0,
+          reason: 'Outer vertical should scroll its component.');
 
       expect(
         onRespondCalls,
         equals([false]),
-        reason: 'Both axes handled, respond(false) called once by the resolver',
+        reason: 'Outer axis handled, respond(false) called once by the resolver',
       );
     },
   );
@@ -2049,6 +2054,56 @@ void main() {
         reason:
             'Only the horizontal scrollable handled the event, respond(false) called once by the resolver',
       );
+    },
+  );
+
+  testWidgets(
+    'Diagonal scroll: inner horizontal does not scroll when outer vertical can',
+    (WidgetTester tester) async {
+      final verticalController = ScrollController();
+      final horizontalController = ScrollController();
+
+      addTearDown(verticalController.dispose);
+      addTearDown(horizontalController.dispose);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: ListView(
+            controller: verticalController,
+            children: <Widget>[
+              SizedBox(
+                height: 200,
+                child: ListView(
+                  controller: horizontalController,
+                  scrollDirection: Axis.horizontal,
+                  children: <Widget>[
+                    Container(width: 2000, height: 200),
+                  ],
+                ),
+              ),
+              Container(height: 2000),
+            ],
+          ),
+        ),
+      );
+
+      final Offset location = tester.getCenter(find.byType(ListView).last);
+      final testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      testPointer.hover(location);
+
+      // Diagonal scroll down-right. Vertical should scroll, horizontal should NOT.
+      await tester.sendEventToBinding(
+        PointerScrollEvent(
+          position: location,
+          scrollDelta: const Offset(20.0, 20.0),
+        ),
+      );
+
+      expect(horizontalController.offset, 0.0,
+          reason: 'Inner horizontal should NOT scroll when outer vertical can.');
+      expect(verticalController.offset, 20.0,
+          reason: 'Outer vertical should scroll its component.');
     },
   );
 }

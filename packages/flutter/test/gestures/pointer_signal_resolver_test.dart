@@ -119,7 +119,21 @@ void main() {
   });
 
   group('multiple registrations with keys', () {
-    test('different keys: both callbacks are called', () {
+    test('different keys: outer wins over inner (outer-axis priority)', () {
+      final resolver = PointerSignalResolver();
+      final event = PointerScrollEvent();
+      final callOrder = <Object?>[];
+
+      resolver.register(event, (_) { callOrder.add('inner'); }, key: 'horizontal');
+      resolver.register(event, (_) { callOrder.add('outer'); }, key: 'vertical');
+
+      resolver.resolve(event);
+
+      // Outer (vertical, registered last) wins; inner is skipped.
+      expect(callOrder, equals(<Object?>['outer']));
+    });
+
+    test('different keys: only outer (last-registered) is called', () {
       final resolver = PointerSignalResolver();
       final event = PointerScrollEvent();
       final calledKeys = <Object?>[];
@@ -129,7 +143,8 @@ void main() {
 
       resolver.resolve(event);
 
-      expect(calledKeys, unorderedEquals(<Object?>['a', 'b']));
+      // Outer (last-registered, 'b') wins, inner ('a') is skipped.
+      expect(calledKeys, equals(<Object?>['b']));
     });
 
     test('same key: only first callback is called', () {
