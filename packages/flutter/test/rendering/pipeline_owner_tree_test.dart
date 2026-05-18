@@ -866,7 +866,7 @@ class TestPipelineManifold extends ChangeNotifier implements PipelineManifold {
   }
 }
 
-class TestRenderObject extends RenderObject with RootRenderObject {
+class TestRenderObject extends RenderObject {
   TestRenderObject({this.onLayout, this.onPaint, this.onSemantics});
 
   final VoidCallback? onLayout;
@@ -904,11 +904,6 @@ class TestRenderObject extends RenderObject with RootRenderObject {
   Rect get semanticBounds => Rect.zero;
 
   bool requiresCompositing = false;
-
-  @override
-  void markRequiresCompositing() {
-    requiresCompositing = true;
-  }
 }
 
 List<PipelineOwner> _treeWalk(PipelineOwner root) {
@@ -923,7 +918,4 @@ List<PipelineOwner> _treeWalk(PipelineOwner root) {
   return results;
 }
 
-class FakeRenderView extends RenderBox with RootRenderObject {
-  @override
-  void markRequiresCompositing() {}
-}
+class FakeRenderView extends RenderBox {}
