@@ -132,7 +132,7 @@ dependencies:
   io: 1.0.5
   isolate: 2.1.1
   js: 0.7.2
-  json_annotation: 4.11.0
+  json_annotation: 4.12.0
   leak_tracker: 11.0.2
   leak_tracker_flutter_testing: ^3.0.10
   leak_tracker_testing: 3.0.2
@@ -224,4 +224,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: pl962k
+# PUBSPEC CHECKSUM: f49okb

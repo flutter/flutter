@@ -82,9 +82,20 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
+  // CADisplayLink timestamps use the CACurrentMediaTime() monotonic clock (seconds since boot).
+  // CACurrentMediaTime() is based on mach_absolute_time, whereas the core engine uses
+  // fml::TimePoint, which is implemented with std::chrono::steady_clock, which uses
+  // mach_continuous_time under the hood. Thus, the values passed to the engine in the vsync
+  // callback need to be rebased to fml::TimePoint's epoch.
+  //
+  // According to Apple's docs, before the first frame is delivered, or when the display link is
+  // paused, both timestamp and targetTimestamp properties are 0.0.
+
   CFTimeInterval delay = CACurrentMediaTime() - link.timestamp;
   fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
 
+  // frame_target_time is the anticipated presentation time of the next screen refresh. If
+  // frame_target_time is zero, fall back to frame start time.
   CFTimeInterval duration = link.targetTimestamp - link.timestamp;
   fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(duration);
 
@@ -94,6 +105,12 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
   std::unique_ptr<flutter::FrameTimingsRecorder> recorder =
       std::make_unique<flutter::FrameTimingsRecorder>();
 
+  // In steady-state, duration reflects the hardware refresh interval (e.g., ~0.01667s for 60Hz).
+  // We dynamically recalculate the refresh rate from the frame duration to adjust to ProMotion
+  // display refresh rate shifts.
+  //
+  // Round to nearest whole Hz value to ensure we don't introduce frame timing issues due to
+  // floating point error. e.g. 59.998, 60.004, 59.995, ... --> 60.000, 60.000, 60.000, ...
   if (duration > 0) {
     _refreshRate = round(1 / duration);
   }

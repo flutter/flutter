@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 import '../../engine.dart';
 
-double? currentDevicePixelRatio;
 //final DomOffscreenCanvas paintCanvas = createDomOffscreenCanvas(0, 0);
 //final paintContext =
 //    paintCanvas.getContext('2d', {'willReadFrequently': true})! as DomCanvasRenderingContext2D;
@@ -15,6 +14,18 @@ final DomHTMLCanvasElement paintCanvas =
     domDocument.createElement('canvas') as DomHTMLCanvasElement;
 final paintContext =
     paintCanvas.getContext('2d', {'willReadFrequently': true})! as DomCanvasRenderingContext2D;
+
+/// Resizes the global paint canvas to the given width and height and updates the device pixel ratio.
+///
+/// The paint canvas is scaled by the device pixel ratio to avoid pixelation
+/// that would happen if it wasn't resized.
+void resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
+  paintCanvas.width = rect.width;
+  paintCanvas.height = rect.height;
+  paintCanvas.style.width = '${rect.width / devicePixelRatio}px';
+  paintCanvas.style.height = '${rect.height / devicePixelRatio}px';
+  paintContext.scale(devicePixelRatio, devicePixelRatio);
+}
 
 /// Paints on a [WebParagraph].
 ///
@@ -140,13 +151,12 @@ abstract class TextPaint {
       (layout.paragraph.height * devicePixelRatio).ceilToDouble(),
     );
     // Target rect will be scaled by the canvas transform, so we don't scale it here
-    final zeroRect = ui.Rect.fromLTWH(
-      0,
-      0,
+    final targetRect = ui.Rect.fromLTWH(
+      offset.dx,
+      offset.dy,
       maxWidth.ceilToDouble(),
       layout.paragraph.height.ceilToDouble(),
     );
-    final ui.Rect targetRect = zeroRect.translate(offset.dx, offset.dy);
 
     if (WebParagraphDebug.logging) {
       WebParagraphDebug.log(
@@ -296,5 +306,5 @@ abstract class TextPaint {
   void fillShadowCluster(WebCluster webTextCluster, ui.Shadow shadow, bool isDefaultLtr);
 
   /// Paints the entire paragraph on Canvas2D
-  void paint(ui.Canvas canvas, TextLayout layout, Painter painter, double x, double y);
+  void paint(ui.Canvas canvas, TextLayout layout, Painter painter, ui.Offset offset);
 }
