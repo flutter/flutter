@@ -739,14 +739,17 @@ void main() {
   });
 
   testWidgets('AnimatedPhysicalModel does not crash at zero area', (WidgetTester tester) async {
+    const physicalModelColor = Color(0xFF009688);
+    const physicalModelShadowColor = Color(0xFF64FFDA);
+
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: SizedBox.shrink(
             child: AnimatedPhysicalModel(
-              color: Color(0xFF009688),
-              shadowColor: Color(0xFF64FFDA),
+              color: physicalModelColor,
+              shadowColor: physicalModelShadowColor,
               duration: Duration(milliseconds: 300),
               child: Text('X'),
             ),
