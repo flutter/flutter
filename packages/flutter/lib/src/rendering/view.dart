@@ -280,13 +280,6 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     _requiresCompositing = true;
   }
 
-  /// Whether the given [RenderView] needs to be composited during this frame.
-  /// A [RenderView] needs to be composited of it was marked as requiring compositing,
-  /// or if the owner has any dirty render objects.
-  bool shouldBeComposited() {
-    return requiresCompositing;
-  }
-
   TransformLayer _updateMatricesAndCreateNewRootLayer() {
     assert(hasConfiguration);
     _rootTransform = configuration.toMatrix();
