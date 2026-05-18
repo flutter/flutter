@@ -2211,16 +2211,26 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
     }
   }
 
+  /// Undoes _deactivate by adding the given `child` back to the `_theater`.
+  ///
+  /// This is called when the OverlayPortal is activated.
+  /// This call is allowed even when this location is invalidated.
   void _activate(_RenderDeferredLayoutBox child) {
-    // This call is allowed even when this location is invalidated.
-    // See _OverlayPortalElement.activate.
     assert(_overlayChildRenderBox == null, '$_overlayChildRenderBox');
     _theater._addDeferredChild(child);
     _overlayChildRenderBox = child;
   }
 
+  /// Removes the given `child` from the `_theater` but keeps it in the child list
+  /// (unlike `_removeChild`).
+  ///
+  /// This is typically called when the [OverlayPortal] deactivates (thus the name).
+  /// Since every [RenderObject] in the render tree must be attached, when an
+  /// [OverlayPortal] deactivates, it must remove the overlay child from the render
+  /// tree instead of just detaching it.
+  ///
+  /// This call is allowed even when this location is invalidated.
   void _deactivate(_RenderDeferredLayoutBox child) {
-    // This call is allowed even when this location is invalidated.
     _theater._removeDeferredChild(child);
     _overlayChildRenderBox = null;
   }
@@ -2234,8 +2244,10 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
   // OverlayPortal is being removed from the widget tree and may use the
   // location information to perform cleanup tasks.
   //
-  // Another exception is the _activate method which is called by
-  // _OverlayPortalElement.activate. See the comment in _OverlayPortalElement.activate.
+  // Another exception is the _activate method which is called shortly after
+  // the `OverlayPortal` activates because it's possible that the widget subtree
+  // hasn't been rebuilt at that point, so we'll have to re-attach the overlay
+  // child render object using a potentially outdated location.
   bool _debugIsLocationValid() {
     if (_debugMarkLocationInvalidStackTrace == null) {
       return true;
@@ -2704,10 +2716,11 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    // If attach is called after _didDeactivate then it is always safe to put deferred child
-    // back because the theater must be an ancestor of both render objects.
-    if (_didDeactivate) {
-      _didDeactivate = false;
+    // If attach is called after _didDetachDeferredChild is set to true then
+    // it is always safe to put deferred child back because the theater must
+    // be an ancestor of both render objects.
+    if (_didDetachDeferredChild) {
+      _didDetachDeferredChild = false;
       assert(_deferredLayoutChild != null);
       assert(!_debugIsFirstAttach);
       overlayLocation!._activate(_deferredLayoutChild!);
@@ -2718,14 +2731,14 @@ class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
     }());
   }
 
-  bool _didDeactivate = false;
+  bool _didDetachDeferredChild = false;
   @override
   void detach() {
     // Detaches the deferred child if this node is being detached, but only if the theater isn't
     // already detached (so the deferred child will be detached by the theater).
     if (_deferredLayoutChild case final deferredChild? when deferredChild.theater.attached) {
       overlayLocation!._deactivate(deferredChild);
-      _didDeactivate = true;
+      _didDetachDeferredChild = true;
     }
     super.detach();
   }
