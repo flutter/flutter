@@ -213,15 +213,22 @@ MigrationResult migratePaths(Iterable<String> paths) {
   }
 
   final Map<String, List<File>> partOwners = _buildPartOwnerIndex(files);
+  final List<Directory> rootDirectories = roots.whereType<Directory>().toList();
+  final dependenciesByRoot = <String, Set<String>>{
+    for (final root in rootDirectories) root.absolute.path: <String>{},
+  };
   var changedFiles = 0;
-  final dependencies = <String>{};
 
   for (final file in files) {
     final _RewriteResult result = _rewriteFile(
       file,
       partOwners[file.absolute.path] ?? const <File>[],
     );
-    dependencies.addAll(result.dependencies);
+    for (final root in rootDirectories) {
+      if (_isWithinDirectory(file, root)) {
+        dependenciesByRoot[root.absolute.path]!.addAll(result.dependencies);
+      }
+    }
     if (!result.changed) {
       continue;
     }
@@ -230,8 +237,8 @@ MigrationResult migratePaths(Iterable<String> paths) {
   }
 
   var changedPubspecs = 0;
-  for (final Directory root in roots.whereType<Directory>()) {
-    if (_updatePubspec(root, dependencies)) {
+  for (final root in rootDirectories) {
+    if (_updatePubspec(root, dependenciesByRoot[root.absolute.path]!)) {
       changedPubspecs += 1;
     }
   }
@@ -289,6 +296,18 @@ Map<String, List<File>> _buildPartOwnerIndex(List<File> files) {
     }
   }
   return index;
+}
+
+bool _isWithinDirectory(File file, Directory directory) {
+  final String rootPath = _withTrailingSeparator(directory.absolute.path);
+  return file.absolute.path.startsWith(rootPath);
+}
+
+String _withTrailingSeparator(String path) {
+  if (path.endsWith(Platform.pathSeparator)) {
+    return path;
+  }
+  return '$path${Platform.pathSeparator}';
 }
 
 _RewriteResult _rewriteFile(File file, List<File> parts) {
@@ -595,11 +614,15 @@ List<String> _effectiveShowNames(_DirectiveInfo info) {
 Map<String, Set<String>> _scanFrameworkUsage(String source) {
   final usage = <String, Set<String>>{};
   for (final String symbol in _frameworkSymbols) {
-    if (RegExp('\\b${RegExp.escape(symbol)}\\b').hasMatch(source)) {
-      final _FrameworkLibrary? library = _frameworkLibraryForSymbol(symbol);
-      if (library != null) {
-        usage.putIfAbsent(library.uri, () => <String>{}).add(symbol);
-      }
+    final Iterable<RegExpMatch> matches = RegExp(
+      '\\b${RegExp.escape(symbol)}\\b',
+    ).allMatches(source);
+    if (!matches.any((RegExpMatch match) => !_isPrefixedReference(source, match.start))) {
+      continue;
+    }
+    final _FrameworkLibrary? library = _frameworkLibraryForSymbol(symbol);
+    if (library != null) {
+      usage.putIfAbsent(library.uri, () => <String>{}).add(symbol);
     }
   }
   return usage;
@@ -618,6 +641,18 @@ Map<String, Set<String>> _scanPrefixedFrameworkUsage(String source, String prefi
     }
   }
   return usage;
+}
+
+bool _isPrefixedReference(String source, int offset) {
+  int index = offset - 1;
+  while (index >= 0 &&
+      (source[index] == ' ' ||
+          source[index] == '\t' ||
+          source[index] == '\n' ||
+          source[index] == '\r')) {
+    index -= 1;
+  }
+  return index >= 0 && source[index] == '.';
 }
 
 Map<String, List<String>> _groupFrameworkNames(Iterable<String> names) {

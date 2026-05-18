@@ -520,4 +520,73 @@ Widget buildText() {
       isNot(contains('  cupertino_ui: any\n')),
     );
   });
+
+  test('does not treat prefixed symbols as unprefixed framework usage', () {
+    final file = File('${tempDir.path}/lib/prefixed_framework.dart')
+      ..writeAsStringSync('''
+import 'package:flutter/widgets.dart' as widgets;
+import 'package:flutter/material.dart';
+
+widgets.Widget buildApp(widgets.BuildContext context) {
+  return const MaterialApp();
+}
+''');
+
+    final migration.MigrationResult result = migration.migratePaths(<String>[tempDir.path]);
+
+    expect(result.changedDartFiles, 1);
+    expect(file.readAsStringSync(), '''
+import 'package:flutter/widgets.dart' as widgets;
+import 'package:material_ui/material_ui.dart';
+
+widgets.Widget buildApp(widgets.BuildContext context) {
+  return const MaterialApp();
+}
+''');
+  });
+
+  test('adds design dependencies only to pubspecs for matching roots', () {
+    final materialRoot = Directory('${tempDir.path}/material_app')..createSync(recursive: true);
+    final cupertinoRoot = Directory('${tempDir.path}/cupertino_app')..createSync(recursive: true);
+    Directory('${materialRoot.path}/lib').createSync();
+    Directory('${cupertinoRoot.path}/lib').createSync();
+    File('${materialRoot.path}/pubspec.yaml').writeAsStringSync('''
+name: material_app
+
+dependencies:
+  flutter:
+    sdk: flutter
+''');
+    File('${cupertinoRoot.path}/pubspec.yaml').writeAsStringSync('''
+name: cupertino_app
+
+dependencies:
+  flutter:
+    sdk: flutter
+''');
+    File('${materialRoot.path}/lib/main.dart').writeAsStringSync('''
+import 'package:flutter/material.dart';
+
+Widget buildApp() => const MaterialApp();
+''');
+    File('${cupertinoRoot.path}/lib/main.dart').writeAsStringSync('''
+import 'package:flutter/cupertino.dart';
+
+Widget buildApp() => const CupertinoApp();
+''');
+
+    final migration.MigrationResult result = migration.migratePaths(<String>[
+      materialRoot.path,
+      cupertinoRoot.path,
+    ]);
+
+    expect(result.changedDartFiles, 2);
+    expect(result.changedPubspecs, 2);
+    final String materialPubspec = File('${materialRoot.path}/pubspec.yaml').readAsStringSync();
+    expect(materialPubspec, contains('  material_ui: any\n'));
+    expect(materialPubspec, isNot(contains('  cupertino_ui: any\n')));
+    final String cupertinoPubspec = File('${cupertinoRoot.path}/pubspec.yaml').readAsStringSync();
+    expect(cupertinoPubspec, contains('  cupertino_ui: any\n'));
+    expect(cupertinoPubspec, isNot(contains('  material_ui: any\n')));
+  });
 }
