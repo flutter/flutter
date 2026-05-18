@@ -734,7 +734,7 @@ class DevFS {
       if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
         archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
       }
-      // If the font manifest is updated, mark this as true so the hot runner
+      // If the font manifest is updated, invoke the callback so the hot runner
       // can invoke a service extension to force the engine to reload fonts.
       if (archivePath == kFontManifestJson) {
         onFontManifestUpdated?.call();
