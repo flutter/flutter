@@ -216,30 +216,46 @@ class LinkHooks extends Target {
     final Map<String, Map<String, Object?>> buildResults = serializedBuildResults
         .cast<String, Map<String, Object?>>();
 
-    final DartHooksResult result = await runFlutterSpecificLinkHooks(
+    final linkingEnabled = buildMode != BuildMode.debug;
+    final DartHooksResult result;
+    if (linkingEnabled) {
+      result = await runFlutterSpecificLinkHooks(
+        environmentDefines: environment.defines,
+        buildRunner: buildRunner,
+        targetPlatform: targetPlatform,
+        projectUri: projectUri,
+        fileSystem: fileSystem,
+        buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
+        buildDataAssets: true,
+        buildResults: buildResults,
+        recordedUsesFile: recordedUsesFileToPass,
+      );
+    } else {
+      result = DartHooksResult.empty();
+    }
+
+    final DartHooksResult combinedResult = combineBuildAndLinkResults(
       environmentDefines: environment.defines,
-      buildRunner: buildRunner,
       targetPlatform: targetPlatform,
-      projectUri: projectUri,
       fileSystem: fileSystem,
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
       buildResults: buildResults,
-      recordedUsesFile: recordedUsesFileToPass,
+      linkResult: result,
     );
 
     final File dartHookResultJsonFile = environment.buildDir.childFile(resultFilename);
     if (!dartHookResultJsonFile.parent.existsSync()) {
       dartHookResultJsonFile.parent.createSync(recursive: true);
     }
-    dartHookResultJsonFile.writeAsStringSync(json.encode(result.toJson()));
-
+    dartHookResultJsonFile.writeAsStringSync(json.encode(combinedResult.toJson()));
     final depfile = Depfile(
       <File>[for (final Uri dependency in result.dependencies) fileSystem.file(dependency)],
       <File>[
         fileSystem.file(dartHookResultJsonFile),
-        for (final Uri uri in result.filesToBeBundled)
-          if (!result.dependencies.contains(uri)) fileSystem.file(uri),
+        if (linkingEnabled)
+          for (final Uri uri in result.filesToBeBundled)
+            if (!result.dependencies.contains(uri)) fileSystem.file(uri),
       ],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
