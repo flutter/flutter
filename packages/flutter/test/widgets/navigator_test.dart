@@ -6359,23 +6359,18 @@ void main() {
                 Navigator.push<bool>(
                   context,
                   PageRouteBuilder<bool>(
-                    pageBuilder:
-                        (
-                          BuildContext context,
-                          Animation<double> animation,
-                          Animation<double> secondaryAnimation,
-                        ) {
-                          return TestButton(
-                            onPressed: () {
-                              try {
-                                Navigator.pop(context, 'NO');
-                              } catch (e) {
-                                popException = e;
-                              }
-                            },
-                            child: const Text('NO'),
-                          );
+                    pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+                      return TestButton(
+                        onPressed: () {
+                          try {
+                            Navigator.pop(context, 'NO');
+                          } catch (e) {
+                            popException = e;
+                          }
                         },
+                        child: const Text('NO'),
+                      );
+                    },
                   ),
                 );
               },
@@ -6428,22 +6423,17 @@ void main() {
                 Navigator.push<bool>(
                   context,
                   PageRouteBuilder<bool>(
-                    pageBuilder:
-                        (
-                          BuildContext context,
-                          Animation<double> animation,
-                          Animation<double> secondaryAnimation,
-                        ) {
-                          return TestButton(
-                            onPressed: () {
-                              Navigator.maybePop(context, 'YES').catchError((Object e) {
-                                maybePopException = e;
-                                return false;
-                              });
-                            },
-                            child: const Text('YES'),
-                          );
+                    pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+                      return TestButton(
+                        onPressed: () {
+                          Navigator.maybePop(context, 'YES').catchError((Object e) {
+                            maybePopException = e;
+                            return false;
+                          });
                         },
+                        child: const Text('YES'),
+                      );
+                    },
                   ),
                 );
               },
