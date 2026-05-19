@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:path/path.dart' as path;
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -115,6 +116,35 @@ void main() {
     expect(await PosixProcessSignal(fakeSignalA, platform: windows).watch().isEmpty, true);
     expect(await PosixProcessSignal(fakeSignalB, platform: linux).watch().first, isNotNull);
   });
+
+  testWithoutContext(
+    'FSGuardIOOverrides isolates filesystem modifications to system temp directory',
+    () {
+      final tempFile = io.File(path.join(io.Directory.systemTemp.path, 'fs_guard_test_safe.txt'));
+      addTearDown(() {
+        if (tempFile.existsSync()) {
+          tempFile.deleteSync();
+        }
+      });
+      // Writing under system temp should succeed
+      tempFile.writeAsStringSync('safe-content');
+      expect(tempFile.readAsStringSync(), 'safe-content');
+
+      // Modifying outside system temp should fail and throw our guarded exception
+      final unsafeFile = io.File('/tmp_unsafe_outside_temp.txt');
+      expect(unsafeFile.existsSync(), false);
+      expect(
+        () => unsafeFile.writeAsStringSync('unsafe-content'),
+        throwsA(
+          isA<io.FileSystemException>().having(
+            (e) => e.message,
+            'message',
+            contains('Test attempted to modify file outside of temp directory'),
+          ),
+        ),
+      );
+    },
+  );
 }
 
 class FakeProcessSignal extends Fake implements io.ProcessSignal {
