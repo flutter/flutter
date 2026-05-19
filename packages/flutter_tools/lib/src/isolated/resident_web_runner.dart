@@ -743,7 +743,11 @@ class ResidentWebRunner extends ResidentRunner {
         flutterDevices.first.generator!
           ..addFileSystemRoot(parent)
           ..addFileSystemRoot(_fileSystem.directory('test').absolute.path);
-        importedEntrypoint = Uri(scheme: 'org-dartlang-app', path: '/${mainUri.pathSegments.last}');
+        importedEntrypoint = Uri(
+          scheme: 'org-dartlang-app',
+          host: '',
+          path: '/${mainUri.pathSegments.last}',
+        );
       }
       final LanguageVersion languageVersion = determineLanguageVersion(
         _fileSystem.file(mainUri),

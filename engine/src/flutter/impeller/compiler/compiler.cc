@@ -10,6 +10,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include "flutter/fml/paths.h"
@@ -280,6 +281,50 @@ uint32_t CalculateUBOSize(const spirv_cross::Compiler* compiler) {
   return result;
 }
 
+// Mirrors BufferBindingsGLES's uniform key normalization: ASCII uppercase
+// and drop underscores. GLSL identifiers are ASCII, so this is locale-safe.
+std::string StripUnderscoresAndUpper(std::string_view name) {
+  std::string result;
+  result.reserve(name.size());
+  for (char ch : name) {
+    if (ch == '_') {
+      continue;
+    }
+    if (ch >= 'a' && ch <= 'z') {
+      result.push_back(static_cast<char>(ch - 'a' + 'A'));
+    } else {
+      result.push_back(ch);
+    }
+  }
+  return result;
+}
+
+// On pre-`#version 140` GL targets, SPIRV-Cross lowers each uniform block to a
+// flat `uniform StructType instanceName;` and BufferBindingsGLES resolves
+// members by the block name modulo `StripUnderscoresAndUpper`. A
+// non-conforming instance name (e.g. `uniform ToonInfo { ... } toon;`) causes
+// every member to silently bind to GL location `-1`. Rename the instance to
+// `_<BlockName>`, which reduces to the block name under the same fold.
+// See flutter/flutter#186393.
+void CanonicalizeUniformBlockInstanceNamesForGL(
+    TargetPlatform target_platform,
+    spirv_cross::Compiler* compiler) {
+  if (target_platform != TargetPlatform::kOpenGLES &&
+      target_platform != TargetPlatform::kOpenGLDesktop) {
+    return;
+  }
+  for (const spirv_cross::Resource& ubo :
+       compiler->get_shader_resources().uniform_buffers) {
+    const std::string block_name = compiler->get_name(ubo.base_type_id);
+    const std::string instance_name = compiler->get_name(ubo.id);
+    if (StripUnderscoresAndUpper(instance_name) ==
+        StripUnderscoresAndUpper(block_name)) {
+      continue;
+    }
+    compiler->set_name(ubo.id, "_" + block_name);
+  }
+}
+
 }  // namespace
 
 Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
@@ -439,6 +484,9 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
         << "Could not create compiler for target platform.";
     return;
   }
+
+  CanonicalizeUniformBlockInstanceNamesForGL(source_options.target_platform,
+                                             sl_compiler.GetCompiler());
 
   uint32_t ubo_size = CalculateUBOSize(sl_compiler.GetCompiler());
   if (ubo_size > kMaxUniformBufferSize) {
