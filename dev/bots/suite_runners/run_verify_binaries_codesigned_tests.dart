@@ -449,7 +449,8 @@ Future<bool> isBinary(
     '-b', // is binary
     filePath,
   ]);
-  return (result.stdout as String).contains('application/x-mach-binary');
+  final output = result.stdout as String;
+  return output.contains('application/x-mach-binary') || output.contains('application/x-sharedlib');
 }
 
 /// Check if the binary has the expected entitlements.
