@@ -4996,8 +4996,9 @@ class SemanticsOwner extends ChangeNotifier {
           );
           _traversalParentNodes[node.traversalParentIdentifier!] = node;
         } else if (isTraversalChild) {
-          _traversalChildNodes[node.traversalChildIdentifier!] ??= <SemanticsNode>{};
-          _traversalChildNodes[node.traversalChildIdentifier!]!.add(node);
+          _traversalChildNodes
+              .putIfAbsent(node.traversalChildIdentifier!, () => <SemanticsNode>{})
+              .add(node);
         }
 
         if (!kIsWeb) {
