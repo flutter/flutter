@@ -89,8 +89,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
 
   final (
     results: SerializedBuildResults results,
-    dependencies: List<Uri> dependencies,
-    filesToBeBundled: _,
+    buildResult: DartHooksResult _,
   ) = await runFlutterSpecificBuildHooks(
     environmentDefines: environmentDefines,
     buildRunner: buildRunner,
@@ -146,7 +145,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
 ///
 /// Returns the serialized build results per target and the list of dependencies
 /// collected during the build stage.
-Future<({SerializedBuildResults results, List<Uri> dependencies, List<Uri> filesToBeBundled})>
+Future<({SerializedBuildResults results, DartHooksResult buildResult})>
 runFlutterSpecificBuildHooks({
   required Map<String, String> environmentDefines,
   required FlutterNativeAssetsBuildRunner buildRunner,
@@ -157,12 +156,10 @@ runFlutterSpecificBuildHooks({
   required bool buildDataAssets,
 }) async {
   if (!await _hookRunRequired(buildRunner)) {
-    return (
-      results: const <String, Map<String, Object?>>{},
-      dependencies: const <Uri>[],
-      filesToBeBundled: const <Uri>[],
-    );
+    return (results: const <String, Map<String, Object?>>{}, buildResult: DartHooksResult.empty());
   }
+
+  final buildStart = DateTime.now();
 
   final (
     targets: List<AssetBuildTarget> targets,
@@ -184,7 +181,9 @@ runFlutterSpecificBuildHooks({
 
   final results = <String, Map<String, Object?>>{};
   final dependencies = <Uri>{};
-  final filesToBeBundled = <Uri>[];
+  final codeAssets = <FlutterCodeAsset>[];
+  final dataAssets = <DataAsset>[];
+
   for (var i = 0; i < targets.length; i++) {
     final AssetBuildTarget target = targets[i];
     // Only run non-code extensions (like data assets) for the first target,
@@ -198,14 +197,20 @@ runFlutterSpecificBuildHooks({
     _decodeAssets(
       encodedAssets: buildResult.encodedAssets,
       target: target,
-      bundledFilesAccumulator: filesToBeBundled,
+      codeAssetsAccumulator: codeAssets,
+      dataAssetsAccumulator: dataAssets,
     );
   }
   globals.logger.printTrace('Running build hooks for $targetString done.');
   return (
     results: results,
-    dependencies: dependencies.toList(),
-    filesToBeBundled: filesToBeBundled,
+    buildResult: DartHooksResult(
+      buildStart: buildStart,
+      buildEnd: DateTime.now(),
+      codeAssets: codeAssets,
+      dataAssets: dataAssets,
+      dependencies: dependencies.toList(),
+    ),
   );
 }
 

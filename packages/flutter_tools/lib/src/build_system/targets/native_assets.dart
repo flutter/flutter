@@ -58,8 +58,7 @@ class BuildHooks extends Target {
         _buildRunner ?? await createFlutterNativeAssetsBuildRunner(environment);
     final (
       results: SerializedBuildResults results,
-      dependencies: List<Uri> dependencies,
-      filesToBeBundled: List<Uri> filesToBeBundled,
+      buildResult: DartHooksResult buildResult,
     ) = await runFlutterSpecificBuildHooks(
       environmentDefines: environment.defines,
       buildRunner: buildRunner,
@@ -82,11 +81,11 @@ class BuildHooks extends Target {
     }
 
     final depfile = Depfile(
-      <File>[for (final Uri dependency in dependencies) fileSystem.file(dependency)],
+      <File>[for (final Uri dependency in buildResult.dependencies) fileSystem.file(dependency)],
       <File>[
         fileSystem.file(dartBuildOutputJsonFile),
-        for (final Uri uri in filesToBeBundled)
-          if (!dependencies.contains(uri)) fileSystem.file(uri),
+        for (final Uri uri in buildResult.filesToBeBundled)
+          if (!buildResult.dependencies.contains(uri)) fileSystem.file(uri),
       ],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
@@ -206,6 +205,8 @@ class LinkHooks extends Target {
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final File? recordedUsesFileToPass = getRecordedUsesFile(environment, buildMode);
 
+    final linkingEnabled = buildMode != BuildMode.debug;
+
     // Read the result of BuildHooks.
     final File dartBuildOutputJsonFile = environment.buildDir.childFile(BuildHooks.resultFilename);
     if (!dartBuildOutputJsonFile.existsSync()) {
@@ -216,10 +217,9 @@ class LinkHooks extends Target {
     final Map<String, Map<String, Object?>> buildResults = serializedBuildResults
         .cast<String, Map<String, Object?>>();
 
-    final linkingEnabled = buildMode != BuildMode.debug;
-    final DartHooksResult result;
+    final DartHooksResult linkResult;
     if (linkingEnabled) {
-      result = await runFlutterSpecificLinkHooks(
+      linkResult = await runFlutterSpecificLinkHooks(
         environmentDefines: environment.defines,
         buildRunner: buildRunner,
         targetPlatform: targetPlatform,
@@ -231,7 +231,7 @@ class LinkHooks extends Target {
         recordedUsesFile: recordedUsesFileToPass,
       );
     } else {
-      result = DartHooksResult.empty();
+      linkResult = DartHooksResult.empty();
     }
 
     final DartHooksResult combinedResult = combineBuildAndLinkResults(
@@ -241,7 +241,7 @@ class LinkHooks extends Target {
       buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
       buildDataAssets: true,
       buildResults: buildResults,
-      linkResult: result,
+      linkResult: linkResult,
     );
 
     final File dartHookResultJsonFile = environment.buildDir.childFile(resultFilename);
@@ -250,12 +250,12 @@ class LinkHooks extends Target {
     }
     dartHookResultJsonFile.writeAsStringSync(json.encode(combinedResult.toJson()));
     final depfile = Depfile(
-      <File>[for (final Uri dependency in result.dependencies) fileSystem.file(dependency)],
+      <File>[for (final Uri dependency in linkResult.dependencies) fileSystem.file(dependency)],
       <File>[
         fileSystem.file(dartHookResultJsonFile),
         if (linkingEnabled)
-          for (final Uri uri in result.filesToBeBundled)
-            if (!result.dependencies.contains(uri)) fileSystem.file(uri),
+          for (final Uri uri in linkResult.filesToBeBundled)
+            if (!linkResult.dependencies.contains(uri)) fileSystem.file(uri),
       ],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
@@ -304,8 +304,8 @@ class InstallCodeAssets extends Target {
     final FileSystem fileSystem = environment.fileSystem;
     final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
-    // We fetch the result from the [LinkHooks].
-    final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
+    // We fetch the combined result from the [LinkHooks].
+    final DartHooksResult combinedResult = await LinkHooks.loadHookResult(environment);
 
     // And install/copy the code assets to the right place and create a
     // native_asset.yaml that can be used by the final AOT compilation.
@@ -319,7 +319,7 @@ class InstallCodeAssets extends Target {
     }
 
     final List<File> installedFiles = await installCodeAssets(
-      dartHookResult: dartHookResult,
+      dartHookResult: combinedResult,
       environmentDefines: environment.defines,
       targetPlatform: targetPlatform,
       projectUri: projectUri,
@@ -330,7 +330,7 @@ class InstallCodeAssets extends Target {
     assert(fileSystem.file(nativeAssetsFileUri).existsSync());
 
     final depfile = Depfile(<File>[
-      for (final Uri file in dartHookResult.filesToBeBundled) fileSystem.file(file),
+      for (final Uri file in combinedResult.filesToBeBundled) fileSystem.file(file),
     ], installedFiles);
     final File outputDepfile = environment.buildDir.childFile(depFilename);
     environment.depFileService.writeToFile(depfile, outputDepfile);

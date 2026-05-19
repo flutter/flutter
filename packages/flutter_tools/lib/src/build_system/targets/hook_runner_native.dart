@@ -37,7 +37,10 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
       environment,
     );
 
-    final DartHooksResult dartHooksResult = await runFlutterSpecificHooks(
+    final (
+      results: _,
+      buildResult: DartHooksResult buildResult,
+    ) = await runFlutterSpecificBuildHooks(
       environmentDefines: environment.defines,
       buildRunner: buildRunner,
       targetPlatform: targetPlatform,
@@ -45,10 +48,9 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
       fileSystem: environment.fileSystem,
       buildCodeAssets: null,
       buildDataAssets: true,
-      recordedUsesFile: null,
     );
 
-    final FlutterHookResult flutterHookResult = dartHooksResult.asFlutterResult;
+    final FlutterHookResult flutterHookResult = buildResult.asFlutterResult;
     _flutterHookResult = flutterHookResult;
     logger?.printTrace('runHooks() - done');
     return flutterHookResult;
