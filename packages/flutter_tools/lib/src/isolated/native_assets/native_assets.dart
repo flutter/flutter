@@ -331,6 +331,7 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
         codeAssetsAccumulator: codeAssets,
         dataAssetsAccumulator: dataAssets,
       );
+      dependencies.addAll(buildResult.dependencies);
     }
   }
 
