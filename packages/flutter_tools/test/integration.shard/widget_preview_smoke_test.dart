@@ -26,12 +26,15 @@ void main() {
   Logger? logger;
   DtdLauncher? dtdLauncher;
   DevtoolsServerLauncher? devtoolsLauncher;
-  final project = BasicProject();
+  late BasicProject project;
+  var projectCounter = 0;
   const ProcessManager processManager = LocalProcessManager();
 
   setUp(() async {
     logger = BufferLogger.test();
     tempDir = createResolvedTempDirectorySync('widget_preview_smoke_test.');
+    projectCounter++;
+    project = BasicProject(name: 'test_smoke_$projectCounter');
     await project.setUpIn(tempDir);
   });
 

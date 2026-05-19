@@ -21,11 +21,14 @@ void main() {
   late Directory tempDir;
   Logger? logger;
   DtdLauncher? dtdLauncher;
-  final project = BasicProject();
+  late BasicProject project;
+  var projectCounter = 0;
 
   setUp(() async {
     logger = BufferLogger.test();
     tempDir = createResolvedTempDirectorySync('widget_preview_detection_test.');
+    projectCounter++;
+    project = BasicProject(name: 'test_detection_$projectCounter');
     await project.setUpIn(tempDir);
   });
 
