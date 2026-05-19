@@ -642,9 +642,9 @@ abstract class Route<T> extends _RoutePlaceholder {
         false;
   }
 
-  /// Asserts that the given result is of a type that can be consumed by this route.
+  /// Asserts that the given [result] is of a type that can be consumed by this route.
   ///
-  /// This is used by [Navigator] to provide a clear error message when route is popped with mismatched result type.
+  /// This is used by [Navigator] to provide a clear error message when a route is popped with a mismatched result type.
   bool _debugCheckCanConsumeResult(Object? result, {required String methodName}) {
     if (result is! T?) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
