@@ -549,47 +549,49 @@ static void EncodeViewport(const ProcTableGLES& gl,
           static_cast<GLsizei>(index_buffer_view.GetRange().offset));
     }
 
-    // An instance count of zero draws nothing, matching the Metal and Vulkan
-    // backends. The hardware path issues a single instanced call; the
-    // emulation path repeats the draw once per instance; every other case is
-    // a single ordinary draw.
-    size_t draw_count = 1u;
+    // A non-instanced draw of the bound geometry. Used directly for ordinary
+    // draws and once per instance when emulating instancing.
+    const auto draw_geometry = [&]() {
+      if (command.index_type == IndexType::kNone) {
+        gl.DrawArrays(mode, command.base_vertex, command.element_count);
+      } else {
+        gl.DrawElements(mode, command.element_count,
+                        ToIndexType(command.index_type), index_offset);
+      }
+    };
+
     if (command.instance_count == 0u) {
-      draw_count = 0u;
+      // A zero instance count draws nothing, matching the Metal and Vulkan
+      // backends.
     } else if (emulate_instanced) {
-      draw_count = command.instance_count;
-    }
-    for (size_t instance = 0; instance < draw_count; instance++) {
-      // The vertex buffers were already bound above for instance 0. When
-      // emulating, re-point the instance-rate attributes at each subsequent
-      // instance.
-      if (emulate_instanced && instance > 0u) {
-        for (size_t i = 0; i < command.vertex_buffers.length; i++) {
-          if (!BindVertexBuffer(
-                  gl, vertex_desc_gles,
-                  vertex_buffers[i + command.vertex_buffers.offset], i,
-                  instance)) {
-            return false;
+      // Repeat the draw once per instance, re-pointing the instance-rate
+      // vertex attributes at each instance in between. The vertex buffers
+      // were already bound above for instance 0.
+      for (size_t instance = 0; instance < command.instance_count; instance++) {
+        if (instance > 0u) {
+          for (size_t i = 0; i < command.vertex_buffers.length; i++) {
+            if (!BindVertexBuffer(
+                    gl, vertex_desc_gles,
+                    vertex_buffers[i + command.vertex_buffers.offset], i,
+                    instance)) {
+              return false;
+            }
           }
         }
+        draw_geometry();
       }
+    } else if (hardware_instanced) {
+      // A single instanced call covers every instance.
       if (command.index_type == IndexType::kNone) {
-        if (hardware_instanced) {
-          gl.DrawArraysInstancedEXT(mode, command.base_vertex,
-                                    command.element_count, instance_count);
-        } else {
-          gl.DrawArrays(mode, command.base_vertex, command.element_count);
-        }
+        gl.DrawArraysInstancedEXT(mode, command.base_vertex,
+                                  command.element_count, instance_count);
       } else {
-        if (hardware_instanced) {
-          gl.DrawElementsInstancedEXT(mode, command.element_count,
-                                      ToIndexType(command.index_type),
-                                      index_offset, instance_count);
-        } else {
-          gl.DrawElements(mode, command.element_count,
-                          ToIndexType(command.index_type), index_offset);
-        }
+        gl.DrawElementsInstancedEXT(mode, command.element_count,
+                                    ToIndexType(command.index_type),
+                                    index_offset, instance_count);
       }
+    } else {
+      draw_geometry();
     }
 
     //--------------------------------------------------------------------------

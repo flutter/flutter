@@ -398,7 +398,10 @@ TEST_F(RenderPassGLESCommandTest, HardwareInstancedArrayDraw) {
   render_pass->SetInstanceCount(4);
   EXPECT_TRUE(render_pass->Draw().ok());
 
-  EXPECT_CALL(mock_gl_impl_ref, DrawArraysInstancedEXT(_, 0, 3, 4)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref,
+              DrawArraysInstancedEXT(/*mode=*/_, /*first=*/0, /*count=*/3,
+                                     /*instancecount=*/4))
+      .Times(1);
   EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, _, _)).Times(0);
 
   EXPECT_TRUE(render_pass->EncodeCommands());
@@ -429,7 +432,9 @@ TEST_F(RenderPassGLESCommandTest, HardwareInstancedElementsDraw) {
   render_pass->SetInstanceCount(4);
   EXPECT_TRUE(render_pass->Draw().ok());
 
-  EXPECT_CALL(mock_gl_impl_ref, DrawElementsInstancedEXT(_, 6, _, _, 4))
+  EXPECT_CALL(mock_gl_impl_ref,
+              DrawElementsInstancedEXT(/*mode=*/_, /*count=*/6, /*type=*/_,
+                                       /*indices=*/_, /*instancecount=*/4))
       .Times(1);
   EXPECT_CALL(mock_gl_impl_ref, DrawElements(_, _, _, _)).Times(0);
 
@@ -453,7 +458,9 @@ TEST_F(RenderPassGLESCommandTest, EmulatedInstancedArrayDraw) {
   render_pass->SetInstanceCount(4);
   EXPECT_TRUE(render_pass->Draw().ok());
 
-  EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, 0, 3)).Times(4);
+  EXPECT_CALL(mock_gl_impl_ref,
+              DrawArrays(/*mode=*/_, /*first=*/0, /*count=*/3))
+      .Times(4);
   EXPECT_CALL(mock_gl_impl_ref, DrawArraysInstancedEXT(_, _, _, _)).Times(0);
 
   EXPECT_TRUE(render_pass->EncodeCommands());
@@ -484,7 +491,9 @@ TEST_F(RenderPassGLESCommandTest, EmulatedInstancedElementsDraw) {
   render_pass->SetInstanceCount(4);
   EXPECT_TRUE(render_pass->Draw().ok());
 
-  EXPECT_CALL(mock_gl_impl_ref, DrawElements(_, 6, _, _)).Times(4);
+  EXPECT_CALL(mock_gl_impl_ref,
+              DrawElements(/*mode=*/_, /*count=*/6, /*type=*/_, /*indices=*/_))
+      .Times(4);
   EXPECT_CALL(mock_gl_impl_ref, DrawElementsInstancedEXT(_, _, _, _, _))
       .Times(0);
 
@@ -506,7 +515,9 @@ TEST_F(RenderPassGLESCommandTest, NonInstancedDrawIssuesSingleDrawArrays) {
   render_pass->SetIndexBuffer({}, IndexType::kNone);
   EXPECT_TRUE(render_pass->Draw().ok());
 
-  EXPECT_CALL(mock_gl_impl_ref, DrawArrays(_, 0, 3)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref,
+              DrawArrays(/*mode=*/_, /*first=*/0, /*count=*/3))
+      .Times(1);
   EXPECT_CALL(mock_gl_impl_ref, DrawArraysInstancedEXT(_, _, _, _)).Times(0);
 
   EXPECT_TRUE(render_pass->EncodeCommands());

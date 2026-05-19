@@ -59,7 +59,7 @@ bool BufferBindingsGLES::RegisterVertexStageInput(
       attrib.normalized = GL_FALSE;
       attrib.offset = input.offset;
       attrib.stride = layout.stride;
-      attrib.divisor =
+      attrib.vertex_attrib_divisor =
           layout.input_rate == VertexInputRate::kInstance ? 1u : 0u;
       vertex_attrib_arrays[layout_i].push_back(attrib);
     }
@@ -214,7 +214,7 @@ bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
     // to advance it. A non-instanced or hardware-instanced draw passes
     // instance 0 and lets the divisor (if any) do the stepping.
     size_t attribute_offset = vertex_offset + array.offset;
-    if (array.divisor != 0u) {
+    if (array.vertex_attrib_divisor != 0u) {
       attribute_offset += instance * static_cast<size_t>(array.stride);
     }
     gl.VertexAttribPointer(array.index,       // index
@@ -232,7 +232,7 @@ bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
     // divisor 0) also clears any stale divisor left by a prior pipeline,
     // which matters on ES, where there is no vertex array object.
     if (gl.VertexAttribDivisorEXT.IsAvailable()) {
-      gl.VertexAttribDivisorEXT(array.index, array.divisor);
+      gl.VertexAttribDivisorEXT(array.index, array.vertex_attrib_divisor);
     }
   }
 

@@ -233,8 +233,12 @@ TEST(BufferBindingsGLESTest, BindVertexAttributesSetsInstanceRateDivisor) {
                                                 layouts));
   // Binding 0 is per-vertex (divisor 0); binding 1 is per-instance
   // (divisor 1).
-  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(), 0, 0, 0));
-  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(), 1, 0, 0));
+  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
+                                            /*binding=*/0, /*vertex_offset=*/0,
+                                            /*instance=*/0));
+  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
+                                            /*binding=*/1, /*vertex_offset=*/0,
+                                            /*instance=*/0));
 }
 
 }  // namespace testing

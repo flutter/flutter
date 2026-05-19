@@ -77,7 +77,7 @@ class BufferBindingsGLES {
     GLsizei stride = 0u;
     GLsizei offset = 0u;
     // glVertexAttribDivisor value: 0 advances per vertex, 1 per instance.
-    GLuint divisor = 0u;
+    GLuint vertex_attrib_divisor = 0u;
   };
   std::vector<std::vector<VertexAttribPointer>> vertex_attrib_arrays_;
 
