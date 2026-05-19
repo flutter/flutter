@@ -586,7 +586,7 @@ targets:
     dimensions:
       os: "Linux"
     properties:
-      cores: "32"
+      cores: "8"
       dependencies: >-
         [
           {"dependency": "dashing", "version": "0.4.0"},
@@ -610,7 +610,7 @@ targets:
     dimensions:
       os: "Linux"
     properties:
-      cores: "32"
+      cores: "8"
       dependencies: >-
         [
           {"dependency": "dashing", "version": "0.4.0"},
@@ -637,7 +637,7 @@ targets:
       - stable
     timeout: 60
     properties:
-      cores: "32"
+      cores: "8"
       dependencies: >-
         [
           {"dependency": "dashing", "version": "0.4.0"},
@@ -654,7 +654,7 @@ targets:
     recipe: flutter/flutter_drone
     timeout: 30
     properties:
-      cores: "32"
+      cores: "8"
       dependencies: >-
         [
           {"dependency": "dashing", "version": "0.4.0"}

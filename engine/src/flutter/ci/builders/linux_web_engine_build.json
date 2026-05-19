@@ -16,7 +16,7 @@
       "drone_dimensions": [
         "device_type=none",
         "os=Linux",
-        "cores=32"
+        "cores=8"
       ],
       "gclient_variables": {
         "download_android_deps": false,
