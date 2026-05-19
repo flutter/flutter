@@ -613,6 +613,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     markNeedsLayout();
   }
 
+  /// The relative position of the zero scroll offset.
+  ///
+  /// Viewports that do not support anchoring use the default of `0.0`.
+  @protected
+  double get anchor => 0.0;
+
   /// This value is set during layout based on the [scrollCacheExtent].
   ///
   /// When the style is [CacheExtentStyle.viewport], it is the main axis extent
@@ -1211,16 +1217,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         };
     }
 
-    var anchorOffset = 0.0;
-    if (this is RenderViewport) {
-      final viewport = this as RenderViewport;
-      anchorOffset =
-          viewport.anchor *
-          switch (axis) {
-            Axis.vertical => size.height,
-            Axis.horizontal => size.width,
-          };
-    }
+    final double anchorOffset =
+        anchor *
+        switch (axis) {
+          Axis.vertical => size.height,
+          Axis.horizontal => size.width,
+        };
 
     final double mainAxisExtentDifference = switch (axis) {
       Axis.horizontal => size.width - extentOfPinnedSlivers - rectLocal.width,
@@ -1648,6 +1650,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   /// on the left edge of the viewport.
   ///
   /// {@macro flutter.rendering.GrowthDirection.sample}
+  @override
   double get anchor => _anchor;
   double _anchor;
   set anchor(double value) {
