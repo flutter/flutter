@@ -474,12 +474,15 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
             return;
           }
           final double currentHeight = context.size?.height ?? 0.0;
-          setState(() {
-            _fadeExtent = _calculateScrollOpacity(
-              currentHeight,
-              _scaledIconSize + math.max(widget.prefixInsets.vertical, widget.suffixInsets.vertical),
-            );
-          });
+          final double newFadeExtent = _calculateScrollOpacity(
+            currentHeight,
+            _scaledIconSize + math.max(widget.prefixInsets.vertical, widget.suffixInsets.vertical),
+          );
+          if (newFadeExtent != _fadeExtent) {
+            setState(() {
+              _fadeExtent = newFadeExtent;
+            });
+          }
         });
       }
     }
