@@ -55,7 +55,7 @@ Future<void> matchPictureGolden(
 ///
 /// This method works even if the CanvasKit build doesn't contain image codecs.
 Future<CkImage> createImageFromBytes(Uint8List bytes) async {
-  final codec = await renderer.instantiateImageCodec(bytes);
-  final frame = await codec.getNextFrame();
+  final ui.Codec codec = await renderer.instantiateImageCodec(bytes);
+  final ui.FrameInfo frame = await codec.getNextFrame();
   return frame.image as CkImage;
 }

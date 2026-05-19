@@ -1151,7 +1151,7 @@ void _canvasTests() {
   });
 
   test('drawAtlas', () async {
-    final image = await createImageFromBytes(kTransparentImage);
+    final CkImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawAtlas(
       image.skImage,
       Float32List.fromList(<double>[0, 0, 1, 1]),
@@ -1179,7 +1179,7 @@ void _canvasTests() {
   });
 
   test('drawImageOptions', () async {
-    final image = await createImageFromBytes(kTransparentImage);
+    final CkImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawImageOptions(
       image.skImage,
       10,
@@ -1191,12 +1191,12 @@ void _canvasTests() {
   });
 
   test('drawImageCubic', () async {
-    final image = await createImageFromBytes(kTransparentImage);
+    final CkImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawImageCubic(image.skImage, 10, 20, 0.3, 0.3, SkPaint());
   });
 
   test('drawImageRectOptions', () async {
-    final image = await createImageFromBytes(kTransparentImage);
+    final CkImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawImageRectOptions(
       image.skImage,
       Float32List.fromList(<double>[0, 0, 1, 1]),
@@ -1208,7 +1208,7 @@ void _canvasTests() {
   });
 
   test('drawImageRectCubic', () async {
-    final image = await createImageFromBytes(kTransparentImage);
+    final CkImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawImageRectCubic(
       image.skImage,
       Float32List.fromList(<double>[0, 0, 1, 1]),
@@ -1220,7 +1220,7 @@ void _canvasTests() {
   });
 
   test('drawImageNine', () async {
-    final image = await createImageFromBytes(kTransparentImage);
+    final CkImage image = await createImageFromBytes(kTransparentImage);
     canvas.drawImageNine(
       image.skImage,
       Float32List.fromList(<double>[0, 0, 1, 1]),
