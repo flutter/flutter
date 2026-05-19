@@ -36,17 +36,20 @@ void main() {
       // Tap the "Red" button.
       await driver.tap(redButton);
 
-      // Wait a short duration to ensure a frame is rasterized after the tap.
-      await Future<void>.delayed(const Duration(seconds: 1));
-
-      // Take another screenshot.
-      final List<int> afterScreenshot = await driver.screenshot(
-        format: ScreenshotFormat.rawStraightRgba,
-      );
-
-      final int afterRedPixels = countRedPixels(afterScreenshot);
-      // ignore: avoid_print
-      print('After red pixel count: $afterRedPixels');
+      // Poll, taking screenshots and counting red pixels for up to 10 seconds (20 attempts of 500ms).
+      var afterRedPixels = 0;
+      for (var attempt = 1; attempt <= 20; attempt++) {
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+        final List<int> afterScreenshot = await driver.screenshot(
+          format: ScreenshotFormat.rawStraightRgba,
+        );
+        afterRedPixels = countRedPixels(afterScreenshot);
+        // ignore: avoid_print
+        print('Attempt $attempt: after red pixel count = $afterRedPixels');
+        if (afterRedPixels > 10000) {
+          break;
+        }
+      }
 
       // The texture size is 300x300. Even with scaling/different device pixel ratio,
       // there should be a substantial block of red pixels (at least several thousands).
