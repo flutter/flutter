@@ -112,59 +112,59 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
       .size = size,
       .stroke = stroke,
       .superellipse_degrees_top =
-          Vector4(top_right.top.se_n, bottom_right.top.se_n,
+          Vector4(bottom_right.top.se_n, top_right.top.se_n,
                   bottom_left.top.se_n, top_left.top.se_n),
       .superellipse_degrees_right =
-          Vector4(top_right.right.se_n, bottom_right.right.se_n,
+          Vector4(bottom_right.right.se_n, top_right.right.se_n,
                   bottom_left.right.se_n, top_left.right.se_n),
       .superellipse_semi_axes_top =
-          Vector4(top_right.top.se_a, bottom_right.top.se_a,
+          Vector4(bottom_right.top.se_a, top_right.top.se_a,
                   bottom_left.top.se_a, top_left.top.se_a),
       .superellipse_semi_axes_right =
-          Vector4(top_right.right.se_a, bottom_right.right.se_a,
+          Vector4(bottom_right.right.se_a, top_right.right.se_a,
                   bottom_left.right.se_a, top_left.right.se_a),
-      .angle_spans_top = Vector4(top_right.top.circle_max_angle.radians,
-                                 bottom_right.top.circle_max_angle.radians,
+      .angle_spans_top = Vector4(bottom_right.top.circle_max_angle.radians,
+                                 top_right.top.circle_max_angle.radians,
                                  bottom_left.top.circle_max_angle.radians,
                                  top_left.top.circle_max_angle.radians),
-      .angle_spans_right = Vector4(top_right.right.circle_max_angle.radians,
-                                   bottom_right.right.circle_max_angle.radians,
+      .angle_spans_right = Vector4(bottom_right.right.circle_max_angle.radians,
+                                   top_right.right.circle_max_angle.radians,
                                    bottom_left.right.circle_max_angle.radians,
                                    top_left.right.circle_max_angle.radians),
       .octant_offsets_c =
-          Vector4(top_right.top.se_a - top_right.right.se_a,
-                  bottom_right.top.se_a - bottom_right.right.se_a,
+          Vector4(bottom_right.top.se_a - bottom_right.right.se_a,
+                  top_right.top.se_a - top_right.right.se_a,
                   bottom_left.top.se_a - bottom_left.right.se_a,
                   top_left.top.se_a - top_left.right.se_a),
       .radii_width =
-          Vector4(top_right.top.circle_radius, bottom_right.top.circle_radius,
+          Vector4(bottom_right.top.circle_radius, top_right.top.circle_radius,
                   bottom_left.top.circle_radius, top_left.top.circle_radius),
       .radii_height = Vector4(
-          top_right.right.circle_radius, bottom_right.right.circle_radius,
+          bottom_right.right.circle_radius, top_right.right.circle_radius,
           bottom_left.right.circle_radius, top_left.right.circle_radius),
       .circle_centers_top_x = Vector4(
-          top_right.top.circle_center.x, bottom_right.top.circle_center.x,
+          bottom_right.top.circle_center.x, top_right.top.circle_center.x,
           bottom_left.top.circle_center.x, top_left.top.circle_center.x),
       .circle_centers_top_y = Vector4(
-          top_right.top.circle_center.y, bottom_right.top.circle_center.y,
+          bottom_right.top.circle_center.y, top_right.top.circle_center.y,
           bottom_left.top.circle_center.y, top_left.top.circle_center.y),
       .circle_centers_right_x = Vector4(
-          top_right.right.circle_center.x, bottom_right.right.circle_center.x,
+          bottom_right.right.circle_center.x, top_right.right.circle_center.x,
           bottom_left.right.circle_center.x, top_left.right.circle_center.x),
       .circle_centers_right_y = Vector4(
-          top_right.right.circle_center.y, bottom_right.right.circle_center.y,
+          bottom_right.right.circle_center.y, top_right.right.circle_center.y,
           bottom_left.right.circle_center.y, top_left.right.circle_center.y),
       .superellipse_scales_x = Vector4(
-          top_right.signed_scale.Abs().x, bottom_right.signed_scale.Abs().x,
+          bottom_right.signed_scale.Abs().x, top_right.signed_scale.Abs().x,
           bottom_left.signed_scale.Abs().x, top_left.signed_scale.Abs().x),
       .superellipse_scales_y = Vector4(
-          top_right.signed_scale.Abs().y, bottom_right.signed_scale.Abs().y,
+          bottom_right.signed_scale.Abs().y, top_right.signed_scale.Abs().y,
           bottom_left.signed_scale.Abs().y, top_left.signed_scale.Abs().y),
       .quadrant_centers_x =
-          Vector4(top_right_center_relative.x, bottom_right_center_relative.x,
+          Vector4(bottom_right_center_relative.x, top_right_center_relative.x,
                   bottom_left_center_relative.x, top_left_center_relative.x),
       .quadrant_centers_y =
-          Vector4(top_right_center_relative.y, bottom_right_center_relative.y,
+          Vector4(bottom_right_center_relative.y, top_right_center_relative.y,
                   bottom_left_center_relative.y, top_left_center_relative.y),
       .quadrant_splits =
           Vector4(round_superellipse_params.top_split - center.x,

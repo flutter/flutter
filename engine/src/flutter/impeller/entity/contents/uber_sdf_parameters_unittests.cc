@@ -143,6 +143,43 @@ TEST(UberSDFParametersTest, MakeRoundedSuperellipse) {
   EXPECT_EQ(params.center, Point(60, 70));
   EXPECT_EQ(params.size, Point(50, 50));
   EXPECT_FALSE(params.stroke.has_value());
+
+  // Test the [BR, TR, BL, TL] packing order
+  EXPECT_EQ(params.radii_width.x,
+            round_superellipse_params.bottom_right.top.circle_radius);
+  EXPECT_EQ(params.radii_width.y,
+            round_superellipse_params.top_right.top.circle_radius);
+  EXPECT_EQ(params.radii_width.z,
+            round_superellipse_params.bottom_left.top.circle_radius);
+  EXPECT_EQ(params.radii_width.w,
+            round_superellipse_params.top_left.top.circle_radius);
+
+  EXPECT_EQ(params.radii_height.x,
+            round_superellipse_params.bottom_right.right.circle_radius);
+  EXPECT_EQ(params.radii_height.y,
+            round_superellipse_params.top_right.right.circle_radius);
+  EXPECT_EQ(params.radii_height.z,
+            round_superellipse_params.bottom_left.right.circle_radius);
+  EXPECT_EQ(params.radii_height.w,
+            round_superellipse_params.top_left.right.circle_radius);
+
+  EXPECT_EQ(params.superellipse_degrees_top.x,
+            round_superellipse_params.bottom_right.top.se_n);
+  EXPECT_EQ(params.superellipse_degrees_top.y,
+            round_superellipse_params.top_right.top.se_n);
+  EXPECT_EQ(params.superellipse_degrees_top.z,
+            round_superellipse_params.bottom_left.top.se_n);
+  EXPECT_EQ(params.superellipse_degrees_top.w,
+            round_superellipse_params.top_left.top.se_n);
+
+  EXPECT_EQ(params.superellipse_scales_x.x,
+            round_superellipse_params.bottom_right.signed_scale.Abs().x);
+  EXPECT_EQ(params.superellipse_scales_x.y,
+            round_superellipse_params.top_right.signed_scale.Abs().x);
+  EXPECT_EQ(params.superellipse_scales_x.z,
+            round_superellipse_params.bottom_left.signed_scale.Abs().x);
+  EXPECT_EQ(params.superellipse_scales_x.w,
+            round_superellipse_params.top_left.signed_scale.Abs().x);
 }
 
 }  // namespace testing

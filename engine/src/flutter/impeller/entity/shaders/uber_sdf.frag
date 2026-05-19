@@ -128,9 +128,9 @@ float getQuadrantDistance(vec2 p,
                           int quadrant_index) {
   vec2 q_sign = vec2(1.0);
   if (quadrant_index == 0)
-    q_sign = vec2(1.0, -1.0);
-  else if (quadrant_index == 1)
     q_sign = vec2(1.0, 1.0);
+  else if (quadrant_index == 1)
+    q_sign = vec2(1.0, -1.0);
   else if (quadrant_index == 2)
     q_sign = vec2(-1.0, 1.0);
   else
@@ -270,10 +270,13 @@ float distanceFromRoundedSuperellipse(vec2 p,
   // p must lie in the TL quadrant.
   // If cT = p x T == 0, p is parallel to T, which can misidentify points in the
   // BR quadrant.
-  if (cR <= 0.0 && (cT > 0.0 || cT == 0.0 && p.x > 0.0)) {
-    quadrant_index = 0;  // TR
-  } else if (cB <= 0.0 && (cR > 0.0 || cR == 0.0 && p.x > 0.0)) {
-    quadrant_index = 1;  // BR
+
+  if ((cR < 0.0 || cR == 0.0 && p.x > 0.0) &&
+      (cT > 0.0 || cT == 0.0 && p.x > 0.0)) {
+    quadrant_index = 1;  // TR
+  } else if ((cB < 0.0 || cB == 0.0 && p.x > 0.0) &&
+             (cR > 0.0 || cR == 0.0 && p.x > 0.0)) {
+    quadrant_index = 0;  // BR
   } else if (cB >= 0.0 && cL <= 0.0) {
     quadrant_index = 2;  // BL
   } else {
@@ -486,8 +489,8 @@ float distanceFromSymmetricRoundedSuperellipse(
   // Fold the pixel into the Top-Right quadrant (x > 0, y < 0)
   vec2 p_folded = vec2(abs(p.x), -abs(p.y));
 
-  // The Top-Right quadrant is always index 0
-  int quadrant_index = 0;
+  // The Top-Right quadrant is index 1
+  int quadrant_index = 1;
 
   float se_degree_top = superellipse_degrees_top[quadrant_index];
   float se_degree_right = superellipse_degrees_right[quadrant_index];
