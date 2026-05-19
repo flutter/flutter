@@ -726,6 +726,13 @@ object FlutterPluginUtils {
                 )
                 return
             }
+            if (gradleProject.gradle.startParameter.isOffline) {
+                configureSyntheticExternalNativeBuildFallback(
+                    gradleProject = gradleProject,
+                    flutterSdkRootPath = flutterSdkRootPath
+                )
+                return
+            }
             gradleProject.afterEvaluate {
                 val handledByToolProvisioning = maybeHandleToolNdkProvisioning(
                     gradleProject = gradleProject,
@@ -792,8 +799,8 @@ object FlutterPluginUtils {
 
         val installedNdkMarker =
             File(
-                File(File(toolNdkProvisioningProperties.androidSdkRoot, "ndk"), configuredNdkVersion),
-                "source.properties"
+                toolNdkProvisioningProperties.androidSdkRoot,
+                "ndk/$configuredNdkVersion/source.properties"
             )
         if (!installedNdkMarker.exists()) {
             throw GradleException(
@@ -991,11 +998,10 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForPrintNdkVersion")
     internal fun addTaskForPrintNdkVersion(project: Project) {
-        val androidExtension = getAndroidApplicationExtension(project)
         project.tasks.register(TASK_PRINT_NDK_VERSION) {
             description = "Prints out the configured ndkVersion for this Android project"
             doLast {
-                val configuredNdkVersion = androidExtension.ndkVersion
+                val configuredNdkVersion = getConfiguredNdkVersion(project)
                 println("$NDK_VERSION_OUTPUT_PREFIX$configuredNdkVersion")
             }
         }
