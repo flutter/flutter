@@ -7,6 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'test_page_tester.dart';
+import 'widgets_app_tester.dart';
+
 class TestIntent extends Intent {
   const TestIntent();
 }
@@ -47,17 +50,6 @@ class _TestActivatable extends StatelessWidget {
       child: const Focus(autofocus: true, child: SizedBox.shrink()),
     );
   }
-}
-
-/// Creates a page route for [WidgetsApp] tests without depending on Material.
-PageRoute<T> _testPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
-  return PageRouteBuilder<T>(
-    settings: settings,
-    pageBuilder:
-        (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-          return builder(context);
-        },
-  );
 }
 
 void main() {
@@ -218,11 +210,10 @@ void main() {
       await expectFlutterError(
         key: key,
         tester: tester,
-        widget: WidgetsApp(
+        widget: TestWidgetsApp(
           navigatorKey: key,
           home: Container(),
           onGenerateRoute: (_) => null,
-          pageRouteBuilder: _testPageRouteBuilder,
           color: const Color(0xFF123456),
         ),
         errorMessage:
@@ -248,12 +239,11 @@ void main() {
       await expectFlutterError(
         key: key,
         tester: tester,
-        widget: WidgetsApp(
+        widget: TestWidgetsApp(
           navigatorKey: key,
           home: Container(),
           onGenerateRoute: (_) => null,
           onUnknownRoute: (_) => null,
-          pageRouteBuilder: _testPageRouteBuilder,
           color: const Color(0xFF123456),
         ),
         errorMessage:
@@ -603,7 +593,6 @@ void main() {
         },
         builder: (BuildContext context, Widget? child) => const Placeholder(),
         color: const Color(0xFF000000),
-        pageRouteBuilder: _testPageRouteBuilder,
       ),
     );
     if (!kIsWeb) {
@@ -860,20 +849,6 @@ class PasteSpy extends Action<PasteTextIntent> {
   }
 }
 
-/// A test page that creates a route without depending on Material.
-class _TestPage<T> extends Page<T> {
-  /// Creates a test page that builds [child].
-  const _TestPage({super.key, required this.child});
-
-  /// The widget built by this page's route.
-  final Widget child;
-
-  @override
-  Route<T> createRoute(BuildContext context) {
-    return PageRouteBuilder<T>(settings: this, pageBuilder: (_, _, _) => child);
-  }
-}
-
 /// A test localization type used to exercise unsupported locale reporting.
 class _TestUnsupportedLocalizations {
   /// Creates test localizations.
@@ -947,8 +922,8 @@ class SimpleNavigatorRouterDelegate extends RouterDelegate<RouteInformation>
       pages: <Page<void>>[
         // We need at least two pages for the pop to propagate through.
         // Otherwise, the navigator will bubble the pop to the system navigator.
-        const _TestPage<void>(child: Text('base')),
-        _TestPage<void>(
+        const TestPage<void>(child: Text('base')),
+        TestPage<void>(
           key: ValueKey<String>(routeInformation.uri.toString()),
           child: builder(context, routeInformation),
         ),
