@@ -1,0 +1,37 @@
+name: Flutter's CI infrastructure has a problem
+description: |
+  As a contributor, you want to file an issue about the build/test/release
+  infra, e.g. dashboards (http://flutter-dashboard.appspot.com), devicelab,
+  LUCI (https://ci.chromium.org/p/flutter) etc.
+labels: ['team-infra']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for contributing to Flutter!
+
+        This template is for requests made to [`team-infra`](https://flutter.dev/to/team-infra).
+
+        If you are filing this to track your **own** contributed work to infrastructure, and the
+        work is already agreed upon (routine maintenance, etc), feel free to skip this template;
+        and use a blank issue - just remember to assign the bug to yourself so it's clear we do
+        not have to triage it.
+  - type: markdown
+    attributes:
+      value: |
+        Please search [existing infra issues](https://github.com/flutter/flutter/issues?q=is%3Aopen+is%3Aissue+label%3Ateam-infra) before filing a new issue.
+  - type: checkboxes
+    id: priority
+    attributes:
+      label: Help us understand the severity of this issue
+      description: Please only choose one
+      options:
+        - label: breakage; unable to contribute or trigger builds will no workarounds
+        - label: inconvenient workarounds exist, but significant effort required
+        - label: needed for a Flutter team-wide priority (already agreed upon)
+        - label: nice-to-have; none of the above
+  - type: textarea
+    attributes:
+      label: What do you need help with
+      description: If you have a bug, What should the expect output be?
+      value: ...

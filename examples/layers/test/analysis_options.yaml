@@ -1,0 +1,5 @@
+include: ../../../analysis_options.yaml
+
+linter:
+  rules:
+    only_throw_errors: false # We are more flexible for tests.

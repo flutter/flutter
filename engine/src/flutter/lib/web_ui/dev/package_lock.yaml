@@ -1,0 +1,17 @@
+# Please refer to the "Upgrade Browser Version" section in the README.md for
+# more details on how to update browser version numbers.
+chrome:
+  # Latest version can be found here:
+  # https://googlechromelabs.github.io/chrome-for-testing/
+  version: '141.0.7390.76'
+
+firefox:
+  # Latest version can be found here:
+  # https://www.firefox.com/en-US/releases/
+  version: '143.0'
+
+edge:
+  launcher_version: '1.2.0.0'
+
+esbuild:
+  version: '0.19.5'

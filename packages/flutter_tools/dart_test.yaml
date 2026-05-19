@@ -1,0 +1,24 @@
+# package:test configuration
+# https://github.com/dart-lang/test/blob/master/pkgs/test/doc/configuration.md
+
+# Some of our tests take an absurdly long time to run, and on some
+# hosts they can take even longer due to the host suddenly being
+# overloaded. For this reason, we set the test timeout to
+# significantly more than it would be by default, and we never set the
+# timeouts in the tests themselves.
+#
+# For the `test/general.shard` specifically, the `dev/bots/test.dart` script
+# overrides this, reducing it to only 2000ms. Unit tests must run fast!
+timeout: 15m
+
+tags:
+  # This tag tells the test framework to not shuffle the test order according to
+  # the --test-randomize-ordering-seed for the suites that have this tag.
+  no-shuffle:
+    allow_test_randomization: false
+
+  # Tests that invoke `flutter build apk` for integration.
+  flutter-build-apk: {}
+
+  # Tests that invoke `flutter test ...` or `flutter run ...` for integration.
+  flutter-test-driver: {}
