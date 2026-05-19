@@ -194,7 +194,7 @@ dependencies:
   vector_math: ^2.3.0
   video_player: 2.11.1
   video_player_android: 2.9.5
-  video_player_avfoundation: 2.9.6
+  video_player_avfoundation: 2.9.7
   video_player_platform_interface: 6.7.0
   video_player_web: 2.4.0
   vm_service: 15.2.0
@@ -233,4 +233,4 @@ dependency_overrides:
   native_toolchain_c: 0.19.0
   hooks: 2.0.0
 
-# PUBSPEC CHECKSUM: tnpcec
+# PUBSPEC CHECKSUM: c0m2k4
