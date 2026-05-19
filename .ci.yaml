@@ -4163,7 +4163,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "mac"]
@@ -5220,7 +5219,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
@@ -5440,7 +5438,6 @@ targets:
 
   - name: Mac_arm64 wide_gamut_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
