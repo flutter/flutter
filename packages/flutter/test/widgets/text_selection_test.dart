@@ -2031,9 +2031,9 @@ void main() {
         expect(endpoints, hasLength(2));
         expect(endpoints.first.direction, testCase.expectedStartEndpointDirection);
         expect(endpoints.last.direction, testCase.expectedEndEndpointDirection);
-        expect(customControls.builtHandleTypes.length, greaterThanOrEqualTo(2));
-        expect(customControls.lastStartHandleType, testCase.expectedStartHandleType);
-        expect(customControls.lastEndHandleType, testCase.expectedEndHandleType);
+        expect(customControls.builtHandleTypes, hasLength(2));
+        expect(customControls.builtHandleTypes.first, testCase.expectedStartHandleType);
+        expect(customControls.builtHandleTypes.last, testCase.expectedEndHandleType);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
@@ -2078,9 +2078,9 @@ void main() {
       expect(endpoints, hasLength(2));
       expect(endpoints.first.direction, TextDirection.ltr);
       expect(endpoints.last.direction, TextDirection.rtl);
-      expect(customControls.builtHandleTypes.length, greaterThanOrEqualTo(2));
-      expect(customControls.lastStartHandleType, TextSelectionHandleType.left);
-      expect(customControls.lastEndHandleType, TextSelectionHandleType.right);
+      expect(customControls.builtHandleTypes, hasLength(2));
+      expect(customControls.builtHandleTypes.first, TextSelectionHandleType.left);
+      expect(customControls.builtHandleTypes.last, TextSelectionHandleType.right);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
@@ -2341,10 +2341,6 @@ class DirectionalitySpyTextSelectionControls extends TextSelectionControls {
   void clearBuiltHandleTypes() {
     builtHandleTypes.clear();
   }
-
-  TextSelectionHandleType get lastStartHandleType => builtHandleTypes[builtHandleTypes.length - 2];
-
-  TextSelectionHandleType get lastEndHandleType => builtHandleTypes[builtHandleTypes.length - 1];
 
   // Wrap the handle in a widget with a Key that identifies its type.
   @override
