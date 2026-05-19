@@ -55,6 +55,7 @@ executable("touch-input-test-bin") {
 fuchsia_test_archive("touch-input-test") {
   deps = [ ":touch-input-test-bin" ]
   subpackages = [
+    "${fuchsia_sdk}/packages/realm_builder_server",
     "embedding-flutter-view:package",
     "touch-input-view:package",
     "//flutter/shell/platform/fuchsia/flutter:flutter_jit_runner",

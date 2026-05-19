@@ -1571,16 +1571,16 @@ extension type DomTextMetrics._(JSObject _) implements JSObject {
   external JSArray<JSAny?> _getTextClusters();
   List<DomTextCluster> getTextClusters() => _getTextClusters().toDart.cast<DomTextCluster>();
 
-  external DomRectReadOnly getActualBoundingBox(int begin, int end);
+  external DomRectReadOnly getActualBoundingBox(int start, int end);
 
   external double get fontBoundingBoxAscent;
 
   external double get fontBoundingBoxDescent;
 
   @JS('getSelectionRects')
-  external JSArray<JSAny> _getSelectionRects(int begin, int end);
-  List<DomRectReadOnly> getSelectionRects(int begin, int end) =>
-      _getSelectionRects(begin, end).toDart.cast<DomRectReadOnly>();
+  external JSArray<JSAny> _getSelectionRects(int start, int end);
+  List<DomRectReadOnly> getSelectionRects(int start, int end) =>
+      _getSelectionRects(start, end).toDart.cast<DomRectReadOnly>();
 }
 
 @JS('DOMException')

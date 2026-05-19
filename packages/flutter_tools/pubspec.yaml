@@ -119,7 +119,7 @@ dev_dependencies:
 
   checked_yaml: 2.0.4
   js: 0.7.2
-  json_annotation: 4.11.0
+  json_annotation: 4.12.0
   node_preamble: 2.0.2
   test: 1.31.1
 
@@ -127,4 +127,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: udpfdj
+# PUBSPEC CHECKSUM: npmtr8
