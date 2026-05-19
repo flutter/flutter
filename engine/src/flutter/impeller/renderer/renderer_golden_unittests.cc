@@ -60,6 +60,9 @@ TEST_P(RendererGoldenTest, BabysFirstTriangle) {
       context->GetCapabilities()->GetMinimumUniformAlignment());
 
   ASSERT_TRUE(OpenPlaygroundHere([&](RenderPass& pass) -> bool {
+    // The harness runs the callback once per pass; start each from a clean
+    // host buffer.
+    host_buffer->Reset();
     pass.SetPipeline(pipeline);
     pass.SetVertexBuffer(vertex_buffer);
 
