@@ -1519,6 +1519,7 @@ abstract class ResidentRunner extends ResidentHandlers {
       // extension which is not registered/supported by the Web engine. On web clients,
       // this throws an internal RPCError (-32603) instead of a standard MethodNotFound
       // error, which would break the hot reload.
+      // See https://github.com/flutter/flutter/issues/137265
       if (device.targetPlatform != TargetPlatform.web_javascript) {
         for (final String assetPath in devFS.shaderPathsToEvict) {
           futures.add(vmService.flutterEvictShader(assetPath, isolateId: firstUiIsolate.id!));

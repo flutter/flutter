@@ -914,11 +914,13 @@ name: my_app
             args: <String, Object>{'isolateId': '1', 'value': 'assets/foo.png'},
             jsonResponse: <String, Object>{'type': 'Success'},
           ),
-          const FakeVmServiceRequest(
-            method: 'ext.ui.window.reinitializeShader',
-            args: <String, Object>{'isolateId': '1', 'assetKey': 'shaders/bar.frag'},
-            jsonResponse: <String, Object>{'type': 'Success'},
-          ),
+          // Note that shader paths are not evicted on the web yet.
+          // See https://github.com/flutter/flutter/issues/137265
+          // const FakeVmServiceRequest(
+          //   method: 'ext.ui.window.reinitializeShader',
+          //   args: <String, Object>{'isolateId': '1', 'assetKey': 'shaders/bar.frag'},
+          //   jsonResponse: <String, Object>{'type': 'Success'},
+          // ),
           const FakeVmServiceRequest(
             method: 'ext.flutter.reassemble',
             jsonResponse: <String, Object>{'type': 'ReloadReport', 'success': true},
@@ -927,9 +929,11 @@ name: my_app
       );
       setupMocks();
 
-      // Populate dirty assets and shaders to evict
+      // Populate dirty assets and shaders to evict.
       webDevFS.assetPathsToEvict.add('assets/foo.png');
-      webDevFS.shaderPathsToEvict.add('shaders/bar.frag');
+      // Note that shader paths are not evicted on the web yet.
+      // See https://github.com/flutter/flutter/issues/137265
+      // webDevFS.shaderPathsToEvict.add('shaders/bar.frag');
       webDevFS.didUpdateFontManifest = true;
 
       final chromiumLauncher = TestChromiumLauncher();
@@ -2429,6 +2433,9 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Uri? testUri;
   UpdateFSReport report = UpdateFSReport(success: true, invalidatedSourcesCount: 1);
   Exception? reportError;
+
+  @override
+  TargetPlatform get targetPlatform => TargetPlatform.web_javascript;
 
   @override
   ResidentCompiler? generator;

@@ -518,6 +518,8 @@ class WebDevFS implements DevFS {
     // Not used for web compilation.
   }
 
+  // Shaders are not supported during hot reload on the web yet.
+  // See https://github.com/flutter/flutter/issues/137265
   @override
   Set<String> get shaderPathsToEvict => _shaderPathsToEvict;
 }
