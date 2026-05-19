@@ -333,6 +333,8 @@ void main() {
   testWidgets('Tight selectionWidthStyle does not expand to a longer next line', (
     WidgetTester tester,
   ) async {
+    const fontSize = 10.0;
+    const characterWidth = fontSize; // FlutterTest is a square monospace font.
     controller.text = 'abc\nabcdefghij';
 
     await tester.pumpWidget(
@@ -344,7 +346,7 @@ void main() {
             focusNode: focusNode,
             maxLines: null,
             selectionWidthStyle: BoxWidthStyle.tight,
-            style: const TextStyle(fontFamily: 'FlutterTest', fontSize: 10.0, height: 1.0),
+            style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize, height: 1.0),
             cursorColor: cursorColor,
             backgroundCursorColor: Colors.grey,
             selectionColor: Colors.black,
@@ -362,10 +364,14 @@ void main() {
     controller.selection = const TextSelection(baseOffset: 2, extentOffset: 3);
     await tester.pump();
 
-    expect(
-      renderEditable,
-      paints..rect(color: Colors.black, rect: const Rect.fromLTRB(20.0, 0.0, 30.0, 10.0)),
+    const expectedSelectionRect = Rect.fromLTRB(
+      2 * characterWidth,
+      0.0,
+      3 * characterWidth,
+      fontSize,
     );
+
+    expect(renderEditable, paints..rect(color: Colors.black, rect: expectedSelectionRect));
   });
 
   group('Check the passed groupId value', () {
