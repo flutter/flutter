@@ -128,6 +128,23 @@ TEST_P(CompilerTest, MustFailDueToMultipleLocationPerStructMember) {
   ASSERT_FALSE(CanCompileAndReflect("struct_def_bug.vert"));
 }
 
+TEST_P(CompilerTest, UniformBlockInstanceNameCanonicalizedForGL) {
+  if (!TargetPlatformIsOpenGL(GetParam())) {
+    GTEST_SKIP() << "Only GL targets lower uniform blocks to flat structs.";
+  }
+  // `mat2_test.frag` has `uniform Params { ... } uParams;`. Without
+  // canonicalization, BufferBindingsGLES cannot resolve `uParams.uMat2`.
+  ASSERT_TRUE(
+      CanCompileAndReflect("mat2_test.frag", SourceType::kFragmentShader));
+  auto sl_source = GetCompiler()->GetSLShaderSource();
+  ASSERT_NE(sl_source, nullptr);
+  const std::string source(
+      reinterpret_cast<const char*>(sl_source->GetMapping()),
+      sl_source->GetSize());
+  EXPECT_EQ(source.find("uParams."), std::string::npos) << source;
+  EXPECT_NE(source.find("_Params."), std::string::npos) << source;
+}
+
 TEST_P(CompilerTest, BindingBaseForFragShader) {
   if (!TargetPlatformIsVulkan(GetParam())) {
     GTEST_SKIP();
