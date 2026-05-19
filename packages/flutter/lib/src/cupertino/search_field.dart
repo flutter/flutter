@@ -377,6 +377,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
   ScrollNotificationObserverState? _scrollNotificationObserver;
   late double _scaledIconSize;
   double _fadeExtent = 0.0;
+  bool _pendingFadeUpdate = false;
 
   @override
   void initState() {
@@ -465,13 +466,22 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
 
   void _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification) {
-      final double currentHeight = context.size?.height ?? 0.0;
-      setState(() {
-        _fadeExtent = _calculateScrollOpacity(
-          currentHeight,
-          _scaledIconSize + math.max(widget.prefixInsets.vertical, widget.suffixInsets.vertical),
-        );
-      });
+      if (!_pendingFadeUpdate) {
+        _pendingFadeUpdate = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _pendingFadeUpdate = false;
+          if (!mounted) {
+            return;
+          }
+          final double currentHeight = context.size?.height ?? 0.0;
+          setState(() {
+            _fadeExtent = _calculateScrollOpacity(
+              currentHeight,
+              _scaledIconSize + math.max(widget.prefixInsets.vertical, widget.suffixInsets.vertical),
+            );
+          });
+        });
+      }
     }
   }
 

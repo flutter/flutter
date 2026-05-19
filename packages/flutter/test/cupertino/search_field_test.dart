@@ -887,6 +887,110 @@ void main() {
     }
   });
 
+  testWidgets('Fade opacity is computed from post-layout height after scroll', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverResizingHeader(
+                child: CupertinoSearchTextField(suffixMode: OverlayVisibilityMode.always),
+              ),
+              SliverFillRemaining(),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder searchTextFieldFinder = find.byType(CupertinoSearchTextField);
+    final Finder prefixIconFinder = find.descendant(
+      of: searchTextFieldFinder,
+      matching: find.byIcon(CupertinoIcons.search),
+    );
+
+    // Initially fully opaque.
+    expect(
+      tester
+          .widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity)))
+          .opacity,
+      equals(1.0),
+    );
+
+    final double searchTextFieldHeight = tester.getSize(searchTextFieldFinder).height;
+
+    // Hold gesture so no fling fires additional notifications between pumps.
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(CustomScrollView)),
+    );
+    await gesture.moveBy(Offset(0, -searchTextFieldHeight / 5));
+
+    await tester.pump(); // SliverResizingHeader lays out; postFrameCallback fires.
+    await tester.pump(); // Widget rebuilds with updated _fadeExtent.
+
+    // The prefix icon starts to fade.
+    expect(
+      tester
+          .widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity)))
+          .opacity,
+      greaterThan(0.0),
+    );
+    expect(
+      tester
+          .widget<Opacity>(find.ancestor(of: prefixIconFinder, matching: find.byType(Opacity)))
+          .opacity,
+      lessThan(1.0),
+    );
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('No crash when widget is disposed while a fade update is pending', (
+    WidgetTester tester,
+  ) async {
+    bool showSearchField = true;
+    late StateSetter stateSetter;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            stateSetter = setter;
+            return CupertinoPageScaffold(
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  if (showSearchField)
+                    const SliverResizingHeader(child: CupertinoSearchTextField()),
+                  const SliverFillRemaining(),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Trigger a scroll so that addPostFrameCallback is registered.
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(CustomScrollView)),
+    );
+    await gesture.moveBy(const Offset(0, -30));
+    await gesture.up();
+
+    // Remove the widget before the pending postFrameCallback fires.
+    stateSetter(() {
+      showSearchField = false;
+    });
+
+    // The !mounted guard prevents setState-after-dispose.
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoSearchTextField), findsNothing);
+  });
+
   testWidgets('CupertinoSearchTextField does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     final controller = TextEditingController(text: 'X');
