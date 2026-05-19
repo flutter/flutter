@@ -1043,15 +1043,12 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/174133
   // (and duplicate https://github.com/flutter/flutter/issues/180337). [Table]
   // defers adopting its render-object children until every row has been
-  // mounted, which means an [OverlayPortal] cell mounts its overlay child
-  // (and the overlay child gets an owner) before the OverlayPortal's own
-  // layout-surrogate render object has been adopted by its parent.
-  // [_RenderDeferredLayoutBox.redepthChildren] used to call
-  // `_layoutSurrogate.redepthChild(this)` unconditionally and trip a
-  // `child.owner == owner` assertion in that window.
+  // mounted. An [OverlayPortal] cell can mount its overlay child in that window,
+  // before the portal's layout-surrogate render object has been adopted by its
+  // parent.
   testWidgets('OverlayPortal child inside a TableRow does not crash', (WidgetTester tester) async {
-    // Mirrors how Slider uses OverlayPortal: controller.show() runs in a
-    // field initializer, before the OverlayPortal widget is mounted.
+    // Exercise the pre-mount show path while the layout surrogate is still
+    // waiting to be adopted by its parent.
     final controller = OverlayPortalController()..show();
     const overlayKey = Key('overlay-child');
     await tester.pumpWidget(
