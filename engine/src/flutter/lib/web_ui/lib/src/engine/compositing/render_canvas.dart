@@ -144,6 +144,6 @@ class RenderCanvas extends DisplayCanvas {
     _pixelHeight = 0;
     canvasElement.width = 0;
     canvasElement.height = 0;
-    _updateLogicalHtmlCanvasSize();
+    canvasElement.remove();
   }
 }

@@ -79,6 +79,20 @@ void testMain() {
       expect(canvas.canvasElement.height, 0);
     });
 
+    test('dispose removes the canvas element from the DOM', () {
+      final canvas = RenderCanvas();
+      addTearDown(canvas.hostElement.remove);
+      domDocument.body!.append(canvas.hostElement);
+
+      expect(canvas.hostElement.isConnected, isTrue);
+      expect(canvas.canvasElement.isConnected, isTrue);
+
+      canvas.dispose();
+
+      expect(canvas.hostElement.isConnected, isTrue);
+      expect(canvas.canvasElement.isConnected, isFalse);
+    });
+
     test('rounds physical size to nearest integer size', () async {
       final EngineFlutterWindow implicitView = EnginePlatformDispatcher.instance.implicitView!;
       implicitView.debugPhysicalSizeOverride = const ui.Size(199.999999, 200.000001);
