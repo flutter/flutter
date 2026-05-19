@@ -1272,86 +1272,84 @@ void main() {
     expect(controller.offset, 352.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets(
-    'keyboard selection should auto scroll - horizontal reversed',
-    (WidgetTester tester) async {
-      final node = FocusNode();
-      addTearDown(node.dispose);
-      final controller = ScrollController();
-      addTearDown(controller.dispose);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SelectionArea(
-            focusNode: node,
-            selectionControls: materialTextSelectionControls,
-            child: ListView.builder(
-              controller: controller,
-              scrollDirection: Axis.horizontal,
-              reverse: true,
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) {
-                return Text('Item $index');
-              },
-            ),
+  testWidgets('keyboard selection should auto scroll - horizontal reversed', (
+    WidgetTester tester,
+  ) async {
+    final node = FocusNode();
+    addTearDown(node.dispose);
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectionArea(
+          focusNode: node,
+          selectionControls: materialTextSelectionControls,
+          child: ListView.builder(
+            controller: controller,
+            scrollDirection: Axis.horizontal,
+            reverse: true,
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
           ),
         ),
-      );
-      await tester.pumpAndSettle();
-      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(
-        find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)),
-      );
-      final TestGesture gesture = await tester.startGesture(
-        textOffsetToPosition(paragraph1, 5) + const Offset(0, 5),
-        kind: ui.PointerDeviceKind.mouse,
-      );
-      addTearDown(gesture.removePointer);
-      await gesture.moveTo(textOffsetToPosition(paragraph1, 4) + const Offset(0, 5));
-      await tester.pumpAndSettle();
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(paragraph1.selections.length, 1);
-      expect(paragraph1.selections[0].start, 4);
-      expect(paragraph1.selections[0].end, 5);
-      expect(controller.offset, 0.0);
+      ),
+    );
+    await tester.pumpAndSettle();
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)),
+    );
+    final TestGesture gesture = await tester.startGesture(
+      textOffsetToPosition(paragraph1, 5) + const Offset(0, 5),
+      kind: ui.PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(textOffsetToPosition(paragraph1, 4) + const Offset(0, 5));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 4);
+    expect(paragraph1.selections[0].end, 5);
+    expect(controller.offset, 0.0);
 
-      await sendKeyCombination(
-        tester,
-        const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
-      );
-      await tester.pump();
-      expect(paragraph1.selections.length, 1);
-      expect(paragraph1.selections[0].start, 0);
-      expect(paragraph1.selections[0].end, 5);
-      expect(controller.offset, 0.0);
+    await sendKeyCombination(
+      tester,
+      const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
+    );
+    await tester.pump();
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 0);
+    expect(paragraph1.selections[0].end, 5);
+    expect(controller.offset, 0.0);
 
-      await sendKeyCombination(
-        tester,
-        const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
-      );
-      await tester.pump();
-      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(
-        find.descendant(of: find.text('Item 2'), matching: find.byType(RichText)),
-      );
-      expect(paragraph2.selections.length, 1);
-      expect(paragraph2.selections[0].start, 0);
-      expect(paragraph2.selections[0].end, 6);
-      expect(controller.offset, 64.0);
+    await sendKeyCombination(
+      tester,
+      const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
+    );
+    await tester.pump();
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Item 2'), matching: find.byType(RichText)),
+    );
+    expect(paragraph2.selections.length, 1);
+    expect(paragraph2.selections[0].start, 0);
+    expect(paragraph2.selections[0].end, 6);
+    expect(controller.offset, 64.0);
 
-      await sendKeyCombination(
-        tester,
-        const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
-      );
-      await tester.pump();
-      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(
-        find.descendant(of: find.text('Item 3'), matching: find.byType(RichText)),
-      );
-      expect(paragraph3.selections.length, 1);
-      expect(paragraph3.selections[0].start, 0);
-      expect(paragraph3.selections[0].end, 6);
-      expect(controller.offset, 352.0);
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    await sendKeyCombination(
+      tester,
+      const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
+    );
+    await tester.pump();
+    final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Item 3'), matching: find.byType(RichText)),
+    );
+    expect(paragraph3.selections.length, 1);
+    expect(paragraph3.selections[0].start, 0);
+    expect(paragraph3.selections[0].end, 6);
+    expect(controller.offset, 352.0);
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('Starting selection in empty padding of scrollable should not crash', (
     WidgetTester tester,
