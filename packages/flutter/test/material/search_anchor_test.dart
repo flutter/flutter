@@ -4435,6 +4435,7 @@ void main() {
     expect(rotatedSize.height, landscapeModeHeight);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/186154.
   testWidgets('SearchAnchor full-screen height matches resized parent height', (
     WidgetTester tester,
   ) async {
@@ -4445,29 +4446,39 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        builder: (BuildContext context, Widget? child) {
-          return Scaffold(
-            body: StatefulBuilder(
-              builder: (BuildContext context, StateSetter stateSetter) {
-                setState = stateSetter;
-                return SizedBox(height: parentHeight, width: 800.0, child: child);
-              },
-            ),
-          );
-        },
-        home: Material(
-          child: SearchAnchor(
-            isFullScreen: true,
-            builder: (BuildContext context, SearchController controller) {
-              return IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  controller.openView();
-                },
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (BuildContext context, StateSetter stateSetter) {
+              setState = stateSetter;
+              return SizedBox(
+                height: parentHeight,
+                width: 800.0,
+                child: Navigator(
+                  onGenerateRoute: (RouteSettings settings) {
+                    return MaterialPageRoute<void>(
+                      builder: (BuildContext context) {
+                        return Scaffold(
+                          body: SearchAnchor(
+                            isFullScreen: true,
+                            builder: (BuildContext context, SearchController controller) {
+                              return IconButton(
+                                icon: const Icon(Icons.search),
+                                onPressed: () {
+                                  controller.openView();
+                                },
+                              );
+                            },
+                            suggestionsBuilder:
+                                (BuildContext context, SearchController controller) {
+                                  return <Widget>[];
+                                },
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               );
-            },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return <Widget>[];
             },
           ),
         ),
