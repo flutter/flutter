@@ -4436,12 +4436,11 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/186154.
-  testWidgets('SearchAnchor full-screen height matches resized parent height', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('SearchAnchor resizes itself to match Navigator parent', (WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
     var parentHeight = 400.0;
+    var parentWidth = 600.0;
     late StateSetter setState;
 
     await tester.pumpWidget(
@@ -4452,7 +4451,7 @@ void main() {
               setState = stateSetter;
               return SizedBox(
                 height: parentHeight,
-                width: 800.0,
+                width: parentWidth,
                 child: Navigator(
                   onGenerateRoute: (RouteSettings settings) {
                     return MaterialPageRoute<void>(
@@ -4489,29 +4488,34 @@ void main() {
     await tester.tap(find.byIcon(Icons.search));
     await tester.pumpAndSettle();
 
-    // Verify search view height matches parent height (400.0).
+    // Verify search view size matches parent.
     Size size = getSearchViewSize(tester);
     expect(size.height, 400.0);
+    expect(size.width, 600.0);
 
-    // Resize the parent container to 500.0.
+    // Resize the parent container larger.
     setState(() {
       parentHeight = 500.0;
+      parentWidth = 700.0;
     });
     await tester.pumpAndSettle();
 
-    // Verify the view expands to 500.0.
+    // Verify the view expands to match parent.
     size = getSearchViewSize(tester);
     expect(size.height, 500.0);
+    expect(size.width, 700.0);
 
-    // Resize the parent container to 300.0.
+    // Resize the parent container smaller.
     setState(() {
       parentHeight = 300.0;
+      parentWidth = 400.0;
     });
     await tester.pumpAndSettle();
 
-    // Verify the view shrinks to 300.0.
+    // Verify the view shrinks to match parent.
     size = getSearchViewSize(tester);
     expect(size.height, 300.0);
+    expect(size.width, 400.0);
   });
 }
 

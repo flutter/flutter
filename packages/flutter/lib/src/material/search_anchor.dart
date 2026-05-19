@@ -1117,7 +1117,9 @@ class _ViewContentState extends State<_ViewContent> {
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minWidth: minWidth,
-                maxWidth: _viewRect.width,
+                maxWidth: widget.showFullScreenView
+                    ? math.max(constraints.maxWidth, minWidth)
+                    : _viewRect.width,
                 minHeight: minHeight,
                 maxHeight: widget.showFullScreenView
                     ? math.max(constraints.maxHeight, minHeight)
