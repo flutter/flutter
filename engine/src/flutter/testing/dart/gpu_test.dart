@@ -710,6 +710,83 @@ void main() async {
     await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  // Regression test for flutter/flutter#186393: a Flutter GPU shader whose
+  // uniform block uses an instance variable name that does not normalize
+  // to the block name (e.g. `uniform ColorParams { ... } params;`) used
+  // to silently bind every member to GL location -1 on the OpenGL ES
+  // backend, producing a black render. `impellerc` now canonicalizes the
+  // instance name to `_<BlockName>` for GL targets so the block resolves
+  // correctly on all backends.
+  test(
+    'Uniform block with non-conforming instance name binds on all backends',
+    () async {
+      final RenderPassState state = createSimpleRenderPass();
+
+      final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
+      final gpu.RenderPipeline pipeline = gpu.gpuContext.createRenderPipeline(
+        library['UnlitVertex']!,
+        library['UnlitFragmentAltInstance']!,
+      );
+      state.renderPass.bindPipeline(pipeline);
+
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      final gpu.BufferView vertices = transients.emplace(
+        float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
+      );
+      state.renderPass.bindVertexBuffer(vertices, 3);
+
+      // Vertex shader writes v_color from VertInfo.color; pick white so the
+      // final pixel color is dictated entirely by ColorParams.base_color.
+      state.renderPass.bindUniform(
+        pipeline.vertexShader.getUniformSlot('VertInfo'),
+        transients.emplace(unlitUBO(Matrix4.identity(), Vector4(1, 1, 1, 1))),
+      );
+
+      // Bind the fragment shader's uniform block by its *block* name. Without
+      // canonicalization, GLES would bind the members to location -1 and
+      // sample zeros here.
+      state.renderPass.bindUniform(
+        pipeline.fragmentShader.getUniformSlot('ColorParams'),
+        transients.emplace(float32(<double>[1.0, 0.0, 0.0, 1.0])),
+      );
+
+      state.renderPass.draw();
+      state.commandBuffer.submit();
+
+      final ui.Image image = state.renderTexture.asImage();
+      await comparer.addGoldenImage(image, 'flutter_gpu_uniform_block_alt_instance.png');
+
+      // Belt-and-suspenders: also assert programmatically that the center of
+      // the rendered triangle is red. If the bug regresses, the uniform reads
+      // zero and the triangle renders as fully transparent black. Sampling a
+      // single pixel inside the triangle catches that without relying on
+      // golden-file plumbing.
+      final ByteData? bytes = await image.toByteData();
+      expect(bytes, isNotNull);
+      final int centerOffset = (image.width ~/ 2 + image.height ~/ 2 * image.width) * 4;
+      final int b0 = bytes!.getUint8(centerOffset);
+      final int b1 = bytes.getUint8(centerOffset + 1);
+      final int b2 = bytes.getUint8(centerOffset + 2);
+      final int b3 = bytes.getUint8(centerOffset + 3);
+      // Format may be RGBA or BGRA depending on backend; check that exactly
+      // one of the first three channels is red-saturated and the others are
+      // dark, with full alpha.
+      expect(
+        b0 + b1 + b2,
+        greaterThan(200),
+        reason:
+            'Center pixel was black (channels=$b0,$b1,$b2,$b3); '
+            'uniform block likely failed to bind.',
+      );
+      expect(
+        b3,
+        greaterThan(200),
+        reason: 'Center pixel alpha was low (channels=$b0,$b1,$b2,$b3).',
+      );
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
+
   // A custom VertexLayout that matches the shader bundle's default for the
   // UnlitVertex shader (one buffer at slot 0, vec2 position at offset 0)
   // should produce identical pipeline behavior. This pins the shape of the
@@ -928,6 +1005,67 @@ void main() async {
           contains('does not match any input declared by the bound vertex shader'),
         );
       }
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
+
+  // Two distinct shader bundles can ship the same entrypoint names without
+  // colliding in the shared shader registry. `test.shaderbundle` and
+  // `test_alt.shaderbundle` both export `UnlitFragment` and `UnlitVertex`
+  // entrypoints; without the per-bundle namespacing they would register at
+  // the same registry key and the second load would evict the first. With
+  // namespacing the asset paths (the bundle library_ids) make the keys
+  // distinct, so both bundles can be loaded and used in the same process.
+  test(
+    'Two shader bundles with the same entrypoint names do not collide',
+    () async {
+      final gpu.ShaderLibrary? libraryA = gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+      final gpu.ShaderLibrary? libraryB = gpu.ShaderLibrary.fromAsset('test_alt.shaderbundle');
+      expect(libraryA, isNotNull);
+      expect(libraryB, isNotNull);
+
+      final gpu.Shader? unlitVertexA = libraryA!['UnlitVertex'];
+      final gpu.Shader? unlitFragmentA = libraryA['UnlitFragment'];
+      final gpu.Shader? unlitVertexB = libraryB!['UnlitVertex'];
+      final gpu.Shader? unlitFragmentB = libraryB['UnlitFragment'];
+      expect(unlitVertexA, isNotNull);
+      expect(unlitFragmentA, isNotNull);
+      expect(unlitVertexB, isNotNull);
+      expect(unlitFragmentB, isNotNull);
+
+      // Both pipelines must register and remain usable. Without namespacing,
+      // `RuntimeEffectContents::RegisterShader`-style eviction would tear one
+      // of these pipelines down at registration time and the second draw
+      // would render against invalid state. With namespacing they coexist.
+      final gpu.RenderPipeline pipelineA = gpu.gpuContext.createRenderPipeline(
+        unlitVertexA!,
+        unlitFragmentA!,
+      );
+      final gpu.RenderPipeline pipelineB = gpu.gpuContext.createRenderPipeline(
+        unlitVertexB!,
+        unlitFragmentB!,
+      );
+
+      void drawWithPipeline(RenderPassState state, gpu.RenderPipeline pipeline, Vector4 color) {
+        state.renderPass.bindPipeline(pipeline);
+        final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+        final gpu.BufferView vertices = transients.emplace(
+          float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
+        );
+        final gpu.BufferView vertInfoData = transients.emplace(unlitUBO(Matrix4.identity(), color));
+        state.renderPass.bindVertexBuffer(vertices, 3);
+        final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
+        state.renderPass.bindUniform(vertInfo, vertInfoData);
+        state.renderPass.draw();
+      }
+
+      final RenderPassState stateA = createSimpleRenderPass();
+      drawWithPipeline(stateA, pipelineA, Colors.lime);
+      stateA.commandBuffer.submit();
+
+      final RenderPassState stateB = createSimpleRenderPass();
+      drawWithPipeline(stateB, pipelineB, Colors.lime);
+      stateB.commandBuffer.submit();
     },
     skip: !(impellerEnabled && flutterGpuEnabled),
   );
