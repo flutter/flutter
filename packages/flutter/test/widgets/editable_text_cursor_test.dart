@@ -904,6 +904,7 @@ void main() {
               focusNode: focusNode,
               style: textStyle,
               cursorColor: _blue,
+              cursorRadius: const Radius.circular(2.0),
               backgroundCursorColor: _textFieldBackgroundCursorColor,
             ),
           ),
@@ -958,7 +959,13 @@ void main() {
       expect(
         find.byType(EditableText),
         paints
-          ..rect(color: _textFieldBackgroundCursorColor)
+          ..rrect(
+            rrect: RRect.fromRectAndRadius(
+              const Rect.fromLTWH(720.0, -0.9166666666666679, 2.0, 18.0),
+              const Radius.circular(2.0),
+            ),
+            color: _textFieldBackgroundCursorColor,
+          )
           ..rrect(
             rrect: RRect.fromRectAndRadius(
               const Rect.fromLTRB(800.5, -5.0, 803.5, 15.0),
