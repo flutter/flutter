@@ -60,8 +60,19 @@ Future<Stream<String>> startWidgetPreview({
   ], workingDirectory: tempDir.path);
 
   addTearDown(() async {
-    process.kill();
-    await process.exitCode;
+    try {
+      process.stdin.writeln('q');
+      await process.exitCode.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          process.kill();
+          return process.exitCode;
+        },
+      );
+    } on Object catch (_) {
+      process.kill();
+      await process.exitCode;
+    }
   });
 
   final controller = StreamController<String>.broadcast();
