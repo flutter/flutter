@@ -1771,6 +1771,72 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Text passes selection styles to RenderParagraph', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: EmptyTextSelectionControls(),
+          child: const Text(
+            'First line\nSecond line',
+            selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+            selectionWidthStyle: ui.BoxWidthStyle.max,
+          ),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.byType(RichText));
+
+    expect(paragraph.selectionHeightStyle, ui.BoxHeightStyle.includeLineSpacingTop);
+    expect(paragraph.selectionWidthStyle, ui.BoxWidthStyle.max);
+  });
+
+  testWidgets('Text inherits selection styles from DefaultSelectionStyle', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: EmptyTextSelectionControls(),
+          child: const DefaultSelectionStyle(
+            selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+            selectionWidthStyle: ui.BoxWidthStyle.max,
+            child: Text('First line\nSecond line'),
+          ),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.byType(RichText));
+
+    expect(paragraph.selectionHeightStyle, ui.BoxHeightStyle.includeLineSpacingBottom);
+    expect(paragraph.selectionWidthStyle, ui.BoxWidthStyle.max);
+  });
+
+  testWidgets('Text selection styles override DefaultSelectionStyle', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: EmptyTextSelectionControls(),
+          child: const DefaultSelectionStyle(
+            selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingBottom,
+            selectionWidthStyle: ui.BoxWidthStyle.tight,
+            child: Text(
+              'First line\nSecond line',
+              selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+              selectionWidthStyle: ui.BoxWidthStyle.max,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.byType(RichText));
+
+    expect(paragraph.selectionHeightStyle, ui.BoxHeightStyle.includeLineSpacingTop);
+    expect(paragraph.selectionWidthStyle, ui.BoxWidthStyle.max);
+  });
+
   testWidgets('Mouse hovering over selectable Text uses SystemMouseCursor.text', (
     WidgetTester tester,
   ) async {
