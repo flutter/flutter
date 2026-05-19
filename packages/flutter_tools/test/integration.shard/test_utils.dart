@@ -63,6 +63,20 @@ Future<void> getPackages(String folder) async {
   }
 }
 
+void killLeakedAnalysisServers() {
+  if (platform.isWindows) {
+    try {
+      processManager.runSync(<String>[
+        'powershell',
+        '-Command',
+        'Get-CimInstance Win32_Process -Filter "CommandLine like \'%language-server%\'" | ForEach-Object { \$_.Terminate() }',
+      ]);
+    } on Object catch (_) {
+      // Ignore any errors during process termination.
+    }
+  }
+}
+
 const kLocalEngineEnvironment = 'FLUTTER_LOCAL_ENGINE';
 const kLocalEngineHostEnvironment = 'FLUTTER_LOCAL_ENGINE_HOST';
 const kLocalEngineLocation = 'FLUTTER_LOCAL_ENGINE_SRC_PATH';

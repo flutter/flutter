@@ -25,6 +25,7 @@ void main() {
   });
 
   tearDown(() async {
+    killLeakedAnalysisServers();
     tryToDelete(tempDir);
   });
 
