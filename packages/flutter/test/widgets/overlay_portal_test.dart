@@ -1040,9 +1040,8 @@ void main() {
     verifyTreeIsClean();
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/174133
-  // (and duplicate https://github.com/flutter/flutter/issues/180337). [Table]
-  // defers adopting its render-object children until every row has been
+  // Regression test for https://github.com/flutter/flutter/issues/174133.
+  // [Table] defers adopting its render-object children until every row has been
   // mounted. An [OverlayPortal] cell can mount its overlay child in that window,
   // before the portal's layout-surrogate render object has been adopted by its
   // parent.
