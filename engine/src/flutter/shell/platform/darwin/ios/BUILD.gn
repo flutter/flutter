@@ -413,8 +413,10 @@ copy("copy_dylib") {
 copy("copy_asan_runtime_dylib") {
   visibility = [ ":*" ]
 
+  # TODO(cbracken): https://github.com/flutter/flutter/issues/186668
+  # Eliminate clang toolchain hardcoding.
   _libclang_base_path =
-      "$buildtools_path/mac-x64/clang/lib/clang/13.0.0/lib/darwin/"
+      "$buildtools_path/mac-${host_cpu}/clang/lib/clang/23/lib/darwin/"
 
   if (defined(use_ios_simulator) && use_ios_simulator) {
     _dylib_name = "libclang_rt.asan_iossim_dynamic.dylib"
