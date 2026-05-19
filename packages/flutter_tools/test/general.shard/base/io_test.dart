@@ -9,7 +9,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -120,7 +119,9 @@ void main() {
   testWithoutContext(
     'FSGuardIOOverrides isolates filesystem modifications to system temp directory',
     () {
-      final tempFile = io.File(path.join(io.Directory.systemTemp.path, 'fs_guard_test_safe.txt'));
+      final tempFile = io.File(
+        '${io.Directory.systemTemp.path}${io.Platform.pathSeparator}fs_guard_test_safe.txt',
+      );
       addTearDown(() {
         if (tempFile.existsSync()) {
           tempFile.deleteSync();

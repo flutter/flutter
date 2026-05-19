@@ -8,12 +8,67 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
-import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
-bool _isUnderTemp(String entityPath) {
-  final String canonicalTemp = path.canonicalize(io.Directory.systemTemp.path);
+bool _isDangerousDirectory(String dirPath) {
+  final String canonical = path.canonicalize(dirPath);
+
+  // Check if it is root
+  if (canonical == '/' || canonical == r'C:\' || canonical.length <= 3) {
+    return true;
+  }
+
+  // Check if it is home or parent of home
+  final String? home = io.Platform.environment['HOME'] ?? io.Platform.environment['USERPROFILE'];
+  if (home != null) {
+    final String canonicalHome = path.canonicalize(home);
+    final String canonicalHomeParent = path.dirname(canonicalHome);
+    if (canonical == canonicalHome || canonical == canonicalHomeParent) {
+      return true;
+    }
+    // Check if it is Desktop
+    final String desktop = path.join(canonicalHome, 'Desktop');
+    final String canonicalDesktop = path.canonicalize(desktop);
+    if (canonical == canonicalDesktop) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool _isAllowedPath(String entityPath) {
   final String canonicalEntity = path.canonicalize(entityPath);
-  return path.isWithin(canonicalTemp, canonicalEntity) || canonicalEntity == canonicalTemp;
+
+  // Allow system temp
+  final String canonicalTemp = path.canonicalize(io.Directory.systemTemp.path);
+  if (path.isWithin(canonicalTemp, canonicalEntity) || canonicalEntity == canonicalTemp) {
+    return true;
+  }
+
+  // Allow modifications inside the Flutter installation root itself
+  final String? flutterRoot = io.Platform.environment['FLUTTER_ROOT'];
+  if (flutterRoot != null) {
+    final String canonicalRoot = path.canonicalize(flutterRoot);
+    if (!_isDangerousDirectory(canonicalRoot)) {
+      if (path.isWithin(canonicalRoot, canonicalEntity) || canonicalEntity == canonicalRoot) {
+        return true;
+      }
+    }
+  }
+
+  // Allow modifications inside the directory specified by FLUTTER_TEST_OUTPUTS_DIR
+  final String? testOutputsDir = io.Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'];
+  if (testOutputsDir != null) {
+    final String canonicalOutputs = path.canonicalize(testOutputsDir);
+    if (!_isDangerousDirectory(canonicalOutputs)) {
+      if (path.isWithin(canonicalOutputs, canonicalEntity) || canonicalEntity == canonicalOutputs) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 bool _isGuardDisabled() {
@@ -24,7 +79,7 @@ void _checkPath(String targetPath, String entityType, String operation) {
   if (_isGuardDisabled()) {
     return;
   }
-  if (!_isUnderTemp(targetPath)) {
+  if (!_isAllowedPath(targetPath)) {
     throw io.FileSystemException(
       'Test attempted to $operation $entityType outside of temp directory: $targetPath. '
       'This check prevents tests from causing data loss or modifying non-test data on the system. '

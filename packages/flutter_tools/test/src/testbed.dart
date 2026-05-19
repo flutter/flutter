@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/bot_detector.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -17,6 +19,8 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/persistent_tool_state.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -49,6 +53,16 @@ final _testbedDefaults = <Type, Generator>{
   FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
   Signals: () => FakeSignals(), // prevent registering actual signal handlers.
   Pub: () => const ThrowingPub(), // prevent accidental invocations of pub.
+  BotDetector: () => const FakeBotDetector(true),
+  Config: () => Config.test(
+    name: Config.kFlutterSettings,
+    directory: globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.'),
+    logger: globals.logger,
+  ),
+  PersistentToolState: () => PersistentToolState.test(
+    directory: globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.'),
+    logger: globals.logger,
+  ),
 };
 
 /// Manages interaction with the tool injection and runner system.
@@ -117,8 +131,7 @@ class TestBed {
     return HttpOverrides.runZoned(() {
       return runInContext<T?>(() {
         return context.run<T?>(
-          name: 'testbed',
-          overrides: testOverrides,
+          name: 'testbed-zone',
           zoneSpecification: ZoneSpecification(
             createTimer:
                 (
@@ -160,7 +173,7 @@ class TestBed {
             return null;
           },
         );
-      });
+      }, overrides: testOverrides);
     }, createHttpClient: (SecurityContext? c) => FakeHttpClient.any());
   }
 }

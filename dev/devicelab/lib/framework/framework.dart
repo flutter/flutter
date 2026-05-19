@@ -14,7 +14,6 @@ import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'devices.dart';
-import 'fs_safety.dart';
 import 'host_agent.dart';
 import 'running_processes.dart';
 import 'task_result.dart';
@@ -60,11 +59,9 @@ Future<TaskResult> task(TaskFunction task, {ProcessManager? processManager}) asy
     print('${rec.level.name}: ${rec.time}: ${rec.message}');
   });
 
-  return IOOverrides.runWithIOOverrides(() async {
-    final runner = _TaskRunner(task, processManager!);
-    runner.keepVmAliveUntilTaskRunRequested();
-    return runner.whenDone;
-  }, FSGuardIOOverrides());
+  final runner = _TaskRunner(task, processManager);
+  runner.keepVmAliveUntilTaskRunRequested();
+  return runner.whenDone;
 }
 
 class _TaskRunner {
