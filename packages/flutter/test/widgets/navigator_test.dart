@@ -2434,6 +2434,52 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('MaterialPageRoute can opt out of route semantics', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<void>(
+            includeRouteSemantics: false,
+            builder: (BuildContext context) => const OnTapPage(id: '1'),
+          );
+        },
+      ),
+    );
+
+    final Iterable<SemanticsNode> routeNodes = semantics.nodesWith().where((SemanticsNode node) {
+      return node.getSemanticsData().hasFlag(SemanticsFlag.scopesRoute);
+    });
+
+    expect(routeNodes, isEmpty);
+
+    semantics.dispose();
+  });
+
+  testWidgets('MaterialPage can opt out of route semantics', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      TestDependencies(
+        child: Navigator(
+          pages: const <Page<void>>[
+            MaterialPage<void>(includeRouteSemantics: false, child: Text('Page')),
+          ],
+          onDidRemovePage: (Page<void> page) {},
+        ),
+      ),
+    );
+
+    final Iterable<SemanticsNode> routeNodes = semantics.nodesWith().where((SemanticsNode node) {
+      return node.getSemanticsData().hasFlag(SemanticsFlag.scopesRoute);
+    });
+
+    expect(routeNodes, isEmpty);
+
+    semantics.dispose();
+  });
+
   testWidgets('arguments for named routes on Navigator', (WidgetTester tester) async {
     late GlobalKey currentRouteKey;
     final arguments = <Object?>[];

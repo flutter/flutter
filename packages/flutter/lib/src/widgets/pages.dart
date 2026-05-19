@@ -29,8 +29,10 @@ abstract class PageRoute<T> extends ModalRoute<T> {
     super.directionalTraversalEdgeBehavior,
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
+    bool includeRouteSemantics = true,
     bool barrierDismissible = false,
-  }) : _barrierDismissible = barrierDismissible;
+  }) : _includeRouteSemantics = includeRouteSemantics,
+       _barrierDismissible = barrierDismissible;
 
   /// {@template flutter.widgets.PageRoute.fullscreenDialog}
   /// Whether this page route is a full-screen dialog.
@@ -45,6 +47,15 @@ abstract class PageRoute<T> extends ModalRoute<T> {
 
   @override
   final bool allowSnapshotting;
+
+  /// {@template flutter.widgets.PageRoute.includeRouteSemantics}
+  /// Whether this route introduces a route scope in the semantics tree.
+  ///
+  /// Defaults to true. Set this to false for routes that update only part of
+  /// the screen, such as tab or shell content in a nested navigator.
+  /// {@endtemplate}
+  bool get includeRouteSemantics => _includeRouteSemantics;
+  final bool _includeRouteSemantics;
 
   @override
   bool get opaque => true;

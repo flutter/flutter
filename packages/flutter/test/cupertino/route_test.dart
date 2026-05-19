@@ -2125,6 +2125,54 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('CupertinoPageRoute can opt out of route semantics', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        onGenerateRoute: (RouteSettings settings) {
+          return CupertinoPageRoute<void>(
+            includeRouteSemantics: false,
+            builder: (BuildContext context) => const Text('Page'),
+          );
+        },
+      ),
+    );
+
+    final Iterable<SemanticsNode> routeNodes = semantics.nodesWith().where((SemanticsNode node) {
+      return node.getSemanticsData().hasFlag(SemanticsFlag.scopesRoute);
+    });
+
+    expect(routeNodes, isEmpty);
+
+    semantics.dispose();
+  });
+
+  testWidgets('CupertinoPage can opt out of route semantics', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      buildNavigator(
+        view: tester.view,
+        pages: const <Page<void>>[
+          CupertinoPage<void>(includeRouteSemantics: false, child: Text('Page')),
+        ],
+        onPopPage: (Route<dynamic> route, dynamic result) {
+          assert(false); // The test shouldn't call this.
+          return true;
+        },
+      ),
+    );
+
+    final Iterable<SemanticsNode> routeNodes = semantics.nodesWith().where((SemanticsNode node) {
+      return node.getSemanticsData().hasFlag(SemanticsFlag.scopesRoute);
+    });
+
+    expect(routeNodes, isEmpty);
+
+    semantics.dispose();
+  });
+
   testWidgets('showCupertinoModalPopup passes RouteSettings to PopupRoute', (
     WidgetTester tester,
   ) async {

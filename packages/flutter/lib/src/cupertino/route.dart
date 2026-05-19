@@ -194,6 +194,9 @@ mixin CupertinoRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> secondaryAnimation,
   ) {
     final Widget child = buildContent(context);
+    if (!includeRouteSemantics) {
+      return child;
+    }
     return Semantics(scopesRoute: true, explicitChildNodes: true, child: child);
   }
 
@@ -309,6 +312,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTransitionMi
     this.maintainState = true,
     super.fullscreenDialog,
     super.allowSnapshotting = true,
+    super.includeRouteSemantics = true,
     super.barrierDismissible = false,
   }) {
     assert(opaque);
@@ -363,6 +367,9 @@ class _PageBasedCupertinoPageRoute<T> extends PageRoute<T> with CupertinoRouteTr
   bool get fullscreenDialog => _page.fullscreenDialog;
 
   @override
+  bool get includeRouteSemantics => _page.includeRouteSemantics;
+
+  @override
   String get debugLabel => '${super.debugLabel}(${_page.name})';
 }
 
@@ -390,6 +397,7 @@ class CupertinoPage<T> extends Page<T> {
     this.title,
     this.fullscreenDialog = false,
     this.allowSnapshotting = true,
+    this.includeRouteSemantics = true,
     super.canPop,
     super.onPopInvoked,
     super.key,
@@ -412,6 +420,9 @@ class CupertinoPage<T> extends Page<T> {
 
   /// {@macro flutter.widgets.TransitionRoute.allowSnapshotting}
   final bool allowSnapshotting;
+
+  /// {@macro flutter.widgets.PageRoute.includeRouteSemantics}
+  final bool includeRouteSemantics;
 
   @override
   Route<T> createRoute(BuildContext context) {
