@@ -21,6 +21,8 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.Properties
@@ -776,7 +778,8 @@ object FlutterPluginUtils {
         }
 
         val sdkManagerPath = toolNdkProvisioningProperties.sdkManagerPath ?: return false
-        gradleProject.exec {
+        val execOps = gradleProject.serviceOf<ExecOperations>()
+        execOps.exec {
             commandLine(
                 listOf(
                     sdkManagerPath,

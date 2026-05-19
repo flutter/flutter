@@ -31,11 +31,14 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.PluginManager
 import org.gradle.internal.impldep.junit.framework.TestCase.assertFalse
 import org.gradle.internal.impldep.junit.framework.TestCase.assertTrue
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
 import org.gradle.process.ExecResult
 import org.gradle.process.ExecSpec
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
@@ -1566,11 +1569,12 @@ class FlutterPluginUtilsTest {
     fun `forceNdkDownload installs a missing ndk when tool properties are provided`(
         @TempDir tempDir: Path
     ) {
-        val project = mockk<Project>()
+        val project = mockk<ProjectInternal>()
         val projectActionSlot = slot<Action<Project>>()
         val execActionSlot = slot<Action<ExecSpec>>()
         val mockExecSpec = mockk<ExecSpec>()
         val mockExecResult = mockk<ExecResult>()
+        val mockExecOperations = mockk<ExecOperations>()
         val mockCmakeOptions = mockk<CmakeOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockBaseExtension = mockk<BaseExtension>()
@@ -1585,7 +1589,8 @@ class FlutterPluginUtilsTest {
         every { project.gradle.startParameter.taskNames } returns emptyList()
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every { project.afterEvaluate(capture(projectActionSlot)) } returns Unit
-        every { project.exec(capture(execActionSlot)) } answers {
+        every { project.serviceOf<ExecOperations>() } returns mockExecOperations
+        every { mockExecOperations.exec(capture(execActionSlot)) } answers {
             File(tempDir.toFile(), "ndk/29.0.13846066/source.properties").apply {
                 parentFile.mkdirs()
                 createNewFile()
@@ -1601,7 +1606,7 @@ class FlutterPluginUtilsTest {
         projectActionSlot.captured.execute(project)
 
         execActionSlot.captured.execute(mockExecSpec)
-        verify(exactly = 1) { project.exec(any<Action<ExecSpec>>()) }
+        verify(exactly = 1) { mockExecOperations.exec(any<Action<ExecSpec>>()) }
         verify {
             mockExecSpec.commandLine(
                 listOf(
@@ -1636,7 +1641,6 @@ class FlutterPluginUtilsTest {
         FlutterPluginUtils.forceNdkDownload(project, "/base/path")
 
         verify(exactly = 0) { project.afterEvaluate(any<Action<Project>>()) }
-        verify(exactly = 0) { project.exec(any<Action<ExecSpec>>()) }
         verify(exactly = 0) { mockCmakeOptions.path(any()) }
         verify { mockDefaultConfig wasNot called }
     }
@@ -1661,7 +1665,6 @@ class FlutterPluginUtilsTest {
         FlutterPluginUtils.forceNdkDownload(project, "/base/path")
 
         verify(exactly = 0) { project.afterEvaluate(any<Action<Project>>()) }
-        verify(exactly = 0) { project.exec(any<Action<ExecSpec>>()) }
         verify(exactly = 0) { mockCmakeOptions.path(any()) }
         verify { mockDefaultConfig wasNot called }
     }
@@ -1690,7 +1693,6 @@ class FlutterPluginUtilsTest {
         FlutterPluginUtils.forceNdkDownload(project, "/base/path")
 
         verify(exactly = 0) { project.afterEvaluate(any<Action<Project>>()) }
-        verify(exactly = 0) { project.exec(any<Action<ExecSpec>>()) }
         verify(exactly = 0) { mockCmakeOptions.path(any()) }
         verify { mockDefaultConfig wasNot called }
     }
@@ -1699,9 +1701,10 @@ class FlutterPluginUtilsTest {
     fun `forceNdkDownload throws when sdkmanager install does not produce the requested ndk`(
         @TempDir tempDir: Path
     ) {
-        val project = mockk<Project>()
+        val project = mockk<ProjectInternal>()
         val projectActionSlot = slot<Action<Project>>()
         val mockExecResult = mockk<ExecResult>()
+        val mockExecOperations = mockk<ExecOperations>()
         val mockCmakeOptions = mockk<CmakeOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
         val mockBaseExtension = mockk<BaseExtension>()
@@ -1716,7 +1719,8 @@ class FlutterPluginUtilsTest {
         every { project.gradle.startParameter.taskNames } returns emptyList()
         every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
         every { project.afterEvaluate(capture(projectActionSlot)) } returns Unit
-        every { project.exec(any<Action<ExecSpec>>()) } returns mockExecResult
+        every { project.serviceOf<ExecOperations>() } returns mockExecOperations
+        every { mockExecOperations.exec(any<Action<ExecSpec>>()) } returns mockExecResult
         every { mockExecResult.assertNormalExitValue() } returns mockExecResult
 
         FlutterPluginUtils.forceNdkDownload(project, "/base/path")
@@ -1786,7 +1790,6 @@ class FlutterPluginUtilsTest {
         FlutterPluginUtils.forceNdkDownload(project, basePath)
 
         verify(exactly = 0) { project.afterEvaluate(any<Action<Project>>()) }
-        verify(exactly = 0) { project.exec(any<Action<ExecSpec>>()) }
         verify(exactly = 1) {
             mockCmakeOptions.path("$basePath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt")
         }
