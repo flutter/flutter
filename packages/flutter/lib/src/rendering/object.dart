@@ -5511,7 +5511,7 @@ typedef _MergeUpAndSiblingMergeGroups = (
 /// Walks the [_children] and produce semantics node for
 /// each [_RenderObjectSemantics] plus the sibling nodes.
 ///
-/// Phase 2, 3, 4 each depends on previous step to finished updating the the
+/// Phase 2, 3, 4 each depends on previous step to finished updating the
 /// entire _RenderObjectSemantics tree. All three of them require separate tree
 /// walk.
 class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeMixin {
@@ -5767,7 +5767,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// rendering subtree and forms a [_RenderObjectSemantics] tree where children
   /// are stored in [_children].
   ///
-  /// This method does the the phase 1 and 2 of the four phases documented on
+  /// This method does the phase 1 and 2 of the four phases documented on
   /// [_RenderObjectSemantics].
   ///
   /// Gather all the merge up _RenderObjectSemantics(s) by walking the rendering
@@ -6085,7 +6085,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Updates the [geometry] for this [_RenderObjectSemantics]s and the dirty
   /// children's subtree in [_children].
   ///
-  /// This method does the the phase 3 of the four phases documented on
+  /// This method does the phase 3 of the four phases documented on
   /// [_RenderObjectSemantics].
   ///
   /// This method is short-circuited if the subtree geometry won't
@@ -6161,7 +6161,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
   /// Ensures the semantics nodes from this render object semantics subtree are
   /// generated and up to date.
   ///
-  /// This method does the the phase 4 of the four phases documented on
+  /// This method does the phase 4 of the four phases documented on
   /// [_RenderObjectSemantics].
   ///
   /// This can only be called if the owning rendering object is a semantics
