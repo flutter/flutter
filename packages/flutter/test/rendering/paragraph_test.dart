@@ -51,8 +51,8 @@ class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
   @override
   List<ui.TextBox> getBoxesForSelection(
     TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? boxHeightStyle,
+    ui.BoxWidthStyle? boxWidthStyle,
   }) {
     if (selection == emptyListSelection) {
       return <ui.TextBox>[];
@@ -79,8 +79,8 @@ class RenderParagraphWithEmptyBoxListForWidgetSpan extends RenderParagraph {
   @override
   List<ui.TextBox> getBoxesForSelection(
     TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? boxHeightStyle,
+    ui.BoxWidthStyle? boxWidthStyle,
   }) {
     if (text.getSpanForPosition(selection.base) is WidgetSpan) {
       return <ui.TextBox>[];
@@ -247,6 +247,54 @@ void main() {
     expect(boxes[3], const TextBox.fromLTRBD(130.0, 10.0, 156.0, 20.0, TextDirection.ltr));
     // 'fifth':
     expect(boxes[4], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
+  });
+
+  test('RenderParagraph uses selection styles in getBoxesForSelection', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(
+        text: 'Test\nText',
+        style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0, height: 3.0),
+      ),
+      textDirection: TextDirection.ltr,
+      selectionHeightStyle: ui.BoxHeightStyle.max,
+      selectionWidthStyle: ui.BoxWidthStyle.max,
+    );
+
+    layout(paragraph);
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 4),
+    );
+
+    expect(boxes, isNotEmpty);
+
+    final double height = boxes.first.bottom - boxes.first.top;
+
+    // Height should reflect expanded line height rather than tight glyph bounds.
+    expect(height, greaterThan(20.0));
+  });
+
+  test('RenderParagraph defaults to tight selection bounds', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(
+        text: 'Test\nText',
+        style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0, height: 3.0),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
+    layout(paragraph);
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 4),
+    );
+
+    expect(boxes, isNotEmpty);
+
+    final double height = boxes.first.bottom - boxes.first.top;
+
+    // Tight bounds should stay close to glyph height.
+    expect(height, lessThan(40.0));
   });
 
   test('getWordBoundary control test', () {
@@ -1038,6 +1086,43 @@ void main() {
         );
       }
     }
+
+    test('RenderParagraph updates selection geometry when selection styles change', () {
+      final registrar = TestSelectionRegistrar();
+      final paragraph = RenderParagraph(
+        const TextSpan(
+          children: <InlineSpan>[
+            TextSpan(text: 'a', style: TextStyle(fontSize: 10.0)),
+            TextSpan(text: 'b\n', style: TextStyle(fontSize: 40.0)),
+            TextSpan(text: 'c', style: TextStyle(fontSize: 10.0)),
+          ],
+        ),
+        textDirection: TextDirection.ltr,
+        registrar: registrar,
+      );
+      layout(paragraph);
+      selectionParagraph(paragraph, const TextPosition(offset: 0), const TextPosition(offset: 4));
+      paragraph.selectionHeightStyle = ui.BoxHeightStyle.max;
+      final SelectionGeometry heightGeometry = registrar.selectables[0].value;
+      expect(
+        heightGeometry.selectionRects,
+        equals(
+          paragraph
+              .getBoxesForSelection(paragraph.selections.first)
+              .map((ui.TextBox box) => box.toRect()),
+        ),
+      );
+      paragraph.selectionWidthStyle = ui.BoxWidthStyle.max;
+      final SelectionGeometry widthGeometry = registrar.selectables[0].value;
+      expect(
+        widthGeometry.selectionRects,
+        equals(
+          paragraph
+              .getBoxesForSelection(paragraph.selections.first)
+              .map((ui.TextBox box) => box.toRect()),
+        ),
+      );
+    });
 
     test('subscribe to SelectionRegistrar', () {
       final registrar = TestSelectionRegistrar();

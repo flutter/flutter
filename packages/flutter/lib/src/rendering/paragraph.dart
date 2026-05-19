@@ -356,6 +356,8 @@ class RenderParagraph extends RenderBox
     Color? selectionColor,
     SelectionRegistrar? registrar,
     double devicePixelRatio = 1.0,
+    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
+    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
@@ -366,6 +368,8 @@ class RenderParagraph extends RenderBox
        _overflow = overflow,
        _devicePixelRatio = devicePixelRatio,
        _selectionColor = selectionColor,
+       _selectionHeightStyle = selectionHeightStyle,
+       _selectionWidthStyle = selectionWidthStyle,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -780,6 +784,36 @@ class RenderParagraph extends RenderBox
     }
   }
 
+  /// {@macro flutter.widgets.selectionHeightStyle}
+  ui.BoxHeightStyle get selectionHeightStyle => _selectionHeightStyle;
+  ui.BoxHeightStyle _selectionHeightStyle;
+
+  set selectionHeightStyle(ui.BoxHeightStyle value) {
+    if (_selectionHeightStyle == value) {
+      return;
+    }
+    _selectionHeightStyle = value;
+    _lastSelectableFragments?.forEach(
+      (_SelectableFragment fragment) => fragment._updateSelectionGeometry(),
+    );
+    markNeedsPaint();
+  }
+
+  /// {@macro flutter.widgets.selectionWidthStyle}
+  ui.BoxWidthStyle get selectionWidthStyle => _selectionWidthStyle;
+  ui.BoxWidthStyle _selectionWidthStyle;
+
+  set selectionWidthStyle(ui.BoxWidthStyle value) {
+    if (_selectionWidthStyle == value) {
+      return;
+    }
+    _selectionWidthStyle = value;
+    _lastSelectableFragments?.forEach(
+      (_SelectableFragment fragment) => fragment._updateSelectionGeometry(),
+    );
+    markNeedsPaint();
+  }
+
   Offset _getOffsetForPosition(TextPosition position) {
     return getOffsetForCaret(position, Rect.zero) + Offset(0, getFullHeightForCaret(position));
   }
@@ -1128,15 +1162,15 @@ class RenderParagraph extends RenderBox
   ///    the equivalent boxes.
   List<ui.TextBox> getBoxesForSelection(
     TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+    ui.BoxHeightStyle? boxHeightStyle,
+    ui.BoxWidthStyle? boxWidthStyle,
   }) {
     assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getBoxesForSelection(
       selection,
-      boxHeightStyle: boxHeightStyle,
-      boxWidthStyle: boxWidthStyle,
+      boxHeightStyle: boxHeightStyle ?? selectionHeightStyle,
+      boxWidthStyle: boxWidthStyle ?? selectionWidthStyle,
     );
   }
 
@@ -1499,6 +1533,20 @@ class RenderParagraph extends RenderBox
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
     properties.add(DoubleProperty('devicePixelRatio', devicePixelRatio, defaultValue: 1.0));
+    properties.add(
+      EnumProperty<ui.BoxHeightStyle>(
+        'selectionHeightStyle',
+        selectionHeightStyle,
+        defaultValue: ui.BoxHeightStyle.tight,
+      ),
+    );
+    properties.add(
+      EnumProperty<ui.BoxWidthStyle>(
+        'selectionWidthStyle',
+        selectionWidthStyle,
+        defaultValue: ui.BoxWidthStyle.tight,
+      ),
+    );
   }
 }
 
