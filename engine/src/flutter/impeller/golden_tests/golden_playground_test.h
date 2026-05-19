@@ -53,6 +53,12 @@ class GoldenPlaygroundTest
 
   bool OpenPlaygroundHere(const sk_sp<flutter::DisplayList>& list);
 
+  /// Renders `callback` into an offscreen render pass and saves the result as
+  /// a golden image. The render target is single-sampled, uses the context's
+  /// default color format, and has no depth or stencil attachment, so the
+  /// pipeline bound inside `callback` must be configured to match.
+  bool OpenPlaygroundHere(const Playground::SinglePassCallback& callback);
+
   std::unique_ptr<testing::Screenshot> MakeScreenshot(
       const sk_sp<flutter::DisplayList>& list);
 
