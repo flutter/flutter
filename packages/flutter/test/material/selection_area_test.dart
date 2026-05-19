@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -636,5 +638,27 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(SelectionArea)), Size.zero);
+  });
+
+  testWidgets('SelectionArea propagates selection height and width styles', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SelectionArea(
+          selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+          selectionWidthStyle: ui.BoxWidthStyle.max,
+          child: Text('First line\nSecond line', style: TextStyle(fontSize: 20, height: 3)),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.byType(Text), matching: find.byType(RichText)),
+    );
+
+    expect(paragraph.selectionHeightStyle, ui.BoxHeightStyle.includeLineSpacingTop);
+
+    expect(paragraph.selectionWidthStyle, ui.BoxWidthStyle.max);
   });
 }

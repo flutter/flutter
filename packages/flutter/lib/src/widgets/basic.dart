@@ -11,7 +11,14 @@ library;
 import 'dart:math' as math;
 import 'dart:ui'
     as ui
-    show Image, ImageFilter, SemanticsHitTestBehavior, SemanticsInputType, TextHeightBehavior;
+    show
+        BoxHeightStyle,
+        BoxWidthStyle,
+        Image,
+        ImageFilter,
+        SemanticsHitTestBehavior,
+        SemanticsInputType,
+        TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -6507,6 +6514,8 @@ class RichText extends MultiChildRenderObjectWidget {
     this.textHeightBehavior,
     this.selectionRegistrar,
     this.selectionColor,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
   }) : assert(maxLines == null || maxLines > 0),
        assert(selectionRegistrar == null || selectionColor != null),
        assert(
@@ -6619,6 +6628,12 @@ class RichText extends MultiChildRenderObjectWidget {
   double _getDevicePixelRatio(BuildContext context) =>
       MediaQuery.maybeDevicePixelRatioOf(context) ?? View.maybeOf(context)?.devicePixelRatio ?? 1.0;
 
+  /// {@macro flutter.widgets.selectionHeightStyle}
+  final ui.BoxHeightStyle? selectionHeightStyle;
+
+  /// {@macro flutter.widgets.selectionWidthStyle}
+  final ui.BoxWidthStyle? selectionWidthStyle;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -6637,6 +6652,8 @@ class RichText extends MultiChildRenderObjectWidget {
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
       devicePixelRatio: _getDevicePixelRatio(context),
+      selectionHeightStyle: selectionHeightStyle ?? ui.BoxHeightStyle.tight,
+      selectionWidthStyle: selectionWidthStyle ?? ui.BoxWidthStyle.tight,
     );
   }
 
@@ -6657,7 +6674,9 @@ class RichText extends MultiChildRenderObjectWidget {
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
-      ..devicePixelRatio = _getDevicePixelRatio(context);
+      ..devicePixelRatio = _getDevicePixelRatio(context)
+      ..selectionHeightStyle = selectionHeightStyle ?? ui.BoxHeightStyle.tight
+      ..selectionWidthStyle = selectionWidthStyle ?? ui.BoxWidthStyle.tight;
   }
 
   @override

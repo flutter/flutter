@@ -249,6 +249,56 @@ void main() {
     expect(boxes[4], const TextBox.fromLTRBD(0.0, 20.0, 50.0, 30.0, TextDirection.ltr));
   });
 
+  test('RenderParagraph uses selection styles in getBoxesForSelection', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(
+        text: 'Test\nText',
+        style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0, height: 3.0),
+      ),
+      textDirection: TextDirection.ltr,
+      selectionHeightStyle: ui.BoxHeightStyle.max,
+      selectionWidthStyle: ui.BoxWidthStyle.max,
+    );
+
+    layout(paragraph);
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 4),
+      boxHeightStyle: ui.BoxHeightStyle.max,
+      boxWidthStyle: ui.BoxWidthStyle.max,
+    );
+
+    expect(boxes, isNotEmpty);
+
+    final double height = boxes.first.bottom - boxes.first.top;
+
+    // Height should reflect expanded line height rather than tight glyph bounds.
+    expect(height, greaterThan(20.0));
+  });
+
+  test('RenderParagraph defaults to tight selection bounds', () {
+    final paragraph = RenderParagraph(
+      const TextSpan(
+        text: 'Test\nText',
+        style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0, height: 3.0),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+
+    layout(paragraph);
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+      const TextSelection(baseOffset: 0, extentOffset: 4),
+    );
+
+    expect(boxes, isNotEmpty);
+
+    final double height = boxes.first.bottom - boxes.first.top;
+
+    // Tight bounds should stay close to glyph height.
+    expect(height, lessThan(40.0));
+  });
+
   test('getWordBoundary control test', () {
     final paragraph = RenderParagraph(
       const TextSpan(text: _kText),

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -7004,6 +7005,28 @@ void main() {
     expect(paragraphE.selections[0], const TextSelection(baseOffset: 7, extentOffset: 0));
     expect(outerParagraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 3));
     expect(outerParagraph2.selections[0], const TextSelection(baseOffset: 2, extentOffset: 1));
+  });
+
+  testWidgets('SelectableRegion propagates selection styles', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          focusNode: FocusNode(),
+          selectionControls: testTextSelectionHandleControls,
+          selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
+          selectionWidthStyle: ui.BoxWidthStyle.max,
+          child: const Text('First line\nSecond line', style: TextStyle(fontSize: 20, height: 3)),
+        ),
+      ),
+    );
+
+    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.byType(Text), matching: find.byType(RichText)),
+    );
+
+    expect(paragraph.selectionHeightStyle, ui.BoxHeightStyle.includeLineSpacingTop);
+
+    expect(paragraph.selectionWidthStyle, ui.BoxWidthStyle.max);
   });
 }
 
