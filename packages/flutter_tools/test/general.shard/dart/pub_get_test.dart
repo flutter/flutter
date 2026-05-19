@@ -290,8 +290,7 @@ void main() {
     });
   });
 
-  testUsingContext('checkUpToDate skips pub get if the package config is newer than the pubspec '
-      'and the current framework version is the same as the last version', () async {
+  testUsingContext('checkUpToDate skips pub get if the resolution is up-to-date', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(
         command: <String>[
@@ -335,8 +334,7 @@ void main() {
   });
 
   testUsingContext(
-    'checkUpToDate does not skip pub get if the package config is newer than the pubspec '
-    'but the current framework version is not the same as the last version',
+    'checkUpToDate does not skip pub get if the resolution is out-of-date',
     () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
@@ -394,8 +392,7 @@ void main() {
   );
 
   testUsingContext(
-    'checkUpToDate does not skip pub get if the package config is newer than the pubspec '
-    'but the current framework version does not exist yet',
+    'checkUpToDate does not skip pub get if the resolution check command fails',
     () async {
       final processManager = FakeProcessManager.list(<FakeCommand>[
         const FakeCommand(
