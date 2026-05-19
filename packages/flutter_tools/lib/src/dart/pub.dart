@@ -274,7 +274,24 @@ class _DefaultPub implements Pub {
       }
     }
 
+    bool versionMatch = false;
+    if (checkUpToDate) {
+      final File? packageConfigFile = findPackageConfigFile(project.directory);
+      if (packageConfigFile != null && packageConfigFile.existsSync()) {
+        final Directory workspaceRoot = packageConfigFile.parent.parent;
+        final File lastVersion = workspaceRoot.childDirectory('.dart_tool').childFile('version');
+        final versionFromFile = FlutterVersion(
+          flutterRoot: Cache.flutterRoot!,
+          fs: _fileSystem,
+          git: _git,
+        );
+        versionMatch = lastVersion.existsSync() &&
+            lastVersion.readAsStringSync() == versionFromFile.frameworkVersion;
+      }
+    }
+
     if (checkUpToDate &&
+        versionMatch &&
         await _checkResolutionUpToDate(directory, context, flutterRootOverride)) {
       _logger.printTrace('Skipping pub get: resolution up-to-date.');
       return;
