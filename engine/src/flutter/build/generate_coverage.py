@@ -9,6 +9,7 @@ import subprocess
 import os
 import argparse
 import errno
+import platform
 import shutil
 
 
@@ -18,7 +19,8 @@ def get_llvm_bin_directory():
   if sys.platform.startswith('linux'):
     platform_dir = 'linux-x64'
   elif sys.platform == 'darwin':
-    platform_dir = 'mac-x64'
+    arch = 'arm64' if platform.machine() in ('arm64', 'aarch64') else 'x64'
+    platform_dir = f'mac-{arch}'
   else:
     raise Exception('Unknown/Unsupported platform.')
   llvm_bin_dir = os.path.abspath(os.path.join(buildtool_dir, platform_dir, 'clang/bin'))
