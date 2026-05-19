@@ -272,7 +272,12 @@ class _DefaultPub implements Pub {
       switch (jsonDecode(workspaceRefFile.readAsStringSync())) {
         case {'workspaceRoot': final String workspaceRoot}:
           packageConfigFile = _fileSystem.file(
-            _fileSystem.path.join(workspaceRefFile.parent.path, workspaceRoot),
+            _fileSystem.path.join(
+              workspaceRefFile.parent.path,
+              workspaceRoot,
+              '.dart_tool',
+              'package_config.json',
+            ),
           );
         default:
           // The workspace_ref.json file was malformed. Attempt to load the
@@ -290,13 +295,6 @@ class _DefaultPub implements Pub {
 
     if (packageConfigFile.existsSync()) {
       final Directory workspaceRoot = packageConfigFile.parent.parent;
-      final File lastVersion = workspaceRoot.childDirectory('.dart_tool').childFile('version');
-      final versionFromFile = FlutterVersion(
-        flutterRoot: Cache.flutterRoot!,
-        fs: _fileSystem,
-        git: _git,
-      );
-      final File pubspecYaml = project.pubspecFile;
       final File pubLockFile = workspaceRoot.childFile('pubspec.lock');
 
       if (shouldSkipThirdPartyGenerator) {
@@ -317,18 +315,10 @@ class _DefaultPub implements Pub {
         }
       }
 
-      // If the pubspec.yaml is older than the package config file and the last
-      // flutter version used is the same as the current version skip pub get.
-      // This will incorrectly skip pub on the master branch if dependencies
-      // are being added/removed from the flutter framework packages, but this
-      // can be worked around by manually running pub.
       if (checkUpToDate &&
           pubLockFile.existsSync() &&
-          pubspecYaml.lastModifiedSync().isBefore(pubLockFile.lastModifiedSync()) &&
-          pubspecYaml.lastModifiedSync().isBefore(packageConfigFile.lastModifiedSync()) &&
-          lastVersion.existsSync() &&
-          lastVersion.readAsStringSync() == versionFromFile.frameworkVersion) {
-        _logger.printTrace('Skipping pub get: version match.');
+          await _checkResolutionUpToDate(directory, context, flutterRootOverride)) {
+        _logger.printTrace('Skipping pub get: resolution up-to-date.');
         return;
       }
     }
@@ -353,6 +343,33 @@ class _DefaultPub implements Pub {
       outputMode: outputMode,
     );
     await _updateVersionAndPackageConfig(project);
+  }
+
+  Future<bool> _checkResolutionUpToDate(
+    String directory,
+    PubContext context,
+    String? flutterRootOverride,
+  ) async {
+    final pubCommand = <String>[
+      ..._pubCommand,
+      '--directory',
+      _fileSystem.path.relative(directory),
+      'check-resolution-up-to-date',
+    ];
+    final Map<String, String> pubEnvironment = await _createPubEnvironment(
+      context: context,
+      flutterRootOverride: flutterRootOverride,
+    );
+    try {
+      final RunResult result = await _processUtils.run(
+        pubCommand,
+        workingDirectory: _fileSystem.path.current,
+        environment: pubEnvironment,
+      );
+      return result.exitCode == 0;
+    } on io.ProcessException {
+      return false;
+    }
   }
 
   /// Runs pub with [arguments] and [ProcessStartMode.inheritStdio] mode.
