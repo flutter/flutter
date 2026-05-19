@@ -3117,7 +3117,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             // because only the RichText element is part of the summary tree.
             expect(service.toObject(summarySelection['valueId']! as String), elementA);
 
-            // Verify tha the regular getSelectedWidget method still returns
+            // Verify that the regular getSelectedWidget method still returns
             // the RichText object not the Text element.
             final regularSelection =
                 (await service.testExtension(
@@ -5646,6 +5646,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
         // We need the runTest to setup the fake async in the test binding.
         await binding.runTest(() async {
+          // ignore: unawaited_futures
           binding.reassembleApplication();
           await binding.pump();
         }, () {});

@@ -26,6 +26,7 @@ Future<void> main() async {
     await binding.runTest(() async {
       final completer = Completer<String>();
 
+      // ignore: unawaited_futures
       completer.future.then(
         (String value) {},
         onError: (Object error, StackTrace stack) {

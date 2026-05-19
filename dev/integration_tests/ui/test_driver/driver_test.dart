@@ -43,6 +43,7 @@ void main() {
       final whenWaitForAbsentResolves = Completer<void>();
       driver
           .waitForAbsent(presentText)
+          // ignore: unawaited_futures
           .then(
             whenWaitForAbsentResolves.complete,
             onError: whenWaitForAbsentResolves.completeError,
@@ -74,6 +75,7 @@ void main() {
       final whenWaitForResolves = Completer<void>();
       driver
           .waitFor(presentText)
+          // ignore: unawaited_futures
           .then(whenWaitForResolves.complete, onError: whenWaitForResolves.completeError);
 
       // Wait 1 second then make it appear

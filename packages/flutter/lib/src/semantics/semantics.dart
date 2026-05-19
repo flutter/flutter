@@ -117,8 +117,12 @@ typedef ChildSemanticsConfigurationsDelegate =
 
 /// Controls how accessibility focus is blocked.
 ///
-/// This is typically used to prevent screen readers
-/// from focusing on parts of the UI.
+/// This is typically used to prevent screen readers from focusing on parts
+/// of the UI.
+///
+/// Setting this property also blocks the reporting of keyboard focusability
+/// for the semantics node, but it does not affect the actual keyboard focus
+/// handled by [FocusNode].
 enum AccessibilityFocusBlockType {
   /// Accessibility focus is **not blocked**.
   none,
@@ -210,38 +214,48 @@ sealed class _DebugSemanticsRoleChecks {
     final SemanticsData data = node.getSemanticsData();
 
     // Check if value is present
-    if (data.value.isEmpty) {
-      return FlutterError('A progress bar must have a value');
+    if (data.value.isEmpty ||
+        (data.minValue?.isEmpty ?? true) ||
+        (data.maxValue?.isEmpty ?? true)) {
+      return FlutterError('A progress bar must have a value, a minValue, a maxValue.');
     }
 
-    // Check if minValue and maxValue are present
-    if (data.minValue?.isEmpty ?? true) {
-      return FlutterError('A progress bar must have a minValue');
-    }
+    final double? minVal = double.tryParse(data.minValue!);
+    final double? maxVal = double.tryParse(data.maxValue!);
+    // The value can either be a direct number fall within the min and max range
+    // or a percentage number between 0% and 100%
+    final double? currentValue = double.tryParse(data.value);
+    final double? percentValue = data.value.endsWith('%')
+        ? double.tryParse(data.value.substring(0, data.value.length - 1))
+        : null;
 
-    if (data.maxValue?.isEmpty ?? true) {
-      return FlutterError('A progress bar must have a maxValue');
-    }
-
-    // Validate that value is within min and max range
-    try {
-      final double currentValue = double.parse(data.value);
-      final double minVal = double.parse(data.minValue!);
-      final double maxVal = double.parse(data.maxValue!);
-
-      if (currentValue < minVal || currentValue > maxVal) {
-        return FlutterError(
-          'Progress bar value ($currentValue) must be between minValue ($minVal) and maxValue ($maxVal)',
-        );
-      }
-
-      if (minVal >= maxVal) {
-        return FlutterError('Progress bar minValue ($minVal) must be less than maxValue ($maxVal)');
-      }
-    } catch (e) {
+    if (minVal == null || maxVal == null || (currentValue == null && percentValue == null)) {
       return FlutterError(
         'Progress bar value, minValue, and maxValue must be valid numbers. '
         'value: "${data.value}", minValue: "${data.minValue}", maxValue: "${data.maxValue}"',
+      );
+    }
+
+    // Validate min/max relation since both are guaranteed to be valid numbers.
+    if (minVal >= maxVal) {
+      return FlutterError(
+        'Progress bar minValue (${data.minValue}) must be less than maxValue (${data.maxValue})',
+      );
+    }
+    // If the value is a number, it must be between min and max.
+    if (currentValue != null) {
+      if (currentValue < minVal || currentValue > maxVal) {
+        return FlutterError(
+          'Progress bar value (${data.value}) must be between minValue (${data.minValue}) and maxValue (${data.maxValue})',
+        );
+      }
+      return null;
+    }
+
+    // If the value is a percentage string (e.g., "50%"), it must be between 0% and 100%.
+    if (percentValue != null && (percentValue < 0 || percentValue > 100)) {
+      return FlutterError(
+        'Progress bar percentage value (${data.value}) must be between 0% and 100%',
       );
     }
 
@@ -1797,9 +1811,8 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, indicates that this subtree represents a header.
   ///
-  /// A header divides into sections. For example, an address book application
-  /// might define headers A, B, C, etc. to divide the list of alphabetically
-  /// sorted contacts into sections.
+  /// A header is typically the top element of a page or section, such as a
+  /// page title or app bar title.
   final bool? header;
 
   /// If non-null, indicates that this subtree represents a text field.
@@ -1841,7 +1854,7 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node currently holds input focus.
   ///
-  /// If null, the node is not fosusable.
+  /// If null, the node is not focusable.
   ///
   /// At most one node in the tree should hold input focus at any point in time,
   /// and it should not be set to true if [focusable] is false.
@@ -2225,7 +2238,11 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// The heading level in the document structure.
   ///
-  /// Screen readers will use this value to determine which part of the page
+  /// A heading divides content into sections. For example, an address book
+  /// application might define headings A, B, C, etc. to divide the list of
+  /// alphabetically sorted contacts into sections.
+  ///
+  /// Screen readers use this value to determine which part of the page
   /// structure this heading represents. A level 1 heading usually indicates
   /// the main heading of a page, a level 2 heading the first subsection,
   /// a level 3 is a subsection of that, and so on.
@@ -3342,7 +3359,11 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _traversalChildIdentifier != config._traversalChildIdentifier ||
         _traversalParentIdentifier != config._traversalParentIdentifier ||
         _minValue != config._minValue ||
-        _maxValue != config._maxValue;
+        _maxValue != config._maxValue ||
+        !mapEquals<CustomSemanticsAction, VoidCallback>(
+          _customSemanticsActions,
+          config._customSemanticsActions,
+        );
   }
 
   // TAGS, LABELS, ACTIONS
@@ -3661,6 +3682,23 @@ class SemanticsNode with DiagnosticableTreeMixin {
   SemanticsInputType _inputType = _kEmptyConfig.inputType;
 
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
+
+  /// Whether this node can perform the specific [CustomSemanticsAction]
+  /// identified by [actionId].
+  bool _canPerformCustomAction(int actionId) {
+    final CustomSemanticsAction? customAction = CustomSemanticsAction.getAction(actionId);
+    return customAction != null && _customSemanticsActions.containsKey(customAction);
+  }
+
+  /// Whether this node can handle [action], taking [args] into account for
+  /// custom actions so that nodes which only have *other* custom actions
+  /// registered are not treated as candidates.
+  bool _canHandleAction(SemanticsAction action, Object? args) {
+    if (action == SemanticsAction.customAction) {
+      return args is int && _canPerformCustomAction(args);
+    }
+    return _canPerformAction(action);
+  }
 
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
 
@@ -4826,6 +4864,9 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the semantics tree is empty, returns null.
   SemanticsNode? get rootSemanticsNode => _nodes[0];
 
+  /// Returns the [SemanticsNode] with the given [id], if any.
+  SemanticsNode? getSemanticsNode(int id) => _nodes[id];
+
   @override
   void dispose() {
     assert(debugMaybeDispatchDisposed(this));
@@ -5024,21 +5065,34 @@ class SemanticsOwner extends ChangeNotifier {
     notifyListeners();
   }
 
-  SemanticsActionHandler? _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
+  SemanticsActionHandler? _getSemanticsActionHandlerForId(
+    int id,
+    SemanticsAction action, [
+    Object? args,
+  ]) {
     SemanticsNode? result = _nodes[id];
-    if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
+    if (result == null) {
+      return null;
+    }
+    // For merged nodes, walk descendants whenever the merge root itself does
+    // not handle the specific (action, args) pair. Without the args check,
+    // a merge root that owns *some* custom action would short-circuit the
+    // walk and we'd dispatch to the wrong handler.
+    if (result.isPartOfNodeMerging && !result._canHandleAction(action, args)) {
+      SemanticsNode? found;
       result._visitDescendants((SemanticsNode node) {
-        if (node._canPerformAction(action)) {
-          result = node;
+        if (node._canHandleAction(action, args)) {
+          found = node;
           return false; // found node, abort walk
         }
         return true; // continue walk
       });
+      result = found;
     }
-    if (result == null || !result!._canPerformAction(action)) {
+    if (result == null || !result._canHandleAction(action, args)) {
       return null;
     }
-    return result!._actions[action];
+    return result._actions[action];
   }
 
   /// Asks the [SemanticsNode] with the given id to perform the given action.
@@ -5049,7 +5103,7 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
   void performAction(int id, SemanticsAction action, [Object? args]) {
-    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action);
+    final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action, args);
     if (handler != null) {
       handler(args);
       return;
@@ -5064,8 +5118,9 @@ class SemanticsOwner extends ChangeNotifier {
   SemanticsActionHandler? _getSemanticsActionHandlerForPosition(
     SemanticsNode node,
     Offset position,
-    SemanticsAction action,
-  ) {
+    SemanticsAction action, [
+    Object? args,
+  ]) {
     if (node.transform != null) {
       final inverse = Matrix4.identity();
       if (inverse.copyInverse(node.transform!) == 0.0) {
@@ -5077,12 +5132,12 @@ class SemanticsOwner extends ChangeNotifier {
       return null;
     }
     if (node.mergeAllDescendantsIntoThisNode) {
-      if (node._canPerformAction(action)) {
+      if (node._canHandleAction(action, args)) {
         return node._actions[action];
       }
       SemanticsNode? result;
       node._visitDescendants((SemanticsNode child) {
-        if (child._canPerformAction(action)) {
+        if (child._canHandleAction(action, args)) {
           result = child;
           return false;
         }
@@ -5096,6 +5151,7 @@ class SemanticsOwner extends ChangeNotifier {
           child,
           position,
           action,
+          args,
         );
         if (handler != null) {
           return handler;
@@ -5121,6 +5177,7 @@ class SemanticsOwner extends ChangeNotifier {
       node,
       position,
       action,
+      args,
     );
     if (handler != null) {
       handler(args);
@@ -7057,7 +7114,7 @@ class OrdinalSortKey extends SemanticsSortKey {
 /// Argument [sourceLevel] is the heading level of the source node that is being
 /// merged into a target node, which has heading level [targetLevel].
 ///
-/// If the target node is not a heading, the the source heading level is used.
+/// If the target node is not a heading, the source heading level is used.
 /// Otherwise, the target heading level is used irrespective of the source
 /// heading level.
 int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {

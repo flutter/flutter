@@ -432,6 +432,21 @@ TEST_F(WindowsTest, GetGraphicsAdapter) {
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
 }
 
+TEST_F(WindowsTest, GetEngineGraphicsAdapter) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+  auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
+
+  // Can't use smart pointer because the result is not a real COM object.
+  IDXGIAdapter* dxgi_adapter;
+  ASSERT_TRUE(FlutterDesktopEngineGetGraphicsAdapter(engine, &dxgi_adapter));
+  ASSERT_NE(dxgi_adapter, nullptr);
+  DXGI_ADAPTER_DESC desc{};
+  ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
+}
+
 TEST_F(WindowsTest, GetGraphicsAdapterWithLowPowerPreference) {
   std::optional<LUID> luid = egl::Manager::GetLowPowerGpuLuid();
   if (!luid) {
@@ -470,6 +485,53 @@ TEST_F(WindowsTest, GetGraphicsAdapterWithHighPerformancePreference) {
 
   Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
   dxgi_adapter = FlutterDesktopViewGetGraphicsAdapter(view);
+  ASSERT_NE(dxgi_adapter, nullptr);
+  DXGI_ADAPTER_DESC desc{};
+  ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
+  ASSERT_EQ(desc.AdapterLuid.HighPart, luid->HighPart);
+  ASSERT_EQ(desc.AdapterLuid.LowPart, luid->LowPart);
+}
+
+TEST_F(WindowsTest, GetEngineGraphicsAdapterWithLowPowerPreference) {
+  std::optional<LUID> luid = egl::Manager::GetLowPowerGpuLuid();
+  if (!luid) {
+    GTEST_SKIP() << "Not able to find low power GPU, nothing to check.";
+  }
+
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetGpuPreference(FlutterDesktopGpuPreference::LowPowerPreference);
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+  auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
+
+  // Can't use smart pointer because the result is not a real COM object.
+  IDXGIAdapter* dxgi_adapter;
+  ASSERT_TRUE(FlutterDesktopEngineGetGraphicsAdapter(engine, &dxgi_adapter));
+  ASSERT_NE(dxgi_adapter, nullptr);
+  DXGI_ADAPTER_DESC desc{};
+  ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
+  ASSERT_EQ(desc.AdapterLuid.HighPart, luid->HighPart);
+  ASSERT_EQ(desc.AdapterLuid.LowPart, luid->LowPart);
+}
+
+TEST_F(WindowsTest, GetEngineGraphicsAdapterWithHighPerformancePreference) {
+  std::optional<LUID> luid = egl::Manager::GetHighPerformanceGpuLuid();
+  if (!luid) {
+    GTEST_SKIP() << "Not able to find high performance GPU, nothing to check.";
+  }
+
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetGpuPreference(
+      FlutterDesktopGpuPreference::HighPerformancePreference);
+  ViewControllerPtr controller{builder.Run()};
+  ASSERT_NE(controller, nullptr);
+  auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
+
+  // Can't use smart pointer because the result is not a real COM object.
+  IDXGIAdapter* dxgi_adapter;
+  ASSERT_TRUE(FlutterDesktopEngineGetGraphicsAdapter(engine, &dxgi_adapter));
   ASSERT_NE(dxgi_adapter, nullptr);
   DXGI_ADAPTER_DESC desc{};
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));

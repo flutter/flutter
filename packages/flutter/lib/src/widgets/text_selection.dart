@@ -249,7 +249,7 @@ abstract class TextSelectionControls {
     'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   Future<void> handlePaste(TextSelectionDelegate delegate) async {
-    delegate.pasteText(SelectionChangedCause.toolbar);
+    await delegate.pasteText(SelectionChangedCause.toolbar);
   }
 
   /// Call [TextSelectionDelegate.selectAll] to set the current selection to
@@ -457,7 +457,15 @@ class TextSelectionOverlay {
   void hideHandles() => _selectionOverlay.hideHandles();
 
   /// {@macro flutter.widgets.SelectionOverlay.showToolbar}
+  ///
+  /// This method requires a fully laid-out render tree (as it calls
+  /// [RenderBox.localToGlobal]), so it should not be called during the build or
+  /// layout phases.
   void showToolbar() {
+    assert(
+      SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks,
+      'showToolbar must not be called during the build or layout phase.',
+    );
     _updateSelectionOverlay();
 
     if (selectionControls != null && selectionControls is! TextSelectionHandleControls) {
@@ -1236,7 +1244,7 @@ class SelectionOverlay {
   //
   // On Apple and web platforms only one selection handle can be dragged
   // at a time, so when the end handle is being dragged on these platforms
-  // the the start handle cannot be dragged.
+  // the start handle cannot be dragged.
   bool get _canDragStartHandle =>
       !_isDraggingEndHandle ||
       (defaultTargetPlatform != TargetPlatform.iOS &&
@@ -1357,7 +1365,7 @@ class SelectionOverlay {
   //
   // On Apple and web platforms only one selection handle can be dragged
   // at a time, so when the start handle is being dragged on these platforms
-  // the the end handle cannot be dragged.
+  // the end handle cannot be dragged.
   bool get _canDragEndHandle =>
       !_isDraggingStartHandle ||
       (defaultTargetPlatform != TargetPlatform.iOS &&
@@ -1636,7 +1644,7 @@ class SelectionOverlay {
         this.context,
         rootOverlay: true,
         debugRequiredFor: debugRequiredFor,
-      ).insert(_toolbar!);
+      ).insert(_toolbar!, above: _handles?.end);
       return;
     }
 

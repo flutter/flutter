@@ -428,6 +428,7 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -481,6 +482,7 @@ void main() {
                 runProjectHostLanguage: 'swift',
                 runIOSInterfaceType: 'usb',
                 runIsTest: true,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -787,6 +789,7 @@ void main() {
                 runProjectModule: false,
                 runProjectHostLanguage: '',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -837,6 +840,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'usb',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -892,6 +896,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
@@ -948,6 +953,7 @@ void main() {
                 runProjectHostLanguage: '',
                 runIOSInterfaceType: 'wireless',
                 runIsTest: false,
+                runEnableHcpp: false,
               ),
             ),
           );
