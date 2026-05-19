@@ -1054,7 +1054,7 @@ Future<void> testMain() async {
     final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
 
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Noto Sans', fontSize: 20);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 20);
     final styleCN = WebTextStyle(locale: const Locale('zh', 'CN'));
     final styleTW = WebTextStyle(locale: const Locale('zh', 'TW'));
     final styleHK = WebTextStyle(locale: const Locale('zh', 'HK'));
