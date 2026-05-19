@@ -539,11 +539,13 @@ class XcodeProjectInterpreter {
     );
   }
 
-  /// Returns scheme-name candidates that cannot be a watch companion (or other
-  /// host build target) and should be excluded from
-  /// [XcodeProjectInfo.schemes] to avoid expensive `xcodebuild
-  /// -showBuildSettings -destination generic/platform=watchOS` probes
-  /// against them.
+  /// Returns scheme-name candidates for Swift packages that should be excluded from
+  /// [XcodeProjectInfo.schemes] to avoid expensive iterations through the scheme list, such as
+  /// during `flutter clean` or during [IosProject.containsWatchCompanion].
+  ///
+  /// Local Swift packages are automatically included by Xcode in `xcodebuild -list` despite not
+  /// being declared in the host `.xcodeproj`. Remote Swift packages may also be included (see
+  /// [_swiftPackageCheckoutSchemes]).
   ///
   /// Covers Flutter's generated SwiftPM packages, plugin names in snake_case
   /// and dashed forms, and transitive SwiftPM checkout schemes.
