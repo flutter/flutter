@@ -30,14 +30,15 @@ Future<TaskResult> run() async {
 
       final completer = Completer<void>();
       var sawImpellerBackendMessage = false;
+      const vulkanBackendMessage = 'Using the Impeller rendering backend (Vulkan).';
+      const openGLBackendMessage = 'Using the Impeller rendering backend (OpenGL).';
 
       final StreamSubscription<String> subscription = process.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())
           .listen((String line) {
             print('[STDOUT]: $line');
-            if (line.contains('Using the Impeller rendering backend (Vulkan).') ||
-                line.contains('Using the Impeller rendering backend (OpenGL).')) {
+            if (line.contains(vulkanBackendMessage) || line.contains(openGLBackendMessage)) {
               sawImpellerBackendMessage = true;
               if (!completer.isCompleted) {
                 completer.complete();
@@ -58,8 +59,8 @@ Future<TaskResult> run() async {
         res = TaskResult.failure('Flutter process exited with non-zero exit code: $exitCode');
       } else if (!sawImpellerBackendMessage) {
         res = TaskResult.failure(
-          'Did not see "Using the Impeller rendering backend (Vulkan)." or '
-          '"Using the Impeller rendering backend (OpenGL)." in output',
+          'Did not see "$vulkanBackendMessage" or '
+          '"$openGLBackendMessage" in output',
         );
       }
     });
