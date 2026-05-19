@@ -456,6 +456,17 @@ void main() {
     () async {
       final fileSystem = MemoryFileSystem.test();
       final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'bin/cache/dart-sdk/bin/dart',
+            'pub',
+            '--suppress-analytics',
+            '--directory',
+            '.',
+            'check-resolution-up-to-date',
+          ],
+          exitCode: 1,
+        ),
         FakeCommand(
           command: const <String>[
             'bin/cache/dart-sdk/bin/dart',
@@ -504,6 +515,17 @@ void main() {
     () async {
       final fileSystem = MemoryFileSystem.test();
       final processManager = FakeProcessManager.list(<FakeCommand>[
+        const FakeCommand(
+          command: <String>[
+            'bin/cache/dart-sdk/bin/dart',
+            'pub',
+            '--suppress-analytics',
+            '--directory',
+            '.',
+            'check-resolution-up-to-date',
+          ],
+          exitCode: 1,
+        ),
         const FakeCommand(
           command: <String>[
             'bin/cache/dart-sdk/bin/dart',

@@ -253,51 +253,9 @@ class _DefaultPub implements Pub {
     PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     final String directory = project.directory.path;
-
-    // Here we use pub's private helper file to locate the package_config.
-    // In pub workspaces pub will generate a `.dart_tool/pub/workspace_ref.json`
-    // inside each workspace-package that refers to the workspace root where
-    // .dart_tool/package_config.json is located.
-    //
-    // By checking for this file instead of iterating parent directories until
-    // finding .dart_tool/package_config.json we will not mistakenly find a
-    // package_config.json from outside the workspace.
-    //
-    // TODO(sigurdm): avoid relying on pubs implementation details somehow?
-    final File workspaceRefFile = project.dartTool
-        .childDirectory('pub')
-        .childFile('workspace_ref.json');
-    final File packageConfigFile;
-    if (workspaceRefFile.existsSync()) {
-      switch (jsonDecode(workspaceRefFile.readAsStringSync())) {
-        case {'workspaceRoot': final String workspaceRoot}:
-          packageConfigFile = _fileSystem.file(
-            _fileSystem.path.join(
-              workspaceRefFile.parent.path,
-              workspaceRoot,
-              '.dart_tool',
-              'package_config.json',
-            ),
-          );
-        default:
-          // The workspace_ref.json file was malformed. Attempt to load the
-          // regular .dart_tool/package_config.json
-          //
-          // Most likely this doesn't exist, and we will get a new pub
-          // resolution.
-          //
-          // Alternatively this is a stray file somehow, and it can be ignored.
-          packageConfigFile = project.dartTool.childFile('package_config.json');
-      }
-    } else {
-      packageConfigFile = project.dartTool.childFile('package_config.json');
-    }
-
-    if (packageConfigFile.existsSync()) {
-      final Directory workspaceRoot = packageConfigFile.parent.parent;
-      final File pubLockFile = workspaceRoot.childFile('pubspec.lock');
-
-      if (shouldSkipThirdPartyGenerator) {
+    if (shouldSkipThirdPartyGenerator) {
+      final File? packageConfigFile = findPackageConfigFile(project.directory);
+      if (packageConfigFile != null && packageConfigFile.existsSync()) {
         Map<String, Object?> packageConfigMap;
         try {
           packageConfigMap =
@@ -314,13 +272,12 @@ class _DefaultPub implements Pub {
           return;
         }
       }
+    }
 
-      if (checkUpToDate &&
-          pubLockFile.existsSync() &&
-          await _checkResolutionUpToDate(directory, context, flutterRootOverride)) {
-        _logger.printTrace('Skipping pub get: resolution up-to-date.');
-        return;
-      }
+    if (checkUpToDate &&
+        await _checkResolutionUpToDate(directory, context, flutterRootOverride)) {
+      _logger.printTrace('Skipping pub get: resolution up-to-date.');
+      return;
     }
 
     final command = upgrade ? 'upgrade' : 'get';
