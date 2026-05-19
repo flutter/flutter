@@ -413,7 +413,7 @@ void main() {
     expect(ModalRoute.of(context)!.popDisposition, RoutePopDisposition.bubble);
   }, variant: TargetPlatformVariant.all());
 
-testWidgets(
+  testWidgets(
     'nested navigators with PopScope(canPop: false) in between keeps setFrameworkHandlesBack true',
     (WidgetTester tester) async {
       final rootNavigatorKey = GlobalKey<NavigatorState>();
