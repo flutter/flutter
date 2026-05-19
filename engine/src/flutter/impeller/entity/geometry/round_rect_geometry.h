@@ -29,7 +29,7 @@ class RoundRectGeometry final : public Geometry {
   ~RoundRectGeometry() override;
 
   // |Geometry|
-  bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+  bool CoversArea(const Matrix& transform, const IRect& rect) const override;
 
   // |Geometry|
   bool IsAxisAlignedRect() const override;
@@ -61,7 +61,7 @@ class FillRoundRectGeometry final : public FillPathSourceGeometry {
   explicit FillRoundRectGeometry(const RoundRect& round_rect);
 
   // |Geometry|
-  bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+  bool CoversArea(const Matrix& transform, const IRect& rect) const override;
 
  protected:
   // |FillPathSourceGeometry|

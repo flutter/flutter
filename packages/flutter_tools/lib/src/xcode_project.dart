@@ -240,7 +240,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       return null;
     }
     return _projectInfo ??= await xcodeProjectInterpreter.getInfo(
-      hostAppRoot.path,
+      this,
       buildDirectory: globals.fs.directory(darwinPlatform.buildDirectory()),
     );
   }
@@ -339,7 +339,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     }
 
     final Map<String, String> buildSettings = await xcodeProjectInterpreter.getBuildSettings(
-      xcodeProject.path,
+      this,
       buildContext: buildContext,
     );
     if (buildSettings.isNotEmpty) {
@@ -572,7 +572,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       }
     }
 
-    return !buildSettings.contains(RegExp('EXCLUDED_ARCHS.*arm64'));
+    return !buildSettings.contains(RegExp(r'EXCLUDED_ARCHS.*\barm64\b'));
   }
 
   /// Returns a list of targets and their associated plugin (if found) that exclude arm64 architecture.

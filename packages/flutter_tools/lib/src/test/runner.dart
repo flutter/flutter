@@ -277,10 +277,7 @@ import 'package:test_api/backend.dart'; // flutter_ignore: test_api_import
     String pathToImport(String path) {
       assert(path.endsWith('.dart'));
       return path
-          .replaceAll('.', '_')
-          .replaceAll(':', '_')
-          .replaceAll('/', '_')
-          .replaceAll(r'\', '_')
+          .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_')
           .replaceRange(path.length - '.dart'.length, null, '');
     }
 
@@ -499,10 +496,7 @@ String pathToImport(String path) {
   assert(path.endsWith('.dart'));
   return path
       .replaceRange(path.length - '.dart'.length, null, '')
-      .replaceAll('.', '_')
-      .replaceAll(':', '_')
-      .replaceAll('/', '_')
-      .replaceAll(r'\', '_');
+      .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
 }
 
 class SpawnPlugin extends PlatformPlugin {
@@ -743,7 +737,8 @@ class SpawnPlugin extends PlatformPlugin {
     globals.logger.printTrace('Started flutter_tester process at pid ${process.pid}');
 
     for (final stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
-      stream.transform<String>(utf8.decoder).listen(globals.stdio.stdoutWrite);
+      // Use permissive decoder for test output which may contain invalid UTF-8
+      stream.transform<String>(utf8AllowMalformed.decoder).listen(globals.stdio.stdoutWrite);
     }
 
     return process.exitCode.then((int exitCode) {

@@ -129,6 +129,9 @@ local.properties
 **/macos/Flutter/ephemeral
 **/xcuserdata/
 
+# Swift package manager (for code indexing)
+**/.build/
+
 # Windows
 **/windows/flutter/ephemeral/
 **/windows/flutter/generated_plugin_registrant.cc
@@ -165,4 +168,5 @@ app.*.symbols
 .gclient_previous_sync_commits
 
 # AI related
+.agents/rules/personal-*
 .agents/skills/personal-*

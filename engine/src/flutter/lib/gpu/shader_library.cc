@@ -15,6 +15,7 @@
 #include "fml/memory/ref_ptr.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/shader_types.h"
+#include "impeller/renderer/shader_key.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
 #include "lib/gpu/context.h"
 
@@ -43,7 +44,7 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromAsset(
     return nullptr;
   }
 
-  return MakeFromFlatbuffer(backend_type, std::move(data));
+  return MakeFromFlatbuffer(backend_type, std::move(data), name);
 }
 
 fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromShaders(ShaderMap shaders) {
@@ -171,9 +172,13 @@ static const impeller::fb::shaderbundle::BackendShader* GetShaderBackend(
 
 fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
     impeller::Context::BackendType backend_type,
-    std::shared_ptr<fml::Mapping> payload) {
+    std::shared_ptr<fml::Mapping> payload,
+    std::string library_id) {
   if (payload == nullptr || !payload->GetMapping()) {
     return nullptr;
+  }
+  if (library_id.empty()) {
+    library_id = impeller::ShaderKey::MakeFallbackLibraryId();
   }
   if (!impeller::fb::shaderbundle::ShaderBundleBufferHasIdentifier(
           payload->GetMapping())) {
@@ -190,7 +195,11 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
       impeller::fb::shaderbundle::ShaderBundleFormatVersion::kVersion);
   if (version != expected) {
     VALIDATION_LOG << "Unsupported shader bundle format version: " << version
-                   << ", expected: " << expected;
+                   << ", expected: " << expected
+                   << ". This shader bundle was compiled with an incompatible "
+                      "version of impellerc. Please rebuild the shader bundle "
+                      "with the version of impellerc that ships with the "
+                      "current Flutter SDK.";
     return nullptr;
   }
 
@@ -219,8 +228,10 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
         std::vector<impeller::ShaderStructMemberMetadata> members;
         if (uniform->fields() != nullptr) {
           for (const auto& struct_member : *uniform->fields()) {
+            const impeller::ShaderType type =
+                FromUniformType(struct_member->type());
             members.push_back(impeller::ShaderStructMemberMetadata{
-                .type = FromUniformType(struct_member->type()),
+                .type = type,
                 .name = struct_member->name()->c_str(),
                 .offset = static_cast<size_t>(struct_member->offset_in_bytes()),
                 .size =
@@ -231,6 +242,9 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
                     struct_member->array_elements() == 0
                         ? std::optional<size_t>(std::nullopt)
                         : static_cast<size_t>(struct_member->array_elements()),
+                .float_type = impeller::DeriveShaderFloatType(
+                    type, static_cast<size_t>(struct_member->vec_size()),
+                    static_cast<size_t>(struct_member->columns())),
             });
           }
         }
@@ -315,7 +329,7 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
     }
 
     auto shader = flutter::gpu::Shader::Make(
-        backend_shader->entrypoint()->str(),
+        library_id, backend_shader->entrypoint()->str(),
         ToShaderStage(backend_shader->stage()), std::move(code_mapping),
         std::move(inputs), std::move(layouts), std::move(uniform_structs),
         std::move(uniform_textures), std::move(descriptor_set_layouts));

@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart';
-import 'dart:math';
 
 class RotatedWireCube extends StatefulWidget {
   const RotatedWireCube({required this.cubeColor, super.key});
@@ -15,8 +16,7 @@ class RotatedWireCube extends StatefulWidget {
   State<StatefulWidget> createState() => _RotatedWireCubeState();
 }
 
-class _RotatedWireCubeState extends State<RotatedWireCube>
-    with SingleTickerProviderStateMixin {
+class _RotatedWireCubeState extends State<RotatedWireCube> with SingleTickerProviderStateMixin {
   late final AnimationController _animation;
 
   @override
@@ -24,7 +24,6 @@ class _RotatedWireCubeState extends State<RotatedWireCube>
     super.initState();
     _animation = AnimationController(
       vsync: this,
-      lowerBound: 0,
       upperBound: 2 * pi,
       duration: const Duration(seconds: 15),
     )..repeat();
@@ -43,10 +42,7 @@ class _RotatedWireCubeState extends State<RotatedWireCube>
       builder: (context, child) {
         return CustomPaint(
           size: const Size(200, 200),
-          painter: _RotatedWireCubePainter(
-            angle: _animation.value,
-            color: widget.cubeColor,
-          ),
+          painter: _RotatedWireCubePainter(angle: _animation.value, color: widget.cubeColor),
         );
       },
     );
@@ -54,6 +50,7 @@ class _RotatedWireCubeState extends State<RotatedWireCube>
 }
 
 class _RotatedWireCubePainter extends CustomPainter {
+  _RotatedWireCubePainter({required this.angle, required this.color});
   static List<Vector3> vertices = [
     Vector3(-0.5, -0.5, -0.5),
     Vector3(0.5, -0.5, -0.5),
@@ -74,16 +71,14 @@ class _RotatedWireCubePainter extends CustomPainter {
   final double angle;
   final Color color;
 
-  _RotatedWireCubePainter({required this.angle, required this.color});
-
   Offset scaleAndCenter(Vector3 point, double size, Offset center) {
-    final scale = size / 2;
+    final double scale = size / 2;
     return Offset(center.dx + point.x * scale, center.dy - point.y * scale);
   }
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rotatedVertices = vertices
+    final List<Vector3> rotatedVertices = vertices
         .map((vertex) => Matrix4.rotationX(angle).transformed3(vertex))
         .map((vertex) => Matrix4.rotationY(angle).transformed3(vertex))
         .map((vertex) => Matrix4.rotationZ(angle).transformed3(vertex))
@@ -96,9 +91,9 @@ class _RotatedWireCubePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
-    for (var edge in edges) {
-      final p1 = scaleAndCenter(rotatedVertices[edge[0]], size.width, center);
-      final p2 = scaleAndCenter(rotatedVertices[edge[1]], size.width, center);
+    for (final List<int> edge in edges) {
+      final Offset p1 = scaleAndCenter(rotatedVertices[edge[0]], size.width, center);
+      final Offset p2 = scaleAndCenter(rotatedVertices[edge[1]], size.width, center);
       canvas.drawLine(p1, p2, paint);
     }
   }

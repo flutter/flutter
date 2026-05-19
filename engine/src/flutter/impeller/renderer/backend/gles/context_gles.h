@@ -110,6 +110,9 @@ class ContextGLES final : public Context,
   [[nodiscard]] bool FlushCommandBuffers() override;
 
   // |Context|
+  [[nodiscard]] bool FinishQueue() override;
+
+  // |Context|
   RuntimeStageBackend GetRuntimeStageBackend() const override;
 
   ContextGLES(const ContextGLES&) = delete;
