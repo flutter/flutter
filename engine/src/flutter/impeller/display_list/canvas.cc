@@ -192,13 +192,6 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
   );
 }
 
-bool AreCornersCircular(const RoundingRadii& radii) {
-  return ScalarNearlyEqual(radii.top_left.width, radii.top_left.height) &&
-         ScalarNearlyEqual(radii.top_right.width, radii.top_right.height) &&
-         ScalarNearlyEqual(radii.bottom_left.width, radii.bottom_left.height) &&
-         ScalarNearlyEqual(radii.bottom_right.width, radii.bottom_right.height);
-}
-
 }  // namespace
 
 class Canvas::RRectBlurShape : public BlurShape {
@@ -977,7 +970,7 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   const RoundingRadii& radii = round_rect.GetRadii();
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint) && AreCornersCircular(radii)) {
+      IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
     auto params = UberSDFParameters::MakeRoundedRect(
         /*color=*/paint.color,
         /*rect=*/round_rect.GetBounds(),

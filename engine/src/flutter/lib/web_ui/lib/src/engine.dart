@@ -62,6 +62,7 @@ export 'engine/frame_service.dart';
 export 'engine/frame_timing_recorder.dart';
 export 'engine/html_image_element_codec.dart';
 export 'engine/image_decoder.dart';
+export 'engine/image_decoding_manager.dart';
 export 'engine/image_downscaler.dart';
 export 'engine/image_format_detector.dart';
 export 'engine/initialization.dart';

@@ -20,6 +20,7 @@
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/shader_function.h"
+#include "impeller/renderer/shader_key.h"
 #include "impeller/renderer/vertex_descriptor.h"
 
 namespace impeller {
@@ -80,6 +81,18 @@ const Geometry* RuntimeEffectContents::GetGeometry() const {
 void RuntimeEffectContents::SetRuntimeStage(
     std::shared_ptr<RuntimeStage> runtime_stage) {
   runtime_stage_ = std::move(runtime_stage);
+  // Precompute the scoped registry name now so that the hot per-frame
+  // `Render` path does not re-allocate it on every call. The name is keyed
+  // on the stage's library id and entrypoint, both of which are stable for
+  // a given `runtime_stage_` value, so this stays valid until the next
+  // `SetRuntimeStage`.
+  if (runtime_stage_) {
+    scoped_fragment_name_ = ShaderKey::MakeUserScopedName(
+        ShaderKey::kScopeRuntimeEffect, runtime_stage_->GetLibraryId(),
+        runtime_stage_->GetEntrypoint());
+  } else {
+    scoped_fragment_name_.clear();
+  }
 }
 
 void RuntimeEffectContents::SetUniformData(
@@ -150,18 +163,17 @@ bool RuntimeEffectContents::RegisterShader(
   const std::shared_ptr<Context>& context = renderer.GetContext();
   const std::shared_ptr<ShaderLibrary>& library = context->GetShaderLibrary();
 
-  std::shared_ptr<const ShaderFunction> function = library->GetFunction(
-      runtime_stage_->GetEntrypoint(), ShaderStage::kFragment);
+  std::shared_ptr<const ShaderFunction> function =
+      library->GetFunction(scoped_fragment_name_, ShaderStage::kFragment);
 
   //--------------------------------------------------------------------------
   /// Resolve runtime stage function.
   ///
 
   if (function && runtime_stage_->IsDirty()) {
-    renderer.ClearCachedRuntimeEffectPipeline(runtime_stage_->GetEntrypoint());
+    renderer.ClearCachedRuntimeEffectPipeline(scoped_fragment_name_);
     context->GetPipelineLibrary()->RemovePipelinesWithEntryPoint(function);
-    library->UnregisterFunction(runtime_stage_->GetEntrypoint(),
-                                ShaderStage::kFragment);
+    library->UnregisterFunction(scoped_fragment_name_, ShaderStage::kFragment);
 
     function = nullptr;
   }
@@ -171,8 +183,7 @@ bool RuntimeEffectContents::RegisterShader(
     auto future = promise.get_future();
 
     library->RegisterFunction(
-        runtime_stage_->GetEntrypoint(),
-        ToShaderStage(runtime_stage_->GetShaderStage()),
+        scoped_fragment_name_, ToShaderStage(runtime_stage_->GetShaderStage()),
         runtime_stage_->GetCodeMapping(),
         fml::MakeCopyable([promise = std::move(promise)](bool result) mutable {
           promise.set_value(result);
@@ -184,8 +195,8 @@ bool RuntimeEffectContents::RegisterShader(
       return false;
     }
 
-    function = library->GetFunction(runtime_stage_->GetEntrypoint(),
-                                    ShaderStage::kFragment);
+    function =
+        library->GetFunction(scoped_fragment_name_, ShaderStage::kFragment);
     if (!function) {
       VALIDATION_LOG
           << "Failed to fetch runtime effect function immediately after "
@@ -216,8 +227,8 @@ RuntimeEffectContents::CreatePipeline(const ContentContext& renderer,
   desc.SetLabel("Runtime Stage");
   desc.AddStageEntrypoint(
       library->GetFunction(VS::kEntrypointName, ShaderStage::kVertex));
-  desc.AddStageEntrypoint(library->GetFunction(runtime_stage_->GetEntrypoint(),
-                                               ShaderStage::kFragment));
+  desc.AddStageEntrypoint(
+      library->GetFunction(scoped_fragment_name_, ShaderStage::kFragment));
 
   std::shared_ptr<VertexDescriptor> vertex_descriptor =
       std::make_shared<VertexDescriptor>();
@@ -351,7 +362,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
       [&](ContentContextOptions options) {
         // Pipeline creation callback for the cache handler to call.
         return renderer.GetCachedRuntimeEffectPipeline(
-            runtime_stage_->GetEntrypoint(), options, [&]() {
+            scoped_fragment_name_, options, [&]() {
               return CreatePipeline(renderer, options, /*async=*/false);
             });
       };
