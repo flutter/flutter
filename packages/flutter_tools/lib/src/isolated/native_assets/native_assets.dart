@@ -323,9 +323,7 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
         codeAssetsAccumulator: codeAssets,
         dataAssetsAccumulator: dataAssets,
       );
-      dependencies
-        ..addAll(buildResult.dependencies)
-        ..addAll(linkResult.dependencies);
+      dependencies.addAll(linkResult.dependencies);
     } else {
       _decodeAssets(
         encodedAssets: buildResult.encodedAssets,
@@ -333,7 +331,6 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
         codeAssetsAccumulator: codeAssets,
         dataAssetsAccumulator: dataAssets,
       );
-      dependencies.addAll(buildResult.dependencies);
     }
   }
 

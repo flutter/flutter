@@ -75,7 +75,11 @@ class BuildHooks extends Target {
       dartBuildOutputJsonFile.parent.createSync(recursive: true);
     }
 
-    dartBuildOutputJsonFile.writeAsStringSync(json.encode(results));
+    final String encodedResults = json.encode(results);
+    if (!dartBuildOutputJsonFile.existsSync() ||
+        dartBuildOutputJsonFile.readAsStringSync() != encodedResults) {
+      dartBuildOutputJsonFile.writeAsStringSync(encodedResults);
+    }
 
     final depfile = Depfile(
       <File>[for (final Uri dependency in dependencies) fileSystem.file(dependency)],
