@@ -523,7 +523,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
 
     final FlutterMutatorView parentView = platformViewParent.get(viewId);
-    parentView.readyToDisplay(mutatorsStack, x, y, width, height);
+    parentView.readyToDisplay(mutatorsStack, x, y, width, height, viewWidth, viewHeight);
     parentView.setVisibility(View.VISIBLE);
     parentView.bringToFront();
 

@@ -45,6 +45,7 @@ public class FlutterMutatorView extends FrameLayout {
           + "uniform float u_interpolation_strength;\n"
           + "uniform shader u_texture;\n"
           + "uniform vec2 u_size;\n"
+          + "uniform vec2 u_content_size;\n"
           + "float ease_in(float t, float d) { return t * d; }\n"
           + "float compute_overscroll_start(float in_pos, float overscroll, float u_stretch_affected_dist, float u_inverse_stretch_affected_dist, float distance_stretched, float interpolation_strength) {\n"
           + "  float offset_pos = u_stretch_affected_dist - in_pos;\n"
@@ -69,11 +70,13 @@ public class FlutterMutatorView extends FrameLayout {
           + "  } else { return in_pos; }\n"
           + "}\n"
           + "half4 main(vec2 fragCoord) {\n"
-          + "  vec2 uv = fragCoord.xy / u_size;\n"
           + "  float overscroll = u_overscroll_y != 0.0 ? u_overscroll_y : u_overscroll_x;\n"
-          + "  float out_u_norm = u_overscroll_y != 0.0 ? uv.x : compute_streched_effect(uv.x, overscroll, 1.0, 1.0, 1.0 / (1.0 + abs(overscroll)), (1.0 / (1.0 + abs(overscroll))) - 1.0, u_interpolation_strength, 1.0);\n"
-          + "  float out_v_norm = u_overscroll_y != 0.0 ? compute_streched_effect(uv.y, overscroll, 1.0, 1.0, 1.0 / (1.0 + abs(overscroll)), (1.0 / (1.0 + abs(overscroll))) - 1.0, u_interpolation_strength, 1.0) : uv.y;\n"
-          + "  return u_texture.eval(vec2(out_u_norm * u_size.x, out_v_norm * u_size.y));\n"
+          + "  float shift = overscroll < 0.0 ? -overscroll : 0.0;\n"
+          + "  float uv_x = (fragCoord.x / u_content_size.x) - (u_overscroll_y != 0.0 ? 0.0 : shift);\n"
+          + "  float uv_y = (fragCoord.y / u_content_size.y) - (u_overscroll_y != 0.0 ? shift : 0.0);\n"
+          + "  float out_u_norm = u_overscroll_y != 0.0 ? uv_x : compute_streched_effect(uv_x, overscroll, 1.0, 1.0, 1.0 / (1.0 + abs(overscroll)), (1.0 / (1.0 + abs(overscroll))) - 1.0, u_interpolation_strength, 1.0);\n"
+          + "  float out_v_norm = u_overscroll_y != 0.0 ? compute_streched_effect(uv_y, overscroll, 1.0, 1.0, 1.0 / (1.0 + abs(overscroll)), (1.0 / (1.0 + abs(overscroll))) - 1.0, u_interpolation_strength, 1.0) : uv_y;\n"
+          + "  return u_texture.eval(vec2(out_u_norm * u_content_size.x, out_v_norm * u_content_size.y));\n"
           + "}\n";
 
   /**
@@ -137,7 +140,13 @@ public class FlutterMutatorView extends FrameLayout {
    * Pass the necessary parameters to the view so it can apply correct mutations to its children.
    */
   public void readyToDisplay(
-      @NonNull FlutterMutatorsStack mutatorsStack, int left, int top, int width, int height) {
+      @NonNull FlutterMutatorsStack mutatorsStack,
+      int left,
+      int top,
+      int width,
+      int height,
+      int viewWidth,
+      int viewHeight) {
     this.mutatorsStack = mutatorsStack;
     this.left = left;
     this.top = top;
@@ -163,7 +172,10 @@ public class FlutterMutatorView extends FrameLayout {
         shader.setFloatUniform("u_overscroll_y", totalYStretch);
         shader.setFloatUniform("u_interpolation_strength", 0.7f);
         shader.setFloatUniform("u_size", (float) width, (float) height);
+        shader.setFloatUniform("u_content_size", (float) viewWidth, (float) viewHeight);
         this.setRenderEffect(RenderEffect.createRuntimeShaderEffect(shader, "u_texture"));
+      } else {
+        this.setRenderEffect(null);
       }
     }
   }
