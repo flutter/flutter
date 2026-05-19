@@ -3767,16 +3767,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   }
 
   bool _getNavigatorCanHandlePop() {
-    final bool navigatorCanPop = canPop();
-    final bool routeBlocksPop;
-    if (!navigatorCanPop) {
-      final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
-      routeBlocksPop =
-          lastEntry != null && lastEntry.route.popDisposition == RoutePopDisposition.doNotPop;
-    } else {
-      routeBlocksPop = false;
+    if (canPop()) {
+      return true;
     }
-    return navigatorCanPop || routeBlocksPop;
+    final _RouteEntry? lastEntry = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+    return lastEntry != null && lastEntry.route.popDisposition == RoutePopDisposition.doNotPop;
   }
 
   bool _debugCheckPageApiParameters() {
