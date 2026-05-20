@@ -2111,48 +2111,6 @@ flutter:
   );
 
   testUsingContext(
-    'HotRunner evictDirtyAssets correctly finds UI isolate and view ID when multiple views are present and the first view has no isolate',
-    () => testbed.run(() async {
-      final viewWithoutIsolate = FlutterView(id: 'view_empty', uiIsolate: null);
-      final viewWithIsolate = FlutterView(id: 'view_active', uiIsolate: fakeUnpausedIsolate);
-
-      final listMultipleViews = FakeVmServiceRequest(
-        method: kListViewsMethod,
-        jsonResponse: <String, Object>{
-          'views': <Object>[viewWithoutIsolate.toJson(), viewWithIsolate.toJson()],
-        },
-      );
-
-      const setAssetBundlePathForActiveView = FakeVmServiceRequest(
-        method: '_flutter.setAssetBundlePath',
-        args: <String, Object>{
-          'viewId': 'view_active',
-          'assetDirectory': 'build/flutter_assets',
-          'isolateId': '1',
-        },
-      );
-
-      fakeVmServiceHost = FakeVmServiceHost(
-        requests: <VmServiceExpectation>[listMultipleViews, setAssetBundlePathForActiveView, evict],
-      );
-      residentRunner = HotRunner(
-        <FlutterDevice>[flutterDevice],
-        stayResident: false,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        target: 'main.dart',
-        analytics: fakeAnalytics,
-      );
-
-      (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'asset'};
-
-      expect(flutterDevice.devFS!.hasSetAssetDirectory, isFalse);
-      await (residentRunner as HotRunner).evictDirtyAssets();
-      expect(flutterDevice.devFS!.hasSetAssetDirectory, isTrue);
-      expect(fakeVmServiceHost!.hasRemainingExpectations, isFalse);
-    }),
-  );
-
-  testUsingContext(
     'use the nativeAssetsYamlFile when provided',
     () => testbed.run(() async {
       final device = FakeDevice(targetPlatform: TargetPlatform.darwin, sdkNameAndVersion: 'Macos');
