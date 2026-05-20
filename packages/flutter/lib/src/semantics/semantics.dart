@@ -4055,6 +4055,48 @@ class SemanticsNode with DiagnosticableTreeMixin {
     return childrenInTraversalOrder;
   }
 
+  List<SemanticsNode> _childrenInHitTestOrder() {
+    if (_children == null) {
+      return const <SemanticsNode>[];
+    }
+    // If the child node is a traversal child, but the current node is
+    // not a traversal parent, it means the child node should be
+    // grafted to be a child of a traversal parent node that has the
+    // same identifier as the child. However, if the traversal parent is not
+    // in the tree, after grafting, the child will not be in the tree as well.
+    // To keep the hit-test tree match the traversal tree, we also skip this
+    // node in childrenInHitTestOrder. Otherwise, the number of nodes in two
+    // trees will be different and user might accidentally hit test a node
+    // that will never be traversed.
+    bool shouldSkipInHitTest(SemanticsNode child) {
+      if (child._isTraversalChild && !_isTraversalParent) {
+        final SemanticsNode? traversalParent =
+            owner!._traversalParentNodes[child.getSemanticsData().traversalChildIdentifier];
+        return traversalParent == null;
+      }
+      return false;
+    }
+
+    final filtered = <SemanticsNode>[];
+    for (final SemanticsNode child in _children!) {
+      if (!shouldSkipInHitTest(child)) {
+        filtered.add(child);
+      }
+    }
+    return filtered;
+  }
+
+  Int32List _childrenIdInHitTestOrder() {
+    final List<SemanticsNode> children = _childrenInHitTestOrder();
+    final childrenInHitTestOrder = Int32List(children.length);
+    var index = 0;
+    for (int i = children.length - 1; i >= 0; i -= 1) {
+      childrenInHitTestOrder[index] = children[i].id;
+      index += 1;
+    }
+    return childrenInHitTestOrder;
+  }
+
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
     assert(_dirty);
     final SemanticsData data = getSemanticsData();
@@ -4093,14 +4135,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       }
     } else {
       childrenInTraversalOrder = _childrenIdInTraversalOrder();
-
-      final int childCount = _children!.length;
-      // _children is sorted in paint order, so we invert it to get the hit test
-      // order.
-      childrenInHitTestOrder = Int32List(childCount);
-      for (int i = childCount - 1; i >= 0; i -= 1) {
-        childrenInHitTestOrder[i] = _children![childCount - i - 1].id;
-      }
+      childrenInHitTestOrder = _childrenIdInHitTestOrder();
     }
 
     Int32List? customSemanticsActionIds;
@@ -4539,7 +4574,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
 
     return switch (childOrder) {
-      DebugSemanticsDumpOrder.inverseHitTest => _children!,
+      DebugSemanticsDumpOrder.inverseHitTest => _childrenInHitTestOrder(),
       DebugSemanticsDumpOrder.traversalOrder => _childrenInTraversalOrder(),
     };
   }
