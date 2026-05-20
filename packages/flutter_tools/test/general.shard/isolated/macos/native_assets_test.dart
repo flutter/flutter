@@ -564,6 +564,17 @@ void main() {
     );
 
     testUsingContext(
+      'parses deployment target from environment when set to a valid version string with multiple dots (mapping macOS 10.x to safe minimum 13)',
+      () {
+        expect(targetMacOSVersion, 13);
+      },
+      overrides: <Type, Generator>{
+        Platform: () =>
+            FakePlatform(environment: <String, String>{'MACOSX_DEPLOYMENT_TARGET': '10.15.7'}),
+      },
+    );
+
+    testUsingContext(
       'falls back to default when environment variable is invalid',
       () {
         expect(targetMacOSVersion, 13);

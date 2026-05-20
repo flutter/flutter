@@ -371,6 +371,17 @@ void main() {
     );
 
     testUsingContext(
+      'parses deployment target from environment when set to a valid version string with multiple dots',
+      () {
+        expect(targetIOSVersion, 16);
+      },
+      overrides: <Type, Generator>{
+        Platform: () =>
+            FakePlatform(environment: <String, String>{'IPHONEOS_DEPLOYMENT_TARGET': '16.4.1'}),
+      },
+    );
+
+    testUsingContext(
       'falls back to default when environment variable is invalid',
       () {
         expect(targetIOSVersion, 13);

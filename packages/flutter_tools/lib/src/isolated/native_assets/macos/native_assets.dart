@@ -7,20 +7,26 @@ import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
+import '../../../darwin/darwin.dart';
 import '../../../globals.dart' as globals;
 import '../native_assets.dart';
 import 'native_assets_host.dart';
 
-/// Fetch minimum macOS version dynamically from build environment or fallback to safety/compatibility default.
+/// Fetch minimum macOS version dynamically from build environment or fallback to FlutterDarwinPlatform's default.
 int get targetMacOSVersion {
   final String? envVersion = globals.platform.environment['MACOSX_DEPLOYMENT_TARGET'];
   if (envVersion != null) {
-    final double? parsed = double.tryParse(envVersion);
+    final String majorString = envVersion.split('.').first;
+    final int? parsed = int.tryParse(majorString);
     if (parsed != null) {
-      return parsed.toInt();
+      // If the target major version is 10 (macOS 10.x), compile with a safe minimum target of 13.
+      // Passing 10 would cause the compiler to target macOS 10.0 (Cheetah, from 2001), which
+      // lacks support for modern features like ARC, weak references, and modern APIs, causing compilation crashes.
+      return parsed == 10 ? 13 : parsed;
     }
   }
-  return 13;
+  final int defaultMajor = FlutterDarwinPlatform.macos.deploymentTarget().major;
+  return defaultMajor == 10 ? 13 : defaultMajor;
 }
 
 /// Extract the [Architecture] from a [DarwinArch].

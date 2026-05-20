@@ -16,9 +16,10 @@ import '../native_assets.dart';
 int get targetIOSVersion {
   final String? envVersion = globals.platform.environment['IPHONEOS_DEPLOYMENT_TARGET'];
   if (envVersion != null) {
-    final double? parsed = double.tryParse(envVersion);
+    final String majorString = envVersion.split('.').first;
+    final int? parsed = int.tryParse(majorString);
     if (parsed != null) {
-      return parsed.toInt();
+      return parsed;
     }
   }
   return FlutterDarwinPlatform.ios.deploymentTarget().major;
