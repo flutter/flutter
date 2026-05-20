@@ -1050,12 +1050,19 @@ void main() {
     // waiting to be adopted by its parent.
     final controller = OverlayPortalController()..show();
     const overlayKey = Key('overlay-child');
+    late final OverlayEntry overlayEntry;
+    addTearDown(
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
+    );
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
+            overlayEntry = OverlayEntry(
               builder: (BuildContext context) {
                 return Table(
                   children: <TableRow>[
