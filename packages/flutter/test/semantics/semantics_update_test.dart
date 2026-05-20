@@ -302,7 +302,7 @@ void main() {
       SemanticsUpdateBuilderSpy.observations.clear();
       handle.dispose();
     },
-    skip: kIsWeb,
+    skip: kIsWeb, // intended: the web engine handles the tree grafting itself.
   );
 
   testWidgets('Semantics update removes detached OverlayPortal traversal child', (
