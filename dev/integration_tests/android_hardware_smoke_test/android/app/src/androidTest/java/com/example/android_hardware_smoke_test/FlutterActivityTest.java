@@ -15,6 +15,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,7 +54,13 @@ public class FlutterActivityTest
       // Send a message to the flutter app telling it which test state to enter.
       // Place the reply into the future.
       Log.d(TAG, "Sending '"+testName+"' on message channel");
-      activity.messageChannel.send(testName, future::complete);
+      try {
+        JSONObject message = new JSONObject();
+        message.put("testName", testName);
+        activity.messageChannel.send(message, reply -> future.complete((String) reply));
+      } catch (JSONException e) {
+        future.completeExceptionally(e);
+      }
     });
 
 

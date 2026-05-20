@@ -1,7 +1,7 @@
+// ignore_for_file: avoid_print, use_key_in_widget_constructors, type_init_formals, no_leading_underscores_for_local_identifiers
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'dart:io' show File;
@@ -34,14 +34,16 @@ class MyWidget extends StatefulWidget {
 }
 
 class _MyState extends State<MyWidget> {
-  final channel = BasicMessageChannel<String>(
+  final channel = BasicMessageChannel<dynamic>(
     'com.example.android_hardware_smoke_test/test_channel',
-    StringCodec(),
+    const JSONMessageCodec(),
   );
 
   String _message = "Waiting for message...";
 
-  Future<String> handler(testName) {
+  Future<dynamic> handler(dynamic message) {
+    final String? testName =
+        (message as Map<dynamic, dynamic>?)?['testName'] as String?;
     Completer<String> completer = Completer<String>();
     setState(() {
       _message = testName ?? "Empty message";
@@ -49,7 +51,7 @@ class _MyState extends State<MyWidget> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // autoUpdateGoldenFiles = true;
-      _compareGolden(testName, completer);
+      _compareGolden(testName ?? "unknown", completer);
     }, debugLabel: 'Rendered $testName');
 
     return completer.future;

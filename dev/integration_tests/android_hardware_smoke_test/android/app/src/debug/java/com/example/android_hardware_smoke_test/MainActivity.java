@@ -6,12 +6,12 @@ import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.BasicMessageChannel;
-import io.flutter.plugin.common.StringCodec;
+import io.flutter.plugin.common.JSONMessageCodec;
 
 public class MainActivity extends FlutterActivity {
   private static final String TAG = "MainActivity";
   static final String CHANNEL_NAME = "com.example.android_hardware_smoke_test/test_channel";
-  public BasicMessageChannel<String> messageChannel = null;
+  public BasicMessageChannel<Object> messageChannel = null;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -21,9 +21,9 @@ public class MainActivity extends FlutterActivity {
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
     super.configureFlutterEngine(flutterEngine);
 
-    this.messageChannel = new BasicMessageChannel<String>(
+    this.messageChannel = new BasicMessageChannel<Object>(
         flutterEngine.getDartExecutor().getBinaryMessenger(),
         CHANNEL_NAME,
-        StringCodec.INSTANCE);
+        JSONMessageCodec.INSTANCE);
   }
 }
