@@ -1844,6 +1844,18 @@ void main() {
     );
     expect(tester.getSize(find.byKey(key)), Size.zero);
   });
+
+  testWidgets('Offstage does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Offstage(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(Offstage)), Size.zero);
+  });
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
