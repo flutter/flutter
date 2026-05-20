@@ -60,11 +60,16 @@ Future<Stream<String>> startWidgetPreview({
   ], workingDirectory: tempDir.path);
 
   addTearDown(() async {
-    try {
+    if (platform.isWindows) {
+      try {
+        processManager.runSync(<String>['taskkill', '/F', '/T', '/PID', '${process.pid}']);
+      } on Object catch (_) {
+        process.kill();
+      }
+      await process.exitCode;
+    } else {
       process.kill();
       await process.exitCode;
-    } finally {
-      killChildProcesses(process.pid);
     }
   });
 
