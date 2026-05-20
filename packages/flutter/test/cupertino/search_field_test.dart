@@ -951,7 +951,7 @@ void main() {
   testWidgets('No crash when widget is disposed while a fade update is pending', (
     WidgetTester tester,
   ) async {
-    bool showSearchField = true;
+    var showSearchField = true;
     late StateSetter stateSetter;
 
     await tester.pumpWidget(
