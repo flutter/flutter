@@ -3517,15 +3517,11 @@ double _inspectorHitArea(RenderObject object) {
 }
 
 ModalRoute<Object?>? _inspectorScopeRouteForHits(List<RenderObject> hits) {
-  ModalRoute<Object?>? currentRoute;
   for (final RenderObject hit in hits) {
     final ModalRoute<Object?>? route = _modalRouteForInspectorRenderObject(hit);
     if (route?.isCurrent ?? false) {
-      currentRoute = route;
+      return route;
     }
-  }
-  if (currentRoute != null) {
-    return currentRoute;
   }
 
   // When multiple modal routes are hit (e.g. scaffold behind a bottom sheet),

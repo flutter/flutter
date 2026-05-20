@@ -3315,6 +3315,102 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(candidates, contains(sheetRender));
     });
 
+    testWidgets('inspector selection scopes to nested navigator inside overlay route', (
+      WidgetTester tester,
+    ) async {
+      WidgetInspectorService.instance.selection.clear();
+
+      final GlobalKey innerTextKey = GlobalKey();
+
+      Widget exitWidgetSelectionButtonBuilder(
+        BuildContext context, {
+        required VoidCallback onPressed,
+        required String semanticsLabel,
+        required GlobalKey key,
+      }) {
+        return SizedBox(key: key);
+      }
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: WidgetInspector(
+            exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+            moveExitWidgetSelectionButtonBuilder: null,
+            tapBehaviorButtonBuilder: null,
+            child: Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return PageRouteBuilder<void>(
+                  settings: settings,
+                  pageBuilder: (BuildContext context, Animation<double> a, Animation<double> b) {
+                    return Column(
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push<void>(
+                              PageRouteBuilder<void>(
+                                pageBuilder:
+                                    (
+                                      BuildContext overlayContext,
+                                      Animation<double> a,
+                                      Animation<double> b,
+                                    ) {
+                                      return SizedBox(
+                                        width: 300,
+                                        height: 300,
+                                        child: Navigator(
+                                          onGenerateRoute: (RouteSettings settings) {
+                                            return PageRouteBuilder<void>(
+                                              settings: settings,
+                                              pageBuilder:
+                                                  (
+                                                    BuildContext navContext,
+                                                    Animation<double> a,
+                                                    Animation<double> b,
+                                                  ) {
+                                                    return Center(
+                                                      child: Text(
+                                                        'nested inner',
+                                                        key: innerTextKey,
+                                                        textDirection: TextDirection.ltr,
+                                                      ),
+                                                    );
+                                                  },
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    },
+                              ),
+                            );
+                          },
+                          child: const Text('open overlay', textDirection: TextDirection.ltr),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open overlay'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      WidgetInspectorService.instance.isSelectMode = true;
+      await tester.tap(find.byKey(innerTextKey), warnIfMissed: false);
+      await tester.pump();
+
+      final RenderObject innerRender = tester.renderObject<RenderObject>(
+        find.byKey(innerTextKey),
+      );
+      final List<RenderObject> candidates =
+          WidgetInspectorService.instance.selection.candidates;
+      expect(candidates, contains(innerRender));
+    });
+
     testWidgets('setSelection clears stale overlay candidates', (WidgetTester tester) async {
       await pumpWidgetTreeWithABC(tester);
       final Element elementA = findElementABC('a');
