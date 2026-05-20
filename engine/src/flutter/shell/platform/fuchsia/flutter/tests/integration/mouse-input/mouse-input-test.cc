@@ -75,8 +75,7 @@ constexpr auto kMouseInputListener = "mouse_input_listener";
 constexpr auto kMouseInputListenerRef = ChildRef{kMouseInputListener};
 constexpr auto kMouseInputView = "mouse-input-view";
 constexpr auto kMouseInputViewRef = ChildRef{kMouseInputView};
-constexpr auto kMouseInputViewUrl =
-    "fuchsia-pkg://fuchsia.com/mouse-input-view#meta/mouse-input-view.cm";
+constexpr auto kMouseInputViewUrl = "mouse-input-view#meta/mouse-input-view.cm";
 
 struct Position {
   double x = 0.0;
