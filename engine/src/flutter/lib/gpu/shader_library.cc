@@ -362,7 +362,7 @@ std::string ShaderLibrary::ReloadFromAsset(
 
   std::unique_ptr<fml::Mapping> data = asset_manager->GetAsMapping(name);
   if (data == nullptr) {
-    return std::string("Asset '") + name + std::string("' not found.");
+    return "Asset '" + name + "' not found.";
   }
   return ReloadFromFlatbuffer(backend_type, std::move(data));
 }
