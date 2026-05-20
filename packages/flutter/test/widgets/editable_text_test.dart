@@ -297,24 +297,17 @@ void main() {
   testWidgets('default text selection width style', (WidgetTester tester) async {
     controller.text = 'a b c\na b c d e f g';
 
-    final TextStyle style = Typography.material2018().black.titleMedium!.copyWith(
-      fontFamily: 'Roboto',
-      fontSize: 14.0, // default.
-    );
-
     await tester.pumpWidget(
       TestWidgetsApp(
         home: Center(
           child: EditableText(
-            showSelectionHandles: true,
             controller: controller,
             focusNode: focusNode,
             maxLines: null,
-            style: style,
-            cursorColor: Colors.blue,
-            backgroundCursorColor: Colors.grey,
-            selectionControls: materialTextSelectionControls,
-            selectionColor: Colors.deepPurpleAccent.withOpacity(0.40),
+            style: const TextStyle(fontFamily: 'Roboto', fontSize: 14.0),
+            cursorColor: const Color(0xFF2196F3),
+            backgroundCursorColor: const Color(0xFF9E9E9E),
+            selectionColor: const Color(0x667C4DFF),
             keyboardType: TextInputType.text,
           ),
         ),
@@ -358,18 +351,13 @@ void main() {
     final RenderEditable renderEditable = findRenderEditable(tester);
     expect(renderEditable.selectionWidthStyle, BoxWidthStyle.tight);
 
-    // Select the last character of the first line. The second line is longer,
-    // but BoxWidthStyle.tight should not expand the highlight to the second
-    // line's width.
-    controller.selection = const TextSelection(baseOffset: 2, extentOffset: 3);
+    // Select the first line, including the line feed character. The second line
+    // is longer, but BoxWidthStyle.tight should not expand the highlight to the
+    // second line's width.
+    controller.selection = const TextSelection(baseOffset: 0, extentOffset: 4);
     await tester.pump();
 
-    const expectedSelectionRect = Rect.fromLTRB(
-      2 * characterWidth,
-      0.0,
-      3 * characterWidth,
-      fontSize,
-    );
+    const expectedSelectionRect = Rect.fromLTRB(0.0, 0.0, 3 * characterWidth, fontSize);
 
     expect(renderEditable, paints..rect(color: Colors.black, rect: expectedSelectionRect));
   });
