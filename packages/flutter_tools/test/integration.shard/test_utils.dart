@@ -63,6 +63,19 @@ Future<void> getPackages(String folder) async {
   }
 }
 
+/// Surgically and recursively terminates all descendant processes spawned by [parentPid] on Windows.
+///
+/// This is necessary on Windows because `Process.kill()` maps to `TerminateProcess`,
+/// which instantly terminates the parent process without executing its registered
+/// shutdown/cleanup hooks or propagating termination to its child processes.
+///
+/// As a result, grandchild processes (like the spawned `dart language-server`)
+/// get orphaned, keep running in the background, and maintain active directory/file locks
+/// on the temp directories, causing subsequent tests to fail on `PathAccessException` and
+/// semantic analysis errors during directory deletion in `tearDown`.
+///
+/// This helper recursively kills the entire process tree starting from [parentPid] to ensure
+/// zero leaked processes and file locks.
 void killChildProcesses(int parentPid) {
   if (platform.isWindows) {
     try {
