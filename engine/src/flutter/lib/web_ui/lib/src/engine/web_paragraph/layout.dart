@@ -70,6 +70,10 @@ class TextLayout {
     // Wrapping text into lines is required on every layout.
     wrapText(width);
     formatLines(width);
+
+    // TODO(jlavrova): Optimize. If lines are the same as the previous layout, we don't need to
+    // clear the paint cache.
+    paragraph.clearPaintCache();
   }
 
   void calculateStrutMetrics() {
@@ -195,8 +199,7 @@ class TextLayout {
     // It's exactly how it's implemented in SkParagraph
     // but it only makes sense if we have one line
     paragraph.alphabeticBaseline = lines.first.fontBoundingBoxAscent;
-    paragraph.ideographicBaseline =
-        lines.first.fontBoundingBoxAscent + lines.first.fontBoundingBoxDescent;
+    paragraph.ideographicBaseline = lines.first.height;
   }
 
   double addLine(
@@ -520,7 +523,7 @@ class TextLayout {
               .getTextRangeSelectionInBlock(block, intersect)
               .translate(
                 block.shiftFromLineStart, // We do not use baseline for placeholder
-                block.rawFontBoundingBoxAscent,
+                block.multipliedFontBoundingBoxAscent,
               );
         }
         // Now we need to recalculate the rects
@@ -531,9 +534,9 @@ class TextLayout {
                 firstRect.top +
                 line.advance.top +
                 line.fontBoundingBoxAscent -
-                block.rawFontBoundingBoxAscent;
-            bottom = top + block.rawHeight;
-            assert((block.advance.height - (bottom - top).abs() < epsilon));
+                block.multipliedFontBoundingBoxAscent;
+            bottom = top + block.multipliedHeight;
+            assert((block.multipliedHeight - (bottom - top).abs() < epsilon));
           case ui.BoxHeightStyle.max:
             top = firstRect.top + line.advance.top;
             bottom = firstRect.top + line.advance.bottom;
@@ -1077,15 +1080,24 @@ class PlaceholderCluster extends WebCluster {
 abstract class LineBlock {
   LineBlock(this.span, this._bidiLevel, this.clusterRange, this.textRange, this.shiftFromLineStart);
 
-  double get _heightMultiplier;
+  double? get _styleHeight;
 
-  double get rawHeight => rawFontBoundingBoxAscent + rawFontBoundingBoxDescent;
+  double get _heightMultiplier {
+    if (_styleHeight == null) {
+      return 1.0;
+    }
+    return (_styleHeight! * span.style.fontSize!) / _rawHeight;
+  }
 
+  double get _rawHeight => rawFontBoundingBoxAscent + rawFontBoundingBoxDescent;
+
+  // TODO(jlavrova): Make this private and don't use it anywhere outside this class.
   double get rawFontBoundingBoxAscent => span.fontBoundingBoxAscent;
 
+  // TODO(jlavrova): Make this private and don't use it anywhere outside this class.
   double get rawFontBoundingBoxDescent => span.fontBoundingBoxDescent;
 
-  double get multipliedHeight => rawHeight * _heightMultiplier;
+  double get multipliedHeight => _rawHeight * _heightMultiplier;
 
   double get multipliedFontBoundingBoxAscent => rawFontBoundingBoxAscent * _heightMultiplier;
 
@@ -1142,8 +1154,7 @@ class TextBlock extends LineBlock {
   double spanShiftFromLineStart;
 
   @override
-  // TODO(jlavrova): Why are we defaulting to 1.0? In Chrome, the default line-height is `1.2` most of the time.
-  double get _heightMultiplier => style.height == null ? 1.0 : style.height!;
+  double? get _styleHeight => style.height;
 
   int get visualClusterStart => isLtr ? clusterRange.start : clusterRange.end - 1;
   int get visualClusterEnd => isLtr ? clusterRange.end : clusterRange.start - 1;
@@ -1195,7 +1206,7 @@ class PlaceholderBlock extends LineBlock {
   final double spanShiftFromLineStart;
 
   @override
-  double get _heightMultiplier => 1.0;
+  double? get _styleHeight => span.style.height;
 
   void calculatePlaceholderTop(double lineAscent, double lineDescent) {
     double baselineAdjustment = 0;
