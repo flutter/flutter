@@ -7,11 +7,21 @@ import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
+import '../../../globals.dart' as globals;
 import '../native_assets.dart';
 import 'native_assets_host.dart';
 
-// TODO(dcharkes): Fetch minimum MacOS version from somewhere. https://github.com/flutter/flutter/issues/145104
-const targetMacOSVersion = 13;
+// Fetch minimum macOS version dynamically from build environment or fallback to safety/compatibility default.
+int get targetMacOSVersion {
+  final String? envVersion = globals.platform.environment['MACOSX_DEPLOYMENT_TARGET'];
+  if (envVersion != null) {
+    final double? parsed = double.tryParse(envVersion);
+    if (parsed != null) {
+      return parsed.toInt();
+    }
+  }
+  return 13;
+}
 
 /// Extract the [Architecture] from a [DarwinArch].
 Architecture getNativeMacOSArchitecture(DarwinArch darwinArch) {

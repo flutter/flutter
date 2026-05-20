@@ -338,4 +338,48 @@ void main() {
       Stdio: () => FakeStdio(),
     },
   );
+
+  group('targetIOSVersion', () {
+    testUsingContext(
+      'defaults to FlutterDarwinPlatform.ios.deploymentTarget().major when environment variable is not set',
+      () {
+        expect(targetIOSVersion, 13);
+      },
+      overrides: <Type, Generator>{Platform: () => FakePlatform(environment: <String, String>{})},
+    );
+
+    testUsingContext(
+      'parses deployment target from environment when set to a valid integer',
+      () {
+        expect(targetIOSVersion, 15);
+      },
+      overrides: <Type, Generator>{
+        Platform: () =>
+            FakePlatform(environment: <String, String>{'IPHONEOS_DEPLOYMENT_TARGET': '15'}),
+      },
+    );
+
+    testUsingContext(
+      'parses deployment target from environment when set to a valid double',
+      () {
+        expect(targetIOSVersion, 16);
+      },
+      overrides: <Type, Generator>{
+        Platform: () =>
+            FakePlatform(environment: <String, String>{'IPHONEOS_DEPLOYMENT_TARGET': '16.4'}),
+      },
+    );
+
+    testUsingContext(
+      'falls back to default when environment variable is invalid',
+      () {
+        expect(targetIOSVersion, 13);
+      },
+      overrides: <Type, Generator>{
+        Platform: () => FakePlatform(
+          environment: <String, String>{'IPHONEOS_DEPLOYMENT_TARGET': 'invalid_version'},
+        ),
+      },
+    );
+  });
 }

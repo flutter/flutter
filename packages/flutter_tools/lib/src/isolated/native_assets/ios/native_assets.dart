@@ -7,11 +7,22 @@ import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
+import '../../../darwin/darwin.dart';
+import '../../../globals.dart' as globals;
 import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
 
-// TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
-const targetIOSVersion = 13;
+// Fetch minimum iOS version dynamically from build environment or fallback to FlutterDarwinPlatform's default.
+int get targetIOSVersion {
+  final String? envVersion = globals.platform.environment['IPHONEOS_DEPLOYMENT_TARGET'];
+  if (envVersion != null) {
+    final double? parsed = double.tryParse(envVersion);
+    if (parsed != null) {
+      return parsed.toInt();
+    }
+  }
+  return FlutterDarwinPlatform.ios.deploymentTarget().major;
+}
 
 IOSSdk getIOSSdk(EnvironmentType environmentType) {
   return switch (environmentType) {
