@@ -77,10 +77,7 @@ Widget myNewPreview() => Container();
       );
       await reloadSub.cancel();
 
-      final DTDResponse result = await dtdConnection.call(
-        'Lsp',
-        'dart/workspace/getFlutterWidgetPreviews',
-      );
+      final DTDResponse result = await getPreviews(dtdConnection);
       final FlutterWidgetPreviews previews = FlutterWidgetPreviews.fromJson(
         result.result['result']! as Map<String, Object?>,
       );
@@ -128,10 +125,7 @@ Widget myRemovePreview() => Container();
       );
       await initReloadSub.cancel();
 
-      DTDResponse result = await dtdConnection.call(
-        'Lsp',
-        'dart/workspace/getFlutterWidgetPreviews',
-      );
+      DTDResponse result = await getPreviews(dtdConnection);
       FlutterWidgetPreviews previews = FlutterWidgetPreviews.fromJson(
         result.result['result']! as Map<String, Object?>,
       );
@@ -154,7 +148,7 @@ Widget myRemovePreview() => Container();
       );
       await deleteReloadSub.cancel();
 
-      result = await dtdConnection.call('Lsp', 'dart/workspace/getFlutterWidgetPreviews');
+      result = await getPreviews(dtdConnection);
       previews = FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
       if (previews.previews.isNotEmpty) {
         throw StateError('Preview was still detected after deletion!');
@@ -200,10 +194,7 @@ Widget myModifyPreview() => Container();
       );
       await initReloadSub.cancel();
 
-      DTDResponse result = await dtdConnection.call(
-        'Lsp',
-        'dart/workspace/getFlutterWidgetPreviews',
-      );
+      DTDResponse result = await getPreviews(dtdConnection);
       FlutterWidgetPreviews previews = FlutterWidgetPreviews.fromJson(
         result.result['result']! as Map<String, Object?>,
       );
@@ -232,7 +223,7 @@ Widget myModifyPreview() => Container();
       );
       await modifyReloadSub.cancel();
 
-      result = await dtdConnection.call('Lsp', 'dart/workspace/getFlutterWidgetPreviews');
+      result = await getPreviews(dtdConnection);
       previews = FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
       if (previews.previews.isEmpty) {
         throw StateError('Preview was lost after modification!');
@@ -295,10 +286,7 @@ Widget myPartPreview() => Container();
       );
       await reloadSub.cancel();
 
-      final DTDResponse result = await dtdConnection.call(
-        'Lsp',
-        'dart/workspace/getFlutterWidgetPreviews',
-      );
+      final DTDResponse result = await getPreviews(dtdConnection);
       final FlutterWidgetPreviews previews = FlutterWidgetPreviews.fromJson(
         result.result['result']! as Map<String, Object?>,
       );
