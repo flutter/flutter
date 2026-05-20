@@ -53,13 +53,32 @@ private const val FAKE_PROJECT_ROOT_DIR = "/fake/root/dir"
 // are updated in DependencyVersionChecker.kt
 // These values should also match the flutter create template values.
 // In //packages/flutter_tools/lib/src/android/gradle_utils.dart
-private const val SUPPORTED_GRADLE_VERSION: String = "8.14"
+private const val SUPPORTED_GRADLE_VERSION: String = "9.1.0"
 private val SUPPORTED_JAVA_VERSION: JavaVersion = JavaVersion.VERSION_17
-private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(8, 11, 1)
-private const val SUPPORTED_KGP_VERSION: String = "2.2.20"
+private val SUPPORTED_AGP_VERSION: AndroidPluginVersion = AndroidPluginVersion(9, 0, 1)
+private const val SUPPORTED_KGP_VERSION: String = "2.3.20"
 private val SUPPORTED_SDK_VERSION: MinSdkVersion = MinSdkVersion("release", 30)
 
 class DependencyVersionCheckerTest {
+    @Test
+    fun `Template versions are considered supported`() {
+        val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions()
+
+        val mockExtraPropertiesExtension = mockProject.extra
+        every { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) } returns Unit
+        val mockLogger = mockProject.logger
+        every { mockLogger.error(any()) } returns Unit
+        every { mockLogger.warn(any()) } returns Unit
+
+        DependencyVersionChecker.checkDependencyVersions(mockProject)
+
+        // Verify that no error or warning messages were logged.
+        verify(exactly = 0) { mockLogger.error(any()) }
+        verify(exactly = 0) { mockLogger.warn(any()) }
+        // Verify that the project was not marked as being out of support range.
+        verify { mockExtraPropertiesExtension.set(OUT_OF_SUPPORT_RANGE_PROPERTY, false) }
+    }
+
     @Test
     fun `AGP version in error range results in DependencyValidationException`() {
         val exampleErrorAgpVersion = AndroidPluginVersion(8, 5, 0)

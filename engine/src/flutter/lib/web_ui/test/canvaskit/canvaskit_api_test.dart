@@ -1284,8 +1284,8 @@ void _canvasTests() {
         Float32List(3)
           ..[0] = shadowX
           ..[1] = shadowY
-          ..[2] = devicePixelRatio * kLightHeight,
-        devicePixelRatio * kLightRadius,
+          ..[2] = devicePixelRatio * 600.0,
+        devicePixelRatio * 800.0,
         tonalColors.ambient,
         tonalColors.spot,
         flags.toDouble(),

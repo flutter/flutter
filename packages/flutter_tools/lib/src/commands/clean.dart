@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 
-import '../../src/macos/xcode.dart';
 import '../base/common.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
@@ -12,6 +11,7 @@ import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
@@ -104,7 +104,7 @@ class CleanCommand extends FlutterCommand {
     try {
       final XcodeProjectInterpreter xcodeProjectInterpreter = globals.xcodeProjectInterpreter!;
       final XcodeProjectInfo projectInfo = (await xcodeProjectInterpreter.getInfo(
-        xcodeWorkspace.parent.path,
+        xcodeProject,
         buildDirectory: globals.fs.directory(xcodeProject.darwinPlatform.buildDirectory()),
       ))!;
       if (argResults?.wasParsed('scheme') ?? false) {
@@ -116,6 +116,7 @@ class CleanCommand extends FlutterCommand {
           throwToolExit('Scheme "$scheme" not found in ${projectInfo.schemes}');
         }
         await xcodeProjectInterpreter.cleanWorkspace(
+          xcodeProject,
           xcodeWorkspace.path,
           scheme,
           verbose: _verbose,
@@ -124,6 +125,7 @@ class CleanCommand extends FlutterCommand {
       } else {
         for (final String scheme in projectInfo.schemes) {
           await xcodeProjectInterpreter.cleanWorkspace(
+            xcodeProject,
             xcodeWorkspace.path,
             scheme,
             verbose: _verbose,

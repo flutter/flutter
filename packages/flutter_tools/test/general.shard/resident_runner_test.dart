@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -248,7 +247,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -316,7 +315,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -369,7 +368,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -424,12 +423,7 @@ void main() {
           listViews,
           listViews,
           listViews,
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{
-              'isolates': <Object>[fakeUnpausedIsolate.toJson()],
-            })!.toJson(),
-          ),
+          getVm([fakeUnpausedIsolate]),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
             args: <String, Object>{
@@ -482,12 +476,7 @@ void main() {
           listViews,
           listViews,
           listViews,
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{
-              'isolates': <Object>[fakeUnpausedIsolate.toJson()],
-            })!.toJson(),
-          ),
+          getVm([fakeUnpausedIsolate]),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
             args: <String, Object>{
@@ -547,12 +536,7 @@ void main() {
           listViews,
           listViews,
           listViews,
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{
-              'isolates': <Object>[fakeUnpausedIsolate.toJson()],
-            })!.toJson(),
-          ),
+          getVm([fakeUnpausedIsolate]),
           const FakeVmServiceRequest(
             method: kReloadSourcesServiceName,
             args: <String, Object>{
@@ -598,7 +582,7 @@ void main() {
         event.eventData['targetPlatform'],
         getNameForTargetPlatform(TargetPlatform.android_arm),
       );
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -677,7 +661,6 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(),
         ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
-        Usage: () => TestUsage(),
       },
     ),
   );
@@ -703,10 +686,7 @@ void main() {
             },
             jsonResponse: vm_service.Success().toJson(),
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -751,7 +731,7 @@ void main() {
         newEvent.eventData['targetPlatform'],
         getNameForTargetPlatform(TargetPlatform.android_arm),
       );
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -786,10 +766,7 @@ void main() {
             method: 'resume',
             args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -846,10 +823,7 @@ void main() {
             },
             jsonResponse: vm_service.Success().toJson(),
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -881,10 +855,7 @@ void main() {
             },
             jsonResponse: vm_service.Success().toJson(),
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -916,10 +887,7 @@ void main() {
             },
             jsonResponse: vm_service.Success().toJson(),
           ),
-          FakeVmServiceRequest(
-            method: 'getVM',
-            jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
-          ),
+          getVm(),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -988,7 +956,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -2139,6 +2107,48 @@ flutter:
       await (residentRunner as HotRunner).evictDirtyAssets();
       expect(flutterDevice.devFS!.hasSetAssetDirectory, true);
       expect(fakeVmServiceHost!.hasRemainingExpectations, false);
+    }),
+  );
+
+  testUsingContext(
+    'HotRunner evictDirtyAssets correctly finds UI isolate and view ID when multiple views are present and the first view has no isolate',
+    () => testbed.run(() async {
+      final viewWithoutIsolate = FlutterView(id: 'view_empty', uiIsolate: null);
+      final viewWithIsolate = FlutterView(id: 'view_active', uiIsolate: fakeUnpausedIsolate);
+
+      final listMultipleViews = FakeVmServiceRequest(
+        method: kListViewsMethod,
+        jsonResponse: <String, Object>{
+          'views': <Object>[viewWithoutIsolate.toJson(), viewWithIsolate.toJson()],
+        },
+      );
+
+      const setAssetBundlePathForActiveView = FakeVmServiceRequest(
+        method: '_flutter.setAssetBundlePath',
+        args: <String, Object>{
+          'viewId': 'view_active',
+          'assetDirectory': 'build/flutter_assets',
+          'isolateId': '1',
+        },
+      );
+
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listMultipleViews, setAssetBundlePathForActiveView, evict],
+      );
+      residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
+        analytics: fakeAnalytics,
+      );
+
+      (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'asset'};
+
+      expect(flutterDevice.devFS!.hasSetAssetDirectory, isFalse);
+      await (residentRunner as HotRunner).evictDirtyAssets();
+      expect(flutterDevice.devFS!.hasSetAssetDirectory, isTrue);
+      expect(fakeVmServiceHost!.hasRemainingExpectations, isFalse);
     }),
   );
 

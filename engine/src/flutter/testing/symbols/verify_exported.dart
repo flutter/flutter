@@ -52,7 +52,13 @@ void main(List<String> arguments) {
   if (Platform.isLinux) {
     platform = 'linux-x64';
   } else if (Platform.isMacOS) {
-    platform = 'mac-x64';
+    final ProcessResult unameResult = Process.runSync('uname', <String>['-m']);
+    if (unameResult.exitCode != 0) {
+      print('ERROR: failed to execute "uname -m":\n${unameResult.stderr}');
+      exit(1);
+    }
+    final arch = unameResult.stdout.toString().trim() == 'x86_64' ? 'x64' : 'arm64';
+    platform = 'mac-$arch';
   } else {
     throw UnimplementedError('Script only support running on Linux or MacOS.');
   }

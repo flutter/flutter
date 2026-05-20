@@ -8,6 +8,7 @@
 #include "flutter/testing/testing.h"
 #include "impeller/compiler/source_options.h"
 #include "impeller/compiler/types.h"
+#include "impeller/core/shader_types.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
 
 namespace impeller {
@@ -190,6 +191,8 @@ TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferProducesCorrectResult) {
   EXPECT_EQ(mvp->element_size_in_bytes, 64u);
   EXPECT_EQ(mvp->total_size_in_bytes, 64u);
   EXPECT_EQ(mvp->array_elements, 0u);
+  EXPECT_EQ(mvp->vec_size, 4u);
+  EXPECT_EQ(mvp->columns, 4u);
   const auto& color = vert_info->fields[1];
   EXPECT_STREQ(color->name.c_str(), "color");
   EXPECT_EQ(color->type, fb::shaderbundle::UniformDataType::kFloat);
@@ -197,6 +200,8 @@ TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferProducesCorrectResult) {
   EXPECT_EQ(color->element_size_in_bytes, 16u);
   EXPECT_EQ(color->total_size_in_bytes, 16u);
   EXPECT_EQ(color->array_elements, 0u);
+  EXPECT_EQ(color->vec_size, 4u);
+  EXPECT_EQ(color->columns, 1u);
 
   // --------------------------------------------------------------------------
   /// Verify fragment shader.
@@ -212,6 +217,93 @@ TEST(ShaderBundleTest, GenerateShaderBundleFlatbufferProducesCorrectResult) {
 
   // Uniforms.
   ASSERT_EQ(fragment->metal_desktop->inputs.size(), 0u);
+}
+
+TEST(ShaderBundleTest,
+     GenerateShaderBundleFlatbufferReportsSourceFilesAsDependencies) {
+  std::string fixtures_path = flutter::testing::GetFixturesPath();
+  const std::string fragment_path = fixtures_path + "/flutter_gpu_unlit.frag";
+  const std::string vertex_path = fixtures_path + "/flutter_gpu_unlit.vert";
+  std::string config =
+      "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\":\"" +
+      fragment_path +
+      "\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"" +
+      vertex_path + "\"}}";
+
+  SourceOptions options;
+  options.target_platform = TargetPlatform::kRuntimeStageMetal;
+  options.source_language = SourceLanguage::kGLSL;
+
+  std::set<std::string> dependencies;
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
+      GenerateShaderBundleFlatbuffer(config, options, &dependencies);
+  ASSERT_TRUE(bundle.has_value());
+
+  // Every primary source file referenced by the bundle config should
+  // appear in the dependency set, deduplicated across the multiple
+  // target-platform compiles of each shader. The fixtures used here
+  // don't contain `#include` directives, so the dependency set
+  // contains exactly the two source files.
+  EXPECT_NE(dependencies.find(fragment_path), dependencies.end());
+  EXPECT_NE(dependencies.find(vertex_path), dependencies.end());
+}
+
+TEST(ShaderBundleTest,
+     GenerateShaderBundleFlatbufferIgnoresNullDependencyCollector) {
+  // Passing nullptr as the dependency collector is supported and is
+  // the default behaviour for callers that don't need a depfile.
+  std::string fixtures_path = flutter::testing::GetFixturesPath();
+  std::string config =
+      "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"" +
+      fixtures_path +
+      "/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", "
+      "\"file\": \"" +
+      fixtures_path + "/flutter_gpu_unlit.vert\"}}";
+
+  SourceOptions options;
+  options.target_platform = TargetPlatform::kRuntimeStageMetal;
+  options.source_language = SourceLanguage::kGLSL;
+
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
+      GenerateShaderBundleFlatbuffer(config, options, /*out_dependencies=*/
+                                     nullptr);
+  ASSERT_TRUE(bundle.has_value());
+}
+
+TEST(ShaderBundleTest, DeriveShaderFloatTypeFromDimensions) {
+  // Non-float types always map to nullopt.
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kSignedInt, 1, 1), std::nullopt);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kUnsignedInt, 4, 1),
+            std::nullopt);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kBoolean, 1, 1), std::nullopt);
+
+  // Scalar and vector floats (columns == 1).
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 1, 1),
+            ShaderFloatType::kFloat);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 2, 1),
+            ShaderFloatType::kVec2);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 3, 1),
+            ShaderFloatType::kVec3);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 4, 1),
+            ShaderFloatType::kVec4);
+
+  // Square matrices (vec_size == columns).
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 2, 2),
+            ShaderFloatType::kMat2);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 3, 3),
+            ShaderFloatType::kMat3);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 4, 4),
+            ShaderFloatType::kMat4);
+
+  // Non-square matrices and unsupported shapes return nullopt.
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 3, 2), std::nullopt);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 2, 3), std::nullopt);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 5, 1), std::nullopt);
+
+  // Zero values (legacy bundle defaults) map to nullopt.
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 0, 0), std::nullopt);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 0, 1), std::nullopt);
+  EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 1, 0), std::nullopt);
 }
 
 }  // namespace testing
