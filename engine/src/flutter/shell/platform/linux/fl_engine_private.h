@@ -17,6 +17,7 @@
 #include "flutter/shell/platform/linux/fl_text_input_handler.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
+#include "shell/platform/linux/fl_pointer_manager.h"
 
 G_BEGIN_DECLS
 
@@ -283,6 +284,7 @@ void fl_engine_send_window_metrics_event(FlEngine* engine,
  * @scroll_delta_x: x offset of scroll.
  * @scroll_delta_y: y offset of scroll.
  * @buttons: buttons that are pressed.
+ * @device_state: state of the pointer device.
  *
  * Sends a mouse pointer event to the engine.
  */
@@ -295,7 +297,8 @@ void fl_engine_send_mouse_pointer_event(FlEngine* engine,
                                         FlutterPointerDeviceKind device_kind,
                                         double scroll_delta_x,
                                         double scroll_delta_y,
-                                        int64_t buttons);
+                                        int64_t buttons,
+                                        FlPointerDeviceState device_state);
 
 /**
  * fl_engine_send_touch_up_event:
