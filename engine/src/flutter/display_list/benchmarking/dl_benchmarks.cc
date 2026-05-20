@@ -114,8 +114,6 @@ DlPaint GetPaintForRun(unsigned attributes) {
     paint.setStrokeWidth(0.0f);
   } else if (attributes & kWideStroke10) {
     paint.setStrokeWidth(10.0f);
-  } else if (attributes & kWideStroke20) {
-    paint.setStrokeWidth(20.0f);
   } else {
     paint.setStrokeWidth(1.0f);
   }
@@ -1637,16 +1635,12 @@ constexpr int kAAFilledPrimitive =
     kAntiAliasing | kFilledStyle;
 constexpr int kAAHairlinePrimitive =
     kAntiAliasing | kStrokedStyle | kHairlineStroke;
-constexpr int kAAStroked10Primitive =
+constexpr int kAAStroke10Primitive =
     kAntiAliasing | kStrokedStyle | kWideStroke10;
 constexpr int kFilledShadow5Primitive =
     kFilledStyle | kShadow5;
 constexpr int kFilledShadow10Primitive =
     kFilledStyle | kShadow10;
-constexpr int kStroked10Shadow5Primitive =
-    kStrokedStyle | kWideStroke10 | kShadow5;
-constexpr int kStroked20Shadow10Primitive =
-    kStrokedStyle | kWideStroke20 | kShadow10;
 
 #define BENCHMARK_OVERHEAD(FUNC, BACKEND)                                    \
   BENCHMARK_CAPTURE(BM_##FUNC, BACKEND, BackendType::k##BACKEND)             \
@@ -1673,14 +1667,12 @@ constexpr int kStroked20Shadow10Primitive =
 
 #define DRAW_BENCHMARK_PRIMITIVES_LINE(BACKEND)                              \
   DRAW_BENCHMARK_PRIMITIVE(BACKEND, Line, AAHairline)                        \
-  DRAW_BENCHMARK_PRIMITIVE(BACKEND, Line, AAStroked10)                       \
-  DRAW_BENCHMARK_SHADOW_PRIMITIVE(BACKEND, Line, Stroked10Shadow5)           \
-  DRAW_BENCHMARK_SHADOW_PRIMITIVE(BACKEND, Line, Stroked20Shadow10)          \
+  DRAW_BENCHMARK_PRIMITIVE(BACKEND, Line, AAStroke10)                        \
 
 #define DRAW_BENCHMARK_PRIMITIVES_TYPE(BACKEND, TYPE)                        \
   DRAW_BENCHMARK_PRIMITIVE(BACKEND, TYPE, AAFilled)                          \
   DRAW_BENCHMARK_PRIMITIVE(BACKEND, TYPE, AAHairline)                        \
-  DRAW_BENCHMARK_PRIMITIVE(BACKEND, TYPE, AAStroked10)                       \
+  DRAW_BENCHMARK_PRIMITIVE(BACKEND, TYPE, AAStroke10)                        \
   DRAW_BENCHMARK_SHADOW_PRIMITIVE(BACKEND, TYPE, FilledShadow5)              \
   DRAW_BENCHMARK_SHADOW_PRIMITIVE(BACKEND, TYPE, FilledShadow10)             \
 
