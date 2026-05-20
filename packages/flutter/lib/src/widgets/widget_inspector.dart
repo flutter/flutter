@@ -36,6 +36,7 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'icon_data.dart';
 import 'media_query.dart';
+import 'routes.dart';
 import 'service_extensions.dart';
 import 'view.dart';
 
@@ -1609,10 +1610,12 @@ mixin WidgetInspectorService {
   bool setSelection(Object? object, [String? groupName]) {
     switch (object) {
       case Element() when object != selection.currentElement:
+        selection.clearOverlayCandidates();
         selection.currentElement = object;
         _notifyToolsOfSelection(selection.currentElement);
         return true;
       case RenderObject() when object != selection.current:
+        selection.clearOverlayCandidates();
         selection.current = object;
         _notifyToolsOfSelection(selection.current);
         return true;
@@ -3010,7 +3013,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     final RenderObject userRender = ignorePointer.child!;
     final List<RenderObject> selected = hitTest(position, userRender);
 
-    selection.candidates = selected;
+    selection.candidates = _filterInspectorHitCandidatesToModalRouteScope(selected);
   }
 
   void _handlePanDown(DragDownDetails event) {
@@ -3302,6 +3305,18 @@ class InspectorSelection with ChangeNotifier {
     _computeCurrent();
   }
 
+  /// Clears [candidates] without changing [current] or [currentElement].
+  ///
+  /// Used when the selection is updated from DevTools or another tool so stale
+  /// on-device hit-test candidates are not drawn on the overlay.
+  void clearOverlayCandidates() {
+    if (_candidates.isEmpty) {
+      return;
+    }
+    _candidates = <RenderObject>[];
+    _index = 0;
+  }
+
   /// Selected render object typically from the [candidates] list.
   ///
   /// Setting [candidates] or calling [clear] resets the selection.
@@ -3473,6 +3488,98 @@ const Color _kTooltipBackgroundColor = Color.fromARGB(230, 60, 60, 60);
 const Color _kHighlightedRenderObjectFillColor = Color.fromARGB(128, 128, 128, 255);
 const Color _kHighlightedRenderObjectBorderColor = Color.fromARGB(128, 64, 64, 128);
 
+Element? _elementForInspectorRenderObject(RenderObject? object) {
+  final Object? creator = object?.debugCreator;
+  if (creator is DebugCreator) {
+    return creator.element;
+  }
+  return null;
+}
+
+ModalRoute<Object?>? _modalRouteForInspectorRenderObject(RenderObject? object) {
+  final Element? element = _elementForInspectorRenderObject(object);
+  if (element == null) {
+    return null;
+  }
+  return ModalRoute.of<Object?>(element);
+}
+
+bool _inspectorRenderObjectsShareModalRouteScope(RenderObject a, RenderObject b) {
+  return identical(
+    _modalRouteForInspectorRenderObject(a),
+    _modalRouteForInspectorRenderObject(b),
+  );
+}
+
+double _inspectorHitArea(RenderObject object) {
+  final Size size = object.semanticBounds.size;
+  return size.width * size.height;
+}
+
+ModalRoute<Object?>? _inspectorScopeRouteForHits(List<RenderObject> hits) {
+  ModalRoute<Object?>? currentRoute;
+  for (final RenderObject hit in hits) {
+    final ModalRoute<Object?>? route = _modalRouteForInspectorRenderObject(hit);
+    if (route?.isCurrent ?? false) {
+      currentRoute = route;
+    }
+  }
+  if (currentRoute != null) {
+    return currentRoute;
+  }
+
+  // When multiple modal routes are hit (e.g. scaffold behind a bottom sheet),
+  // prefer the route for the most specific (smallest) target.
+  RenderObject? smallestHit;
+  var smallestArea = double.infinity;
+  for (final RenderObject hit in hits) {
+    final ModalRoute<Object?>? route = _modalRouteForInspectorRenderObject(hit);
+    if (route == null) {
+      continue;
+    }
+    final double area = _inspectorHitArea(hit);
+    if (area < smallestArea) {
+      smallestArea = area;
+      smallestHit = hit;
+    }
+  }
+  if (smallestHit != null) {
+    return _modalRouteForInspectorRenderObject(smallestHit);
+  }
+
+  return _modalRouteForInspectorRenderObject(hits.first);
+}
+
+List<RenderObject> _filterInspectorHitCandidatesToModalRouteScope(List<RenderObject> hits) {
+  if (hits.isEmpty) {
+    return hits;
+  }
+
+  // Ignore widgets that belong to offstage modal routes.
+  final List<RenderObject> onstageHits = hits
+      .where((RenderObject hit) {
+        final ModalRoute<Object?>? route = _modalRouteForInspectorRenderObject(hit);
+        return route == null || !route.offstage;
+      })
+      .toList();
+  if (onstageHits.isEmpty) {
+    return onstageHits;
+  }
+
+  final ModalRoute<Object?>? scopeRoute = _inspectorScopeRouteForHits(onstageHits);
+  final List<RenderObject> scopedHits = onstageHits
+      .where(
+        (RenderObject hit) =>
+            identical(_modalRouteForInspectorRenderObject(hit), scopeRoute),
+      )
+      .toList();
+
+  scopedHits.sort(
+    (RenderObject a, RenderObject b) => _inspectorHitArea(a).compareTo(_inspectorHitArea(b)),
+  );
+  return scopedHits;
+}
+
 /// A layer that outlines the selected [RenderObject] and candidate render
 /// objects that also match the last pointer location.
 ///
@@ -3545,7 +3652,8 @@ class _InspectorOverlayLayer extends Layer {
     for (final RenderObject candidate in selection.candidates) {
       if (candidate == selected ||
           !candidate.attached ||
-          !_isInInspectorRenderObjectTree(candidate)) {
+          !_isInInspectorRenderObjectTree(candidate) ||
+          !_inspectorRenderObjectsShareModalRouteScope(candidate, selected)) {
         continue;
       }
       candidates.add(_TransformedRect(candidate, rootRenderObject));
