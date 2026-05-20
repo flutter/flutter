@@ -21,6 +21,9 @@
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/vertex_buffer_builder.h"
 
+// TODO(zanderso): https://github.com/flutter/flutter/issues/127701
+// NOLINTBEGIN(bugprone-unchecked-optional-access)
+
 namespace impeller {
 namespace testing {
 
@@ -80,5 +83,7 @@ TEST_P(RendererGoldenTest, BabysFirstTriangle) {
 
 }  // namespace testing
 }  // namespace impeller
+
+// NOLINTEND(bugprone-unchecked-optional-access)
 
 #endif  // IMPELLER_GOLDEN_TESTS
