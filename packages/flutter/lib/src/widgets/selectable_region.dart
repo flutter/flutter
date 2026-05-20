@@ -1026,10 +1026,10 @@ class SelectableRegionState extends State<SelectableRegion>
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
     _finalizeSelectableRegionStatus();
+    _showToolbar();
     if (defaultTargetPlatform == TargetPlatform.android) {
       _showHandles();
     }
-    _showToolbar();
   }
 
   bool _positionIsOnActiveSelection({required Offset globalPosition}) {
@@ -1849,8 +1849,8 @@ class SelectableRegionState extends State<SelectableRegion>
     clearSelection();
     _selectable?.dispatchSelectionEvent(const SelectAllSelectionEvent());
     if (cause == SelectionChangedCause.toolbar) {
-      _showHandles();
       _showToolbar();
+      _showHandles();
     }
     _updateSelectedContentIfNeeded();
     _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;

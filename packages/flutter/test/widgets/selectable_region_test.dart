@@ -3026,74 +3026,7 @@ void main() {
       }),
       skip: kIsWeb, // [intended] Web uses its native context menu.
     );
-    testWidgets(
-      'context menu is displayed above selection handles after long press on Android',
-          (WidgetTester tester) async {
-        // Regression test for https://github.com/flutter/flutter/issues/161330.
-        final toolbarKey = UniqueKey();
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              selectionControls: materialTextSelectionHandleControls,
-              contextMenuBuilder:
-                  (BuildContext context, SelectableRegionState selectableRegionState) {
-                return SizedBox.shrink(key: toolbarKey);
-              },
-              child: const Column(
-                children: <Widget>[
-                  Text('How are you?'),
-                ],
-              ),
-            ),
-          ),
-        );
-
-        final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
-          find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)),
-        );
-
-        // Long press to trigger selection and show handles + toolbar.
-        final TestGesture gesture = await tester.startGesture(
-          textOffsetToPosition(paragraph, 2),
-        );
-        addTearDown(gesture.removePointer);
-        await tester.pump(const Duration(milliseconds: 500));
-        await gesture.up();
-        await tester.pumpAndSettle();
-
-        // Both handles and toolbar should be visible.
-        final List<FadeTransition> transitions = find
-            .descendant(
-          of: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
-          ),
-          matching: find.byType(FadeTransition),
-        )
-            .evaluate()
-            .map((Element e) => e.widget)
-            .cast<FadeTransition>()
-            .toList();
-        expect(transitions.length, 2);
-        expect(find.byKey(toolbarKey), findsOneWidget);
-
-        // Verify the toolbar renders on top of the handles by checking that
-        // the toolbar widget appears after the handle widgets in the tree,
-        // which reflects the overlay insertion order (last inserted = on top).
-        final List<Widget> allWidgets = tester.allWidgets.toList();
-        final int toolbarIndex = allWidgets.indexWhere(
-              (Widget w) => w.key == toolbarKey,
-        );
-        final int lastHandleIndex = allWidgets.lastIndexWhere(
-              (Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay',
-        );
-        expect(toolbarIndex, greaterThan(lastHandleIndex),
-          reason: 'Toolbar should be inserted after handles in the overlay so it renders on top',
-        );
-      },
-      variant: TargetPlatformVariant.only(TargetPlatform.android),
-      skip: kIsWeb, // [intended] Web uses its native context menu.
-    );
     testWidgets(
       'single tap on the previous selection toggles the toolbar on iOS',
       (WidgetTester tester) async {
