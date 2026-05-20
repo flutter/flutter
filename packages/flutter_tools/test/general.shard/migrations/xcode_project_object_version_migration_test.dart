@@ -44,19 +44,22 @@ void main() {
           lastUpgradeCheck: migratedLastUpgradeCheck,
         ),
       );
-      expect(fakeProject.schemeFile.readAsStringSync(), _schemeFilePart(
-        lastUpgradeVersion: migratedLastUpgradeVersion,
-      ));
+      expect(
+        fakeProject.schemeFile.readAsStringSync(),
+        _schemeFilePart(lastUpgradeVersion: migratedLastUpgradeVersion),
+      );
     });
 
     testWithoutContext('does not update when values are already at target', () async {
-      fakeProject.xcodeProjectInfoFile.writeAsStringSync(_projectFilePart(
-        objectVersion: migratedObjectVersion,
-        lastUpgradeCheck: migratedLastUpgradeCheck,
-      ));
-      fakeProject.schemeFile.writeAsStringSync(_schemeFilePart(
-        lastUpgradeVersion: migratedLastUpgradeVersion,
-      ));
+      fakeProject.xcodeProjectInfoFile.writeAsStringSync(
+        _projectFilePart(
+          objectVersion: migratedObjectVersion,
+          lastUpgradeCheck: migratedLastUpgradeCheck,
+        ),
+      );
+      fakeProject.schemeFile.writeAsStringSync(
+        _schemeFilePart(lastUpgradeVersion: migratedLastUpgradeVersion),
+      );
       final migration = XcodeProjectObjectVersionMigration(fakeProject, testLogger);
 
       await migration.migrate();
@@ -69,19 +72,17 @@ void main() {
           lastUpgradeCheck: migratedLastUpgradeCheck,
         ),
       );
-      expect(fakeProject.schemeFile.readAsStringSync(), _schemeFilePart(
-        lastUpgradeVersion: migratedLastUpgradeVersion,
-      ));
+      expect(
+        fakeProject.schemeFile.readAsStringSync(),
+        _schemeFilePart(lastUpgradeVersion: migratedLastUpgradeVersion),
+      );
     });
 
     testWithoutContext('does not update when values are above target', () async {
-      fakeProject.xcodeProjectInfoFile.writeAsStringSync(_projectFilePart(
-        objectVersion: '9999',
-        lastUpgradeCheck: '99999',
-      ));
-      fakeProject.schemeFile.writeAsStringSync(_schemeFilePart(
-        lastUpgradeVersion: '99999',
-      ));
+      fakeProject.xcodeProjectInfoFile.writeAsStringSync(
+        _projectFilePart(objectVersion: '9999', lastUpgradeCheck: '99999'),
+      );
+      fakeProject.schemeFile.writeAsStringSync(_schemeFilePart(lastUpgradeVersion: '99999'));
       final migration = XcodeProjectObjectVersionMigration(fakeProject, testLogger);
 
       await migration.migrate();
@@ -89,19 +90,18 @@ void main() {
       expect(testLogger.statusText, isEmpty);
       expect(
         fakeProject.xcodeProjectInfoFile.readAsStringSync(),
-        _projectFilePart(
-          objectVersion: '9999',
-          lastUpgradeCheck: '99999',
-        ),
+        _projectFilePart(objectVersion: '9999', lastUpgradeCheck: '99999'),
       );
-      expect(fakeProject.schemeFile.readAsStringSync(), _schemeFilePart(
-        lastUpgradeVersion: '99999',
-      ));
+      expect(
+        fakeProject.schemeFile.readAsStringSync(),
+        _schemeFilePart(lastUpgradeVersion: '99999'),
+      );
     });
   });
 }
 
-String _projectFilePart({required String objectVersion, required String lastUpgradeCheck}) => '''
+String _projectFilePart({required String objectVersion, required String lastUpgradeCheck}) =>
+    '''
 {
 \tobjectVersion = $objectVersion;
 }
@@ -109,7 +109,8 @@ String _projectFilePart({required String objectVersion, required String lastUpgr
 \t\t\t\tLastUpgradeCheck = $lastUpgradeCheck;
 ''';
 
-String _schemeFilePart({required String lastUpgradeVersion}) => '''
+String _schemeFilePart({required String lastUpgradeVersion}) =>
+    '''
 <Scheme
    LastUpgradeVersion = "$lastUpgradeVersion"
    version = "1.3">
