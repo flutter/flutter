@@ -209,7 +209,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         cache: globals.cache,
         flutterVersion: globals.flutterVersion,
       ),
-      ChannelCommand(verboseHelp: verboseHelp),
+      ChannelCommand(git: globals.git, verboseHelp: verboseHelp),
       CleanCommand(verbose: verbose),
       ConfigCommand(verboseHelp: verboseHelp),
       CustomDevicesCommand(
@@ -227,7 +227,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
       DebugAdapterCommand(verboseHelp: verboseHelp),
       DevicesCommand(verboseHelp: verboseHelp),
       DoctorCommand(verbose: verbose),
-      DowngradeCommand(verboseHelp: verboseHelp, logger: globals.logger),
+      DowngradeCommand(git: globals.git, verboseHelp: verboseHelp, logger: globals.logger),
       DriveCommand(
         verboseHelp: verboseHelp,
         fileSystem: globals.fs,
@@ -276,7 +276,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         artifacts: globals.artifacts!,
         terminal: globals.terminal,
       ),
-      UpgradeCommand(verboseHelp: verboseHelp),
+      UpgradeCommand(git: globals.git, verboseHelp: verboseHelp),
       SymbolizeCommand(stdio: globals.stdio, fileSystem: globals.fs),
       // Development-only commands. These are always hidden,
       IdeConfigCommand(),

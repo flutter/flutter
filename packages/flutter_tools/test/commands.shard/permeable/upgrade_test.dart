@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -7,11 +9,13 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -42,8 +46,10 @@ void main() {
     );
 
     setUp(() {
-      fakeCommandRunner = FakeUpgradeCommandRunner()..clock = SystemClock.fixed(jan12026);
-      realCommandRunner = UpgradeCommandRunner()
+      final lazyGit = LazyGit(() => globals.git);
+      fakeCommandRunner = FakeUpgradeCommandRunner(git: lazyGit)
+        ..clock = SystemClock.fixed(jan12026);
+      realCommandRunner = UpgradeCommandRunner(git: lazyGit)
         ..workingDirectory = getFlutterRoot()
         ..clock = SystemClock.fixed(jan12026);
       processManager = FakeProcessManager.empty();
@@ -633,7 +639,7 @@ void main() {
         );
 
         final CommandRunner<void> runner = createTestCommandRunner(
-          UpgradeCommand(verboseHelp: false, commandRunner: fakeCommandRunner),
+          UpgradeCommand(git: globals.git, verboseHelp: false, commandRunner: fakeCommandRunner),
         );
 
         fakeCommandRunner.alreadyUpToDate = false;
@@ -854,6 +860,7 @@ void main() {
           () async {
             fakeProcessManager = FakeProcessManager.any();
             final upgradeCommand = UpgradeCommand(
+              git: globals.git,
               verboseHelp: false,
               commandRunner: fakeCommandRunner,
             );
@@ -884,6 +891,7 @@ void main() {
 }
 
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
+  FakeUpgradeCommandRunner({required super.git});
   bool willHaveUncommittedChanges = false;
   bool alreadyUpToDate = false;
 
@@ -903,4 +911,87 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
 
   @override
   Future<void> runDoctor() async {}
+}
+
+class LazyGit implements Git {
+  LazyGit(this._gitGetter);
+  final Git Function() _gitGetter;
+
+  @override
+  RunResult logSync(List<String> arguments, {String? workingDirectory}) {
+    return _gitGetter().logSync(arguments, workingDirectory: workingDirectory);
+  }
+
+  @override
+  Future<RunResult> run(
+    List<String> arguments, {
+    bool throwOnError = false,
+    RunResultChecker? allowedFailures,
+    String? workingDirectory,
+    bool allowReentrantFlutter = false,
+    Map<String, String>? environment,
+    Duration? timeout,
+    int timeoutRetries = 0,
+  }) {
+    return _gitGetter().run(
+      arguments,
+      throwOnError: throwOnError,
+      allowedFailures: allowedFailures,
+      workingDirectory: workingDirectory,
+      allowReentrantFlutter: allowReentrantFlutter,
+      environment: environment,
+      timeout: timeout,
+      timeoutRetries: timeoutRetries,
+    );
+  }
+
+  @override
+  RunResult runSync(
+    List<String> arguments, {
+    bool throwOnError = false,
+    bool verboseExceptions = false,
+    RunResultChecker? allowedFailures,
+    bool hideStdout = false,
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool allowReentrantFlutter = false,
+    Encoding encoding = systemEncoding,
+  }) {
+    return _gitGetter().runSync(
+      arguments,
+      throwOnError: throwOnError,
+      verboseExceptions: verboseExceptions,
+      allowedFailures: allowedFailures,
+      hideStdout: hideStdout,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      allowReentrantFlutter: allowReentrantFlutter,
+      encoding: encoding,
+    );
+  }
+
+  @override
+  Future<int> stream(
+    List<String> arguments, {
+    String? workingDirectory,
+    bool allowReentrantFlutter = false,
+    String prefix = '',
+    bool trace = false,
+    RegExp? filter,
+    RegExp? stdoutErrorMatcher,
+    StringConverter? mapFunction,
+    Map<String, String>? environment,
+  }) {
+    return _gitGetter().stream(
+      arguments,
+      workingDirectory: workingDirectory,
+      allowReentrantFlutter: allowReentrantFlutter,
+      prefix: prefix,
+      trace: trace,
+      filter: filter,
+      stdoutErrorMatcher: stdoutErrorMatcher,
+      mapFunction: mapFunction,
+      environment: environment,
+    );
+  }
 }

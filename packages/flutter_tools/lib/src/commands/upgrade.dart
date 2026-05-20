@@ -12,6 +12,7 @@ import '../base/time.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
+import '../git.dart';
 import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
 import '../project.dart';
@@ -23,8 +24,9 @@ import 'channel.dart';
 const _flutterInstallDocs = 'https://flutter.dev/setup';
 
 class UpgradeCommand extends FlutterCommand {
-  UpgradeCommand({required bool verboseHelp, UpgradeCommandRunner? commandRunner})
-    : _commandRunner = commandRunner ?? UpgradeCommandRunner() {
+  UpgradeCommand({required bool verboseHelp, required Git git, UpgradeCommandRunner? commandRunner})
+    : _git = git,
+      _commandRunner = commandRunner ?? UpgradeCommandRunner(git: git) {
     argParser
       ..addFlag(
         'force',
@@ -64,6 +66,7 @@ class UpgradeCommand extends FlutterCommand {
   }
 
   final UpgradeCommandRunner _commandRunner;
+  final Git _git;
 
   @override
   final name = 'upgrade';
@@ -100,7 +103,7 @@ class UpgradeCommand extends FlutterCommand {
       testFlow: stringArg('working-directory') != null,
       gitTagVersion: GitTagVersion.determine(
         globals.platform,
-        git: globals.git,
+        git: _git,
         workingDirectory: _commandRunner.workingDirectory,
       ),
       flutterVersion: stringArg('working-directory') == null
@@ -108,7 +111,7 @@ class UpgradeCommand extends FlutterCommand {
           : FlutterVersion(
               flutterRoot: _commandRunner.workingDirectory!,
               fs: globals.fs,
-              git: globals.git,
+              git: _git,
             ),
       verifyOnly: boolArg('verify-only'),
     );
@@ -136,6 +139,9 @@ final class _SecondHalf implements UpgradePhase {
 
 @visibleForTesting
 class UpgradeCommandRunner {
+  UpgradeCommandRunner({required Git git}) : _git = git;
+
+  final Git _git;
   String? workingDirectory; // set in runCommand() above
 
   @visibleForTesting
@@ -234,7 +240,7 @@ class UpgradeCommandRunner {
       );
     }
     recordState(flutterVersion);
-    await ChannelCommand.upgradeChannel(flutterVersion);
+    await ChannelCommand.upgradeChannel(flutterVersion, _git);
     globals.printStatus(
       'Upgrading Flutter to ${upstreamVersion.frameworkVersion} from ${flutterVersion.frameworkVersion} in $workingDirectory...',
     );
@@ -309,7 +315,7 @@ class UpgradeCommandRunner {
   @visibleForTesting
   Future<bool> hasUncommittedChanges(FlutterVersion version) async {
     try {
-      final RunResult result = await globals.git.run(
+      final RunResult result = await _git.run(
         ['status', '-s'],
         throwOnError: true,
         workingDirectory: workingDirectory,
@@ -359,13 +365,9 @@ class UpgradeCommandRunner {
     String revision;
     try {
       // Fetch upstream branch's commits and tags
-      await globals.git.run(
-        ['fetch', '--tags'],
-        throwOnError: true,
-        workingDirectory: workingDirectory,
-      );
+      await _git.run(['fetch', '--tags'], throwOnError: true, workingDirectory: workingDirectory);
       // Get the latest commit revision of the upstream
-      final RunResult result = await globals.git.run(
+      final RunResult result = await _git.run(
         ['rev-parse', '--verify', kGitTrackingUpstream],
         throwOnError: true,
         workingDirectory: workingDirectory,
@@ -408,7 +410,7 @@ class UpgradeCommandRunner {
       flutterRoot: workingDirectory!,
       frameworkRevision: revision,
       fs: globals.fs,
-      git: globals.git,
+      git: _git,
     );
   }
 
@@ -420,7 +422,7 @@ class UpgradeCommandRunner {
   @visibleForTesting
   Future<void> attemptReset(String newRevision) async {
     try {
-      await globals.git.run(
+      await _git.run(
         ['reset', '--hard', newRevision],
         throwOnError: true,
         workingDirectory: workingDirectory,

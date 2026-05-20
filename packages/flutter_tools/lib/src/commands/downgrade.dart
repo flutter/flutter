@@ -42,6 +42,7 @@ String downgradePositionalArgumentErrorMessage(List<String> args) {
 /// the command would fail since there was no previously recorded stable version.
 class DowngradeCommand extends FlutterCommand {
   DowngradeCommand({
+    required Git git,
     bool verboseHelp = false,
     PersistentToolState? persistentToolState,
     required Logger logger,
@@ -55,7 +56,7 @@ class DowngradeCommand extends FlutterCommand {
        _stdio = stdio,
        _logger = logger,
        _fileSystem = fileSystem,
-       _git = globals.git {
+       _git = git {
     argParser.addOption(
       'working-directory',
       hide: !verboseHelp,

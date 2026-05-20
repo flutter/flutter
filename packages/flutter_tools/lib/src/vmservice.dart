@@ -18,6 +18,7 @@ import 'base/utils.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'device.dart';
+import 'git.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
 import 'version.dart';
@@ -157,23 +158,26 @@ Future<io.WebSocket> _defaultOpenChannel(
 
 /// Override `VMServiceConnector` in [context] to return a different
 /// [vm_service.VmService] from [connectToVmService] (used by tests).
-typedef VMServiceConnector = Future<FlutterVmService> Function(
-  Uri httpUri, {
-  ReloadSources? reloadSources,
-  Restart? restart,
-  CompileExpression? compileExpression,
-  FlutterProject? flutterProject,
-  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-  io.CompressionOptions compression,
-  Device? device,
-  required Logger logger,
-});
+typedef VMServiceConnector =
+    Future<FlutterVmService> Function(
+      Uri httpUri, {
+      Git? git,
+      ReloadSources? reloadSources,
+      Restart? restart,
+      CompileExpression? compileExpression,
+      FlutterProject? flutterProject,
+      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      io.CompressionOptions compression,
+      Device? device,
+      required Logger logger,
+    });
 
 /// Set up the VM Service client by attaching services for each of the provided
 /// callbacks.
 ///
 /// All parameters besides [vmService] may be null.
 Future<vm_service.VmService> setUpVmService({
+  Git? git,
   ReloadSources? reloadSources,
   Restart? restart,
   CompileExpression? compileExpression,
@@ -182,6 +186,7 @@ Future<vm_service.VmService> setUpVmService({
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   required vm_service.VmService vmService,
 }) async {
+  final Git useGit = git ?? context.get<Git>()!;
   // Each service registration requires a request to the attached VM service. Since the
   // order of these requests does not matter, store each future in a list and await
   // all at the end of this method.
@@ -221,7 +226,7 @@ Future<vm_service.VmService> setUpVmService({
   ) async {
     final FlutterVersion version =
         context.get<FlutterVersion>() ??
-        FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: globals.git);
+        FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: useGit);
     final Map<String, Object> versionJson = version.toJson();
     versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
     versionJson['engineRevisionShort'] = version.engineRevisionShort;
@@ -341,6 +346,7 @@ Future<vm_service.VmService> setUpVmService({
 /// See: https://github.com/dart-lang/sdk/commit/df8bf384eb815cf38450cb50a0f4b62230fba217
 Future<FlutterVmService> connectToVmService(
   Uri httpUri, {
+  Git? git,
   ReloadSources? reloadSources,
   Restart? restart,
   CompileExpression? compileExpression,
@@ -353,6 +359,7 @@ Future<FlutterVmService> connectToVmService(
   final VMServiceConnector connector = context.get<VMServiceConnector>() ?? _connect;
   return connector(
     httpUri,
+    git: git,
     reloadSources: reloadSources,
     restart: restart,
     compileExpression: compileExpression,
@@ -385,6 +392,7 @@ Future<vm_service.VmService> createVmServiceDelegate(
 
 Future<FlutterVmService> _connect(
   Uri httpUri, {
+  Git? git,
   ReloadSources? reloadSources,
   Restart? restart,
   CompileExpression? compileExpression,
@@ -402,6 +410,7 @@ Future<FlutterVmService> _connect(
   );
 
   final vm_service.VmService service = await setUpVmService(
+    git: git,
     reloadSources: reloadSources,
     restart: restart,
     compileExpression: compileExpression,

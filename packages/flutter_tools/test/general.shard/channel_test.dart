@@ -41,7 +41,7 @@ void main() {
               '  origin/beta',
         ),
       ]);
-      final command = ChannelCommand();
+      final command = ChannelCommand(git: globals.git);
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(args);
       expect(testLogger.errorText, hasLength(0));
@@ -54,7 +54,7 @@ void main() {
     testUsingContext(
       'usage (--help) explains how to use channel',
       () async {
-        final command = ChannelCommand();
+        final command = ChannelCommand(git: globals.git);
 
         // Required because otherwise command.usage fails as it is not hooked up.
         createTestCommandRunner(command);
@@ -106,7 +106,7 @@ void main() {
     testUsingContext(
       'sorted by stability',
       () async {
-        final command = ChannelCommand();
+        final command = ChannelCommand(git: globals.git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         fakeProcessManager.addCommand(
@@ -212,7 +212,7 @@ void main() {
           ),
         );
 
-        final command = ChannelCommand();
+        final command = ChannelCommand(git: globals.git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel']);
 
@@ -245,7 +245,7 @@ void main() {
           ),
         );
 
-        final command = ChannelCommand();
+        final command = ChannelCommand(git: globals.git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel']);
 
@@ -282,7 +282,7 @@ void main() {
           ),
         );
 
-        final command = ChannelCommand();
+        final command = ChannelCommand(git: globals.git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel']);
 
@@ -316,7 +316,7 @@ void main() {
           ),
         ]);
 
-        final command = ChannelCommand();
+        final command = ChannelCommand(git: globals.git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel', 'beta']);
 
@@ -362,7 +362,7 @@ void main() {
           ),
         ]);
 
-        final command = ChannelCommand();
+        final command = ChannelCommand(git: globals.git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel', 'beta']);
 
@@ -416,7 +416,7 @@ void main() {
         }
       ''');
 
-        final command = ChannelCommand();
+        final command = ChannelCommand(git: globals.git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel', 'beta']);
 

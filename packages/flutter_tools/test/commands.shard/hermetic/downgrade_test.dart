@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/downgrade.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:test/fake.dart';
 
@@ -46,6 +47,7 @@ void main() {
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"invalid"}');
     final command = DowngradeCommand(
+      git: globals.git,
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
@@ -72,6 +74,7 @@ void main() {
       () async {
         final fakeFlutterVersion = FakeFlutterVersion();
         final command = DowngradeCommand(
+          git: globals.git,
           persistentToolState: PersistentToolState.test(
             directory: fileSystem.currentDirectory,
             logger: bufferLogger,
@@ -103,6 +106,7 @@ void main() {
       FakeCommand(command: ['git', 'describe', '--tags', 'abcd'], stdout: 'v1.2.3'),
     ]);
     final command = DowngradeCommand(
+      git: globals.git,
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
@@ -137,6 +141,7 @@ Channel "master" was previously on: v1.2.3.''',
       FakeCommand(command: ['git', 'describe', '--tags', 'invalid'], exitCode: 1),
     ]);
     final command = DowngradeCommand(
+      git: globals.git,
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
@@ -167,6 +172,7 @@ Channel "master" was previously on: v1.2.3.''',
           .childFile('.flutter_tool_state')
           .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
       final command = DowngradeCommand(
+        git: globals.git,
         persistentToolState: PersistentToolState.test(
           directory: fileSystem.currentDirectory,
           logger: bufferLogger,
@@ -200,6 +206,7 @@ Channel "master" was previously on: v1.2.3.''',
           .childFile('.flutter_tool_state')
           .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
       final command = DowngradeCommand(
+        git: globals.git,
         persistentToolState: PersistentToolState.test(
           directory: fileSystem.currentDirectory,
           logger: bufferLogger,
@@ -233,6 +240,7 @@ Channel "master" was previously on: v1.2.3.''',
           .childFile('.flutter_tool_state')
           .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
       final command = DowngradeCommand(
+        git: globals.git,
         persistentToolState: PersistentToolState.test(
           directory: fileSystem.currentDirectory,
           logger: bufferLogger,
@@ -262,6 +270,7 @@ Channel "master" was previously on: v1.2.3.''',
       FakeCommand(command: ['git', 'checkout', 'master', '--']),
     ]);
     final command = DowngradeCommand(
+      git: globals.git,
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
