@@ -4069,6 +4069,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     // trees will be different and user might accidentally hit test a node
     // that will never be traversed.
     bool shouldSkipInHitTest(SemanticsNode child) {
+      if (kIsWeb) {
+        return false;
+      }
       if (child._isTraversalChild && !_isTraversalParent) {
         final SemanticsNode? traversalParent =
             owner!._traversalParentNodes[child.getSemanticsData().traversalChildIdentifier];
