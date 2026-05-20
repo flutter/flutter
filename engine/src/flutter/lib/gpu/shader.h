@@ -135,6 +135,12 @@ extern int InternalFlutterGpu_Shader_GetUniformMemberOffset(
     Dart_Handle struct_name_handle,
     Dart_Handle member_name_handle);
 
+// Test-only: exposes the per-shader dirty bit so tests can assert that
+// reload deduplication keeps unchanged shaders clean.
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Shader_DebugIsDirty(
+    flutter::gpu::Shader* wrapper);
+
 }  // extern "C"
 
 #endif  // FLUTTER_LIB_GPU_SHADER_H_

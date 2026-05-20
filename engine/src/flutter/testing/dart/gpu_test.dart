@@ -1034,6 +1034,25 @@ void main() async {
     );
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  // A shader bundle is the unit of asset distribution: a one-shader edit
+  // ships a whole new bundle. `Shader::ResetFrom` dedupes by code-byte
+  // comparison so unchanged shaders stay clean across reload and skip the
+  // eviction / re-registration triple. Reload here re-fetches identical
+  // bytes; every shader in the bundle must remain clean.
+  test('reinitialize with unchanged bytes leaves shaders clean', () async {
+    final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
+    final gpu.Shader vertex = library['UnlitVertex']!;
+    final gpu.Shader fragment = library['UnlitFragment']!;
+    // Force registration so the dirty bit is observable as false before reload.
+    gpu.gpuContext.createRenderPipeline(vertex, fragment);
+    expect(vertex.debugIsDirty, isFalse);
+    expect(fragment.debugIsDirty, isFalse);
+
+    gpu.ShaderLibrary.reinitialize('test.shaderbundle');
+    expect(vertex.debugIsDirty, isFalse, reason: 'identical bytes should not flip dirty');
+    expect(fragment.debugIsDirty, isFalse, reason: 'identical bytes should not flip dirty');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   // After reloading a shader bundle in place, pipelines built with the
   // freshly-fetched shaders must still draw correctly. Exercises the
   // dirty-bit + eviction path in `Shader::RegisterSync`: the second pipeline

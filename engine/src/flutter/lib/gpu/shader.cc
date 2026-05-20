@@ -4,6 +4,7 @@
 
 #include "flutter/lib/gpu/shader.h"
 
+#include <cstring>
 #include <utility>
 
 #include "flutter/lib/gpu/formats.h"
@@ -83,6 +84,20 @@ void Shader::SetClean() {
 }
 
 void Shader::ResetFrom(Shader& other) {
+  // Compare the compiled bytes against the freshly-parsed mapping before
+  // moving anything. A shader bundle is the unit of asset distribution, so
+  // editing one shader recompiles the whole bundle; without this dedupe
+  // every unchanged shader in the bundle would still be evicted and
+  // re-registered on reload. Code-byte equality is sufficient because
+  // impellerc derives reflection metadata (uniforms, inputs, layouts)
+  // deterministically from the compiled output.
+  const bool code_changed =
+      code_mapping_ == nullptr || other.code_mapping_ == nullptr ||
+      code_mapping_->GetSize() != other.code_mapping_->GetSize() ||
+      std::memcmp(code_mapping_->GetMapping(),
+                  other.code_mapping_->GetMapping(),
+                  code_mapping_->GetSize()) != 0;
+
   // library_id_ is intentionally preserved: the scoped registry key
   // (library_id + entrypoint) must remain stable across reloads so the
   // eviction triple-call in `RegisterSync` lands at the same slot.
@@ -94,7 +109,9 @@ void Shader::ResetFrom(Shader& other) {
   uniform_structs_ = std::move(other.uniform_structs_);
   uniform_textures_ = std::move(other.uniform_textures_);
   descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
-  is_dirty_ = true;
+  if (code_changed) {
+    is_dirty_ = true;
+  }
 }
 
 bool Shader::RegisterSync(Context& context) {
@@ -209,4 +226,8 @@ int InternalFlutterGpu_Shader_GetUniformMemberOffset(
   }
 
   return member->offset;
+}
+
+bool InternalFlutterGpu_Shader_DebugIsDirty(flutter::gpu::Shader* wrapper) {
+  return wrapper->IsDirty();
 }
