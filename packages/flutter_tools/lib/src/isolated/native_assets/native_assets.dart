@@ -201,6 +201,7 @@ runFlutterSpecificBuildHooks({
       dataAssetsAccumulator: dataAssets,
     );
   }
+  _checkForDuplicateAssets(codeAssets: codeAssets, dataAssets: dataAssets, targets: targets);
   globals.logger.printTrace('Running build hooks for $targetString done.');
   return (
     results: results,
@@ -353,17 +354,7 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
     }
   }
 
-  if (dataAssets.map((DataAsset asset) => asset.id).toSet().length != dataAssets.length) {
-    throwToolExit(
-      'Found duplicates in the data assets: ${dataAssets.map((DataAsset e) => e.id).toList()} while compiling for ${targets.map((AssetBuildTarget e) => e.targetString).toList()}.',
-    );
-  }
-
-  if (codeAssets.toSet().length != codeAssets.length) {
-    throwToolExit(
-      'Found duplicates in the code assets: ${codeAssets.map((FlutterCodeAsset e) => e.codeAsset.id).toList()} while compiling for ${targets.map((AssetBuildTarget e) => e.targetString).toList()}.',
-    );
-  }
+  _checkForDuplicateAssets(codeAssets: codeAssets, dataAssets: dataAssets, targets: targets);
 
   globals.logger.printTrace('Running link hooks for $targetString done.');
 
@@ -417,17 +408,7 @@ DartHooksResult combineBuildAndLinkResults({
     dependencies.addAll(buildResult.dependencies);
   }
 
-  if (dataAssets.map((DataAsset asset) => asset.id).toSet().length != dataAssets.length) {
-    throwToolExit(
-      'Found duplicates in the data assets: ${dataAssets.map((DataAsset e) => e.id).toList()} while compiling for ${targets.map((AssetBuildTarget e) => e.targetString).toList()}.',
-    );
-  }
-
-  if (codeAssets.toSet().length != codeAssets.length) {
-    throwToolExit(
-      'Found duplicates in the code assets: ${codeAssets.map((FlutterCodeAsset e) => e.codeAsset.id).toList()} while compiling for ${targets.map((AssetBuildTarget e) => e.targetString).toList()}.',
-    );
-  }
+  _checkForDuplicateAssets(codeAssets: codeAssets, dataAssets: dataAssets, targets: targets);
 
   return DartHooksResult(
     buildStart: linkResult.buildStart,
@@ -440,16 +421,14 @@ DartHooksResult combineBuildAndLinkResults({
 
 /// Extracts and categorizes code and data assets from [encodedAssets] for the given [target].
 ///
-/// The extracted assets and files to be bundled are appended to the optional accumulator lists:
+/// The extracted assets are appended to the optional accumulator lists:
 /// - [codeAssetsAccumulator]: Collects matching [FlutterCodeAsset]s.
 /// - [dataAssetsAccumulator]: Collects matching [DataAsset]s.
-/// - [bundledFilesAccumulator]: Collects the file URIs of dynamic libraries and data assets that need to be bundled.
 void _decodeAssets({
   required Iterable<EncodedAsset> encodedAssets,
   required AssetBuildTarget target,
   List<FlutterCodeAsset>? codeAssetsAccumulator,
   List<DataAsset>? dataAssetsAccumulator,
-  List<Uri>? bundledFilesAccumulator,
 }) {
   if (target is CodeAssetTarget) {
     final Iterable<FlutterCodeAsset> filteredCode = _filterCodeAssets(
@@ -457,20 +436,40 @@ void _decodeAssets({
       Target.fromArchitectureAndOS(target.architecture, target.os),
     );
     codeAssetsAccumulator?.addAll(filteredCode);
-    if (bundledFilesAccumulator != null) {
-      for (final code in filteredCode) {
-        if (code.codeAsset.linkMode is DynamicLoadingBundled) {
-          bundledFilesAccumulator.add(code.codeAsset.file!);
-        }
-      }
-    }
   }
   final Iterable<DataAsset> filteredData = _filterDataAssets(encodedAssets);
   dataAssetsAccumulator?.addAll(filteredData);
-  if (bundledFilesAccumulator != null) {
-    for (final asset in filteredData) {
-      bundledFilesAccumulator.add(asset.file);
+}
+
+void _checkForDuplicateAssets({
+  required List<FlutterCodeAsset> codeAssets,
+  required List<DataAsset> dataAssets,
+  required List<AssetBuildTarget> targets,
+}) {
+  final dataAssetIds = <String>{};
+  final duplicateDataAssetIds = <String>{};
+  for (final asset in dataAssets) {
+    if (!dataAssetIds.add(asset.id)) {
+      duplicateDataAssetIds.add(asset.id);
     }
+  }
+  if (duplicateDataAssetIds.isNotEmpty) {
+    throwToolExit(
+      'Found duplicates in the data assets: ${duplicateDataAssetIds.toList()} while compiling for ${targets.map((AssetBuildTarget e) => e.targetString).toList()}.',
+    );
+  }
+
+  final codeAssetIds = <(String, Target)>{};
+  final duplicateCodeAssetIds = <String>{};
+  for (final asset in codeAssets) {
+    if (!codeAssetIds.add((asset.codeAsset.id, asset.target))) {
+      duplicateCodeAssetIds.add(asset.codeAsset.id);
+    }
+  }
+  if (duplicateCodeAssetIds.isNotEmpty) {
+    throwToolExit(
+      'Found duplicates in the code assets: ${duplicateCodeAssetIds.toList()} while compiling for ${targets.map((AssetBuildTarget e) => e.targetString).toList()}.',
+    );
   }
 }
 

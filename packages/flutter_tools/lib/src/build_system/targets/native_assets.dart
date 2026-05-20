@@ -80,12 +80,13 @@ class BuildHooks extends Target {
       dartBuildOutputJsonFile.writeAsStringSync(encodedResults);
     }
 
+    final Set<Uri> buildDependencies = buildResult.dependencies.toSet();
     final depfile = Depfile(
       <File>[for (final Uri dependency in buildResult.dependencies) fileSystem.file(dependency)],
       <File>[
         fileSystem.file(dartBuildOutputJsonFile),
         for (final Uri uri in buildResult.filesToBeBundled)
-          if (!buildResult.dependencies.contains(uri)) fileSystem.file(uri),
+          if (!buildDependencies.contains(uri)) fileSystem.file(uri),
       ],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
@@ -106,7 +107,6 @@ class BuildHooks extends Target {
     // If different packages are resolved, different native assets might need to
     // be built.
     Source.pattern('{WORKSPACE_DIR}/.dart_tool/package_config.json'),
-    // TODO(mosuem): Should consume resources.json. https://github.com/flutter/flutter/issues/146263
   ];
 
   @override
@@ -248,14 +248,21 @@ class LinkHooks extends Target {
     if (!dartHookResultJsonFile.parent.existsSync()) {
       dartHookResultJsonFile.parent.createSync(recursive: true);
     }
+    // TODO(dcharkes): The build system uses file hashing to determine if
+    // targets need to be rerun. Because combinedResult.toJson() includes
+    // transient build_start and build_end times, this file is rewritten on
+    // every build causing downstream targets to rerun. We should remove
+    // build_start and build_end from the JSON representation entirely in a
+    // future PR.
     dartHookResultJsonFile.writeAsStringSync(json.encode(combinedResult.toJson()));
+    final Set<Uri> linkDependencies = linkResult.dependencies.toSet();
     final depfile = Depfile(
       <File>[for (final Uri dependency in linkResult.dependencies) fileSystem.file(dependency)],
       <File>[
         fileSystem.file(dartHookResultJsonFile),
         if (linkingEnabled)
           for (final Uri uri in linkResult.filesToBeBundled)
-            if (!linkResult.dependencies.contains(uri)) fileSystem.file(uri),
+            if (!linkDependencies.contains(uri)) fileSystem.file(uri),
       ],
     );
     final File outputDepfile = environment.buildDir.childFile(depFilename);
