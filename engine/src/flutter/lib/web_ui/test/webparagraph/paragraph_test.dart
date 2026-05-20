@@ -1211,4 +1211,41 @@ Future<void> testMain() async {
     await matchGoldenFile('web_paragraph.zoom_05.png', region: region);
     EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
   });
+
+  test('paint overflows', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+
+    // canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final lightbluePaint = Paint()..color = const Color(0xFFDDEEFF);
+    final redPaint = Paint()..color = const Color(0xFFFF0000);
+
+    final paragraphStyle = ParagraphStyle();
+    final style = TextStyle(
+      foreground: blackPaint,
+      background: lightbluePaint,
+      fontSize: 40,
+      fontFamily: 'sans-serif',
+      fontStyle: FontStyle.italic,
+    );
+
+    final builder = ParagraphBuilder(paragraphStyle);
+    builder.pushStyle(style);
+    builder.addText('Top shelf');
+    builder.pop();
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+    final double fullWidth = paragraph.maxIntrinsicWidth;
+    paragraph.layout(ParagraphConstraints(width: fullWidth));
+    const offset = Offset(20, 20);
+    canvas.drawParagraph(paragraph, offset);
+
+    final paragraphRect = Rect.fromLTWH(offset.dx, offset.dy, fullWidth, paragraph.height);
+    canvas.drawRect(paragraphRect, redPaint..style = PaintingStyle.stroke);
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph.paint_overflows.png', region: paragraphRect.inflate(20.0));
+  });
 }
