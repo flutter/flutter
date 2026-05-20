@@ -57,6 +57,7 @@ public class FlutterActivityTest
       try {
         JSONObject message = new JSONObject();
         message.put("testName", testName);
+        message.put("performAppSideGoldenCompare", true);
         activity.messageChannel.send(message, reply -> future.complete((String) reply));
       } catch (JSONException e) {
         future.completeExceptionally(e);

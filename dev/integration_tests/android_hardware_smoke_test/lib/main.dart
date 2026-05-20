@@ -42,8 +42,10 @@ class _MyState extends State<MyWidget> {
   String _message = "Waiting for message...";
 
   Future<dynamic> handler(dynamic message) {
-    final String? testName =
-        (message as Map<dynamic, dynamic>?)?['testName'] as String?;
+    final Map<dynamic, dynamic>? messageMap = message as Map<dynamic, dynamic>?;
+    final String? testName = messageMap?['testName'] as String?;
+    final bool performAppSideGoldenCompare =
+        messageMap?['performAppSideGoldenCompare'] as bool? ?? true;
     Completer<String> completer = Completer<String>();
     setState(() {
       _message = testName ?? "Empty message";
@@ -51,7 +53,12 @@ class _MyState extends State<MyWidget> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // autoUpdateGoldenFiles = true;
-      _compareGolden(testName ?? "unknown", completer);
+      if (performAppSideGoldenCompare) {
+        _compareGolden(testName ?? "unknown", completer);
+      } else {
+        print("App handler: skipping app-side golden comparison for $testName");
+        completer.complete("Rendered $testName");
+      }
     }, debugLabel: 'Rendered $testName');
 
     return completer.future;

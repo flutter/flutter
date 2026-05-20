@@ -65,6 +65,7 @@ void main() {
           'com.example.android_hardware_smoke_test/test_channel';
       final message = const JSONMessageCodec().encodeMessage(<String, dynamic>{
         'testName': 'fooTest',
+        'performAppSideGoldenCompare': false,
       });
       final replyFuture = tester.binding.defaultBinaryMessenger
           .handlePlatformMessage(channelName, message, null);
@@ -87,9 +88,10 @@ void main() {
         findsOneWidget,
       );
 
-      // TODO: skip app-side testing when running with driver, using JSON instead of String for message channel
-      // TODO: integrate with LUCI in a similar way to android_engine_test
-      // await expectLater(find.byKey(app.targetKey), matchesGoldenFile('integration_test/goldens/fooTest.png'));
+      await expectLater(
+        find.byKey(app.targetKey),
+        matchesGoldenFile('integration_test/goldens/fooTest.png'),
+      );
     });
   });
 }
