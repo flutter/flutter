@@ -1175,14 +1175,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.5"
-  usage:
-    dependency: transitive
-    description:
-      name: usage
-      sha256: "0bdbde65a6e710343d02a56552eeaefd20b735e04bfb6b3ee025b6b22e8d0e15"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.1"
   uuid:
     dependency: transitive
     description:
