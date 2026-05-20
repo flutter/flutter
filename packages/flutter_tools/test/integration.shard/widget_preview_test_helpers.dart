@@ -61,15 +61,6 @@ Future<Stream<String>> startWidgetPreview({
 
   addTearDown(() async {
     try {
-      process.stdin.writeln('q');
-      await process.exitCode.timeout(
-        const Duration(seconds: 5),
-        onTimeout: () {
-          process.kill();
-          return process.exitCode;
-        },
-      );
-    } on Object catch (_) {
       process.kill();
       await process.exitCode;
     } finally {
