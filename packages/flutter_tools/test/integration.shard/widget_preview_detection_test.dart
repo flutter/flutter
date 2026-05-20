@@ -35,7 +35,6 @@ void main() {
   tearDown(() async {
     await dtdLauncher?.dispose();
     dtdLauncher = null;
-    killLeakedAnalysisServers();
     tryToDelete(tempDir);
   });
 

@@ -43,7 +43,6 @@ void main() {
     await devtoolsLauncher?.close();
     devtoolsLauncher = null;
     dtdLauncher = null;
-    killLeakedAnalysisServers();
     tryToDelete(tempDir);
   });
 

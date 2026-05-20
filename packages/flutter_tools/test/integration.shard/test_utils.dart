@@ -63,13 +63,13 @@ Future<void> getPackages(String folder) async {
   }
 }
 
-void killLeakedAnalysisServers() {
+void killChildProcesses(int parentPid) {
   if (platform.isWindows) {
     try {
       processManager.runSync(<String>[
         'powershell',
         '-Command',
-        'Get-CimInstance Win32_Process -Filter "CommandLine like \'%language-server%\'" | ForEach-Object { \$_.Terminate() }',
+        'function Kill-Tree(\$id) { Get-CimInstance Win32_Process -Filter "ParentProcessId = \$id" | ForEach-Object { Kill-Tree \$_.ProcessId; \$_.Terminate() } }; Kill-Tree $parentPid',
       ]);
     } on Object catch (_) {
       // Ignore any errors during process termination.

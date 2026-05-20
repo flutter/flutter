@@ -72,6 +72,8 @@ Future<Stream<String>> startWidgetPreview({
     } on Object catch (_) {
       process.kill();
       await process.exitCode;
+    } finally {
+      killChildProcesses(process.pid);
     }
   });
 
