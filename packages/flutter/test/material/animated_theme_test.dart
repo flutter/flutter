@@ -48,26 +48,18 @@ void main() {
     await tester.pump(_additionalDelay);
     expect(mockOnEndFunction.called, 1);
 
-    await _tapTest2and3(tester, widgetFinder, mockOnEndFunction);
+    await tester.tap(widgetFinder);
+
+    await tester.pump();
+    await tester.pump(_animationDuration + _additionalDelay);
+    expect(mockOnEndFunction.called, 2);
+
+    await tester.tap(widgetFinder);
+
+    await tester.pump();
+    await tester.pump(_animationDuration + _additionalDelay);
+    expect(mockOnEndFunction.called, 3);
   });
-}
-
-Future<void> _tapTest2and3(
-  WidgetTester tester,
-  Finder widgetFinder,
-  _MockOnEndFunction mockOnEndFunction,
-) async {
-  await tester.tap(widgetFinder);
-
-  await tester.pump();
-  await tester.pump(_animationDuration + _additionalDelay);
-  expect(mockOnEndFunction.called, 2);
-
-  await tester.tap(widgetFinder);
-
-  await tester.pump();
-  await tester.pump(_animationDuration + _additionalDelay);
-  expect(mockOnEndFunction.called, 3);
 }
 
 class _TestAnimatedThemeWidget extends StatefulWidget {
