@@ -828,11 +828,20 @@ class FlutterVmService {
   /// Tell the provided flutter view that the font manifest has been updated
   /// and asset fonts should be reloaded.
   Future<void> reloadAssetFonts({required String isolateId, required String viewId}) async {
-    await callMethodWrapper(
-      kReloadAssetFonts,
-      isolateId: isolateId,
-      args: <String, Object?>{'viewId': viewId},
-    );
+    try {
+      await callMethodWrapper(
+        kReloadAssetFonts,
+        isolateId: isolateId,
+        args: <String, Object?>{'viewId': viewId},
+      );
+    } on vm_service.RPCError catch (e) {
+      if (e.code == vm_service.RPCErrorKind.kMethodNotFound.code) {
+        // Some platforms or embedders (like web) may not implement this VM
+        // service protocol method. Just ignore the error and return.
+        return;
+      }
+      rethrow;
+    }
   }
 
   /// Waits for a signal from the VM service that [extensionName] is registered.
