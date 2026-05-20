@@ -56,6 +56,7 @@ import 'macos/xcdevice.dart';
 import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
 import 'persistent_tool_state.dart';
+import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/unified_analytics.dart';
 import 'resident_runner.dart';
@@ -232,6 +233,12 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
           ),
         ),
         platform: globals.platform,
+      ),
+      FlutterProjectFactory: () => FlutterProjectFactory(
+        logger: globals.logger,
+        fileSystem: globals.fs,
+        xcode: globals.xcode,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
       ),
       FlutterVersion: () =>
           FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: globals.git),

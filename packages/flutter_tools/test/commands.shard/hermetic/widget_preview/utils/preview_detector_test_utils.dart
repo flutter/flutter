@@ -70,8 +70,12 @@ void testPreviewDetector(
       }
     },
     overrides: {
-      FlutterProjectFactory: () =>
-          FlutterProjectFactory(fileSystem: _fs, logger: BufferLogger.test()),
+      FlutterProjectFactory: () => FlutterProjectFactory(
+        fileSystem: _fs,
+        logger: BufferLogger.test(),
+        xcode: null,
+        xcodeProjectInterpreter: null,
+      ),
     },
   );
 }

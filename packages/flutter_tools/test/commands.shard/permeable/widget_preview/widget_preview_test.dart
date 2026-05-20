@@ -214,7 +214,12 @@ void main() {
         verboseHelp: false,
         logger: logger,
         fs: fs,
-        projectFactory: FlutterProjectFactory(logger: logger, fileSystem: fs),
+        projectFactory: FlutterProjectFactory(
+          logger: logger,
+          fileSystem: fs,
+          xcode: null,
+          xcodeProjectInterpreter: null,
+        ),
         cache: Cache.test(processManager: loggingProcessManager, platform: platform),
         platform: platform,
         shutdownHooks: shutdownHooks,

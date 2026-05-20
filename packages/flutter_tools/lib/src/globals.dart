@@ -276,7 +276,12 @@ CocoaPods? get cocoaPods => context.get<CocoaPods>();
 
 FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ??
-      FlutterProjectFactory(logger: logger, fileSystem: fs);
+      FlutterProjectFactory(
+        logger: logger,
+        fileSystem: fs,
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
+      );
 }
 
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;

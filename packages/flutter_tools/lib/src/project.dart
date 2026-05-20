@@ -27,6 +27,8 @@ import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'ios/xcodeproj.dart';
+import 'macos/xcode.dart';
 import 'package_graph.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
@@ -49,12 +51,20 @@ enum SupportedPlatform {
 }
 
 class FlutterProjectFactory {
-  FlutterProjectFactory({required Logger logger, required FileSystem fileSystem})
-    : _logger = logger,
-      _fileSystem = fileSystem;
+  FlutterProjectFactory({
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Xcode? xcode,
+    required XcodeProjectInterpreter? xcodeProjectInterpreter,
+  }) : _logger = logger,
+       _fileSystem = fileSystem,
+       _xcode = xcode,
+       _xcodeProjectInterpreter = xcodeProjectInterpreter;
 
   final Logger _logger;
   final FileSystem _fileSystem;
+  final Xcode? _xcode;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
   @visibleForTesting
   final projects = <String, FlutterProject>{};
@@ -73,7 +83,13 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(directory, manifest, exampleManifest);
+      return FlutterProject(
+        directory,
+        manifest,
+        exampleManifest,
+        xcode: _xcode,
+        xcodeProjectInterpreter: _xcodeProjectInterpreter,
+      );
     });
   }
 }
@@ -88,10 +104,18 @@ class FlutterProjectFactory {
 /// used across changes to other files, as no other file-level information is
 /// cached.
 class FlutterProject {
-  @visibleForTesting
-  FlutterProject(this.directory, FlutterManifest manifest, this._exampleManifest) {
+  FlutterProject(
+    this.directory,
+    FlutterManifest manifest,
+    this._exampleManifest, {
+    required this.xcode,
+    required this.xcodeProjectInterpreter,
+  }) {
     _setManifest(manifest);
   }
+
+  final Xcode? xcode;
+  final XcodeProjectInterpreter? xcodeProjectInterpreter;
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -105,7 +129,12 @@ class FlutterProject {
 
   /// Create a [FlutterProject] and bypass the project caching.
   @visibleForTesting
-  static FlutterProject fromDirectoryTest(Directory directory, [Logger? logger]) {
+  static FlutterProject fromDirectoryTest(
+    Directory directory, [
+    Logger? logger,
+    Xcode? xcode,
+    XcodeProjectInterpreter? xcodeProjectInterpreter,
+  ]) {
     final FileSystem fileSystem = directory.fileSystem;
     logger ??= BufferLogger.test();
     final FlutterManifest manifest = FlutterProject._readManifest(
@@ -118,7 +147,13 @@ class FlutterProject {
       logger: logger,
       fileSystem: fileSystem,
     );
-    return FlutterProject(directory, manifest, exampleManifest);
+    return FlutterProject(
+      directory,
+      manifest,
+      exampleManifest,
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
+    );
   }
 
   /// The location of this project.
@@ -282,6 +317,8 @@ class FlutterProject {
     _exampleDirectory(directory),
     _exampleManifest,
     FlutterManifest.empty(logger: globals.logger),
+    xcode: xcode,
+    xcodeProjectInterpreter: xcodeProjectInterpreter,
   );
 
   /// The generated scaffolding project for hosting widget previews from this

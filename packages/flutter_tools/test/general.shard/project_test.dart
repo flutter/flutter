@@ -45,6 +45,8 @@ void main() {
         final projectFactory = FlutterProjectFactory(
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
+          xcode: null,
+          xcodeProjectInterpreter: null,
         );
         fileSystem.file('pubspec.yaml').writeAsBytesSync(<int>[0xFFFE]);
 
@@ -127,6 +129,8 @@ void main() {
           globals.fs.directory('not_created'),
           FlutterManifest.empty(logger: logger),
           FlutterManifest.empty(logger: logger),
+          xcode: globals.xcode,
+          xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
         );
         await project.regeneratePlatformSpecificTooling(releaseMode: false);
         expectNotExists(project.directory);
@@ -293,8 +297,12 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           Pub: ThrowingPub.new,
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () => FlutterProjectFactory(
+            logger: logger,
+            fileSystem: globals.fs,
+            xcode: globals.xcode,
+            xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          ),
         },
       );
 
@@ -316,8 +324,12 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           Pub: ThrowingPub.new,
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () => FlutterProjectFactory(
+            logger: logger,
+            fileSystem: globals.fs,
+            xcode: globals.xcode,
+            xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          ),
         },
       );
 
@@ -339,8 +351,12 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           Pub: ThrowingPub.new,
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () => FlutterProjectFactory(
+            logger: logger,
+            fileSystem: globals.fs,
+            xcode: globals.xcode,
+            xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          ),
         },
       );
 
@@ -356,8 +372,12 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () => FlutterProjectFactory(
+            logger: logger,
+            fileSystem: globals.fs,
+            xcode: globals.xcode,
+            xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          ),
         },
       );
       testUsingContext(
@@ -372,8 +392,12 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () => FlutterProjectFactory(
+            logger: logger,
+            fileSystem: globals.fs,
+            xcode: globals.xcode,
+            xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          ),
         },
       );
       testUsingContext(
@@ -389,8 +413,12 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () => FlutterProjectFactory(
+            logger: logger,
+            fileSystem: globals.fs,
+            xcode: globals.xcode,
+            xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          ),
         },
       );
       testUsingContext(
@@ -408,8 +436,12 @@ void main() {
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
+          FlutterProjectFactory: () => FlutterProjectFactory(
+            logger: logger,
+            fileSystem: globals.fs,
+            xcode: globals.xcode,
+            xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          ),
         },
       );
       _testInMemory('creates Android library in module', () async {
@@ -441,7 +473,13 @@ void main() {
     name: test
     version: 1.0.0+3
     ''', logger: BufferLogger.test())!;
-        final project = FlutterProject(fileSystem.systemTempDirectory, manifest, manifest);
+        final project = FlutterProject(
+          fileSystem.systemTempDirectory,
+          manifest,
+          manifest,
+          xcode: globals.xcode,
+          xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+        );
         final versionInfo = jsonDecode(project.getVersionInfo()) as Map<String, dynamic>;
         expect(versionInfo['app_name'], 'test');
         expect(versionInfo['version'], '1.0.0');
@@ -875,7 +913,12 @@ dependencies {
         xcodeProjectInterpreter = XcodeProjectInterpreter.test(
           processManager: FakeProcessManager.any(),
         );
-        flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fs);
+        flutterProjectFactory = FlutterProjectFactory(
+          logger: logger,
+          fileSystem: fs,
+          xcode: null,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+        );
       });
 
       _testInMemory('default host app language', () async {
@@ -1118,7 +1161,12 @@ android {
         fs = MemoryFileSystem.test();
         testPlistUtils = FakePlistParser();
         xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
-        flutterProjectFactory = FlutterProjectFactory(fileSystem: fs, logger: logger);
+        flutterProjectFactory = FlutterProjectFactory(
+          fileSystem: fs,
+          logger: logger,
+          xcode: null,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+        );
       });
 
       void testWithMocks(String description, Future<void> Function() testMethod) {
@@ -2027,7 +2075,12 @@ resolution: workspace
       fs = MemoryFileSystem.test();
       testPlistParser = FakePlistParser();
       mockXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
-      flutterProjectFactory = FlutterProjectFactory(fileSystem: fs, logger: logger);
+      flutterProjectFactory = FlutterProjectFactory(
+        fileSystem: fs,
+        logger: logger,
+        xcode: null,
+        xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+      );
       const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
       mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
         IosProject.kProductBundleIdKey: 'io.flutter.someProject',
@@ -2487,8 +2540,12 @@ void _testInMemory(
         platform: globals.platform,
         artifacts: <ArtifactSet>[],
       ),
-      FlutterProjectFactory: () =>
-          FlutterProjectFactory(fileSystem: testFileSystem, logger: globals.logger),
+      FlutterProjectFactory: () => FlutterProjectFactory(
+        fileSystem: testFileSystem,
+        logger: globals.logger,
+        xcode: globals.xcode,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+      ),
       Pub: ThrowingPub.new,
     },
   );

@@ -31,7 +31,13 @@ void main() {
       final manifest = FlutterManifest.empty(logger: BufferLogger.test());
       final Directory projectDir = fs.currentDirectory.childDirectory('project')..createSync();
       projectDir.childDirectory('lib/src').createSync(recursive: true);
-      rootProject = FlutterProject(projectDir, manifest, manifest);
+      rootProject = FlutterProject(
+        projectDir,
+        manifest,
+        manifest,
+        xcode: null,
+        xcodeProjectInterpreter: null,
+      );
       logger = BufferLogger.test();
       previewManifest = PreviewManifest(
         logger: logger,

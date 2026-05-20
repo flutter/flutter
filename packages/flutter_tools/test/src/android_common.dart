@@ -58,7 +58,12 @@ class FakeAndroidBuilder implements AndroidBuilder {
 /// within [directoryOverride].
 class FakeFlutterProjectFactory extends FlutterProjectFactory {
   FakeFlutterProjectFactory(this.directoryOverride)
-    : super(fileSystem: globals.fs, logger: globals.logger);
+    : super(
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        xcode: null,
+        xcodeProjectInterpreter: null,
+      );
 
   final file_system.Directory directoryOverride;
 

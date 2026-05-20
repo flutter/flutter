@@ -186,7 +186,12 @@ void main() {
           final creator = GitHubTemplateCreator(
             fileSystem: fs,
             logger: logger,
-            flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+            flutterProjectFactory: FlutterProjectFactory(
+              fileSystem: fs,
+              logger: logger,
+              xcode: null,
+              xcodeProjectInterpreter: null,
+            ),
           );
           expect(
             await creator.toolCrashIssueTemplateGitHubURL(command, error, stackTrace, doctorText),
@@ -211,7 +216,12 @@ void main() {
           final creator = GitHubTemplateCreator(
             fileSystem: fs,
             logger: logger,
-            flutterProjectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+            flutterProjectFactory: FlutterProjectFactory(
+              fileSystem: fs,
+              logger: logger,
+              xcode: null,
+              xcodeProjectInterpreter: null,
+            ),
           );
           final Directory projectDirectory = fs.currentDirectory;
 

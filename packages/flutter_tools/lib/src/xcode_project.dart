@@ -41,6 +41,15 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform {
+  XcodeBasedProject({
+    required Xcode? xcode,
+    required XcodeProjectInterpreter? xcodeProjectInterpreter,
+  }) : _xcode = xcode,
+       _xcodeProjectInterpreter = xcodeProjectInterpreter;
+
+  final Xcode? _xcode;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
+
   static const _defaultHostAppName = 'Runner';
 
   /// The Xcode workspace (.xcworkspace directory) of the host app.
@@ -223,7 +232,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     }
 
     // Swift Package Manager requires Xcode 15 or greater.
-    final Xcode? xcode = globals.xcode;
+    final Xcode? xcode = _xcode;
     final Version? xcodeVersion = xcode?.currentVersion;
     if (xcodeVersion == null || xcodeVersion.major < 15) {
       return false;
@@ -238,7 +247,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       featureFlags.isSwiftPackageManagerEnabled && compatibleWithSwiftPackageManager;
 
   Future<XcodeProjectInfo?> projectInfo() async {
-    final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
+    final XcodeProjectInterpreter? xcodeProjectInterpreter = _xcodeProjectInterpreter;
     if (!xcodeProject.existsSync() ||
         xcodeProjectInterpreter == null ||
         !xcodeProjectInterpreter.isInstalled) {
@@ -338,7 +347,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   Future<Map<String, String>?> _xcodeProjectBuildSettings(
     XcodeProjectBuildContext buildContext,
   ) async {
-    final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
+    final XcodeProjectInterpreter? xcodeProjectInterpreter = _xcodeProjectInterpreter;
     if (xcodeProjectInterpreter == null || !xcodeProjectInterpreter.isInstalled) {
       return null;
     }
@@ -452,7 +461,8 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 /// Instances will reflect the contents of the `ios/` sub-folder of
 /// Flutter applications and the `.ios/` sub-folder of Flutter module projects.
 class IosProject extends XcodeBasedProject {
-  IosProject.fromFlutter(this.parent);
+  IosProject.fromFlutter(this.parent)
+    : super(xcode: parent.xcode, xcodeProjectInterpreter: parent.xcodeProjectInterpreter);
 
   @override
   final FlutterProject parent;
@@ -585,7 +595,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// When using Xcode 26+, print a warning if a plugin or its dependencies does not support
   /// arm64.
   Future<bool> pluginsSupportArmSimulator({required bool printWarnings}) async {
-    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode?.currentVersion;
     final Directory podXcodeProject = hostAppRoot
         .childDirectory('Pods')
         .childDirectory('Pods.xcodeproj');
@@ -593,7 +603,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       return true;
     }
 
-    final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
+    final XcodeProjectInterpreter? xcodeProjectInterpreter = _xcodeProjectInterpreter;
     if (xcodeProjectInterpreter == null) {
       // Xcode isn't installed, don't try to check.
       return true;
@@ -1207,7 +1217,8 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
 
 /// The macOS sub project.
 class MacOSProject extends XcodeBasedProject {
-  MacOSProject.fromFlutter(this.parent);
+  MacOSProject.fromFlutter(this.parent)
+    : super(xcode: parent.xcode, xcodeProjectInterpreter: parent.xcodeProjectInterpreter);
 
   @override
   final FlutterProject parent;

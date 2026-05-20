@@ -351,6 +351,8 @@ platform :osx, '10.15'
       flutterProjectFactory = FlutterProjectFactory(
         fileSystem: memoryFileSystem,
         logger: testLogger,
+        xcode: null,
+        xcodeProjectInterpreter: null,
       );
     });
 

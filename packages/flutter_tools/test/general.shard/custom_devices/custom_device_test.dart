@@ -44,6 +44,8 @@ FlutterProject _setUpFlutterProject(Directory directory) {
   final flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
+    xcode: null,
+    xcodeProjectInterpreter: null,
   );
   return flutterProjectFactory.fromDirectory(directory);
 }
