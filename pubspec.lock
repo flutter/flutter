@@ -238,11 +238,11 @@ packages:
     dependency: transitive
     description:
       path: "tool/dart_skills_lint"
-      ref: "9eff6bbcfa27c2724ea9ad67a611c19fe77057ea"
-      resolved-ref: "9eff6bbcfa27c2724ea9ad67a611c19fe77057ea"
+      ref: e4497873950727ee781fa411c1a2f624b1ec50c6
+      resolved-ref: e4497873950727ee781fa411c1a2f624b1ec50c6
       url: "https://github.com/flutter/skills"
     source: git
-    version: "0.2.0"
+    version: "0.3.0"
   dart_style:
     dependency: "direct main"
     description:
@@ -486,10 +486,10 @@ packages:
     dependency: "direct main"
     description:
       name: googleapis_auth
-      sha256: "661738b763d3e524de69df53bf4e03943e4e01e98265cebcc6684871b06a5379"
+      sha256: "2a8895c3885197f96bb2fd91ee0ae77b53ff3874c7b1f1eadb6566248e880958"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.0"
+    version: "2.3.1"
   graphs:
     dependency: transitive
     description:
@@ -598,10 +598,10 @@ packages:
     dependency: "direct main"
     description:
       name: json_annotation
-      sha256: cb09e7dac6210041fad964ed7fbee004f14258b4eca4040f72d1234062ace4c8
+      sha256: "2a743920d81b7910627f68ee2c9ac1fc0bfee32b9fc3403587d7c6791ca12f80"
       url: "https://pub.dev"
     source: hosted
-    version: "4.11.0"
+    version: "4.12.0"
   json_rpc_2:
     dependency: transitive
     description:
@@ -1175,14 +1175,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.5"
-  usage:
-    dependency: transitive
-    description:
-      name: usage
-      sha256: "0bdbde65a6e710343d02a56552eeaefd20b735e04bfb6b3ee025b6b22e8d0e15"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.1"
   uuid:
     dependency: transitive
     description:
@@ -1219,10 +1211,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_player_avfoundation
-      sha256: e5371e9c09a5f5d55b88fd552bb1192dd5805a5747388553a439a30b85851a6a
+      sha256: "9338f3ec22774f88146b22f13273a446719b1da010fd200c4d1d97802156ac58"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.5"
+    version: "2.9.7"
   video_player_platform_interface:
     dependency: "direct main"
     description:
@@ -1376,5 +1368,5 @@ packages:
     source: hosted
     version: "2.2.4"
 sdks:
-  dart: ">=3.12.0-307.0.dev <4.0.0"
+  dart: ">=3.12.0 <4.0.0"
   flutter: ">=3.38.4"

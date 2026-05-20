@@ -1216,6 +1216,23 @@ targets:
       - engine/**
       - DEPS
 
+  - name: Linux hello_world_impeller_linux
+    recipe: devicelab/devicelab_drone
+    timeout: 60
+    presubmit: false
+    bringup: true
+    properties:
+      xvfb: "1"
+      dependencies: >-
+        [
+          {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
+          {"dependency": "cmake", "version": "build_id:8787856497187628321"},
+          {"dependency": "ninja", "version": "version:1.9.0"}
+        ]
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: hello_world_impeller_linux
+
   - name: Linux linux_desktop_impeller
     recipe: devicelab/devicelab_drone
     timeout: 60
@@ -4163,7 +4180,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "mac"]
@@ -5220,7 +5236,6 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
-    bringup: true
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
@@ -5440,7 +5455,6 @@ targets:
 
   - name: Mac_arm64 wide_gamut_macos
     recipe: devicelab/devicelab_drone
-    bringup: true
     presubmit: false
     timeout: 60
     properties:
