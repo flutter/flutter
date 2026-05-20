@@ -997,11 +997,17 @@ class _RenderDecoration extends RenderBox
         end: contentPadding.end + decoration.inputGap,
       ),
     );
+    final BoxConstraints subTextConstraints = containerConstraints.deflate(
+      EdgeInsetsDirectional.only(
+        start: (supportingTextPadding?.start ?? contentPadding.start) + decoration.inputGap,
+        end: (supportingTextPadding?.end ?? contentPadding.end) + decoration.inputGap,
+      ),
+    );
 
     // The helper or error text can occupy the full width less the space
     // occupied by the icon and counter.
     final _SubtextSize? subtextSize = _computeSubtextSizes(
-      constraints: contentConstraints,
+      constraints: subTextConstraints,
       layoutChild: layoutChild,
       getBaseline: getBaseline,
     );
@@ -1283,6 +1289,12 @@ class _RenderDecoration extends RenderBox
     final double iconWidth = _minWidth(icon, iconHeight);
 
     width = math.max(width - iconWidth, 0.0);
+    final double supportingTextWidth = math.max(
+      width -
+          (supportingTextPadding?.horizontal ?? contentPadding.horizontal) -
+          decoration.inputGap * 2,
+      0.0,
+    );
 
     final double prefixIconHeight = _minHeight(prefixIcon, width);
     final double prefixIconWidth = _minWidth(prefixIcon, prefixIconHeight);
@@ -1294,12 +1306,15 @@ class _RenderDecoration extends RenderBox
 
     // TODO(LongCatIsLooong): use _computeSubtextSizes for subtext intrinsic sizes.
     // See https://github.com/flutter/flutter/issues/13715.
-    final double counterHeight = _minHeight(counter, width);
+    final double counterHeight = _minHeight(counter, supportingTextWidth);
     final double counterWidth = _minWidth(counter, counterHeight);
 
     // Only add padding when counter is present (maxLength is used).
     final double counterPadding = counter != null ? _kSubtextCounterPadding : 0.0;
-    final double helperErrorAvailableWidth = math.max(width - counterWidth - counterPadding, 0.0);
+    final double helperErrorAvailableWidth = math.max(
+      supportingTextWidth - counterWidth - counterPadding,
+      0.0,
+    );
     final double helperErrorHeight = _minHeight(helperError, helperErrorAvailableWidth);
     double subtextHeight = math.max(counterHeight, helperErrorHeight);
     if (subtextHeight > 0.0) {
@@ -3948,6 +3963,7 @@ class InputDecoration {
   ///    given decorator.
   final VisualDensity? visualDensity;
 
+  /// {@template flutter.material.inputDecoration.supportingTextPadding}
   /// The padding applied to the supporting text row.
   ///
   /// This padding is applied specifically to supporting text and is independent of [contentPadding].
@@ -3955,7 +3971,8 @@ class InputDecoration {
   /// for all supporting text widgets including [InputDecoration.helper], [InputDecoration.counter]
   /// and [InputDecoration.error].
   /// When non-null, it completely overrides the default behavior, including the default
-  /// vertical gap (`subtextGap`) between the input container and the supporting text row.
+  /// vertical gap between the input container and the supporting text row.
+  /// {@endtemplate}
   final EdgeInsetsGeometry? supportingTextPadding;
 
   /// Creates a copy of this input decoration with the given fields replaced
@@ -5440,14 +5457,7 @@ class InputDecorationThemeData with Diagnosticable {
   ///    given decorator.
   final VisualDensity? visualDensity;
 
-  /// The padding applied to the supporting text row.
-  ///
-  /// This padding is applied specifically to supporting text and is independent of [contentPadding].
-  /// If [supportingTextPadding] is null, the value of [contentPadding] will be used
-  /// for all supporting text widgets including [InputDecoration.helper], [InputDecoration.counter]
-  /// and [InputDecoration.error].
-  /// When non-null, it completely overrides the default behavior, including the default
-  /// vertical gap (`subtextGap`) between the input container and the supporting text row.
+  /// {@macro flutter.material.inputDecoration.supportingTextPadding}
   final EdgeInsetsGeometry? supportingTextPadding;
 
   /// Creates a copy of this object but with the given fields replaced with the
