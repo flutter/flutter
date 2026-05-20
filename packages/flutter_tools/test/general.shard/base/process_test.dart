@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -15,6 +17,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
@@ -416,16 +419,12 @@ void main() {
       );
     });
 
-    testUsingContext(
-      'prints analytics welcome message',
-      () async {
-        setExitFunctionForTests((int exitCode) {});
-        final shutdownHooks = ShutdownHooks();
-        await exitWithHooks(0, shutdownHooks: shutdownHooks);
-        expect(logger.statusText, contains(analytics.getConsentMessage));
-      },
-      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
-    );
+    testUsingContext('prints analytics welcome message', () async {
+      setExitFunctionForTests((int exitCode) {});
+      final shutdownHooks = ShutdownHooks();
+      await exitWithHooks(0, shutdownHooks: shutdownHooks);
+      expect(logger.statusText, contains(analytics.getConsentMessage));
+    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
 
     testUsingContext(
       'does not print analytics welcome message if Analytics instance indicates it should not be printed',
@@ -441,36 +440,108 @@ void main() {
       overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
     );
 
-    testUsingContext(
-      '[sync] exceptions thrown from a hook do not crash the tool',
-      () async {
-        setExitFunctionForTests((int exitCode) {});
+    testUsingContext('[sync] exceptions thrown from a hook do not crash the tool', () async {
+      setExitFunctionForTests((int exitCode) {});
 
-        final shutdownHooks = ShutdownHooks();
-        shutdownHooks.addShutdownHook(() => throw StateError('CRASH'));
-        await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
-        expect(
-          logger.warningText,
-          stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+      final shutdownHooks = ShutdownHooks();
+      shutdownHooks.addShutdownHook(() => throw StateError('CRASH'));
+      await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+      expect(
+        logger.warningText,
+        stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+      );
+    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+
+    testUsingContext('[async] exceptions thrown from a hook do not crash the tool', () async {
+      setExitFunctionForTests((int exitCode) {});
+
+      final shutdownHooks = ShutdownHooks();
+      shutdownHooks.addShutdownHook(() async => throw StateError('CRASH'));
+      await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+      expect(
+        logger.warningText,
+        stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+      );
+    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+  });
+
+  group('Environment variable propagation', () {
+    late MemoryFileSystem fileSystem;
+    late Analytics analytics;
+    late FakeProcessManager fakeProcessManager;
+    late ProcessUtils processUtils;
+
+    const expectedEnvWithDefaultTool = <String, String>{
+      'DASH__SUPPRESS_ANALYTICS': 'true',
+      'DASH__TOOL': 'flutter-tool',
+    };
+
+    const expectedEnvWithParentTool = <String, String>{
+      'DASH__SUPPRESS_ANALYTICS': 'true',
+      'DASH__TOOL': 'parent-tool',
+    };
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      final fakeFlutterVersion = FakeFlutterVersion();
+      analytics = Analytics.fake(
+        tool: DashTool.flutterTool,
+        homeDirectory: fileSystem.currentDirectory,
+        dartVersion: fakeFlutterVersion.dartSdkVersion,
+        fs: fileSystem,
+        flutterChannel: fakeFlutterVersion.channel,
+        flutterVersion: fakeFlutterVersion.getVersionString(),
+      );
+      fakeProcessManager = FakeProcessManager.empty();
+      final errorHandlingProcessManager = ErrorHandlingProcessManager(
+        delegate: fakeProcessManager,
+        platform: const LocalPlatform(),
+      );
+      processUtils = ProcessUtils(
+        processManager: errorHandlingProcessManager,
+        logger: BufferLogger.test(),
+      );
+    });
+
+    testUsingContext(
+      'propagates DASH__SUPPRESS_ANALYTICS and DASH__TOOL when running a command',
+      () async {
+        fakeProcessManager.addCommand(
+          const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithDefaultTool),
         );
+
+        await analytics.setTelemetry(false);
+
+        expect((await processUtils.run(<String>['whoohoo'])).exitCode, 0);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
+      overrides: <Type, Generator>{Analytics: () => analytics},
     );
 
     testUsingContext(
-      '[async] exceptions thrown from a hook do not crash the tool',
+      'preserves parent DASH__TOOL if already specified in the environment',
       () async {
-        setExitFunctionForTests((int exitCode) {});
+        fakeProcessManager.addCommand(
+          const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithParentTool),
+        );
 
-        final shutdownHooks = ShutdownHooks();
-        shutdownHooks.addShutdownHook(() async => throw StateError('CRASH'));
-        await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+        await analytics.setTelemetry(false);
+
+        final fakePlatform = FakePlatform(
+          environment: const <String, String>{'DASH__TOOL': 'parent-tool'},
+        );
+
         expect(
-          logger.warningText,
-          stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+          context.run<void>(
+            overrides: <Type, Generator>{Platform: () => fakePlatform},
+            body: () async {
+              expect((await processUtils.run(<String>['whoohoo'])).exitCode, 0);
+            },
+          ),
+          completes,
         );
       },
-      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
+      overrides: <Type, Generator>{Analytics: () => analytics},
     );
   });
 }

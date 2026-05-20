@@ -20,8 +20,10 @@ import 'dart:typed_data';
 import 'package:file/file.dart';
 import 'package:path/path.dart' as p; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'common.dart' show ToolExit, throwToolExit;
+import 'context.dart';
 import 'platform.dart';
 
 // The Flutter tool hits file system and process errors that only the end-user can address.
@@ -613,6 +615,39 @@ class ErrorHandlingProcessManager extends ProcessManager {
     return _runSync(() => _delegate.killPid(pid, signal), platform: _platform);
   }
 
+  Map<String, String>? _propagateAnalyticsEnvironment(Map<String, String>? environment) {
+    // Create a mutable copy of the environment map upfront to avoid redundant allocations later.
+    final environmentResult = environment == null
+        ? <String, String>{}
+        : Map<String, String>.of(environment);
+
+    // Safely lookup context-injected properties with a fallback for contextless unit tests.
+    Analytics? analytics;
+    Platform platform = _platform;
+    try {
+      analytics = context.get<Analytics>();
+      final Platform? contextPlatform = context.get<Platform>();
+      if (contextPlatform != null) {
+        platform = contextPlatform;
+      }
+    } on UnsupportedError {
+      // context.get is not supported in tests without context.
+    }
+
+    // Propagate the unified analytics suppression flag.
+    if (analytics != null) {
+      environmentResult[DashEnvVar.suppressAnalytics.name] = (!analytics.telemetryEnabled)
+          .toString();
+    }
+
+    // Propagate the parent tool identifier down to the spawned process.
+    final String? parentTool = platform.environment[DashEnvVar.tool.name];
+    environmentResult[DashEnvVar.tool.name] =
+        parentTool ?? environmentResult[DashEnvVar.tool.name] ?? DashTool.flutterTool.label;
+
+    return environmentResult;
+  }
+
   @override
   Future<io.ProcessResult> run(
     List<Object> command, {
@@ -628,7 +663,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
         return _delegate.run(
           command,
           workingDirectory: workingDirectory,
-          environment: environment,
+          environment: _propagateAnalyticsEnvironment(environment),
           includeParentEnvironment: includeParentEnvironment,
           runInShell: runInShell,
           stdoutEncoding: stdoutEncoding,
@@ -654,7 +689,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
         return _delegate.start(
           command,
           workingDirectory: workingDirectory,
-          environment: environment,
+          environment: _propagateAnalyticsEnvironment(environment),
           includeParentEnvironment: includeParentEnvironment,
           runInShell: runInShell,
           mode: mode,
@@ -680,7 +715,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
         return _delegate.runSync(
           command,
           workingDirectory: workingDirectory,
-          environment: environment,
+          environment: _propagateAnalyticsEnvironment(environment),
           includeParentEnvironment: includeParentEnvironment,
           runInShell: runInShell,
           stdoutEncoding: stdoutEncoding,
