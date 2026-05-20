@@ -7,6 +7,7 @@
 
 // ignore_for_file: avoid_relative_lib_imports
 
+import 'dart:developer' as developer;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -996,6 +997,97 @@ void main() async {
     final RenderPassState stateB = createSimpleRenderPass();
     drawWithPipeline(stateB, pipelineB, Colors.lime);
     stateB.commandBuffer.submit();
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  // Repeated `fromAsset` calls for the same asset path return the same
+  // `ShaderLibrary` instance. The cache backs hot reload: the
+  // `reinitializeShaderLibrary` service extension looks the library up by
+  // asset path and reloads into the existing instance.
+  test('ShaderLibrary.fromAsset caches by asset path', () async {
+    final gpu.ShaderLibrary? a = gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+    final gpu.ShaderLibrary? b = gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+    expect(a, isNotNull);
+    expect(identical(a, b), isTrue);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  // Loading any shader library lazily registers the
+  // `ext.ui.gpu.reinitializeShaderLibrary` service extension (debug only).
+  // `registerExtension` throws `ArgumentError` if the same name is registered
+  // twice, so re-registering it confirms the lazy hook installed it.
+  test('Loading a shader library registers the reinitialize service extension', () async {
+    gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+    expect(
+      () => developer.registerExtension(
+        'ext.ui.gpu.reinitializeShaderLibrary',
+        (String _, Map<String, String> __) async => developer.ServiceExtensionResponse.result('{}'),
+      ),
+      throwsArgumentError,
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  // `reinitialize` with an asset that hasn't been loaded yet must no-op.
+  // The next `fromAsset` will pick up the fresh bytes on its own.
+  test('ShaderLibrary.reinitialize is a no-op for an unknown asset key', () async {
+    expect(
+      () => gpu.ShaderLibrary.reinitialize('never_loaded_asset.shaderbundle'),
+      returnsNormally,
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  // After reloading a shader bundle in place, pipelines built with the
+  // freshly-fetched shaders must still draw correctly. Exercises the
+  // dirty-bit + eviction path in `Shader::RegisterSync`: the second pipeline
+  // build sees a registered function whose Shader is dirty and must run
+  // `UnregisterFunction` + `RemovePipelinesWithEntryPoint` before re-
+  // registering.
+  test('reinitialize evicts and re-registers shader functions cleanly', () async {
+    final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
+    // Pin the user-facing Shader Dart wrappers; their underlying native
+    // Shader objects are the ones that get patched in place by reload.
+    final gpu.Shader vertex = library['UnlitVertex']!;
+    final gpu.Shader fragment = library['UnlitFragment']!;
+
+    final gpu.RenderPipeline before = gpu.gpuContext.createRenderPipeline(vertex, fragment);
+    {
+      final RenderPassState state = createSimpleRenderPass();
+      state.renderPass.bindPipeline(before);
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      state.renderPass.bindVertexBuffer(
+        transients.emplace(float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5])),
+        3,
+      );
+      state.renderPass.bindUniform(
+        before.vertexShader.getUniformSlot('VertInfo'),
+        transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+      );
+      state.renderPass.draw();
+      state.commandBuffer.submit();
+    }
+
+    // Reload the same asset. Bytes haven't changed on disk, but every Shader
+    // is marked dirty so the next pipeline build walks the evict + re-
+    // register path. Identity of `library`, `vertex`, and `fragment` must
+    // all be preserved.
+    gpu.ShaderLibrary.reinitialize('test.shaderbundle');
+    expect(identical(library['UnlitVertex'], vertex), isTrue);
+    expect(identical(library['UnlitFragment'], fragment), isTrue);
+
+    final gpu.RenderPipeline after = gpu.gpuContext.createRenderPipeline(vertex, fragment);
+    {
+      final RenderPassState state = createSimpleRenderPass();
+      state.renderPass.bindPipeline(after);
+      final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+      state.renderPass.bindVertexBuffer(
+        transients.emplace(float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5])),
+        3,
+      );
+      state.renderPass.bindUniform(
+        after.vertexShader.getUniformSlot('VertInfo'),
+        transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+      );
+      state.renderPass.draw();
+      state.commandBuffer.submit();
+    }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   // Renders a green triangle pointing downwards using polygon mode line.

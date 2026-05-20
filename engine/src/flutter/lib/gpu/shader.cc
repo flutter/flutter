@@ -74,23 +74,59 @@ bool Shader::IsRegistered(Context& context) {
   return GetFunctionFromLibrary(lib) != nullptr;
 }
 
+bool Shader::IsDirty() const {
+  return is_dirty_;
+}
+
+void Shader::SetClean() {
+  is_dirty_ = false;
+}
+
+void Shader::ResetFrom(Shader& other) {
+  // library_id_ is intentionally preserved: the scoped registry key
+  // (library_id + entrypoint) must remain stable across reloads so the
+  // eviction triple-call in `RegisterSync` lands at the same slot.
+  entrypoint_ = std::move(other.entrypoint_);
+  stage_ = other.stage_;
+  code_mapping_ = std::move(other.code_mapping_);
+  inputs_ = std::move(other.inputs_);
+  layouts_ = std::move(other.layouts_);
+  uniform_structs_ = std::move(other.uniform_structs_);
+  uniform_textures_ = std::move(other.uniform_textures_);
+  descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
+  is_dirty_ = true;
+}
+
 bool Shader::RegisterSync(Context& context) {
-  if (IsRegistered(context)) {
-    return true;  // Already registered.
+  auto& lib = *context.GetContext().GetShaderLibrary();
+  const std::string scoped_name = GetScopedName();
+
+  std::shared_ptr<const impeller::ShaderFunction> existing =
+      lib.GetFunction(scoped_name, stage_);
+  if (existing && !is_dirty_) {
+    return true;  // Already registered and current.
   }
 
-  auto& lib = *context.GetContext().GetShaderLibrary();
+  // Dirty path: an earlier asset version still occupies the scoped slot.
+  // Evict it (and any pipelines that referenced it) before registering the
+  // new code mapping. Mirrors `RuntimeEffectContents::RegisterShader`.
+  if (existing && is_dirty_) {
+    context.GetContext().GetPipelineLibrary()->RemovePipelinesWithEntryPoint(
+        existing);
+    lib.UnregisterFunction(scoped_name, stage_);
+  }
 
   std::promise<bool> promise;
   auto future = promise.get_future();
   lib.RegisterFunction(
-      GetScopedName(), stage_, code_mapping_,
+      scoped_name, stage_, code_mapping_,
       fml::MakeCopyable([promise = std::move(promise)](bool result) mutable {
         promise.set_value(result);
       }));
   if (!future.get()) {
     return false;  // Registration failed.
   }
+  is_dirty_ = false;
   return true;
 }
 

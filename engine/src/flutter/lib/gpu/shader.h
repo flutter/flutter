@@ -59,6 +59,20 @@ class Shader : public RefCountedDartWrappable<Shader> {
 
   bool RegisterSync(Context& context);
 
+  /// Whether this shader needs to be re-registered with the impeller shader
+  /// library on next use. Fresh shaders start dirty. Set back to false by
+  /// `RegisterSync` after registration completes, and back to true by
+  /// `ResetFrom` when the underlying asset is reloaded.
+  bool IsDirty() const;
+
+  void SetClean();
+
+  /// Replaces this shader's payload (code, layouts, uniforms) with the data
+  /// from `other`, preserving the library_id / entrypoint registry key and
+  /// marking this shader dirty. Used by `ShaderLibrary` to reload a shader
+  /// bundle in place without breaking existing Dart wrappers.
+  void ResetFrom(Shader& other);
+
   std::shared_ptr<impeller::VertexDescriptor> CreateVertexDescriptor() const;
 
   const std::vector<impeller::ShaderStageIOSlot>& GetStageInputs() const;
@@ -92,6 +106,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
   std::unordered_map<std::string, UniformBinding> uniform_structs_;
   std::unordered_map<std::string, TextureBinding> uniform_textures_;
   std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts_;
+  bool is_dirty_ = true;
 
   // Returns the scoped name to use when registering or looking up this
   // shader's function in a shared impeller::ShaderLibrary.
