@@ -12,7 +12,7 @@ import '../../../globals.dart' as globals;
 import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
 
-// Fetch minimum iOS version dynamically from build environment or fallback to FlutterDarwinPlatform's default.
+/// Fetch minimum iOS version dynamically from build environment or fallback to FlutterDarwinPlatform's default.
 int get targetIOSVersion {
   final String? envVersion = globals.platform.environment['IPHONEOS_DEPLOYMENT_TARGET'];
   if (envVersion != null) {

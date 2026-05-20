@@ -11,7 +11,7 @@ import '../../../globals.dart' as globals;
 import '../native_assets.dart';
 import 'native_assets_host.dart';
 
-// Fetch minimum macOS version dynamically from build environment or fallback to safety/compatibility default.
+/// Fetch minimum macOS version dynamically from build environment or fallback to safety/compatibility default.
 int get targetMacOSVersion {
   final String? envVersion = globals.platform.environment['MACOSX_DEPLOYMENT_TARGET'];
   if (envVersion != null) {
