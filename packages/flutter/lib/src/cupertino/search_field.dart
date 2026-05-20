@@ -388,6 +388,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
     if (widget.focusNode == null) {
       _focusNode = FocusNode();
     }
+    _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
   @override
@@ -410,9 +411,15 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
     }
     if (widget.focusNode == null && oldWidget.focusNode != null) {
       _focusNode = FocusNode();
+      _effectiveFocusNode.addListener(_handleFocusChanged);
     } else if (widget.focusNode != null && oldWidget.focusNode == null) {
+      _focusNode!.removeListener(_handleFocusChanged);
       _focusNode!.dispose();
       _focusNode = null;
+      _effectiveFocusNode.addListener(_handleFocusChanged);
+    } else if (widget.focusNode != oldWidget.focusNode) {
+      oldWidget.focusNode!.removeListener(_handleFocusChanged);
+      widget.focusNode!.addListener(_handleFocusChanged);
     }
   }
 
@@ -430,7 +437,10 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
       _scrollNotificationObserver = null;
     }
     if (widget.focusNode == null) {
+      _focusNode?.removeListener(_handleFocusChanged);
       _focusNode?.dispose();
+    } else {
+      widget.focusNode!.removeListener(_handleFocusChanged);
     }
     if (widget.controller == null) {
       _controller?.dispose();
@@ -462,6 +472,10 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
     if (widget.onChanged != null && textChanged) {
       widget.onChanged!(_effectiveController.text);
     }
+  }
+
+  void _handleFocusChanged() {
+    setState(() {});
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
