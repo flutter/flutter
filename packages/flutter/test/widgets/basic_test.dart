@@ -1829,6 +1829,21 @@ void main() {
     expect(aPos.dy, 0.0);
     expect(bPos.dy, 0.0);
   });
+
+  testWidgets('LimitedBox does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    const key = Key('LimitedBox');
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: LimitedBox(key: key, child: Placeholder()),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byKey(key)), Size.zero);
+  });
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
