@@ -269,10 +269,12 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// reasonable selection range within the new [text].
   ///
   /// Setting this notifies all the listeners of this [TextEditingController]
-  /// that they need to update (it calls [notifyListeners]). For this reason,
-  /// this value should only be set between frames, e.g. in response to user
-  /// actions, not during the build, layout, or paint phases. This property can
-  /// be set from a listener added to this [TextEditingController].
+  /// that they need to update (it calls [notifyListeners]). Because listeners
+  /// are notified synchronously, they can call [State.setState] or otherwise
+  /// mark parts of the widget tree dirty. For this reason, this value should
+  /// only be set between frames, e.g. in response to user actions, and not
+  /// during the build, layout, or paint phases. This property can be set from
+  /// a listener added to this [TextEditingController].
   set text(String newText) {
     value = value.copyWith(
       text: newText,
