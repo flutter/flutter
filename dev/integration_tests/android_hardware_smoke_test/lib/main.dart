@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
-//import 'dart:io' as io;
+import 'dart:io' show File;
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:android_driver_extensions/native_driver.dart';
@@ -48,32 +48,81 @@ class _MyState extends State<MyWidget> {
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      autoUpdateGoldenFiles = true;
-      // kick off an attempt to match the golden file.
-      getApplicationSupportDirectory().then((directory) {
-        var goldenPath = path.join(directory.path, '$testName.png');
-        print("App postFrameCallback, comparing golden at $goldenPath");
-        matchesGoldenFile(goldenPath).matchAsync(_capturePng(testName)).then((
-          String? result,
-        ) {
-          if (result == null) {
-            completer.complete("Rendered $testName");
-          } else {
-            completer.complete(
-              "Failed to render $testName, match result: $result",
-            );
-            return;
-          }
-        });
-      });
+      // autoUpdateGoldenFiles = true;
+      _compareGolden(testName, completer);
     }, debugLabel: 'Rendered $testName');
 
     return completer.future;
   }
 
-  Future<Uint8List> _capturePng(String testName) async {
+  Future _compareGolden(String testName, Completer completer) async {
+    final tempDir = await getTemporaryDirectory();
+    final testFileName = '$testName.png';
+    var goldenAssetPath = path.join("integration_test/goldens", testFileName);
+    var tempGoldenPath = path.join(tempDir.path, 'goldens', testFileName);
+    var tempResultPath = path.join(tempDir.path, 'results', testFileName);
+
+    await _copyGoldenAssetToTemp(goldenAssetPath, tempGoldenPath);
+    final resultImageBytes = _capturePngAndWriteResult(
+      testName,
+      tempResultPath,
+    );
+
+    print("App postFrameCallback, comparing golden at $tempGoldenPath");
+    print(
+      'App postFrameCallback: type of goldenFileComparator: ${goldenFileComparator.runtimeType}',
+    );
+    String? result = await matchesGoldenFile(
+      tempGoldenPath,
+    ).matchAsync(resultImageBytes);
+
+    if (result == null) {
+      completer.complete("Rendered $testName");
+    } else {
+      completer.complete("Failed to render $testName, match result: $result");
+      return;
+    }
+  }
+
+  Future _copyGoldenAssetToTemp(
+    String goldenAssetPath,
+    String tempGoldenPath,
+  ) async {
+    // Copy golden from asset to temp dir.
+    // Do this every time the test executes because we always want to match against the golden.
     try {
-      print('_capturePng for $testName');
+      print(
+        "App postFrameCallback, copying $goldenAssetPath to $tempGoldenPath",
+      );
+      var file = File(tempGoldenPath);
+      var byteData = await rootBundle.load(goldenAssetPath);
+      var buffer = byteData.buffer;
+      if (!file.existsSync()) {
+        print(
+          "App postFrameCallback, $tempGoldenPath did not exist, creating it",
+        );
+        await file.create(recursive: true);
+      }
+      await file.writeAsBytes(
+        buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+      );
+      print("App postFrameCallback, wrote $tempGoldenPath");
+    } catch (e) {
+      // Maybe golden does not exist in asset path
+      print(
+        "App postFramecallback, exception thrown while copying $goldenAssetPath to $tempGoldenPath, exception: $e",
+      );
+      // Instead of rethrowing here, allow the test to continue.
+      // When matchesGolden is called later, it will either fail on missing golden or write the test result.
+    }
+  }
+
+  Future<Uint8List> _capturePngAndWriteResult(
+    String testName,
+    String tempResultPath,
+  ) async {
+    try {
+      print('_capturePngAndWriteResults for $testName');
       RenderRepaintBoundary boundary =
           targetKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
@@ -81,10 +130,36 @@ class _MyState extends State<MyWidget> {
         format: ui.ImageByteFormat.png,
       );
       var pngBytes = byteData!.buffer.asUint8List();
-      if (pngBytes.isEmpty) throw Exception('pngBytes should not be null');
+      if (pngBytes.isEmpty) {
+        throw Exception(
+          'pngBytes from RenderRepaintBoundary.toImage was empty',
+        );
+      }
+
+      try {
+        print("App _capturePngAndWriteResults, writing to $tempResultPath");
+        var file = File(tempResultPath);
+        var buffer = byteData.buffer;
+        if (!file.existsSync()) {
+          print(
+            "App _capturePngAndWriteResults, $tempResultPath did not exist, creating it",
+          );
+          await file.create(recursive: true);
+        }
+        await file.writeAsBytes(
+          buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+        );
+        print("App _capturePngAndWriteResults, wrote $tempResultPath");
+      } catch (e) {
+        print(
+          "App _capturePngAndWriteResults, exception thrown while writing $tempResultPath, exception: $e",
+        );
+        rethrow;
+      }
+
       return pngBytes;
     } catch (e) {
-      print(e);
+      print('_capturePngAndWriteResults for $testName caught exception: $e');
       return Uint8List(0);
     }
   }
@@ -107,13 +182,11 @@ class _MyState extends State<MyWidget> {
     return SafeArea(
       child: Stack(
         children: <Widget>[
-          SizedBox(
-            child: RepaintBoundary(
-              key: targetKey,
-              child: CustomPaint(
-                size: const Size(200, 200),
-                painter: MyPainter(message: _message),
-              ),
+          RepaintBoundary(
+            key: targetKey,
+            child: CustomPaint(
+              size: const Size(150, 150),
+              painter: MyPainter(message: _message),
             ),
           ),
           Align(alignment: Alignment.center, child: Text(_message)),

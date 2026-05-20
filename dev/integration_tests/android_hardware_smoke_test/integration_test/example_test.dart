@@ -95,7 +95,9 @@ void main() {
         findsOneWidget,
       );
 
-      await expectLater(find.byKey(app.targetKey), matchesGoldenFile('goldens/fooTest.png'));
+      // TODO: skip app-side testing when running with driver, using JSON instead of String for message channel
+      // TODO: integrate with LUCI in a similar way to android_engine_test
+      await expectLater(find.byKey(app.targetKey), matchesGoldenFile('integration_test/goldens/fooTest.png'));
 
       // final response = await responseFuture;
       // print("example_test received channel reply $response");
