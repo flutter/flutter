@@ -2177,8 +2177,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     markNeedsCompositingBitsUpdate();
     markNeedsSemanticsUpdate();
     child._parent = this;
-    if (owner case final owner?) {
-      child.attach(owner);
+    if (attached) {
+      child.attach(owner!);
     }
     redepthChild(child);
   }
