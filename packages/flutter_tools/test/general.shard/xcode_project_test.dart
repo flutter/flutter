@@ -423,23 +423,21 @@ void main() {
 
     group('ensureReadyForPlatformSpecificTooling', () {
       group('lldb files are generated', () {
-        testUsingContext(
-          'when they are missing',
-          () async {
-            final fs = MemoryFileSystem.test();
-            final Directory projectDirectory = fs.directory('path');
-            projectDirectory.childDirectory('ios').createSync(recursive: true);
-            final FlutterManifest manifest = FakeFlutterManifest();
-            final flutterProject = FlutterProject(
-              projectDirectory,
-              manifest,
-              manifest,
-              xcode: globals.xcode,
-              xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
-            );
-            final project = IosProject.fromFlutter(flutterProject);
-            expect(project.lldbInitFile, isNot(exists));
-            expect(project.lldbHelperPythonFile, isNot(exists));
+        testUsingContext('when they are missing', () async {
+          final fs = MemoryFileSystem.test();
+          final Directory projectDirectory = fs.directory('path');
+          projectDirectory.childDirectory('ios').createSync(recursive: true);
+          final FlutterManifest manifest = FakeFlutterManifest();
+          final flutterProject = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: globals.xcode,
+            xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          );
+          final project = IosProject.fromFlutter(flutterProject);
+          expect(project.lldbInitFile, isNot(exists));
+          expect(project.lldbHelperPythonFile, isNot(exists));
 
           await project.ensureReadyForPlatformSpecificTooling();
 
@@ -447,25 +445,23 @@ void main() {
           expect(project.lldbHelperPythonFile, exists);
         }, overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)});
 
-        testUsingContext(
-          'when they are older than tool',
-          () async {
-            final fs = MemoryFileSystem.test();
-            final Directory projectDirectory = fs.directory('path');
-            projectDirectory.childDirectory('ios').createSync(recursive: true);
-            final FlutterManifest manifest = FakeFlutterManifest();
-            final flutterProject = FlutterProject(
-              projectDirectory,
-              manifest,
-              manifest,
-              xcode: globals.xcode,
-              xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
-            );
-            final project = IosProject.fromFlutter(flutterProject);
-            project.lldbInitFile.createSync(recursive: true);
-            project.lldbInitFile.writeAsStringSync('old');
-            project.lldbHelperPythonFile.createSync(recursive: true);
-            project.lldbHelperPythonFile.writeAsStringSync('old');
+        testUsingContext('when they are older than tool', () async {
+          final fs = MemoryFileSystem.test();
+          final Directory projectDirectory = fs.directory('path');
+          projectDirectory.childDirectory('ios').createSync(recursive: true);
+          final FlutterManifest manifest = FakeFlutterManifest();
+          final flutterProject = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: globals.xcode,
+            xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
+          );
+          final project = IosProject.fromFlutter(flutterProject);
+          project.lldbInitFile.createSync(recursive: true);
+          project.lldbInitFile.writeAsStringSync('old');
+          project.lldbHelperPythonFile.createSync(recursive: true);
+          project.lldbHelperPythonFile.writeAsStringSync('old');
 
           await project.ensureReadyForPlatformSpecificTooling();
 

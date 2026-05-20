@@ -378,7 +378,17 @@ void main() {
         ProcessManager: () => processManager,
         Logger: () => logger,
         VMServiceConnector: () =>
-            (_) => throw UnimplementedError(),
+            (Uri uri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions? compression,
+              Device? device,
+              Object? git,
+              required Logger logger,
+            }) => throw UnimplementedError(),
       },
     );
 
@@ -472,7 +482,8 @@ void main() {
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               io.CompressionOptions? compression,
               Device? device,
-              Logger? logger,
+              Object? git,
+              required Logger logger,
             }) async => flutterVmService,
         ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
         Artifacts: () => artifacts,
