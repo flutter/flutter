@@ -921,6 +921,9 @@ void main() {
       );
       await tester.pump();
 
+      // TestWidgetsApp leaves the EditableText origin on whole pixels instead
+      // of inheriting Material's fractional text field offset, so the odd-width
+      // floating cursor is centered on half-pixel x values.
       expect(
         editable,
         paints..rrect(
