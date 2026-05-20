@@ -625,6 +625,14 @@ class ErrorHandlingProcessManager extends ProcessManager {
     try {
       analytics = context.get<Analytics>();
       platform = context.get<Platform>() ?? _platform;
+    } on ContextDependencyCycleException {
+      // This exception is thrown during early startup bootstrapping of the Flutter CLI.
+      // Specifically, `FlutterVersion` runs a synchronous `git log` command during its own
+      // construction to resolve version metadata. Because process execution is intercepted
+      // by this manager, looking up `Analytics` (which in turn depends on `FlutterVersion`)
+      // triggers a circular dependency cycle (`FlutterVersion -> Process -> Analytics -> FlutterVersion`).
+      // Catching `ContextDependencyCycleException` breaks this cycle, allowing us to safely
+      // skip analytics environment propagation for these early initialization commands.
     } on UnsupportedError {
       // context.get is not supported in tests without context.
     }
