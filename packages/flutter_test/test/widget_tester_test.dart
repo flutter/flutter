@@ -258,6 +258,15 @@ void main() {
     expect(tester.hasRunningAnimations, isFalse);
   });
 
+  testWidgets(
+    'hasRunningAnimations is false when the transient callback does not schedule new frames',
+    (WidgetTester tester) async {
+      assert(!tester.hasRunningAnimations);
+      tester.binding.scheduleFrameCallback((_) {}, scheduleNewFrame: false);
+      expect(tester.hasRunningAnimations, false);
+    },
+  );
+
   testWidgets('pumpAndSettle control test', (WidgetTester tester) async {
     final controller = AnimationController(
       duration: const Duration(minutes: 525600),
