@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_GPU_RENDER_PASS_H_
 #define FLUTTER_LIB_GPU_RENDER_PASS_H_
 
+#include <array>
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -74,7 +75,17 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   BufferUniformMap fragment_uniform_bindings;
   TextureUniformMap fragment_texture_bindings;
 
-  impeller::BufferView vertex_buffer;
+  // Vertex buffers indexed by binding slot. Mirrors
+  // `impeller::kMaxVertexBuffers`; Impeller's HAL caps vertex buffer
+  // bindings at 16 per draw, and index `i` here corresponds to the binding
+  // declared at slot `i` in the active VertexLayout. On the OpenGL ES
+  // backend the per-pipeline limit on the *total attribute count* across
+  // all bound buffers is `GL_MAX_VERTEX_ATTRIBS` (spec minimum 8 on GLES
+  // 2.0, 16 on GLES 3.0+), enforced by the driver.
+  static constexpr size_t kMaxVertexBufferSlots = 16;
+  std::array<impeller::BufferView, kMaxVertexBufferSlots> vertex_buffers;
+  // Highest slot index that has been bound on this pass (plus one).
+  size_t vertex_buffer_count = 0;
   impeller::BufferView index_buffer;
   impeller::IndexType index_buffer_type = impeller::IndexType::kNone;
   size_t element_count = 0;
@@ -163,7 +174,8 @@ extern void InternalFlutterGpu_RenderPass_BindVertexBufferDevice(
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes,
-    int vertex_count);
+    int vertex_count,
+    int slot);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(

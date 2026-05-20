@@ -31,7 +31,9 @@ class TypographerContextSkia : public TypographerContext {
       const std::vector<RenderableText>& renderable_texts) const override;
 
   // Visible for testing.
-  static SkImageInfo GetImageInfo(const GlyphAtlas& atlas, Size size);
+  static SkImageInfo GetImageInfo(const GlyphAtlas& atlas,
+                                  Size size,
+                                  bool support_light_glyphs);
 
  private:
   static std::pair<std::vector<FontGlyphPair>, std::vector<Rect>>

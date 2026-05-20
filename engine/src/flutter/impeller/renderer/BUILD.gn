@@ -95,7 +95,10 @@ impeller_component("renderer") {
     public_deps += [ ":compute_shaders" ]
   }
 
-  deps = [ "//flutter/fml" ]
+  deps = [
+    "//flutter/fml",
+    "//third_party/abseil-cpp/absl/strings",
+  ]
 }
 
 template("renderer_unittests_component") {

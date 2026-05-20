@@ -2,6 +2,9 @@ module.exports = async ({ github, context }) => {
   const owner = context.repo.owner;
   const repo = context.repo.repo;
   const labelName = 'waiting for response';
+  // TODO(chunhtai): Remove this once all issues have applied or reapplied the
+  // label. This should happen after 21 days.
+  const oldLabelName = 'waiting for customer response';
   const daysUntilClose = 21;
   const issueCloseComment = `Without additional information, we are unfortunately not sure how to resolve this issue. We are therefore reluctantly going to close this bug for now.
 
@@ -36,7 +39,12 @@ Thanks for your contribution.`;
       issue_number: issue.number,
     });
 
-    const labelEvent = events.reverse().find(event => event.event === 'labeled' && event.label.name === labelName);
+    const labelEvent = events.reverse().find(
+      event =>
+        event.event === 'labeled' &&
+        // Issues that applied the label before the renaming still use oldLabelName.
+        (event.label.name === labelName || event.label.name === oldLabelName)
+    );
 
     if (!labelEvent) {
       continue; // Skip if label not found in events
@@ -85,7 +93,6 @@ Thanks for your contribution.`;
         issue_number: issue.number,
         name: labelName,
       });
-
 
       continue; // Skip stale check
     }
