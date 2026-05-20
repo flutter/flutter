@@ -495,7 +495,7 @@ void main() {
       fakeProcessManager = FakeProcessManager.empty();
       final errorHandlingProcessManager = ErrorHandlingProcessManager(
         delegate: fakeProcessManager,
-        platform: const LocalPlatform(),
+        platform: FakePlatform(),
       );
       processUtils = ProcessUtils(
         processManager: errorHandlingProcessManager,

@@ -617,19 +617,14 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
   Map<String, String>? _propagateAnalyticsEnvironment(Map<String, String>? environment) {
     // Create a mutable copy of the environment map upfront to avoid redundant allocations later.
-    final environmentResult = environment == null
-        ? <String, String>{}
-        : Map<String, String>.of(environment);
+    final environmentResult = <String, String>{...?environment};
 
     // Safely lookup context-injected properties with a fallback for contextless unit tests.
     Analytics? analytics;
     Platform platform = _platform;
     try {
       analytics = context.get<Analytics>();
-      final Platform? contextPlatform = context.get<Platform>();
-      if (contextPlatform != null) {
-        platform = contextPlatform;
-      }
+      platform = context.get<Platform>() ?? _platform;
     } on UnsupportedError {
       // context.get is not supported in tests without context.
     }
