@@ -14,6 +14,7 @@
 FLUTTER_ASSERT_ARC
 
 NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFrameDurationOnPhone";
+static const double kDefaultRefreshRate = 60.0;
 
 @implementation FlutterVSyncClient {
   flutter::VsyncWaiter::Callback _callback;
@@ -63,8 +64,8 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
   if (!_isVariableRefreshRateEnabled) {
     return;
   }
-  double maxFrameRate = fmax(refreshRate, 60);
-  double minFrameRate = fmax(maxFrameRate / 2, 60);
+  double maxFrameRate = fmax(refreshRate, kDefaultRefreshRate);
+  double minFrameRate = fmax(maxFrameRate / 2, kDefaultRefreshRate);
   if (@available(iOS 15.0, *)) {
     _displayLink.preferredFrameRateRange =
         CAFrameRateRangeMake(minFrameRate, maxFrameRate, maxFrameRate);
@@ -82,21 +83,50 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
-  CFTimeInterval delay = CACurrentMediaTime() - link.timestamp;
+  // CADisplayLink timestamps use the CACurrentMediaTime() monotonic clock (seconds since boot).
+  // CACurrentMediaTime() is based on mach_absolute_time, whereas the core engine uses
+  // fml::TimePoint, which is implemented with std::chrono::steady_clock, which uses
+  // mach_continuous_time under the hood. Thus, the values passed to the engine in the vsync
+  // callback need to be rebased to fml::TimePoint's epoch.
+  //
+  // According to Apple's docs, before the first frame is delivered, or when the display link is
+  // paused, both timestamp and targetTimestamp properties are 0.0. To guarantee consistent frame
+  // progression, we guard against zero values and fall back to CACurrentMediaTime().
+  CFTimeInterval timestamp = link.timestamp;
+  if (timestamp == 0.0) {
+    timestamp = CACurrentMediaTime();
+  }
+  CFTimeInterval delay = CACurrentMediaTime() - timestamp;
   fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
 
-  CFTimeInterval duration = link.targetTimestamp - link.timestamp;
+  // targetTimestamp is the anticipated presentation time of the next screen refresh. If
+  // targetTimestamp is zero or less than/equal to timestamp (which also occurs on paused/unpaused
+  // transitions), synthesize a projected target time based on the current refresh rate.
+  CFTimeInterval targetTimestamp = link.targetTimestamp;
+  if (targetTimestamp <= timestamp) {
+    double effectiveRefreshRate = _refreshRate > 0.0 ? _refreshRate : kDefaultRefreshRate;
+    targetTimestamp = timestamp + (1.0 / effectiveRefreshRate);
+  }
+  CFTimeInterval duration = targetTimestamp - timestamp;
   fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(duration);
 
-  [FlutterTracing
-      tracePlatformVsyncWithStartTime:frame_start_time.ToEpochDelta().ToMicroseconds()
-                           targetTime:frame_target_time.ToEpochDelta().ToMicroseconds()];
+  [FlutterTracing tracePlatformVsyncWithStartTime:frame_start_time.ToEpochDelta().ToSecondsF()
+                                       targetTime:frame_target_time.ToEpochDelta().ToSecondsF()];
 
   std::unique_ptr<flutter::FrameTimingsRecorder> recorder =
       std::make_unique<flutter::FrameTimingsRecorder>();
 
+  // In steady-state, duration reflects the hardware refresh interval (e.g., ~0.01667s for 60Hz).
+  // We dynamically recalculate the refresh rate from the frame duration to adjust to ProMotion
+  // display refresh rate shifts.
+  //
+  // Round to nearest whole Hz value to ensure we don't introduce frame timing issues due to
+  // floating point error. e.g. 59.998, 60.004, 59.995, ... --> 60.000, 60.000, 60.000, ...
   if (duration > 0) {
-    _refreshRate = round(1 / duration);
+    double roundedRefreshRate = round(1.0 / duration);
+    if (roundedRefreshRate > 0.0) {
+      _refreshRate = roundedRefreshRate;
+    }
   }
 
   recorder->RecordVsync(frame_start_time, frame_target_time);
