@@ -40,8 +40,12 @@ TEST_P(RendererGoldenTest, BabysFirstTriangle) {
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
   // Match the golden harness render target: single-sampled, no depth/stencil.
+  // `ClearStencilAttachments` also resets the stencil pixel format on the
+  // pipeline, which Metal validation requires to match the target's lack of a
+  // stencil texture; `SetStencilAttachmentDescriptors(nullopt)` alone leaves
+  // the format set and trips that validation.
   desc->SetSampleCount(SampleCount::kCount1);
-  desc->SetStencilAttachmentDescriptors(std::nullopt);
+  desc->ClearStencilAttachments();
   desc->ClearDepthAttachment();
   auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
   ASSERT_TRUE(pipeline);
