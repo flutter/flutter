@@ -934,6 +934,10 @@ bool FlutterWindowsView::IsSizedToContent() const {
   return is_sized_to_content_;
 }
 
+void FlutterWindowsView::SetSizedToContent(bool sized_to_content) {
+  is_sized_to_content_ = sized_to_content;
+}
+
 BoxConstraints FlutterWindowsView::GetConstraints() const {
   if (!is_sized_to_content_) {
     PhysicalWindowBounds bounds = binding_handler_->GetPhysicalWindowBounds();

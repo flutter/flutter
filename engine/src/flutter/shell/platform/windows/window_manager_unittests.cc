@@ -855,5 +855,220 @@ TEST_F(WindowManagerTest, PopupWindowUpdatesPositionOnViewSizeChange) {
   EXPECT_NE(initial_rect.top, new_rect.top);
 }
 
+TEST_F(WindowManagerTest, CreateRegularWindowSizedToContent) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Sized To Content",
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(engine_id(),
+                                                               &creation_request);
+  EXPECT_GE(view_id, 0);
+}
+
+TEST_F(WindowManagerTest, RegularWindowSizedToContentResizesToContent) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Sized To Content",
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(engine_id(),
+                                                               &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  FlutterWindowsView* view =
+      engine()->GetViewFromTopLevelWindow(window_handle);
+  ASSERT_NE(view, nullptr);
+
+  view->OnFrameGenerated(300, 200);
+  engine()->task_runner()->ProcessTasks();
+
+  ActualWindowSize size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
+  EXPECT_EQ(size.width, 300);
+  EXPECT_EQ(size.height, 200);
+}
+
+TEST_F(WindowManagerTest,
+       RegularWindowSizedToContentNonResizableHasNoThickFrame) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Sized To Content Non-Resizable",
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(engine_id(),
+                                                               &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  const LONG style = GetWindowLong(window_handle, GWL_STYLE);
+  EXPECT_EQ(style & WS_THICKFRAME, 0L);
+  EXPECT_EQ(style & WS_MAXIMIZEBOX, 0L);
+}
+
+TEST_F(WindowManagerTest,
+       RegularWindowSizedToContentResizableHasThickFrame) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Sized To Content Resizable",
+      .sized_to_content = true,
+      .resizable = true};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(engine_id(),
+                                                               &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  const LONG style = GetWindowLong(window_handle, GWL_STYLE);
+  EXPECT_NE(style & WS_THICKFRAME, 0L);
+  EXPECT_NE(style & WS_MAXIMIZEBOX, 0L);
+}
+
+TEST_F(WindowManagerTest,
+       RegularWindowSizedToContentResizableStopsTrackingAfterFirstFrame) {
+  IsolateScope isolate_scope(isolate());
+
+  RegularWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Sized To Content Resizable",
+      .sized_to_content = true,
+      .resizable = true};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(engine_id(),
+                                                               &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  FlutterWindowsView* view =
+      engine()->GetViewFromTopLevelWindow(window_handle);
+  ASSERT_NE(view, nullptr);
+
+  view->OnFrameGenerated(300, 200);
+  engine()->task_runner()->ProcessTasks();
+
+  EXPECT_FALSE(view->IsSizedToContent());
+}
+
+TEST_F(WindowManagerTest, CreateModelessDialogSizedToContent) {
+  IsolateScope isolate_scope(isolate());
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Modeless Dialog Sized To Content",
+      .parent_or_null = nullptr,
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(engine_id(),
+                                                              &creation_request);
+  EXPECT_GE(view_id, 0);
+}
+
+TEST_F(WindowManagerTest, CreateModalDialogSizedToContent) {
+  IsolateScope isolate_scope(isolate());
+
+  const int64_t parent_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND parent_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), parent_view_id);
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Modal Dialog Sized To Content",
+      .parent_or_null = parent_window_handle,
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(engine_id(),
+                                                              &creation_request);
+  EXPECT_GE(view_id, 0);
+}
+
+TEST_F(WindowManagerTest, DialogWindowSizedToContentResizesToContent) {
+  IsolateScope isolate_scope(isolate());
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Dialog Sized To Content",
+      .parent_or_null = nullptr,
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(engine_id(),
+                                                              &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  FlutterWindowsView* view =
+      engine()->GetViewFromTopLevelWindow(window_handle);
+  ASSERT_NE(view, nullptr);
+
+  view->OnFrameGenerated(300, 200);
+  engine()->task_runner()->ProcessTasks();
+
+  ActualWindowSize size =
+      InternalFlutterWindows_WindowManager_GetWindowContentSize(window_handle);
+  EXPECT_EQ(size.width, 300);
+  EXPECT_EQ(size.height, 200);
+}
+
+TEST_F(WindowManagerTest,
+       DialogWindowSizedToContentNonResizableHasNoThickFrame) {
+  IsolateScope isolate_scope(isolate());
+
+  DialogWindowCreationRequest creation_request{
+      .preferred_size = {.has_preferred_view_size = false},
+      .preferred_constraints = {.has_view_constraints = false},
+      .title = L"Dialog Sized To Content Non-Resizable",
+      .parent_or_null = nullptr,
+      .sized_to_content = true,
+      .resizable = false};
+
+  const int64_t view_id =
+      InternalFlutterWindows_WindowManager_CreateDialogWindow(engine_id(),
+                                                              &creation_request);
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(engine_id(),
+                                                                   view_id);
+
+  const LONG style = GetWindowLong(window_handle, GWL_STYLE);
+  EXPECT_EQ(style & WS_THICKFRAME, 0L);
+}
+
 }  // namespace testing
 }  // namespace flutter
