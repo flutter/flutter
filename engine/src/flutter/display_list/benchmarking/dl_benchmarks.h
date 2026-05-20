@@ -21,7 +21,10 @@ enum BenchmarkAttributes {
   kFilledStyle = 1 << 1,
   kHairlineStroke = 1 << 2,
   kWideStroke10 = 1 << 3,
-  kAntiAliasing = 1 << 4
+  kWideStroke20 = 1 << 4,
+  kAntiAliasing = 1 << 5,
+  kShadow5 = 1 << 6,
+  kShadow10 = 1 << 7,
 };
 
 enum class RRectType {
