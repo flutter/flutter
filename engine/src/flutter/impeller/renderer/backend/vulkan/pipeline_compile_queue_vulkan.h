@@ -27,23 +27,17 @@ class PipelineCompileQueueVulkan : public PipelineCompileQueue {
       delete;
 
   //----------------------------------------------------------------------------
-  /// @brief      Post a compile job for the specified descriptor.
-  ///
-  /// @param[in]  desc  The description
-  /// @param[in]  job   The job
-  ///
-  /// @return     If the job was successfully posted to the parallel task
-  /// runners.
-  ///
-  bool PostJobForDescriptor(const PipelineDescriptor& desc,
-                            const fml::closure& job) override;
-
-  //----------------------------------------------------------------------------
   /// @brief      Post a job to the worker task runner.
   ///
   /// @param[in]  job   The job
   ///
   void PostJob(const fml::closure& job) override;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Called after a job has been added to the queue. Implements
+  ///             the parallel scheduling strategy for Vulkan.
+  ///
+  void OnJobAdded() override;
 
  private:
   std::shared_ptr<fml::BasicTaskRunner> worker_task_runner_;

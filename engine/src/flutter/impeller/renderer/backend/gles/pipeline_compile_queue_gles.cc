@@ -19,40 +19,35 @@ PipelineCompileQueueGLES::PipelineCompileQueueGLES(
     fml::RefPtr<fml::TaskRunner> worker_task_runner)
     : worker_task_runner_(std::move(worker_task_runner)) {}
 
-PipelineCompileQueueGLES::~PipelineCompileQueueGLES() {}
+// The base class destructor calls FinishAllJobs() which drains any remaining
+// pending jobs on the current thread. If a ProcessJobsSequentially task is
+// still in flight on the IO thread, the weak_from_this() capture in the
+// posted lambda will safely return nullptr and the task will be a no-op.
+// Any jobs already taken from the queue by the IO thread will still execute,
+// but this is safe because they capture weak references to the pipeline
+// library (not to this compile queue).
+PipelineCompileQueueGLES::~PipelineCompileQueueGLES() = default;
 
-bool PipelineCompileQueueGLES::PostJobForDescriptor(
-    const PipelineDescriptor& desc,
-    const fml::closure& job) {
-  if (!job) {
-    return false;
-  }
-
-  if (!AddJob(desc, job)) {
-    // This bit is being extremely conservative. If insertion did not take
-    // place, someone gave the compile queue a job for the same description.
-    // This is highly unusual but technically not impossible. Just run the job
-    // eagerly.
-    FML_LOG(ERROR) << "Got multiple compile jobs for the same descriptor. "
-                      "Running eagerly.";
-    PostJob(job);
-    return true;
-  }
-
-  std::scoped_lock lock(processing_mutex_);
+void PipelineCompileQueueGLES::OnJobAdded() {
+  Lock lock(processing_mutex_);
   if (!is_processing_) {
     is_processing_ = true;
     ProcessJobsSequentially();
   }
-  return true;
 }
 
 void PipelineCompileQueueGLES::PostJob(const fml::closure& job) {
   if (!job) {
     return;
   }
-
-  worker_task_runner_->PostTask(job);
+  if (worker_task_runner_) {
+    worker_task_runner_->PostTask(job);
+  } else {
+    // No task runner available, execute synchronously on the current thread.
+    // This is safe in Playground/test environments where the current thread
+    // is the GL thread.
+    job();
+  }
 }
 
 void PipelineCompileQueueGLES::ProcessJobsSequentially() {
@@ -61,7 +56,7 @@ void PipelineCompileQueueGLES::ProcessJobsSequentially() {
             weak_queue.lock())) {
       queue->DoOneJob();
       {
-        std::scoped_lock lock(queue->processing_mutex_);
+        Lock lock(queue->processing_mutex_);
         if (!queue->HasPendingJobs()) {
           queue->is_processing_ = false;
           return;

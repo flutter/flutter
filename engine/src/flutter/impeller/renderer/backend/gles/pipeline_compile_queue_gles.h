@@ -5,11 +5,9 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_PIPELINE_COMPILE_QUEUE_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_PIPELINE_COMPILE_QUEUE_GLES_H_
 
-#include <atomic>
-#include <mutex>
-
 #include "flutter/fml/closure.h"
 #include "flutter/fml/task_runner.h"
+#include "impeller/base/thread.h"
 #include "impeller/renderer/pipeline_compile_queue.h"
 
 namespace impeller {
@@ -29,30 +27,24 @@ class PipelineCompileQueueGLES : public PipelineCompileQueue {
   PipelineCompileQueueGLES& operator=(const PipelineCompileQueueGLES&) = delete;
 
   //----------------------------------------------------------------------------
-  /// @brief      Post a compile job for the specified descriptor.
-  ///
-  /// @param[in]  desc  The description
-  /// @param[in]  job   The job
-  ///
-  /// @return     If the job was successfully posted to the parallel task
-  /// runners.
-  ///
-  bool PostJobForDescriptor(const PipelineDescriptor& desc,
-                            const fml::closure& job) override;
-
-  //----------------------------------------------------------------------------
   /// @brief      Post a job to the worker task runner.
   ///
   /// @param[in]  job   The job
   ///
   void PostJob(const fml::closure& job) override;
 
-  void ProcessJobsSequentially();
+  //----------------------------------------------------------------------------
+  /// @brief      Called after a job has been added to the queue. Implements
+  ///             the sequential scheduling strategy for GLES.
+  ///
+  void OnJobAdded() override;
 
  private:
+  void ProcessJobsSequentially();
+
   fml::RefPtr<fml::TaskRunner> worker_task_runner_;
-  std::mutex processing_mutex_;
-  bool is_processing_ = false;
+  Mutex processing_mutex_;
+  bool is_processing_ IPLR_GUARDED_BY(processing_mutex_) = false;
 };
 
 }  // namespace impeller
