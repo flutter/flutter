@@ -464,6 +464,10 @@ class CanvasKitRenderer extends Renderer {
       isExperimentalWebParagraph ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
 
   @override
+  WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) =>
+      CanvasKitPainter(paragraph);
+
+  @override
   void clearFragmentProgramCache() {
     _programs.clear();
   }
