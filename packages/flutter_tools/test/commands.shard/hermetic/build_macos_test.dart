@@ -133,7 +133,6 @@ void main() {
     List<String>? additionalCommandArguments,
     String hostPlatformArch = 'x86_64',
   }) {
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
     final destination = configuration == 'Debug'
         ? 'platform=macOS,arch=$hostPlatformArch'
@@ -144,7 +143,7 @@ void main() {
         'xcrun',
         'xcodebuild',
         '-workspace',
-        flutterProject.macos.xcodeWorkspace!.path,
+        fileSystem.directory(fileSystem.path.join('macos', 'Runner.xcworkspace')).absolute.path,
         '-configuration',
         configuration,
         '-scheme',
@@ -707,11 +706,11 @@ STDERR STUFF
         'FLUTTER_XCODE_ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon.special',
       });
 
+      createMinimalMockProjectFiles();
       final FlutterProject flutterProject = FlutterProject.fromDirectory(
         fileSystem.currentDirectory,
       );
       final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
-      createMinimalMockProjectFiles();
 
       fakeProcessManager.addCommands(<FakeCommand>[
         FakeCommand(
