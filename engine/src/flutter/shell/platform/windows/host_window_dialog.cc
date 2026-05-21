@@ -64,22 +64,16 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
       .is_sized_to_content = sized_to_content,
   });
 
-  if (!sized_to_content) {
-    InitialModalState();
+  auto hwnd = window_handle_;
+  if (owner_window) {
+    if (HMENU hMenu = GetSystemMenu(hwnd, FALSE)) {
+      EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_GRAYED);
+    }
   }
-}
 
-void HostWindowDialog::InitialModalState() {
-    auto hwnd = GetWindowHandle();
-    if (GetOwnerWindow()) {
-      if (HMENU hMenu = GetSystemMenu(hwnd, FALSE)) {
-        EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_GRAYED);
-      }
-    }
-
-    if (GetOwnerWindow()) {
-      UpdateModalState();
-    }
+  if (owner_window) {
+    UpdateModalState();
+  }
 }
 
 #include <iostream>
