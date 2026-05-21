@@ -568,7 +568,7 @@ class XcodeProjectInterpreter {
     return ignoredSchemes;
   }
 
-  /// Returns scheme names contributed by resolved Swift package checkouts.
+  /// Returns scheme names contributed by direct and transitive Swift package checkouts.
   ///
   /// When a Swift package ships its own `.swiftpm/xcode/xcshareddata/xcschemes/`
   /// directory, Xcode auto-merges those schemes into the host project's scheme
