@@ -1050,11 +1050,11 @@ Future<void> testMain() async {
 
   test('Paragraph with different locales for the same language', () async {
     final recorder = PictureRecorder();
-    const region = Rect.fromLTWH(0, 0, 400, 300);
+    const region = Rect.fromLTWH(0, 0, 1000, 400);
     final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
 
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 40);
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 40);
     final noLocaleStyle = WebTextStyle();
     final localeStyles = [
       WebTextStyle(locale: const Locale('zh', 'CN')),
@@ -1074,11 +1074,17 @@ Future<void> testMain() async {
       builder.pop();
     }
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 500));
-    paragraph.paint(canvas, const Offset(20, 20));
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+    final double fullWidth = paragraph.maxIntrinsicWidth;
+    paragraph.layout(ParagraphConstraints(width: fullWidth));
+    const offset = Offset(20, 20);
+    paragraph.paint(canvas, offset);
 
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph.locales.png', region: region);
+    await matchGoldenFile(
+      'web_paragraph.locales.png',
+      region: Rect.fromLTWH(offset.dx, offset.dy, fullWidth, paragraph.height).inflate(20.0),
+    );
   });
 
   test('NoHeightMultiplier', () async {
