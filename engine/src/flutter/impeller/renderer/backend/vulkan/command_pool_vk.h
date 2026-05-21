@@ -61,10 +61,12 @@ class CommandPoolVK final {
   /// @see        |GarbageCollectBuffersIfAble|
   void CollectCommandBuffer(vk::UniqueCommandBuffer&& buffer);
 
+ private:
+  friend CommandPoolRecyclerVK;
+
   /// @brief      Delete all Vulkan objects in this command pool.
   void Destroy();
 
- private:
   CommandPoolVK(const CommandPoolVK&) = delete;
 
   CommandPoolVK& operator=(const CommandPoolVK&) = delete;

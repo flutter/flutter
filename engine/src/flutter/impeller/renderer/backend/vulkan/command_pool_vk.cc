@@ -70,6 +70,10 @@ class BackgroundCommandPoolVK final {
 };
 
 CommandPoolVK::~CommandPoolVK() {
+  if (!pool_) {
+    return;
+  }
+
   std::shared_ptr<DeviceHolderVK> device_holder = device_holder_.lock();
   if (!device_holder) {
     pool_.release();
@@ -79,10 +83,6 @@ CommandPoolVK::~CommandPoolVK() {
     for (auto& buffer : unused_command_buffers_) {
       buffer.release();
     }
-    return;
-  }
-
-  if (!pool_) {
     return;
   }
 
@@ -150,13 +150,9 @@ void CommandPoolVK::CollectCommandBuffer(vk::UniqueCommandBuffer&& buffer) {
 }
 
 void CommandPoolVK::Destroy() {
+  FML_DCHECK(device_holder_.lock());
   Lock lock(pool_mutex_);
-  std::shared_ptr<DeviceHolderVK> device_holder = device_holder_.lock();
-  if (device_holder) {
-    pool_.reset();
-  } else {
-    pool_.release();
-  }
+  pool_.reset();
 
   // When the command pool is destroyed, all of its command buffers are freed.
   // Handles allocated from that pool are now invalid and must be discarded.
