@@ -294,6 +294,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/174689.
   testWidgets('default text selection width style', (WidgetTester tester) async {
     const blue = Color(0xFF2196F3);
     const grey = Color(0xFF9E9E9E);
