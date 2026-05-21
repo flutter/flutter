@@ -1,5 +1,7 @@
 For people who make the occasional contribution to Flutter (filing an issue, submitting the occasional PR, chatting on Discord), the default set of permissions is fine. However, if you are a frequent contributor, whether helping us in triage, or often fixing bugs, or regularly improving our documentation, or regularly helping others in our #help channel, or participating in high-level design discussions and prioritization, you may find your life is more pleasant with commit access (also known as "contributor access", "being a member of the flutter-hackers group", "being a member of the Flutter team").
 
+The "write access" label in GitHub's pull request UI refers to the commit access (or "contributor access") described on this page.
+
 We grant commit access (which includes full rights to the issue database, such as being able to edit labels, and grants access to our internal chat channels) to people who have gained our trust and demonstrated a commitment to Flutter.
 
 Specifically, if you meet one of the following criteria and you have a sponsor (someone who already has contributor access and agrees that you should be granted access), then please ask your sponsor to propose, on the #server-support [Chat](Chat.md) channel, that you be made a member of the team, and then reply to that message explaining which criteria below you are claiming to meet. The possible criteria are:
