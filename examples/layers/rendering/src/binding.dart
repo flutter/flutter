@@ -31,6 +31,9 @@ class ViewRenderingFlutterBinding extends RenderingFlutterBinding {
     _renderView = initRenderView(PlatformDispatcher.instance.implicitView!);
     _renderView.child = _root;
     _root = null;
+    if (rootPipelineOwner.semanticsOwner != null) {
+      _renderView.scheduleInitialSemantics();
+    }
   }
 
   RenderBox? _root;
@@ -56,13 +59,19 @@ class ViewRenderingFlutterBinding extends RenderingFlutterBinding {
   PipelineOwner createRootPipelineOwner() {
     return PipelineOwner(
       onSemanticsOwnerCreated: () {
-        renderView.scheduleInitialSemantics();
+        if (rootPipelineOwner.rootNode case final RenderView renderView) {
+          renderView.scheduleInitialSemantics();
+        }
       },
       onSemanticsUpdate: (SemanticsUpdate update) {
-        renderView.updateSemantics(update);
+        if (rootPipelineOwner.rootNode case final RenderView renderView) {
+          renderView.updateSemantics(update);
+        }
       },
       onSemanticsOwnerDisposed: () {
-        renderView.clearSemantics();
+        if (rootPipelineOwner.rootNode case final RenderView renderView) {
+          renderView.clearSemantics();
+        }
       },
     );
   }
