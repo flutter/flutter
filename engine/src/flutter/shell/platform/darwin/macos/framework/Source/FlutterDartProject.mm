@@ -102,11 +102,7 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
 }
 
 - (BOOL)enableSDFs {
-  NSNumber* enableSDFs = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableSDFs"];
-  if (enableSDFs != nil) {
-    return enableSDFs.boolValue;
-  }
-  return NO;
+  return YES;
 }
 
 - (NSString*)assetsPath {

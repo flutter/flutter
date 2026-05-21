@@ -1900,7 +1900,7 @@ class OverlayPortal extends StatefulWidget {
   /// called.
   ///
   /// Developers can use `overlayChildBuilder` to configure the overlay child
-  /// based on the the size and the location of [OverlayPortal.child] within the
+  /// based on the size and the location of [OverlayPortal.child] within the
   /// target [Overlay], as well as the size of the [Overlay] itself. This allows
   /// the overlay child to, for example, always follow [OverlayPortal.child] and
   /// at the same time resize itself base on how close it is to the edges of
@@ -2491,9 +2491,9 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
   const _DeferredLayout({
     // This widget must not be given a key: we currently do not support
     // reparenting between the overlayChild and child.
-    required Widget child,
+    required Widget super.child,
     this.childIdentifier,
-  }) : super(child: child);
+  });
 
   final Object? childIdentifier;
 

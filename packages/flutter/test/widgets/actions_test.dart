@@ -1899,7 +1899,7 @@ class ThirdTestIntent extends SecondTestIntent {
 }
 
 class TestAction extends CallbackAction<TestIntent> {
-  TestAction({required OnInvokeCallback onInvoke}) : super(onInvoke: onInvoke);
+  TestAction({required OnInvokeCallback super.onInvoke});
 
   @override
   bool isEnabled(TestIntent intent) => enabled;
