@@ -45,11 +45,18 @@ const Set<TargetPlatform> _kMobilePlatforms = <TargetPlatform>{
 /// views in a subtree. For example, the [Scaffold] uses this mechanism to
 /// implement the scroll-to-top gesture on iOS.
 ///
-/// Another default behavior handled by the PrimaryScrollController is default
-/// [ScrollAction]s. If a ScrollAction is not handled by an otherwise focused
-/// part of the application, the ScrollAction will be evaluated using the scroll
-/// view associated with a PrimaryScrollController, for example, when executing
-/// [Shortcuts] key events like page up and down.
+/// The PrimaryScrollController can also provide the fallback controller for
+/// default [ScrollAction]s. A [ScrollAction] first looks for an enclosing
+/// [Scrollable] around the current [primaryFocus]. If none is found, the
+/// PrimaryScrollController associated with that focus scope is considered for
+/// fallback handling, for example, when executing [Shortcuts] key events like
+/// page up and down, or the space bar on the web.
+///
+/// Only one [ScrollPosition] can be attached to the fallback controller when a
+/// [ScrollAction] is invoked. In layouts with multiple scroll views, make sure
+/// only the intended fallback scroll view can attach to the
+/// PrimaryScrollController; set [ScrollView.primary] to false or give other
+/// scroll views unique [ScrollController]s when needed.
 ///
 /// See also:
 ///   * [ScrollAction], an [Action] that scrolls the [Scrollable] that encloses

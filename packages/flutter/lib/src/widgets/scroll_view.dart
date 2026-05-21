@@ -196,10 +196,19 @@ abstract class ScrollView extends StatelessWidget {
   /// sufficient content to actually scroll. Otherwise, by default the user can
   /// only scroll the view if it has sufficient content. See [physics].
   ///
-  /// Also when true, the scroll view is used for default [ScrollAction]s. If a
-  /// ScrollAction is not handled by an otherwise focused part of the application,
-  /// the ScrollAction will be evaluated using this scroll view, for example,
-  /// when executing [Shortcuts] key events like page up and down.
+  /// Also when true, the scroll view can be used for fallback [ScrollAction]s.
+  /// A [ScrollAction] first looks for an enclosing [Scrollable] around the
+  /// current [primaryFocus]. If none is found, the [PrimaryScrollController]
+  /// associated with that focus scope is considered, for example, when
+  /// executing [Shortcuts] key events like page up and down, or the space bar
+  /// on the web.
+  ///
+  /// Only one [ScrollPosition] can be attached to that fallback controller when
+  /// a [ScrollAction] is invoked. On mobile platforms, vertical scroll views
+  /// with no explicit [controller] can automatically inherit the
+  /// [PrimaryScrollController]. In layouts with multiple scroll views, set this
+  /// to false or provide unique [ScrollController]s for scroll views that
+  /// should not receive fallback [ScrollAction]s.
   ///
   /// On iOS, this also identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
