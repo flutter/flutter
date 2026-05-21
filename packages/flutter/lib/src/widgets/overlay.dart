@@ -448,14 +448,26 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
 /// [MaterialApp]. The navigator uses its overlay to manage the visual
 /// appearance of its routes.
 ///
-/// The [Overlay] widget uses a custom stack implementation, which is very
-/// similar to the [Stack] widget. The main use case of [Overlay] is related to
-/// navigation and being able to insert widgets on top of the pages in an app.
-/// For layout purposes unrelated to navigation, consider using [Stack] instead.
+/// The [Overlay] widget uses a custom stack implementation, which uses the same
+/// layout algorithm as the [Stack] widget. The widgets built by overlay entries
+/// can use [Positioned] and [Positioned.directional] as they would in a [Stack].
+/// The main use case of [Overlay] is related to navigation and being able to
+/// insert widgets on top of the pages in an app. For layout purposes unrelated
+/// to navigation, consider using [Stack] instead.
 ///
 /// An [Overlay] widget requires a [Directionality] widget to be in scope, so
 /// that it can resolve direction-sensitive coordinates of any
 /// [Positioned.directional] children.
+///
+/// When [alwaysSizeToContent] is false and the incoming constraints are
+/// bounded, the overlay takes the biggest possible size allowed by those
+/// constraints. Otherwise, it sizes itself using a non-[Positioned]
+/// [OverlayEntry] with [OverlayEntry.canSizeOverlay] set to true. See
+/// [OverlayEntry.canSizeOverlay] for details about size-determining overlay
+/// entries. Non-[Positioned] overlay entries that do not determine the overlay's
+/// size are laid out with tight constraints matching the [Overlay]'s size. To
+/// make an overlay entry's child smaller than the [Overlay], position or size it
+/// inside the entry using widgets such as [Positioned] or [Align].
 ///
 /// For widgets drawn in an [OverlayEntry], do not assume that the size of the
 /// [Overlay] is the size returned by [MediaQuery.sizeOf]. Nested overlays can
