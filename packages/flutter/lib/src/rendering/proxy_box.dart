@@ -145,18 +145,35 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
 }
 
 /// How to behave during hit tests.
+///
+/// These values control whether a [RenderProxyBoxWithHitTestBehavior] can add
+/// itself to the hit test result and how the hit test result is reported to its
+/// parent when the pointer is within its bounds.
+///
+/// Hit testing still walks this render object's children before testing the
+/// render object itself. A behavior of [opaque] or [translucent] does not
+/// prevent descendants from also being hit.
 enum HitTestBehavior {
-  /// Targets that defer to their children receive events within their bounds
-  /// only if one of their children is hit by the hit test.
+  /// The target receives events within its bounds only if one of its children
+  /// is hit by the hit test.
+  ///
+  /// If no child is hit, a parent that tests visually behind this target can
+  /// continue testing those targets.
   deferToChild,
 
-  /// Opaque targets can be hit by hit tests, causing them to both receive
-  /// events within their bounds and prevent targets visually behind them from
-  /// also receiving events.
+  /// The target receives events within its bounds and prevents targets visually
+  /// behind it from also receiving events.
+  ///
+  /// Because children are hit tested first, this behavior does not prevent
+  /// children from also receiving events.
   opaque,
 
-  /// Translucent targets both receive events within their bounds and permit
-  /// targets visually behind them to also receive events.
+  /// The target receives events within its bounds and permits targets visually
+  /// behind it to also receive events when no child is hit.
+  ///
+  /// When a child is hit, this target reports that hit to its parent, so a
+  /// parent that tests visually behind this target does not continue testing
+  /// those targets.
   translucent,
 }
 

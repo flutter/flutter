@@ -246,8 +246,9 @@ class Scrollable extends StatefulWidget {
   /// {@template flutter.widgets.scrollable.hitTestBehavior}
   /// Defines the behavior of gesture detector used in this [Scrollable].
   ///
-  /// This defaults to [HitTestBehavior.opaque] which means it prevents targets
-  /// behind this [Scrollable] from receiving events.
+  /// This defaults to [HitTestBehavior.opaque], which means the [Scrollable]
+  /// receives events within its bounds and prevents targets visually behind it
+  /// from also receiving events.
   /// {@endtemplate}
   ///
   /// See also:
