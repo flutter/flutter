@@ -36,6 +36,20 @@ void main() {
     });
   });
 
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
+
+  // ARM host.
+  const kARMCheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    stdout: 'hw.optional.arm64: 1',
+  );
+
   const kResolvePackagesCommandList = <String>[
     'xcrun',
     'xcodebuild',
@@ -71,6 +85,8 @@ void main() {
     'xcodebuild versionText returns null when xcodebuild is not fully installed',
     () {
       fakeProcessManager.addCommands(const <FakeCommand>[
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>['xcrun', 'xcodebuild', '-version'],
           stdout:
@@ -88,6 +104,8 @@ void main() {
 
   testWithoutContext('xcodebuild versionText returns null when xcodebuild is not installed', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
       FakeCommand(
         command: <String>['xcrun', 'xcodebuild', '-version'],
         exception: ProcessException(xcodebuild, <String>['-version']),
@@ -99,8 +117,8 @@ void main() {
 
   testWithoutContext('xcodebuild versionText returns formatted version text', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
-      FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-      FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '0'),
+      kWhichSysctlCommand,
+      kx64CheckCommand,
       FakeCommand(
         command: <String>['xcrun', 'xcodebuild', '-version'],
         stdout: 'Xcode 8.3.3\nBuild version 8E3004b',
@@ -115,6 +133,8 @@ void main() {
     'xcodebuild versionText handles Xcode version string with unexpected format',
     () {
       fakeProcessManager.addCommands(const <FakeCommand>[
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>['xcrun', 'xcodebuild', '-version'],
           stdout: 'Xcode Ultra5000\nBuild version 8E3004b',
@@ -128,6 +148,8 @@ void main() {
 
   testWithoutContext('xcodebuild version parts can be parsed', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
       FakeCommand(
         command: <String>['xcrun', 'xcodebuild', '-version'],
         stdout: 'Xcode 11.4.1\nBuild version 11N111s',
@@ -141,6 +163,8 @@ void main() {
 
   testWithoutContext('xcodebuild minor and patch version default to 0', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
       FakeCommand(
         command: <String>['xcrun', 'xcodebuild', '-version'],
         stdout: 'Xcode 11\nBuild version 11N111s',
@@ -153,6 +177,8 @@ void main() {
 
   testWithoutContext('xcodebuild version parts is null when version has unexpected format', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
       FakeCommand(
         command: <String>['xcrun', 'xcodebuild', '-version'],
         stdout: 'Xcode Ultra5000\nBuild version 8E3004b',
@@ -187,6 +213,8 @@ void main() {
 
   testWithoutContext('xcodebuild isInstalled is false when Xcode is not fully installed', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
       FakeCommand(
         command: <String>['xcrun', 'xcodebuild', '-version'],
         stdout:
@@ -203,6 +231,8 @@ void main() {
 
   testWithoutContext('xcodebuild isInstalled is false when version has unexpected format', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
       FakeCommand(
         command: <String>['xcrun', 'xcodebuild', '-version'],
         stdout: 'Xcode Ultra5000\nBuild version 8E3004b',
@@ -215,6 +245,8 @@ void main() {
 
   testWithoutContext('xcodebuild isInstalled is true when version has expected format', () {
     fakeProcessManager.addCommands(const <FakeCommand>[
+      kWhichSysctlCommand,
+      kx64CheckCommand,
       FakeCommand(
         command: <String>['xcrun', 'xcodebuild', '-version'],
         stdout: 'Xcode 8.3.3\nBuild version 8E3004b',
@@ -226,13 +258,7 @@ void main() {
   });
 
   testWithoutContext('xcrun runs natively on arm64', () {
-    final xcodeProjectInterpreter = XcodeProjectInterpreter(
-      logger: logger,
-      fileSystem: fileSystem,
-      platform: platform,
-      processManager: fakeProcessManager,
-      analytics: const NoOpAnalytics(),
-    );
+    fakeProcessManager.addCommands(const <FakeCommand>[kWhichSysctlCommand, kARMCheckCommand]);
 
     expect(xcodeProjectInterpreter.xcrunCommand(), <String>['/usr/bin/arch', '-arm64e', 'xcrun']);
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -244,6 +270,8 @@ void main() {
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
+kWhichSysctlCommand,
+const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -288,6 +316,8 @@ void main() {
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
+kWhichSysctlCommand,
+kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -332,6 +362,8 @@ void main() {
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
+kWhichSysctlCommand,
+kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -376,6 +408,8 @@ void main() {
         'FLUTTER_XCODE_ARCHS': 'arm64',
       };
       fakeProcessManager.addCommands(<FakeCommand>[
+kWhichSysctlCommand,
+kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -420,6 +454,8 @@ void main() {
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
+kWhichSysctlCommand,
+kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -462,6 +498,8 @@ void main() {
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
+kWhichSysctlCommand,
+kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -504,6 +542,8 @@ void main() {
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         const FakeCommand(
           command: <String>[
             'xcrun',
@@ -556,6 +596,8 @@ void main() {
     };
 
     fakeProcessManager.addCommands(const <FakeCommand>[
+kWhichSysctlCommand,
+kx64CheckCommand,
       kResolvePackagesCommand,
       FakeCommand(
         command: <String>[
@@ -593,6 +635,8 @@ void main() {
       const workingDirectory = '/';
       final Directory buildDirectory = fileSystem.directory('build/ios');
       fakeProcessManager.addCommands(const <FakeCommand>[
+kWhichSysctlCommand,
+kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -635,6 +679,8 @@ void main() {
       const stderr = 'Useful Xcode failure message about missing project.';
 
       fakeProcessManager.addCommands(const <FakeCommand>[
+kWhichSysctlCommand,
+kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -679,6 +725,8 @@ void main() {
       final Directory buildDirectory = fileSystem.directory('build/ios');
 
       fakeProcessManager.addCommands(const <FakeCommand>[
+kWhichSysctlCommand,
+kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -1417,8 +1465,8 @@ Information about project "Runner":
           final String buildDirectory = fs.path.absolute('build', 'ios');
 
           fakeProcessManager.addCommands(<FakeCommand>[
-            const FakeCommand(command: <String>['which', 'sysctl'], stdout: '/usr/sbin/sysctl'),
-            const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], stdout: '1'),
+            kWhichSysctlCommand,
+            kARMCheckCommand,
             FakeCommand(
               command: <String>[
                 '/usr/bin/arch',
@@ -1528,6 +1576,8 @@ PODS:
           final String buildDirectory = fs.path.absolute('build', 'ios');
 
           fakeProcessManager.addCommands(<FakeCommand>[
+            kWhichSysctlCommand,
+            kARMCheckCommand,
             FakeCommand(
               command: <String>[
                 '/usr/bin/arch',
@@ -1594,6 +1644,8 @@ Build settings for action build and target good_plugin:
           final String buildDirectory = fs.path.absolute('build', 'ios');
 
           fakeProcessManager.addCommands(<FakeCommand>[
+            kWhichSysctlCommand,
+            kARMCheckCommand,
             FakeCommand(
               command: <String>[
                 '/usr/bin/arch',
@@ -1666,6 +1718,8 @@ Build settings for action build and target good_plugin:
           final String buildDirectory = fs.path.absolute('build', 'ios');
 
           fakeProcessManager.addCommands(<FakeCommand>[
+            kWhichSysctlCommand,
+            kARMCheckCommand,
             FakeCommand(
               command: <String>[
                 '/usr/bin/arch',
@@ -1748,6 +1802,8 @@ Build settings for action build and target bad_plugin:
           final String buildDirectory = fs.path.absolute('build', 'ios');
 
           fakeProcessManager.addCommands(<FakeCommand>[
+            kWhichSysctlCommand,
+            kARMCheckCommand,
             FakeCommand(
               command: <String>[
                 '/usr/bin/arch',
@@ -2492,7 +2548,6 @@ flutter:
       platform: platform,
       processManager: fakeProcessManager,
       analytics: const NoOpAnalytics(),
-      currentAbi: Abi.macosX64,
     );
     expect(
       xcodeProjectInterpreter.swiftPackageCachePath(buildDirectory),
