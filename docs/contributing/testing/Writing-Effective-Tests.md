@@ -1,4 +1,4 @@
-Tests are a critical framework tool for stability and education. Tests fulfill the following roles:
+Tests are a critical framework tool for stability and education. Tests serve the following roles:
 
 * Automatically protect against regressions
 * Define an executable specification that engrains original intent
