@@ -1323,6 +1323,24 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement
 /// ** See code in examples/api/lib/widgets/sliver/sliver_opacity.1.dart **
 /// {@end-tool}
 ///
+/// ## Hit testing
+///
+/// This widget affects painting and semantics only. At an [opacity] of zero,
+/// the sliver child is not painted and is excluded from the semantics tree
+/// unless [alwaysIncludeSemantics] is true.
+///
+/// Setting the [opacity] to zero does not prevent hit testing from being
+/// applied to the descendants of the [SliverOpacity] widget. This can be
+/// confusing for the user, who may not see anything, and may believe the area
+/// of the interface where the [SliverOpacity] is hiding a widget to be
+/// non-interactive. With the default semantics behavior, this can also cause an
+/// invisible widget to be interactive without being exposed to assistive
+/// technologies.
+///
+/// To avoid such problems, it is generally a good idea to use a
+/// [SliverIgnorePointer] widget when setting the [opacity] to zero. This
+/// prevents interactions with any children in the subtree.
+///
 /// See also:
 ///
 ///  * [Opacity], which can apply a uniform alpha effect to its child using the
@@ -1363,7 +1381,8 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
   /// When true, regardless of the opacity settings, the sliver child semantic
   /// information is exposed as if the widget were fully visible. This is
   /// useful in cases where labels may be hidden during animations that
-  /// would otherwise contribute relevant semantics.
+  /// would otherwise contribute relevant semantics. When false, semantics are
+  /// excluded when [opacity] is zero.
   final bool alwaysIncludeSemantics;
 
   @override

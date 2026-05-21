@@ -562,11 +562,17 @@ class SizeTransition extends AnimatedWidget {
 ///
 /// ## Hit testing
 ///
-/// Setting the [opacity] to zero does not prevent hit testing from being
-/// applied to the descendants of the [FadeTransition] widget. This can be
-/// confusing for the user, who may not see anything, and may believe the area
-/// of the interface where the [FadeTransition] is hiding a widget to be
-/// non-interactive.
+/// This widget affects painting and semantics only. When the [opacity]
+/// animation has a value of zero, the child is not painted and is excluded from
+/// the semantics tree unless [alwaysIncludeSemantics] is true.
+///
+/// When the [opacity] animation reaches zero, hit testing is still applied to
+/// the descendants of the [FadeTransition] widget. This can be confusing for
+/// the user, who may not see anything, and may believe the area of the
+/// interface where the [FadeTransition] is hiding a widget to be
+/// non-interactive. With the default semantics behavior, this can also cause an
+/// invisible widget to be interactive without being exposed to assistive
+/// technologies.
 ///
 /// With certain widgets, such as [Flow], that compute their positions only when
 /// they are painted, this can actually lead to bugs (from unexpected geometry
@@ -610,7 +616,8 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   /// When true, regardless of the opacity settings the child semantic
   /// information is exposed as if the widget were fully visible. This is
   /// useful in cases where labels may be hidden during animations that
-  /// would otherwise contribute relevant semantics.
+  /// would otherwise contribute relevant semantics. When false, semantics are
+  /// excluded when the [opacity] value is zero.
   final bool alwaysIncludeSemantics;
 
   @override
@@ -656,11 +663,17 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 ///
 /// ## Hit testing
 ///
-/// Setting the [opacity] to zero does not prevent hit testing from being
-/// applied to the descendants of the [SliverFadeTransition] widget. This can be
-/// confusing for the user, who may not see anything, and may believe the area
-/// of the interface where the [SliverFadeTransition] is hiding a widget to be
-/// non-interactive.
+/// This widget affects painting and semantics only. When the [opacity]
+/// animation has a value of zero, the sliver child is not painted and is
+/// excluded from the semantics tree unless [alwaysIncludeSemantics] is true.
+///
+/// When the [opacity] animation reaches zero, hit testing is still applied to
+/// the descendants of the [SliverFadeTransition] widget. This can be confusing
+/// for the user, who may not see anything, and may believe the area of the
+/// interface where the [SliverFadeTransition] is hiding a widget to be
+/// non-interactive. With the default semantics behavior, this can also cause an
+/// invisible widget to be interactive without being exposed to assistive
+/// technologies.
 ///
 /// With certain widgets, such as [Flow], that compute their positions only when
 /// they are painted, this can actually lead to bugs (from unexpected geometry
@@ -703,7 +716,8 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
   /// When true, regardless of the opacity settings the sliver child's semantic
   /// information is exposed as if the widget were fully visible. This is
   /// useful in cases where labels may be hidden during animations that
-  /// would otherwise contribute relevant semantics.
+  /// would otherwise contribute relevant semantics. When false, semantics are
+  /// excluded when the [opacity] value is zero.
   final bool alwaysIncludeSemantics;
 
   @override

@@ -306,10 +306,16 @@ class Directionality extends _UbiquitousInheritedWidget {
 ///
 /// ## Hit testing
 ///
+/// This widget affects painting and semantics only. At an [opacity] of zero,
+/// the child is not painted and is excluded from the semantics tree unless
+/// [alwaysIncludeSemantics] is true.
+///
 /// Setting the [opacity] to zero does not prevent hit testing from being applied
 /// to the descendants of the [Opacity] widget. This can be confusing for the
 /// user, who may not see anything, and may believe the area of the interface
 /// where the [Opacity] is hiding a widget to be non-interactive.
+/// With the default semantics behavior, this can also cause an invisible widget
+/// to be interactive without being exposed to assistive technologies.
 ///
 /// With certain widgets, such as [Flow], that compute their positions only when
 /// they are painted, this can actually lead to bugs (from unexpected geometry
@@ -358,7 +364,8 @@ class Opacity extends SingleChildRenderObjectWidget {
   /// When true, regardless of the opacity settings the child semantic
   /// information is exposed as if the widget were fully visible. This is
   /// useful in cases where labels may be hidden during animations that
-  /// would otherwise contribute relevant semantics.
+  /// would otherwise contribute relevant semantics. When false, semantics are
+  /// excluded when [opacity] is zero.
   final bool alwaysIncludeSemantics;
 
   @override
