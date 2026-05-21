@@ -820,38 +820,40 @@ void main() {
     WidgetTester tester,
   ) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Column(
-            children: <Widget>[
-              Autocomplete<String>(
-                optionsBuilder: (TextEditingValue textEditingValue) {
-                  const options = <String>['Apple', 'Banana', 'Cherry'];
-                  return options.where(
-                    (String option) => option.toLowerCase().contains(textEditingValue.text),
-                  );
-                },
-              ),
-              for (int i = 0; i < 3; i++) ListTile(title: Text('Item $i'), onTap: () {}),
-            ],
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                Autocomplete<String>(
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    const options = <String>['Apple', 'Banana', 'Cherry'];
+                    return options.where(
+                      (String option) => option.toLowerCase().contains(textEditingValue.text),
+                    );
+                  },
+                ),
+                for (int i = 0; i < 3; i++) ListTile(title: Text('Item $i'), onTap: () {}),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    await tester.tap(find.byType(TextField));
-    await tester.pump();
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
 
-    final Finder cherryFinder = find.text('Cherry');
-    expect(cherryFinder, findsOneWidget);
+      final Finder cherryFinder = find.text('Cherry');
+      expect(cherryFinder, findsOneWidget);
 
-    await tester.tap(cherryFinder);
-    await tester.pump();
+      await tester.tap(cherryFinder);
+      await tester.pump();
 
-    expect(find.widgetWithText(TextField, 'Cherry'), findsOneWidget);
-    handle.dispose();
+      expect(find.widgetWithText(TextField, 'Cherry'), findsOneWidget);
+    } finally {
+      handle.dispose();
+    }
   });
 
   testWidgets('Autocomplete renders at zero area', (WidgetTester tester) async {
