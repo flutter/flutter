@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'navigator.dart';
 /// @docImport 'value_listenable_builder.dart';
 library;
 
@@ -415,6 +416,12 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   ///
   /// This builder must only return a widget and should not have any side
   /// effects as it may be called multiple times.
+  ///
+  /// Side effects, such as calling [State.setState] or [Navigator.push], should
+  /// happen in callbacks or listeners that are executed outside of the build
+  /// method. For example, when a stream event should trigger navigation,
+  /// navigate from the stream listener, such as [Stream.listen], rather than
+  /// from this builder.
   final AsyncWidgetBuilder<T> builder;
 
   /// The data that will be used to create the initial snapshot.
@@ -568,6 +575,12 @@ class FutureBuilder<T> extends StatefulWidget {
   ///
   /// This builder must only return a widget and should not have any side
   /// effects as it may be called multiple times.
+  ///
+  /// Side effects, such as calling [State.setState] or [Navigator.push], should
+  /// happen in callbacks or listeners that are executed outside of the build
+  /// method. For example, when the future completes and triggers navigation,
+  /// navigate from the future's completion callback, such as [Future.then],
+  /// rather than from this builder.
   final AsyncWidgetBuilder<T> builder;
 
   /// The data that will be used to create the snapshots provided until a
