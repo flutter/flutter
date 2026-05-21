@@ -164,8 +164,10 @@ void main() {
       value: 1,
       duration: const Duration(seconds: 2),
     );
+    final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
     addTearDown(tester.view.reset);
     addTearDown(controller.dispose);
+    addTearDown(curvedAnimation.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -182,7 +184,7 @@ void main() {
                     const Rect.fromLTRB(81.0, 91.0, 91.0, 101.0),
                     const Rect.fromLTRB(1.0, 11.0, 101.0, 111.0),
                   ),
-                ).animate(CurvedAnimation(parent: controller, curve: Curves.linear)),
+                ).animate(curvedAnimation),
                 child: const Placeholder(),
               ),
             ],
@@ -248,8 +250,10 @@ void main() {
         value: 1,
         duration: const Duration(seconds: 2),
       );
+      final curvedAnimation = CurvedAnimation(parent: controller, curve: Curves.linear);
       addTearDown(tester.view.reset);
       addTearDown(controller.dispose);
+      addTearDown(curvedAnimation.dispose);
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -261,7 +265,7 @@ void main() {
                   rect: RectTween(
                     begin: const Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
                     end: const Rect.fromLTRB(1.0, 11.0, 101.0, 111.0),
-                  ).animate(CurvedAnimation(parent: controller, curve: Curves.linear)),
+                  ).animate(curvedAnimation),
                   child: const Placeholder(),
                 ),
               ],
