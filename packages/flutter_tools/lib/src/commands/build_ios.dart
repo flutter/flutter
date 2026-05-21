@@ -26,6 +26,7 @@ import '../ios/application_package.dart';
 import '../ios/code_signing.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
+import '../macos/swift_package_manager.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
@@ -532,10 +533,11 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     try {
       final String exportMethodDisplayName = isAppStoreUpload ? 'App Store' : exportMethod;
       status = globals.logger.startProgress('Building $exportMethodDisplayName IPA...');
+      Map<String, String>? buildSettings;
+      if (exportOptions == null || app.project.usesSwiftPackageManager) {
+        buildSettings = await app.project.buildSettingsForBuildInfo(buildInfo);
+      }
       if (exportOptions == null) {
-        final Map<String, String>? buildSettings = await app.project.buildSettingsForBuildInfo(
-          buildInfo,
-        );
         // Create XcodeCodeSigningSettings for dependency injection into createExportPlist
         final codeSigningSettings = XcodeCodeSigningSettings(
           config: globals.config,
@@ -556,6 +558,17 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
           codeSigningSettings: codeSigningSettings,
         );
         exportOptions = generatedExportPlist.path;
+      }
+
+      if (app.project.usesSwiftPackageManager && buildSettings != null) {
+        final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];
+        if (iosDeploymentTarget != null) {
+          SwiftPackageManager.updateMinimumDeployment(
+            platform: FlutterDarwinPlatform.ios,
+            project: project.ios,
+            deploymentTarget: iosDeploymentTarget,
+          );
+        }
       }
 
       result = await globals.processUtils.run(<String>[

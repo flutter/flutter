@@ -16,8 +16,10 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_ios.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -3108,7 +3110,119 @@ void main() {
       Artifacts: () => Artifacts.test(),
     },
   );
+
+  testUsingContext(
+    'ipa build updates minimum deployment target in Package.swift when Swift Package Manager is enabled',
+    () async {
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(),
+        exportArchiveCommand(exportOptionsPlist: _exportOptionsPlist),
+      ]);
+
+      createMinimalMockProjectFiles();
+
+      // Mock SPM migration files as already migrated to skip migration.
+      fileSystem
+          .file(fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj'))
+          .writeAsStringSync(
+            'FlutterGeneratedPluginSwiftPackage\n'
+            '78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference',
+          );
+      fileSystem
+          .file(
+            fileSystem.path.join(
+              'ios',
+              'Runner.xcodeproj',
+              'xcshareddata',
+              'xcschemes',
+              'Runner.xcscheme',
+            ),
+          )
+          .createSync(recursive: true);
+      fileSystem
+          .file(
+            fileSystem.path.join(
+              'ios',
+              'Runner.xcodeproj',
+              'xcshareddata',
+              'xcschemes',
+              'Runner.xcscheme',
+            ),
+          )
+          .writeAsStringSync('xcode_backend.sh');
+
+      // Create the Swift Package manifest file.
+      final File manifestFile = fileSystem.file(
+        'ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift',
+      );
+      manifestFile.createSync(recursive: true);
+      manifestFile.writeAsStringSync('.iOS("13.0")');
+
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        logger: logger,
+        fileSystem: fileSystem,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcodeWithVersion(Version(15, 0, 0)),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      await createTestCommandRunner(command).run(<String>['build', 'ipa', '--no-pub']);
+
+      // Verify the package manifest file is updated.
+      expect(manifestFile.readAsStringSync(), contains('.iOS("14.0")'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Logger: () => logger,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
+        overrides: <String, String>{'IPHONEOS_DEPLOYMENT_TARGET': '14.0'},
+      ),
+      Artifacts: () => Artifacts.test(),
+      FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+      Xcode: () => FakeXcodeWithVersion(Version(15, 0, 0)),
+    },
+  );
 }
 
 const _xcBundleFilePath = '/.tmp_rand0/flutter_ios_build_temp_dirrand0/temporary_xcresult_bundle';
 const _exportOptionsPlist = '/.tmp_rand0/flutter_build_ios.rand0/ExportOptions.plist';
+
+class FakeXcodeWithVersion extends Fake implements Xcode {
+  FakeXcodeWithVersion(this.currentVersion);
+
+  @override
+  final Version currentVersion;
+
+  @override
+  bool get isInstalled => true;
+
+  @override
+  bool get isRequiredVersionSatisfactory => true;
+
+  @override
+  List<String> xcrunCommand() => <String>['xcrun'];
+
+  @override
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    XcodeBasedProject xcodeProject,
+    Directory buildDirectory, {
+    bool skipPackageUpdatesAndValidation = true,
+  }) async {
+    return <String>['xcrun', 'xcodebuild'];
+  }
+}
