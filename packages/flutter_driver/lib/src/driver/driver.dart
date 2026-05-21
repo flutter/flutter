@@ -826,6 +826,9 @@ class CommonFinders {
   SerializableFinder byTooltip(String message) => ByTooltipMessage(message);
 
   /// Finds widgets with the given semantics [label].
+  ///
+  /// Semantics must be enabled, for example by calling
+  /// [FlutterDriver.setSemantics] before using the returned finder.
   SerializableFinder bySemanticsLabel(Pattern label) => BySemanticsLabel(label);
 
   /// Finds widgets whose class name matches the given string.

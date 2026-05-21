@@ -8,6 +8,9 @@
 /// @docImport 'package:flutter_test/flutter_test.dart';
 library;
 
+// Examples can assume:
+// import 'package:flutter_driver/flutter_driver.dart';
+
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
@@ -139,12 +142,26 @@ class ByTooltipMessage extends SerializableFinder {
   }
 }
 
-/// A Flutter Driver finder that finds widgets by semantic label.
+/// A Flutter Driver finder that finds widgets by semantics label.
 ///
 /// If the [label] property is a [String], the finder will try to find an exact
 /// match. If it is a [RegExp], it will return true for [RegExp.hasMatch].
+///
+/// Semantics must be enabled before Flutter Driver can match this finder. In a
+/// driver test, call [FlutterDriver.setSemantics] before using
+/// [CommonFinders.bySemanticsLabel]:
+///
+/// {@tool snippet}
+///
+/// ```dart
+/// Future<void> tapNext(FlutterDriver driver) async {
+///   await driver.setSemantics(true);
+///   await driver.tap(find.bySemanticsLabel('Next'));
+/// }
+/// ```
+/// {@end-tool}
 class BySemanticsLabel extends SerializableFinder {
-  /// Creates a semantic label finder given the [label].
+  /// Creates a semantics label finder given the [label].
   const BySemanticsLabel(this.label);
 
   /// A [Pattern] matching the label of a [SemanticsNode].
