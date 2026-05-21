@@ -69,6 +69,13 @@ class FlutterProjectFactory {
   @visibleForTesting
   final projects = <String, FlutterProject>{};
 
+  /// Removes the project for [directory] from the cache, forcing it to be
+  /// re-read from disk on the next access.
+  void invalidate(Directory directory) {
+    projects.remove(directory.path);
+    projects.remove(directory.childDirectory('example').path);
+  }
+
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {

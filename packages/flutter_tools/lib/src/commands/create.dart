@@ -549,6 +549,8 @@ class CreateCommand extends FlutterCommand with CreateBase {
 
     _generatePubspecLock(relativeDir);
 
+    globals.projectFactory.invalidate(relativeDir);
+
     if (shouldCallPubGet) {
       final FlutterProject project = FlutterProject.fromDirectory(relativeDir);
       await pub.get(
