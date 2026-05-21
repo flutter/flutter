@@ -106,10 +106,10 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
       failures++;
       continue;
     }
-    final List<NmEntry> swiftEntries = <NmEntry>[];
-    final List<NmEntry> unexpectedEntries = <NmEntry>[];
+    final swiftEntries = <NmEntry>[];
+    final unexpectedEntries = <NmEntry>[];
 
-    for (final entry in NmEntry.parse(nmResult.stdout as String)) {
+    for (final NmEntry entry in NmEntry.parse(nmResult.stdout as String)) {
       final bool cInternalSymbol =
           entry.type == '(__TEXT,__text)' && entry.name.startsWith('_InternalFlutter');
       if (cInternalSymbol || entry.isAllowedCSymbol || entry.isAllowedObjCSymbol) {
@@ -298,12 +298,12 @@ Map<String, String?>? _demangleSymbols(Iterable<String> symbols) {
     return null;
   }
 
-  final Map<String, String?> symbolToModule = <String, String?>{};
-  final String output = demangledResult.stdout as String;
+  final symbolToModule = <String, String?>{};
+  final output = demangledResult.stdout as String;
 
   String trim(String string) => string.trim();
 
-  for (final symbolTree in output.split('Demangling for ').map(trim)) {
+  for (final String symbolTree in output.split('Demangling for ').map(trim)) {
     final List<String> lines = LineSplitter.split(symbolTree).toList();
     if (lines.isEmpty) {
       continue;
