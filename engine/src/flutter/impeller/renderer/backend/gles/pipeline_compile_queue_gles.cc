@@ -39,8 +39,9 @@ bool PipelineCompileQueueGLES::PostJobForDescriptor(
     return true;
   }
 
-  bool expected = false;
-  if (is_processing_.compare_exchange_strong(expected, true)) {
+  std::scoped_lock lock(processing_mutex_);
+  if (!is_processing_) {
+    is_processing_ = true;
     ProcessJobsSequentially();
   }
   return true;
@@ -59,9 +60,12 @@ void PipelineCompileQueueGLES::ProcessJobsSequentially() {
     if (auto queue = std::static_pointer_cast<PipelineCompileQueueGLES>(
             weak_queue.lock())) {
       queue->DoOneJob();
-      if (!queue->HasPendingJobs()) {
-        queue->is_processing_ = false;
-        return;
+      {
+        std::scoped_lock lock(queue->processing_mutex_);
+        if (!queue->HasPendingJobs()) {
+          queue->is_processing_ = false;
+          return;
+        }
       }
       queue->ProcessJobsSequentially();
     }

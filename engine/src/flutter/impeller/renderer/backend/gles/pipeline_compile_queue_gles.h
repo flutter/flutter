@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_PIPELINE_COMPILE_QUEUE_GLES_H_
 
 #include <atomic>
+#include <mutex>
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/task_runner.h"
@@ -50,7 +51,8 @@ class PipelineCompileQueueGLES : public PipelineCompileQueue {
 
  private:
   fml::RefPtr<fml::TaskRunner> worker_task_runner_;
-  std::atomic<bool> is_processing_{false};
+  std::mutex processing_mutex_;
+  std::atomic<bool> is_processing_ = false;
 };
 
 }  // namespace impeller
