@@ -1816,8 +1816,12 @@ class Navigator extends StatefulWidget {
   /// [Navigator.observers], they will be notified as well (see
   /// [NavigatorObserver.didPush]).
   ///
-  /// Ongoing gestures within the current route are canceled when a new route is
-  /// pushed.
+  /// {@template flutter.widgets.navigator.ongoingGesturesCanceled}
+  /// Ongoing gestures within the current route are canceled when a route is
+  /// added to or removed from the navigator. This prevents pointers that were
+  /// active before the route stack changed from continuing to invoke callbacks
+  /// after navigation has updated the stack.
+  /// {@endtemplate}
   ///
   /// The `T` type argument is the type of the return value of the route.
   ///
@@ -1987,8 +1991,7 @@ class Navigator extends StatefulWidget {
   /// route's exit animation is not run (see [popAndPushNamed] for a variant
   /// that animates the removed route).
   ///
-  /// Ongoing gestures within the current route are canceled when a new route is
-  /// pushed.
+  /// {@macro flutter.widgets.navigator.ongoingGesturesCanceled}
   ///
   /// The `T` type argument is the type of the return value of the new route,
   /// and `TO` is the type of the return value of the old route.
@@ -2085,8 +2088,7 @@ class Navigator extends StatefulWidget {
   /// route below may be briefly visible even if both the old route and the new
   /// route are opaque (see [TransitionRoute.opaque]).
   ///
-  /// Ongoing gestures within the current route are canceled when a new route is
-  /// pushed.
+  /// {@macro flutter.widgets.navigator.ongoingGesturesCanceled}
   ///
   /// The `T` type argument is the type of the return value of the new route,
   /// and `TO` is the return value type of the old route.
@@ -2193,8 +2195,7 @@ class Navigator extends StatefulWidget {
   /// and the futures that had been returned from pushing those routes
   /// will complete.
   ///
-  /// Ongoing gestures within the current route are canceled when a new route is
-  /// pushed.
+  /// {@macro flutter.widgets.navigator.ongoingGesturesCanceled}
   ///
   /// The `T` type argument is the type of the return value of the new route.
   ///
@@ -2281,8 +2282,7 @@ class Navigator extends StatefulWidget {
   /// [Navigator.observers], they will be notified as well (see
   /// [NavigatorObserver.didPush]).
   ///
-  /// Ongoing gestures within the current route are canceled when a new route is
-  /// pushed.
+  /// {@macro flutter.widgets.navigator.ongoingGesturesCanceled}
   ///
   /// The `T` type argument is the type of the return value of the route.
   /// {@endtemplate}
@@ -2372,8 +2372,7 @@ class Navigator extends StatefulWidget {
   /// [NavigatorObserver.didReplace]). The removed route is notified once the
   /// new route has finished animating (see [Route.didComplete]).
   ///
-  /// Ongoing gestures within the current route are canceled when a new route is
-  /// pushed.
+  /// {@macro flutter.widgets.navigator.ongoingGesturesCanceled}
   ///
   /// The `T` type argument is the type of the return value of the new route,
   /// and `TO` is the type of the return value of the old route.
@@ -2470,8 +2469,7 @@ class Navigator extends StatefulWidget {
   /// notified, once the new route has finished animating. The futures that had
   /// been returned from pushing those routes will complete.
   ///
-  /// Ongoing gestures within the current route are canceled when a new route is
-  /// pushed.
+  /// {@macro flutter.widgets.navigator.ongoingGesturesCanceled}
   ///
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
@@ -2855,7 +2853,7 @@ class Navigator extends StatefulWidget {
   /// The type of `result`, if provided, must match the type argument of the
   /// class of the removed route (`T`).
   ///
-  /// Ongoing gestures within the current route are canceled.
+  /// {@macro flutter.widgets.navigator.ongoingGesturesCanceled}
   /// {@endtemplate}
   ///
   /// This method is used, for example, to instantly dismiss dropdown menus that
@@ -2891,7 +2889,7 @@ class Navigator extends StatefulWidget {
   /// The type of `result`, if provided, must match the type argument of the
   /// class of the removed route (`T`).
   ///
-  /// Ongoing gestures within the current route are canceled.
+  /// {@macro flutter.widgets.navigator.ongoingGesturesCanceled}
   /// {@endtemplate}
   @optionalTypeArgs
   static void removeRouteBelow<T extends Object?>(
@@ -5138,6 +5136,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
 
       developer.postEvent('Flutter.Navigation', <String, dynamic>{'route': routeJsonable});
     }
+    // Cancel any active pointers so gestures that started before the route
+    // stack changed cannot keep invoking callbacks after navigation has updated
+    // the stack.
     _cancelActivePointers();
   }
 
