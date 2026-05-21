@@ -76,12 +76,10 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
   }
 }
 
-#include <iostream>
 void HostWindowDialog::DidUpdateViewSize(int32_t width, int32_t height) {
   // This is called from the raster thread.
   std::weak_ptr<int> weak_view_alive = view_alive_;
   engine_->task_runner()->PostTask([this, width, height, weak_view_alive]() {
-    std::cout << width << ", " << height << std::endl;
     auto const view_alive = weak_view_alive.lock();
     if (!view_alive) {
       return;
