@@ -294,7 +294,11 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/174689.
   testWidgets('default text selection width style', (WidgetTester tester) async {
+    const blue = Color(0xFF2196F3);
+    const grey = Color(0xFF9E9E9E);
+    const selectionColor = Color(0x667C4DFF);
     controller.text = 'a b c\na b c d e f g';
 
     await tester.pumpWidget(
@@ -305,9 +309,9 @@ void main() {
             focusNode: focusNode,
             maxLines: null,
             style: const TextStyle(fontFamily: 'Roboto', fontSize: 14.0),
-            cursorColor: Color() //Colors.blue,
-            backgroundCursorColor: Color() //Colors.grey,
-            selectionColor: Color() //Colors.deepPurpleAccent.withOpacity(0.40),
+            cursorColor: blue,
+            backgroundCursorColor: grey,
+            selectionColor: selectionColor,
             keyboardType: TextInputType.text,
           ),
         ),
@@ -323,9 +327,12 @@ void main() {
     );
   }, variant: TargetPlatformVariant.all());
 
+  // Regression test for https://github.com/flutter/flutter/issues/174689.
   testWidgets('Tight selectionWidthStyle does not expand to a longer next line', (
     WidgetTester tester,
   ) async {
+    const backgroundCursorColor = Color(0xFF9E9E9E);
+    const selectionColor = Color(0xFF000000);
     const fontSize = 10.0;
     const characterWidth = fontSize; // FlutterTest is a square monospace font.
     controller.text = 'abc\nabcdefghij';
@@ -341,8 +348,8 @@ void main() {
             selectionWidthStyle: BoxWidthStyle.tight,
             style: const TextStyle(fontFamily: 'FlutterTest', fontSize: fontSize, height: 1.0),
             cursorColor: cursorColor,
-            backgroundCursorColor: Color() //Colors.grey,
-            selectionColor: Color() //Colors.black,
+            backgroundCursorColor: backgroundCursorColor,
+            selectionColor: selectionColor,
           ),
         ),
       ),
@@ -359,7 +366,7 @@ void main() {
 
     const expectedSelectionRect = Rect.fromLTRB(0.0, 0.0, 3 * characterWidth, fontSize);
 
-    expect(renderEditable, paints..rect(color: Colors.black, rect: expectedSelectionRect));
+    expect(renderEditable, paints..rect(color: selectionColor, rect: expectedSelectionRect));
   });
 
   group('Check the passed groupId value', () {
