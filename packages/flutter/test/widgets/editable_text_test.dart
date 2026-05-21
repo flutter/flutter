@@ -4072,15 +4072,12 @@ void main() {
     WidgetTester tester,
   ) async {
     final controller = TextEditingController(text: 'Line 1\n' * 100);
-    final focusNode = FocusNode();
 
     await tester.pumpWidget(
-      TestWidgetsApp(
-        home: TestTextField(controller: controller, focusNode: focusNode, maxLines: null),
-      ),
+      TestWidgetsApp(home: TestTextField(controller: controller, maxLines: null)),
     );
 
-    focusNode.requestFocus();
+    await tester.tap(find.byType(TestTextField));
     await tester.pumpAndSettle();
 
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
