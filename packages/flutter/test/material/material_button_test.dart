@@ -635,10 +635,13 @@ void main() {
   testWidgets(
     'Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics',
     (WidgetTester tester) async {
-      const Size expectedButtonSize = Size(116.0, 48.0);
+      const expectedButtonSize = Size(116.0, 48.0);
       // Button is in center of the 800x600 test screen.
-      final Matrix4 expectedButtonTransform = Matrix4.identity()
-        ..translate(400.0 - expectedButtonSize.width / 2, 300.0 - expectedButtonSize.height / 2);
+      final expectedButtonTransform = Matrix4.diagonal3Values(
+        tester.view.devicePixelRatio,
+        tester.view.devicePixelRatio,
+        1.0,
+      )..translate(400.0 - expectedButtonSize.width / 2, 300.0 - expectedButtonSize.height / 2);
 
       // enabled button
       await tester.pumpWidget(
