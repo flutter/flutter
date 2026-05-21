@@ -44,6 +44,7 @@ class RunConfiguration {
     this.variant,
     this.crossOriginIsolated,
     this.forceSingleThreadedSkwasm,
+    this.enableWebParagraph,
     this.enableWimp,
     this.wasmAllowList,
   );
@@ -54,6 +55,7 @@ class RunConfiguration {
   final CanvasKitVariant? variant;
   final bool crossOriginIsolated;
   final bool forceSingleThreadedSkwasm;
+  final bool enableWebParagraph;
   final bool enableWimp;
   final Map<String, bool> wasmAllowList;
 }
@@ -194,6 +196,7 @@ class FeltConfig {
       final bool crossOriginIsolated = runConfigYaml['cross-origin-isolated'] as bool? ?? false;
       final bool forceSingleThreadedSkwasm =
           runConfigYaml['force-single-threaded-skwasm'] as bool? ?? false;
+      final bool enableWebParagraph = runConfigYaml['enable-webparagraph'] as bool? ?? false;
       final bool enableWimp = runConfigYaml['enable-wimp'] as bool? ?? false;
       final YamlMap wasmAllowList = (runConfigYaml['wasm-allow-list'] as YamlMap?) ?? YamlMap();
       final runConfig = RunConfiguration(
@@ -203,6 +206,7 @@ class FeltConfig {
         variant,
         crossOriginIsolated,
         forceSingleThreadedSkwasm,
+        enableWebParagraph,
         enableWimp,
         wasmAllowList.cast<String, bool>(),
       );
