@@ -54,8 +54,8 @@ final class _PrintEnvironmentVariablesInTestDriverProject extends Project {
   final main = r'void main() {}';
 
   @override
-  Future<void> setUpIn(Directory dir) async {
-    await super.setUpIn(dir);
+  Future<void> setUpIn(Directory dir, {bool generateMain = true}) async {
+    await super.setUpIn(dir, generateMain: generateMain);
     writeFile(fileSystem.path.join(dir.path, 'test_driver', 'main_test.dart'), r'''
 import 'dart:io' as io;
 

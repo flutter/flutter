@@ -104,7 +104,7 @@ Future<void> _testProject(
       final completer = Completer<void>();
       final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
         printOnFailure(line);
-        if (line.contains('(((((RELOAD WORKED)))))')) {
+        if (!completer.isCompleted && line.contains('(((((RELOAD WORKED)))))')) {
           completer.complete();
         }
       });

@@ -186,7 +186,7 @@ final gradleOrgVersionMatch = RegExp(
 );
 
 // This matches uncommented minSdkVersion lines in the module-level build.gradle
-// file which have minSdkVersion 16, 17, 18, 19, 20, 21, 22, 23 set with space sytax,
+// file which have minSdkVersion 16, 17, 18, 19, 20, 21, 22, 23 set with space syntax,
 // equals syntax and when using minSdk or minSdkVersion.
 // Matches uncommented minSdkVersion lines using equals syntax (=)
 final tooOldMinSdkVersionEqualsMatch = RegExp(
@@ -419,10 +419,10 @@ Future<String?> getKgpVersion(
   // gradle --version or ./gradlew --version will print the kotlin dsl version.
   // This version normally changes with the version of gradle.
   // https://github.com/gradle/gradle/blob/cefbee263181a924ac4efcaace6bda97a55bc0f7/platforms/core-runtime/gradle-cli/src/main/java/org/gradle/launcher/cli/DefaultCommandLineActionFactory.java#L260
-  // This vesion is NOT the version of KGP that the project uses.
+  // This version is NOT the version of KGP that the project uses.
   //
-  // Instead the kgpVersion task is a custom flutter task dynamiclly added that can
-  // print the kgp version if gradle can run successfuly.
+  // Instead the kgpVersion task is a custom flutter task dynamically added that can
+  // print the kgp version if gradle can run successfully.
 
   if (processManager.canRun('./gradlew', workingDirectory: androidDirectory.path)) {
     final ProcessResult command = await processManager.run(<String>[
@@ -576,16 +576,16 @@ bool validateGradleAndKGP(Logger logger, {required String? kgpV, required String
   }
 
   // https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
-  // Documenation is non continuous, past versions are known to the
+  // Documentation is non continuous, past versions are known to the
   // publishers of KGP. When covering version ranges beyond what is documented
   // add a comment with the documented value.
-  // Continuous KGP version handling is prefered in case an emergency patch to a
+  // Continuous KGP version handling is preferred in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
 
   // Documented max is 2.3.10, using 2.3.29 covers patch versions.
   if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.29')) {
-    // Documented max is 9.0.0, using 9.0.99 non inclusive covers patch versions.
-    return isWithinVersionRange(gradleV, min: '7.6.3', max: '9.0.99', inclusiveMax: false);
+    // Documented max is 9.5.0, using 9.5.99 non inclusive covers patch versions.
+    return isWithinVersionRange(gradleV, min: '7.6.3', max: '9.5.99', inclusiveMax: false);
   }
   // Documented max is 2.2.21, using 2.3.0 covers patch versions.
   if (isWithinVersionRange(kgpV, min: '2.2.20', max: '2.3.0')) {
@@ -690,16 +690,16 @@ bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? a
   }
 
   // https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
-  // Documenation is non continuous, past versions are known to the
+  // Documentation is non continuous, past versions are known to the
   // publishers of KGP. When covering version ranges beyond what is documented
   // add a comment with the documented value.
-  // Continuous KGP version handling is prefered in case an emergency patch to a
+  // Continuous KGP version handling is preferred in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
 
   // Documented max is 2.3.10
   if (isWithinVersionRange(kgpV, min: '2.3.10', max: '2.3.29')) {
-    // Documented max is 9.0.0
-    return isWithinVersionRange(agpV, min: '8.2.2', max: '9.0.99', inclusiveMax: false);
+    // Documented max is 9.2.0
+    return isWithinVersionRange(agpV, min: '8.2.2', max: '9.2.99', inclusiveMax: false);
   }
   // Documented max is 2.3.0
   if (isWithinVersionRange(kgpV, min: '2.3.0', max: '2.3.10', inclusiveMax: false)) {
