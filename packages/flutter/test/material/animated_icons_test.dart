@@ -195,8 +195,6 @@ void main() {
   });
 
   testWidgets('Semantic label', (WidgetTester tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
-
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -210,8 +208,6 @@ void main() {
     );
 
     expect(find.bySemanticsLabel('a label'), findsOneWidget);
-
-    handle.dispose();
   });
 
   testWidgets('Inherited text direction rtl', (WidgetTester tester) async {
