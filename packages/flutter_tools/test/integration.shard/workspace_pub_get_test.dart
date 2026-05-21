@@ -14,10 +14,6 @@ import 'isolated/native_assets_test_utils.dart';
 import 'test_utils.dart';
 
 void main() {
-  if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
-    return;
-  }
-
   const ProcessManager processManager = LocalProcessManager();
 
   testWithoutContext('flutter tools correctly skip pub get when resolution is up-to-date in a workspace', () async {
