@@ -1612,7 +1612,7 @@ class FlutterPluginUtilsTest {
             mockExecSpec.commandLine(
                 listOf(
                     "/sdkmanager",
-                    "--sdk_root=${tempDir}",
+                    "--sdk_root=$tempDir",
                     "--install",
                     "ndk;29.0.13846066"
                 )

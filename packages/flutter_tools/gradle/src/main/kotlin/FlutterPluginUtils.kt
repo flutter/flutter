@@ -734,10 +734,11 @@ object FlutterPluginUtils {
                 return
             }
             gradleProject.afterEvaluate {
-                val handledByToolProvisioning = maybeHandleToolNdkProvisioning(
-                    gradleProject = gradleProject,
-                    toolNdkProvisioningProperties = toolNdkProvisioningProperties
-                )
+                val handledByToolProvisioning =
+                    maybeHandleToolNdkProvisioning(
+                        gradleProject = gradleProject,
+                        toolNdkProvisioningProperties = toolNdkProvisioningProperties
+                    )
                 if (!handledByToolProvisioning) {
                     configureSyntheticExternalNativeBuildFallback(
                         gradleProject = gradleProject,
@@ -757,7 +758,8 @@ object FlutterPluginUtils {
     private fun getToolNdkProvisioningProperties(project: Project): ToolNdkProvisioningProperties? {
         val androidSdkRoot = project.findProperty(PROP_ANDROID_SDK_ROOT)?.toString() ?: return null
         val installedNdkVersions =
-            project.findProperty(PROP_INSTALLED_NDK_VERSIONS)
+            project
+                .findProperty(PROP_INSTALLED_NDK_VERSIONS)
                 ?.toString()
                 ?.split(",")
                 ?.map(String::trim)
@@ -786,16 +788,17 @@ object FlutterPluginUtils {
 
         val sdkManagerPath = toolNdkProvisioningProperties.sdkManagerPath ?: return false
         val execOps = gradleProject.serviceOf<ExecOperations>()
-        execOps.exec {
-            commandLine(
-                listOf(
-                    sdkManagerPath,
-                    "--sdk_root=${toolNdkProvisioningProperties.androidSdkRoot}",
-                    "--install",
-                    "ndk;$configuredNdkVersion"
+        execOps
+            .exec {
+                commandLine(
+                    listOf(
+                        sdkManagerPath,
+                        "--sdk_root=${toolNdkProvisioningProperties.androidSdkRoot}",
+                        "--install",
+                        "ndk;$configuredNdkVersion"
+                    )
                 )
-            )
-        }.assertNormalExitValue()
+            }.assertNormalExitValue()
 
         val installedNdkMarker =
             File(
