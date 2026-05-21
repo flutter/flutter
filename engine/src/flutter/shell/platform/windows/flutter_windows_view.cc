@@ -167,6 +167,7 @@ bool FlutterWindowsView::OnFrameGenerated(size_t width, size_t height) {
   std::unique_lock<std::mutex> lock(resize_mutex_);
 
   if (IsSizedToContent()) {
+     // For views sized to content, the window size is expected to match the
     if (!ResizeRenderSurface(width, height)) {
       return false;
     }
@@ -207,6 +208,7 @@ void FlutterWindowsView::ForceRedraw() {
 // Called on the platform thread.
 bool FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
   if (IsSizedToContent()) {
+    std::cout << "FlutterWindowsView::OnWindowSizeChanged: sized to content, ignoring size change" << std::endl;
     // No resize synchronization needed for views sized to content.
     return true;
   }
