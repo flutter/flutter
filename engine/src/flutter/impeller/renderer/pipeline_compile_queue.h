@@ -71,35 +71,10 @@ class PipelineCompileQueue
   ///
   void PerformJobEagerly(const PipelineDescriptor& desc);
 
-  //----------------------------------------------------------------------------
-  /// @brief      Post a job to the worker task runner.
-  ///
-  /// @param[in]  job   The job
-  ///
-  /// @return     If the job was successfully posted to the parallel task
-  ///             runners.
-  ///
-  virtual void PostJob(const fml::closure& job) = 0;
-
-  void DoOneJob();
-
  protected:
-  //----------------------------------------------------------------------------
-  /// @brief      Add a job to the pending jobs map.
-  ///
-  /// @param[in]  desc  The pipeline descriptor.
-  /// @param[in]  job   The job to add.
-  ///
-  /// @return     true if the job was successfully inserted, false if a job
-  ///             for the same descriptor already exists.
-  ///
+  virtual void PostJob(const fml::closure& job) = 0;
+  void DoOneJob();
   bool AddJob(const PipelineDescriptor& desc, const fml::closure& job);
-
-  //----------------------------------------------------------------------------
-  /// @brief      Check if there are any pending jobs.
-  ///
-  /// @return     true if there are pending jobs, false otherwise.
-  ///
   bool HasPendingJobs();
 
  private:
