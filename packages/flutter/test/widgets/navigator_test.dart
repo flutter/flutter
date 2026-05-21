@@ -1816,6 +1816,40 @@ void main() {
     expect(await pageAValue, null);
   });
 
+  testWidgets('replace reports when oldRoute is not installed', (WidgetTester tester) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(navigatorKey: navigatorKey, home: const SizedBox.shrink()));
+
+    final oldRoute = MaterialPageRoute<void>(builder: (BuildContext context) => Container());
+    final newRoute = MaterialPageRoute<void>(builder: (BuildContext context) => Container());
+
+    final Matcher invalidOldRouteMatcher = throwsA(
+      isA<AssertionError>()
+          .having(
+            (AssertionError error) => error.message,
+            'message',
+            contains('oldRoute must be a route that is currently installed'),
+          )
+          .having(
+            (AssertionError error) => error.message,
+            'message',
+            contains('ModalRoute.of(context)'),
+          ),
+    );
+
+    expect(
+      () => navigatorKey.currentState!.replace<void>(oldRoute: oldRoute, newRoute: newRoute),
+      invalidOldRouteMatcher,
+    );
+    expect(
+      () => navigatorKey.currentState!.restorableReplace<void>(
+        oldRoute: oldRoute,
+        newRouteBuilder: _routeBuilder,
+      ),
+      invalidOldRouteMatcher,
+    );
+  });
+
   testWidgets('push named route and remove until where routes values are awaited', (
     WidgetTester tester,
   ) async {
