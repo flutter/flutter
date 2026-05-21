@@ -27,9 +27,13 @@ import 'framework.dart';
 /// [WidgetSpan]s. Child [Text] and [RichText] widgets will be laid out
 /// independently and occupy a rectangular space in the parent text layout.
 ///
-/// [WidgetSpan]s will be ignored when passed into a [TextPainter] directly.
-/// To properly layout and paint the [child] widget, [WidgetSpan] should be
-/// passed into a [Text.rich] widget.
+/// A [WidgetSpan] will be ignored when passed into a [TextPainter] directly
+/// unless [TextPainter.setPlaceholderDimensions] is used to reserve space for
+/// the placeholder. Direct [TextPainter] callers are also responsible for
+/// laying out and painting the [child] widget separately, using
+/// [TextPainter.inlinePlaceholderBoxes] to determine where the placeholder
+/// space was reserved. To properly layout and paint the [child] widget
+/// automatically, pass [WidgetSpan] into a [Text.rich] or [RichText] widget.
 ///
 /// {@tool snippet}
 ///
@@ -160,12 +164,23 @@ class WidgetSpan extends PlaceholderSpan {
     List<PlaceholderDimensions>? dimensions,
   }) {
     assert(debugAssertIsValid());
-    assert(dimensions != null);
+    assert(
+      dimensions != null,
+      'WidgetSpan requires PlaceholderDimensions to be set on the TextPainter. '
+      'Call TextPainter.setPlaceholderDimensions with the dimensions of each '
+      'WidgetSpan before calling TextPainter.layout, or use Text.rich, RichText, '
+      'or EditableText to lay out and paint the inline widgets automatically.',
+    );
     final hasStyle = style != null;
     if (hasStyle) {
       builder.pushStyle(style!.getTextStyle(textScaler: textScaler));
     }
-    assert(builder.placeholderCount < dimensions!.length);
+    assert(
+      builder.placeholderCount < dimensions!.length,
+      'WidgetSpan requires a PlaceholderDimensions entry for each WidgetSpan. '
+      'The dimensions list has fewer entries than the number of WidgetSpans in '
+      'the InlineSpan tree.',
+    );
     final PlaceholderDimensions currentDimensions = dimensions![builder.placeholderCount];
     builder.addPlaceholder(
       currentDimensions.size.width,

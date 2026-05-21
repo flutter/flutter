@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -61,6 +63,21 @@ void main() {
       20, // c
       14, // d
     ]);
+  });
+
+  test('WidgetSpan build explains missing placeholder dimensions', () {
+    final builder = ui.ParagraphBuilder(ui.ParagraphStyle());
+
+    expect(
+      () => const WidgetSpan(child: SizedBox()).build(builder),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'message',
+          contains('TextPainter.setPlaceholderDimensions'),
+        ),
+      ),
+    );
   });
 }
 
