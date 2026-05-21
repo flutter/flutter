@@ -10,3 +10,4 @@ linter:
     avoid_print: false
     # Samples are sometimes incomplete and don't show usage of everything.
     unreachable_from_main: false
+    prefer_initializing_formals: false # temporarily disabled since upgrading to Dart 3.12 triggers this rule for private fields
