@@ -49,33 +49,22 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
 
 /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for the entire paragraph
 (ui.Rect sourceRect, ui.Rect targetRect) _calculateParagraph(
-  TextLayout layout,
+  WebParagraph paragraph,
   ui.Offset offset,
   double devicePixelRatio,
 ) {
-  final WebParagraph paragraph = layout.paragraph;
-
-  // Calculate the longest line taking in account the formatting shifts
-  var maxWidth = 0.0;
-  for (final TextLine line in layout.lines) {
-    final double lineWidth = line.fullWidth;
-    if (lineWidth > maxWidth) {
-      maxWidth = lineWidth;
-    }
-  }
-
   // Define the paragraph rect (using advances, not selected rects)
   // Source rect must take in account the scaling
   final sourceRect = ui.Rect.fromLTWH(
     0,
     0,
-    ((maxWidth + paragraph.paintOverflows.horizontal) * devicePixelRatio).ceilToDouble(),
-    ((paragraph.height + paragraph.paintOverflows.vertical) * devicePixelRatio).ceilToDouble(),
+    ((paragraph.actualBounds.width) * devicePixelRatio).ceilToDouble(),
+    ((paragraph.actualBounds.height) * devicePixelRatio).ceilToDouble(),
   );
   // Target rect will be scaled by the canvas transform, so we don't scale it here
   final targetRect = ui.Rect.fromLTWH(
-    (offset.dx - paragraph.paintOverflows.left).floorToDouble(),
-    (offset.dy - paragraph.paintOverflows.top).floorToDouble(),
+    (offset.dx + paragraph.actualBounds.left).floorToDouble(),
+    (offset.dy + paragraph.actualBounds.top).floorToDouble(),
     (sourceRect.width / devicePixelRatio).ceilToDouble(),
     (sourceRect.height / devicePixelRatio).ceilToDouble(),
   );
@@ -151,10 +140,14 @@ abstract class WebParagraphPainter {
 
   /// Paints the entire paragraph on Canvas2D
   void paint(ui.Canvas canvas, ui.Offset offset) {
+    if (_paragraph.text.isEmpty) {
+      return;
+    }
+
     final TextLayout layout = _paragraph.getLayout();
 
     final (ui.Rect sourceRect, ui.Rect targetRect) = _calculateParagraph(
-      layout,
+      _paragraph,
       offset,
       ui.window.devicePixelRatio,
     );
@@ -169,6 +162,9 @@ abstract class WebParagraphPainter {
       targetRect,
       generateParagraphImage: () {
         _resizePaintCanvas(ui.window.devicePixelRatio, sourceRect);
+
+        // We only want to paint the actual paint bounds of the paragraph.
+        _paintContext.translate(-_paragraph.actualBounds.left, -_paragraph.actualBounds.top);
 
         // Fill out all the blocks on Canvas2D canvas
         DomCanvasParagraphPainter._fillAllBlocks(StyleElements.shadows, layout);
@@ -203,10 +199,7 @@ class DomCanvasParagraphPainter {
     // Paint the entire paragraph as a single image on Canvas2D
     for (final TextLine line in layout.lines) {
       _paintContext.save();
-      _paintContext.translate(
-        line.formattingShift,
-        line.baseline + layout.paragraph.paintOverflows.top,
-      );
+      _paintContext.translate(line.formattingShift, line.baseline);
 
       for (final LineBlock block in line.visualBlocks) {
         if (block is PlaceholderBlock) {

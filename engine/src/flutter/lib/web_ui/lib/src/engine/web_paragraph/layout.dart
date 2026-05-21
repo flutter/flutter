@@ -71,8 +71,14 @@ class TextLayout {
     wrapText(width);
     formatLines(width);
 
-    // Calculate how much overflow is needed in all directions in order to paint the full glyphs.
-    calculatePaintOverflows();
+    if (paragraph.text.isNotEmpty) {
+      // When the paragraph is empty, instead of setting the bounds to a zero rect, we let it unset.
+      // This will make it easy to detect when there's a bug in our painting pipeline that's trying
+      // to paint an empty paragraph.
+
+      // Calculate the actual paint bounds of the paragraph.
+      _calculateActualBounds();
+    }
 
     // TODO(jlavrova): Optimize. If lines are the same as the previous layout, we don't need to
     // clear the paint cache.
@@ -193,6 +199,9 @@ class TextLayout {
 
     final wrapper = TextWrapper(this);
     wrapper.breakLines(width);
+    for (final TextLine line in lines) {
+      paragraph.fullWidth = math.max(paragraph.fullWidth, line.fullWidth);
+    }
     paragraph.width = width;
     paragraph.maxIntrinsicWidth = wrapper.maxIntrinsicWidth;
     paragraph.minIntrinsicWidth = wrapper.minIntrinsicWidth;
@@ -475,29 +484,21 @@ class TextLayout {
     }
   }
 
-  void calculatePaintOverflows() {
+  void _calculateActualBounds() {
     // First, calculate the actual bounds of the entire paragraph.
-    double leftBound = 0;
-    double topBound = 0;
-    double rightBound = 0;
-    double bottomBound = 0;
+    double leftBound = double.infinity;
+    double topBound = double.infinity;
+    double rightBound = double.negativeInfinity;
+    double bottomBound = double.negativeInfinity;
 
-    var maxWidth = 0.0;
     for (final TextLine line in lines) {
       leftBound = math.min(leftBound, line.formattingShift + line.actualBoundingBoxLeft);
       topBound = math.min(topBound, line.baseline - line.actualBoundingBoxAscent);
       rightBound = math.max(rightBound, line.formattingShift + line.actualBoundingBoxRight);
       bottomBound = math.max(bottomBound, line.baseline + line.actualBoundingBoxDescent);
-
-      maxWidth = math.max(maxWidth, line.fullWidth);
     }
 
-    paragraph.paintOverflows = (
-      left: math.max(0, -leftBound),
-      top: math.max(0, -topBound),
-      right: math.max(0, rightBound - maxWidth),
-      bottom: math.max(0, bottomBound - paragraph.height),
-    );
+    paragraph.actualBounds = ui.Rect.fromLTRB(leftBound, topBound, rightBound, bottomBound);
   }
 
   static const epsilon = 0.001;
@@ -1307,8 +1308,8 @@ class TextLine {
 
   double actualBoundingBoxAscent = 0.0;
   double actualBoundingBoxDescent = 0.0;
-  double actualBoundingBoxLeft = 0.0;
-  double actualBoundingBoxRight = 0.0;
+  double actualBoundingBoxLeft = double.infinity;
+  double actualBoundingBoxRight = double.negativeInfinity;
 
   double formattingShift = 0.0; // For centered or right aligned text
   double trailingSpacesWidth = 0.0;

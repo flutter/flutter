@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -1221,31 +1223,51 @@ Future<void> testMain() async {
     final blackPaint = Paint()..color = const Color(0xFF000000);
     final lightbluePaint = Paint()..color = const Color(0xFFDDEEFF);
     final redPaint = Paint()..color = const Color(0xFFFF0000);
+    final bluePaint = Paint()..color = const Color(0xFF0000FF);
 
     final paragraphStyle = ParagraphStyle();
     final style = TextStyle(
       foreground: blackPaint,
       background: lightbluePaint,
-      fontSize: 40,
+      fontSize: 60,
       fontFamily: 'sans-serif',
       fontStyle: FontStyle.italic,
     );
 
-    final builder = ParagraphBuilder(paragraphStyle);
-    builder.pushStyle(style);
-    builder.addText('Top shelf');
-    builder.pop();
-    final Paragraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: double.infinity));
-    final double fullWidth = paragraph.maxIntrinsicWidth;
-    paragraph.layout(ParagraphConstraints(width: fullWidth));
-    const offset = Offset(20, 20);
-    canvas.drawParagraph(paragraph, offset);
+    Paragraph drawParagraph(String text, Offset offset) {
+      final builder = ParagraphBuilder(paragraphStyle);
+      builder.pushStyle(style);
+      builder.addText(text);
+      builder.pop();
+      final Paragraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: double.infinity));
+      final double fullWidth = paragraph.maxIntrinsicWidth;
+      paragraph.layout(ParagraphConstraints(width: fullWidth));
+      canvas.drawParagraph(paragraph, offset);
 
-    final paragraphRect = Rect.fromLTWH(offset.dx, offset.dy, fullWidth, paragraph.height);
-    canvas.drawRect(paragraphRect, redPaint..style = PaintingStyle.stroke);
+      final paragraphRect = Rect.fromLTWH(offset.dx, offset.dy, fullWidth, paragraph.height);
+      canvas.drawRect(paragraphRect, redPaint..style = PaintingStyle.stroke);
+
+      final Rect paintRect = (paragraph as WebParagraph).actualBounds.shift(offset);
+      canvas.drawRect(paintRect, bluePaint..style = PaintingStyle.stroke);
+
+      return paragraph;
+    }
+
+    var offset = const Offset(20, 20);
+    final Paragraph paragraph1 = drawParagraph('Top shelf', offset);
+    offset = offset.translate(0.0, paragraph1.height + 20.0);
+    final Paragraph paragraph2 = drawParagraph('no descent', offset);
 
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph.paint_overflows.png', region: paragraphRect.inflate(20.0));
+    await matchGoldenFile(
+      'web_paragraph.paint_overflows.png',
+      region: Rect.fromLTWH(
+        0,
+        0,
+        offset.dx + math.max(paragraph1.maxIntrinsicWidth, paragraph2.maxIntrinsicWidth) + 20.0,
+        offset.dy + paragraph2.height + 20.0,
+      ),
+    );
   });
 }

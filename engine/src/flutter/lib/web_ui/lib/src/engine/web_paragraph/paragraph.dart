@@ -847,13 +847,6 @@ class WebStrutStyle implements ui.StrutStyle {
   }
 }
 
-typedef PaintOverflows = ({double left, double top, double right, double bottom});
-
-extension PaintOverflowsSize on PaintOverflows {
-  double get horizontal => left + right;
-  double get vertical => top + bottom;
-}
-
 /// An implementation of [ui.Paragraph] based on the new Enhanced TextMetrics API.
 ///
 /// See: https://chromestatus.com/feature/5075532483657728
@@ -888,12 +881,14 @@ class WebParagraph implements ui.Paragraph {
   @override
   double width = 0;
 
+  double fullWidth = 0;
+
   double maxLineWidthWithTrailingSpaces = 0; // without trailing spaces it would be longestLine
 
   List<TextLine> get lines => _layout.lines;
 
-  /// The amount of overflow needed in each direction in order to paint all glyphs fully.
-  late PaintOverflows paintOverflows;
+  /// The actual paint bounds of the paragraph.
+  late ui.Rect actualBounds;
 
   @override
   List<ui.TextBox> getBoxesForPlaceholders() => _layout.getBoxesForPlaceholders();
