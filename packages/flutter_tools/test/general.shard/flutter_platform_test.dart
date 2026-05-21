@@ -378,7 +378,8 @@ void main() {
         ProcessManager: () => processManager,
         Logger: () => logger,
         VMServiceConnector: () =>
-            (Uri uri, {
+            (
+              Uri uri, {
               ReloadSources? reloadSources,
               Restart? restart,
               CompileExpression? compileExpression,
