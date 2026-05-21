@@ -18,6 +18,14 @@ extern NSString* const kCADisableMinimumFrameDurationOnPhoneKey;
 
 @class FlutterFMLTaskRunner;
 
+//------------------------------------------------------------------------------
+/// @brief      A manager type that queries display characteristics, such as high refresh rate
+///             capabilities.
+///
+///             Provides static properties to check whether dynamic refresh rates are supported
+///             on the device and to get the display's maximum refresh rate (either the hardware
+///             maximum or the maximum configured by the user).
+///
 NS_SWIFT_NAME(DisplayLinkManager)
 @interface FlutterDisplayLinkManager : NSObject
 
@@ -31,24 +39,34 @@ NS_SWIFT_NAME(DisplayLinkManager)
 @property(class, nonatomic, readonly) BOOL maxRefreshRateEnabledOnIPhone;
 
 //------------------------------------------------------------------------------
-/// @brief      The display refresh rate used for reporting purposes. The engine does not care
-///             about this for frame scheduling. It is only used by tools for instrumentation. The
-///             engine uses the duration field of the link per frame for frame scheduling.
+/// @brief      The maximum display refresh rate used for reporting purposes. This is intended to
+///             return either the hardware maximum refresh rate or the maximum configured by the
+///             user (e.g. via an Info.plist setting or custom configuration). The engine does not
+///             care about this for frame scheduling. It is only used by tools for instrumentation.
+///             The engine uses the duration field of the link per frame for frame scheduling.
 ///
-/// @attention  Do not use the this call in frame scheduling. It is only meant for reporting.
+/// @attention  Do not use this call in frame scheduling. It is only meant for reporting.
 ///
-/// @return     The refresh rate in frames per second.
+/// @return     The maximum refresh rate in frames per second.
 ///
 @property(class, nonatomic, readonly) double displayRefreshRate;
 
 @end
 
+//------------------------------------------------------------------------------
+/// @brief      A client that wraps a `CADisplayLink` to deliver synchronized vsync signals.
+///
+///             Schedules on-demand vsync signals using a request-and-pause cycle to maintain CPU
+///             and battery efficiency. Adds additional logic around the wrapped CADisplayLink to
+///             ensure consistent frame timings both on display link startup and at steady state.
+///
 NS_SWIFT_NAME(VSyncClient)
 @interface FlutterVSyncClient : NSObject
 
 //------------------------------------------------------------------------------
-/// @brief      The current display refresh rate in Hertz, rounded to the nearest integer value. The
-///             value. This value is calculated during each vsync callback as the inverse of the
+/// @brief      The current display refresh rate in Hertz, rounded to the nearest integer value.
+///
+///             This value is calculated during each vsync callback as the inverse of the
 ///             frame duration (the time between the current frame and the target next frame). The
 ///             resulting frequency is rounded to the nearest whole number to smooth out minor
 ///             hardware timestamp variations.
@@ -61,7 +79,8 @@ NS_SWIFT_NAME(VSyncClient)
 ///             will trigger vsync callback continuously.
 ///
 ///
-/// @param allowPauseAfterVsync Allow vsync client to pause after receiving a vsync signal.
+/// @param      allowPauseAfterVsync         Allow vsync client to pause after receiving a vsync
+///                                          signal.
 ///
 @property(nonatomic, assign) BOOL allowPauseAfterVsync;
 
@@ -80,8 +99,20 @@ NS_SWIFT_NAME(VSyncClient)
                           callback:(void (^)(CFTimeInterval startTime,
                                              CFTimeInterval targetTime))callback;
 
+//------------------------------------------------------------------------------
+/// @brief      Requests a vsync signal.
+///
+///             Unpauses the underlying `CADisplayLink` to schedule the next vsync callback.
+///             Once the vsync callback executes, the client automatically pauses the display
+///             link if `allowPauseAfterVsync` is `YES`.
+///
 - (void)await;
 
+//------------------------------------------------------------------------------
+/// @brief      Pauses the vsync client.
+///
+///             Pauses the underlying `CADisplayLink` to stop receiving vsync signals immediately.
+///
 - (void)pause;
 
 //------------------------------------------------------------------------------
@@ -89,6 +120,14 @@ NS_SWIFT_NAME(VSyncClient)
 ///
 - (void)invalidate;
 
+//------------------------------------------------------------------------------
+/// @brief      Dynamically configures the display link's frame rate ranges.
+///
+///             Adjusts the target and minimum FPS limits of the display link to support variable
+///             refresh rates (e.g. on ProMotion displays) when dynamic rate changes are enabled.
+///
+/// @param      refreshRate                  The target maximum refresh rate in Hz.
+///
 - (void)setMaxRefreshRate:(double)refreshRate;
 
 @end
