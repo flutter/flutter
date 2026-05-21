@@ -350,6 +350,11 @@ abstract class PointerEvent with Diagnosticable {
   /// Bit field using the *Button constants such as [kPrimaryMouseButton],
   /// [kSecondaryStylusButton], etc.
   ///
+  /// This value represents the buttons that are currently pressed when the
+  /// event is dispatched, not the button that caused the event. For example,
+  /// a [PointerUpEvent] usually has a value of 0 because the button that
+  /// triggered the event is no longer pressed.
+  ///
   /// For example, if this has the value 6 and the
   /// [kind] is [PointerDeviceKind.invertedStylus], then this indicates an
   /// upside-down stylus with both its primary and secondary buttons pressed.
