@@ -25,9 +25,12 @@ typedef AppExitRequestCallback = Future<AppExitResponse> Function();
 /// [onStateChange] callback. See the [AppLifecycleState] enum for details on
 /// the various states.
 ///
-/// The [onStateChange] callback is called for each state change, and the
-/// individual state transitions ([onResume], [onInactive], etc.) are also
-/// called if the state transition they represent occurs.
+/// The [onStateChange] callback is called for each state change. If a state
+/// change maps to one of the lifecycle transition callbacks exposed by this
+/// class ([onResume], [onInactive], etc.), the matching callback is called for
+/// that transition. A single high-level application event, such as backgrounding
+/// the app, can produce several state changes in sequence, so multiple
+/// transition callbacks may be called one after another.
 ///
 /// State changes will occur in accordance with the state machine described by
 /// this diagram:
@@ -38,6 +41,12 @@ typedef AppExitRequestCallback = Future<AppExitResponse> Function();
 /// The initial state of the state machine is the [AppLifecycleState.detached]
 /// state, and the arrows describe valid state transitions. Transitions in blue
 /// are transitions that only happen on iOS and Android.
+///
+/// The diagram is shared with [AppLifecycleState]. Some transition labels
+/// describe platform lifecycle concepts rather than callbacks on this class.
+/// For example, this class does not expose an `onStart` callback; when the
+/// application enters [AppLifecycleState.resumed] from
+/// [AppLifecycleState.detached], this class calls [onResume].
 ///
 /// {@tool dartpad}
 /// This example shows how an application can listen to changes in the
@@ -106,6 +115,10 @@ class AppLifecycleListener with WidgetsBindingObserver, Diagnosticable {
 
   /// A callback that is called when a view in the application gains input
   /// focus.
+  ///
+  /// This callback is called for transitions into [AppLifecycleState.resumed],
+  /// including from [AppLifecycleState.inactive] and from
+  /// [AppLifecycleState.detached].
   ///
   /// A call to this callback indicates that the application is entering a state
   /// where it is visible, active, and accepting user input.
