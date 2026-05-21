@@ -714,7 +714,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
       _sliverAnimatedMultiBoxKey.currentState!.insertAllItems(index, length, duration: duration);
     } else {
       final int itemIndex = _computeItemIndex(index);
-      final int lengthWithSeparators = _itemsCount == 0 ? length * 2 - 1 : length * 2;
+      final int lengthWithSeparators = _visibleItemsCount == 0 ? length * 2 - 1 : length * 2;
       _sliverAnimatedMultiBoxKey.currentState!.insertAllItems(
         itemIndex,
         lengthWithSeparators,
@@ -822,14 +822,19 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
 
   int get _outgoingItemsCount => _sliverAnimatedMultiBoxKey.currentState!._outgoingItems.length;
 
+  /// The number of underlying children not currently animating out.
+  ///
+  /// For [AnimatedList.separated], this includes both items and separators.
+  int get _visibleItemsCount => _itemsCount - _outgoingItemsCount;
+
   // Helper method to compute the index for the item to insert or remove considering the separators in between.
   int _computeItemIndex(int index) {
     if (index == 0) {
       return index;
     }
-    final int itemsAndSeparatorsCount = _itemsCount;
+    final int itemsAndSeparatorsCount = _visibleItemsCount;
     final int separatorsCount = itemsAndSeparatorsCount ~/ 2;
-    final int separatedItemsCount = _itemsCount - separatorsCount;
+    final int separatedItemsCount = itemsAndSeparatorsCount - separatorsCount;
 
     final isNewLastIndex = index == separatedItemsCount;
     final int indexAdjustedForSeparators = index * 2;

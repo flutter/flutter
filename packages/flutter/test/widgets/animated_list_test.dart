@@ -1279,6 +1279,107 @@ void main() {
     },
   );
 
+  testWidgets('AnimatedList.separated reinserts a removed tail item', (WidgetTester tester) async {
+    Widget itemBuilder(BuildContext context, int index, Animation<double> animation) {
+      return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
+    }
+
+    Widget separatorBuilder(BuildContext context, int index, Animation<double> animation) {
+      return SizedBox(height: 10.0, child: Center(child: Text('separator $index')));
+    }
+
+    Widget removedSeparatorBuilder(BuildContext context, int index, Animation<double> animation) {
+      return SizedBox(height: 10.0, child: Center(child: Text('removing separator $index')));
+    }
+
+    final listKey = GlobalKey<AnimatedListState>();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList.separated(
+          key: listKey,
+          initialItemCount: 2,
+          itemBuilder: itemBuilder,
+          separatorBuilder: separatorBuilder,
+          removedSeparatorBuilder: removedSeparatorBuilder,
+        ),
+      ),
+    );
+
+    listKey.currentState!.removeItem(1, (BuildContext context, Animation<double> animation) {
+      return const SizedBox(height: 100.0, child: Center(child: Text('removing item 1')));
+    }, duration: const Duration(milliseconds: 100));
+
+    // Before the fix this triggered an "itemIndex >= 0 && itemIndex <= _itemsCount"
+    // assertion inside _SliverAnimatedMultiBoxAdaptorState.insertItem.
+    listKey.currentState!.insertItem(1, duration: const Duration(milliseconds: 100));
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('item 0'), findsOneWidget);
+    expect(find.text('item 1'), findsOneWidget);
+    expect(find.text('removing item 1'), findsOneWidget);
+    expect(find.text('removing separator 0'), findsOneWidget);
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('item 0'), findsOneWidget);
+    expect(find.text('separator 0'), findsOneWidget);
+    expect(find.text('item 1'), findsOneWidget);
+    expect(find.text('removing item 1'), findsNothing);
+    expect(find.text('removing separator 0'), findsNothing);
+  });
+
+  testWidgets('AnimatedList.separated inserts all after emptying', (WidgetTester tester) async {
+    Widget itemBuilder(BuildContext context, int index, Animation<double> animation) {
+      return SizedBox(height: 100.0, child: Center(child: Text('item $index')));
+    }
+
+    Widget separatorBuilder(BuildContext context, int index, Animation<double> animation) {
+      return SizedBox(height: 10.0, child: Center(child: Text('separator $index')));
+    }
+
+    Widget removedSeparatorBuilder(BuildContext context, int index, Animation<double> animation) {
+      return SizedBox(height: 10.0, child: Center(child: Text('removing separator $index')));
+    }
+
+    final listKey = GlobalKey<AnimatedListState>();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList.separated(
+          key: listKey,
+          initialItemCount: 1,
+          itemBuilder: itemBuilder,
+          separatorBuilder: separatorBuilder,
+          removedSeparatorBuilder: removedSeparatorBuilder,
+        ),
+      ),
+    );
+
+    listKey.currentState!.removeItem(0, (BuildContext context, Animation<double> animation) {
+      return const SizedBox(height: 100.0, child: Center(child: Text('removing item 0')));
+    }, duration: const Duration(milliseconds: 100));
+
+    listKey.currentState!.insertAllItems(0, 2, duration: const Duration(milliseconds: 100));
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('item 0'), findsOneWidget);
+    expect(find.text('separator 0'), findsOneWidget);
+    expect(find.text('item 1'), findsOneWidget);
+    expect(find.text('removing item 0'), findsOneWidget);
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('item 0'), findsOneWidget);
+    expect(find.text('separator 0'), findsOneWidget);
+    expect(find.text('item 1'), findsOneWidget);
+    expect(find.text('removing item 0'), findsNothing);
+  });
+
   testWidgets('AnimatedList does not crash at zero area', (WidgetTester tester) async {
     tester.view.physicalSize = Size.zero;
     final controller = ScrollController();
