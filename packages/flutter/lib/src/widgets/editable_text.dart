@@ -3074,7 +3074,7 @@ class EditableTextState extends State<EditableText>
         WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
     if (spellCheckAutomaticallyDisabled || !spellCheckServiceIsConfigured) {
       // Only enable spell check if a non-disabled configuration is provided
-      // for non-password text and, if that configuration does not specify a
+      // for non-password input and, if that configuration does not specify a
       // spell check service, a native spell checker must be supported.
       assert(() {
         if (!spellCheckAutomaticallyDisabled && !spellCheckServiceIsConfigured) {
