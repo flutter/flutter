@@ -29,7 +29,7 @@ export const loadCanvasKit = (deps, config, browserEnvironment, canvasKitBaseUrl
     }
     let filename = "canvaskit.wasm";
     if (useWebParagraphCanvasKit) {
-      filename = "experimental_webparagraph/canvaskit.wasm";
+      filename = "webparagraph/canvaskit.wasm";
     } else if (useChromiumCanvasKit) {
       filename = "chromium/canvaskit.wasm";
     }

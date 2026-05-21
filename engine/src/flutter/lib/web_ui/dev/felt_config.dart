@@ -62,27 +62,26 @@ class RunConfiguration {
 
 class ArtifactDependencies {
   ArtifactDependencies({
-    required this.canvasKitExperimentalWebParagraph,
+    required this.canvasKitWebParagraph,
     required this.canvasKit,
     required this.canvasKitChromium,
     required this.skwasm,
   });
 
   ArtifactDependencies.none()
-    : canvasKitExperimentalWebParagraph = false,
+    : canvasKitWebParagraph = false,
       canvasKit = false,
       canvasKitChromium = false,
       skwasm = false;
 
-  final bool canvasKitExperimentalWebParagraph;
+  final bool canvasKitWebParagraph;
   final bool canvasKit;
   final bool canvasKitChromium;
   final bool skwasm;
 
   ArtifactDependencies operator |(ArtifactDependencies other) {
     return ArtifactDependencies(
-      canvasKitExperimentalWebParagraph:
-          canvasKitExperimentalWebParagraph || other.canvasKitExperimentalWebParagraph,
+      canvasKitWebParagraph: canvasKitWebParagraph || other.canvasKitWebParagraph,
       canvasKit: canvasKit || other.canvasKit,
       canvasKitChromium: canvasKitChromium || other.canvasKitChromium,
       skwasm: skwasm || other.skwasm,
@@ -91,8 +90,7 @@ class ArtifactDependencies {
 
   ArtifactDependencies operator &(ArtifactDependencies other) {
     return ArtifactDependencies(
-      canvasKitExperimentalWebParagraph:
-          canvasKitExperimentalWebParagraph && other.canvasKitExperimentalWebParagraph,
+      canvasKitWebParagraph: canvasKitWebParagraph && other.canvasKitWebParagraph,
       canvasKit: canvasKit && other.canvasKit,
       canvasKitChromium: canvasKitChromium && other.canvasKitChromium,
       skwasm: skwasm && other.skwasm,
@@ -235,7 +233,7 @@ class FeltConfig {
           'Run config not found with name: `$runConfigName` (referenced by test suite: `$name`)',
         );
       }
-      var canvasKitExperimentalWebParagraph = false;
+      var canvasKitWebParagraph = false;
       var canvasKit = false;
       var canvasKitChromium = false;
       var skwasm = false;
@@ -243,11 +241,11 @@ class FeltConfig {
       if (depsNode != null) {
         for (final dynamic dep in depsNode as YamlList) {
           switch (dep as String) {
-            case 'canvaskit_experimental_webparagraph':
-              if (canvasKitExperimentalWebParagraph) {
+            case 'canvaskit_webparagraph':
+              if (canvasKitWebParagraph) {
                 throw AssertionError('Artifact dep $dep listed twice in suite $name.');
               }
-              canvasKitExperimentalWebParagraph = true;
+              canvasKitWebParagraph = true;
             case 'canvaskit':
               if (canvasKit) {
                 throw AssertionError('Artifact dep $dep listed twice in suite $name.');
@@ -269,7 +267,7 @@ class FeltConfig {
         }
       }
       final artifactDeps = ArtifactDependencies(
-        canvasKitExperimentalWebParagraph: canvasKitExperimentalWebParagraph,
+        canvasKitWebParagraph: canvasKitWebParagraph,
         canvasKit: canvasKit,
         canvasKitChromium: canvasKitChromium,
         skwasm: skwasm,

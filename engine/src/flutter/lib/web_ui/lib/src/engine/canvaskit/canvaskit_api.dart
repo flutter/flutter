@@ -2422,7 +2422,7 @@ SkRuntimeEffect? MakeRuntimeEffect(String program) => _MakeRuntimeEffect(program
 
 const String _kFullCanvasKitJsFileName = 'canvaskit.js';
 const String _kChromiumCanvasKitJsFileName = 'chromium/canvaskit.js';
-const String _kWebParagraphCanvasKitJsFileName = 'experimental_webparagraph/canvaskit.js';
+const String _kWebParagraphCanvasKitJsFileName = 'webparagraph/canvaskit.js';
 
 String get _canvasKitBaseUrl => configuration.canvasKitBaseUrl;
 
