@@ -94,13 +94,7 @@ std::vector<uint8_t> BuildMaliciousApng(uint32_t fdat_data_length) {
   // Malicious fdAT for frame 0: data_length < 4
   // An fdAT chunk must have at least 4 bytes (sequence number).
   // With data_length < 4, the subtraction in DemuxNextImage() underflows.
-  {
-    std::vector<uint8_t> fdat;
-    for (uint32_t i = 0; i < fdat_data_length; i++) {
-      fdat.push_back(0);
-    }
-    AppendChunk(apng, "fdAT", fdat);
-  }
+  AppendChunk(apng, "fdAT", std::vector<uint8_t>(fdat_data_length, 0));
 
   // IEND
   AppendChunk(apng, "IEND", {});
