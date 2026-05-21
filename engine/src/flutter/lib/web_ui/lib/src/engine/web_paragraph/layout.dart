@@ -199,9 +199,6 @@ class TextLayout {
 
     final wrapper = TextWrapper(this);
     wrapper.breakLines(width);
-    for (final TextLine line in lines) {
-      paragraph.fullWidth = math.max(paragraph.fullWidth, line.fullWidth);
-    }
     paragraph.width = width;
     paragraph.maxIntrinsicWidth = wrapper.maxIntrinsicWidth;
     paragraph.minIntrinsicWidth = wrapper.minIntrinsicWidth;
@@ -485,20 +482,19 @@ class TextLayout {
   }
 
   void _calculatePaintBounds() {
-    // First, calculate the actual bounds of the entire paragraph.
-    double leftBound = double.infinity;
-    double topBound = double.infinity;
-    double rightBound = double.negativeInfinity;
-    double bottomBound = double.negativeInfinity;
+    double left = double.infinity;
+    double top = double.infinity;
+    double right = double.negativeInfinity;
+    double bottom = double.negativeInfinity;
 
     for (final TextLine line in lines) {
-      leftBound = math.min(leftBound, line.formattingShift + line.paintBoundsLeft);
-      topBound = math.min(topBound, line.baseline - line.paintBoundsAscent);
-      rightBound = math.max(rightBound, line.formattingShift + line.paintBoundsRight);
-      bottomBound = math.max(bottomBound, line.baseline + line.paintBoundsDescent);
+      left = math.min(left, line.formattingShift + line.paintBoundsLeft);
+      top = math.min(top, line.baseline - line.paintBoundsAscent);
+      right = math.max(right, line.formattingShift + line.paintBoundsRight);
+      bottom = math.max(bottom, line.baseline + line.paintBoundsDescent);
     }
 
-    paragraph.paintBounds = ui.Rect.fromLTRB(leftBound, topBound, rightBound, bottomBound);
+    paragraph.paintBounds = ui.Rect.fromLTRB(left, top, right, bottom);
   }
 
   static const epsilon = 0.001;

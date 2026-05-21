@@ -881,8 +881,6 @@ class WebParagraph implements ui.Paragraph {
   @override
   double width = 0;
 
-  double fullWidth = 0;
-
   double maxLineWidthWithTrailingSpaces = 0; // without trailing spaces it would be longestLine
 
   List<TextLine> get lines => _layout.lines;
