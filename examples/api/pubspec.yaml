@@ -16,6 +16,7 @@ dependencies:
     sdk: flutter
 
   collection: any
+  http: any
   vector_math: any
   web: any
   test: any
@@ -39,4 +40,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: 1vgq65
+# PUBSPEC CHECKSUM: k1uknc
