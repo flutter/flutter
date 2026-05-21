@@ -1208,42 +1208,44 @@ void main() {
 
   testWidgets('OutlinedButton contributes semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
-    await tester.pumpWidget(
-      Theme(
-        data: ThemeData(useMaterial3: false),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: OutlinedButton(
-              style: const ButtonStyle(
-                // Specifying minimumSize to mimic the original minimumSize for
-                // RaisedButton so that the corresponding button size matches
-                // the original version of this test.
-                minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
+    try {
+      await tester.pumpWidget(
+        Theme(
+          data: ThemeData(useMaterial3: false),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: OutlinedButton(
+                style: const ButtonStyle(
+                  // Specifying minimumSize to mimic the original minimumSize for
+                  // RaisedButton so that the corresponding button size matches
+                  // the original version of this test.
+                  minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
+                ),
+                onPressed: () {},
+                child: const Text('ABC'),
               ),
-              onPressed: () {},
-              child: const Text('ABC'),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(
-      tester.getSemantics(find.byType(OutlinedButton)),
-      matchesSemantics(
-        label: 'ABC',
-        hasTapAction: true,
-        hasFocusAction: true,
-        hasEnabledState: true,
-        isButton: true,
-        isEnabled: true,
-        isFocusable: true,
-        size: const Size(88.0, 48.0),
-      ),
-    );
-
-    handle.dispose();
+      expect(
+        tester.getSemantics(find.byType(OutlinedButton)),
+        matchesSemantics(
+          label: 'ABC',
+          hasTapAction: true,
+          hasFocusAction: true,
+          hasEnabledState: true,
+          isButton: true,
+          isEnabled: true,
+          isFocusable: true,
+          size: const Size(88.0, 48.0),
+        ),
+      );
+    } finally {
+      handle.dispose();
+    }
   });
 
   testWidgets('When an OutlinedButton gains an icon, preserves the same SemanticsNode id', (
