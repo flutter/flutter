@@ -219,7 +219,7 @@ class DomCanvasParagraphPainter {
             _fillBlockText(layout, block as TextBlock);
           case StyleElements.decorations:
             // For decorations we need to shift to the start of the block
-            _paintContext.translate(block.shiftFromLineStart, 0);
+            _paintContext.translate(block.shiftFromLineStart, -line.fontBoundingBoxAscent);
             // Let's calculate the sizes
             final (ui.Rect sourceRect, ui.Rect targetRect) = _calculateBlock(
               block as TextBlock,
