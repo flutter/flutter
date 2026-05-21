@@ -77,7 +77,7 @@ class TextLayout {
       // to paint an empty paragraph.
 
       // Calculate the actual paint bounds of the paragraph.
-      _calculateActualBounds();
+      _calculatePaintBounds();
     }
 
     // TODO(jlavrova): Optimize. If lines are the same as the previous layout, we don't need to
@@ -484,7 +484,7 @@ class TextLayout {
     }
   }
 
-  void _calculateActualBounds() {
+  void _calculatePaintBounds() {
     // First, calculate the actual bounds of the entire paragraph.
     double leftBound = double.infinity;
     double topBound = double.infinity;
@@ -492,13 +492,13 @@ class TextLayout {
     double bottomBound = double.negativeInfinity;
 
     for (final TextLine line in lines) {
-      leftBound = math.min(leftBound, line.formattingShift + line.actualBoundingBoxLeft);
-      topBound = math.min(topBound, line.baseline - line.actualBoundingBoxAscent);
-      rightBound = math.max(rightBound, line.formattingShift + line.actualBoundingBoxRight);
-      bottomBound = math.max(bottomBound, line.baseline + line.actualBoundingBoxDescent);
+      leftBound = math.min(leftBound, line.formattingShift + line.paintBoundsLeft);
+      topBound = math.min(topBound, line.baseline - line.paintBoundsAscent);
+      rightBound = math.max(rightBound, line.formattingShift + line.paintBoundsRight);
+      bottomBound = math.max(bottomBound, line.baseline + line.paintBoundsDescent);
     }
 
-    paragraph.actualBounds = ui.Rect.fromLTRB(leftBound, topBound, rightBound, bottomBound);
+    paragraph.paintBounds = ui.Rect.fromLTRB(leftBound, topBound, rightBound, bottomBound);
   }
 
   static const epsilon = 0.001;
@@ -1136,10 +1136,10 @@ class TextBlock extends LineBlock {
   @override
   late final ui.Rect advance = span.getBlockSelection(this);
 
-  late final ui.Rect actualBounds = span.getBlockBounds(this);
+  late final ui.Rect paintBounds = span.getBlockBounds(this);
 
-  double get actualBoundingBoxAscent => -actualBounds.top;
-  double get actualBoundingBoxDescent => actualBounds.bottom;
+  double get paintBoundsAscent => -paintBounds.top;
+  double get paintBoundsDescent => paintBounds.bottom;
 
   @override
   double spanShiftFromLineStart;
@@ -1306,10 +1306,10 @@ class TextLine {
   double fontBoundingBoxAscent = 0.0;
   double fontBoundingBoxDescent = 0.0;
 
-  double actualBoundingBoxAscent = 0.0;
-  double actualBoundingBoxDescent = 0.0;
-  double actualBoundingBoxLeft = double.infinity;
-  double actualBoundingBoxRight = double.negativeInfinity;
+  double paintBoundsAscent = 0.0;
+  double paintBoundsDescent = 0.0;
+  double paintBoundsLeft = double.infinity;
+  double paintBoundsRight = double.negativeInfinity;
 
   double formattingShift = 0.0; // For centered or right aligned text
   double trailingSpacesWidth = 0.0;
@@ -1329,13 +1329,15 @@ class TextLine {
         fontBoundingBoxDescent,
         block.multipliedFontBoundingBoxDescent,
       );
-      actualBoundingBoxAscent = math.max(actualBoundingBoxAscent, block.actualBoundingBoxAscent);
-      actualBoundingBoxDescent = math.max(actualBoundingBoxDescent, block.actualBoundingBoxDescent);
-      actualBoundingBoxLeft = math.min(actualBoundingBoxLeft, block.actualBounds.left);
-      actualBoundingBoxRight = math.max(actualBoundingBoxRight, block.actualBounds.right);
+      paintBoundsAscent = math.max(paintBoundsAscent, block.paintBoundsAscent);
+      paintBoundsDescent = math.max(paintBoundsDescent, block.paintBoundsDescent);
+      paintBoundsLeft = math.min(paintBoundsLeft, block.paintBounds.left);
+      paintBoundsRight = math.max(paintBoundsRight, block.paintBounds.right);
     } else if (block is PlaceholderBlock) {
       fontBoundingBoxAscent = math.max(fontBoundingBoxAscent, block.ascent);
       fontBoundingBoxDescent = math.max(fontBoundingBoxDescent, block.descent);
+      // There's no need to update paint bounds because placeholders aren't painted by the
+      // paragraph.
     } else {
       throw UnsupportedError('Unknown block type: $block');
     }

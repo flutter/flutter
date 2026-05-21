@@ -1248,7 +1248,7 @@ Future<void> testMain() async {
       final paragraphRect = Rect.fromLTWH(offset.dx, offset.dy, fullWidth, paragraph.height);
       canvas.drawRect(paragraphRect, redPaint..style = PaintingStyle.stroke);
 
-      final Rect paintRect = (paragraph as WebParagraph).actualBounds.shift(offset);
+      final Rect paintRect = (paragraph as WebParagraph).paintBounds.shift(offset);
       canvas.drawRect(paintRect, bluePaint..style = PaintingStyle.stroke);
 
       return paragraph;

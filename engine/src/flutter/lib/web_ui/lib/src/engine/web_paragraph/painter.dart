@@ -58,13 +58,13 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
   final sourceRect = ui.Rect.fromLTWH(
     0,
     0,
-    ((paragraph.actualBounds.width) * devicePixelRatio).ceilToDouble(),
-    ((paragraph.actualBounds.height) * devicePixelRatio).ceilToDouble(),
+    ((paragraph.paintBounds.width) * devicePixelRatio).ceilToDouble(),
+    ((paragraph.paintBounds.height) * devicePixelRatio).ceilToDouble(),
   );
   // Target rect will be scaled by the canvas transform, so we don't scale it here
   final targetRect = ui.Rect.fromLTWH(
-    (offset.dx + paragraph.actualBounds.left).floorToDouble(),
-    (offset.dy + paragraph.actualBounds.top).floorToDouble(),
+    (offset.dx + paragraph.paintBounds.left).floorToDouble(),
+    (offset.dy + paragraph.paintBounds.top).floorToDouble(),
     (sourceRect.width / devicePixelRatio).ceilToDouble(),
     (sourceRect.height / devicePixelRatio).ceilToDouble(),
   );
@@ -164,7 +164,7 @@ abstract class WebParagraphPainter {
         _resizePaintCanvas(ui.window.devicePixelRatio, sourceRect);
 
         // We only want to paint the actual paint bounds of the paragraph.
-        _paintContext.translate(-_paragraph.actualBounds.left, -_paragraph.actualBounds.top);
+        _paintContext.translate(-_paragraph.paintBounds.left, -_paragraph.paintBounds.top);
 
         // Fill out all the blocks on Canvas2D canvas
         DomCanvasParagraphPainter._fillAllBlocks(StyleElements.shadows, layout);
