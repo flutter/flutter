@@ -2911,6 +2911,10 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// Events dispatched by [TestGesture] are not affected by this.
   HitTestDispatcher? deviceEventDispatcher;
 
+  /// Framework code may asynchronously cancel a pointer after the test-dispatched
+  /// event has reset the source back to device.
+  final Set<int> _testPointerIds = <int>{};
+
   /// Dispatch an event to the targets found by a hit test on its position.
   ///
   /// If the [pointerEventSource] is [TestBindingEventSource.test], then
@@ -2922,8 +2926,22 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// forwarded to [deviceEventDispatcher].
   @override
   void handlePointerEvent(PointerEvent event) {
+    if (pointerEventSource == TestBindingEventSource.device &&
+        event is PointerCancelEvent &&
+        _testPointerIds.contains(event.pointer)) {
+      withPointerEventSource(TestBindingEventSource.test, () => handlePointerEvent(event));
+      return;
+    }
+
     switch (pointerEventSource) {
       case TestBindingEventSource.test:
+        if (event is PointerDownEvent || event is PointerPanZoomStartEvent) {
+          _testPointerIds.add(event.pointer);
+        } else if (event is PointerUpEvent ||
+            event is PointerCancelEvent ||
+            event is PointerPanZoomEndEvent) {
+          _testPointerIds.remove(event.pointer);
+        }
         RenderView? target;
         for (final RenderView renderView in renderViews) {
           if (renderView.flutterView.viewId == event.viewId) {
@@ -3078,6 +3096,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void postTest() {
     super.postTest();
+    _testPointerIds.clear();
     assert(!_expectingFrame);
     assert(_pendingFrame == null);
     _inTest = false;

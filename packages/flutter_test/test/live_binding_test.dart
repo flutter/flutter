@@ -73,6 +73,69 @@ void main() {
     expect(invocations, 3);
   });
 
+  testWidgets('long press can reopen a dialog route after dismissing it', (
+    WidgetTester tester,
+  ) async {
+    var longPresses = 0;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              transitionDuration: Duration.zero,
+              pageBuilder:
+                  (
+                    BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                  ) {
+                    return GestureDetector(
+                      onLongPress: () {
+                        longPresses++;
+                        Navigator.of(context).push<void>(
+                          RawDialogRoute<void>(
+                            transitionDuration: Duration.zero,
+                            pageBuilder:
+                                (
+                                  BuildContext context,
+                                  Animation<double> animation,
+                                  Animation<double> secondaryAnimation,
+                                ) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Center(child: Text('Popup')),
+                                  );
+                                },
+                          ),
+                        );
+                      },
+                      child: const Center(child: Text('Show dialog')),
+                    );
+                  },
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.longPress(find.text('Show dialog'));
+    await tester.pumpAndSettle();
+    expect(longPresses, 1);
+    expect(find.text('Popup'), findsOneWidget);
+
+    await tester.tap(find.text('Popup'));
+    await tester.pumpAndSettle();
+    expect(find.text('Popup'), findsNothing);
+
+    await tester.longPress(find.text('Show dialog'));
+    await tester.pumpAndSettle();
+    expect(longPresses, 2);
+    expect(find.text('Popup'), findsOneWidget);
+  });
+
   testWidgets('setSurfaceSize works', (WidgetTester tester) async {
     addTearDown(binding.resetLayers);
     await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
