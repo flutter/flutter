@@ -1,3 +1,4 @@
+// @dart = 3.12
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -41,11 +42,7 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform {
-  XcodeBasedProject({
-    required Xcode? xcode,
-    required XcodeProjectInterpreter? xcodeProjectInterpreter,
-  }) : _xcode = xcode,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter;
+  XcodeBasedProject({required this._xcode, required this._xcodeProjectInterpreter});
 
   final Xcode? _xcode;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
