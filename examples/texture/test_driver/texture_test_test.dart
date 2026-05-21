@@ -38,7 +38,8 @@ void main() {
 
       // Poll, taking screenshots and counting red pixels for up to 10 seconds (20 attempts of 500ms).
       var afterRedPixels = 0;
-      for (var attempt = 1; attempt <= 20; attempt++) {
+      var attempt = 1;
+      while (afterRedPixels < 10000) {
         await Future<void>.delayed(const Duration(milliseconds: 500));
         final List<int> afterScreenshot = await driver.screenshot(
           format: ScreenshotFormat.rawStraightRgba,
@@ -46,9 +47,7 @@ void main() {
         afterRedPixels = countRedPixels(afterScreenshot);
         // ignore: avoid_print
         print('Attempt $attempt: after red pixel count = $afterRedPixels');
-        if (afterRedPixels > 10000) {
-          break;
-        }
+        attempt++;
       }
 
       // The texture size is 300x300. Even with scaling/different device pixel ratio,
