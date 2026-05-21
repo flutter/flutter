@@ -184,7 +184,7 @@ dependencies:
   test_core: 0.6.18
   typed_data: 1.4.0
   url_launcher: 6.3.2
-  url_launcher_android: 6.3.29
+  url_launcher_android: 6.3.30
   url_launcher_ios: 6.4.1
   url_launcher_linux: 3.2.2
   url_launcher_macos: 3.2.5
@@ -224,4 +224,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: i3305a
+# PUBSPEC CHECKSUM: ntrh87
