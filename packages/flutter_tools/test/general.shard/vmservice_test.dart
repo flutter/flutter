@@ -81,36 +81,32 @@ void main() {
     expect(mockVMService.services, containsPair(kFlutterVersionServiceName, kFlutterToolAlias));
   });
 
-  testUsingContext(
-    'VM Service prints messages for connection failures',
-    () {
-      final logger = BufferLogger.test();
-      FakeAsync().run((FakeAsync time) {
-        final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
-        unawaited(connectToVmService(uri, logger: logger));
+  testUsingContext('VM Service prints messages for connection failures', () {
+    final logger = BufferLogger.test();
+    FakeAsync().run((FakeAsync time) {
+      final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
+      unawaited(connectToVmService(uri, logger: logger));
 
-        time.elapse(const Duration(seconds: 5));
-        expect(logger.statusText, isEmpty);
+      time.elapse(const Duration(seconds: 5));
+      expect(logger.statusText, isEmpty);
 
-        time.elapse(const Duration(minutes: 2));
+      time.elapse(const Duration(minutes: 2));
 
-        final String statusText = logger.statusText;
-        expect(
-          statusText,
-          containsIgnoringWhitespace(
-            'Connecting to the VM Service is taking longer than expected...',
-          ),
-        );
-        expect(statusText, containsIgnoringWhitespace('try re-running with --host-vmservice-port'));
-        expect(
-          statusText,
-          containsIgnoringWhitespace('Exception attempting to connect to the VM Service:'),
-        );
-        expect(statusText, containsIgnoringWhitespace('This was attempt #50. Will retry'));
-      });
-    },
-    overrides: <Type, Generator>{WebSocketConnector: () => failingWebSocketConnector},
-  );
+      final String statusText = logger.statusText;
+      expect(
+        statusText,
+        containsIgnoringWhitespace(
+          'Connecting to the VM Service is taking longer than expected...',
+        ),
+      );
+      expect(statusText, containsIgnoringWhitespace('try re-running with --host-vmservice-port'));
+      expect(
+        statusText,
+        containsIgnoringWhitespace('Exception attempting to connect to the VM Service:'),
+      );
+      expect(statusText, containsIgnoringWhitespace('This was attempt #50. Will retry'));
+    });
+  }, overrides: <Type, Generator>{WebSocketConnector: () => failingWebSocketConnector});
 
   testWithoutContext('setAssetDirectory forwards arguments correctly', () async {
     final mockVMService = FakeVMService();
@@ -647,6 +643,31 @@ void main() {
     expect(await completer.future, 'ws://localhost:8181/foo/ws');
     openChannelForTesting = null;
   });
+
+  testWithoutContext(
+    'RPCErrorExtension detects DWDS-specific unregistered service extension errors',
+    () {
+      final unregisteredErrorNative = vm_service.RPCError(
+        'ext.flutter.evict',
+        vm_service.RPCErrorKind.kMethodNotFound.code,
+        'Method not found',
+      );
+      final unregisteredErrorDwds = vm_service.RPCError(
+        'ext.flutter.evict',
+        -32603,
+        'Service extension failed in some clients: Unexpected null value.',
+      );
+      final otherError = vm_service.RPCError(
+        'ext.flutter.evict',
+        -32603,
+        'Some other random error message',
+      );
+
+      expect(unregisteredErrorNative.isServiceExtensionUnregisteredError, isTrue);
+      expect(unregisteredErrorDwds.isServiceExtensionUnregisteredError, isTrue);
+      expect(otherError.isServiceExtensionUnregisteredError, isFalse);
+    },
+  );
 }
 
 class FakeVMService extends Fake implements vm_service.VmService {
