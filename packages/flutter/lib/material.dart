@@ -14,6 +14,10 @@
 ///    for a catalog of commonly-used Material component widgets.
 ///  * [m3.material.io](https://m3.material.io/) for the Material 3 specification
 ///  * [m2.material.io](https://m2.material.io/) for the Material 2 specification
+@Deprecated(
+  'Use the `material_ui` package instead. '
+  'This feature was deprecated after v3.47.',
+)
 library material;
 
 export 'src/material/about.dart';
