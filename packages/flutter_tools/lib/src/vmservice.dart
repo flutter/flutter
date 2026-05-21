@@ -1024,5 +1024,6 @@ extension RPCErrorExtension on vm_service.RPCError {
   // TODO(kevmoo): Remove this work-around once https://github.com/dart-lang/sdk/issues/63424 is fixed.
   bool get isServiceExtensionUnregisteredError =>
       code == vm_service.RPCErrorKind.kMethodNotFound.code ||
-      (code == -32603 && message.contains('Unexpected null value'));
+      (code == vm_service.RPCErrorKind.kInternalError.code &&
+          message.contains('Unexpected null value'));
 }

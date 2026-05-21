@@ -654,12 +654,12 @@ void main() {
       );
       final unregisteredErrorDwds = vm_service.RPCError(
         'ext.flutter.evict',
-        -32603,
+        vm_service.RPCErrorKind.kInternalError.code,
         'Service extension failed in some clients: Unexpected null value.',
       );
       final otherError = vm_service.RPCError(
         'ext.flutter.evict',
-        -32603,
+        vm_service.RPCErrorKind.kInternalError.code,
         'Some other random error message',
       );
 
