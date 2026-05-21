@@ -7,8 +7,7 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine/canvaskit/image.dart';
-import 'package:ui/src/engine/html_image_element_codec.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
@@ -21,6 +20,9 @@ void main() {
 
 Future<void> testMain() async {
   setUpUnitTests();
+  setUp(() {
+    ImageDecodingManager.instance.debugReset();
+  });
   group('$HtmlImageElementCodec', () {
     test('supports raw images - RGBA8888', () async {
       final completer = Completer<ui.Image>();
@@ -91,6 +93,102 @@ Future<void> testMain() async {
       );
       await codec.getNextFrame();
       expect(buffer.toString(), '0/100,100/100,');
+    });
+
+    test('uses ImageDecodingManager', () async {
+      final ImageDecodingManager manager = ImageDecodingManager.instance;
+      // Occupy all slots
+      final requests = <ImageDecodingRequest>[];
+      for (var i = 0; i < 8; i++) {
+        requests.add(manager.requestDecodingSlot(100, 100));
+      }
+
+      final HtmlImageElementCodec codec = CkImageElementCodec('sample_image1.png');
+      var decoded = false;
+      final Future<void> decodeFuture = codec.decode().then((_) => decoded = true);
+
+      // Give it some time to load (Phase 1)
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(decoded, false); // Should be blocked in Phase 2
+
+      // Release one slot
+      manager.releaseDecodingSlot(requests[0]);
+
+      // Wait for it to decode (Phase 3)
+      await decodeFuture;
+      expect(decoded, true);
+
+      // Clean up remaining slots
+      for (var i = 1; i < 8; i++) {
+        manager.releaseDecodingSlot(requests[i]);
+      }
+    });
+
+    test('dispose unblocks ImageDecodingManager queue', () async {
+      final ImageDecodingManager manager = ImageDecodingManager.instance;
+      // Occupy all slots
+      final requests = <ImageDecodingRequest>[];
+      for (var i = 0; i < 8; i++) {
+        requests.add(manager.requestDecodingSlot(100, 100));
+      }
+
+      final HtmlImageElementCodec codec = CkImageElementCodec('sample_image1.png');
+      var decodeFinished = false;
+      unawaited(codec.decode().whenComplete(() => decodeFinished = true));
+
+      // Give it some time to load (Phase 1)
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(decodeFinished, false); // Should be blocked in Phase 2
+
+      // Dispose the codec while it's in the queue
+      codec.dispose();
+
+      // The decode future should complete (as requested in the plan)
+      await Future<void>.delayed(Duration.zero);
+      expect(decodeFinished, true);
+
+      // A new request should be able to get a slot if we release one.
+      manager.releaseDecodingSlot(requests[0]);
+      final ImageDecodingRequest request2 = manager.requestDecodingSlot(100, 100);
+      var granted2 = false;
+      unawaited(request2.future.then((_) => granted2 = true));
+      await Future<void>.delayed(Duration.zero);
+      expect(granted2, true);
+
+      // Clean up
+      for (var i = 1; i < 8; i++) {
+        manager.releaseDecodingSlot(requests[i]);
+      }
+      manager.releaseDecodingSlot(request2);
+    });
+
+    test('getNextFrame() throws StateError if disposed', () async {
+      final HtmlImageElementCodec codec = CkImageElementCodec('sample_image1.png');
+      codec.dispose();
+      expect(() => codec.getNextFrame(), throwsStateError);
+    });
+
+    test('clears src on loading failure', () async {
+      final HtmlImageElementCodec codec = CkImageElementCodec('non_existent_image.png');
+      try {
+        await codec.getNextFrame();
+        fail('Should have thrown an exception');
+      } catch (e) {
+        expect(e, isA<ImageCodecException>());
+      }
+      expect(codec.imgElement?.src, isNot(contains('non_existent_image.png')));
+    });
+
+    test('dispose does not clear src if image handed out', () async {
+      final HtmlImageElementCodec codec = CkImageElementCodec('sample_image1.png');
+      final ui.FrameInfo frame = await codec.getNextFrame();
+      final String? src = codec.imgElement?.src;
+      expect(src, contains('sample_image1.png'));
+
+      codec.dispose();
+      expect(codec.imgElement?.src, src); // Should NOT be cleared
+
+      frame.image.dispose();
     });
 
     /// Regression test for Firefox

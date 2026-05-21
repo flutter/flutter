@@ -9,6 +9,8 @@
 /// @docImport 'gesture_detector.dart';
 library;
 
+import 'dart:ui' as ui show Rect, SemanticsAction, SemanticsActionEvent;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -148,6 +150,11 @@ class TapRegionSurface extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderProxyBoxWithHitTestBehavior renderObject) {}
 }
 
+typedef _ClassifiedTapRegions = ({
+  Iterable<RenderTapRegion> inside,
+  Iterable<RenderTapRegion> outside,
+});
+
 /// A render object that provides notification of a tap inside or outside of a
 /// set of registered regions, without participating in the [gesture
 /// disambiguation](https://flutter.dev/to/gesture-disambiguation) system
@@ -201,6 +208,73 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
   final Map<Object?, Set<RenderTapRegion>> _groupIdToRegions = <Object?, Set<RenderTapRegion>>{};
 
   @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    SemanticsBinding.instance.addSemanticsActionListener(_handleSemanticsAction);
+  }
+
+  @override
+  void detach() {
+    SemanticsBinding.instance.removeSemanticsActionListener(_handleSemanticsAction);
+    super.detach();
+  }
+
+  // Handles semantics tap and long-press events so that TapRegionSurface can
+  // detect taps delivered via the accessibility / semantics channel, not just
+  // the pointer event channel.
+  //
+  // When a semantics action arrives, we ask SemanticsBinding for the tapped
+  // semantics node's global rect and run a hit test at its center. We need the
+  // hit test because TapRegion tracks regions as render objects, not semantics
+  // nodes, so the only way to determine which RenderTapRegion was hit is to
+  // query the render tree. The hit test result is then passed to
+  // _classifyRegions, which reuses the same inside/outside logic as pointer
+  // events without going through handleEvent and its pointer-specific side
+  // effects.
+  //
+  // TODO(flutter-zl): consumeOutsideTaps cannot currently stop semantics
+  // action propagation. SemanticsBinding listeners have no mechanism to
+  // prevent an action from reaching performSemanticsAction. A new API
+  // similar to WidgetsBindingObserver.handleStartBackGesture may be needed.
+  // See https://github.com/flutter/flutter/pull/183093 for discussion.
+  void _handleSemanticsAction(ui.SemanticsActionEvent event) {
+    if (event.type != ui.SemanticsAction.tap && event.type != ui.SemanticsAction.longPress) {
+      return;
+    }
+    if (_registeredRegions.isEmpty) {
+      return;
+    }
+
+    final ui.Rect? globalRect = SemanticsBinding.instance.getRectOfSemanticsNodeInViewCoordinates(
+      event.viewId,
+      event.nodeId,
+    );
+    if (globalRect == null) {
+      return;
+    }
+    final Offset globalCenter = globalRect.center;
+    final Offset localPosition = globalToLocal(globalCenter);
+
+    final hitResult = BoxHitTestResult();
+    if (!hitTest(hitResult, position: localPosition)) {
+      return;
+    }
+
+    final (:Iterable<RenderTapRegion> inside, :Iterable<RenderTapRegion> outside) =
+        _classifyRegions(hitResult);
+
+    final syntheticEvent = PointerDownEvent(viewId: event.viewId, position: globalCenter);
+    for (final region in outside) {
+      assert(_tapRegionDebug('Calling onTapOutside for $region (from semantics action)'));
+      region.onTapOutside?.call(syntheticEvent);
+    }
+    for (final region in inside) {
+      assert(_tapRegionDebug('Calling onTapInside for $region (from semantics action)'));
+      region.onTapInside?.call(syntheticEvent);
+    }
+  }
+
+  @override
   void registerTapRegion(RenderTapRegion region) {
     assert(_tapRegionDebug('Region $region registered.'));
     assert(!_registeredRegions.contains(region));
@@ -242,6 +316,29 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
     return hitTarget;
   }
 
+  // Classifies registered TapRegions as inside or outside based on which
+  // regions appear in the hit test result path. Grouped regions are treated
+  // as a single unit: if any member of a group is hit, all members are
+  // considered inside.
+  _ClassifiedTapRegions _classifyRegions(BoxHitTestResult result) {
+    final Iterable<RenderTapRegion> hitRegions = _getRegionsHit(
+      _registeredRegions,
+      result.path,
+    ).cast<RenderTapRegion>();
+    assert(_tapRegionDebug('Tap event hit ${hitRegions.length} descendants.'));
+
+    final insideRegions = <RenderTapRegion>{
+      for (final RenderTapRegion region in hitRegions)
+        if (region.groupId == null) region else ..._groupIdToRegions[region.groupId]!,
+    };
+    return (
+      inside: insideRegions,
+      // Materialize the outside list so callbacks that mutate registrations
+      // during iteration do not affect the snapshot we are walking.
+      outside: _registeredRegions.where((RenderTapRegion r) => !insideRegions.contains(r)).toList(),
+    );
+  }
+
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
@@ -270,27 +367,11 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
       return;
     }
 
-    // A child was hit, so we need to call onTapOutside / onTapUpOutside for
-    // those regions or groups of regions that were not hit.
-    final Set<RenderTapRegion> hitRegions = _getRegionsHit(
-      _registeredRegions,
-      result.path,
-    ).cast<RenderTapRegion>().toSet();
-    assert(_tapRegionDebug('Tap event hit ${hitRegions.length} descendants.'));
-
-    final insideRegions = <RenderTapRegion>{
-      for (final RenderTapRegion region in hitRegions)
-        if (region.groupId == null)
-          region
-        // Adding all grouped regions, so they act as a single region.
-        else
-          ..._groupIdToRegions[region.groupId]!,
-    };
-    // If they're not inside, then they're outside.
-    final Set<RenderTapRegion> outsideRegions = _registeredRegions.difference(insideRegions);
+    final (:Iterable<RenderTapRegion> inside, :Iterable<RenderTapRegion> outside) =
+        _classifyRegions(result);
 
     var consumeOutsideTaps = false;
-    for (final region in outsideRegions) {
+    for (final region in outside) {
       if (event is PointerDownEvent) {
         assert(_tapRegionDebug('Calling onTapOutside for $region'));
         region.onTapOutside?.call(event);
@@ -306,7 +387,7 @@ class RenderTapRegionSurface extends RenderProxyBoxWithHitTestBehavior
         consumeOutsideTaps = true;
       }
     }
-    for (final region in insideRegions) {
+    for (final region in inside) {
       if (event is PointerDownEvent) {
         assert(_tapRegionDebug('Calling onTapInside for $region'));
         region.onTapInside?.call(event);

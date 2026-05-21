@@ -53,6 +53,44 @@ void main() async {
     expect(identical(programA, programB), true);
   });
 
+  // Two FragmentPrograms loaded from different asset paths but built from
+  // the same underlying shader source share an embedded entrypoint name.
+  // Each FragmentProgram registers under a scoped key derived from its
+  // asset path (its `library_id`), so the two coexist in the shared shader
+  // registry without one evicting the other. Without that namespacing the
+  // shader libraries would collide at the bare entrypoint name and the
+  // second load would tear down the first one's pipeline state.
+  //
+  // `no_uniforms.frag.iplr` and `no_uniforms_alt.frag.iplr` are
+  // byte-identical aliases of the same compiled shader, wired up in
+  // `lib/ui/fixtures/shaders/general_shaders/BUILD.gn`. `no_uniforms.frag`
+  // is used so the test does not need to thread sampler or uniform setup
+  // through the FragmentShader to validate it.
+  test('FragmentPrograms from different asset paths do not collide', () async {
+    final FragmentProgram programA = await FragmentProgram.fromAsset('no_uniforms.frag.iplr');
+    final FragmentProgram programB = await FragmentProgram.fromAsset('no_uniforms_alt.frag.iplr');
+
+    expect(identical(programA, programB), isFalse);
+
+    final FragmentShader shaderA = programA.fragmentShader();
+    final FragmentShader shaderB = programB.fragmentShader();
+    expect(shaderA, isNotNull);
+    expect(shaderB, isNotNull);
+
+    // Both shaders must remain usable end to end. Construct a Paint that
+    // uses each and confirm we can build a Picture, which exercises the
+    // pipeline that the shader is registered against.
+    for (final shader in <FragmentShader>[shaderA, shaderB]) {
+      final paint = Paint()..shader = shader;
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder);
+      canvas.drawRect(const Rect.fromLTWH(0, 0, 10, 10), paint);
+      final Picture picture = recorder.endRecording();
+      expect(picture, isNotNull);
+      picture.dispose();
+    }
+  });
+
   group('getUniformFloat slots', () {
     late FragmentShader shader;
 
