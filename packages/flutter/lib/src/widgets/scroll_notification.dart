@@ -68,9 +68,9 @@ mixin ViewportElementMixin on NotifiableElementMixin {
 ///    scrolling.
 ///  * Zero or more [ScrollUpdateNotification]s, which indicate that the widget
 ///    has changed its scroll position, mixed with zero or more
-///    [OverscrollNotification]s, which indicate that the widget has not changed
-///    its scroll position because the change would have caused its scroll
-///    position to go outside its scroll bounds.
+///    [OverscrollNotification]s, which indicate that a requested scroll offset
+///    change was not fully applied because it would have moved the scroll
+///    position outside its scroll bounds.
 ///  * Interspersed with the [ScrollUpdateNotification]s and
 ///    [OverscrollNotification]s are zero or more [UserScrollNotification]s,
 ///    which indicate that the user has changed the direction in which they are
@@ -85,6 +85,15 @@ mixin ViewportElementMixin on NotifiableElementMixin {
 /// [Scrollable] widgets. To focus on notifications from the nearest
 /// [Scrollable] descendant, check that the [depth] property of the notification
 /// is zero.
+///
+/// Whether a boundary scroll produces an [OverscrollNotification] depends on
+/// the active [ScrollPhysics]. For example, [ClampingScrollPhysics] rejects
+/// scroll deltas that would move the position past the edge, so those rejected
+/// deltas are reported as [OverscrollNotification]s. By contrast,
+/// [BouncingScrollPhysics] allows the position to move beyond the scroll bounds
+/// and then bounce back. A listener that needs to detect iOS-style boundary
+/// movement should listen for [ScrollUpdateNotification]s and check whether
+/// [ScrollMetrics.outOfRange] is true.
 ///
 /// When a scroll notification is received by a [NotificationListener], the
 /// listener will have already completed build and layout, and it is therefore
@@ -176,9 +185,9 @@ class ScrollStartNotification extends ScrollNotification {
 ///
 /// See also:
 ///
-///  * [OverscrollNotification], which indicates that a [Scrollable] widget
-///    has not changed its scroll position because the change would have caused
-///    its scroll position to go outside its scroll bounds.
+///  * [OverscrollNotification], which indicates that a requested scroll offset
+///    change was not fully applied because it would have moved the scroll
+///    position outside its scroll bounds.
 ///  * [ScrollNotification], which describes the notification lifecycle.
 class ScrollUpdateNotification extends ScrollNotification {
   /// Creates a notification that a [Scrollable] widget has changed its scroll
@@ -214,9 +223,19 @@ class ScrollUpdateNotification extends ScrollNotification {
   }
 }
 
-/// A notification that a [Scrollable] widget has not changed its scroll position
-/// because the change would have caused its scroll position to go outside of
+/// A notification that a [Scrollable] widget could not fully apply a requested
+/// scroll offset change because it would have moved the scroll position outside
 /// its scroll bounds.
+///
+/// The [overscroll] value is the number of logical pixels of the requested
+/// scroll offset change that the [Scrollable] did not apply. This notification
+/// is based on [ScrollPhysics.applyBoundaryConditions], so it is only dispatched
+/// when the physics prevent part of the requested scroll offset change.
+/// Scrollables that use [BouncingScrollPhysics], the default on iOS, allow the
+/// scroll position to move outside the scroll bounds and then bounce back
+/// instead of reporting those boundary movements as [OverscrollNotification]s.
+/// To detect that state, listen for [ScrollUpdateNotification] and check whether
+/// [ScrollMetrics.outOfRange] is true.
 ///
 /// See also:
 ///
@@ -224,8 +243,9 @@ class ScrollUpdateNotification extends ScrollNotification {
 ///    has changed its scroll position.
 ///  * [ScrollNotification], which describes the notification lifecycle.
 class OverscrollNotification extends ScrollNotification {
-  /// Creates a notification that a [Scrollable] widget has changed its scroll
-  /// position outside of its scroll bounds.
+  /// Creates a notification for a scroll offset change that was not fully
+  /// applied because it would have moved the scroll position outside its
+  /// scroll bounds.
   OverscrollNotification({
     required super.metrics,
     required BuildContext super.context,
@@ -241,7 +261,8 @@ class OverscrollNotification extends ScrollNotification {
   /// Otherwise, null.
   final DragUpdateDetails? dragDetails;
 
-  /// The number of logical pixels that the [Scrollable] avoided scrolling.
+  /// The number of logical pixels of the requested scroll offset change that
+  /// the [Scrollable] did not apply.
   ///
   /// This will be negative for overscroll on the "start" side and positive for
   /// overscroll on the "end" side.
