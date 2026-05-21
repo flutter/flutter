@@ -158,8 +158,8 @@ class FlutterProject {
       directory,
       manifest,
       exampleManifest,
-      xcode: xcode ?? globals.xcode,
-      xcodeProjectInterpreter: xcodeProjectInterpreter ?? globals.xcodeProjectInterpreter,
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     );
   }
 

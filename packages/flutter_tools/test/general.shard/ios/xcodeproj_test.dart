@@ -1453,7 +1453,7 @@ Information about project "Runner":
             ..createSync(recursive: true)
             ..writeAsStringSync('name: my_app\n');
 
-          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir, logger, xcode, xcodeProjectInterpreter);
 
           final Directory podXcodeProject =
               project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
@@ -1566,7 +1566,7 @@ PODS:
             ..createSync(recursive: true)
             ..writeAsStringSync('name: my_app\n');
 
-          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir, logger, xcode, xcodeProjectInterpreter);
 
           final Directory podXcodeProject =
               project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
@@ -1632,7 +1632,7 @@ Build settings for action build and target good_plugin:
             ..createSync(recursive: true)
             ..writeAsStringSync('name: my_app\n');
 
-          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir, logger, xcode, xcodeProjectInterpreter);
 
           final Directory podXcodeProject =
               project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
@@ -1706,7 +1706,7 @@ Build settings for action build and target good_plugin:
             ..createSync(recursive: true)
             ..writeAsStringSync('name: my_app\n');
 
-          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir, logger, xcode, xcodeProjectInterpreter);
 
           final Directory podXcodeProject =
               project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
@@ -1790,7 +1790,7 @@ Build settings for action build and target bad_plugin:
             ..createSync(recursive: true)
             ..writeAsStringSync('name: my_app\n');
 
-          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+          final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir, logger, xcode, xcodeProjectInterpreter);
 
           final Directory podXcodeProject =
               project.ios.hostAppRoot.childDirectory('Pods').childDirectory('Pods.xcodeproj')
