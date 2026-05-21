@@ -107,7 +107,7 @@ vars = {
   # logic or condition may not work if this flag is False.
   # TODO(zijiehe): Make this condition more strict to only download fuchsia
   # dependencies when necessary: b/40935282
-  'download_fuchsia_deps': 'host_os == "linux"',
+  'download_fuchsia_deps': 'host_os == "linux" and host_cpu == "x64"',
   # Downloads the fuchsia SDK as listed in fuchsia_sdk_path var. This variable
   # is currently only used for the Fuchsia LSC process and is not intended for
   # local development.
@@ -634,6 +634,7 @@ deps = {
         'version': 'version:21'
        }
      ],
+     'condition': 'not (host_os == "linux" and host_cpu == "arm64")',
      # Always download the JDK since java is required for running the formatter.
      'dep_type': 'cipd',
    },
