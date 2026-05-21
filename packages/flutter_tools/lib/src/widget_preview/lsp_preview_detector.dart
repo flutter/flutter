@@ -185,7 +185,7 @@ class LspPreviewDetector {
       onPubspecChangeDetected(filePath);
       return;
     }
-    await _analysisServer?.waitForAnalysis(delay: const Duration(seconds: 5));
+    await _analysisServer?.waitForAnalysis();
     try {
       final FlutterWidgetPreviews result = await dtd.getFlutterWidgetPreviews();
       onChangeDetected(result);
