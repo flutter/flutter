@@ -857,10 +857,22 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   FlutterManifest get manifest => FakeFlutterManifest();
 
   @override
-  Xcode? get xcode => null;
+  Xcode? get xcode {
+    try {
+      return globals.xcode;
+    } on Object {
+      return null;
+    }
+  }
 
   @override
-  XcodeProjectInterpreter? get xcodeProjectInterpreter => null;
+  XcodeProjectInterpreter? get xcodeProjectInterpreter {
+    try {
+      return globals.xcodeProjectInterpreter;
+    } on Object {
+      return null;
+    }
+  }
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
