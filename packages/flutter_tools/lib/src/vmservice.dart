@@ -186,7 +186,7 @@ Future<vm_service.VmService> setUpVmService({
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   required vm_service.VmService vmService,
 }) async {
-  final Git useGit = git ?? context.get<Git>()!;
+  final Git? useGit = git ?? context.get<Git>();
   // Each service registration requires a request to the attached VM service. Since the
   // order of these requests does not matter, store each future in a list and await
   // all at the end of this method.
@@ -226,7 +226,7 @@ Future<vm_service.VmService> setUpVmService({
   ) async {
     final FlutterVersion version =
         context.get<FlutterVersion>() ??
-        FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: useGit);
+        FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: useGit!);
     final Map<String, Object> versionJson = version.toJson();
     versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
     versionJson['engineRevisionShort'] = version.engineRevisionShort;
