@@ -1289,6 +1289,7 @@ void main() {
     ]);
   });
 
+
   testWithoutContext('Cache can delete stampfiles of artifacts', () {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final artifactSet = FakeIosUsbArtifacts();
