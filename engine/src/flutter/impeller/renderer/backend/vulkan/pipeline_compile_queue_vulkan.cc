@@ -22,31 +22,13 @@ PipelineCompileQueueVulkan::PipelineCompileQueueVulkan(
 
 PipelineCompileQueueVulkan::~PipelineCompileQueueVulkan() {}
 
-bool PipelineCompileQueueVulkan::PostJobForDescriptor(
-    const PipelineDescriptor& desc,
-    const fml::closure& job) {
-  if (!job) {
-    return false;
-  }
-
-  if (!AddJob(desc, job)) {
-    // This bit is being extremely conservative. If insertion did not take
-    // place, someone gave the compile queue a job for the same description.
-    // This is highly unusual but technically not impossible. Just run the job
-    // eagerly.
-    FML_LOG(ERROR) << "Got multiple compile jobs for the same descriptor. "
-                      "Running eagerly.";
-    PostJob(job);
-    return true;
-  }
-
+void PipelineCompileQueueVulkan::OnJobAdded() {
   PostJob([weak_queue = weak_from_this()]() {
     if (auto queue = std::static_pointer_cast<PipelineCompileQueueVulkan>(
             weak_queue.lock())) {
       queue->DoOneJob();
     }
   });
-  return true;
 }
 
 void PipelineCompileQueueVulkan::PostJob(const fml::closure& job) {

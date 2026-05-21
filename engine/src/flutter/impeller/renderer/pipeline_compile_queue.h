@@ -59,8 +59,8 @@ class PipelineCompileQueue
   /// @return     If the job was successfully posted to the parallel task
   /// runners.
   ///
-  virtual bool PostJobForDescriptor(const PipelineDescriptor& desc,
-                                    const fml::closure& job) = 0;
+  bool PostJobForDescriptor(const PipelineDescriptor& desc,
+                            const fml::closure& job);
 
   //----------------------------------------------------------------------------
   /// @brief      If the task has not yet been done, perform it eagerly on the
@@ -73,6 +73,18 @@ class PipelineCompileQueue
 
  protected:
   virtual void PostJob(const fml::closure& job) = 0;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Called by PostJobForDescriptor after a job has been
+  ///             successfully added to the queue. Subclasses must implement
+  ///             this to define their scheduling strategy.
+  ///
+  ///             The default implementation for duplicate descriptors is to
+  ///             run the job eagerly. Subclasses can override this behavior
+  ///             by checking for duplicates before calling the base class.
+  ///
+  virtual void OnJobAdded() = 0;
+
   void DoOneJob();
   bool AddJob(const PipelineDescriptor& desc, const fml::closure& job);
   bool HasPendingJobs();
