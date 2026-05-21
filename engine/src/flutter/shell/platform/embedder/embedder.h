@@ -31,6 +31,8 @@
 // - Instead of array of structures, prefer array of pointers to structures.
 //   This ensures that array indexing does not break if members are added
 //   to the structure.
+// - Structures documented as frozen must not have members added. Introduce a
+//   new versioned structure instead.
 //
 // These changes are allowed:
 // - Adding new struct members at the end of a structure as long as the struct
@@ -392,6 +394,7 @@ typedef struct _FlutterEngine* FLUTTER_API_SYMBOL(FlutterEngine);
 /// opaque to the engine; the engine does not interpret view IDs in any way.
 typedef int64_t FlutterViewId;
 
+/// Frozen because adding members would break the ABI of `FlutterSemanticsNode`.
 typedef struct {
   /// horizontal scale factor
   double scaleX;
@@ -645,6 +648,9 @@ typedef struct {
 } FlutterUIntSize;
 
 /// A structure to represent a rectangle.
+///
+/// Frozen because adding members would break the ABI of `FlutterSemanticsNode`
+/// and `FlutterDamage`.
 typedef struct {
   double left;
   double top;
@@ -653,6 +659,8 @@ typedef struct {
 } FlutterRect;
 
 /// A structure to represent a 2D point.
+///
+/// Frozen because adding members would break the ABI of `FlutterLayer`.
 typedef struct {
   double x;
   double y;
@@ -668,6 +676,8 @@ typedef struct {
 } FlutterRoundedRect;
 
 /// A structure to represent a damage region.
+///
+/// Frozen because adding members would break the ABI of `FlutterPresentInfo`.
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterDamage).
   size_t struct_size;
@@ -1565,6 +1575,9 @@ typedef struct {
 ///                 ABI compatibility for existing users, no new fields will be
 ///                 added to this struct. New fields will continue to be added
 ///                 to `FlutterSemanticsNode2`.
+///
+/// Frozen because adding members would break the ABI of
+/// `FlutterSemanticsUpdate`.
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterSemanticsNode).
   size_t struct_size;
@@ -1772,6 +1785,9 @@ extern const int32_t kFlutterSemanticsCustomActionIdBatchEnd;
 ///                 preserve ABI compatility for existing users, no new fields
 ///                 will be added to this struct. New fields will continue to
 ///                 be added to `FlutterSemanticsCustomAction2`.
+///
+/// Frozen because adding members would break the ABI of
+/// `FlutterSemanticsUpdate`.
 typedef struct {
   /// The size of the struct. Must be sizeof(FlutterSemanticsCustomAction).
   size_t struct_size;
