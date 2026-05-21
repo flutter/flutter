@@ -1299,6 +1299,10 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
   /// Implementations of this method should end with a call to the inherited
   /// method, as in `super.dispose()`.
   ///
+  /// This method must not be marked `async`. If a subclass starts asynchronous
+  /// work from this method, it must not wait for the work to complete before
+  /// calling `super.dispose()` synchronously.
+  ///
   /// ## Caveats
   ///
   /// This method is _not_ invoked at times where a developer might otherwise
@@ -6027,7 +6031,21 @@ class StatefulElement extends ComponentElement {
   @override
   void unmount() {
     super.unmount();
-    state.dispose();
+    final Object? debugCheckForReturnedFuture = state.dispose() as dynamic;
+    assert(() {
+      if (debugCheckForReturnedFuture is Future) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('${state.runtimeType}.dispose() returned a Future.'),
+          ErrorDescription('State.dispose() must be a void method without an `async` keyword.'),
+          ErrorHint(
+            'Rather than awaiting on asynchronous work directly inside of dispose, '
+            'call a separate method to do this work without awaiting it, and call '
+            'super.dispose() synchronously.',
+          ),
+        ]);
+      }
+      return true;
+    }());
     assert(() {
       if (state._debugLifecycleState == _StateLifecycle.defunct) {
         return true;

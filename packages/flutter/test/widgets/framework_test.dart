@@ -1222,6 +1222,21 @@ void main() {
     }, throwsFlutterError);
   });
 
+  testWidgets('Async State.dispose throws a targeted FlutterError', (WidgetTester tester) async {
+    await tester.pumpWidget(const _AsyncDisposeWidget());
+
+    await tester.pumpWidget(const SizedBox());
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), contains('_AsyncDisposeWidgetState.dispose() returned a Future.'));
+    expect(
+      exception.toString(),
+      contains('State.dispose() must be a void method without an `async` keyword.'),
+    );
+    expect(exception.toString(), contains('call super.dispose() synchronously.'));
+  });
+
   testWidgets('State toString', (WidgetTester tester) async {
     final state = TestState();
     expect(state.toString(), contains('no widget'));
@@ -2444,6 +2459,25 @@ class _StatefulWidgetSpyState extends State<StatefulWidgetSpy> {
     widget.onBuild?.call(context);
     return widget.child;
   }
+}
+
+class _AsyncDisposeWidget extends StatefulWidget {
+  const _AsyncDisposeWidget();
+
+  @override
+  State<_AsyncDisposeWidget> createState() => _AsyncDisposeWidgetState();
+}
+
+class _AsyncDisposeWidgetState extends State<_AsyncDisposeWidget> {
+  @override
+  // ignore: avoid_void_async, intentionally verifies the framework diagnostic.
+  void dispose() async {
+    await Future<void>.value();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
 }
 
 class RenderObjectWidgetSpy extends LeafRenderObjectWidget {
