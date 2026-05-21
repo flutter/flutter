@@ -19432,6 +19432,7 @@ void main() {
                 controller: controller,
                 maxLines: null,
                 style: const TextStyle(color: Colors.black, fontSize: 24),
+                dragStartBehavior: DragStartBehavior.down,
               ),
             ),
           ),
@@ -19440,47 +19441,56 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final ScrollableState scrollable = tester.state(find.byType(Scrollable).last);
-
-    // Scroll to the bottom of the long text viewport.
-    scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
+    // Focus the TextField to ensure the text layout is properly initialized.
+    await tester.tap(find.byType(TextField));
     await tester.pumpAndSettle();
 
-    // Establish an initial selection near the bottom of the text view.
-    controller.selection = const TextSelection(baseOffset: 650, extentOffset: 680);
-    await tester.pumpAndSettle();
-
+    // Move the cursor to the very end of the text.
     final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-
-    // Simulate an incremental drag gesture by moving the base selection offset
-    // upwards frame-by-frame toward the beginning of the text.
-    var currentBase = 650;
-    while (currentBase > 0) {
-      currentBase -= 50;
-      if (currentBase < 0) {
-        currentBase = 0;
-      }
-
       state.userUpdateTextEditingValue(
         TextEditingValue(
           text: controller.text,
-          selection: TextSelection(baseOffset: currentBase, extentOffset: 680),
+        selection: TextSelection.collapsed(offset: controller.text.length),
         ),
-        SelectionChangedCause.drag,
+      null,
       );
-
-      await tester.pump(const Duration(milliseconds: 20));
-    }
-
     await tester.pumpAndSettle();
 
-    // The viewport must follow the continuous drag gesture and scroll smoothly
-    // all the way to the top without being blocked or snapping back down.
+    // Verify that the viewport has automatically scrolled down to the bottom.
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable).last);
+    expect(scrollable.position.pixels, equals(scrollable.position.maxScrollExtent));
+
+    // Long press near the end of the text via a physical gesture to trigger
+    // the selection overlay and bring up the text selection handles.
+    final int lastWordOffset = controller.text.length - 5;
+    final Offset lastWordPos = textOffsetToPosition(tester, lastWordOffset);
+    await tester.longPressAt(lastWordPos, pointer: 7);
+    await tester.pumpAndSettle();
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 2);
+
+    // Grab the start handle and set the target to the very top of the text.
+    final Offset handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
+    final Offset targetPos = textOffsetToPosition(tester, 0);
+
+    // Simulate a drag gesture by moving the handle to the top target.
+    final TestGesture gesture = await tester.startGesture(handlePos, pointer: 7);
+    await tester.pump();
+    await gesture.moveTo(targetPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
     expect(
       scrollable.position.pixels,
       equals(0.0),
       reason:
-          'The viewport should successfully follow the incremental drag all the way to the top.',
+          'The viewport should successfully follow the selection handle drag all the way to the top.',
     );
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 }
