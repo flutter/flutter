@@ -63,16 +63,23 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
       .sizing_delegate = sized_to_content ? this : nullptr,
       .is_sized_to_content = sized_to_content,
   });
-  auto hwnd = window_handle_;
-  if (owner_window == nullptr) {
-    if (HMENU hMenu = GetSystemMenu(hwnd, FALSE)) {
-      EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_GRAYED);
-    }
-  }
 
-  if (owner_window != nullptr) {
-    UpdateModalState();
+  if (!sized_to_content) {
+    InitialModalState();
   }
+}
+
+void HostWindowDialog::InitialModalState() {
+    auto hwnd = GetWindowHandle();
+    if (GetOwnerWindow()) {
+      if (HMENU hMenu = GetSystemMenu(hwnd, FALSE)) {
+        EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_GRAYED);
+      }
+    }
+
+    if (GetOwnerWindow()) {
+      UpdateModalState();
+    }
 }
 
 #include <iostream>

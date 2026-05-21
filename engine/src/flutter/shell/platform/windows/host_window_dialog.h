@@ -56,6 +56,8 @@ class HostWindowDialog : public HostWindow,
   // modal window higest up in the window hierarchy.
   void UpdateModalState();
 
+  void InitialModalState();
+
   static DWORD GetWindowStyleForDialog(std::optional<HWND> const& owner_window,
                                        bool resizable);
   static DWORD GetExtendedWindowStyleForDialog(
