@@ -7781,6 +7781,23 @@ class MetaData extends SingleChildRenderObjectWidget {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=NvtMt_DtFrQ}
 ///
 /// {@macro flutter.widgets.SemanticsBase}
+///
+/// [GestureDetector] adds semantic tap actions automatically when possible. Use
+/// [Semantics] when a custom control also needs to describe a role, enabled
+/// state, or other semantic properties that the gesture alone does not provide.
+/// If [Semantics] supplies the semantic action, for example with
+/// [SemanticsProperties.onTap], set [GestureDetector.excludeFromSemantics] to
+/// true on the pointer detector to avoid exposing duplicate semantic actions.
+///
+/// {@tool dartpad}
+/// This example shows a custom button that uses [Semantics] to expose a button
+/// role, enabled state, and tap action, [FocusableActionDetector] to handle
+/// focus, hover, and keyboard activation, and [GestureDetector] to handle
+/// pointer taps.
+///
+/// ** See code in examples/api/lib/widgets/basic/semantics.0.dart **
+/// {@end-tool}
+///
 ///  * [SliverSemantics], the sliver variant of this widget.
 @immutable
 class Semantics extends _SemanticsBase {
