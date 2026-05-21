@@ -749,10 +749,14 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
       _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
     } else {
       final int itemIndex = _computeItemIndex(index);
+      // Children animating out from earlier removeItem calls still count
+      // towards [_itemsCount], so subtract them to recognize the new tail
+      // of the visible list while a previous removal is still in flight.
+      final int visibleItemsCount = _itemsCount - _outgoingItemsCount;
       // Remove the item
       _sliverAnimatedMultiBoxKey.currentState!.removeItem(itemIndex, builder, duration: duration);
-      if (_itemsCount > 1) {
-        if (itemIndex == _itemsCount - 1) {
+      if (visibleItemsCount > 1) {
+        if (itemIndex == visibleItemsCount - 1) {
           // The item was removed from the end of the list, so the separator to remove is the one at `last index` - 1.
           _sliverAnimatedMultiBoxKey.currentState!.removeItem(
             itemIndex - 1,
@@ -815,6 +819,8 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   }
 
   int get _itemsCount => _sliverAnimatedMultiBoxKey.currentState!._itemsCount;
+
+  int get _outgoingItemsCount => _sliverAnimatedMultiBoxKey.currentState!._outgoingItems.length;
 
   // Helper method to compute the index for the item to insert or remove considering the separators in between.
   int _computeItemIndex(int index) {

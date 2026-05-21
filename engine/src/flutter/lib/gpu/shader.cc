@@ -10,6 +10,7 @@
 #include "fml/make_copyable.h"
 #include "impeller/core/runtime_types.h"
 #include "impeller/renderer/shader_function.h"
+#include "impeller/renderer/shader_key.h"
 #include "impeller/renderer/shader_library.h"
 #include "tonic/converter/dart_converter.h"
 
@@ -36,6 +37,7 @@ Shader::Shader() = default;
 Shader::~Shader() = default;
 
 fml::RefPtr<Shader> Shader::Make(
+    std::string library_id,
     std::string entrypoint,
     impeller::ShaderStage stage,
     std::shared_ptr<fml::Mapping> code_mapping,
@@ -45,6 +47,7 @@ fml::RefPtr<Shader> Shader::Make(
     std::unordered_map<std::string, TextureBinding> uniform_textures,
     std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts) {
   auto shader = fml::MakeRefCounted<Shader>();
+  shader->library_id_ = std::move(library_id);
   shader->entrypoint_ = std::move(entrypoint);
   shader->stage_ = stage;
   shader->code_mapping_ = std::move(code_mapping);
@@ -56,9 +59,14 @@ fml::RefPtr<Shader> Shader::Make(
   return shader;
 }
 
+std::string Shader::GetScopedName() const {
+  return impeller::ShaderKey::MakeUserScopedName(
+      impeller::ShaderKey::kScopeFlutterGPU, library_id_, entrypoint_);
+}
+
 std::shared_ptr<const impeller::ShaderFunction> Shader::GetFunctionFromLibrary(
     impeller::ShaderLibrary& library) {
-  return library.GetFunction(entrypoint_, stage_);
+  return library.GetFunction(GetScopedName(), stage_);
 }
 
 bool Shader::IsRegistered(Context& context) {
@@ -76,7 +84,7 @@ bool Shader::RegisterSync(Context& context) {
   std::promise<bool> promise;
   auto future = promise.get_future();
   lib.RegisterFunction(
-      entrypoint_, stage_, code_mapping_,
+      GetScopedName(), stage_, code_mapping_,
       fml::MakeCopyable([promise = std::move(promise)](bool result) mutable {
         promise.set_value(result);
       }));
