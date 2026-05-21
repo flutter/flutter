@@ -749,6 +749,15 @@ typedef RawKeyEventHandler = bool Function(RawKeyEvent event);
 /// * Lock modes (such as CapsLock) only have their "enabled" state recorded.
 ///   There's no way to acquire their pressing state.
 ///
+/// Since [RawKeyboard] forwards platform key events without regularizing them,
+/// it also exposes platform-specific quirks directly. For example, some
+/// Android Emulator keyboard paths have reported a held hardware key as
+/// repeated down/up pairs, even though the same keyboard reports repeat events
+/// correctly on physical Android devices. Verify platform-specific key hold
+/// and repeat behavior on the target hardware when that distinction matters,
+/// or use [HardwareKeyboard] when app logic requires a regularized key event
+/// model.
+///
 /// See also:
 ///
 ///  * [RawKeyDownEvent] and [RawKeyUpEvent], the classes used to describe
