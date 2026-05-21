@@ -270,8 +270,8 @@ void main() {
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
-kWhichSysctlCommand,
-const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -316,8 +316,8 @@ const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1)
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
-kWhichSysctlCommand,
-kx64CheckCommand,
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -362,8 +362,8 @@ kx64CheckCommand,
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
-kWhichSysctlCommand,
-kx64CheckCommand,
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -408,8 +408,8 @@ kx64CheckCommand,
         'FLUTTER_XCODE_ARCHS': 'arm64',
       };
       fakeProcessManager.addCommands(<FakeCommand>[
-kWhichSysctlCommand,
-kx64CheckCommand,
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -454,8 +454,8 @@ kx64CheckCommand,
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
-kWhichSysctlCommand,
-kx64CheckCommand,
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -498,8 +498,8 @@ kx64CheckCommand,
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
-kWhichSysctlCommand,
-kx64CheckCommand,
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -596,8 +596,8 @@ kx64CheckCommand,
     };
 
     fakeProcessManager.addCommands(const <FakeCommand>[
-kWhichSysctlCommand,
-kx64CheckCommand,
+      kWhichSysctlCommand,
+      kx64CheckCommand,
       kResolvePackagesCommand,
       FakeCommand(
         command: <String>[
@@ -635,8 +635,8 @@ kx64CheckCommand,
       const workingDirectory = '/';
       final Directory buildDirectory = fileSystem.directory('build/ios');
       fakeProcessManager.addCommands(const <FakeCommand>[
-kWhichSysctlCommand,
-kx64CheckCommand,
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -679,8 +679,8 @@ kx64CheckCommand,
       const stderr = 'Useful Xcode failure message about missing project.';
 
       fakeProcessManager.addCommands(const <FakeCommand>[
-kWhichSysctlCommand,
-kx64CheckCommand,
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -725,8 +725,8 @@ kx64CheckCommand,
       final Directory buildDirectory = fileSystem.directory('build/ios');
 
       fakeProcessManager.addCommands(const <FakeCommand>[
-kWhichSysctlCommand,
-kx64CheckCommand,
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
