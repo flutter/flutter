@@ -3481,41 +3481,37 @@ Future<void> testMain() async {
       );
     });
 
-    test(
-      'hidden autofill elements should have a width and height of 0 on non-Safari browsers',
-      () {
-        final List<Map<String, Object?>> fields = createFieldValues(
-          <String>['email', 'username', 'password'],
-          <String>['field1', 'field2', 'field3'],
-        );
-        final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
-        final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
-          kImplicitViewId,
-          emailAutofillMap,
-          fields,
-        )!;
+    test('hidden autofill elements should have a width and height of 0 on non-Safari browsers', () {
+      final List<Map<String, Object?>> fields = createFieldValues(
+        <String>['email', 'username', 'password'],
+        <String>['field1', 'field2', 'field3'],
+      );
+      final emailAutofillMap = fields.first['autofill']! as Map<String, Object?>;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        emailAutofillMap,
+        fields,
+      )!;
 
-        final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
-        final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
-        autofillForm.wakeUp(emailFocusedElement, emailAutofill);
+      final emailFocusedElement = createDomElement('input') as DomHTMLInputElement;
+      final emailAutofill = AutofillInfo.fromFrameworkMessage(emailAutofillMap);
+      autofillForm.wakeUp(emailFocusedElement, emailAutofill);
 
-        final formChildNodes =
-            autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
-        final DomHTMLInputElement username = formChildNodes[1];
-        final DomHTMLInputElement password = formChildNodes[2];
+      final formChildNodes =
+          autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
+      final DomHTMLInputElement username = formChildNodes[1];
+      final DomHTMLInputElement password = formChildNodes[2];
 
-        expect(username.name, 'username');
-        expect(password.name, 'current-password');
-        expect(username.style.width, '0px');
-        expect(username.style.height, '0px');
-        expect(username.style.pointerEvents, isNot('none'));
-        expect(password.style.width, '0px');
-        expect(password.style.height, '0px');
-        expect(password.style.pointerEvents, isNot('none'));
-        expect(autofillForm.formElement!.style.pointerEvents, isNot('none'));
-      },
-      skip: isSafari,
-    );
+      expect(username.name, 'username');
+      expect(password.name, 'current-password');
+      expect(username.style.width, '0px');
+      expect(username.style.height, '0px');
+      expect(username.style.pointerEvents, isNot('none'));
+      expect(password.style.width, '0px');
+      expect(password.style.height, '0px');
+      expect(password.style.pointerEvents, isNot('none'));
+      expect(autofillForm.formElement!.style.pointerEvents, isNot('none'));
+    }, skip: isSafari);
 
     test('hidden autofill elements should not have a width and height of 0 on Safari', () {
       final List<Map<String, Object?>> fields = createFieldValues(
@@ -3549,45 +3545,41 @@ Future<void> testMain() async {
       expect(autofillForm.formElement!.style.pointerEvents, 'none');
     }, skip: !isSafari);
 
-    test(
-      'the focused element within a form should explicitly set pointer events on Safari',
-      () {
-        final List<Map<String, Object?>> fields = createFieldValues(
-          <String>['email', 'username', 'password'],
-          <String>['field1', 'field2', 'field3'],
-        );
-        final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
-        final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
-          kImplicitViewId,
-          focusedAutofillMap,
-          fields,
-        )!;
+    test('the focused element within a form should explicitly set pointer events on Safari', () {
+      final List<Map<String, Object?>> fields = createFieldValues(
+        <String>['email', 'username', 'password'],
+        <String>['field1', 'field2', 'field3'],
+      );
+      final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        focusedAutofillMap,
+        fields,
+      )!;
 
-        final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
-        testInputElement.name = 'email';
-        final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
-        autofillForm.wakeUp(testInputElement, focusedAutofill);
+      final DomHTMLInputElement testInputElement = createDomHTMLInputElement();
+      testInputElement.name = 'email';
+      final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
+      autofillForm.wakeUp(testInputElement, focusedAutofill);
 
-        final formChildNodes =
-            autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
-        final DomHTMLInputElement email = formChildNodes[0];
-        final DomHTMLInputElement username = formChildNodes[1];
-        final DomHTMLInputElement password = formChildNodes[2];
+      final formChildNodes =
+          autofillForm.formElement!.childNodes.toList() as List<DomHTMLInputElement>;
+      final DomHTMLInputElement email = formChildNodes[0];
+      final DomHTMLInputElement username = formChildNodes[1];
+      final DomHTMLInputElement password = formChildNodes[2];
 
-        expect(email.name, 'email');
-        expect(username.name, 'username');
-        expect(password.name, 'current-password');
+      expect(email.name, 'email');
+      expect(username.name, 'username');
+      expect(password.name, 'current-password');
 
-        // pointer events are none on the form and all non-focused elements
-        expect(autofillForm.formElement!.style.pointerEvents, 'none');
-        expect(username.style.pointerEvents, 'none');
-        expect(password.style.pointerEvents, 'none');
+      // pointer events are none on the form and all non-focused elements
+      expect(autofillForm.formElement!.style.pointerEvents, 'none');
+      expect(username.style.pointerEvents, 'none');
+      expect(password.style.pointerEvents, 'none');
 
-        // pointer events are set to all on the activeDomElement
-        expect(email.style.pointerEvents, 'all');
-      },
-      skip: !isSafari,
-    );
+      // pointer events are set to all on the activeDomElement
+      expect(email.style.pointerEvents, 'all');
+    }, skip: !isSafari);
 
     tearDown(() {
       clearForms();

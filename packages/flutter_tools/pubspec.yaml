@@ -14,7 +14,7 @@ dependencies:
   archive: 3.6.1
   args: 2.7.0
   dds: 5.3.0
-  dwds: 26.2.5
+  dwds: 27.1.1
   code_builder: 4.11.1
   collection: 1.19.1
   completion: 1.0.2
@@ -26,14 +26,13 @@ dependencies:
   html: 0.15.6
   http: 1.6.0
   intl: 0.20.2
-  meta: 1.18.0
+  meta: 1.18.2
   multicast_dns: 0.3.3
   mustache_template: 2.0.4
   package_config: 2.2.0
   process: 5.0.5
   fake_async: 1.3.3
   stack_trace: 1.12.1
-  usage: 4.1.1
   webdriver: 3.1.0
   webkit_inspection_protocol: 1.2.1
   xml: 6.6.1
@@ -58,18 +57,18 @@ dependencies:
   pubspec_parse: 1.5.0
 
   graphs: 2.3.2
-  hooks_runner: 1.1.1
-  hooks: 1.0.2
+  hooks_runner: 1.2.1
+  hooks: 1.0.3
   code_assets: 1.0.0
   data_assets: 0.19.6
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
-  test_api: 0.7.11
-  test_core: 0.6.17
+  test_api: 0.7.12
+  test_core: 0.6.18
 
-  vm_service: 15.0.2
+  vm_service: 15.2.0
 
   standard_message_codec: 0.0.1+4
 
@@ -80,7 +79,7 @@ dependencies:
   boolean_selector: 2.1.2
   browser_launcher: 1.1.3
   built_collection: 5.1.1
-  built_value: 8.12.5
+  built_value: 8.12.6
   cli_config: 0.2.0
   clock: 1.1.2
   csslib: 1.0.2
@@ -95,11 +94,11 @@ dependencies:
   http_parser: 4.1.2
   io: 1.0.5
   json_rpc_2: 4.1.0
-  matcher: 0.12.19
+  matcher: 0.12.20
   petitparser: 7.0.2
   platform: 3.1.6
   shelf_packages_handler: 3.0.2
-  shelf_proxy: 1.0.4
+  shelf_proxy: 1.0.5
   source_map_stack_trace: 2.1.2
   source_maps: 0.10.13
   source_span: 1.10.2
@@ -120,12 +119,12 @@ dev_dependencies:
 
   checked_yaml: 2.0.4
   js: 0.7.2
-  json_annotation: 4.11.0
+  json_annotation: 4.12.0
   node_preamble: 2.0.2
-  test: 1.31.0
+  test: 1.31.1
 
 dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 3f506k
+# PUBSPEC CHECKSUM: npmtr8

@@ -1096,7 +1096,7 @@ void main() {
   });
 
   testWidgets('ImageInfo.isCloneOf returns false when scales differ', (WidgetTester tester) async {
-    final Image image = await createTestImage(width: 10, height: 10);
+    final Image image = image20x10.clone();
     addTearDown(image.dispose);
 
     final imageInfo1 = ImageInfo(image: image.clone());
@@ -1111,7 +1111,7 @@ void main() {
   testWidgets('ImageInfo.isCloneOf returns true when all properties match', (
     WidgetTester tester,
   ) async {
-    final Image image = await createTestImage(width: 10, height: 10);
+    final Image image = image20x10.clone();
     addTearDown(image.dispose);
 
     final imageInfo1 = ImageInfo(image: image.clone(), scale: 2.0);
@@ -1121,5 +1121,52 @@ void main() {
 
     // These should be considered clones because all properties match
     expect(imageInfo1.isCloneOf(imageInfo2), isTrue);
+  });
+
+  testWidgets('errors are not reported after removal when reportErrors is false', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/81931.
+    final completer = FakeEventReportingImageStreamCompleter();
+    final reportedErrors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = reportedErrors.add;
+    addTearDown(() => FlutterError.onError = oldHandler);
+
+    final listener = ImageStreamListener(
+      (ImageInfo info, bool syncCall) {},
+      onError: (Object error, StackTrace? stack) {},
+      reportErrors: false,
+    );
+    completer.addListener(listener);
+    completer.removeListener(listener);
+
+    completer.reportError(
+      exception: Exception('test error'),
+      context: ErrorDescription('test'),
+      silent: true,
+    );
+
+    expect(reportedErrors, isEmpty);
+  });
+
+  testWidgets('errors are reported after listener removal by default', (WidgetTester tester) async {
+    final completer = FakeEventReportingImageStreamCompleter();
+    final reportedErrors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = reportedErrors.add;
+    addTearDown(() => FlutterError.onError = oldHandler);
+
+    final listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
+    completer.addListener(listener);
+    completer.removeListener(listener);
+
+    completer.reportError(
+      exception: Exception('test error'),
+      context: ErrorDescription('test'),
+      silent: true,
+    );
+
+    expect(reportedErrors, hasLength(1));
   });
 }

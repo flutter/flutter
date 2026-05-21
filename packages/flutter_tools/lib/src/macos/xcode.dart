@@ -19,6 +19,7 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../ios/xcodeproj.dart';
+import '../xcode_project.dart';
 
 Version get xcodeRequiredVersion => Version(15, null, null);
 
@@ -231,14 +232,14 @@ class Xcode {
   /// See [XcodeProjectInterpreter.xcrunCommand].
   List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
 
-  Future<List<String>> xcodebuildProjectCommand(
-    String projectPath,
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageResolution = true,
-  }) async => _xcodeProjectInterpreter.xcodebuildProjectCommand(
-    projectPath,
+    bool skipPackageUpdatesAndValidation = true,
+  }) async => _xcodeProjectInterpreter.fetchDependenciesAndGenerateXcodebuildArgs(
+    xcodeProject,
     buildDirectory,
-    skipPackageResolution: skipPackageResolution,
+    skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
   );
 
   Future<RunResult> cc(List<String> args) => _run('cc', args);

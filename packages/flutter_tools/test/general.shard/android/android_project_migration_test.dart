@@ -488,7 +488,7 @@ android.builtInKotlin    false
 
             expect(
               bufferLogger.errorText,
-              contains('Failed to process/migrate the gradle.properties during migration:'),
+              contains('Failed to process/migrate gradle.properties during migration:'),
             );
           },
           overrides: <Type, Generator>{
@@ -676,7 +676,7 @@ android.newDsl  :  false
 
             expect(
               bufferLogger.errorText,
-              contains('Failed to process/migrate the gradle.properties during migration:'),
+              contains('Failed to process/migrate gradle.properties during migration:'),
             );
           },
           overrides: <Type, Generator>{

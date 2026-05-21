@@ -657,6 +657,13 @@ void FlutterWindowsEngine::RemoveView(FlutterViewId view_id) {
     std::unique_lock write_lock(views_mutex_);
 
     FML_DCHECK(views_.find(view_id) != views_.end());
+
+    // Reset text input state if the removed view is the active text input
+    // view, to prevent stale view references.
+    if (text_input_plugin_) {
+      text_input_plugin_->OnViewRemoved(view_id);
+    }
+
     views_.erase(view_id);
   }
 }
