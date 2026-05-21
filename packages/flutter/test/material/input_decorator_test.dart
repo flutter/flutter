@@ -11734,7 +11734,7 @@ void main() {
       //   12 - help/error/counter text (font size 12dps)
       //
       // When the label is not floating, it's vertically centered in the space
-      // above the subtext:
+      // above the supportingText:
       //
       //   20 - top padding
       //   16 - label (font size 16dps)
@@ -11793,14 +11793,14 @@ void main() {
       //   12 - help/error/counter text (font size 12dps)
       //
       // When the label is not floating, it's vertically centered in the space
-      // above the subtext:
+      // above the supportingText:
       //
       //   16 - top padding
       //   16 - label (font size 16dps)
       //   16 - bottom padding (empty input text still appears here)
       //    8 - below the border padding
       //   12 - help/error/counter text (font size 12dps)
-      // The layout of the error/helper/counter subtext doesn't change for dense layout.
+      // The layout of the error/helper/counter supportingText doesn't change for dense layout.
       await tester.pumpWidget(
         buildInputDecoratorM2(
           // isEmpty: false (default)
