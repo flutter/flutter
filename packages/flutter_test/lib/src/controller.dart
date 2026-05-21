@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'dart:io';
-///
 /// @docImport 'package:flutter/scheduler.dart';
 /// @docImport 'package:flutter_driver/flutter_driver.dart';
 ///
@@ -2185,10 +2183,7 @@ abstract class WidgetController {
   /// This only simulates key events coming from a physical keyboard, not from a
   /// soft keyboard.
   ///
-  /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from
-  /// that type of system. If not specified, defaults to "web" on web, and the
-  /// operating system name based on [defaultTargetPlatform] everywhere else.
+  /// {@macro flutter.flutter_test.keyEventSimulationPlatform}
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -2232,10 +2227,7 @@ abstract class WidgetController {
   /// This only simulates key down events coming from a physical keyboard, not
   /// from a soft keyboard.
   ///
-  /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from
-  /// that type of system. If not specified, defaults to "web" on web, and the
-  /// operating system name based on [defaultTargetPlatform] everywhere else.
+  /// {@macro flutter.flutter_test.keyEventSimulationPlatform}
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -2274,10 +2266,7 @@ abstract class WidgetController {
   /// This only simulates key up events coming from a physical keyboard,
   /// not from a soft keyboard.
   ///
-  /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from
-  /// that type of system. If not specified, defaults to "web" on web, and the
-  /// operating system name based on [defaultTargetPlatform] everywhere else.
+  /// {@macro flutter.flutter_test.keyEventSimulationPlatform}
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US
@@ -2304,10 +2293,7 @@ abstract class WidgetController {
   /// This only simulates key repeat events coming from a physical keyboard, not
   /// from a soft keyboard.
   ///
-  /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from
-  /// that type of system. If not specified, defaults to "web" on web, and the
-  /// operating system name based on [defaultTargetPlatform] everywhere else.
+  /// {@macro flutter.flutter_test.keyEventSimulationPlatform}
   ///
   /// Specify the `physicalKey` for the event to override what is included in
   /// the simulated event. If not specified, it uses a default from the US

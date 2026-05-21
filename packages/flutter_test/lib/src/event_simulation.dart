@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -726,10 +725,17 @@ abstract final class KeyEventSimulator {
   /// This only simulates key presses coming from a physical keyboard, not from a
   /// soft keyboard.
   ///
-  /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to "web" on web, and the operating system name based on
+  /// {@template flutter.flutter_test.keyEventSimulationPlatform}
+  /// Specify `platform` as one of `android`, `fuchsia`, `ios`, `linux`, `macos`,
+  /// `web`, and `windows` to make the event appear to be from that type of
+  /// system. Defaults to "web" on web, and the lowercased name of
   /// [defaultTargetPlatform] everywhere else.
+  ///
+  /// The `platform` value selects the platform key map used to synthesize the
+  /// event. Not every [LogicalKeyboardKey] or [PhysicalKeyboardKey] is
+  /// available on every platform; simulating a key that is not in the selected
+  /// platform's key map can throw.
+  /// {@endtemplate}
   ///
   /// Keys that are down when the test completes are cleared after each test.
   ///
@@ -775,10 +781,7 @@ abstract final class KeyEventSimulator {
   /// This only simulates key presses coming from a physical keyboard, not from a
   /// soft keyboard.
   ///
-  /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to "web" on web, and the operating system name based on
-  /// [defaultTargetPlatform] everywhere else.
+  /// {@macro flutter.flutter_test.keyEventSimulationPlatform}
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -821,10 +824,7 @@ abstract final class KeyEventSimulator {
   /// This only simulates key presses coming from a physical keyboard, not from a
   /// soft keyboard.
   ///
-  /// Specify `platform` as one of the platforms allowed in
-  /// [Platform.operatingSystem] to make the event appear to be from that type of
-  /// system. Defaults to "web" on web, and the operating system name based on
-  /// [defaultTargetPlatform] everywhere else.
+  /// {@macro flutter.flutter_test.keyEventSimulationPlatform}
   ///
   /// Returns true if the key event was handled by the framework.
   ///
@@ -872,10 +872,7 @@ abstract final class KeyEventSimulator {
 /// soft keyboard, and it can only simulate keys that appear in the key maps
 /// such as [kAndroidToLogicalKey], [kMacOsToPhysicalKey], etc.
 ///
-/// Specify `platform` as one of the platforms allowed in
-/// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to "web" on web, and the operating system name based on
-/// [defaultTargetPlatform] everywhere else.
+/// {@macro flutter.flutter_test.keyEventSimulationPlatform}
 ///
 /// Keys that are down when the test completes are cleared after each test.
 ///
@@ -912,10 +909,7 @@ Future<bool> simulateKeyDownEvent(
 /// soft keyboard, and it can only simulate keys that appear in the key maps
 /// such as [kAndroidToLogicalKey], [kMacOsToPhysicalKey], etc.
 ///
-/// Specify `platform` as one of the platforms allowed in
-/// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to "web" on web, and the operating system name based on
-/// [defaultTargetPlatform] everywhere else.
+/// {@macro flutter.flutter_test.keyEventSimulationPlatform}
 ///
 /// Returns true if the key event was handled by the framework.
 ///
@@ -945,10 +939,7 @@ Future<bool> simulateKeyUpEvent(
 /// This only simulates key presses coming from a physical keyboard, not from a
 /// soft keyboard.
 ///
-/// Specify `platform` as one of the platforms allowed in
-/// [Platform.operatingSystem] to make the event appear to be from that type of
-/// system. Defaults to "web" on web, and the operating system name based on
-/// [defaultTargetPlatform] everywhere else.
+/// {@macro flutter.flutter_test.keyEventSimulationPlatform}
 ///
 /// Returns true if the key event was handled by the framework.
 ///
