@@ -4630,7 +4630,7 @@ class EditableTextState extends State<EditableText>
   bool _viewFocusObserverRegistered = false;
 
   void _handleViewFocusChanged(ui.ViewFocusEvent event) {
-    if (!mounted) {
+    if (!mounted || widget.unfocusedSelectionColor == null) {
       return;
     }
     final int currentViewId = View.of(context).viewId;
@@ -5985,9 +5985,7 @@ class EditableTextState extends State<EditableText>
                                         _selectionOverlay?.spellCheckToolbarIsVisible ?? false
                                         ? _spellCheckConfiguration.misspelledSelectionColor ??
                                               widget.selectionColor
-                                        : (_viewFocused
-                                                  ? null
-                                                  : widget.unfocusedSelectionColor) ??
+                                        : (_viewFocused ? null : widget.unfocusedSelectionColor) ??
                                               widget.selectionColor,
                                     textScaler: effectiveTextScaler,
                                     textAlign: widget.textAlign,
