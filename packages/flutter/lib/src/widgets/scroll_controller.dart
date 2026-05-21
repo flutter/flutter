@@ -166,10 +166,21 @@ class ScrollController extends ChangeNotifier {
   /// Returns the attached [ScrollPosition], from which the actual scroll offset
   /// of the [ScrollView] can be obtained.
   ///
-  /// Calling this is only valid when only a single position is attached.
+  /// Calling this is only valid when exactly one position is attached. If
+  /// multiple positions are attached, use [positions] to inspect them all.
   ScrollPosition get position {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    assert(_positions.length == 1, 'ScrollController attached to multiple scroll views.');
+    assert(
+      _positions.length == 1,
+      'ScrollController attached to multiple scroll views.\n'
+      'The ScrollController.position getter can only be used when a single '
+      'ScrollPosition is attached.\n'
+      'Some ScrollController operations, including reading the position, require '
+      'the controller to be attached to exactly one Scrollable. If multiple '
+      'Scrollables need independent scroll positions, use a separate '
+      'ScrollController for each.\n'
+      'To access all attached positions, use the ScrollController.positions getter.',
+    );
     return _positions.single;
   }
 

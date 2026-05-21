@@ -236,7 +236,23 @@ void main() {
     );
 
     expect(() => controller.offset, throwsAssertionError);
-    expect(() => controller.position, throwsAssertionError);
+    expect(
+      () => controller.position,
+      throwsA(
+        isAssertionError.having(
+          (AssertionError error) => error.message,
+          'message',
+          allOf(
+            contains(
+              'The ScrollController.position getter can only be used when a single '
+              'ScrollPosition is attached.',
+            ),
+            isNot(contains('PrimaryScrollController')),
+            isNot(contains('primary')),
+          ),
+        ),
+      ),
+    );
   });
 
   testWidgets('Write operations on ScrollControllers with no positions fail', (
