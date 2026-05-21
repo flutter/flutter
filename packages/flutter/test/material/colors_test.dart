@@ -85,19 +85,20 @@ void main() {
   });
 
   test('MaterialColor swatch comparison', () {
-    const sampleMap = <int, MaterialColor>{
+    final sampleMap = <int, MaterialColor>{
       0: Colors.lightBlue,
       1: Colors.deepOrange,
       2: Colors.blueGrey,
     };
-    const first = MaterialColor(0, sampleMap);
-    const second = MaterialColor(0, sampleMap);
-    const third = MaterialColor(0, <int, MaterialColor>{
+    final anotherMap = <int, MaterialColor>{
       0: Colors.lightBlue,
       1: Colors.deepOrange,
       2: Colors.blueGrey,
-    });
-    expect(first == second, true);
-    expect(first == third, true);
+    };
+    final first = MaterialColor(0, sampleMap);
+    final second = MaterialColor(0, sampleMap);
+    final third = MaterialColor(0, anotherMap);
+    expect(first, second);
+    expect(first, third);
   });
 }
