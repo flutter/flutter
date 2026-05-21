@@ -41,7 +41,8 @@ bool PipelineCompileQueueVulkan::PostJobForDescriptor(
   }
 
   PostJob([weak_queue = weak_from_this()]() {
-    if (auto queue = weak_queue.lock()) {
+    if (auto queue = std::static_pointer_cast<PipelineCompileQueueVulkan>(
+            weak_queue.lock())) {
       queue->DoOneJob();
     }
   });

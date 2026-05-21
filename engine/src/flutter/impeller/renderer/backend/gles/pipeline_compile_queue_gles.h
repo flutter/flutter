@@ -52,7 +52,7 @@ class PipelineCompileQueueGLES : public PipelineCompileQueue {
  private:
   fml::RefPtr<fml::TaskRunner> worker_task_runner_;
   std::mutex processing_mutex_;
-  std::atomic<bool> is_processing_ = false;
+  bool is_processing_ = false;
 };
 
 }  // namespace impeller
