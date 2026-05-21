@@ -17,14 +17,11 @@ import 'terminal.dart';
 /// A class to analyze APK and AOT snapshot and generate a breakdown of the data.
 class SizeAnalyzer {
   SizeAnalyzer({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Analytics analytics,
-    Pattern appFilenamePattern = 'libapp.so',
-  }) : _analytics = analytics,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _appFilenamePattern = appFilenamePattern;
+    required this._fileSystem,
+    required this._logger,
+    required this._analytics,
+    this._appFilenamePattern = 'libapp.so',
+  });
 
   final FileSystem _fileSystem;
   final Logger _logger;
@@ -441,7 +438,7 @@ class SizeAnalyzer {
 
 /// A node class that represents a single symbol for AOT size snapshots.
 class _SymbolNode {
-  _SymbolNode(this.name, {this.byteSize = 0}) : _children = <String, _SymbolNode>{};
+  _SymbolNode(this.name, {this.byteSize = 0});
 
   /// The human friendly identifier for this node.
   String name;
@@ -455,7 +452,7 @@ class _SymbolNode {
   _SymbolNode? _parent;
 
   Iterable<_SymbolNode> get children => _children.values;
-  final Map<String, _SymbolNode> _children;
+  final Map<String, _SymbolNode> _children = {};
 
   _SymbolNode? childByName(String name) => _children[name];
 

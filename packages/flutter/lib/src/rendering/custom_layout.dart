@@ -122,8 +122,8 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 abstract class MultiChildLayoutDelegate {
   /// Creates a layout delegate.
   ///
-  /// The layout will update whenever [relayout] notifies its listeners.
-  MultiChildLayoutDelegate({Listenable? relayout}) : _relayout = relayout;
+  /// The layout will update whenever `relayout` notifies its listeners.
+  MultiChildLayoutDelegate({this._relayout});
 
   final Listenable? _relayout;
 
@@ -315,10 +315,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
         ContainerRenderObjectMixin<RenderBox, MultiChildLayoutParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, MultiChildLayoutParentData> {
   /// Creates a render object that customizes the layout of multiple children.
-  RenderCustomMultiChildLayoutBox({
-    List<RenderBox>? children,
-    required MultiChildLayoutDelegate delegate,
-  }) : _delegate = delegate {
+  RenderCustomMultiChildLayoutBox({List<RenderBox>? children, required this._delegate}) {
     addAll(children);
   }
 

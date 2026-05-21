@@ -109,9 +109,9 @@ class TextMagnifierConfiguration {
   /// If [magnifierBuilder] is null, a default [MagnifierBuilder] will be used
   /// that does not build a magnifier.
   const TextMagnifierConfiguration({
-    MagnifierBuilder? magnifierBuilder,
+    this._magnifierBuilder,
     this.shouldDisplayHandlesInMagnifier = true,
-  }) : _magnifierBuilder = magnifierBuilder;
+  });
 
   /// The builder callback that creates the widget that renders the magnifier.
   MagnifierBuilder get magnifierBuilder => _magnifierBuilder ?? _none;

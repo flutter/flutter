@@ -39,12 +39,10 @@ class TextureBox extends RenderBox {
   /// Creates a box backed by the texture identified by [textureId], and use
   /// [filterQuality] to set texture's [FilterQuality].
   TextureBox({
-    required int textureId,
-    bool freeze = false,
-    FilterQuality filterQuality = FilterQuality.low,
-  }) : _textureId = textureId,
-       _freeze = freeze,
-       _filterQuality = filterQuality;
+    required this._textureId,
+    this._freeze = false,
+    this._filterQuality = FilterQuality.low,
+  });
 
   /// The identity of the backend texture.
   int get textureId => _textureId;

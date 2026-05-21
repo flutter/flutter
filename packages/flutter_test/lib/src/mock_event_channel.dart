@@ -62,7 +62,7 @@ class _InlineMockStreamHandler extends MockStreamHandler {
 /// API.
 class MockStreamHandlerEventSink {
   /// Create a new [MockStreamHandlerEventSink] with the given [sink].
-  MockStreamHandlerEventSink(EventSink<Object?> sink) : _sink = sink;
+  MockStreamHandlerEventSink(this._sink);
 
   final EventSink<Object?> _sink;
 

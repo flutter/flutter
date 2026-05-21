@@ -19,7 +19,7 @@ class FontLoader {
   ///
   /// The font family will not be available for use until [load] has been
   /// called.
-  FontLoader(this.family) : _loaded = false, _fontFutures = <Future<Uint8List>>[];
+  FontLoader(this.family);
 
   /// The font family being loaded.
   ///
@@ -76,6 +76,6 @@ class FontLoader {
     return loadFontFromList(list, fontFamily: family);
   }
 
-  bool _loaded;
-  final List<Future<Uint8List>> _fontFutures;
+  bool _loaded = false;
+  final List<Future<Uint8List>> _fontFutures = [];
 }

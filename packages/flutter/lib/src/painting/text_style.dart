@@ -501,11 +501,10 @@ class TextStyle with Diagnosticable {
     this.decorationThickness,
     this.debugLabel,
     String? fontFamily,
-    List<String>? fontFamilyFallback,
+    this._fontFamilyFallback,
     String? package,
     this.overflow,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
-       _fontFamilyFallback = fontFamilyFallback,
        _package = package,
        assert(color == null || foreground == null, _kColorForegroundWarning),
        assert(backgroundColor == null || background == null, _kColorBackgroundWarning);

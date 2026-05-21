@@ -28,14 +28,11 @@ import 'xcode_build_settings.dart';
 /// Scripting to debug Flutter applications.
 class XcodeDebug {
   XcodeDebug({
-    required Logger logger,
+    required this._logger,
     required ProcessManager processManager,
-    required Xcode xcode,
-    required FileSystem fileSystem,
-  }) : _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _xcode = xcode,
-       _fileSystem = fileSystem;
+    required this._xcode,
+    required this._fileSystem,
+  }) : _processUtils = ProcessUtils(logger: _logger, processManager: processManager);
 
   final ProcessUtils _processUtils;
   final Logger _logger;

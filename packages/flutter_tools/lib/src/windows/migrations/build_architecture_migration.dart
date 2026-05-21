@@ -59,9 +59,8 @@ endif()
 /// Migrates Windows build to target specific architecture.
 /// In more, it deletes old runner folder
 class BuildArchitectureMigration extends ProjectMigrator {
-  BuildArchitectureMigration(WindowsProject project, Directory buildDirectory, super.logger)
-    : _cmakeFile = project.managedCmakeFile,
-      _buildDirectory = buildDirectory;
+  BuildArchitectureMigration(WindowsProject project, this._buildDirectory, super.logger)
+    : _cmakeFile = project.managedCmakeFile;
 
   final File _cmakeFile;
   final Directory _buildDirectory;

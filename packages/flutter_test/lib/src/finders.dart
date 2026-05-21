@@ -1112,9 +1112,7 @@ class FinderResult<CandidateType> extends Iterable<CandidateType> {
   /// `describeMatch` callback.
   ///
   /// {@macro flutter_test.finders.FinderBase.describeMatch}
-  FinderResult(DescribeMatchCallback describeMatch, Iterable<CandidateType> values)
-    : _describeMatch = describeMatch,
-      _values = values;
+  FinderResult(this._describeMatch, this._values);
 
   final DescribeMatchCallback _describeMatch;
   final Iterable<CandidateType> _values;
@@ -1707,8 +1705,7 @@ class _ExactWidgetFinder extends MatchFinder {
 }
 
 class _WidgetPredicateWidgetFinder extends MatchFinder {
-  _WidgetPredicateWidgetFinder(this.predicate, {String? description, super.skipOffstage})
-    : _description = description;
+  _WidgetPredicateWidgetFinder(this.predicate, {this._description, super.skipOffstage});
 
   final WidgetPredicate predicate;
   final String? _description;
@@ -1723,8 +1720,7 @@ class _WidgetPredicateWidgetFinder extends MatchFinder {
 }
 
 class _ElementPredicateWidgetFinder extends MatchFinder {
-  _ElementPredicateWidgetFinder(this.predicate, {String? description, super.skipOffstage})
-    : _description = description;
+  _ElementPredicateWidgetFinder(this.predicate, {this._description, super.skipOffstage});
 
   final ElementPredicate predicate;
   final String? _description;
@@ -1739,8 +1735,7 @@ class _ElementPredicateWidgetFinder extends MatchFinder {
 }
 
 class _PredicateSemanticsFinder extends SemanticsFinder with MatchFinderMixin<SemanticsNode> {
-  _PredicateSemanticsFinder(this.predicate, DescribeMatchCallback? describeMatch, super.view)
-    : _describeMatch = describeMatch;
+  _PredicateSemanticsFinder(this.predicate, this._describeMatch, super.view);
 
   final SemanticsNodePredicate predicate;
   final DescribeMatchCallback? _describeMatch;

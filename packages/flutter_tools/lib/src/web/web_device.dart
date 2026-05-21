@@ -48,10 +48,9 @@ abstract class ChromiumDevice extends WebDevice {
   ChromiumDevice({
     required String name,
     required this.chromeLauncher,
-    required FileSystem fileSystem,
+    required this._fileSystem,
     required super.logger,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
+  }) : _logger = logger,
        super(name);
 
   final ChromiumLauncher chromeLauncher;
@@ -185,14 +184,12 @@ abstract class ChromiumDevice extends WebDevice {
 /// The Google Chrome browser based on Chromium.
 class GoogleChromeDevice extends ChromiumDevice {
   GoogleChromeDevice({
-    required Platform platform,
-    required ProcessManager processManager,
+    required this._platform,
+    required this._processManager,
     required ChromiumLauncher chromiumLauncher,
     required super.logger,
     required super.fileSystem,
-  }) : _platform = platform,
-       _processManager = processManager,
-       super(name: 'chrome', chromeLauncher: chromiumLauncher);
+  }) : super(name: 'chrome', chromeLauncher: chromiumLauncher);
 
   final Platform _platform;
   final ProcessManager _processManager;
@@ -245,9 +242,8 @@ class MicrosoftEdgeDevice extends ChromiumDevice {
     required ChromiumLauncher chromiumLauncher,
     required super.logger,
     required super.fileSystem,
-    required ProcessManager processManager,
-  }) : _processManager = processManager,
-       super(name: 'edge', chromeLauncher: chromiumLauncher);
+    required this._processManager,
+  }) : super(name: 'edge', chromeLauncher: chromiumLauncher);
 
   final ProcessManager _processManager;
 
@@ -300,9 +296,8 @@ class WebDevices extends PollingDeviceDiscovery {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-    required FeatureFlags featureFlags,
-  }) : _featureFlags = featureFlags,
-       _webServerDevice = WebServerDevice(logger: logger),
+    required this._featureFlags,
+  }) : _webServerDevice = WebServerDevice(logger: logger),
        super(GoogleChromeDevice.kChromeDeviceName) {
     final operatingSystemUtils = OperatingSystemUtils(
       fileSystem: fileSystem,

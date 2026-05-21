@@ -335,19 +335,17 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
   ///  * [RegularWindowController], the base class for regular windows.
   @internal
   RegularWindowControllerWin32({
-    required WindowingOwnerWin32 owner,
-    required RegularWindowControllerDelegate delegate,
+    required this._owner,
+    required this._delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-  }) : _owner = owner,
-       _delegate = delegate,
-       super.empty() {
+  }) : super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
     _handler = _RegularWindowMesageHandler(controller: this);
-    owner._addMessageHandler(_handler);
+    _owner._addMessageHandler(_handler);
     final int viewId = _Win32PlatformInterface.createRegularWindow(
       _owner.allocator,
       WidgetsBinding.instance.platformDispatcher.engineId!,
@@ -566,31 +564,28 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
   ///  * [DialogWindowController], the base class for dialog windows.
   @internal
   DialogWindowControllerWin32({
-    required WindowingOwnerWin32 owner,
-    required DialogWindowControllerDelegate delegate,
+    required this._owner,
+    required this._delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
-    BaseWindowController? parent,
-  }) : _owner = owner,
-       _delegate = delegate,
-       _parent = parent,
-       super.empty() {
+    this._parent,
+  }) : super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
     _handler = _DialogWindowMesageHandler(controller: this);
-    owner._addMessageHandler(_handler);
+    _owner._addMessageHandler(_handler);
     final int viewId = _Win32PlatformInterface.createDialogWindow(
       _owner.allocator,
       WidgetsBinding.instance.platformDispatcher.engineId!,
       preferredSize,
       preferredConstraints,
       title,
-      parent != null
+      _parent != null
           ? _Win32PlatformInterface.getWindowHandle(
               WidgetsBinding.instance.platformDispatcher.engineId!,
-              parent.rootView.viewId,
+              _parent.rootView.viewId,
             )
           : null,
     );
@@ -771,18 +766,13 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   /// * [TooltipWindowController], the base class for tooltip windows.
   @internal
   TooltipWindowControllerWin32({
-    required WindowingOwnerWin32 owner,
-    required TooltipWindowControllerDelegate delegate,
+    required this._owner,
+    required this._delegate,
     required BoxConstraints contentSizeConstraints,
-    required BaseWindowController parent,
-    required Rect anchorRect,
-    required WindowPositioner positioner,
-  }) : _delegate = delegate,
-       _owner = owner,
-       _parent = parent,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
-       super.empty() {
+    required this._parent,
+    required this._anchorRect,
+    required this._positioner,
+  }) : super.empty() {
     _owner._addMessageHandler(this);
     _onGetWindowPosition = ffi.NativeCallable<_GetWindowPositionNative>.isolateLocal(
       _handleGetWindowPosition,
@@ -793,7 +783,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       contentSizeConstraints,
       _Win32PlatformInterface.getWindowHandle(
         PlatformDispatcher.instance.engineId!,
-        parent.rootView.viewId,
+        _parent.rootView.viewId,
       ),
       _onGetWindowPosition.nativeFunction,
     );
@@ -957,18 +947,13 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
   /// * [PopupWindowController], the base class for popup windows.
   @internal
   PopupWindowControllerWin32({
-    required WindowingOwnerWin32 owner,
-    required PopupWindowControllerDelegate delegate,
+    required this._owner,
+    required this._delegate,
     required BoxConstraints contentSizeConstraints,
-    required BaseWindowController parent,
-    required Rect anchorRect,
-    required WindowPositioner positioner,
-  }) : _delegate = delegate,
-       _owner = owner,
-       _parent = parent,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
-       super.empty() {
+    required this._parent,
+    required this._anchorRect,
+    required this._positioner,
+  }) : super.empty() {
     _owner._addMessageHandler(this);
     _onGetWindowPosition = ffi.NativeCallable<_GetWindowPositionNative>.isolateLocal(
       _handleGetWindowPosition,
@@ -979,7 +964,7 @@ class PopupWindowControllerWin32 extends PopupWindowController implements _Windo
       contentSizeConstraints,
       _Win32PlatformInterface.getWindowHandle(
         PlatformDispatcher.instance.engineId!,
-        parent.rootView.viewId,
+        _parent.rootView.viewId,
       ),
       _onGetWindowPosition.nativeFunction,
     );

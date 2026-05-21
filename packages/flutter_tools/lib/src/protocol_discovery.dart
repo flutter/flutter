@@ -21,10 +21,9 @@ class ProtocolDiscovery {
     required this.throttleDuration,
     this.hostPort,
     this.devicePort,
-    required bool ipv6,
-    required Logger logger,
-  }) : _logger = logger,
-       _ipv6 = ipv6 {
+    required this._ipv6,
+    required this._logger,
+  }) {
     _deviceLogSubscription = logReader.logLines.listen(_handleLine, onDone: _stopScrapingLogs);
   }
 
@@ -154,8 +153,6 @@ class ProtocolDiscovery {
 /// if there isn't a listener attached.
 /// The events are then delivered when a listener is attached to the stream.
 class _BufferedStreamController<T extends Object> {
-  _BufferedStreamController() : _events = <Object>[];
-
   /// The stream that this controller is controlling.
   Stream<T> get stream {
     return _streamController.stream;
@@ -179,7 +176,7 @@ class _BufferedStreamController<T extends Object> {
     return streamControllerInstance;
   }();
 
-  final List<Object> _events;
+  final List<Object> _events = [];
 
   /// Sends [event] if there is a listener attached to the broadcast stream.
   /// Otherwise, it enqueues [event] until a listener is attached.

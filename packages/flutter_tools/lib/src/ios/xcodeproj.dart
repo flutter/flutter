@@ -45,27 +45,21 @@ class XcodeProjectInterpreter {
   }
 
   XcodeProjectInterpreter._({
-    required Platform platform,
+    required this._platform,
     required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Analytics analytics,
-    Version? version,
-    String? build,
-  }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+    required this._logger,
+    required this._fileSystem,
+    required this._analytics,
+    this._version,
+    this._build,
+  }) : _processUtils = ProcessUtils(logger: _logger, processManager: processManager),
        _operatingSystemUtils = OperatingSystemUtils(
-         fileSystem: fileSystem,
-         logger: logger,
-         platform: platform,
+         fileSystem: _fileSystem,
+         logger: _logger,
+         platform: _platform,
          processManager: processManager,
        ),
-       _version = version,
-       _build = build,
-       _versionText = version?.toString(),
-       _analytics = analytics;
+       _versionText = _version?.toString();
 
   /// Create an [XcodeProjectInterpreter] for testing.
   ///
@@ -554,8 +548,7 @@ class XcodeProjectBuildContext {
 ///
 /// Represents the output of `xcodebuild -list`.
 class XcodeProjectInfo {
-  const XcodeProjectInfo(this.targets, this.buildConfigurations, this.schemes, Logger logger)
-    : _logger = logger;
+  const XcodeProjectInfo(this.targets, this.buildConfigurations, this.schemes, this._logger);
 
   factory XcodeProjectInfo.fromXcodeBuildOutput(String output, Logger logger) {
     final targets = <String>[];

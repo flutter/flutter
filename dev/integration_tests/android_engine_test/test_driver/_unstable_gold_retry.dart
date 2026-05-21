@@ -21,9 +21,9 @@ AsyncMatcher matchesGoldenFileWithRetries(Object key, {int? version, int retries
 }
 
 final class _AsyncMatcherWithRetries extends AsyncMatcher {
-  _AsyncMatcherWithRetries(this._delegate, {required int retries}) : _retries = retries {
-    if (retries < 1) {
-      throw RangeError.value(retries, 'retries', 'Must be at least 1');
+  _AsyncMatcherWithRetries(this._delegate, {required this._retries}) {
+    if (_retries < 1) {
+      throw RangeError.value(_retries, 'retries', 'Must be at least 1');
     }
   }
 

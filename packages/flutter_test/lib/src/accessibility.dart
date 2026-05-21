@@ -565,8 +565,8 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
     required this.finder,
     this.minimumRatio = 4.5,
     this.tolerance = 0.01,
-    String description = 'Contrast should follow custom guidelines',
-  }) : _description = description;
+    this._description = 'Contrast should follow custom guidelines',
+  });
 
   /// The minimum contrast ratio allowed.
   ///

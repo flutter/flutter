@@ -19,10 +19,9 @@ import 'build.dart';
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
     required super.logger,
-    required FileSystem fileSystem,
+    required this._fileSystem,
     required bool verboseHelp,
-  }) : _fileSystem = fileSystem,
-       super(verboseHelp: verboseHelp) {
+  }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
     usesOutputDir();

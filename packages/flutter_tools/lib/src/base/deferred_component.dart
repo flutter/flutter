@@ -14,7 +14,7 @@ class DeferredComponent {
     required this.name,
     this.libraries = const <String>[],
     this.assets = const <AssetsEntry>[],
-  }) : _assigned = false;
+  });
 
   /// The name of the deferred component. There should be a matching
   /// android dynamic feature module with the same name.
@@ -57,7 +57,7 @@ class DeferredComponent {
   /// component needs to include. Loading units can be assigned with the [assignLoadingUnits]
   /// call.
   bool get assigned => _assigned;
-  bool _assigned;
+  bool _assigned = false;
 
   /// Selects the [LoadingUnit]s that contain this component's dart libraries.
   ///

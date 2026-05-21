@@ -20,12 +20,10 @@ import 'build.dart';
 class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({
     required super.logger,
-    required AndroidSdk? androidSdk,
-    required FileSystem fileSystem,
+    required this._androidSdk,
+    required this._fileSystem,
     required bool verboseHelp,
-  }) : _androidSdk = androidSdk,
-       _fileSystem = fileSystem,
-       super(verboseHelp: verboseHelp) {
+  }) : super(verboseHelp: verboseHelp) {
     argParser
       ..addFlag('debug', defaultsTo: true, help: 'Build a debug version of the current project.')
       ..addFlag(

@@ -148,24 +148,18 @@ class DevelopmentArtifact {
 /// For more details on specific URLs used to download artifacts, see
 /// [storageBaseUrl] and [cipdBaseUrl].
 class Cache {
-  /// [rootOverride] is configurable for testing.
+  /// [_rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
   Cache({
-    @protected Directory? rootOverride,
+    @protected this._rootOverride,
     @protected List<ArtifactSet>? artifacts,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required OperatingSystemUtils osUtils,
-    Stdio? stdio,
-  }) : _rootOverride = rootOverride,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _platform = platform,
-       _osUtils = osUtils,
-       _stdio = stdio,
-       _net = Net(logger: logger, platform: platform),
-       _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
+    required this._logger,
+    required this._fileSystem,
+    required this._platform,
+    required this._osUtils,
+    this._stdio,
+  }) : _net = Net(logger: _logger, platform: _platform),
+       _fsUtils = FileSystemUtils(fileSystem: _fileSystem, platform: _platform),
        _artifacts = artifacts ?? <ArtifactSet>[];
 
   /// Create a [Cache] for testing.
@@ -1114,22 +1108,15 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 /// additional source code.
 class ArtifactUpdater {
   ArtifactUpdater({
-    required OperatingSystemUtils operatingSystemUtils,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Directory tempStorage,
-    required HttpClient httpClient,
-    required Platform platform,
-    required List<String> allowedBaseUrls,
-    Stdio? stdio,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       _httpClient = httpClient,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _tempStorage = tempStorage,
-       _platform = platform,
-       _allowedBaseUrls = allowedBaseUrls,
-       _stdio = stdio;
+    required this._operatingSystemUtils,
+    required this._logger,
+    required this._fileSystem,
+    required this._tempStorage,
+    required this._httpClient,
+    required this._platform,
+    required this._allowedBaseUrls,
+    this._stdio,
+  });
 
   /// The number of times the artifact updater will repeat the artifact download loop.
   static const _kRetryCount = 2;
@@ -1545,7 +1532,7 @@ abstract class _DownloadDisplay {
 
 /// Displays an ANSI progress bar with speed, ETA, and percentage.
 class _ProgressBarDisplay extends _DownloadDisplay {
-  _ProgressBarDisplay({required Stdio stdio, required this.statusMessage}) : _stdio = stdio;
+  _ProgressBarDisplay({required this._stdio, required this.statusMessage});
 
   static const int _maxTerminalWidth = 80;
   static const int _progressUpdateIntervalMs = 100;
@@ -1614,9 +1601,7 @@ class _ProgressBarDisplay extends _DownloadDisplay {
 
 /// Displays a spinner via [Logger.startProgress].
 class _SpinnerDisplay extends _DownloadDisplay {
-  _SpinnerDisplay({required Logger logger, required String statusMessage})
-    : _logger = logger,
-      _statusMessage = statusMessage;
+  _SpinnerDisplay({required this._logger, required this._statusMessage});
 
   final Logger _logger;
   final String _statusMessage;

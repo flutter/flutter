@@ -38,13 +38,12 @@ class FrictionSimulation extends Simulation {
   /// length units as used for [x]; and the initial velocity _dx₀_, in the same
   /// velocity units as used for [dx].
   FrictionSimulation(
-    double drag,
+    this._drag,
     double position,
     double velocity, {
     super.tolerance,
     double constantDeceleration = 0,
-  }) : _drag = drag,
-       _dragLog = math.log(drag),
+  }) : _dragLog = math.log(_drag),
        _x = position,
        _v = velocity,
        _constantDeceleration = constantDeceleration * velocity.sign {

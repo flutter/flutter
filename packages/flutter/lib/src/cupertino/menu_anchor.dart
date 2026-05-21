@@ -2108,11 +2108,10 @@ class _CupertinoMenuItemLabel extends StatelessWidget {
     this.trailing,
     this.trailingWidth,
     AlignmentGeometry? trailingMidpointAlignment,
-    BoxConstraints? constraints,
+    this._constraints,
     this.padding,
   }) : _leadingAlignment = leadingMidpointAlignment,
-       _trailingAlignment = trailingMidpointAlignment,
-       _constraints = constraints;
+       _trailingAlignment = trailingMidpointAlignment;
 
   static const double _kDefaultHorizontalWidth = 16;
 
@@ -2850,11 +2849,10 @@ class _SwipeSurface extends SingleChildRenderObjectWidget {
 
 class _RenderSwipeSurface extends RenderProxyBoxWithHitTestBehavior {
   _RenderSwipeSurface({
-    required _SwipeRegionState region,
+    required this._region,
     required this.delay,
     required this.onStart,
-  }) : _region = region,
-       super(behavior: HitTestBehavior.opaque) {
+  }) : super(behavior: HitTestBehavior.opaque) {
     _region.attachSurface(this);
   }
 

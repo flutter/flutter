@@ -718,9 +718,7 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
 }
 
 class _TestRecordingCanvasPaintsCountMatcher extends _TestRecordingCanvasMatcher {
-  _TestRecordingCanvasPaintsCountMatcher(Symbol methodName, int count)
-    : _methodName = methodName,
-      _count = count;
+  _TestRecordingCanvasPaintsCountMatcher(this._methodName, this._count);
 
   final Symbol _methodName;
   final int _count;

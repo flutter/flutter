@@ -163,7 +163,7 @@ class MouseTracker extends ChangeNotifier {
   /// The `hitTestInView` is used to find the render objects on a given
   /// position in the specific view. It is typically provided by the
   /// [RendererBinding].
-  MouseTracker(MouseTrackerHitTest hitTestInView) : _hitTestInView = hitTestInView;
+  MouseTracker(this._hitTestInView);
 
   final MouseTrackerHitTest _hitTestInView;
 

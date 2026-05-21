@@ -176,7 +176,7 @@ class RestorableTimeOfDay extends RestorableValue<TimeOfDay> {
   /// Creates a [RestorableTimeOfDay].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableTimeOfDay(TimeOfDay defaultValue) : _defaultValue = defaultValue;
+  RestorableTimeOfDay(this._defaultValue);
 
   final TimeOfDay _defaultValue;
 

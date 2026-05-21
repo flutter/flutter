@@ -3558,7 +3558,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Creates an element that uses the given widget as its configuration.
   ///
   /// Typically called by an override of [Widget.createElement].
-  Element(Widget widget) : _widget = widget {
+  Element(this._widget) {
     assert(debugMaybeDispatchCreated('widgets', 'Element', this));
   }
 

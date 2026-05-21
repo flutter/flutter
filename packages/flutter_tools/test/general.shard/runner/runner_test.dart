@@ -848,9 +848,7 @@ void main() {
 }
 
 class CrashingFlutterCommand extends FlutterCommand {
-  CrashingFlutterCommand({bool asyncCrash = false, Completer<void>? completer})
-    : _asyncCrash = asyncCrash,
-      _completer = completer;
+  CrashingFlutterCommand({this._asyncCrash = false, this._completer});
 
   final bool _asyncCrash;
   final Completer<void>? _completer;
@@ -934,7 +932,7 @@ class CustomBugInstructions extends UserMessages {
 /// Used to exacerbate a race between the success and failure paths of
 /// [runner.run]. See https://github.com/flutter/flutter/issues/56406.
 class WaitingCrashReporter implements CrashReporter {
-  WaitingCrashReporter(Future<void> future) : _future = future;
+  WaitingCrashReporter(this._future);
 
   final Future<void> _future;
   late CrashDetails _details;

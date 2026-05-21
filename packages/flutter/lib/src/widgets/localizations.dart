@@ -772,19 +772,15 @@ class LocalizationsResolver extends ChangeNotifier with WidgetsBindingObserver {
   ///  * [LocalizationsDelegate] for more details about providing localized resources to a
   ///    [Localizations] widget.
   LocalizationsResolver({
-    required Iterable<Locale> supportedLocales,
-    Locale? locale,
-    LocaleListResolutionCallback? localeListResolutionCallback,
-    LocaleResolutionCallback? localeResolutionCallback,
-    Iterable<LocalizationsDelegate<Object?>>? localizationsDelegates,
-  }) : _locale = locale,
-       _localeListResolutionCallback = localeListResolutionCallback,
-       _localeResolutionCallback = localeResolutionCallback,
-       _localizationsDelegates = localizationsDelegates,
-       _supportedLocales = supportedLocales {
+    required this._supportedLocales,
+    this._locale,
+    this._localeListResolutionCallback,
+    this._localeResolutionCallback,
+    this._localizationsDelegates,
+  }) {
     _resolvedLocale = _resolveLocales(
       WidgetsBinding.instance.platformDispatcher.locales,
-      supportedLocales,
+      _supportedLocales,
     );
     WidgetsBinding.instance.addObserver(this);
   }

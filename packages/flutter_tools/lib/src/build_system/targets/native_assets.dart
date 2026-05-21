@@ -34,8 +34,8 @@ enum HookPlatform { native, web }
 class BuildHooks extends Target {
   const BuildHooks({
     this.platform = HookPlatform.native,
-    @visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner,
-  }) : _buildRunner = buildRunner;
+    @visibleForTesting this._buildRunner,
+  });
 
   final FlutterNativeAssetsBuildRunner? _buildRunner;
 
@@ -121,8 +121,8 @@ class LinkHooks extends Target {
   const LinkHooks({
     this.platform = HookPlatform.native,
     this.extraDependencies = const <Target>[],
-    FlutterNativeAssetsBuildRunner? buildRunner,
-  }) : _buildRunner = buildRunner;
+    this._buildRunner,
+  });
 
   final HookPlatform platform;
   final List<Target> extraDependencies;

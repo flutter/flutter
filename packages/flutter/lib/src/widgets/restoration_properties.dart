@@ -331,7 +331,7 @@ class RestorableDateTime extends RestorableValue<DateTime> {
   /// Creates a [RestorableDateTime].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableDateTime(DateTime defaultValue) : _defaultValue = defaultValue;
+  RestorableDateTime(this._defaultValue);
 
   final DateTime _defaultValue;
 
@@ -359,7 +359,7 @@ class RestorableDateTimeN extends RestorableValue<DateTime?> {
   /// Creates a [RestorableDateTime].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableDateTimeN(DateTime? defaultValue) : _defaultValue = defaultValue;
+  RestorableDateTimeN(this._defaultValue);
 
   final DateTime? _defaultValue;
 

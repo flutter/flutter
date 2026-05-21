@@ -23,11 +23,9 @@ class VMServiceFlutterDriver extends FlutterDriver {
   VMServiceFlutterDriver.connectedTo(
     this._serviceClient,
     this._appIsolate, {
-    bool printCommunication = false,
-    bool logCommunicationToFile = true,
-  }) : _printCommunication = printCommunication,
-       _logCommunicationToFile = logCommunicationToFile,
-       _driverId = _nextDriverId++ {
+    this._printCommunication = false,
+    this._logCommunicationToFile = true,
+  }) {
     _logFilePathName = p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log');
   }
 
@@ -278,7 +276,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
 ''';
 
   /// The unique ID of this driver instance.
-  final int _driverId;
+  final int _driverId = _nextDriverId++;
 
   @override
   vms.Isolate get appIsolate => _appIsolate;

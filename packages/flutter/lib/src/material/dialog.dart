@@ -1831,9 +1831,8 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     super.anchorPoint,
     super.traversalEdgeBehavior,
     super.fullscreenDialog,
-    AnimationStyle? animationStyle,
-  }) : _animationStyle = animationStyle,
-       super(
+    this._animationStyle,
+  }) : super(
          pageBuilder:
              (
                BuildContext buildContext,
@@ -1850,7 +1849,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
                return dialog;
              },
          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
-         transitionDuration: animationStyle?.duration ?? const Duration(milliseconds: 150),
+         transitionDuration: _animationStyle?.duration ?? const Duration(milliseconds: 150),
          transitionBuilder: _buildMaterialDialogTransitions,
        );
 

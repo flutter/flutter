@@ -214,10 +214,10 @@ class CachingIterable<E> extends IterableBase<E> {
 }
 
 class _LazyListIterator<E> implements Iterator<E> {
-  _LazyListIterator(this._owner) : _index = -1;
+  _LazyListIterator(this._owner);
 
   final CachingIterable<E> _owner;
-  int _index;
+  int _index = -1;
 
   @override
   E get current {

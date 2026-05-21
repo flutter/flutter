@@ -1168,7 +1168,7 @@ class TestDelegateThatCanThrow extends SliverPersistentHeaderDelegate {
 }
 
 class RenderBigSliver extends RenderSliver {
-  RenderBigSliver(double height) : _height = height;
+  RenderBigSliver(this._height);
 
   double get height => _height;
   double _height;

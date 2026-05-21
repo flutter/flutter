@@ -16,7 +16,7 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class CleanCommand extends FlutterCommand {
-  CleanCommand({bool verbose = false}) : _verbose = verbose {
+  CleanCommand({this._verbose = false}) {
     requiresPubspecYaml();
     argParser.addOption(
       'scheme',

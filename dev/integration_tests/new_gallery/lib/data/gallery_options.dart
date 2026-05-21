@@ -37,12 +37,11 @@ class GalleryOptions {
     required this.themeMode,
     required double? textScaleFactor,
     required this.customTextDirection,
-    required Locale? locale,
+    required this._locale,
     required this.timeDilation,
     required this.platform,
     required this.isTestMode,
-  }) : _textScaleFactor = textScaleFactor ?? 1.0,
-       _locale = locale;
+  }) : _textScaleFactor = textScaleFactor ?? 1.0;
 
   final ThemeMode themeMode;
   final double _textScaleFactor;

@@ -72,15 +72,11 @@ class FlutterCache extends Cache {
 class PubDependencies extends ArtifactSet {
   PubDependencies({
     // Needs to be lazy to avoid reading from the cache before the root is initialized.
-    required String Function() flutterRoot,
-    required Logger logger,
-    required Pub Function() pub,
-    required FlutterProjectFactory projectFactory,
-  }) : _logger = logger,
-       _flutterRoot = flutterRoot,
-       _pub = pub,
-       _projectFactory = projectFactory,
-       super(DevelopmentArtifact.universal);
+    required this._flutterRoot,
+    required this._logger,
+    required this._pub,
+    required this._projectFactory,
+  }) : super(DevelopmentArtifact.universal);
 
   final String Function() _flutterRoot;
   final Logger _logger;
@@ -251,9 +247,8 @@ class LegacyCanvasKitRemover extends ArtifactSet {
 
 /// A cached artifact containing the dart:ui source code.
 class FlutterSdk extends EngineCachedArtifact {
-  FlutterSdk(Cache cache, {required Platform platform})
-    : _platform = platform,
-      super('flutter_sdk', cache, DevelopmentArtifact.universal);
+  FlutterSdk(Cache cache, {required this._platform})
+    : super('flutter_sdk', cache, DevelopmentArtifact.universal);
 
   final Platform _platform;
 
@@ -288,9 +283,8 @@ class FlutterSdk extends EngineCachedArtifact {
 }
 
 class MacOSEngineArtifacts extends EngineCachedArtifact {
-  MacOSEngineArtifacts(Cache cache, {required Platform platform})
-    : _platform = platform,
-      super('macos-sdk', cache, DevelopmentArtifact.macOS);
+  MacOSEngineArtifacts(Cache cache, {required this._platform})
+    : super('macos-sdk', cache, DevelopmentArtifact.macOS);
 
   final Platform _platform;
 
@@ -314,9 +308,8 @@ class MacOSEngineArtifacts extends EngineCachedArtifact {
 
 /// Artifacts required for desktop Windows builds.
 class WindowsEngineArtifacts extends EngineCachedArtifact {
-  WindowsEngineArtifacts(Cache cache, {required Platform platform})
-    : _platform = platform,
-      super('windows-sdk', cache, DevelopmentArtifact.windows);
+  WindowsEngineArtifacts(Cache cache, {required this._platform})
+    : super('windows-sdk', cache, DevelopmentArtifact.windows);
 
   final Platform _platform;
 
@@ -341,9 +334,8 @@ class WindowsEngineArtifacts extends EngineCachedArtifact {
 
 /// Artifacts required for desktop Linux builds.
 class LinuxEngineArtifacts extends EngineCachedArtifact {
-  LinuxEngineArtifacts(Cache cache, {required Platform platform})
-    : _platform = platform,
-      super('linux-sdk', cache, DevelopmentArtifact.linux);
+  LinuxEngineArtifacts(Cache cache, {required this._platform})
+    : super('linux-sdk', cache, DevelopmentArtifact.linux);
 
   final Platform _platform;
 
@@ -372,9 +364,8 @@ class LinuxEngineArtifacts extends EngineCachedArtifact {
 
 /// The artifact used to generate snapshots for Android builds.
 class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
-  AndroidGenSnapshotArtifacts(Cache cache, {required Platform platform})
-    : _platform = platform,
-      super('android-sdk', cache, DevelopmentArtifact.androidGenSnapshot);
+  AndroidGenSnapshotArtifacts(Cache cache, {required this._platform})
+    : super('android-sdk', cache, DevelopmentArtifact.androidGenSnapshot);
 
   final Platform _platform;
 
@@ -413,10 +404,8 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
 ///
 /// Set [Java] to `null` to indicate that no Java/JDK installation could be found.
 class AndroidMavenArtifacts extends ArtifactSet {
-  AndroidMavenArtifacts(this.cache, {required Java? java, required Platform platform})
-    : _java = java,
-      _platform = platform,
-      super(DevelopmentArtifact.androidMaven);
+  AndroidMavenArtifacts(this.cache, {required this._java, required this._platform})
+    : super(DevelopmentArtifact.androidMaven);
 
   final Java? _java;
   final Platform _platform;
@@ -503,9 +492,8 @@ class AndroidInternalBuildArtifacts extends EngineCachedArtifact {
 }
 
 class IOSEngineArtifacts extends EngineCachedArtifact {
-  IOSEngineArtifacts(Cache cache, {required Platform platform})
-    : _platform = platform,
-      super('ios-sdk', cache, DevelopmentArtifact.iOS);
+  IOSEngineArtifacts(Cache cache, {required this._platform})
+    : super('ios-sdk', cache, DevelopmentArtifact.iOS);
 
   final Platform _platform;
 
@@ -610,9 +598,8 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
 
 /// The pre-built flutter runner for Fuchsia development.
 class FlutterRunnerSDKArtifacts extends CachedArtifact {
-  FlutterRunnerSDKArtifacts(Cache cache, {required Platform platform})
-    : _platform = platform,
-      super('flutter_runner', cache, DevelopmentArtifact.flutterRunner);
+  FlutterRunnerSDKArtifacts(Cache cache, {required this._platform})
+    : super('flutter_runner', cache, DevelopmentArtifact.flutterRunner);
 
   final Platform _platform;
 
@@ -671,10 +658,9 @@ class CipdArchiveResolver extends VersionedPackageResolver {
 class FlutterRunnerDebugSymbols extends CachedArtifact {
   FlutterRunnerDebugSymbols(
     Cache cache, {
-    required Platform platform,
+    required this._platform,
     VersionedPackageResolver? packageResolver,
-  }) : _platform = platform,
-       packageResolver = packageResolver ?? CipdArchiveResolver(cache),
+  }) : packageResolver = packageResolver ?? CipdArchiveResolver(cache),
        super('flutter_runner_debug_symbols', cache, DevelopmentArtifact.flutterRunner);
 
   final VersionedPackageResolver packageResolver;
@@ -718,9 +704,8 @@ class FlutterRunnerDebugSymbols extends CachedArtifact {
 
 /// The Fuchsia core SDK for Linux.
 class LinuxFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
-  LinuxFuchsiaSDKArtifacts(Cache cache, {required Platform platform})
-    : _platform = platform,
-      super(cache, 'linux');
+  LinuxFuchsiaSDKArtifacts(Cache cache, {required this._platform})
+    : super(cache, 'linux');
 
   final Platform _platform;
 
@@ -739,9 +724,8 @@ class LinuxFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
 
 /// The Fuchsia core SDK for MacOS.
 class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
-  MacOSFuchsiaSDKArtifacts(Cache cache, {required Platform platform})
-    : _platform = platform,
-      super(cache, 'mac');
+  MacOSFuchsiaSDKArtifacts(Cache cache, {required this._platform})
+    : super(cache, 'mac');
 
   final Platform _platform;
 
@@ -760,9 +744,8 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
 
 /// Cached artifacts for font subsetting.
 class FontSubsetArtifacts extends EngineCachedArtifact {
-  FontSubsetArtifacts(Cache cache, {required Platform platform})
-    : _platform = platform,
-      super(artifactName, cache, DevelopmentArtifact.universal);
+  FontSubsetArtifacts(Cache cache, {required this._platform})
+    : super(artifactName, cache, DevelopmentArtifact.universal);
 
   final Platform _platform;
 
@@ -800,9 +783,8 @@ class FontSubsetArtifacts extends EngineCachedArtifact {
 
 /// Cached iOS/USB binary artifacts.
 class IosUsbArtifacts extends CachedArtifact {
-  IosUsbArtifacts(String name, Cache cache, {required Platform platform})
-    : _platform = platform,
-      super(name, cache, DevelopmentArtifact.universal);
+  IosUsbArtifacts(String name, Cache cache, {required this._platform})
+    : super(name, cache, DevelopmentArtifact.universal);
 
   final Platform _platform;
 

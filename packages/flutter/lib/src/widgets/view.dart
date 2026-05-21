@@ -412,14 +412,12 @@ class _RawViewInternal extends RenderObjectWidget {
   /// returned by [builder].
   _RawViewInternal({
     required this.view,
-    required PipelineOwner? deprecatedPipelineOwner,
-    required RenderView? deprecatedRenderView,
+    required this._deprecatedPipelineOwner,
+    required this._deprecatedRenderView,
     required this.builder,
-  }) : _deprecatedPipelineOwner = deprecatedPipelineOwner,
-       _deprecatedRenderView = deprecatedRenderView,
-       assert(deprecatedRenderView == null || deprecatedRenderView.flutterView == view),
+  }) : assert(_deprecatedRenderView == null || _deprecatedRenderView.flutterView == view),
        // TODO(goderbauer): Replace this with GlobalObjectKey(view) when the deprecated properties are removed.
-       super(key: _DeprecatedRawViewKey(view, deprecatedPipelineOwner, deprecatedRenderView));
+       super(key: _DeprecatedRawViewKey(view, _deprecatedPipelineOwner, _deprecatedRenderView));
 
   /// The [FlutterView] into which the [Widget] returned by [builder] is drawn.
   final FlutterView view;
@@ -630,12 +628,7 @@ class _PipelineOwnerScope extends InheritedWidget {
 }
 
 class _MultiChildComponentWidget extends Widget {
-  const _MultiChildComponentWidget({
-    super.key,
-    List<Widget> views = const <Widget>[],
-    Widget? child,
-  }) : _views = views,
-       _child = child;
+  const _MultiChildComponentWidget({super.key, this._views = const <Widget>[], this._child});
 
   // It is up to the subclasses to make the relevant properties public.
   final List<Widget> _views;

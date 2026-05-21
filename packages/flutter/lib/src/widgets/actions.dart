@@ -1475,8 +1475,8 @@ class DoNothingAndStopPropagationIntent extends Intent {
 class DoNothingAction extends Action<Intent> {
   /// Creates a [DoNothingAction].
   ///
-  /// The optional [consumesKey] argument defaults to true.
-  DoNothingAction({bool consumesKey = true}) : _consumesKey = consumesKey;
+  /// The optional `consumesKey` argument defaults to true.
+  DoNothingAction({this._consumesKey = true});
 
   @override
   bool consumesKey(Intent intent) => _consumesKey;

@@ -301,12 +301,10 @@ class _RenderBadge extends RenderAligningShiftedBox {
   _RenderBadge({
     super.textDirection,
     super.alignment,
-    required Offset offset,
-    required bool hasLabel,
-    required double widthOffset,
-  }) : _offset = offset,
-       _hasLabel = hasLabel,
-       _widthOffset = widthOffset;
+    required this._offset,
+    required this._hasLabel,
+    required this._widthOffset,
+  });
 
   Offset get offset => _offset;
   Offset _offset;
@@ -414,9 +412,8 @@ class _IntrinsicHorizontalStadium extends SingleChildRenderObjectWidget {
 }
 
 class _RenderIntrinsicHorizontalStadium extends RenderProxyBox {
-  _RenderIntrinsicHorizontalStadium({RenderBox? child, required double minSize})
-    : _minSize = minSize,
-      super(child);
+  _RenderIntrinsicHorizontalStadium({RenderBox? child, required this._minSize})
+    : super(child);
 
   double get minSize => _minSize;
   double _minSize;

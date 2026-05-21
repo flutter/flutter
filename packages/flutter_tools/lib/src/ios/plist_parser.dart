@@ -13,12 +13,10 @@ import '../convert.dart';
 
 class PlistParser {
   PlistParser({
-    required FileSystem fileSystem,
-    required Logger logger,
+    required this._fileSystem,
+    required this._logger,
     required ProcessManager processManager,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  }) : _processUtils = ProcessUtils(logger: _logger, processManager: processManager);
 
   final FileSystem _fileSystem;
   final Logger _logger;

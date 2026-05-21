@@ -1169,9 +1169,8 @@ class _ScrollableSelectionHandlerState extends State<_ScrollableSelectionHandler
 /// date with the scroll position when it sends the drag update event to a
 /// selectable.
 class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  _ScrollableSelectionContainerDelegate({required this.state, required ScrollPosition position})
-    : _position = position,
-      _autoScroller = EdgeDraggingAutoScroller(
+  _ScrollableSelectionContainerDelegate({required this.state, required this._position})
+    : _autoScroller = EdgeDraggingAutoScroller(
         state,
         velocityScalar: _kDefaultSelectToScrollVelocityScalar,
       ) {
@@ -1646,16 +1645,13 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
 
 class _RenderScrollSemantics extends RenderProxyBox {
   _RenderScrollSemantics({
-    required ScrollPosition position,
-    required bool allowImplicitScrolling,
+    required this._position,
+    required this._allowImplicitScrolling,
     required this.axis,
-    required int? semanticChildCount,
+    required this._semanticChildCount,
     RenderBox? child,
-  }) : _position = position,
-       _allowImplicitScrolling = allowImplicitScrolling,
-       _semanticChildCount = semanticChildCount,
-       super(child) {
-    position.addListener(markNeedsSemanticsUpdate);
+  }) : super(child) {
+    _position.addListener(markNeedsSemanticsUpdate);
   }
 
   /// Whether this render object is excluded from the semantic tree.

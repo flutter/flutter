@@ -20,14 +20,11 @@ import '../runner/flutter_command.dart';
 /// [internationalization guide](https://flutter.dev/to/internationalization).
 class GenerateLocalizationsCommand extends FlutterCommand {
   GenerateLocalizationsCommand({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Artifacts artifacts,
-    required ProcessManager processManager,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _artifacts = artifacts,
-       _processManager = processManager {
+    required this._fileSystem,
+    required this._logger,
+    required this._artifacts,
+    required this._processManager,
+  }) {
     argParser.addOption(
       'arb-dir',
       help: 'The directory where the template and translated arb files are located.',

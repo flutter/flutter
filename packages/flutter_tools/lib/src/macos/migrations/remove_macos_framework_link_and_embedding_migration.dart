@@ -11,12 +11,8 @@ import '../../xcode_project.dart';
 
 // Remove the linking and embedding logic from the Xcode project to give the tool more control over these.
 class RemoveMacOSFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
-  RemoveMacOSFrameworkLinkAndEmbeddingMigration(
-    MacOSProject project,
-    super.logger,
-    Analytics analytics,
-  ) : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-      _analytics = analytics;
+  RemoveMacOSFrameworkLinkAndEmbeddingMigration(MacOSProject project, super.logger, this._analytics)
+    : _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
 
   final File _xcodeProjectInfoFile;
   final Analytics _analytics;

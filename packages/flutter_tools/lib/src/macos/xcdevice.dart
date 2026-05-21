@@ -54,49 +54,46 @@ class XCDevice {
     required Artifacts artifacts,
     required Cache cache,
     required ProcessManager processManager,
-    required Logger logger,
-    required Xcode xcode,
+    required this._logger,
+    required this._xcode,
     required Platform platform,
     required IProxy iproxy,
     required FileSystem fileSystem,
-    required Analytics analytics,
+    required this._analytics,
     required ShutdownHooks shutdownHooks,
     @visibleForTesting IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
-  }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _logger = logger,
+  }) : _processUtils = ProcessUtils(logger: _logger, processManager: processManager),
        _iMobileDevice = IMobileDevice(
          artifacts: artifacts,
          cache: cache,
-         logger: logger,
+         logger: _logger,
          processManager: processManager,
        ),
        _iosDeploy = IOSDeploy(
          artifacts: artifacts,
          cache: cache,
-         logger: logger,
+         logger: _logger,
          platform: platform,
          processManager: processManager,
        ),
        _coreDeviceControl =
            coreDeviceControl ??
            IOSCoreDeviceControl(
-             logger: logger,
+             logger: _logger,
              processManager: processManager,
-             xcode: xcode,
+             xcode: _xcode,
              fileSystem: fileSystem,
            ),
        _xcodeDebug =
            xcodeDebug ??
            XcodeDebug(
-             logger: logger,
+             logger: _logger,
              processManager: processManager,
-             xcode: xcode,
+             xcode: _xcode,
              fileSystem: fileSystem,
            ),
-       _iProxy = iproxy,
-       _xcode = xcode,
-       _analytics = analytics {
+       _iProxy = iproxy {
     shutdownHooks.addShutdownHook(dispose);
 
     _setupDeviceIdentifierByEventStream();

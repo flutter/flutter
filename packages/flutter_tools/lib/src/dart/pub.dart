@@ -198,37 +198,26 @@ abstract class Pub {
 
 class _DefaultPub implements Pub {
   _DefaultPub({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required ProcessManager processManager,
-    required Platform platform,
-    required BotDetector botDetector,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _platform = platform,
-       _botDetector = botDetector,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _processManager = processManager,
+    required this._fileSystem,
+    required this._logger,
+    required this._processManager,
+    required this._platform,
+    required this._botDetector,
+  }) : _processUtils = ProcessUtils(logger: _logger, processManager: _processManager),
        _stdio = null {
-    _git = Git(currentPlatform: platform, runProcessWith: _processUtils);
+    _git = Git(currentPlatform: _platform, runProcessWith: _processUtils);
   }
 
   @visibleForTesting
   _DefaultPub.test({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required ProcessManager processManager,
-    required Platform platform,
-    required BotDetector botDetector,
-    required Stdio stdio,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _platform = platform,
-       _botDetector = botDetector,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _processManager = processManager,
-       _stdio = stdio {
-    _git = Git(currentPlatform: platform, runProcessWith: _processUtils);
+    required this._fileSystem,
+    required this._logger,
+    required this._processManager,
+    required this._platform,
+    required this._botDetector,
+    required Stdio this._stdio,
+  }) : _processUtils = ProcessUtils(logger: _logger, processManager: _processManager) {
+    _git = Git(currentPlatform: _platform, runProcessWith: _processUtils);
   }
 
   final FileSystem _fileSystem;

@@ -290,8 +290,8 @@ class RenderEditable extends RenderBox
     Color? backgroundCursorColor,
     ValueNotifier<bool>? showCursor,
     bool? hasFocus,
-    required LayerLink startHandleLayerLink,
-    required LayerLink endHandleLayerLink,
+    required this._startHandleLayerLink,
+    required this._endHandleLayerLink,
     int? maxLines = 1,
     int? minLines,
     bool expands = false,
@@ -305,28 +305,28 @@ class RenderEditable extends RenderBox
     double textScaleFactor = 1.0,
     TextScaler textScaler = TextScaler.noScaling,
     TextSelection? selection,
-    required ViewportOffset offset,
+    required this._offset,
     this.ignorePointer = false,
-    bool readOnly = false,
-    bool forceLine = true,
+    this._readOnly = false,
+    this._forceLine = true,
     TextHeightBehavior? textHeightBehavior,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     String obscuringCharacter = '•',
-    bool obscureText = false,
+    this._obscureText = false,
     Locale? locale,
     double cursorWidth = 1.0,
     double? cursorHeight,
     Radius? cursorRadius,
     bool paintCursorAboveText = false,
     Offset cursorOffset = Offset.zero,
-    double devicePixelRatio = 1.0,
+    this._devicePixelRatio = 1.0,
     ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.max,
     ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.max,
-    bool? enableInteractiveSelection,
+    this._enableInteractiveSelection,
     this.floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
     TextRange? promptRectRange,
     Color? promptRectColor,
-    Clip clipBehavior = Clip.hardEdge,
+    this._clipBehavior = Clip.hardEdge,
     required this.textSelectionDelegate,
     RenderEditablePainter? painter,
     RenderEditablePainter? foregroundPainter,
@@ -366,19 +366,10 @@ class RenderEditable extends RenderBox
        _minLines = minLines,
        _expands = expands,
        _selection = selection,
-       _offset = offset,
        _cursorWidth = cursorWidth,
        _cursorHeight = cursorHeight,
        _paintCursorOnTop = paintCursorAboveText,
-       _enableInteractiveSelection = enableInteractiveSelection,
-       _devicePixelRatio = devicePixelRatio,
-       _startHandleLayerLink = startHandleLayerLink,
-       _endHandleLayerLink = endHandleLayerLink,
        _obscuringCharacter = obscuringCharacter,
-       _obscureText = obscureText,
-       _readOnly = readOnly,
-       _forceLine = forceLine,
-       _clipBehavior = clipBehavior,
        _hasFocus = hasFocus ?? false,
        _disposeShowCursor = showCursor == null {
     assert(!_showCursor.value || cursorColor != null);
@@ -2740,7 +2731,7 @@ class RenderEditable extends RenderBox
 }
 
 class _RenderEditableCustomPaint extends RenderBox {
-  _RenderEditableCustomPaint({RenderEditablePainter? painter}) : _painter = painter, super();
+  _RenderEditableCustomPaint({this._painter}) : super();
 
   @override
   RenderEditable? get parent => super.parent as RenderEditable?;
@@ -2850,10 +2841,6 @@ abstract class RenderEditablePainter extends ChangeNotifier {
 }
 
 class _TextHighlightPainter extends RenderEditablePainter {
-  _TextHighlightPainter({TextRange? highlightedRange, Color? highlightColor})
-    : _highlightedRange = highlightedRange,
-      _highlightColor = highlightColor;
-
   final Paint highlightPaint = Paint();
 
   Color? get highlightColor => _highlightColor;

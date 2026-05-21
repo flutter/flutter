@@ -24,13 +24,10 @@ const kCoreProcessPattern = r'Topaz\s+OFD\\Warsaw\\core\.exe';
 /// Validator for supported Windows host machine operating system version.
 class WindowsVersionValidator extends DoctorValidator {
   WindowsVersionValidator({
-    required OperatingSystemUtils operatingSystemUtils,
-    required ProcessLister processLister,
-    required WindowsVersionExtractor versionExtractor,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       _processLister = processLister,
-       _versionExtractor = versionExtractor,
-       super('Windows Version');
+    required this._operatingSystemUtils,
+    required this._processLister,
+    required this._versionExtractor,
+  }) : super('Windows Version');
 
   // See https://learn.microsoft.com/en-us/windows/release-health/windows11-release-information
   static const _lowestWindows11BuildNumber = 22000;
@@ -147,9 +144,7 @@ class ProcessLister {
 /// the edition and the processor architecture), releaseId and displayVersion and are returned via the
 /// [WindowsVersionExtractionResult] class.
 class WindowsVersionExtractor {
-  WindowsVersionExtractor({required ProcessManager processManager, required Logger logger})
-    : _logger = logger,
-      _processManager = processManager;
+  WindowsVersionExtractor({required this._processManager, required this._logger});
 
   final ProcessManager _processManager;
   final Logger _logger;

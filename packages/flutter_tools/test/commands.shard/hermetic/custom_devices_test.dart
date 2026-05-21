@@ -252,14 +252,11 @@ class FakeTerminal implements Terminal {
 
 class FakeCommandRunner extends FlutterCommandRunner {
   FakeCommandRunner({
-    required Platform platform,
-    required FileSystem fileSystem,
-    required Logger logger,
+    required this._platform,
+    required this._fileSystem,
+    required this._logger,
     UserMessages? userMessages,
-  }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _userMessages = userMessages ?? UserMessages();
+  }) : _userMessages = userMessages ?? UserMessages();
 
   final Platform _platform;
   final FileSystem _fileSystem;

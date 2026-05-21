@@ -1951,11 +1951,11 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
-    DevicePortForwarder? portForwarder,
+    this._portForwarder,
     this.onGetLogReader,
     this.connectionInterface = DeviceConnectionInterface.attached,
     this.majorSdkVersion = 0,
-  }) : _portForwarder = portForwarder;
+  });
 
   final DevicePortForwarder? _portForwarder;
   @override

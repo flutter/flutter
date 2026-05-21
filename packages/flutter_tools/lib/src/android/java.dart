@@ -37,17 +37,12 @@ class Java {
     required this.javaHome,
     required this.binaryPath,
     required this.javaSource,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils os,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _os = os,
-       _platform = platform,
-       _processManager = processManager,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
+    required this._logger,
+    required this._fileSystem,
+    required this._os,
+    required this._platform,
+    required this._processManager,
+  }) : _processUtils = ProcessUtils(processManager: _processManager, logger: _logger);
 
   /// Within the Java ecosystem, this environment variable is typically set
   /// the install location of a Java Runtime Environment (JRE) or Java

@@ -284,9 +284,7 @@ RRect tabIndicatorRRectElasticAnimation(
 
 // This decoration is used to test async image loading in indicator.
 class TabBarAsyncImageIndicatorDecoration extends Decoration {
-  TabBarAsyncImageIndicatorDecoration() : _paintCounter = _TabBarPaintCounter();
-
-  final _TabBarPaintCounter _paintCounter;
+  final _TabBarPaintCounter _paintCounter = _TabBarPaintCounter();
 
   /// The number of times the indicator has been painted.
   int get paintCount => _paintCounter.count;

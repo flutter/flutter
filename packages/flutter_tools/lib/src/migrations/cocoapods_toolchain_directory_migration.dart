@@ -17,10 +17,9 @@ import '../xcode_project.dart';
 class CocoaPodsToolchainDirectoryMigration extends ProjectMigrator {
   CocoaPodsToolchainDirectoryMigration(
     XcodeBasedProject project,
-    XcodeProjectInterpreter xcodeProjectInterpreter,
+    this._xcodeProjectInterpreter,
     super.logger,
-  ) : _podRunnerTargetSupportFiles = project.podRunnerTargetSupportFiles,
-      _xcodeProjectInterpreter = xcodeProjectInterpreter;
+  ) : _podRunnerTargetSupportFiles = project.podRunnerTargetSupportFiles;
 
   final Directory _podRunnerTargetSupportFiles;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;

@@ -29,7 +29,7 @@ class FlutterTesterApp extends ApplicationPackage {
     return FlutterTesterApp._(fileSystem.currentDirectory);
   }
 
-  FlutterTesterApp._(Directory directory) : _directory = directory, super(id: directory.path);
+  FlutterTesterApp._(this._directory) : super(id: _directory.path);
 
   final Directory _directory;
 
@@ -45,18 +45,13 @@ class FlutterTesterApp extends ApplicationPackage {
 class FlutterTesterDevice extends Device {
   FlutterTesterDevice(
     super.id, {
-    required ProcessManager processManager,
-    required FlutterVersion flutterVersion,
+    required this._processManager,
+    required this._flutterVersion,
     required super.logger,
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-  }) : _processManager = processManager,
-       _flutterVersion = flutterVersion,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _nativeAssetsBuilder = nativeAssetsBuilder,
+    required this._fileSystem,
+    required this._artifacts,
+    this._nativeAssetsBuilder,
+  }) : _logger = logger,
        super(platformType: null, category: null, ephemeral: false);
 
   final ProcessManager _processManager;

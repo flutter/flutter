@@ -288,14 +288,11 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
 /// Our logger class hierarchy and runtime requirements are overly complicated.
 class LoggerFactory {
   LoggerFactory({
-    required Terminal terminal,
-    required Stdio stdio,
-    required OutputPreferences outputPreferences,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  }) : _terminal = terminal,
-       _stdio = stdio,
-       _stopwatchFactory = stopwatchFactory,
-       _outputPreferences = outputPreferences;
+    required this._terminal,
+    required this._stdio,
+    required this._outputPreferences,
+    this._stopwatchFactory = const StopwatchFactory(),
+  });
 
   final Terminal _terminal;
   final Stdio _stdio;

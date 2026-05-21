@@ -14,12 +14,8 @@ import '../xcode_project.dart';
 //
 // See https://github.com/flutter/flutter/issues/123890#issuecomment-1494825976.
 class CocoaPodsScriptReadlink extends ProjectMigrator {
-  CocoaPodsScriptReadlink(
-    XcodeBasedProject project,
-    XcodeProjectInterpreter xcodeProjectInterpreter,
-    super.logger,
-  ) : _podRunnerFrameworksScript = project.podRunnerFrameworksScript,
-      _xcodeProjectInterpreter = xcodeProjectInterpreter;
+  CocoaPodsScriptReadlink(XcodeBasedProject project, this._xcodeProjectInterpreter, super.logger)
+    : _podRunnerFrameworksScript = project.podRunnerFrameworksScript;
 
   final File _podRunnerFrameworksScript;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;

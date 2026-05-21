@@ -408,8 +408,8 @@ class _ArcPainter extends CustomPainter {
     required this.startAngle,
     required this.sweepAngle,
     required this.useCenter,
-    required Paint paint,
-  }) : _paint = paint;
+    required this._paint,
+  });
 
   final double startAngle;
 
@@ -431,7 +431,7 @@ class _ArcPainter extends CustomPainter {
 }
 
 class _RSuperellipsePainter extends CustomPainter {
-  const _RSuperellipsePainter({required this.rsuperellipse, required Paint paint}) : _paint = paint;
+  const _RSuperellipsePainter({required this.rsuperellipse, required this._paint});
 
   final RSuperellipse rsuperellipse;
 

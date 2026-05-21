@@ -951,7 +951,7 @@ typedef RenderObjectVisitor = void Function(RenderObject child);
 typedef LayoutCallback<T extends Constraints> = void Function(T constraints);
 
 class _LocalSemanticsHandle implements SemanticsHandle {
-  _LocalSemanticsHandle._(PipelineOwner owner, this.listener) : _owner = owner {
+  _LocalSemanticsHandle._(this._owner, this.listener) {
     assert(debugMaybeDispatchCreated('rendering', '_LocalSemanticsHandle', this));
     if (listener != null) {
       _owner.semanticsOwner!.addListener(listener!);

@@ -987,7 +987,7 @@ class _RichText extends StatelessWidget {
 const double _kSelectableVerticalComparingThreshold = 3.0;
 
 class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate {
-  _SelectableTextContainerDelegate(GlobalKey textKey) : _textKey = textKey;
+  _SelectableTextContainerDelegate(this._textKey);
 
   final GlobalKey _textKey;
   RenderParagraph get paragraph => _textKey.currentContext!.findRenderObject()! as RenderParagraph;

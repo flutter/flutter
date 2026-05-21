@@ -31,9 +31,7 @@ abstract class LinuxApp extends ApplicationPackage {
 }
 
 class PrebuiltLinuxApp extends LinuxApp {
-  PrebuiltLinuxApp({required String executable})
-    : _executable = executable,
-      super(projectBundleId: executable);
+  PrebuiltLinuxApp({required this._executable}) : super(projectBundleId: _executable);
 
   final String _executable;
 

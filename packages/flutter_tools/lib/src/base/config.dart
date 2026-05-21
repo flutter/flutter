@@ -92,9 +92,7 @@ class Config {
 
   /// Test only access to the Config constructor.
   @visibleForTesting
-  Config.createForTesting(File file, Logger logger, {bool managed = false})
-    : _file = file,
-      _logger = logger {
+  Config.createForTesting(this._file, this._logger, {bool managed = false}) {
     if (!_file.existsSync()) {
       return;
     }
@@ -121,7 +119,7 @@ class Config {
       }
     } on Exception catch (err) {
       _logger
-        ..printError('Could not read preferences in ${file.path}.\n$err')
+        ..printError('Could not read preferences in ${_file.path}.\n$err')
         ..printError(
           'You may need to resolve the error above and reapply any previously '
           'saved configuration with the "flutter config" command.',

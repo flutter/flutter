@@ -205,8 +205,7 @@ class BasicMessageChannel<T> {
   ///
   /// The default [ServicesBinding.defaultBinaryMessenger] instance is used if
   /// [binaryMessenger] is null.
-  const BasicMessageChannel(this.name, this.codec, {BinaryMessenger? binaryMessenger})
-    : _binaryMessenger = binaryMessenger;
+  const BasicMessageChannel(this.name, this.codec, {this._binaryMessenger});
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -297,11 +296,7 @@ class MethodChannel {
   ///
   /// The default [ServicesBinding.defaultBinaryMessenger] instance is used if
   /// [binaryMessenger] is null.
-  const MethodChannel(
-    this.name, [
-    this.codec = const StandardMethodCodec(),
-    BinaryMessenger? binaryMessenger,
-  ]) : _binaryMessenger = binaryMessenger;
+  const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), this._binaryMessenger]);
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -656,11 +651,7 @@ class EventChannel {
   ///
   /// Neither [name] nor [codec] may be null. The default [ServicesBinding.defaultBinaryMessenger]
   /// instance is used if [binaryMessenger] is null.
-  const EventChannel(
-    this.name, [
-    this.codec = const StandardMethodCodec(),
-    BinaryMessenger? binaryMessenger,
-  ]) : _binaryMessenger = binaryMessenger;
+  const EventChannel(this.name, [this.codec = const StandardMethodCodec(), this._binaryMessenger]);
 
   /// The logical channel on which communication happens, not null.
   final String name;

@@ -72,38 +72,37 @@ class CustomDevicesCommand extends FlutterCommand {
   }
 
   CustomDevicesCommand._common({
-    required CustomDevicesConfig customDevicesConfig,
+    required this._customDevicesConfig,
     required OperatingSystemUtils operatingSystemUtils,
     required Terminal terminal,
     required Platform platform,
     required ProcessManager processManager,
     required FileSystem fileSystem,
     required Logger logger,
-    required FeatureFlags featureFlags,
-  }) : _customDevicesConfig = customDevicesConfig,
-       _featureFlags = featureFlags {
+    required this._featureFlags,
+  }) {
     addSubcommand(
       CustomDevicesListCommand(
-        customDevicesConfig: customDevicesConfig,
-        featureFlags: featureFlags,
+        customDevicesConfig: _customDevicesConfig,
+        featureFlags: _featureFlags,
         logger: logger,
       ),
     );
     addSubcommand(
       CustomDevicesResetCommand(
-        customDevicesConfig: customDevicesConfig,
-        featureFlags: featureFlags,
+        customDevicesConfig: _customDevicesConfig,
+        featureFlags: _featureFlags,
         fileSystem: fileSystem,
         logger: logger,
       ),
     );
     addSubcommand(
       CustomDevicesAddCommand(
-        customDevicesConfig: customDevicesConfig,
+        customDevicesConfig: _customDevicesConfig,
         operatingSystemUtils: operatingSystemUtils,
         terminal: terminal,
         platform: platform,
-        featureFlags: featureFlags,
+        featureFlags: _featureFlags,
         processManager: processManager,
         fileSystem: fileSystem,
         logger: logger,
@@ -111,8 +110,8 @@ class CustomDevicesCommand extends FlutterCommand {
     );
     addSubcommand(
       CustomDevicesDeleteCommand(
-        customDevicesConfig: customDevicesConfig,
-        featureFlags: featureFlags,
+        customDevicesConfig: _customDevicesConfig,
+        featureFlags: _featureFlags,
         fileSystem: fileSystem,
         logger: logger,
       ),
@@ -291,17 +290,14 @@ If a file already exists at the backup location, it will be overwritten.
 class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   CustomDevicesAddCommand({
     required super.customDevicesConfig,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Terminal terminal,
-    required Platform platform,
+    required this._operatingSystemUtils,
+    required this._terminal,
+    required this._platform,
     required super.featureFlags,
-    required ProcessManager processManager,
+    required this._processManager,
     required FileSystem super.fileSystem,
     required super.logger,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       _terminal = terminal,
-       _platform = platform,
-       _processManager = processManager {
+  }) {
     argParser.addFlag(
       _kCheck,
       help:

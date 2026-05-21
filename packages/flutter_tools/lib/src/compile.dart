@@ -88,9 +88,7 @@ enum StdoutState { CollectDiagnostic, CollectDependencies }
 
 /// Handles stdin/stdout communication with the frontend server.
 class StdoutHandler {
-  StdoutHandler({required Logger logger, required FileSystem fileSystem})
-    : _logger = logger,
-      _fileSystem = fileSystem {
+  StdoutHandler({required this._logger, required this._fileSystem}) {
     reset();
   }
 
@@ -223,20 +221,14 @@ Iterable<String>? _filterExtraFrontEndOptions(List<String>? options) =>
 /// A compiler interface for producing single (non-incremental) kernel files.
 class KernelCompiler {
   KernelCompiler({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required ProcessManager processManager,
-    required Artifacts artifacts,
-    required List<String> fileSystemRoots,
-    String? fileSystemScheme,
+    required this._fileSystem,
+    required this._logger,
+    required this._processManager,
+    required this._artifacts,
+    required this._fileSystemRoots,
+    this._fileSystemScheme,
     @visibleForTesting StdoutHandler? stdoutHandler,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _artifacts = artifacts,
-       _processManager = processManager,
-       _fileSystemScheme = fileSystemScheme,
-       _fileSystemRoots = fileSystemRoots,
-       _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem);
+  }) : _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: _logger, fileSystem: _fileSystem);
 
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
@@ -705,11 +697,11 @@ class DefaultResidentCompiler implements ResidentCompiler {
     String sdkRoot, {
     required BuildInfo buildInfo,
     required Logger logger,
-    required ProcessManager processManager,
+    required this._processManager,
     required this.artifacts,
-    required Platform platform,
+    required this._platform,
     required FileSystem fileSystem,
-    required ShutdownHooks shutdownHooks,
+    required this._shutdownHooks,
     required Config config,
     this.testCompilation = false,
     this.targetModel = TargetModel.flutter,
@@ -734,10 +726,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
        assumeInitializeFromDillUpToDate = buildInfo.assumeInitializeFromDillUpToDate,
        frontendServerStarterPath = buildInfo.frontendServerStarterPath,
        _logger = logger,
-       _processManager = processManager,
-       _shutdownHooks = shutdownHooks,
        _stdoutHandler = stdoutHandler ?? StdoutHandler(logger: logger, fileSystem: fileSystem),
-       _platform = platform,
        dartDefines = buildInfo.dartDefines,
        // This is a URI, not a file path, so the forward slash is correct even on Windows.
        sdkRoot = sdkRoot.endsWith('/') ? sdkRoot : '$sdkRoot/',

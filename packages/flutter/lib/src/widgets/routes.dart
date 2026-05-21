@@ -2593,24 +2593,19 @@ abstract mixin class RouteAware {
 class RawDialogRoute<T> extends PopupRoute<T> {
   /// A general dialog route which allows for customization of the dialog popup.
   RawDialogRoute({
-    required RoutePageBuilder pageBuilder,
-    bool barrierDismissible = true,
-    Color? barrierColor = const Color(0x80000000),
-    String? barrierLabel,
-    Duration transitionDuration = const Duration(milliseconds: 200),
-    RouteTransitionsBuilder? transitionBuilder,
+    required this._pageBuilder,
+    this._barrierDismissible = true,
+    this._barrierColor = const Color(0x80000000),
+    this._barrierLabel,
+    this._transitionDuration = const Duration(milliseconds: 200),
+    this._transitionBuilder,
     super.settings,
     super.requestFocus,
     this.anchorPoint,
     super.traversalEdgeBehavior,
     super.directionalTraversalEdgeBehavior,
     this.fullscreenDialog = false,
-  }) : _pageBuilder = pageBuilder,
-       _barrierDismissible = barrierDismissible,
-       _barrierLabel = barrierLabel,
-       _barrierColor = barrierColor,
-       _transitionDuration = transitionDuration,
-       _transitionBuilder = transitionBuilder;
+  });
 
   final RoutePageBuilder _pageBuilder;
 

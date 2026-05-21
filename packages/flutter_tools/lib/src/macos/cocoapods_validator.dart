@@ -11,10 +11,7 @@ import 'cocoapods.dart';
 /// See also:
 ///   * [CocoaPods], for the interface to the cocoapods command line tool.
 class CocoaPodsValidator extends DoctorValidator {
-  CocoaPodsValidator(CocoaPods cocoaPods, UserMessages userMessages)
-    : _cocoaPods = cocoaPods,
-      _userMessages = userMessages,
-      super('CocoaPods subvalidator');
+  CocoaPodsValidator(this._cocoaPods, this._userMessages) : super('CocoaPods subvalidator');
 
   final CocoaPods _cocoaPods;
   final UserMessages _userMessages;

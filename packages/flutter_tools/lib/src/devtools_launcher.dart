@@ -19,14 +19,11 @@ import 'resident_runner.dart';
 /// start a DevTools server instance.
 class DevtoolsServerLauncher extends DevtoolsLauncher {
   DevtoolsServerLauncher({
-    required ProcessManager processManager,
-    required Logger logger,
-    required BotDetector botDetector,
-    required Artifacts artifacts,
-  }) : _processManager = processManager,
-       _logger = logger,
-       _botDetector = botDetector,
-       _artifacts = artifacts;
+    required this._processManager,
+    required this._logger,
+    required this._botDetector,
+    required this._artifacts,
+  });
 
   final ProcessManager _processManager;
   final Artifacts _artifacts;

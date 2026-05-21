@@ -221,11 +221,10 @@ class SpringSimulation extends Simulation {
     double start,
     double end,
     double velocity, {
-    bool snapToEnd = false,
+    this._snapToEnd = false,
     super.tolerance,
   }) : _endPosition = end,
-       _solution = _SpringSolution(spring, start - end, velocity),
-       _snapToEnd = snapToEnd;
+       _solution = _SpringSolution(spring, start - end, velocity);
 
   final double _endPosition;
   final _SpringSolution _solution;
@@ -308,7 +307,7 @@ class _CriticalSolution implements _SpringSolution {
     return _CriticalSolution.withArgs(r, c1, c2);
   }
 
-  _CriticalSolution.withArgs(double r, double c1, double c2) : _r = r, _c1 = c1, _c2 = c2;
+  _CriticalSolution.withArgs(this._r, this._c1, this._c2);
 
   final double _r, _c1, _c2;
 
@@ -370,11 +369,7 @@ class _UnderdampedSolution implements _SpringSolution {
     return _UnderdampedSolution.withArgs(w, r, c1, c2);
   }
 
-  _UnderdampedSolution.withArgs(double w, double r, double c1, double c2)
-    : _w = w,
-      _r = r,
-      _c1 = c1,
-      _c2 = c2;
+  _UnderdampedSolution.withArgs(this._w, this._r, this._c1, this._c2);
 
   final double _w, _r, _c1, _c2;
 

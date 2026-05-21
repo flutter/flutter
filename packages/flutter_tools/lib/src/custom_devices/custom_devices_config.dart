@@ -20,33 +20,25 @@ class CustomDevicesConfig {
   /// but will not result in an exception being thrown. The file will not be deleted
   /// when it's not valid JSON (which other configurations do) and will not
   /// be implicitly created when it doesn't exist.
-  CustomDevicesConfig({
-    required Platform platform,
-    required FileSystem fileSystem,
-    required Logger logger,
-  }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _configLoader = (() => Config.managed(
-         _kCustomDevicesConfigName,
-         fileSystem: fileSystem,
-         logger: logger,
-         platform: platform,
-       ));
+  CustomDevicesConfig({required this._platform, required this._fileSystem, required this._logger})
+    : _configLoader = (() => Config.managed(
+        _kCustomDevicesConfigName,
+        fileSystem: _fileSystem,
+        logger: _logger,
+        platform: _platform,
+      ));
 
   @visibleForTesting
   CustomDevicesConfig.test({
-    required FileSystem fileSystem,
-    required Logger logger,
+    required this._fileSystem,
+    required this._logger,
     Directory? directory,
     Platform? platform,
   }) : _platform = platform ?? FakePlatform(),
-       _fileSystem = fileSystem,
-       _logger = logger,
        _configLoader = (() => Config.test(
          name: _kCustomDevicesConfigName,
          directory: directory,
-         logger: logger,
+         logger: _logger,
          managed: true,
        ));
 

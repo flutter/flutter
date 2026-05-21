@@ -81,11 +81,9 @@ class WebAssetServer implements AssetReader {
     required this.useLocalCanvasKit,
     required this.fileSystem,
     required this.logger,
-    String? baseHref,
-    Map<String, String> webDefines = const <String, String>{},
-  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)),
-       _baseHref = baseHref,
-       _webDefines = webDefines {
+    this._baseHref,
+    this._webDefines = const <String, String>{},
+  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)) {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (_ddcModuleSystem) {

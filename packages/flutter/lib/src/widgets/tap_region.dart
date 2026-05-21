@@ -639,21 +639,17 @@ class TapRegion extends SingleChildRenderObjectWidget {
 class RenderTapRegion extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a [RenderTapRegion].
   RenderTapRegion({
-    TapRegionRegistry? registry,
-    bool enabled = true,
-    bool consumeOutsideTaps = false,
+    this._registry,
+    this._enabled = true,
+    this._consumeOutsideTaps = false,
     this.onTapOutside,
     this.onTapInside,
     this.onTapUpOutside,
     this.onTapUpInside,
     super.behavior = HitTestBehavior.deferToChild,
-    Object? groupId,
+    this._groupId,
     String? debugLabel,
-  }) : _registry = registry,
-       _enabled = enabled,
-       _consumeOutsideTaps = consumeOutsideTaps,
-       _groupId = groupId,
-       debugLabel = kReleaseMode ? null : debugLabel;
+  }) : debugLabel = kReleaseMode ? null : debugLabel;
 
   bool _isRegistered = false;
 
