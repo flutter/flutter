@@ -563,7 +563,7 @@ class TextSelectionOverlay {
       );
       final TextDirection textDirection = renderObject.textDirection;
       // UIKit keeps selection handles aligned with the field direction.
-      final bool preferRenderObjectDirectionForSelectionHandles =
+      final preferRenderObjectDirectionForSelectionHandles =
           defaultTargetPlatform == TargetPlatform.iOS;
       final TextDirection startHandleDirection;
       final TextDirection endHandleDirection;
