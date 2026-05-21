@@ -20,7 +20,6 @@ import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
