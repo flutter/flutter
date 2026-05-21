@@ -340,6 +340,7 @@ void main() {
           'flutter:\n  deferred-components:',
         );
         pubspec.writeAsStringSync(modifiedContents);
+        globals.projectFactory.invalidate(globals.fs.directory(projectPath));
         printOnFailure(pubspec.readAsStringSync());
 
         final Directory oldCwd = globals.localFileSystem.currentDirectory;
