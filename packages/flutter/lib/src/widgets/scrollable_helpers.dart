@@ -153,8 +153,83 @@ class ScrollableDetails {
 /// The scroll velocity is controlled by the [velocityScalar]:
 ///
 /// velocity = (distance of overscroll) * [velocityScalar].
+///
+/// The [ScrollableState] can be obtained with [Scrollable.of] from a
+/// [BuildContext] below the [Scrollable]. For example, a widget returned by a
+/// [ListView] item builder can look up the surrounding scrollable and then
+/// update the auto scroller from drag callbacks.
+///
+/// {@tool snippet}
+///
+/// ```dart
+/// Widget buildDragList() {
+///   return ListView.builder(
+///     itemCount: 30,
+///     itemBuilder: (BuildContext context, int index) {
+///       return AutoScrollingDragItem(index: index);
+///     },
+///   );
+/// }
+///
+/// /// A list item that scrolls its nearest [Scrollable] while being dragged
+/// /// near the scrollable's edge.
+/// class AutoScrollingDragItem extends StatefulWidget {
+///   const AutoScrollingDragItem({super.key, required this.index});
+///
+///   final int index;
+///
+///   @override
+///   State<AutoScrollingDragItem> createState() => _AutoScrollingDragItemState();
+/// }
+///
+/// class _AutoScrollingDragItemState extends State<AutoScrollingDragItem> {
+///   EdgeDraggingAutoScroller? _autoScroller;
+///
+///   @override
+///   void didChangeDependencies() {
+///     super.didChangeDependencies();
+///     final ScrollableState scrollable = Scrollable.of(context);
+///     if (_autoScroller?.scrollable != scrollable) {
+///       _autoScroller?.stopAutoScroll();
+///       _autoScroller = EdgeDraggingAutoScroller(
+///         scrollable,
+///         velocityScalar: 20.0,
+///       );
+///     }
+///   }
+///
+///   @override
+///   void dispose() {
+///     _autoScroller?.stopAutoScroll();
+///     super.dispose();
+///   }
+///
+///   void _handleDragUpdate(DragUpdateDetails details) {
+///     final Rect dragTarget = Rect.fromCenter(
+///       center: details.globalPosition,
+///       width: 40.0,
+///       height: 40.0,
+///     );
+///     _autoScroller?.startAutoScrollIfNecessary(dragTarget);
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return LongPressDraggable<int>(
+///       data: widget.index,
+///       onDragUpdate: _handleDragUpdate,
+///       onDragEnd: (_) => _autoScroller?.stopAutoScroll(),
+///       feedback: Material(
+///         child: SizedBox(width: 200.0, child: Text('Item ${widget.index}')),
+///       ),
+///       child: ListTile(title: Text('Item ${widget.index}')),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
 class EdgeDraggingAutoScroller {
-  /// Creates a auto scroller that scrolls the [scrollable].
+  /// Creates an auto scroller that scrolls the [scrollable].
   EdgeDraggingAutoScroller(
     this.scrollable, {
     this.onScrollViewScrolled,
