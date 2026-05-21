@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -51,7 +52,7 @@ void main() {
     Future<void> reloadSources(String isolateId, {bool? pause, bool? force}) async {}
 
     final mockVMService = FakeVMService();
-    await setUpVmService(reloadSources: reloadSources, vmService: mockVMService);
+    await setUpVmService(git: FakeGit(), reloadSources: reloadSources, vmService: mockVMService);
 
     expect(mockVMService.services, containsPair(kReloadSourcesServiceName, kFlutterToolAlias));
   });
@@ -60,7 +61,7 @@ void main() {
     final mockDevice = FakeDevice();
 
     final mockVMService = FakeVMService();
-    await setUpVmService(device: mockDevice, vmService: mockVMService);
+    await setUpVmService(git: FakeGit(), device: mockDevice, vmService: mockVMService);
 
     expect(mockVMService.services, containsPair(kFlutterMemoryInfoServiceName, kFlutterToolAlias));
   });
@@ -68,6 +69,7 @@ void main() {
   testWithoutContext('VM Service registers flutterPrintStructuredErrorLogMethod', () async {
     final mockVMService = FakeVMService();
     await setUpVmService(
+      git: FakeGit(),
       printStructuredErrorLogMethod: (vm_service.Event event) async => 'hello',
       vmService: mockVMService,
     );
@@ -76,7 +78,7 @@ void main() {
 
   testWithoutContext('VM Service returns correct FlutterVersion', () async {
     final mockVMService = FakeVMService();
-    await setUpVmService(vmService: mockVMService);
+    await setUpVmService(git: FakeGit(), vmService: mockVMService);
 
     expect(mockVMService.services, containsPair(kFlutterVersionServiceName, kFlutterToolAlias));
   });
@@ -738,3 +740,5 @@ Future<io.WebSocket> failingWebSocketConnector(
 }) {
   throw const io.SocketException('Failed WebSocket connection');
 }
+
+class FakeGit extends Fake implements Git {}
