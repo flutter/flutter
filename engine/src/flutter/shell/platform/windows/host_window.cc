@@ -211,10 +211,10 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
     LPCWSTR title,
     bool sized_to_content,
     bool resizable) {
-  return std::unique_ptr<HostWindow>(new HostWindowRegular(
-      window_manager, engine, preferred_size,
-      FromWindowConstraints(preferred_constraints), title, sized_to_content,
-      resizable));
+  return std::unique_ptr<HostWindow>(
+      new HostWindowRegular(window_manager, engine, preferred_size,
+                            FromWindowConstraints(preferred_constraints), title,
+                            sized_to_content, resizable));
 }
 
 std::unique_ptr<HostWindow> HostWindow::CreateDialogWindow(
@@ -226,11 +226,10 @@ std::unique_ptr<HostWindow> HostWindow::CreateDialogWindow(
     HWND parent,
     bool sized_to_content,
     bool resizable) {
-  return std::unique_ptr<HostWindow>(
-      new HostWindowDialog(window_manager, engine, preferred_size,
-                           FromWindowConstraints(preferred_constraints), title,
-                           parent ? parent : std::optional<HWND>(),
-                           sized_to_content, resizable));
+  return std::unique_ptr<HostWindow>(new HostWindowDialog(
+      window_manager, engine, preferred_size,
+      FromWindowConstraints(preferred_constraints), title,
+      parent ? parent : std::optional<HWND>(), sized_to_content, resizable));
 }
 
 std::unique_ptr<HostWindow> HostWindow::CreateTooltipWindow(

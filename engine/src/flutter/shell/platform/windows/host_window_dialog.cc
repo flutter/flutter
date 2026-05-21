@@ -124,10 +124,8 @@ WindowRect HostWindowDialog::GetWorkArea() const {
     if (GetMonitorInfo(monitor, &monitor_info)) {
       work_area.left = monitor_info.rcWork.left;
       work_area.top = monitor_info.rcWork.top;
-      work_area.width =
-          monitor_info.rcWork.right - monitor_info.rcWork.left;
-      work_area.height =
-          monitor_info.rcWork.bottom - monitor_info.rcWork.top;
+      work_area.width = monitor_info.rcWork.right - monitor_info.rcWork.left;
+      work_area.height = monitor_info.rcWork.bottom - monitor_info.rcWork.top;
     }
   }
   return work_area;
