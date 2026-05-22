@@ -10947,7 +10947,7 @@ void main() {
   testWidgets('Dragging selection base handle upwards scrolls the viewport smoothly to zero', (
     WidgetTester tester,
   ) async {
-    final controller = TextEditingController(text: 'Line 1\n' * 100);
+    final controller = TextEditingController(text: '${'Line 1\n' * 100}FinalWord');
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -10993,6 +10993,9 @@ void main() {
     final Offset lastWordPos = textOffsetToPosition(tester, lastWordOffset);
     await tester.longPressAt(lastWordPos, pointer: 7);
     await tester.pumpAndSettle();
+
+    // Verify that the last word is successfully selected.
+    expect(controller.selection.textInside(controller.text), 'FinalWord');
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
