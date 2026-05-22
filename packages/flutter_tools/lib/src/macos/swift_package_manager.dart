@@ -173,8 +173,56 @@ class SwiftPackageManager {
       }
 
       final Link pluginSymlink = symlinkDirectory.childLink(basename);
-      ErrorHandlingFileSystem.deleteIfExists(pluginSymlink);
-      pluginSymlink.createSync(packagePath);
+      final FileSystemEntityType type = _fileSystem.typeSync(
+        pluginSymlink.path,
+        followLinks: false,
+      );
+      if (type == FileSystemEntityType.link) {
+        try {
+          if (pluginSymlink.targetSync() == packagePath) {
+            // The symlink already exists and points to the correct target.
+            // Skip recreating to avoid potential race conditions in parallel builds.
+            continue;
+          }
+        } on FileSystemException catch (_) {
+          // If targetSync fails (e.g. broken link), proceed to delete.
+        }
+      }
+
+      final FileSystemEntity? entityToDelete = switch (type) {
+        FileSystemEntityType.directory => _fileSystem.directory(pluginSymlink.path),
+        FileSystemEntityType.file => _fileSystem.file(pluginSymlink.path),
+        FileSystemEntityType.link => pluginSymlink,
+        _ => null,
+      };
+
+      if (entityToDelete != null) {
+        ErrorHandlingFileSystem.deleteIfExists(
+          entityToDelete,
+          recursive: type == FileSystemEntityType.directory,
+        );
+      }
+
+      try {
+        pluginSymlink.createSync(packagePath);
+      } on FileSystemException catch (e) {
+        if (e.osError?.errorCode == 17) {
+          // OS Error: File exists, errno = 17
+          final FileSystemEntityType postCrashType = _fileSystem.typeSync(
+            pluginSymlink.path,
+            followLinks: false,
+          );
+          if (postCrashType == FileSystemEntityType.link) {
+            try {
+              if (pluginSymlink.targetSync() == packagePath) {
+                // Concurrently created by another parallel target build, and points to the correct target.
+                continue;
+              }
+            } on FileSystemException catch (_) {}
+          }
+        }
+        rethrow;
+      }
       final String packageRelativePath = _fileSystem.path.relative(
         pluginSymlink.path,
         from: pathRelativeTo,
