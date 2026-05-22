@@ -84,6 +84,40 @@ class ThemedCard extends SingleChildRenderObjectWidget {
   }
 }
 
+class UbiquitousInheritedWidget extends InheritedWidget {
+  const UbiquitousInheritedWidget({super.key, required super.child});
+
+  @override
+  InheritedElement createElement() => InheritedElement.ubiquitous(this);
+
+  @override
+  bool updateShouldNotify(InheritedWidget oldWidget) => true;
+}
+
+/// [InheritedElement.ubiquitous] determines whether a rebuild is necessary by calling
+/// [Element.doesDependOnInheritedElement] for all descendant elements
+/// instead of updating and iterating through a map of dependents.
+///
+/// This widget can be used to verify that the appropriate method is being called.
+class UbiquitousDummyWidget extends StatelessWidget {
+  const UbiquitousDummyWidget({super.key});
+
+  static bool isDependent = false;
+
+  @override
+  StatelessElement createElement() => _UbiquitousDummyElement(this);
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
+}
+
+class _UbiquitousDummyElement extends StatelessElement {
+  _UbiquitousDummyElement(super.widget);
+
+  @override
+  bool doesDependOnInheritedElement(InheritedElement element) => UbiquitousDummyWidget.isDependent;
+}
+
 void main() {
   testWidgets('Inherited notifies dependents', (WidgetTester tester) async {
     final log = <TestInherited>[];
@@ -587,5 +621,44 @@ void main() {
     });
     await tester.pump();
     expectCardToMatchTheme();
+  });
+
+  testWidgets('InheritedElement.ubiquitous() constructor', (WidgetTester tester) async {
+    bool? dependentDirty;
+    var firstBuild = true;
+    const key = Key('key');
+
+    Future<void> rebuild() async {
+      tester.element(find.byKey(key)).markNeedsBuild();
+      await tester.pump();
+    }
+
+    await tester.pumpWidget(
+      Builder(
+        key: key,
+        builder: (context) {
+          return UbiquitousInheritedWidget(
+            child: Builder(
+              builder: (context) {
+                if (firstBuild) {
+                  firstBuild = false;
+                } else {
+                  dependentDirty = tester.element(find.byType(UbiquitousDummyWidget)).dirty;
+                }
+                return const UbiquitousDummyWidget();
+              },
+            ),
+          );
+        },
+      ),
+    );
+
+    UbiquitousDummyWidget.isDependent = false; // See UbiquitousDummyWidget class for more info.
+    await rebuild();
+    expect(dependentDirty, isFalse);
+
+    UbiquitousDummyWidget.isDependent = true;
+    await rebuild();
+    expect(dependentDirty, isTrue);
   });
 }
