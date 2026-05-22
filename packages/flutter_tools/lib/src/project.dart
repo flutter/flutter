@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 3.12
+
 import 'dart:collection';
 
 import 'package:glob/glob.dart';
@@ -52,14 +54,11 @@ enum SupportedPlatform {
 
 class FlutterProjectFactory {
   FlutterProjectFactory({
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Xcode? xcode,
-    required XcodeProjectInterpreter? xcodeProjectInterpreter,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _xcode = xcode,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter;
+    required this._logger,
+    required this._fileSystem,
+    required this._xcode,
+    required this._xcodeProjectInterpreter,
+  });
 
   final Logger _logger;
   final FileSystem _fileSystem;
