@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:watcher/watcher.dart';
@@ -185,7 +184,7 @@ class LspPreviewDetector {
     } catch (e) {
       if (_disposed || shutdownHooks.isShuttingDown) {
         logger.printTrace('Failed to get widget previews during shutdown: $e');
-      } else if (e is RpcException || e is StateError || e is Exception) {
+      } else if (e is StateError || e is Exception) {
         logger.printWarning(
           'Lost connection to the Dart Tooling Daemon (DTD). '
           'Live preview updates are paused. Details: $e',

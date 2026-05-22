@@ -424,6 +424,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           'Failed to retrieve widget previews from the Dart Tooling Daemon (DTD). '
           'Ensure that the analysis server is running and reachable. Details: $e',
         );
+      } on StateError catch (e) {
+        throwToolExit(
+          'Failed to retrieve widget previews from the Dart Tooling Daemon (DTD). '
+          'Ensure that the analysis server is running and reachable. Details: $e',
+        );
       }
       _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffoldLsp(originalPreviews);
     }
