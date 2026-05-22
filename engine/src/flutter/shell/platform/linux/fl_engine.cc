@@ -818,6 +818,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   for (const auto& env_switch : flutter::GetSwitchesFromEnvironment()) {
     g_ptr_array_add(command_line_args, g_strdup(env_switch.c_str()));
   }
+  // Linux (and other desktop platforms) always uses SDFs.
   g_ptr_array_add(command_line_args, g_strdup("--impeller-use-sdfs"));
 
   gchar** dart_entrypoint_args =
