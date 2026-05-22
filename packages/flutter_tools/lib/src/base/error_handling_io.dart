@@ -843,6 +843,7 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
       () async => wrapLink(await delegate.create(target, recursive: recursive)),
       platform: _platform,
       failureMessage: 'Flutter failed to create a link at "${delegate.path}" to "$target"',
+      ignoreErrorCodes: _platform.isWindows ? const <int>[1, 5, 1314] : const <int>[],
     );
   }
 
@@ -852,6 +853,7 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
       () => delegate.createSync(target, recursive: recursive),
       platform: _platform,
       failureMessage: 'Flutter failed to create a link at "${delegate.path}" to "$target"',
+      ignoreErrorCodes: _platform.isWindows ? const <int>[1, 5, 1314] : const <int>[],
     );
   }
 
