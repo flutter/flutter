@@ -20,8 +20,7 @@ PipelineLibraryGLES::PipelineLibraryGLES(
     std::shared_ptr<ReactorGLES> reactor,
     fml::RefPtr<fml::TaskRunner> io_task_runner)
     : reactor_(std::move(reactor)),
-      io_task_runner_(std::move(io_task_runner)),
-      compile_queue_(PipelineCompileQueueGLES::Create(io_task_runner_)) {}
+      compile_queue_(PipelineCompileQueueGLES::Create(std::move(io_task_runner))) {}
 
 static std::string GetShaderInfoLog(const ProcTableGLES& gl, GLuint shader) {
   GLint log_length = 0;

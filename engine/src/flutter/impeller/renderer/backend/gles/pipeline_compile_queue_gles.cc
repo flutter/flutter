@@ -19,13 +19,6 @@ PipelineCompileQueueGLES::PipelineCompileQueueGLES(
     fml::RefPtr<fml::TaskRunner> worker_task_runner)
     : worker_task_runner_(std::move(worker_task_runner)) {}
 
-// The base class destructor calls FinishAllJobs() which drains any remaining
-// pending jobs on the current thread. If a ProcessJobsSequentially task is
-// still in flight on the IO thread, the weak_from_this() capture in the
-// posted lambda will safely return nullptr and the task will be a no-op.
-// Any jobs already taken from the queue by the IO thread will still execute,
-// but this is safe because they capture weak references to the pipeline
-// library (not to this compile queue).
 PipelineCompileQueueGLES::~PipelineCompileQueueGLES() = default;
 
 void PipelineCompileQueueGLES::OnJobAdded() {

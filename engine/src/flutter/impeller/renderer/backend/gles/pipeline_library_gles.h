@@ -93,7 +93,6 @@ class PipelineLibraryGLES final
   PipelineMap pipelines_;
   Mutex programs_mutex_;
   ProgramMap programs_ IPLR_GUARDED_BY(programs_mutex_);
-  fml::RefPtr<fml::TaskRunner> io_task_runner_;
   std::shared_ptr<PipelineCompileQueueGLES> compile_queue_;
 
   explicit PipelineLibraryGLES(std::shared_ptr<ReactorGLES> reactor,
