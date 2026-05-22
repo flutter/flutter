@@ -231,7 +231,7 @@ void skiaDecodeImageFromPixels(
         colorSpace: SkColorSpaceSRGB,
       ),
       pixels,
-      (rowBytes ?? 4 * width).toDouble(),
+      rowBytes ?? 4 * width,
     );
 
     if (skImage == null) {

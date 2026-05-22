@@ -8,13 +8,12 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
+import '../renderer.dart';
 import '../text/paragraph.dart';
 import '../util.dart';
 import '../view_embedder/style_manager.dart';
 import 'debug.dart';
 import 'layout.dart';
-import 'paint.dart';
-import 'paint_paragraph.dart';
 import 'painter.dart';
 
 @visibleForTesting
@@ -968,7 +967,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
-    _paint.paint(canvas, _layout, _painter, offset);
+    _painter.paint(canvas, offset);
   }
 
   @override
@@ -1083,8 +1082,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   late final TextLayout _layout = TextLayout(this);
-  late final TextPaint _paint = PaintParagraph(this);
-  late final Painter _painter = CanvasKitPainter();
+  late final WebParagraphPainter _painter = renderer.createWebParagraphPainter(this);
 }
 
 class WebLineMetrics implements ui.LineMetrics {

@@ -278,8 +278,8 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   command_buffer_vk_.setScissor(0, 1, &scissor);
 
   // Set the initial stencil reference.
-  command_buffer_vk_.setStencilReference(
-      vk::StencilFaceFlagBits::eVkStencilFrontAndBack, 0u);
+  command_buffer_vk_.setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack,
+                                         0u);
 
   is_valid_ = true;
 }
@@ -397,8 +397,8 @@ void RenderPassVK::SetStencilReference(uint32_t value) {
     return;
   }
   current_stencil_ = value;
-  command_buffer_vk_.setStencilReference(
-      vk::StencilFaceFlagBits::eVkStencilFrontAndBack, value);
+  command_buffer_vk_.setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack,
+                                         value);
 }
 
 // |RenderPass|
