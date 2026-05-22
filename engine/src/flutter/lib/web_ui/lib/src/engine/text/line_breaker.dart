@@ -6,18 +6,29 @@ import 'dart:js_interop';
 
 import '../dom.dart';
 
-const Set<int> _kNewlines = <int>{
-  0x000A, // LF
-  0x000B, // BK
-  0x000C, // BK
-  0x000D, // CR
-  0x0085, // NL
-  0x2028, // BK
-  0x2029, // BK
+// Using a switch expression rather than a generic Set<int> prevents dart2wasm
+// from dynamically boxing the primitive codeUnit integer into a heap-allocated
+// object when performing lookup queries. Switch expressions compile directly
+// into highly efficient, zero-allocation WebAssembly jump tables.
+bool _isNewline(int codeUnit) => switch (codeUnit) {
+  0x000A || // LF
+  0x000B || // BK
+  0x000C || // BK
+  0x000D || // CR
+  0x0085 || // NL
+  0x2028 || // BK
+  0x2029 => true, // BK
+  _ => false,
 };
-const Set<int> _kSpaces = <int>{
-  0x0020, // SP
-  0x200B, // ZW
+
+// Using a switch expression rather than a generic Set<int> prevents dart2wasm
+// from dynamically boxing the primitive codeUnit integer into a heap-allocated
+// object when performing lookup queries. Switch expressions compile directly
+// into highly efficient, zero-allocation WebAssembly jump tables.
+bool _isSpace(int codeUnit) => switch (codeUnit) {
+  0x0020 || // SP
+  0x200B => true, // ZW
+  _ => false,
 };
 
 /// Various types of line breaks as defined by the Unicode spec.
@@ -56,10 +67,10 @@ List<LineBreakFragment> breakLinesUsingV8BreakIterator(
     // Calculate trailing newlines and spaces.
     for (var i = fragmentStart; i < fragmentEnd; i++) {
       final int codeUnit = text.codeUnitAt(i);
-      if (_kNewlines.contains(codeUnit)) {
+      if (_isNewline(codeUnit)) {
         trailingNewlines++;
         trailingSpaces++;
-      } else if (_kSpaces.contains(codeUnit)) {
+      } else if (_isSpace(codeUnit)) {
         trailingSpaces++;
       } else {
         // Always break after a sequence of spaces.

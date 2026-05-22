@@ -144,7 +144,7 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
           );
           assert(missingCodePointCount == returnedCodePointCount);
           FallbackFontService.instance.addMissingCodePoints(
-            List<int>.generate(missingCodePointCount, (int index) => codePointBuffer[index]),
+            codePointBuffer.asUint32List(missingCodePointCount),
           );
         });
       }
@@ -978,8 +978,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
       text = '';
       jsText = ''.toJS;
     } else {
-      final codeUnitList = List<int>.generate(outSize.value, (int index) => utf8Data[index]);
-      text = utf8.decode(codeUnitList);
+      text = utf8.decode(utf8Data.asUint8List(outSize.value));
       jsText = _utf8Decoder.decode(
         // In an ideal world we would just use a subview of wasm memory rather
         // than a slice, but the TextDecoder API doesn't work on shared buffer

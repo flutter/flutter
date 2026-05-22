@@ -252,8 +252,7 @@ class SkwasmPath implements DisposablePath, DisposablePathBuilder {
     final SkStringHandle skString = pathGetSvgString(handle);
     final Pointer<Int8> buffer = skStringGetData(skString);
     final int length = skStringGetLength(skString);
-    final characters = List<int>.generate(length, (int i) => buffer[i]);
-    final String svgString = utf8.decode(characters);
+    final String svgString = utf8.decode(buffer.asUint8List(length));
     skStringFree(skString);
     return svgString;
   }
