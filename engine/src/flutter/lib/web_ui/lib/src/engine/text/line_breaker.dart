@@ -6,10 +6,10 @@ import 'dart:js_interop';
 
 import '../dom.dart';
 
-// Using a switch expression rather than a generic Set<int> prevents dart2wasm
-// from dynamically boxing the primitive codeUnit integer into a heap-allocated
-// object when performing lookup queries. Switch expressions compile directly
-// into highly efficient, zero-allocation WebAssembly jump tables.
+/// Using a switch expression rather than a generic Set<int> prevents dart2wasm
+/// from dynamically boxing the primitive codeUnit integer into a heap-allocated
+/// object when performing lookup queries. Switch expressions compile directly
+/// into highly efficient, zero-allocation WebAssembly jump tables.
 bool _isNewline(int codeUnit) => switch (codeUnit) {
   0x000A || // LF
   0x000B || // BK
@@ -21,10 +21,10 @@ bool _isNewline(int codeUnit) => switch (codeUnit) {
   _ => false,
 };
 
-// Using a switch expression rather than a generic Set<int> prevents dart2wasm
-// from dynamically boxing the primitive codeUnit integer into a heap-allocated
-// object when performing lookup queries. Switch expressions compile directly
-// into highly efficient, zero-allocation WebAssembly jump tables.
+/// Using a switch expression rather than a generic Set<int> prevents dart2wasm
+/// from dynamically boxing the primitive codeUnit integer into a heap-allocated
+/// object when performing lookup queries. Switch expressions compile directly
+/// into highly efficient, zero-allocation WebAssembly jump tables.
 bool _isSpace(int codeUnit) => switch (codeUnit) {
   0x0020 || // SP
   0x200B => true, // ZW

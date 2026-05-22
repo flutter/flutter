@@ -5,7 +5,6 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:js_interop';
-import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
@@ -145,7 +144,7 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
           );
           assert(missingCodePointCount == returnedCodePointCount);
           FallbackFontService.instance.addMissingCodePoints(
-            codePointBuffer.asUint32List(missingCodePointCount),
+            codePointBuffer.asTypedList(missingCodePointCount),
           );
         });
       }
@@ -979,7 +978,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
       text = '';
       jsText = ''.toJS;
     } else {
-      text = utf8.decode(utf8Data.asUint8List(outSize.value));
+      text = utf8.decode(utf8Data.asTypedList(outSize.value));
       jsText = _utf8Decoder.decode(
         // In an ideal world we would just use a subview of wasm memory rather
         // than a slice, but the TextDecoder API doesn't work on shared buffer
@@ -1089,31 +1088,5 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     textStyle.applyToNative(nativeStyle);
     textStyleStack.add(nativeStyle);
     paragraphBuilderPushStyle(handle, nativeStyle.handle);
-  }
-}
-
-// Using a specialized local extension rather than a generic List<int>.generate
-// prevents dart2wasm from dynamically boxing the primitive integers into
-// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
-extension on Pointer<Uint8> {
-  Uint8List asUint8List(int length) {
-    final list = Uint8List(length);
-    for (var i = 0; i < length; i++) {
-      list[i] = this[i];
-    }
-    return list;
-  }
-}
-
-// Using a specialized local extension rather than a generic List<int>.generate
-// prevents dart2wasm from dynamically boxing the primitive integers into
-// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
-extension on Pointer<Uint32> {
-  Uint32List asUint32List(int length) {
-    final list = Uint32List(length);
-    for (var i = 0; i < length; i++) {
-      list[i] = this[i];
-    }
-    return list;
   }
 }
