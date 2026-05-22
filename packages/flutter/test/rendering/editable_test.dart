@@ -7,12 +7,17 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/text_input.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
+
+const Color _black = Color(0xFF000000);
+const Color _blue = Color(0xFF2196F3);
+const Color _grey = Color(0xFF9E9E9E);
+const Color _red = Color(0xFFF44336);
 
 double _caretMarginOf(RenderEditable renderEditable) {
   return renderEditable.cursorWidth + 1.0;
@@ -259,7 +264,7 @@ void main() {
     EditableText.debugDeterministicCursor = true;
 
     final editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
+      backgroundCursorColor: _grey,
       textDirection: TextDirection.ltr,
       cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
       offset: ViewportOffset.zero(),
@@ -383,7 +388,7 @@ void main() {
     EditableText.debugDeterministicCursor = true;
 
     final editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
+      backgroundCursorColor: _grey,
       textDirection: TextDirection.ltr,
       cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
       offset: ViewportOffset.zero(),
@@ -452,10 +457,10 @@ void main() {
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
+      backgroundCursorColor: _grey,
+      selectionColor: _black,
       textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
+      cursorColor: _red,
       offset: ViewportOffset.zero(),
       textSelectionDelegate: delegate,
       text: const TextSpan(text: 'test', style: TextStyle(height: 1.0, fontSize: 10.0)),
@@ -474,7 +479,7 @@ void main() {
       editable,
       paints
         // Check that it's the black selection box, not the red cursor.
-        ..rect(color: Colors.black)
+        ..rect(color: _black)
         ..paragraph(),
     );
 
@@ -486,11 +491,11 @@ void main() {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final showCursor = ValueNotifier<bool>(true);
     final editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
+      backgroundCursorColor: _grey,
+      selectionColor: _black,
       paintCursorAboveText: true,
       textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
+      cursorColor: _red,
       showCursor: showCursor,
       offset: ViewportOffset.zero(),
       textSelectionDelegate: delegate,
@@ -507,7 +512,7 @@ void main() {
       paints
         ..paragraph()
         // Red collapsed cursor is painted, not a selection box.
-        ..rect(color: Colors.red[500]),
+        ..rect(color: _red),
     );
 
     // There is exactly one rect paint (0 selection, 1 cursor).
@@ -520,7 +525,7 @@ void main() {
       editable,
       // The paint order is now flipped.
       paints
-        ..rect(color: Colors.red[500])
+        ..rect(color: _red)
         ..paragraph(),
     );
     expect(editable, paintsExactlyCountTimes(#drawRect, 1));
@@ -530,11 +535,11 @@ void main() {
     final TextSelectionDelegate delegate = _FakeEditableTextState();
     final showCursor = ValueNotifier<bool>(true);
     final editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
+      backgroundCursorColor: _grey,
+      selectionColor: _black,
       paintCursorAboveText: true,
       textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
+      cursorColor: _red,
       showCursor: showCursor,
       offset: ViewportOffset.zero(),
       textSelectionDelegate: delegate,
@@ -551,7 +556,7 @@ void main() {
       paints
         ..paragraph()
         // Red collapsed cursor is painted, not a selection box.
-        ..rect(color: Colors.red[500]),
+        ..rect(color: _red),
     );
 
     // Let the RenderEditable paint again. Setting the selection to null should
@@ -560,19 +565,19 @@ void main() {
     // Still paints the paragraph.
     expect(editable, paints..paragraph());
     // No longer paints the caret.
-    expect(editable, isNot(paints..rect(color: Colors.red[500])));
+    expect(editable, isNot(paints..rect(color: _red)));
 
     // Reset.
     editable.selection = const TextSelection.collapsed(offset: 0);
     expect(editable, paints..paragraph());
-    expect(editable, paints..rect(color: Colors.red[500]));
+    expect(editable, paints..rect(color: _red));
 
     // Invalid cursor position.
     editable.selection = const TextSelection.collapsed(offset: -1);
     // Still paints the paragraph.
     expect(editable, paints..paragraph());
     // No longer paints the caret.
-    expect(editable, isNot(paints..rect(color: Colors.red[500])));
+    expect(editable, isNot(paints..rect(color: _red)));
   });
 
   test('selects correct place with offsets', () {
@@ -581,10 +586,10 @@ void main() {
       ..textEditingValue = const TextEditingValue(text: text);
     final viewportOffset = ViewportOffset.zero();
     final editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
+      backgroundCursorColor: _grey,
+      selectionColor: _black,
       textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
+      cursorColor: _red,
       offset: viewportOffset,
       // This makes the scroll axis vertical.
       maxLines: 2,
@@ -653,10 +658,10 @@ void main() {
       ..textEditingValue = const TextEditingValue(text: text);
     final viewportOffset = ViewportOffset.zero();
     final editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
+      backgroundCursorColor: _grey,
+      selectionColor: _black,
       textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
+      cursorColor: _red,
       readOnly: true,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
@@ -686,10 +691,10 @@ void main() {
       ..textEditingValue = const TextEditingValue(text: text);
     final viewportOffset = ViewportOffset.zero();
     final editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
+      backgroundCursorColor: _grey,
+      selectionColor: _black,
       textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
+      cursorColor: _red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
       startHandleLayerLink: LayerLink(),
@@ -718,10 +723,10 @@ void main() {
       ..textEditingValue = const TextEditingValue(text: text);
     final viewportOffset = ViewportOffset.zero();
     final editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
+      backgroundCursorColor: _grey,
+      selectionColor: _black,
       textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
+      cursorColor: _red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
       startHandleLayerLink: LayerLink(),
@@ -747,10 +752,10 @@ void main() {
       ..textEditingValue = const TextEditingValue(text: text);
     final viewportOffset = ViewportOffset.zero();
     final editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
+      backgroundCursorColor: _grey,
+      selectionColor: _black,
       textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
+      cursorColor: _red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
       text: const TextSpan(text: text, style: TextStyle(height: 1.0, fontSize: 10.0)),
@@ -832,7 +837,7 @@ void main() {
 
     final editable = RenderEditable(
       maxLines: 2,
-      backgroundCursorColor: Colors.grey,
+      backgroundCursorColor: _grey,
       textDirection: TextDirection.ltr,
       cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
       offset: ViewportOffset.zero(),
@@ -1494,10 +1499,10 @@ void main() {
       ];
       final viewportOffset = ViewportOffset.zero();
       final editable = RenderEditable(
-        backgroundCursorColor: Colors.grey,
-        selectionColor: Colors.black,
+        backgroundCursorColor: _grey,
+        selectionColor: _black,
         textDirection: TextDirection.ltr,
-        cursorColor: Colors.red,
+        cursorColor: _red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
         startHandleLayerLink: LayerLink(),
@@ -1506,7 +1511,7 @@ void main() {
           style: const TextStyle(height: 1.0, fontSize: 10.0),
           children: <InlineSpan>[
             const TextSpan(text: 'test'),
-            WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
+            WidgetSpan(child: Container(width: 10, height: 10, color: _blue)),
           ],
         ),
         selection: const TextSelection.collapsed(offset: 3),
@@ -1536,10 +1541,10 @@ void main() {
       ];
       final viewportOffset = ViewportOffset.zero();
       final editable = RenderEditable(
-        backgroundCursorColor: Colors.grey,
-        selectionColor: Colors.black,
+        backgroundCursorColor: _grey,
+        selectionColor: _black,
         textDirection: TextDirection.ltr,
-        cursorColor: Colors.red,
+        cursorColor: _red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
         startHandleLayerLink: LayerLink(),
@@ -1548,9 +1553,9 @@ void main() {
           style: const TextStyle(height: 1.0, fontSize: 10.0),
           children: <InlineSpan>[
             const TextSpan(text: 'test'),
-            WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
-            WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
-            WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
+            WidgetSpan(child: Container(width: 10, height: 10, color: _blue)),
+            WidgetSpan(child: Container(width: 10, height: 10, color: _blue)),
+            WidgetSpan(child: Container(width: 10, height: 10, color: _blue)),
           ],
         ),
         selection: const TextSelection.collapsed(offset: 3),
@@ -1581,10 +1586,10 @@ void main() {
       ];
       final viewportOffset = ViewportOffset.zero();
       final editable = RenderEditable(
-        backgroundCursorColor: Colors.grey,
-        selectionColor: Colors.black,
+        backgroundCursorColor: _grey,
+        selectionColor: _black,
         textDirection: TextDirection.ltr,
-        cursorColor: Colors.red,
+        cursorColor: _red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
         startHandleLayerLink: LayerLink(),
@@ -1630,10 +1635,10 @@ void main() {
       ];
       final viewportOffset = ViewportOffset.zero();
       final editable = RenderEditable(
-        backgroundCursorColor: Colors.grey,
-        selectionColor: Colors.black,
+        backgroundCursorColor: _grey,
+        selectionColor: _black,
         textDirection: TextDirection.ltr,
-        cursorColor: Colors.red,
+        cursorColor: _red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
         startHandleLayerLink: LayerLink(),
@@ -1686,10 +1691,10 @@ void main() {
       ];
       final viewportOffset = ViewportOffset.zero();
       final editable = RenderEditable(
-        backgroundCursorColor: Colors.grey,
-        selectionColor: Colors.black,
+        backgroundCursorColor: _grey,
+        selectionColor: _black,
         textDirection: TextDirection.ltr,
-        cursorColor: Colors.red,
+        cursorColor: _red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
         startHandleLayerLink: LayerLink(),
@@ -1740,10 +1745,10 @@ void main() {
       ];
       final viewportOffset = ViewportOffset.fixed(100.0);
       final editable = RenderEditable(
-        backgroundCursorColor: Colors.grey,
-        selectionColor: Colors.black,
+        backgroundCursorColor: _grey,
+        selectionColor: _black,
         textDirection: TextDirection.ltr,
-        cursorColor: Colors.red,
+        cursorColor: _red,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
         startHandleLayerLink: LayerLink(),
@@ -1753,7 +1758,7 @@ void main() {
           style: const TextStyle(height: 1.0, fontSize: 10.0),
           children: <InlineSpan>[
             const TextSpan(text: 'test'),
-            WidgetSpan(child: Container(width: 10, height: 10, color: Colors.blue)),
+            WidgetSpan(child: Container(width: 10, height: 10, color: _blue)),
           ],
         ),
         selection: const TextSelection.collapsed(offset: 3),
@@ -1785,10 +1790,10 @@ void main() {
       ];
       final viewportOffset = ViewportOffset.zero();
       final editable = RenderEditable(
-        backgroundCursorColor: Colors.grey,
-        selectionColor: Colors.black,
+        backgroundCursorColor: _grey,
+        selectionColor: _black,
         textDirection: TextDirection.ltr,
-        cursorColor: Colors.red,
+        cursorColor: _red,
         cursorWidth: 0.0,
         offset: viewportOffset,
         textSelectionDelegate: delegate,
@@ -2036,7 +2041,7 @@ void main() {
     const cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
 
     final editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
+      backgroundCursorColor: _grey,
       textDirection: TextDirection.ltr,
       cursorColor: cursorColor,
       offset: ViewportOffset.zero(),
@@ -2095,10 +2100,10 @@ void main() {
       ..textEditingValue = const TextEditingValue(text: text);
     final viewportOffset = ViewportOffset.zero();
     final editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
+      backgroundCursorColor: _grey,
+      selectionColor: _black,
       textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
+      cursorColor: _red,
       offset: viewportOffset,
       textSelectionDelegate: delegate,
       startHandleLayerLink: LayerLink(),
