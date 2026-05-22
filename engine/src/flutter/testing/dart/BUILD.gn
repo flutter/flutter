@@ -48,6 +48,7 @@ tests = [
   "process_test.dart",
   "semantics_test.dart",
   "serial_gc_test.dart",
+  "shader_reload_test.dart",
   "spawn_helper.dart",
   "spawn_test.dart",
   "stringification_test.dart",

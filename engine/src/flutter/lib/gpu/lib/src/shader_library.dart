@@ -69,6 +69,13 @@ base class ShaderLibrary extends NativeFieldWrapperClass1 {
     }
   }
 
+  /// Test-only. Reloads this library from `assetName`'s bytes while keeping
+  /// this library's identity and registry key. Production hot reload always
+  /// re-fetches the original asset path via [reinitialize]; this hook lets
+  /// tests simulate an edited bundle by swapping in a different fixture.
+  String? debugReinitializeFromAsset(String assetName) =>
+      _reinitializeWithAsset(assetName);
+
   @Native<Handle Function(Handle, Handle)>(
     symbol: 'InternalFlutterGpu_ShaderLibrary_InitializeWithAsset',
   )

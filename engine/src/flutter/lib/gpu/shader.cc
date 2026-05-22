@@ -10,6 +10,7 @@
 #include "flutter/lib/gpu/formats.h"
 #include "fml/make_copyable.h"
 #include "impeller/core/runtime_types.h"
+#include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/shader_function.h"
 #include "impeller/renderer/shader_key.h"
 #include "impeller/renderer/shader_library.h"
