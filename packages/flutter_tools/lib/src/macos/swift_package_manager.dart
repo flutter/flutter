@@ -177,39 +177,44 @@ class SwiftPackageManager {
         pluginSymlink.path,
         followLinks: false,
       );
+      var skipCreation = false;
       if (type == FileSystemEntityType.link) {
         try {
           if (pluginSymlink.targetSync() == packagePath) {
             // The symlink already exists and points to the correct target.
             // Skip recreating to avoid potential race conditions in parallel builds.
-            continue;
+            skipCreation = true;
           }
         } on FileSystemException catch (_) {
           // If targetSync fails (e.g. broken link), proceed to delete.
         }
       }
 
-      ErrorHandlingFileSystem.deleteIfExists(pluginSymlink, recursive: true);
+      if (!skipCreation) {
+        ErrorHandlingFileSystem.deleteIfExists(pluginSymlink, recursive: true);
 
-      try {
-        pluginSymlink.createSync(packagePath);
-      } on FileSystemException catch (e) {
-        if (e.osError?.errorCode == 17) {
-          // OS Error: File exists, errno = 17
-          final FileSystemEntityType postCrashType = _fileSystem.typeSync(
-            pluginSymlink.path,
-            followLinks: false,
-          );
-          if (postCrashType == FileSystemEntityType.link) {
-            try {
-              if (pluginSymlink.targetSync() == packagePath) {
-                // Concurrently created by another parallel target build, and points to the correct target.
-                continue;
-              }
-            } on FileSystemException catch (_) {}
+        try {
+          pluginSymlink.createSync(packagePath);
+        } on FileSystemException catch (e) {
+          if (e.osError?.errorCode == 17) {
+            // OS Error: File exists, errno = 17
+            final FileSystemEntityType postCrashType = _fileSystem.typeSync(
+              pluginSymlink.path,
+              followLinks: false,
+            );
+            if (postCrashType == FileSystemEntityType.link) {
+              try {
+                if (pluginSymlink.targetSync() == packagePath) {
+                  // Concurrently created by another parallel target build, and points to the correct target.
+                  skipCreation = true;
+                }
+              } on FileSystemException catch (_) {}
+            }
+          }
+          if (!skipCreation) {
+            rethrow;
           }
         }
-        rethrow;
       }
       final String packageRelativePath = _fileSystem.path.relative(
         pluginSymlink.path,

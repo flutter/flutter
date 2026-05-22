@@ -368,6 +368,7 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
 
   @override
   Future<bool> exists() async {
+    // ignore: avoid_slow_async_io
     return _run<bool>(() => delegate.exists(), platform: _platform);
   }
 
@@ -421,6 +422,7 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
       platform: _platform,
       failureMessage: 'Flutter failed to delete file at "${delegate.path}"',
       posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
+      ignoreErrorCodes: const <int>[2, 3], // enoent, kFileNotFound, kPathNotFound
     );
   }
 
@@ -431,11 +433,13 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
       platform: _platform,
       failureMessage: 'Flutter failed to delete file at "${delegate.path}"',
       posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
+      ignoreErrorCodes: const <int>[2, 3],
     );
   }
 
   @override
   Future<FileStat> stat() async {
+    // ignore: avoid_slow_async_io
     return _run<FileStat>(() => delegate.stat(), platform: _platform);
   }
 
@@ -465,6 +469,7 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
   @override
   Future<DateTime> lastModified() async {
     return _run<DateTime>(
+      // ignore: avoid_slow_async_io
       () => delegate.lastModified(),
       platform: _platform,
       failureMessage: 'Flutter failed to retrieve last modified time of file at "${delegate.path}"',
@@ -668,6 +673,7 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       platform: _platform,
       failureMessage: 'Flutter failed to delete a directory at "${delegate.path}"',
       posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.path),
+      ignoreErrorCodes: const <int>[2, 3],
     );
   }
 
@@ -678,6 +684,7 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       platform: _platform,
       failureMessage: 'Flutter failed to delete a directory at "${delegate.path}"',
       posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.path),
+      ignoreErrorCodes: const <int>[2, 3],
     );
   }
 
@@ -693,6 +700,7 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
 
   @override
   Future<bool> exists() async {
+    // ignore: avoid_slow_async_io
     return _run<bool>(() => delegate.exists(), platform: _platform);
   }
 
@@ -718,6 +726,7 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
 
   @override
   Future<FileStat> stat() async {
+    // ignore: avoid_slow_async_io
     return _run<FileStat>(() => delegate.stat(), platform: _platform);
   }
 
@@ -819,6 +828,7 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
 
   @override
   Future<bool> exists() async {
+    // ignore: avoid_slow_async_io
     return _run<bool>(() => delegate.exists(), platform: _platform);
   }
 
@@ -905,6 +915,7 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
       () async => fileSystem.link((await delegate.delete(recursive: recursive)).path),
       platform: _platform,
       failureMessage: 'Flutter failed to delete a link at "${delegate.path}"',
+      ignoreErrorCodes: const <int>[2, 3],
     );
   }
 
@@ -914,11 +925,13 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
       () => delegate.deleteSync(recursive: recursive),
       platform: _platform,
       failureMessage: 'Flutter failed to delete a link at "${delegate.path}"',
+      ignoreErrorCodes: const <int>[2, 3],
     );
   }
 
   @override
   Future<FileStat> stat() async {
+    // ignore: avoid_slow_async_io
     return _run<FileStat>(() => delegate.stat(), platform: _platform);
   }
 
@@ -951,6 +964,7 @@ Future<T> _run<T>(
   required Platform platform,
   String? failureMessage,
   String? posixPermissionSuggestion,
+  List<int> ignoreErrorCodes = const <int>[],
 }) async {
   var attempt = 0;
   while (true) {
@@ -963,6 +977,9 @@ Future<T> _run<T>(
       rethrow;
     } on FileSystemException catch (e) {
       final int errorCode = e.osError?.errorCode ?? 0;
+      if (ignoreErrorCodes.contains(errorCode)) {
+        rethrow;
+      }
       if (platform.isWindows &&
           _isWindowsTransientLock(errorCode) &&
           attempt < windowsRetryBackoffs.length) {
@@ -979,6 +996,9 @@ Future<T> _run<T>(
       rethrow;
     } on io.ProcessException catch (e) {
       final int errorCode = e.errorCode;
+      if (ignoreErrorCodes.contains(errorCode)) {
+        rethrow;
+      }
       if (platform.isWindows &&
           _isWindowsTransientLock(errorCode) &&
           attempt < windowsRetryBackoffs.length) {
@@ -1005,6 +1025,7 @@ T _runSync<T>(
   required Platform platform,
   String? failureMessage,
   String? posixPermissionSuggestion,
+  List<int> ignoreErrorCodes = const <int>[],
 }) {
   var attempt = 0;
   while (true) {
@@ -1017,6 +1038,9 @@ T _runSync<T>(
       rethrow;
     } on FileSystemException catch (e) {
       final int errorCode = e.osError?.errorCode ?? 0;
+      if (ignoreErrorCodes.contains(errorCode)) {
+        rethrow;
+      }
       if (platform.isWindows &&
           _isWindowsTransientLock(errorCode) &&
           attempt < windowsRetryBackoffs.length) {
@@ -1033,6 +1057,9 @@ T _runSync<T>(
       rethrow;
     } on io.ProcessException catch (e) {
       final int errorCode = e.errorCode;
+      if (ignoreErrorCodes.contains(errorCode)) {
+        rethrow;
+      }
       if (platform.isWindows &&
           _isWindowsTransientLock(errorCode) &&
           attempt < windowsRetryBackoffs.length) {
