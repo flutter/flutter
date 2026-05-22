@@ -1543,7 +1543,8 @@ Please ensure that the SDK and/or project is installed in a location that has re
         FileSystemOp.exists,
         const FileSystemException('', '', OSError('', 13)), // eacces
       );
-      expect(() async => await file.exists(), throwsToolExit());
+      // ignore: avoid_slow_async_io
+      expect(() => file.exists(), throwsToolExit());
     });
 
     testWithoutContext(
@@ -1555,7 +1556,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
           FileSystemOp.read,
           const FileSystemException('', '', OSError('', 13)), // eacces
         );
-        expect(() async => await file.readAsString(), throwsToolExit());
+        expect(() => file.readAsString(), throwsToolExit());
       },
     );
   });
@@ -1639,7 +1640,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
 
     testWithoutContext('recovers from transient lock during retry loop (sync)', () {
       attemptsLeft = 3; // Fails 3 times, succeeds on 4th (attempt index 3)
-      final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test(
+      final memoryFileSystem = MemoryFileSystem.test(
         opHandle: (String path, FileSystemOp op) {
           if (path == '/file' && op == FileSystemOp.write) {
             if (attemptsLeft > 0) {
@@ -1664,7 +1665,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
 
     testWithoutContext('fails after 5 transient locks and throws ToolExit (sync)', () {
       attemptsLeft = 6; // Fails 6 times
-      final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test(
+      final memoryFileSystem = MemoryFileSystem.test(
         opHandle: (String path, FileSystemOp op) {
           if (path == '/file' && op == FileSystemOp.write) {
             if (attemptsLeft > 0) {
@@ -1689,7 +1690,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
 
     testWithoutContext('recovers from transient lock during retry loop (async)', () async {
       attemptsLeft = 3; // Fails 3 times, succeeds on 4th (attempt index 3)
-      final MemoryFileSystem memoryFileSystem = MemoryFileSystem.test(
+      final memoryFileSystem = MemoryFileSystem.test(
         opHandle: (String path, FileSystemOp op) {
           if (path == '/file' && op == FileSystemOp.write) {
             if (attemptsLeft > 0) {
