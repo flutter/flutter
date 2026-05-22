@@ -817,119 +817,111 @@ class ResidentWebRunner extends ResidentRunner {
     if (supportsServiceProtocol) {
       assert(connectDebug != null);
       unawaited(
-        connectDebug!
-            .then((connectionResult) async {
-              _connectionResult = connectionResult;
-              final DebugConnection debugConnection = connectionResult!.debugConnection!;
-              unawaited(debugConnection.onDone.whenComplete(_cleanupAndExit));
+        connectDebug!.then((connectionResult) async {
+          _connectionResult = connectionResult;
+          final DebugConnection debugConnection = connectionResult!.debugConnection!;
+          unawaited(debugConnection.onDone.whenComplete(_cleanupAndExit));
 
-              void onLogEvent(vmservice.Event event) {
-                final String message = processVmServiceMessage(event);
-                _logger.printStatus(message);
-              }
+          void onLogEvent(vmservice.Event event) {
+            final String message = processVmServiceMessage(event);
+            _logger.printStatus(message);
+          }
 
-              // This flag is needed to manage breakpoints properly.
-              if (debuggingOptions.startPaused && debuggingOptions.debuggingEnabled) {
-                try {
-                  final vmservice.Response result = await _vmService.service.setFlag(
-                    'pause_isolates_on_start',
-                    'true',
-                  );
-                  if (result is! vmservice.Success) {
-                    _logger.printError('setFlag failure: $result');
-                  }
-                } on Exception catch (e) {
-                  _logger.printError(
-                    'Failed to set pause_isolates_on_start=true, proceeding. '
-                    'Error: $e',
-                  );
-                }
-              }
-
-              _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);
-              _stdErrSub = _vmService.service.onStderrEvent.listen(onLogEvent);
-              _serviceSub = _vmService.service.onServiceEvent.listen(_onServiceEvent);
-              try {
-                await _vmService.service.streamListen(vmservice.EventStreams.kStdout);
-              } on vmservice.RPCError {
-                // It is safe to ignore this error because we expect an error to be
-                // thrown if we're already subscribed.
-              }
-              try {
-                await _vmService.service.streamListen(vmservice.EventStreams.kStderr);
-              } on vmservice.RPCError {
-                // It is safe to ignore this error because we expect an error to be
-                // thrown if we're already subscribed.
-              }
-              try {
-                await _vmService.service.streamListen(vmservice.EventStreams.kService);
-              } on vmservice.RPCError {
-                // It is safe to ignore this error because we expect an error to be
-                // thrown if we're already subscribed.
-              }
-              try {
-                await _vmService.service.streamListen(vmservice.EventStreams.kIsolate);
-              } on vmservice.RPCError {
-                // It is safe to ignore this error because we expect an error to be
-                // thrown if we're not already subscribed.
-              }
-              final Device device = flutterDevice!.device!;
-              await setUpVmService(
-                reloadSources: (String isolateId, {bool? force, bool? pause}) async {
-                  await restart(pause: pause);
-                },
-                device: device,
-                flutterProject: flutterProject,
-                printStructuredErrorLogMethod: printStructuredErrorLog,
-                vmService: _vmService.service,
+          // This flag is needed to manage breakpoints properly.
+          if (debuggingOptions.startPaused && debuggingOptions.debuggingEnabled) {
+            try {
+              final vmservice.Response result = await _vmService.service.setFlag(
+                'pause_isolates_on_start',
+                'true',
               );
-
-              final Uri websocketUri = Uri.parse(debugConnection.uri);
-              flutterDevice!.vmService = _vmService;
-              if (debugConnection.devToolsUri != null) {
-                (flutterDevice!.device! as WebDevice).devToolsUri = Uri.parse(
-                  debugConnection.devToolsUri!,
-                );
+              if (result is! vmservice.Success) {
+                _logger.printError('setFlag failure: $result');
               }
-
-              // Run main immediately if the app is not started paused or if there
-              // is no debugger attached. Otherwise, runMain when a resume event
-              // is received.
-              if (!debuggingOptions.startPaused || !supportsServiceProtocol) {
-                _connectionResult!.appConnection!.runMain();
-              } else {
-                late StreamSubscription<void> resumeSub;
-                resumeSub = _vmService.service.onDebugEvent.listen((vmservice.Event event) {
-                  if (event.type == vmservice.EventKind.kResume) {
-                    _connectionResult!.appConnection!.runMain();
-                    resumeSub.cancel();
-                  }
-                });
-              }
-
-              if (debuggingOptions.vmserviceOutFile != null) {
-                _fileSystem.file(debuggingOptions.vmserviceOutFile)
-                  ..createSync(recursive: true)
-                  ..writeAsStringSync(websocketUri.toString());
-              }
-              // TODO(bkonyi): consider removing this log message and using only the standard VM
-              // service message instead.
-              _logger.printStatus('Debug service listening on $websocketUri');
-              final connectionInfo = DebugConnectionInfo(
-                wsUri: websocketUri,
-                devToolsUri: debugConnection.devToolsUri?.toUri(),
-                dtdUri: debugConnection.dtdUri?.toUri(),
-              );
-              printDebuggerList(connectionInfo: connectionInfo);
-              connectionInfoCompleter?.complete(connectionInfo);
-            })
-            .catchError((Object error, StackTrace stackTrace) {
+            } on Exception catch (e) {
               _logger.printError(
-                'Failed to establish connection with the web debug service: $error',
+                'Failed to set pause_isolates_on_start=true, proceeding. '
+                'Error: $e',
               );
-              appFailedToStart();
-              throwToolExit('Failed to connect to the web debug service.');
-            }),
+            }
+          }
+
+          _stdOutSub = _vmService.service.onStdoutEvent.listen(onLogEvent);
+          _stdErrSub = _vmService.service.onStderrEvent.listen(onLogEvent);
+          _serviceSub = _vmService.service.onServiceEvent.listen(_onServiceEvent);
+          try {
+            await _vmService.service.streamListen(vmservice.EventStreams.kStdout);
+          } on vmservice.RPCError {
+            // It is safe to ignore this error because we expect an error to be
+            // thrown if we're already subscribed.
+          }
+          try {
+            await _vmService.service.streamListen(vmservice.EventStreams.kStderr);
+          } on vmservice.RPCError {
+            // It is safe to ignore this error because we expect an error to be
+            // thrown if we're already subscribed.
+          }
+          try {
+            await _vmService.service.streamListen(vmservice.EventStreams.kService);
+          } on vmservice.RPCError {
+            // It is safe to ignore this error because we expect an error to be
+            // thrown if we're already subscribed.
+          }
+          try {
+            await _vmService.service.streamListen(vmservice.EventStreams.kIsolate);
+          } on vmservice.RPCError {
+            // It is safe to ignore this error because we expect an error to be
+            // thrown if we're not already subscribed.
+          }
+          final Device device = flutterDevice!.device!;
+          await setUpVmService(
+            reloadSources: (String isolateId, {bool? force, bool? pause}) async {
+              await restart(pause: pause);
+            },
+            device: device,
+            flutterProject: flutterProject,
+            printStructuredErrorLogMethod: printStructuredErrorLog,
+            vmService: _vmService.service,
+          );
+
+          final Uri websocketUri = Uri.parse(debugConnection.uri);
+          flutterDevice!.vmService = _vmService;
+          if (debugConnection.devToolsUri != null) {
+            (flutterDevice!.device! as WebDevice).devToolsUri = Uri.parse(
+              debugConnection.devToolsUri!,
+            );
+          }
+
+          // Run main immediately if the app is not started paused or if there
+          // is no debugger attached. Otherwise, runMain when a resume event
+          // is received.
+          if (!debuggingOptions.startPaused || !supportsServiceProtocol) {
+            _connectionResult!.appConnection!.runMain();
+          } else {
+            late StreamSubscription<void> resumeSub;
+            resumeSub = _vmService.service.onDebugEvent.listen((vmservice.Event event) {
+              if (event.type == vmservice.EventKind.kResume) {
+                _connectionResult!.appConnection!.runMain();
+                resumeSub.cancel();
+              }
+            });
+          }
+
+          if (debuggingOptions.vmserviceOutFile != null) {
+            _fileSystem.file(debuggingOptions.vmserviceOutFile)
+              ..createSync(recursive: true)
+              ..writeAsStringSync(websocketUri.toString());
+          }
+          // TODO(bkonyi): consider removing this log message and using only the standard VM
+          // service message instead.
+          _logger.printStatus('Debug service listening on $websocketUri');
+          final connectionInfo = DebugConnectionInfo(
+            wsUri: websocketUri,
+            devToolsUri: debugConnection.devToolsUri?.toUri(),
+            dtdUri: debugConnection.dtdUri?.toUri(),
+          );
+          printDebuggerList(connectionInfo: connectionInfo);
+          connectionInfoCompleter?.complete(connectionInfo);
+        }),
       );
     } else {
       connectionInfoCompleter?.complete(DebugConnectionInfo());
