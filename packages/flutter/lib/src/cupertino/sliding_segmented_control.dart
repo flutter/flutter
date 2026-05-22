@@ -342,7 +342,9 @@ class _SegmentSeparatorState extends State<_SegmentSeparator>
 ///
 /// The default [backgroundColor], [CupertinoColors.tertiarySystemFill], is
 /// intentionally translucent (alpha 0.12 in light mode) to match the native
-/// `UISegmentedControl`. As a result, content placed behind the segmented
+/// `UISegmentedControl`
+/// (<https://developer.apple.com/documentation/uikit/uisegmentedcontrol>).
+/// As a result, content placed behind the segmented
 /// control — for example, a [Stack] child beneath it — shows through the
 /// unselected segments. To get an opaque background, pass an opaque [Color]
 /// to [backgroundColor].
@@ -470,7 +472,9 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   ///
   /// The default value is [CupertinoColors.tertiarySystemFill], which is
   /// translucent (alpha 0.12 in light mode) to match the native
-  /// `UISegmentedControl`. Content placed behind the segmented control is
+  /// `UISegmentedControl`
+  /// (<https://developer.apple.com/documentation/uikit/uisegmentedcontrol>).
+  /// Content placed behind the segmented control is
   /// therefore visible through the unselected segments unless an opaque
   /// [Color] is supplied here.
   final Color backgroundColor;
