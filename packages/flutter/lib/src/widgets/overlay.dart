@@ -2131,14 +2131,13 @@ class _OverlayPortalState extends State<OverlayPortal> {
 // The occupant (a `RenderBox`) will be painted above the associated
 // [OverlayEntry], but below the [OverlayEntry] above that [OverlayEntry].
 //
-// Additionally, `_activate` and `_deactivate` are called when the overlay
-// child's `_OverlayPortalElement` activates/deactivates (for instance, during
-// global key reparenting).
-// `_OverlayPortalElement` removes its overlay child's render object from the
-// target `_RenderTheater` when it deactivates and puts it back on `activated`.
-// These 2 methods can be used to "hide" a child in the child model without
-// removing it, when the child is expensive/difficult to re-insert at the
-// correct location on `activated`.
+// Additionally, `_reattachFromLayoutSurrogate` and `_detachFromLayoutSurrogate`
+// are called when the overlay child's `_OverlayPortalElement` activates/deactivates
+// (for instance, during global key reparenting). `_OverlayPortalElement` removes
+// its overlay child's render object from the target `_RenderTheater` when it
+// deactivates and puts it back on `activated`. These 2 methods can be used to
+// "hide" a child in the child model without removing it, when the child is
+// expensive/difficult to re-insert at the correct location on `activated`.
 //
 // ### Equality
 //
@@ -2211,7 +2210,8 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
     }
   }
 
-  /// Undoes _deactivate by adding the given `child` back to the `_theater`.
+  /// Undoes _detachFromLayoutSurrogate by adding the given `child` back to the
+  /// `_theater`.
   ///
   /// This is called when the OverlayPortal is activated.
   /// This call is allowed even when this location is invalidated.
@@ -2243,14 +2243,15 @@ final class _OverlayEntryLocation extends LinkedListEntry<_OverlayEntryLocation>
   //
   // Generally, `assert(_debugIsLocationValid())` should be used to prevent
   // invalid accesses to an invalid `_OverlayEntryLocation` object. Exceptions
-  // to this rule are _removeChild, _deactivate, which will be called when the
-  // OverlayPortal is being removed from the widget tree and may use the
-  // location information to perform cleanup tasks.
+  // to this rule are _removeChild, _detachFromLayoutSurrogate, which will be
+  // called when the OverlayPortal is being removed from the widget tree and
+  // may use the location information to perform cleanup tasks.
   //
-  // Another exception is the _activate method which is called shortly after
-  // the `OverlayPortal` activates because it's possible that the widget subtree
-  // hasn't been rebuilt at that point, so we'll have to re-attach the overlay
-  // child render object using a potentially outdated location.
+  // Another exception is the _reattachFromLayoutSurrogate method which is
+  // called shortly after the `OverlayPortal` activates because it's possible
+  // that the widget subtree hasn't been rebuilt at that point, so we'll have
+  // to re-attach the overlay child render object using a potentially outdated
+  // location.
   bool _debugIsLocationValid() {
     if (_debugMarkLocationInvalidStackTrace == null) {
       return true;
@@ -2439,7 +2440,7 @@ class _OverlayPortalElement extends RenderObjectElement {
   void insertRenderObjectChild(RenderBox child, _OverlayEntryLocation? slot) {
     assert(child.parent == null, "$child's parent is not null: ${child.parent}");
     if (slot != null) {
-      // _deferredLayoutChild is assigned in createRenderObject.
+      // _deferredLayoutChild is assigned in _DeferredLayout.createRenderObject.
       assert(renderObject._deferredLayoutChild == child);
       slot._addChild(child as _RenderDeferredLayoutBox);
       renderObject.markNeedsSemanticsUpdate();
@@ -2705,8 +2706,8 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
 //
 // This RenderObject also conditionally attaches and detaches the associated
 // [_RenderDeferredLayoutBox] when itself attaches and detaches from its
-// [PipelineOwner] to make sure when this RenderObject is detached the
-// associated [_RenderDeferredLayoutBox] is also attached.
+// [PipelineOwner]. This guarantees that the deferred box's attached status is
+// always kept in sync with both the surrogate and its parent theater.
 class _RenderLayoutSurrogateProxyBox extends RenderProxyBox {
   _RenderLayoutSurrogateProxyBox(this.overlayLocation);
   // This variable is set as soon as the _DeferredLayout widget creates it, and
