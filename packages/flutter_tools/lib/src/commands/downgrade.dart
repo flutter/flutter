@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 3.12
+
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -42,21 +44,15 @@ String downgradePositionalArgumentErrorMessage(List<String> args) {
 /// the command would fail since there was no previously recorded stable version.
 class DowngradeCommand extends FlutterCommand {
   DowngradeCommand({
-    required Git git,
+    required this._git,
     bool verboseHelp = false,
-    PersistentToolState? persistentToolState,
-    required Logger logger,
-    FlutterVersion? flutterVersion,
-    Terminal? terminal,
-    Stdio? stdio,
-    FileSystem? fileSystem,
-  }) : _terminal = terminal,
-       _flutterVersion = flutterVersion,
-       _persistentToolState = persistentToolState,
-       _stdio = stdio,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _git = git {
+    this._persistentToolState,
+    required this._logger,
+    this._flutterVersion,
+    this._terminal,
+    this._stdio,
+    this._fileSystem,
+  }) {
     argParser.addOption(
       'working-directory',
       hide: !verboseHelp,

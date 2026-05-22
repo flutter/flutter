@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 3.12
+
 import '../base/common.dart';
 import '../base/process.dart';
 import '../cache.dart';
@@ -14,7 +16,7 @@ import '../version.dart';
 import 'upgrade.dart' show precacheArtifacts;
 
 class ChannelCommand extends FlutterCommand {
-  ChannelCommand({required Git git, bool verboseHelp = false}) : _git = git {
+  ChannelCommand({required this._git, bool verboseHelp = false}) {
     argParser.addFlag(
       'all',
       abbr: 'a',

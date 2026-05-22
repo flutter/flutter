@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 3.12
+
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
@@ -125,12 +127,11 @@ abstract class FlutterVersion {
   }
 
   FlutterVersion._({
-    required SystemClock clock,
-    required Git git,
+    required this._clock,
+    required this._git,
     required this.flutterRoot,
     required this.fs,
-  }) : _clock = clock,
-       _git = git;
+  });
 
   factory FlutterVersion.fromRevision({
     SystemClock clock = const SystemClock(),

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// @dart = 3.12
+
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
@@ -24,9 +26,11 @@ import 'channel.dart';
 const _flutterInstallDocs = 'https://flutter.dev/setup';
 
 class UpgradeCommand extends FlutterCommand {
-  UpgradeCommand({required bool verboseHelp, required Git git, UpgradeCommandRunner? commandRunner})
-    : _git = git,
-      _commandRunner = commandRunner ?? UpgradeCommandRunner(git: git) {
+  UpgradeCommand({
+    required bool verboseHelp,
+    required this._git,
+    UpgradeCommandRunner? commandRunner,
+  }) : _commandRunner = commandRunner ?? UpgradeCommandRunner(git: _git) {
     argParser
       ..addFlag(
         'force',
@@ -139,7 +143,7 @@ final class _SecondHalf implements UpgradePhase {
 
 @visibleForTesting
 class UpgradeCommandRunner {
-  UpgradeCommandRunner({required Git git}) : _git = git;
+  UpgradeCommandRunner({required this._git});
 
   final Git _git;
   String? workingDirectory; // set in runCommand() above
