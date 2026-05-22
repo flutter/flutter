@@ -27,13 +27,9 @@ VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners)
     // Align the start time to the C++ steady_clock used by fml::TimePoint.
     fml::TimePoint start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
 
-    // Guard against division-by-zero when duration is 0.0, and avoid
-    // frame timing inconsistencies due to floating point error by
-    // rounding to nearest Hz value.
-    CFTimeInterval duration = targetTime - startTime;
-    if (duration <= 0.0) {
-      duration = 1.0 / max_refresh_rate_;  // Synthesize safe default frame interval
-    }
+    // Snap to the nearest whole Hz value to avoid floating point errors.
+    CFTimeInterval duration =
+        VsyncWaiterIOS::SnapDuration(targetTime - startTime, max_refresh_rate_);
 
     // Align target time to the C++ steady_clock used by fml::TimePoint.
     fml::TimePoint target_time = start_time + fml::TimeDelta::FromSecondsF(duration);
@@ -67,6 +63,15 @@ void VsyncWaiterIOS::AwaitVSync() {
 // |VariableRefreshRateReporter|
 double VsyncWaiterIOS::GetRefreshRate() const {
   return client_.refreshRate;
+}
+
+CFTimeInterval VsyncWaiterIOS::SnapDuration(CFTimeInterval duration, double max_refresh_rate) {
+  if (duration > 0.0) {
+    double roundedRefreshRate = round(1.0 / duration);
+    return 1.0 / roundedRefreshRate;
+  }
+  double fallbackRefreshRate = max_refresh_rate > 0.0 ? max_refresh_rate : 60.0;
+  return 1.0 / fallbackRefreshRate;
 }
 
 }  // namespace flutter
