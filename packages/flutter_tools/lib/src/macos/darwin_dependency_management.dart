@@ -70,7 +70,7 @@ class DarwinDependencyManagement {
       await _swiftPackageManager.generatePluginsSwiftPackage(_plugins, platform, xcodeProject);
 
       // Start the SwiftPM dependency resolution in the background.
-      await _xcodeProjectInterpreter?.prefetchSwiftPackages(
+      await _xcodeProjectInterpreter?.prefetchSwiftPackagesForProject(
         xcodeProject,
         waitForCompletion: false,
         buildDirectory: _fileSystem.directory(
