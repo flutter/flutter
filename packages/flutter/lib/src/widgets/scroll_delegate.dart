@@ -746,7 +746,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   }
 
   @override
-  int? findIndexByKey(Object key) {
+  int? findIndexByKey(Key key) {
     final Object childKey;
     if (key is _SaltedValueKey) {
       final _SaltedValueKey saltedValueKey = key;

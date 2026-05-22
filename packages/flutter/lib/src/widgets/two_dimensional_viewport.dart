@@ -263,7 +263,7 @@ class _TwoDimensionalViewportElement extends RenderObjectElement
 
   // Contains all children, including those that are keyed.
   Map<ChildVicinity, Element> _vicinityToChild = <ChildVicinity, Element>{};
-  Map<Object, Element> _keyToChild = <Key, Element>{};
+  Map<Object, Element> _keyToChild = <Object, Element>{};
   // Used between _startLayout() & _endLayout() to compute the new values for
   // _vicinityToChild and _keyToChild.
   Map<ChildVicinity, Element>? _newVicinityToChild;
