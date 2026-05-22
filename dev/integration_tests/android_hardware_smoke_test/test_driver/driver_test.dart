@@ -1,17 +1,21 @@
-// ignore_for_file: unused_import
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:android_driver_extensions/native_driver.dart';
 import 'package:android_driver_extensions/skia_gold.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
+import 'dart:io' as io;
+
+/// Whether the current environment is LUCI.
+bool get isLuci => io.Platform.environment['LUCI_CI'] == 'True';
 
 void main() async {
   late final FlutterDriver flutterDriver;
 
   setUpAll(() async {
-    // If running on CI, this will seamlessly initialize Skia Gold comparisons
-    // await enableSkiaGoldComparator(namePrefix: 'android_hardware_smoke_test');
+    if (isLuci) {
+      await enableSkiaGoldComparator(namePrefix: 'android_hardware_smoke_test');
+    }
     flutterDriver = await FlutterDriver.connect();
   });
 
@@ -20,7 +24,7 @@ void main() async {
   });
 
   Future<void> templateTest(String testName) async {
-    // 1. Command the app to render the test and return its screenshot bytes
+    // Ask the app to render the test and return the rendered image bytes
     final String response = await flutterDriver.requestData(
       json.encode(<String, dynamic>{
         'testName': testName,
@@ -28,15 +32,15 @@ void main() async {
       }),
     );
 
-    // 2. Assert on status message
-    final dynamic reply = json.decode(response);
+    // Expect a successful reply
+    final Map<String, Object?> reply =
+        (json.decode(response) as Map<Object?, Object?>)
+            .cast<String, Object?>();
     expect(reply['message'], equals('Rendered $testName'));
 
-    // 3. Extract and decode the base64 screenshot bytes
-    final String imageBase64 = reply['imageBytes'] as String;
+    // Compare the bytes to a golden file on the host filesystem
+    final String imageBase64 = reply['imageBytes']! as String;
     final Uint8List imageBytes = base64.decode(imageBase64);
-
-    // 4. Compare on the host filesystem relative to integration_test/goldens/
     await expectLater(imageBytes, matchesGoldenFile('goldens/$testName.png'));
   }
 

@@ -1,4 +1,3 @@
-// ignore_for_file: avoid_print, deprecated_member_use
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart';
@@ -10,20 +9,19 @@ void main() {
       'com.example.android_hardware_smoke_test/test_channel';
 
   enableFlutterDriverExtension(
+    // Thin handler to bridge driver's requestData and MainApp's test_channel.
     handler: (String? request) async {
-      print("integration_test_wrapper: received request: $request");
       if (request == null) {
         return json.encode(<String, dynamic>{
           'message': "Error: request was null",
         });
       }
 
-      // Decode JSON payload containing testName & performAppSideGoldenCompare
-      final dynamic decoded = json.decode(request);
-      final ByteData message = const JSONMessageCodec().encodeMessage(decoded)!;
+      // The request is encoded JSON, but there is no need to decode it here.
+      final ByteData message = const StringCodec().encodeMessage(request)!;
       final Completer<String> completer = Completer<String>();
 
-      // Simulates MainActivity platform message internally targeting the app's test_channel
+      // ignore: deprecated_member_use
       ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         channelName,
         message,
