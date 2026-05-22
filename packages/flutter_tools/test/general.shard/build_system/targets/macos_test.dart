@@ -6,13 +6,16 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -936,6 +939,140 @@ void main() {
       },
     );
   });
+
+  group('MacOSSwiftPackageMinimumDeployment', () {
+    late Environment environment;
+    late MemoryFileSystem fileSystem;
+    late FakeProcessManager processManager;
+    late BufferLogger logger;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      processManager = FakeProcessManager.empty();
+      logger = BufferLogger.test();
+      environment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{},
+        inputs: <String, String>{},
+        processManager: processManager,
+        artifacts: Artifacts.test(),
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+    });
+
+    testWithoutContext('canSkip matches XcodeBuildScript value', () async {
+      const target = MacOSSwiftPackageMinimumDeployment();
+
+      environment.defines[kXcodeBuildScript] = kXcodeBuildScriptValuePrepare;
+      expect(await target.canSkip(environment), isFalse);
+
+      environment.defines[kXcodeBuildScript] = 'other';
+      expect(await target.canSkip(environment), isTrue);
+    });
+
+    testUsingContext('build does nothing if usesSwiftPackageManager is false', () async {
+      final Directory projectDir = fileSystem.directory('/project')..createSync();
+      environment = Environment.test(
+        fileSystem.currentDirectory,
+        projectDir: projectDir,
+        defines: <String, String>{},
+        inputs: <String, String>{},
+        processManager: processManager,
+        artifacts: Artifacts.test(),
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+
+      const target = MacOSSwiftPackageMinimumDeployment();
+      await target.build(environment);
+
+      expect(logger.errorText, isEmpty);
+    });
+
+    testUsingContext(
+      'build catching ToolExit when manifest does not exist',
+      () async {
+        final Directory projectDir = fileSystem.directory('/project')..createSync();
+        projectDir
+            .childDirectory('macos')
+            .childDirectory('Runner.xcodeproj')
+            .createSync(recursive: true);
+        environment = Environment.test(
+          fileSystem.currentDirectory,
+          projectDir: projectDir,
+          defines: <String, String>{kDeploymentTarget: '11.0'},
+          inputs: <String, String>{},
+          processManager: processManager,
+          artifacts: Artifacts.test(),
+          logger: logger,
+          fileSystem: fileSystem,
+        );
+
+        const target = MacOSSwiftPackageMinimumDeployment();
+        await target.build(environment);
+
+        final fakeStdio = globals.stdio as FakeStdio;
+        expect(fakeStdio.buffer.toString(), contains('does not exist.'));
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        Xcode: () => FakeXcode15(),
+        Stdio: () => FakeStdio(),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'build successfully updates deployment target',
+      () async {
+        final Directory projectDir = fileSystem.directory('/project')..createSync();
+        projectDir
+            .childDirectory('macos')
+            .childDirectory('Runner.xcodeproj')
+            .createSync(recursive: true);
+
+        final File manifest = projectDir
+            .childDirectory('macos')
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childDirectory('Packages')
+            .childDirectory('FlutterGeneratedPluginSwiftPackage')
+            .childFile('Package.swift');
+        manifest.createSync(recursive: true);
+        manifest.writeAsStringSync('.macOS("10.15")');
+
+        environment = Environment.test(
+          fileSystem.currentDirectory,
+          projectDir: projectDir,
+          defines: <String, String>{kDeploymentTarget: '11.0'},
+          inputs: <String, String>{},
+          processManager: processManager,
+          artifacts: Artifacts.test(),
+          logger: logger,
+          fileSystem: fileSystem,
+        );
+
+        const target = MacOSSwiftPackageMinimumDeployment();
+        await target.build(environment);
+
+        final fakeStdio = globals.stdio as FakeStdio;
+        expect(
+          fakeStdio.buffer.toString(),
+          contains('minimum supported platform updated to 11.0, but Xcode cache is out of date.'),
+        );
+        expect(manifest.readAsStringSync(), contains('.macOS("11.0")'));
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        Xcode: () => FakeXcode15(),
+        Stdio: () => FakeStdio(),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+  });
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
@@ -961,4 +1098,18 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   }) async {
     return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
   }
+}
+
+class FakeStdio extends Fake implements Stdio {
+  final buffer = StringBuffer();
+
+  @override
+  void stderrWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {
+    buffer.writeln(message);
+  }
+}
+
+class FakeXcode15 extends Fake implements Xcode {
+  @override
+  Version get currentVersion => Version(15, 0, 0);
 }

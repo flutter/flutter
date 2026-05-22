@@ -562,6 +562,152 @@ let package = Package(
         });
       });
     }
+
+    group('updateMinimumDeployment', () {
+      for (final platform in supportedPlatforms) {
+        group('for ${platform.name}', () {
+          testWithoutContext('throws ToolExit if manifest does not exist', () {
+            final fs = MemoryFileSystem();
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+            expect(
+              () => SwiftPackageManager.updateMinimumDeployment(
+                project: project,
+                platform: platform,
+                deploymentTarget: '14.0',
+              ),
+              throwsToolExit(
+                message:
+                    'does not exist.\n\nPlease run "flutter build ${platform.name} --config-only" '
+                    "to regenerate the project's configuration files.",
+              ),
+            );
+          });
+
+          testWithoutContext(
+            'throws ToolExit if manifest platform version is invalid or not found',
+            () {
+              final fs = MemoryFileSystem();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+              project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
+              project.flutterPluginSwiftPackageManifest.writeAsStringSync('''
+// Invalid manifest format with no platform info
+''');
+
+              expect(
+                () => SwiftPackageManager.updateMinimumDeployment(
+                  project: project,
+                  platform: platform,
+                  deploymentTarget: '14.0',
+                ),
+                throwsToolExit(
+                  message:
+                      'Failed to parse platform from ${project.flutterPluginSwiftPackageManifest.path}.\n\n'
+                      'Please run "flutter build ${platform.name} --config-only" '
+                      "to regenerate the project's configuration files.",
+                ),
+              );
+            },
+          );
+
+          testWithoutContext('returns false if new deployment target is invalid', () {
+            final fs = MemoryFileSystem();
+            final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+            project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
+            final platformString = platform == FlutterDarwinPlatform.ios
+                ? '.iOS("13.0")'
+                : '.macOS("10.15")';
+            project.flutterPluginSwiftPackageManifest.writeAsStringSync('''
+    platforms: [
+        $platformString
+    ],
+''');
+
+            final bool changed = SwiftPackageManager.updateMinimumDeployment(
+              project: project,
+              platform: platform,
+              deploymentTarget: 'invalid_version',
+            );
+
+            expect(changed, isFalse);
+          });
+
+          testWithoutContext(
+            'returns false if new deployment target is less than or equal to current',
+            () {
+              final fs = MemoryFileSystem();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+              project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
+              final platformString = platform == FlutterDarwinPlatform.ios
+                  ? '.iOS("13.0")'
+                  : '.macOS("10.15")';
+              project.flutterPluginSwiftPackageManifest.writeAsStringSync('''
+    platforms: [
+        $platformString
+    ],
+''');
+
+              final currentVersion = platform == FlutterDarwinPlatform.ios ? '13.0' : '10.15';
+              final lowerVersion = platform == FlutterDarwinPlatform.ios ? '12.0' : '10.14';
+
+              // Equal version
+              expect(
+                SwiftPackageManager.updateMinimumDeployment(
+                  project: project,
+                  platform: platform,
+                  deploymentTarget: currentVersion,
+                ),
+                isFalse,
+              );
+
+              // Lower version
+              expect(
+                SwiftPackageManager.updateMinimumDeployment(
+                  project: project,
+                  platform: platform,
+                  deploymentTarget: lowerVersion,
+                ),
+                isFalse,
+              );
+            },
+          );
+
+          testWithoutContext(
+            'updates manifest and returns true if new deployment target is greater than current',
+            () {
+              final fs = MemoryFileSystem();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+              project.flutterPluginSwiftPackageManifest.createSync(recursive: true);
+              final platformString = platform == FlutterDarwinPlatform.ios
+                  ? '.iOS("13.0")'
+                  : '.macOS("10.15")';
+              project.flutterPluginSwiftPackageManifest.writeAsStringSync('''
+    platforms: [
+        $platformString
+    ],
+''');
+
+              final newVersion = platform == FlutterDarwinPlatform.ios ? '14.0' : '11.0';
+
+              final bool changed = SwiftPackageManager.updateMinimumDeployment(
+                project: project,
+                platform: platform,
+                deploymentTarget: newVersion,
+              );
+
+              expect(changed, isTrue);
+              final expectedPlatformString = platform == FlutterDarwinPlatform.ios
+                  ? '.iOS("14.0")'
+                  : '.macOS("11.0")';
+              expect(
+                project.flutterPluginSwiftPackageManifest.readAsStringSync(),
+                contains(expectedPlatformString),
+              );
+            },
+          );
+        });
+      }
+    });
   });
 }
 

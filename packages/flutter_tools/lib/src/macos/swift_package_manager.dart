@@ -362,9 +362,11 @@ class SwiftPackageManager {
   }
 
   /// If the project's IPHONEOS_DEPLOYMENT_TARGET/MACOSX_DEPLOYMENT_TARGET is
-  /// higher than the FlutterGeneratedPluginSwiftPackage's default
+  /// higher than the FlutterGeneratedPluginSwiftPackage's current
   /// SupportedPlatform, increase the SupportedPlatform to match the project's
   /// deployment target.
+  ///
+  /// Returns `true` if the deployment target was changed, `false` otherwise.
   ///
   /// This is done for the use case of a plugin requiring a higher iOS/macOS
   /// version than FlutterGeneratedPluginSwiftPackage.
@@ -377,23 +379,41 @@ class SwiftPackageManager {
   /// To still be able to use the plugin, the user can increase the Xcode
   /// project's iOS/macOS deployment target and this will then increase the
   /// deployment target for FlutterGeneratedPluginSwiftPackage.
-  static void updateMinimumDeployment({
+  static bool updateMinimumDeployment({
     required XcodeBasedProject project,
     required FlutterDarwinPlatform platform,
     required String deploymentTarget,
   }) {
-    final Version? projectDeploymentTargetVersion = Version.parse(deploymentTarget);
-    final SwiftPackageSupportedPlatform defaultPlatform = platform.supportedPackagePlatform;
-    final SwiftPackagePlatform packagePlatform = platform.swiftPackagePlatform;
-
-    if (projectDeploymentTargetVersion == null ||
-        projectDeploymentTargetVersion <= defaultPlatform.version ||
-        !project.flutterPluginSwiftPackageManifest.existsSync()) {
-      return;
+    final regenerateMessage =
+        'Please run "flutter build ${platform.name} --config-only" '
+        "to regenerate the project's configuration files.";
+    final String manifestPath = project.flutterPluginSwiftPackageManifest.path;
+    if (!project.flutterPluginSwiftPackageManifest.existsSync()) {
+      throwToolExit('$manifestPath does not exist.\n\n$regenerateMessage');
     }
 
     final String manifestContents = project.flutterPluginSwiftPackageManifest.readAsStringSync();
-    final String oldSupportedPlatform = defaultPlatform.format();
+    final Version? currentVersion = Version.parse(
+      RegExp(
+        '${platform.swiftPackagePlatform.displayName}\\("([\\d\\.]+)"\\)',
+      ).firstMatch(manifestContents)?.group(1),
+    );
+    if (currentVersion == null) {
+      throwToolExit('Failed to parse platform from $manifestPath.\n\n$regenerateMessage');
+    }
+
+    final Version? projectDeploymentTargetVersion = Version.parse(deploymentTarget);
+    final SwiftPackagePlatform packagePlatform = platform.swiftPackagePlatform;
+
+    if (projectDeploymentTargetVersion == null ||
+        projectDeploymentTargetVersion <= currentVersion) {
+      return false;
+    }
+
+    final String oldSupportedPlatform = SwiftPackageSupportedPlatform(
+      platform: packagePlatform,
+      version: currentVersion,
+    ).format();
     final String newSupportedPlatform = SwiftPackageSupportedPlatform(
       platform: packagePlatform,
       version: projectDeploymentTargetVersion,
@@ -402,5 +422,6 @@ class SwiftPackageManager {
     project.flutterPluginSwiftPackageManifest.writeAsStringSync(
       manifestContents.replaceFirst(oldSupportedPlatform, newSupportedPlatform),
     );
+    return true;
   }
 }

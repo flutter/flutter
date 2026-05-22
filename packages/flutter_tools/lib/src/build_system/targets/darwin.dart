@@ -5,10 +5,14 @@
 import 'package:meta/meta.dart';
 
 import '../../artifacts.dart';
+import '../../base/common.dart';
 import '../../base/io.dart';
 import '../../build_info.dart';
+import '../../convert.dart';
 import '../../darwin/darwin.dart';
 import '../../globals.dart' as globals show stdio;
+import '../../macos/swift_package_manager.dart';
+import '../../project.dart';
 import '../build_system.dart';
 
 abstract class UnpackDarwin extends Target {
@@ -120,6 +124,65 @@ abstract class UnpackDarwin extends Target {
         'lipo -info:\n'
         '$lipoInfo',
       );
+    }
+  }
+}
+
+abstract class DarwinSwiftPackageMinimumDeployment extends Target {
+  const DarwinSwiftPackageMinimumDeployment();
+
+  @visibleForOverriding
+  FlutterDarwinPlatform get darwinPlatform;
+
+  @override
+  List<Source> get inputs {
+    return <Source>[
+      const Source.pattern(
+        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/darwin.dart',
+      ),
+    ];
+  }
+
+  @override
+  List<Source> get outputs => [];
+
+  @override
+  List<Target> get dependencies => [];
+
+  @override
+  Future<bool> canSkip(Environment environment) async {
+    return environment.defines[kXcodeBuildScript] != kXcodeBuildScriptValuePrepare;
+  }
+
+  @override
+  Future<void> build(Environment environment) async {
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final XcodeBasedProject xcodeProject = darwinPlatform.xcodeProject(flutterProject);
+    if (xcodeProject.usesSwiftPackageManager) {
+      final String? deploymentTarget = environment.defines[kDeploymentTarget];
+      if (deploymentTarget != null) {
+        bool? changed;
+        try {
+          changed = SwiftPackageManager.updateMinimumDeployment(
+            platform: darwinPlatform,
+            project: xcodeProject,
+            deploymentTarget: deploymentTarget,
+          );
+        } on ToolExit catch (e) {
+          final String? errorMessage = e.message;
+          if (errorMessage != null && errorMessage.isNotEmpty) {
+            const LineSplitter().convert(errorMessage).forEach((line) => printXcodeError(line));
+          }
+        }
+        if (changed ?? false) {
+          printXcodeError(
+            'FlutterGeneratedPluginSwiftPackage minimum supported platform updated to $deploymentTarget, but Xcode cache is out of date.',
+          );
+          printXcodeError(
+            'Please reset the manfiest cache by selecting File > Packages > Resolve Package Versions',
+          );
+        }
+      }
     }
   }
 }

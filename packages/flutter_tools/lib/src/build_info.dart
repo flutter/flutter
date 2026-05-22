@@ -1159,6 +1159,11 @@ const kXcodeBuildScriptValueAddToAppBuild = 'build-add-to-app';
 /// Expects value of "true".
 const kBuildSwiftPackage = 'BuildSwiftPackage';
 
+/// The Darwin deployment target for a build.
+///
+/// This value will be set to the value of IPHONEOS_DEPLOYMENT_TARGET or MACOSX_DEPLOYMENT_TARGET.
+const kDeploymentTarget = 'DeploymentTarget';
+
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
 

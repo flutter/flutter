@@ -15,8 +15,10 @@ import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -1600,6 +1602,140 @@ flutter:
       },
     );
   });
+
+  group('IosSwiftPackageMinimumDeployment', () {
+    late Environment environment;
+    late MemoryFileSystem fileSystem;
+    late FakeProcessManager processManager;
+    late BufferLogger logger;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      processManager = FakeProcessManager.empty();
+      logger = BufferLogger.test();
+      environment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{},
+        inputs: <String, String>{},
+        processManager: processManager,
+        artifacts: Artifacts.test(),
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+    });
+
+    testWithoutContext('canSkip matches XcodeBuildScript value', () async {
+      const target = IosSwiftPackageMinimumDeployment();
+
+      environment.defines[kXcodeBuildScript] = kXcodeBuildScriptValuePrepare;
+      expect(await target.canSkip(environment), isFalse);
+
+      environment.defines[kXcodeBuildScript] = 'other';
+      expect(await target.canSkip(environment), isTrue);
+    });
+
+    testUsingContext('build does nothing if usesSwiftPackageManager is false', () async {
+      final Directory projectDir = fileSystem.directory('/project')..createSync();
+      environment = Environment.test(
+        fileSystem.currentDirectory,
+        projectDir: projectDir,
+        defines: <String, String>{},
+        inputs: <String, String>{},
+        processManager: processManager,
+        artifacts: Artifacts.test(),
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+
+      const target = IosSwiftPackageMinimumDeployment();
+      await target.build(environment);
+
+      expect(logger.errorText, isEmpty);
+    });
+
+    testUsingContext(
+      'build catching ToolExit when manifest does not exist',
+      () async {
+        final Directory projectDir = fileSystem.directory('/project')..createSync();
+        projectDir
+            .childDirectory('ios')
+            .childDirectory('Runner.xcodeproj')
+            .createSync(recursive: true);
+        environment = Environment.test(
+          fileSystem.currentDirectory,
+          projectDir: projectDir,
+          defines: <String, String>{kDeploymentTarget: '14.0'},
+          inputs: <String, String>{},
+          processManager: processManager,
+          artifacts: Artifacts.test(),
+          logger: logger,
+          fileSystem: fileSystem,
+        );
+
+        const target = IosSwiftPackageMinimumDeployment();
+        await target.build(environment);
+
+        final fakeStdio = globals.stdio as FakeStdio;
+        expect(fakeStdio.buffer.toString(), contains('does not exist.'));
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        Xcode: () => FakeXcode15(),
+        Stdio: () => FakeStdio(),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'build successfully updates deployment target',
+      () async {
+        final Directory projectDir = fileSystem.directory('/project')..createSync();
+        projectDir
+            .childDirectory('ios')
+            .childDirectory('Runner.xcodeproj')
+            .createSync(recursive: true);
+
+        final File manifest = projectDir
+            .childDirectory('ios')
+            .childDirectory('Flutter')
+            .childDirectory('ephemeral')
+            .childDirectory('Packages')
+            .childDirectory('FlutterGeneratedPluginSwiftPackage')
+            .childFile('Package.swift');
+        manifest.createSync(recursive: true);
+        manifest.writeAsStringSync('.iOS("13.0")');
+
+        environment = Environment.test(
+          fileSystem.currentDirectory,
+          projectDir: projectDir,
+          defines: <String, String>{kDeploymentTarget: '14.0'},
+          inputs: <String, String>{},
+          processManager: processManager,
+          artifacts: Artifacts.test(),
+          logger: logger,
+          fileSystem: fileSystem,
+        );
+
+        const target = IosSwiftPackageMinimumDeployment();
+        await target.build(environment);
+
+        final fakeStdio = globals.stdio as FakeStdio;
+        expect(
+          fakeStdio.buffer.toString(),
+          contains('minimum supported platform updated to 14.0, but Xcode cache is out of date.'),
+        );
+        expect(manifest.readAsStringSync(), contains('.iOS("14.0")'));
+      },
+      overrides: <Type, Generator>{
+        FeatureFlags: () => TestFeatureFlags(isSwiftPackageManagerEnabled: true),
+        Xcode: () => FakeXcode15(),
+        Stdio: () => FakeStdio(),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+  });
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
@@ -1634,4 +1770,9 @@ class FakeStdio extends Fake implements Stdio {
   void stderrWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {
     buffer.writeln(message);
   }
+}
+
+class FakeXcode15 extends Fake implements Xcode {
+  @override
+  Version get currentVersion => Version(15, 0, 0);
 }
