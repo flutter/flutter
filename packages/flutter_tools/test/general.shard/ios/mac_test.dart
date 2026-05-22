@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -16,10 +17,12 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
+import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/ios/xcresult.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -1196,6 +1199,134 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
       expect(fingerprintFile.readAsStringSync(), correctHeaderFingerprint);
     });
   });
+
+  group('buildXcodeProject', () {
+    late MemoryFileSystem fs;
+    late BufferLogger logger;
+    late FakeProcessManager fakeProcessManager;
+    late FakeXcodeProjectInterpreterForBuild xcodeProjectInterpreter;
+    late FakeXcodeForBuild xcode;
+    late FakeIosProjectForBuild iosProject;
+    late FakeBuildableIOSApp app;
+    late FakeFlutterProjectForBuild fakeFlutterProject;
+    late FakeFlutterProjectFactoryForBuild fakeFlutterProjectFactory;
+    late FakeArtifacts fakeArtifacts;
+
+    setUp(() {
+      fs = MemoryFileSystem.test();
+      logger = BufferLogger.test();
+      fakeProcessManager = FakeProcessManager.empty();
+      xcodeProjectInterpreter = FakeXcodeProjectInterpreterForBuild();
+      xcode = FakeXcodeForBuild();
+      fakeFlutterProject = FakeFlutterProjectForBuild(fileSystem: fs);
+      fakeFlutterProject.manifest = FakeFlutterManifest();
+      iosProject = fakeFlutterProject.ios as FakeIosProjectForBuild;
+      app = FakeBuildableIOSApp(project: iosProject);
+      fakeFlutterProjectFactory = FakeFlutterProjectFactoryForBuild(fakeFlutterProject);
+
+      final Directory frameworkDir = fs.systemTempDirectory.childDirectory('Flutter.xcframework');
+      frameworkDir.childDirectory('Flutter.framework').createSync(recursive: true);
+      fakeArtifacts = FakeArtifacts(frameworkPath: frameworkDir.path);
+
+      // Create required files for upgradePbxProjWithFlutterAssets
+      iosProject.xcodeProjectInfoFile.createSync(recursive: true);
+      iosProject.xcodeProjectInfoFile.writeAsStringSync('// empty pbxproj');
+
+      // Create pubspec.yaml to avoid warnings/errors about missing version
+      fs.file('pubspec.yaml').writeAsStringSync('''
+name: app_name
+version: 1.0.0+1
+''');
+
+      // Create package_config.json to avoid findPlugins failure
+      fakeFlutterProject.packageConfig.createSync(recursive: true);
+      fakeFlutterProject.packageConfig.writeAsStringSync(
+        '{"configVersion": 2, "packages": [{"name": "my_app", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
+      );
+
+      // Create package_graph.json to avoid findPlugins failure
+      final File packageGraph = fakeFlutterProject.directory
+          .childDirectory('.dart_tool')
+          .childFile('package_graph.json');
+      packageGraph.createSync(recursive: true);
+      packageGraph.writeAsStringSync(
+        '{"configVersion": 1, "packages": [{"name": "my_app", "dependencies": [], "devDependencies": []}]}',
+      );
+    });
+
+    testUsingContext(
+      'does not crash if temp directory is deleted during build',
+      () async {
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <Pattern>[
+              'xcrun',
+              'xcodebuild',
+              '-configuration',
+              'Debug',
+              '-quiet',
+              '-allowProvisioningUpdates',
+              '-allowProvisioningDeviceRegistration',
+              '-workspace',
+              'Runner.xcworkspace',
+              '-scheme',
+              'Runner',
+              'BUILD_DIR=/build/ios',
+              '-sdk',
+              'iphoneos',
+              '-destination',
+              'generic/platform=iOS',
+              '-resultBundlePath',
+              RegExp(r'.*/temporary_xcresult_bundle'),
+              '-resultBundleVersion',
+              '3',
+              'FLUTTER_SUPPRESS_ANALYTICS=true',
+              'COMPILER_INDEX_STORE_ENABLE=NO',
+            ],
+            onRun: (_) {
+              // Delete everything in temp directory to simulate async deletion
+              for (final FileSystemEntity entity in fs.systemTempDirectory.listSync()) {
+                if (entity is Directory &&
+                    entity.basename.startsWith('flutter_ios_build_temp_dir')) {
+                  entity.deleteSync(recursive: true);
+                }
+              }
+            },
+          ),
+        );
+
+        fakeProcessManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'xattr',
+              '-w',
+              'com.apple.xcode.CreatedByBuildSystem',
+              'true',
+              'build/ios/iphoneos',
+            ],
+          ),
+        );
+
+        final XcodeBuildResult result = await buildXcodeProject(
+          app: app,
+          buildInfo: BuildInfo.debug,
+        );
+
+        expect(result.success, isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => fakeProcessManager,
+        Logger: () => logger,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+        Xcode: () => xcode,
+        Platform: () => FakePlatform(operatingSystem: 'macos'),
+        FlutterProjectFactory: () => fakeFlutterProjectFactory,
+        Artifacts: () => fakeArtifacts,
+      },
+    );
+  });
 }
 
 class FakeIosProject extends Fake implements IosProject {
@@ -1257,11 +1388,17 @@ class FakeFlutterProject extends Fake implements FlutterProject {
   File get packageConfig => directory.childDirectory('.dart_tool').childFile('package_config.json');
 
   @override
+  File get gitignoreFile => directory.childFile('.gitignore');
+
+  @override
   late final IosProject ios = FakeIosProject(
     fileSystem: fileSystem,
     usesSwiftPackageManager: usesSwiftPackageManager,
     plugins: _plugins,
   );
+
+  @override
+  late final MacOSProject macos = FakeMacOSProject();
 
   @override
   final bool isModule;
@@ -1275,6 +1412,12 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
   String get appName => 'my_app';
 
   @override
+  String? get buildName => '1.0.0';
+
+  @override
+  String? get buildNumber => '1';
+
+  @override
   YamlMap toYaml() => YamlMap.wrap(<String, String>{});
 }
 
@@ -1282,6 +1425,10 @@ class FakeArtifacts extends Fake implements Artifacts {
   FakeArtifacts({required this.frameworkPath});
 
   final String frameworkPath;
+
+  @override
+  LocalEngineInfo? get localEngineInfo => null;
+
   @override
   String getArtifactPath(
     Artifact artifact, {
@@ -1380,4 +1527,161 @@ class FakeFlutterProjectWithAbsoluteDirectory extends FakeFlutterProject {
 
   @override
   Directory get directory => fileSystem.directory('/app_name');
+}
+
+class FakeXcodeForBuild extends Fake implements Xcode {
+  @override
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    XcodeBasedProject xcodeProject,
+    Directory buildDirectory, {
+    bool skipPackageUpdatesAndValidation = true,
+  }) async {
+    return <String>['xcrun', 'xcodebuild'];
+  }
+
+  @override
+  Version get currentVersion => Version(15, 0, 0);
+
+  @override
+  bool get isRequiredVersionSatisfactory => true;
+
+  @override
+  List<String> xcrunCommand() => <String>['xcrun'];
+}
+
+class FakeIosProjectForBuild extends FakeIosProject {
+  FakeIosProjectForBuild({required super.fileSystem, required FlutterProject parent})
+    : _parent = parent;
+
+  final FlutterProject _parent;
+
+  @override
+  FlutterProject get parent => _parent;
+
+  @override
+  bool existsSync() => true;
+
+  @override
+  File? get xcodeWorkspaceSharedSettings => null;
+
+  @override
+  File get xcodeProjectWorkspaceData =>
+      hostAppRoot.childDirectory('project.xcworkspace').childFile('contents.xcworkspacedata');
+
+  @override
+  File get appFrameworkInfoPlist => hostAppRoot.childFile('AppFrameworkInfo.plist');
+
+  @override
+  File xcodeProjectSchemeFile({String? scheme}) => hostAppRoot.childFile('scheme.xcscheme');
+
+  @override
+  File get defaultHostInfoPlist => hostAppRoot.childFile('Info.plist');
+
+  @override
+  File get appDelegateSwift => hostAppRoot.childDirectory('Runner').childFile('AppDelegate.swift');
+
+  @override
+  Future<XcodeProjectInfo?> projectInfo() async {
+    return XcodeProjectInfo(
+      <String>[],
+      <String>['Debug', 'Release'],
+      <String>['Runner'],
+      BufferLogger.test(),
+    );
+  }
+
+  @override
+  Directory get xcodeWorkspace => hostAppRoot.childDirectory('Runner.xcworkspace');
+
+  @override
+  Directory get flutterFrameworkSwiftPackageDirectory =>
+      hostAppRoot.childDirectory('FlutterGeneratedPluginSwiftPackage');
+
+  @override
+  File get lldbInitFile => hostAppRoot.childFile('lldbinit');
+
+  @override
+  Future<bool> pluginsSupportArmSimulator({required bool printWarnings}) async => true;
+
+  @override
+  File get generatedXcodePropertiesFile => hostAppRoot.childFile('Generated.xcconfig');
+
+  @override
+  File get generatedEnvironmentVariableExportScript =>
+      hostAppRoot.childFile('GeneratedEnvironmentVariables.sh');
+
+  @override
+  File get generatedNativeIntegrationEnvironmentFile =>
+      hostAppRoot.childFile('GeneratedNativeIntegrationEnvironment.sh');
+
+  @override
+  Future<bool> containsWatchCompanion({
+    required XcodeProjectInfo projectInfo,
+    required BuildInfo buildInfo,
+    String? deviceId,
+  }) async => false;
+
+  @override
+  Future<Map<String, String>> buildSettingsForBuildInfo(
+    BuildInfo? buildInfo, {
+    String? scheme,
+    String? configuration,
+    String? target,
+    EnvironmentType environmentType = EnvironmentType.physical,
+    String? deviceId,
+    bool isWatch = false,
+  }) async {
+    return <String, String>{'TARGET_BUILD_DIR': 'build/ios/iphoneos', 'WRAPPER_NAME': 'Runner.app'};
+  }
+}
+
+class FakeBuildableIOSApp extends Fake implements BuildableIOSApp {
+  FakeBuildableIOSApp({required this.project});
+
+  @override
+  final IosProject project;
+}
+
+class FakeXcodeProjectInterpreterForBuild extends FakeXcodeProjectInterpreter {
+  FakeXcodeProjectInterpreterForBuild({
+    super.schemes = const <String>['Runner'],
+    this.buildConfigurations = const <String>['Debug', 'Release'],
+  });
+
+  final List<String> buildConfigurations;
+
+  @override
+  Future<XcodeProjectInfo?> getInfo(
+    XcodeBasedProject xcodeProject, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async {
+    return XcodeProjectInfo(<String>[], buildConfigurations, schemes, BufferLogger.test());
+  }
+}
+
+class FakeFlutterProjectFactoryForBuild implements FlutterProjectFactory {
+  FakeFlutterProjectFactoryForBuild(this.project);
+  final FlutterProject project;
+
+  @override
+  FlutterProject fromDirectory(Directory directory) {
+    return project;
+  }
+
+  @override
+  Map<String, FlutterProject> get projects => <String, FlutterProject>{};
+}
+
+class FakeFlutterProjectForBuild extends FakeFlutterProject {
+  FakeFlutterProjectForBuild({required super.fileSystem});
+
+  @override
+  IosProject get ios => _ios;
+  late final IosProject _ios = FakeIosProjectForBuild(fileSystem: fileSystem, parent: this);
+}
+
+class FakeMacOSProject extends Fake implements MacOSProject {
+  @override
+  bool existsSync() => false;
 }

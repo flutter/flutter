@@ -10,6 +10,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/config.dart';
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../base/io.dart';
@@ -606,7 +607,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       }
     }
   } finally {
-    tempDir.deleteSync(recursive: true);
+    ErrorHandlingFileSystem.deleteIfExists(tempDir, recursive: true);
   }
   if (buildResult != null && buildResult.exitCode != 0) {
     globals.printStatus('Failed to build iOS app');

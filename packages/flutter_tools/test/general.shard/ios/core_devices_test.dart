@@ -3880,6 +3880,282 @@ invalid JSON
         expect(logger.traceText, contains('Error reading output file'));
       });
     });
+
+    group('Robust cleanup and error handling', () {
+      const deviceId = 'device-id';
+      const bundleId = 'com.example.flutterApp';
+      const bundlePath = '/path/to/com.example.flutterApp';
+
+      testWithoutContext('getInstalledApps does not crash if temp directory deleted', () async {
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('core_device_app_list.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'info',
+              'apps',
+              '--device',
+              deviceId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              tempFile.writeAsStringSync('{"result": {"apps": []}}');
+              tempFile.parent.deleteSync(recursive: true);
+            },
+          ),
+        );
+
+        final List<IOSCoreDeviceInstalledApp> apps = await deviceControl.getInstalledApps(
+          deviceId: deviceId,
+        );
+        expect(apps, isEmpty);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('getInstalledApps does not crash if output file missing', () async {
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('core_device_app_list.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'info',
+              'apps',
+              '--device',
+              deviceId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              if (tempFile.existsSync()) {
+                tempFile.deleteSync();
+              }
+            },
+          ),
+        );
+
+        final List<IOSCoreDeviceInstalledApp> apps = await deviceControl.getInstalledApps(
+          deviceId: deviceId,
+        );
+        expect(apps, isEmpty);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.traceText, contains('devicectl output file does not exist'));
+      });
+
+      testWithoutContext('installApp does not crash if temp directory deleted', () async {
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('install_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'install',
+              'app',
+              '--device',
+              deviceId,
+              bundlePath,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              tempFile.writeAsStringSync('{"info": {"outcome": "success"}}');
+              tempFile.parent.deleteSync(recursive: true);
+            },
+          ),
+        );
+
+        final (bool status, IOSCoreDeviceInstallResult? result) = await deviceControl.installApp(
+          deviceId: deviceId,
+          bundlePath: bundlePath,
+        );
+        expect(status, isFalse);
+        expect(result, isNull);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('installApp does not crash if output file missing', () async {
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('install_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'install',
+              'app',
+              '--device',
+              deviceId,
+              bundlePath,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              if (tempFile.existsSync()) {
+                tempFile.deleteSync();
+              }
+            },
+          ),
+        );
+
+        final (bool status, IOSCoreDeviceInstallResult? result) = await deviceControl.installApp(
+          deviceId: deviceId,
+          bundlePath: bundlePath,
+        );
+        expect(status, isFalse);
+        expect(result, isNull);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.traceText, contains('devicectl output file does not exist'));
+      });
+
+      testWithoutContext('uninstallApp does not crash if temp directory deleted', () async {
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('uninstall_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'uninstall',
+              'app',
+              '--device',
+              deviceId,
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              tempFile.writeAsStringSync('{"info": {"outcome": "success"}}');
+              tempFile.parent.deleteSync(recursive: true);
+            },
+          ),
+        );
+
+        final bool status = await deviceControl.uninstallApp(
+          deviceId: deviceId,
+          bundleId: bundleId,
+        );
+        expect(status, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('uninstallApp does not crash if output file missing', () async {
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('uninstall_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'uninstall',
+              'app',
+              '--device',
+              deviceId,
+              bundleId,
+              '--json-output',
+              tempFile.path,
+            ],
+            onRun: (_) {
+              if (tempFile.existsSync()) {
+                tempFile.deleteSync();
+              }
+            },
+          ),
+        );
+
+        final bool status = await deviceControl.uninstallApp(
+          deviceId: deviceId,
+          bundleId: bundleId,
+        );
+        expect(status, isFalse);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.traceText, contains('devicectl output file does not exist'));
+      });
+
+      testWithoutContext('launchApp does not crash if temp directory deleted', () async {
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('launch_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'launch',
+              '--device',
+              deviceId,
+              '--json-output',
+              tempFile.path,
+              bundleId,
+            ],
+            onRun: (_) {
+              tempFile.writeAsStringSync('{"info": {"outcome": "success"}}');
+              tempFile.parent.deleteSync(recursive: true);
+            },
+          ),
+        );
+
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
+          deviceId: deviceId,
+          bundleId: bundleId,
+        );
+        expect(result, isNull);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext('launchApp does not crash if output file missing', () async {
+        final File tempFile = fileSystem.systemTempDirectory
+            .childDirectory('core_devices.rand0')
+            .childFile('launch_results.json');
+        fakeProcessManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              'xcrun',
+              'devicectl',
+              'device',
+              'process',
+              'launch',
+              '--device',
+              deviceId,
+              '--json-output',
+              tempFile.path,
+              bundleId,
+            ],
+            onRun: (_) {
+              if (tempFile.existsSync()) {
+                tempFile.deleteSync();
+              }
+            },
+          ),
+        );
+
+        final IOSCoreDeviceLaunchResult? result = await deviceControl.launchApp(
+          deviceId: deviceId,
+          bundleId: bundleId,
+        );
+        expect(result, isNull);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+        expect(logger.traceText, contains('devicectl output file does not exist'));
+      });
+    });
   });
 }
 

@@ -502,8 +502,7 @@ class IOSCoreDeviceControl {
       'apps',
       '--device',
       deviceId,
-      if (bundleId != null) '--bundle-id',
-      bundleId!,
+      if (bundleId != null) ...<String>['--bundle-id', bundleId],
       '--json-output',
       output.path,
     ];
@@ -511,6 +510,10 @@ class IOSCoreDeviceControl {
     try {
       await _processUtils.run(command, throwOnError: true);
 
+      if (!output.existsSync()) {
+        _logger.printTrace('devicectl output file does not exist: ${output.path}');
+        return <Object?>[];
+      }
       final String stringOutput = output.readAsStringSync();
 
       try {
@@ -532,7 +535,7 @@ class IOSCoreDeviceControl {
       _logger.printError('Error executing devicectl: $err');
       return <Object?>[];
     } finally {
-      tempDirectory.deleteSync(recursive: true);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 
@@ -587,6 +590,11 @@ class IOSCoreDeviceControl {
 
     try {
       await _processUtils.run(command, throwOnError: true);
+
+      if (!output.existsSync()) {
+        _logger.printTrace('devicectl output file does not exist: ${output.path}');
+        return (false, null);
+      }
       final String stringOutput = output.readAsStringSync();
 
       try {
@@ -609,7 +617,7 @@ class IOSCoreDeviceControl {
       _logger.printTrace('Error executing devicectl: $err');
       return (false, null);
     } finally {
-      tempDirectory.deleteSync(recursive: true);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 
@@ -640,6 +648,11 @@ class IOSCoreDeviceControl {
 
     try {
       await _processUtils.run(command, throwOnError: true);
+
+      if (!output.existsSync()) {
+        _logger.printTrace('devicectl output file does not exist: ${output.path}');
+        return false;
+      }
       final String stringOutput = output.readAsStringSync();
 
       try {
@@ -658,7 +671,7 @@ class IOSCoreDeviceControl {
       _logger.printError('Error executing devicectl: $err');
       return false;
     } finally {
-      tempDirectory.deleteSync(recursive: true);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 
@@ -732,6 +745,11 @@ class IOSCoreDeviceControl {
 
     try {
       await _processUtils.run(command, throwOnError: true);
+
+      if (!output.existsSync()) {
+        _logger.printTrace('devicectl output file does not exist: ${output.path}');
+        return null;
+      }
       final String stringOutput = output.readAsStringSync();
 
       try {
@@ -752,7 +770,7 @@ class IOSCoreDeviceControl {
       _logger.printTrace('Error executing devicectl: $err');
       return null;
     } finally {
-      tempDirectory.deleteSync(recursive: true);
+      ErrorHandlingFileSystem.deleteIfExists(tempDirectory, recursive: true);
     }
   }
 
