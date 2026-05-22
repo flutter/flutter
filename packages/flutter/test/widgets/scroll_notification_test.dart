@@ -341,4 +341,122 @@ void main() {
     await tester.pumpAndSettle();
     expect(notification, isA<ScrollEndNotification>());
   });
+
+  testWidgets('CustomScrollView scrolling does not fire ScrollMetricsNotification', (WidgetTester tester) async {
+    final metricsNotifications = <ScrollMetricsNotification>[];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NotificationListener<ScrollMetricsNotification>(
+          onNotification: (ScrollMetricsNotification n) {
+            metricsNotifications.add(n);
+            return false;
+          },
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) =>
+                      SizedBox(height: 100, child: Text('$index')),
+                  childCount: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    metricsNotifications.clear();
+
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, -300.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(metricsNotifications, isEmpty);
+  });
+
+  testWidgets('CustomScrollView fires ScrollMetricsNotification when content dimensions change', (WidgetTester tester) async {
+    final metricsNotifications = <ScrollMetricsNotification>[];
+
+    Widget buildWidget(int itemCount) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: NotificationListener<ScrollMetricsNotification>(
+          onNotification: (ScrollMetricsNotification n) {
+            metricsNotifications.add(n);
+            return false;
+          },
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) =>
+                      SizedBox(height: 100, child: Text('$index')),
+                  childCount: itemCount,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(5));
+    metricsNotifications.clear();
+
+    await tester.pumpWidget(buildWidget(20));
+    await tester.pump();
+
+    expect(metricsNotifications, isNotEmpty);
+    expect(metricsNotifications.first.metrics.maxScrollExtent, greaterThan(0.0));
+  });
+
+  testWidgets('CustomScrollView fires ScrollMetricsNotification when viewportDimension changes', (WidgetTester tester) async {
+    final metricsNotifications = <ScrollMetricsNotification>[];
+
+    Widget buildWidget(double viewportHeight) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        // Align with Alignment.topLeft provides loose constraints to its child,
+        // allowing SizedBox to override the parent's tight test-window height.
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 800,
+            height: viewportHeight,
+            child: NotificationListener<ScrollMetricsNotification>(
+              onNotification: (ScrollMetricsNotification n) {
+                metricsNotifications.add(n);
+                return false;
+              },
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (BuildContext context, int index) => const SizedBox(height: 100),
+                      childCount: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildWidget(600));
+    metricsNotifications.clear();
+
+    // Shrink the viewport: viewportDimension changes from 600 to 400.
+    await tester.pumpWidget(buildWidget(400));
+    await tester.pump();
+
+    expect(metricsNotifications, isNotEmpty);
+    expect(metricsNotifications.first.metrics.viewportDimension, 400.0);
+  });
+
 }

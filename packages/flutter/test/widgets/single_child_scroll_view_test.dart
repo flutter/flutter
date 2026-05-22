@@ -1086,4 +1086,36 @@ void main() {
     await tester.pumpAndSettle();
     expect(textField.focusNode.hasFocus, isTrue);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/145078
+  testWidgets('position is clamped correctly when content shrinks after scroll', (WidgetTester tester) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    Widget buildWidget(double contentHeight) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          controller: controller,
+          child: SizedBox(height: contentHeight),
+        ),
+      );
+    }
+
+    // Viewport height = 600, content = 1200, maxScrollExtent = 600.
+    await tester.pumpWidget(buildWidget(1200.0));
+
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, -400.0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+    expect(controller.offset, moreOrLessEquals(400.0, epsilon: 1.0));
+
+    // Shrink content to 800, new maxScrollExtent = 200.
+    await tester.pumpWidget(buildWidget(800.0));
+    await tester.pump();
+
+    expect(controller.offset, lessThanOrEqualTo(200.0 + 1e-10));
+  });
 }

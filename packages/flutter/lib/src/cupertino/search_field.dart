@@ -374,9 +374,9 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
   TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? _focusNode!;
 
-  ScrollNotificationObserverState? _scrollNotificationObserver;
   late double _scaledIconSize;
   double _fadeExtent = 0.0;
+  bool _hasPendingFadeUpdate = false;
 
   @override
   void initState() {
@@ -387,14 +387,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
     if (widget.focusNode == null) {
       _focusNode = FocusNode();
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _scrollNotificationObserver?.removeListener(_handleScrollNotification);
-    _scrollNotificationObserver = ScrollNotificationObserver.maybeOf(context);
-    _scrollNotificationObserver?.addListener(_handleScrollNotification);
+    _effectiveFocusNode.addListener(_handleFocusChanged);
   }
 
   @override
@@ -408,10 +401,17 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
       _controller = null;
     }
     if (widget.focusNode == null && oldWidget.focusNode != null) {
+      oldWidget.focusNode!.removeListener(_handleFocusChanged);
       _focusNode = FocusNode();
+      _focusNode!.addListener(_handleFocusChanged);
     } else if (widget.focusNode != null && oldWidget.focusNode == null) {
+      _focusNode!.removeListener(_handleFocusChanged);
       _focusNode!.dispose();
       _focusNode = null;
+      widget.focusNode!.addListener(_handleFocusChanged);
+    } else if (widget.focusNode != oldWidget.focusNode) {
+      oldWidget.focusNode!.removeListener(_handleFocusChanged);
+      widget.focusNode!.addListener(_handleFocusChanged);
     }
   }
 
@@ -424,10 +424,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
 
   @override
   void dispose() {
-    if (_scrollNotificationObserver != null) {
-      _scrollNotificationObserver!.removeListener(_handleScrollNotification);
-      _scrollNotificationObserver = null;
-    }
+    _effectiveFocusNode.removeListener(_handleFocusChanged);
     if (widget.focusNode == null) {
       _focusNode?.dispose();
     }
@@ -463,16 +460,8 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
     }
   }
 
-  void _handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification) {
-      final double currentHeight = context.size?.height ?? 0.0;
-      setState(() {
-        _fadeExtent = _calculateScrollOpacity(
-          currentHeight,
-          _scaledIconSize + math.max(widget.prefixInsets.vertical, widget.suffixInsets.vertical),
-        );
-      });
-    }
+  void _handleFocusChanged() {
+    setState(() {});
   }
 
   static double _calculateScrollOpacity(double currentHeight, double maxHeight) {
@@ -559,33 +548,60 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
       ),
     );
 
-    return CupertinoTextField(
-      controller: _effectiveController,
-      decoration: decoration,
-      style: widget.style,
-      prefix: prefix,
-      suffix: suffix,
-      keyboardType: widget.keyboardType,
-      onTap: widget.onTap,
-      enabled: widget.enabled ?? true,
-      cursorWidth: widget.cursorWidth,
-      cursorHeight: widget.cursorHeight,
-      cursorRadius: widget.cursorRadius,
-      cursorOpacityAnimates: widget.cursorOpacityAnimates,
-      cursorColor: widget.cursorColor,
-      suffixMode: widget.suffixMode,
-      placeholder: placeholder,
-      placeholderStyle: placeholderStyle,
-      padding: _animatedInsets(context, widget.padding),
-      onChanged: widget.onChanged,
-      onSubmitted: widget.onSubmitted,
-      focusNode: _effectiveFocusNode,
-      autofocus: widget.autofocus,
-      autocorrect: widget.autocorrect,
-      smartQuotesType: widget.smartQuotesType,
-      smartDashesType: widget.smartDashesType,
-      enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-      textInputAction: TextInputAction.search,
+    return NotificationListener<SizeChangedLayoutNotification>(
+      onNotification: (_) {
+        if (!_hasPendingFadeUpdate) {
+          _hasPendingFadeUpdate = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _hasPendingFadeUpdate = false;
+            if (!mounted) {
+              return;
+            }
+            final double currentHeight = context.size?.height ?? 0.0;
+            final double newFadeExtent = _calculateScrollOpacity(
+              currentHeight,
+              _scaledIconSize +
+                  math.max(widget.prefixInsets.vertical, widget.suffixInsets.vertical),
+            );
+            if (newFadeExtent != _fadeExtent) {
+              setState(() {
+                _fadeExtent = newFadeExtent;
+              });
+            }
+          });
+        }
+        return false;
+      },
+      child: SizeChangedLayoutNotifier(
+        child: CupertinoTextField(
+          controller: _effectiveController,
+          decoration: decoration,
+          style: widget.style,
+          prefix: prefix,
+          suffix: suffix,
+          keyboardType: widget.keyboardType,
+          onTap: widget.onTap,
+          enabled: widget.enabled ?? true,
+          cursorWidth: widget.cursorWidth,
+          cursorHeight: widget.cursorHeight,
+          cursorRadius: widget.cursorRadius,
+          cursorOpacityAnimates: widget.cursorOpacityAnimates,
+          cursorColor: widget.cursorColor,
+          suffixMode: widget.suffixMode,
+          placeholder: placeholder,
+          placeholderStyle: placeholderStyle,
+          padding: _animatedInsets(context, widget.padding),
+          onChanged: widget.onChanged,
+          onSubmitted: widget.onSubmitted,
+          focusNode: _effectiveFocusNode,
+          autofocus: widget.autofocus,
+          autocorrect: widget.autocorrect,
+          smartQuotesType: widget.smartQuotesType,
+          smartDashesType: widget.smartDashesType,
+          enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+          textInputAction: TextInputAction.search,
+        ),
+      ),
     );
   }
 }

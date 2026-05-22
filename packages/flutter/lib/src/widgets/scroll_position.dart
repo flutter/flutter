@@ -389,6 +389,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         if (outOfRange) {
           context.setIgnorePointer(false);
         }
+        _lastMetrics = _lastMetrics?.copyWith(pixels: _pixels);
         notifyListeners();
         didUpdateScrollPositionBy(pixels - oldPixels);
       }
@@ -632,9 +633,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     final ScrollMetrics currentMetrics = copyWith();
 
     return _lastMetrics == null ||
-        !(currentMetrics.extentBefore == _lastMetrics!.extentBefore &&
-            currentMetrics.extentInside == _lastMetrics!.extentInside &&
-            currentMetrics.extentAfter == _lastMetrics!.extentAfter &&
+        !(currentMetrics.minScrollExtent == _lastMetrics!.minScrollExtent &&
+            currentMetrics.maxScrollExtent == _lastMetrics!.maxScrollExtent &&
+            currentMetrics.viewportDimension == _lastMetrics!.viewportDimension &&
             currentMetrics.axisDirection == _lastMetrics!.axisDirection);
   }
 
@@ -676,8 +677,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         scheduleMicrotask(didUpdateScrollMetrics);
         _haveScheduledUpdateNotification = true;
       }
-      _lastMetrics = copyWith();
     }
+    _lastMetrics = copyWith();
     return true;
   }
 
