@@ -7,8 +7,27 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+const Color _blueAccent400 = Color(0xFF2979FF);
+const Color _green100 = Color(0xFFC8E6C9);
+const Color _green200 = Color(0xFFA5D6A7);
+const Color _green300 = Color(0xFF81C784);
+const Color _green400 = Color(0xFF66BB6A);
+const Color _green500 = Color(0xFF4CAF50);
+const Color _redAccent400 = Color(0xFFFF1744);
+
+Widget _buildGoldenTest({required Color color, required BorderRadiusGeometry borderRadius}) {
+  return RepaintBoundary(
+    child: DecoratedBox(
+      decoration: ShapeDecoration(
+        color: color,
+        shape: ContinuousRectangleBorder(borderRadius: borderRadius),
+      ),
+    ),
+  );
+}
 
 void main() {
   test('ContinuousRectangleBorder defaults', () {
@@ -120,13 +139,9 @@ void main() {
 
   testWidgets('Golden test even radii', (WidgetTester tester) async {
     await tester.pumpWidget(
-      RepaintBoundary(
-        child: Material(
-          color: Colors.blueAccent[400],
-          shape: const ContinuousRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(28.0)),
-          ),
-        ),
+      _buildGoldenTest(
+        color: _blueAccent400,
+        borderRadius: const BorderRadius.all(Radius.circular(28.0)),
       ),
     );
 
@@ -140,17 +155,13 @@ void main() {
 
   testWidgets('Golden test varying radii', (WidgetTester tester) async {
     await tester.pumpWidget(
-      RepaintBoundary(
-        child: Material(
-          color: Colors.green[100],
-          shape: const ContinuousRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.elliptical(100.0, 200.0),
-              topRight: Radius.circular(350.0),
-              bottomLeft: Radius.elliptical(2000.0, 100.0),
-              bottomRight: Radius.circular(700.0),
-            ),
-          ),
+      _buildGoldenTest(
+        color: _green100,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.elliptical(100.0, 200.0),
+          topRight: Radius.circular(350.0),
+          bottomLeft: Radius.elliptical(2000.0, 100.0),
+          bottomRight: Radius.circular(700.0),
         ),
       ),
     );
@@ -165,13 +176,9 @@ void main() {
 
   testWidgets('Golden test topLeft radii', (WidgetTester tester) async {
     await tester.pumpWidget(
-      RepaintBoundary(
-        child: Material(
-          color: Colors.green[200],
-          shape: const ContinuousRectangleBorder(
-            borderRadius: BorderRadius.only(topLeft: Radius.elliptical(100.0, 200.0)),
-          ),
-        ),
+      _buildGoldenTest(
+        color: _green200,
+        borderRadius: const BorderRadius.only(topLeft: Radius.elliptical(100.0, 200.0)),
       ),
     );
 
@@ -185,13 +192,9 @@ void main() {
 
   testWidgets('Golden test topRight radii', (WidgetTester tester) async {
     await tester.pumpWidget(
-      RepaintBoundary(
-        child: Material(
-          color: Colors.green[300],
-          shape: const ContinuousRectangleBorder(
-            borderRadius: BorderRadius.only(topRight: Radius.circular(350.0)),
-          ),
-        ),
+      _buildGoldenTest(
+        color: _green300,
+        borderRadius: const BorderRadius.only(topRight: Radius.circular(350.0)),
       ),
     );
 
@@ -205,13 +208,9 @@ void main() {
 
   testWidgets('Golden test bottomLeft radii', (WidgetTester tester) async {
     await tester.pumpWidget(
-      RepaintBoundary(
-        child: Material(
-          color: Colors.green[400],
-          shape: const ContinuousRectangleBorder(
-            borderRadius: BorderRadius.only(bottomLeft: Radius.elliptical(2000.0, 100.0)),
-          ),
-        ),
+      _buildGoldenTest(
+        color: _green400,
+        borderRadius: const BorderRadius.only(bottomLeft: Radius.elliptical(2000.0, 100.0)),
       ),
     );
 
@@ -225,13 +224,9 @@ void main() {
 
   testWidgets('Golden test bottomRight radii', (WidgetTester tester) async {
     await tester.pumpWidget(
-      RepaintBoundary(
-        child: Material(
-          color: Colors.green[500],
-          shape: const ContinuousRectangleBorder(
-            borderRadius: BorderRadius.only(bottomRight: Radius.circular(700.0)),
-          ),
-        ),
+      _buildGoldenTest(
+        color: _green500,
+        borderRadius: const BorderRadius.only(bottomRight: Radius.circular(700.0)),
       ),
     );
 
@@ -245,13 +240,9 @@ void main() {
 
   testWidgets('Golden test large radii', (WidgetTester tester) async {
     await tester.pumpWidget(
-      RepaintBoundary(
-        child: Material(
-          color: Colors.redAccent[400],
-          shape: const ContinuousRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(50.0)),
-          ),
-        ),
+      _buildGoldenTest(
+        color: _redAccent400,
+        borderRadius: const BorderRadius.all(Radius.circular(50.0)),
       ),
     );
 
