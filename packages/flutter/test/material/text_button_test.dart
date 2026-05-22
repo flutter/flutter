@@ -731,6 +731,14 @@ void main() {
 
   testWidgets('Does TextButton contribute semantics', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
+    const expectedButtonSize = Size(88.0, 48.0);
+    // Button is in center of the 800x600 test screen.
+    final expectedButtonTransform = Matrix4.diagonal3Values(
+      tester.view.devicePixelRatio,
+      tester.view.devicePixelRatio,
+      1.0,
+    )..translate(400.0 - expectedButtonSize.width / 2, 300.0 - expectedButtonSize.height / 2);
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -738,7 +746,7 @@ void main() {
           child: TextButton(
             style: const ButtonStyle(
               // Specifying minimumSize to mimic the original minimumSize for
-              // RaisedButton so that the corresponding button size matches the
+              // RaisedButton so the semantics size and transform match the
               // original version of this test.
               minimumSize: MaterialStatePropertyAll<Size>(Size(88, 36)),
             ),
@@ -749,8 +757,9 @@ void main() {
       ),
     );
 
+    final SemanticsNode buttonSemantics = tester.getSemantics(find.byType(TextButton));
     expect(
-      tester.getSemantics(find.byType(TextButton)),
+      buttonSemantics,
       matchesSemantics(
         label: 'ABC',
         hasTapAction: true,
@@ -759,9 +768,10 @@ void main() {
         isButton: true,
         isEnabled: true,
         isFocusable: true,
-        size: const Size(88.0, 48.0),
+        size: expectedButtonSize,
       ),
     );
+    expect(buttonSemantics.transform, expectedButtonTransform);
 
     handle.dispose();
   });
