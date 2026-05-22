@@ -176,7 +176,7 @@ abstract class DarwinSwiftPackageMinimumDeployment extends Target {
         }
         if (changed ?? false) {
           printXcodeError(
-            'FlutterGeneratedPluginSwiftPackage minimum supported platform updated to $deploymentTarget, but Xcode cache is out of date.',
+            '$kFlutterGeneratedPluginSwiftPackageName minimum supported platform updated to $deploymentTarget, but Xcode cache is out of date.',
           );
           printXcodeError(
             'Please reset the manfiest cache by selecting File > Packages > Resolve Package Versions',
