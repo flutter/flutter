@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -55,13 +54,13 @@ void main() {
   test('RenderShaderMask getters and setters', () {
     Shader callback1(Rect bounds) {
       assert(false); // The test should not call this.
-      const gradient = LinearGradient(colors: <Color>[Colors.red]);
+      const gradient = LinearGradient(colors: <Color>[Color(0xFFF44336)]);
       return gradient.createShader(Rect.zero);
     }
 
     Shader callback2(Rect bounds) {
       assert(false); // The test should not call this.
-      const gradient = LinearGradient(colors: <Color>[Colors.blue]);
+      const gradient = LinearGradient(colors: <Color>[Color(0xFF2196F3)]);
       return gradient.createShader(Rect.zero);
     }
 

@@ -3,23 +3,27 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+const Color _grey500 = Color(0xFF9E9E9E);
+const Color _black = Color(0xFF000000);
+const Color _red500 = Color(0xFFF44336);
 
 void main() {
   final TestWidgetsFlutterBinding binding = _GestureBindingSpy();
 
   testWidgets('attach and detach correctly handle gesture', (_) async {
-    expect(WidgetsBinding.instance, binding);
+    expect(TestWidgetsFlutterBinding.instance, binding);
     final TextSelectionDelegate delegate = FakeEditableTextState();
     final offset = ViewportOffset.zero();
     addTearDown(offset.dispose);
     final editable = RenderEditable(
-      backgroundCursorColor: Colors.grey,
-      selectionColor: Colors.black,
+      backgroundCursorColor: _grey500,
+      selectionColor: _black,
       textDirection: TextDirection.ltr,
-      cursorColor: Colors.red,
+      cursorColor: _red500,
       offset: offset,
       textSelectionDelegate: delegate,
       text: const TextSpan(text: 'test', style: TextStyle(height: 1.0, fontSize: 10.0)),

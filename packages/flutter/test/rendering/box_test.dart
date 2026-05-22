@@ -4,11 +4,29 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
+
+const Color _materialYellow500 = Color(0xFFFFEB3B);
+const Color _materialBlue500 = Color(0xFF2196F3);
+const List<BoxShadow> _materialElevation3Shadows = <BoxShadow>[
+  BoxShadow(
+    offset: Offset(0.0, 3.0),
+    blurRadius: 3.0,
+    spreadRadius: -2.0,
+    color: Color(0x33000000),
+  ),
+  BoxShadow(offset: Offset(0.0, 3.0), blurRadius: 4.0, color: Color(0x24000000)),
+  BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 8.0, color: Color(0x1F000000)),
+];
+
+BoxConstraints _unconstrained(BoxConstraints constraints) => const BoxConstraints();
+
+BoxConstraints _widthUnconstrained(BoxConstraints constraints) => constraints.heightConstraints();
+
+BoxConstraints _heightUnconstrained(BoxConstraints constraints) => constraints.widthConstraints();
 
 class MissingPerformLayoutRenderBox extends RenderBox {
   void triggerExceptionSettingSizeOutsideOfLayout() {
@@ -84,14 +102,14 @@ void main() {
 
   test('should size to render view', () {
     final RenderBox root = RenderDecoratedBox(
-      decoration: BoxDecoration(
-        color: const Color(0xFF00FF00),
+      decoration: const BoxDecoration(
+        color: Color(0xFF00FF00),
         gradient: RadialGradient(
           center: Alignment.topLeft,
           radius: 1.8,
-          colors: <Color>[Colors.yellow[500]!, Colors.blue[500]!],
+          colors: <Color>[_materialYellow500, _materialBlue500],
         ),
-        boxShadow: kElevationToShadow[3],
+        boxShadow: _materialElevation3Shadows,
       ),
     );
     layout(root);
@@ -397,7 +415,7 @@ void main() {
 
   test('UnconstrainedBox expands to fit children', () {
     final unconstrained = RenderConstraintsTransformBox(
-      constraintsTransform: ConstraintsTransformBox.widthUnconstrained,
+      constraintsTransform: _widthUnconstrained,
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 200.0, height: 200.0),
@@ -414,7 +432,7 @@ void main() {
       ),
     );
     // Check that we can update the constrained axis to null.
-    unconstrained.constraintsTransform = ConstraintsTransformBox.unconstrained;
+    unconstrained.constraintsTransform = _unconstrained;
     TestRenderingFlutterBinding.instance.reassembleApplication();
 
     expect(unconstrained.size.width, equals(200.0), reason: 'unconstrained width');
@@ -423,7 +441,7 @@ void main() {
 
   test('UnconstrainedBox handles vertical overflow', () {
     final unconstrained = RenderConstraintsTransformBox(
-      constraintsTransform: ConstraintsTransformBox.unconstrained,
+      constraintsTransform: _unconstrained,
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(height: 200.0),
@@ -440,7 +458,7 @@ void main() {
 
   test('UnconstrainedBox handles horizontal overflow', () {
     final unconstrained = RenderConstraintsTransformBox(
-      constraintsTransform: ConstraintsTransformBox.unconstrained,
+      constraintsTransform: _unconstrained,
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 200.0),
@@ -590,7 +608,7 @@ void main() {
 
   test('getMinIntrinsicWidth error handling', () {
     final unconstrained = RenderConstraintsTransformBox(
-      constraintsTransform: ConstraintsTransformBox.unconstrained,
+      constraintsTransform: _unconstrained,
       textDirection: TextDirection.ltr,
       child: RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 200.0),
@@ -723,7 +741,7 @@ void main() {
 
   test('UnconstrainedBox.toStringDeep returns useful information', () {
     final unconstrained = RenderConstraintsTransformBox(
-      constraintsTransform: ConstraintsTransformBox.unconstrained,
+      constraintsTransform: _unconstrained,
       textDirection: TextDirection.ltr,
       alignment: Alignment.center,
     );
@@ -748,7 +766,7 @@ void main() {
       additionalConstraints: const BoxConstraints.expand(height: 200.0),
     );
     final unconstrained = RenderConstraintsTransformBox(
-      constraintsTransform: ConstraintsTransformBox.heightUnconstrained,
+      constraintsTransform: _heightUnconstrained,
       textDirection: TextDirection.ltr,
       child: RenderFlex(textDirection: TextDirection.ltr, children: <RenderBox>[flexible]),
       alignment: Alignment.center,
@@ -769,7 +787,7 @@ void main() {
       additionalConstraints: const BoxConstraints.expand(width: 200.0),
     );
     final unconstrained = RenderConstraintsTransformBox(
-      constraintsTransform: ConstraintsTransformBox.widthUnconstrained,
+      constraintsTransform: _widthUnconstrained,
       textDirection: TextDirection.ltr,
       child: RenderFlex(
         direction: Axis.vertical,
@@ -807,7 +825,7 @@ void main() {
         case Clip.antiAlias:
         case Clip.antiAliasWithSaveLayer:
           box = RenderConstraintsTransformBox(
-            constraintsTransform: ConstraintsTransformBox.unconstrained,
+            constraintsTransform: _unconstrained,
             alignment: Alignment.center,
             textDirection: TextDirection.ltr,
             child: box200x200,
@@ -815,7 +833,7 @@ void main() {
           );
         case null:
           box = RenderConstraintsTransformBox(
-            constraintsTransform: ConstraintsTransformBox.unconstrained,
+            constraintsTransform: _unconstrained,
             alignment: Alignment.center,
             textDirection: TextDirection.ltr,
             child: box200x200,
