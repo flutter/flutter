@@ -10944,6 +10944,7 @@ void main() {
     expect(editableText.enableInlinePrediction, true);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/132047.
   testWidgets('Dragging selection base handle upwards scrolls the viewport smoothly to zero', (
     WidgetTester tester,
   ) async {

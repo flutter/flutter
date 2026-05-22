@@ -4068,6 +4068,7 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/issues/132047.
   testWidgets('Dragging selection base handle upwards scrolls the viewport', (
     WidgetTester tester,
   ) async {
@@ -4117,6 +4118,7 @@ void main() {
     );
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
+  // Regression test for https://github.com/flutter/flutter/issues/132047.
   testWidgets('Mouse drag selection from bottom to top does not snap to extent', (
     WidgetTester tester,
   ) async {
