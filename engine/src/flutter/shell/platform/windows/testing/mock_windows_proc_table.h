@@ -67,6 +67,8 @@ class MockWindowsProcTable : public WindowsProcTable {
       (HDC hdc, LPCRECT lprcClip, MONITORENUMPROC lpfnEnum, LPARAM dwData),
       (const, override));
 
+  MOCK_METHOD(UINT, GetDpiForWindow, (HWND hwnd), (const, override));
+
   MOCK_METHOD(UINT, GetDpiForMonitor, (HMONITOR, UINT), ());
 
  private:

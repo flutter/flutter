@@ -173,6 +173,14 @@ class WindowsProcTable {
                                    MONITORENUMPROC lpfnEnum,
                                    LPARAM dwData) const;
 
+  // Returns the dots per inch (dpi) value for the associated window.
+  //
+  // Available on Windows 10 version 1607 and newer, otherwise returns 0.
+  //
+  // See:
+  // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-getdpiforwindow
+  virtual UINT GetDpiForWindow(HWND hwnd) const;
+
  private:
   using GetPointerType_ = BOOL __stdcall(UINT32 pointerId,
                                          POINTER_INPUT_TYPE* pointerType);
@@ -188,6 +196,7 @@ class WindowsProcTable {
                                                    BOOL bMenu,
                                                    DWORD dwExStyle,
                                                    UINT dpi);
+  using GetDpiForWindow_ = UINT __stdcall(HWND hwnd);
 
   // The User32.dll library, used to resolve functions at runtime.
   fml::RefPtr<fml::NativeLibrary> user32_;
@@ -199,6 +208,7 @@ class WindowsProcTable {
   std::optional<SetWindowCompositionAttribute_*>
       set_window_composition_attribute_;
   std::optional<AdjustWindowRectExForDpi_*> adjust_window_rect_ext_for_dpi_;
+  std::optional<GetDpiForWindow_*> get_dpi_for_window_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(WindowsProcTable);
 };

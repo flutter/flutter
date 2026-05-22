@@ -26,6 +26,8 @@ WindowsProcTable::WindowsProcTable() {
   adjust_window_rect_ext_for_dpi_ =
       user32_->ResolveFunction<AdjustWindowRectExForDpi_*>(
           "AdjustWindowRectExForDpi");
+  get_dpi_for_window_ =
+      user32_->ResolveFunction<GetDpiForWindow_*>("GetDpiForWindow");
 }
 
 WindowsProcTable::~WindowsProcTable() {
@@ -170,6 +172,14 @@ BOOL WindowsProcTable::EnumDisplayMonitors(HDC hdc,
                                            MONITORENUMPROC lpfnEnum,
                                            LPARAM dwData) const {
   return ::EnumDisplayMonitors(hdc, lprcClip, lpfnEnum, dwData);
+}
+
+UINT WindowsProcTable::GetDpiForWindow(HWND hwnd) const {
+  if (!get_dpi_for_window_.has_value()) {
+    return 0;
+  }
+
+  return get_dpi_for_window_.value()(hwnd);
 }
 
 }  // namespace flutter

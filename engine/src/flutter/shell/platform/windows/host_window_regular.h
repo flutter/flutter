@@ -33,7 +33,8 @@ class HostWindowRegular : public HostWindowSized {
   static Rect GetInitialRect(FlutterWindowsEngine* engine,
                              const WindowSizeRequest& preferred_size,
                              const BoxConstraints& constraints,
-                             bool sized_to_content);
+                             bool sized_to_content,
+                             bool resizable);
 };
 }  // namespace flutter
 

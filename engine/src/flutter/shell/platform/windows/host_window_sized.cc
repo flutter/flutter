@@ -34,8 +34,9 @@ void HostWindowSized::DidUpdateViewSize(int32_t width, int32_t height) {
     height_ = height;
 
     // Convert physical pixels to logical pixels.
-    UINT const dpi = GetDpiForWindow(window_handle_);
-    double const scale = static_cast<double>(dpi) / 96.0;
+    UINT const dpi =
+        engine_->windows_proc_table()->GetDpiForWindow(window_handle_);
+    double const scale = static_cast<double>(dpi > 0 ? dpi : 96) / 96.0;
     WindowSizeRequest const size{
         .has_preferred_view_size = true,
         .preferred_view_width = width / scale,

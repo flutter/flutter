@@ -39,8 +39,8 @@ HostWindowRegular::HostWindowRegular(WindowManager* window_manager,
       .window_style = window_style,
       .extended_window_style = 0,
       .box_constraints = constraints,
-      .initial_window_rect =
-          GetInitialRect(engine, preferred_size, constraints, sized_to_content),
+      .initial_window_rect = GetInitialRect(engine, preferred_size, constraints,
+                                            sized_to_content, resizable),
       .title = title,
       .owner_window = std::optional<HWND>(),
       .sizing_delegate = sized_to_content ? AsSizingDelegate() : nullptr,
@@ -52,7 +52,8 @@ HostWindowRegular::HostWindowRegular(WindowManager* window_manager,
 Rect HostWindowRegular::GetInitialRect(FlutterWindowsEngine* engine,
                                        const WindowSizeRequest& preferred_size,
                                        const BoxConstraints& constraints,
-                                       bool sized_to_content) {
+                                       bool sized_to_content,
+                                       bool resizable) {
   double client_width;
   double client_height;
   if (sized_to_content) {
@@ -68,8 +69,8 @@ Rect HostWindowRegular::GetInitialRect(FlutterWindowsEngine* engine,
   std::optional<Size> const window_size =
       HostWindow::GetWindowSizeForClientSize(
           *engine->windows_proc_table(), Size(client_width, client_height),
-          constraints.smallest(), constraints.biggest(), WS_OVERLAPPEDWINDOW, 0,
-          nullptr);
+          constraints.smallest(), constraints.biggest(),
+          GetWindowStyleForRegular(resizable), 0, nullptr);
   return {{CW_USEDEFAULT, CW_USEDEFAULT},
           window_size ? *window_size : Size{CW_USEDEFAULT, CW_USEDEFAULT}};
 }
