@@ -3,7 +3,7 @@
 An integration and compatibility smoke test suite designed to verify visual rendering correctness on Android hardware.
 
 ## 1. Overview & Purpose
-The primary objective of the `android_hardware_smoke_test` is to provide a **fully self-contained Android instrumented test suite**. 
+The primary objective of the `android_hardware_smoke_test` is to provide a **fully self-contained Android instrumented test suite**.
 
 This allows Android hardware manufacturers (OEMs) to run visual regression, performance, and GPU compatibility tests on a precompiled APK directly on their target devices. **The test execution requires no Flutter SDK, Dart CLI commands, or host-side orchestration.** Feedback is reported directly in standard native Android JUnit test reports.
 
@@ -40,17 +40,16 @@ While both suites verify rendering correctness, they are architected differently
                   │                                                 │
                   ▼                                                 ▼
         Native Java Test sends                            Host driver script connects,
-     testName over Message Channel                       syncs app state, and executes
-                  │                                      matchesGoldenFile(screenshot) matcher
+     testName over Message Channel                       and requests testName via
+                  │                                      driver.requestData()
                   ▼                                                 │
      App renders target state &                                     ▼
-   performs local on-device golden                       App-side golden comparison is
-   comparison against bundled assets                      skipped (via JSON configuration)
+   performs local on-device golden                       App renders target state and
+   comparison against bundled assets                     returns image bytes over channel
                   │                                                 │
                   ▼                                                 ▼
-     App replies status back to                          Screenshot is captured by ADB
-      Java; JUnit reports result                         and verified on the host using the
-                                                         Naive Local Golden Comparator
+     App replies status back to                          Host driver script decodes
+      Java; JUnit reports result                         image bytes and asserts match
 ```
 
 ### Mode A: Instrumented Mode (OEM / Standalone)
