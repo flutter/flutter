@@ -956,24 +956,21 @@ Future<void> testMain() async {
       ellipsis: '...',
       maxLines: 1,
     );
-    final style30 = WebTextStyle(
-      foreground: blackPaint,
-      background: whitePaint,
-      fontSize: 30,
-      fontFamily: 'Roboto',
-    );
+    final style30 = WebTextStyle(foreground: blackPaint, background: whitePaint, fontSize: 40);
 
-    {
-      final builder = WebParagraphBuilder(paragraphStyle);
-      builder.pushStyle(style30);
-      builder.addText('This is a long text that should be ellipsized at the end');
-      builder.pop();
-      final WebParagraph paragraph = builder.build();
-      paragraph.layout(const ParagraphConstraints(width: 300));
-      paragraph.paint(canvas, const Offset(100, 100));
-    }
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.pushStyle(style30);
+    builder.addText('This is a long text that should be ellipsized at the end');
+    builder.pop();
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 350));
+    paragraph.paint(canvas, const Offset(20, 20));
+
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph.ellipsis_ltr.png', region: region);
+    await matchGoldenFile(
+      'web_paragraph.ellipsis_ltr.png',
+      region: const Rect.fromLTWH(0, 0, 500, 200),
+    );
   });
 
   test('Ellipsis RTL', () async {
@@ -992,25 +989,22 @@ Future<void> testMain() async {
       maxLines: 1,
       textDirection: TextDirection.rtl,
     );
-    final style30 = WebTextStyle(
-      foreground: blackPaint,
-      background: whitePaint,
-      fontSize: 30,
-      fontFamily: 'Roboto',
-    );
+    final style30 = WebTextStyle(foreground: blackPaint, background: whitePaint, fontSize: 40);
 
-    {
-      final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
 
-      builder.pushStyle(style30);
-      builder.addText('إنالسيطرةعلىالعالمعبارةقبيحةللغاية-أفضلأنأسميهاتحسينالعالم');
-      builder.pop();
-      final WebParagraph paragraph = builder.build();
-      paragraph.layout(const ParagraphConstraints(width: 300));
-      paragraph.paint(canvas, const Offset(100, 100));
-    }
+    builder.pushStyle(style30);
+    builder.addText('إن السيطرة على العالم عبارة قبيحة للغاية - أفضل أن أسميها تحسين العالم');
+    builder.pop();
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 350));
+    paragraph.paint(canvas, const Offset(20, 20));
+
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph.ellipsis_rtl.png', region: region);
+    await matchGoldenFile(
+      'web_paragraph.ellipsis_rtl.png',
+      region: const Rect.fromLTWH(0, 0, 500, 200),
+    );
   });
 
   test('MaxLines, no ellipsis', () async {

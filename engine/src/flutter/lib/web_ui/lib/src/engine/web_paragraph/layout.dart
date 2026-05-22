@@ -421,6 +421,7 @@ class TextLayout {
         // We place the ellipsis block at the beginning of the line (for RTL paragraph)
         line.visualBlocks.insert(0, ellipsisBlock);
       }
+      line.updateBoundingBox(ellipsisBlock);
     }
 
     // Now when we calculated all line metrics we have to correct placeholders that depend on it
