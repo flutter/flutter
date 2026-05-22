@@ -184,7 +184,7 @@ dependencies:
   test_core: 0.6.18
   typed_data: 1.4.0
   url_launcher: 6.3.2
-  url_launcher_android: 6.3.29
+  url_launcher_android: 6.3.30
   url_launcher_ios: 6.4.1
   url_launcher_linux: 3.2.2
   url_launcher_macos: 3.2.5
@@ -224,13 +224,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# Because objective_c >=9.2.3 depends on native_toolchain_c ^0.17.4 and
-# objective_c >=9.2.1 <9.2.3 depends on native_toolchain_c ^0.17.2, objective_c
-# >=9.2.1 requires native_toolchain_c ^0.17.2. And because
-# >path_provider_foundation 2.6.0 depends on objective_c ^9.2.1,
-# >path_provider_foundation 2.6.0 requires native_toolchain_c ^0.17.2.
-dependency_overrides:
-  native_toolchain_c: 0.19.0
-  hooks: 2.0.0
-
-# PUBSPEC CHECKSUM: c0m2k4
+# PUBSPEC CHECKSUM: 82uul6
