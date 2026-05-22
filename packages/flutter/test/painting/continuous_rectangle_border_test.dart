@@ -18,6 +18,7 @@ const Color _green400 = Color(0xFF66BB6A);
 const Color _green500 = Color(0xFF4CAF50);
 const Color _redAccent400 = Color(0xFFFF1744);
 
+/// Builds a repaint boundary for golden testing a [ContinuousRectangleBorder].
 Widget _buildGoldenTest({required Color color, required BorderRadiusGeometry borderRadius}) {
   return RepaintBoundary(
     child: DecoratedBox(
