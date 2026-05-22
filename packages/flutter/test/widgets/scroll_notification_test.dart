@@ -342,7 +342,9 @@ void main() {
     expect(notification, isA<ScrollEndNotification>());
   });
 
-  testWidgets('CustomScrollView scrolling does not fire ScrollMetricsNotification', (WidgetTester tester) async {
+  testWidgets('CustomScrollView scrolling does not fire ScrollMetricsNotification', (
+    WidgetTester tester,
+  ) async {
     final metricsNotifications = <ScrollMetricsNotification>[];
 
     await tester.pumpWidget(
@@ -357,8 +359,7 @@ void main() {
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) =>
-                      SizedBox(height: 100, child: Text('$index')),
+                  (BuildContext context, int index) => SizedBox(height: 100, child: Text('$index')),
                   childCount: 20,
                 ),
               ),
@@ -378,7 +379,9 @@ void main() {
     expect(metricsNotifications, isEmpty);
   });
 
-  testWidgets('CustomScrollView fires ScrollMetricsNotification when content dimensions change', (WidgetTester tester) async {
+  testWidgets('CustomScrollView fires ScrollMetricsNotification when content dimensions change', (
+    WidgetTester tester,
+  ) async {
     final metricsNotifications = <ScrollMetricsNotification>[];
 
     Widget buildWidget(int itemCount) {
@@ -393,8 +396,7 @@ void main() {
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) =>
-                      SizedBox(height: 100, child: Text('$index')),
+                  (BuildContext context, int index) => SizedBox(height: 100, child: Text('$index')),
                   childCount: itemCount,
                 ),
               ),
@@ -414,7 +416,9 @@ void main() {
     expect(metricsNotifications.first.metrics.maxScrollExtent, greaterThan(0.0));
   });
 
-  testWidgets('CustomScrollView fires ScrollMetricsNotification when viewportDimension changes', (WidgetTester tester) async {
+  testWidgets('CustomScrollView fires ScrollMetricsNotification when viewportDimension changes', (
+    WidgetTester tester,
+  ) async {
     final metricsNotifications = <ScrollMetricsNotification>[];
 
     Widget buildWidget(double viewportHeight) {
@@ -458,5 +462,4 @@ void main() {
     expect(metricsNotifications, isNotEmpty);
     expect(metricsNotifications.first.metrics.viewportDimension, 400.0);
   });
-
 }

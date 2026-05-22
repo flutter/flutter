@@ -131,7 +131,10 @@ void main() {
     final TestGesture drag1 = await tester.startGesture(const Offset(10.0, 500.0));
     expect(await tester.pumpAndSettle(), 1); // Nothing to animate
     await drag1.moveTo(const Offset(10.0, 0.0));
-    expect(await tester.pumpAndSettle(), 2); // Nothing to animate, one semantics update due to metrics change
+    expect(
+      await tester.pumpAndSettle(),
+      2,
+    ); // Nothing to animate, one semantics update due to metrics change
     await drag1.up();
     expect(await tester.pumpAndSettle(), 1); // Nothing to animate
     expect(position.pixels, moreOrLessEquals(500.0));
@@ -150,7 +153,10 @@ void main() {
       find.byType(ExpandingBox),
     );
     expandingBoxState.toggleSize();
-    expect(await tester.pumpAndSettle(), 2); // Nothing to animate, one semantics update due to metrics change
+    expect(
+      await tester.pumpAndSettle(),
+      2,
+    ); // Nothing to animate, one semantics update due to metrics change
     expect(position.activity, isInstanceOf<DragScrollActivity>());
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, 100.0);
