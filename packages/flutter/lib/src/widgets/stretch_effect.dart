@@ -10,11 +10,13 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'image_filter.dart';
+import 'layout_builder.dart';
 
 /// A widget that applies a stretching visual effect to its child.
 ///
 /// When shader-based effects are supported, this effect replicates the native Android stretch overscroll effect.
-/// Otherwise, a matrix transform provides an approximation.
+/// Otherwise, a capped translation along the scroll axis provides overscroll feedback without scaling the
+/// child, which distorts text under Impeller. See https://github.com/flutter/flutter/issues/167795.
 ///
 /// Used by [StretchingOverscrollIndicator] widget.
 class StretchEffect extends StatelessWidget {
@@ -70,44 +72,68 @@ class StretchEffect extends StatelessWidget {
   /// The child widget that the stretching overscroll effect applies to.
   final Widget child;
 
-  AlignmentGeometry _getAlignment(TextDirection direction) {
-    final bool isForward = stretchStrength > 0;
+  /// Whether to use the fragment-shader based stretch effect.
+  ///
+  /// Disabled by default because applying [ImageFilter.shader] to scrollable
+  /// content under Impeller causes text to jitter and stretch incorrectly.
+  /// See https://github.com/flutter/flutter/issues/167795.
+  @visibleForTesting
+  static const bool useShaderStretchEffect = false;
 
-    if (axis == Axis.vertical) {
-      return isForward ? AlignmentDirectional.topCenter : AlignmentDirectional.bottomCenter;
+  /// Maximum fraction of the main-axis extent used for transform-based overscroll
+  /// feedback when the shader path is disabled.
+  ///
+  /// Scaling scrollable content (especially text) under Impeller distorts glyphs.
+  /// See https://github.com/flutter/flutter/issues/167795.
+  @visibleForTesting
+  static const double maxTransformTranslationFraction = 0.12;
+
+  Widget _buildTransformStretch() {
+    if (stretchStrength.abs() <= precisionErrorTolerance) {
+      return child;
     }
 
-    // RTL horizontal.
-    if (direction == TextDirection.rtl) {
-      return isForward ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart;
-    } else {
-      return isForward ? AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd;
-    }
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double? mainExtent = switch (axis) {
+          Axis.vertical =>
+            constraints.hasBoundedHeight && constraints.maxHeight.isFinite
+                ? constraints.maxHeight
+                : null,
+          Axis.horizontal =>
+            constraints.hasBoundedWidth && constraints.maxWidth.isFinite
+                ? constraints.maxWidth
+                : null,
+        };
+
+        if (mainExtent == null || mainExtent <= 0) {
+          return child;
+        }
+
+        final double translation =
+            stretchStrength * mainExtent * maxTransformTranslationFraction;
+
+        final Offset offset = switch (axis) {
+          Axis.vertical => Offset(0.0, translation),
+          Axis.horizontal => Offset(translation, 0.0),
+        };
+
+        return Transform.translate(
+          offset: offset,
+          filterQuality: FilterQuality.medium,
+          child: child,
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (ui.ImageFilter.isShaderFilterSupported) {
+    if (useShaderStretchEffect && ui.ImageFilter.isShaderFilterSupported) {
       return _StretchOverscrollEffect(stretchStrength: stretchStrength, axis: axis, child: child);
     }
 
-    final TextDirection textDirection = Directionality.of(context);
-    var x = 1.0;
-    var y = 1.0;
-
-    switch (axis) {
-      case Axis.horizontal:
-        x += stretchStrength.abs();
-      case Axis.vertical:
-        y += stretchStrength.abs();
-    }
-
-    return Transform(
-      alignment: _getAlignment(textDirection),
-      transform: Matrix4.diagonal3Values(x, y, 1.0),
-      filterQuality: stretchStrength == 0 ? null : FilterQuality.medium,
-      child: child,
-    );
+    return _buildTransformStretch();
   }
 }
 
@@ -150,6 +176,8 @@ class _StretchOverscrollEffect extends StatefulWidget {
 
 class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
   ui.FragmentShader? _fragmentShader;
+  bool _fragmentShaderInitialized = false;
+  ui.ImageFilter? _imageFilter;
 
   /// The maximum scale multiplier applied during a stretch effect.
   static const double maxStretchIntensity = 1.0;
@@ -172,35 +200,44 @@ class _StretchOverscrollEffectState extends State<_StretchOverscrollEffect> {
     _StretchEffectShader.initializeShader();
   }
 
+  void _updateFragmentShaderUniforms() {
+    if (_fragmentShader == null) {
+      return;
+    }
+    _fragmentShader!
+      ..setFloat(2, maxStretchIntensity)
+      ..setFloat(3, widget.axis == Axis.vertical ? 0.0 : widget.stretchStrength)
+      ..setFloat(4, widget.axis == Axis.vertical ? widget.stretchStrength : 0.0)
+      ..setFloat(5, interpolationStrength);
+  }
+
+  ui.ImageFilter _createImageFilter() {
+    if (_StretchEffectShader._initialized && _fragmentShader != null) {
+      return ui.ImageFilter.shader(_fragmentShader!);
+    }
+    return _emptyFilter;
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isShaderNeeded = widget.stretchStrength.abs() > precisionErrorTolerance;
 
-    final ui.ImageFilter imageFilter;
-
-    if (_StretchEffectShader._initialized) {
-      _fragmentShader?.dispose();
+    if (_StretchEffectShader._initialized && !_fragmentShaderInitialized) {
       _fragmentShader = _StretchEffectShader._program!.fragmentShader();
-      _fragmentShader!.setFloat(2, maxStretchIntensity);
-      if (widget.axis == Axis.vertical) {
-        _fragmentShader!.setFloat(3, 0.0);
-        _fragmentShader!.setFloat(4, widget.stretchStrength);
-      } else {
-        _fragmentShader!.setFloat(3, widget.stretchStrength);
-        _fragmentShader!.setFloat(4, 0.0);
-      }
-      _fragmentShader!.setFloat(5, interpolationStrength);
+      _fragmentShaderInitialized = true;
+      _imageFilter = _createImageFilter();
+    }
 
-      imageFilter = ui.ImageFilter.shader(_fragmentShader!);
+    if (_fragmentShaderInitialized) {
+      _updateFragmentShaderUniforms();
+      // ImageFilter.shader captures uniform values at creation time.
+      _imageFilter = _createImageFilter();
     } else {
-      _fragmentShader?.dispose();
-      _fragmentShader = null;
-
-      imageFilter = _emptyFilter;
+      _imageFilter = _emptyFilter;
     }
 
     return ImageFiltered(
-      imageFilter: imageFilter,
+      imageFilter: _imageFilter!,
       enabled: isShaderNeeded,
       // A nearly-transparent pixels is used to ensure the shader gets applied,
       // even when the child is visually transparent or has no paint operations.
