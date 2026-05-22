@@ -189,19 +189,7 @@ class SwiftPackageManager {
         }
       }
 
-      final FileSystemEntity? entityToDelete = switch (type) {
-        FileSystemEntityType.directory => _fileSystem.directory(pluginSymlink.path),
-        FileSystemEntityType.file => _fileSystem.file(pluginSymlink.path),
-        FileSystemEntityType.link => pluginSymlink,
-        _ => null,
-      };
-
-      if (entityToDelete != null) {
-        ErrorHandlingFileSystem.deleteIfExists(
-          entityToDelete,
-          recursive: type == FileSystemEntityType.directory,
-        );
-      }
+      ErrorHandlingFileSystem.deleteIfExists(pluginSymlink, recursive: true);
 
       try {
         pluginSymlink.createSync(packagePath);
