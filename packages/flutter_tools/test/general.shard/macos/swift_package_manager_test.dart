@@ -262,6 +262,76 @@ let package = Package(
 ''');
           });
 
+          testWithoutContext(
+            'uses package name symlink for path dependency with different root',
+            () async {
+              final fs = MemoryFileSystem();
+              final processManager = FakeProcessManager.any();
+              final logger = BufferLogger.test();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+              final plugin = FakePlugin(
+                name: 'device_plugin',
+                rootDirectoryName: 'NUXXXXX_DEVICE_PLUGIN_Lib',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs.file('${plugin.path}/${platform.name}/${plugin.name}/Package.swift')
+                ..createSync(recursive: true)
+                ..writeAsStringSync('');
+              final spm = SwiftPackageManager(
+                fileSystem: fs,
+                templateRenderer: const MustacheTemplateRenderer(),
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                config: FakeConfig(),
+              );
+
+              await spm.generatePluginsSwiftPackage(<Plugin>[plugin], platform, project);
+
+              expect(project.relativeSwiftPackagesDirectory.childLink('device_plugin'), exists);
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('device_plugin').targetSync(),
+                '${plugin.path}/${platform.name}/device_plugin',
+              );
+              expect(
+                project.flutterPluginSwiftPackageManifest.readAsStringSync(),
+                contains('.package(name: "device_plugin", path: "../.packages/device_plugin")'),
+              );
+            },
+          );
+
+          testWithoutContext(
+            'uses package name symlink when root has invalid version suffix',
+            () async {
+              final fs = MemoryFileSystem();
+              final processManager = FakeProcessManager.any();
+              final logger = BufferLogger.test();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+              final plugin = FakePlugin(
+                name: 'device_plugin',
+                rootDirectoryName: 'device_plugin-dev-build',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs.file('${plugin.path}/${platform.name}/${plugin.name}/Package.swift')
+                ..createSync(recursive: true)
+                ..writeAsStringSync('');
+              final spm = SwiftPackageManager(
+                fileSystem: fs,
+                templateRenderer: const MustacheTemplateRenderer(),
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                config: FakeConfig(),
+              );
+
+              await spm.generatePluginsSwiftPackage(<Plugin>[plugin], platform, project);
+
+              expect(project.relativeSwiftPackagesDirectory.childLink('device_plugin'), exists);
+              expect(
+                project.flutterPluginSwiftPackageManifest.readAsStringSync(),
+                contains('.package(name: "device_plugin", path: "../.packages/device_plugin")'),
+              );
+            },
+          );
+
           testWithoutContext('generate with multiple dependencies', () async {
             final fs = MemoryFileSystem();
             final processManager = FakeProcessManager.any();
@@ -609,8 +679,12 @@ class FakeXcodeProject extends Fake implements IosProject {
 }
 
 class FakePlugin extends Fake implements Plugin {
-  FakePlugin({required this.name, required this.platforms, this.hasSwiftPackage = true})
-    : path = '/local/path/to/plugins/$name-1.0.0';
+  FakePlugin({
+    required this.name,
+    required this.platforms,
+    this.hasSwiftPackage = true,
+    String? rootDirectoryName,
+  }) : path = '/local/path/to/plugins/${rootDirectoryName ?? '$name-1.0.0'}';
 
   @override
   final String name;

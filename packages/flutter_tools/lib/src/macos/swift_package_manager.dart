@@ -150,10 +150,7 @@ class SwiftPackageManager {
         continue;
       }
 
-      // Use the plugin basename as the symlink plugin directory name since the basename has the
-      // version number in it. This will make the symlink name change when the plugin version
-      // changes, which forces Xcode to re-process the package manifest.
-      final String basename = _fileSystem.directory(plugin.path).basename;
+      final String symlinkName = _pluginSymlinkName(plugin);
 
       // Check if the plugin has a dependency on another Flutter plugin.
       // If the plugin has a dependency on another plugin, copy the plugin to the SourcePackages
@@ -166,13 +163,13 @@ class SwiftPackageManager {
           plugin: plugin,
           pluginDependencies: pluginDependencies,
           pathRelativeTo: pathRelativeTo,
-          basename: basename,
+          symlinkName: symlinkName,
           platform: platform,
           manifestContent: manifestContent,
         );
       }
 
-      final Link pluginSymlink = symlinkDirectory.childLink(basename);
+      final Link pluginSymlink = symlinkDirectory.childLink(symlinkName);
       ErrorHandlingFileSystem.deleteIfExists(pluginSymlink);
       pluginSymlink.createSync(packagePath);
       final String packageRelativePath = _fileSystem.path.relative(
@@ -196,6 +193,26 @@ class SwiftPackageManager {
       );
     }
     return (packageDependencies, targetDependencies);
+  }
+
+  /// Returns the name to use for the generated symlink to a plugin's Swift package.
+  ///
+  /// Hosted packages use a root directory like `plugin_name-1.0.0`; preserving that
+  /// versioned name forces Xcode to reprocess the manifest when the package version changes.
+  /// Path dependencies may live in an arbitrary repository directory. In that case the
+  /// symlink name must match the Dart package name so SwiftPM's path identity matches the
+  /// explicit package dependency name.
+  String _pluginSymlinkName(Plugin plugin) {
+    final String basename = _fileSystem.directory(plugin.path).basename;
+    if (basename == plugin.name) {
+      return basename;
+    }
+    final versionedPluginPrefix = '${plugin.name}-';
+    if (basename.startsWith(versionedPluginPrefix) &&
+        Version.parse(basename.substring(versionedPluginPrefix.length)) != null) {
+      return basename;
+    }
+    return plugin.name;
   }
 
   /// Checks if the plugin has a dependency on another Flutter plugin and returns a list of paths
@@ -238,7 +255,7 @@ class SwiftPackageManager {
         if (pluginDependency == null) {
           continue;
         }
-        final newPath = '"../${_fileSystem.directory(pluginDependency.path).basename}"';
+        final newPath = '"../${_pluginSymlinkName(pluginDependency)}"';
         if (path == newPath) {
           continue;
         }
@@ -258,7 +275,7 @@ class SwiftPackageManager {
     required Plugin plugin,
     required List<({String original, String replacement})> pluginDependencies,
     required String pathRelativeTo,
-    required String basename,
+    required String symlinkName,
     required FlutterDarwinPlatform platform,
     required String manifestContent,
   }) {
@@ -267,7 +284,7 @@ class SwiftPackageManager {
           _fileSystem.path.join(
             platform.buildDirectory(config: _config, fileSystem: _fileSystem),
             'SourcePackages',
-            basename,
+            symlinkName,
           ),
         )
         .absolute
