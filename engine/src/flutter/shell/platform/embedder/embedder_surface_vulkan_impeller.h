@@ -14,8 +14,6 @@
 #include "flutter/vulkan/procs/vulkan_proc_table.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 
-#include "impeller/base/flags.h"
-
 namespace flutter {
 
 class EmbedderSurfaceVulkanImpeller final : public EmbedderSurface,
@@ -41,8 +39,7 @@ class EmbedderSurfaceVulkanImpeller final : public EmbedderSurface,
       uint32_t queue_family_index,
       VkQueue queue,
       const VulkanDispatchTable& vulkan_dispatch_table,
-      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
-      impeller::Flags impeller_flags = {});
+      std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 
   ~EmbedderSurfaceVulkanImpeller() override;
 

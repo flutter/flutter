@@ -77,8 +77,7 @@ class ReactorWorker final : public impeller::ReactorGLES::Worker {
 EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
     EmbedderSurfaceGLSkia::GLDispatchTable gl_dispatch_table,
     bool fbo_reset_after_present,
-    std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder,
-    impeller::Flags impeller_flags)
+    std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
     : gl_dispatch_table_(std::move(gl_dispatch_table)),
       fbo_reset_after_present_(fbo_reset_after_present),
       external_view_embedder_(std::move(external_view_embedder)),
@@ -107,7 +106,7 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
   const auto shader_mappings = GetShaderMappings(is_gles3);
 
   impeller_context_ = impeller::ContextGLES::Create(
-      impeller_flags, std::move(gl), shader_mappings,
+      impeller::Flags{}, std::move(gl), shader_mappings,
       /*enable_gpu_tracing=*/false);
 
   if (!impeller_context_) {
@@ -122,11 +121,7 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
   }
 
   gl_dispatch_table_.gl_clear_current_callback();
-  if (impeller_flags.use_sdfs) {
-    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGLESSDF).";
-  } else {
-    FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGLES).";
-  }
+  FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (OpenGL).";
   valid_ = true;
 }
 

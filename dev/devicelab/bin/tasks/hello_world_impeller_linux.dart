@@ -30,8 +30,8 @@ Future<TaskResult> run() async {
 
       final completer = Completer<void>();
       var sawImpellerBackendMessage = false;
-      const vulkanBackendMessage = 'Using the Impeller rendering backend (VulkanSDF).';
-      const openGLBackendMessage = 'Using the Impeller rendering backend (OpenGLESSDF).';
+      const vulkanBackendMessage = 'Using the Impeller rendering backend (Vulkan).';
+      const openGLBackendMessage = 'Using the Impeller rendering backend (OpenGL).';
 
       final StreamSubscription<String> subscription = process.stdout
           .transform(utf8.decoder)

@@ -12,8 +12,6 @@
 #include <string>
 #include <vector>
 
-#include "impeller/base/flags.h"
-
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/make_copyable.h"
@@ -311,8 +309,7 @@ InferOpenGLPlatformViewCreationCallback(
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
-    bool enable_impeller,
-    impeller::Flags impeller_flags) {
+    bool enable_impeller) {
 #ifdef SHELL_ENABLE_GL
   if (config->type != kOpenGL) {
     return nullptr;
@@ -484,7 +481,7 @@ InferOpenGLPlatformViewCreationCallback(
 
   return fml::MakeCopyable(
       [gl_dispatch_table, fbo_reset_after_present, platform_dispatch_table,
-       enable_impeller, impeller_flags,
+       enable_impeller,
        external_view_embedder =
            std::move(external_view_embedder)](flutter::Shell& shell) mutable {
         std::shared_ptr<flutter::EmbedderExternalViewEmbedder> view_embedder =
@@ -494,8 +491,8 @@ InferOpenGLPlatformViewCreationCallback(
               shell,                   // delegate
               shell.GetTaskRunners(),  // task runners
               std::make_unique<flutter::EmbedderSurfaceGLImpeller>(
-                  gl_dispatch_table, fbo_reset_after_present, view_embedder,
-                  impeller_flags),      // embedder_surface
+                  gl_dispatch_table, fbo_reset_after_present,
+                  view_embedder),       // embedder_surface
               platform_dispatch_table,  // embedder platform dispatch table
               view_embedder             // external view embedder
           );
@@ -524,8 +521,7 @@ InferMetalPlatformViewCreationCallback(
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
-    bool enable_impeller,
-    impeller::Flags impeller_flags) {
+    bool enable_impeller) {
   if (config->type != kMetal) {
     return nullptr;
   }
@@ -622,8 +618,7 @@ InferVulkanPlatformViewCreationCallback(
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
-    bool enable_impeller,
-    impeller::Flags impeller_flags) {
+    bool enable_impeller) {
   if (config->type != kVulkan) {
     return nullptr;
   }
@@ -687,7 +682,7 @@ InferVulkanPlatformViewCreationCallback(
             static_cast<VkDevice>(config->vulkan.device),
             config->vulkan.queue_family_index,
             static_cast<VkQueue>(config->vulkan.queue), vulkan_dispatch_table,
-            view_embedder, impeller_flags);
+            view_embedder);
 
     return fml::MakeCopyable(
         [embedder_surface = std::move(embedder_surface),
@@ -823,8 +818,7 @@ InferPlatformViewCreationCallback(
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
-    bool enable_impeller,
-    impeller::Flags impeller_flags) {
+    bool enable_impeller) {
   if (config == nullptr) {
     return nullptr;
   }
@@ -833,7 +827,7 @@ InferPlatformViewCreationCallback(
     case kOpenGL:
       return InferOpenGLPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder), enable_impeller, impeller_flags);
+          std::move(external_view_embedder), enable_impeller);
     case kSoftware:
       return InferSoftwarePlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
@@ -841,11 +835,11 @@ InferPlatformViewCreationCallback(
     case kMetal:
       return InferMetalPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder), enable_impeller, impeller_flags);
+          std::move(external_view_embedder), enable_impeller);
     case kVulkan:
       return InferVulkanPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder), enable_impeller, impeller_flags);
+          std::move(external_view_embedder), enable_impeller);
     default:
       return nullptr;
   }
@@ -2314,14 +2308,10 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
           view_focus_change_request_callback,         //
       };
 
-  impeller::Flags impeller_flags;
-  impeller_flags.use_sdfs = settings.impeller_use_sdfs;
-  impeller_flags.antialiased_lines = settings.impeller_antialiased_lines;
-
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,
       std::move(external_view_embedder_result.value()),
-      settings.enable_impeller, impeller_flags);
+      settings.enable_impeller);
 
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(
