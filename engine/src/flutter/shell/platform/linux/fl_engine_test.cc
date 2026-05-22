@@ -1069,9 +1069,11 @@ TEST(FlEngineTest, EnableImpeller) {
 
   bool called = false;
   fl_engine_get_embedder_api(engine)->Initialize = MOCK_ENGINE_PROC(
-      Initialize, ([](size_t version, const FlutterRendererConfig* config,
-                      const FlutterProjectArgs* args, void* user_data,
-                      FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+      Initialize,
+      ([&called](size_t version, const FlutterRendererConfig* config,
+                 const FlutterProjectArgs* args, void* user_data,
+                 FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        called = true;
         bool has_impeller_switch = false;
         for (int i = 0; i < args->command_line_argc; i++) {
           if (strcmp(args->command_line_argv[i], "--enable-impeller") == 0) {
@@ -1087,6 +1089,7 @@ TEST(FlEngineTest, EnableImpeller) {
   g_autoptr(GError) error = nullptr;
   EXPECT_TRUE(fl_engine_start(engine, &error));
   EXPECT_EQ(error, nullptr);
+  EXPECT_TRUE(called);
 }
 
 TEST(FlEngineTest, ChildObjects) {
