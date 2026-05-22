@@ -5,6 +5,9 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+const Color _red500 = Color(0xFFF44336);
+const Color _blue500 = Color(0xFF2196F3);
+
 void main() {
   test('RenderConstrainedBox getters and setters', () {
     final box = RenderConstrainedBox(
@@ -54,13 +57,13 @@ void main() {
   test('RenderShaderMask getters and setters', () {
     Shader callback1(Rect bounds) {
       assert(false); // The test should not call this.
-      const gradient = LinearGradient(colors: <Color>[Color(0xFFF44336)]);
+      const gradient = LinearGradient(colors: [_red500]);
       return gradient.createShader(Rect.zero);
     }
 
     Shader callback2(Rect bounds) {
       assert(false); // The test should not call this.
-      const gradient = LinearGradient(colors: <Color>[Color(0xFF2196F3)]);
+      const gradient = LinearGradient(colors: [_blue500]);
       return gradient.createShader(Rect.zero);
     }
 

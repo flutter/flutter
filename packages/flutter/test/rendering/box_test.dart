@@ -22,7 +22,7 @@ const List<BoxShadow> _materialElevation3Shadows = <BoxShadow>[
   BoxShadow(offset: Offset(0.0, 1.0), blurRadius: 8.0, color: Color(0x1F000000)),
 ];
 
-BoxConstraints _unconstrained(BoxConstraints constraints) => const BoxConstraints();
+BoxConstraints _unconstrained(BoxConstraints _) => const BoxConstraints();
 
 BoxConstraints _widthUnconstrained(BoxConstraints constraints) => constraints.heightConstraints();
 
@@ -107,7 +107,7 @@ void main() {
         gradient: RadialGradient(
           center: Alignment.topLeft,
           radius: 1.8,
-          colors: <Color>[_materialYellow500, _materialBlue500],
+          colors: [_materialYellow500, _materialBlue500],
         ),
         boxShadow: _materialElevation3Shadows,
       ),
