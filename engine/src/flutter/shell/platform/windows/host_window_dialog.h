@@ -5,15 +5,12 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_HOST_WINDOW_DIALOG_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_HOST_WINDOW_DIALOG_H_
 
-#include <memory>
 #include <optional>
 
-#include "host_window.h"
-#include "shell/platform/windows/flutter_windows_view.h"
+#include "host_window_sized.h"
 
 namespace flutter {
-class HostWindowDialog : public HostWindow,
-                         private FlutterWindowsViewSizingDelegate {
+class HostWindowDialog : public HostWindowSized {
  public:
   // Creates a dialog window.
   //
@@ -49,9 +46,6 @@ class HostWindowDialog : public HostWindow,
                         LPARAM lparam) override;
 
  private:
-  void DidUpdateViewSize(int32_t width, int32_t height) override;
-  WindowRect GetWorkArea() const override;
-
   // Enforces modal behavior. This favors enabling most recently created
   // modal window higest up in the window hierarchy.
   void UpdateModalState();
@@ -66,19 +60,6 @@ class HostWindowDialog : public HostWindow,
                              std::optional<HWND> const& owner_window,
                              bool sized_to_content,
                              bool resizable);
-
-  // Whether the user can manually resize this window.
-  const bool resizable_;
-
-  // Used to track whether the view is still alive in tasks posted from the
-  // raster thread.
-  std::shared_ptr<int> view_alive_;
-
-  // The last physical-pixel width reported to DidUpdateViewSize.
-  int width_ = 0;
-
-  // The last physical-pixel height reported to DidUpdateViewSize.
-  int height_ = 0;
 };
 }  // namespace flutter
 
