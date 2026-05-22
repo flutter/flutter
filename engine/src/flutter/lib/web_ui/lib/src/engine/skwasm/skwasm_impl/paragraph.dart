@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:js_interop';
+import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
@@ -1088,5 +1089,31 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     textStyle.applyToNative(nativeStyle);
     textStyleStack.add(nativeStyle);
     paragraphBuilderPushStyle(handle, nativeStyle.handle);
+  }
+}
+
+// Using a specialized local extension rather than a generic List<int>.generate
+// prevents dart2wasm from dynamically boxing the primitive integers into
+// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+extension on Pointer<Uint8> {
+  Uint8List asUint8List(int length) {
+    final list = Uint8List(length);
+    for (var i = 0; i < length; i++) {
+      list[i] = this[i];
+    }
+    return list;
+  }
+}
+
+// Using a specialized local extension rather than a generic List<int>.generate
+// prevents dart2wasm from dynamically boxing the primitive integers into
+// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+extension on Pointer<Uint32> {
+  Uint32List asUint32List(int length) {
+    final list = Uint32List(length);
+    for (var i = 0; i < length; i++) {
+      list[i] = this[i];
+    }
+    return list;
   }
 }

@@ -284,33 +284,3 @@ T withStackScope<T>(T Function(StackScope scope) f) {
   stackRestore(stack);
   return result;
 }
-
-extension PointerToTypedListUint8 on Pointer<Uint8> {
-  Uint8List asUint8List(int length) {
-    final list = Uint8List(length);
-    for (var i = 0; i < length; i++) {
-      list[i] = this[i];
-    }
-    return list;
-  }
-}
-
-extension PointerToTypedListInt8 on Pointer<Int8> {
-  Uint8List asUint8List(int length) {
-    final list = Uint8List(length);
-    for (var i = 0; i < length; i++) {
-      list[i] = this[i] & 0xFF;
-    }
-    return list;
-  }
-}
-
-extension PointerToTypedListUint32 on Pointer<Uint32> {
-  Uint32List asUint32List(int length) {
-    final list = Uint32List(length);
-    for (var i = 0; i < length; i++) {
-      list[i] = this[i];
-    }
-    return list;
-  }
-}

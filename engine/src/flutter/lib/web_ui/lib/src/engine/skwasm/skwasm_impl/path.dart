@@ -270,3 +270,18 @@ class SkwasmPathConstructors implements DisposablePathConstructors {
     return SkwasmPath.combine(operation, path1 as SkwasmPath, path2 as SkwasmPath);
   }
 }
+
+// Using a specialized local extension rather than a generic List<int>.generate
+// prevents dart2wasm from dynamically boxing the primitive integers into
+// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+// Explicitly masks the signed Int8 values to positive unsigned bytes (& 0xFF)
+// to guarantee correct decoding by the UTF-8 decoder.
+extension on Pointer<Int8> {
+  Uint8List asUint8List(int length) {
+    final list = Uint8List(length);
+    for (var i = 0; i < length; i++) {
+      list[i] = this[i] & 0xFF;
+    }
+    return list;
+  }
+}
