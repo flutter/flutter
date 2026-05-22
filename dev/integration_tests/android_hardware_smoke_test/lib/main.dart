@@ -1,17 +1,20 @@
 // ignore_for_file: avoid_print, use_key_in_widget_constructors, type_init_formals, no_leading_underscores_for_local_identifiers
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
-import 'dart:io' show File;
+import 'dart:io' as io;
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:android_driver_extensions/native_driver.dart';
 
 GlobalKey targetKey = GlobalKey();
 
-void main() {
+void main() async {
   runApp(const MyApp());
 }
 
@@ -46,36 +49,66 @@ class _MyState extends State<MyWidget> {
     final String? testName = messageMap?['testName'] as String?;
     final bool performAppSideGoldenCompare =
         messageMap?['performAppSideGoldenCompare'] as bool? ?? true;
-    Completer<String> completer = Completer<String>();
+    Completer<Map<String, dynamic>> completer =
+        Completer<Map<String, dynamic>>();
     setState(() {
       _message = testName ?? "Empty message";
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // autoUpdateGoldenFiles = true;
-      if (performAppSideGoldenCompare) {
-        _compareGolden(testName ?? "unknown", completer);
-      } else {
-        print("App handler: skipping app-side golden comparison for $testName");
-        completer.complete("Rendered $testName");
-      }
+      _postFrameCallback(
+        testName ?? "unknown",
+        completer,
+        performAppSideGoldenCompare,
+      );
     }, debugLabel: 'Rendered $testName');
 
     return completer.future;
   }
 
-  Future _compareGolden(String testName, Completer completer) async {
+  Future _postFrameCallback(
+    String testName,
+    Completer<Map<String, dynamic>> completer,
+    bool performAppSideGoldenCompare,
+  ) async {
+    final Uint8List resultImageBytes = await _capturePng(testName);
+
+    if (performAppSideGoldenCompare) {
+      return _compareGolden(testName, resultImageBytes, completer);
+    } else {
+      completer.complete(<String, dynamic>{
+        'message': "Rendered $testName",
+        'imageBytes': base64.encode(resultImageBytes),
+      });
+    }
+  }
+
+  Future _compareGolden(
+    String testName,
+    Uint8List resultImageBytes,
+    Completer<Map<String, dynamic>> completer,
+  ) async {
     final tempDir = await getTemporaryDirectory();
     final testFileName = '$testName.png';
-    var goldenAssetPath = path.join("integration_test/goldens", testFileName);
+    var goldenAssetPath = path.join("test_driver/goldens", testFileName);
     var tempGoldenPath = path.join(tempDir.path, 'goldens', testFileName);
     var tempResultPath = path.join(tempDir.path, 'results', testFileName);
 
     await _copyGoldenAssetToTemp(goldenAssetPath, tempGoldenPath);
-    final resultImageBytes = _capturePngAndWriteResult(
-      testName,
-      tempResultPath,
-    );
+
+    try {
+      await _writeBytesToFile(
+        tempResultPath,
+        resultImageBytes,
+        "compareGolden",
+      );
+    } catch (e) {
+      completer.complete(<String, dynamic>{
+        'message': "Failed to write result image: $e",
+      });
+      return;
+    }
 
     print("App postFrameCallback, comparing golden at $tempGoldenPath");
     print(
@@ -86,36 +119,49 @@ class _MyState extends State<MyWidget> {
     ).matchAsync(resultImageBytes);
 
     if (result == null) {
-      completer.complete("Rendered $testName");
+      completer.complete(<String, dynamic>{'message': "Rendered $testName"});
     } else {
-      completer.complete("Failed to render $testName, match result: $result");
-      return;
+      completer.complete(<String, dynamic>{
+        'message': "Failed to render $testName, match result: $result",
+      });
     }
   }
 
-  Future _copyGoldenAssetToTemp(
+  Future<void> _writeBytesToFile(
+    String filePath,
+    Uint8List bytes,
+    String logTag,
+  ) async {
+    try {
+      final io.File file = io.File(filePath);
+      if (!file.existsSync()) {
+        print("App $logTag, $filePath did not exist, creating it");
+        await file.create(recursive: true);
+      }
+      await file.writeAsBytes(bytes);
+      print("App $logTag, wrote $filePath");
+    } catch (e) {
+      print(
+        "App $logTag, exception thrown while writing $filePath, exception: $e",
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> _copyGoldenAssetToTemp(
     String goldenAssetPath,
     String tempGoldenPath,
   ) async {
-    // Copy golden from asset to temp dir.
-    // Do this every time the test executes because we always want to match against the golden.
     try {
       print(
         "App postFrameCallback, copying $goldenAssetPath to $tempGoldenPath",
       );
-      var file = File(tempGoldenPath);
-      var byteData = await rootBundle.load(goldenAssetPath);
-      var buffer = byteData.buffer;
-      if (!file.existsSync()) {
-        print(
-          "App postFrameCallback, $tempGoldenPath did not exist, creating it",
-        );
-        await file.create(recursive: true);
-      }
-      await file.writeAsBytes(
-        buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+      final ByteData byteData = await rootBundle.load(goldenAssetPath);
+      final Uint8List bytes = byteData.buffer.asUint8List(
+        byteData.offsetInBytes,
+        byteData.lengthInBytes,
       );
-      print("App postFrameCallback, wrote $tempGoldenPath");
+      await _writeBytesToFile(tempGoldenPath, bytes, "postFrameCallback");
     } catch (e) {
       // Maybe golden does not exist in asset path
       print(
@@ -126,12 +172,9 @@ class _MyState extends State<MyWidget> {
     }
   }
 
-  Future<Uint8List> _capturePngAndWriteResult(
-    String testName,
-    String tempResultPath,
-  ) async {
+  Future<Uint8List> _capturePng(String testName) async {
     try {
-      print('_capturePngAndWriteResults for $testName');
+      print('_capturePng for $testName');
       RenderRepaintBoundary boundary =
           targetKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
@@ -144,32 +187,10 @@ class _MyState extends State<MyWidget> {
           'pngBytes from RenderRepaintBoundary.toImage was empty',
         );
       }
-
-      try {
-        print("App _capturePngAndWriteResults, writing to $tempResultPath");
-        var file = File(tempResultPath);
-        var buffer = byteData.buffer;
-        if (!file.existsSync()) {
-          print(
-            "App _capturePngAndWriteResults, $tempResultPath did not exist, creating it",
-          );
-          await file.create(recursive: true);
-        }
-        await file.writeAsBytes(
-          buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
-        );
-        print("App _capturePngAndWriteResults, wrote $tempResultPath");
-      } catch (e) {
-        print(
-          "App _capturePngAndWriteResults, exception thrown while writing $tempResultPath, exception: $e",
-        );
-        rethrow;
-      }
-
       return pngBytes;
     } catch (e) {
-      print('_capturePngAndWriteResults for $testName caught exception: $e');
-      return Uint8List(0);
+      print('_capturePng for $testName caught exception: $e');
+      rethrow;
     }
   }
 
