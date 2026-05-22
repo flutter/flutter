@@ -64,7 +64,8 @@ class HostWindowDialog : public HostWindow,
                              const WindowSizeRequest& preferred_size,
                              const BoxConstraints& constraints,
                              std::optional<HWND> const& owner_window,
-                             bool sized_to_content);
+                             bool sized_to_content,
+                             bool resizable);
 
   // Whether the user can manually resize this window.
   const bool resizable_;

@@ -56,8 +56,9 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
       .window_style = GetWindowStyleForDialog(owner_window, resizable),
       .extended_window_style = GetExtendedWindowStyleForDialog(owner_window),
       .box_constraints = constraints,
-      .initial_window_rect = GetInitialRect(engine, preferred_size, constraints,
-                                            owner_window, sized_to_content),
+      .initial_window_rect =
+          GetInitialRect(engine, preferred_size, constraints, owner_window,
+                         sized_to_content, resizable),
       .title = title,
       .owner_window = owner_window,
       .sizing_delegate = sized_to_content ? this : nullptr,
@@ -134,9 +135,9 @@ Rect HostWindowDialog::GetInitialRect(FlutterWindowsEngine* engine,
                                       const WindowSizeRequest& preferred_size,
                                       const BoxConstraints& constraints,
                                       std::optional<HWND> const& owner_window,
-                                      bool sized_to_content) {
-  auto const window_style = GetWindowStyleForDialog(owner_window,
-                                                    /*resizable=*/true);
+                                      bool sized_to_content,
+                                      bool resizable) {
+  auto const window_style = GetWindowStyleForDialog(owner_window, resizable);
   auto const extended_window_style =
       GetExtendedWindowStyleForDialog(owner_window);
 
@@ -145,8 +146,8 @@ Rect HostWindowDialog::GetInitialRect(FlutterWindowsEngine* engine,
   if (sized_to_content) {
     // Use the minimum constraint as the initial window size. The window will
     // be resized to match the rendered content after the first frame.
-    client_width = std::max(10.0, constraints.smallest().width());
-    client_height = std::max(10.0, constraints.smallest().height());
+    client_width = std::max(1.0, constraints.smallest().width());
+    client_height = std::max(1.0, constraints.smallest().height());
   } else {
     client_width = preferred_size.preferred_view_width;
     client_height = preferred_size.preferred_view_height;
