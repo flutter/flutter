@@ -225,7 +225,7 @@ void main() {
         FileSystemException('', file.path, const OSError('', kUserMappedSectionOpened)),
       );
 
-      const expectedMessage = 'The file is being used by another program';
+      const String expectedMessage = kSharingViolationMessage;
       expect(() async => file.writeAsBytes(<int>[0]), throwsToolExit(message: expectedMessage));
       expect(() async => file.writeAsString(''), throwsToolExit(message: expectedMessage));
       expect(() => file.writeAsBytesSync(<int>[0]), throwsToolExit(message: expectedMessage));
@@ -373,10 +373,7 @@ void main() {
         platform: windowsPlatform,
       );
 
-      expect(
-        () => fileSystem.currentDirectory,
-        throwsToolExit(message: 'The flutter tool cannot access the file or directory'),
-      );
+      expect(() => fileSystem.currentDirectory, throwsToolExit(message: kCannotAccessMessage));
     });
   });
 
@@ -817,10 +814,7 @@ void main() {
         platform: linuxPlatform,
       );
 
-      expect(
-        () => fileSystem.currentDirectory,
-        throwsToolExit(message: 'The flutter tool cannot access the file or directory'),
-      );
+      expect(() => fileSystem.currentDirectory, throwsToolExit(message: kCannotAccessMessage));
     });
   });
 
@@ -1074,7 +1068,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
         platform: windowsPlatform,
       );
 
-      const expectedMessage = 'The file is being used by another program';
+      const String expectedMessage = kSharingViolationMessage;
       expect(
         () async => processManager.start(<String>['foo']),
         throwsToolExit(message: expectedMessage),
@@ -1684,7 +1678,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
 
       expect(
         () => file.writeAsStringSync('content'),
-        throwsToolExit(message: 'The file is being used by another program'),
+        throwsToolExit(message: kSharingViolationMessage),
       );
     });
 
