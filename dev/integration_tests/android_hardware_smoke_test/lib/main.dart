@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 import 'dart:io' as io;
-import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:android_driver_extensions/native_driver.dart';

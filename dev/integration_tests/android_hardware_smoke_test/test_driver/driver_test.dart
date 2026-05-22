@@ -19,45 +19,32 @@ void main() async {
     await flutterDriver.close();
   });
 
-  test('should render and match fooTest golden', () async {
-    // 1. Command the app to render fooTest and return its screenshot bytes
+  Future<void> templateTest(String testName) async {
+    // 1. Command the app to render the test and return its screenshot bytes
     final String response = await flutterDriver.requestData(
       json.encode(<String, dynamic>{
-        'testName': 'fooTest',
+        'testName': testName,
         'performAppSideGoldenCompare': false,
       }),
     );
 
     // 2. Assert on status message
     final dynamic reply = json.decode(response);
-    expect(reply['message'], equals('Rendered fooTest'));
+    expect(reply['message'], equals('Rendered $testName'));
 
     // 3. Extract and decode the base64 screenshot bytes
     final String imageBase64 = reply['imageBytes'] as String;
     final Uint8List imageBytes = base64.decode(imageBase64);
 
     // 4. Compare on the host filesystem relative to integration_test/goldens/
-    await expectLater(imageBytes, matchesGoldenFile('goldens/fooTest.png'));
+    await expectLater(imageBytes, matchesGoldenFile('goldens/$testName.png'));
+  }
+
+  test('should render and match fooTest golden', () async {
+    await templateTest('fooTest');
   }, timeout: Timeout.none);
 
   test('should render and match barTest golden', () async {
-    // 1. Command the app to render barTest and return its screenshot bytes
-    final String response = await flutterDriver.requestData(
-      json.encode(<String, dynamic>{
-        'testName': 'barTest',
-        'performAppSideGoldenCompare': false,
-      }),
-    );
-
-    // 2. Assert on status message
-    final dynamic reply = json.decode(response);
-    expect(reply['message'], equals('Rendered barTest'));
-
-    // 3. Extract and decode the base64 screenshot bytes
-    final String imageBase64 = reply['imageBytes'] as String;
-    final Uint8List imageBytes = base64.decode(imageBase64);
-
-    // 4. Compare on the host filesystem relative to integration_test/goldens/
-    await expectLater(imageBytes, matchesGoldenFile('goldens/barTest.png'));
+    await templateTest('barTest');
   }, timeout: Timeout.none);
 }
