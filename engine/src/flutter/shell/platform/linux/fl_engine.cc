@@ -812,6 +812,19 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
       break;
   }
 
+  gboolean enable_impeller = fl_dart_project_get_enable_impeller(self->project);
+  gboolean has_enable_impeller = FALSE;
+  for (const auto& env_switch : flutter::GetSwitchesFromEnvironment()) {
+    if (env_switch == "--enable-impeller" ||
+        env_switch == "--enable-impeller=true") {
+      enable_impeller = TRUE;
+      has_enable_impeller = TRUE;
+    } else if (env_switch == "--enable-impeller=false") {
+      enable_impeller = FALSE;
+      has_enable_impeller = TRUE;
+    }
+  }
+
   g_autoptr(GPtrArray) command_line_args =
       g_ptr_array_new_with_free_func(g_free);
   g_ptr_array_insert(command_line_args, 0, g_strdup("flutter"));
@@ -820,6 +833,10 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   }
   // Linux (and other desktop platforms) always uses SDFs.
   g_ptr_array_add(command_line_args, g_strdup("--impeller-use-sdfs"));
+
+  if (enable_impeller && !has_enable_impeller) {
+    g_ptr_array_add(command_line_args, g_strdup("--enable-impeller"));
+  }
 
   gchar** dart_entrypoint_args =
       fl_dart_project_get_dart_entrypoint_arguments(self->project);
