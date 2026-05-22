@@ -57,8 +57,8 @@ class BuildHooks extends Target {
     final FlutterNativeAssetsBuildRunner buildRunner =
         _buildRunner ?? await createFlutterNativeAssetsBuildRunner(environment);
     final (
-      results: SerializedBuildResults results,
-      buildResult: DartHooksResult buildResult,
+      :SerializedBuildResults results,
+      :DartHooksResult buildResult,
     ) = await runFlutterSpecificBuildHooks(
       environmentDefines: environment.defines,
       buildRunner: buildRunner,

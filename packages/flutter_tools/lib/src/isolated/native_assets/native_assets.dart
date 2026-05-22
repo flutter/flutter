@@ -87,10 +87,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
 
   final buildStart = DateTime.now();
 
-  final (
-    results: SerializedBuildResults results,
-    buildResult: DartHooksResult _,
-  ) = await runFlutterSpecificBuildHooks(
+  final (:SerializedBuildResults results, buildResult: _) = await runFlutterSpecificBuildHooks(
     environmentDefines: environmentDefines,
     buildRunner: buildRunner,
     targetPlatform: targetPlatform,
@@ -392,8 +389,7 @@ DartHooksResult combineBuildAndLinkResults({
   final dataAssets = <DataAsset>[...linkResult.dataAssets];
   final dependencies = <Uri>{...linkResult.dependencies};
 
-  for (var i = 0; i < targets.length; i++) {
-    final AssetBuildTarget target = targets[i];
+  for (final target in targets) {
     final Map<String, Object?>? buildResultJson = buildResults[target.targetString];
     if (buildResultJson == null) {
       continue;
@@ -446,6 +442,8 @@ void _checkForDuplicateAssets({
   required List<DataAsset> dataAssets,
   required List<AssetBuildTarget> targets,
 }) {
+  final List<String> targetStrings = targets.map((AssetBuildTarget e) => e.targetString).toList();
+
   final dataAssetIds = <String>{};
   final duplicateDataAssetIds = <String>{};
   for (final asset in dataAssets) {
@@ -455,7 +453,9 @@ void _checkForDuplicateAssets({
   }
   if (duplicateDataAssetIds.isNotEmpty) {
     throwToolExit(
-      'Found duplicates in the data assets: ${duplicateDataAssetIds.toList()} while compiling for ${targets.map((AssetBuildTarget e) => e.targetString).toList()}.',
+      'Found duplicates in the data assets: '
+      '${duplicateDataAssetIds.toList()} while compiling for '
+      '$targetStrings.',
     );
   }
 
@@ -468,7 +468,9 @@ void _checkForDuplicateAssets({
   }
   if (duplicateCodeAssetIds.isNotEmpty) {
     throwToolExit(
-      'Found duplicates in the code assets: ${duplicateCodeAssetIds.toList()} while compiling for ${targets.map((AssetBuildTarget e) => e.targetString).toList()}.',
+      'Found duplicates in the code assets: '
+      '${duplicateCodeAssetIds.toList()} while compiling for '
+      '$targetStrings.',
     );
   }
 }
