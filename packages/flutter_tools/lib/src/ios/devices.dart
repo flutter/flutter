@@ -1834,7 +1834,7 @@ class IOSDeviceLogReader extends SharedIOSDeviceLogReader {
   // Connects the already-launched [idevicesyslogProcess] output to [linesController].
   //
   // Called synchronously when the first listener subscribes (via onListen).
-  // `start()` must have been awaited before any listener subscribes so that
+  // `startProcess()` must have been awaited before any listener subscribes so that
   // [idevicesyslogProcess] is available.
   void _connectSyslogOutput() {
     if (!useSyslogLogging) {
