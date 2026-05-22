@@ -18,8 +18,25 @@ namespace flutter {
 VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners)
     : VsyncWaiter(task_runners) {
   auto vsyncCallback = ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
-    fml::TimePoint start_time = fml::TimePoint() + fml::TimeDelta::FromSecondsF(startTime);
-    fml::TimePoint target_time = fml::TimePoint() + fml::TimeDelta::FromSecondsF(targetTime);
+    // Compute delay using the same CACurrentMediaTime() clock.
+    CFTimeInterval delay = CACurrentMediaTime() - startTime;
+    if (delay < 0.0) {
+      delay = 0.0;
+    }
+
+    // Align the start time to the C++ steady_clock used by fml::TimePoint.
+    fml::TimePoint start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
+
+    // Guard against division-by-zero when duration is 0.0, and avoid
+    // frame timing inconsistencies due to floating point error by
+    // rounding to nearest Hz value.
+    CFTimeInterval duration = targetTime - startTime;
+    if (duration <= 0.0) {
+      duration = 1.0 / max_refresh_rate_;  // Synthesize safe default frame interval
+    }
+
+    // Align target time to the C++ steady_clock used by fml::TimePoint.
+    fml::TimePoint target_time = start_time + fml::TimeDelta::FromSecondsF(duration);
     FireCallback(start_time, target_time, true);
   };
   FlutterFMLTaskRunner* uiTaskRunner =
