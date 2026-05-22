@@ -4086,6 +4086,8 @@ void main() {
     scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
     await tester.pumpAndSettle();
 
+    expect(scrollable.position.pixels, equals(scrollable.position.maxScrollExtent));
+
     // Establish an initial selection at the end of the text.
     controller.selection = const TextSelection(baseOffset: 500, extentOffset: 600);
     await tester.pumpAndSettle();
@@ -4129,6 +4131,8 @@ void main() {
     // Scroll to the bottom of the long text.
     scrollable.position.jumpTo(scrollable.position.maxScrollExtent);
     await tester.pumpAndSettle();
+
+    expect(scrollable.position.pixels, equals(scrollable.position.maxScrollExtent));
 
     final Finder textField = find.byType(TestTextField);
 
