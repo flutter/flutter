@@ -105,13 +105,24 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
     -s
   ```
 
+> [!NOTE]
+> **Automated HTML Screenshot Embedding (`embedTestResultImages`)**:
+> When running the Gradle command above, a custom Kotlin DSL task named **`embedTestResultImages`** executes automatically once the tests finish. 
+> 
+> It performs the following actions seamlessly:
+> 1. Prevents Gradle from auto-uninstalling the APKs prematurely (via a `gradle.properties` injection).
+> 2. Queries the device sandbox cache to discover all rendered `.png` files dynamically.
+> 3. Streams the raw binary images directly onto the host PC using zero-copy ADB piping.
+> 4. Dynamically parses the generated HTML reports and injects Alternative `<img>` elements right next to the test outcome table cells.
+> 5. Executes a manual `adb uninstall` cleanup to leave the target device perfectly clean.
+> 
+> Once finished, open `app/build/reports/androidTests/connected/debug/index.html` to view the interactive report with all rendering result snapshots embedded natively!
+
 ---
 
-### C. Standalone Execution & Pulling Snapshots (Without Auto-Uninstall)
+### C. Manual Command-Line Debugging (Without Gradle Orchestration)
 
-Running `./gradlew connectedDebugAndroidTest` automatically uninstalls the test APK immediately after completion. This deletes the application's sandboxed cached directories, preventing you from pulling and inspecting the generated snapshot result PNGs off the device.
-
-To run the tests standalone, prevent auto-uninstallation, and pull the screenshots, follow these steps:
+If you prefer to bypass Gradle entirely for custom debugging, you can manually build, install, and run the instrumentation using raw `adb` shell calls:
 
 1. **Build and Install the packages manually**:
    ```sh
@@ -127,8 +138,8 @@ To run the tests standalone, prevent auto-uninstallation, and pull the screensho
      com.example.android_hardware_smoke_test.test/androidx.test.runner.AndroidJUnitRunner
    ```
 
-3. **Pull the generated snapshot off the device's sandbox**:
-   Since the app remains installed, you can access its sandbox cache and copy the rendered snapshots using `adb shell run-as`:
+3. **Manually pull the generated snapshot off the device's sandbox**:
+   Since the app remains installed during raw `adb` runs, you can copy the rendering result files manually:
    ```sh
    adb shell "run-as com.example.android_hardware_smoke_test cat cache/results/fooTest.png" \
      > integration_test/results/fooTest.png
