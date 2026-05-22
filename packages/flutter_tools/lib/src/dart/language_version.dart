@@ -56,6 +56,9 @@ LanguageVersion determineLanguageVersion(File file, Package? package, String flu
   // command will likely fail later in the process with a better error
   // message.
   List<String> lines;
+  if (!file.existsSync()) {
+    return currentLanguageVersion(file.fileSystem, flutterRoot);
+  }
   try {
     lines = file.readAsLinesSync();
   } on FileSystemException {

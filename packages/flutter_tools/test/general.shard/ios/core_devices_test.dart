@@ -33,6 +33,10 @@ class LocalFileSystemFake extends Fake implements LocalFileSystem {
   MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
 
   @override
+  FileSystemEntityType typeSync(String path, {bool followLinks = true}) =>
+      memoryFileSystem.typeSync(path, followLinks: followLinks);
+
+  @override
   Directory get systemTempDirectory => memoryFileSystem.systemTempDirectory;
 
   @override

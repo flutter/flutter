@@ -85,6 +85,18 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
     }
   }
 
+  /// This can be used to bypass the [ErrorHandlingFileSystem] permission exit
+  /// checks for asynchronous operations.
+  static Future<T> noExitOnFailureAsync<T>(Future<T> Function() operation) async {
+    final bool previousValue = ErrorHandlingFileSystem._noExitOnFailure;
+    try {
+      ErrorHandlingFileSystem._noExitOnFailure = true;
+      return await operation();
+    } finally {
+      ErrorHandlingFileSystem._noExitOnFailure = previousValue;
+    }
+  }
+
   /// Delete the file or directory and return true if it exists, take no
   /// action and return false if it does not.
   ///
@@ -1251,6 +1263,8 @@ void _handlePosixException(
   int errorCode,
   String? posixPermissionSuggestion,
 ) {
+  final String path = e is FileSystemException ? (e.path ?? '') : '';
+  final OSError? osError = e is FileSystemException ? e.osError : (e is io.ProcessException ? OSError(e.message, e.errorCode) : null);
   // From:
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
@@ -1269,7 +1283,7 @@ void _handlePosixException(
     eperm || eacces => _getPosixPermissionMessage(message, posixPermissionSuggestion),
     _ => null,
   };
-  _throwFileSystemException(errorMessage);
+  _throwFileSystemException(errorMessage, path: path, osError: osError);
 }
 
 void _handleMacOSException(
@@ -1278,6 +1292,8 @@ void _handleMacOSException(
   int errorCode,
   String? posixPermissionSuggestion,
 ) {
+  final String path = e is FileSystemException ? (e.path ?? '') : '';
+  final OSError? osError = e is FileSystemException ? e.osError : (e is io.ProcessException ? OSError(e.message, e.errorCode) : null);
   // https://github.com/apple/darwin-xnu/blob/main/bsd/dev/dtrace/scripts/errno.d
   const ebadarch = 86;
   const eagain = 35;
@@ -1293,7 +1309,7 @@ void _handleMacOSException(
       'If you are on an ARM Apple Silicon Mac, Flutter requires the Rosetta translation environment. Try running:',
     );
     errorBuffer.writeln('  sudo softwareupdate --install-rosetta --agree-to-license');
-    _throwFileSystemException(errorBuffer.toString());
+    _throwFileSystemException(errorBuffer.toString(), path: path, osError: osError);
   }
   if (errorCode == eagain) {
     final errorBuffer = StringBuffer();
@@ -1310,6 +1326,8 @@ void _handleMacOSException(
 }
 
 void _handleWindowsException(Exception e, String? message, int errorCode) {
+  final String path = e is FileSystemException ? (e.path ?? '') : '';
+  final OSError? osError = e is FileSystemException ? e.osError : (e is io.ProcessException ? OSError(e.message, e.errorCode) : null);
   // From:
   // https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes
   const kFileNotFound = 2;
@@ -1346,15 +1364,15 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
           'Verify the device is mounted and try again.',
     _ => null,
   };
-  _throwFileSystemException(errorMessage);
+  _throwFileSystemException(errorMessage, path: path, osError: osError);
 }
 
-void _throwFileSystemException(String? errorMessage) {
+void _throwFileSystemException(String? errorMessage, {String path = '', OSError? osError}) {
   if (errorMessage == null) {
     return;
   }
   if (ErrorHandlingFileSystem._noExitOnFailure) {
-    throw FileSystemException(errorMessage);
+    throw FileSystemException(errorMessage, path, osError);
   }
   throwToolExit(errorMessage);
 }

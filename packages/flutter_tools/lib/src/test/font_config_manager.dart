@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../globals.dart' as globals;
 
@@ -35,7 +36,7 @@ class FontConfigManager {
     if (_fontsDirectory != null) {
       globals.printTrace('Deleting ${_fontsDirectory!.path}...');
       try {
-        await _fontsDirectory!.delete(recursive: true);
+        await ErrorHandlingFileSystem.noExitOnFailureAsync(() => _fontsDirectory!.delete(recursive: true));
       } on FileSystemException {
         // Silently exit
       }

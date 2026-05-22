@@ -1270,7 +1270,7 @@ void _createPlatformPluginSymlinks(
       continue;
     }
     try {
-      link.createSync(path);
+      ErrorHandlingFileSystem.noExitOnFailure(() => link.createSync(path));
     } on FileSystemException catch (e) {
       handleSymlinkException(
         e,

@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
+import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -457,7 +458,9 @@ abstract class FlutterVersion {
   /// channel doesn't linger.
   static Future<void> resetFlutterVersionFreshnessCheck() async {
     try {
-      await globals.cache.getStampFileFor(VersionCheckStamp.flutterVersionCheckStampFile).delete();
+      await ErrorHandlingFileSystem.noExitOnFailureAsync(
+        () => globals.cache.getStampFileFor(VersionCheckStamp.flutterVersionCheckStampFile).delete(),
+      );
     } on FileSystemException {
       // Ignore, since we don't mind if the file didn't exist in the first place.
     }
