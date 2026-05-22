@@ -274,7 +274,7 @@ class _DefaultPub implements Pub {
       }
     }
 
-    bool versionMatch = false;
+    var versionMatch = false;
     if (checkUpToDate) {
       final File? packageConfigFile = findPackageConfigFile(project.directory);
       if (packageConfigFile != null && packageConfigFile.existsSync()) {
@@ -285,7 +285,8 @@ class _DefaultPub implements Pub {
           fs: _fileSystem,
           git: _git,
         );
-        versionMatch = lastVersion.existsSync() &&
+        versionMatch =
+            lastVersion.existsSync() &&
             lastVersion.readAsStringSync() == versionFromFile.frameworkVersion;
       }
     }
