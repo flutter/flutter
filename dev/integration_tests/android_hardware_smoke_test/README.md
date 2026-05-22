@@ -134,3 +134,14 @@ To run the tests standalone, prevent auto-uninstallation, and pull the screensho
    adb shell "run-as com.example.android_hardware_smoke_test cat cache/results/fooTest.png" \
      > integration_test/results/fooTest.png
    ```
+
+---
+
+### D. Running the CI Shard Locally
+
+Since the test suite is registered inside the central repository test orchestrator (`dev/bots/test.dart`), you can execute the full CI runner pipeline locally using standard dev-bot scripts:
+
+```sh
+# Run from the root of the Flutter repository
+SHARD=android_hardware_smoke_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
+```
