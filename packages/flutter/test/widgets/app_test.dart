@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_page_tester.dart';
-import 'widgets_app_tester.dart';
 
 class TestIntent extends Intent {
   const TestIntent();
@@ -186,6 +185,25 @@ void main() {
   });
 
   group('error control test', () {
+    PageRoute<T> pageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
+      return PageRouteBuilder<T>(
+        settings: settings,
+        pageBuilder:
+            (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) => builder(context),
+        transitionsBuilder:
+            (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+              Widget child,
+            ) => child,
+      );
+    }
+
     Future<void> expectFlutterError({
       required GlobalKey<NavigatorState> key,
       required Widget widget,
@@ -210,10 +228,11 @@ void main() {
       await expectFlutterError(
         key: key,
         tester: tester,
-        widget: TestWidgetsApp(
+        widget: WidgetsApp(
           navigatorKey: key,
           home: Container(),
           onGenerateRoute: (_) => null,
+          pageRouteBuilder: pageRouteBuilder,
           color: const Color(0xFF123456),
         ),
         errorMessage:
@@ -239,11 +258,12 @@ void main() {
       await expectFlutterError(
         key: key,
         tester: tester,
-        widget: TestWidgetsApp(
+        widget: WidgetsApp(
           navigatorKey: key,
           home: Container(),
           onGenerateRoute: (_) => null,
           onUnknownRoute: (_) => null,
+          pageRouteBuilder: pageRouteBuilder,
           color: const Color(0xFF123456),
         ),
         errorMessage:

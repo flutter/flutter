@@ -6,14 +6,13 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart' as web;
 
 import 'web_platform_view_registry_utils.dart';
-import 'widgets_app_tester.dart';
 
 extension on web.HTMLCollection {
   Iterable<web.Element?> get iterable =>
@@ -53,7 +52,7 @@ void main() {
     final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
 
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: SelectableRegion(
           selectionControls: EmptyTextSelectionControls(),
           child: const Placeholder(),
@@ -74,7 +73,7 @@ void main() {
 
   testWidgets('only one <style> is inserted into the DOM', (WidgetTester tester) async {
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: ListView(
           children: <Widget>[
             SelectableRegion(
@@ -107,10 +106,10 @@ void main() {
     addTearDown(focusNode.dispose);
     final spy = UniqueKey();
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: SelectableRegion(
           focusNode: focusNode,
-          selectionControls: emptyTextSelectionControls,
+          selectionControls: materialTextSelectionControls,
           child: SelectionSpy(key: spy),
         ),
       ),
@@ -148,7 +147,7 @@ void main() {
     final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
 
     await tester.pumpWidget(
-      TestWidgetsApp(
+      MaterialApp(
         home: SelectableRegion(
           selectionControls: emptyTextSelectionControls,
           child: const SizedBox.shrink(),
