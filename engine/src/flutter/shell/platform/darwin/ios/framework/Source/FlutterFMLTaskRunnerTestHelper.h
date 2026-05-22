@@ -12,12 +12,18 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(TaskRunnerTestHelper)
 @interface FlutterFMLTaskRunnerTestHelper : NSObject
 
 /**
  * Returns a FlutterFMLTaskRunner for the current thread.
  */
 + (FlutterFMLTaskRunner*)makeCurrentThreadTaskRunner;
+
+/**
+ * Returns a FlutterFMLTaskRunner running on a new background thread with the given label.
+ */
++ (FlutterFMLTaskRunner*)makeTaskRunnerWithLabel:(NSString*)label;
 
 /**
  * Returns a FlutterFMLTaskRunners object where all runners point to the same task runner.

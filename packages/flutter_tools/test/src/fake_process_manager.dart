@@ -276,6 +276,18 @@ abstract class FakeProcessManager implements ProcessManager {
   /// last command and verify its execution is successful, to ensure that all
   /// the specified commands are actually called.
   factory FakeProcessManager.list(List<FakeCommand> commands) = _SequenceProcessManager;
+
+  /// A fake [ProcessManager] which responds to particular commands with
+  /// particular results, but does not enforce the order in which the commands
+  /// are run.
+  ///
+  /// On creation, pass in a list of [FakeCommand] objects. When the
+  /// [ProcessManager] methods are invoked, any of the remaining expected
+  /// [FakeCommand]s can match (otherwise the test fails).
+  ///
+  /// This is useful for testing concurrent process execution where the order
+  /// of execution is not deterministic.
+  factory FakeProcessManager.unordered(List<FakeCommand> commands) = _UnorderedProcessManager;
   factory FakeProcessManager.empty() => _SequenceProcessManager(<FakeCommand>[]);
 
   FakeProcessManager._();
@@ -500,6 +512,106 @@ class _SequenceProcessManager extends FakeProcessManager {
     );
     _commands.first._matches(command, workingDirectory, environment, encoding, mode);
     return _commands.removeAt(0);
+  }
+
+  @override
+  void addCommand(FakeCommand command) {
+    _commands.add(command);
+  }
+
+  @override
+  bool get hasRemainingExpectations => _commands.isNotEmpty;
+
+  @override
+  List<FakeCommand> get _remainingExpectations => _commands;
+}
+
+/// An implementation of [FakeProcessManager] that allows executing expected
+/// [FakeCommand]s in any order.
+class _UnorderedProcessManager extends FakeProcessManager {
+  _UnorderedProcessManager(this._commands) : super._();
+
+  final List<FakeCommand> _commands;
+
+  /// Checks if the given [command] and its execution parameters match [expected].
+  bool _commandMatches(
+    FakeCommand expected,
+    List<String> command,
+    String? workingDirectory,
+    Map<String, String>? environment,
+    Encoding? encoding,
+    io.ProcessStartMode? mode,
+  ) {
+    if (expected.command.length != command.length) {
+      return false;
+    }
+    for (var i = 0; i < expected.command.length; i++) {
+      final Pattern pattern = expected.command[i];
+      if (pattern is String) {
+        if (pattern != command[i]) {
+          return false;
+        }
+      } else if (pattern is RegExp) {
+        if (!pattern.hasMatch(command[i])) {
+          return false;
+        }
+      } else {
+        if (pattern.matchAsPrefix(command[i]) == null) {
+          return false;
+        }
+      }
+    }
+    if (expected.processStartMode != null && mode != expected.processStartMode) {
+      return false;
+    }
+    if (expected.workingDirectory != null && workingDirectory != expected.workingDirectory) {
+      return false;
+    }
+    if (expected.environment != null) {
+      if (environment == null) {
+        return false;
+      }
+      for (final String key in expected.environment!.keys) {
+        if (environment[key] != expected.environment![key]) {
+          return false;
+        }
+      }
+    }
+    if (expected.encoding != null && encoding != expected.encoding) {
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  FakeCommand findCommand(
+    List<String> command,
+    String? workingDirectory,
+    Map<String, String>? environment,
+    Encoding? encoding,
+    io.ProcessStartMode? mode,
+  ) {
+    expect(
+      _commands,
+      isNotEmpty,
+      reason:
+          'ProcessManager was told to execute $command (in $workingDirectory) '
+          'but the FakeProcessManager expected no more processes.',
+    );
+
+    for (var i = 0; i < _commands.length; i++) {
+      final FakeCommand expected = _commands[i];
+      if (_commandMatches(expected, command, workingDirectory, environment, encoding, mode)) {
+        expected._matches(command, workingDirectory, environment, encoding, mode);
+        return _commands.removeAt(i);
+      }
+    }
+
+    fail(
+      'ProcessManager was told to execute $command (in $workingDirectory) '
+      'but no matching command was found in the expected list:\n'
+      '${_commands.map((c) => c.command).join('\n')}',
+    );
   }
 
   @override

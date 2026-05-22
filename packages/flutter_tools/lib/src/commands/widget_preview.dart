@@ -28,6 +28,7 @@ import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../isolated/resident_web_runner.dart';
+import '../migrations/widget_preview_gitignore_migration.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
@@ -322,6 +323,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     previewAnalytics.initializeLaunchStopwatch();
     logger.sendInitializingEvent();
 
+    await WidgetPreviewGitignoreMigration(rootProject, logger).migrate();
+
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
     widgetPreviewScaffold = customPreviewScaffoldOutput != null
         ? fs.directory(customPreviewScaffoldOutput)
@@ -414,6 +417,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         dtdUri: _dtdService.dtdUri!,
         widgetPreviewServiceName: _dtdService.widgetPreviewService,
         widgetPreviewScaffoldStreamName: _dtdService.widgetPreviewScaffoldStream,
+        projectRootPath: rootProject.directory.absolute.path,
       );
 
       final FlutterWidgetPreviews originalPreviews;
