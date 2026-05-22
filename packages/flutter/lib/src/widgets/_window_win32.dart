@@ -351,7 +351,7 @@ class RegularWindowControllerWin32 extends RegularWindowController with WindowCo
     }
     _handler = _RegularWindowMesageHandler(controller: this);
     owner._addMessageHandler(_handler);
-    final bool sizedToContent = preferredSize == null;
+    final sizedToContent = preferredSize == null;
     final int viewId = _Win32PlatformInterface.createRegularWindow(
       _owner.allocator,
       WidgetsBinding.instance.platformDispatcher.engineId!,
@@ -588,7 +588,7 @@ class DialogWindowControllerWin32 extends DialogWindowController with WindowCont
     }
     _handler = _DialogWindowMesageHandler(controller: this);
     owner._addMessageHandler(_handler);
-    final bool sizedToContent = preferredSize == null;
+    final sizedToContent = preferredSize == null;
     final int viewId = _Win32PlatformInterface.createDialogWindow(
       _owner.allocator,
       WidgetsBinding.instance.platformDispatcher.engineId!,
