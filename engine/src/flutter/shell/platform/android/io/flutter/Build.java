@@ -43,5 +43,7 @@ public class Build {
     public static final int API_35 = 35;
     /** Android 16 */
     public static final int API_36 = 36;
+    /** Android 17 */
+    public static final int API_37 = 37;
   }
 }
