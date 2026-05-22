@@ -160,13 +160,10 @@ class TestsCrossImportChecker {
     'packages/flutter/test/rendering/localized_fonts_test.dart',
     'packages/flutter/test/rendering/editable_gesture_test.dart',
     'packages/flutter/test/rendering/box_test.dart',
-    'packages/flutter/test/rendering/pipeline_owner_tree_test.dart',
     'packages/flutter/test/rendering/proxy_getters_and_setters_test.dart',
     'packages/flutter/test/rendering/view_chrome_style_test.dart',
-    'packages/flutter/test/rendering/proxy_box_test.dart',
     'packages/flutter/test/rendering/sliver_tree_test.dart',
     'packages/flutter/test/rendering/editable_test.dart',
-    'packages/flutter/test/rendering/object_test.dart',
   };
   static final Set<String> knownSchedulerCrossImports = <String>{};
   static final Set<String> knownSemanticsCrossImports = <String>{};
