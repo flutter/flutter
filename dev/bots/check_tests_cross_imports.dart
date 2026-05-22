@@ -113,14 +113,12 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/app_test.dart',
     'packages/flutter/test/widgets/navigator_replacement_test.dart',
     'packages/flutter/test/widgets/implicit_animations_test.dart',
-    'packages/flutter/test/widgets/default_text_editing_shortcuts_test.dart',
     'packages/flutter/test/widgets/routes_transition_test.dart',
     'packages/flutter/test/widgets/editable_text_test.dart',
     'packages/flutter/test/widgets/scrollbar_test.dart',
     'packages/flutter/test/widgets/inherited_test.dart',
     'packages/flutter/test/widgets/heroes_test.dart',
     'packages/flutter/test/widgets/drawer_test.dart',
-    'packages/flutter/test/widgets/framework_test.dart',
     'packages/flutter/test/widgets/editable_text_cursor_test.dart',
     'packages/flutter/test/widgets/nested_scroll_view_test.dart',
     'packages/flutter/test/widgets/scrollable_selection_test.dart',
@@ -143,9 +141,7 @@ class TestsCrossImportChecker {
   /// and `knownSchedulerCrossImports` corresponds to `flutter/test/scheduler`.
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
-  static final Set<String> knownAnimationCrossImports = <String>{
-    'packages/flutter/test/animation/animation_sheet_test.dart',
-  };
+  static final Set<String> knownAnimationCrossImports = <String>{};
   static final Set<String> knownCupertinoCrossImports = <String>{};
   static final Set<String> knownDartCrossImports = <String>{};
   static final Set<String> knownExamplesCrossImports = <String>{};
