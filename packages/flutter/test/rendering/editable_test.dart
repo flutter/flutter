@@ -15,9 +15,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 const Color _black = Color(0xFF000000);
-const Color _blue = Color(0xFF2196F3);
+const Color _blue = Color(0xFF0000FF);
 const Color _grey = Color(0xFF9E9E9E);
-const Color _red = Color(0xFFF44336);
+const Color _red = Color(0xFFFF0000);
 
 double _caretMarginOf(RenderEditable renderEditable) {
   return renderEditable.cursorWidth + 1.0;

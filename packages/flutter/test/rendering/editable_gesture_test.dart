@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 const Color _black = Color(0xFF000000);
 const Color _grey = Color(0xFF9E9E9E);
-const Color _red = Color(0xFFF44336);
+const Color _red = Color(0xFFFF0000);
 
 void main() {
   final TestWidgetsFlutterBinding binding = _GestureBindingSpy();
