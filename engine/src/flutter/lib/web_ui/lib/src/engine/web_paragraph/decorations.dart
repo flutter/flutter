@@ -96,8 +96,7 @@ class DomCanvasDecorationPainter {
         continue;
       }
 
-      final double height =
-          block.multipliedFontBoundingBoxAscent + block.multipliedFontBoundingBoxDescent;
+      final double height = block.multipliedHeight;
       final double ascent = block.multipliedFontBoundingBoxAscent;
       final double position = _calculatePosition(decoration, thickness, height, ascent);
 

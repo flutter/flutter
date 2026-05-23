@@ -3,13 +3,12 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient.h"
-#include "flutter/shell/common/vsync_waiter.h"
 
 #import <UIKit/UIKit.h>
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterTracing.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -17,7 +16,7 @@ NSString* const kCADisableMinimumFrameDurationOnPhoneKey = @"CADisableMinimumFra
 static const double kDefaultRefreshRate = 60.0;
 
 @implementation FlutterVSyncClient {
-  flutter::VsyncWaiter::Callback _callback;
+  void (^_callback)(CFTimeInterval startTime, CFTimeInterval targetTime);
   CADisplayLink* _displayLink;
   BOOL _isVariableRefreshRateEnabled;
 }
@@ -27,20 +26,14 @@ static const double kDefaultRefreshRate = 60.0;
                     maxRefreshRate:(double)maxRefreshRate
                           callback:(void (^)(CFTimeInterval startTime,
                                              CFTimeInterval targetTime))callback {
-  FML_DCHECK(callback);
-  FML_DCHECK(taskRunner);
-  fml::RefPtr<fml::TaskRunner> task_runner = taskRunner.taskRunner;
-  FML_DCHECK(task_runner);
+  NSAssert(callback, @"callback must not be nil");
+  NSAssert(taskRunner, @"taskRunner must not be nil");
 
   if (self = [super init]) {
     _refreshRate = maxRefreshRate;
     _isVariableRefreshRateEnabled = isVariableRefreshRateEnabled;
     _allowPauseAfterVsync = YES;
-    _callback = [callback](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
-      double start_time_seconds = recorder->GetVsyncStartTime().ToEpochDelta().ToSecondsF();
-      double target_time_seconds = recorder->GetVsyncTargetTime().ToEpochDelta().ToSecondsF();
-      callback(start_time_seconds, target_time_seconds);
-    };
+    _callback = callback;
     _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)];
     _displayLink.paused = YES;
 
@@ -49,12 +42,12 @@ static const double kDefaultRefreshRate = 60.0;
     // Capture a weak reference to self to ensure we don't add the display link
     // to the run loop if the client has already been deallocated.
     __weak FlutterVSyncClient* weakSelf = self;
-    task_runner->PostTask([weakSelf]() {
+    [taskRunner postTask:^{
       FlutterVSyncClient* strongSelf = weakSelf;
       if (strongSelf) {
         [strongSelf.displayLink addToRunLoop:NSRunLoop.currentRunLoop forMode:NSRunLoopCommonModes];
       }
-    });
+    }];
   }
 
   return self;
@@ -96,8 +89,6 @@ static const double kDefaultRefreshRate = 60.0;
   if (timestamp == 0.0) {
     timestamp = CACurrentMediaTime();
   }
-  CFTimeInterval delay = CACurrentMediaTime() - timestamp;
-  fml::TimePoint frame_start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
 
   // targetTimestamp is the anticipated presentation time of the next screen refresh. If
   // targetTimestamp is zero or less than/equal to timestamp (which also occurs on paused/unpaused
@@ -108,13 +99,8 @@ static const double kDefaultRefreshRate = 60.0;
     targetTimestamp = timestamp + (1.0 / effectiveRefreshRate);
   }
   CFTimeInterval duration = targetTimestamp - timestamp;
-  fml::TimePoint frame_target_time = frame_start_time + fml::TimeDelta::FromSecondsF(duration);
 
-  [FlutterTracing tracePlatformVsyncWithStartTime:frame_start_time.ToEpochDelta().ToSecondsF()
-                                       targetTime:frame_target_time.ToEpochDelta().ToSecondsF()];
-
-  std::unique_ptr<flutter::FrameTimingsRecorder> recorder =
-      std::make_unique<flutter::FrameTimingsRecorder>();
+  [FlutterTracing tracePlatformVsyncWithStartTime:timestamp targetTime:targetTimestamp];
 
   // In steady-state, duration reflects the hardware refresh interval (e.g., ~0.01667s for 60Hz).
   // We dynamically recalculate the refresh rate from the frame duration to adjust to ProMotion
@@ -129,12 +115,10 @@ static const double kDefaultRefreshRate = 60.0;
     }
   }
 
-  recorder->RecordVsync(frame_start_time, frame_target_time);
-
   if (_allowPauseAfterVsync) {
     link.paused = YES;
   }
-  _callback(std::move(recorder));
+  _callback(timestamp, targetTimestamp);
 }
 
 - (void)dealloc {
@@ -168,7 +152,7 @@ static const double kDefaultRefreshRate = 60.0;
   CADisplayLink* displayLink = [CADisplayLink displayLinkWithTarget:[[[self class] alloc] init]
                                                            selector:@selector(onDisplayLink:)];
   displayLink.paused = YES;
-  auto preferredFPS = displayLink.preferredFramesPerSecond;
+  NSInteger preferredFPS = displayLink.preferredFramesPerSecond;
 
   // From Docs:
   // The default value for preferredFramesPerSecond is 0. When this value is 0, the preferred
