@@ -60,7 +60,6 @@ void main() {
         ),
       ),
     );
-    await _sendSystemFontsChange(tester);
     final RenderObject renderObject = tester.renderObject(
       find.byWidgetPredicate(
         (Widget widget) => widget.runtimeType.toString() == '_RangeSliderRenderObjectWidget',
