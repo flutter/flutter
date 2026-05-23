@@ -1847,6 +1847,9 @@ void main() {
       expect(find.text('Dragging'), findsOneWidget);
       expect(find.text('Target'), findsOneWidget);
       expect(find.text('Rejected'), findsNothing);
+
+      await gesture.up();
+      await tester.pump();
     },
   );
 
