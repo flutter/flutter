@@ -127,6 +127,40 @@ class CupertinoTabController extends ChangeNotifier {
 /// to render correctly. Placing a [CupertinoSliverNavigationBar] inside a tab
 /// without a [CupertinoPageScaffold] ancestor can suppress that effect.
 ///
+/// {@tool snippet}
+///
+/// This example wraps each tab's content in a [CupertinoPageScaffold] so a
+/// [CupertinoSliverNavigationBar] inside the tab can render its translucent
+/// background correctly:
+///
+/// ```dart
+/// CupertinoTabScaffold(
+///   tabBar: CupertinoTabBar(
+///     items: const <BottomNavigationBarItem>[
+///       BottomNavigationBarItem(icon: Icon(CupertinoIcons.home), label: 'Home'),
+///       BottomNavigationBarItem(icon: Icon(CupertinoIcons.search), label: 'Search'),
+///     ],
+///   ),
+///   tabBuilder: (BuildContext context, int index) {
+///     return CupertinoTabView(
+///       builder: (BuildContext context) {
+///         return CupertinoPageScaffold(
+///           child: CustomScrollView(
+///             slivers: <Widget>[
+///               CupertinoSliverNavigationBar(largeTitle: Text('Tab $index')),
+///               SliverFillRemaining(
+///                 child: Center(child: Text('Tab $index content')),
+///               ),
+///             ],
+///           ),
+///         );
+///       },
+///     );
+///   },
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoTabBar], the bottom tab bar inserted in the scaffold.
