@@ -14,7 +14,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:flutter/material.dart';
 import '../services/fake_platform_views.dart';
 
 void main() {
@@ -4354,5 +4354,47 @@ void main() {
     final dynamic exception = tester.takeException();
     expect(exception, isUnimplementedError);
     expect(exception.toString(), contains('HtmlElementView is only available on Flutter Web'));
+  });
+
+  testWidgets('SelectionArea does not throw when PlatformView scrolls off screen quickly', (
+    WidgetTester tester,
+  ) async {
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView(
+            controller: scrollController,
+            reverse: true,
+            children: List.generate(
+              20,
+              (int i) => SelectionArea(
+                child: Container(
+                  height: 300,
+                  color: i.isEven ? Colors.grey : Colors.green,
+                  child: Text('Item $i'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Simulate fast scrolling to force widgets off screen quickly
+    scrollController.jumpTo(3000);
+    await tester.pump();
+
+    scrollController.jumpTo(0);
+    await tester.pump();
+
+    scrollController.jumpTo(6000);
+    await tester.pump();
+
+    // Should not throw: "attached is not true"
+    expect(tester.takeException(), isNull);
+
+    scrollController.dispose();
   });
 }
