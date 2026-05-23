@@ -4,13 +4,15 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_testing/leak_tracker_testing.dart';
 
 typedef ElementRebuildCallback = void Function(StatefulElement element);
+
+const Color _green = Color(0xFF00FF00);
 
 class TestState extends State<StatefulWidget> {
   @override
@@ -995,7 +997,7 @@ void main() {
         const SwapKeyWidget(childKey: ValueKey<int>(0)),
         Container(key: const ValueKey<int>(1)),
         ColoredBox(
-          color: Colors.green,
+          color: _green,
           child: SizedBox(key: key),
         ),
       ],
@@ -1151,9 +1153,9 @@ void main() {
       const Key key1 = GlobalObjectKey('key1');
       const Key key2 = GlobalObjectKey('key2');
       late StateSetter setState;
-      var tabBarViewCnt = 2;
-      var tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
-      addTearDown(tabController.dispose);
+      var pageCount = 2;
+      var pageController = PageController();
+      addTearDown(pageController.dispose);
 
       await tester.pumpWidget(
         Directionality(
@@ -1161,11 +1163,11 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setter) {
               setState = setter;
-              return TabBarView(
-                controller: tabController,
+              return PageView(
+                controller: pageController,
                 children: <Widget>[
-                  if (tabBarViewCnt > 0) const Text('key1', key: key1),
-                  if (tabBarViewCnt > 1) const Text('key2', key: key2),
+                  if (pageCount > 0) const Text('key1', key: key1),
+                  if (pageCount > 1) const Text('key2', key: key2),
                 ],
               );
             },
@@ -1173,27 +1175,28 @@ void main() {
         ),
       );
 
-      expect(tabController.index, 0);
+      expect(pageController.page, 0.0);
 
-      // switch tabs 0 -> 1
+      // switch pages 0 -> 1
+      pageController.animateToPage(
+        1,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.ease,
+      );
+      await tester.pumpAndSettle(); // finish the animation
+
+      expect(pageController.page, 1.0);
+
+      // rebuild PageView that only have the 1st page with GlobalKey 'key1'
       setState(() {
-        tabController.index = 1;
+        pageCount = 1;
+        pageController = PageController();
+        addTearDown(pageController.dispose);
       });
 
       await tester.pump(const Duration(seconds: 1)); // finish the animation
 
-      expect(tabController.index, 1);
-
-      // rebuild TabBarView that only have the 1st page with GlobalKey 'key1'
-      setState(() {
-        tabBarViewCnt = 1;
-        tabController = TabController(length: tabBarViewCnt, vsync: const TestVSync());
-        addTearDown(tabController.dispose);
-      });
-
-      await tester.pump(const Duration(seconds: 1)); // finish the animation
-
-      expect(tabController.index, 0);
+      expect(pageController.page, 0.0);
     },
   );
 
@@ -1322,7 +1325,7 @@ void main() {
         children: <Widget>[
           Container(),
           Container(key: GlobalKey()),
-          ColoredBox(color: Colors.green, child: Container()),
+          ColoredBox(color: _green, child: Container()),
           Container(key: GlobalKey()),
           Container(),
         ],
@@ -1341,7 +1344,7 @@ void main() {
         '├Container-[GlobalKey#00000]\n'
         '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
         '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
-        '├ColoredBox(color: MaterialColor(primary value: ${const Color(0xff4caf50)}), renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
+        '├ColoredBox(color: $_green, renderObject: _RenderColoredBox#00000 relayoutBoundary=up1)\n'
         '│└Container\n'
         '│ └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up2)\n'
         '│  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up3)\n'
@@ -1685,18 +1688,15 @@ void main() {
     final directionality = _TestInheritedElement(
       const Directionality(textDirection: TextDirection.ltr, child: Placeholder()),
     );
-    final navigationBarTheme = _TestInheritedElement(
-      const NavigationBarTheme(
-        data: NavigationBarThemeData(indicatorColor: Color(0xff00ff00)),
-        child: Placeholder(),
-      ),
+    final mediaQuery = _TestInheritedElement(
+      const MediaQuery(data: MediaQueryData(), child: Placeholder()),
     );
 
     // Dependencies are added out of alphabetical order.
     element
       ..dependOnInheritedElement(focusTraversalOrder)
       ..dependOnInheritedElement(directionality)
-      ..dependOnInheritedElement(navigationBarTheme);
+      ..dependOnInheritedElement(mediaQuery);
 
     // Dependencies will be sorted by [debugFillProperties].
     element.debugFillProperties(builder);
@@ -1716,7 +1716,7 @@ void main() {
     expect(dependencies.length, equals(3));
     expect(
       dependenciesProperty.toDescription(),
-      '[Directionality, FocusTraversalOrder, NavigationBarTheme]',
+      '[Directionality, FocusTraversalOrder, MediaQuery]',
     );
   });
 

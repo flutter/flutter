@@ -7,10 +7,16 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const kAmber = Color(0xFFFFC107);
+  const kGreen = Color(0xFF4CAF50);
+  const kRed = Color(0xFFF44336);
+  const kGrey = Color(0xFF9E9E9E);
+  const kPurple = Color(0xFF9C27B0);
+
   tearDown(() {
     debugDisableShadows = true;
   });
@@ -188,7 +194,7 @@ void main() {
         child: RepaintBoundary(
           key: key,
           child: Container(
-            color: Colors.white,
+            color: const Color(0xFFFFFFFF),
             width: 50,
             height: 50,
             child: Center(
@@ -217,7 +223,7 @@ void main() {
         child: RepaintBoundary(
           key: key,
           child: Container(
-            color: Colors.white,
+            color: const Color(0xFFFFFFFF),
             width: 50,
             height: 50,
             child: Center(
@@ -246,7 +252,7 @@ void main() {
         child: RepaintBoundary(
           key: key,
           child: Container(
-            color: Colors.white,
+            color: const Color(0xFFFFFFFF),
             width: 50,
             height: 50,
             child: Center(
@@ -275,7 +281,7 @@ void main() {
         child: RepaintBoundary(
           key: key,
           child: Container(
-            color: Colors.white,
+            color: const Color(0xFFFFFFFF),
             width: 50,
             height: 50,
             child: Center(
@@ -302,18 +308,18 @@ void main() {
         child: RepaintBoundary(
           key: key,
           child: Container(
-            color: Colors.amber,
+            color: kAmber,
             width: 128,
             height: 128,
             child: Center(
               child: Container(
                 decoration: const BoxDecoration(
-                  color: Colors.black,
+                  color: Color(0xFF000000),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
                       blurRadius: 16.0,
                       offset: Offset(4, 4),
-                      color: Colors.green,
+                      color: kGreen,
                       spreadRadius: 2,
                     ),
                   ],
@@ -342,19 +348,19 @@ void main() {
         child: RepaintBoundary(
           key: key,
           child: Container(
-            color: Colors.amber,
+            color: kAmber,
             width: 128,
             height: 128,
             child: Center(
               child: Container(
                 decoration: const BoxDecoration(
-                  color: Colors.black,
+                  color: Color(0xFF000000),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
                       blurRadius: 16.0,
                       offset: Offset(4, 4),
                       blurStyle: BlurStyle.outer,
-                      color: Colors.red,
+                      color: kRed,
                       spreadRadius: 2,
                     ),
                   ],
@@ -383,19 +389,19 @@ void main() {
         child: RepaintBoundary(
           key: key,
           child: Container(
-            color: Colors.grey,
+            color: kGrey,
             width: 128,
             height: 128,
             child: Center(
               child: Container(
                 decoration: const BoxDecoration(
-                  color: Colors.black,
+                  color: Color(0xFF000000),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
                       blurRadius: 16.0,
                       offset: Offset(4, 4),
                       blurStyle: BlurStyle.solid,
-                      color: Colors.purple,
+                      color: kPurple,
                       spreadRadius: 2,
                     ),
                   ],
@@ -423,19 +429,19 @@ void main() {
         child: RepaintBoundary(
           key: key,
           child: Container(
-            color: Colors.green,
+            color: kGreen,
             width: 128,
             height: 128,
             child: Center(
               child: Container(
                 decoration: const BoxDecoration(
-                  color: Colors.black,
+                  color: Color(0xFF000000),
                   boxShadow: <BoxShadow>[
                     BoxShadow(
                       blurRadius: 16.0,
                       offset: Offset(4, 4),
                       blurStyle: BlurStyle.inner,
-                      color: Colors.amber,
+                      color: kAmber,
                       spreadRadius: 2,
                     ),
                   ],

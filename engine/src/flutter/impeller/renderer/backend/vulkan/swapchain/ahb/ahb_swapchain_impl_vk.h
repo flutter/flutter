@@ -27,6 +27,7 @@ static constexpr const size_t kMaxPendingPresents = 2u;
 
 struct AHBFrameSynchronizerVK {
   vk::UniqueFence acquire;
+  bool acquire_fence_pending = false;
   vk::UniqueSemaphore render_ready = {};
   std::shared_ptr<ExternalSemaphoreVK> present_ready;
   std::shared_ptr<CommandBuffer> final_cmd_buffer;

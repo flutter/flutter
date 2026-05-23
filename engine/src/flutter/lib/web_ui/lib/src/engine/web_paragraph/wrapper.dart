@@ -124,7 +124,6 @@ class TextWrapper {
     if (!line.reachedMaxLines()) {
       // Special case: we have only whitespaces in the whole paragraph
       if (_layout.lines.isEmpty && line.hasOnlyWhitespaces) {
-        line._maxIntrinsicWidth = line._widthWhitespaces;
         line._minIntrinsicWidth = line._widthWhitespaces;
         line._longestLine = line._widthWhitespaces;
         line._maxLineWidthWithTrailingSpaces = line._widthWhitespaces;
@@ -140,24 +139,35 @@ class TextWrapper {
       }
     }
 
-    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, line._maxIntrinsicWidth);
+    // Flutter wants to have another (empty) line if \n is the last codepoint in the text
+    // This empty line gets in a way of detecting line visual runs (there isn't any)
+    if (hardLineBreak) {
+      final emptyClusterRange = ClusterRange(
+        start: _layout.allClusters.length - 1,
+        end: _layout.allClusters.length - 1,
+      );
+      line._top += _layout.addLine(emptyClusterRange, emptyClusterRange, false, line._top);
+    }
+
     _minIntrinsicWidth = math.max(_minIntrinsicWidth, line._minIntrinsicWidth);
     _longestLine = math.max(_longestLine, line._longestLine);
     _maxLineWidthWithTrailingSpaces = math.max(_longestLine, line._maxLineWidthWithTrailingSpaces);
     _height = line._top;
 
-    // TODO(jlavrova): Discuss with Mouad
-    // Flutter wants to have another (empty) line if \n is the last codepoint in the text
-    // This empty line gets in a way of detecting line visual runs (there isn't any)
-    /*
-    if (hardLineBreak) {
-      final emptyClusterRange = ClusterRange(
-        start: _layout.textClusters.length - 1,
-        end: _layout.textClusters.length - 1,
-      );
-      _top +=_layout.addLine(emptyClusterRange, 0.0, emptyClusterRange, 0.0, false, _top,);
+    _calculateMaxIntrinsicWidth();
+  }
+
+  void _calculateMaxIntrinsicWidth() {
+    var currentWidth = 0.0;
+    for (final WebCluster cluster in _layout.allClusters) {
+      if (_isHardLineBreak(cluster)) {
+        _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, currentWidth);
+        currentWidth = 0.0;
+      } else {
+        currentWidth += cluster.advance.width;
+      }
     }
-    */
+    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, currentWidth);
   }
 }
 
@@ -188,9 +198,6 @@ class _LineBuilder {
 
   double get minIntrinsicWidth => _minIntrinsicWidth;
   double _minIntrinsicWidth = 0.0;
-
-  double get maxIntrinsicWidth => _maxIntrinsicWidth;
-  double _maxIntrinsicWidth = 0.0;
 
   double get longestLine => _longestLine;
   double _longestLine = 0.0;
@@ -334,8 +341,6 @@ class _LineBuilder {
   ///
   /// Returns the height of the line.
   double build(bool hardLineBreak) {
-    // Update max intrinsic width.
-    _maxIntrinsicWidth = math.max(_maxIntrinsicWidth, _widthConsumedText);
     _longestLine = math.max(_longestLine, _widthConsumedText);
     _maxLineWidthWithTrailingSpaces = math.max(
       _maxLineWidthWithTrailingSpaces,
@@ -390,11 +395,8 @@ class _LineBuilder {
     while (true) {
       if (clusterIndex <= start) {
         // We have removed all the clusters in this line and still can't fit the ellipsis
-        // Not sure what to do in this case
-        // TODO(jlavrova): Implement this case
-        throw UnimplementedError(
-          'Ellipsizing requires removing the whole line, not implemented yet',
-        );
+        // Not really important. Could go without an ellipsis in this case.
+        return false;
       }
       final WebCluster cluster = _layout.allClusters[clusterIndex - 1];
       final double widthCluster = cluster.advance.width;

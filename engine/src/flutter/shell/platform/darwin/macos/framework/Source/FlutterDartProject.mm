@@ -84,12 +84,7 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
 }
 
 - (BOOL)enableWideGamut {
-  NSNumber* enableWideGamut =
-      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
-  if (enableWideGamut != nil) {
-    return enableWideGamut.boolValue && DoesHardwareSupportWideGamut();
-  }
-  return NO;
+  return self.enableImpeller && DoesHardwareSupportWideGamut();
 }
 
 - (BOOL)enableFlutterGPU {
@@ -102,11 +97,7 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
 }
 
 - (BOOL)enableSDFs {
-  NSNumber* enableSDFs = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableSDFs"];
-  if (enableSDFs != nil) {
-    return enableSDFs.boolValue;
-  }
-  return NO;
+  return YES;
 }
 
 - (NSString*)assetsPath {
