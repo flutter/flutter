@@ -60,7 +60,6 @@ void main() {
         ),
       );
       await _verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(tester, child);
-      await _sendSystemFontsChange(tester);
       expect(child.hasValidTextLayout, isTrue);
     },
   );

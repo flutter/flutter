@@ -116,7 +116,7 @@ void main() {
     await tester.pumpAndSettle();
     await _sendSystemFontsChange(tester);
     final Finder customPaintFinder = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
+      of: find.byWidgetPredicate((Widget w) => w.runtimeType.toString() == '_Dial'),
       matching: find.byType(CustomPaint),
     );
     final RenderObject renderObject = tester.renderObject(customPaintFinder);
