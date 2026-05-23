@@ -551,6 +551,7 @@ mixin _TapStatusTrackerMixin on OneSequenceGestureRecognizer {
   @override
   void rejectGesture(int pointer) {
     _tapTrackerReset();
+    super.rejectGesture(pointer);
   }
 
   @override
@@ -1128,6 +1129,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
   }
 
   @override
+  @mustCallSuper
   void rejectGesture(int pointer) {
     if (pointer != _primaryPointer) {
       return;
