@@ -827,11 +827,13 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
+  @mustCallSuper
   void rejectGesture(int pointer) {
     _pointerPanZooms.remove(pointer);
     _pointerLocations.remove(pointer);
     _pointerQueue.remove(pointer);
     stopTrackingPointer(pointer);
+    super.rejectGesture(pointer);
   }
 
   @override
