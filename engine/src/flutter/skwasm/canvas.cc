@@ -321,7 +321,7 @@ SKWASM_EXPORT void canvas_drawImageRect(flutter::DisplayListBuilder* canvas,
                                         Skwasm::FilterQuality quality) {
   canvas->DrawImageRect(sk_ref_sp(image), *source_rect, *dest_rect,
                         Skwasm::SamplingOptionsForQuality(quality), paint,
-                        flutter::DlSrcRectConstraint::kStrict);
+                        flutter::DlSrcRectConstraint::kFast);
 }
 
 SKWASM_EXPORT void canvas_drawImageNine(flutter::DisplayListBuilder* canvas,
