@@ -473,8 +473,8 @@ public typealias FlutterKeyboardAnimationCallback = (_ targetTime: CFTimeInterva
 
     keyboardAnimationVSyncClient = VSyncClient(
       taskRunner: taskRunner,
-      isVariableRefreshRateEnabled: DisplayLinkManager.maxRefreshRateEnabledOnIPhone,
-      maxRefreshRate: DisplayLinkManager.displayRefreshRate,
+      isVariableRefreshRateEnabled: DisplayLinkManager.shared.maxRefreshRateEnabledOnIPhone,
+      maxRefreshRate: DisplayLinkManager.shared.displayRefreshRate,
       callback: vsyncCallback)
     keyboardAnimationVSyncClient?.allowPauseAfterVsync = false
     keyboardAnimationVSyncClient?.await()
