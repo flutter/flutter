@@ -2,9 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+/// The color value for Material blue 500, used here to avoid a dependency on
+/// the Material library.
+const Color _materialBlue500 = Color(0xFF2196F3);
+
+/// The color value for Material green 500, used here to avoid a dependency on
+/// the Material library.
+const Color _materialGreen500 = Color(0xFF4CAF50);
 
 void main() {
   group('SystemChrome - style', () {
@@ -48,13 +56,13 @@ void main() {
         setupTestDevice(tester);
         await tester.pumpWidget(
           const AnnotatedRegion<SystemUiOverlayStyle>(
-            value: SystemUiOverlayStyle(statusBarColor: Colors.blue),
+            value: SystemUiOverlayStyle(statusBarColor: _materialBlue500),
             child: SizedBox.expand(),
           ),
         );
         await tester.pumpAndSettle();
 
-        expect(SystemChrome.latestStyle?.statusBarColor, Colors.blue);
+        expect(SystemChrome.latestStyle?.statusBarColor, _materialBlue500);
       }, variant: TargetPlatformVariant.mobile());
 
       testWidgets(
@@ -66,7 +74,7 @@ void main() {
             const Align(
               alignment: Alignment.topCenter,
               child: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle(statusBarColor: Colors.blue),
+                value: SystemUiOverlayStyle(statusBarColor: _materialBlue500),
                 child: SizedBox(width: 100, height: lessThanHalfOfTheStatusBarHeight),
               ),
             ),
@@ -87,64 +95,58 @@ void main() {
             const Align(
               alignment: Alignment.topCenter,
               child: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle(statusBarColor: Colors.blue),
+                value: SystemUiOverlayStyle(statusBarColor: _materialBlue500),
                 child: SizedBox(width: 100, height: moreThanHalfOfTheStatusBarHeight),
               ),
             ),
           );
           await tester.pumpAndSettle();
 
-          expect(SystemChrome.latestStyle?.statusBarColor, Colors.blue);
+          expect(SystemChrome.latestStyle?.statusBarColor, _materialBlue500);
         },
         variant: TargetPlatformVariant.mobile(),
       );
     });
 
     group('navigation color (Android only)', () {
-      testWidgets(
-        "systemNavigationBarColor isn't set for non Android device",
-        (WidgetTester tester) async {
-          setupTestDevice(tester);
-          await tester.pumpWidget(
-            const AnnotatedRegion<SystemUiOverlayStyle>(
-              value: SystemUiOverlayStyle(systemNavigationBarColor: Colors.blue),
-              child: SizedBox.expand(),
-            ),
-          );
-          await tester.pumpAndSettle();
+      testWidgets("systemNavigationBarColor isn't set for non Android device", (
+        WidgetTester tester,
+      ) async {
+        setupTestDevice(tester);
+        await tester.pumpWidget(
+          const AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(systemNavigationBarColor: _materialBlue500),
+            child: SizedBox.expand(),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-          expect(SystemChrome.latestStyle?.systemNavigationBarColor, isNull);
-        },
-        variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-      );
+        expect(SystemChrome.latestStyle?.systemNavigationBarColor, isNull);
+      }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-      testWidgets(
-        "systemNavigationBarColor isn't set for unannotated view",
-        (WidgetTester tester) async {
-          await tester.pumpWidget(const SizedBox.expand());
-          await tester.pumpAndSettle();
+      testWidgets("systemNavigationBarColor isn't set for unannotated view", (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(const SizedBox.expand());
+        await tester.pumpAndSettle();
 
-          expect(SystemChrome.latestStyle?.systemNavigationBarColor, isNull);
-        },
-        variant: TargetPlatformVariant.only(TargetPlatform.android),
-      );
+        expect(SystemChrome.latestStyle?.systemNavigationBarColor, isNull);
+      }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-      testWidgets(
-        'systemNavigationBarColor is set for annotated view',
-        (WidgetTester tester) async {
-          setupTestDevice(tester);
-          await tester.pumpWidget(
-            const AnnotatedRegion<SystemUiOverlayStyle>(
-              value: SystemUiOverlayStyle(systemNavigationBarColor: Colors.blue),
-              child: SizedBox.expand(),
-            ),
-          );
-          await tester.pumpAndSettle();
+      testWidgets('systemNavigationBarColor is set for annotated view', (
+        WidgetTester tester,
+      ) async {
+        setupTestDevice(tester);
+        await tester.pumpWidget(
+          const AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(systemNavigationBarColor: _materialBlue500),
+            child: SizedBox.expand(),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-          expect(SystemChrome.latestStyle?.systemNavigationBarColor, Colors.blue);
-        },
-        variant: TargetPlatformVariant.only(TargetPlatform.android),
-      );
+        expect(SystemChrome.latestStyle?.systemNavigationBarColor, _materialBlue500);
+      }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
       testWidgets(
         "systemNavigationBarColor isn't set when view covers less than half of navigation bar",
@@ -155,7 +157,7 @@ void main() {
             const Align(
               alignment: Alignment.bottomCenter,
               child: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle(systemNavigationBarColor: Colors.blue),
+                value: SystemUiOverlayStyle(systemNavigationBarColor: _materialBlue500),
                 child: SizedBox(width: 100, height: lessThanHalfOfTheNavigationBarHeight),
               ),
             ),
@@ -176,14 +178,14 @@ void main() {
             const Align(
               alignment: Alignment.bottomCenter,
               child: AnnotatedRegion<SystemUiOverlayStyle>(
-                value: SystemUiOverlayStyle(systemNavigationBarColor: Colors.blue),
+                value: SystemUiOverlayStyle(systemNavigationBarColor: _materialBlue500),
                 child: SizedBox(width: 100, height: moreThanHalfOfTheNavigationBarHeight),
               ),
             ),
           );
           await tester.pumpAndSettle();
 
-          expect(SystemChrome.latestStyle?.systemNavigationBarColor, Colors.blue);
+          expect(SystemChrome.latestStyle?.systemNavigationBarColor, _materialBlue500);
         },
         variant: TargetPlatformVariant.only(TargetPlatform.android),
       );
@@ -199,8 +201,8 @@ void main() {
               Expanded(
                 child: AnnotatedRegion<SystemUiOverlayStyle>(
                   value: SystemUiOverlayStyle(
-                    systemNavigationBarColor: Colors.blue,
-                    statusBarColor: Colors.blue,
+                    systemNavigationBarColor: _materialBlue500,
+                    statusBarColor: _materialBlue500,
                   ),
                   child: SizedBox.expand(),
                 ),
@@ -208,8 +210,8 @@ void main() {
               Expanded(
                 child: AnnotatedRegion<SystemUiOverlayStyle>(
                   value: SystemUiOverlayStyle(
-                    systemNavigationBarColor: Colors.green,
-                    statusBarColor: Colors.green,
+                    systemNavigationBarColor: _materialGreen500,
+                    statusBarColor: _materialGreen500,
                   ),
                   child: SizedBox.expand(),
                 ),
@@ -219,8 +221,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(SystemChrome.latestStyle?.statusBarColor, Colors.blue);
-        expect(SystemChrome.latestStyle?.systemNavigationBarColor, Colors.green);
+        expect(SystemChrome.latestStyle?.statusBarColor, _materialBlue500);
+        expect(SystemChrome.latestStyle?.systemNavigationBarColor, _materialGreen500);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
@@ -235,8 +237,8 @@ void main() {
               Expanded(
                 child: AnnotatedRegion<SystemUiOverlayStyle>(
                   value: SystemUiOverlayStyle(
-                    systemNavigationBarColor: Colors.blue,
-                    statusBarColor: Colors.blue,
+                    systemNavigationBarColor: _materialBlue500,
+                    statusBarColor: _materialBlue500,
                   ),
                   child: SizedBox.expand(),
                 ),
@@ -247,8 +249,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(SystemChrome.latestStyle?.statusBarColor, Colors.blue);
-        expect(SystemChrome.latestStyle?.systemNavigationBarColor, Colors.blue);
+        expect(SystemChrome.latestStyle?.statusBarColor, _materialBlue500);
+        expect(SystemChrome.latestStyle?.systemNavigationBarColor, _materialBlue500);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
@@ -264,8 +266,8 @@ void main() {
               Expanded(
                 child: AnnotatedRegion<SystemUiOverlayStyle>(
                   value: SystemUiOverlayStyle(
-                    systemNavigationBarColor: Colors.green,
-                    statusBarColor: Colors.green,
+                    systemNavigationBarColor: _materialGreen500,
+                    statusBarColor: _materialGreen500,
                   ),
                   child: SizedBox.expand(),
                 ),
@@ -275,8 +277,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(SystemChrome.latestStyle?.statusBarColor, Colors.green);
-        expect(SystemChrome.latestStyle?.systemNavigationBarColor, Colors.green);
+        expect(SystemChrome.latestStyle?.statusBarColor, _materialGreen500);
+        expect(SystemChrome.latestStyle?.systemNavigationBarColor, _materialGreen500);
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
