@@ -6,12 +6,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// The color value for Material blue 500, used here to avoid a dependency on
-/// the Material library.
+/// Matches the legacy `Colors.blue` value while avoiding a dependency on the
+/// Material library.
 const Color _materialBlue500 = Color(0xFF2196F3);
 
-/// The color value for Material green 500, used here to avoid a dependency on
-/// the Material library.
+/// Matches the legacy `Colors.green` value while avoiding a dependency on the
+/// Material library.
 const Color _materialGreen500 = Color(0xFF4CAF50);
 
 void main() {
