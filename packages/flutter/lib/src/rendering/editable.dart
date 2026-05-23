@@ -2075,10 +2075,10 @@ class RenderEditable extends RenderBox
 
   void _handleTapUp(SerialTapUpDetails details) {
     assert(!ignorePointer);
-    if (details.count == 2) {
-      handleDoubleTap();
-    } else {
+    if (details.count == 1) {
       handleTap();
+    } else if (details.count == 2) {
+      handleDoubleTap();
     }
   }
 
