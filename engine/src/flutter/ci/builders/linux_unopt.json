@@ -1,6 +1,7 @@
 {
     "builds": [
         {
+            "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
                 "os=Linux",
@@ -105,7 +106,7 @@
             "timeout": 120
         },
         {
-            "archives": [],
+            "cas_archive": false,
             "drone_dimensions": [
                 "device_type=none",
                 "os=Linux",
