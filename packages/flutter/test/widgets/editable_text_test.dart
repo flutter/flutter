@@ -18596,6 +18596,124 @@ void main() {
     // [intended] only applies to platforms where we supply the context menu.
     skip: kIsWeb,
   );
+
+  testWidgets('EditableText supports double tap to select word', (WidgetTester tester) async {
+    controller = TextEditingController(text: 'hello world');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap once to focus.
+    await tester.tap(find.byType(EditableText));
+    await tester.pumpAndSettle();
+
+    // Double tap on the word 'hello' to select it.
+    final Offset helloPosition = textOffsetToPosition(tester, 2);
+    await tester.tapAt(helloPosition);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(helloPosition);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 5);
+  });
+
+  testWidgets('EditableText supports double tap to select word with rendererIgnoresPointer false', (
+    WidgetTester tester,
+  ) async {
+    controller = TextEditingController(text: 'foo bar baz');
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              backgroundCursorColor: Colors.grey,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Tap once to focus.
+    await tester.tap(find.byType(EditableText));
+    await tester.pumpAndSettle();
+
+    // Double tap on the word 'bar' to select it.
+    final Offset barPosition = textOffsetToPosition(tester, 5);
+    await tester.tapAt(barPosition);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(barPosition);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 7);
+  });
+
+  testWidgets(
+    'EditableText does not use built-in gesture detector when rendererIgnoresPointer is true',
+    (WidgetTester tester) async {
+      controller = TextEditingController(text: 'hello world');
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                controller: controller,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+                backgroundCursorColor: Colors.grey,
+                rendererIgnoresPointer: true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Tap once to focus.
+      await tester.tap(find.byType(EditableText));
+      await tester.pumpAndSettle();
+
+      // Double tap should not select a word because rendererIgnoresPointer is
+      // true, meaning an external gesture detector is expected to handle it.
+      final Offset helloPosition = textOffsetToPosition(tester, 2);
+      await tester.tapAt(helloPosition);
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(helloPosition);
+      await tester.pumpAndSettle();
+
+      expect(controller.selection.baseOffset, isNot(0));
+      expect(controller.selection.extentOffset, isNot(5));
+    },
+  );
 }
 
 class UnsettableController extends TextEditingController {

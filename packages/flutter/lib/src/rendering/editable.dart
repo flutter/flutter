@@ -1643,9 +1643,9 @@ class RenderEditable extends RenderBox
     _foregroundRenderObject?.attach(owner);
     _backgroundRenderObject?.attach(owner);
 
-    _tap = TapGestureRecognizer(debugOwner: this)
-      ..onTapDown = _handleTapDown
-      ..onTap = _handleTap;
+    _tap = SerialTapGestureRecognizer(debugOwner: this)
+      ..onSerialTapDown = _handleTapDown
+      ..onSerialTapUp = _handleTapUp;
     _longPress = LongPressGestureRecognizer(debugOwner: this)..onLongPress = _handleLongPress;
     _offset.addListener(markNeedsPaint);
     _showHideCursor();
@@ -2008,7 +2008,7 @@ class RenderEditable extends RenderBox
     }
   }
 
-  late TapGestureRecognizer _tap;
+  late SerialTapGestureRecognizer _tap;
   late LongPressGestureRecognizer _longPress;
 
   @override
@@ -2016,7 +2016,6 @@ class RenderEditable extends RenderBox
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent) {
       assert(!debugNeedsLayout);
-
       if (!ignorePointer) {
         // Propagates the pointer event to selection handlers.
         _tap.addPointer(event);
@@ -2053,9 +2052,15 @@ class RenderEditable extends RenderBox
     _lastTapDownPosition = details.globalPosition;
   }
 
-  void _handleTapDown(TapDownDetails details) {
+  void _handleTapDown(SerialTapDownDetails details) {
     assert(!ignorePointer);
-    handleTapDown(details);
+    handleTapDown(
+      TapDownDetails(
+        globalPosition: details.globalPosition,
+        localPosition: details.localPosition,
+        kind: details.kind,
+      ),
+    );
   }
 
   /// If [ignorePointer] is false (the default) then this method is called by
@@ -2068,9 +2073,13 @@ class RenderEditable extends RenderBox
     selectPosition(cause: SelectionChangedCause.tap);
   }
 
-  void _handleTap() {
+  void _handleTapUp(SerialTapUpDetails details) {
     assert(!ignorePointer);
-    handleTap();
+    if (details.count == 2) {
+      handleDoubleTap();
+    } else {
+      handleTap();
+    }
   }
 
   /// If [ignorePointer] is false (the default) then this method is called by
