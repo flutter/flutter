@@ -1852,6 +1852,48 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     scrollController.dispose();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/141348.
+  testWidgets(
+    'Scrollbar should not shown due to precision error on desktop',
+    (WidgetTester tester) async {
+      Widget buildFrame(Size size) {
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
+        return MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: DatePickerDialog(
+                initialDate: DateTime(2020, DateTime.may), // Month with six rows.
+                firstDate: DateTime(2010),
+                lastDate: DateTime(2030),
+              ),
+            ),
+          ),
+        );
+      }
+
+      const screenSizePortrait = Size(400, 600);
+      await tester.pumpWidget(buildFrame(screenSizePortrait));
+      await tester.pumpAndSettle();
+
+      // Scrollbar is not shown.
+      expect(find.byType(Scrollbar), findsOneWidget);
+      expect(find.byType(Scrollbar), isNot(paints..rect()));
+
+      // Scroll on the Scrollbar.
+      final pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+      pointer.hover(tester.getCenter(find.byType(Scrollbar)));
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 10.0)));
+      await tester.pumpAndSettle();
+
+      // Scrollbar is still not shown.
+      expect(find.byType(Scrollbar), findsOneWidget);
+      expect(find.byType(Scrollbar), isNot(paints..rect()));
+    },
+    variant: TargetPlatformVariant.desktop(),
+  );
+
   testWidgets('Scrollbar does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
