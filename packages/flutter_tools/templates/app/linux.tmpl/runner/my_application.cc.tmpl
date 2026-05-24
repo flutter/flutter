@@ -44,7 +44,7 @@ static void my_application_activate(GApplication* application) {
 #endif
 #ifdef FLUTTER_APP_FLAVOR
   g_autofree gchar* window_title =
-      g_strdup_printf("{{projectName}} (%s)", FLUTTER_APP_FLAVOR);
+      g_strdup_printf("%s (%s)", "{{projectName}}", FLUTTER_APP_FLAVOR);
 #else
   const gchar* window_title = "{{projectName}}";
 #endif
