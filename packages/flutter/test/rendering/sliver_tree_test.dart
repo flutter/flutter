@@ -2,56 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart'
-    show FlutterError, FlutterErrorDetails, FlutterExceptionHandler;
-import 'package:flutter/painting.dart'
-    show
-        Axis,
-        Color,
-        FontWeight,
-        Offset,
-        Rect,
-        TextDecoration,
-        TextDecorationStyle,
-        TextDirection,
-        TextStyle;
-import 'package:flutter/rendering.dart' show TreeSliverIndentationType;
-import 'package:flutter/widgets.dart'
-    show
-        AnimationStyle,
-        Container,
-        Curves,
-        CustomScrollView,
-        DefaultTextStyle,
-        Directionality,
-        Icon,
-        ScrollController,
-        TreeSliver,
-        TreeSliverNode,
-        Widget;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-/// The fallback text style used by MaterialApp when no other style is provided.
-///
-/// This is used in tests to ensure consistent text metrics without a dependency
-/// on the Material library.
-const TextStyle _materialAppFallbackTextStyle = TextStyle(
-  color: Color(0xD0FF0000),
-  fontFamily: 'monospace',
-  fontSize: 48.0,
-  fontWeight: FontWeight.w900,
-  decoration: TextDecoration.underline,
-  decorationColor: Color(0xFFFFFF00),
-  decorationStyle: TextDecorationStyle.double,
-  debugLabel: 'fallback style; consider putting your text in a Material',
-);
 
 /// Wraps the [child] in a [Directionality] and [DefaultTextStyle] to provide
 /// the necessary context for rendering tests.
 Widget _buildTestWidget(Widget child) {
   return Directionality(
     textDirection: TextDirection.ltr,
-    child: DefaultTextStyle(style: _materialAppFallbackTextStyle, child: child),
+    child: DefaultTextStyle(
+      style: const TextStyle(
+        color: Color(0xFF000000),
+        fontFamily: 'monospace',
+        fontSize: 48.0,
+        fontWeight: FontWeight.w900,
+        decoration: TextDecoration.underline,
+        decorationColor: Color(0xFFFFFF00),
+        decorationStyle: TextDecorationStyle.double,
+        debugLabel: 'fallback style',
+      ),
+      child: child,
+    ),
   );
 }
 
