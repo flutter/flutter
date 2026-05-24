@@ -5,9 +5,9 @@
 import 'dart:collection';
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'button_tester.dart';
@@ -760,42 +760,6 @@ void main() {
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
     });
 
-    testWidgets(
-      'delegated transitions are removed when secondary animation is dismissed and next route is removed',
-      (WidgetTester tester) async {
-        final navigator = GlobalKey<NavigatorState>();
-        await tester.pumpWidget(TestWidgetsApp(navigatorKey: navigator, home: const Text('home')));
-
-        // Push first page with custom transition builder.
-        final Route<void> firstRoute = CupertinoSheetRoute<void>(
-          builder: (_) {
-            return const Text('Page One');
-          },
-        );
-
-        navigator.currentState!.push(firstRoute);
-        await tester.pumpAndSettle();
-
-        expect(find.text('Page One'), findsOneWidget);
-        final Finder cupertinoSheetDelegatedTransitionFinder = find.ancestor(
-          of: find.ancestor(
-            of: find.byType(ClipRSuperellipse),
-            matching: find.byType(AnimatedBuilder),
-          ),
-          matching: find.byType(ScaleTransition),
-        );
-        expect(cupertinoSheetDelegatedTransitionFinder, findsOneWidget);
-
-        navigator.currentState!.pop();
-        await tester.pumpAndSettle();
-
-        // Verify home is still visible without transitions.
-        expect(find.text('home'), findsOneWidget);
-
-        // Verify the delegated transition is removed.
-        expect(cupertinoSheetDelegatedTransitionFinder, findsNothing);
-      },
-    );
 
     testWidgets('secondary animation is kDismissed after train hopping finishes and pop', (
       WidgetTester tester,
@@ -2099,57 +2063,6 @@ void main() {
       expect(modalRoute!.requestFocus, isFalse);
     });
 
-    testWidgets('outgoing route receives a delegated transition from the new route', (
-      WidgetTester tester,
-    ) async {
-      final navigatorKey = GlobalKey<NavigatorState>();
-
-      final pageRoute = PageRouteBuilder<void>(
-        pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
-          return TestButton(
-            onPressed: () {
-              final route = CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
-                  return const Text('Cupertino Transition');
-                },
-              );
-              Navigator.of(context).push(route);
-            },
-            child: const Text('Cupertino Transition'),
-          );
-        },
-      );
-
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          navigatorKey: navigatorKey,
-          home: TestButton(
-            onPressed: () {
-              navigatorKey.currentState!.push<void>(pageRoute);
-            },
-            child: const Text('Page Route Transition'),
-          ),
-        ),
-      );
-
-      expect(pageRoute.receivedTransition, null);
-
-      await tester.tap(find.text('Page Route Transition'));
-
-      await tester.pumpAndSettle();
-
-      expect(find.text('Cupertino Transition'), findsOneWidget);
-      expect(find.text('Page Route Transition'), findsNothing);
-
-      expect(pageRoute.receivedTransition, null);
-
-      await tester.tap(find.text('Cupertino Transition'));
-
-      await tester.pumpAndSettle();
-
-      expect(pageRoute.receivedTransition, isNotNull);
-      expect(pageRoute.receivedTransition, CupertinoPageTransition.delegatedTransition);
-    });
 
     testWidgets(
       'outgoing route does not receive a delegated transition from a route with the same transition',
@@ -2256,181 +2169,6 @@ void main() {
       },
     );
 
-    testWidgets('a received transition animates the same as a non-received transition', (
-      WidgetTester tester,
-    ) async {
-      final navigatorKey = GlobalKey<NavigatorState>();
-
-      const firstPlaceholderKey = Key('First Placeholder');
-      const secondPlaceholderKey = Key('Second Placeholder');
-
-      final cupertinoPageRoute = CupertinoPageRoute<void>(
-        builder: (BuildContext context) {
-          return Column(
-            children: <Widget>[
-              const Placeholder(key: secondPlaceholderKey),
-              TestButton(
-                onPressed: () {
-                  final route = CupertinoPageRoute<void>(
-                    builder: (BuildContext context) {
-                      return Column(
-                        children: <Widget>[
-                          TestButton(onPressed: () {}, child: const Text('Page 3')),
-                        ],
-                      );
-                    },
-                  );
-                  Navigator.of(context).push(route);
-                },
-                child: const Text('Second Cupertino Transition'),
-              ),
-            ],
-          );
-        },
-      );
-
-      await tester.pumpWidget(
-        TestWidgetsApp(
-          navigatorKey: navigatorKey,
-          home: Column(
-            children: <Widget>[
-              const Placeholder(key: firstPlaceholderKey),
-              TestButton(
-                onPressed: () {
-                  navigatorKey.currentState!.push<void>(cupertinoPageRoute);
-                },
-                child: const Text('First Cupertino Transition'),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      // Start first page transition. This one will be playing the delegated transition
-      // received from Cupertino page route.
-      await tester.tap(find.text('First Cupertino Transition'));
-
-      await tester.pump();
-
-      // Save the position of element on the screen at certain intervals
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalOne = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalTwo = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalThree = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalFour = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalFive = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalSix = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalSeven = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalEight = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalNine = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalTen = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 50));
-      final double xLocationIntervalEleven = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 50));
-      final double xLocationIntervalTwelve = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      // Give time to the animation to finish
-      await tester.pumpAndSettle(const Duration(milliseconds: 1));
-
-      // Start the second page transition. This time it's the default secondary
-      // transition of a Cupertino page, with no delegation.
-      await tester.tap(find.text('Second Cupertino Transition'));
-
-      await tester.pump();
-
-      // Compare against the values from before.
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalOne, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalTwo, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalThree, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalFour, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalFive, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalSix, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalSeven, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalEight, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalNine, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalTen, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalEleven, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalTwelve, epsilon: 0.1),
-      );
-    });
 
     testWidgets('ModalRoute.isFirstOf only rebuilds when first route state changes', (
       WidgetTester tester,

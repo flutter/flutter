@@ -109,7 +109,6 @@ class TestsCrossImportChecker {
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownWidgetsCrossImports = <String>{
     'packages/flutter/test/widgets/page_transitions_test.dart',
-    'packages/flutter/test/widgets/routes_test.dart',
     'packages/flutter/test/widgets/app_test.dart',
     'packages/flutter/test/widgets/navigator_replacement_test.dart',
     'packages/flutter/test/widgets/implicit_animations_test.dart',

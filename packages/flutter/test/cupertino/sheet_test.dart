@@ -61,6 +61,39 @@ void main() {
     );
   });
 
+  testWidgets(
+    'delegated transitions are removed when secondary animation is dismissed and next route is removed',
+    (WidgetTester tester) async {
+      final navigator = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(CupertinoApp(navigatorKey: navigator, home: const Text('home')));
+
+      final Route<void> firstRoute = CupertinoSheetRoute<void>(
+        builder: (_) {
+          return const Text('Page One');
+        },
+      );
+
+      navigator.currentState!.push(firstRoute);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Page One'), findsOneWidget);
+      final Finder cupertinoSheetDelegatedTransitionFinder = find.ancestor(
+        of: find.ancestor(
+          of: find.byType(ClipRSuperellipse),
+          matching: find.byType(AnimatedBuilder),
+        ),
+        matching: find.byType(ScaleTransition),
+      );
+      expect(cupertinoSheetDelegatedTransitionFinder, findsOneWidget);
+
+      navigator.currentState!.pop();
+      await tester.pumpAndSettle();
+
+      expect(find.text('home'), findsOneWidget);
+      expect(cupertinoSheetDelegatedTransitionFinder, findsNothing);
+    },
+  );
+
   testWidgets('showDragHandle adds a drag handle to the top of the sheet', (
     WidgetTester tester,
   ) async {

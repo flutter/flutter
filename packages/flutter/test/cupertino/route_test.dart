@@ -3236,6 +3236,222 @@ void main() {
       expect(builder.delegatedTransition, isNotNull);
       expect(builder.delegatedTransition, CupertinoPageTransition.delegatedTransition);
     });
+
+    testWidgets('outgoing route receives a delegated transition from the new route', (
+      WidgetTester tester,
+    ) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+
+      final pageRoute = PageRouteBuilder<void>(
+        pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+          return CupertinoButton(
+            onPressed: () {
+              final route = CupertinoPageRoute<void>(
+                builder: (BuildContext context) {
+                  return const Text('Cupertino Transition');
+                },
+              );
+              Navigator.of(context).push(route);
+            },
+            child: const Text('Cupertino Transition'),
+          );
+        },
+      );
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          navigatorKey: navigatorKey,
+          home: CupertinoButton(
+            onPressed: () {
+              navigatorKey.currentState!.push<void>(pageRoute);
+            },
+            child: const Text('Page Route Transition'),
+          ),
+        ),
+      );
+
+      expect(pageRoute.receivedTransition, null);
+
+      await tester.tap(find.text('Page Route Transition'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cupertino Transition'), findsOneWidget);
+      expect(find.text('Page Route Transition'), findsNothing);
+      expect(pageRoute.receivedTransition, null);
+
+      await tester.tap(find.text('Cupertino Transition'));
+      await tester.pumpAndSettle();
+
+      expect(pageRoute.receivedTransition, isNotNull);
+      expect(pageRoute.receivedTransition, CupertinoPageTransition.delegatedTransition);
+    });
+
+    testWidgets('a received transition animates the same as a non-received transition', (
+      WidgetTester tester,
+    ) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+
+      const firstPlaceholderKey = Key('First Placeholder');
+      const secondPlaceholderKey = Key('Second Placeholder');
+
+      final cupertinoPageRoute = CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return Column(
+            children: <Widget>[
+              const Placeholder(key: secondPlaceholderKey),
+              CupertinoButton(
+                onPressed: () {
+                  final route = CupertinoPageRoute<void>(
+                    builder: (BuildContext context) {
+                      return Column(
+                        children: <Widget>[
+                          CupertinoButton(onPressed: () {}, child: const Text('Page 3')),
+                        ],
+                      );
+                    },
+                  );
+                  Navigator.of(context).push(route);
+                },
+                child: const Text('Second Cupertino Transition'),
+              ),
+            ],
+          );
+        },
+      );
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          navigatorKey: navigatorKey,
+          home: Column(
+            children: <Widget>[
+              const Placeholder(key: firstPlaceholderKey),
+              CupertinoButton(
+                onPressed: () {
+                  navigatorKey.currentState!.push<void>(cupertinoPageRoute);
+                },
+                child: const Text('First Cupertino Transition'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('First Cupertino Transition'));
+      await tester.pump();
+
+      await tester.pump(const Duration(milliseconds: 40));
+      final double xLocationIntervalOne = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
+
+      await tester.pump(const Duration(milliseconds: 40));
+      final double xLocationIntervalTwo = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
+
+      await tester.pump(const Duration(milliseconds: 40));
+      final double xLocationIntervalThree = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
+
+      await tester.pump(const Duration(milliseconds: 40));
+      final double xLocationIntervalFour = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
+
+      await tester.pump(const Duration(milliseconds: 40));
+      final double xLocationIntervalFive = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
+
+      await tester.pump(const Duration(milliseconds: 40));
+      final double xLocationIntervalSix = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
+
+      await tester.pump(const Duration(milliseconds: 40));
+      final double xLocationIntervalSeven = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
+
+      await tester.pump(const Duration(milliseconds: 40));
+      final double xLocationIntervalEight = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
+
+      await tester.pump(const Duration(milliseconds: 40));
+      final double xLocationIntervalNine = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
+
+      await tester.pump(const Duration(milliseconds: 40));
+      final double xLocationIntervalTen = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
+
+      await tester.pump(const Duration(milliseconds: 50));
+      final double xLocationIntervalEleven = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
+
+      await tester.pump(const Duration(milliseconds: 50));
+      final double xLocationIntervalTwelve = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
+
+      await tester.pumpAndSettle(const Duration(milliseconds: 1));
+
+      await tester.tap(find.text('Second Cupertino Transition'));
+      await tester.pump();
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(
+        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+        moreOrLessEquals(xLocationIntervalOne, epsilon: 0.1),
+      );
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(
+        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+        moreOrLessEquals(xLocationIntervalTwo, epsilon: 0.1),
+      );
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(
+        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+        moreOrLessEquals(xLocationIntervalThree, epsilon: 0.1),
+      );
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(
+        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+        moreOrLessEquals(xLocationIntervalFour, epsilon: 0.1),
+      );
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(
+        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+        moreOrLessEquals(xLocationIntervalFive, epsilon: 0.1),
+      );
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(
+        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+        moreOrLessEquals(xLocationIntervalSix, epsilon: 0.1),
+      );
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(
+        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+        moreOrLessEquals(xLocationIntervalSeven, epsilon: 0.1),
+      );
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(
+        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+        moreOrLessEquals(xLocationIntervalEight, epsilon: 0.1),
+      );
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(
+        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+        moreOrLessEquals(xLocationIntervalNine, epsilon: 0.1),
+      );
+
+      await tester.pump(const Duration(milliseconds: 40));
+      expect(
+        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+        moreOrLessEquals(xLocationIntervalTen, epsilon: 0.1),
+      );
+
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(
+        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+        moreOrLessEquals(xLocationIntervalEleven, epsilon: 0.1),
+      );
+
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(
+        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+        moreOrLessEquals(xLocationIntervalTwelve, epsilon: 0.1),
+      );
+    });
   });
 }
 
