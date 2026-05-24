@@ -84,12 +84,7 @@ static NSString* const kAppBundleIdentifier = @"io.flutter.flutter.app";
 }
 
 - (BOOL)enableWideGamut {
-  NSNumber* enableWideGamut =
-      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableWideGamut"];
-  if (enableWideGamut != nil) {
-    return enableWideGamut.boolValue && DoesHardwareSupportWideGamut();
-  }
-  return NO;
+  return self.enableImpeller && DoesHardwareSupportWideGamut();
 }
 
 - (BOOL)enableFlutterGPU {
