@@ -2,6 +2,8 @@
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
 
+#include <string>
+
 #include "flutter_window.h"
 #include "utils.h"
 
@@ -27,7 +29,18 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(L"{{projectName}}", origin, size)) {
+  std::wstring window_title = L"{{projectName}}";
+#ifdef FLUTTER_APP_FLAVOR
+  {
+    // Convert FLUTTER_APP_FLAVOR (UTF-8 literal) to wide string for window title.
+    const std::string flavor_utf8(FLUTTER_APP_FLAVOR);
+    const int wide_len = MultiByteToWideChar(CP_UTF8, 0, flavor_utf8.c_str(), -1, nullptr, 0);
+    std::wstring flavor_wide(wide_len - 1, L'\0');
+    MultiByteToWideChar(CP_UTF8, 0, flavor_utf8.c_str(), -1, flavor_wide.data(), wide_len);
+    window_title += L" (" + flavor_wide + L")";
+  }
+#endif
+  if (!window.Create(window_title, origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);

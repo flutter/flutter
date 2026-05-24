@@ -11,7 +11,8 @@ import 'cmake_project.dart';
 /// Extracts the `BINARY_NAME` from a project's CMake file.
 ///
 /// Returns `null` if it cannot be found.
-String? getCmakeExecutableName(CmakeBasedProject project) {
+/// When [flavor] is non-empty the binary name is suffixed with `-flavor`.
+String? getCmakeExecutableName(CmakeBasedProject project, {String? flavor}) {
   if (!project.cmakeFile.existsSync()) {
     return null;
   }
@@ -19,7 +20,11 @@ String? getCmakeExecutableName(CmakeBasedProject project) {
   for (final String line in project.cmakeFile.readAsLinesSync()) {
     final RegExpMatch? match = nameSetPattern.firstMatch(line);
     if (match != null) {
-      return match.group(1);
+      final String baseName = match.group(1)!;
+      if (flavor != null && flavor.isNotEmpty) {
+        return '$baseName-$flavor';
+      }
+      return baseName;
     }
   }
   return null;

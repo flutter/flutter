@@ -63,7 +63,7 @@ Future<void> buildWindows(
   }
 
   final Directory buildDirectory = globals.fs.directory(
-    globals.fs.path.join(projectPath, getWindowsBuildDirectory(targetPlatform)),
+    globals.fs.path.join(projectPath, getWindowsBuildDirectory(targetPlatform, buildInfo.flavor)),
   );
 
   final migrators = <ProjectMigrator>[
@@ -108,6 +108,7 @@ Future<void> buildWindows(
       targetPlatform: targetPlatform,
       buildDir: buildDirectory,
       sourceDir: windowsProject.cmakeFile.parent,
+      flavor: buildInfo.flavor,
     );
     if (visualStudio.displayVersion == '17.1.0') {
       _fixBrokenCmakeGeneration(buildDirectory);
@@ -120,7 +121,7 @@ Future<void> buildWindows(
     status.stop();
   }
 
-  final String? binaryName = getCmakeExecutableName(windowsProject);
+  final String? binaryName = getCmakeExecutableName(windowsProject, flavor: buildInfo.flavor);
   final File binaryFile = buildDirectory
       .childDirectory('runner')
       .childDirectory(sentenceCase(buildModeName))
@@ -183,6 +184,7 @@ Future<void> _runCmakeGeneration({
   required TargetPlatform targetPlatform,
   required Directory buildDir,
   required Directory sourceDir,
+  String? flavor,
 }) async {
   final sw = Stopwatch()..start();
 
@@ -200,7 +202,8 @@ Future<void> _runCmakeGeneration({
       generator,
       '-A',
       getCmakeWindowsArch(targetPlatform),
-      '-DFLUTTER_TARGET_PLATFORM=${targetPlatform.getName()}',
+      '-DFLUTTER_TARGET_PLATFORM=${getNameForTargetPlatform(targetPlatform)}',
+      if (flavor != null && flavor.isNotEmpty) '-DFLUTTER_APP_FLAVOR=$flavor',
     ], trace: true);
   } on ArgumentError {
     throwToolExit("cmake not found. Run 'flutter doctor' for more information.");
