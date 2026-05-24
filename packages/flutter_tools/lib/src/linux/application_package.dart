@@ -27,7 +27,7 @@ abstract class LinuxApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
-  String executable(BuildMode buildMode);
+  String executable(BuildMode buildMode, [String? flavor]);
 }
 
 class PrebuiltLinuxApp extends LinuxApp {
@@ -38,7 +38,7 @@ class PrebuiltLinuxApp extends LinuxApp {
   final String _executable;
 
   @override
-  String executable(BuildMode buildMode) => _executable;
+  String executable(BuildMode buildMode, [String? flavor]) => _executable;
 
   @override
   String get name => _executable;
@@ -51,9 +51,14 @@ class BuildableLinuxApp extends LinuxApp {
   final LinuxProject project;
 
   @override
-  String executable(BuildMode buildMode) {
-    final String? binaryName = getCmakeExecutableName(project);
-    return globals.fs.path.join(getLinuxBuildDirectory(), buildMode.cliName, 'bundle', binaryName);
+  String executable(BuildMode buildMode, [String? flavor]) {
+    final String? binaryName = getCmakeExecutableName(project, flavor: flavor);
+    return globals.fs.path.join(
+      getLinuxBuildDirectory(null, flavor),
+      buildMode.cliName,
+      'bundle',
+      binaryName,
+    );
   }
 
   @override
