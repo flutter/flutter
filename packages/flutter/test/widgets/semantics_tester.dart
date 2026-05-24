@@ -508,7 +508,7 @@ class TestSemantics {
       );
     }
 
-    if (controlsNodes != controlsNodes && !setEquals(controlsNodes, node.controlsNodes)) {
+    if (controlsNodes != node.controlsNodes && !setEquals(controlsNodes, node.controlsNodes)) {
       return fail(
         'expected node id $id to controls nodes $controlsNodes but found controlling nodes ${node.controlsNodes}',
       );
@@ -716,7 +716,7 @@ class SemanticsTester {
           (second[i] is! LocaleStringAttribute ||
               second[i].range != first[i].range ||
               (second[i] as LocaleStringAttribute).locale !=
-                  (second[i] as LocaleStringAttribute).locale)) {
+                  (first[i] as LocaleStringAttribute).locale)) {
         return false;
       }
     }
@@ -1181,8 +1181,7 @@ class _IncludesNodeWith extends Matcher {
              maxValueLength != null ||
              currentValueLength != null ||
              inputType != null,
-         minValue != null || maxValue != null,
-       );
+         minValue != null || maxValue != null);
   final AttributedString? attributedLabel;
   final AttributedString? attributedValue;
   final AttributedString? attributedHint;
