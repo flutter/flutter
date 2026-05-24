@@ -4,6 +4,7 @@
 
 import 'package:process/process.dart';
 
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -79,7 +80,11 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
-  void onAttached(covariant MacOSApp package, BuildInfo buildInfo, Process process) {
+  Future<void> onAttached(
+    covariant MacOSApp package,
+    BuildInfo buildInfo,
+    Process process,
+  ) async {
     // Bring app to foreground. Ideally this would be done post-launch rather
     // than post-attach, since this won't run for release builds, but there's
     // no general-purpose way of knowing when a process is far enough along in
@@ -89,11 +94,21 @@ class MacOSDevice extends DesktopDevice {
       _logger.printError('Failed to foreground app; application bundle not found');
       return;
     }
-    _processManager.run(<String>['open', applicationBundle]).then((ProcessResult result) {
-      if (result.exitCode != 0) {
-        _logger.printError('Failed to foreground app; open returned ${result.exitCode}');
-      }
-    });
+    final ProcessResult result = await _processManager.run(<String>['open', applicationBundle]);
+    if (result.exitCode != 0) {
+      // Without foregrounding, the macOS window server never makes the app
+      // visible, so no display-link callbacks fire and Flutter produces no
+      // frames. `flutter test -d macos` then hangs forever waiting for the
+      // first widget tree. Fail fast with a clear message instead, matching
+      // the issue reported in https://github.com/flutter/flutter/issues/176850.
+      throwToolExit(
+        'Failed to foreground app; open returned ${result.exitCode}. '
+        'The macOS window server may be unavailable (e.g. a CI runner '
+        'without a graphical session, or a remote SSH session). Without '
+        'foreground, the app produces no frames and `flutter test` / '
+        '`flutter run` will hang.',
+      );
+    }
   }
 }
 

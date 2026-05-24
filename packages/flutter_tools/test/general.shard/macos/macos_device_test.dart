@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -238,6 +239,48 @@ void main() {
     expect(device.executablePathForDevice(package, BuildInfo.profile), profilePath);
     expect(device.executablePathForDevice(package, BuildInfo.release), releasePath);
   });
+
+  testWithoutContext(
+    'onAttached throws ToolExit when `open` fails to foreground the app',
+    () async {
+      final device = MacOSDevice(
+        fileSystem: MemoryFileSystem.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['open', 'build/macos/Build/Products/Debug/Bundle.app'],
+            exitCode: 1,
+          ),
+        ]),
+        logger: BufferLogger.test(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+      );
+      final package = FakeMacOSApp();
+
+      await expectLater(
+        device.onAttached(package, BuildInfo.debug, FakeProcess()),
+        throwsToolExit(message: 'Failed to foreground app; open returned 1'),
+      );
+    },
+  );
+
+  testWithoutContext(
+    'onAttached returns normally when `open` succeeds',
+    () async {
+      final device = MacOSDevice(
+        fileSystem: MemoryFileSystem.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['open', 'build/macos/Build/Products/Debug/Bundle.app'],
+          ),
+        ]),
+        logger: BufferLogger.test(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+      );
+      final package = FakeMacOSApp();
+
+      await device.onAttached(package, BuildInfo.debug, FakeProcess());
+    },
+  );
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {
@@ -258,4 +301,11 @@ class FakeMacOSApp extends Fake implements MacOSApp {
       _ => throw StateError(''),
     };
   }
+
+  @override
+  String? applicationBundle(BuildInfo buildInfo) {
+    return 'build/macos/Build/Products/Debug/Bundle.app';
+  }
 }
+
+class FakeProcess extends Fake implements Process {}

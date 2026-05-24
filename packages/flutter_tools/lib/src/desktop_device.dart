@@ -183,7 +183,7 @@ abstract class DesktopDevice extends Device {
       final Uri? vmServiceUri = await vmServiceDiscovery.uri;
       if (vmServiceUri != null) {
         timer?.cancel();
-        onAttached(package, buildInfo, process);
+        await onAttached(package, buildInfo, process);
         return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
       _logger.printError(
@@ -227,7 +227,11 @@ abstract class DesktopDevice extends Device {
 
   /// Called after a process is attached, allowing any device-specific extra
   /// steps to be run.
-  void onAttached(ApplicationPackage package, BuildInfo buildInfo, Process process) {}
+  ///
+  /// Returning a [Future] lets device-specific hooks (e.g. macOS `open`) run
+  /// asynchronously and abort the launch by throwing if a required post-attach
+  /// step fails.
+  Future<void> onAttached(ApplicationPackage package, BuildInfo buildInfo, Process process) async {}
 
   /// Computes a set of environment variables used to pass debugging information
   /// to the engine without interfering with application level command line
