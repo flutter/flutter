@@ -1574,7 +1574,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
     expect(find.text('Overlay'), findsNothing);
 
-    Navigator.push(containerKey2.currentContext!, TestOverlayRoute());
+    Navigator.push(containerKey2.currentContext!, _TestOverlayRoute());
 
     await tester.pump();
 
@@ -1822,7 +1822,7 @@ void main() {
     expect(completeCount, 1);
   });
 
-  testWidgets('navigating with transitions of different lengths', (WidgetTester tester) async {
+  testWidgets('Navigating with transitions of different lengths', (WidgetTester tester) async {
     final observer = TransitionDurationObserver();
 
     await tester.pumpWidget(
@@ -1946,12 +1946,11 @@ void main() {
   testWidgets('PageTransitionsBuilder buildTransitions method is called correctly', (
     WidgetTester tester,
   ) async {
-    var buildTransitionsCalled = false;
-    PageRoute<dynamic>? capturedRoute;
-    BuildContext? capturedContext;
-    Animation<double>? capturedAnimation;
-    Animation<double>? capturedSecondaryAnimation;
-    Widget? capturedChild;
+    final capturedRoutes = <PageRoute<dynamic>>[];
+    final capturedContexts = <BuildContext>[];
+    final capturedAnimations = <Animation<double>>[];
+    final capturedSecondaryAnimations = <Animation<double>>[];
+    final capturedChildren = <Widget>[];
 
     final builderWithCapture = _TestPageTransitionsBuilder(
       onBuildTransitions:
@@ -1962,12 +1961,11 @@ void main() {
             Animation<double> secondaryAnimation,
             Widget child,
           ) {
-            buildTransitionsCalled = true;
-            capturedRoute = route;
-            capturedContext = context;
-            capturedAnimation = animation;
-            capturedSecondaryAnimation = secondaryAnimation;
-            capturedChild = child;
+            capturedRoutes.add(route);
+            capturedContexts.add(context);
+            capturedAnimations.add(animation);
+            capturedSecondaryAnimations.add(secondaryAnimation);
+            capturedChildren.add(child);
 
             return SlideTransition(
               position: Tween<Offset>(
@@ -2004,18 +2002,26 @@ void main() {
       ),
     );
 
-    // Trigger navigation
+    capturedRoutes.clear();
+    capturedContexts.clear();
+    capturedAnimations.clear();
+    capturedSecondaryAnimations.clear();
+    capturedChildren.clear();
+
+    // Trigger navigation.
     await tester.tap(find.text('push'));
     await tester.pump();
 
-    // Verify buildTransitions was called with correct parameters
-    expect(buildTransitionsCalled, isTrue);
-    expect(capturedRoute, isNotNull);
-    expect(capturedContext, isNotNull);
-    expect(capturedAnimation, isNotNull);
-    expect(capturedSecondaryAnimation, isNotNull);
-    expect(capturedChild, isNotNull);
-    expect(capturedRoute!.settings.name, '/');
+    // Verify buildTransitions was called for the pushed route with matching captured arguments.
+    expect(capturedRoutes, isNotEmpty);
+    expect(capturedContexts, hasLength(capturedRoutes.length));
+    expect(capturedAnimations, hasLength(capturedRoutes.length));
+    expect(capturedSecondaryAnimations, hasLength(capturedRoutes.length));
+    expect(capturedChildren, hasLength(capturedRoutes.length));
+    final int pushedRouteIndex = capturedRoutes.indexWhere((PageRoute<dynamic> route) {
+      return route.settings.name == '/test';
+    });
+    expect(pushedRouteIndex, isNot(-1));
   });
 
   testWidgets('PageTransitionsBuilder works with custom Navigator and PageRoute', (
@@ -2443,8 +2449,7 @@ void main() {
   );
 }
 
-class TestOverlayRoute extends OverlayRoute<void> {
-  TestOverlayRoute({super.settings});
+class _TestOverlayRoute extends OverlayRoute<void> {
   @override
   Iterable<OverlayEntry> createOverlayEntries() => [OverlayEntry(builder: _build)];
 
