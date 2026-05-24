@@ -230,7 +230,8 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
   }
 
   @override
-  void debugFillClipOverlapProperty(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     properties.add(
       DiagnosticsProperty<bool>('clipOverlap', clipOverlap != .none, defaultValue: true),
     );
@@ -518,6 +519,13 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(
+      EnumProperty<ClipOverlapBehavior>(
+        'clipOverlap',
+        clipOverlap,
+        defaultValue: ClipOverlapBehavior.followEdge,
+      ),
+    );
+    properties.add(
       DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null),
     );
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
@@ -687,24 +695,11 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     );
   }
 
-  /// Used by subclasses to add the [clipOverlap] property to their debug output.
-  @protected
-  void debugFillClipOverlapProperty(DiagnosticPropertiesBuilder properties) {
-    properties.add(
-      EnumProperty<ClipOverlapBehavior>(
-        'clipOverlap',
-        clipOverlap,
-        defaultValue: ClipOverlapBehavior.followEdge,
-      ),
-    );
-  }
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<CustomClipper<T>>('clipper', clipper, defaultValue: null));
     properties.add(DiagnosticsProperty<T?>('clip', _clip));
     properties.add(EnumProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.hardEdge));
-    debugFillClipOverlapProperty(properties);
   }
 }
