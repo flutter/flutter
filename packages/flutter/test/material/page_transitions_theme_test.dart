@@ -1537,4 +1537,1020 @@ void main() {
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
+
+  testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
+    final GlobalKey containerKey1 = GlobalKey();
+    final GlobalKey containerKey2 = GlobalKey();
+    final routes = <String, WidgetBuilder>{
+      '/': (_) => Container(key: containerKey1, child: const Text('Home')),
+      '/settings': (_) => Container(key: containerKey2, child: const Text('Settings')),
+    };
+
+    await tester.pumpWidget(MaterialApp(routes: routes));
+
+    expect(find.text('Home'), isOnstage);
+    expect(find.text('Settings'), findsNothing);
+    expect(find.text('Overlay'), findsNothing);
+
+    expect(Navigator.canPop(containerKey1.currentContext!), isFalse);
+    Navigator.pushNamed(containerKey1.currentContext!, '/settings');
+    expect(Navigator.canPop(containerKey1.currentContext!), isTrue);
+
+    await tester.pump();
+
+    expect(find.text('Home'), isOnstage);
+    expect(find.text('Settings', skipOffstage: false), isOffstage);
+    expect(find.text('Overlay'), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 16));
+
+    expect(find.text('Home'), isOnstage);
+    expect(find.text('Settings'), isOnstage);
+    expect(find.text('Overlay'), findsNothing);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Settings'), isOnstage);
+    expect(find.text('Overlay'), findsNothing);
+
+    Navigator.push(containerKey2.currentContext!, TestOverlayRoute());
+
+    await tester.pump();
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Settings'), isOnstage);
+    expect(find.text('Overlay'), isOnstage);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Settings'), isOnstage);
+    expect(find.text('Overlay'), isOnstage);
+
+    expect(Navigator.canPop(containerKey2.currentContext!), isTrue);
+    Navigator.pop(containerKey2.currentContext!);
+    await tester.pump();
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Settings'), isOnstage);
+    expect(find.text('Overlay'), findsNothing);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Settings'), isOnstage);
+    expect(find.text('Overlay'), findsNothing);
+
+    expect(Navigator.canPop(containerKey2.currentContext!), isTrue);
+    Navigator.pop(containerKey2.currentContext!);
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Home'), isOnstage);
+    expect(find.text('Settings'), isOnstage);
+    expect(find.text('Overlay'), findsNothing);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Home'), isOnstage);
+    expect(find.text('Settings'), findsNothing);
+    expect(find.text('Overlay'), findsNothing);
+
+    expect(Navigator.canPop(containerKey1.currentContext!), isFalse);
+  });
+
+  testWidgets(
+    'Check back gesture disables Heroes',
+    (WidgetTester tester) async {
+      final GlobalKey containerKey1 = GlobalKey();
+      final GlobalKey containerKey2 = GlobalKey();
+      const kHeroTag = 'hero';
+      final routes = <String, WidgetBuilder>{
+        '/': (_) => SizedBox(
+          key: containerKey1,
+          child: const ColoredBox(
+            color: Color(0xff00ffff),
+            child: Hero(tag: kHeroTag, child: Text('Home')),
+          ),
+        ),
+        '/settings': (_) => SizedBox(
+          key: containerKey2,
+          child: Container(
+            padding: const EdgeInsets.all(100.0),
+            color: const Color(0xffff00ff),
+            child: const Hero(tag: kHeroTag, child: Text('Settings')),
+          ),
+        ),
+      };
+
+      await tester.pumpWidget(MaterialApp(routes: routes));
+
+      Navigator.pushNamed(containerKey1.currentContext!, '/settings');
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 16));
+
+      expect(find.text('Settings'), isOnstage);
+
+      // Settings text is heroing to its new location
+      Offset settingsOffset = tester.getTopLeft(find.text('Settings'));
+      expect(settingsOffset.dx, greaterThan(0.0));
+      expect(settingsOffset.dx, lessThan(100.0));
+      expect(settingsOffset.dy, greaterThan(0.0));
+      expect(settingsOffset.dy, lessThan(100.0));
+
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text('Home'), findsNothing);
+      expect(find.text('Settings'), isOnstage);
+
+      // Drag from left edge to invoke the gesture.
+      final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
+      await gesture.moveBy(const Offset(50.0, 0.0));
+      await tester.pump();
+
+      // Home is now visible.
+      expect(find.text('Home'), isOnstage);
+      expect(find.text('Settings'), isOnstage);
+
+      // Home page is sliding in from the left, no heroes.
+      final Offset homeOffset = tester.getTopLeft(find.text('Home'));
+      expect(homeOffset.dx, lessThan(0.0));
+      expect(homeOffset.dy, 0.0);
+
+      // Settings page is sliding off to the right, no heroes.
+      settingsOffset = tester.getTopLeft(find.text('Settings'));
+      expect(settingsOffset.dx, greaterThan(100.0));
+      expect(settingsOffset.dy, 100.0);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets(
+    "Check back gesture doesn't start during transitions",
+    (WidgetTester tester) async {
+      final GlobalKey containerKey1 = GlobalKey();
+      final GlobalKey containerKey2 = GlobalKey();
+      final routes = <String, WidgetBuilder>{
+        '/': (_) => SizedBox(key: containerKey1, child: const Text('Home')),
+        '/settings': (_) => SizedBox(key: containerKey2, child: const Text('Settings')),
+      };
+
+      await tester.pumpWidget(MaterialApp(routes: routes));
+
+      Navigator.pushNamed(containerKey1.currentContext!, '/settings');
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // We are mid-transition, both pages are on stage.
+      expect(find.text('Home'), isOnstage);
+      expect(find.text('Settings'), isOnstage);
+
+      // Drag from left edge to invoke the gesture. (near bottom so we grab
+      // the Settings page as it comes up).
+      TestGesture gesture = await tester.startGesture(const Offset(5.0, 550.0));
+      await gesture.moveBy(const Offset(500.0, 0.0));
+      await gesture.up();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1000));
+
+      // The original forward navigation should have completed, instead of the
+      // back gesture, since we were mid transition.
+      expect(find.text('Home'), findsNothing);
+      expect(find.text('Settings'), isOnstage);
+
+      // Try again now that we're settled.
+      gesture = await tester.startGesture(const Offset(5.0, 550.0));
+      await gesture.moveBy(const Offset(500.0, 0.0));
+      await gesture.up();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1000));
+
+      expect(find.text('Home'), isOnstage);
+      expect(find.text('Settings'), findsNothing);
+    },
+    variant: const TargetPlatformVariant(<TargetPlatform>{
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    }),
+  );
+
+  testWidgets('Test completed future', (WidgetTester tester) async {
+    final routes = <String, WidgetBuilder>{
+      '/': (_) => const Center(child: Text('home')),
+      '/next': (_) => const Center(child: Text('next')),
+    };
+
+    await tester.pumpWidget(MaterialApp(routes: routes));
+
+    final PageRoute<void> route = PageRouteBuilder<void>(
+      settings: const RouteSettings(name: '/page'),
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => const Center(child: Text('page')),
+    );
+
+    var popCount = 0;
+    route.popped.whenComplete(() {
+      popCount += 1;
+    });
+
+    var completeCount = 0;
+    route.completed.whenComplete(() {
+      completeCount += 1;
+    });
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    Navigator.push(tester.element(find.text('home')), route);
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump();
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    Navigator.pop(tester.element(find.text('page')));
+
+    expect(popCount, 0);
+    expect(completeCount, 0);
+
+    await tester.pump();
+
+    expect(popCount, 1);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(popCount, 1);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(popCount, 1);
+    expect(completeCount, 0);
+
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(popCount, 1);
+    expect(completeCount, 1);
+  });
+
+  testWidgets('navigating with transitions of different lengths', (WidgetTester tester) async {
+    final observer = TransitionDurationObserver();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorObservers: <NavigatorObserver>[observer],
+        onGenerateRoute: (RouteSettings settings) {
+          return switch (settings.name) {
+            // A route that uses the default page transition.
+            '/' => MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return Scaffold(
+                  body: Center(
+                    child: Column(
+                      children: <Widget>[
+                        const Text('Page 1'),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/2');
+                          },
+                          child: const Text('Next'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            // A route that uses ZoomPageTransitionsBuilder.
+            '/2' => _TestTransitionRoute<void>(
+              transitionDurationOverride: const Duration(milliseconds: 456),
+              reverseTransitionDurationOverride: const Duration(milliseconds: 567),
+              pageTransitionsBuilder: const ZoomPageTransitionsBuilder(),
+              builder: (BuildContext context) {
+                return Scaffold(
+                  body: Center(
+                    child: Column(
+                      children: <Widget>[
+                        const Text('Page 2'),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/3');
+                          },
+                          child: const Text('Next'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Back'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            // A route that uses FadeForwardsPageTransitionsBuilder.
+            '/3' => _TestTransitionRoute<void>(
+              pageTransitionsBuilder: const FadeForwardsPageTransitionsBuilder(),
+              builder: (BuildContext context) {
+                return Scaffold(
+                  body: Center(
+                    child: Column(
+                      children: <Widget>[
+                        const Text('Page 3'),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Back'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            _ => throw Exception('Invalid route.'),
+          };
+        },
+      ),
+    );
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+    expect(find.text('Page 3'), findsNothing);
+
+    await tester.tap(find.text('Next'));
+
+    await observer.pumpPastTransition(tester);
+
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+    expect(find.text('Page 3'), findsNothing);
+
+    await tester.tap(find.text('Next'));
+
+    await observer.pumpPastTransition(tester);
+
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsNothing);
+    expect(find.text('Page 3'), findsOneWidget);
+
+    await tester.tap(find.text('Back'));
+
+    await observer.pumpPastTransition(tester);
+
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), findsOneWidget);
+    expect(find.text('Page 3'), findsNothing);
+
+    await tester.tap(find.text('Back'));
+
+    await observer.pumpPastTransition(tester);
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+    expect(find.text('Page 3'), findsNothing);
+  });
+
+  testWidgets('PageTransitionsBuilder buildTransitions method is called correctly', (
+    WidgetTester tester,
+  ) async {
+    var buildTransitionsCalled = false;
+    PageRoute<dynamic>? capturedRoute;
+    BuildContext? capturedContext;
+    Animation<double>? capturedAnimation;
+    Animation<double>? capturedSecondaryAnimation;
+    Widget? capturedChild;
+
+    final builderWithCapture = _TestPageTransitionsBuilder(
+      onBuildTransitions:
+          <T>(
+            PageRoute<T> route,
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) {
+            buildTransitionsCalled = true;
+            capturedRoute = route;
+            capturedContext = context;
+            capturedAnimation = animation;
+            capturedSecondaryAnimation = secondaryAnimation;
+            capturedChild = child;
+
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1.0, 0.0),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
+            );
+          },
+    );
+
+    final routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: TextButton(
+          child: const Text('push'),
+          onPressed: () {
+            Navigator.of(context).pushNamed('/test');
+          },
+        ),
+      ),
+      '/test': (BuildContext context) => const Material(child: Text('test page')),
+    };
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          pageTransitionsTheme: PageTransitionsTheme(
+            builders: <TargetPlatform, PageTransitionsBuilder>{
+              TargetPlatform.android: builderWithCapture,
+            },
+          ),
+        ),
+        routes: routes,
+      ),
+    );
+
+    // Trigger navigation
+    await tester.tap(find.text('push'));
+    await tester.pump();
+
+    // Verify buildTransitions was called with correct parameters
+    expect(buildTransitionsCalled, isTrue);
+    expect(capturedRoute, isNotNull);
+    expect(capturedContext, isNotNull);
+    expect(capturedAnimation, isNotNull);
+    expect(capturedSecondaryAnimation, isNotNull);
+    expect(capturedChild, isNotNull);
+    expect(capturedRoute!.settings.name, '/');
+  });
+
+  testWidgets('PageTransitionsBuilder works with custom Navigator and PageRoute', (
+    WidgetTester tester,
+  ) async {
+    final customTransitionsBuilder = _TestPageTransitionsBuilder(
+      onBuildTransitions:
+          <T>(
+            PageRoute<T> route,
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) {
+            return FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(
+                scale: animation.drive(
+                  Tween<double>(begin: 0.5, end: 1.0).chain(CurveTween(curve: Curves.easeInOut)),
+                ),
+                child: child,
+              ),
+            );
+          },
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return _CustomPageRoute<void>(
+              settings: settings,
+              transitionsBuilder: customTransitionsBuilder,
+              builder: (BuildContext context) {
+                if (settings.name == '/') {
+                  return Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushNamed('/second');
+                      },
+                      child: Container(
+                        width: 200,
+                        height: 50,
+                        color: const Color(0xFF2196F3),
+                        child: const Center(
+                          child: Text('Navigate', style: TextStyle(color: Color(0xFFFFFFFF))),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return const ColoredBox(
+                  color: Color(0xFF4CAF50),
+                  child: Center(
+                    child: Text(
+                      'Second Page',
+                      style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 24),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(find.text('Navigate'), findsOneWidget);
+    expect(find.text('Second Page'), findsNothing);
+
+    await tester.tap(find.text('Navigate'));
+    await tester.pump();
+
+    expect(find.text('Navigate'), findsOneWidget);
+    expect(find.text('Second Page'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 50));
+
+    final FadeTransition fadeTransition = tester.widget<FadeTransition>(
+      find.byType(FadeTransition).first,
+    );
+    expect(fadeTransition.opacity.value, greaterThan(0.0));
+    expect(fadeTransition.opacity.value, lessThanOrEqualTo(1.0));
+
+    final ScaleTransition scaleTransition = tester.widget<ScaleTransition>(
+      find.byType(ScaleTransition).first,
+    );
+    expect(scaleTransition.scale.value, greaterThanOrEqualTo(0.5));
+    expect(scaleTransition.scale.value, lessThanOrEqualTo(1.0));
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Navigate'), findsNothing);
+    expect(find.text('Second Page'), findsOneWidget);
+  });
+
+  testWidgets('FadeUpwardsPageTransitionsBuilder test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return _CustomPageRoute<void>(
+              settings: settings,
+              transitionsBuilder: const FadeUpwardsPageTransitionsBuilder(),
+              builder: (BuildContext context) {
+                if (settings.name == '/') {
+                  return ColoredBox(
+                    color: const Color(0xFF2196F3),
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pushNamed('/second');
+                        },
+                        child: const Text(
+                          'Page 1',
+                          style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 24),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return const ColoredBox(
+                  color: Color(0xFF4CAF50),
+                  child: Center(
+                    child: Text('Page 2', style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 24)),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
+
+    await tester.tap(find.text('Page 1'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    FadeTransition widget2Opacity = tester
+        .element(find.text('Page 2'))
+        .findAncestorWidgetOfExactType<FadeTransition>()!;
+    Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    expect(widget1TopLeft.dx == widget2TopLeft.dx, true);
+    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
+    expect(widget2Opacity.opacity.value < 0.01, true);
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    widget2Opacity = tester
+        .element(find.text('Page 2'))
+        .findAncestorWidgetOfExactType<FadeTransition>()!;
+    widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
+    expect(widget2Opacity.opacity.value < 1.0, true);
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), findsNothing);
+  });
+
+  testWidgets(
+    'FadeUpwardsPageTransitionsBuilder test with Material PageTransitionTheme',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: const Material(child: Text('Page 1')),
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+              },
+            ),
+          ),
+          routes: <String, WidgetBuilder>{
+            '/next': (BuildContext context) {
+              return const Material(child: Text('Page 2'));
+            },
+          },
+        ),
+      );
+
+      final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
+
+      tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+
+      FadeTransition widget2Opacity = tester
+          .element(find.text('Page 2'))
+          .findAncestorWidgetOfExactType<FadeTransition>()!;
+      Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+      final Size widget2Size = tester.getSize(find.text('Page 2'));
+
+      // Android transition is vertical only.
+      expect(widget1TopLeft.dx == widget2TopLeft.dx, true);
+      // Page 1 is above page 2 mid-transition.
+      expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
+      // Animation begins 3/4 of the way up the page.
+      expect(widget2TopLeft.dy < widget2Size.height / 4.0, true);
+      // Animation starts with page 2 being near transparent.
+      expect(widget2Opacity.opacity.value < 0.01, true);
+
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Page 2 covers page 1.
+      expect(find.text('Page 1'), findsNothing);
+      expect(find.text('Page 2'), isOnstage);
+
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+
+      widget2Opacity = tester
+          .element(find.text('Page 2'))
+          .findAncestorWidgetOfExactType<FadeTransition>()!;
+      widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+      // Page 2 starts to move down.
+      expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
+      // Page 2 starts to lose opacity.
+      expect(widget2Opacity.opacity.value < 1.0, true);
+
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('Page 1'), isOnstage);
+      expect(find.text('Page 2'), findsNothing);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets(
+    'PageTransitionsTheme override builds a _OpenUpwardsPageTransition',
+    (WidgetTester tester) async {
+      final routes = <String, WidgetBuilder>{
+        '/': (BuildContext context) => Material(
+          child: TextButton(
+            child: const Text('push'),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/b');
+            },
+          ),
+        ),
+        '/b': (BuildContext context) => const Text('page b'),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android:
+                    OpenUpwardsPageTransitionsBuilder(), // creates a _OpenUpwardsPageTransition
+              },
+            ),
+          ),
+          routes: routes,
+        ),
+      );
+
+      Finder findOpenUpwardsPageTransition() {
+        return find.descendant(
+          of: find.byType(MaterialApp),
+          matching: find.byWidgetPredicate(
+            (Widget w) => '${w.runtimeType}' == '_OpenUpwardsPageTransition',
+          ),
+        );
+      }
+
+      expect(
+        Theme.of(tester.element(find.text('push'))).platform,
+        debugDefaultTargetPlatformOverride,
+      );
+      expect(findOpenUpwardsPageTransition(), findsOneWidget);
+
+      await tester.tap(find.text('push'));
+      await tester.pumpAndSettle();
+      expect(find.text('page b'), findsOneWidget);
+      expect(findOpenUpwardsPageTransition(), findsOneWidget);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+
+  testWidgets('OpenUpwardsPageTransitionsBuilder test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            return _CustomPageRoute<void>(
+              settings: settings,
+              transitionsBuilder: const OpenUpwardsPageTransitionsBuilder(),
+              builder: (BuildContext context) {
+                if (settings.name == '/') {
+                  return ColoredBox(
+                    color: const Color(0xFF2196F3),
+                    child: Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pushNamed('/second');
+                        },
+                        child: const Text(
+                          'Page 1',
+                          style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 24),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                return const ColoredBox(
+                  color: Color(0xFF4CAF50),
+                  child: Center(
+                    child: Text('Page 2', style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 24)),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
+
+    await tester.tap(find.text('Page 1'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    final Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    expect(widget1TopLeft.dx, widget2TopLeft.dx);
+    expect(widget1TopLeft.dy <= widget2TopLeft.dy, true);
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // After animation, only Page 2 should be visible.
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // After reverse animation, only Page 1 should be visible.
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), findsNothing);
+  });
+
+  testWidgets(
+    'OpenUpwardsPageTransitionsBuilder test with Material PageTransitionTheme',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: const Material(child: Text('Page 1')),
+          theme: ThemeData(
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                TargetPlatform.android: OpenUpwardsPageTransitionsBuilder(),
+              },
+            ),
+          ),
+          routes: <String, WidgetBuilder>{
+            '/next': (BuildContext context) {
+              return const Material(child: Text('Page 2'));
+            },
+          },
+        ),
+      );
+
+      final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
+
+      tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+
+      expect(find.text('Page 1'), findsOneWidget);
+      expect(find.text('Page 2'), findsOneWidget);
+
+      final Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+      expect(widget1TopLeft.dx, widget2TopLeft.dx);
+      expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
+
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Page 2 covers page 1.
+      expect(find.text('Page 1'), findsNothing);
+      expect(find.text('Page 2'), isOnstage);
+
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+
+      expect(find.text('Page 1'), findsOneWidget);
+      expect(find.text('Page 2'), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Back to page 1.
+      expect(find.text('Page 1'), isOnstage);
+      expect(find.text('Page 2'), findsNothing);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
+  );
+}
+
+class TestOverlayRoute extends OverlayRoute<void> {
+  TestOverlayRoute({super.settings});
+  @override
+  Iterable<OverlayEntry> createOverlayEntries() => [OverlayEntry(builder: _build)];
+
+  Widget _build(BuildContext context) => const Text('Overlay');
+}
+
+class _TestTransitionRoute<T> extends MaterialPageRoute<T> {
+  _TestTransitionRoute({
+    required super.builder,
+    required this.pageTransitionsBuilder,
+    this.transitionDurationOverride,
+    this.reverseTransitionDurationOverride,
+  });
+
+  final PageTransitionsBuilder pageTransitionsBuilder;
+  final Duration? transitionDurationOverride;
+  final Duration? reverseTransitionDurationOverride;
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return pageTransitionsBuilder.buildTransitions(
+      this,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
+    );
+  }
+
+  @override
+  Duration get transitionDuration =>
+      transitionDurationOverride ?? pageTransitionsBuilder.transitionDuration;
+  @override
+  Duration get reverseTransitionDuration =>
+      reverseTransitionDurationOverride ?? pageTransitionsBuilder.reverseTransitionDuration;
+}
+
+class _CustomPageRoute<T> extends PageRoute<T> {
+  _CustomPageRoute({required this.builder, required this.transitionsBuilder, super.settings});
+
+  final WidgetBuilder builder;
+  final PageTransitionsBuilder transitionsBuilder;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 300);
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return builder(context);
+  }
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return transitionsBuilder.buildTransitions<T>(
+      this,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
+    );
+  }
+}
+
+class _TestPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _TestPageTransitionsBuilder({required this.onBuildTransitions});
+
+  final Widget Function<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  )
+  onBuildTransitions;
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return onBuildTransitions(route, context, animation, secondaryAnimation, child);
+  }
 }
