@@ -16,6 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/material/text_selection_theme.dart';
 
 import 'adaptive_text_selection_toolbar.dart';
 import 'color_scheme.dart';
@@ -323,7 +324,7 @@ class TextField extends StatefulWidget {
     this.stylusHandwritingEnabled = EditableText.defaultStylusHandwritingEnabled,
     this.enableIMEPersonalizedLearning = true,
     this.enableInlinePrediction,
-    this.contextMenuBuilder = _defaultContextMenuBuilder,
+    this.contextMenuBuilder,
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
@@ -874,6 +875,8 @@ class TextField extends StatefulWidget {
   ///  * [AdaptiveTextSelectionToolbar], which is built by default.
   ///  * [BrowserContextMenu], which allows the browser's context menu on web to
   ///    be disabled and Flutter-rendered context menus to appear.
+  ///  * [ThemeData.textSelectionTheme], which provides a way to override the
+  ///    default context menu.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
   /// Determine whether this text field can request the primary focus.
@@ -888,16 +891,6 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.services.TextInputConfiguration.hintLocales}
   final List<Locale>? hintLocales;
-
-  static Widget _defaultContextMenuBuilder(
-    BuildContext context,
-    EditableTextState editableTextState,
-  ) {
-    if (SystemContextMenu.isSupportedByField(editableTextState)) {
-      return SystemContextMenu.editableText(editableTextState: editableTextState);
-    }
-    return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
-  }
 
   /// {@macro flutter.widgets.EditableText.spellCheckConfiguration}
   ///
@@ -1526,6 +1519,16 @@ class _TextFieldState extends State<TextField>
     return providedStyle.merge(stateStyle);
   }
 
+  static Widget _defaultContextMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    if (SystemContextMenu.isSupportedByField(editableTextState)) {
+      return SystemContextMenu.editableText(editableTextState: editableTextState);
+    }
+    return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -1752,7 +1755,10 @@ class _TextFieldState extends State<TextField>
           enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
           enableInlinePrediction: widget.enableInlinePrediction,
           contentInsertionConfiguration: widget.contentInsertionConfiguration,
-          contextMenuBuilder: widget.contextMenuBuilder,
+          contextMenuBuilder:
+              widget.contextMenuBuilder ??
+              TextSelectionTheme.of(context).contextMenuBuilder ??
+              _defaultContextMenuBuilder,
           spellCheckConfiguration: spellCheckConfiguration,
           magnifierConfiguration:
               widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,

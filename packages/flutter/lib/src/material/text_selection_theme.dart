@@ -36,7 +36,12 @@ import 'theme.dart';
 @immutable
 class TextSelectionThemeData with Diagnosticable {
   /// Creates the set of properties used to configure [TextField]s.
-  const TextSelectionThemeData({this.cursorColor, this.selectionColor, this.selectionHandleColor});
+  const TextSelectionThemeData({
+    this.cursorColor,
+    this.selectionColor,
+    this.selectionHandleColor,
+    this.contextMenuBuilder,
+  });
 
   /// The color of the cursor in the text field.
   ///
@@ -58,17 +63,31 @@ class TextSelectionThemeData with Diagnosticable {
   /// containing your [TextField] or [SelectableText] with a [CupertinoTheme].
   final Color? selectionHandleColor;
 
+  /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
+  ///
+  /// Provides a way to globally override the default Flutter context menu for
+  /// text fields and selectable text.
+  ///
+  /// See also:
+  ///
+  ///  * [AdaptiveTextSelectionToolbar], which is built by default.
+  ///  * [BrowserContextMenu], which allows the browser's context menu on web to
+  ///    be disabled and Flutter-rendered context menus to appear.
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// specified values.
   TextSelectionThemeData copyWith({
     Color? cursorColor,
     Color? selectionColor,
     Color? selectionHandleColor,
+    EditableTextContextMenuBuilder? contextMenuBuilder,
   }) {
     return TextSelectionThemeData(
       cursorColor: cursorColor ?? this.cursorColor,
       selectionColor: selectionColor ?? this.selectionColor,
       selectionHandleColor: selectionHandleColor ?? this.selectionHandleColor,
+      contextMenuBuilder: contextMenuBuilder ?? this.contextMenuBuilder,
     );
   }
 
@@ -89,11 +108,13 @@ class TextSelectionThemeData with Diagnosticable {
       cursorColor: Color.lerp(a?.cursorColor, b?.cursorColor, t),
       selectionColor: Color.lerp(a?.selectionColor, b?.selectionColor, t),
       selectionHandleColor: Color.lerp(a?.selectionHandleColor, b?.selectionHandleColor, t),
+      // TODO: Should anything happen with contextMenuBuilder here?
     );
   }
 
   @override
-  int get hashCode => Object.hash(cursorColor, selectionColor, selectionHandleColor);
+  int get hashCode =>
+      Object.hash(cursorColor, selectionColor, selectionHandleColor, contextMenuBuilder);
 
   @override
   bool operator ==(Object other) {
@@ -106,7 +127,8 @@ class TextSelectionThemeData with Diagnosticable {
     return other is TextSelectionThemeData &&
         other.cursorColor == cursorColor &&
         other.selectionColor == selectionColor &&
-        other.selectionHandleColor == selectionHandleColor;
+        other.selectionHandleColor == selectionHandleColor &&
+        other.contextMenuBuilder == contextMenuBuilder;
   }
 
   @override
@@ -115,6 +137,13 @@ class TextSelectionThemeData with Diagnosticable {
     properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(ColorProperty('selectionColor', selectionColor, defaultValue: null));
     properties.add(ColorProperty('selectionHandleColor', selectionHandleColor, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<EditableTextContextMenuBuilder>(
+        'contextMenuBuilder',
+        contextMenuBuilder,
+        defaultValue: null,
+      ),
+    );
   }
 }
 
