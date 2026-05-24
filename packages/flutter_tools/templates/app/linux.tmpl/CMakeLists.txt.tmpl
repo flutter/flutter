@@ -9,6 +9,12 @@ set(BINARY_NAME "{{projectName}}")
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
 set(APPLICATION_ID "{{linuxIdentifier}}")
 
+# Flavor support: when --flavor is passed, suffix binary and application id.
+if(DEFINED FLUTTER_APP_FLAVOR AND NOT FLUTTER_APP_FLAVOR STREQUAL "")
+  set(BINARY_NAME "${BINARY_NAME}-${FLUTTER_APP_FLAVOR}")
+  set(APPLICATION_ID "${APPLICATION_ID}.${FLUTTER_APP_FLAVOR}")
+endif()
+
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
 cmake_policy(SET CMP0063 NEW)

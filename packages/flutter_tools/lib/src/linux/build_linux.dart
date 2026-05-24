@@ -83,7 +83,7 @@ Future<void> buildLinux(
   final String buildModeName = buildInfo.mode.cliName;
   final Directory platformBuildDirectory = globals.fs
       .directory(linuxProject.parent.directory.path)
-      .childDirectory(getLinuxBuildDirectory(targetPlatform));
+      .childDirectory(getLinuxBuildDirectory(targetPlatform, buildInfo.flavor));
   final Directory buildDirectory = platformBuildDirectory.childDirectory(buildModeName);
   try {
     await _runCmake(
@@ -93,6 +93,7 @@ Future<void> buildLinux(
       needCrossBuild,
       targetPlatform,
       targetSysroot,
+      buildInfo.flavor,
     );
     if (configOnly) {
       return;
@@ -102,7 +103,7 @@ Future<void> buildLinux(
     status.cancel();
   }
 
-  final String? binaryName = getCmakeExecutableName(linuxProject);
+  final String? binaryName = getCmakeExecutableName(linuxProject, flavor: buildInfo.flavor);
   final File binaryFile = buildDirectory.childDirectory('bundle').childFile('$binaryName');
   final FileSystemEntity buildOutput = binaryFile.existsSync() ? binaryFile : binaryFile.parent;
   // We don't print a size because the output directory can contain
@@ -126,7 +127,11 @@ Future<void> buildLinux(
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
       outputDirectory: globals.fs.directory(
-        globals.fs.path.join(getLinuxBuildDirectory(targetPlatform), 'release', 'bundle'),
+        globals.fs.path.join(
+          getLinuxBuildDirectory(targetPlatform, buildInfo.flavor),
+          'release',
+          'bundle',
+        ),
       ),
       precompilerTrace: precompilerTrace,
       type: 'linux',
@@ -155,6 +160,7 @@ Future<void> _runCmake(
   bool needCrossBuild,
   TargetPlatform targetPlatform,
   String targetSysroot,
+  String? flavor,
 ) async {
   final sw = Stopwatch()..start();
 
@@ -184,6 +190,7 @@ Future<void> _runCmake(
       // Support cross-building for riscv64 targets on x64 hosts.
       if (needCrossBuildOptionsForRiscv64) '-DCMAKE_C_COMPILER_TARGET=riscv64-linux-gnu',
       if (needCrossBuildOptionsForRiscv64) '-DCMAKE_CXX_COMPILER_TARGET=riscv64-linux-gnu',
+      if (flavor != null && flavor.isNotEmpty) '-DFLUTTER_APP_FLAVOR=$flavor',
       sourceDir.path,
     ],
     workingDirectory: buildDir.path,

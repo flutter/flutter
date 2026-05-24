@@ -933,11 +933,13 @@ String getWebBuildDirectory() {
 }
 
 /// Returns the Linux build output directory.
-String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
+String getLinuxBuildDirectory([TargetPlatform? targetPlatform, String? flavor]) {
   final String arch = (targetPlatform == null)
       ? _getCurrentHostPlatformArchName()
       : targetPlatform.simpleName;
-  final subDirs = 'linux/$arch';
+  final subDirs = (flavor != null && flavor.isNotEmpty)
+      ? 'linux/$arch/$flavor'
+      : 'linux/$arch';
   return globals.fs.path.join(getBuildDirectory(), subDirs);
 }
 
