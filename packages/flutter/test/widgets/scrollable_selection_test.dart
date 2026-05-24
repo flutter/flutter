@@ -52,7 +52,7 @@ class _ScrollableSelectionHandleControls extends TextSelectionControls {
     final Widget handle = SizedBox.square(
       dimension: 22.0,
       child: CustomPaint(
-        painter: _ScrollableSelectionHandlePainter(),
+        painter: const _ScrollableSelectionHandlePainter(),
         child: GestureDetector(onTap: onTap, behavior: HitTestBehavior.translucent),
       ),
     );
@@ -77,10 +77,6 @@ class _ScrollableSelectionHandleControls extends TextSelectionControls {
     return const Size.square(22.0);
   }
 
-  @Deprecated(
-    'Use contextMenuBuilder instead. '
-    'This feature was deprecated after v3.43.0-0.3.pre.',
-  )
   @override
   bool canSelectAll(TextSelectionDelegate delegate) {
     final TextEditingValue value = delegate.textEditingValue;
@@ -89,10 +85,6 @@ class _ScrollableSelectionHandleControls extends TextSelectionControls {
         !(value.selection.start == 0 && value.selection.end == value.text.length);
   }
 
-  @Deprecated(
-    'Use contextMenuBuilder instead. '
-    'This feature was deprecated after v3.43.0-0.3.pre.',
-  )
   @override
   Widget buildToolbar(
     BuildContext context,
@@ -109,9 +101,13 @@ class _ScrollableSelectionHandleControls extends TextSelectionControls {
 }
 
 class _ScrollableSelectionHandlePainter extends CustomPainter {
+  const _ScrollableSelectionHandlePainter();
+
+  static final Paint _handlePaint = Paint()..color = const Color(0xFF000000);
+
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFF000000));
+    canvas.drawRect(Offset.zero & size, _handlePaint);
   }
 
   @override
