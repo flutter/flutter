@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
@@ -23,6 +25,99 @@ Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
 
 Offset globalize(Offset point, RenderBox box) {
   return box.localToGlobal(point);
+}
+
+Widget _selectionTestApp({required Widget child, FocusNode? focusNode}) {
+  return TestWidgetsApp(
+    textStyle: const TextStyle(color: Color(0xFF000000), fontSize: 48.0),
+    home: SelectableRegion(
+      focusNode: focusNode,
+      selectionControls: _scrollableSelectionHandleControls,
+      child: child,
+    ),
+  );
+}
+
+final TextSelectionControls _scrollableSelectionHandleControls =
+    _ScrollableSelectionHandleControls();
+
+class _ScrollableSelectionHandleControls extends TextSelectionControls {
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    final Widget handle = SizedBox.square(
+      dimension: 22.0,
+      child: CustomPaint(
+        painter: _ScrollableSelectionHandlePainter(),
+        child: GestureDetector(onTap: onTap, behavior: HitTestBehavior.translucent),
+      ),
+    );
+    return switch (type) {
+      TextSelectionHandleType.left => Transform.rotate(angle: math.pi / 2.0, child: handle),
+      TextSelectionHandleType.right => handle,
+      TextSelectionHandleType.collapsed => Transform.rotate(angle: math.pi / 4.0, child: handle),
+    };
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return switch (type) {
+      TextSelectionHandleType.collapsed => const Offset(11.0, -4.0),
+      TextSelectionHandleType.left => const Offset(22.0, 0.0),
+      TextSelectionHandleType.right => Offset.zero,
+    };
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return const Size.square(22.0);
+  }
+
+  @Deprecated(
+    'Use contextMenuBuilder instead. '
+    'This feature was deprecated after v3.43.0-0.3.pre.',
+  )
+  @override
+  bool canSelectAll(TextSelectionDelegate delegate) {
+    final TextEditingValue value = delegate.textEditingValue;
+    return delegate.selectAllEnabled &&
+        value.text.isNotEmpty &&
+        !(value.selection.start == 0 && value.selection.end == value.text.length);
+  }
+
+  @Deprecated(
+    'Use contextMenuBuilder instead. '
+    'This feature was deprecated after v3.43.0-0.3.pre.',
+  )
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    return const SizedBox.shrink();
+  }
+}
+
+class _ScrollableSelectionHandlePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFF000000));
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
 }
 
 void main() {
@@ -46,15 +141,12 @@ void main() {
 
   testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -95,16 +187,13 @@ void main() {
 
   testWidgets('mouse can select multiple widgets - horizontal', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -139,15 +228,12 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -196,16 +282,13 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -246,15 +329,12 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -318,16 +398,13 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -380,16 +457,13 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -445,21 +519,15 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: false),
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: Scaffold(
-            body: SizedBox(
-              height: 10,
-              child: ListView.builder(
-                controller: controller,
-                itemCount: 100,
-                itemBuilder: (BuildContext context, int index) {
-                  return Text('Item $index');
-                },
-              ),
-            ),
+      _selectionTestApp(
+        child: SizedBox(
+          height: 10,
+          child: ListView.builder(
+            controller: controller,
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
           ),
         ),
       ),
@@ -499,16 +567,13 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -561,17 +626,14 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            controller: controller,
-            itemCount: 10,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          controller: controller,
+          itemCount: 10,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -623,17 +685,14 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            controller: controller,
-            itemCount: 10,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          controller: controller,
+          itemCount: 10,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -684,16 +743,13 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -745,16 +801,13 @@ void main() {
       final node = FocusNode();
       addTearDown(node.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectionArea(
-            focusNode: node,
-            selectionControls: materialTextSelectionControls,
-            child: ListView.builder(
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) {
-                return Text('Item $index');
-              },
-            ),
+        _selectionTestApp(
+          focusNode: node,
+          child: ListView.builder(
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
           ),
         ),
       );
@@ -791,16 +844,13 @@ void main() {
       final node = FocusNode();
       addTearDown(node.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectionArea(
-            focusNode: node,
-            selectionControls: materialTextSelectionControls,
-            child: ListView.builder(
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) {
-                return Text('Item $index');
-              },
-            ),
+        _selectionTestApp(
+          focusNode: node,
+          child: ListView.builder(
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
           ),
         ),
       );
@@ -832,16 +882,13 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -905,16 +952,13 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -967,16 +1011,13 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -1028,17 +1069,14 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          focusNode: node,
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        focusNode: node,
+        child: ListView.builder(
+          controller: controller,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -1122,18 +1160,15 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          focusNode: node,
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            reverse: true,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        focusNode: node,
+        child: ListView.builder(
+          controller: controller,
+          reverse: true,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -1215,18 +1250,15 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          focusNode: node,
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            scrollDirection: Axis.horizontal,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        focusNode: node,
+        child: ListView.builder(
+          controller: controller,
+          scrollDirection: Axis.horizontal,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -1280,19 +1312,16 @@ void main() {
     final controller = ScrollController();
     addTearDown(controller.dispose);
     await tester.pumpWidget(
-      MaterialApp(
-        home: SelectionArea(
-          focusNode: node,
-          selectionControls: materialTextSelectionControls,
-          child: ListView.builder(
-            controller: controller,
-            scrollDirection: Axis.horizontal,
-            reverse: true,
-            itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
-              return Text('Item $index');
-            },
-          ),
+      _selectionTestApp(
+        focusNode: node,
+        child: ListView.builder(
+          controller: controller,
+          scrollDirection: Axis.horizontal,
+          reverse: true,
+          itemCount: 100,
+          itemBuilder: (BuildContext context, int index) {
+            return Text('Item $index');
+          },
         ),
       ),
     );
@@ -1505,25 +1534,22 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectionArea(
-            selectionControls: materialTextSelectionControls,
-            child: Column(
-              children: <Widget>[
-                const Text('Item 0'),
-                SizedBox(
-                  height: 400,
-                  child: ListView.builder(
-                    controller: controller,
-                    itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Text('Inner item $index');
-                    },
-                  ),
+        _selectionTestApp(
+          child: Column(
+            children: <Widget>[
+              const Text('Item 0'),
+              SizedBox(
+                height: 400,
+                child: ListView.builder(
+                  controller: controller,
+                  itemCount: 100,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Text('Inner item $index');
+                  },
                 ),
-                const Text('Item 1'),
-              ],
-            ),
+              ),
+              const Text('Item 1'),
+            ],
           ),
         ),
       );
@@ -1563,28 +1589,25 @@ void main() {
       final innerController = ScrollController();
       addTearDown(innerController.dispose);
       await tester.pumpWidget(
-        MaterialApp(
-          home: SelectionArea(
-            selectionControls: materialTextSelectionControls,
-            child: ListView.builder(
-              controller: outerController,
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 2) {
-                  return SizedBox(
-                    height: 700,
-                    child: ListView.builder(
-                      controller: innerController,
-                      itemCount: 100,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Text('Iteminner $index');
-                      },
-                    ),
-                  );
-                }
-                return Text('Item $index');
-              },
-            ),
+        _selectionTestApp(
+          child: ListView.builder(
+            controller: outerController,
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 2) {
+                return SizedBox(
+                  height: 700,
+                  child: ListView.builder(
+                    controller: innerController,
+                    itemCount: 100,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Text('Iteminner $index');
+                    },
+                  ),
+                );
+              }
+              return Text('Item $index');
+            },
           ),
         ),
       );
@@ -1657,17 +1680,14 @@ void main() {
         final focusNode = FocusNode();
         addTearDown(focusNode.dispose);
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectionArea(
-              focusNode: focusNode,
-              selectionControls: materialTextSelectionControls,
-              child: ListView.builder(
-                controller: controller,
-                itemCount: 100,
-                itemBuilder: (BuildContext context, int index) {
-                  return Text('Item $index');
-                },
-              ),
+          _selectionTestApp(
+            focusNode: focusNode,
+            child: ListView.builder(
+              controller: controller,
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return Text('Item $index');
+              },
             ),
           ),
         );
@@ -1725,17 +1745,14 @@ void main() {
         final focusNode = FocusNode();
         addTearDown(focusNode.dispose);
         await tester.pumpWidget(
-          MaterialApp(
-            home: SelectionArea(
-              focusNode: focusNode,
-              selectionControls: materialTextSelectionControls,
-              child: ListView.builder(
-                controller: controller,
-                itemCount: 100,
-                itemBuilder: (BuildContext context, int index) {
-                  return Text('Item $index');
-                },
-              ),
+          _selectionTestApp(
+            focusNode: focusNode,
+            child: ListView.builder(
+              controller: controller,
+              itemCount: 100,
+              itemBuilder: (BuildContext context, int index) {
+                return Text('Item $index');
+              },
             ),
           ),
         );
