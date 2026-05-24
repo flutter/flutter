@@ -264,6 +264,26 @@ void main() {
   );
 
   testWithoutContext(
+    'onAttached throws ToolExit when application bundle is missing',
+    () async {
+      final device = MacOSDevice(
+        fileSystem: MemoryFileSystem.test(),
+        // No `open` invocation expected — the bundle-missing branch must
+        // throw before we get there.
+        processManager: FakeProcessManager.empty(),
+        logger: BufferLogger.test(),
+        operatingSystemUtils: FakeOperatingSystemUtils(),
+      );
+      final package = FakeMacOSAppNoBundle();
+
+      await expectLater(
+        device.onAttached(package, BuildInfo.debug, FakeProcess()),
+        throwsToolExit(message: 'application bundle not found'),
+      );
+    },
+  );
+
+  testWithoutContext(
     'onAttached returns normally when `open` succeeds',
     () async {
       final device = MacOSDevice(
@@ -306,6 +326,14 @@ class FakeMacOSApp extends Fake implements MacOSApp {
   String? applicationBundle(BuildInfo buildInfo) {
     return 'build/macos/Build/Products/Debug/Bundle.app';
   }
+}
+
+class FakeMacOSAppNoBundle extends Fake implements MacOSApp {
+  @override
+  String executable(BuildInfo buildInfo) => 'debug/executable';
+
+  @override
+  String? applicationBundle(BuildInfo buildInfo) => null;
 }
 
 class FakeProcess extends Fake implements Process {}

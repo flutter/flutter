@@ -91,8 +91,14 @@ class MacOSDevice extends DesktopDevice {
     // the launch process for 'open' to foreground it.
     final String? applicationBundle = package.applicationBundle(buildInfo);
     if (applicationBundle == null) {
-      _logger.printError('Failed to foreground app; application bundle not found');
-      return;
+      // Without a bundle path `open` cannot run, so the app never comes to
+      // the front and `flutter test`/`flutter run` would hang the same way
+      // a non-zero `open` exit does. Fail fast for consistency.
+      throwToolExit(
+        'Failed to foreground app; application bundle not found. Without '
+        'foreground, the app produces no frames and `flutter test` / '
+        '`flutter run` will hang.',
+      );
     }
     final ProcessResult result = await _processManager.run(<String>['open', applicationBundle]);
     if (result.exitCode != 0) {
