@@ -139,7 +139,8 @@ void main() {
     late StateSetter setState;
 
     void expectCardToMatchTheme() {
-      final RenderPhysicalShape renderShape = tester.renderObject(find.byType(ThemedCard));
+      // Verifies that the themed card is rendered with the appropriate inherited theme data.
+      final RenderPhysicalShape renderShape = tester.renderObject(find.byType(_ThemedCard));
 
       if (cardThemeData.color != null) {
         expect(renderShape.color, cardThemeData.color);
@@ -166,7 +167,7 @@ void main() {
           setState = stateSetter;
           return Theme(
             data: ThemeData(cardTheme: cardThemeData),
-            child: const ThemedCard(),
+            child: const _ThemedCard(),
           );
         },
       ),
@@ -503,8 +504,8 @@ ThemeData _themeData() {
   return ThemeData(cardColor: Colors.pink);
 }
 
-class ThemedCard extends SingleChildRenderObjectWidget {
-  const ThemedCard({super.key}) : super(child: const SizedBox.expand());
+class _ThemedCard extends SingleChildRenderObjectWidget {
+  const _ThemedCard() : super(child: const SizedBox.expand());
 
   @override
   RenderPhysicalShape createRenderObject(BuildContext context) {
