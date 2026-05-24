@@ -3336,121 +3336,45 @@ void main() {
         ),
       );
 
+      // Start first page transition. This one will be playing the delegated transition
+      // received from Cupertino page route.
       await tester.tap(find.text('First Cupertino Transition'));
       await tester.pump();
 
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalOne = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
+      // Save the position of element on the screen at certain intervals.
+      final xLocations = <double>[];
+      for (var i = 0; i < 10; i += 1) {
+        await tester.pump(const Duration(milliseconds: 40));
+        xLocations.add(tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx);
+      }
+      for (var i = 0; i < 2; i += 1) {
+        await tester.pump(const Duration(milliseconds: 50));
+        xLocations.add(tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx);
+      }
 
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalTwo = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalThree = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalFour = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalFive = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalSix = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalSeven = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalEight = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalNine = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 40));
-      final double xLocationIntervalTen = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 50));
-      final double xLocationIntervalEleven = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
-      await tester.pump(const Duration(milliseconds: 50));
-      final double xLocationIntervalTwelve = tester.getTopLeft(find.byKey(firstPlaceholderKey)).dx;
-
+      // Give time to the animation to finish.
       await tester.pumpAndSettle(const Duration(milliseconds: 1));
 
+      // Start the second page transition. This time it's the default secondary
+      // transition of a Cupertino page, with no delegation.
       await tester.tap(find.text('Second Cupertino Transition'));
       await tester.pump();
 
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalOne, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalTwo, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalThree, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalFour, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalFive, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalSix, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalSeven, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalEight, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalNine, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 40));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalTen, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalEleven, epsilon: 0.1),
-      );
-
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(
-        tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
-        moreOrLessEquals(xLocationIntervalTwelve, epsilon: 0.1),
-      );
+      // Compare against the values from before.
+      for (var i = 0; i < 10; i += 1) {
+        await tester.pump(const Duration(milliseconds: 40));
+        expect(
+          tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+          moreOrLessEquals(xLocations[i], epsilon: 0.1),
+        );
+      }
+      for (var i = 0; i < 2; i += 1) {
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(
+          tester.getTopLeft(find.byKey(secondPlaceholderKey)).dx,
+          moreOrLessEquals(xLocations[10 + i], epsilon: 0.1),
+        );
+      }
     });
   });
 }

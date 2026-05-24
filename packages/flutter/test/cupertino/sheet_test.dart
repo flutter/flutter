@@ -67,6 +67,7 @@ void main() {
       final navigator = GlobalKey<NavigatorState>();
       await tester.pumpWidget(CupertinoApp(navigatorKey: navigator, home: const Text('home')));
 
+      // Push first page with custom transition builder.
       final Route<void> firstRoute = CupertinoSheetRoute<void>(
         builder: (_) {
           return const Text('Page One');
@@ -89,7 +90,10 @@ void main() {
       navigator.currentState!.pop();
       await tester.pumpAndSettle();
 
+      // Verify home is still visible without transitions.
       expect(find.text('home'), findsOneWidget);
+
+      // Verify the delegated transition is removed.
       expect(cupertinoSheetDelegatedTransitionFinder, findsNothing);
     },
   );
