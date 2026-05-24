@@ -7,12 +7,14 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
-import '../widgets/multi_view_testing.dart';
+
 import 'test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
@@ -1217,7 +1219,7 @@ void main() {
                 builder: (BuildContext context) {
                   outsideView = Material.maybeOf(context);
                   return View(
-                    view: FakeView(tester.view),
+                    view: _FakeView(tester.view),
                     child: Builder(
                       builder: (BuildContext context) {
                         insideView = Material.maybeOf(context);
@@ -1247,6 +1249,33 @@ void main() {
     );
     expect(tester.getSize(find.byType(Material)), Size.zero);
   });
+}
+
+class _FakeView extends TestFlutterView {
+  _FakeView(FlutterView view)
+    : super(
+        view: view,
+        platformDispatcher: view.platformDispatcher as TestPlatformDispatcher,
+        display: view.display as TestDisplay,
+      );
+
+  @override
+  int get viewId => 100;
+
+  @override
+  void render(Scene scene, {Size? size}) {
+    // Do not render the scene in the engine. The engine only observes one
+    // instance of FlutterView (the _view), and it is generally expected that
+    // the framework will render no more than one Scene per frame.
+  }
+
+  @override
+  void updateSemantics(SemanticsUpdate update) {
+    // Do not send the update to the engine. The engine only observes one
+    // instance of FlutterView (the _view). Sending semantic updates meant for
+    // different views to the same engine view does not work as the updates do
+    // not produce consistent semantics trees.
+  }
 }
 
 class TrackPaintInkFeature extends InkFeature {
