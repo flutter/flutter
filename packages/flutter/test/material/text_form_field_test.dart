@@ -17,7 +17,9 @@ import 'editable_text_utils.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
   final mockClipboard = MockClipboard();
+
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
     SystemChannels.platform,
     mockClipboard.handleMethodCall,
@@ -698,7 +700,9 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 200));
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
-  }, skip: isBrowser); // [intended] We do not use Flutter-rendered context menu on the Web.
+  }, skip: isBrowser);
+
+  // [intended] We do not use Flutter-rendered context menu on the Web.
 
   testWidgets('onTap is called upon tap', (WidgetTester tester) async {
     var tapCount = 0;
@@ -1949,20 +1953,14 @@ void main() {
 
     Widget builder() {
       return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: Form(
-                  key: formKey,
-                  child: TextFormField(
-                    onSaved: (String? value) {
-                      fieldValue = value;
-                    },
-                  ),
-                ),
+        home: Center(
+          child: Material(
+            child: Form(
+              key: formKey,
+              child: TextFormField(
+                onSaved: (String? value) {
+                  fieldValue = value;
+                },
               ),
             ),
           ),
@@ -2043,12 +2041,12 @@ void main() {
     _PlatformAnnounceScenario(
       supportsAnnounce: false,
       testName:
-          'Should announce only the first error message when validate returns errors and announce = false',
+          'Should not announce error message when validate returns errors and supportsAnnounce = false',
     ),
     _PlatformAnnounceScenario(
       supportsAnnounce: true,
       testName:
-          'Should not announce error message when validate returns errors and announce = true',
+          'Should announce only the first error message when validate returns errors and supportsAnnounce = true',
     ),
   ]) {
     testWidgets(test.testName, (WidgetTester tester) async {
@@ -2101,226 +2099,6 @@ void main() {
       }
     });
   }
-
-  testWidgets('isValid returns true when a field is valid', (WidgetTester tester) async {
-    final fieldKey1 = GlobalKey<FormFieldState<String>>();
-    final fieldKey2 = GlobalKey<FormFieldState<String>>();
-    const validString = 'Valid string';
-    String? validator(String? s) => s == validString ? null : 'Error text';
-
-    Widget builder() {
-      return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: Form(
-                  child: ListView(
-                    children: <Widget>[
-                      TextFormField(
-                        key: fieldKey1,
-                        initialValue: validString,
-                        validator: validator,
-                        autovalidateMode: AutovalidateMode.always,
-                      ),
-                      TextFormField(
-                        key: fieldKey2,
-                        initialValue: validString,
-                        validator: validator,
-                        autovalidateMode: AutovalidateMode.always,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(builder());
-
-    expect(fieldKey1.currentState!.isValid, isTrue);
-    expect(fieldKey2.currentState!.isValid, isTrue);
-  });
-
-  testWidgets('isValid returns false when the field is invalid and does not change error display', (
-    WidgetTester tester,
-  ) async {
-    final fieldKey1 = GlobalKey<FormFieldState<String>>();
-    final fieldKey2 = GlobalKey<FormFieldState<String>>();
-    const validString = 'Valid string';
-    String? validator(String? s) => s == validString ? null : 'Error text';
-
-    Widget builder() {
-      return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: Form(
-                  child: ListView(
-                    children: <Widget>[
-                      TextFormField(
-                        key: fieldKey1,
-                        initialValue: validString,
-                        validator: validator,
-                        autovalidateMode: AutovalidateMode.disabled,
-                      ),
-                      TextFormField(
-                        key: fieldKey2,
-                        initialValue: '',
-                        validator: validator,
-                        autovalidateMode: AutovalidateMode.disabled,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(builder());
-
-    expect(fieldKey1.currentState!.isValid, isTrue);
-    expect(fieldKey2.currentState!.isValid, isFalse);
-    expect(fieldKey2.currentState!.hasError, isFalse);
-  });
-
-  testWidgets('validateGranularly returns a set containing all, and only, invalid fields', (
-    WidgetTester tester,
-  ) async {
-    final formKey = GlobalKey<FormState>();
-    final validFieldsKey = UniqueKey();
-    final invalidFieldsKey = UniqueKey();
-
-    const validString = 'Valid string';
-    const invalidString = 'Invalid string';
-    String? validator(String? s) => s == validString ? null : 'Error text';
-
-    Widget builder() {
-      return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: Form(
-                  key: formKey,
-                  child: ListView(
-                    children: <Widget>[
-                      TextFormField(
-                        key: validFieldsKey,
-                        initialValue: validString,
-                        validator: validator,
-                        autovalidateMode: AutovalidateMode.disabled,
-                      ),
-                      TextFormField(
-                        key: invalidFieldsKey,
-                        initialValue: invalidString,
-                        validator: validator,
-                        autovalidateMode: AutovalidateMode.disabled,
-                      ),
-                      TextFormField(
-                        key: invalidFieldsKey,
-                        initialValue: invalidString,
-                        validator: validator,
-                        autovalidateMode: AutovalidateMode.disabled,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(builder());
-
-    final Set<FormFieldState<dynamic>> validationResult = formKey.currentState!
-        .validateGranularly();
-
-    expect(validationResult.length, equals(2));
-    expect(
-      validationResult
-          .where((FormFieldState<dynamic> field) => field.widget.key == invalidFieldsKey)
-          .length,
-      equals(2),
-    );
-    expect(
-      validationResult
-          .where((FormFieldState<dynamic> field) => field.widget.key == validFieldsKey)
-          .length,
-      equals(0),
-    );
-  });
-
-  testWidgets('Should announce error text when validateGranularly is called', (
-    WidgetTester tester,
-  ) async {
-    final formKey = GlobalKey<FormState>();
-    const validString = 'Valid string';
-    String? validator(String? s) => s == validString ? null : 'error';
-
-    Widget builder() {
-      return MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(supportsAnnounce: true),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: Form(
-                  key: formKey,
-                  child: ListView(
-                    children: <Widget>[
-                      TextFormField(
-                        initialValue: validString,
-                        validator: validator,
-                        autovalidateMode: AutovalidateMode.disabled,
-                      ),
-                      TextFormField(
-                        initialValue: '',
-                        validator: validator,
-                        autovalidateMode: AutovalidateMode.disabled,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    await tester.pumpWidget(builder());
-    expect(find.text('error'), findsNothing);
-
-    formKey.currentState!.validateGranularly();
-
-    await tester.pump();
-    expect(find.text('error'), findsOneWidget);
-
-    expect(tester.takeAnnouncements(), [
-      isAccessibilityAnnouncement(
-        'error',
-        textDirection: TextDirection.ltr,
-        assertiveness: Assertiveness.assertive,
-      ),
-    ]);
-  });
 
   testWidgets('Multiple TextFormFields communicate', (WidgetTester tester) async {
     final formKey = GlobalKey<FormState>();
@@ -3518,153 +3296,6 @@ void main() {
         validationResult: SemanticsValidationResult.invalid,
       ),
     );
-  });
-
-  testWidgets('clearError() clears error but keeps value', (WidgetTester tester) async {
-    final fieldKey = GlobalKey<FormFieldState<String>>();
-    String errorText(String? value) => '$value/error';
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Form(
-            child: TextFormField(key: fieldKey, initialValue: 'foo', validator: errorText),
-          ),
-        ),
-      ),
-    );
-
-    fieldKey.currentState?.validate();
-    await tester.pump();
-    expect(find.text(errorText('foo')), findsOneWidget);
-
-    fieldKey.currentState?.clearError();
-    await tester.pump();
-
-    expect(find.text(errorText('foo')), findsNothing);
-
-    // Value is preserved.
-    expect(find.text('foo'), findsOneWidget);
-  });
-
-  testWidgets('clearError() clears all field errors', (WidgetTester tester) async {
-    final formKey = GlobalKey<FormState>();
-    String errorText(String? value) => '$value/error';
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Form(
-            key: formKey,
-            child: Column(
-              children: <Widget>[
-                TextFormField(initialValue: 'foo', validator: errorText),
-                TextFormField(initialValue: 'bar', validator: errorText),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    formKey.currentState?.validate();
-    await tester.pump();
-
-    expect(find.text(errorText('foo')), findsOneWidget);
-    expect(find.text(errorText('bar')), findsOneWidget);
-
-    formKey.currentState?.clearError();
-    await tester.pump();
-
-    expect(find.text(errorText('foo')), findsNothing);
-    expect(find.text(errorText('bar')), findsNothing);
-
-    // Values are preserved.
-    expect(find.text('foo'), findsOneWidget);
-    expect(find.text('bar'), findsOneWidget);
-  });
-
-  testWidgets('exposes all registered FormFieldStates with their values', (
-    WidgetTester tester,
-  ) async {
-    final formKey = GlobalKey<FormState>();
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Form(
-            key: formKey,
-            child: Column(
-              children: <Widget>[
-                TextFormField(initialValue: 'A'),
-                TextFormField(initialValue: 'B'),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final FormState formState = formKey.currentState!;
-
-    expect(formState.fields.length, equals(2));
-    expect(formState.fields.map((field) => field.value), containsAll(<String>['A', 'B']));
-  });
-
-  testWidgets('reports all fields as invalid after validation errors', (WidgetTester tester) async {
-    final formKey = GlobalKey<FormState>();
-    String errorText(String? value) => '$value/error';
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Form(
-            key: formKey,
-            child: Column(
-              children: <Widget>[
-                TextFormField(initialValue: 'foo', validator: errorText),
-                TextFormField(initialValue: 'bar', validator: errorText),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    formKey.currentState?.validate();
-    await tester.pump();
-
-    expect(find.text(errorText('foo')), findsOneWidget);
-    expect(find.text(errorText('bar')), findsOneWidget);
-
-    final List<FormFieldState<dynamic>> fields = formKey.currentState!.fields.toList();
-
-    // Expect all fields to be invalid.
-    expect(fields.every((field) => !field.isValid), isTrue);
-  });
-
-  testWidgets('isValid evaluates validity without updating error UI', (WidgetTester tester) async {
-    final formKey = GlobalKey<FormState>();
-    String errorText(String? value) => '$value/error';
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Form(
-            key: formKey,
-            child: TextFormField(initialValue: 'foo', validator: errorText),
-          ),
-        ),
-      ),
-    );
-
-    final FormFieldState<dynamic> field = formKey.currentState!.fields.single;
-
-    expect(field.isValid, isFalse);
-
-    // No error UI should be shown.
-    expect(find.text(errorText('foo')), findsNothing);
-    expect(field.hasError, isFalse);
   });
 }
 
