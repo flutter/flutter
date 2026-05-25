@@ -10,11 +10,11 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 import '../services/fake_platform_views.dart';
 
 void main() {
@@ -4360,6 +4360,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -4394,7 +4395,5 @@ void main() {
 
     // Should not throw: "attached is not true"
     expect(tester.takeException(), isNull);
-
-    scrollController.dispose();
   });
 }
