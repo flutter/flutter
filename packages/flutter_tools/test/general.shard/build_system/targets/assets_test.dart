@@ -174,6 +174,10 @@ flutter:
             logger.traceText,
             contains('Skipping assets entry "assets/strawberry/ice-cream.png"'),
           );
+          expect(
+            logger.traceText,
+            isNot(contains('Skipping assets entry "assets/common/image.png"')),
+          );
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -226,6 +230,10 @@ flutter:
           expect(
             logger.traceText,
             contains('Skipping assets entry "assets/vanilla/ice-cream.png"'),
+          );
+          expect(
+            logger.traceText,
+            isNot(contains('Skipping assets entry "assets/strawberry/ice-cream.png"')),
           );
         },
         overrides: <Type, Generator>{
