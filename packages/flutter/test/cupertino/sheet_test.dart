@@ -315,6 +315,85 @@ void main() {
     );
   });
 
+  testWidgets('covered sheet does not reveal the root route through its top gap', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey scaffoldKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          key: scaffoldKey,
+          child: Column(
+            children: <Widget>[
+              const Text('Page 1'),
+              CupertinoButton(
+                onPressed: () {
+                  Navigator.push<void>(
+                    scaffoldKey.currentContext!,
+                    CupertinoSheetRoute<void>(
+                      builder: (BuildContext context) {
+                        return CupertinoPageScaffold(
+                          child: Column(
+                            children: <Widget>[
+                              const Text('Page 2'),
+                              CupertinoButton(
+                                onPressed: () {
+                                  Navigator.push<void>(
+                                    context,
+                                    CupertinoSheetRoute<void>(
+                                      builder: (BuildContext context) {
+                                        return const CupertinoPageScaffold(child: Text('Page 3'));
+                                      },
+                                    ),
+                                  );
+                                },
+                                child: const Text('Push Page 3'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+                child: const Text('Push Page 2'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Push Page 2'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Push Page 3'));
+    await tester.pumpAndSettle();
+
+    final double page1Top = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 1'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
+    final double page2Top = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 2'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
+    final double page3Top = tester
+        .getTopLeft(
+          find.ancestor(of: find.text('Page 3'), matching: find.byType(CupertinoPageScaffold)),
+        )
+        .dy;
+
+    // Sheet 2 moves up above Page 1 so that the root route (Page 1) is completely hidden behind
+    // Sheet 2.
+    expect(page2Top, lessThanOrEqualTo(page1Top));
+    // Sheet 3 is stacked on top of Sheet 2, with Sheet 2 peeking out above Sheet 3.
+    expect(page2Top, lessThanOrEqualTo(page3Top));
+  });
+
   testWidgets('by default showCupertinoSheet does not enable nested navigation', (
     WidgetTester tester,
   ) async {
