@@ -170,3 +170,7 @@ app.*.symbols
 # AI related
 .agents/rules/personal-*
 .agents/skills/personal-*
+# dart_hooks opt-in config (flutter/skills#148) and generated hook logs.
+# Create dart_hooks.yaml locally to enable the format/analyze hooks.
+dart_hooks.yaml
+.agents/*.log

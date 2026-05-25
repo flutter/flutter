@@ -26,7 +26,7 @@ dependencies:
     git:
       url: https://github.com/flutter/skills
       path: tool/dart_hooks
-      ref: f6996f5cebf06377cd75076c49484e47436f65f4
+      ref: 23f7d6aac9958c05d87a54006466f765eda25cdf
   dart_skills_lint:
     git:
       url: https://github.com/flutter/skills
