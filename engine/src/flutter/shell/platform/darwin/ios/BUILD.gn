@@ -274,8 +274,8 @@ if (enable_ios_unittests) {
   # considerably slower to start than the tests in
   # "//flutter/shell/platform/darwin/common:framework_common_swift_unittests".
   # If your tests do not have to be run on a simulator (no UIKit dependencies
-  # for example), consider adding them to the ":framework_common_swift_unittests"
-  # target.
+  # for example), consider adding them to the
+  # ":framework_common_swift_unittests" target.
   shared_library("ios_test_flutter") {
     testonly = true
     visibility = [ "*" ]
@@ -322,6 +322,7 @@ if (enable_ios_unittests) {
       "framework/Source/SemanticsObjectTest.mm",
       "framework/Source/SemanticsObjectTestMocks.h",
       "framework/Source/UIViewController_FlutterScreenAndSceneIfLoadedTest.mm",
+      "framework/Source/VsyncWaiterIOSTest.mm",
       "framework/Source/accessibility_bridge_test.mm",
       "framework/Source/availability_version_check_test.mm",
       "ios_context_noop_unittests.mm",

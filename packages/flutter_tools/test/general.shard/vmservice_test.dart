@@ -300,21 +300,6 @@ void main() {
     expect(fakeVmServiceHost.hasRemainingExpectations, false);
   });
 
-  testWithoutContext('reloadAssetFonts handles missing method', () async {
-    final fakeVmServiceHost = FakeVmServiceHost(
-      requests: <VmServiceExpectation>[
-        FakeVmServiceRequest(
-          method: '_flutter.reloadAssetFonts',
-          args: <String, Object>{'isolateId': '1', 'viewId': '2'},
-          error: FakeRPCError(code: vm_service.RPCErrorKind.kMethodNotFound.code),
-        ),
-      ],
-    );
-
-    await fakeVmServiceHost.vmService.reloadAssetFonts(isolateId: '1', viewId: '2');
-    expect(fakeVmServiceHost.hasRemainingExpectations, false);
-  });
-
   testWithoutContext('flutterDebugDumpFocusTree returns data', () async {
     final fakeVmServiceHost = FakeVmServiceHost(
       requests: <VmServiceExpectation>[
@@ -658,6 +643,31 @@ void main() {
     expect(await completer.future, 'ws://localhost:8181/foo/ws');
     openChannelForTesting = null;
   });
+
+  testWithoutContext(
+    'RPCErrorExtension detects DWDS-specific unregistered service extension errors',
+    () {
+      final unregisteredErrorNative = vm_service.RPCError(
+        'ext.flutter.evict',
+        vm_service.RPCErrorKind.kMethodNotFound.code,
+        'Method not found',
+      );
+      final unregisteredErrorDwds = vm_service.RPCError(
+        'ext.flutter.evict',
+        vm_service.RPCErrorKind.kInternalError.code,
+        'Service extension failed in some clients: Unexpected null value.',
+      );
+      final otherError = vm_service.RPCError(
+        'ext.flutter.evict',
+        vm_service.RPCErrorKind.kInternalError.code,
+        'Some other random error message',
+      );
+
+      expect(unregisteredErrorNative.isServiceExtensionUnregisteredError, isTrue);
+      expect(unregisteredErrorDwds.isServiceExtensionUnregisteredError, isTrue);
+      expect(otherError.isServiceExtensionUnregisteredError, isFalse);
+    },
+  );
 }
 
 class FakeVMService extends Fake implements vm_service.VmService {
