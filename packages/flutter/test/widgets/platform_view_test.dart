@@ -4359,6 +4359,9 @@ void main() {
   testWidgets('SelectionArea does not throw when PlatformView scrolls off screen quickly', (
     WidgetTester tester,
   ) async {
+    final viewsController = FakeAndroidPlatformViewsController();
+    viewsController.registerViewType('webview');
+
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
@@ -4371,10 +4374,10 @@ void main() {
             children: List.generate(
               20,
               (int i) => SelectionArea(
-                child: Container(
-                  height: 300,
-                  color: i.isEven ? Colors.grey : Colors.green,
-                  child: Text('Item $i'),
+                child: SizedBox(
+                  width: 200.0,
+                  height: 300.0,
+                  child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
                 ),
               ),
             ),
@@ -4383,7 +4386,8 @@ void main() {
       ),
     );
 
-    // Simulate fast scrolling to force widgets off screen quickly
+    // Simulate fast scrolling to force AndroidView widgets off screen quickly
+    // which triggers _PlatformViewPlaceholderBox detachment before post-frame callback
     scrollController.jumpTo(3000);
     await tester.pump();
 
@@ -4393,7 +4397,7 @@ void main() {
     scrollController.jumpTo(6000);
     await tester.pump();
 
-    // Should not throw: "attached is not true"
+    // Should not throw: "attached is not true" from _PlatformViewPlaceholderBox
     expect(tester.takeException(), isNull);
   });
 }
