@@ -56,6 +56,11 @@ base class ShaderLibrary extends NativeFieldWrapperClass1 {
   /// is the `ext.ui.gpu.reinitializeShaderLibrary` service extension driving
   /// hot reload from `flutter_tools`; tests may also call this directly.
   /// No-ops if no library has been loaded for `assetKey`.
+  ///
+  /// `assetKey` must be the asset's bundle path: the same string passed to
+  /// [fromAsset] and listed in the asset manifest. That path is both the
+  /// registry key here and the value `flutter_tools` dispatches, so the two
+  /// must match for a reload to land.
   static void reinitialize(String assetKey) {
     final ShaderLibrary? lib = _registry[assetKey];
     if (lib == null) {
