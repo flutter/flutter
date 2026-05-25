@@ -846,6 +846,7 @@ flutter:
               isFalse,
               reason: 'Expected asset for $platform to be skipped when target is $targetPlatform',
             );
+            expect(logger.traceText, contains('Skipping assets entry "assets/test-$platform.txt"'));
           },
           overrides: <Type, Generator>{
             FileSystem: () => fileSystem,
