@@ -111,6 +111,22 @@ void main() {
     );
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  // Directly exercises the Shader dirty-bit lifecycle (Shader::IsDirty /
+  // SetClean): freshly parsed shaders start dirty, and registering them with
+  // a pipeline clears the bit. Uses test_alt.shaderbundle, which no other
+  // test in this file loads, so the bit reflects a fresh load.
+  test('shaders start dirty and are cleaned by registration', () async {
+    final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test_alt.shaderbundle')!;
+    final gpu.Shader vertex = library['UnlitVertex']!;
+    final gpu.Shader fragment = library['UnlitFragment']!;
+    expect(vertex.debugIsDirty, isTrue, reason: 'freshly parsed shaders start dirty');
+    expect(fragment.debugIsDirty, isTrue, reason: 'freshly parsed shaders start dirty');
+
+    gpu.gpuContext.createRenderPipeline(vertex, fragment);
+    expect(vertex.debugIsDirty, isFalse, reason: 'registration clears the dirty bit');
+    expect(fragment.debugIsDirty, isFalse, reason: 'registration clears the dirty bit');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   // A shader bundle is the unit of asset distribution: a one-shader edit
   // ships a whole new bundle. `Shader::ResetFrom` dedupes by code-byte
   // comparison so unchanged shaders stay clean across reload. Reloading
