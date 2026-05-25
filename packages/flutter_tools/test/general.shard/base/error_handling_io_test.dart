@@ -32,7 +32,7 @@ final Platform macOSPlatform = FakePlatform(
 
 void main() {
   setUpAll(() {
-    windowsRetryBackoffs = const <Duration>[];
+    overrideWindowsRetryBackoffs = const <Duration>[];
   });
 
   testWithoutContext('deleteIfExists does not delete if file does not exist', () {
@@ -1621,11 +1621,11 @@ Please ensure that the SDK and/or project is installed in a location that has re
   group('Windows transient lock retry', () {
     late ErrorHandlingFileSystem fileSystem;
     late int attemptsLeft;
-    late List<Duration> originalBackoffs;
+    late List<Duration>? originalBackoffs;
 
     setUp(() {
-      originalBackoffs = windowsRetryBackoffs;
-      windowsRetryBackoffs = const <Duration>[
+      originalBackoffs = overrideWindowsRetryBackoffs;
+      overrideWindowsRetryBackoffs = const <Duration>[
         Duration.zero,
         Duration.zero,
         Duration.zero,
@@ -1635,7 +1635,7 @@ Please ensure that the SDK and/or project is installed in a location that has re
     });
 
     tearDown(() {
-      windowsRetryBackoffs = originalBackoffs;
+      overrideWindowsRetryBackoffs = originalBackoffs;
     });
 
     testWithoutContext('recovers from transient lock during retry loop (sync)', () {

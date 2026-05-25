@@ -949,13 +949,34 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
 const _kNoExecutableFound =
     'The Flutter tool could not locate an executable with suitable permissions';
 
-List<Duration> windowsRetryBackoffs = const <Duration>[
-  Duration(milliseconds: 50),
-  Duration(milliseconds: 100),
-  Duration(milliseconds: 200),
-  Duration(milliseconds: 400),
-  Duration(milliseconds: 800),
-];
+List<Duration>? overrideWindowsRetryBackoffs;
+
+Duration? _getWindowsRetryDelay({
+  required Platform platform,
+  required int errorCode,
+  required int attempt,
+  required List<int> ignoreErrorCodes,
+}) {
+  if (!platform.isWindows) {
+    return null;
+  }
+  if (ignoreErrorCodes.contains(errorCode)) {
+    return null;
+  }
+  if (overrideWindowsRetryBackoffs != null) {
+    if (_isWindowsTransientLock(errorCode) && attempt < overrideWindowsRetryBackoffs!.length) {
+      return overrideWindowsRetryBackoffs![attempt];
+    }
+    return null;
+  }
+  const maxAttempts = 5;
+  const baseDelayMs = 50;
+  if (_isWindowsTransientLock(errorCode) && attempt < maxAttempts) {
+    final int delayMs = baseDelayMs * (1 << attempt); // 50ms, 100ms, 200ms, 400ms, 800ms
+    return Duration(milliseconds: delayMs);
+  }
+  return null;
+}
 
 bool _isWindowsTransientLock(int errorCode) {
   return errorCode == 5 || errorCode == 32 || errorCode == 33 || errorCode == 1224;
@@ -982,41 +1003,46 @@ Future<T> _run<T>(
       if (ignoreErrorCodes.contains(errorCode)) {
         rethrow;
       }
-      if (platform.isWindows &&
-          _isWindowsTransientLock(errorCode) &&
-          attempt < windowsRetryBackoffs.length) {
-        final Duration delay = windowsRetryBackoffs[attempt];
+      final Duration? delay = _getWindowsRetryDelay(
+        platform: platform,
+        errorCode: errorCode,
+        attempt: attempt,
+        ignoreErrorCodes: ignoreErrorCodes,
+      );
+      if (delay != null) {
         attempt++;
         await Future<void>.delayed(delay);
         continue;
       }
-      if (platform.isWindows) {
-        _handleWindowsException(e, failureMessage, errorCode);
-      } else if (platform.isLinux || platform.isMacOS) {
-        _handlePosixException(e, failureMessage, errorCode, posixPermissionSuggestion);
-      }
+      _onFileSystemException(
+        exception: e,
+        platform: platform,
+        failureMessage: failureMessage,
+        posixPermissionSuggestion: posixPermissionSuggestion,
+      );
       rethrow;
     } on io.ProcessException catch (e) {
       final int errorCode = e.errorCode;
       if (ignoreErrorCodes.contains(errorCode)) {
         rethrow;
       }
-      if (platform.isWindows &&
-          _isWindowsTransientLock(errorCode) &&
-          attempt < windowsRetryBackoffs.length) {
-        final Duration delay = windowsRetryBackoffs[attempt];
+      final Duration? delay = _getWindowsRetryDelay(
+        platform: platform,
+        errorCode: errorCode,
+        attempt: attempt,
+        ignoreErrorCodes: ignoreErrorCodes,
+      );
+      if (delay != null) {
         attempt++;
         await Future<void>.delayed(delay);
         continue;
       }
-      if (platform.isWindows) {
-        _handleWindowsException(e, failureMessage, errorCode);
-      } else if (platform.isLinux) {
-        _handlePosixException(e, failureMessage, errorCode, posixPermissionSuggestion);
-      }
-      if (platform.isMacOS) {
-        _handleMacOSException(e, failureMessage, errorCode, posixPermissionSuggestion);
-      }
+      _onProcessException(
+        exception: e,
+        platform: platform,
+        failureMessage: failureMessage,
+        posixPermissionSuggestion: posixPermissionSuggestion,
+      );
       rethrow;
     }
   }
@@ -1043,41 +1069,46 @@ T _runSync<T>(
       if (ignoreErrorCodes.contains(errorCode)) {
         rethrow;
       }
-      if (platform.isWindows &&
-          _isWindowsTransientLock(errorCode) &&
-          attempt < windowsRetryBackoffs.length) {
-        final Duration delay = windowsRetryBackoffs[attempt];
+      final Duration? delay = _getWindowsRetryDelay(
+        platform: platform,
+        errorCode: errorCode,
+        attempt: attempt,
+        ignoreErrorCodes: ignoreErrorCodes,
+      );
+      if (delay != null) {
         attempt++;
         io.sleep(delay);
         continue;
       }
-      if (platform.isWindows) {
-        _handleWindowsException(e, failureMessage, errorCode);
-      } else if (platform.isLinux || platform.isMacOS) {
-        _handlePosixException(e, failureMessage, errorCode, posixPermissionSuggestion);
-      }
+      _onFileSystemException(
+        exception: e,
+        platform: platform,
+        failureMessage: failureMessage,
+        posixPermissionSuggestion: posixPermissionSuggestion,
+      );
       rethrow;
     } on io.ProcessException catch (e) {
       final int errorCode = e.errorCode;
       if (ignoreErrorCodes.contains(errorCode)) {
         rethrow;
       }
-      if (platform.isWindows &&
-          _isWindowsTransientLock(errorCode) &&
-          attempt < windowsRetryBackoffs.length) {
-        final Duration delay = windowsRetryBackoffs[attempt];
+      final Duration? delay = _getWindowsRetryDelay(
+        platform: platform,
+        errorCode: errorCode,
+        attempt: attempt,
+        ignoreErrorCodes: ignoreErrorCodes,
+      );
+      if (delay != null) {
         attempt++;
         io.sleep(delay);
         continue;
       }
-      if (platform.isWindows) {
-        _handleWindowsException(e, failureMessage, errorCode);
-      } else if (platform.isLinux) {
-        _handlePosixException(e, failureMessage, errorCode, posixPermissionSuggestion);
-      }
-      if (platform.isMacOS) {
-        _handleMacOSException(e, failureMessage, errorCode, posixPermissionSuggestion);
-      }
+      _onProcessException(
+        exception: e,
+        platform: platform,
+        failureMessage: failureMessage,
+        posixPermissionSuggestion: posixPermissionSuggestion,
+      );
       rethrow;
     }
   }
@@ -1196,6 +1227,37 @@ class ErrorHandlingProcessManager extends ProcessManager {
   }
 }
 
+void _onFileSystemException({
+  required FileSystemException exception,
+  required Platform platform,
+  String? failureMessage,
+  String? posixPermissionSuggestion,
+}) {
+  final int errorCode = exception.osError?.errorCode ?? 0;
+  if (platform.isWindows) {
+    _handleWindowsException(exception, failureMessage, errorCode);
+  } else if (platform.isLinux || platform.isMacOS) {
+    _handlePosixException(exception, failureMessage, errorCode, posixPermissionSuggestion);
+  }
+}
+
+void _onProcessException({
+  required io.ProcessException exception,
+  required Platform platform,
+  String? failureMessage,
+  String? posixPermissionSuggestion,
+}) {
+  final int errorCode = exception.errorCode;
+  if (platform.isWindows) {
+    _handleWindowsException(exception, failureMessage, errorCode);
+  } else if (platform.isLinux) {
+    _handlePosixException(exception, failureMessage, errorCode, posixPermissionSuggestion);
+  }
+  if (platform.isMacOS) {
+    _handleMacOSException(exception, failureMessage, errorCode, posixPermissionSuggestion);
+  }
+}
+
 void _handlePosixException(
   Exception e,
   String? message,
@@ -1211,21 +1273,17 @@ void _handlePosixException(
   const enospc = 28;
   const eacces = 13;
   // Catch errors and bail when:
-  String? errorMessage;
-  switch (errorCode) {
-    case enoent:
-      errorMessage =
-          '${message != null ? "$message. " : ""}The file or directory could not be found.'
+  final String? errorMessage = switch (errorCode) {
+    enoent =>
+      '${message != null ? "$message. " : ""}The file or directory could not be found.'
           '\n$e\n'
           'This can sometimes happen if the file was deleted or moved while the tool was running.'
-          ' Try running "flutter clean" and try again.';
-    case enospc:
-      errorMessage =
-          '$message. The target device is full.'
+          ' Try running "flutter clean" and try again.',
+    enospc =>
+      '$message. The target device is full.'
           '\n$e\n'
-          'Free up space and try again.';
-    case eperm:
-    case eacces:
+          'Free up space and try again.',
+    eperm || eacces => () {
       final errorBuffer = StringBuffer();
       if (message != null && message.isNotEmpty) {
         errorBuffer.writeln('$message.');
@@ -1239,11 +1297,10 @@ void _handlePosixException(
       if (posixPermissionSuggestion != null && posixPermissionSuggestion.isNotEmpty) {
         errorBuffer.writeln(posixPermissionSuggestion);
       }
-      errorMessage = errorBuffer.toString();
-    default:
-      // Caller must rethrow the exception.
-      break;
-  }
+      return errorBuffer.toString();
+    }(),
+    _ => null,
+  };
   _throwFileSystemException(errorMessage);
 }
 
@@ -1298,46 +1355,34 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   const kDeviceDoesNotExist = 433;
 
   // Catch errors and bail when:
-  String? errorMessage;
-  switch (errorCode) {
-    case kFileNotFound:
-    case kPathNotFound:
-      errorMessage =
-          '${message != null ? "$message. " : ""}The file or directory could not be found.'
+  final String? errorMessage = switch (errorCode) {
+    kFileNotFound || kPathNotFound =>
+      '${message != null ? "$message. " : ""}The file or directory could not be found.'
           '\n$e\n'
           'This can sometimes happen if the file was deleted or moved while the tool was running.'
-          ' Try running "flutter clean" and try again.';
-    case kAccessDenied:
-      errorMessage =
-          '$message. The flutter tool cannot access the file or directory.\n'
+          ' Try running "flutter clean" and try again.',
+    kAccessDenied =>
+      '$message. The flutter tool cannot access the file or directory.\n'
           'Please ensure that the SDK and/or project is installed in a location '
-          'that has read/write permissions for the current user.';
-    case kDeviceFull:
-      errorMessage =
-          '$message. The target device is full.'
+          'that has read/write permissions for the current user.',
+    kDeviceFull =>
+      '$message. The target device is full.'
           '\n$e\n'
-          'Free up space and try again.';
-    case kSharingViolation:
-    case kLockViolation:
-    case kUserMappedSectionOpened:
-      errorMessage =
-          '$message. The file is being used by another program.'
+          'Free up space and try again.',
+    kSharingViolation || kLockViolation || kUserMappedSectionOpened =>
+      '$message. The file is being used by another program.'
           '\n$e\n'
           'Do you have an antivirus program running? '
-          'Try disabling your antivirus program and try again.';
-    case kFatalDeviceHardwareError:
-      errorMessage =
-          '$message. There is a problem with the device driver '
-          'that this file or directory is stored on.';
-    case kDeviceDoesNotExist:
-      errorMessage =
-          '$message. The device was not found.'
+          'Try disabling your antivirus program and try again.',
+    kFatalDeviceHardwareError =>
+      '$message. There is a problem with the device driver '
+          'that this file or directory is stored on.',
+    kDeviceDoesNotExist =>
+      '$message. The device was not found.'
           '\n$e\n'
-          'Verify the device is mounted and try again.';
-    default:
-      // Caller must rethrow the exception.
-      break;
-  }
+          'Verify the device is mounted and try again.',
+    _ => null,
+  };
   _throwFileSystemException(errorMessage);
 }
 
