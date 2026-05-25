@@ -32,12 +32,13 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
+    logger = BufferLogger.test();
     environment = Environment.test(
       fileSystem.currentDirectory,
       processManager: FakeProcessManager.any(),
       artifacts: Artifacts.test(),
       fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      logger: logger,
       platform: FakePlatform(),
       defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
     );
@@ -60,7 +61,6 @@ flutter:
     - assets/foo/bar.png
     - assets/wildcard/
 ''');
-    logger = BufferLogger.test();
   });
 
   testUsingContext(
@@ -166,6 +166,14 @@ flutter:
             ),
             isNot(exists),
           );
+          expect(
+            logger.traceText,
+            contains('Skipping assets entry "assets/vanilla/ice-cream.png"'),
+          );
+          expect(
+            logger.traceText,
+            contains('Skipping assets entry "assets/strawberry/ice-cream.png"'),
+          );
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -214,6 +222,10 @@ flutter:
               '${environment.buildDir.path}/flutter_assets/assets/strawberry/ice-cream.png',
             ),
             exists,
+          );
+          expect(
+            logger.traceText,
+            contains('Skipping assets entry "assets/vanilla/ice-cream.png"'),
           );
         },
         overrides: <Type, Generator>{
