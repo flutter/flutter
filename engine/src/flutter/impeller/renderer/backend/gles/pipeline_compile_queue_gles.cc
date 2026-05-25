@@ -11,6 +11,9 @@ namespace impeller {
 
 std::shared_ptr<PipelineCompileQueueGLES> PipelineCompileQueueGLES::Create(
     fml::RefPtr<fml::TaskRunner> worker_task_runner) {
+  if (!worker_task_runner) {
+    return nullptr;
+  }
   return std::shared_ptr<PipelineCompileQueueGLES>(
       new PipelineCompileQueueGLES(std::move(worker_task_runner)));
 }
@@ -33,14 +36,8 @@ void PipelineCompileQueueGLES::PostJob(const fml::closure& job) {
   if (!job) {
     return;
   }
-  if (worker_task_runner_) {
-    worker_task_runner_->PostTask(job);
-  } else {
-    // No task runner available, execute synchronously on the current thread.
-    // This is safe in Playground/test environments where the current thread
-    // is the GL thread.
-    job();
-  }
+
+  worker_task_runner_->PostTask(job);
 }
 
 void PipelineCompileQueueGLES::ProcessJobsSequentially() {
