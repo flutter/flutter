@@ -508,7 +508,7 @@ class TestSemantics {
       );
     }
 
-    if (controlsNodes != node.controlsNodes && !setEquals(controlsNodes, node.controlsNodes)) {
+    if (!setEquals(controlsNodes, node.controlsNodes)) {
       return fail(
         'expected node id $id to controls nodes $controlsNodes but found controlling nodes ${node.controlsNodes}',
       );
@@ -1180,8 +1180,8 @@ class _IncludesNodeWith extends Matcher {
              scrollExtentMin != null ||
              maxValueLength != null ||
              currentValueLength != null ||
-             inputType != null,
-         minValue != null || maxValue != null);
+             inputType != null ||
+             minValue != null || maxValue != null);
   final AttributedString? attributedLabel;
   final AttributedString? attributedValue;
   final AttributedString? attributedHint;
