@@ -105,14 +105,15 @@ enum Artifact {
   final bool isPatchedSdk;
   final bool isFuchsiaRunner;
 
-  String? getFileName(Platform hostPlatform, [BuildMode? mode]) {
+  String getFileName(Platform hostPlatform, [BuildMode? mode]) {
     if (isPatchedSdk) {
-      assert(false, 'No filename for sdk path, should not be invoked');
-      return null;
+      throw StateError('No filename for sdk path, should not be invoked');
     }
     if (isFuchsiaRunner) {
-      assert(mode != null, 'BuildMode is required for fuchsiaFlutterRunner');
-      final jitOrAot = mode!.isJit ? '_jit' : '_aot';
+      if (mode == null) {
+        throw ArgumentError('BuildMode is required for fuchsiaFlutterRunner');
+      }
+      final jitOrAot = mode.isJit ? '_jit' : '_aot';
       final productOrNo = mode.isRelease ? '_product' : '';
       return 'flutter$jitOrAot${productOrNo}_runner-0.far';
     }
@@ -563,7 +564,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.genSnapshotRiscv64:
       case Artifact.genSnapshotX64:
       case Artifact.flutterXcframework:
-        final String artifactFileName = artifact.getFileName(_platform)!;
+        final String artifactFileName = artifact.getFileName(_platform);
         final String engineDir = _getEngineArtifactsPath(platform, mode)!;
         return _fileSystem.path.join(engineDir, artifactFileName);
       case Artifact.flutterFramework:
@@ -620,13 +621,13 @@ class CachedArtifacts implements Artifacts {
         const artifactFileName = 'flutter_runner_patched_sdk';
         return _fileSystem.path.join(root, runtime, artifactFileName);
       case Artifact.platformKernelDill:
-        final String artifactFileName = artifact.getFileName(_platform, mode)!;
+        final String artifactFileName = artifact.getFileName(_platform, mode);
         return _fileSystem.path.join(root, runtime, 'flutter_runner_patched_sdk', artifactFileName);
       case Artifact.fuchsiaKernelCompiler:
-        final String artifactFileName = artifact.getFileName(_platform, mode)!;
+        final String artifactFileName = artifact.getFileName(_platform, mode);
         return _fileSystem.path.join(root, runtime, 'dart_binaries', artifactFileName);
       case Artifact.fuchsiaFlutterRunner:
-        final String artifactFileName = artifact.getFileName(_platform, mode)!;
+        final String artifactFileName = artifact.getFileName(_platform, mode);
         return _fileSystem.path.join(root, runtime, artifactFileName);
       case Artifact.constFinder:
       case Artifact.flutterFramework:
@@ -768,7 +769,7 @@ class CachedArtifacts implements Artifacts {
         return _cache
             .getArtifactDirectory('engine')
             .childDirectory(_enginePlatformDirectoryName(platform))
-            .childFile(artifact.getFileName(_platform, mode)!)
+            .childFile(artifact.getFileName(_platform, mode))
             .path;
       case Artifact.flutterFramework:
       case Artifact.flutterFrameworkDsym:
@@ -856,7 +857,7 @@ Directory _getIosFlutterFrameworkPlatformDirectory(
 ) {
   final Directory xcframeworkDirectory = fileSystem
       .directory(engineDirectory)
-      .childDirectory(Artifact.flutterXcframework.getFileName(hostPlatform)!);
+      .childDirectory(Artifact.flutterXcframework.getFileName(hostPlatform));
 
   if (!xcframeworkDirectory.existsSync()) {
     throwToolExit(
@@ -894,7 +895,7 @@ String _getIosFrameworkPath(
     fileSystem,
     hostPlatform,
   );
-  return platformDir.childDirectory(Artifact.flutterFramework.getFileName(hostPlatform)!).path;
+  return platformDir.childDirectory(Artifact.flutterFramework.getFileName(hostPlatform)).path;
 }
 
 /// Returns the path to Flutter.framework.dSYM.
@@ -912,7 +913,7 @@ String _getIosFrameworkDsymPath(
   );
   return platformDir
       .childDirectory('dSYMs')
-      .childDirectory(Artifact.flutterFrameworkDsym.getFileName(hostPlatform)!)
+      .childDirectory(Artifact.flutterFrameworkDsym.getFileName(hostPlatform))
       .path;
 }
 
@@ -929,7 +930,7 @@ Directory _getMacOSFrameworkPlatformDirectory(
 ) {
   final Directory xcframeworkDirectory = fileSystem
       .directory(engineDirectory)
-      .childDirectory(Artifact.flutterMacOSXcframework.getFileName(hostPlatform)!);
+      .childDirectory(Artifact.flutterMacOSXcframework.getFileName(hostPlatform));
 
   if (!xcframeworkDirectory.existsSync()) {
     throwToolExit(
@@ -961,7 +962,7 @@ String _getMacOSFrameworkPath(
     hostPlatform,
   );
   return platformDirectory
-      .childDirectory(Artifact.flutterMacOSFramework.getFileName(hostPlatform)!)
+      .childDirectory(Artifact.flutterMacOSFramework.getFileName(hostPlatform))
       .path;
 }
 
@@ -978,7 +979,7 @@ String _getMacOSFrameworkDsymPath(
   );
   return platformDirectory
       .childDirectory('dSYMs')
-      .childDirectory(Artifact.flutterMacOSFrameworkDsym.getFileName(hostPlatform)!)
+      .childDirectory(Artifact.flutterMacOSFrameworkDsym.getFileName(hostPlatform))
       .path;
 }
 
@@ -1208,7 +1209,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
       'clang_arm64',
       'clang_riscv64',
     ];
-    final String genSnapshotName = artifact.getFileName(_platform)!;
+    final String genSnapshotName = artifact.getFileName(_platform);
     for (final clangDir in clangDirs) {
       final String genSnapshotPath = _fileSystem.path.join(
         localEngineInfo.targetOutPath,
