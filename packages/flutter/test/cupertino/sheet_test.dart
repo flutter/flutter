@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -314,6 +316,98 @@ void main() {
       ),
     );
   });
+
+  testWidgets(
+    'covered sheet does not reveal the root route through its top gap',
+    (WidgetTester tester) async {
+      final GlobalKey scaffoldKey = GlobalKey();
+      const captureKey = ValueKey<String>('capture');
+
+      Future<int> countPixelsWithOnlyRedChannel() async {
+        final TestWidgetsFlutterBinding binding = tester.binding;
+        final ui.Image image = (await binding.runAsync<ui.Image>(
+          () => captureImage(find.byKey(captureKey).evaluate().single),
+        ))!;
+        try {
+          final ByteData bytes = (await binding.runAsync<ByteData?>(
+            () => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba),
+          ))!;
+          var redPixelCount = 0;
+          for (var offset = 0; offset < bytes.lengthInBytes; offset += 4) {
+            if (bytes.getUint8(offset) > 0x00 &&
+                bytes.getUint8(offset + 1) == 0x00 &&
+                bytes.getUint8(offset + 2) == 0x00 &&
+                bytes.getUint8(offset + 3) == 0xFF) {
+              redPixelCount += 1;
+            }
+          }
+          return redPixelCount;
+        } finally {
+          image.dispose();
+        }
+      }
+
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: captureKey,
+          child: CupertinoApp(
+            debugShowCheckedModeBanner: false,
+            home: CupertinoPageScaffold(
+              key: scaffoldKey,
+              backgroundColor: const Color(0xFFFF0000),
+              child: Center(
+                child: CupertinoButton(
+                  onPressed: () {
+                    Navigator.push<void>(
+                      scaffoldKey.currentContext!,
+                      CupertinoSheetRoute<void>(
+                        builder: (BuildContext context) {
+                          return CupertinoPageScaffold(
+                            backgroundColor: const Color(0xFF00FF00),
+                            child: Center(
+                              child: CupertinoButton(
+                                onPressed: () {
+                                  Navigator.push<void>(
+                                    context,
+                                    CupertinoSheetRoute<void>(
+                                      builder: (BuildContext context) {
+                                        return const CupertinoPageScaffold(
+                                          backgroundColor: Color(0xFF0000FF),
+                                          child: Center(child: Text('Page 3')),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                                child: const Text('Push Page 3'),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('Push Page 2'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Push Page 2'));
+      await tester.pumpAndSettle();
+
+      expect(await countPixelsWithOnlyRedChannel(), greaterThan(0));
+
+      await tester.tap(find.text('Push Page 3'));
+      await tester.pumpAndSettle();
+
+      expect(await countPixelsWithOnlyRedChannel(), 0);
+    },
+    // [intended] Test relies on captureImage, unsupported on web.
+    skip: !canCaptureImage,
+  );
 
   testWidgets('by default showCupertinoSheet does not enable nested navigation', (
     WidgetTester tester,
