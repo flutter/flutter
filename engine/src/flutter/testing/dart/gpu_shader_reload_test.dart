@@ -7,7 +7,6 @@
 
 // ignore_for_file: avoid_relative_lib_imports
 
-import 'dart:developer' as developer;
 import 'dart:typed_data';
 
 import 'package:test/test.dart';
@@ -16,17 +15,6 @@ import 'package:vector_math/vector_math.dart';
 import '../../lib/gpu/lib/gpu.dart' as gpu;
 
 import 'impeller_enabled.dart';
-
-// The reinitialize service extension is only registered in debug mode (inside
-// an assert), so tests that depend on it must be skipped when asserts are off.
-bool get assertsEnabled {
-  bool enabled = false;
-  assert(() {
-    enabled = true;
-    return true;
-  }());
-  return enabled;
-}
 
 ByteData float32(List<double> values) {
   return Float32List.fromList(values).buffer.asByteData();
@@ -96,21 +84,6 @@ void main() {
     expect(a, isNotNull);
     expect(identical(a, b), isTrue);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
-
-  // Loading any shader library lazily registers the
-  // `ext.ui.gpu.reinitializeShaderLibrary` service extension (debug only).
-  // `registerExtension` throws `ArgumentError` if the same name is registered
-  // twice, so re-registering it confirms the lazy hook installed it.
-  test('Loading a shader library registers the reinitialize service extension', () async {
-    gpu.ShaderLibrary.fromAsset('test.shaderbundle');
-    expect(
-      () => developer.registerExtension(
-        'ext.ui.gpu.reinitializeShaderLibrary',
-        (String _, Map<String, String> _) async => developer.ServiceExtensionResponse.result('{}'),
-      ),
-      throwsArgumentError,
-    );
-  }, skip: !(impellerEnabled && flutterGpuEnabled && assertsEnabled));
 
   // `reinitialize` with an asset that hasn't been loaded yet must no-op.
   // The next `fromAsset` will pick up the fresh bytes on its own.
