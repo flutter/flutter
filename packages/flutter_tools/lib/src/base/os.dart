@@ -622,3 +622,6 @@ enum HostPlatform {
   final String cliName;
   final String platformName;
 }
+
+@Deprecated('Use HostPlatform.cliName instead')
+String getNameForHostPlatform(HostPlatform platform) => platform.cliName;

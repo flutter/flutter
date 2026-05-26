@@ -578,10 +578,7 @@ void main() {
       final Event event = fakeAnalytics.sentEvents.first;
       expect(event.eventName.label, 'hot_runner_info');
       expect(event.eventData['label'], 'reload');
-      expect(
-        event.eventData['targetPlatform'],
-        TargetPlatform.android_arm.getName(),
-      );
+      expect(event.eventData['targetPlatform'], TargetPlatform.android_arm.getName());
     }),
   );
 
@@ -727,10 +724,7 @@ void main() {
       expect(hotRunnerInfoEvents, hasLength(1));
       final Event newEvent = hotRunnerInfoEvents.first;
       expect(newEvent.eventData['label'], 'restart');
-      expect(
-        newEvent.eventData['targetPlatform'],
-        TargetPlatform.android_arm.getName(),
-      );
+      expect(newEvent.eventData['targetPlatform'], TargetPlatform.android_arm.getName());
     }),
   );
 
