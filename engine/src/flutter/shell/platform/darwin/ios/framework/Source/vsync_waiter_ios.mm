@@ -5,7 +5,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient+FML.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient.h"
 
 FLUTTER_ASSERT_ARC
@@ -17,13 +17,31 @@ namespace flutter {
 
 VsyncWaiterIOS::VsyncWaiterIOS(const flutter::TaskRunners& task_runners)
     : VsyncWaiter(task_runners) {
-  auto callback = [this](std::unique_ptr<flutter::FrameTimingsRecorder> recorder) {
-    const fml::TimePoint start_time = recorder->GetVsyncStartTime();
-    const fml::TimePoint target_time = recorder->GetVsyncTargetTime();
+  auto vsyncCallback = ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
+    // Compute delay using the same CACurrentMediaTime() clock.
+    CFTimeInterval delay = CACurrentMediaTime() - startTime;
+    if (delay < 0.0) {
+      delay = 0.0;
+    }
+
+    // Align the start time to the C++ steady_clock used by fml::TimePoint.
+    fml::TimePoint start_time = fml::TimePoint::Now() - fml::TimeDelta::FromSecondsF(delay);
+
+    // Snap to the nearest whole Hz value to avoid floating point errors.
+    CFTimeInterval duration =
+        VsyncWaiterIOS::SnapDuration(targetTime - startTime, max_refresh_rate_);
+
+    // Align target time to the C++ steady_clock used by fml::TimePoint.
+    fml::TimePoint target_time = start_time + fml::TimeDelta::FromSecondsF(duration);
     FireCallback(start_time, target_time, true);
   };
-  client_ = [[FlutterVSyncClient alloc] initWithTaskRunnerPtr:task_runners_.GetUITaskRunner()
-                                                     callback:callback];
+  FlutterFMLTaskRunner* uiTaskRunner =
+      [[FlutterFMLTaskRunner alloc] initWithTaskRunner:task_runners_.GetUITaskRunner()];
+  client_ = [[FlutterVSyncClient alloc]
+                initWithTaskRunner:uiTaskRunner
+      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+                          callback:vsyncCallback];
   max_refresh_rate_ = FlutterDisplayLinkManager.displayRefreshRate;
 }
 
@@ -45,6 +63,15 @@ void VsyncWaiterIOS::AwaitVSync() {
 // |VariableRefreshRateReporter|
 double VsyncWaiterIOS::GetRefreshRate() const {
   return client_.refreshRate;
+}
+
+CFTimeInterval VsyncWaiterIOS::SnapDuration(CFTimeInterval duration, double max_refresh_rate) {
+  if (duration > 0.0) {
+    double roundedRefreshRate = round(1.0 / duration);
+    return 1.0 / roundedRefreshRate;
+  }
+  double fallbackRefreshRate = max_refresh_rate > 0.0 ? max_refresh_rate : 60.0;
+  return 1.0 / fallbackRefreshRate;
 }
 
 }  // namespace flutter

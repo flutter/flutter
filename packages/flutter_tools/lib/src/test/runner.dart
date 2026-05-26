@@ -737,7 +737,8 @@ class SpawnPlugin extends PlatformPlugin {
     globals.logger.printTrace('Started flutter_tester process at pid ${process.pid}');
 
     for (final stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
-      stream.transform<String>(utf8.decoder).listen(globals.stdio.stdoutWrite);
+      // Use permissive decoder for test output which may contain invalid UTF-8
+      stream.transform<String>(utf8AllowMalformed.decoder).listen(globals.stdio.stdoutWrite);
     }
 
     return process.exitCode.then((int exitCode) {
