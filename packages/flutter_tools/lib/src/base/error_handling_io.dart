@@ -439,7 +439,10 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
       platform: _platform,
       failureMessage: 'Flutter failed to delete file at "${delegate.path}"',
       posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
-      ignoreErrorCodes: const <int>[kSystemCodeCannotFindFile, kSystemCodePathNotFound], // enoent, kFileNotFound, kPathNotFound
+      ignoreErrorCodes: const <int>[
+        kSystemCodeCannotFindFile,
+        kSystemCodePathNotFound,
+      ], // enoent, kFileNotFound, kPathNotFound
     );
   }
 
@@ -748,6 +751,7 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       posixPermissionSuggestion: _posixPermissionSuggestion(delegate.path),
     );
   }
+
   @override
   Future<FileStat> stat() async {
     return _run<FileStat>(
@@ -868,7 +872,11 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
       platform: _platform,
       failureMessage: 'Flutter failed to create a link at "${delegate.path}" to "$target"',
       ignoreErrorCodes: _platform.isWindows
-          ? const <int>[kSystemCodeInvalidFunction, kSystemCodeAccessDenied, kSystemCodePrivilegeNotHeld]
+          ? const <int>[
+              kSystemCodeInvalidFunction,
+              kSystemCodeAccessDenied,
+              kSystemCodePrivilegeNotHeld,
+            ]
           : const <int>[],
     );
   }
@@ -880,7 +888,11 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
       platform: _platform,
       failureMessage: 'Flutter failed to create a link at "${delegate.path}" to "$target"',
       ignoreErrorCodes: _platform.isWindows
-          ? const <int>[kSystemCodeInvalidFunction, kSystemCodeAccessDenied, kSystemCodePrivilegeNotHeld]
+          ? const <int>[
+              kSystemCodeInvalidFunction,
+              kSystemCodeAccessDenied,
+              kSystemCodePrivilegeNotHeld,
+            ]
           : const <int>[],
     );
   }
