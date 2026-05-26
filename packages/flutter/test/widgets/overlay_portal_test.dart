@@ -1040,6 +1040,59 @@ void main() {
     verifyTreeIsClean();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/174133.
+  // [Table] defers adopting its render-object children until every row has been
+  // mounted. An [OverlayPortal] cell can mount its overlay child in that window,
+  // before the portal's layout-surrogate render object has been adopted by its
+  // parent.
+  testWidgets('OverlayPortal child inside a TableRow does not crash', (WidgetTester tester) async {
+    // Exercise the pre-mount show path while the layout surrogate is still
+    // waiting to be adopted by its parent.
+    final controller = OverlayPortalController()..show();
+    const overlayKey = Key('overlay-child');
+    late final OverlayEntry overlayEntry;
+    addTearDown(
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Table(
+                  children: <TableRow>[
+                    TableRow(
+                      children: <Widget>[
+                        OverlayPortal(
+                          controller: controller,
+                          overlayChildBuilder: (BuildContext context) => const Align(
+                            alignment: Alignment.topLeft,
+                            child: SizedBox(key: overlayKey, width: 10, height: 10),
+                          ),
+                          child: const SizedBox(width: 10, height: 10),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(overlayKey), findsOneWidget);
+    // Confirm the overlay child actually completed layout. The depth-invariant
+    // restoration must hold for the deferred-layout box to be laid out.
+    expect(tester.getSize(find.byKey(overlayKey)), const Size(10, 10));
+  });
+
   testWidgets('adding/removing overlay child does not redirty overlay more than once', (
     WidgetTester tester,
   ) async {

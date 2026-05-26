@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -954,24 +956,21 @@ Future<void> testMain() async {
       ellipsis: '...',
       maxLines: 1,
     );
-    final style30 = WebTextStyle(
-      foreground: blackPaint,
-      background: whitePaint,
-      fontSize: 30,
-      fontFamily: 'Roboto',
-    );
+    final style30 = WebTextStyle(foreground: blackPaint, background: whitePaint, fontSize: 40);
 
-    {
-      final builder = WebParagraphBuilder(paragraphStyle);
-      builder.pushStyle(style30);
-      builder.addText('This is a long text that should be ellipsized at the end');
-      builder.pop();
-      final WebParagraph paragraph = builder.build();
-      paragraph.layout(const ParagraphConstraints(width: 300));
-      paragraph.paint(canvas, const Offset(100, 100));
-    }
+    final builder = WebParagraphBuilder(paragraphStyle);
+    builder.pushStyle(style30);
+    builder.addText('This is a long text that should be ellipsized at the end');
+    builder.pop();
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 350));
+    paragraph.paint(canvas, const Offset(20, 20));
+
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph.ellipsis_ltr.png', region: region);
+    await matchGoldenFile(
+      'web_paragraph.ellipsis_ltr.png',
+      region: const Rect.fromLTWH(0, 0, 500, 200),
+    );
   });
 
   test('Ellipsis RTL', () async {
@@ -990,25 +989,22 @@ Future<void> testMain() async {
       maxLines: 1,
       textDirection: TextDirection.rtl,
     );
-    final style30 = WebTextStyle(
-      foreground: blackPaint,
-      background: whitePaint,
-      fontSize: 30,
-      fontFamily: 'Roboto',
-    );
+    final style30 = WebTextStyle(foreground: blackPaint, background: whitePaint, fontSize: 40);
 
-    {
-      final builder = WebParagraphBuilder(paragraphStyle);
+    final builder = WebParagraphBuilder(paragraphStyle);
 
-      builder.pushStyle(style30);
-      builder.addText('إنالسيطرةعلىالعالمعبارةقبيحةللغاية-أفضلأنأسميهاتحسينالعالم');
-      builder.pop();
-      final WebParagraph paragraph = builder.build();
-      paragraph.layout(const ParagraphConstraints(width: 300));
-      paragraph.paint(canvas, const Offset(100, 100));
-    }
+    builder.pushStyle(style30);
+    builder.addText('إن السيطرة على العالم عبارة قبيحة للغاية - أفضل أن أسميها تحسين العالم');
+    builder.pop();
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 350));
+    paragraph.paint(canvas, const Offset(20, 20));
+
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph.ellipsis_rtl.png', region: region);
+    await matchGoldenFile(
+      'web_paragraph.ellipsis_rtl.png',
+      region: const Rect.fromLTWH(0, 0, 500, 200),
+    );
   });
 
   test('MaxLines, no ellipsis', () async {
@@ -1214,5 +1210,62 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph.zoom_05.png', region: region);
     EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+  });
+
+  test('paint overflows', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    final canvas = Canvas(recorder, region);
+
+    // canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
+    final blackPaint = Paint()..color = const Color(0xFF000000);
+    final lightbluePaint = Paint()..color = const Color(0xFFDDEEFF);
+    final redPaint = Paint()..color = const Color(0xFFFF0000);
+    final bluePaint = Paint()..color = const Color(0xFF0000FF);
+
+    final paragraphStyle = ParagraphStyle();
+    final style = TextStyle(
+      foreground: blackPaint,
+      background: lightbluePaint,
+      fontSize: 60,
+      fontFamily: 'sans-serif',
+      fontStyle: FontStyle.italic,
+    );
+
+    Paragraph drawParagraph(String text, Offset offset) {
+      final builder = ParagraphBuilder(paragraphStyle);
+      builder.pushStyle(style);
+      builder.addText(text);
+      builder.pop();
+      final Paragraph paragraph = builder.build();
+      paragraph.layout(const ParagraphConstraints(width: double.infinity));
+      final double fullWidth = paragraph.maxIntrinsicWidth;
+      paragraph.layout(ParagraphConstraints(width: fullWidth));
+      canvas.drawParagraph(paragraph, offset);
+
+      final paragraphRect = Rect.fromLTWH(offset.dx, offset.dy, fullWidth, paragraph.height);
+      canvas.drawRect(paragraphRect, redPaint..style = PaintingStyle.stroke);
+
+      final Rect paintRect = (paragraph as WebParagraph).paintBounds.shift(offset);
+      canvas.drawRect(paintRect, bluePaint..style = PaintingStyle.stroke);
+
+      return paragraph;
+    }
+
+    var offset = const Offset(20, 20);
+    final Paragraph paragraph1 = drawParagraph('Top shelf', offset);
+    offset = offset.translate(0.0, paragraph1.height + 20.0);
+    final Paragraph paragraph2 = drawParagraph('no descent', offset);
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile(
+      'web_paragraph.paint_overflows.png',
+      region: Rect.fromLTWH(
+        0,
+        0,
+        offset.dx + math.max(paragraph1.maxIntrinsicWidth, paragraph2.maxIntrinsicWidth) + 20.0,
+        offset.dy + paragraph2.height + 20.0,
+      ),
+    );
   });
 }
