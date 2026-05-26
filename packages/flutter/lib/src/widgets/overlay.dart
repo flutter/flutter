@@ -2491,9 +2491,9 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
   const _DeferredLayout({
     // This widget must not be given a key: we currently do not support
     // reparenting between the overlayChild and child.
-    required Widget child,
+    required Widget super.child,
     this.childIdentifier,
-  }) : super(child: child);
+  });
 
   final Object? childIdentifier;
 
@@ -2573,7 +2573,13 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
 
   @override
   void redepthChildren() {
-    _layoutSurrogate.redepthChild(this);
+    // The layout surrogate can be adopted after this box enters the theater.
+    // Until then, the surrogate has no owner and cannot redepth this child.
+    // Once the surrogate is adopted, its own [redepthChildren] will restore the
+    // depth invariant.
+    if (_layoutSurrogate.attached) {
+      _layoutSurrogate.redepthChild(this);
+    }
     super.redepthChildren();
   }
 

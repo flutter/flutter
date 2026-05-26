@@ -273,7 +273,7 @@
   // Set animation begin value and DisplayLink tracking values.
   CGFloat currentInset = delegate.physicalViewInsetBottom;
   self.keyboardAnimationView.frame = CGRectMake(0, currentInset, 0, 0);
-  self.keyboardAnimationStartTime = fml::TimePoint::Now().ToEpochDelta().ToSeconds();
+  self.keyboardAnimationStartTime = CACurrentMediaTime();
   self.originalViewInsetBottom = currentInset;
 
   // Invalidate old vsync client if old animation is not completed.
