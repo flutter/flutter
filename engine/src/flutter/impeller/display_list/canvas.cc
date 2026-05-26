@@ -30,6 +30,7 @@
 #include "impeller/entity/contents/circle_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/color_source_contents.h"
+#include "impeller/entity/contents/complex_rse_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
@@ -1040,15 +1041,46 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
     auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
         round_superellipse.GetBounds(), round_superellipse.GetRadii());
 
-    auto params = UberSDFParameters::MakeRoundedSuperellipse(
-        /*color=*/paint.color,
-        /*bounds=*/round_superellipse.GetBounds(),
-        /*round_superellipse_params=*/round_superellipse_params,
-        /*stroke=*/paint.GetStroke());
+    if (round_superellipse_params.all_corners_same) {
+      auto params = UberSDFParameters::MakeRoundedSuperellipse(
+          /*color=*/paint.color,
+          /*bounds=*/round_superellipse.GetBounds(),
+          /*round_superellipse_params=*/round_superellipse_params,
+          /*stroke=*/paint.GetStroke());
 
-    AddRenderSDFEntityToCurrentPass(paint, params);
+      AddRenderSDFEntityToCurrentPass(paint, params);
+      return;
+    } else {
+      auto contents = ComplexRoundedSuperellipseContents::Make(
+          /*color=*/paint.color_source ? Color::White() : paint.color,
+          /*bounds=*/round_superellipse.GetBounds(),
+          /*round_superellipse_params=*/round_superellipse_params,
+          /*stroke=*/paint.GetStroke());
 
-    return;
+      const Geometry* geom = contents->GetGeometry();
+
+      if (paint.color_source) {
+        std::shared_ptr<Contents> color_source_contents =
+            paint.CreateContents(renderer_, geom);
+        std::shared_ptr<Contents> final_contents =
+            ColorFilterContents::MakeBlend(
+                BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
+                                    FilterInput::Make(color_source_contents)});
+
+        Paint new_paint = paint;
+        new_paint.color_source = nullptr;
+        AddRenderEntityWithFiltersToCurrentPass(entity, geom, new_paint,
+                                                /*reuse_depth=*/false,
+                                                /*override_contents=*/
+                                                std::move(final_contents));
+      } else {
+        AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
+                                                /*reuse_depth=*/false,
+                                                /*override_contents=*/
+                                                std::move(contents));
+      }
+      return;
+    }
   }
 
   if (paint.style == Paint::Style::kFill) {

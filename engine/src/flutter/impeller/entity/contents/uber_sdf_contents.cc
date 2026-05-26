@@ -32,8 +32,6 @@ Scalar ToShaderType(UberSDFParameters::Type type) {
       return 3.0f;
     case UberSDFParameters::Type::kRoundedSuperellipseSymmetric:
       return 4.0f;
-    case UberSDFParameters::Type::kRoundedSuperellipse:
-      return 5.0f;
   }
 }
 
@@ -80,24 +78,16 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.stroke_join =
       params_.stroke ? ToShaderStrokeJoin(params_.stroke->join) : 0.0f;
   frag_info.aa_pixels = UberSDFParameters::kAntialiasPixels;
-  frag_info.superellipse_degrees_top = params_.superellipse_degrees_top;
-  frag_info.superellipse_degrees_right = params_.superellipse_degrees_right;
-  frag_info.superellipse_semi_axes_top = params_.superellipse_semi_axes_top;
-  frag_info.superellipse_semi_axes_right = params_.superellipse_semi_axes_right;
-  frag_info.angle_spans_top = params_.angle_spans_top;
-  frag_info.angle_spans_right = params_.angle_spans_right;
-  frag_info.octant_offsets_c = params_.octant_offsets_c;
-  frag_info.radii_width = params_.radii_width;
-  frag_info.radii_height = params_.radii_height;
-  frag_info.circle_centers_top_x = params_.circle_centers_top_x;
-  frag_info.circle_centers_top_y = params_.circle_centers_top_y;
-  frag_info.circle_centers_right_x = params_.circle_centers_right_x;
-  frag_info.circle_centers_right_y = params_.circle_centers_right_y;
-  frag_info.superellipse_scales_x = params_.superellipse_scales_x;
-  frag_info.superellipse_scales_y = params_.superellipse_scales_y;
-  frag_info.quadrant_centers_x = params_.quadrant_centers_x;
-  frag_info.quadrant_centers_y = params_.quadrant_centers_y;
-  frag_info.quadrant_splits = params_.quadrant_splits;
+  frag_info.superellipse_degree = params_.superellipse_degree;
+  frag_info.superellipse_semi_axis = params_.superellipse_semi_axis;
+  frag_info.angle_span = params_.angle_span;
+  frag_info.octant_offset_c = params_.octant_offset_c;
+  frag_info.radius = params_.radius;
+  frag_info.circle_center_top = params_.circle_center_top;
+  frag_info.circle_center_right = params_.circle_center_right;
+  frag_info.superellipse_scale = params_.superellipse_scale;
+  frag_info.quadrant_center = params_.quadrant_center;
+  frag_info.radii = params_.radii;
 
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);

@@ -7,6 +7,9 @@ precision mediump float;
 #include <impeller/color.glsl>
 #include <impeller/types.glsl>
 
+#include "sdf_functions.glsl"
+#include "sdf_utils.glsl"
+
 uniform FragInfo {
   vec4 color;
   vec2 center;
@@ -16,34 +19,22 @@ uniform FragInfo {
   float aa_pixels;
   float stroked;
   float type;
-  vec4 superellipse_degrees_top;
-  vec4 superellipse_degrees_right;
-  vec4 superellipse_semi_axes_top;
-  vec4 superellipse_semi_axes_right;
-  vec4 angle_spans_top;
-  vec4 angle_spans_right;
-  vec4 octant_offsets_c;
-  vec4 radii_width;
-  vec4 radii_height;
-  vec4 circle_centers_top_x;
-  vec4 circle_centers_top_y;
-  vec4 circle_centers_right_x;
-  vec4 circle_centers_right_y;
-  vec4 superellipse_scales_x;
-  vec4 superellipse_scales_y;
-  vec4 quadrant_centers_x;
-  vec4 quadrant_centers_y;
-  vec4 quadrant_splits;
+  vec2 superellipse_degree;
+  vec2 superellipse_semi_axis;
+  vec2 angle_span;
+  float octant_offset_c;
+  vec2 radius;
+  vec2 circle_center_top;
+  vec2 circle_center_right;
+  vec2 superellipse_scale;
+  vec2 quadrant_center;
+  vec4 radii;
 }
 frag_info;
 
 out vec4 frag_color;
 
 highp in vec2 v_position;
-
-const float PI = 3.14159265;
-const float TWO_PI = 6.28318531;
-const float PI_OVER_FOUR = 0.78539816;
 
 float distanceFromCircle(vec2 p, float radius) {
   return length(p) - radius;
@@ -54,367 +45,19 @@ float distanceFromRect(vec2 p, vec2 b) {
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 }
 
-// SDF for a superellipse defined by (x/a)^n + (y/b)^n = 1
-//
-// `p` is the coordinate of the point relative to the center of the superellipse
-// normalized by the length of the ellipse semi-axes (a, b)
-// `n` is the exponent of the superellipse
-//
-// https://iquilezles.org/articles/ellipsedist/
-//
-// The MIT License
-// Copyright © 2015 Inigo Quilez
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions: The above copyright
-// notice and this permission notice shall be included in all copies or
-// substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS",
-// WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-// TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
-// FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
-// THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-// https://www.youtube.com/c/InigoQuilez
-// https://iquilezles.org
-
-float sdSuperellipse(vec2 p, float n) {
-  // symmetries
-  p = abs(p);
-  if (p.y > p.x)
-    p = p.yx;
-
-  n = 2.0 / n;  // note the remapping in order to match the implicit versions
-
-  float xa = 0.0, xb = TWO_PI / 8.0;
-  for (int i = 0; i < 6; i++) {
-    float x = 0.5 * (xa + xb);
-    float c = cos(x);
-    float s = sin(x);
-    float cn = pow(c, n);
-    float sn = pow(s, n);
-    float y = (p.x - cn) * cn * s * s - (p.y - sn) * sn * c * c;
-
-    if (y < 0.0)
-      xa = x;
-    else
-      xb = x;
-  }
-  // compute distance
-  vec2 qa = pow(vec2(cos(xa), sin(xa)), vec2(n));
-  vec2 qb = pow(vec2(cos(xb), sin(xb)), vec2(n));
-  vec2 pa = p - qa, ba = qb - qa;
-  float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
-  return length(pa - ba * h) * sign(pa.x * ba.y - pa.y * ba.x);
-}
-
-float getQuadrantDistance(vec2 p,
-                          float se_degree_top,
-                          float se_degree_right,
-                          float se_a_top,
-                          float se_a_right,
-                          float angle_span_top,
-                          float angle_span_right,
-                          float c,
-                          float radius_top,
-                          float radius_right,
-                          vec2 circle_center_top,
-                          vec2 circle_center_right,
-                          vec2 scale,
-                          vec2 q_center,
-                          int quadrant_index) {
-  vec2 q_sign = vec2(1.0);
-  if (quadrant_index == 0)
-    q_sign = vec2(1.0, 1.0);
-  else if (quadrant_index == 1)
-    q_sign = vec2(1.0, -1.0);
-  else if (quadrant_index == 2)
-    q_sign = vec2(-1.0, 1.0);
-  else
-    q_sign = vec2(-1.0, -1.0);
-
-  // Transform the point into the quadrant's local space
-  vec2 p_local = (p - q_center) * q_sign;
-
-  // Clamp the point to positive values - this avoids issues with the sdf
-  // calculations below. This also means that interior distances for this
-  // function are not totally accurate.
-  vec2 p_clamped = max(p_local, 0.0);
-
-  // For points that we clamped, return an approximate interior distance
-  vec2 extents = vec2(scale.x * se_a_top, scale.y * se_a_right);
-  vec2 d_rect = p_local - extents;
-  float dist_rect_local =
-      length(max(d_rect, 0.0)) + min(max(d_rect.x, d_rect.y), 0.0);
-
-  if (p_local.x <= 0.0 || p_local.y <= 0.0) {
-    return dist_rect_local;
-  }
-
-  // Map p in to a square.
-  vec2 p_norm = p_clamped / scale;
-
-  // Declare all RSE params for a single octant.
-  float se_degree;
-  float span;
-  float radius;
-  vec2 circle_center;
-  float axis_length;
-
-  // 'p_norm' in the coordinate system of the octant.
-  vec2 p_oct;
-
-  // We split the quadrant along the diagonal of the transition (p_norm.y + c ==
-  // p_norm.x). This allows us to grab the correct set of parameters for the
-  // "top" and "right" halves of the corner.
-  if (p_norm.y + c > p_norm.x) {
-    p_oct = p_norm + vec2(0.0, c);
-    se_degree = se_degree_top;
-    span = angle_span_top;
-    radius = radius_top;
-    circle_center = circle_center_top;
-    axis_length = se_a_top;
-  } else {
-    p_oct = p_norm.yx - vec2(0.0, c);
-    se_degree = se_degree_right;
-    span = angle_span_right;
-    radius = radius_right;
-    circle_center = circle_center_right;
-    axis_length = se_a_right;
-  }
-
-  // Move the point to the corner circle's coordinate system.
-  vec2 p_rel = p_oct - circle_center;
-  // Grab the angle offset of the point.
-  float theta = atan(p_rel.y, p_rel.x);
-
-  // The angular distance between the point and the 45 degree midline.
-  float d_theta = theta - PI_OVER_FOUR;
-  d_theta = mod(d_theta + PI, TWO_PI) - PI;
-
-  float dist_raw;
-  vec2 grad_oct;
-
-  // If the point is within the span of the corner circle's arc,
-  // use a circle SDF.
-  // This works because the normals of the circular and superelliptical sections
-  // agree at the transition angle, the total RSE curve is continuous and
-  // the closest point on a continuous curve to a point lies along the normal.
-
-  // We also compute the gradient of the distance function for normalization.
-  if (abs(d_theta) < abs(span)) {
-    dist_raw = distanceFromCircle(p_rel, radius);
-    grad_oct = normalize(p_rel);
-  } else {
-    dist_raw = sdSuperellipse(p_oct / axis_length, se_degree) * axis_length;
-    // Clamp the coordinate to avoid division by zero
-    vec2 p_oct_clamped = max(p_oct, vec2(0.001));
-    float max_p = max(p_oct_clamped.x, p_oct_clamped.y);
-    vec2 p_safe = p_oct_clamped / max_p;
-    // Approximation of the gradient
-    grad_oct = normalize(pow(p_safe, vec2(se_degree - 1.0)));
-  }
-
-  if (p_norm.y + c <= p_norm.x) {
-    grad_oct = grad_oct.yx;
-  }
-
-  // Divide the distance by the length of the gradient.
-  // This ensures that the resulting distance has a gradient magnitude of 1
-  // everywhere, allowing to be mixed cleanly with other SDFs.
-  float corner_dist = dist_raw / length(grad_oct / scale);
-
-  return max(corner_dist, dist_rect_local);
-}
-
-float distanceFromRoundedSuperellipse(vec2 p,
-                                      vec4 quadrant_splits,
-                                      vec2 size,
-                                      vec4 superellipse_degrees_top,
-                                      vec4 superellipse_degrees_right,
-                                      vec4 superellipse_semi_axes_top,
-                                      vec4 superellipse_semi_axes_right,
-                                      vec4 angle_spans_top,
-                                      vec4 angle_spans_right,
-                                      vec4 octant_offsets_c,
-                                      vec4 radii_width,
-                                      vec4 radii_height,
-                                      vec4 circle_centers_top_x,
-                                      vec4 circle_centers_top_y,
-                                      vec4 circle_centers_right_x,
-                                      vec4 circle_centers_right_y,
-                                      vec4 superellipse_scales_x,
-                                      vec4 superellipse_scales_y,
-                                      vec4 quadrant_centers_x,
-                                      vec4 quadrant_centers_y) {
-  vec2 T = vec2(quadrant_splits.x, -size.y);
-  vec2 R = vec2(size.x, quadrant_splits.w);
-  vec2 B = vec2(quadrant_splits.y, size.y);
-  vec2 L = vec2(-size.x, quadrant_splits.z);
-
-  // Grab the 2d cross products between p and the split points.
-  // Imagine drawing a line L from the center of the shape to each split point,
-  // p x L tells us whether p is clockwise or counterclockwise relative to L.
-  float cT = T.x * p.y - T.y * p.x;
-  float cR = R.x * p.y - R.y * p.x;
-  float cB = B.x * p.y - B.y * p.x;
-  float cL = L.x * p.y - L.y * p.x;
-
-  int quadrant_index = 0;
-  // cR = p x R <= 0 -> p is counterclockwise relative to R.
-  // cT = p x T > 0 -> p is clockwise relative to T.
-  // If p is clockwise relative to T and counterclockwise relative to R,
-  // p must lie in the TL quadrant.
-  // If cT = p x T == 0, p is parallel to T, which can misidentify points in the
-  // BR quadrant.
-
-  if ((cR < 0.0 || cR == 0.0 && p.x > 0.0) &&
-      (cT > 0.0 || cT == 0.0 && p.x > 0.0)) {
-    quadrant_index = 1;  // TR
-  } else if ((cB < 0.0 || cB == 0.0 && p.x > 0.0) &&
-             (cR > 0.0 || cR == 0.0 && p.x > 0.0)) {
-    quadrant_index = 0;  // BR
-  } else if (cB >= 0.0 && cL <= 0.0) {
-    quadrant_index = 2;  // BL
-  } else {
-    quadrant_index = 3;  // TL
-  }
-
-  float se_degree_top = superellipse_degrees_top[quadrant_index];
-  float se_degree_right = superellipse_degrees_right[quadrant_index];
-  float se_a_top = superellipse_semi_axes_top[quadrant_index];
-  float se_a_right = superellipse_semi_axes_right[quadrant_index];
-  float angle_span_top = angle_spans_top[quadrant_index];
-  float angle_span_right = angle_spans_right[quadrant_index];
-  float c = octant_offsets_c[quadrant_index];
-  float radius_top = radii_width[quadrant_index];
-  float radius_right = radii_height[quadrant_index];
-
-  vec2 circle_center_top = vec2(circle_centers_top_x[quadrant_index],
-                                circle_centers_top_y[quadrant_index]);
-  vec2 circle_center_right = vec2(circle_centers_right_x[quadrant_index],
-                                  circle_centers_right_y[quadrant_index]);
-
-  vec2 scale = vec2(superellipse_scales_x[quadrant_index],
-                    superellipse_scales_y[quadrant_index]);
-
-  vec2 q_center = vec2(quadrant_centers_x[quadrant_index],
-                       quadrant_centers_y[quadrant_index]);
-
-  return getQuadrantDistance(
-      p, se_degree_top, se_degree_right, se_a_top, se_a_right, angle_span_top,
-      angle_span_right, c, radius_top, radius_right, circle_center_top,
-      circle_center_right, scale, q_center, quadrant_index);
-}
-// Define an ellipse as q(w) = (a*cos(w), b*sin(w)), and p = (x, y) on the
-// plane. Let q(w0) be the closest point on q to p, then q(w0) - p is tangent to
-// q(w0), and (q(w0) - p) dot q'(w0) = 0. This function uses the Newton-Raphson
-// method to find q(w0).
-//
-// `p` is the coordinate of the point relative to the center of the oval
-// `ab` is the extent of the oval from the center to the x and y axis
-//
-// https://iquilezles.org/articles/ellipsedist/
-//
-// The MIT License
-// Copyright © 2015 Inigo Quilez
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions: The above copyright
-// notice and this permission notice shall be included in all copies or
-// substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS",
-// WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-// TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
-// FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
-// THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-// https://www.youtube.com/c/InigoQuilez
-// https://iquilezles.org
-
 float distanceFromOval(vec2 p, vec2 ab) {
-  // The ellipse is symmetric along both axes, do the calculation in the upper
-  // right quadrant.
   p = abs(p);
-
-  // Initial guess for w0. Determine whether q is closer to the top of the
-  // ellipse or closer to the righthand side. Use the top (0) or righthand side
-  // (pi/2) as the initial guess for w0.
   vec2 q = ab * (p - ab);
   float w = (q.x < q.y) ? 1.570796327 : 0.0;
   for (int i = 0; i < 5; i++) {
     vec2 cs = vec2(cos(w), sin(w));
-
-    // u = q(w) = (a*cos(w), b*sin(w))
     vec2 u = ab * vec2(cs.x, cs.y);
-
-    // v = q'(w) = (a*-sin(w), b*cos(w))
     vec2 v = ab * vec2(-cs.y, cs.x);
-
-    // Newton-Raphson update step, w_n = w_n-1 + f(w_n-1)/f'(w_n-1)
-    // In this case f(w) = (p - q(w)) dot q'(w) = (p - u) dot v
     w = w + dot(p - u, v) / (dot(p - u, u) + dot(v, v));
   }
-
-  // Compute final point and distance
   float d = length(p - ab * vec2(cos(w), sin(w)));
-
-  // Return signed distance.
-  // p is outside the ellipse if (p.x/a)^2 + (p.y/b)^2 > 0
   return (dot(p / ab, p / ab) > 1.0) ? d : -d;
 }
-
-float distanceFromChamferRect(vec2 p, vec2 b, float chamfer) {
-  vec2 d = abs(p) - b;
-
-  d = (d.y > d.x) ? d.yx : d.xy;
-  d.y += chamfer;
-
-  const float k = 1.0 - sqrt(2.0);
-  if (d.y < 0.0 && d.y + d.x * k < 0.0) {
-    return d.x;
-  }
-
-  if (d.x < d.y) {
-    return (d.x + d.y) * sqrt(0.5);
-  }
-
-  return length(d);
-}
-
-// Exact math for rounded rect.
-//
-// `p` is position relative to the center of the shape.
-// `b` is the size of box, .x is the distance between center and left/right, .y
-// is the distance between center and top/bottom. `r` is radii for each corner
-// in order [bottom_right, top_right, bottom_left, top_left].
-//
-// See https://iquilezles.org/articles/distfunctions2d/
-//
-// The MIT License
-// Copyright © 2015 Inigo Quilez
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions: The above copyright
-// notice and this permission notice shall be included in all copies or
-// substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS",
-// WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-// TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
-// FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
-// THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-// https://www.youtube.com/c/InigoQuilez
-// https://iquilezles.org
 
 float distanceFromRoundedRect(in vec2 p, in vec2 b, in vec4 r) {
   r.xy = (p.x > 0.0) ? r.xy : r.zw;
@@ -423,109 +66,115 @@ float distanceFromRoundedRect(in vec2 p, in vec2 b, in vec4 r) {
   return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - r.x;
 }
 
-// Returns the pixel size for the given SDF value.
-//
-// This is the size of a pixel at the current fragment, measured in the
-// direction perpendicular to the SDF's shape.
-float pixelSize(float sdf) {
-  // Gradient vector of the SDF at point p. Points in the direction of steepest
-  // increase away from SDF's shape. At the edges of the shape, this is
-  // perpendicular to the edge.
-  //
-  // The x and y magnitudes of the gradient are determined by the dFdx and dFdy
-  // of the SDF value. dFdx and dFdy return the change of a value in the x and y
-  // direction per screen-space unit (physical pixel). So this gradient
-  // is the change in the SDF, at point p, in local space units per pixel.
-  vec2 gradient = vec2(dFdx(sdf), dFdy(sdf));
-
-  // The length of the gradient vector is how fast the SDF changes per
-  // screen-space pixel distance. In other words, it is the size of a pixel
-  // measured in the units of the SDF calculation.
-  //
-  // In local space, the SDF always increases by 1 in the gradient's direction
-  // per unit distance. That's the definition of an SDF: it is the distance to
-  // the closest point of the shape. But in terms of screen-space, the SDF may
-  // increase by a different amount than 1 per unit distance (in screen-space
-  // units, i.e. physical pixels), due to scales/skews/rotations.
-  //
-  // As an example, consider the SDF of an unscaled/unskewed circle centered at
-  // the origin. The gradient is vec2(1.0, 0.0) for points along the positive x
-  // axis[^1]: for every one pixel we move along the positive x axis,
-  // the SDF value increases by 1.0. Now consider the same circle with a
-  // transformation that scales it by 2 along the x axis. With a transformation,
-  // the local space size of the circle remains the same, but the way it maps
-  // onto screen-space pixels is changed. In screen-space the circle is
-  // stretched to be twice as wide as the original circle in the postive and
-  // negative x directions. The gradient for this will be vec2(0.5, 0.0) along
-  // the positive x axis: for every physical pixel we move along the positive x
-  // axis, we move only 0.5 units in the SDF's local space.
-  //
-  // [^1]: In the real world, there would not be a pixel where the gradient
-  // vector for a circle is exactly (1.0, 0.0) due to the way dFdx and dFdy are
-  // approximated from pixel samples. This does not affect the applicability
-  // of this example.
-  return length(gradient);
+float distanceFromChamferRect(vec2 p, vec2 half_size, float chamfer_size) {
+  p = abs(p);
+  float d1 = max(p.x - half_size.x, p.y - half_size.y);
+  float d2 =
+      (p.x + p.y - half_size.x - half_size.y + chamfer_size) * 0.70710678;
+  return max(d1, d2);
 }
 
-float distanceFromSymmetricRoundedSuperellipse(
-    vec2 p,
-    vec4 superellipse_degrees_top,
-    vec4 superellipse_degrees_right,
-    vec4 superellipse_semi_axes_top,
-    vec4 superellipse_semi_axes_right,
-    vec4 angle_spans_top,
-    vec4 angle_spans_right,
-    vec4 octant_offsets_c,
-    vec4 radii_width,
-    vec4 radii_height,
-    vec4 circle_centers_top_x,
-    vec4 circle_centers_top_y,
-    vec4 circle_centers_right_x,
-    vec4 circle_centers_right_y,
-    vec4 superellipse_scales_x,
-    vec4 superellipse_scales_y,
-    vec4 quadrant_centers_x,
-    vec4 quadrant_centers_y) {
+float getQuadrantDistanceSymmetric(vec2 p,
+                                   vec2 se_degree,
+                                   vec2 se_a,
+                                   vec2 angle_span,
+                                   float c,
+                                   vec2 radius,
+                                   vec2 circle_center_top,
+                                   vec2 circle_center_right,
+                                   vec2 scale,
+                                   vec2 q_center) {
+  vec2 p_local = p - q_center;
+  vec2 p_clamped = max(p_local, 0.0);
+
+  vec2 extents = vec2(scale.x * se_a.x, scale.y * se_a.y);
+  vec2 d_rect = p_local - extents;
+  float dist_rect_local =
+      length(max(d_rect, 0.0)) + min(max(d_rect.x, d_rect.y), 0.0);
+
+  if (p_local.x <= 0.0 || p_local.y <= 0.0) {
+    return dist_rect_local;
+  }
+
+  vec2 p_norm = p_clamped / scale;
+
+  float se_d;
+  float span;
+  float r;
+  vec2 circle_center;
+  float axis_length;
+
+  vec2 p_oct;
+
+  if (p_norm.y + c > p_norm.x) {
+    p_oct = p_norm + vec2(0.0, c);
+    se_d = se_degree.x;
+    span = angle_span.x;
+    r = radius.x;
+    circle_center = circle_center_top;
+    axis_length = se_a.x;
+  } else {
+    p_oct = p_norm.yx - vec2(0.0, c);
+    se_d = se_degree.y;
+    span = angle_span.y;
+    r = radius.y;
+    circle_center = circle_center_right;
+    axis_length = se_a.y;
+  }
+
+  vec2 p_rel = p_oct - circle_center;
+  float theta = atan(p_rel.y, p_rel.x);
+
+  float d_theta = theta - PI_OVER_FOUR;
+  d_theta = mod(d_theta + PI, TWO_PI) - PI;
+
+  float dist_raw;
+  vec2 grad_oct;
+
+  if (abs(d_theta) < abs(span)) {
+    dist_raw = distanceFromCircle(p_rel, r);
+    grad_oct = normalize(p_rel);
+  } else {
+    dist_raw = sdSuperellipse(p_oct / axis_length, se_d) * axis_length;
+    vec2 p_oct_clamped = max(p_oct, vec2(0.001));
+    float max_p = max(p_oct_clamped.x, p_oct_clamped.y);
+    vec2 p_safe = p_oct_clamped / max_p;
+    grad_oct = normalize(pow(p_safe, vec2(se_d - 1.0)));
+  }
+
+  if (p_norm.y + c <= p_norm.x) {
+    grad_oct = grad_oct.yx;
+  }
+
+  float corner_dist = dist_raw / length(grad_oct / scale);
+
+  return max(dist_rect_local, corner_dist);
+}
+
+float distanceFromSymmetricRoundedSuperellipse(vec2 p,
+                                               vec2 superellipse_degree,
+                                               vec2 superellipse_semi_axis,
+                                               vec2 angle_span,
+                                               float octant_offset_c,
+                                               vec2 radius,
+                                               vec2 circle_center_top,
+                                               vec2 circle_center_right,
+                                               vec2 superellipse_scale,
+                                               vec2 quadrant_center) {
   // Fold the pixel into the Top-Right quadrant (x > 0, y < 0)
   vec2 p_folded = vec2(abs(p.x), -abs(p.y));
 
-  // The Top-Right quadrant is index 1
-  int quadrant_index = 1;
-
-  float se_degree_top = superellipse_degrees_top[quadrant_index];
-  float se_degree_right = superellipse_degrees_right[quadrant_index];
-  float se_a_top = superellipse_semi_axes_top[quadrant_index];
-  float se_a_right = superellipse_semi_axes_right[quadrant_index];
-  float angle_span_top = angle_spans_top[quadrant_index];
-  float angle_span_right = angle_spans_right[quadrant_index];
-  float c = octant_offsets_c[quadrant_index];
-  float radius_top = radii_width[quadrant_index];
-  float radius_right = radii_height[quadrant_index];
-
-  vec2 circle_center_top = vec2(circle_centers_top_x[quadrant_index],
-                                circle_centers_top_y[quadrant_index]);
-  vec2 circle_center_right = vec2(circle_centers_right_x[quadrant_index],
-                                  circle_centers_right_y[quadrant_index]);
-
-  vec2 scale = vec2(superellipse_scales_x[quadrant_index],
-                    superellipse_scales_y[quadrant_index]);
-
-  vec2 q_center = vec2(quadrant_centers_x[quadrant_index],
-                       quadrant_centers_y[quadrant_index]);
-
-  return getQuadrantDistance(
-      p_folded, se_degree_top, se_degree_right, se_a_top, se_a_right,
-      angle_span_top, angle_span_right, c, radius_top, radius_right,
-      circle_center_top, circle_center_right, scale, q_center, quadrant_index);
+  return getQuadrantDistanceSymmetric(
+      p_folded, superellipse_degree, superellipse_semi_axis, angle_span,
+      octant_offset_c, radius, circle_center_top, circle_center_right,
+      superellipse_scale, quadrant_center);
 }
 
-// Computes the SDF value and pixel size for a filled shape.
-//
-// `p` is position relative to the center of the shape.
-//
-// Returns a vec2 with:
-//   x: The SDF value at `p`.
-//   y: The pixel size at `p`.
+float pixelSize(float sdf) {
+  vec2 gradient = vec2(dFdx(sdf), dFdy(sdf));
+  return length(gradient);
+}
+
 vec2 filledSDF(vec2 p) {
   float sdf;
   if (frag_info.type < 0.5) {  // Circle
@@ -535,86 +184,41 @@ vec2 filledSDF(vec2 p) {
   } else if (frag_info.type < 2.5) {  // Oval
     sdf = distanceFromOval(p, frag_info.size);
   } else if (frag_info.type < 3.5) {  // Rounded Rect
-    sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii_width);
-  } else if (frag_info.type < 4.5) {  // Symmetric Rounded Superellipse
+    sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
+  } else {  // Symmetric Rounded Superellipse
     sdf = distanceFromSymmetricRoundedSuperellipse(
-        p, frag_info.superellipse_degrees_top,
-        frag_info.superellipse_degrees_right,
-        frag_info.superellipse_semi_axes_top,
-        frag_info.superellipse_semi_axes_right, frag_info.angle_spans_top,
-        frag_info.angle_spans_right, frag_info.octant_offsets_c,
-        frag_info.radii_width, frag_info.radii_height,
-        frag_info.circle_centers_top_x, frag_info.circle_centers_top_y,
-        frag_info.circle_centers_right_x, frag_info.circle_centers_right_y,
-        frag_info.superellipse_scales_x, frag_info.superellipse_scales_y,
-        frag_info.quadrant_centers_x, frag_info.quadrant_centers_y);
-  } else {  // Asymmetric Rounded Superellipse
-    sdf = distanceFromRoundedSuperellipse(
-        p, frag_info.quadrant_splits, frag_info.size,
-        frag_info.superellipse_degrees_top,
-        frag_info.superellipse_degrees_right,
-        frag_info.superellipse_semi_axes_top,
-        frag_info.superellipse_semi_axes_right, frag_info.angle_spans_top,
-        frag_info.angle_spans_right, frag_info.octant_offsets_c,
-        frag_info.radii_width, frag_info.radii_height,
-        frag_info.circle_centers_top_x, frag_info.circle_centers_top_y,
-        frag_info.circle_centers_right_x, frag_info.circle_centers_right_y,
-        frag_info.superellipse_scales_x, frag_info.superellipse_scales_y,
-        frag_info.quadrant_centers_x, frag_info.quadrant_centers_y);
+        p, frag_info.superellipse_degree, frag_info.superellipse_semi_axis,
+        frag_info.angle_span, frag_info.octant_offset_c, frag_info.radius,
+        frag_info.circle_center_top, frag_info.circle_center_right,
+        frag_info.superellipse_scale, frag_info.quadrant_center);
   }
   return vec2(sdf, pixelSize(sdf));
 }
 
-// Computes the SDF value and pixel size for a stroked shape.
-//
-// `p` is position relative to the center of the shape.
-//
-// Returns a vec2 with:
-//   x: The SDF value at `p`.
-//   y: The pixel size at `p`.
 vec2 strokedSDF(vec2 p) {
-  // Get the base (filled) SDF for this shape. The filled SDF pixel size is used
-  // to calculate a minimum stroke width, and the filled SDF value is used to
-  // calculate the stroked SDF value for many shapes.
   vec2 base_sdf_and_pixel_size = filledSDF(p);
   float base_sdf = base_sdf_and_pixel_size.x;
   float base_pixel_size = base_sdf_and_pixel_size.y;
 
-  // Stroke width is clamped to be at least the base sdf's pixel size.
   float half_stroke = max(frag_info.stroke_width, base_pixel_size) * 0.5;
 
-  // Some cases need special handling because their stroked SDFs have a
-  // different shape from their base SDFs.
   if (frag_info.type >= 0.5 && frag_info.type < 1.5) {  // Rect
 
     if (frag_info.stroke_join < 0.5) {  // Miter
-      // Outer edge is the SDF for a rect with size expanded by half_stroke.
       float outer = distanceFromRect(p, frag_info.size + half_stroke);
-      // Inner edge is base_sdf's -half_stroke isoline.
       float inner = base_sdf + half_stroke;
       float sdf = max(outer, -inner);
       return vec2(sdf, pixelSize(sdf));
     } else if (frag_info.stroke_join < 1.5) {  // Bevel
-      // Outer edge is the SDF for a rect with size expanded by half_stroke,
-      // with a half_stroke chamfer.
       float outer =
           distanceFromChamferRect(p, frag_info.size + half_stroke, half_stroke);
-      // Inner edge is base_sdf's -half_stroke isoline.
       float inner = base_sdf + half_stroke;
       float sdf = max(outer, -inner);
       return vec2(sdf, pixelSize(sdf));
-    }  // else stroke_join is Round. Fall through to the common case.
+    }
   }
 
-  // For most shapes, the stroked SDF is defined by the +/- half_stroke
-  // isolines of the base SDF. See the "Making shapes annular" section in
-  // https://iquilezles.org/articles/distfunctions2d/.
-  float sdf = abs(base_sdf) - half_stroke;
-  // For these shapes, the stroked pixel size is the same as the base pixel
-  // size. This is because the stroked SDF's gradient has the same magnitudes as
-  // the base SDF's gradient (except for a discontinuity at the center of the
-  // stroke, which does not affect the final render).
-  return vec2(sdf, base_pixel_size);
+  return SDFStroke(base_sdf, base_pixel_size, frag_info.stroke_width);
 }
 
 void main() {
@@ -625,11 +229,7 @@ void main() {
   float sdf = sdf_and_pixel_size.x;
   float pixel_size = sdf_and_pixel_size.y;
 
-  // Anti-aliasing. Fade from alpha 1 to 0 across the edge of the SDF (where it
-  // goes from negative to positive). Fade through distance of half
-  // (pixel_size * aa_pixels) in each direction.
-  float fade_size = pixel_size * frag_info.aa_pixels * 0.5;
-  float alpha = 1.0 - smoothstep(-fade_size, fade_size, sdf);
+  float alpha = SDFAlpha(sdf, pixel_size, frag_info.aa_pixels);
 
   frag_color = vec4(frag_info.color.rgb, frag_info.color.a * alpha);
   frag_color = IPPremultiply(frag_color);
