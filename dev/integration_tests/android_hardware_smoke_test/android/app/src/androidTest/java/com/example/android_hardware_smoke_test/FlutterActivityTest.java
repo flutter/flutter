@@ -91,13 +91,13 @@ public class FlutterActivityTest
   }
 
   @Test(timeout = TEST_TIMEOUT_MS)
-  public void fooTest() {
-    templateTest("fooTest");
+  public void blueRectangleTest() {
+    templateTest("blueRectangleTest");
   }
 
   @Test(timeout = TEST_TIMEOUT_MS)
-  public void barTest() {
-    templateTest("barTest");
+  public void trianglePathTest() {
+    templateTest("trianglePathTest");
   }
 
 

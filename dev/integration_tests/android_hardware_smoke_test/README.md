@@ -82,7 +82,7 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
 * **Command to capture/update reference golden baselines**:
   Running with `UPDATE_GOLDENS=1` writes or overwrites the local PNG baselines under `integration_test/goldens/` on the host.
 
-  To support rendering differences between graphics backends, you can pass the `ANDROID_HARDWARE_SMOKE_TEST_GOLDEN_VARIANT` environment variable to separate Vulkan and OpenGLES baselines (generating `fooTest.vulkan.png` vs `fooTest.opengles.png`):
+  To support rendering differences between graphics backends, you can pass the `ANDROID_HARDWARE_SMOKE_TEST_GOLDEN_VARIANT` environment variable to separate Vulkan and OpenGLES baselines (generating `blueRectangleTest.vulkan.png` vs `blueRectangleTest.opengles.png`):
 
   ```sh
   # Establish/Update Vulkan goldens locally:
@@ -151,8 +151,8 @@ If you prefer to bypass Gradle entirely for custom debugging, you can manually b
 3. **Manually pull the generated snapshot off the device's sandbox**:
    Since the app remains installed during raw `adb` runs, you can copy the rendering result files manually:
    ```sh
-   adb shell "run-as com.example.android_hardware_smoke_test cat cache/results/fooTest.png" \
-     > integration_test/results/fooTest.png
+   adb shell "run-as com.example.android_hardware_smoke_test cat cache/results/blueRectangleTest.png" \
+     > integration_test/results/blueRectangleTest.png
    ```
 
 ---

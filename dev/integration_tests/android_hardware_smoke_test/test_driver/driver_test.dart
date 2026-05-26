@@ -61,11 +61,11 @@ void main() async {
     );
   }
 
-  test("should render and match fooTest golden", () async {
-    await templateTest("fooTest");
+  test("should render and match blueRectangleTest golden", () async {
+    await templateTest("blueRectangleTest");
   }, timeout: Timeout.none);
 
-  test("should render and match barTest golden", () async {
-    await templateTest("barTest");
+  test("should render and match trianglePathTest golden", () async {
+    await templateTest("trianglePathTest");
   }, timeout: Timeout.none);
 }

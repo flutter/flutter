@@ -100,20 +100,23 @@ class MyPainter extends CustomPainter {
   final String message;
   MyPainter({required this.message}) : assert(message.isNotEmpty);
 
-  void renderFooTest(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.red
-      ..strokeWidth = 5
-      ..style = PaintingStyle.stroke;
-    canvas.drawCircle(Offset(40, 40), 20, paint);
-  }
-
-  void renderBarTest(Canvas canvas, Size size) {
+  void renderBlueRectangleTest(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.blue
-      ..strokeWidth = 5
-      ..style = PaintingStyle.stroke;
-    canvas.drawCircle(Offset(80, 70), 30, paint);
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+  }
+
+  void renderTrianglePathTest(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.fill;
+    final path = Path();
+    path.moveTo(size.width / 2, 10);
+    path.lineTo(size.width - 10, size.height - 10);
+    path.lineTo(10, size.height - 10);
+    path.close();
+    canvas.drawPath(path, paint);
   }
 
   void renderDefault(Canvas canvas, Size size) {
@@ -127,11 +130,11 @@ class MyPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     switch (message) {
-      case "fooTest":
-        renderFooTest(canvas, size);
+      case "blueRectangleTest":
+        renderBlueRectangleTest(canvas, size);
         return;
-      case "barTest":
-        renderBarTest(canvas, size);
+      case "trianglePathTest":
+        renderTrianglePathTest(canvas, size);
         return;
       default:
         renderDefault(canvas, size);
