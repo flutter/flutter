@@ -84,9 +84,8 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetMaximumRenderPassAttachmentSize(DeviceMaxTextureSizeSupported(device))
       .SetSupportsExtendedRangeFormats(
           DeviceSupportsExtendedRangeFormats(device))
-      .SetSupportsTextureCompression(
-          CompressedTextureFamily::kBC,
-          DeviceSupportsTextureCompressionBC(device))
+      .SetSupportsTextureCompression(CompressedTextureFamily::kBC,
+                                     DeviceSupportsTextureCompressionBC(device))
       .SetSupportsTextureCompression(
           CompressedTextureFamily::kETC2,
           DeviceSupportsTextureCompressionMobile(device))

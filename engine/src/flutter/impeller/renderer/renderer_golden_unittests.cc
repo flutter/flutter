@@ -114,9 +114,9 @@ TEST_P(RendererGoldenTest, CanRenderBC1CompressedTexture) {
     return {{lo, hi, lo, hi, 0, 0, 0, 0}};
   };
   // RGB565: red, green, blue, white.
-  const std::array<std::array<uint8_t, 8>, 4> blocks = {{
-      bc1_solid_block(0xF800), bc1_solid_block(0x07E0),
-      bc1_solid_block(0x001F), bc1_solid_block(0xFFFF)}};
+  const std::array<std::array<uint8_t, 8>, 4> blocks = {
+      {bc1_solid_block(0xF800), bc1_solid_block(0x07E0),
+       bc1_solid_block(0x001F), bc1_solid_block(0xFFFF)}};
   std::vector<uint8_t> data;
   for (const auto& block : blocks) {
     data.insert(data.end(), block.begin(), block.end());

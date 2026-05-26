@@ -249,9 +249,9 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
                             gles_format->internal_format,  // internal format
                             mip_width,                     // width
                             mip_height,                    // height
-                            0u,                        // border
-                            source.GetRange().length,  // image size
-                            tex_data);                 // data
+                            0u,                            // border
+                            source.GetRange().length,      // image size
+                            tex_data);                     // data
     texture_gles.MarkSliceMipLevelInitialized(slice, mip_level);
     return true;
   }
