@@ -951,6 +951,8 @@ Rasterizer::ScreenshotFormat ToScreenshotFormat(impeller::PixelFormat format) {
     case impeller::PixelFormat::kASTC4x4LDRSRGB:
     case impeller::PixelFormat::kASTC8x8LDR:
     case impeller::PixelFormat::kASTC8x8LDRSRGB:
+    case impeller::PixelFormat::kASTC4x4HDR:
+    case impeller::PixelFormat::kASTC8x8HDR:
       FML_DCHECK(false);
       return Rasterizer::ScreenshotFormat::kUnknown;
     case impeller::PixelFormat::kR8G8B8A8UNormInt:
