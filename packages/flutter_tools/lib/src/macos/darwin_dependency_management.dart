@@ -10,6 +10,7 @@ import '../base/logger.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
+import '../flutter_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
 import 'cocoapods.dart';
@@ -22,14 +23,12 @@ import 'swift_package_manager.dart';
 class DarwinDependencyManagement {
   DarwinDependencyManagement({
     required FlutterProject project,
-    required List<Plugin> plugins,
     required CocoaPods? cocoapods,
     required SwiftPackageManager swiftPackageManager,
     required FileSystem fileSystem,
     required FeatureFlags featureFlags,
     required Analytics analytics,
   }) : _project = project,
-       _plugins = plugins,
        _cocoapods = cocoapods,
        _swiftPackageManager = swiftPackageManager,
        _fileSystem = fileSystem,
@@ -37,7 +36,6 @@ class DarwinDependencyManagement {
        _analytics = analytics;
 
   final FlutterProject _project;
-  final List<Plugin> _plugins;
   final CocoaPods? _cocoapods;
   final SwiftPackageManager _swiftPackageManager;
   final FileSystem _fileSystem;
@@ -56,10 +54,13 @@ class DarwinDependencyManagement {
   /// Swift Package Manager requires a generated Package.swift and certain
   /// settings in the Xcode project's project.pbxproj and xcscheme (done later
   /// before build).
-  Future<void> setUp({required FlutterDarwinPlatform platform}) async {
+  Future<void> setUp({
+    required FlutterDarwinPlatform platform,
+    required List<Plugin> plugins,
+  }) async {
     final XcodeBasedProject xcodeProject = platform.xcodeProject(_project);
     if (xcodeProject.usesSwiftPackageManager) {
-      await _swiftPackageManager.generatePluginsSwiftPackage(_plugins, platform, xcodeProject);
+      await _swiftPackageManager.generatePluginsSwiftPackage(plugins, platform, xcodeProject);
     } else if (xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
       // If Swift Package Manager is not enabled but the project is already
       // integrated for Swift Package Manager, pass no plugins to the generator.
@@ -81,6 +82,7 @@ class DarwinDependencyManagement {
     final (:int totalCount, :int swiftPackageCount, :int podCount) = await _countPluginsPerManager(
       platform: platform,
       xcodeProject: xcodeProject,
+      plugins: plugins,
     );
 
     final bool useCocoapods;
@@ -91,7 +93,7 @@ class DarwinDependencyManagement {
       // is not empty, regardless of if plugins are CocoaPod compatible. This
       // is done because `processPodsIfNeeded` uses `hasPlugins` to determine
       // whether to run.
-      useCocoapods = _plugins.isNotEmpty;
+      useCocoapods = plugins.isNotEmpty;
     }
 
     if (useCocoapods) {
@@ -126,11 +128,12 @@ class DarwinDependencyManagement {
   Future<({int totalCount, int swiftPackageCount, int podCount})> _countPluginsPerManager({
     required FlutterDarwinPlatform platform,
     required XcodeBasedProject xcodeProject,
+    required List<Plugin> plugins,
   }) async {
     var pluginCount = 0;
     var swiftPackageCount = 0;
     var cocoapodCount = 0;
-    for (final Plugin plugin in _plugins) {
+    for (final plugin in plugins) {
       final bool pluginSupportsSwiftPM = plugin.supportSwiftPackageManagerForPlatform(
         _fileSystem,
         platform.name,
@@ -179,7 +182,12 @@ class DarwinDependencyManagement {
 
     final swiftPackageOnlyPlugins = <String>[];
     final cocoapodOnlyPlugins = <String>[];
-    for (final plugin in plugins) {
+    final List<Plugin> filteredPlugins = resolvePluginImplementationsForPlatform(
+      plugins,
+      platform.pluginConfigKey,
+      quiet: true,
+    );
+    for (final plugin in filteredPlugins) {
       final bool pluginSupportsSwiftPM = plugin.supportSwiftPackageManagerForPlatform(
         fileSystem,
         platform.name,
