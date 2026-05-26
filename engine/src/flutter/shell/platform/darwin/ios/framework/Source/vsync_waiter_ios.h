@@ -22,6 +22,19 @@ class VsyncWaiterIOS final : public VsyncWaiter,
   // |VariableRefreshRateReporter|
   double GetRefreshRate() const override;
 
+  // @brief Snaps the duration to the nearest whole Hz value and provides safe
+  //        fallbacks. This ensures we don't introduce frame timing issues due
+  //        to floating point error. e.g.
+  //        59.998, 60.004, 59.995, ... --> 60.000
+  //
+  //        Additionally, guards against divide-by-zero and non-positive
+  //        durations, which can occur on paused/unpaused transitions.
+  //
+  // Visible for testing.
+  static CFTimeInterval SnapDuration(CFTimeInterval duration,
+                                     double max_refresh_rate);
+
+ private:
   // |VsyncWaiter|
   // Made public for testing.
   void AwaitVSync() override;
