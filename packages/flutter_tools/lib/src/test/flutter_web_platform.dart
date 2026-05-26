@@ -74,31 +74,25 @@ class FlutterWebPlatform extends PlatformPlugin {
     required this.webMemoryFS,
     required FlutterProject flutterProject,
     required String flutterTesterBinPath,
-    required FileSystem fileSystem,
-    required Directory buildDirectory,
-    required File testDartJs,
-    required File testHostDartJs,
-    required ChromiumLauncher chromiumLauncher,
-    required Logger logger,
-    required Artifacts? artifacts,
+    required this._fileSystem,
+    required this._buildDirectory,
+    required this._testDartJs,
+    required this._testHostDartJs,
+    required this._chromiumLauncher,
+    required this._logger,
+    required this._artifacts,
     required ProcessManager processManager,
     required this.webRenderer,
     required this.useWasm,
     required this.crossOriginIsolation,
     TestTimeRecorder? testTimeRecorder,
-  }) : _fileSystem = fileSystem,
-       _buildDirectory = buildDirectory,
-       _testDartJs = testDartJs,
-       _testHostDartJs = testHostDartJs,
-       _chromiumLauncher = chromiumLauncher,
-       _logger = logger,
-       _artifacts = artifacts {
+  }) {
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
         .add(
           createDirectoryHandler(
-            fileSystem.directory(
-              fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'),
+            _fileSystem.directory(
+              _fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools'),
             ),
             crossOriginIsolated: crossOriginIsolation,
           ),
@@ -110,7 +104,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_handleTestRequest)
         .add(
           createDirectoryHandler(
-            fileSystem.directory(fileSystem.path.join(fileSystem.currentDirectory.path, 'test')),
+            _fileSystem.directory(_fileSystem.path.join(_fileSystem.currentDirectory.path, 'test')),
             crossOriginIsolated: crossOriginIsolation,
           ),
         )

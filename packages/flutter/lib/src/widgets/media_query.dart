@@ -214,8 +214,8 @@ class MediaQueryData {
       'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
       'This feature was deprecated after v3.12.0-2.0.pre.',
     )
-    double textScaleFactor = 1.0,
-    TextScaler textScaler = _kUnspecifiedTextScaler,
+    this._textScaleFactor = 1.0,
+    this._textScaler = _kUnspecifiedTextScaler,
     this.platformBrightness = Brightness.light,
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
@@ -238,10 +238,8 @@ class MediaQueryData {
     this.wordSpacingOverride,
     this.paragraphSpacingOverride,
     this.displayCornerRadii,
-  }) : _textScaleFactor = textScaleFactor,
-       _textScaler = textScaler,
-       assert(
-         identical(textScaler, _kUnspecifiedTextScaler) || textScaleFactor == 1.0,
+  }) : assert(
+         identical(_textScaler, _kUnspecifiedTextScaler) || _textScaleFactor == 1.0,
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        );
 

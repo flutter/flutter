@@ -532,9 +532,8 @@ class _IndicatorPainter extends CustomPainter {
     this.devicePixelRatio,
     required this.indicatorAnimation,
     required this.textDirection,
-    required _IndicatorPainterNotifier repaint,
-  }) : _repaint = repaint,
-       super(repaint: Listenable.merge(<Listenable?>[controller.animation, repaint])) {
+    required this._repaint,
+  }) : super(repaint: Listenable.merge(<Listenable?>[controller.animation, _repaint])) {
     assert(debugMaybeDispatchCreated('material', '_IndicatorPainter', this));
     if (old != null) {
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);

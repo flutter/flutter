@@ -114,11 +114,10 @@ class OverlayEntry implements Listenable {
   /// call [remove] on the overlay entry itself.
   OverlayEntry({
     required this.builder,
-    bool opaque = false,
-    bool maintainState = false,
+    this._opaque = false,
+    this._maintainState = false,
     this.canSizeOverlay = false,
-  }) : _opaque = opaque,
-       _maintainState = maintainState {
+  }) {
     assert(debugMaybeDispatchCreated('widgets', 'OverlayEntry', this));
   }
 
@@ -1195,15 +1194,12 @@ class _RenderTheater extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, StackParentData>, _RenderTheaterMixin {
   _RenderTheater({
     List<RenderBox>? children,
-    required TextDirection textDirection,
+    required this._textDirection,
     int skipCount = 0,
-    Clip clipBehavior = Clip.hardEdge,
-    required bool alwaysSizeToContent,
+    this._clipBehavior = Clip.hardEdge,
+    required this._alwaysSizeToContent,
   }) : assert(skipCount >= 0),
-       _textDirection = textDirection,
-       _skipCount = skipCount,
-       _clipBehavior = clipBehavior,
-       _alwaysSizeToContent = alwaysSizeToContent {
+       _skipCount = skipCount {
     addAll(children);
   }
 
@@ -1684,7 +1680,7 @@ class _RenderTheater extends RenderBox
 class OverlayPortalController {
   /// Creates an [OverlayPortalController], optionally with a String identifier
   /// `debugLabel`.
-  OverlayPortalController({String? debugLabel}) : _debugLabel = debugLabel;
+  OverlayPortalController({this._debugLabel});
 
   _OverlayPortalState? _attachTarget;
 
@@ -2539,8 +2535,7 @@ class _DeferredLayout extends SingleChildRenderObjectWidget {
 //  like an `Overlay` that has only one entry.
 final class _RenderDeferredLayoutBox extends RenderProxyBox
     with _RenderTheaterMixin, LinkedListEntry<_RenderDeferredLayoutBox> {
-  _RenderDeferredLayoutBox(this._layoutSurrogate, Object? childIdentifier)
-    : _childIdentifier = childIdentifier;
+  _RenderDeferredLayoutBox(this._layoutSurrogate, this._childIdentifier);
 
   StackParentData get stackParentData => parentData! as StackParentData;
   final _RenderLayoutSurrogateProxyBox _layoutSurrogate;

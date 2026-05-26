@@ -1156,14 +1156,13 @@ class CupertinoModalPopupRoute<T> extends PopupRoute<T> {
     required this.builder,
     this.barrierLabel = 'Dismiss',
     this.barrierColor = kCupertinoModalBarrierColor,
-    bool barrierDismissible = true,
-    bool semanticsDismissible = false,
+    this._barrierDismissible = true,
+    this._semanticsDismissible = false,
     super.filter,
     super.settings,
     super.requestFocus,
     this.anchorPoint,
-  }) : _barrierDismissible = barrierDismissible,
-       _semanticsDismissible = semanticsDismissible;
+  });
 
   /// A builder that builds the widget tree for the [CupertinoModalPopupRoute].
   ///

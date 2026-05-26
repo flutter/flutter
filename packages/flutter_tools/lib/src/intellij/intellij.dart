@@ -33,7 +33,7 @@ import '../doctor_validator.dart';
 /// Intellij Flutter plugin's files can be found here:
 ///   https://plugins.jetbrains.com/plugin/9212-flutter/versions/stable
 class IntelliJPlugins {
-  IntelliJPlugins(this.pluginsPath, {required FileSystem fileSystem}) : _fileSystem = fileSystem;
+  IntelliJPlugins(this.pluginsPath, {required this._fileSystem});
 
   final FileSystem _fileSystem;
   final String pluginsPath;

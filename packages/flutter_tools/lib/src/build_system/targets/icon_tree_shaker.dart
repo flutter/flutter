@@ -37,20 +37,16 @@ class IconTreeShaker {
   IconTreeShaker(
     this._environment,
     DevFSStringContent? fontManifest, {
-    required ProcessManager processManager,
-    required Logger logger,
+    required this._processManager,
+    required this._logger,
     required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required TargetPlatform targetPlatform,
-  }) : _processManager = processManager,
-       _logger = logger,
-       _fs = fileSystem,
-       _artifacts = artifacts,
-       _fontManifest = fontManifest?.string,
-       _targetPlatform = targetPlatform {
+    required this._artifacts,
+    required this._targetPlatform,
+  }) : _fs = fileSystem,
+       _fontManifest = fontManifest?.string {
     if (_environment.defines[kIconTreeShakerFlag] == 'true' &&
         _environment.defines[kBuildMode] == 'debug') {
-      logger.printError(
+      _logger.printError(
         'Font subsetting is not supported in debug mode. The '
         '--tree-shake-icons flag will be ignored.',
       );

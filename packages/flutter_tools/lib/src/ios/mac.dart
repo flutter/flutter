@@ -76,13 +76,12 @@ class IMobileDevice {
   IMobileDevice({
     required Artifacts artifacts,
     required Cache cache,
-    required ProcessManager processManager,
+    required this._processManager,
     required Logger logger,
   }) : _idevicesyslogPath = artifacts.getHostArtifact(HostArtifact.idevicesyslog).path,
        _idevicescreenshotPath = artifacts.getHostArtifact(HostArtifact.idevicescreenshot).path,
        _dyLdLibEntry = cache.dyLdLibEntry,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _processManager = processManager;
+       _processUtils = ProcessUtils(logger: logger, processManager: _processManager);
 
   /// Create an [IMobileDevice] for testing.
   factory IMobileDevice.test({required ProcessManager processManager}) {

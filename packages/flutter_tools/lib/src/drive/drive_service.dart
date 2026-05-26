@@ -24,22 +24,15 @@ import 'web_driver_service.dart';
 
 class FlutterDriverFactory {
   FlutterDriverFactory({
-    required ApplicationPackageFactory applicationPackageFactory,
-    required Platform platform,
-    required Logger logger,
-    required Terminal terminal,
-    required OutputPreferences outputPreferences,
-    required ProcessUtils processUtils,
-    required String dartSdkPath,
-    required DevtoolsLauncher devtoolsLauncher,
-  }) : _applicationPackageFactory = applicationPackageFactory,
-       _platform = platform,
-       _logger = logger,
-       _terminal = terminal,
-       _outputPreferences = outputPreferences,
-       _processUtils = processUtils,
-       _dartSdkPath = dartSdkPath,
-       _devtoolsLauncher = devtoolsLauncher;
+    required this._applicationPackageFactory,
+    required this._platform,
+    required this._logger,
+    required this._terminal,
+    required this._outputPreferences,
+    required this._processUtils,
+    required this._dartSdkPath,
+    required this._devtoolsLauncher,
+  });
 
   final ApplicationPackageFactory _applicationPackageFactory;
   final Platform _platform;
@@ -117,20 +110,14 @@ abstract class DriverService {
 /// applications.
 class FlutterDriverService extends DriverService {
   FlutterDriverService({
-    required ApplicationPackageFactory applicationPackageFactory,
-    required Logger logger,
-    required Platform platform,
-    required ProcessUtils processUtils,
-    required String dartSdkPath,
-    required DevtoolsLauncher devtoolsLauncher,
-    @visibleForTesting VMServiceConnector vmServiceConnector = connectToVmService,
-  }) : _applicationPackageFactory = applicationPackageFactory,
-       _logger = logger,
-       _platform = platform,
-       _processUtils = processUtils,
-       _dartSdkPath = dartSdkPath,
-       _vmServiceConnector = vmServiceConnector,
-       _devtoolsLauncher = devtoolsLauncher;
+    required this._applicationPackageFactory,
+    required this._logger,
+    required this._platform,
+    required this._processUtils,
+    required this._dartSdkPath,
+    required this._devtoolsLauncher,
+    @visibleForTesting this._vmServiceConnector = connectToVmService,
+  });
 
   static const _kLaunchAttempts = 3;
 

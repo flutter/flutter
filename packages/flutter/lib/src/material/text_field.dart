@@ -56,9 +56,7 @@ typedef InputCounterWidgetBuilder =
     });
 
 class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
-  _TextFieldSelectionGestureDetectorBuilder({required _TextFieldState state})
-    : _state = state,
-      super(delegate: state);
+  _TextFieldSelectionGestureDetectorBuilder({required this._state}) : super(delegate: _state);
 
   final _TextFieldState _state;
 
@@ -1514,6 +1512,7 @@ class _TextFieldState extends State<TextField>
       autofillConfiguration: autofillConfiguration,
     );
   }
+
   // AutofillClient implementation end.
 
   TextStyle _getInputStyleForState(TextStyle style) {

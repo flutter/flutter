@@ -757,8 +757,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
     super.supportedDevices,
     super.allowedButtonsFilter,
     this.eagerVictoryOnDrag = true,
-  }) : _deadline = kPressTimeout,
-       dragStartBehavior = DragStartBehavior.start;
+  }) : dragStartBehavior = DragStartBehavior.start;
 
   /// Configure the behavior of offsets passed to [onDragStart].
   ///
@@ -896,13 +895,12 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
 
   // Primary pointer being tracked by this recognizer.
   int? _primaryPointer;
-  Timer? _deadlineTimer;
-  // The recognizer will call [onTapDown] after this amount of time has elapsed
+  // The recognizer will call [onTapDown] after [kPressTimeout] has elapsed
   // since starting to track the primary pointer.
   //
   // [onTapDown] will not be called if the primary pointer is
   // accepted, rejected, or all pointers are up or canceled before [_deadline].
-  final Duration _deadline;
+  Timer? _deadlineTimer;
 
   // Drag related state.
   _DragState _dragState = _DragState.ready;
@@ -971,7 +969,7 @@ sealed class BaseTapAndDragGestureRecognizer extends OneSequenceGestureRecognize
       _dragState = _DragState.possible;
       _initialPosition = OffsetPair(global: event.position, local: event.localPosition);
       _currentPosition = _initialPosition;
-      _deadlineTimer = Timer(_deadline, () => _didExceedDeadlineWithEvent(event));
+      _deadlineTimer = Timer(kPressTimeout, () => _didExceedDeadlineWithEvent(event));
     }
   }
 

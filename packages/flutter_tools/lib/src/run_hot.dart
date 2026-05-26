@@ -84,24 +84,18 @@ class HotRunner extends ResidentRunner {
     this.benchmarkMode = false,
     this.applicationBinary,
     this.hostIsIde = false,
-    Logger? logger,
+    this._logger,
     super.projectRootPath,
     super.dillOutputPath,
     super.stayResident,
     super.machine,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-    ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
-    ReassembleHelper reassembleHelper = _defaultReassembleHelper,
-    String? nativeAssetsYamlFile,
-    required Analytics analytics,
+    this._stopwatchFactory = const StopwatchFactory(),
+    this._reloadSourcesHelper = defaultReloadSourcesHelper,
+    this._reassembleHelper = _defaultReassembleHelper,
+    this._nativeAssetsYamlFile,
+    required this._analytics,
     super.dartBuilder,
-  }) : _stopwatchFactory = stopwatchFactory,
-       _reloadSourcesHelper = reloadSourcesHelper,
-       _reassembleHelper = reassembleHelper,
-       _nativeAssetsYamlFile = nativeAssetsYamlFile,
-       _analytics = analytics,
-       _logger = logger,
-       super(hotMode: true);
+  }) : super(hotMode: true);
 
   final StopwatchFactory _stopwatchFactory;
   final ReloadSourcesHelper _reloadSourcesHelper;
@@ -1478,12 +1472,10 @@ class InvalidationResult {
 /// application to determine when they are dirty.
 class ProjectFileInvalidator {
   ProjectFileInvalidator({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _logger = logger;
+    required this._fileSystem,
+    required this._platform,
+    required this._logger,
+  });
 
   final FileSystem _fileSystem;
   final Platform _platform;

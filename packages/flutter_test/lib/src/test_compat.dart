@@ -309,9 +309,8 @@ Future<void> _tearDownForTestFile() async {
 /// so that test files can be run directly. This means that until issue 6943 is
 /// fixed, this must not import `dart:io`.
 class _Reporter {
-  _Reporter({bool color = true, bool printPath = true})
-    : _printPath = printPath,
-      _green = color ? '\u001b[32m' : '',
+  _Reporter({bool color = true})
+    : _green = color ? '\u001b[32m' : '',
       _red = color ? '\u001b[31m' : '',
       _yellow = color ? '\u001b[33m' : '',
       _bold = color ? '\u001b[1m' : '',
@@ -342,7 +341,7 @@ class _Reporter {
   final String _noColor;
 
   /// Whether the path to each test's suite should be printed.
-  final bool _printPath;
+  final bool _printPath = true;
 
   /// A stopwatch that tracks the duration of the full run.
   final Stopwatch _stopwatch = Stopwatch(); // flutter_ignore: stopwatch (see analyze.dart)

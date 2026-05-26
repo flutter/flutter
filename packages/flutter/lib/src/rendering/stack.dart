@@ -378,14 +378,11 @@ class RenderStack extends RenderBox
   /// top left corners.
   RenderStack({
     List<RenderBox>? children,
-    AlignmentGeometry alignment = AlignmentDirectional.topStart,
-    TextDirection? textDirection,
-    StackFit fit = StackFit.loose,
-    Clip clipBehavior = Clip.hardEdge,
-  }) : _alignment = alignment,
-       _textDirection = textDirection,
-       _fit = fit,
-       _clipBehavior = clipBehavior {
+    this._alignment = AlignmentDirectional.topStart,
+    this._textDirection,
+    this._fit = StackFit.loose,
+    this._clipBehavior = Clip.hardEdge,
+  }) {
     addAll(children);
   }
 
@@ -775,8 +772,8 @@ class RenderIndexedStack extends RenderStack {
     super.textDirection,
     super.fit,
     super.clipBehavior,
-    int? index = 0,
-  }) : _index = index;
+    this._index = 0,
+  });
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {

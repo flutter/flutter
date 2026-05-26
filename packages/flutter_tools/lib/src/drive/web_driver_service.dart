@@ -29,18 +29,13 @@ import 'drive_service.dart';
 /// An implementation of the driver service for web debug and release applications.
 class WebDriverService extends DriverService {
   WebDriverService({
-    required ProcessUtils processUtils,
-    required String dartSdkPath,
-    required Platform platform,
-    required Logger logger,
-    required Terminal terminal,
-    required OutputPreferences outputPreferences,
-  }) : _processUtils = processUtils,
-       _dartSdkPath = dartSdkPath,
-       _platform = platform,
-       _logger = logger,
-       _terminal = terminal,
-       _outputPreferences = outputPreferences;
+    required this._processUtils,
+    required this._dartSdkPath,
+    required this._platform,
+    required this._logger,
+    required this._terminal,
+    required this._outputPreferences,
+  });
 
   final ProcessUtils _processUtils;
   final String _dartSdkPath;

@@ -132,8 +132,8 @@ class InkSplash extends InteractiveInkFeature {
   InkSplash({
     required MaterialInkController controller,
     required super.referenceBox,
-    required TextDirection textDirection,
-    Offset? position,
+    required this._textDirection,
+    this._position,
     required Color color,
     bool containedInkWell = false,
     RectCallback? rectCallback,
@@ -141,13 +141,11 @@ class InkSplash extends InteractiveInkFeature {
     super.customBorder,
     double? radius,
     super.onRemoved,
-  }) : _position = position,
-       _borderRadius = borderRadius ?? BorderRadius.zero,
+  }) : _borderRadius = borderRadius ?? BorderRadius.zero,
        _targetRadius =
-           radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position!),
+           radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, _position!),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        _repositionToReferenceBox = !containedInkWell,
-       _textDirection = textDirection,
        super(controller: controller, color: color) {
     _radiusController =
         AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)

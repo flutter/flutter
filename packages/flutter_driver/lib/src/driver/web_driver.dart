@@ -30,21 +30,18 @@ class WebFlutterDriver extends FlutterDriver {
   /// [_connection].
   WebFlutterDriver.connectedTo(
     this._connection, {
-    bool printCommunication = false,
-    bool logCommunicationToFile = true,
-  }) : _printCommunication = printCommunication,
-       _logCommunicationToFile = logCommunicationToFile,
-       _startTime = DateTime.now(),
-       _driverId = _nextDriverId++ {
+    this._printCommunication = false,
+    this._logCommunicationToFile = true,
+  }) {
     _logFilePathName = path.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log');
   }
 
   final FlutterWebConnection _connection;
-  DateTime _startTime;
+  DateTime _startTime = DateTime.now();
   static int _nextDriverId = 0;
 
   /// The unique ID of this driver instance.
-  final int _driverId;
+  final int _driverId = _nextDriverId++;
 
   /// Start time for tracing.
   @visibleForTesting

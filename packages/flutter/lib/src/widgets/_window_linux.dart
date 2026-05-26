@@ -241,15 +241,13 @@ class RegularWindowControllerLinux extends RegularWindowController
   ///  * [RegularWindowController], the base class for regular windows.
   @internal
   RegularWindowControllerLinux({
-    required WindowingOwnerLinux owner,
-    required RegularWindowControllerDelegate delegate,
+    required this._owner,
+    required this._delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
     String? title,
     bool decorated = true,
-  }) : _owner = owner,
-       _delegate = delegate,
-       _window = _GtkWindow(_GtkWindowType.toplevel),
+  }) : _window = _GtkWindow(_GtkWindowType.toplevel),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -444,25 +442,22 @@ class DialogWindowControllerLinux extends DialogWindowController implements Wind
   ///  * [DialogWindowController], the base class for dialog windows.
   @internal
   DialogWindowControllerLinux({
-    required WindowingOwnerLinux owner,
-    required DialogWindowControllerDelegate delegate,
+    required this._owner,
+    required this._delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
-    BaseWindowController? parent,
+    this._parent,
     String? title,
     bool decorated = true,
-  }) : _owner = owner,
-       _delegate = delegate,
-       _parent = parent,
-       _window = _GtkWindow(_GtkWindowType.toplevel),
+  }) : _window = _GtkWindow(_GtkWindowType.toplevel),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
     }
 
     _window.setTypeHint(_GdkWindowTypeHint.dialog);
-    if (parent != null) {
-      final _GtkWindow? parentWindow = owner._windows[parent.rootView.viewId];
+    if (_parent != null) {
+      final _GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
       if (parentWindow == null) {
         throw Exception('Failed to find dialog parent window');
       }
@@ -631,16 +626,13 @@ class TooltipWindowControllerLinux extends TooltipWindowController
   ///  * [TooltipWindowController], the base class for tooltip windows.
   @internal
   TooltipWindowControllerLinux({
-    required WindowingOwnerLinux owner,
-    required TooltipWindowControllerDelegate delegate,
+    required this._owner,
+    required this._delegate,
     required BoxConstraints preferredConstraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
-    required BaseWindowController parent,
-  }) : _owner = owner,
-       _delegate = delegate,
-       _parent = parent,
-       _window = _GtkWindow(_GtkWindowType.popup),
+    required this._parent,
+  }) : _window = _GtkWindow(_GtkWindowType.popup),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);
@@ -822,16 +814,13 @@ class PopupWindowControllerLinux extends PopupWindowController {
   ///  * [PopupWindowController], the base class for popup windows.
   @internal
   PopupWindowControllerLinux({
-    required WindowingOwnerLinux owner,
-    required PopupWindowControllerDelegate delegate,
+    required this._owner,
+    required this._delegate,
     required BoxConstraints preferredConstraints,
     required Rect anchorRect,
     required WindowPositioner positioner,
-    required BaseWindowController parent,
-  }) : _owner = owner,
-       _delegate = delegate,
-       _parent = parent,
-       _window = _GtkWindow(_GtkWindowType.popup),
+    required this._parent,
+  }) : _window = _GtkWindow(_GtkWindowType.popup),
        super.empty() {
     if (!isWindowingEnabled) {
       throw UnsupportedError(_kWindowingDisabledErrorMessage);

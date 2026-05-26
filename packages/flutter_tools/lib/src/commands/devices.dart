@@ -105,12 +105,11 @@ class DevicesCommandOutput {
   }
 
   DevicesCommandOutput._private({
-    required Logger logger,
-    required DeviceManager? deviceManager,
+    required this._logger,
+    required this._deviceManager,
     required this.deviceDiscoveryTimeout,
     required this.deviceConnectionInterface,
-  }) : _deviceManager = deviceManager,
-       _logger = logger;
+  });
 
   final DeviceManager? _deviceManager;
   final Logger _logger;

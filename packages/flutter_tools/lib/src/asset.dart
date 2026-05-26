@@ -203,14 +203,11 @@ abstract class AssetBundle {
 
 class _ManifestAssetBundleFactory implements AssetBundleFactory {
   _ManifestAssetBundleFactory({
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Platform platform,
-    bool splitDeferredAssets = false,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _platform = platform,
-       _splitDeferredAssets = splitDeferredAssets;
+    required this._logger,
+    required this._fileSystem,
+    required this._platform,
+    this._splitDeferredAssets = false,
+  });
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -232,18 +229,12 @@ class ManifestAssetBundle implements AssetBundle {
   /// Constructs an [ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
   ManifestAssetBundle({
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required String flutterRoot,
-    bool splitDeferredAssets = false,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _platform = platform,
-       _flutterRoot = flutterRoot,
-       _splitDeferredAssets = splitDeferredAssets,
-       _licenseCollector = LicenseCollector(fileSystem: fileSystem),
-       _lastHookResult = FlutterHookResult.empty();
+    required this._logger,
+    required this._fileSystem,
+    required this._platform,
+    required this._flutterRoot,
+    this._splitDeferredAssets = false,
+  }) : _licenseCollector = LicenseCollector(fileSystem: _fileSystem);
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -268,7 +259,7 @@ class ManifestAssetBundle implements AssetBundle {
 
   DateTime? _lastBuildTimestamp;
 
-  FlutterHookResult _lastHookResult;
+  FlutterHookResult _lastHookResult = .empty();
 
   // We assume the main asset is designed for a device pixel ratio of 1.0.
   static const _kAssetManifestBinFilename = 'AssetManifest.bin';

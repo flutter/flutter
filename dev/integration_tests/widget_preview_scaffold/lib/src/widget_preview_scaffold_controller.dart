@@ -21,11 +21,9 @@ typedef PreviewsCallback = WidgetPreviews Function();
 /// displayed and how they should be displayed in the [WidgetPreviewScaffold].
 class WidgetPreviewScaffoldController {
   WidgetPreviewScaffoldController({
-    required PreviewsCallback previews,
+    required this._previews,
     @visibleForTesting WidgetPreviewScaffoldDtdServices? dtdServicesOverride,
-    // ignore: prefer_initializing_formals
-  }) : _previews = previews,
-       dtdServices = dtdServicesOverride ?? WidgetPreviewScaffoldDtdServices();
+  }) : dtdServices = dtdServicesOverride ?? WidgetPreviewScaffoldDtdServices();
 
   @visibleForTesting
   static const kFilterBySelectedFilePreference = 'filterBySelectedFile';
@@ -34,9 +32,7 @@ class WidgetPreviewScaffoldController {
   /// listening for events.
   Future<void> initialize() async {
     await dtdServices.connect();
-    context = path.Context(
-      style: dtdServices.isWindows ? path.Style.windows : path.Style.posix,
-    );
+    context = path.Context(style: dtdServices.isWindows ? path.Style.windows : path.Style.posix);
     _registerListeners();
     await Future.wait<void>([
       dtdServices
@@ -78,15 +74,13 @@ class WidgetPreviewScaffoldController {
   set layoutType(LayoutType type) => _layoutType.value = type;
 
   /// Set to true when the Editor service is available over DTD.
-  ValueListenable<bool> get editorServiceAvailable =>
-      dtdServices.editorServiceAvailable;
+  ValueListenable<bool> get editorServiceAvailable => dtdServices.editorServiceAvailable;
 
   /// The DevTools instance that's used to display the widget inspector within the previewer.
   late final Uri devToolsUri;
 
   /// Specifies if only previews from the currently selected source file should be rendered.
-  ValueListenable<bool> get filterBySelectedFileListenable =>
-      _filterBySelectedFile;
+  ValueListenable<bool> get filterBySelectedFileListenable => _filterBySelectedFile;
   final _filterBySelectedFile = ValueNotifier<bool>(true);
 
   /// Enable or disable filtering by selected source file.
@@ -108,18 +102,15 @@ class WidgetPreviewScaffoldController {
   final _searchByGroupName = ValueNotifier<bool>(true);
 
   /// Whether to include preview names when applying search filters.
-  ValueListenable<bool> get searchByPreviewNameListenable =>
-      _searchByPreviewName;
+  ValueListenable<bool> get searchByPreviewNameListenable => _searchByPreviewName;
   final _searchByPreviewName = ValueNotifier<bool>(true);
 
   /// Whether to include script URIs when applying search filters.
-  ValueListenable<bool> get searchByContainingScriptListenable =>
-      _searchByContainingScript;
+  ValueListenable<bool> get searchByContainingScriptListenable => _searchByContainingScript;
   final _searchByContainingScript = ValueNotifier<bool>(true);
 
   /// Whether to include package names when applying search filters.
-  ValueListenable<bool> get searchByContainingPackageListenable =>
-      _searchByContainingPackage;
+  ValueListenable<bool> get searchByContainingPackageListenable => _searchByContainingPackage;
   final _searchByContainingPackage = ValueNotifier<bool>(true);
 
   /// Toggle inclusion of group names in search filters.
@@ -135,14 +126,12 @@ class WidgetPreviewScaffoldController {
   /// Toggle inclusion of script URIs in search filters.
   ///
   /// Returns true if the filter state was changed.
-  bool toggleSearchByContainingScript() =>
-      _toggleSearchField(_searchByContainingScript);
+  bool toggleSearchByContainingScript() => _toggleSearchField(_searchByContainingScript);
 
   /// Toggle inclusion of package names in search filters.
   ///
   /// Returns true if the filter state was changed.
-  bool toggleSearchByContainingPackage() =>
-      _toggleSearchField(_searchByContainingPackage);
+  bool toggleSearchByContainingPackage() => _toggleSearchField(_searchByContainingPackage);
 
   /// Specifies if the DevTools Widget Inspector should be visible.
   ValueListenable<bool> get widgetInspectorVisible => _widgetInspectorVisible;
@@ -153,8 +142,7 @@ class WidgetPreviewScaffoldController {
       _widgetInspectorVisible.value = !_widgetInspectorVisible.value;
 
   /// The current set of previews to be displayed.
-  ValueListenable<WidgetPreviewGroups> get filteredPreviewSetListenable =>
-      _filteredPreviewSet;
+  ValueListenable<WidgetPreviewGroups> get filteredPreviewSetListenable => _filteredPreviewSet;
   final _filteredPreviewSet = ValueNotifier<WidgetPreviewGroups>([]);
 
   void _registerListeners() {
@@ -178,10 +166,7 @@ class WidgetPreviewScaffoldController {
     _searchByContainingPackage,
   ];
 
-  String _getSearchableValue(
-    WidgetPreview preview,
-    ValueNotifier<bool> searchField,
-  ) {
+  String _getSearchableValue(WidgetPreview preview, ValueNotifier<bool> searchField) {
     if (identical(searchField, _searchByGroupName)) {
       return preview.previewData.group.toLowerCase();
     }
@@ -207,9 +192,7 @@ class WidgetPreviewScaffoldController {
   }
 
   bool _hasAnotherActiveSearchField(ValueNotifier<bool> activeSearchField) =>
-      _searchFields.any(
-        (field) => !identical(field, activeSearchField) && field.value,
-      );
+      _searchFields.any((field) => !identical(field, activeSearchField) && field.value);
 
   bool _matchesSearchFilter(WidgetPreview preview, String searchQuery) {
     if (searchQuery.isEmpty) {
@@ -228,9 +211,7 @@ class WidgetPreviewScaffoldController {
     return false;
   }
 
-  void _updateFilteredPreviewSet({
-    bool editorServiceAvailabilityUpdated = false,
-  }) {
+  void _updateFilteredPreviewSet({bool editorServiceAvailabilityUpdated = false}) {
     final previews = _previews();
 
     final normalizedSearchQuery = _searchQuery.value.trim().toLowerCase();
@@ -275,10 +256,7 @@ class WidgetPreviewScaffoldController {
 
       final group = preview.previewData.group;
       previewGroups
-          .putIfAbsent(
-            group,
-            () => WidgetPreviewGroup(name: group, previews: []),
-          )
+          .putIfAbsent(group, () => WidgetPreviewGroup(name: group, previews: []))
           .previews
           .add(preview);
     }

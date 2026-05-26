@@ -76,14 +76,12 @@ Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
 class RenderAndroidView extends PlatformViewRenderBox {
   /// Creates a render object for an Android view.
   RenderAndroidView({
-    required AndroidViewController viewController,
+    required this._viewController,
     required PlatformViewHitTestBehavior hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-    Clip clipBehavior = Clip.hardEdge,
-  }) : _viewController = viewController,
-       _clipBehavior = clipBehavior,
-       super(
-         controller: viewController,
+    this._clipBehavior = Clip.hardEdge,
+  }) : super(
+         controller: _viewController,
          hitTestBehavior: hitTestBehavior,
          gestureRecognizers: gestureRecognizers,
        ) {
@@ -292,10 +290,10 @@ class RenderAndroidView extends PlatformViewRenderBox {
 abstract class RenderDarwinPlatformView<T extends DarwinPlatformViewController> extends RenderBox {
   /// Creates a render object for a platform view.
   RenderDarwinPlatformView({
-    required T viewController,
+    required this._viewController,
     required this.hitTestBehavior,
     required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
-  }) : _viewController = viewController {
+  }) {
     updateGestureRecognizers(gestureRecognizers);
   }
 

@@ -1651,9 +1651,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold> implements
 }
 
 class _DetailView extends StatelessWidget {
-  const _DetailView({required _DetailPageBuilder builder, Object? arguments})
-    : _builder = builder,
-      _arguments = arguments;
+  const _DetailView({required this._builder, this._arguments});
 
   final _DetailPageBuilder _builder;
   final Object? _arguments;

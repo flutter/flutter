@@ -737,13 +737,11 @@ class _CreationParams {
 abstract class AndroidViewController extends PlatformViewController {
   AndroidViewController._({
     required this.viewId,
-    required String viewType,
-    required TextDirection layoutDirection,
+    required this._viewType,
+    required this._layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic>? creationParamsCodec,
   }) : assert(creationParams == null || creationParamsCodec != null),
-       _viewType = viewType,
-       _layoutDirection = layoutDirection,
        _creationParams = creationParams == null
            ? null
            : _CreationParams(creationParams, creationParamsCodec!);
@@ -1536,8 +1534,7 @@ class _Hybrid2AndroidViewControllerInternals extends _AndroidViewControllerInter
 /// underlying a platform view.
 abstract class DarwinPlatformViewController {
   /// Public default for subclasses to override.
-  DarwinPlatformViewController(this.id, TextDirection layoutDirection)
-    : _layoutDirection = layoutDirection;
+  DarwinPlatformViewController(this.id, this._layoutDirection);
 
   /// The unique identifier of the iOS view controlled by this controller.
   ///

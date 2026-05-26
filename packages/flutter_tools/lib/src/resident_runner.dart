@@ -1538,18 +1538,13 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
 class TerminalHandler {
   TerminalHandler(
     this.residentRunner, {
-    required Logger logger,
-    required Terminal terminal,
-    required Signals signals,
-    required io.ProcessInfo processInfo,
-    required bool reportReady,
-    String? pidFile,
-  }) : _logger = logger,
-       _terminal = terminal,
-       _signals = signals,
-       _processInfo = processInfo,
-       _reportReady = reportReady,
-       _pidFile = pidFile;
+    required this._logger,
+    required this._terminal,
+    required this._signals,
+    required this._processInfo,
+    required this._reportReady,
+    this._pidFile,
+  });
 
   final Logger _logger;
   final Terminal _terminal;

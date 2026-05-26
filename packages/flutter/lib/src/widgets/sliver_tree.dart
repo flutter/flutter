@@ -30,9 +30,8 @@ const double _kDefaultRowExtent = 40.0;
 /// managed by the [TreeSliver]'s state.
 class TreeSliverNode<T> {
   /// Creates a [TreeSliverNode] instance for use in a [TreeSliver].
-  TreeSliverNode(T content, {List<TreeSliverNode<T>>? children, bool expanded = false})
+  TreeSliverNode(this._content, {List<TreeSliverNode<T>>? children, bool expanded = false})
     : _expanded = (children?.isNotEmpty ?? false) && expanded,
-      _content = content,
       _children = children ?? <TreeSliverNode<T>>[];
 
   /// The subject matter of the node.

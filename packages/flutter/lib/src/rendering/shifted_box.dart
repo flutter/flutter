@@ -127,14 +127,10 @@ class RenderPadding extends RenderShiftedBox {
   /// Creates a render object that insets its child.
   ///
   /// The [padding] argument must have non-negative insets.
-  RenderPadding({
-    required EdgeInsetsGeometry padding,
-    TextDirection? textDirection,
-    RenderBox? child,
-  }) : assert(padding.isNonNegative),
-       _textDirection = textDirection,
-       _padding = padding,
-       super(child);
+  RenderPadding({required EdgeInsetsGeometry padding, this._textDirection, RenderBox? child})
+    : assert(padding.isNonNegative),
+      _padding = padding,
+      super(child);
 
   EdgeInsets? _resolvedPaddingCache;
   EdgeInsets get _resolvedPadding {
@@ -297,12 +293,10 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// The [textDirection] must be non-null if the [alignment] is
   /// direction-sensitive.
   RenderAligningShiftedBox({
-    AlignmentGeometry alignment = Alignment.center,
-    required TextDirection? textDirection,
+    this._alignment = Alignment.center,
+    required this._textDirection,
     RenderBox? child,
-  }) : _alignment = alignment,
-       _textDirection = textDirection,
-       super(child);
+  }) : super(child);
 
   /// The [Alignment] to use for aligning the child.
   ///
@@ -636,18 +630,14 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// Creates a render object that lets its child overflow itself.
   RenderConstrainedOverflowBox({
     super.child,
-    double? minWidth,
-    double? maxWidth,
-    double? minHeight,
-    double? maxHeight,
-    OverflowBoxFit fit = OverflowBoxFit.max,
+    this._minWidth,
+    this._maxWidth,
+    this._minHeight,
+    this._maxHeight,
+    this._fit = OverflowBoxFit.max,
     super.alignment,
     super.textDirection,
-  }) : _minWidth = minWidth,
-       _maxWidth = maxWidth,
-       _minHeight = minHeight,
-       _maxHeight = maxHeight,
-       _fit = fit;
+  });
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
@@ -839,11 +829,10 @@ class RenderConstraintsTransformBox extends RenderAligningShiftedBox
   RenderConstraintsTransformBox({
     required super.alignment,
     required super.textDirection,
-    required BoxConstraintsTransform constraintsTransform,
+    required this._constraintsTransform,
     super.child,
-    Clip clipBehavior = Clip.none,
-  }) : _constraintsTransform = constraintsTransform,
-       _clipBehavior = clipBehavior;
+    this._clipBehavior = Clip.none,
+  });
 
   /// {@macro flutter.widgets.constraintsTransform}
   BoxConstraintsTransform get constraintsTransform => _constraintsTransform;
@@ -1047,10 +1036,10 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   /// direction-sensitive.
   RenderSizedOverflowBox({
     super.child,
-    required Size requestedSize,
+    required this._requestedSize,
     super.alignment,
     super.textDirection,
-  }) : _requestedSize = requestedSize;
+  });
 
   /// The size this render box should attempt to be.
   Size get requestedSize => _requestedSize;
@@ -1149,15 +1138,12 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// direction-sensitive.
   RenderFractionallySizedOverflowBox({
     super.child,
-    double? widthFactor,
-    double? heightFactor,
+    this._widthFactor,
+    this._heightFactor,
     super.alignment,
     super.textDirection,
-  }) : _widthFactor = widthFactor,
-       _heightFactor = heightFactor {
-    assert(_widthFactor == null || _widthFactor! >= 0.0);
-    assert(_heightFactor == null || _heightFactor! >= 0.0);
-  }
+  }) : assert(_widthFactor == null || _widthFactor >= 0.0),
+       assert(_heightFactor == null || _heightFactor >= 0.0);
 
   /// If non-null, the factor of the incoming width to use.
   ///
@@ -1340,8 +1326,8 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 abstract class SingleChildLayoutDelegate {
   /// Creates a layout delegate.
   ///
-  /// The layout will update whenever [relayout] notifies its listeners.
-  const SingleChildLayoutDelegate({Listenable? relayout}) : _relayout = relayout;
+  /// The layout will update whenever `relayout` notifies its listeners.
+  const SingleChildLayoutDelegate({this._relayout});
 
   final Listenable? _relayout;
 
@@ -1400,11 +1386,7 @@ abstract class SingleChildLayoutDelegate {
 /// child.
 class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   /// Creates a render box that defers its layout to a delegate.
-  ///
-  /// The [delegate] argument must not be null.
-  RenderCustomSingleChildLayoutBox({RenderBox? child, required SingleChildLayoutDelegate delegate})
-    : _delegate = delegate,
-      super(child);
+  RenderCustomSingleChildLayoutBox({RenderBox? child, required this._delegate}) : super(child);
 
   /// A delegate that controls this object's layout.
   SingleChildLayoutDelegate get delegate => _delegate;
@@ -1543,10 +1525,8 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
 /// and the bottom of the box.
 class RenderBaseline extends RenderShiftedBox {
   /// Creates a [RenderBaseline] object.
-  RenderBaseline({RenderBox? child, required double baseline, required TextBaseline baselineType})
-    : _baseline = baseline,
-      _baselineType = baselineType,
-      super(child);
+  RenderBaseline({RenderBox? child, required this._baseline, required this._baselineType})
+    : super(child);
 
   /// The number of logical pixels from the top of this box at which to position
   /// the child's baseline.

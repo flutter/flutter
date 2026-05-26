@@ -22,7 +22,7 @@ import 'deferred_components_validator.dart';
 class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
   /// Constructs a validator instance.
   ///
-  /// The [templatesDir] parameter is optional. If null, the tool's default
+  /// The [_templatesDir] parameter is optional. If null, the tool's default
   /// templates directory will be used.
   ///
   /// When [exitOnFail] is set to true, the [handleResults] and [attemptToolExit]
@@ -34,8 +34,8 @@ class DeferredComponentsPrebuildValidator extends DeferredComponentsValidator {
     super.platform, {
     super.exitOnFail,
     super.title,
-    Directory? templatesDir,
-  }) : _templatesDir = templatesDir;
+    this._templatesDir,
+  });
 
   final Directory? _templatesDir;
 
@@ -215,8 +215,8 @@ class _DeferredComponentAndroidFiles {
     required this.name,
     required this.projectDir,
     required this.logger,
-    Directory? templatesDir,
-  }) : _templatesDir = templatesDir;
+    this._templatesDir,
+  });
 
   // The name of the deferred component.
   final String name;

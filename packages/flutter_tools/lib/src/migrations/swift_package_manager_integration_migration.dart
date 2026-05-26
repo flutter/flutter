@@ -24,21 +24,15 @@ import '../project.dart';
 class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   SwiftPackageManagerIntegrationMigration(
     XcodeBasedProject project,
-    FlutterDarwinPlatform platform,
-    BuildInfo buildInfo, {
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
+    this._platform,
+    this._buildInfo, {
+    required this._xcodeProjectInterpreter,
     required Logger logger,
-    required FileSystem fileSystem,
-    required PlistParser plistParser,
-    required Config config,
+    required this._fileSystem,
+    required this._plistParser,
+    required this._config,
   }) : _xcodeProject = project,
-       _platform = platform,
-       _buildInfo = buildInfo,
        _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _fileSystem = fileSystem,
-       _plistParser = plistParser,
-       _config = config,
        super(logger);
 
   final XcodeBasedProject _xcodeProject;

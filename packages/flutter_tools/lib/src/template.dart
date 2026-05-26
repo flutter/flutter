@@ -105,14 +105,11 @@ class Template {
   Template._(
     List<Directory> templateSources,
     this.imageSourceDirectories, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required TemplateRenderer templateRenderer,
+    required this._fileSystem,
+    required this._logger,
+    required this._templateRenderer,
     required Set<Uri>? templateManifest,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _templateRenderer = templateRenderer,
-       _templateManifest = templateManifest ?? <Uri>{} {
+  }) : _templateManifest = templateManifest ?? <Uri>{} {
     for (final sourceDirectory in templateSources) {
       if (!sourceDirectory.existsSync()) {
         throwToolExit('Template source directory does not exist: ${sourceDirectory.absolute.path}');
@@ -132,7 +129,7 @@ class Template {
         continue;
       }
 
-      final String relativePath = fileSystem.path.relative(
+      final String relativePath = _fileSystem.path.relative(
         entity.path,
         from: templateFiles[entity]!.absolute.path,
       );
@@ -140,7 +137,7 @@ class Template {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // a candidate for rendering. This catches cases where the folder
         // itself is a template.
-        _templateFilePaths[relativePath] = fileSystem.path.absolute(entity.path);
+        _templateFilePaths[relativePath] = _fileSystem.path.absolute(entity.path);
       }
     }
   }

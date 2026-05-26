@@ -1533,7 +1533,7 @@ class FakeSignalProcessManager extends Fake implements ProcessManager {
 }
 
 class ThrowingFakeProcessManager extends Fake implements ProcessManager {
-  ThrowingFakeProcessManager(Exception exception) : _exception = exception;
+  ThrowingFakeProcessManager(this._exception);
 
   final Exception _exception;
 

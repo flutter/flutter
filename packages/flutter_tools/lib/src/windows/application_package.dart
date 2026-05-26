@@ -77,9 +77,8 @@ abstract class WindowsApp extends ApplicationPackage {
 }
 
 class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackage {
-  PrebuiltWindowsApp({required String executable, required this.applicationPackage})
-    : _executable = executable,
-      super(projectBundleId: executable);
+  PrebuiltWindowsApp({required this._executable, required this.applicationPackage})
+    : super(projectBundleId: _executable);
 
   final String _executable;
 

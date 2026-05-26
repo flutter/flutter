@@ -74,19 +74,18 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// The arguments [duration], [curve], [alignment], and [vsync] must
   /// not be null.
   RenderAnimatedSize({
-    required TickerProvider vsync,
+    required this._vsync,
     required Duration duration,
     Duration? reverseDuration,
     Curve curve = Curves.linear,
     super.alignment,
     super.textDirection,
     super.child,
-    Clip clipBehavior = Clip.hardEdge,
+    this._clipBehavior = Clip.hardEdge,
     VoidCallback? onEnd,
-  }) : _vsync = vsync,
-       _clipBehavior = clipBehavior {
+  }) {
     _controller =
-        AnimationController(vsync: vsync, duration: duration, reverseDuration: reverseDuration)
+        AnimationController(vsync: _vsync, duration: duration, reverseDuration: reverseDuration)
           ..addListener(() {
             if (_controller.value != _lastValue) {
               markNeedsLayout();

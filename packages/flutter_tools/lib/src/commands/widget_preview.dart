@@ -130,7 +130,7 @@ abstract base class WidgetPreviewSubCommandBase extends FlutterCommand {
 final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with CreateBase {
   WidgetPreviewStartCommand({
     this.verbose = false,
-    required Logger logger,
+    required this._logger,
     required this.fs,
     required this.projectFactory,
     required this.cache,
@@ -142,7 +142,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required this.terminal,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
-  }) : _logger = logger {
+  }) {
     if (dtdServicesOverride != null) {
       _dtdService = dtdServicesOverride;
     }

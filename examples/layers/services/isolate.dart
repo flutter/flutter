@@ -76,8 +76,7 @@ class CalculationMessage {
 // This class manages these ports and maintains state related to the
 // progress of the background computation.
 class CalculationManager {
-  CalculationManager({required this.onProgressListener, required this.onResultListener})
-    : _receivePort = ReceivePort() {
+  CalculationManager({required this.onProgressListener, required this.onResultListener}) {
     _receivePort.listen(_handleMessage);
   }
 
@@ -117,7 +116,7 @@ class CalculationManager {
     }
   }
 
-  final ReceivePort _receivePort;
+  final ReceivePort _receivePort = ReceivePort();
   Isolate? _isolate;
 
   void _runCalculation() {

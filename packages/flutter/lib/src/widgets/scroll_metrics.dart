@@ -172,16 +172,13 @@ mixin ScrollMetrics {
 class FixedScrollMetrics with ScrollMetrics {
   /// Creates an immutable snapshot of values associated with a [Scrollable] viewport.
   FixedScrollMetrics({
-    required double? minScrollExtent,
-    required double? maxScrollExtent,
-    required double? pixels,
-    required double? viewportDimension,
+    required this._minScrollExtent,
+    required this._maxScrollExtent,
+    required this._pixels,
+    required this._viewportDimension,
     required this.axisDirection,
     required this.devicePixelRatio,
-  }) : _minScrollExtent = minScrollExtent,
-       _maxScrollExtent = maxScrollExtent,
-       _pixels = pixels,
-       _viewportDimension = viewportDimension;
+  });
 
   @override
   double get minScrollExtent => _minScrollExtent!;

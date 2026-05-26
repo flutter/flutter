@@ -427,12 +427,10 @@ T asLogger<T extends Logger>(Logger logger) {
 class StdoutLogger extends Logger {
   StdoutLogger({
     required this.terminal,
-    required Stdio stdio,
-    required OutputPreferences outputPreferences,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-  }) : _stdio = stdio,
-       _outputPreferences = outputPreferences,
-       _stopwatchFactory = stopwatchFactory;
+    required this._stdio,
+    required this._outputPreferences,
+    this._stopwatchFactory = const StopwatchFactory(),
+  });
 
   @override
   final Terminal terminal;
@@ -747,22 +745,19 @@ class WindowsStdoutLogger extends StdoutLogger {
 class BufferLogger extends Logger {
   BufferLogger({
     required this.terminal,
-    required OutputPreferences outputPreferences,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
-    bool verbose = false,
-  }) : _outputPreferences = outputPreferences,
-       _stopwatchFactory = stopwatchFactory,
-       _verbose = verbose;
+    required this._outputPreferences,
+    this._stopwatchFactory = const StopwatchFactory(),
+    this._verbose = false,
+  });
 
   /// Create a [BufferLogger] with test preferences.
   BufferLogger.test({
     Terminal? terminal,
     OutputPreferences? outputPreferences,
-    bool verbose = false,
+    this._verbose = false,
   }) : terminal = terminal ?? Terminal.test(),
        _outputPreferences = outputPreferences ?? OutputPreferences.test(),
-       _stopwatchFactory = const StopwatchFactory(),
-       _verbose = verbose;
+       _stopwatchFactory = const StopwatchFactory();
 
   @override
   final OutputPreferences _outputPreferences;
@@ -934,9 +929,8 @@ class BufferLogger extends Logger {
 }
 
 class VerboseLogger extends DelegatingLogger {
-  VerboseLogger(super.parent, {StopwatchFactory stopwatchFactory = const StopwatchFactory()})
-    : _stopwatch = stopwatchFactory.createStopwatch(),
-      _stopwatchFactory = stopwatchFactory {
+  VerboseLogger(super.parent, {this._stopwatchFactory = const StopwatchFactory()})
+    : _stopwatch = _stopwatchFactory.createStopwatch() {
     _stopwatch.start();
   }
 
@@ -1156,10 +1150,7 @@ typedef SlowWarningCallback = String Function();
 /// Generally, consider `logger.startProgress` instead of directly creating
 /// a [Status] or one of its subclasses.
 abstract class Status {
-  Status({VoidCallback? onFinish, required Stopwatch stopwatch, Duration? timeout})
-    : _timeout = timeout,
-      _onFinish = onFinish,
-      _stopwatch = stopwatch;
+  Status({this._onFinish, required this._stopwatch, this._timeout});
 
   final VoidCallback? _onFinish;
   final Duration? _timeout;
@@ -1219,19 +1210,17 @@ const _kTimePadding = 8; // should fit "99,999ms"
 
 /// A version of [Status] that just outputs a summary.
 class SummaryStatus extends Status {
-  /// Writes [message] to [stdio].
+  /// Writes [_message] to [_stdio].
   ///
   /// On [cancel] or [stop], will call [onFinish].
   /// On [stop], will additionally print out summary information.
   SummaryStatus({
-    String message = '',
+    this._message = '',
     required super.stopwatch,
-    int padding = kDefaultStatusPadding,
+    this._padding = kDefaultStatusPadding,
     super.onFinish,
-    required Stdio stdio,
-  }) : _padding = padding,
-       _message = message,
-       _stdio = stdio;
+    required this._stdio,
+  });
 
   final String _message;
   final int _padding;
@@ -1289,16 +1278,12 @@ class AnonymousSpinnerStatus extends Status {
   AnonymousSpinnerStatus({
     super.onFinish,
     required super.stopwatch,
-    required Stdio stdio,
-    required Terminal terminal,
-    SlowWarningCallback? slowWarningCallback,
-    TerminalColor? warningColor,
+    required this._stdio,
+    required this._terminal,
+    this._slowWarningCallback,
+    this._warningColor,
     super.timeout,
-  }) : _warningColor = warningColor,
-       _slowWarningCallback = slowWarningCallback,
-       _stdio = stdio,
-       _terminal = terminal,
-       _animation = _selectAnimation(terminal);
+  }) : _animation = _selectAnimation(_terminal);
 
   final Stdio _stdio;
   final Terminal _terminal;
@@ -1440,7 +1425,7 @@ class AnonymousSpinnerStatus extends Status {
 
 /// An animated version of [Status].
 class SpinnerStatus extends AnonymousSpinnerStatus {
-  /// Writes [message] to [stdio] with padding, then starts an
+  /// Writes [_message] to [stdio] with padding, then starts an
   /// indeterminate progress indicator animation.
   ///
   /// On [cancel] or [stop], will call [onFinish].
@@ -1448,14 +1433,13 @@ class SpinnerStatus extends AnonymousSpinnerStatus {
   ///
   /// Call [pause] before outputting any text while this is running.
   SpinnerStatus({
-    required String message,
-    int padding = kDefaultStatusPadding,
+    required this._message,
+    this._padding = kDefaultStatusPadding,
     super.onFinish,
     required super.stopwatch,
     required super.stdio,
     required super.terminal,
-  }) : _padding = padding,
-       _message = message;
+  });
 
   final String _message;
   final int _padding;

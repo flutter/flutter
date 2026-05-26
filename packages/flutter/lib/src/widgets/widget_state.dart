@@ -1000,7 +1000,7 @@ typedef WidgetStateMap<T> = Map<WidgetStatesConstraint, T>;
 class WidgetStateMapper<T> with Diagnosticable implements WidgetStateProperty<T> {
   /// Creates a [WidgetStateProperty] object that can resolve
   /// to a value of type [T] using the provided [map].
-  const WidgetStateMapper(WidgetStateMap<T> map) : _map = map;
+  const WidgetStateMapper(this._map);
 
   final WidgetStateMap<T> _map;
 

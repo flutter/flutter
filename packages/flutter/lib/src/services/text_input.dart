@@ -1666,7 +1666,7 @@ final class TextInputStyle with Diagnosticable {
 ///  * [EditableText], a [TextInputClient] that connects to and interacts with
 ///    the system's text input using a [TextInputConnection].
 class TextInputConnection {
-  TextInputConnection._(this._client) : _id = _nextId++;
+  TextInputConnection._(this._client);
 
   Size? _cachedSize;
   Matrix4? _cachedTransform;
@@ -1675,7 +1675,7 @@ class TextInputConnection {
   List<SelectionRect> _cachedSelectionRects = <SelectionRect>[];
 
   static int _nextId = 1;
-  final int _id;
+  final int _id = _nextId++;
 
   /// Resets the internal ID counter for testing purposes.
   ///
@@ -2928,6 +2928,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     );
     callback?.call();
   }
+
   // End SystemContextMenuClient.
 
   /// Shows the system context menu anchored on the given [Rect].

@@ -755,7 +755,7 @@ class FakeThrowingFlutterVersion extends FakeFlutterVersion {
 }
 
 class FakeFlutterFeatures extends FeatureFlags {
-  const FakeFlutterFeatures(this.allFeatures, {required bool enabled}) : _enabled = enabled;
+  const FakeFlutterFeatures(this.allFeatures, {required this._enabled});
   final bool _enabled;
 
   @override

@@ -390,9 +390,7 @@ class CrashingCrashReportSender extends MockClient {
 }
 
 class FakeDoctorText extends Fake implements DoctorText {
-  FakeDoctorText(String text, String piiStrippedText)
-    : _text = text,
-      _piiStrippedText = piiStrippedText;
+  FakeDoctorText(this._text, this._piiStrippedText);
 
   @override
   Future<String> get text async => _text;

@@ -510,9 +510,8 @@ class RestorationBucket {
   /// claiming a child from a parent via [claimChild]. If no parent bucket is
   /// available, [RestorationManager.rootBucket] may be used as a parent.
   /// {@endtemplate}
-  RestorationBucket.empty({required String restorationId, required Object? debugOwner})
-    : _restorationId = restorationId,
-      _rawData = <String, Object?>{} {
+  RestorationBucket.empty({required this._restorationId, required Object? debugOwner})
+    : _rawData = <String, Object?>{} {
     assert(() {
       _debugOwner = debugOwner;
       return true;
@@ -541,14 +540,11 @@ class RestorationBucket {
   /// ```
   ///
   /// {@macro flutter.services.RestorationBucket.empty.bucketCreation}
-  RestorationBucket.root({
-    required RestorationManager manager,
-    required Map<Object?, Object?>? rawData,
-  }) : _manager = manager,
-       _rawData = rawData ?? <Object?, Object?>{},
-       _restorationId = 'root' {
+  RestorationBucket.root({required this._manager, required Map<Object?, Object?>? rawData})
+    : _rawData = rawData ?? <Object?, Object?>{},
+      _restorationId = 'root' {
     assert(() {
-      _debugOwner = manager;
+      _debugOwner = _manager;
       return true;
     }());
     assert(debugMaybeDispatchCreated('services', 'RestorationBucket', this));

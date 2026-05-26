@@ -1218,7 +1218,7 @@ class PerfTest {
     this.needsFullTimeline = true,
     this.benchmarkScoreKeys,
     this.dartDefine = '',
-    String? resultFilename,
+    this._resultFilename,
     this.device,
     this.flutterDriveCallback,
     this.timeoutSeconds,
@@ -1229,7 +1229,7 @@ class PerfTest {
     this.enableHcpp = false,
     this.enableLazyShaderMode = false,
     this.createPlatforms = const <String>[],
-  }) : _resultFilename = resultFilename;
+  });
 
   const PerfTest.e2e(
     this.testDirectory,
@@ -1241,7 +1241,7 @@ class PerfTest {
     this.needsFullTimeline = false,
     this.benchmarkScoreKeys = _kCommonScoreKeys,
     this.dartDefine = '',
-    String resultFilename = 'e2e_perf_summary',
+    String this._resultFilename = 'e2e_perf_summary',
     this.device,
     this.flutterDriveCallback,
     this.timeoutSeconds,
@@ -1253,8 +1253,7 @@ class PerfTest {
     this.enableLazyShaderMode = false,
     this.createPlatforms = const <String>[],
   }) : saveTraceFile = false,
-       timelineFileName = null,
-       _resultFilename = resultFilename;
+       timelineFileName = null;
 
   /// The directory where the app under test is defined.
   final String testDirectory;

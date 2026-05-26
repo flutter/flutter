@@ -43,19 +43,13 @@ String downgradePositionalArgumentErrorMessage(List<String> args) {
 class DowngradeCommand extends FlutterCommand {
   DowngradeCommand({
     bool verboseHelp = false,
-    PersistentToolState? persistentToolState,
-    required Logger logger,
-    FlutterVersion? flutterVersion,
-    Terminal? terminal,
-    Stdio? stdio,
-    FileSystem? fileSystem,
-  }) : _terminal = terminal,
-       _flutterVersion = flutterVersion,
-       _persistentToolState = persistentToolState,
-       _stdio = stdio,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _git = globals.git {
+    this._persistentToolState,
+    required this._logger,
+    this._flutterVersion,
+    this._terminal,
+    this._stdio,
+    this._fileSystem,
+  }) : _git = globals.git {
     argParser.addOption(
       'working-directory',
       hide: !verboseHelp,

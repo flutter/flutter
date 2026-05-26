@@ -96,23 +96,18 @@ const cocoaPodsRecommendedVersion = Version.withText(1, 16, 2, '1.16.2');
 ///     installing iOS/macOS dependencies.
 class CocoaPods {
   CocoaPods({
-    required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
-    required Logger logger,
+    required this._fileSystem,
+    required this._processManager,
+    required this._xcodeProjectInterpreter,
+    required this._logger,
     required Platform platform,
-    required Analytics analytics,
-  }) : _fileSystem = fileSystem,
-       _processManager = processManager,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _logger = logger,
-       _analytics = analytics,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
+    required this._analytics,
+  }) : _processUtils = ProcessUtils(processManager: _processManager, logger: _logger),
        _operatingSystemUtils = OperatingSystemUtils(
-         fileSystem: fileSystem,
-         logger: logger,
+         fileSystem: _fileSystem,
+         logger: _logger,
          platform: platform,
-         processManager: processManager,
+         processManager: _processManager,
        );
 
   final FileSystem _fileSystem;

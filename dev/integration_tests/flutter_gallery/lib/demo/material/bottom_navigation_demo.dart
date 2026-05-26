@@ -8,19 +8,16 @@ import '../../gallery/demo.dart';
 
 class NavigationIconView {
   NavigationIconView({
-    required Widget icon,
+    required this._icon,
     Widget? activeIcon,
-    String? title,
-    Color? color,
+    this._title,
+    this._color,
     required TickerProvider vsync,
-  }) : _icon = icon,
-       _color = color,
-       _title = title,
-       item = BottomNavigationBarItem(
-         icon: icon,
+  }) : item = BottomNavigationBarItem(
+         icon: _icon,
          activeIcon: activeIcon,
-         label: title,
-         backgroundColor: color,
+         label: _title,
+         backgroundColor: _color,
        ),
        controller = AnimationController(duration: kThemeAnimationDuration, vsync: vsync) {
     _animation = controller.drive(

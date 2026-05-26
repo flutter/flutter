@@ -2535,7 +2535,7 @@ class _TestLeaderLayerWidget extends SingleChildRenderObjectWidget {
 }
 
 class _RenderTestLeaderLayerWidget extends RenderProxyBox {
-  _RenderTestLeaderLayerWidget({LayerLink? link, RenderBox? child}) : _link = link, super(child);
+  _RenderTestLeaderLayerWidget({this._link, RenderBox? child}) : super(child);
 
   LayerLink? get link => _link;
   LayerLink? _link;

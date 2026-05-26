@@ -18,16 +18,12 @@ import '../convert.dart';
 /// Encapsulates information about the installed copy of Visual Studio, if any.
 class VisualStudio {
   VisualStudio({
-    required FileSystem fileSystem,
+    required this._fileSystem,
     required ProcessManager processManager,
-    required Platform platform,
-    required Logger logger,
-    required OperatingSystemUtils osUtils,
-  }) : _platform = platform,
-       _fileSystem = fileSystem,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-       _logger = logger,
-       _osUtils = osUtils;
+    required this._platform,
+    required this._logger,
+    required this._osUtils,
+  }) : _processUtils = ProcessUtils(processManager: processManager, logger: _logger);
 
   final FileSystem _fileSystem;
   final Platform _platform;

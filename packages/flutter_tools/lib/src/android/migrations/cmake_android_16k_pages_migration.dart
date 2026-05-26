@@ -18,7 +18,7 @@ import '../../project.dart';
 /// endif()
 /// ```
 class CmakeAndroid16kPagesMigration extends ProjectMigrator {
-  CmakeAndroid16kPagesMigration(AndroidProject project, super.logger) : _project = project;
+  CmakeAndroid16kPagesMigration(this._project, super.logger);
 
   final AndroidProject _project;
 

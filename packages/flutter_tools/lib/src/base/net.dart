@@ -22,10 +22,8 @@ typedef UrlTunneller = Future<String> Function(String url);
 
 class Net {
   /// If [httpClientFactory] is `null`, a default [HttpClient] is used.
-  Net({HttpClientFactory? httpClientFactory, required Logger logger, required Platform platform})
-    : _httpClientFactory = httpClientFactory ?? (() => HttpClient()),
-      _logger = logger,
-      _platform = platform;
+  Net({HttpClientFactory? httpClientFactory, required this._logger, required this._platform})
+    : _httpClientFactory = httpClientFactory ?? HttpClient.new;
 
   final HttpClientFactory _httpClientFactory;
 

@@ -94,15 +94,13 @@ var _kDefaultTargets = <Target>[
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
-  AssembleCommand({bool verboseHelp = false, required BuildSystem buildSystem})
-    : _verboseHelp = verboseHelp,
-      _buildSystem = buildSystem {
+  AssembleCommand({this._verboseHelp = false, required this._buildSystem}) {
     requiresPubspecYaml();
     argParser.addMultiOption(
       'define',
       abbr: 'd',
       valueHelp: 'target=key=value',
-      hide: !verboseHelp,
+      hide: !_verboseHelp,
       help:
           'DEPRECATED. Use "--dart-define" or "-D" instead for consistency.\n'
           '\n'
@@ -154,7 +152,7 @@ class AssembleCommand extends FlutterCommand {
           'files will be written. Must be either absolute or relative from the '
           'root of the current Flutter project.',
     );
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
+    usesExtraDartFlagOptions(verboseHelp: _verboseHelp);
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',

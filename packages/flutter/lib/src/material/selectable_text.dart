@@ -35,9 +35,8 @@ import 'theme.dart';
 const int iOSHorizontalOffset = -2;
 
 class _TextSpanEditingController extends TextEditingController {
-  _TextSpanEditingController({required TextSpan textSpan})
-    : _textSpan = textSpan,
-      super(text: textSpan.toPlainText(includeSemanticsLabels: false));
+  _TextSpanEditingController({required this._textSpan})
+    : super(text: _textSpan.toPlainText(includeSemanticsLabels: false));
 
   final TextSpan _textSpan;
 
@@ -59,9 +58,7 @@ class _TextSpanEditingController extends TextEditingController {
 }
 
 class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
-  _SelectableTextSelectionGestureDetectorBuilder({required _SelectableTextState state})
-    : _state = state,
-      super(delegate: state);
+  _SelectableTextSelectionGestureDetectorBuilder({required this._state}) : super(delegate: _state);
 
   final _SelectableTextState _state;
 

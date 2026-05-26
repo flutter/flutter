@@ -13,9 +13,8 @@ import '../../xcode_project.dart';
 // This caused issues switching between a real device and simulator due to architecture mismatch.
 // Remove the linking and embedding logic from the Xcode project to give the tool more control over these.
 class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
-  RemoveFrameworkLinkAndEmbeddingMigration(IosProject project, super.logger, Analytics analytics)
-    : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-      _analytics = analytics;
+  RemoveFrameworkLinkAndEmbeddingMigration(IosProject project, super.logger, this._analytics)
+    : _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
 
   final File _xcodeProjectInfoFile;
   final Analytics _analytics;

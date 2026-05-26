@@ -55,12 +55,10 @@ class RouteInformation {
       'Pass Uri.parse(location) to uri parameter instead. '
       'This feature was deprecated after v3.8.0-3.0.pre.',
     )
-    String? location,
-    Uri? uri,
+    this._location,
+    this._uri,
     this.state,
-  }) : _location = location,
-       _uri = uri,
-       assert((location != null) != (uri != null));
+  }) : assert((_location != null) != (_uri != null));
 
   /// The location of the application.
   ///

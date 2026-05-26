@@ -824,7 +824,7 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
 //
 // This serializes each entry as a unique `int` value.
 class _RestorableDatePickerEntryMode extends RestorableValue<DatePickerEntryMode> {
-  _RestorableDatePickerEntryMode(DatePickerEntryMode defaultValue) : _defaultValue = defaultValue;
+  _RestorableDatePickerEntryMode(this._defaultValue);
 
   final DatePickerEntryMode _defaultValue;
 
@@ -848,7 +848,7 @@ class _RestorableDatePickerEntryMode extends RestorableValue<DatePickerEntryMode
 //
 // This serializes each entry as a unique `int` value.
 class _RestorableAutovalidateMode extends RestorableValue<AutovalidateMode> {
-  _RestorableAutovalidateMode(AutovalidateMode defaultValue) : _defaultValue = defaultValue;
+  _RestorableAutovalidateMode(this._defaultValue);
 
   final AutovalidateMode _defaultValue;
 
@@ -1339,7 +1339,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.initialDateRange,
     required this.firstDate,
     required this.lastDate,
-    DateTime? currentDate,
+    this._currentDate,
     this.initialEntryMode = DatePickerEntryMode.calendar,
     this.helpText,
     this.cancelText,
@@ -1358,7 +1358,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.switchToCalendarEntryModeIcon,
     this.selectableDayPredicate,
     this.calendarDelegate = const GregorianCalendarDelegate(),
-  }) : _currentDate = currentDate;
+  });
 
   /// The date range that the date range picker starts with when it opens.
   ///

@@ -479,9 +479,8 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 }
 
 class TestRenderSliverFixedExtentBoxAdaptor extends RenderSliverFixedExtentBoxAdaptor {
-  TestRenderSliverFixedExtentBoxAdaptor({required double itemExtent})
-    : _itemExtent = itemExtent,
-      super(childManager: TestRenderSliverBoxChildManager(children: <RenderBox>[]));
+  TestRenderSliverFixedExtentBoxAdaptor({required this._itemExtent})
+    : super(childManager: TestRenderSliverBoxChildManager(children: <RenderBox>[]));
 
   final double _itemExtent;
 

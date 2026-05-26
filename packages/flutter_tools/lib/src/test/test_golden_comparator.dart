@@ -42,19 +42,13 @@ import 'test_config.dart';
 final class TestGoldenComparator {
   /// Creates a [TestGoldenComparator] instance.
   TestGoldenComparator({
-    required String flutterTesterBinPath,
-    required TestCompiler Function() compilerFactory,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required ProcessManager processManager,
-    Map<String, String> environment = const <String, String>{},
-  }) : _tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
-       _flutterTesterBinPath = flutterTesterBinPath,
-       _compilerFactory = compilerFactory,
-       _logger = logger,
-       _fileSystem = fileSystem,
-       _processManager = processManager,
-       _environment = environment;
+    required this._flutterTesterBinPath,
+    required this._compilerFactory,
+    required this._logger,
+    required this._fileSystem,
+    required this._processManager,
+    this._environment = const <String, String>{},
+  }) : _tempDir = _fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.');
 
   final String _flutterTesterBinPath;
   final Directory _tempDir;
@@ -269,14 +263,14 @@ final class TestGoldenUpdateError implements TestGoldenUpdate {
 /// handles communication with the child process.
 class TestGoldenComparatorProcess {
   /// Creates a [TestGoldenComparatorProcess] backed by [process].
-  TestGoldenComparatorProcess(this.process, {required Logger logger}) : _logger = logger {
+  TestGoldenComparatorProcess(this.process, {required this._logger}) {
     // Pipe stdout and stderr to printTrace and printError.
     // Also parse stdout as a stream of JSON objects.
     streamIterator = StreamIterator<Map<String, dynamic>>(
       process.stdout
           .transform(utf8LineDecoder)
           .where((String line) {
-            logger.printTrace('<<< $line');
+            _logger.printTrace('<<< $line');
             return line.isNotEmpty && line[0] == '{';
           })
           .map<dynamic>(jsonDecode)
@@ -284,7 +278,7 @@ class TestGoldenComparatorProcess {
     );
 
     process.stderr.transform(utf8LineDecoder).forEach((String line) {
-      logger.printError('<<< $line');
+      _logger.printError('<<< $line');
     });
   }
 

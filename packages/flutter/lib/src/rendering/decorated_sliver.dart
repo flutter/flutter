@@ -19,12 +19,10 @@ class RenderDecoratedSliver extends RenderProxySliver {
   /// The [ImageConfiguration] will be passed to the decoration (with the size
   /// filled in) to let it resolve images.
   RenderDecoratedSliver({
-    required Decoration decoration,
-    DecorationPosition position = DecorationPosition.background,
-    ImageConfiguration configuration = ImageConfiguration.empty,
-  }) : _decoration = decoration,
-       _position = position,
-       _configuration = configuration;
+    required this._decoration,
+    this._position = DecorationPosition.background,
+    this._configuration = ImageConfiguration.empty,
+  });
 
   /// What decoration to paint.
   ///

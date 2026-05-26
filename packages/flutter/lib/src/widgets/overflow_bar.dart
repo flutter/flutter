@@ -249,18 +249,13 @@ class _RenderOverflowBar extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox, _OverflowBarParentData> {
   _RenderOverflowBar({
     List<RenderBox>? children,
-    double spacing = 0.0,
-    MainAxisAlignment? alignment,
-    double overflowSpacing = 0.0,
-    OverflowBarAlignment overflowAlignment = OverflowBarAlignment.start,
-    VerticalDirection overflowDirection = VerticalDirection.down,
-    required TextDirection textDirection,
-  }) : _spacing = spacing,
-       _alignment = alignment,
-       _overflowSpacing = overflowSpacing,
-       _overflowAlignment = overflowAlignment,
-       _overflowDirection = overflowDirection,
-       _textDirection = textDirection {
+    this._spacing = 0.0,
+    this._alignment,
+    this._overflowSpacing = 0.0,
+    this._overflowAlignment = OverflowBarAlignment.start,
+    this._overflowDirection = VerticalDirection.down,
+    required this._textDirection,
+  }) {
     addAll(children);
   }
 

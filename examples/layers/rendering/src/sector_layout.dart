@@ -162,7 +162,7 @@ abstract class RenderSector extends RenderObject {
 }
 
 abstract class RenderDecoratedSector extends RenderSector {
-  RenderDecoratedSector(BoxDecoration? decoration) : _decoration = decoration;
+  RenderDecoratedSector(this._decoration);
 
   BoxDecoration? _decoration;
   BoxDecoration? get decoration => _decoration;
@@ -249,9 +249,8 @@ class RenderSectorRing extends RenderSectorWithChildren {
   RenderSectorRing({
     BoxDecoration? decoration,
     double deltaRadius = double.infinity,
-    double padding = 0.0,
-  }) : _padding = padding,
-       assert(deltaRadius >= 0.0),
+    this._padding = 0.0,
+  }) : assert(deltaRadius >= 0.0),
        _desiredDeltaRadius = deltaRadius,
        super(decoration);
 
@@ -370,9 +369,8 @@ class RenderSectorRing extends RenderSectorWithChildren {
 class RenderSectorSlice extends RenderSectorWithChildren {
   // lays out RenderSector children in a stack
 
-  RenderSectorSlice({BoxDecoration? decoration, double deltaTheta = kTwoPi, double padding = 0.0})
-    : _padding = padding,
-      _desiredDeltaTheta = deltaTheta,
+  RenderSectorSlice({BoxDecoration? decoration, double deltaTheta = kTwoPi, this._padding = 0.0})
+    : _desiredDeltaTheta = deltaTheta,
       super(decoration);
 
   double _desiredDeltaTheta;
@@ -481,8 +479,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
 
 class RenderBoxToRenderSectorAdapter extends RenderBox
     with RenderObjectWithChildMixin<RenderSector> {
-  RenderBoxToRenderSectorAdapter({double innerRadius = 0.0, RenderSector? child})
-    : _innerRadius = innerRadius {
+  RenderBoxToRenderSectorAdapter({this._innerRadius = 0.0, RenderSector? child}) {
     this.child = child;
   }
 

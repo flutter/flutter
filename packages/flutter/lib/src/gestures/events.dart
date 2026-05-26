@@ -1888,8 +1888,8 @@ class PointerScrollEvent extends PointerSignalEvent
     super.position,
     this.scrollDelta = Offset.zero,
     super.embedderId,
-    RespondPointerEventCallback? onRespond,
-  }) : _onRespond = onRespond;
+    this._onRespond,
+  });
 
   @override
   final Offset scrollDelta;

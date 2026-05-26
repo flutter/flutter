@@ -60,7 +60,7 @@ enum PlatformType {
 
 /// A discovery mechanism for flutter-supported development devices.
 abstract class DeviceManager {
-  DeviceManager({required Logger logger}) : _logger = logger;
+  DeviceManager({required this._logger});
 
   final Logger _logger;
 
@@ -310,25 +310,23 @@ class DeviceDiscoverySupportFilter {
       _flutterProject = null;
 
   /// Filter devices to only include those supported by Flutter and the
-  /// provided [flutterProject].
+  /// provided `flutterProject`.
   ///
-  /// If [flutterProject] is null, all devices will be considered supported by
+  /// If `flutterProject` is null, all devices will be considered supported by
   /// the project.
   DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProject({
-    required FlutterProject? flutterProject,
-  }) : _flutterProject = flutterProject,
-       _excludeDevicesNotSupportedByProject = true,
+    required this._flutterProject,
+  }) : _excludeDevicesNotSupportedByProject = true,
        _excludeDevicesNotSupportedByAll = false;
 
   /// Filter devices to only include those supported by Flutter, the provided
-  /// [flutterProject], and `--device all`.
+  /// [_flutterProject], and `--device all`.
   ///
-  /// If [flutterProject] is null, all devices will be considered supported by
+  /// If [_flutterProject] is null, all devices will be considered supported by
   /// the project.
   DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProjectOrAll({
-    required FlutterProject? flutterProject,
-  }) : _flutterProject = flutterProject,
-       _excludeDevicesNotSupportedByProject = true,
+    required this._flutterProject,
+  }) : _excludeDevicesNotSupportedByProject = true,
        _excludeDevicesNotSupportedByAll = true;
 
   final FlutterProject? _flutterProject;

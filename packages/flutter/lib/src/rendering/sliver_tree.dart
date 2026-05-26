@@ -62,7 +62,7 @@ class TreeSliverNodeParentData extends SliverMultiBoxAdaptorParentData {
 ///
 /// {@endtemplate}
 class TreeSliverIndentationType {
-  const TreeSliverIndentationType._internal(double value) : _value = value;
+  const TreeSliverIndentationType._internal(this._value);
 
   /// The number of pixels by which [TreeSliverNode]s will be offset according
   /// to their [TreeSliverNode.depth].
@@ -111,10 +111,9 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
   RenderTreeSliver({
     required super.childManager,
     required super.itemExtentBuilder,
-    required Map<UniqueKey, TreeSliverNodesAnimation> activeAnimations,
-    required double indentation,
-  }) : _activeAnimations = activeAnimations,
-       _indentation = indentation;
+    required this._activeAnimations,
+    required this._indentation,
+  });
 
   // TODO(Piinks): There are some opportunities to cache even further as far as
   // extents and layout offsets when using itemExtentBuilder from the super

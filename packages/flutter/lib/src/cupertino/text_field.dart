@@ -102,9 +102,8 @@ enum OverlayVisibilityMode {
 
 class _CupertinoTextFieldSelectionGestureDetectorBuilder
     extends TextSelectionGestureDetectorBuilder {
-  _CupertinoTextFieldSelectionGestureDetectorBuilder({required _CupertinoTextFieldState state})
-    : _state = state,
-      super(delegate: state);
+  _CupertinoTextFieldSelectionGestureDetectorBuilder({required this._state})
+    : super(delegate: _state);
 
   final _CupertinoTextFieldState _state;
 
@@ -1439,6 +1438,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
       autofillConfiguration: autofillConfiguration,
     );
   }
+
   // AutofillClient implementation end.
 
   @override
@@ -1755,12 +1755,10 @@ class _BaselineAlignedStackParentData extends ContainerBoxParentData<RenderBox> 
 class _RenderBaselineAlignedStack extends RenderBox
     with SlottedContainerRenderObjectMixin<_BaselineAlignedStackSlot, RenderBox> {
   _RenderBaselineAlignedStack({
-    required TextAlignVertical textAlignVertical,
-    required TextBaseline editableTextBaseline,
-    required TextBaseline placeholderBaseline,
-  }) : _textAlignVertical = textAlignVertical,
-       _editableTextBaseline = editableTextBaseline,
-       _placeholderBaseline = placeholderBaseline;
+    required this._textAlignVertical,
+    required this._editableTextBaseline,
+    required this._placeholderBaseline,
+  });
 
   TextAlignVertical get textAlignVertical => _textAlignVertical;
   TextAlignVertical _textAlignVertical;

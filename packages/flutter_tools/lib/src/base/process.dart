@@ -336,9 +336,7 @@ abstract class ProcessUtils {
 }
 
 class _DefaultProcessUtils implements ProcessUtils {
-  _DefaultProcessUtils({required ProcessManager processManager, required Logger logger})
-    : _processManager = processManager,
-      _logger = logger;
+  _DefaultProcessUtils({required this._processManager, required this._logger});
 
   final ProcessManager _processManager;
 

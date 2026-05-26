@@ -55,15 +55,11 @@ abstract class OperatingSystemUtils {
   }
 
   OperatingSystemUtils._private({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-  }) : _fileSystem = fileSystem,
-       _logger = logger,
-       _platform = platform,
-       _processManager = processManager,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+    required this._fileSystem,
+    required this._logger,
+    required this._platform,
+    required this._processManager,
+  }) : _processUtils = ProcessUtils(logger: _logger, processManager: _processManager);
 
   @visibleForTesting
   static final gzipLevel1 = GZipCodec(level: 1);
