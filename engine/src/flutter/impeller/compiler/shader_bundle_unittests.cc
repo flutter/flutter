@@ -306,6 +306,49 @@ TEST(ShaderBundleTest, DeriveShaderFloatTypeFromDimensions) {
   EXPECT_EQ(DeriveShaderFloatType(ShaderType::kFloat, 1, 0), std::nullopt);
 }
 
+TEST(ShaderBundleTest, TargetPlatformDefinesMatchEachBackend) {
+  EXPECT_EQ(
+      ShaderBundleTargetPlatformDefines(TargetPlatform::kMetalIOS),
+      (std::vector<std::string>{"IMPELLER_TARGET_METAL",
+                                "IMPELLER_TARGET_METAL_IOS"}));
+  EXPECT_EQ(
+      ShaderBundleTargetPlatformDefines(TargetPlatform::kMetalDesktop),
+      (std::vector<std::string>{"IMPELLER_TARGET_METAL",
+                                "IMPELLER_TARGET_METAL_DESKTOP"}));
+  EXPECT_EQ(ShaderBundleTargetPlatformDefines(TargetPlatform::kOpenGLES),
+            (std::vector<std::string>{"IMPELLER_TARGET_OPENGLES"}));
+  EXPECT_EQ(ShaderBundleTargetPlatformDefines(TargetPlatform::kOpenGLDesktop),
+            (std::vector<std::string>{"IMPELLER_TARGET_OPENGLES"}));
+  EXPECT_EQ(ShaderBundleTargetPlatformDefines(TargetPlatform::kVulkan),
+            (std::vector<std::string>{"IMPELLER_TARGET_VULKAN"}));
+
+  // Runtime stages and SkSL receive their defines elsewhere; the shader bundle
+  // adds none for them.
+  EXPECT_TRUE(
+      ShaderBundleTargetPlatformDefines(TargetPlatform::kRuntimeStageVulkan)
+          .empty());
+  EXPECT_TRUE(
+      ShaderBundleTargetPlatformDefines(TargetPlatform::kUnknown).empty());
+}
+
+TEST(ShaderBundleTest, InjectsTargetDefinesDuringCompilation) {
+  // `check_gles_definition.frag` contains an invalid token guarded by
+  // `#ifdef IMPELLER_TARGET_OPENGLES`. Bundling it must fail because the
+  // OpenGLES backend now receives that define and compiles the error branch.
+  // Without the injected define the OpenGLES backend would compile cleanly.
+  std::string fixtures_path = flutter::testing::GetFixturesPath();
+  std::string config = "{\"Probe\": {\"type\": \"fragment\", \"file\": \"" +
+                       fixtures_path + "/check_gles_definition.frag\"}}";
+
+  SourceOptions options;
+  options.target_platform = TargetPlatform::kRuntimeStageMetal;
+  options.source_language = SourceLanguage::kGLSL;
+
+  std::optional<fb::shaderbundle::ShaderBundleT> bundle =
+      GenerateShaderBundleFlatbuffer(config, options);
+  EXPECT_FALSE(bundle.has_value());
+}
+
 }  // namespace testing
 }  // namespace compiler
 }  // namespace impeller

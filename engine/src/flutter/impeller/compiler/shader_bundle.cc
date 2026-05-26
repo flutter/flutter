@@ -87,6 +87,29 @@ std::optional<ShaderBundleConfig> ParseShaderBundleConfig(
   return bundle;
 }
 
+std::vector<std::string> ShaderBundleTargetPlatformDefines(
+    TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform::kMetalIOS:
+      return {"IMPELLER_TARGET_METAL", "IMPELLER_TARGET_METAL_IOS"};
+    case TargetPlatform::kMetalDesktop:
+      return {"IMPELLER_TARGET_METAL", "IMPELLER_TARGET_METAL_DESKTOP"};
+    case TargetPlatform::kOpenGLES:
+    case TargetPlatform::kOpenGLDesktop:
+      return {"IMPELLER_TARGET_OPENGLES"};
+    case TargetPlatform::kVulkan:
+      return {"IMPELLER_TARGET_VULKAN"};
+    case TargetPlatform::kSkSL:
+    case TargetPlatform::kRuntimeStageMetal:
+    case TargetPlatform::kRuntimeStageGLES:
+    case TargetPlatform::kRuntimeStageGLES3:
+    case TargetPlatform::kRuntimeStageVulkan:
+    case TargetPlatform::kUnknown:
+      return {};
+  }
+  return {};
+}
+
 static std::unique_ptr<fb::shaderbundle::BackendShaderT>
 GenerateShaderBackendFB(TargetPlatform target_platform,
                         SourceOptions& options,
@@ -112,12 +135,22 @@ GenerateShaderBackendFB(TargetPlatform target_platform,
       shader_config.source_file_name, options.type, options.source_language,
       shader_config.entry_point);
 
+  // Inject the platform-discriminating defines (e.g. IMPELLER_TARGET_METAL) so
+  // bundled shaders can specialize per backend. These are added to a local copy
+  // because `options` is shared across every backend compiled here; pushing
+  // onto it directly would accumulate defines from previously compiled
+  // backends.
+  SourceOptions backend_options = options;
+  for (const auto& define : ShaderBundleTargetPlatformDefines(target_platform)) {
+    backend_options.defines.push_back(define);
+  }
+
   Reflector::Options reflector_options;
   reflector_options.target_platform = options.target_platform;
   reflector_options.entry_point_name = options.entry_point_name;
   reflector_options.shader_name = shader_name;
 
-  Compiler compiler(source_file_mapping, options, reflector_options);
+  Compiler compiler(source_file_mapping, backend_options, reflector_options);
   if (!compiler.IsValid()) {
     std::cerr << "Compilation failed for bundled shader \"" << shader_name
               << "\"." << std::endl;
