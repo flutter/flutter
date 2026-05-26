@@ -14,6 +14,7 @@ import '../../base/error_handling_io.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/logger.dart';
+import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
@@ -94,15 +95,18 @@ class ShaderCompiler {
     required Logger logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
+    Platform platform = const LocalPlatform(),
   }) : _processManager = processManager,
        _logger = logger,
        _fs = fileSystem,
-       _artifacts = artifacts;
+       _artifacts = artifacts,
+       _platform = platform;
 
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fs;
   final Artifacts _artifacts;
+  final Platform _platform;
 
   List<String> _shaderTargetsFromTargetPlatform(TargetPlatform targetPlatform) {
     switch (targetPlatform) {
@@ -164,6 +168,30 @@ class ShaderCompiler {
     required TargetPlatform targetPlatform,
     bool fatal = true,
   }) async {
+    if (_platform.isWindows) {
+      final String absoluteInputPath = input.absolute.path;
+      final String absoluteOutputPath = _fs.path.absolute(outputPath);
+      final nonAscii = RegExp(r'[^\x00-\x7F]');
+      if (nonAscii.hasMatch(absoluteInputPath) || nonAscii.hasMatch(absoluteOutputPath)) {
+        throw ShaderCompilerException._(
+          'The shader compilation path contains non-ASCII characters:\n'
+          '  Input: "$absoluteInputPath"\n'
+          '  Output: "$absoluteOutputPath"\n'
+          'The Impeller shader compiler (impellerc) does not support non-ASCII characters in file paths on Windows. '
+          r'Please move your project or Flutter SDK to a path containing only standard ASCII characters (e.g., C:\projects\my_app).',
+        );
+      }
+
+      if (absoluteInputPath.length >= 260 || absoluteOutputPath.length >= 260) {
+        throw ShaderCompilerException._(
+          'The shader compilation path exceeds Windows MAX_PATH (260 characters):\n'
+          '  Input: "$absoluteInputPath"\n'
+          '  Output: "$absoluteOutputPath"\n'
+          r'Please move your project to a shorter path (e.g., C:\projects\my_app).',
+        );
+      }
+    }
+
     final File impellerc = _fs.file(_artifacts.getHostArtifact(HostArtifact.impellerc));
     if (!impellerc.existsSync()) {
       throw ShaderCompilerException._(
@@ -194,10 +222,11 @@ class ShaderCompiler {
     _logger.printTrace('impellerc command: $cmd');
     final ProcessResult result = await _processManager.run(cmd, stderrEncoding: utf8);
     if (result.exitCode != 0) {
+      final bool isCrash = result.exitCode < 0;
       // Maybe retry impellerc command without --sksl.
-      if (!(shaderTargets.length > 1 && shaderTargets.contains('--sksl'))) {
-        // The original command did not target sksl or targeted only sksl, so
-        // we can't retry without --sksl.
+      if (isCrash || !(shaderTargets.length > 1 && shaderTargets.contains('--sksl'))) {
+        // The process crashed or the original command did not target sksl or
+        // targeted only sksl, so we can't retry without --sksl.
         _logger.printError('impellerc failure: ${result.stderr}');
         failure = true;
       } else {
@@ -229,9 +258,21 @@ class ShaderCompiler {
 
     if (failure) {
       if (fatal) {
+        final int exitCode = result.exitCode;
+        if (exitCode < 0) {
+          throw ShaderCompilerException._(
+            'Shader compilation of "${input.path}" to "$outputPath" '
+            'failed because the Impeller shader compiler crashed (exit code $exitCode).\n'
+            'This may be caused by a system access violation, stack overflow, or antivirus interference.\n'
+            'Try the following troubleshooting steps:\n'
+            '  1. Run "flutter clean" and try again.\n'
+            '  2. Check if your antivirus or Ransomware Protection is blocking "impellerc".\n'
+            '  3. Temporarily disable Impeller by running with "--no-enable-impeller" if applicable.',
+          );
+        }
         throw ShaderCompilerException._(
           'Shader compilation of "${input.path}" to "$outputPath" '
-          'failed with exit code ${result.exitCode}.',
+          'failed with exit code $exitCode.',
         );
       }
       return false;

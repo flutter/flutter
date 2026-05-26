@@ -8,6 +8,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -537,4 +538,119 @@ void main() {
     expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp.spirv'), isNot(exists));
     expect(fileSystem.file('/.tmp_rand0/0.8255140718871702.temp'), isNot(exists));
   });
+
+  testWithoutContext(
+    'compileShader throws ShaderCompilerException when paths contain non-ASCII characters on Windows',
+    () async {
+      final processManager = FakeProcessManager.empty();
+      final platform = FakePlatform(operatingSystem: 'windows');
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: platform,
+      );
+
+      const nonAsciiInputPath = '/shaders/é_shader.frag';
+      fileSystem.file(nonAsciiInputPath).createSync(recursive: true);
+
+      expect(
+        () => shaderCompiler.compileShader(
+          input: fileSystem.file(nonAsciiInputPath),
+          outputPath: outputPath,
+          targetPlatform: TargetPlatform.android,
+        ),
+        throwsA(
+          isA<ShaderCompilerException>().having(
+            (ShaderCompilerException e) => e.toString(),
+            'message',
+            contains('contains non-ASCII characters'),
+          ),
+        ),
+      );
+    },
+  );
+
+  testWithoutContext(
+    'compileShader throws ShaderCompilerException when paths exceed 260 characters on Windows',
+    () async {
+      final processManager = FakeProcessManager.empty();
+      final platform = FakePlatform(operatingSystem: 'windows');
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        platform: platform,
+      );
+
+      final String longName = 'a' * 250;
+      final longInputPath = '/shaders/$longName.frag';
+      fileSystem.file(longInputPath).createSync(recursive: true);
+
+      expect(
+        () => shaderCompiler.compileShader(
+          input: fileSystem.file(longInputPath),
+          outputPath: outputPath,
+          targetPlatform: TargetPlatform.android,
+        ),
+        throwsA(
+          isA<ShaderCompilerException>().having(
+            (ShaderCompilerException e) => e.toString(),
+            'message',
+            contains('exceeds Windows MAX_PATH'),
+          ),
+        ),
+      );
+    },
+  );
+
+  testWithoutContext(
+    'compileShader throws custom ShaderCompilerException when impellerc crashes with negative exit code',
+    () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            impellerc,
+            '--sksl',
+            '--iplr',
+            '--json',
+            '--sl=$outputPath',
+            '--spirv=$outputSpirvPath',
+            '--input=$notFragPath',
+            '--input-type=frag',
+            '--include=$fragDir',
+            '--include=$shaderLibDir',
+          ],
+          exitCode: -1073741819, // Access Violation
+        ),
+      ]);
+      final shaderCompiler = ShaderCompiler(
+        processManager: processManager,
+        logger: logger,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+      );
+
+      expect(
+        () => shaderCompiler.compileShader(
+          input: fileSystem.file(notFragPath),
+          outputPath: outputPath,
+          targetPlatform: TargetPlatform.web_javascript,
+        ),
+        throwsA(
+          isA<ShaderCompilerException>().having(
+            (ShaderCompilerException e) => e.toString(),
+            'message',
+            allOf(
+              contains('Impeller shader compiler crashed (exit code -1073741819)'),
+              contains('antivirus interference'),
+              contains('troubleshooting steps'),
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }
