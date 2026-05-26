@@ -444,28 +444,25 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
         ? localizations.collapsedHint
         : localizations.expandedHint;
 
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      // Match ExpansionTile's delayed VoiceOver announcement behavior.
-      _timer?.cancel();
-      _timer = Timer(const Duration(seconds: 1), () {
-        SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection).catchError((
-          Object exception,
-          StackTrace stack,
-        ) {
-          FlutterError.reportError(
-            FlutterErrorDetails(
-              exception: exception,
-              stack: stack,
-              library: 'widgets library',
-              context: ErrorDescription('while sending expansible semantics announcement'),
-            ),
-          );
-        });
-        _timer?.cancel();
-        _timer = null;
+    // Match ExpansionTile's delayed VoiceOver announcement behavior.
+    _timer?.cancel();
+    _timer = Timer(const Duration(seconds: 1), () {
+      SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection).catchError((
+        Object exception,
+        StackTrace stack,
+      ) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'widgets library',
+            context: ErrorDescription('while sending expansible semantics announcement'),
+          ),
+        );
       });
-      return;
-    }
+      _timer?.cancel();
+      _timer = null;
+    });
 
     SemanticsService.sendAnnouncement(View.of(context), stateHint, textDirection).catchError((
       Object exception,
@@ -483,7 +480,9 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
   }
 
   void _toggleExpansion() {
-    _announceExpansionChange();
+    if (MediaQuery.maybeSupportsAnnounceOf(context) ?? false) {
+      _announceExpansionChange();
+    }
     setState(() {
       // Rebuild with the header and the animating body.
       if (widget.controller.isExpanded) {
@@ -518,21 +517,23 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
       child: TickerMode(enabled: !closed, child: widget.bodyBuilder(context, _animationController)),
     );
 
+    final Widget child = AnimatedBuilder(
+      animation: _animationController.view,
+      builder: (BuildContext context, Widget? child) {
+        final Widget header = widget.headerBuilder(context, _animationController);
+        final Widget body = ClipRect(
+          child: Align(heightFactor: _heightFactor.value, child: child),
+        );
+        return widget.expansibleBuilder(context, header, body, _animationController);
+      },
+      child: shouldRemoveBody ? null : result,
+    );
+
     final Widget semanticsChild = Semantics(
       expanded: widget.controller.isExpanded,
       onExpand: widget.controller.isExpanded ? null : widget.controller.expand,
       onCollapse: !widget.controller.isExpanded ? null : widget.controller.collapse,
-      child: AnimatedBuilder(
-        animation: _animationController.view,
-        builder: (BuildContext context, Widget? child) {
-          final Widget header = widget.headerBuilder(context, _animationController);
-          final Widget body = ClipRect(
-            child: Align(heightFactor: _heightFactor.value, child: child),
-          );
-          return widget.expansibleBuilder(context, header, body, _animationController);
-        },
-        child: shouldRemoveBody ? null : result,
-      ),
+      child: child,
     );
 
     if (MediaQuery.maybeSupportsAnnounceOf(context) ?? false) {
@@ -543,17 +544,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
         expanded: widget.controller.isExpanded,
         onExpand: widget.controller.isExpanded ? null : widget.controller.expand,
         onCollapse: !widget.controller.isExpanded ? null : widget.controller.collapse,
-        child: AnimatedBuilder(
-          animation: _animationController.view,
-          builder: (BuildContext context, Widget? child) {
-            final Widget header = widget.headerBuilder(context, _animationController);
-            final Widget body = ClipRect(
-              child: Align(heightFactor: _heightFactor.value, child: child),
-            );
-            return widget.expansibleBuilder(context, header, body, _animationController);
-          },
-          child: shouldRemoveBody ? null : result,
-        ),
+        child: child,
       );
     }
 
