@@ -1071,17 +1071,9 @@ class IOSDevice extends Device {
         await deviceLogReader.listenToCoreDeviceLauncher(_coreDeviceLauncher);
       }
 
-      var shouldAttachDebugger = false;
-      if (debuggingOptions.buildInfo.isDebug) {
-        shouldAttachDebugger = true;
-      } else if (debuggingOptions.buildInfo.isProfile) {
-        final bool? userFlag = debuggingOptions.iosProfileDebugger;
-        if (userFlag != null) {
-          shouldAttachDebugger = userFlag;
-        } else {
-          shouldAttachDebugger = false;
-        }
-      }
+      final bool shouldAttachDebugger =
+          debuggingOptions.buildInfo.isDebug ||
+          (debuggingOptions.buildInfo.isProfile && (debuggingOptions.iosProfileDebugger ?? false));
 
       if (shouldAttachDebugger) {
         final bool launchSuccess = await _coreDeviceLauncher.launchAppWithLLDBDebugger(
@@ -1093,8 +1085,6 @@ class IOSDevice extends Device {
           mode: debuggingOptions.buildInfo.mode,
         );
 
-        // If it succeeds to launch with LLDB, return, otherwise continue on to
-        // try launching with Xcode.
         if (launchSuccess) {
           return (launchSuccess, IOSDeploymentMethod.coreDeviceWithLLDB);
         } else {

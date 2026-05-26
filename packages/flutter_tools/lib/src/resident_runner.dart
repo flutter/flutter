@@ -21,6 +21,7 @@ import 'base/platform.dart';
 import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
+import 'base/version.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/tools/shader_compiler.dart';
@@ -1304,15 +1305,13 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     globals.printStatus('Lost connection to device.');
 
-    // If running in profile mode on a physical iOS CoreDevice, and we didn't attach a debugger,
-    // prompt the user to opt into debugging for better stack traces on crash.
+    final Version? xcodeVersion = globals.xcode?.currentVersion;
     for (final FlutterDevice device in flutterDevices) {
       final Device? rawDevice = device.device;
       if (rawDevice is IOSDevice &&
           debuggingOptions.buildInfo.isProfile &&
           !(debuggingOptions.iosProfileDebugger ??
-              (globals.xcode?.currentVersion == null ||
-                  globals.xcode!.currentVersion!.major < 26))) {
+              (xcodeVersion == null || xcodeVersion.major < 26))) {
         globals.printStatus(
           'If the application crashed, you can attach a debugger to get a more complete '
           'stack trace by running again with the "--ios-profile-debugger" flag.',

@@ -1165,6 +1165,8 @@ class DebuggingOptions {
   final bool printDtd;
   final WebDevServerConfig? webDevServerConfig;
   final bool testFlag;
+
+  /// Whether to attach the LLDB debugger when running in profile mode on a physical iOS device.
   final bool? iosProfileDebugger;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.

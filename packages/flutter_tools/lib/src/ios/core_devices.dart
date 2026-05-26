@@ -167,7 +167,6 @@ class IOSCoreDeviceLauncher {
     required List<String> launchArguments,
     required ShutdownHooks shutdownHooks,
   }) async {
-    // Install app to device
     final (bool installStatus, _) = await _coreDeviceControl.installApp(
       deviceId: deviceId,
       bundlePath: bundlePath,
@@ -176,8 +175,7 @@ class IOSCoreDeviceLauncher {
       return false;
     }
 
-    // Launch app on device and stream logs. Since we are not attaching a debugger,
-    // startStopped should be false.
+    // Since we are not attaching a debugger, startStopped should be false.
     return _coreDeviceControl.launchAppAndStreamLogs(
       coreDeviceLogForwarder: coreDeviceLogForwarder,
       deviceId: deviceId,
