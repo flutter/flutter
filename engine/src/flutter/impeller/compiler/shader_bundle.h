@@ -7,6 +7,7 @@
 
 #include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "impeller/compiler/source_options.h"
@@ -24,7 +25,7 @@ namespace compiler {
 ///         that Impeller's own shaders receive from the build templates.
 ///
 /// @note   Exposed only for testing purposes.
-std::vector<std::string> ShaderBundleTargetPlatformDefines(
+std::vector<std::string_view> ShaderBundleTargetPlatformDefines(
     TargetPlatform platform);
 
 /// @brief  Parse a shader bundle configuration from a given JSON string.

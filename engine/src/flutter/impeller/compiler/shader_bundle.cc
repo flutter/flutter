@@ -87,7 +87,7 @@ std::optional<ShaderBundleConfig> ParseShaderBundleConfig(
   return bundle;
 }
 
-std::vector<std::string> ShaderBundleTargetPlatformDefines(
+std::vector<std::string_view> ShaderBundleTargetPlatformDefines(
     TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform::kMetalIOS:
@@ -141,12 +141,13 @@ GenerateShaderBackendFB(TargetPlatform target_platform,
   // onto it directly would accumulate defines from previously compiled
   // backends.
   SourceOptions backend_options = options;
+  backend_options.target_platform = target_platform;
   for (const auto& define : ShaderBundleTargetPlatformDefines(target_platform)) {
-    backend_options.defines.push_back(define);
+    backend_options.defines.emplace_back(define);
   }
 
   Reflector::Options reflector_options;
-  reflector_options.target_platform = options.target_platform;
+  reflector_options.target_platform = target_platform;
   reflector_options.entry_point_name = options.entry_point_name;
   reflector_options.shader_name = shader_name;
 
