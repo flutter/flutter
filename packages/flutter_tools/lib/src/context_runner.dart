@@ -241,7 +241,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
       ),
       FlutterVersion: () =>
-          FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: globals.git),
+          FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: context.get<Git>()!),
       Git: () => Git(currentPlatform: globals.platform, runProcessWith: globals.processUtils),
       GradleUtils: () => GradleUtils(
         operatingSystemUtils: globals.os,

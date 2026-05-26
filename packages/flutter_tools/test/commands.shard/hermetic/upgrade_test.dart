@@ -9,6 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -16,7 +17,6 @@ import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/git.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 
 import '../../src/context.dart';
@@ -41,7 +41,7 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
-    final lazyGit = LazyGit(() => globals.git);
+    final lazyGit = LazyGit(() => context.get<Git>()!);
     command = UpgradeCommand(
       git: lazyGit,
       verboseHelp: false,

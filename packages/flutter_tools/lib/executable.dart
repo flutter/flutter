@@ -46,6 +46,7 @@ import 'src/commands/upgrade.dart';
 import 'src/commands/widget_preview.dart';
 import 'src/devtools_launcher.dart';
 import 'src/features.dart';
+import 'src/git.dart';
 import 'src/globals.dart' as globals;
 // Files in `isolated` are intentionally excluded from google3 tooling.
 import 'src/hook_runner.dart' show FlutterHookRunner;
@@ -173,7 +174,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
             logger: globals.logger,
             fileSystem: globals.fs,
             platform: globals.platform,
-            git: globals.git,
+            git: context.get<Git>()!,
           ),
         ],
         suppressAnalytics: !globals.analytics.okToSend,
@@ -209,7 +210,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         cache: globals.cache,
         flutterVersion: globals.flutterVersion,
       ),
-      ChannelCommand(git: globals.git, verboseHelp: verboseHelp),
+      ChannelCommand(git: context.get<Git>()!, verboseHelp: verboseHelp),
       CleanCommand(verbose: verbose),
       ConfigCommand(verboseHelp: verboseHelp),
       CustomDevicesCommand(
@@ -227,7 +228,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
       DebugAdapterCommand(verboseHelp: verboseHelp),
       DevicesCommand(verboseHelp: verboseHelp),
       DoctorCommand(verbose: verbose),
-      DowngradeCommand(git: globals.git, verboseHelp: verboseHelp, logger: globals.logger),
+      DowngradeCommand(git: context.get<Git>()!, verboseHelp: verboseHelp, logger: globals.logger),
       DriveCommand(
         verboseHelp: verboseHelp,
         fileSystem: globals.fs,
@@ -276,7 +277,7 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         artifacts: globals.artifacts!,
         terminal: globals.terminal,
       ),
-      UpgradeCommand(git: globals.git, verboseHelp: verboseHelp),
+      UpgradeCommand(git: context.get<Git>()!, verboseHelp: verboseHelp),
       SymbolizeCommand(stdio: globals.stdio, fileSystem: globals.fs),
       // Development-only commands. These are always hidden,
       IdeConfigCommand(),

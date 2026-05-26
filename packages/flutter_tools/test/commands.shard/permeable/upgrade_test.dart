@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -46,7 +47,7 @@ void main() {
     );
 
     setUp(() {
-      final lazyGit = LazyGit(() => globals.git);
+      final lazyGit = LazyGit(() => context.get<Git>()!);
       fakeCommandRunner = FakeUpgradeCommandRunner(git: lazyGit)
         ..clock = SystemClock.fixed(jan12026);
       realCommandRunner = UpgradeCommandRunner(git: lazyGit)
@@ -631,7 +632,11 @@ void main() {
         );
 
         final CommandRunner<void> runner = createTestCommandRunner(
-          UpgradeCommand(git: globals.git, verboseHelp: false, commandRunner: fakeCommandRunner),
+          UpgradeCommand(
+            git: context.get<Git>()!,
+            verboseHelp: false,
+            commandRunner: fakeCommandRunner,
+          ),
         );
 
         fakeCommandRunner.alreadyUpToDate = false;
@@ -852,7 +857,7 @@ void main() {
           () async {
             fakeProcessManager = FakeProcessManager.any();
             final upgradeCommand = UpgradeCommand(
-              git: globals.git,
+              git: context.get<Git>()!,
               verboseHelp: false,
               commandRunner: fakeCommandRunner,
             );
