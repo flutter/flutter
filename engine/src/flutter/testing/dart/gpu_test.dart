@@ -326,6 +326,19 @@ void main() async {
     expect(texture.sliceCount, 1);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('GpuContext.createTexture allocates an r32Float texture', () async {
+    // Verifies the single-channel float format round-trips through allocation.
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      4,
+      4,
+      format: gpu.PixelFormat.r32Float,
+    );
+    expect(texture.format, gpu.PixelFormat.r32Float);
+    expect(texture.bytesPerTexel, 4);
+    expect(texture.getBaseMipLevelSizeInBytes(), 4 * 4 * 4);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('Texture.fullMipCount', () async {
     // Matches Impeller's `ISize::MipCount`: `floor(log2(min(w, h)))`,
     // clamped to a minimum of 1.

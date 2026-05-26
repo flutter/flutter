@@ -49,9 +49,7 @@ enum class FlutterGPUPixelFormat {
   kB8G8R8A8UNormIntSRGB,
   kR32G32B32A32Float,
   kR16G16B16A16Float,
-  kB10G10R10XR,
-  kB10G10R10XRSRGB,
-  kB10G10R10A10XR,
+  kR32Float,
   kS8UInt,
   kD24UnormS8Uint,
   kD32FloatS8UInt,
@@ -80,12 +78,8 @@ constexpr impeller::PixelFormat ToImpellerPixelFormat(
       return impeller::PixelFormat::kR32G32B32A32Float;
     case FlutterGPUPixelFormat::kR16G16B16A16Float:
       return impeller::PixelFormat::kR16G16B16A16Float;
-    case FlutterGPUPixelFormat::kB10G10R10XR:
-      return impeller::PixelFormat::kB10G10R10XR;
-    case FlutterGPUPixelFormat::kB10G10R10XRSRGB:
-      return impeller::PixelFormat::kB10G10R10XRSRGB;
-    case FlutterGPUPixelFormat::kB10G10R10A10XR:
-      return impeller::PixelFormat::kB10G10R10A10XR;
+    case FlutterGPUPixelFormat::kR32Float:
+      return impeller::PixelFormat::kR32Float;
     case FlutterGPUPixelFormat::kS8UInt:
       return impeller::PixelFormat::kS8UInt;
     case FlutterGPUPixelFormat::kD24UnormS8Uint:
@@ -105,8 +99,7 @@ constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
     case impeller::PixelFormat::kUnknown:
       return FlutterGPUPixelFormat::kUnknown;
     case impeller::PixelFormat::kR32Float:
-      FML_DCHECK(false) << "k32Float not implemented.";
-      return FlutterGPUPixelFormat::kUnknown;
+      return FlutterGPUPixelFormat::kR32Float;
     case impeller::PixelFormat::kA8UNormInt:
       return FlutterGPUPixelFormat::kA8UNormInt;
     case impeller::PixelFormat::kR8UNormInt:
@@ -126,11 +119,10 @@ constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
     case impeller::PixelFormat::kR16G16B16A16Float:
       return FlutterGPUPixelFormat::kR16G16B16A16Float;
     case impeller::PixelFormat::kB10G10R10XR:
-      return FlutterGPUPixelFormat::kB10G10R10XR;
     case impeller::PixelFormat::kB10G10R10XRSRGB:
-      return FlutterGPUPixelFormat::kB10G10R10XRSRGB;
     case impeller::PixelFormat::kB10G10R10A10XR:
-      return FlutterGPUPixelFormat::kB10G10R10A10XR;
+      // Apple-only extended-range formats, not exposed by the Flutter GPU API.
+      return FlutterGPUPixelFormat::kUnknown;
     case impeller::PixelFormat::kS8UInt:
       return FlutterGPUPixelFormat::kS8UInt;
     case impeller::PixelFormat::kD24UnormS8Uint:
