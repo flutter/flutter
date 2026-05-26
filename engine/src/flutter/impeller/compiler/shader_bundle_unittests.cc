@@ -307,26 +307,27 @@ TEST(ShaderBundleTest, DeriveShaderFloatTypeFromDimensions) {
 }
 
 TEST(ShaderBundleTest, TargetPlatformDefinesMatchEachBackend) {
-  EXPECT_EQ(ShaderBundleTargetPlatformDefines(TargetPlatform::kMetalIOS),
+  EXPECT_EQ(GetShaderBundleTargetPlatformDefines(TargetPlatform::kMetalIOS),
             (std::vector<std::string_view>{"IMPELLER_TARGET_METAL",
                                            "IMPELLER_TARGET_METAL_IOS"}));
-  EXPECT_EQ(ShaderBundleTargetPlatformDefines(TargetPlatform::kMetalDesktop),
+  EXPECT_EQ(GetShaderBundleTargetPlatformDefines(TargetPlatform::kMetalDesktop),
             (std::vector<std::string_view>{"IMPELLER_TARGET_METAL",
                                            "IMPELLER_TARGET_METAL_DESKTOP"}));
-  EXPECT_EQ(ShaderBundleTargetPlatformDefines(TargetPlatform::kOpenGLES),
+  EXPECT_EQ(GetShaderBundleTargetPlatformDefines(TargetPlatform::kOpenGLES),
             (std::vector<std::string_view>{"IMPELLER_TARGET_OPENGLES"}));
-  EXPECT_EQ(ShaderBundleTargetPlatformDefines(TargetPlatform::kOpenGLDesktop),
-            (std::vector<std::string_view>{"IMPELLER_TARGET_OPENGLES"}));
-  EXPECT_EQ(ShaderBundleTargetPlatformDefines(TargetPlatform::kVulkan),
+  EXPECT_EQ(
+      GetShaderBundleTargetPlatformDefines(TargetPlatform::kOpenGLDesktop),
+      (std::vector<std::string_view>{"IMPELLER_TARGET_OPENGL"}));
+  EXPECT_EQ(GetShaderBundleTargetPlatformDefines(TargetPlatform::kVulkan),
             (std::vector<std::string_view>{"IMPELLER_TARGET_VULKAN"}));
 
   // Runtime stages and SkSL receive their defines elsewhere; the shader bundle
   // adds none for them.
   EXPECT_TRUE(
-      ShaderBundleTargetPlatformDefines(TargetPlatform::kRuntimeStageVulkan)
+      GetShaderBundleTargetPlatformDefines(TargetPlatform::kRuntimeStageVulkan)
           .empty());
   EXPECT_TRUE(
-      ShaderBundleTargetPlatformDefines(TargetPlatform::kUnknown).empty());
+      GetShaderBundleTargetPlatformDefines(TargetPlatform::kUnknown).empty());
 }
 
 TEST(ShaderBundleTest, InjectsTargetDefinesDuringCompilation) {

@@ -87,7 +87,7 @@ std::optional<ShaderBundleConfig> ParseShaderBundleConfig(
   return bundle;
 }
 
-std::vector<std::string_view> ShaderBundleTargetPlatformDefines(
+std::vector<std::string_view> GetShaderBundleTargetPlatformDefines(
     TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform::kMetalIOS:
@@ -95,8 +95,9 @@ std::vector<std::string_view> ShaderBundleTargetPlatformDefines(
     case TargetPlatform::kMetalDesktop:
       return {"IMPELLER_TARGET_METAL", "IMPELLER_TARGET_METAL_DESKTOP"};
     case TargetPlatform::kOpenGLES:
-    case TargetPlatform::kOpenGLDesktop:
       return {"IMPELLER_TARGET_OPENGLES"};
+    case TargetPlatform::kOpenGLDesktop:
+      return {"IMPELLER_TARGET_OPENGL"};
     case TargetPlatform::kVulkan:
       return {"IMPELLER_TARGET_VULKAN"};
     case TargetPlatform::kSkSL:
@@ -143,7 +144,7 @@ GenerateShaderBackendFB(TargetPlatform target_platform,
   SourceOptions backend_options = options;
   backend_options.target_platform = target_platform;
   for (const auto& define :
-       ShaderBundleTargetPlatformDefines(target_platform)) {
+       GetShaderBundleTargetPlatformDefines(target_platform)) {
     backend_options.defines.emplace_back(define);
   }
 

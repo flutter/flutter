@@ -25,7 +25,7 @@ namespace compiler {
 ///         that Impeller's own shaders receive from the build templates.
 ///
 /// @note   Exposed only for testing purposes.
-std::vector<std::string_view> ShaderBundleTargetPlatformDefines(
+std::vector<std::string_view> GetShaderBundleTargetPlatformDefines(
     TargetPlatform platform);
 
 /// @brief  Parse a shader bundle configuration from a given JSON string.
