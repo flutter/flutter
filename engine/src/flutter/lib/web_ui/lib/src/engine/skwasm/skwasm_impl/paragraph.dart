@@ -1098,7 +1098,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
 extension on Pointer<Uint8> {
   Uint8List toUint8List(int length) {
     final list = Uint8List(length);
-    for (var i = 0; i < length; i++) {
+    for (int i = length - 1; i >= 0; i--) {
       list[i] = this[i];
     }
     return list;
@@ -1111,7 +1111,7 @@ extension on Pointer<Uint8> {
 extension on Pointer<Uint32> {
   Uint32List toUint32List(int length) {
     final list = Uint32List(length);
-    for (var i = 0; i < length; i++) {
+    for (int i = length - 1; i >= 0; i--) {
       list[i] = this[i];
     }
     return list;

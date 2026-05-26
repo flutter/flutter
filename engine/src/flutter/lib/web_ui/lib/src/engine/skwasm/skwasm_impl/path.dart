@@ -279,7 +279,7 @@ class SkwasmPathConstructors implements DisposablePathConstructors {
 extension on Pointer<Int8> {
   Uint8List toUint8List(int length) {
     final list = Uint8List(length);
-    for (var i = 0; i < length; i++) {
+    for (int i = length - 1; i >= 0; i--) {
       list[i] = this[i] & 0xFF;
     }
     return list;
