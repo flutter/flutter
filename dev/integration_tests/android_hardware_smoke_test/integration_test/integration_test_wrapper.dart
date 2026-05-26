@@ -1,19 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
+
+import 'package:android_hardware_smoke_test/main.dart' as app;
 import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
-import 'package:android_hardware_smoke_test/main.dart' as app;
 
 void main() {
   const String channelName =
-      'com.example.android_hardware_smoke_test/test_channel';
+      "com.example.android_hardware_smoke_test/test_channel";
 
   enableFlutterDriverExtension(
     // Thin handler to bridge driver's requestData and MainApp's test_channel.
     handler: (String? request) async {
       if (request == null) {
-        return json.encode(<String, dynamic>{
-          'message': "Error: request was null",
+        return json.encode(<String, Object?>{
+          "message": "Error: request was null",
         });
       }
 
@@ -28,7 +29,7 @@ void main() {
         (ByteData? replyData) {
           final reply =
               const JSONMessageCodec().decodeMessage(replyData)
-                  as Map<dynamic, dynamic>?;
+                  as Map<Object?, Object?>?;
           completer.complete(json.encode(reply));
         },
       );
