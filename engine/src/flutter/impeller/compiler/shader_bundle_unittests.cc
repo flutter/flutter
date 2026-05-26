@@ -307,14 +307,12 @@ TEST(ShaderBundleTest, DeriveShaderFloatTypeFromDimensions) {
 }
 
 TEST(ShaderBundleTest, TargetPlatformDefinesMatchEachBackend) {
-  EXPECT_EQ(
-      ShaderBundleTargetPlatformDefines(TargetPlatform::kMetalIOS),
-      (std::vector<std::string_view>{"IMPELLER_TARGET_METAL",
-                                     "IMPELLER_TARGET_METAL_IOS"}));
-  EXPECT_EQ(
-      ShaderBundleTargetPlatformDefines(TargetPlatform::kMetalDesktop),
-      (std::vector<std::string_view>{"IMPELLER_TARGET_METAL",
-                                     "IMPELLER_TARGET_METAL_DESKTOP"}));
+  EXPECT_EQ(ShaderBundleTargetPlatformDefines(TargetPlatform::kMetalIOS),
+            (std::vector<std::string_view>{"IMPELLER_TARGET_METAL",
+                                           "IMPELLER_TARGET_METAL_IOS"}));
+  EXPECT_EQ(ShaderBundleTargetPlatformDefines(TargetPlatform::kMetalDesktop),
+            (std::vector<std::string_view>{"IMPELLER_TARGET_METAL",
+                                           "IMPELLER_TARGET_METAL_DESKTOP"}));
   EXPECT_EQ(ShaderBundleTargetPlatformDefines(TargetPlatform::kOpenGLES),
             (std::vector<std::string_view>{"IMPELLER_TARGET_OPENGLES"}));
   EXPECT_EQ(ShaderBundleTargetPlatformDefines(TargetPlatform::kOpenGLDesktop),

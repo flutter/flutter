@@ -142,7 +142,8 @@ GenerateShaderBackendFB(TargetPlatform target_platform,
   // backends.
   SourceOptions backend_options = options;
   backend_options.target_platform = target_platform;
-  for (const auto& define : ShaderBundleTargetPlatformDefines(target_platform)) {
+  for (const auto& define :
+       ShaderBundleTargetPlatformDefines(target_platform)) {
     backend_options.defines.emplace_back(define);
   }
 
