@@ -17,6 +17,17 @@ import '../../lib/gpu/lib/gpu.dart' as gpu;
 
 import 'impeller_enabled.dart';
 
+// The reinitialize service extension is only registered in debug mode (inside
+// an assert), so tests that depend on it must be skipped when asserts are off.
+bool get assertsEnabled {
+  bool enabled = false;
+  assert(() {
+    enabled = true;
+    return true;
+  }());
+  return enabled;
+}
+
 ByteData float32(List<double> values) {
   return Float32List.fromList(values).buffer.asByteData();
 }
@@ -32,9 +43,8 @@ ByteData unlitUBO(Matrix4 mvp, Vector4 color) {
 }
 
 class RenderPassState {
-  RenderPassState(this.renderTexture, this.commandBuffer, this.renderPass);
+  RenderPassState(this.commandBuffer, this.renderPass);
 
-  final gpu.Texture renderTexture;
   final gpu.CommandBuffer commandBuffer;
   final gpu.RenderPass renderPass;
 }
@@ -57,7 +67,7 @@ RenderPassState createSimpleRenderPass() {
     depthStencilAttachment: gpu.DepthStencilAttachment(texture: depthStencilTexture),
   );
   final gpu.RenderPass renderPass = commandBuffer.createRenderPass(renderTarget);
-  return RenderPassState(renderTexture, commandBuffer, renderPass);
+  return RenderPassState(commandBuffer, renderPass);
 }
 
 void drawUnlitTriangle(RenderPassState state, gpu.RenderPipeline pipeline) {
@@ -96,11 +106,11 @@ void main() {
     expect(
       () => developer.registerExtension(
         'ext.ui.gpu.reinitializeShaderLibrary',
-        (String _, Map<String, String> __) async => developer.ServiceExtensionResponse.result('{}'),
+        (String _, Map<String, String> _) async => developer.ServiceExtensionResponse.result('{}'),
       ),
       throwsArgumentError,
     );
-  }, skip: !(impellerEnabled && flutterGpuEnabled));
+  }, skip: !(impellerEnabled && flutterGpuEnabled && assertsEnabled));
 
   // `reinitialize` with an asset that hasn't been loaded yet must no-op.
   // The next `fromAsset` will pick up the fresh bytes on its own.
