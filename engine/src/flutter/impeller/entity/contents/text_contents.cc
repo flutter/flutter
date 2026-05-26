@@ -270,7 +270,7 @@ bool TextContents::Render(const ContentContext& renderer,
 #if FML_OS_LINUX || FML_OS_WIN
   Scalar luma =
       color.red * 0.2126f + color.green * 0.7152f + color.blue * 0.0722f;
-  frag_info.text_contrast = 1.0f + luma * 1.0f;
+  frag_info.text_contrast = 1.0f + luma * 1.2f;
 #else
   frag_info.text_contrast = 1.0f;
 #endif
