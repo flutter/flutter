@@ -4059,45 +4059,29 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (_children == null) {
       return const <SemanticsNode>[];
     }
-    // If the child node is a traversal child, but the current node is
-    // not a traversal parent, it means the child node should be
-    // grafted to be a child of a traversal parent node that has the
-    // same identifier as the child. However, if the traversal parent is not
-    // in the tree, after grafting, the child will not be in the tree as well.
-    // To keep the hit-test tree match the traversal tree, we also skip this
-    // node in childrenInHitTestOrder. Otherwise, the number of nodes in two
-    // trees will be different and user might accidentally hit test a node
-    // that will never be traversed.
-    bool shouldSkipInHitTest(SemanticsNode child) {
-      if (kIsWeb) {
-        return false;
-      }
-      if (child._isTraversalChild && !_isTraversalParent) {
-        final SemanticsNode? traversalParent =
-            owner!._traversalParentNodes[child.getSemanticsData().traversalChildIdentifier];
-        return traversalParent == null;
-      }
-      return false;
+    if (kIsWeb || _isTraversalParent) {
+      return _children!;
     }
 
-    final filtered = <SemanticsNode>[];
-    for (final SemanticsNode child in _children!) {
-      if (!shouldSkipInHitTest(child)) {
-        filtered.add(child);
+    // If a child node is not in the traversal tree after grafting, it is
+    // dropped from the hit-test tree to keep the two trees in sync.
+    // Otherwise, the user might accidentally hit test a node that cannot
+    // be traversed.
+    bool shouldNotSkipInHitTest(SemanticsNode child) {
+      if (child._isTraversalChild) {
+        final SemanticsNode? traversalParent =
+            owner!._traversalParentNodes[child.getSemanticsData().traversalChildIdentifier];
+        return traversalParent != null;
       }
+      return true;
     }
-    return filtered;
+
+    return _children!.where(shouldNotSkipInHitTest).toList();
   }
 
   Int32List _childrenIdInHitTestOrder() {
     final List<SemanticsNode> children = _childrenInHitTestOrder();
-    final childrenInHitTestOrder = Int32List(children.length);
-    var index = 0;
-    for (int i = children.length - 1; i >= 0; i -= 1) {
-      childrenInHitTestOrder[index] = children[i].id;
-      index += 1;
-    }
-    return childrenInHitTestOrder;
+    return Int32List.fromList(children.reversed.map<int>((SemanticsNode c) => c.id).toList());
   }
 
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
