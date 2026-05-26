@@ -5,15 +5,15 @@ version: 0.0.1
 publish_to: none
 
 environment:
-  sdk: '>=3.5.0-0 <4.0.0'
+  sdk: ^3.13.0-0
 
 resolution: workspace
 
 dependencies:
   flutter:
     sdk: flutter
-  hooks: ^1.0.2
-  data_assets: ^0.19.6
+  hooks: ^2.0.0
+  data_assets: ^0.20.0
 
 dev_dependencies:
   flutter_test:
@@ -22,4 +22,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: 2g5j7i
+# PUBSPEC CHECKSUM: 6cfeb0
