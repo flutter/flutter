@@ -1027,7 +1027,10 @@ Duration? _getWindowsRetryDelay({
 }
 
 bool _isWindowsTransientLock(int errorCode) {
-  return errorCode == 5 || errorCode == 32 || errorCode == 33 || errorCode == 1224;
+  return errorCode == kSystemCodeAccessDenied ||
+      errorCode == kSystemCodeSharingViolation ||
+      errorCode == kSystemCodeLockViolation ||
+      errorCode == kSystemCodeUserMappedSectionOpened;
 }
 
 Future<T> _run<T>(
