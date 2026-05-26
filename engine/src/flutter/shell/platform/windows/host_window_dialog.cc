@@ -9,7 +9,6 @@
 
 namespace flutter {
 
-// static
 DWORD HostWindowDialog::GetWindowStyleForDialog(
     std::optional<HWND> const& owner_window,
     bool resizable) {
@@ -24,7 +23,6 @@ DWORD HostWindowDialog::GetWindowStyleForDialog(
   return window_style;
 }
 
-// static
 DWORD HostWindowDialog::GetExtendedWindowStyleForDialog(
     std::optional<HWND> const& owner_window) {
   DWORD extended_window_style = WS_EX_DLGMODALFRAME;
@@ -74,7 +72,6 @@ HostWindowDialog::HostWindowDialog(WindowManager* window_manager,
   }
 }
 
-// static
 Rect HostWindowDialog::GetInitialRect(FlutterWindowsEngine* engine,
                                       const WindowSizeRequest& preferred_size,
                                       const BoxConstraints& constraints,

@@ -48,7 +48,6 @@ HostWindowRegular::HostWindowRegular(WindowManager* window_manager,
   });
 }
 
-// static
 Rect HostWindowRegular::GetInitialRect(FlutterWindowsEngine* engine,
                                        const WindowSizeRequest& preferred_size,
                                        const BoxConstraints& constraints,

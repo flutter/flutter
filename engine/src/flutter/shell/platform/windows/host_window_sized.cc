@@ -33,16 +33,25 @@ void HostWindowSized::DidUpdateViewSize(int32_t width, int32_t height) {
     width_ = width;
     height_ = height;
 
+    WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
+    GetWindowInfo(window_handle_, &window_info);
+
     // Convert physical pixels to logical pixels.
     UINT const dpi =
         engine_->windows_proc_table()->GetDpiForWindow(window_handle_);
     double const scale = static_cast<double>(dpi > 0 ? dpi : 96) / 96.0;
-    WindowSizeRequest const size{
-        .has_preferred_view_size = true,
-        .preferred_view_width = width / scale,
-        .preferred_view_height = height / scale,
-    };
-    SetContentSize(size);
+    std::optional<Size> const window_size = GetWindowSizeForClientSize(
+        *engine_->windows_proc_table(), Size(width / scale, height / scale),
+        box_constraints_.smallest(), box_constraints_.biggest(),
+        window_info.dwStyle, window_info.dwExStyle, nullptr);
+
+    if (!window_size) {
+      return;
+    }
+
+    SetWindowPos(window_handle_, NULL, 0, 0, window_size->width(),
+                 window_size->height(),
+                 SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 
     if (resizable_) {
       // For resizable windows, stop tracking content size after the initial

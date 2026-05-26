@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOWS_VIEW_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOWS_VIEW_H_
 
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -510,7 +511,7 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
 
   // If `true`, the view is sized to its content via a sizing delegate.
   // If `false`, the view is sized by its parent HWND.
-  bool is_sized_to_content_{false};
+  std::atomic<bool> is_sized_to_content_{false};
 
   // The constraints for this view.
   BoxConstraints box_constraints_;

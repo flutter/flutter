@@ -509,6 +509,10 @@ LRESULT HostWindow::HandleMessage(HWND hwnd,
 }
 
 void HostWindow::SetContentSize(const WindowSizeRequest& size) {
+  if (!size.has_preferred_view_size) {
+    return;
+  }
+
   if (GetFullscreen()) {
     std::optional<Size> const window_size = GetWindowSizeForClientSize(
         *engine_->windows_proc_table(),
