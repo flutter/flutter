@@ -14,7 +14,7 @@ bool _isDangerousDirectory(String dirPath) {
   final String canonical = path.canonicalize(dirPath);
 
   // Check if it is root
-  if (canonical == '/' || canonical == r'C:\' || canonical.length <= 3) {
+  if (canonical == '/' || canonical == r'C:\' || (io.Platform.isWindows && canonical.length <= 3)) {
     return true;
   }
 

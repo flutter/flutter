@@ -59,7 +59,8 @@ void main() {
       expect(tempFile.readAsStringSync(), 'safe-devicelab-content');
 
       // Modifying outside system temp should fail and throw our guarded exception
-      final unsafeFile = io.File('/tmp_unsafe_devicelab.txt');
+      final String root = path.rootPrefix(io.Directory.current.absolute.path);
+      final unsafeFile = io.File(path.join(root, 'tmp_unsafe_devicelab.txt'));
       expect(unsafeFile.existsSync(), false);
       expect(
         () => unsafeFile.writeAsStringSync('unsafe-content'),

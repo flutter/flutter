@@ -9,9 +9,11 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fs_safety.dart';
 import '../../src/io.dart';
 
 void main() {
@@ -119,31 +121,32 @@ void main() {
   testWithoutContext(
     'FSGuardIOOverrides isolates filesystem modifications to system temp directory',
     () {
-      final tempFile = io.File(
-        '${io.Directory.systemTemp.path}${io.Platform.pathSeparator}fs_guard_test_safe.txt',
-      );
-      addTearDown(() {
-        if (tempFile.existsSync()) {
-          tempFile.deleteSync();
-        }
-      });
-      // Writing under system temp should succeed
-      tempFile.writeAsStringSync('safe-content');
-      expect(tempFile.readAsStringSync(), 'safe-content');
+      io.IOOverrides.runWithIOOverrides(() {
+        final tempFile = io.File(path.join(io.Directory.systemTemp.path, 'fs_guard_test_safe.txt'));
+        addTearDown(() {
+          if (tempFile.existsSync()) {
+            tempFile.deleteSync();
+          }
+        });
+        // Writing under system temp should succeed
+        tempFile.writeAsStringSync('safe-content');
+        expect(tempFile.readAsStringSync(), 'safe-content');
 
-      // Modifying outside system temp should fail and throw our guarded exception
-      final unsafeFile = io.File('/tmp_unsafe_outside_temp.txt');
-      expect(unsafeFile.existsSync(), false);
-      expect(
-        () => unsafeFile.writeAsStringSync('unsafe-content'),
-        throwsA(
-          isA<io.FileSystemException>().having(
-            (e) => e.message,
-            'message',
-            contains('Test attempted to modify file outside of temp directory'),
+        // Modifying outside system temp should fail and throw our guarded exception
+        final String root = path.rootPrefix(io.Directory.current.absolute.path);
+        final unsafeFile = io.File(path.join(root, 'tmp_unsafe_outside_temp.txt'));
+        expect(unsafeFile.existsSync(), false);
+        expect(
+          () => unsafeFile.writeAsStringSync('unsafe-content'),
+          throwsA(
+            isA<io.FileSystemException>().having(
+              (e) => e.message,
+              'message',
+              contains('Test attempted to modify file outside of temp directory'),
+            ),
           ),
-        ),
-      );
+        );
+      }, FSGuardIOOverrides());
     },
   );
 }
