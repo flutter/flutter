@@ -42,6 +42,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
   ~Shader() override;
 
   static fml::RefPtr<Shader> Make(
+      std::string library_id,
       std::string entrypoint,
       impeller::ShaderStage stage,
       std::shared_ptr<fml::Mapping> code_mapping,
@@ -78,6 +79,11 @@ class Shader : public RefCountedDartWrappable<Shader> {
  private:
   Shader();
 
+  // Stable per-source identifier used to namespace this shader's entrypoint
+  // in the shared shader registry. Set by ShaderLibrary at construction, and
+  // shared by all shaders within the same library. Typically the asset path
+  // the bundle was loaded from.
+  std::string library_id_;
   std::string entrypoint_;
   impeller::ShaderStage stage_;
   std::shared_ptr<fml::Mapping> code_mapping_;
@@ -86,6 +92,10 @@ class Shader : public RefCountedDartWrappable<Shader> {
   std::unordered_map<std::string, UniformBinding> uniform_structs_;
   std::unordered_map<std::string, TextureBinding> uniform_textures_;
   std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts_;
+
+  // Returns the scoped name to use when registering or looking up this
+  // shader's function in a shared impeller::ShaderLibrary.
+  std::string GetScopedName() const;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Shader);
 };

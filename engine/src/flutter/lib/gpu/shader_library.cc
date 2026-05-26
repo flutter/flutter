@@ -15,6 +15,7 @@
 #include "fml/memory/ref_ptr.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/shader_types.h"
+#include "impeller/renderer/shader_key.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
 #include "lib/gpu/context.h"
 
@@ -43,7 +44,7 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromAsset(
     return nullptr;
   }
 
-  return MakeFromFlatbuffer(backend_type, std::move(data));
+  return MakeFromFlatbuffer(backend_type, std::move(data), name);
 }
 
 fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromShaders(ShaderMap shaders) {
@@ -171,9 +172,13 @@ static const impeller::fb::shaderbundle::BackendShader* GetShaderBackend(
 
 fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
     impeller::Context::BackendType backend_type,
-    std::shared_ptr<fml::Mapping> payload) {
+    std::shared_ptr<fml::Mapping> payload,
+    std::string library_id) {
   if (payload == nullptr || !payload->GetMapping()) {
     return nullptr;
+  }
+  if (library_id.empty()) {
+    library_id = impeller::ShaderKey::MakeFallbackLibraryId();
   }
   if (!impeller::fb::shaderbundle::ShaderBundleBufferHasIdentifier(
           payload->GetMapping())) {
@@ -324,7 +329,7 @@ fml::RefPtr<ShaderLibrary> ShaderLibrary::MakeFromFlatbuffer(
     }
 
     auto shader = flutter::gpu::Shader::Make(
-        backend_shader->entrypoint()->str(),
+        library_id, backend_shader->entrypoint()->str(),
         ToShaderStage(backend_shader->stage()), std::move(code_mapping),
         std::move(inputs), std::move(layouts), std::move(uniform_structs),
         std::move(uniform_textures), std::move(descriptor_set_layouts));

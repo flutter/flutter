@@ -1982,6 +1982,39 @@ resolution: workspace
           <String>['child1', 'child2', 'child2_example'],
         );
       });
+
+      _testInMemory('supports glob patterns in workspace entries', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: parent
+flutter:
+workspace:
+- packages/*
+''');
+        directory.childDirectory('packages').childDirectory('child1').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child1
+flutter:
+resolution: workspace
+''');
+        directory.childDirectory('packages').childDirectory('child2').childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child2
+flutter:
+resolution: workspace
+''');
+
+        expect(
+          FlutterProject.fromDirectory(directory).workspaceProjects
+              .map((FlutterProject subproject) => subproject.manifest.appName)
+              .toList(),
+          <String>['child1', 'child2'],
+        );
+      });
     });
   });
 
