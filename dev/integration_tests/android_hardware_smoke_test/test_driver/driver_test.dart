@@ -11,12 +11,24 @@ import 'package:test/test.dart';
 /// Whether the current environment is LUCI.
 bool get isLuci => io.Platform.environment["LUCI_CI"] == "True";
 
+/// What golden suffix this test should use for different engine configurations.
+String get goldenVariant {
+  final String? variant =
+      io.Platform.environment["ANDROID_HARDWARE_SMOKE_TEST_GOLDEN_VARIANT"];
+  if (variant == null || variant.isEmpty) {
+    return "";
+  }
+  return ".$variant";
+}
+
 void main() async {
   late final FlutterDriver flutterDriver;
 
   setUpAll(() async {
     if (isLuci) {
-      await enableSkiaGoldComparator(namePrefix: "android_hardware_smoke_test");
+      await enableSkiaGoldComparator(
+        namePrefix: "android_hardware_smoke_test$goldenVariant",
+      );
     }
     flutterDriver = await FlutterDriver.connect();
   });
@@ -43,7 +55,10 @@ void main() async {
     // Compare the bytes to a golden file on the host filesystem
     final String imageBase64 = reply["imageBytes"]! as String;
     final Uint8List imageBytes = base64.decode(imageBase64);
-    await expectLater(imageBytes, matchesGoldenFile("goldens/$testName.png"));
+    await expectLater(
+      imageBytes,
+      matchesGoldenFile("goldens/$testName$goldenVariant.png"),
+    );
   }
 
   test("should render and match fooTest golden", () async {

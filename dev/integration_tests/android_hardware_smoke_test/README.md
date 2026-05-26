@@ -80,9 +80,19 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
   ```
 
 * **Command to capture/update reference golden baselines**:
-  Running with `UPDATE_GOLDENS=1` writes or overwrites the local PNG baselines under `integration_test/goldens/` on the host:
+  Running with `UPDATE_GOLDENS=1` writes or overwrites the local PNG baselines under `integration_test/goldens/` on the host.
+
+  To support rendering differences between graphics backends, you can pass the `ANDROID_HARDWARE_SMOKE_TEST_GOLDEN_VARIANT` environment variable to separate Vulkan and OpenGLES baselines (generating `fooTest.vulkan.png` vs `fooTest.opengles.png`):
+
   ```sh
-  UPDATE_GOLDENS=1 flutter drive -v \
+  # Establish/Update Vulkan goldens locally:
+  UPDATE_GOLDENS=1 ANDROID_HARDWARE_SMOKE_TEST_GOLDEN_VARIANT=vulkan flutter drive -v \
+    --driver=test_driver/driver_test.dart \
+    --target=integration_test/integration_test_wrapper.dart \
+    --no-dds
+
+  # Establish/Update OpenGLES goldens locally:
+  UPDATE_GOLDENS=1 ANDROID_HARDWARE_SMOKE_TEST_GOLDEN_VARIANT=opengles flutter drive -v \
     --driver=test_driver/driver_test.dart \
     --target=integration_test/integration_test_wrapper.dart \
     --no-dds
@@ -107,15 +117,15 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
 
 > [!NOTE]
 > **Automated HTML Screenshot Embedding (`embedTestResultImages`)**:
-> When running the Gradle command above, a custom Kotlin DSL task named **`embedTestResultImages`** executes automatically once the tests finish. 
-> 
+> When running the Gradle command above, a custom Kotlin DSL task named **`embedTestResultImages`** executes automatically once the tests finish.
+>
 > It performs the following actions seamlessly:
 > 1. Prevents Gradle from auto-uninstalling the APKs prematurely (via a `gradle.properties` injection).
 > 2. Queries the device sandbox cache to discover all rendered `.png` files dynamically.
 > 3. Streams the raw binary images directly onto the host PC using zero-copy ADB piping.
 > 4. Dynamically parses the generated HTML reports and injects Alternative `<img>` elements right next to the test outcome table cells.
 > 5. Executes a manual `adb uninstall` cleanup to leave the target device perfectly clean.
-> 
+>
 > Once finished, open `app/build/reports/androidTests/connected/debug/index.html` to view the interactive report with all rendering result snapshots embedded natively!
 
 ---
@@ -152,6 +162,9 @@ If you prefer to bypass Gradle entirely for custom debugging, you can manually b
 Since the test suite is registered inside the central repository test orchestrator (`dev/bots/test.dart`), you can execute the full CI runner pipeline locally using standard dev-bot scripts:
 
 ```sh
-# Run from the root of the Flutter repository
-SHARD=android_hardware_smoke_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
+# Run the Vulkan graphics backend shard locally
+SHARD=android_hardware_smoke_vulkan_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
+
+# Run the OpenGLES graphics backend shard locally
+SHARD=android_hardware_smoke_opengles_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 ```
