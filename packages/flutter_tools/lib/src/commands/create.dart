@@ -1405,13 +1405,9 @@ List<String> gatherSdkPackageDependencies(Directory directory) {
   // So it is safe to access it here.
   final String flutterRoot = Cache.flutterRoot!;
   for (final sdkPackage in sdkPackages) {
-    final pubspecYaml =
-        loadYaml(
-              fs
-                  .file(fs.path.join(flutterRoot, 'packages', sdkPackage, 'pubspec.yaml'))
-                  .readAsStringSync(),
-            )
-            as YamlMap;
+    final pubspecYaml = loadYaml(
+      fs.file(fs.path.join(flutterRoot, 'packages', sdkPackage, 'pubspec.yaml')).readAsStringSync(),
+    ) as YamlMap;
     for (final MapEntry<dynamic, dynamic> dependency
         in (pubspecYaml['dependencies'] as YamlMap).entries) {
       final descriptor = dependency.value as Object?;

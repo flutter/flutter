@@ -158,19 +158,18 @@ Future<io.WebSocket> _defaultOpenChannel(
 
 /// Override `VMServiceConnector` in [context] to return a different
 /// [vm_service.VmService] from [connectToVmService] (used by tests).
-typedef VMServiceConnector =
-    Future<FlutterVmService> Function(
-      Uri httpUri, {
-      Git? git,
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device? device,
-      required Logger logger,
-    });
+typedef VMServiceConnector = Future<FlutterVmService> Function(
+  Uri httpUri, {
+  Git? git,
+  ReloadSources? reloadSources,
+  Restart? restart,
+  CompileExpression? compileExpression,
+  FlutterProject? flutterProject,
+  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+  io.CompressionOptions compression,
+  Device? device,
+  required Logger logger,
+});
 
 /// Set up the VM Service client by attaching services for each of the provided
 /// callbacks.
