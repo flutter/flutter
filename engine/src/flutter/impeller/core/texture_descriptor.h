@@ -79,10 +79,7 @@ struct TextureDescriptor {
     if (!IsValid()) {
       return 0u;
     }
-    const size_t block_width = CompressedBlockWidthForPixelFormat(format);
-    const size_t w = size.width <= 0 ? 0u : static_cast<size_t>(size.width);
-    const size_t blocks_wide = (w + block_width - 1u) / block_width;
-    return blocks_wide * BytesPerBlockForPixelFormat(format);
+    return BytesPerRowForTextureWidth(format, size.width);
   }
 
   constexpr bool SamplingOptionsAreValid() const {

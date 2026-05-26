@@ -136,9 +136,9 @@ enum class PixelFormat : uint8_t {
 };
 
 //------------------------------------------------------------------------------
-/// @brief      The family of a block-compressed pixel format. Whole families
-///             are gated behind a single device feature, mirroring the three
-///             optional compression features exposed by WebGPU.
+/// @brief      The family of a block-compressed pixel format. GPUs support
+///             compressed formats on a per-family basis, so each family is
+///             gated behind a single device feature.
 ///
 enum class CompressedTextureFamily {
   /// S3TC, RGTC, and BPTC (BC1 through BC7). Desktop GPUs.
@@ -191,9 +191,15 @@ constexpr CompressedTextureFamily CompressedTextureFamilyForFormat(
     case PixelFormat::kETC2RGBA8UNormInt:
     case PixelFormat::kETC2RGBA8UNormIntSRGB:
       return CompressedTextureFamily::kETC2;
-    default:
+    case PixelFormat::kASTC4x4LDR:
+    case PixelFormat::kASTC4x4LDRSRGB:
+    case PixelFormat::kASTC8x8LDR:
+    case PixelFormat::kASTC8x8LDRSRGB:
       return CompressedTextureFamily::kASTC;
+    default:
+      break;
   }
+  FML_UNREACHABLE();
 }
 
 /// @brief The width, in texels, of one compression block. Uncompressed formats
@@ -203,8 +209,22 @@ constexpr size_t CompressedBlockWidthForPixelFormat(PixelFormat format) {
     case PixelFormat::kASTC8x8LDR:
     case PixelFormat::kASTC8x8LDRSRGB:
       return 8u;
+    case PixelFormat::kBC1RGBAUNormInt:
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+    case PixelFormat::kBC3RGBAUNormInt:
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+    case PixelFormat::kBC5RGUNormInt:
+    case PixelFormat::kBC7RGBAUNormInt:
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+    case PixelFormat::kETC2RGB8UNormInt:
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+    case PixelFormat::kETC2RGBA8UNormInt:
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case PixelFormat::kASTC4x4LDR:
+    case PixelFormat::kASTC4x4LDRSRGB:
+      return 4u;
     default:
-      return IsCompressed(format) ? 4u : 1u;
+      return 1u;
   }
 }
 
@@ -215,8 +235,22 @@ constexpr size_t CompressedBlockHeightForPixelFormat(PixelFormat format) {
     case PixelFormat::kASTC8x8LDR:
     case PixelFormat::kASTC8x8LDRSRGB:
       return 8u;
+    case PixelFormat::kBC1RGBAUNormInt:
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+    case PixelFormat::kBC3RGBAUNormInt:
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+    case PixelFormat::kBC5RGUNormInt:
+    case PixelFormat::kBC7RGBAUNormInt:
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+    case PixelFormat::kETC2RGB8UNormInt:
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+    case PixelFormat::kETC2RGBA8UNormInt:
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case PixelFormat::kASTC4x4LDR:
+    case PixelFormat::kASTC4x4LDRSRGB:
+      return 4u;
     default:
-      return IsCompressed(format) ? 4u : 1u;
+      return 1u;
   }
 }
 

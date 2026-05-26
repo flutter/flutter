@@ -29,13 +29,24 @@ static const constexpr char* kMultisampledRenderToTexture2Ext =
 // https://registry.khronos.org/OpenGL/extensions/OES/OES_element_index_uint.txt
 static const constexpr char* kElementIndexUintExt = "GL_OES_element_index_uint";
 
+// The BC family spans three separate OpenGL ES extensions: S3TC (BC1-BC3),
+// RGTC (BC5), and BPTC (BC7). All three are required to report kBC support.
 // https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_compression_s3tc.txt
 static const constexpr char* kTextureCompressionS3TCExt =
     "GL_EXT_texture_compression_s3tc";
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_compression_rgtc.txt
+static const constexpr char* kTextureCompressionRGTCExt =
+    "GL_EXT_texture_compression_rgtc";
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_compression_bptc.txt
+static const constexpr char* kTextureCompressionBPTCExt =
+    "GL_EXT_texture_compression_bptc";
 
 // https://registry.khronos.org/OpenGL/extensions/KHR/KHR_texture_compression_astc_hdr.txt
 static const constexpr char* kTextureCompressionAstcLdrExt =
     "GL_KHR_texture_compression_astc_ldr";
+// https://registry.khronos.org/OpenGL/extensions/OES/OES_texture_compression_astc.txt
+static const constexpr char* kTextureCompressionAstcOesExt =
+    "GL_OES_texture_compression_astc";
 
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
@@ -156,12 +167,16 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   is_es_ = desc->IsES();
   is_angle_ = desc->IsANGLE();
 
-  // ETC2 and EAC are mandatory in OpenGL ES 3.0. S3TC (BC) and ASTC are gated
-  // behind extensions and are not present on most mobile or desktop GLES.
+  // ETC2 and EAC are mandatory in OpenGL ES 3.0. BC and ASTC are gated behind
+  // extensions and are not present on most mobile or desktop GLES. The whole BC
+  // family requires S3TC, RGTC, and BPTC to all be present.
   supports_texture_compression_bc_ =
-      desc->HasExtension(kTextureCompressionS3TCExt);
+      desc->HasExtension(kTextureCompressionS3TCExt) &&
+      desc->HasExtension(kTextureCompressionRGTCExt) &&
+      desc->HasExtension(kTextureCompressionBPTCExt);
   supports_texture_compression_astc_ =
-      desc->HasExtension(kTextureCompressionAstcLdrExt);
+      desc->HasExtension(kTextureCompressionAstcLdrExt) ||
+      desc->HasExtension(kTextureCompressionAstcOesExt);
   supports_texture_compression_etc2_ =
       desc->IsES() && desc->GetGlVersion().major_version >= 3;
 }
