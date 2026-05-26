@@ -45,12 +45,11 @@ class ConnectionResult {
   final vm_service.VmService vmService;
 }
 
-typedef VmServiceFactory =
-    Future<vm_service.VmService> Function(
-      Uri, {
-      CompressionOptions compression,
-      required Logger logger,
-    });
+typedef VmServiceFactory = Future<vm_service.VmService> Function(
+  Uri, {
+  CompressionOptions compression,
+  required Logger logger,
+});
 
 /// The web specific DevFS implementation.
 class WebDevFS implements DevFS {
