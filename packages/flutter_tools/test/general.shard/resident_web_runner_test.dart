@@ -2082,6 +2082,33 @@ flutter:
   );
 
   testUsingContext(
+    'ResidentWebRunner throws ToolExit when DWDS debug connection times out',
+    () async {
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+      setupMocks();
+      webDevFS.exception = TimeoutException('Connection timed out');
+
+      await expectLater(
+        residentWebRunner.run,
+        throwsToolExit(message: 'Failed to connect to the web debug service.'),
+      );
+      expect(
+        logger.errorText,
+        contains(
+          'Failed to establish connection with the web debug service: TimeoutException: Connection timed out',
+        ),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'throws when port is an integer outside the valid TCP range',
     () async {
       final logger = BufferLogger.test();
