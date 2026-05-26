@@ -43,7 +43,6 @@ DartVMRef::~DartVMRef() {
 }
 
 DartVMRef DartVMRef::Create(const Settings& settings,
-                            fml::RefPtr<const DartSnapshot> vm_snapshot,
                             fml::RefPtr<const DartSnapshot> isolate_snapshot) {
   std::scoped_lock lifecycle_lock(gVMMutex);
 
@@ -76,7 +75,6 @@ DartVMRef DartVMRef::Create(const Settings& settings,
   // and pass a strong reference to the caller.
   auto isolate_name_server = std::make_shared<IsolateNameServer>();
   auto vm = DartVM::Create(settings,                     //
-                           std::move(vm_snapshot),       //
                            std::move(isolate_snapshot),  //
                            isolate_name_server           //
   );

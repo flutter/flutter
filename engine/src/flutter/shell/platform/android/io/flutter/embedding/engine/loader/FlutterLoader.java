@@ -452,11 +452,9 @@ public class FlutterLoader {
         kernelPath = snapshotAssetPath + File.separator + DEFAULT_KERNEL_BLOB;
         shellArgs.add("--" + SNAPSHOT_ASSET_PATH_KEY + "=" + snapshotAssetPath);
         shellArgs.add(
-            FlutterEngineFlags.VM_SNAPSHOT_DATA.engineArgument
-                + flutterApplicationInfo.vmSnapshotData);
+            FlutterEngineFlags.SNAPSHOT_DATA.engineArgument + flutterApplicationInfo.snapshotData);
         shellArgs.add(
-            FlutterEngineFlags.ISOLATE_SNAPSHOT_DATA.engineArgument
-                + flutterApplicationInfo.isolateSnapshotData);
+            FlutterEngineFlags.SNAPSHOT_TEXT.engineArgument + flutterApplicationInfo.snapshotText);
       } else {
         // Add default AOT shared library name arg. Note that if a different library
         // is set in the manifest, that value will take precendence and the default
@@ -691,8 +689,8 @@ public class FlutterLoader {
       // In debug/JIT mode these assets will be written to disk and then
       // mapped into memory so they can be provided to the Dart VM.
       resourceExtractor
-          .addResource(fullAssetPathFrom(flutterApplicationInfo.vmSnapshotData))
-          .addResource(fullAssetPathFrom(flutterApplicationInfo.isolateSnapshotData))
+          .addResource(fullAssetPathFrom(flutterApplicationInfo.snapshotData))
+          .addResource(fullAssetPathFrom(flutterApplicationInfo.snapshotText))
           .addResource(fullAssetPathFrom(DEFAULT_KERNEL_BLOB));
 
       resourceExtractor.start();

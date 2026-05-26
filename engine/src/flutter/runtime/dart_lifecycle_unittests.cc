@@ -61,7 +61,7 @@ static std::shared_ptr<DartIsolate> CreateAndRunRootIsolate(
   auto isolate =
       DartIsolate::CreateRunningRootIsolate(
           vm.GetSettings(),                    // settings
-          vm.GetIsolateSnapshot(),             // isolate_snapshot
+          vm.GetSnapshot(),                    // isolate_snapshot
           {},                                  // platform configuration
           DartIsolate::Flags{},                // flags
           nullptr,                             // root isolate create callback

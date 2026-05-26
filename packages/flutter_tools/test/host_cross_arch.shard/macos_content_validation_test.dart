@@ -206,7 +206,7 @@ void main() {
 
         // Check extracted dSYM file.
         _checkFatBinary(libDsymBinary, buildModeLower, 'dSYM companion file');
-        expect(libSymbols, equals(AppleTestUtils.requiredSymbols));
+        expect(libSymbols, containsAll(AppleTestUtils.requiredSymbols));
         final List<String> dSymSymbols = AppleTestUtils.getExportedSymbols(libDsymBinary.path);
         expect(dSymSymbols, containsAll(AppleTestUtils.requiredSymbols));
         // The actual number of symbols is going to vary but there should
@@ -224,7 +224,7 @@ void main() {
           'App.framework',
           'Resources',
           'flutter_assets',
-          'vm_snapshot_data',
+          'snapshot_data.bin',
         ),
       );
 

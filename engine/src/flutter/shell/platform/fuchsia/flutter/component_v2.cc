@@ -356,24 +356,13 @@ ComponentV2::ComponentV2(
         std::make_shared<dart_utils::ElfSnapshot>();
     if (snapshot->Load(component_data_directory_.get(),
                        "app_aot_snapshot.so")) {
-      const uint8_t* isolate_data = snapshot->IsolateData();
-      const uint8_t* isolate_instructions = snapshot->IsolateInstrs();
-      const uint8_t* vm_data = snapshot->VmData();
-      const uint8_t* vm_instructions = snapshot->VmInstrs();
-      if (isolate_data == nullptr || isolate_instructions == nullptr ||
-          vm_data == nullptr || vm_instructions == nullptr) {
+      const uint8_t* isolate_data = snapshot->SnapshotData();
+      const uint8_t* isolate_instructions = snapshot->SnapshotText();
+      if (isolate_data == nullptr || isolate_instructions == nullptr) {
         FML_LOG(FATAL) << "ELF snapshot missing AOT symbols.";
         return;
       }
       auto hold_snapshot = [snapshot](const uint8_t* _, size_t __) {};
-      settings_.vm_snapshot_data = [hold_snapshot, vm_data]() {
-        return std::make_unique<fml::NonOwnedMapping>(vm_data, 0, hold_snapshot,
-                                                      true /* dontneed_safe */);
-      };
-      settings_.vm_snapshot_instr = [hold_snapshot, vm_instructions]() {
-        return std::make_unique<fml::NonOwnedMapping>(
-            vm_instructions, 0, hold_snapshot, true /* dontneed_safe */);
-      };
       settings_.isolate_snapshot_data = [hold_snapshot, isolate_data]() {
         return std::make_unique<fml::NonOwnedMapping>(
             isolate_data, 0, hold_snapshot, true /* dontneed_safe */);
@@ -391,14 +380,6 @@ ComponentV2::ComponentV2(
                                                  true /* dontneed_safe */));
     } else {
       const int namespace_fd = component_data_directory_.get();
-      settings_.vm_snapshot_data = [namespace_fd]() {
-        return LoadFile(namespace_fd, "vm_snapshot_data.bin",
-                        false /* executable */);
-      };
-      settings_.vm_snapshot_instr = [namespace_fd]() {
-        return LoadFile(namespace_fd, "vm_snapshot_instructions.bin",
-                        true /* executable */);
-      };
       settings_.isolate_snapshot_data = [namespace_fd]() {
         return LoadFile(namespace_fd, "isolate_snapshot_data.bin",
                         false /* executable */);
@@ -409,13 +390,13 @@ ComponentV2::ComponentV2(
       };
     }
   } else {
-    settings_.vm_snapshot_data = []() {
-      return MakeFileMapping("/pkg/data/vm_snapshot_data.bin",
-                             false /* executable */);
-    };
     settings_.isolate_snapshot_data = []() {
       return MakeFileMapping("/pkg/data/isolate_core_snapshot_data.bin",
                              false /* executable */);
+    };
+    settings_.isolate_snapshot_instr = []() {
+      return MakeFileMapping("/pkg/data/isolate_core_snapshot_instr.bin",
+                             true /* executable */);
     };
   }
 

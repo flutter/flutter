@@ -661,7 +661,7 @@ class RuntimeController : public PlatformConfigurationClient,
 
   virtual DartVM* GetDartVM() const { return vm_; }
 
-  const fml::RefPtr<const DartSnapshot>& GetIsolateSnapshot() const {
+  const fml::RefPtr<const DartSnapshot>& GetSnapshot() const {
     return isolate_snapshot_;
   }
 

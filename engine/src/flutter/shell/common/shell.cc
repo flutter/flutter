@@ -207,14 +207,13 @@ Shell::InferVmInitDataFromSettings(Settings& settings) {
   // Always use the `vm_snapshot` and `isolate_snapshot` provided by the
   // settings to launch the VM.  If the VM is already running, the snapshot
   // arguments are ignored.
-  auto vm_snapshot = DartSnapshot::VMSnapshotFromSettings(settings);
   auto isolate_snapshot = DartSnapshot::IsolateSnapshotFromSettings(settings);
-  auto vm = DartVMRef::Create(settings, vm_snapshot, isolate_snapshot);
+  auto vm = DartVMRef::Create(settings, isolate_snapshot);
 
   // If the settings did not specify an `isolate_snapshot`, fall back to the
   // one the VM was launched with.
   if (!isolate_snapshot) {
-    isolate_snapshot = vm->GetVMData()->GetIsolateSnapshot();
+    isolate_snapshot = vm->GetVMData()->GetSnapshot();
   }
   return {std::move(vm), isolate_snapshot};
 }
@@ -708,7 +707,7 @@ std::unique_ptr<Shell> Shell::Spawn(
   std::unique_ptr<Shell> result = CreateWithSnapshot(
       PlatformData{}, task_runners_, rasterizer_->GetRasterThreadMerger(),
       io_manager_, resource_cache_limit_calculator_, GetSettings(), vm_,
-      vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
+      vm_->GetVMData()->GetSnapshot(), on_create_platform_view,
       on_create_rasterizer,
       [engine = this->engine_.get(), initial_route](
           Engine::Delegate& delegate,

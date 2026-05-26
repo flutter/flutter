@@ -39,13 +39,11 @@ ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary(std::string elf_filename) {
   const char* error = nullptr;
 
   auto loaded_elf =
-      Dart_LoadELF(elf_path.c_str(),             // file path
-                   0,                            // file offset
-                   &error,                       // error (out)
-                   &symbols.vm_snapshot_data,    // vm snapshot data (out)
-                   &symbols.vm_snapshot_instrs,  // vm snapshot instrs (out)
-                   &symbols.vm_isolate_data,     // vm isolate data (out)
-                   &symbols.vm_isolate_instrs    // vm isolate instr (out)
+      Dart_LoadELF2(elf_path.c_str(),        // file path
+                    0,                       // file offset
+                    &error,                  // error (out)
+                    &symbols.snapshot_data,  // snapshot data (out)
+                    &symbols.snapshot_text   // snapshot text (out)
       );
 
   if (loaded_elf == nullptr) {
@@ -89,13 +87,11 @@ ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary(
   const char* error = nullptr;
 
   auto loaded_elf =
-      Dart_LoadELF(elf_path.c_str(),             // file path
-                   0,                            // file offset
-                   &error,                       // error (out)
-                   &symbols.vm_snapshot_data,    // vm snapshot data (out)
-                   &symbols.vm_snapshot_instrs,  // vm snapshot instrs (out)
-                   &symbols.vm_isolate_data,     // vm isolate data (out)
-                   &symbols.vm_isolate_instrs    // vm isolate instr (out)
+      Dart_LoadELF2(elf_path.c_str(),        // file path
+                    0,                       // file offset
+                    &error,                  // error (out)
+                    &symbols.snapshot_data,  // snapshot data (out)
+                    &symbols.snapshot_text   // snapshot text (out)
       );
 
   if (loaded_elf == nullptr) {
@@ -117,19 +113,11 @@ bool PrepareSettingsForAOTWithSymbols(Settings& settings,
   if (!DartVM::IsRunningPrecompiledCode()) {
     return false;
   }
-  settings.vm_snapshot_data = [&]() {
-    return std::make_unique<fml::NonOwnedMapping>(symbols.vm_snapshot_data, 0u);
-  };
   settings.isolate_snapshot_data = [&]() {
-    return std::make_unique<fml::NonOwnedMapping>(symbols.vm_isolate_data, 0u);
-  };
-  settings.vm_snapshot_instr = [&]() {
-    return std::make_unique<fml::NonOwnedMapping>(symbols.vm_snapshot_instrs,
-                                                  0u);
+    return std::make_unique<fml::NonOwnedMapping>(symbols.snapshot_data, 0u);
   };
   settings.isolate_snapshot_instr = [&]() {
-    return std::make_unique<fml::NonOwnedMapping>(symbols.vm_isolate_instrs,
-                                                  0u);
+    return std::make_unique<fml::NonOwnedMapping>(symbols.snapshot_text, 0u);
   };
   return true;
 }

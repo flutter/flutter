@@ -77,15 +77,17 @@ Dart_Isolate CreateServiceIsolate(
     char** error) {
   Dart_SetEmbedderInformationCallback(EmbedderInformationCallback);
 
-  const uint8_t *vmservice_data = nullptr, *vmservice_instructions = nullptr;
+  const uint8_t* vmservice_snapshot_data = nullptr;
+  const uint8_t* vmservice_snapshot_text = nullptr;
 
 #if defined(AOT_RUNTIME)
   // The VM service was compiled as a separate app.
   const char* snapshot_path = "/pkg/data/vmservice_snapshot.so";
   if (elf_snapshot.Load(nullptr, snapshot_path)) {
-    vmservice_data = elf_snapshot.IsolateData();
-    vmservice_instructions = elf_snapshot.IsolateInstrs();
-    if (vmservice_data == nullptr || vmservice_instructions == nullptr) {
+    vmservice_snapshot_data = elf_snapshot.SnapshotData();
+    vmservice_snapshot_text = elf_snapshot.SnapshotText();
+    if (vmservice_snapshot_data == nullptr ||
+        vmservice_snapshot_text == nullptr) {
       return nullptr;
     }
   } else {
@@ -115,8 +117,8 @@ Dart_Isolate CreateServiceIsolate(
       return nullptr;
     }
 
-    vmservice_data = mapped_isolate_snapshot_data.address();
-    vmservice_instructions = mapped_isolate_snapshot_instructions.address();
+    vmservice_snapshot_data = mapped_isolate_snapshot_data.address();
+    vmservice_snapshot_text = mapped_isolate_snapshot_instructions.address();
 #if defined(AOT_RUNTIME)
   }
 #endif
@@ -127,8 +129,8 @@ Dart_Isolate CreateServiceIsolate(
 
   auto state = new std::shared_ptr<tonic::DartState>(new tonic::DartState());
   Dart_Isolate isolate = Dart_CreateIsolateGroup(
-      uri, DART_VM_SERVICE_ISOLATE_NAME, vmservice_data, vmservice_instructions,
-      &flags, state, state, error);
+      uri, DART_VM_SERVICE_ISOLATE_NAME, vmservice_snapshot_data,
+      vmservice_snapshot_text, &flags, state, state, error);
   if (!isolate) {
     FML_LOG(ERROR) << "Dart_CreateIsolateGroup failed: " << *error;
     return nullptr;

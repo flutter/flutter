@@ -43,12 +43,12 @@ template("core_snapshot") {
         "$root_out_dir/flutter_runner_patched_sdk/platform_strong.dill"
     inputs = [ platform_dill ]
 
-    vm_snapshot_data = "$target_gen_dir/vm_isolate_snapshot${suffix}.bin"
-    isolate_snapshot_data = "$target_gen_dir/isolate_snapshot${suffix}.bin"
+    core_snapshot_data = "$target_gen_dir/core_snapshot_data${suffix}.bin"
+    core_snapshot_text = "$target_gen_dir/core_snapshot_text${suffix}.bin"
     snapshot_profile = "$target_gen_dir/snapshot_profile${suffix}.json"
     outputs = [
-      vm_snapshot_data,
-      isolate_snapshot_data,
+      core_snapshot_data,
+      core_snapshot_text,
       snapshot_profile,
     ]
 
@@ -63,9 +63,8 @@ template("core_snapshot") {
       "--enable_mirrors=false",
       "--deterministic",
       "--snapshot_kind=core",
-      "--vm_snapshot_data=" + rebase_path(vm_snapshot_data, root_build_dir),
-      "--isolate_snapshot_data=" +
-          rebase_path(isolate_snapshot_data, root_build_dir),
+      "--snapshot_data=" + rebase_path(core_snapshot_data, root_build_dir),
+      "--snapshot_text=" + rebase_path(core_snapshot_text, root_build_dir),
       "--write_v8_snapshot_profile_to=" +
           rebase_path(snapshot_profile, root_build_dir),
     ]
@@ -80,11 +79,11 @@ template("core_snapshot") {
   }
 }
 
-core_snapshot("kernel_core_snapshot") {
+core_snapshot("core_snapshot") {
   product = false
 }
 
-core_snapshot("kernel_core_snapshot_product") {
+core_snapshot("core_snapshot_product") {
   product = true
 }
 

@@ -60,7 +60,7 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
   context.advisory_script_entrypoint = "main";
   auto weak_isolate = DartIsolate::CreateRunningRootIsolate(
       vm_data->GetSettings(),              // settings
-      vm_data->GetIsolateSnapshot(),       // isolate snapshot
+      vm_data->GetSnapshot(),              // isolate snapshot
       nullptr,                             // platform configuration
       DartIsolate::Flags{},                // flags
       nullptr,                             // root_isolate_create_callback
@@ -99,7 +99,7 @@ TEST_F(DartIsolateTest, IsolateShutdownCallbackIsInIsolateScope) {
   context.advisory_script_entrypoint = "main";
   auto weak_isolate = DartIsolate::CreateRunningRootIsolate(
       vm_data->GetSettings(),              // settings
-      vm_data->GetIsolateSnapshot(),       // isolate snapshot
+      vm_data->GetSnapshot(),              // isolate snapshot
       nullptr,                             // platform configuration
       DartIsolate::Flags{},                // flags
       nullptr,                             // root_isolate_create_callback
@@ -431,7 +431,7 @@ TEST_F(DartIsolateTest, CanCreateServiceIsolate) {
   context.advisory_script_entrypoint = "main";
   auto weak_isolate = DartIsolate::CreateRunningRootIsolate(
       vm_data->GetSettings(),              // settings
-      vm_data->GetIsolateSnapshot(),       // isolate snapshot
+      vm_data->GetSnapshot(),              // isolate snapshot
       nullptr,                             // platform configuration
       DartIsolate::Flags{},                // flags
       nullptr,                             // root_isolate_create_callback
@@ -531,7 +531,7 @@ TEST_F(DartIsolateTest, InvalidLoadingUnitFails) {
   context.advisory_script_entrypoint = "main";
   auto weak_isolate = DartIsolate::CreateRunningRootIsolate(
       vm_data->GetSettings(),              // settings
-      vm_data->GetIsolateSnapshot(),       // isolate snapshot
+      vm_data->GetSnapshot(),              // isolate snapshot
       nullptr,                             // platform configuration
       DartIsolate::Flags{},                // flags
       nullptr,                             // root_isolate_create_callback
@@ -548,14 +548,14 @@ TEST_F(DartIsolateTest, InvalidLoadingUnitFails) {
   ASSERT_TRUE(root_isolate);
   ASSERT_EQ(root_isolate->GetPhase(), DartIsolate::Phase::Running);
 
-  auto isolate_data = std::make_unique<const fml::NonOwnedMapping>(
-      split_aot_symbols_.vm_isolate_data, 0);
-  auto isolate_instructions = std::make_unique<const fml::NonOwnedMapping>(
-      split_aot_symbols_.vm_isolate_instrs, 0);
+  auto snapshot_data = std::make_unique<const fml::NonOwnedMapping>(
+      split_aot_symbols_.snapshot_data, 0);
+  auto snapshot_text = std::make_unique<const fml::NonOwnedMapping>(
+      split_aot_symbols_.snapshot_text, 0);
 
   // Invalid loading unit should fail gracefully with error message.
-  ASSERT_FALSE(root_isolate->LoadLoadingUnit(3, std::move(isolate_data),
-                                             std::move(isolate_instructions)));
+  ASSERT_FALSE(root_isolate->LoadLoadingUnit(3, std::move(snapshot_data),
+                                             std::move(snapshot_text)));
   ASSERT_TRUE(root_isolate->Shutdown());
 }
 
@@ -641,7 +641,7 @@ TEST_F(DartIsolateTest, SpawningAnIsolateDoesNotReloadKernel) {
     context.advisory_script_entrypoint = "main";
     auto weak_isolate = DartIsolate::CreateRunningRootIsolate(
         /*settings=*/vm_data->GetSettings(),
-        /*isolate_snapshot=*/vm_data->GetIsolateSnapshot(),
+        /*isolate_snapshot=*/vm_data->GetSnapshot(),
         /*platform_configuration=*/nullptr,
         /*flags=*/DartIsolate::Flags{},
         /*root_isolate_create_callback=*/nullptr,
@@ -672,7 +672,7 @@ TEST_F(DartIsolateTest, SpawningAnIsolateDoesNotReloadKernel) {
     context.advisory_script_entrypoint = "main";
     auto weak_isolate = DartIsolate::CreateRunningRootIsolate(
         /*settings=*/vm_data->GetSettings(),
-        /*isolate_snapshot=*/vm_data->GetIsolateSnapshot(),
+        /*isolate_snapshot=*/vm_data->GetSnapshot(),
         /*platform_configuration=*/nullptr,
         /*flags=*/DartIsolate::Flags{},
         /*root_isolate_create_callback=*/nullptr,
@@ -1137,7 +1137,7 @@ TEST_F(DartIsolateTest, RootIsolateIsOwnedByMainThread) {
   context.advisory_script_entrypoint = "main";
   auto weak_isolate = DartIsolate::CreateRunningRootIsolate(
       vm_data->GetSettings(),              // settings
-      vm_data->GetIsolateSnapshot(),       // isolate snapshot
+      vm_data->GetSnapshot(),              // isolate snapshot
       nullptr,                             // platform configuration
       DartIsolate::Flags{},                // flags
       nullptr,                             // root_isolate_create_callback

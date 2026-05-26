@@ -40,8 +40,8 @@ public class ApplicationInfoLoaderTest {
         ApplicationInfoLoader.load(ApplicationProvider.getApplicationContext());
     assertNotNull(info);
     assertEquals("libapp.so", info.aotSharedLibraryName);
-    assertEquals("vm_snapshot_data", info.vmSnapshotData);
-    assertEquals("isolate_snapshot_data", info.isolateSnapshotData);
+    assertEquals("snapshot_data", info.snapshotData);
+    assertEquals("snapshot_text", info.snapshotText);
     assertEquals("flutter_assets", info.flutterAssetsDir);
     assertEquals("", info.domainNetworkPolicy);
     assertNull(info.nativeLibraryDir);
@@ -72,15 +72,15 @@ public class ApplicationInfoLoaderTest {
   public void itGeneratesCorrectApplicationInfoWithCustomValues() throws Exception {
     Bundle bundle = new Bundle();
     bundle.putString(FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.metadataKey, "testaot");
-    bundle.putString(FlutterEngineFlags.VM_SNAPSHOT_DATA.metadataKey, "testvmsnapshot");
-    bundle.putString(FlutterEngineFlags.ISOLATE_SNAPSHOT_DATA.metadataKey, "testisolatesnapshot");
+    bundle.putString(FlutterEngineFlags.SNAPSHOT_DATA.metadataKey, "testsnapshotdata");
+    bundle.putString(FlutterEngineFlags.SNAPSHOT_TEXT.metadataKey, "testsnapshottext");
     bundle.putString(FlutterEngineFlags.FLUTTER_ASSETS_DIR.metadataKey, "testassets");
     Context context = generateMockContext(bundle, null);
     FlutterApplicationInfo info = ApplicationInfoLoader.load(context);
     assertNotNull(info);
     assertEquals("testaot", info.aotSharedLibraryName);
-    assertEquals("testvmsnapshot", info.vmSnapshotData);
-    assertEquals("testisolatesnapshot", info.isolateSnapshotData);
+    assertEquals("testsnapshotdata", info.snapshotData);
+    assertEquals("testsnapshottext", info.snapshotText);
     assertEquals("testassets", info.flutterAssetsDir);
     assertNull(info.nativeLibraryDir);
     assertEquals("", info.domainNetworkPolicy);

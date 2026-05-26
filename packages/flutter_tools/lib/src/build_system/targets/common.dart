@@ -47,8 +47,8 @@ class CopyFlutterBundle extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
-    Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
+    Source.pattern('{OUTPUT_DIR}/snapshot_data.bin'),
+    Source.pattern('{OUTPUT_DIR}/snapshot_text.bin'),
     Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
     Source.pattern('{BUILD_DIR}/${LinkHooks.resultFilename}'),
   ];
@@ -69,10 +69,6 @@ class CopyFlutterBundle extends Target {
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
-      final String vmSnapshotData = environment.artifacts.getArtifactPath(
-        Artifact.vmSnapshotData,
-        mode: BuildMode.debug,
-      );
       final String isolateSnapshotData = environment.artifacts.getArtifactPath(
         Artifact.isolateSnapshotData,
         mode: BuildMode.debug,
@@ -81,11 +77,8 @@ class CopyFlutterBundle extends Target {
           .childFile('app.dill')
           .copySync(environment.outputDir.childFile('kernel_blob.bin').path);
       environment.fileSystem
-          .file(vmSnapshotData)
-          .copySync(environment.outputDir.childFile('vm_snapshot_data').path);
-      environment.fileSystem
           .file(isolateSnapshotData)
-          .copySync(environment.outputDir.childFile('isolate_snapshot_data').path);
+          .copySync(environment.outputDir.childFile('snapshot_data.bin').path);
     }
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(

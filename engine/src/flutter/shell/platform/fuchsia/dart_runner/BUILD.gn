@@ -219,8 +219,8 @@ template("jit_runner_package") {
   fuchsia_archive(target_name) {
     deps = [
       ":dart_jit${product_suffix}_runner_bin",
+      "kernel:core_snapshot${product_suffix}",
       "kernel:ffi_callback_stub${product_suffix}",
-      "kernel:kernel_core_snapshot${product_suffix}",
     ]
 
     binary = "dart_jit${product_suffix}_runner"
@@ -229,14 +229,14 @@ template("jit_runner_package") {
 
     resources = [
       {
-        path =
-            rebase_path("$target_gen_dir/kernel/vm_data${product_suffix}.bin")
-        dest = "data/vm_snapshot_data.bin"
+        path = rebase_path(
+                "$target_gen_dir/kernel/core_snapshot_data${product_suffix}.bin")
+        dest = "data/core_snapshot_data.bin"
       },
       {
         path = rebase_path(
-                "$target_gen_dir/kernel/isolate_data${product_suffix}.bin")
-        dest = "data/isolate_core_snapshot_data.bin"
+                "$target_gen_dir/kernel/core_snapshot_text${product_suffix}.bin")
+        dest = "data/core_snapshot_text.bin"
       },
       {
         path = rebase_path(

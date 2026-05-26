@@ -36,8 +36,7 @@ const Settings& DartIsolateGroupData::GetSettings() const {
   return settings_;
 }
 
-fml::RefPtr<const DartSnapshot> DartIsolateGroupData::GetIsolateSnapshot()
-    const {
+fml::RefPtr<const DartSnapshot> DartIsolateGroupData::GetSnapshot() const {
   return isolate_snapshot_;
 }
 

@@ -2899,10 +2899,8 @@ TEST_F(EmbedderTest, CanLaunchAndShutdownWithAValidElfSource) {
 }
 
 #if defined(__clang_analyzer__)
-#define TEST_VM_SNAPSHOT_DATA "vm_data"
-#define TEST_VM_SNAPSHOT_INSTRUCTIONS "vm_instructions"
-#define TEST_ISOLATE_SNAPSHOT_DATA "isolate_data"
-#define TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS "isolate_instructions"
+#define TEST_SNAPSHOT_DATA "snapshot_data"
+#define TEST_SNAPSHOT_TEXT "snapshot_text"
 #endif
 
 //------------------------------------------------------------------------------
@@ -2928,32 +2926,26 @@ TEST_F(EmbedderTest, CanSuccessfullyPopulateSpecificJITSnapshotCallbacks) {
 
   // Construct the location of valid JIT snapshots.
   const std::string src_path = GetSourcePath();
-  const std::string vm_snapshot_data =
-      fml::paths::JoinPaths({src_path, TEST_VM_SNAPSHOT_DATA});
-  const std::string vm_snapshot_instructions =
-      fml::paths::JoinPaths({src_path, TEST_VM_SNAPSHOT_INSTRUCTIONS});
-  const std::string isolate_snapshot_data =
-      fml::paths::JoinPaths({src_path, TEST_ISOLATE_SNAPSHOT_DATA});
-  const std::string isolate_snapshot_instructions =
-      fml::paths::JoinPaths({src_path, TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS});
+  const std::string snapshot_data =
+      fml::paths::JoinPaths({src_path, TEST_SNAPSHOT_DATA});
+  const std::string snapshot_text =
+      fml::paths::JoinPaths({src_path, TEST_SNAPSHOT_TEXT});
 
   // Explicitly define the locations of the JIT snapshots
-  builder.GetProjectArgs().vm_snapshot_data =
-      reinterpret_cast<const uint8_t*>(vm_snapshot_data.c_str());
-  builder.GetProjectArgs().vm_snapshot_instructions =
-      reinterpret_cast<const uint8_t*>(vm_snapshot_instructions.c_str());
+  builder.GetProjectArgs().vm_snapshot_data = nullptr;
+  builder.GetProjectArgs().vm_snapshot_instructions = nullptr;
   builder.GetProjectArgs().isolate_snapshot_data =
-      reinterpret_cast<const uint8_t*>(isolate_snapshot_data.c_str());
+      reinterpret_cast<const uint8_t*>(snapshot_data.c_str());
   builder.GetProjectArgs().isolate_snapshot_instructions =
-      reinterpret_cast<const uint8_t*>(isolate_snapshot_instructions.c_str());
+      reinterpret_cast<const uint8_t*>(snapshot_text.c_str());
 
   auto engine = builder.LaunchEngine();
 
   flutter::Shell& shell = ToEmbedderEngine(engine.get())->GetShell();
   const Settings settings = shell.GetSettings();
 
-  ASSERT_NE(settings.vm_snapshot_data(), nullptr);
-  ASSERT_NE(settings.vm_snapshot_instr(), nullptr);
+  ASSERT_EQ(settings.vm_snapshot_data, nullptr);
+  ASSERT_EQ(settings.vm_snapshot_instr, nullptr);
   ASSERT_NE(settings.isolate_snapshot_data(), nullptr);
   ASSERT_NE(settings.isolate_snapshot_instr(), nullptr);
   ASSERT_NE(settings.dart_library_sources_kernel(), nullptr);
@@ -2997,8 +2989,6 @@ TEST_F(EmbedderTest, JITSnapshotCallbacksFailWithInvalidLocation) {
   flutter::Shell& shell = ToEmbedderEngine(engine.get())->GetShell();
   const Settings settings = shell.GetSettings();
 
-  ASSERT_EQ(settings.vm_snapshot_data(), nullptr);
-  ASSERT_EQ(settings.vm_snapshot_instr(), nullptr);
   ASSERT_EQ(settings.isolate_snapshot_data(), nullptr);
   ASSERT_EQ(settings.isolate_snapshot_instr(), nullptr);
 #endif  // OS_FUCHSIA
@@ -3021,24 +3011,16 @@ TEST_F(EmbedderTest, CanLaunchEngineWithSpecifiedJITSnapshots) {
 
   // Construct the location of valid JIT snapshots.
   const std::string src_path = GetSourcePath();
-  const std::string vm_snapshot_data =
-      fml::paths::JoinPaths({src_path, TEST_VM_SNAPSHOT_DATA});
-  const std::string vm_snapshot_instructions =
-      fml::paths::JoinPaths({src_path, TEST_VM_SNAPSHOT_INSTRUCTIONS});
-  const std::string isolate_snapshot_data =
-      fml::paths::JoinPaths({src_path, TEST_ISOLATE_SNAPSHOT_DATA});
-  const std::string isolate_snapshot_instructions =
-      fml::paths::JoinPaths({src_path, TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS});
+  const std::string snapshot_data =
+      fml::paths::JoinPaths({src_path, TEST_SNAPSHOT_DATA});
+  const std::string snapshot_text =
+      fml::paths::JoinPaths({src_path, TEST_SNAPSHOT_TEXT});
 
   // Explicitly define the locations of the JIT snapshots
-  builder.GetProjectArgs().vm_snapshot_data =
-      reinterpret_cast<const uint8_t*>(vm_snapshot_data.c_str());
-  builder.GetProjectArgs().vm_snapshot_instructions =
-      reinterpret_cast<const uint8_t*>(vm_snapshot_instructions.c_str());
   builder.GetProjectArgs().isolate_snapshot_data =
-      reinterpret_cast<const uint8_t*>(isolate_snapshot_data.c_str());
+      reinterpret_cast<const uint8_t*>(snapshot_data.c_str());
   builder.GetProjectArgs().isolate_snapshot_instructions =
-      reinterpret_cast<const uint8_t*>(isolate_snapshot_instructions.c_str());
+      reinterpret_cast<const uint8_t*>(snapshot_text.c_str());
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -3061,16 +3043,16 @@ TEST_F(EmbedderTest, CanLaunchEngineWithSomeSpecifiedJITSnapshots) {
 
   // Construct the location of valid JIT snapshots.
   const std::string src_path = GetSourcePath();
-  const std::string vm_snapshot_data =
-      fml::paths::JoinPaths({src_path, TEST_VM_SNAPSHOT_DATA});
-  const std::string vm_snapshot_instructions =
-      fml::paths::JoinPaths({src_path, TEST_VM_SNAPSHOT_INSTRUCTIONS});
+  const std::string snapshot_data =
+      fml::paths::JoinPaths({src_path, TEST_SNAPSHOT_DATA});
+  const std::string snapshot_text =
+      fml::paths::JoinPaths({src_path, TEST_SNAPSHOT_TEXT});
 
   // Explicitly define the locations of the JIT snapshots
-  builder.GetProjectArgs().vm_snapshot_data =
-      reinterpret_cast<const uint8_t*>(vm_snapshot_data.c_str());
-  builder.GetProjectArgs().vm_snapshot_instructions =
-      reinterpret_cast<const uint8_t*>(vm_snapshot_instructions.c_str());
+  builder.GetProjectArgs().isolate_snapshot_data =
+      reinterpret_cast<const uint8_t*>(snapshot_data.c_str());
+  builder.GetProjectArgs().isolate_snapshot_instructions =
+      reinterpret_cast<const uint8_t*>(snapshot_text.c_str());
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());

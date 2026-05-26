@@ -303,7 +303,7 @@ template("jit_runner") {
   }
 
   fuchsia_archive(target_name) {
-    snapshot_label = "kernel:kernel_core_snapshot${product_suffix}"
+    snapshot_label = "kernel:core_snapshot${product_suffix}"
     snapshot_gen_dir = get_label_info(snapshot_label, "target_gen_dir")
     stub_label = "kernel:ffi_callback_stub${product_suffix}"
     stub_gen_dir = get_label_info(stub_label, "target_gen_dir")
@@ -323,13 +323,13 @@ template("jit_runner") {
       },
       {
         path = rebase_path(
-                "$snapshot_gen_dir/vm_isolate_snapshot${product_suffix}.bin")
-        dest = "data/vm_snapshot_data.bin"
+                "$snapshot_gen_dir/core_snapshot_data${product_suffix}.bin")
+        dest = "data/core_snapshot_data.bin"
       },
       {
         path = rebase_path(
-                "$snapshot_gen_dir/isolate_snapshot${product_suffix}.bin")
-        dest = "data/isolate_core_snapshot_data.bin"
+                "$snapshot_gen_dir/core_snapshot_text${product_suffix}.bin")
+        dest = "data/core_snapshot_text.bin"
       },
       {
         path =

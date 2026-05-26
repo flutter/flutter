@@ -292,11 +292,11 @@ bool DartTestComponentController::SetUpFromAppSnapshot() {
 #else
   // Load the ELF snapshot as available, and fall back to a blobs snapshot
   // otherwise.
-  const uint8_t *isolate_data, *isolate_instructions;
+  const uint8_t *snapshot_data, *snapshot_text;
   if (elf_snapshot_.Load(namespace_, data_path_ + "/app_aot_snapshot.so")) {
-    isolate_data = elf_snapshot_.IsolateData();
-    isolate_instructions = elf_snapshot_.IsolateInstrs();
-    if (isolate_data == nullptr || isolate_instructions == nullptr) {
+    snapshot_data = elf_snapshot_.SnapshotData();
+    snapshot_text = elf_snapshot_.SnapshotText();
+    if (snapshot_data == nullptr || snapshot_text == nullptr) {
       return false;
     }
   } else {
@@ -305,10 +305,10 @@ bool DartTestComponentController::SetUpFromAppSnapshot() {
             isolate_snapshot_data_)) {
       return false;
     }
-    isolate_data = isolate_snapshot_data_.address();
-    isolate_instructions = nullptr;
+    snapshot_data = isolate_snapshot_data_.address();
+    snapshot_text = nullptr;
   }
-  return CreateIsolate(isolate_data, isolate_instructions);
+  return CreateIsolate(snapshot_data, snapshot_text);
 #endif  // defined(AOT_RUNTIME)
 }
 

@@ -60,7 +60,7 @@ class PlatformIsolateManagerTest : public FixtureTest {
     context.advisory_script_entrypoint = "main";
     auto weak_isolate = DartIsolate::CreateRunningRootIsolate(
         vm_data->GetSettings(),              // settings
-        vm_data->GetIsolateSnapshot(),       // isolate snapshot
+        vm_data->GetSnapshot(),              // isolate snapshot
         nullptr,                             // platform configuration
         DartIsolate::Flags{},                // flags
         nullptr,                             // root_isolate_create_callback

@@ -62,10 +62,8 @@ group("generate_snapshot_bins") {
 #   * gen_snapshot
 #
 # Outputs:
-#   * vm_snapshot_data.bin
-#   * vm_snapshot_instructions.bin
-#   * isolate_snapshot_data.bin
-#   * isolate_snapshot_instructions.bin
+#   * snapshot_data.bin
+#   * snapshot_text.bin
 #
 # See: `bin_to_linkable` rules below that build these outputs into linkable form
 # See: https://github.com/flutter/flutter/wiki/Flutter-engine-operation-in-AOT-Mode
@@ -85,26 +83,18 @@ compiled_action("generate_snapshot_bin") {
   inputs = [ platform_kernel ]
   deps = [ ":kernel_platform_files" ]
 
-  vm_snapshot_data = "$target_gen_dir/vm_isolate_snapshot.bin"
-  vm_snapshot_instructions = "$target_gen_dir/vm_snapshot_instructions.bin"
-  isolate_snapshot_data = "$target_gen_dir/isolate_snapshot.bin"
-  isolate_snapshot_instructions =
-      "$target_gen_dir/isolate_snapshot_instructions.bin"
+  snapshot_data = "$target_gen_dir/snapshot_data.bin"
+  snapshot_text = "$target_gen_dir/snapshot_text.bin"
   outputs = [
-    vm_snapshot_data,
-    vm_snapshot_instructions,
-    isolate_snapshot_data,
-    isolate_snapshot_instructions,
+    snapshot_data,
+    snapshot_text,
   ]
 
   args = [
     "--snapshot_kind=core",
     "--enable_mirrors=false",
-    "--vm_snapshot_data=" + rebase_path(vm_snapshot_data),
-    "--vm_snapshot_instructions=" + rebase_path(vm_snapshot_instructions),
-    "--isolate_snapshot_data=" + rebase_path(isolate_snapshot_data),
-    "--isolate_snapshot_instructions=" +
-        rebase_path(isolate_snapshot_instructions),
+    "--snapshot_data=" + rebase_path(snapshot_data),
+    "--snapshot_text=" + rebase_path(snapshot_text),
   ]
 
   if (is_debug && flutter_runtime_mode != "profile" &&
@@ -120,31 +110,17 @@ compiled_action("generate_snapshot_bin") {
   }
 }
 
-bin_to_linkable("vm_snapshot_data_linkable") {
+bin_to_linkable("snapshot_data_linkable") {
   deps = [ ":generate_snapshot_bin" ]
-  input = "$target_gen_dir/vm_isolate_snapshot.bin"
-  symbol = "kDartVmSnapshotData"
+  input = "$target_gen_dir/snapshot_data.bin"
+  symbol = "kDartSnapshotData"
   executable = false
 }
 
-bin_to_linkable("vm_snapshot_instructions_linkable") {
+bin_to_linkable("snapshot_text_linkable") {
   deps = [ ":generate_snapshot_bin" ]
-  input = "$target_gen_dir/vm_snapshot_instructions.bin"
-  symbol = "kDartVmSnapshotInstructions"
-  executable = true
-}
-
-bin_to_linkable("isolate_snapshot_data_linkable") {
-  deps = [ ":generate_snapshot_bin" ]
-  input = "$target_gen_dir/isolate_snapshot.bin"
-  symbol = "kDartIsolateSnapshotData"
-  executable = false
-}
-
-bin_to_linkable("isolate_snapshot_instructions_linkable") {
-  deps = [ ":generate_snapshot_bin" ]
-  input = "$target_gen_dir/isolate_snapshot_instructions.bin"
-  symbol = "kDartIsolateSnapshotInstructions"
+  input = "$target_gen_dir/snapshot_text.bin"
+  symbol = "kDartSnapshotText"
   executable = true
 }
 
@@ -261,18 +237,14 @@ if (host_os == "mac" &&
 
 source_set("snapshot") {
   deps = [
-    ":isolate_snapshot_data_linkable",
-    ":isolate_snapshot_instructions_linkable",
     ":platform_strong_dill_linkable",
-    ":vm_snapshot_data_linkable",
-    ":vm_snapshot_instructions_linkable",
+    ":snapshot_data_linkable",
+    ":snapshot_text_linkable",
   ]
 
-  sources = get_target_outputs(":isolate_snapshot_data_linkable") +
-            get_target_outputs(":isolate_snapshot_instructions_linkable") +
-            get_target_outputs(":vm_snapshot_data_linkable") +
-            get_target_outputs(":vm_snapshot_instructions_linkable") +
-            get_target_outputs(":platform_strong_dill_linkable")
+  sources = get_target_outputs(":platform_strong_dill_linkable") +
+            get_target_outputs(":snapshot_data_linkable") +
+            get_target_outputs(":snapshot_text_linkable")
 }
 
 # Compiles the Dart/Flutter core libraries to kernel bytecode.

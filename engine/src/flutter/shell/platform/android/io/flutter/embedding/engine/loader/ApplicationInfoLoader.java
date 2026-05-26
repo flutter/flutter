@@ -164,8 +164,8 @@ public final class ApplicationInfoLoader {
             appInfo.metaData,
             FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.metadataKey,
             FlutterEngineFlags.DEPRECATED_AOT_SHARED_LIBRARY_NAME.metadataKey),
-        getString(appInfo.metaData, FlutterEngineFlags.VM_SNAPSHOT_DATA.metadataKey),
-        getString(appInfo.metaData, FlutterEngineFlags.ISOLATE_SNAPSHOT_DATA.metadataKey),
+        getString(appInfo.metaData, FlutterEngineFlags.SNAPSHOT_DATA.metadataKey),
+        getString(appInfo.metaData, FlutterEngineFlags.SNAPSHOT_TEXT.metadataKey),
         getStringWithFallback(
             appInfo.metaData,
             FlutterEngineFlags.FLUTTER_ASSETS_DIR.metadataKey,

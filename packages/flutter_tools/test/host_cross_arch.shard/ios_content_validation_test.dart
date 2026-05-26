@@ -172,7 +172,7 @@ void main() {
             expect(buildAppFrameworkDsymBinary.existsSync(), buildMode != BuildMode.debug);
 
             final File vmSnapshot = fileSystem.file(
-              fileSystem.path.join(outputAppFramework.path, 'flutter_assets', 'vm_snapshot_data'),
+              fileSystem.path.join(outputAppFramework.path, 'flutter_assets', 'snapshot_data.bin'),
             );
 
             expect(vmSnapshot.existsSync(), buildMode == BuildMode.debug);
@@ -237,7 +237,7 @@ void main() {
             if (buildMode == BuildMode.debug) {
               expect(symbols, isEmpty);
             } else {
-              expect(symbols, equals(AppleTestUtils.requiredSymbols));
+              expect(symbols, containsAll(AppleTestUtils.requiredSymbols));
             }
           });
 

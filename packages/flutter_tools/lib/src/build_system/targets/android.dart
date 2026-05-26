@@ -67,10 +67,10 @@ abstract class AndroidAssetBundle extends Target {
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
       environment.fileSystem
           .file(vmSnapshotData)
-          .copySync(outputDirectory.childFile('vm_snapshot_data').path);
+          .copySync(outputDirectory.childFile('snapshot_data.bin').path);
       environment.fileSystem
           .file(isolateSnapshotData)
-          .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
+          .copySync(outputDirectory.childFile('snapshot_text.bin').path);
     }
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(

@@ -173,7 +173,6 @@ class DartVM {
 
   static std::shared_ptr<DartVM> Create(
       const Settings& settings,
-      fml::RefPtr<const DartSnapshot> vm_snapshot,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       std::shared_ptr<IsolateNameServer> isolate_name_server);
 

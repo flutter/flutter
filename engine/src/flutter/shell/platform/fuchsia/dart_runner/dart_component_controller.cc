@@ -361,11 +361,11 @@ bool DartComponentController::SetUpFromAppSnapshot() {
 #else
   // Load the ELF snapshot as available, and fall back to a blobs snapshot
   // otherwise.
-  const uint8_t *isolate_data, *isolate_instructions;
+  const uint8_t *snapshot_data, *snapshot_text;
   if (elf_snapshot_.Load(namespace_, data_path_ + "/app_aot_snapshot.so")) {
-    isolate_data = elf_snapshot_.IsolateData();
-    isolate_instructions = elf_snapshot_.IsolateInstrs();
-    if (isolate_data == nullptr || isolate_instructions == nullptr) {
+    snapshot_data = elf_snapshot_.SnapshotData();
+    snapshot_text = elf_snapshot_.SnapshotText();
+    if (snapshot_data == nullptr || snapshot_text == nullptr) {
       return false;
     }
   } else {
@@ -374,16 +374,15 @@ bool DartComponentController::SetUpFromAppSnapshot() {
             isolate_snapshot_data_)) {
       return false;
     }
-    isolate_data = isolate_snapshot_data_.address();
-    isolate_instructions = nullptr;
+    snapshot_data = isolate_snapshot_data_.address();
+    snapshot_text = nullptr;
   }
-  return CreateIsolate(isolate_data, isolate_instructions);
+  return CreateIsolate(snapshot_data, snapshot_text);
 #endif  // defined(AOT_RUNTIME)
 }
 
-bool DartComponentController::CreateIsolate(
-    const uint8_t* isolate_snapshot_data,
-    const uint8_t* isolate_snapshot_instructions) {
+bool DartComponentController::CreateIsolate(const uint8_t* snapshot_data,
+                                            const uint8_t* snapshot_text) {
   // Create the isolate from the snapshot.
   char* error = nullptr;
 
@@ -398,9 +397,9 @@ bool DartComponentController::CreateIsolate(
   Dart_IsolateFlagsInitialize(&isolate_flags);
   isolate_flags.null_safety = true;
 
-  isolate_ = Dart_CreateIsolateGroup(
-      url_.c_str(), label_.c_str(), isolate_snapshot_data,
-      isolate_snapshot_instructions, &isolate_flags, state, state, &error);
+  isolate_ = Dart_CreateIsolateGroup(url_.c_str(), label_.c_str(),
+                                     snapshot_data, snapshot_text,
+                                     &isolate_flags, state, state, &error);
   if (!isolate_) {
     FML_LOG(ERROR) << "Dart_CreateIsolateGroup failed: " << error;
     return false;

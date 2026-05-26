@@ -20,9 +20,9 @@ if (!is_aot) {
   copy("copy_jit_assets") {
     visibility = [ ":*" ]
     sources = [
-      "$target_gen_dir/isolate_snapshot_data",
-      "$target_gen_dir/isolate_snapshot_instr",
       "$target_gen_dir/kernel_blob.bin",
+      "$target_gen_dir/snapshot_data.bin",
+      "$target_gen_dir/snapshot_text.bin",
     ]
     outputs = [ "$_flutter_assets_dir/{{source_file_part}}" ]
     deps = [ ":ios_scenario_app_snapshot" ]

@@ -257,17 +257,17 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
                 isolate_shutdown_callback,        // isolate shutdown callback
                 std::move(native_assets_manager)  //
                 )));
-    isolate_maker = [](std::shared_ptr<DartIsolateGroupData>*
-                           isolate_group_data,
-                       std::shared_ptr<DartIsolate>* isolate_data,
-                       Dart_IsolateFlags* flags, char** error) {
-      return Dart_CreateIsolateGroup(
-          (*isolate_group_data)->GetAdvisoryScriptURI().c_str(),
-          (*isolate_group_data)->GetAdvisoryScriptEntrypoint().c_str(),
-          (*isolate_group_data)->GetIsolateSnapshot()->GetDataMapping(),
-          (*isolate_group_data)->GetIsolateSnapshot()->GetInstructionsMapping(),
-          flags, isolate_group_data, isolate_data, error);
-    };
+    isolate_maker =
+        [](std::shared_ptr<DartIsolateGroupData>* isolate_group_data,
+           std::shared_ptr<DartIsolate>* isolate_data, Dart_IsolateFlags* flags,
+           char** error) {
+          return Dart_CreateIsolateGroup(
+              (*isolate_group_data)->GetAdvisoryScriptURI().c_str(),
+              (*isolate_group_data)->GetAdvisoryScriptEntrypoint().c_str(),
+              (*isolate_group_data)->GetSnapshot()->GetDataMapping(),
+              (*isolate_group_data)->GetSnapshot()->GetInstructionsMapping(),
+              flags, isolate_group_data, isolate_data, error);
+        };
   }
 
   vm_isolate = CreateDartIsolateGroup(std::move(isolate_group_data),
@@ -1103,9 +1103,8 @@ Dart_Isolate DartIsolate::DartIsolateGroupCreateCallback(
   auto isolate_group_data =
       std::make_unique<std::shared_ptr<DartIsolateGroupData>>(
           std::shared_ptr<DartIsolateGroupData>(new DartIsolateGroupData(
-              parent_group_data.GetSettings(),
-              parent_group_data.GetIsolateSnapshot(), advisory_script_uri,
-              advisory_script_entrypoint,
+              parent_group_data.GetSettings(), parent_group_data.GetSnapshot(),
+              advisory_script_uri, advisory_script_entrypoint,
               parent_group_data.GetChildIsolatePreparer(),
               parent_group_data.GetIsolateCreateCallback(),
               parent_group_data.GetIsolateShutdownCallback())));
@@ -1133,10 +1132,8 @@ Dart_Isolate DartIsolate::DartIsolateGroupCreateCallback(
         return Dart_CreateIsolateGroup(
             (*isolate_group_data)->GetAdvisoryScriptURI().c_str(),
             (*isolate_group_data)->GetAdvisoryScriptEntrypoint().c_str(),
-            (*isolate_group_data)->GetIsolateSnapshot()->GetDataMapping(),
-            (*isolate_group_data)
-                ->GetIsolateSnapshot()
-                ->GetInstructionsMapping(),
+            (*isolate_group_data)->GetSnapshot()->GetDataMapping(),
+            (*isolate_group_data)->GetSnapshot()->GetInstructionsMapping(),
             flags, isolate_group_data, isolate_data, error);
       });
 
