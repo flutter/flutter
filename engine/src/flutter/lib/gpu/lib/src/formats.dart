@@ -44,6 +44,8 @@ enum PixelFormat {
   b8g8r8a8UNormIntSRGB,
   r32g32b32a32Float,
   r16g16b16a16Float,
+
+  /// A single-channel 32-bit floating-point pixel format.
   r32Float,
   // Depth and stencil formats.
   s8UInt,
