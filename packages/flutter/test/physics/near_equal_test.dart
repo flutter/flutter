@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/physics.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/src/physics/utils.dart';
+
+import 'package:flutter_test/src/test_compat.dart';
+import 'package:flutter_test/src/widget_tester.dart';
 
 void main() {
   test('test_friction', () {
