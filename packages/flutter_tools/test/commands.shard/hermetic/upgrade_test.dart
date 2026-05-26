@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -41,7 +42,15 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
-    final lazyGit = LazyGit(() => context.get<Git>()!);
+    final lazyGit = LazyGit(
+      () => Git(
+        currentPlatform: const LocalPlatform(),
+        runProcessWith: ProcessUtils(
+          processManager: context.get<ProcessManager>()!,
+          logger: logger,
+        ),
+      ),
+    );
     command = UpgradeCommand(
       git: lazyGit,
       verboseHelp: false,

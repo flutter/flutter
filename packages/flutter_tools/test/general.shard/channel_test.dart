@@ -4,8 +4,10 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/channel.dart';
 import 'package:flutter_tools/src/git.dart';
@@ -21,9 +23,17 @@ import '../src/test_flutter_command_runner.dart';
 void main() {
   group('channel', () {
     late FakeProcessManager fakeProcessManager;
+    late Git git;
 
     setUp(() {
       fakeProcessManager = FakeProcessManager.empty();
+      git = Git(
+        currentPlatform: const LocalPlatform(),
+        runProcessWith: ProcessUtils(
+          processManager: fakeProcessManager,
+          logger: BufferLogger.test(),
+        ),
+      );
     });
 
     setUpAll(() {
@@ -43,7 +53,7 @@ void main() {
               '  origin/beta',
         ),
       ]);
-      final command = ChannelCommand(git: context.get<Git>()!);
+      final command = ChannelCommand(git: git);
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(args);
       expect(testLogger.errorText, hasLength(0));
@@ -56,7 +66,7 @@ void main() {
     testUsingContext(
       'usage (--help) explains how to use channel',
       () async {
-        final command = ChannelCommand(git: context.get<Git>()!);
+        final command = ChannelCommand(git: git);
 
         // Required because otherwise command.usage fails as it is not hooked up.
         createTestCommandRunner(command);
@@ -108,7 +118,7 @@ void main() {
     testUsingContext(
       'sorted by stability',
       () async {
-        final command = ChannelCommand(git: context.get<Git>()!);
+        final command = ChannelCommand(git: git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
 
         fakeProcessManager.addCommand(
@@ -214,7 +224,7 @@ void main() {
           ),
         );
 
-        final command = ChannelCommand(git: context.get<Git>()!);
+        final command = ChannelCommand(git: git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel']);
 
@@ -247,7 +257,7 @@ void main() {
           ),
         );
 
-        final command = ChannelCommand(git: context.get<Git>()!);
+        final command = ChannelCommand(git: git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel']);
 
@@ -284,7 +294,7 @@ void main() {
           ),
         );
 
-        final command = ChannelCommand(git: context.get<Git>()!);
+        final command = ChannelCommand(git: git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel']);
 
@@ -318,7 +328,7 @@ void main() {
           ),
         ]);
 
-        final command = ChannelCommand(git: context.get<Git>()!);
+        final command = ChannelCommand(git: git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel', 'beta']);
 
@@ -364,7 +374,7 @@ void main() {
           ),
         ]);
 
-        final command = ChannelCommand(git: context.get<Git>()!);
+        final command = ChannelCommand(git: git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel', 'beta']);
 
@@ -418,7 +428,7 @@ void main() {
         }
       ''');
 
-        final command = ChannelCommand(git: context.get<Git>()!);
+        final command = ChannelCommand(git: git);
         final CommandRunner<void> runner = createTestCommandRunner(command);
         await runner.run(<String>['channel', 'beta']);
 

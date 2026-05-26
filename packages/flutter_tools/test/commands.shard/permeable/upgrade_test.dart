@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -34,6 +35,7 @@ void main() {
 
     late FakeUpgradeCommandRunner fakeCommandRunner;
     late UpgradeCommandRunner realCommandRunner;
+    late Git git;
     late FakeProcessManager processManager;
     late FakePlatform fakePlatform;
     const gitTagVersion = GitTagVersion(
@@ -47,13 +49,20 @@ void main() {
     );
 
     setUp(() {
-      final lazyGit = LazyGit(() => context.get<Git>()!);
-      fakeCommandRunner = FakeUpgradeCommandRunner(git: lazyGit)
-        ..clock = SystemClock.fixed(jan12026);
-      realCommandRunner = UpgradeCommandRunner(git: lazyGit)
+      processManager = FakeProcessManager.empty();
+      git = LazyGit(
+        () => Git(
+          currentPlatform: const LocalPlatform(),
+          runProcessWith: ProcessUtils(
+            processManager: context.get<ProcessManager>()!,
+            logger: BufferLogger.test(),
+          ),
+        ),
+      );
+      fakeCommandRunner = FakeUpgradeCommandRunner(git: git)..clock = SystemClock.fixed(jan12026);
+      realCommandRunner = UpgradeCommandRunner(git: git)
         ..workingDirectory = getFlutterRoot()
         ..clock = SystemClock.fixed(jan12026);
-      processManager = FakeProcessManager.empty();
       fakeCommandRunner.willHaveUncommittedChanges = false;
       fakePlatform = FakePlatform()
         ..environment = Map<String, String>.unmodifiable(<String, String>{
@@ -632,11 +641,7 @@ void main() {
         );
 
         final CommandRunner<void> runner = createTestCommandRunner(
-          UpgradeCommand(
-            git: context.get<Git>()!,
-            verboseHelp: false,
-            commandRunner: fakeCommandRunner,
-          ),
+          UpgradeCommand(git: git, verboseHelp: false, commandRunner: fakeCommandRunner),
         );
 
         fakeCommandRunner.alreadyUpToDate = false;
@@ -857,7 +862,7 @@ void main() {
           () async {
             fakeProcessManager = FakeProcessManager.any();
             final upgradeCommand = UpgradeCommand(
-              git: context.get<Git>()!,
+              git: git,
               verboseHelp: false,
               commandRunner: fakeCommandRunner,
             );

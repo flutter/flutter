@@ -7,8 +7,10 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/executable.dart' as executable;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
+import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -28,7 +30,9 @@ void main() {
     'Help for command line arguments is consistently styled and complete',
     () => TestBed().run(() {
       final runner = FlutterCommandRunner(verboseHelp: true);
-      executable.generateCommands(verboseHelp: true, verbose: true).forEach(runner.addCommand);
+      executable
+          .generateCommands(verboseHelp: true, verbose: true, git: FakeGit())
+          .forEach(runner.addCommand);
       verifyCommandRunner(runner);
       for (final Command<void> command in runner.commands.values) {
         if (command.name == 'analyze') {
@@ -397,3 +401,5 @@ void verifyOptions(String? command, Iterable<Option> options) {
     // TODO(ianh): arguably we should ban help text that starts with "Whether to..." since by definition a flag is to enable a feature, so the "whether to" is redundant.
   }
 }
+
+class FakeGit extends Fake implements Git {}
