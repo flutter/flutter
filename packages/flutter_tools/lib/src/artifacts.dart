@@ -519,7 +519,7 @@ class CachedArtifacts implements Artifacts {
           hostPlatform = HostPlatform.darwin_x64;
         }
 
-        final String hostPlatformName = getNameForHostPlatform(hostPlatform);
+        final String hostPlatformName = hostPlatform.cliName;
         return _fileSystem.path.join(engineDir, hostPlatformName, artifact.getFileName(_platform));
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
@@ -1129,7 +1129,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.skyEnginePath:
         return _fileSystem.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
       case Artifact.fuchsiaKernelCompiler:
-        final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
+        final String hostPlatform = getCurrentHostPlatform().cliName;
         final modeName = mode!.isRelease ? 'release' : mode.toString();
         final dartBinaries = 'dart_binaries-$modeName-$hostPlatform';
         return _fileSystem.path.join(
