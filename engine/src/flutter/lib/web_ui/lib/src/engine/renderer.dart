@@ -282,6 +282,8 @@ abstract class Renderer {
 
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style);
 
+  WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph);
+
   /// Map from view id to the associated [ViewRasterizer] for that view.
   final Map<int, ViewRasterizer> rasterizers = <int, ViewRasterizer>{};
 
