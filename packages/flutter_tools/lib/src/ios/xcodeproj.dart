@@ -197,7 +197,6 @@ class XcodeProjectInterpreter {
     await prefetchSwiftPackagesForProject(
       xcodeProject,
       buildDirectory: buildDirectory,
-      quiet: false,
     );
 
     return _xcodebuildProjectCommandArguments(
@@ -395,8 +394,6 @@ class XcodeProjectInterpreter {
   Future<void> prefetchSwiftPackagesForProject(
     XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
-    bool quiet = true,
-    bool waitForCompletion = true,
   }) async {
     await xcodeProject.prefetchSwiftPackages(
       xcodebuildProjectCommandArguments: _xcodebuildProjectCommandArguments(
@@ -407,8 +404,6 @@ class XcodeProjectInterpreter {
       ),
       processUtils: _processUtils,
       logger: _logger,
-      quiet: quiet,
-      waitForCompletion: waitForCompletion,
     );
   }
 

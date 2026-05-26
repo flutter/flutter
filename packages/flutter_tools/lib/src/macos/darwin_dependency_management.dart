@@ -5,13 +5,11 @@
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
-import '../ios/xcodeproj.dart';
 import '../plugins.dart';
 import '../project.dart';
 import 'cocoapods.dart';
@@ -30,11 +28,7 @@ class DarwinDependencyManagement {
     required FileSystem fileSystem,
     required FeatureFlags featureFlags,
     required Analytics analytics,
-    required XcodeProjectInterpreter? xcodeProjectInterpreter,
-    required Config? config,
-  }) : _config = config,
-       _xcodeProjectInterpreter = xcodeProjectInterpreter,
-       _project = project,
+  }) : _project = project,
        _plugins = plugins,
        _cocoapods = cocoapods,
        _swiftPackageManager = swiftPackageManager,
@@ -49,8 +43,6 @@ class DarwinDependencyManagement {
   final FileSystem _fileSystem;
   final FeatureFlags _featureFlags;
   final Analytics _analytics;
-  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
-  final Config? _config;
 
   /// Generates/updates required files and project settings for Darwin
   /// Dependency Managers (CocoaPods and Swift Package Manager). Projects may
@@ -68,15 +60,6 @@ class DarwinDependencyManagement {
     final XcodeBasedProject xcodeProject = platform.xcodeProject(_project);
     if (xcodeProject.usesSwiftPackageManager) {
       await _swiftPackageManager.generatePluginsSwiftPackage(_plugins, platform, xcodeProject);
-
-      // Start the SwiftPM dependency resolution in the background.
-      await _xcodeProjectInterpreter?.prefetchSwiftPackagesForProject(
-        xcodeProject,
-        waitForCompletion: false,
-        buildDirectory: _fileSystem.directory(
-          platform.buildDirectory(config: _config, fileSystem: _fileSystem),
-        ),
-      );
     } else if (xcodeProject.flutterPluginSwiftPackageInProjectSettings) {
       // If Swift Package Manager is not enabled but the project is already
       // integrated for Swift Package Manager, pass no plugins to the generator.

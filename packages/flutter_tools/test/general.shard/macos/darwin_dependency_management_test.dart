@@ -4,10 +4,8 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
-import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/macos/darwin_dependency_management.dart';
 import 'package:flutter_tools/src/macos/swift_package_manager.dart';
@@ -61,8 +59,6 @@ void main() {
                 fileSystem: testFileSystem,
                 featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                 analytics: fakeAnalytics,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                config: FakeConfig(),
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isTrue);
@@ -126,9 +122,6 @@ void main() {
                   featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
 
                   analytics: testAnalytics,
-
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  config: FakeConfig(),
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
@@ -194,9 +187,6 @@ void main() {
                   featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
 
                   analytics: testAnalytics,
-
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  config: FakeConfig(),
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
@@ -265,9 +255,6 @@ void main() {
                   featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
 
                   analytics: testAnalytics,
-
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  config: FakeConfig(),
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
@@ -337,9 +324,6 @@ void main() {
                   featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
 
                   analytics: testAnalytics,
-
-                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                  config: FakeConfig(),
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
@@ -414,9 +398,6 @@ void main() {
                 featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
 
                 analytics: testAnalytics,
-
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                config: FakeConfig(),
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isTrue);
@@ -479,8 +460,6 @@ void main() {
                 fileSystem: testFileSystem,
                 featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                 analytics: testAnalytics,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                config: FakeConfig(),
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isTrue);
@@ -530,8 +509,6 @@ void main() {
                 fileSystem: testFileSystem,
                 featureFlags: TestFeatureFlags(),
                 analytics: testAnalytics,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                config: FakeConfig(),
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isFalse);
@@ -584,8 +561,6 @@ void main() {
                 fileSystem: testFileSystem,
                 featureFlags: TestFeatureFlags(),
                 analytics: testAnalytics,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                config: FakeConfig(),
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isFalse);
@@ -636,9 +611,6 @@ void main() {
                 featureFlags: TestFeatureFlags(),
 
                 analytics: testAnalytics,
-
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                config: FakeConfig(),
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isFalse);
@@ -679,8 +651,6 @@ void main() {
           fileSystem: testFileSystem,
           featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
           analytics: testAnalytics,
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          config: FakeConfig(),
         );
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.macos);
         expect(xcodeProject.outputFileList.readAsStringSync(), 'Something else');
@@ -973,9 +943,6 @@ version: 0.0.1
           featureFlags: TestFeatureFlags(),
 
           analytics: fakeAnalytics,
-
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          config: FakeConfig(),
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
@@ -1015,9 +982,6 @@ version: 0.0.1
           featureFlags: TestFeatureFlags(),
 
           analytics: fakeAnalytics,
-
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          config: FakeConfig(),
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
@@ -1054,9 +1018,6 @@ version: 0.0.1
           featureFlags: TestFeatureFlags(),
 
           analytics: fakeAnalytics,
-
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          config: FakeConfig(),
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
@@ -1094,9 +1055,6 @@ version: 0.0.1
           featureFlags: TestFeatureFlags(),
 
           analytics: fakeAnalytics,
-
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          config: FakeConfig(),
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
@@ -1144,9 +1102,6 @@ flutter:
           featureFlags: TestFeatureFlags(),
 
           analytics: fakeAnalytics,
-
-          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-          config: FakeConfig(),
         );
 
         await dependencyManagement.setUp(platform: FlutterDarwinPlatform.ios);
@@ -1677,18 +1632,3 @@ class FakePlugin extends Fake implements Plugin {
 }
 
 class FakePluginPlatform extends Fake implements PluginPlatform {}
-
-class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
-  @override
-  Future<void> prefetchSwiftPackagesForProject(
-    XcodeBasedProject xcodeProject, {
-    required Directory buildDirectory,
-    bool quiet = true,
-    bool waitForCompletion = true,
-  }) async {}
-}
-
-class FakeConfig extends Fake implements Config {
-  @override
-  Object? getValue(String key) => null;
-}
