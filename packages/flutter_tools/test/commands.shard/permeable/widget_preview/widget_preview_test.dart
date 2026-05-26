@@ -29,6 +29,7 @@ import 'package:flutter_tools/src/widget_preview/analytics.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_services.dart';
 import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:flutter_tools/src/widget_preview/preview_code_generator.dart';
+import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -62,15 +63,20 @@ class FakeWidgetPreviewScaffoldDtdServices extends Fake implements WidgetPreview
   Future<void> launchAndConnect({required AnalysisServer analysisServer}) async {}
 
   FlutterWidgetPreviews? nextUpdate;
+  bool shouldThrow = false;
 
   @override
-  Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async =>
-      nextUpdate ??
-      const FlutterWidgetPreviews(
-        namespaces: <String, String>{},
-        previews: <FlutterWidgetPreviewDetails>[],
-        scriptUris: <Uri>[],
-      );
+  Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async {
+    if (shouldThrow) {
+      throw RpcException(123, 'Fake RPC Exception');
+    }
+    return nextUpdate ??
+        const FlutterWidgetPreviews(
+          namespaces: <String, String>{},
+          previews: <FlutterWidgetPreviewDetails>[],
+          scriptUris: <Uri>[],
+        );
+  }
 }
 
 class FakeTerminal extends Fake implements Terminal {}
@@ -286,6 +292,38 @@ void main() {
 
   group('flutter widget-preview', () {
     group('start exits if', () {
+      testUsingContext(
+        'DTD fails to retrieve widget previews',
+        () async {
+          final Directory rootProject = await createRootProject();
+          fakeDtdServices.shouldThrow = true;
+          try {
+            await startWidgetPreview(rootProject: rootProject);
+            fail('Successfully executed despite DTD failure.');
+          } on ToolExit catch (e) {
+            expect(
+              e.message,
+              contains('Failed to retrieve widget previews from the Dart Tooling Daemon (DTD)'),
+            );
+          }
+          expectNoPreviewLaunchTimingEvents();
+        },
+        overrides: <Type, Generator>{
+          Analytics: () => fakeAnalytics,
+          DeviceManager: () => fakeDeviceManager,
+          FileSystem: () => fs,
+          ProcessManager: () => loggingProcessManager,
+          Pub: () => Pub.test(
+            fileSystem: fs,
+            logger: logger,
+            processManager: loggingProcessManager,
+            botDetector: botDetector,
+            platform: platform,
+            stdio: mockStdio,
+          ),
+        },
+      );
+
       testUsingContext('given an invalid directory', () async {
         try {
           await runWidgetPreviewCommand(<String>['start', 'foo']);
