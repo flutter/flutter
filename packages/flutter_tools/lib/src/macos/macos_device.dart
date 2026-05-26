@@ -12,18 +12,22 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../ios/xcodeproj.dart';
 import '../project.dart';
 import 'application_package.dart';
 import 'build_macos.dart';
 import 'macos_workflow.dart';
+import 'xcode.dart';
 
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice({
-    required super.processManager,
-    required super.logger,
     required super.fileSystem,
+    required super.logger,
     required super.operatingSystemUtils,
+    required super.processManager,
+    required this._xcode,
+    required this._xcodeProjectInterpreter,
   }) : _processManager = processManager,
        _logger = logger,
        _operatingSystemUtils = operatingSystemUtils,
@@ -32,6 +36,8 @@ class MacOSDevice extends DesktopDevice {
   final ProcessManager _processManager;
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
+  final Xcode? _xcode;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
   @override
   Future<bool> isSupported() async => true;
@@ -70,6 +76,8 @@ class MacOSDevice extends DesktopDevice {
       targetOverride: mainPath,
       verboseLogging: _logger.isVerbose,
       usingCISystem: usingCISystem,
+      xcode: _xcode!,
+      xcodeProjectInterpreter: _xcodeProjectInterpreter!,
     );
   }
 
@@ -99,12 +107,14 @@ class MacOSDevice extends DesktopDevice {
 
 class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices({
-    required Platform platform,
-    required MacOSWorkflow macOSWorkflow,
-    required ProcessManager processManager,
-    required Logger logger,
     required FileSystem fileSystem,
+    required Logger logger,
+    required MacOSWorkflow macOSWorkflow,
     required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required ProcessManager processManager,
+    required this._xcode,
+    required this._xcodeProjectInterpreter,
   }) : _logger = logger,
        _platform = platform,
        _macOSWorkflow = macOSWorkflow,
@@ -119,6 +129,8 @@ class MacOSDevices extends PollingDeviceDiscovery {
   final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
+  final Xcode? _xcode;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -140,6 +152,8 @@ class MacOSDevices extends PollingDeviceDiscovery {
         logger: _logger,
         fileSystem: _fileSystem,
         operatingSystemUtils: _operatingSystemUtils,
+        xcode: _xcode,
+        xcodeProjectInterpreter: _xcodeProjectInterpreter,
       ),
     ];
   }

@@ -71,10 +71,10 @@ abstract class FlutterVersion {
   /// Parses the Flutter version from currently available tags in the local
   /// repo.
   factory FlutterVersion({
-    SystemClock clock = const SystemClock(),
+    required String flutterRoot,
     required FileSystem fs,
     required Git git,
-    required String flutterRoot,
+    SystemClock clock = const SystemClock(),
     @protected bool fetchTags = false,
   }) {
     final File versionFile = getVersionFile(fs, flutterRoot);
@@ -513,22 +513,22 @@ String _gitCommitDate({
 
 class _FlutterVersionFromFile extends FlutterVersion {
   _FlutterVersionFromFile._({
-    required super.clock,
-    required this.frameworkVersion,
     required this.channel,
-    required this.repositoryUrl,
-    required this.frameworkRevision,
-    required this.frameworkCommitDate,
-    required this.engineRevision,
-    required this.engineCommitDate,
+    required super.clock,
     required this.dartSdkVersion,
     required this.devToolsVersion,
-    required this.gitTagVersion,
-    required this.engineContentHash,
     required this.engineBuildDate,
-    required super.flutterRoot,
+    required this.engineCommitDate,
+    required this.engineContentHash,
+    required this.engineRevision,
     required super.fs,
+    required super.flutterRoot,
+    required this.frameworkCommitDate,
+    required this.frameworkRevision,
+    required this.frameworkVersion,
     required super.git,
+    required this.gitTagVersion,
+    required this.repositoryUrl,
   }) : super._();
 
   static _FlutterVersionFromFile? tryParseFromFile(
@@ -620,12 +620,12 @@ class _FlutterVersionFromFile extends FlutterVersion {
 class _FlutterVersionGit extends FlutterVersion {
   _FlutterVersionGit._({
     required super.clock,
+    required super.fs,
     required super.flutterRoot,
     required this.frameworkRevision,
     required this.frameworkVersion,
-    required this.gitTagVersion,
-    required super.fs,
     required super.git,
+    required this.gitTagVersion,
   }) : super._();
 
   late final FlutterEngineStampFromFile? _engineStamp = FlutterEngineStampFromFile.tryParseFromFile(

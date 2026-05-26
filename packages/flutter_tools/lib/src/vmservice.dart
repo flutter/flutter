@@ -49,8 +49,8 @@ const kIsolateReloadBarred = 1005;
 /// for [io.WebSocket]s (used by tests).
 typedef WebSocketConnector = Future<io.WebSocket> Function(
   String url, {
-  io.CompressionOptions compression,
   required Logger logger,
+  io.CompressionOptions compression,
 });
 
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
@@ -160,15 +160,15 @@ Future<io.WebSocket> _defaultOpenChannel(
 /// [vm_service.VmService] from [connectToVmService] (used by tests).
 typedef VMServiceConnector = Future<FlutterVmService> Function(
   Uri httpUri, {
-  Git? git,
-  ReloadSources? reloadSources,
-  Restart? restart,
+  required Logger logger,
   CompileExpression? compileExpression,
-  FlutterProject? flutterProject,
-  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression,
   Device? device,
-  required Logger logger,
+  FlutterProject? flutterProject,
+  Git? git,
+  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+  ReloadSources? reloadSources,
+  Restart? restart,
 });
 
 /// Set up the VM Service client by attaching services for each of the provided

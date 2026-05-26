@@ -31,6 +31,7 @@ import 'http_host_validator.dart';
 import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
 import 'macos/macos_workflow.dart';
+import 'macos/xcode.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
@@ -43,34 +44,45 @@ import 'windows/windows_version_validator.dart';
 import 'windows/windows_workflow.dart';
 
 abstract class DoctorValidatorsProvider {
-  // Allow tests to construct a [_DefaultDoctorValidatorsProvider] with explicit
+  // Allow tests to construct a [DefaultDoctorValidatorsProvider] with explicit
   // [FeatureFlags].
-  factory DoctorValidatorsProvider.test({Platform? platform, required FeatureFlags featureFlags}) {
-    return _DefaultDoctorValidatorsProvider(
+  factory DoctorValidatorsProvider.test({
+    Platform? platform,
+    required FeatureFlags featureFlags,
+    Xcode? xcode,
+  }) {
+    return DefaultDoctorValidatorsProvider(
       featureFlags: featureFlags,
       platform: platform ?? FakePlatform(),
+      xcode: xcode,
     );
   }
 
   /// The singleton instance, pulled from the [AppContext].
   static DoctorValidatorsProvider get _instance => context.get<DoctorValidatorsProvider>()!;
 
-  static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider(
+  static final DoctorValidatorsProvider defaultInstance = DefaultDoctorValidatorsProvider(
     platform: globals.platform,
     featureFlags: featureFlags,
+    xcode: globals.xcode,
   );
 
   List<DoctorValidator> get validators;
   List<Workflow> get workflows;
 }
 
-class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
-  _DefaultDoctorValidatorsProvider({required this.platform, required this.featureFlags});
+class DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
+  DefaultDoctorValidatorsProvider({
+    required this.featureFlags,
+    required this.platform,
+    required this._xcode,
+  });
 
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;
   final Platform platform;
   final FeatureFlags featureFlags;
+  final Xcode? _xcode;
 
   late final linuxWorkflow = LinuxWorkflow(platform: platform, featureFlags: featureFlags);
 
@@ -113,7 +125,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (globals.iosWorkflow!.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         GroupedValidator(<DoctorValidator>[
           XcodeValidator(
-            xcode: globals.xcode!,
+            xcode: _xcode!,
             userMessages: globals.userMessages,
             iosSimulatorUtils: globals.iosSimulatorUtils!,
           ),

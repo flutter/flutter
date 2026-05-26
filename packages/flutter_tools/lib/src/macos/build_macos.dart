@@ -34,6 +34,7 @@ import 'migrations/nsapplicationmain_deprecation_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 import 'migrations/secure_restorable_state_migration.dart';
 import 'swift_package_manager.dart';
+import 'xcode.dart';
 
 /// When run in -quiet mode, Xcode should only print from the underlying tasks to stdout.
 /// Passing this regexp to trace moves the stdout output to stderr.
@@ -66,12 +67,14 @@ final _filteredOutput = RegExp(
 /// Builds the macOS project through xcodebuild.
 // TODO(zanderso): refactor to share code with the existing iOS code.
 Future<void> buildMacOS({
-  required FlutterProject flutterProject,
   required BuildInfo buildInfo,
-  String? targetOverride,
+  required FlutterProject flutterProject,
   required bool verboseLogging,
+  required Xcode xcode,
+  required XcodeProjectInterpreter xcodeProjectInterpreter,
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
+  String? targetOverride,
   bool usingCISystem = false,
 }) async {
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
@@ -100,7 +103,7 @@ Future<void> buildMacOS({
       flutterProject.macos,
       darwinPlatform,
       buildInfo,
-      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
       logger: globals.logger,
       fileSystem: globals.fs,
       plistParser: globals.plistParser,
@@ -134,7 +137,7 @@ Future<void> buildMacOS({
   // other Xcode projects in the macos/ directory. Otherwise pass no name, which will work
   // regardless of the project name so long as there is exactly one project.
   final String? xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
-  final XcodeProjectInfo? projectInfo = await globals.xcodeProjectInterpreter?.getInfo(
+  final XcodeProjectInfo? projectInfo = await xcodeProjectInterpreter.getInfo(
     flutterProject.macos,
     projectFilename: xcodeProjectName,
     buildDirectory: flutterBuildDir,
@@ -225,7 +228,7 @@ Future<void> buildMacOS({
   final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
 
   try {
-    final List<String> xcodebuildCommandArgs = await globals.xcode!
+    final List<String> xcodebuildCommandArgs = await xcode
         .fetchDependenciesAndGenerateXcodebuildArgs(
           flutterProject.macos,
           globals.fs.directory(buildDirectoryPath),

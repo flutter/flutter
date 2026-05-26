@@ -212,6 +212,7 @@ List<FlutterCommand> generateCommands({
     processManager: globals.processManager,
     templateRenderer: globals.templateRenderer,
     xcode: globals.xcode,
+    xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
     artifacts: globals.artifacts!,
     cache: globals.cache,
     flutterVersion: globals.flutterVersion,

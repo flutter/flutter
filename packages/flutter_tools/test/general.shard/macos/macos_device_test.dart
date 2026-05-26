@@ -18,7 +18,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
 import '../../src/fakes.dart';
 
 final macOS = FakePlatform(operatingSystem: 'macos');
@@ -26,12 +26,16 @@ final macOS = FakePlatform(operatingSystem: 'macos');
 final linux = FakePlatform();
 
 void main() {
+  final xcode = FakeXcode();
+  final xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
   testWithoutContext('default configuration', () async {
     final device = MacOSDevice(
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     );
     final package = FakeMacOSApp();
 
@@ -63,6 +67,8 @@ void main() {
       ]),
       logger: BufferLogger.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     );
     final package = FakeMacOSApp();
 
@@ -92,6 +98,8 @@ void main() {
           featureFlags: TestFeatureFlags(isMacOSEnabled: true),
           platform: linux,
         ),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
       ).devices(),
       isEmpty,
     );
@@ -107,6 +115,8 @@ void main() {
         platform: macOS,
         operatingSystemUtils: FakeOperatingSystemUtils(),
         macOSWorkflow: MacOSWorkflow(featureFlags: TestFeatureFlags(), platform: macOS),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
       );
 
       expect(await macOSDevices.devices(), isEmpty);
@@ -124,6 +134,8 @@ void main() {
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     );
 
     expect(await macOSDevices.devices(), hasLength(1));
@@ -140,6 +152,8 @@ void main() {
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     );
 
     expect(macOSDevices.wellKnownIds, <String>['macos']);
@@ -156,6 +170,8 @@ void main() {
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     );
 
     // Timeout ignored.
@@ -173,6 +189,8 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     );
 
     fileSystem.file('pubspec.yaml').createSync();
@@ -190,6 +208,8 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: fakeOperatingSystemUtils,
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     );
 
     expect(await device.targetPlatformDisplayName, 'darwin-x64');
@@ -203,6 +223,8 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: fakeOperatingSystemUtils,
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     );
 
     expect(await device.targetPlatformDisplayName, 'darwin-arm64');
@@ -215,6 +237,8 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     );
     fileSystem.file('pubspec.yaml').createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
@@ -229,6 +253,8 @@ void main() {
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
       operatingSystemUtils: FakeOperatingSystemUtils(),
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     );
     const debugPath = 'debug/executable';
     const profilePath = 'profile/executable';

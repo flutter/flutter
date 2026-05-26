@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -88,6 +89,7 @@ void main() {
   late FakeProcessManager fakeProcessManager;
   late BufferLogger logger;
   late XcodeProjectInterpreter xcodeProjectInterpreter;
+  late Xcode xcode;
   late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
@@ -99,6 +101,12 @@ void main() {
     logger = BufferLogger.test();
     fakeProcessManager = FakeProcessManager.empty();
     xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
+    xcode = Xcode.test(
+      processManager: fakeProcessManager,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -203,7 +211,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -245,7 +254,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -298,7 +308,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -337,7 +348,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -379,7 +391,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -433,7 +446,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -474,7 +488,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -513,7 +528,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -539,6 +555,13 @@ STDERR STUFF
   testUsingContext(
     'macOS build invokes xcode build (profile)',
     () async {
+      xcodeProjectInterpreter = FakeXcodeProjectInterpreterWithProfile();
+      xcode = Xcode.test(
+        processManager: fakeProcessManager,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
       final command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -553,7 +576,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -593,7 +617,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -632,7 +657,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -751,7 +777,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -791,7 +818,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -840,7 +868,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -850,6 +879,8 @@ STDERR STUFF
     final bool supported = BuildMacosCommand(
       logger: BufferLogger.test(),
       verboseHelp: false,
+      xcode: xcode,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     ).supported;
     expect(
       () => runner.run(<String>['build', 'macos', '--no-pub']),
@@ -860,7 +891,15 @@ STDERR STUFF
   testUsingContext(
     'hidden when not enabled on macOS host',
     () {
-      expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, true);
+      expect(
+        BuildMacosCommand(
+          logger: BufferLogger.test(),
+          verboseHelp: false,
+          xcode: xcode,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+        ).hidden,
+        true,
+      );
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(),
@@ -871,7 +910,15 @@ STDERR STUFF
   testUsingContext(
     'Not hidden when enabled and on macOS host',
     () {
-      expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, false);
+      expect(
+        BuildMacosCommand(
+          logger: BufferLogger.test(),
+          verboseHelp: false,
+          xcode: xcode,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+        ).hidden,
+        false,
+      );
     },
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
@@ -896,7 +943,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -953,7 +1001,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -1026,7 +1075,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -1106,7 +1156,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -1188,7 +1239,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -1229,7 +1281,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -1271,7 +1324,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -1308,6 +1362,15 @@ STDERR STUFF
         ),
       ]);
 
+      xcodeProjectInterpreter = FakeXcodeProjectInterpreterWithBuildSettings(
+        overrides: <String, String>{'EXCLUDED_ARCHS': 'x86_64'},
+      );
+      xcode = Xcode.test(
+        processManager: fakeProcessManager,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
       final command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -1322,7 +1385,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -1340,9 +1404,7 @@ STDERR STUFF
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
-        overrides: <String, String>{'EXCLUDED_ARCHS': 'x86_64'},
-      ),
+      XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
@@ -1364,6 +1426,13 @@ STDERR STUFF
         ),
       ]);
 
+      xcodeProjectInterpreter = FakeXcodeProjectInterpreterWithBuildSettings();
+      xcode = Xcode.test(
+        processManager: fakeProcessManager,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
       final command = BuildCommand(
         androidSdk: FakeAndroidSdk(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
@@ -1378,7 +1447,8 @@ STDERR STUFF
         processUtils: FakeProcessUtils(),
         processManager: FakeProcessManager.any(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: FakeXcode(),
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
         artifacts: FakeArtifacts(),
         cache: FakeCache(),
         flutterVersion: FakeFlutterVersion(),
@@ -1396,9 +1466,7 @@ STDERR STUFF
       ProcessManager: () => fakeProcessManager,
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
-        // Empty overrides - no EXCLUDED_ARCHS
-      ),
+      XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );

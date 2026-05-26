@@ -201,6 +201,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         operatingSystemUtils: globals.os,
         customDevicesConfig: globals.customDevicesConfig,
         nativeAssetsBuilder: globals.nativeAssetsBuilder,
+        xcode: globals.xcode,
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
@@ -209,7 +211,11 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         botDetector: globals.botDetector,
       ),
       Doctor: () => Doctor(logger: globals.logger, clock: globals.systemClock),
-      DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
+      DoctorValidatorsProvider: () => DefaultDoctorValidatorsProvider(
+        platform: globals.platform,
+        featureFlags: featureFlags,
+        xcode: globals.xcode,
+      ),
       EmulatorManager: () => EmulatorManager(
         java: globals.java,
         androidSdk: globals.androidSdk,

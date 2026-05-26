@@ -19,11 +19,13 @@ import 'features.dart';
 import 'ios/devices.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/simulators.dart';
+import 'ios/xcodeproj.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
 import 'macos/macos_ipad_device.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
+import 'macos/xcode.dart';
 import 'native_assets.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
@@ -34,24 +36,26 @@ import 'windows/windows_workflow.dart';
 /// A provider for all of the device discovery instances.
 class FlutterDeviceManager extends DeviceManager {
   FlutterDeviceManager({
+    required AndroidSdk? androidSdk,
+    required AndroidWorkflow androidWorkflow,
+    required Artifacts artifacts,
+    required CustomDevicesConfig customDevicesConfig,
+    required FeatureFlags featureFlags,
+    required FileSystem fileSystem,
+    required FlutterVersion flutterVersion,
+    required IOSSimulatorUtils iosSimulatorUtils,
+    required IOSWorkflow iosWorkflow,
     required super.logger,
+    required MacOSWorkflow macOSWorkflow,
+    required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    required OperatingSystemUtils operatingSystemUtils,
     required Platform platform,
     required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required AndroidSdk? androidSdk,
-    required FeatureFlags featureFlags,
-    required IOSSimulatorUtils iosSimulatorUtils,
-    required XCDevice xcDevice,
-    required AndroidWorkflow androidWorkflow,
-    required IOSWorkflow iosWorkflow,
-    required FlutterVersion flutterVersion,
-    required Artifacts artifacts,
-    required MacOSWorkflow macOSWorkflow,
     required UserMessages userMessages,
-    required OperatingSystemUtils operatingSystemUtils,
     required WindowsWorkflow windowsWorkflow,
-    required CustomDevicesConfig customDevicesConfig,
-    required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    required Xcode? xcode,
+    required XcodeProjectInterpreter? xcodeProjectInterpreter,
+    required XCDevice xcDevice,
   }) : deviceDiscoverers = <DeviceDiscovery>[
          AndroidDevices(
            logger: logger,
@@ -84,6 +88,8 @@ class FlutterDeviceManager extends DeviceManager {
            platform: platform,
            fileSystem: fileSystem,
            operatingSystemUtils: operatingSystemUtils,
+           xcode: xcode,
+           xcodeProjectInterpreter: xcodeProjectInterpreter,
          ),
          MacOSDesignedForIPadDevices(
            processManager: processManager,

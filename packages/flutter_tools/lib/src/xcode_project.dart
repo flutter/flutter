@@ -46,6 +46,9 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   final Xcode? _xcode;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
+  Xcode? get xcode => _xcode;
+  XcodeProjectInterpreter? get xcodeProjectInterpreter => _xcodeProjectInterpreter;
+
   static const _defaultHostAppName = 'Runner';
 
   /// The Xcode workspace (.xcworkspace directory) of the host app.
@@ -951,7 +954,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     // https://flutter.dev/to/xcode-name-config
     // The only source of truth for the name is Xcode's interpretation of the build settings.
     String? productName;
-    if (globals.xcodeProjectInterpreter?.isInstalled ?? false) {
+    if (xcodeProjectInterpreter?.isInstalled ?? false) {
       final Map<String, String>? xcodeBuildSettings = await buildSettingsForBuildInfo(buildInfo);
       if (xcodeBuildSettings != null) {
         productName = xcodeBuildSettings[kProductNameKey];

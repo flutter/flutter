@@ -20,6 +20,7 @@ import '../cache.dart';
 import '../features.dart';
 import '../ios/code_signing.dart';
 import '../ios/plist_parser.dart';
+import '../ios/xcodeproj.dart';
 import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -39,24 +40,25 @@ import 'darwin_add_to_app.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({
-    required Artifacts artifacts,
-    required Cache cache,
-    required FileSystem fileSystem,
-    required FlutterVersion flutterVersion,
-    required BuildSystem buildSystem,
-    required OperatingSystemUtils osUtils,
-    required Logger logger,
     required AndroidSdk? androidSdk,
+    required Artifacts artifacts,
+    required BuildSystem buildSystem,
+    required Cache cache,
     required Config config,
-    required Platform platform,
-    required ProcessUtils processUtils,
-    required ProcessManager processManager,
+    required FileSystem fileSystem,
     required FileSystemUtils fileSystemUtils,
+    required FlutterVersion flutterVersion,
+    required Logger logger,
+    required OperatingSystemUtils osUtils,
+    required Platform platform,
+    required PlistParser plistParser,
+    required ProcessManager processManager,
+    required ProcessUtils processUtils,
     required TemplateRenderer templateRenderer,
     required Terminal terminal,
-    required PlistParser plistParser,
-    required Xcode? xcode,
     bool verboseHelp = false,
+    Xcode? xcode,
+    XcodeProjectInterpreter? xcodeProjectInterpreter,
   }) {
     _addSubcommand(
       BuildAarCommand(
@@ -145,7 +147,14 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(
       BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
     );
-    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(
+      BuildMacosCommand(
+        logger: logger,
+        verboseHelp: verboseHelp,
+        xcode: xcode,
+        xcodeProjectInterpreter: xcodeProjectInterpreter,
+      ),
+    );
     _addSubcommand(
       BuildLinuxCommand(logger: logger, operatingSystemUtils: osUtils, verboseHelp: verboseHelp),
     );

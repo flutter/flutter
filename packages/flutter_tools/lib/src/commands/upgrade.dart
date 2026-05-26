@@ -25,8 +25,8 @@ const _flutterInstallDocs = 'https://flutter.dev/setup';
 
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand({
-    required bool verboseHelp,
     required this._git,
+    required bool verboseHelp,
     UpgradeCommandRunner? commandRunner,
   }) : _commandRunner = commandRunner ?? UpgradeCommandRunner(git: _git) {
     argParser
@@ -151,10 +151,10 @@ class UpgradeCommandRunner {
 
   Future<FlutterCommandResult> runCommand(
     UpgradePhase phase, {
-    required bool force,
-    required bool testFlow,
-    required GitTagVersion gitTagVersion,
     required FlutterVersion flutterVersion,
+    required bool force,
+    required GitTagVersion gitTagVersion,
+    required bool testFlow,
     required bool verifyOnly,
   }) async {
     switch (phase) {
