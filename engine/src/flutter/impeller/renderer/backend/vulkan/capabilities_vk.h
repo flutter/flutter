@@ -267,6 +267,10 @@ class CapabilitiesVK final : public Capabilities,
   bool SupportsExtendedRangeFormats() const override;
 
   // |Capabilities|
+  bool SupportsTextureCompression(
+      CompressedTextureFamily family) const override;
+
+  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
 
   // |Capabilities|
@@ -341,6 +345,9 @@ class CapabilitiesVK final : public Capabilities,
   bool has_primitive_restart_ = true;
   bool has_framebuffer_fetch_ = true;
   bool supports_external_fence_and_semaphore_ = false;
+  bool supports_texture_compression_bc_ = false;
+  bool supports_texture_compression_etc2_ = false;
+  bool supports_texture_compression_astc_ = false;
   bool is_valid_ = false;
 
   // The embedder.h API is responsible for providing the instance and device

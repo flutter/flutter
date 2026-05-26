@@ -49,6 +49,20 @@ static bool DeviceSupportsExtendedRangeFormats(id<MTLDevice> device) {
   return [device supportsFamily:MTLGPUFamilyApple3];
 }
 
+// See "Pixel Format Capabilities" in the Metal Feature Set Tables:
+// https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
+// BC formats are available on the Mac family and on Apple7+ (A14/M1 and newer).
+static bool DeviceSupportsTextureCompressionBC(id<MTLDevice> device) {
+  return [device supportsFamily:MTLGPUFamilyMac2] ||
+         [device supportsFamily:MTLGPUFamilyApple7];
+}
+
+// ETC2 and ASTC are available on all Apple GPU families but not on the Mac
+// (Intel/AMD) family.
+static bool DeviceSupportsTextureCompressionMobile(id<MTLDevice> device) {
+  return [device supportsFamily:MTLGPUFamilyApple2];
+}
+
 static std::unique_ptr<Capabilities> InferMetalCapabilities(
     id<MTLDevice> device,
     PixelFormat color_format) {
@@ -70,6 +84,15 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetMaximumRenderPassAttachmentSize(DeviceMaxTextureSizeSupported(device))
       .SetSupportsExtendedRangeFormats(
           DeviceSupportsExtendedRangeFormats(device))
+      .SetSupportsTextureCompression(
+          CompressedTextureFamily::kBC,
+          DeviceSupportsTextureCompressionBC(device))
+      .SetSupportsTextureCompression(
+          CompressedTextureFamily::kETC2,
+          DeviceSupportsTextureCompressionMobile(device))
+      .SetSupportsTextureCompression(
+          CompressedTextureFamily::kASTC,
+          DeviceSupportsTextureCompressionMobile(device))
 #if FML_OS_IOS && !TARGET_OS_SIMULATOR
       .SetMinimumUniformAlignment(16)
 #else

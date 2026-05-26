@@ -77,6 +77,28 @@ TEST(CapabilitiesTest, MaxRenderPassAttachmentSize) {
   EXPECT_EQ(mutated->GetMaximumRenderPassAttachmentSize(), ISize(100, 100));
 }
 
+TEST(CapabilitiesTest, SupportsTextureCompression) {
+  auto defaults = CapabilitiesBuilder().Build();
+  EXPECT_FALSE(
+      defaults->SupportsTextureCompression(CompressedTextureFamily::kBC));
+  EXPECT_FALSE(
+      defaults->SupportsTextureCompression(CompressedTextureFamily::kETC2));
+  EXPECT_FALSE(
+      defaults->SupportsTextureCompression(CompressedTextureFamily::kASTC));
+
+  // Each family is gated independently.
+  auto mutated =
+      CapabilitiesBuilder()
+          .SetSupportsTextureCompression(CompressedTextureFamily::kETC2, true)
+          .Build();
+  EXPECT_FALSE(
+      mutated->SupportsTextureCompression(CompressedTextureFamily::kBC));
+  EXPECT_TRUE(
+      mutated->SupportsTextureCompression(CompressedTextureFamily::kETC2));
+  EXPECT_FALSE(
+      mutated->SupportsTextureCompression(CompressedTextureFamily::kASTC));
+}
+
 TEST(CapabilitiesTest, MinUniformAlignment) {
   auto defaults = CapabilitiesBuilder().Build();
   EXPECT_EQ(defaults->GetMinimumUniformAlignment(), 256u);

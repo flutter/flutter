@@ -178,8 +178,9 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
 
   if (!tex_descriptor.IsValid() ||
       source.GetRange().length !=
-          BytesPerPixelForPixelFormat(tex_descriptor.format) *
-              destination_region.Area()) {
+          BytesForTextureRegion(tex_descriptor.format,
+                                destination_region.GetWidth(),
+                                destination_region.GetHeight())) {
     return false;
   }
 
@@ -226,6 +227,23 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
   gl.BindTexture(texture_type, gl_handle.value());
   const GLvoid* tex_data =
       source.GetBuffer()->OnGetContents() + source.GetRange().offset;
+
+  // Block-compressed textures cannot be allocated empty and then filled with a
+  // sub-image; the whole mip level is uploaded at once with
+  // glCompressedTexImage2D. Callers must overwrite a full mip level.
+  if (gles_format->is_compressed) {
+    gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    gl.CompressedTexImage2D(texture_target,                // target
+                            mip_level,                     // LOD level
+                            gles_format->internal_format,  // internal format
+                            destination_region.GetWidth(),
+                            destination_region.GetHeight(),
+                            0u,                        // border
+                            source.GetRange().length,  // image size
+                            tex_data);                 // data
+    texture_gles.MarkSliceMipLevelInitialized(slice, mip_level);
+    return true;
+  }
 
   // GL_INVALID_OPERATION if the requested mip level has not been defined by
   // a previous glTexImage2D operation. Allocate the requested mip lazily on

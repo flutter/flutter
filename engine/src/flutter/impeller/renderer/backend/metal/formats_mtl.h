@@ -109,6 +109,36 @@ constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
       return SafeMTLPixelFormatBGRA10_XR();
     case PixelFormat::kR32Float:
       return MTLPixelFormatR32Float;
+    case PixelFormat::kBC1RGBAUNormInt:
+      return MTLPixelFormatBC1_RGBA;
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+      return MTLPixelFormatBC1_RGBA_sRGB;
+    case PixelFormat::kBC3RGBAUNormInt:
+      return MTLPixelFormatBC3_RGBA;
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+      return MTLPixelFormatBC3_RGBA_sRGB;
+    case PixelFormat::kBC5RGUNormInt:
+      return MTLPixelFormatBC5_RGUnorm;
+    case PixelFormat::kBC7RGBAUNormInt:
+      return MTLPixelFormatBC7_RGBAUnorm;
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+      return MTLPixelFormatBC7_RGBAUnorm_sRGB;
+    case PixelFormat::kETC2RGB8UNormInt:
+      return MTLPixelFormatETC2_RGB8;
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+      return MTLPixelFormatETC2_RGB8_sRGB;
+    case PixelFormat::kETC2RGBA8UNormInt:
+      return MTLPixelFormatEAC_RGBA8;
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+      return MTLPixelFormatEAC_RGBA8_sRGB;
+    case PixelFormat::kASTC4x4LDR:
+      return MTLPixelFormatASTC_4x4_LDR;
+    case PixelFormat::kASTC4x4LDRSRGB:
+      return MTLPixelFormatASTC_4x4_sRGB;
+    case PixelFormat::kASTC8x8LDR:
+      return MTLPixelFormatASTC_8x8_LDR;
+    case PixelFormat::kASTC8x8LDRSRGB:
+      return MTLPixelFormatASTC_8x8_sRGB;
   }
   return MTLPixelFormatInvalid;
 };

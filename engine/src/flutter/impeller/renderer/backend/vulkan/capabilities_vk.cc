@@ -631,6 +631,13 @@ bool CapabilitiesVK::SetPhysicalDevice(
           .get<vk::PhysicalDeviceImageCompressionControlFeaturesEXT>()
           .imageCompressionControl;
 
+  {
+    const auto& features = enabled_features.get().features;
+    supports_texture_compression_bc_ = features.textureCompressionBC;
+    supports_texture_compression_etc2_ = features.textureCompressionETC2;
+    supports_texture_compression_astc_ = features.textureCompressionASTC_LDR;
+  }
+
   max_render_pass_attachment_size_ =
       ISize{device_properties_.limits.maxFramebufferWidth,
             device_properties_.limits.maxFramebufferHeight};
@@ -839,6 +846,19 @@ bool CapabilitiesVK::SupportsExternalSemaphoreExtensions() const {
 }
 
 bool CapabilitiesVK::SupportsExtendedRangeFormats() const {
+  return false;
+}
+
+bool CapabilitiesVK::SupportsTextureCompression(
+    CompressedTextureFamily family) const {
+  switch (family) {
+    case CompressedTextureFamily::kBC:
+      return supports_texture_compression_bc_;
+    case CompressedTextureFamily::kETC2:
+      return supports_texture_compression_etc2_;
+    case CompressedTextureFamily::kASTC:
+      return supports_texture_compression_astc_;
+  }
   return false;
 }
 

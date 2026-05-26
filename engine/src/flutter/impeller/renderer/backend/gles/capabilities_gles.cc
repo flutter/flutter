@@ -29,6 +29,14 @@ static const constexpr char* kMultisampledRenderToTexture2Ext =
 // https://registry.khronos.org/OpenGL/extensions/OES/OES_element_index_uint.txt
 static const constexpr char* kElementIndexUintExt = "GL_OES_element_index_uint";
 
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_compression_s3tc.txt
+static const constexpr char* kTextureCompressionS3TCExt =
+    "GL_EXT_texture_compression_s3tc";
+
+// https://registry.khronos.org/OpenGL/extensions/KHR/KHR_texture_compression_astc_hdr.txt
+static const constexpr char* kTextureCompressionAstcLdrExt =
+    "GL_KHR_texture_compression_astc_ldr";
+
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
     GLint value = 0;
@@ -147,6 +155,15 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   }
   is_es_ = desc->IsES();
   is_angle_ = desc->IsANGLE();
+
+  // ETC2 and EAC are mandatory in OpenGL ES 3.0. S3TC (BC) and ASTC are gated
+  // behind extensions and are not present on most mobile or desktop GLES.
+  supports_texture_compression_bc_ =
+      desc->HasExtension(kTextureCompressionS3TCExt);
+  supports_texture_compression_astc_ =
+      desc->HasExtension(kTextureCompressionAstcLdrExt);
+  supports_texture_compression_etc2_ =
+      desc->IsES() && desc->GetGlVersion().major_version >= 3;
 }
 
 bool CapabilitiesGLES::IsES() const {
@@ -235,6 +252,19 @@ bool CapabilitiesGLES::Supports32BitPrimitiveIndices() const {
 }
 
 bool CapabilitiesGLES::SupportsExtendedRangeFormats() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsTextureCompression(
+    CompressedTextureFamily family) const {
+  switch (family) {
+    case CompressedTextureFamily::kBC:
+      return supports_texture_compression_bc_;
+    case CompressedTextureFamily::kETC2:
+      return supports_texture_compression_etc2_;
+    case CompressedTextureFamily::kASTC:
+      return supports_texture_compression_astc_;
+  }
   return false;
 }
 

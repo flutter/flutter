@@ -115,7 +115,110 @@ enum class PixelFormat : uint8_t {
   kS8UInt,
   kD24UnormS8Uint,
   kD32FloatS8UInt,
+  // Block-compressed formats. These are sample-only; they cannot be used as
+  // render targets, storage textures, or transient attachments, and their
+  // support varies by device (see `Capabilities::SupportsTextureCompression`).
+  kBC1RGBAUNormInt,
+  kBC1RGBAUNormIntSRGB,
+  kBC3RGBAUNormInt,
+  kBC3RGBAUNormIntSRGB,
+  kBC5RGUNormInt,
+  kBC7RGBAUNormInt,
+  kBC7RGBAUNormIntSRGB,
+  kETC2RGB8UNormInt,
+  kETC2RGB8UNormIntSRGB,
+  kETC2RGBA8UNormInt,
+  kETC2RGBA8UNormIntSRGB,
+  kASTC4x4LDR,
+  kASTC4x4LDRSRGB,
+  kASTC8x8LDR,
+  kASTC8x8LDRSRGB,
 };
+
+//------------------------------------------------------------------------------
+/// @brief      The family of a block-compressed pixel format. Whole families
+///             are gated behind a single device feature, mirroring the three
+///             optional compression features exposed by WebGPU.
+///
+enum class CompressedTextureFamily {
+  /// S3TC, RGTC, and BPTC (BC1 through BC7). Desktop GPUs.
+  kBC,
+  /// ETC2 and EAC. Mobile, OpenGL ES 3.0, and WebGL2.
+  kETC2,
+  /// ASTC LDR. Modern mobile and some desktop.
+  kASTC,
+};
+
+/// @brief Whether `format` is a block-compressed format.
+constexpr bool IsCompressed(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kBC1RGBAUNormInt:
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+    case PixelFormat::kBC3RGBAUNormInt:
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+    case PixelFormat::kBC5RGUNormInt:
+    case PixelFormat::kBC7RGBAUNormInt:
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+    case PixelFormat::kETC2RGB8UNormInt:
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+    case PixelFormat::kETC2RGBA8UNormInt:
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case PixelFormat::kASTC4x4LDR:
+    case PixelFormat::kASTC4x4LDRSRGB:
+    case PixelFormat::kASTC8x8LDR:
+    case PixelFormat::kASTC8x8LDRSRGB:
+      return true;
+    default:
+      return false;
+  }
+}
+
+/// @brief The compression family that `format` belongs to. Only valid for
+///        formats where `IsCompressed` is true.
+constexpr CompressedTextureFamily CompressedTextureFamilyForFormat(
+    PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kBC1RGBAUNormInt:
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+    case PixelFormat::kBC3RGBAUNormInt:
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+    case PixelFormat::kBC5RGUNormInt:
+    case PixelFormat::kBC7RGBAUNormInt:
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+      return CompressedTextureFamily::kBC;
+    case PixelFormat::kETC2RGB8UNormInt:
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+    case PixelFormat::kETC2RGBA8UNormInt:
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+      return CompressedTextureFamily::kETC2;
+    default:
+      return CompressedTextureFamily::kASTC;
+  }
+}
+
+/// @brief The width, in texels, of one compression block. Uncompressed formats
+///        report 1.
+constexpr size_t CompressedBlockWidthForPixelFormat(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kASTC8x8LDR:
+    case PixelFormat::kASTC8x8LDRSRGB:
+      return 8u;
+    default:
+      return IsCompressed(format) ? 4u : 1u;
+  }
+}
+
+/// @brief The height, in texels, of one compression block. Uncompressed formats
+///        report 1.
+constexpr size_t CompressedBlockHeightForPixelFormat(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kASTC8x8LDR:
+    case PixelFormat::kASTC8x8LDRSRGB:
+      return 8u;
+    default:
+      return IsCompressed(format) ? 4u : 1u;
+  }
+}
 
 constexpr bool IsDepthWritable(PixelFormat format) {
   switch (format) {
@@ -174,6 +277,36 @@ constexpr const char* PixelFormatToString(PixelFormat format) {
       return "D32FloatS8UInt";
     case PixelFormat::kR32Float:
       return "R32Float";
+    case PixelFormat::kBC1RGBAUNormInt:
+      return "BC1RGBAUNormInt";
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+      return "BC1RGBAUNormIntSRGB";
+    case PixelFormat::kBC3RGBAUNormInt:
+      return "BC3RGBAUNormInt";
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+      return "BC3RGBAUNormIntSRGB";
+    case PixelFormat::kBC5RGUNormInt:
+      return "BC5RGUNormInt";
+    case PixelFormat::kBC7RGBAUNormInt:
+      return "BC7RGBAUNormInt";
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+      return "BC7RGBAUNormIntSRGB";
+    case PixelFormat::kETC2RGB8UNormInt:
+      return "ETC2RGB8UNormInt";
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+      return "ETC2RGB8UNormIntSRGB";
+    case PixelFormat::kETC2RGBA8UNormInt:
+      return "ETC2RGBA8UNormInt";
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+      return "ETC2RGBA8UNormIntSRGB";
+    case PixelFormat::kASTC4x4LDR:
+      return "ASTC4x4LDR";
+    case PixelFormat::kASTC4x4LDRSRGB:
+      return "ASTC4x4LDRSRGB";
+    case PixelFormat::kASTC8x8LDR:
+      return "ASTC8x8LDR";
+    case PixelFormat::kASTC8x8LDRSRGB:
+      return "ASTC8x8LDRSRGB";
   }
   FML_UNREACHABLE();
 }
@@ -493,8 +626,78 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
       return 8u;
     case PixelFormat::kR32G32B32A32Float:
       return 16u;
+    // Block-compressed formats have no meaningful bytes-per-pixel. Use
+    // `BytesPerBlockForPixelFormat` together with the block dimensions instead.
+    case PixelFormat::kBC1RGBAUNormInt:
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+    case PixelFormat::kBC3RGBAUNormInt:
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+    case PixelFormat::kBC5RGUNormInt:
+    case PixelFormat::kBC7RGBAUNormInt:
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+    case PixelFormat::kETC2RGB8UNormInt:
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+    case PixelFormat::kETC2RGBA8UNormInt:
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case PixelFormat::kASTC4x4LDR:
+    case PixelFormat::kASTC4x4LDRSRGB:
+    case PixelFormat::kASTC8x8LDR:
+    case PixelFormat::kASTC8x8LDRSRGB:
+      return 0u;
   }
   return 0u;
+}
+
+/// @brief The number of bytes used to store one block of `format`. For
+///        uncompressed formats a block is a single pixel, so this matches
+///        `BytesPerPixelForPixelFormat`.
+constexpr size_t BytesPerBlockForPixelFormat(PixelFormat format) {
+  switch (format) {
+    case PixelFormat::kBC1RGBAUNormInt:
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+    case PixelFormat::kETC2RGB8UNormInt:
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+      return 8u;
+    case PixelFormat::kBC3RGBAUNormInt:
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+    case PixelFormat::kBC5RGUNormInt:
+    case PixelFormat::kBC7RGBAUNormInt:
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+    case PixelFormat::kETC2RGBA8UNormInt:
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case PixelFormat::kASTC4x4LDR:
+    case PixelFormat::kASTC4x4LDRSRGB:
+    case PixelFormat::kASTC8x8LDR:
+    case PixelFormat::kASTC8x8LDRSRGB:
+      return 16u;
+    default:
+      return BytesPerPixelForPixelFormat(format);
+  }
+}
+
+/// @brief The number of bytes required to store a `width` x `height` texel
+///        region in `format`. Block-compressed formats round the dimensions up
+///        to whole blocks. Uncompressed formats reduce to `width * height *
+///        bytes-per-pixel`.
+constexpr size_t BytesForTextureRegion(PixelFormat format,
+                                       int64_t width,
+                                       int64_t height) {
+  const size_t block_width = CompressedBlockWidthForPixelFormat(format);
+  const size_t block_height = CompressedBlockHeightForPixelFormat(format);
+  const size_t w = width <= 0 ? 0u : static_cast<size_t>(width);
+  const size_t h = height <= 0 ? 0u : static_cast<size_t>(height);
+  const size_t blocks_wide = (w + block_width - 1u) / block_width;
+  const size_t blocks_high = (h + block_height - 1u) / block_height;
+  return blocks_wide * blocks_high * BytesPerBlockForPixelFormat(format);
+}
+
+/// @brief The number of bytes in a single row of texel blocks for a texture of
+///        the given `width` in `format`.
+constexpr size_t BytesPerRowForTextureWidth(PixelFormat format, int64_t width) {
+  const size_t block_width = CompressedBlockWidthForPixelFormat(format);
+  const size_t w = width <= 0 ? 0u : static_cast<size_t>(width);
+  const size_t blocks_wide = (w + block_width - 1u) / block_width;
+  return blocks_wide * BytesPerBlockForPixelFormat(format);
 }
 
 //------------------------------------------------------------------------------

@@ -126,5 +126,71 @@ TEST(AllocatorTest, RangeTest) {
   }
 }
 
+TEST(AllocatorTest, CompressedFormatClassification) {
+  EXPECT_FALSE(IsCompressed(PixelFormat::kR8G8B8A8UNormInt));
+  EXPECT_FALSE(IsCompressed(PixelFormat::kR32Float));
+  EXPECT_TRUE(IsCompressed(PixelFormat::kBC1RGBAUNormInt));
+  EXPECT_TRUE(IsCompressed(PixelFormat::kETC2RGBA8UNormInt));
+  EXPECT_TRUE(IsCompressed(PixelFormat::kASTC8x8LDR));
+
+  EXPECT_EQ(CompressedTextureFamilyForFormat(PixelFormat::kBC7RGBAUNormInt),
+            CompressedTextureFamily::kBC);
+  EXPECT_EQ(CompressedTextureFamilyForFormat(PixelFormat::kETC2RGB8UNormInt),
+            CompressedTextureFamily::kETC2);
+  EXPECT_EQ(CompressedTextureFamilyForFormat(PixelFormat::kASTC4x4LDR),
+            CompressedTextureFamily::kASTC);
+}
+
+TEST(AllocatorTest, CompressedFormatBlockMath) {
+  // Block dimensions: everything here is 4x4 except ASTC 8x8.
+  EXPECT_EQ(CompressedBlockWidthForPixelFormat(PixelFormat::kBC1RGBAUNormInt),
+            4u);
+  EXPECT_EQ(CompressedBlockWidthForPixelFormat(PixelFormat::kASTC8x8LDR), 8u);
+  EXPECT_EQ(CompressedBlockHeightForPixelFormat(PixelFormat::kASTC8x8LDR), 8u);
+  // Uncompressed formats report a 1x1 block.
+  EXPECT_EQ(CompressedBlockWidthForPixelFormat(PixelFormat::kR8G8B8A8UNormInt),
+            1u);
+
+  // Bytes per block: BC1/ETC2-RGB8 are 8 bytes, the rest here are 16.
+  EXPECT_EQ(BytesPerBlockForPixelFormat(PixelFormat::kBC1RGBAUNormInt), 8u);
+  EXPECT_EQ(BytesPerBlockForPixelFormat(PixelFormat::kETC2RGB8UNormInt), 8u);
+  EXPECT_EQ(BytesPerBlockForPixelFormat(PixelFormat::kBC3RGBAUNormInt), 16u);
+  EXPECT_EQ(BytesPerBlockForPixelFormat(PixelFormat::kASTC4x4LDR), 16u);
+  // Uncompressed falls back to bytes-per-pixel.
+  EXPECT_EQ(BytesPerBlockForPixelFormat(PixelFormat::kR8G8B8A8UNormInt), 4u);
+}
+
+TEST(AllocatorTest, CompressedFormatRegionByteSizes) {
+  // BC1: 4x4 blocks of 8 bytes. Dimensions round up to whole blocks.
+  EXPECT_EQ(BytesForTextureRegion(PixelFormat::kBC1RGBAUNormInt, 4, 4), 8u);
+  EXPECT_EQ(BytesForTextureRegion(PixelFormat::kBC1RGBAUNormInt, 8, 8), 32u);
+  EXPECT_EQ(BytesForTextureRegion(PixelFormat::kBC1RGBAUNormInt, 5, 5), 32u);
+  EXPECT_EQ(BytesPerRowForTextureWidth(PixelFormat::kBC1RGBAUNormInt, 8), 16u);
+
+  // ASTC 8x8: a single 16-byte block covers up to 8x8 texels.
+  EXPECT_EQ(BytesForTextureRegion(PixelFormat::kASTC8x8LDR, 8, 8), 16u);
+  EXPECT_EQ(BytesForTextureRegion(PixelFormat::kASTC8x8LDR, 9, 9), 64u);
+
+  // Uncompressed math is unchanged: width * height * bytes-per-pixel.
+  EXPECT_EQ(BytesForTextureRegion(PixelFormat::kR8G8B8A8UNormInt, 100, 100),
+            40000u);
+  EXPECT_EQ(BytesPerRowForTextureWidth(PixelFormat::kR8G8B8A8UNormInt, 100),
+            400u);
+}
+
+TEST(AllocatorTest, CompressedTextureDescriptorByteSizes) {
+  {
+    TextureDescriptor desc = {.format = PixelFormat::kBC1RGBAUNormInt,
+                              .size = ISize(8, 8)};
+    EXPECT_EQ(desc.GetByteSizeOfBaseMipLevel(), 32u);
+    EXPECT_EQ(desc.GetBytesPerRow(), 16u);
+  }
+  {
+    TextureDescriptor desc = {.format = PixelFormat::kASTC8x8LDR,
+                              .size = ISize(16, 16)};
+    EXPECT_EQ(desc.GetByteSizeOfBaseMipLevel(), 64u);
+  }
+}
+
 }  // namespace testing
 }  // namespace impeller
