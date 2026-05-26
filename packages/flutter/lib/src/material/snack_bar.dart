@@ -988,7 +988,10 @@ class _RenderSnackBarLayout extends RenderBox
           end: hasButtons ? 0.0 : horizontalPadding,
         ).resolve(textDirection);
 
-    final double verticalPadding = resolvedPadding.top + resolvedPadding.bottom;
+    final double topPadding = resolvedPadding.top;
+    final double bottomPadding = resolvedPadding.bottom;
+    final gapBetweenContentAndButtons = bottomPadding;
+
     final double edgeWrapPadding = _padding != null
         ? (isLtr ? resolvedPadding.right : resolvedPadding.left)
         : 0.0;
@@ -1066,14 +1069,23 @@ class _RenderSnackBarLayout extends RenderBox
               : dryActionSize)
         : Size.zero;
 
-    final double naturalHeight = contentSize.height + verticalPadding;
+    final double naturalHeight = contentSize.height + topPadding + bottomPadding;
     final double maxButtonHeight = math.max(closeIconSize.height, actionSize.height);
 
-    final double totalHeight = !hasButtons
-        ? naturalHeight
-        : (willOverflow
-              ? naturalHeight + maxButtonHeight
-              : math.max(naturalHeight, maxButtonHeight));
+    final double totalHeight;
+    if (!hasButtons) {
+      totalHeight = naturalHeight;
+    } else if (willOverflow) {
+      totalHeight =
+          topPadding +
+          contentSize.height +
+          gapBetweenContentAndButtons +
+          maxButtonHeight +
+          bottomPadding;
+    } else {
+      totalHeight = math.max(naturalHeight, maxButtonHeight);
+    }
+
     final double actualWidth = availableWidth.isFinite
         ? availableWidth
         : (contentSize.width + contentSpacePadding + totalActionAreaWidth);
@@ -1085,12 +1097,13 @@ class _RenderSnackBarLayout extends RenderBox
     }
 
     // Position the content.
+    final double verticalCenteringOffset = (totalHeight - naturalHeight) / 2;
     final double contentX = isLtr
         ? resolvedPadding.left
         : actualWidth - resolvedPadding.left - contentSize.width;
     final double contentY = (!hasButtons || !willOverflow)
-        ? resolvedPadding.top + ((totalHeight - naturalHeight) / 2)
-        : resolvedPadding.top;
+        ? topPadding + verticalCenteringOffset
+        : topPadding;
 
     (content.parentData! as BoxParentData).offset = Offset(contentX, contentY);
 
@@ -1099,7 +1112,14 @@ class _RenderSnackBarLayout extends RenderBox
     }
 
     // Position the buttons.
-    final double actionRowTop = resolvedPadding.top + contentSize.height;
+    final double buttonYBase;
+    if (willOverflow) {
+      buttonYBase = topPadding + contentSize.height + gapBetweenContentAndButtons;
+    } else {
+      buttonYBase =
+          topPadding + verticalCenteringOffset + ((contentSize.height - maxButtonHeight) / 2);
+    }
+
     double currentX = isLtr ? actualWidth - edgeWrapPadding : edgeWrapPadding;
 
     void positionButton(
@@ -1117,12 +1137,6 @@ class _RenderSnackBarLayout extends RenderBox
 
       currentX = isLtr ? x - horizontalMargin : x + childSize.width + horizontalMargin;
     }
-
-    final double buttonYBase = willOverflow
-        ? actionRowTop
-        : resolvedPadding.top +
-              ((totalHeight - naturalHeight) / 2) +
-              ((contentSize.height - maxButtonHeight) / 2);
 
     if (hasCloseIcon) {
       positionButton(closeIcon, closeIconSize, iconHorizontalMargin, buttonYBase);
