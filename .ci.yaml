@@ -20,7 +20,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "curl", "version": "version:7.64.0"}
+          {"dependency": "curl", "version": "version:8.20.0"}
         ]
       os: Ubuntu
       cores: "8"
@@ -31,7 +31,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "curl", "version": "version:7.64.0"}
+          {"dependency": "curl", "version": "version:8.20.0"}
         ]
       os: Ubuntu
       cores: "8"
@@ -117,7 +117,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:36v8unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "curl", "version": "version:7.64.0"}
+          {"dependency": "curl", "version": "version:8.20.0"}
         ]
       os: Ubuntu
       cores: "8"
@@ -129,7 +129,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:36v8unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "curl", "version": "version:7.64.0"}
+          {"dependency": "curl", "version": "version:8.20.0"}
         ]
       os: Linux
       device_type: "Pixel 7 Pro"
@@ -140,7 +140,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:36v8unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "curl", "version": "version:7.64.0"}
+          {"dependency": "curl", "version": "version:8.20.0"}
         ]
       os: Linux
       device_type: "mokey"
@@ -151,7 +151,7 @@ platform_properties:
         [
           {"dependency": "android_sdk", "version": "version:36v8unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "curl", "version": "version:7.64.0"}
+          {"dependency": "curl", "version": "version:8.20.0"}
         ]
       os: Linux
       device_type: "SM-S921U1"
@@ -377,7 +377,7 @@ targets:
         [
           {"dependency": "android_sdk", "version": "version:36v8unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "curl", "version": "version:7.64.0"}
+          {"dependency": "curl", "version": "version:8.20.0"}
         ]
       tags: >
         ["devicelab", "android", "linux", "mokey"]
@@ -1181,7 +1181,7 @@ targets:
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"},
-          {"dependency": "curl", "version": "version:7.64.0"}
+          {"dependency": "curl", "version": "version:8.20.0"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
