@@ -1448,7 +1448,6 @@ Future<void> injectPlugins(
         darwinDependencyManagement ??
         DarwinDependencyManagement(
           project: project,
-          plugins: plugins,
           cocoapods: globals.cocoaPods,
           swiftPackageManager: SwiftPackageManager(
             fileSystem: globals.fs,
@@ -1463,10 +1462,16 @@ Future<void> injectPlugins(
           config: globals.config,
         );
     if (iosPlatform) {
-      await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.ios);
+      await darwinDependencyManagerSetup.setUp(
+        platform: FlutterDarwinPlatform.ios,
+        plugins: pluginsByPlatform[IOSPlugin.kConfigKey]!,
+      );
     }
     if (macOSPlatform) {
-      await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.macos);
+      await darwinDependencyManagerSetup.setUp(
+        platform: FlutterDarwinPlatform.macos,
+        plugins: pluginsByPlatform[MacOSPlugin.kConfigKey]!,
+      );
     }
   }
 }
@@ -1476,6 +1481,18 @@ Future<void> injectPlugins(
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 bool hasPlugins(FlutterProject project) {
   return _readFileContent(project.flutterPluginsDependenciesFile) != null;
+}
+
+/// Resolves the plugin implementations for the platform specified by [platformKey].
+///
+/// Uses [_resolvePluginImplementations] with [_PluginResolutionType.nativeOrDart]
+/// to find which plugins are resolved for the given platform.
+List<Plugin> resolvePluginImplementationsForPlatform(List<Plugin> plugins, String platformKey) {
+  final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
+    plugins,
+    pluginResolutionType: _PluginResolutionType.nativeOrDart,
+  );
+  return pluginsByPlatform[platformKey] ?? [];
 }
 
 /// Resolves the plugin implementations for all platforms.
