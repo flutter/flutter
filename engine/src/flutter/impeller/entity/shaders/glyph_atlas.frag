@@ -39,8 +39,10 @@ void main() {
       coverage = float(value.r);
     }
 
-    coverage =
-        1.0 - pow(clamp(1.0 - coverage, 0.0, 1.0), frag_info.text_contrast);
+    if (frag_info.text_contrast != 1.0) {
+      coverage =
+          1.0 - pow(clamp(1.0 - coverage, 0.0, 1.0), frag_info.text_contrast);
+    }
 
     frag_color = f16vec4(coverage) * frag_info.text_color;
   }
