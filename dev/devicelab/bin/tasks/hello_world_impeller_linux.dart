@@ -19,8 +19,8 @@ Future<TaskResult> run() async {
   final String myApplicationPath = path.join(appDir.path, 'linux', 'runner', 'my_application.cc');
   final myApplicationFile = File(myApplicationPath);
 
-  const vulkanBackendMessage = 'Using the Impeller rendering backend (Vulkan).';
-  const openGLBackendMessage = 'Using the Impeller rendering backend (OpenGL).';
+  const vulkanBackendMessage = 'Using the Impeller rendering backend (VulkanSDF).';
+  const openGLBackendMessage = 'Using the Impeller rendering backend (OpenGLESSDF).';
 
   var res = TaskResult.success(null);
 
