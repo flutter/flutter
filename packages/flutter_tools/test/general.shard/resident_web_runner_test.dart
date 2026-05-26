@@ -968,9 +968,10 @@ name: my_app
       expect(result.code, 0);
       expect(webDevFS.mainUri.toString(), contains('entrypoint.dart'));
 
-      // Verifying the sets are successfully cleared after eviction
+      // Verifying the sets and trigger flags are successfully cleared after eviction
       expect(webDevFS.assetPathsToEvict, isEmpty);
       expect(webDevFS.shaderPathsToEvict, isEmpty);
+      expect(webDevFS.didUpdateFontManifest, false);
 
       expect(fakeVmServiceHost.hasRemainingExpectations, false);
     },
