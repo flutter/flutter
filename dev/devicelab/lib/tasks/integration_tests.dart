@@ -139,6 +139,14 @@ TaskFunction createSolidColorTest({required bool enableImpeller}) {
   ).call;
 }
 
+TaskFunction createTextureTest({required bool enableImpeller}) {
+  return DriverTest(
+    '${flutterDirectory.path}/examples/texture',
+    'test_driver/texture_test.dart',
+    extraOptions: <String>[if (enableImpeller) '--enable-impeller'],
+  ).call;
+}
+
 TaskFunction androidVerifiedInputTest({Map<String, String>? environment}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/android_verified_input',
