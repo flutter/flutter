@@ -621,105 +621,108 @@ bool isEmulatorBuildMode(BuildMode mode) {
 }
 
 enum TargetPlatform {
-  android,
-  ios,
-  darwin,
-  linux_x64,
-  linux_arm64,
-  linux_riscv64,
-  windows_x64,
-  windows_arm64,
-  fuchsia_arm64,
-  fuchsia_x64,
-  tester,
-  web_javascript,
+  android('android'),
+  ios('ios'),
+  darwin('darwin'),
+  linux_x64('linux-x64'),
+  linux_arm64('linux-arm64'),
+  linux_riscv64('linux-riscv64'),
+  windows_x64('windows-x64'),
+  windows_arm64('windows-arm64'),
+  fuchsia_arm64('fuchsia-arm64'),
+  fuchsia_x64('fuchsia-x64'),
+  tester('flutter-tester'),
+  web_javascript('web-javascript'),
   // The arch specific android target platforms are soft-deprecated.
   // Instead of using TargetPlatform as a combination arch + platform
   // the code will be updated to carry arch information in [DarwinArch]
   // and [AndroidArch].
-  android_arm,
-  android_arm64,
-  android_x64,
-  unsupported;
+  android_arm('android-arm'),
+  android_arm64('android-arm64'),
+  android_x64('android-x64'),
+  unsupported('unsupported');
 
-  String get fuchsiaArchForTargetPlatform {
-    switch (this) {
-      case fuchsia_arm64:
-        return 'arm64';
-      case fuchsia_x64:
-        return 'x64';
-      case android:
-      case android_arm:
-      case android_arm64:
-      case android_x64:
-      case darwin:
-      case ios:
-      case linux_arm64:
-      case linux_riscv64:
-      case linux_x64:
-      case tester:
-      case web_javascript:
-      case windows_x64:
-      case windows_arm64:
-      case unsupported:
-        throw UnsupportedError('Unexpected Fuchsia platform $this');
-    }
+  const TargetPlatform(this._defaultName);
+
+  factory TargetPlatform.fromName(String name) {
+    return switch (name) {
+      'android' => TargetPlatform.android,
+      'android-arm' => TargetPlatform.android_arm,
+      'android-arm64' => TargetPlatform.android_arm64,
+      'android-x64' => TargetPlatform.android_x64,
+      'fuchsia-arm64' => TargetPlatform.fuchsia_arm64,
+      'fuchsia-x64' => TargetPlatform.fuchsia_x64,
+      'ios' => TargetPlatform.ios,
+      // For backward-compatibility and also for Tester, where it must match
+      // host platform name (HostPlatform.darwin_x64)
+      'darwin' || 'darwin-x64' || 'darwin-arm64' => TargetPlatform.darwin,
+      'linux-x64' => TargetPlatform.linux_x64,
+      'linux-arm64' => TargetPlatform.linux_arm64,
+      'linux-riscv64' => TargetPlatform.linux_riscv64,
+      'windows-x64' => TargetPlatform.windows_x64,
+      'windows-arm64' => TargetPlatform.windows_arm64,
+      'web-javascript' => TargetPlatform.web_javascript,
+      'flutter-tester' => TargetPlatform.tester,
+      _ => throw Exception('Unsupported platform name "$name"'),
+    };
   }
 
-  String get osName {
-    switch (this) {
-      case linux_x64:
-      case linux_arm64:
-      case linux_riscv64:
-        return 'linux';
-      case darwin:
-        return 'macos';
-      case windows_x64:
-      case windows_arm64:
-        return 'windows';
-      case android:
-      case android_arm:
-      case android_arm64:
-      case android_x64:
-        return 'android';
-      case fuchsia_arm64:
-      case fuchsia_x64:
-        return 'fuchsia';
-      case ios:
-        return 'ios';
-      case tester:
-        return 'flutter-tester';
-      case web_javascript:
-        return 'web';
-      case unsupported:
-        throw UnsupportedError('Unexpected target platform $this');
-    }
+  final String _defaultName;
+
+  String getName({DarwinArch? darwinArch}) {
+    return switch (this) {
+      TargetPlatform.ios when darwinArch != null => 'ios-${darwinArch.name}',
+      TargetPlatform.darwin when darwinArch != null => 'darwin-${darwinArch.name}',
+      _ => _defaultName,
+    };
   }
 
-  String get simpleName {
-    switch (this) {
-      case linux_x64:
-      case darwin:
-      case windows_x64:
-        return 'x64';
-      case linux_arm64:
-      case windows_arm64:
-        return 'arm64';
-      case linux_riscv64:
-        return 'riscv64';
-      case android:
-      case android_arm:
-      case android_arm64:
-      case android_x64:
-      case fuchsia_arm64:
-      case fuchsia_x64:
-      case ios:
-      case tester:
-      case web_javascript:
-      case unsupported:
-        throw UnsupportedError('Unexpected target platform $this');
-    }
-  }
+  String get fuchsiaArchForTargetPlatform => switch (this) {
+    fuchsia_arm64 => 'arm64',
+    fuchsia_x64 => 'x64',
+    android ||
+    android_arm ||
+    android_arm64 ||
+    android_x64 ||
+    darwin ||
+    ios ||
+    linux_arm64 ||
+    linux_riscv64 ||
+    linux_x64 ||
+    tester ||
+    web_javascript ||
+    windows_x64 ||
+    windows_arm64 ||
+    unsupported => throw UnsupportedError('Unexpected Fuchsia platform $this'),
+  };
+
+  String get osName => switch (this) {
+    linux_x64 || linux_arm64 || linux_riscv64 => 'linux',
+    darwin => 'macos',
+    windows_x64 || windows_arm64 => 'windows',
+    android || android_arm || android_arm64 || android_x64 => 'android',
+    fuchsia_arm64 || fuchsia_x64 => 'fuchsia',
+    ios => 'ios',
+    tester => 'flutter-tester',
+    web_javascript => 'web',
+    unsupported => throw UnsupportedError('Unexpected target platform $this'),
+  };
+
+  String get simpleName => switch (this) {
+    linux_x64 || darwin || windows_x64 => 'x64',
+    linux_arm64 || windows_arm64 => 'arm64',
+    linux_riscv64 => 'riscv64',
+    android ||
+    android_arm ||
+    android_arm64 ||
+    android_x64 ||
+    fuchsia_arm64 ||
+    fuchsia_x64 ||
+    ios ||
+    tester ||
+    web_javascript ||
+    unsupported => throw UnsupportedError('Unexpected target platform $this'),
+  };
 
   static Never throwUnsupportedTarget() =>
       throw UnsupportedError('Target platform is unsupported.');
@@ -828,52 +831,6 @@ List<DarwinArch> getDarwinArchsFromEnv(Map<String, String> defines) {
   const defaultDarwinArchitectures = <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
   return defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
       defaultDarwinArchitectures;
-}
-
-String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
-  return switch (platform) {
-    TargetPlatform.ios when darwinArch != null => 'ios-${darwinArch.name}',
-    TargetPlatform.darwin when darwinArch != null => 'darwin-${darwinArch.name}',
-    TargetPlatform.ios => 'ios',
-    TargetPlatform.darwin => 'darwin',
-    TargetPlatform.android_arm => 'android-arm',
-    TargetPlatform.android_arm64 => 'android-arm64',
-    TargetPlatform.android_x64 => 'android-x64',
-    TargetPlatform.linux_x64 => 'linux-x64',
-    TargetPlatform.linux_arm64 => 'linux-arm64',
-    TargetPlatform.linux_riscv64 => 'linux-riscv64',
-    TargetPlatform.windows_x64 => 'windows-x64',
-    TargetPlatform.windows_arm64 => 'windows-arm64',
-    TargetPlatform.fuchsia_arm64 => 'fuchsia-arm64',
-    TargetPlatform.fuchsia_x64 => 'fuchsia-x64',
-    TargetPlatform.tester => 'flutter-tester',
-    TargetPlatform.web_javascript => 'web-javascript',
-    TargetPlatform.android => 'android',
-    TargetPlatform.unsupported => 'unsupported',
-  };
-}
-
-TargetPlatform getTargetPlatformForName(String platform) {
-  return switch (platform) {
-    'android' => TargetPlatform.android,
-    'android-arm' => TargetPlatform.android_arm,
-    'android-arm64' => TargetPlatform.android_arm64,
-    'android-x64' => TargetPlatform.android_x64,
-    'fuchsia-arm64' => TargetPlatform.fuchsia_arm64,
-    'fuchsia-x64' => TargetPlatform.fuchsia_x64,
-    'ios' => TargetPlatform.ios,
-    // For backward-compatibility and also for Tester, where it must match
-    // host platform name (HostPlatform.darwin_x64)
-    'darwin' || 'darwin-x64' || 'darwin-arm64' => TargetPlatform.darwin,
-    'linux-x64' => TargetPlatform.linux_x64,
-    'linux-arm64' => TargetPlatform.linux_arm64,
-    'linux-riscv64' => TargetPlatform.linux_riscv64,
-    'windows-x64' => TargetPlatform.windows_x64,
-    'windows-arm64' => TargetPlatform.windows_arm64,
-    'web-javascript' => TargetPlatform.web_javascript,
-    'flutter-tester' => TargetPlatform.tester,
-    _ => throw Exception('Unsupported platform name "$platform"'),
-  };
 }
 
 AndroidArch getAndroidArchForName(String platform) {

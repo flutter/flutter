@@ -200,7 +200,7 @@ String _enginePlatformDirectoryName(TargetPlatform platform) {
   if (platform == TargetPlatform.darwin) {
     return 'darwin-x64';
   }
-  return getNameForTargetPlatform(platform);
+  return platform.getName();
 }
 
 // Remove android target platform type.
