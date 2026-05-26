@@ -143,4 +143,127 @@ MTLPixelFormat SafeMTLPixelFormatBGRA10_XR() {
   }
 }
 
+// BC formats are only available on macOS; referencing the enum values when
+// compiling for iOS is a hard error, so they are guarded at compile time.
+MTLPixelFormat SafeMTLPixelFormatBC1_RGBA() {
+#if !FML_OS_IOS
+  if (@available(macOS 10.11, *)) {
+    return MTLPixelFormatBC1_RGBA;
+  }
+#endif  // FML_OS_IOS
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatBC1_RGBA_sRGB() {
+#if !FML_OS_IOS
+  if (@available(macOS 10.11, *)) {
+    return MTLPixelFormatBC1_RGBA_sRGB;
+  }
+#endif  // FML_OS_IOS
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatBC3_RGBA() {
+#if !FML_OS_IOS
+  if (@available(macOS 10.11, *)) {
+    return MTLPixelFormatBC3_RGBA;
+  }
+#endif  // FML_OS_IOS
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatBC3_RGBA_sRGB() {
+#if !FML_OS_IOS
+  if (@available(macOS 10.11, *)) {
+    return MTLPixelFormatBC3_RGBA_sRGB;
+  }
+#endif  // FML_OS_IOS
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatBC5_RGUnorm() {
+#if !FML_OS_IOS
+  if (@available(macOS 10.11, *)) {
+    return MTLPixelFormatBC5_RGUnorm;
+  }
+#endif  // FML_OS_IOS
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatBC7_RGBAUnorm() {
+#if !FML_OS_IOS
+  if (@available(macOS 10.11, *)) {
+    return MTLPixelFormatBC7_RGBAUnorm;
+  }
+#endif  // FML_OS_IOS
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatBC7_RGBAUnorm_sRGB() {
+#if !FML_OS_IOS
+  if (@available(macOS 10.11, *)) {
+    return MTLPixelFormatBC7_RGBAUnorm_sRGB;
+  }
+#endif  // FML_OS_IOS
+  return MTLPixelFormatInvalid;
+}
+
+// ETC2 and ASTC are available on iOS and on macOS 11.0+. The macOS deployment
+// target is below 11.0, so the references are version-guarded.
+MTLPixelFormat SafeMTLPixelFormatETC2_RGB8() {
+  if (@available(macOS 11.0, *)) {
+    return MTLPixelFormatETC2_RGB8;
+  }
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatETC2_RGB8_sRGB() {
+  if (@available(macOS 11.0, *)) {
+    return MTLPixelFormatETC2_RGB8_sRGB;
+  }
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatEAC_RGBA8() {
+  if (@available(macOS 11.0, *)) {
+    return MTLPixelFormatEAC_RGBA8;
+  }
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatEAC_RGBA8_sRGB() {
+  if (@available(macOS 11.0, *)) {
+    return MTLPixelFormatEAC_RGBA8_sRGB;
+  }
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatASTC_4x4_LDR() {
+  if (@available(macOS 11.0, *)) {
+    return MTLPixelFormatASTC_4x4_LDR;
+  }
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatASTC_4x4_sRGB() {
+  if (@available(macOS 11.0, *)) {
+    return MTLPixelFormatASTC_4x4_sRGB;
+  }
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatASTC_8x8_LDR() {
+  if (@available(macOS 11.0, *)) {
+    return MTLPixelFormatASTC_8x8_LDR;
+  }
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatASTC_8x8_sRGB() {
+  if (@available(macOS 11.0, *)) {
+    return MTLPixelFormatASTC_8x8_sRGB;
+  }
+  return MTLPixelFormatInvalid;
+}
+
 }  // namespace impeller
