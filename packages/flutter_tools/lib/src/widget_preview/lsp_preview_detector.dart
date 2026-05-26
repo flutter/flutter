@@ -192,6 +192,11 @@ class LspPreviewDetector {
     } catch (e) {
       if (_disposed || shutdownHooks.isShuttingDown) {
         logger.printTrace('Failed to get widget previews during shutdown: $e');
+      } else if (e is StateError || e is Exception) {
+        logger.printWarning(
+          'Lost connection to the Dart Tooling Daemon (DTD). '
+          'Live preview updates are paused. Details: $e',
+        );
       } else {
         rethrow;
       }
