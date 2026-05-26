@@ -590,7 +590,7 @@ class MediaQueryData {
   ///   setting where available (for example,
   ///   `org.gnome.desktop.interface.clock-format` on GNOME). On desktops
   ///   that do not expose such a setting, it defaults to true (24-hour).
-  /// - On web this flag is always false. The Flutter web engine does not
+  /// - On Web this flag is always false. The Flutter web engine does not
   ///   currently populate it from the browser's locale settings, even though
   ///   the browser exposes a preferred hour cycle via
   ///   `Intl.DateTimeFormat.resolvedOptions().hourCycle`.
