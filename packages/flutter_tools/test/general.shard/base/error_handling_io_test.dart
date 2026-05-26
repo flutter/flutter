@@ -55,7 +55,26 @@ void main() {
   });
 
   testWithoutContext('deleteIfExists handles separate program deleting file', () {
-    final File file = FakeExistsFile()..error = const FileSystemException('', '', OSError('', 2));
+    late MemoryFileSystem memoryFileSystem;
+    var inOpHandle = false;
+    memoryFileSystem = MemoryFileSystem.test(
+      opHandle: (String path, FileSystemOp op) {
+        if (inOpHandle) {
+          return;
+        }
+        if (path == '/file' && op == FileSystemOp.delete) {
+          inOpHandle = true;
+          try {
+            memoryFileSystem.file(path).deleteSync();
+          } finally {
+            inOpHandle = false;
+          }
+          throw const FileSystemException('', '', OSError('', 2));
+        }
+      },
+    );
+    final fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: linuxPlatform);
+    final File file = fileSystem.file('/file')..createSync();
 
     expect(ErrorHandlingFileSystem.deleteIfExists(file), true);
   });
@@ -1762,32 +1781,6 @@ class ThrowsOnCurrentDirectoryFileSystem extends Fake implements FileSystem {
 
   @override
   Directory get currentDirectory => throw FileSystemException('', '', OSError('', errorCode));
-}
-
-class FakeExistsFile extends Fake implements File {
-  late Exception error;
-  int existsCount = 0;
-  final FileSystem _fs = MemoryFileSystem.test();
-
-  @override
-  FileSystem get fileSystem => _fs;
-
-  @override
-  String get path => '/file';
-
-  @override
-  bool existsSync() {
-    if (existsCount == 0) {
-      existsCount += 1;
-      return true;
-    }
-    return false;
-  }
-
-  @override
-  void deleteSync({bool recursive = false}) {
-    throw error;
-  }
 }
 
 class FakeFileSystem extends Fake implements FileSystem {
