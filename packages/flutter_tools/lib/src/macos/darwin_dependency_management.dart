@@ -202,6 +202,7 @@ class DarwinDependencyManagement {
     final List<Plugin> filteredPlugins = resolvePluginImplementationsForPlatform(
       plugins,
       platform.pluginConfigKey,
+      quiet: true,
     );
     for (final plugin in filteredPlugins) {
       final bool pluginSupportsSwiftPM = plugin.supportSwiftPackageManagerForPlatform(

@@ -2849,6 +2849,117 @@ flutter:
       expect(iosResolved, isNot(contains(appFacingPlugin)));
       expect(iosResolved, isNot(contains(androidPlatformPlugin)));
     });
+
+    testUsingContext('respects quiet parameter', () {
+      final appFacingPluginNoDefaultPackage = Plugin(
+        name: 'foo',
+        path: '',
+        defaultPackagePlatforms: const <String, String>{IOSPlugin.kConfigKey: 'foo_ios'},
+        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+        platforms: const <String, PluginPlatform>{},
+        dependencies: const <String>[],
+        isDirectDependency: true,
+        isDevDependency: false,
+      );
+      final appFacingPluginWithNoInlineImplDefault = Plugin(
+        name: 'bar',
+        path: '',
+        defaultPackagePlatforms: const <String, String>{IOSPlugin.kConfigKey: 'bar_ios'},
+        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+        platforms: const <String, PluginPlatform>{},
+        dependencies: const <String>[],
+        isDirectDependency: true,
+        isDevDependency: false,
+      );
+      final barIosWithNoInlineImpl = Plugin(
+        name: 'bar_ios',
+        path: '',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+        platforms: const <String, PluginPlatform>{},
+        dependencies: const <String>[],
+        isDirectDependency: false,
+        isDevDependency: false,
+      );
+      final invalidPlugin = Plugin(
+        name: 'invalid_plugin',
+        path: '',
+        implementsPackage: 'some_package',
+        defaultPackagePlatforms: const <String, String>{IOSPlugin.kConfigKey: 'some_default'},
+        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+        platforms: const <String, PluginPlatform>{},
+        dependencies: const <String>[],
+        isDirectDependency: true,
+        isDevDependency: false,
+      );
+      final directImpl1 = Plugin(
+        name: 'impl1',
+        path: '',
+        implementsPackage: 'conflict_foo',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+        platforms: const <String, PluginPlatform>{
+          IOSPlugin.kConfigKey: IOSPlugin(name: 'impl1', classPrefix: ''),
+        },
+        dependencies: const <String>[],
+        isDirectDependency: true,
+        isDevDependency: false,
+      );
+      final directImpl2 = Plugin(
+        name: 'impl2',
+        path: '',
+        implementsPackage: 'conflict_foo',
+        defaultPackagePlatforms: const <String, String>{},
+        pluginDartClassPlatforms: const <String, DartPluginClassAndFilePair>{},
+        platforms: const <String, PluginPlatform>{
+          IOSPlugin.kConfigKey: IOSPlugin(name: 'impl2', classPrefix: ''),
+        },
+        dependencies: const <String>[],
+        isDirectDependency: true,
+        isDevDependency: false,
+      );
+
+      final plugins = <Plugin>[
+        appFacingPluginNoDefaultPackage,
+        appFacingPluginWithNoInlineImplDefault,
+        barIosWithNoInlineImpl,
+        invalidPlugin,
+        directImpl1,
+        directImpl2,
+      ];
+
+      expect(
+        () => resolvePluginImplementationsForPlatform(plugins, IOSPlugin.kConfigKey, quiet: true),
+        throwsToolExit(),
+      );
+      expect(testLogger.warningText, isEmpty);
+      expect(testLogger.errorText, isEmpty);
+
+      expect(
+        () => resolvePluginImplementationsForPlatform(plugins, IOSPlugin.kConfigKey),
+        throwsToolExit(),
+      );
+      expect(
+        testLogger.warningText,
+        contains('references foo_ios:ios as the default plugin, but the package does not exist'),
+      );
+      expect(
+        testLogger.warningText,
+        contains(
+          'references bar_ios:ios as the default plugin, but it does not provide an inline implementation',
+        ),
+      );
+      expect(
+        testLogger.errorText,
+        contains(
+          'invalid_plugin:ios provides an implementation for some_package and also references a default implementation',
+        ),
+      );
+      expect(
+        testLogger.errorText,
+        contains('conflict_foo:ios has conflicting direct dependency implementations'),
+      );
+    });
   });
 
   group('buildPubspecCache', () {

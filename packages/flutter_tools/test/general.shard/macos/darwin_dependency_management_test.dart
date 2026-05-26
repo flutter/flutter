@@ -1224,11 +1224,11 @@ flutter:
         isDirectDependency: false,
         isDevDependency: false,
       );
-
-      fileSystem.file('/foo_ios/ios/foo_ios/Package.swift').createSync(recursive: true);
+      fileSystem.file('/foo_ios/ios/foo_ios.podspec').createSync(recursive: true);
       fileSystem
           .file('/foo_ios_override/ios/foo_ios_override/Package.swift')
           .createSync(recursive: true);
+      fileSystem.file('/foo_ios_override/ios/foo_ios_override.podspec').createSync(recursive: true);
 
       final plugins = <Plugin>[
         appFacingPlugin,
@@ -1237,24 +1237,16 @@ flutter:
         overrideIosPlatformPlugin,
       ];
 
-      expect(
-        () => DarwinDependencyManagement.validatePluginSupport(
-          platform: FlutterDarwinPlatform.ios,
-          xcodeProject: project,
-          plugins: plugins,
-          fileSystem: fileSystem,
-          logger: logger,
-          cocoapods: cocoapods,
-        ),
-        throwsToolExit(
-          message:
-              'The following plugin(s) are only compatible with Swift Package Manager:\n'
-              '  - foo_ios_override\n\n'
-              'Try enabling Swift Package Manager by running '
-              '"flutter config --enable-swift-package-manager" or remove the '
-              'plugin as a dependency.',
-        ),
+      await DarwinDependencyManagement.validatePluginSupport(
+        platform: FlutterDarwinPlatform.ios,
+        xcodeProject: project,
+        plugins: plugins,
+        fileSystem: fileSystem,
+        logger: logger,
+        cocoapods: cocoapods,
       );
+      expect(logger.warningText, isEmpty);
+      expect(logger.errorText, isEmpty);
     });
 
     testWithoutContext('when plugin supports platform but has no podspec or manifest', () async {
