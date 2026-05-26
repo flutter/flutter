@@ -33,13 +33,39 @@ import 'platform.dart';
 // ToolExit and a message that is more clear than the FileSystemException by
 // itself.
 
+/// On Windows this is error code 0: ERROR_SUCCESS.
+const int kSystemCodeSuccess = 0;
+
+/// On Windows this is error code 1: ERROR_INVALID_FUNCTION.
+const int kSystemCodeInvalidFunction = 1;
+
 /// On Windows this is error code 2: ERROR_FILE_NOT_FOUND, and on
 /// macOS/Linux it is error code 2/ENOENT: No such file or directory.
-const kSystemCodeCannotFindFile = 2;
+const int kSystemCodeCannotFindFile = 2;
 
 /// On Windows this error is 3: ERROR_PATH_NOT_FOUND, and on
 /// macOS/Linux, it is error code 3/ESRCH: No such process.
-const kSystemCodePathNotFound = 3;
+const int kSystemCodePathNotFound = 3;
+
+/// On Windows this error is 5: ERROR_ACCESS_DENIED, and on
+/// macOS/Linux, it is error code 13/EACCES or 1/EPERM: Permission denied.
+const int kSystemCodeAccessDenied = 5;
+
+/// On Windows this is error code 32: ERROR_SHARING_VIOLATION.
+const int kSystemCodeSharingViolation = 32;
+
+/// On Windows this is error code 33: ERROR_LOCK_VIOLATION.
+const int kSystemCodeLockViolation = 33;
+
+/// On Windows this is error code 112: ERROR_DISK_FULL, and on
+/// macOS/Linux, it is error code 28/ENOSPC: No space left on device.
+const int kSystemCodeDeviceFull = 112;
+
+/// On Windows this is error code 1224: ERROR_USER_MAPPED_FILE.
+const int kSystemCodeUserMappedSectionOpened = 1224;
+
+/// On Windows this is error code 1314: ERROR_PRIVILEGE_NOT_HELD.
+const int kSystemCodePrivilegeNotHeld = 1314;
 
 /// A [FileSystem] that throws a [ToolExit] on certain errors.
 ///
@@ -86,25 +112,16 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   /// is deleted by a different program between the two calls.
   static bool deleteIfExists(FileSystemEntity entity, {bool recursive = false}) {
     final FileSystemEntityType type = entity.fileSystem.typeSync(entity.path, followLinks: false);
-    var actualEntity = entity;
-    if (type == FileSystemEntityType.notFound) {
-      if (!entity.existsSync()) {
-        return false;
-      }
-    } else {
-      switch (type) {
-        case FileSystemEntityType.file:
-          actualEntity = entity is File ? entity : entity.fileSystem.file(entity.path);
-        case FileSystemEntityType.directory:
-          actualEntity = entity is Directory ? entity : entity.fileSystem.directory(entity.path);
-        case FileSystemEntityType.link:
-          actualEntity = entity is Link ? entity : entity.fileSystem.link(entity.path);
-        case FileSystemEntityType.notFound:
-        case FileSystemEntityType.pipe:
-        case FileSystemEntityType.unixDomainSock:
-          break;
-      }
+    if (type == .notFound) {
+      return false;
     }
+
+    final FileSystemEntity actualEntity = switch (type) {
+      .file => entity is File ? entity : entity.fileSystem.file(entity.path),
+      .directory => entity is Directory ? entity : entity.fileSystem.directory(entity.path),
+      .link => entity is Link ? entity : entity.fileSystem.link(entity.path),
+      _ => entity,
+    };
     try {
       actualEntity.deleteSync(recursive: recursive);
     } on FileSystemException catch (err) {
@@ -422,7 +439,7 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
       platform: _platform,
       failureMessage: 'Flutter failed to delete file at "${delegate.path}"',
       posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
-      ignoreErrorCodes: const <int>[2, 3], // enoent, kFileNotFound, kPathNotFound
+      ignoreErrorCodes: const <int>[kSystemCodeCannotFindFile, kSystemCodePathNotFound], // enoent, kFileNotFound, kPathNotFound
     );
   }
 
@@ -433,19 +450,27 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
       platform: _platform,
       failureMessage: 'Flutter failed to delete file at "${delegate.path}"',
       posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
-      ignoreErrorCodes: const <int>[2, 3],
+      ignoreErrorCodes: const <int>[kSystemCodeCannotFindFile, kSystemCodePathNotFound],
     );
   }
 
   @override
   Future<FileStat> stat() async {
-    // ignore: avoid_slow_async_io
-    return _run<FileStat>(() => delegate.stat(), platform: _platform);
+    return _run<FileStat>(
+      // ignore: avoid_slow_async_io
+      () => delegate.stat(),
+      platform: _platform,
+      failureMessage: 'Flutter failed to retrieve statistics of file at "${delegate.path}"',
+    );
   }
 
   @override
   FileStat statSync() {
-    return _runSync<FileStat>(() => delegate.statSync(), platform: _platform);
+    return _runSync<FileStat>(
+      () => delegate.statSync(),
+      platform: _platform,
+      failureMessage: 'Flutter failed to retrieve statistics of file at "${delegate.path}"',
+    );
   }
 
   @override
@@ -673,7 +698,7 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       platform: _platform,
       failureMessage: 'Flutter failed to delete a directory at "${delegate.path}"',
       posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.path),
-      ignoreErrorCodes: const <int>[2, 3],
+      ignoreErrorCodes: const <int>[kSystemCodeCannotFindFile, kSystemCodePathNotFound],
     );
   }
 
@@ -684,7 +709,7 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       platform: _platform,
       failureMessage: 'Flutter failed to delete a directory at "${delegate.path}"',
       posixPermissionSuggestion: recursive ? null : _posixPermissionSuggestion(delegate.path),
-      ignoreErrorCodes: const <int>[2, 3],
+      ignoreErrorCodes: const <int>[kSystemCodeCannotFindFile, kSystemCodePathNotFound],
     );
   }
 
@@ -723,16 +748,23 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
       posixPermissionSuggestion: _posixPermissionSuggestion(delegate.path),
     );
   }
-
   @override
   Future<FileStat> stat() async {
-    // ignore: avoid_slow_async_io
-    return _run<FileStat>(() => delegate.stat(), platform: _platform);
+    return _run<FileStat>(
+      // ignore: avoid_slow_async_io
+      () => delegate.stat(),
+      platform: _platform,
+      failureMessage: 'Flutter failed to retrieve statistics of directory at "${delegate.path}"',
+    );
   }
 
   @override
   FileStat statSync() {
-    return _runSync<FileStat>(() => delegate.statSync(), platform: _platform);
+    return _runSync<FileStat>(
+      () => delegate.statSync(),
+      platform: _platform,
+      failureMessage: 'Flutter failed to retrieve statistics of directory at "${delegate.path}"',
+    );
   }
 
   @override
@@ -751,20 +783,12 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
         })
         .handleError((Object error) {
           if (error is FileSystemException) {
-            if (_platform.isWindows) {
-              _handleWindowsException(
-                error,
-                'Flutter failed to list directory at "${delegate.path}"',
-                error.osError?.errorCode ?? 0,
-              );
-            } else if (_platform.isLinux || _platform.isMacOS) {
-              _handlePosixException(
-                error,
-                'Flutter failed to list directory at "${delegate.path}"',
-                error.osError?.errorCode ?? 0,
-                _posixPermissionSuggestion(delegate.path),
-              );
-            }
+            _onFileSystemException(
+              exception: error,
+              platform: _platform,
+              failureMessage: 'Flutter failed to list directory at "${delegate.path}"',
+              posixPermissionSuggestion: _posixPermissionSuggestion(delegate.path),
+            );
           }
           // ignore: only_throw_errors
           throw error;
@@ -843,7 +867,9 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
       () async => wrapLink(await delegate.create(target, recursive: recursive)),
       platform: _platform,
       failureMessage: 'Flutter failed to create a link at "${delegate.path}" to "$target"',
-      ignoreErrorCodes: _platform.isWindows ? const <int>[1, 5, 1314] : const <int>[],
+      ignoreErrorCodes: _platform.isWindows
+          ? const <int>[kSystemCodeInvalidFunction, kSystemCodeAccessDenied, kSystemCodePrivilegeNotHeld]
+          : const <int>[],
     );
   }
 
@@ -853,7 +879,9 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
       () => delegate.createSync(target, recursive: recursive),
       platform: _platform,
       failureMessage: 'Flutter failed to create a link at "${delegate.path}" to "$target"',
-      ignoreErrorCodes: _platform.isWindows ? const <int>[1, 5, 1314] : const <int>[],
+      ignoreErrorCodes: _platform.isWindows
+          ? const <int>[kSystemCodeInvalidFunction, kSystemCodeAccessDenied, kSystemCodePrivilegeNotHeld]
+          : const <int>[],
     );
   }
 
@@ -917,7 +945,7 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
       () async => wrapLink((await delegate.delete(recursive: recursive)) as io.Link),
       platform: _platform,
       failureMessage: 'Flutter failed to delete a link at "${delegate.path}"',
-      ignoreErrorCodes: const <int>[2, 3],
+      ignoreErrorCodes: const <int>[kSystemCodeCannotFindFile, kSystemCodePathNotFound],
     );
   }
 
@@ -927,19 +955,27 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
       () => delegate.deleteSync(recursive: recursive),
       platform: _platform,
       failureMessage: 'Flutter failed to delete a link at "${delegate.path}"',
-      ignoreErrorCodes: const <int>[2, 3],
+      ignoreErrorCodes: const <int>[kSystemCodeCannotFindFile, kSystemCodePathNotFound],
     );
   }
 
   @override
   Future<FileStat> stat() async {
-    // ignore: avoid_slow_async_io
-    return _run<FileStat>(() => delegate.stat(), platform: _platform);
+    return _run<FileStat>(
+      // ignore: avoid_slow_async_io
+      () => delegate.stat(),
+      platform: _platform,
+      failureMessage: 'Flutter failed to retrieve statistics of a link at "${delegate.path}"',
+    );
   }
 
   @override
   FileStat statSync() {
-    return _runSync<FileStat>(() => delegate.statSync(), platform: _platform);
+    return _runSync<FileStat>(
+      () => delegate.statSync(),
+      platform: _platform,
+      failureMessage: 'Flutter failed to retrieve statistics of a link at "${delegate.path}"',
+    );
   }
 
   @override
