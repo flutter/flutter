@@ -25,6 +25,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
+import androidx.annotation.DoNotInline;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -658,11 +659,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (rootAccessibilityView == null || rootAccessibilityView.getResources() == null) {
       return;
     }
-    int fontWeightAdjustment =
-        rootAccessibilityView.getResources().getConfiguration().fontWeightAdjustment;
     boolean shouldBold =
-        fontWeightAdjustment != Configuration.FONT_WEIGHT_ADJUSTMENT_UNDEFINED
-            && fontWeightAdjustment >= BOLD_TEXT_WEIGHT_ADJUSTMENT;
+        Api31Impl.isBoldText(rootAccessibilityView.getResources().getConfiguration());
 
     if (shouldBold) {
       accessibilityFeatureFlags |= AccessibilityFeature.BOLD_TEXT.value;
@@ -3255,5 +3253,23 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         break;
     }
     return true;
+  }
+
+  /**
+   * Isolates API-31 field references so that ART's class verifier does not attempt to resolve them
+   * when loading {@link AccessibilityBridge} on older API levels. Without this separation, the
+   * verifier eagerly resolves {@link Configuration#fontWeightAdjustment} at class-load time,
+   * causing a {@link NoSuchFieldError} crash on Android 11 devices (observed on Pixel 4a and
+   * OnePlus 8 Pro). This mirrors the fix AndroidX Compose applied for the same crash (AOSP
+   * b/353988277).
+   */
+  @RequiresApi(API_LEVELS.API_31)
+  private static class Api31Impl {
+    @DoNotInline
+    static boolean isBoldText(Configuration configuration) {
+      int fontWeightAdjustment = configuration.fontWeightAdjustment;
+      return fontWeightAdjustment != Configuration.FONT_WEIGHT_ADJUSTMENT_UNDEFINED
+          && fontWeightAdjustment >= BOLD_TEXT_WEIGHT_ADJUSTMENT;
+    }
   }
 }
