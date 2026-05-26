@@ -194,10 +194,7 @@ class XcodeProjectInterpreter {
     // All `xcodebuild` project commands will download and resolve Swift packages.
     // We should always prefetch Swift packages before running any `xcodebuild` project command
     // to control the output.
-    await prefetchSwiftPackagesForProject(
-      xcodeProject,
-      buildDirectory: buildDirectory,
-    );
+    await prefetchSwiftPackagesForProject(xcodeProject, buildDirectory: buildDirectory);
 
     return _xcodebuildProjectCommandArguments(
       buildDirectory,
