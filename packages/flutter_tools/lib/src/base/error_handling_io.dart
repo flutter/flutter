@@ -418,7 +418,7 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
   @override
   Future<File> delete({bool recursive = false}) async {
     return _run<File>(
-      () async => fileSystem.file((await delegate.delete(recursive: recursive)).path),
+      () async => wrapFile((await delegate.delete(recursive: recursive)) as io.File),
       platform: _platform,
       failureMessage: 'Flutter failed to delete file at "${delegate.path}"',
       posixPermissionSuggestion: _posixPermissionSuggestion(<String>[delegate.path]),
@@ -914,7 +914,7 @@ class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with F
   @override
   Future<Link> delete({bool recursive = false}) async {
     return _run<Link>(
-      () async => fileSystem.link((await delegate.delete(recursive: recursive)).path),
+      () async => wrapLink((await delegate.delete(recursive: recursive)) as io.Link),
       platform: _platform,
       failureMessage: 'Flutter failed to delete a link at "${delegate.path}"',
       ignoreErrorCodes: const <int>[2, 3],
