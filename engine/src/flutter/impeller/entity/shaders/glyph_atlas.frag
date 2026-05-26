@@ -14,6 +14,7 @@ uniform FragInfo {
   float is_color_glyph;
   float use_text_color;
   f16vec4 text_color;
+  float text_contrast;
 }
 frag_info;
 
@@ -31,10 +32,16 @@ void main() {
       frag_color = value * frag_info.text_color.aaaa;
     }
   } else {
+    float coverage;
     if (use_alpha_color_channel == 1.0) {
-      frag_color = value.aaaa * frag_info.text_color;
+      coverage = float(value.a);
     } else {
-      frag_color = value.rrrr * frag_info.text_color;
+      coverage = float(value.r);
     }
+
+    coverage =
+        1.0 - pow(clamp(1.0 - coverage, 0.0, 1.0), frag_info.text_contrast);
+
+    frag_color = f16vec4(coverage) * frag_info.text_color;
   }
 }

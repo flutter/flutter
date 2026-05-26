@@ -267,6 +267,9 @@ bool TextContents::Render(const ContentContext& renderer,
   frag_info.use_text_color = force_text_color_ ? 1.0 : 0.0;
   frag_info.text_color = ToVector(color.Premultiply());
   frag_info.is_color_glyph = type == GlyphAtlas::Type::kColorBitmap;
+  Scalar luma =
+      color.red * 0.2126f + color.green * 0.7152f + color.blue * 0.0722f;
+  frag_info.text_contrast = 1.0f + luma * 0.4f;
 
   FS::BindFragInfo(
       pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));
