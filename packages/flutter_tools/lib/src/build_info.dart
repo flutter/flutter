@@ -1189,11 +1189,13 @@ String? _uncapitalize(String? s) {
   return s.substring(0, 1).toLowerCase() + s.substring(1);
 }
 
+// flutter_ignore: deprecation_syntax (see analyze.dart)
 @Deprecated('Use TargetPlatform.getName() instead')
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
   return platform.getName(darwinArch: darwinArch);
 }
 
+// flutter_ignore: deprecation_syntax (see analyze.dart)
 @Deprecated('Use TargetPlatform.fromName() instead')
 TargetPlatform getTargetPlatformForName(String platform) {
   return TargetPlatform.fromName(platform);
