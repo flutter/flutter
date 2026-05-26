@@ -57,10 +57,15 @@ static bool DeviceSupportsTextureCompressionBC(id<MTLDevice> device) {
          [device supportsFamily:MTLGPUFamilyApple7];
 }
 
-// ETC2 and ASTC are available on all Apple GPU families but not on the Mac
+// ETC2 and ASTC LDR are available on all Apple GPU families but not on the Mac
 // (Intel/AMD) family.
 static bool DeviceSupportsTextureCompressionMobile(id<MTLDevice> device) {
   return [device supportsFamily:MTLGPUFamilyApple2];
+}
+
+// ASTC HDR requires Apple GPU family 6 (A13) or later.
+static bool DeviceSupportsTextureCompressionAstcHdr(id<MTLDevice> device) {
+  return [device supportsFamily:MTLGPUFamilyApple6];
 }
 
 static std::unique_ptr<Capabilities> InferMetalCapabilities(
@@ -92,6 +97,9 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetSupportsTextureCompression(
           CompressedTextureFamily::kASTC,
           DeviceSupportsTextureCompressionMobile(device))
+      .SetSupportsTextureCompression(
+          CompressedTextureFamily::kASTCHDR,
+          DeviceSupportsTextureCompressionAstcHdr(device))
 #if FML_OS_IOS && !TARGET_OS_SIMULATOR
       .SetMinimumUniformAlignment(16)
 #else

@@ -113,6 +113,8 @@ class StandardCapabilities final : public Capabilities {
         return supports_texture_compression_etc2_;
       case CompressedTextureFamily::kASTC:
         return supports_texture_compression_astc_;
+      case CompressedTextureFamily::kASTCHDR:
+        return supports_texture_compression_astc_hdr_;
     }
     return false;
   }
@@ -148,7 +150,8 @@ class StandardCapabilities final : public Capabilities {
                        bool needs_partitioned_host_buffer,
                        bool supports_texture_compression_bc,
                        bool supports_texture_compression_etc2,
-                       bool supports_texture_compression_astc)
+                       bool supports_texture_compression_astc,
+                       bool supports_texture_compression_astc_hdr)
       : supports_offscreen_msaa_(supports_offscreen_msaa),
         supports_ssbo_(supports_ssbo),
         supports_texture_to_texture_blits_(supports_texture_to_texture_blits),
@@ -171,7 +174,9 @@ class StandardCapabilities final : public Capabilities {
         minimum_uniform_alignment_(minimum_uniform_alignment),
         supports_texture_compression_bc_(supports_texture_compression_bc),
         supports_texture_compression_etc2_(supports_texture_compression_etc2),
-        supports_texture_compression_astc_(supports_texture_compression_astc) {}
+        supports_texture_compression_astc_(supports_texture_compression_astc),
+        supports_texture_compression_astc_hdr_(
+            supports_texture_compression_astc_hdr) {}
 
   friend class CapabilitiesBuilder;
 
@@ -196,6 +201,7 @@ class StandardCapabilities final : public Capabilities {
   bool supports_texture_compression_bc_ = false;
   bool supports_texture_compression_etc2_ = false;
   bool supports_texture_compression_astc_ = false;
+  bool supports_texture_compression_astc_hdr_ = false;
 
   StandardCapabilities(const StandardCapabilities&) = delete;
 
@@ -311,6 +317,9 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsTextureCompression(
     case CompressedTextureFamily::kASTC:
       supports_texture_compression_astc_ = value;
       break;
+    case CompressedTextureFamily::kASTCHDR:
+      supports_texture_compression_astc_hdr_ = value;
+      break;
   }
   return *this;
 }
@@ -350,7 +359,8 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       needs_partitioned_host_buffer_,                                      //
       supports_texture_compression_bc_,                                    //
       supports_texture_compression_etc2_,                                  //
-      supports_texture_compression_astc_                                   //
+      supports_texture_compression_astc_,                                  //
+      supports_texture_compression_astc_hdr_                               //
       ));
 }
 

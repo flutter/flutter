@@ -85,6 +85,8 @@ TEST(CapabilitiesTest, SupportsTextureCompression) {
       defaults->SupportsTextureCompression(CompressedTextureFamily::kETC2));
   EXPECT_FALSE(
       defaults->SupportsTextureCompression(CompressedTextureFamily::kASTC));
+  EXPECT_FALSE(
+      defaults->SupportsTextureCompression(CompressedTextureFamily::kASTCHDR));
 
   // Each family is gated independently.
   auto mutated =
@@ -97,6 +99,18 @@ TEST(CapabilitiesTest, SupportsTextureCompression) {
       mutated->SupportsTextureCompression(CompressedTextureFamily::kETC2));
   EXPECT_FALSE(
       mutated->SupportsTextureCompression(CompressedTextureFamily::kASTC));
+  EXPECT_FALSE(
+      mutated->SupportsTextureCompression(CompressedTextureFamily::kASTCHDR));
+
+  // ASTC LDR and HDR are distinct families.
+  auto astc_hdr = CapabilitiesBuilder()
+                      .SetSupportsTextureCompression(
+                          CompressedTextureFamily::kASTCHDR, true)
+                      .Build();
+  EXPECT_FALSE(
+      astc_hdr->SupportsTextureCompression(CompressedTextureFamily::kASTC));
+  EXPECT_TRUE(
+      astc_hdr->SupportsTextureCompression(CompressedTextureFamily::kASTCHDR));
 }
 
 TEST(CapabilitiesTest, MinUniformAlignment) {

@@ -216,6 +216,7 @@ class CapabilitiesBuilder {
   bool supports_texture_compression_bc_ = false;
   bool supports_texture_compression_etc2_ = false;
   bool supports_texture_compression_astc_ = false;
+  bool supports_texture_compression_astc_hdr_ = false;
   std::optional<PixelFormat> default_color_format_ = std::nullopt;
   std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
   std::optional<PixelFormat> default_depth_stencil_format_ = std::nullopt;

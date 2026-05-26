@@ -153,6 +153,8 @@ constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
     case impeller::PixelFormat::kASTC4x4LDRSRGB:
     case impeller::PixelFormat::kASTC8x8LDR:
     case impeller::PixelFormat::kASTC8x8LDRSRGB:
+    case impeller::PixelFormat::kASTC4x4HDR:
+    case impeller::PixelFormat::kASTC8x8HDR:
       return FlutterGPUPixelFormat::kUnknown;
   }
 }

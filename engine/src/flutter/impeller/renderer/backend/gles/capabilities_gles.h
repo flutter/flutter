@@ -159,6 +159,7 @@ class CapabilitiesGLES final
   bool supports_texture_compression_bc_ = false;
   bool supports_texture_compression_etc2_ = false;
   bool supports_texture_compression_astc_ = false;
+  bool supports_texture_compression_astc_hdr_ = false;
   PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
 };
 

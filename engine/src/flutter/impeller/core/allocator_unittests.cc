@@ -132,6 +132,7 @@ TEST(AllocatorTest, CompressedFormatClassification) {
   EXPECT_TRUE(IsCompressed(PixelFormat::kBC1RGBAUNormInt));
   EXPECT_TRUE(IsCompressed(PixelFormat::kETC2RGBA8UNormInt));
   EXPECT_TRUE(IsCompressed(PixelFormat::kASTC8x8LDR));
+  EXPECT_TRUE(IsCompressed(PixelFormat::kASTC4x4HDR));
 
   EXPECT_EQ(CompressedTextureFamilyForFormat(PixelFormat::kBC7RGBAUNormInt),
             CompressedTextureFamily::kBC);
@@ -139,6 +140,8 @@ TEST(AllocatorTest, CompressedFormatClassification) {
             CompressedTextureFamily::kETC2);
   EXPECT_EQ(CompressedTextureFamilyForFormat(PixelFormat::kASTC4x4LDR),
             CompressedTextureFamily::kASTC);
+  EXPECT_EQ(CompressedTextureFamilyForFormat(PixelFormat::kASTC8x8HDR),
+            CompressedTextureFamily::kASTCHDR);
 }
 
 TEST(AllocatorTest, CompressedFormatBlockMath) {
@@ -147,6 +150,8 @@ TEST(AllocatorTest, CompressedFormatBlockMath) {
             4u);
   EXPECT_EQ(CompressedBlockWidthForPixelFormat(PixelFormat::kASTC8x8LDR), 8u);
   EXPECT_EQ(CompressedBlockHeightForPixelFormat(PixelFormat::kASTC8x8LDR), 8u);
+  EXPECT_EQ(CompressedBlockWidthForPixelFormat(PixelFormat::kASTC4x4HDR), 4u);
+  EXPECT_EQ(CompressedBlockHeightForPixelFormat(PixelFormat::kASTC8x8HDR), 8u);
   // Uncompressed formats report a 1x1 block.
   EXPECT_EQ(CompressedBlockWidthForPixelFormat(PixelFormat::kR8G8B8A8UNormInt),
             1u);
@@ -156,6 +161,7 @@ TEST(AllocatorTest, CompressedFormatBlockMath) {
   EXPECT_EQ(BytesPerBlockForPixelFormat(PixelFormat::kETC2RGB8UNormInt), 8u);
   EXPECT_EQ(BytesPerBlockForPixelFormat(PixelFormat::kBC3RGBAUNormInt), 16u);
   EXPECT_EQ(BytesPerBlockForPixelFormat(PixelFormat::kASTC4x4LDR), 16u);
+  EXPECT_EQ(BytesPerBlockForPixelFormat(PixelFormat::kASTC8x8HDR), 16u);
   // Uncompressed falls back to bytes-per-pixel.
   EXPECT_EQ(BytesPerBlockForPixelFormat(PixelFormat::kR8G8B8A8UNormInt), 4u);
 }

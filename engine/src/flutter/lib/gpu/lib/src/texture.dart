@@ -65,6 +65,11 @@ base class Texture extends NativeFieldWrapperClass1 {
       enableShaderWriteUsage,
       mipLevelCount,
     );
+    if (!_valid) {
+      // The engine logs the specific reason (for example, a compressed format
+      // used with render target or shader write usage, which is sample-only).
+      throw Exception('Failed to create texture.');
+    }
   }
 
   GpuContext _gpuContext;

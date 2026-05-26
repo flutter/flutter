@@ -133,6 +133,9 @@ enum class PixelFormat : uint8_t {
   kASTC4x4LDRSRGB,
   kASTC8x8LDR,
   kASTC8x8LDRSRGB,
+  // ASTC HDR has no sRGB variant; the data is already linear floating point.
+  kASTC4x4HDR,
+  kASTC8x8HDR,
 };
 
 //------------------------------------------------------------------------------
@@ -147,6 +150,8 @@ enum class CompressedTextureFamily {
   kETC2,
   /// ASTC LDR. Modern mobile and some desktop.
   kASTC,
+  /// ASTC HDR. A separate device feature from ASTC LDR.
+  kASTCHDR,
 };
 
 /// @brief Whether `format` is a block-compressed format.
@@ -167,6 +172,8 @@ constexpr bool IsCompressed(PixelFormat format) {
     case PixelFormat::kASTC4x4LDRSRGB:
     case PixelFormat::kASTC8x8LDR:
     case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return true;
     default:
       return false;
@@ -196,6 +203,9 @@ constexpr CompressedTextureFamily CompressedTextureFamilyForFormat(
     case PixelFormat::kASTC8x8LDR:
     case PixelFormat::kASTC8x8LDRSRGB:
       return CompressedTextureFamily::kASTC;
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
+      return CompressedTextureFamily::kASTCHDR;
     default:
       break;
   }
@@ -208,6 +218,7 @@ constexpr size_t CompressedBlockWidthForPixelFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kASTC8x8LDR:
     case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC8x8HDR:
       return 8u;
     case PixelFormat::kBC1RGBAUNormInt:
     case PixelFormat::kBC1RGBAUNormIntSRGB:
@@ -222,6 +233,7 @@ constexpr size_t CompressedBlockWidthForPixelFormat(PixelFormat format) {
     case PixelFormat::kETC2RGBA8UNormIntSRGB:
     case PixelFormat::kASTC4x4LDR:
     case PixelFormat::kASTC4x4LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
       return 4u;
     default:
       return 1u;
@@ -234,6 +246,7 @@ constexpr size_t CompressedBlockHeightForPixelFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kASTC8x8LDR:
     case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC8x8HDR:
       return 8u;
     case PixelFormat::kBC1RGBAUNormInt:
     case PixelFormat::kBC1RGBAUNormIntSRGB:
@@ -248,6 +261,7 @@ constexpr size_t CompressedBlockHeightForPixelFormat(PixelFormat format) {
     case PixelFormat::kETC2RGBA8UNormIntSRGB:
     case PixelFormat::kASTC4x4LDR:
     case PixelFormat::kASTC4x4LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
       return 4u;
     default:
       return 1u;
@@ -341,6 +355,10 @@ constexpr const char* PixelFormatToString(PixelFormat format) {
       return "ASTC8x8LDR";
     case PixelFormat::kASTC8x8LDRSRGB:
       return "ASTC8x8LDRSRGB";
+    case PixelFormat::kASTC4x4HDR:
+      return "ASTC4x4HDR";
+    case PixelFormat::kASTC8x8HDR:
+      return "ASTC8x8HDR";
   }
   FML_UNREACHABLE();
 }
@@ -677,6 +695,8 @@ constexpr size_t BytesPerPixelForPixelFormat(PixelFormat format) {
     case PixelFormat::kASTC4x4LDRSRGB:
     case PixelFormat::kASTC8x8LDR:
     case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return 0u;
   }
   return 0u;
@@ -703,6 +723,8 @@ constexpr size_t BytesPerBlockForPixelFormat(PixelFormat format) {
     case PixelFormat::kASTC4x4LDRSRGB:
     case PixelFormat::kASTC8x8LDR:
     case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return 16u;
     default:
       return BytesPerPixelForPixelFormat(format);

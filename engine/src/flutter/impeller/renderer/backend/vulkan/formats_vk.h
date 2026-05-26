@@ -207,6 +207,10 @@ constexpr vk::Format ToVKImageFormat(PixelFormat format) {
       return vk::Format::eAstc8x8UnormBlock;
     case PixelFormat::kASTC8x8LDRSRGB:
       return vk::Format::eAstc8x8SrgbBlock;
+    case PixelFormat::kASTC4x4HDR:
+      return vk::Format::eAstc4x4SfloatBlock;
+    case PixelFormat::kASTC8x8HDR:
+      return vk::Format::eAstc8x8SfloatBlock;
   }
 
   FML_UNREACHABLE();
@@ -474,6 +478,8 @@ constexpr bool PixelFormatIsDepthStencil(PixelFormat format) {
     case PixelFormat::kASTC4x4LDRSRGB:
     case PixelFormat::kASTC8x8LDR:
     case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return false;
     case PixelFormat::kS8UInt:
     case PixelFormat::kD24UnormS8Uint:
@@ -589,6 +595,8 @@ constexpr vk::ImageAspectFlags ToVKImageAspectFlags(PixelFormat format) {
     case PixelFormat::kASTC4x4LDRSRGB:
     case PixelFormat::kASTC8x8LDR:
     case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return vk::ImageAspectFlagBits::eColor;
     case PixelFormat::kS8UInt:
       return vk::ImageAspectFlagBits::eStencil;
@@ -679,6 +687,8 @@ constexpr vk::ImageAspectFlags ToImageAspectFlags(PixelFormat format) {
     case PixelFormat::kASTC4x4LDRSRGB:
     case PixelFormat::kASTC8x8LDR:
     case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return vk::ImageAspectFlagBits::eColor;
     case PixelFormat::kS8UInt:
       return vk::ImageAspectFlagBits::eStencil;

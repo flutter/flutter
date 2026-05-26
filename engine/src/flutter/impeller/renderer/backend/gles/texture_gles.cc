@@ -55,6 +55,8 @@ static bool IsDepthStencilFormat(PixelFormat format) {
     case PixelFormat::kASTC4x4LDRSRGB:
     case PixelFormat::kASTC8x8LDR:
     case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return false;
   }
   FML_UNREACHABLE();
@@ -381,6 +383,8 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
     case PixelFormat::kASTC4x4LDRSRGB:
     case PixelFormat::kASTC8x8LDR:
     case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return std::nullopt;
   }
   FML_UNREACHABLE();

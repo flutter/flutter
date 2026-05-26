@@ -91,6 +91,8 @@ MTLPixelFormat SafeMTLPixelFormatASTC_4x4_LDR();
 MTLPixelFormat SafeMTLPixelFormatASTC_4x4_sRGB();
 MTLPixelFormat SafeMTLPixelFormatASTC_8x8_LDR();
 MTLPixelFormat SafeMTLPixelFormatASTC_8x8_sRGB();
+MTLPixelFormat SafeMTLPixelFormatASTC_4x4_HDR();
+MTLPixelFormat SafeMTLPixelFormatASTC_8x8_HDR();
 
 constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
   switch (format) {
@@ -158,6 +160,10 @@ constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
       return SafeMTLPixelFormatASTC_8x8_LDR();
     case PixelFormat::kASTC8x8LDRSRGB:
       return SafeMTLPixelFormatASTC_8x8_sRGB();
+    case PixelFormat::kASTC4x4HDR:
+      return SafeMTLPixelFormatASTC_4x4_HDR();
+    case PixelFormat::kASTC8x8HDR:
+      return SafeMTLPixelFormatASTC_8x8_HDR();
   }
   return MTLPixelFormatInvalid;
 };

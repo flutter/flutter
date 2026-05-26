@@ -193,6 +193,16 @@ std::optional<PixelFormatGLES> ToPixelFormatGLES(PixelFormat pixel_format,
       format.internal_format = GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR;
       format.is_compressed = true;
       break;
+    // ASTC HDR uses the same internal formats as LDR; the HDR profile is
+    // selected by the GL_KHR_texture_compression_astc_hdr extension.
+    case PixelFormat::kASTC4x4HDR:
+      format.internal_format = GL_COMPRESSED_RGBA_ASTC_4x4_KHR;
+      format.is_compressed = true;
+      break;
+    case PixelFormat::kASTC8x8HDR:
+      format.internal_format = GL_COMPRESSED_RGBA_ASTC_8x8_KHR;
+      format.is_compressed = true;
+      break;
     case PixelFormat::kUnknown:
     case PixelFormat::kD32FloatS8UInt:
     case PixelFormat::kR8G8UNormInt:

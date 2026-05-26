@@ -47,6 +47,9 @@ static const constexpr char* kTextureCompressionAstcLdrExt =
 // https://registry.khronos.org/OpenGL/extensions/OES/OES_texture_compression_astc.txt
 static const constexpr char* kTextureCompressionAstcOesExt =
     "GL_OES_texture_compression_astc";
+// https://registry.khronos.org/OpenGL/extensions/KHR/KHR_texture_compression_astc_hdr.txt
+static const constexpr char* kTextureCompressionAstcHdrExt =
+    "GL_KHR_texture_compression_astc_hdr";
 
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
@@ -174,8 +177,16 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
       desc->HasExtension(kTextureCompressionS3TCExt) &&
       desc->HasExtension(kTextureCompressionRGTCExt) &&
       desc->HasExtension(kTextureCompressionBPTCExt);
+  // Either extension is sufficient: both expose the same LDR 2D ASTC internal
+  // formats this backend uses. KHR is the common one; OES is a superset that
+  // also adds HDR and 3D, which are not used here.
   supports_texture_compression_astc_ =
       desc->HasExtension(kTextureCompressionAstcLdrExt) ||
+      desc->HasExtension(kTextureCompressionAstcOesExt);
+  // HDR reuses the same internal formats as LDR, gated by a separate extension.
+  // The OES extension is a superset that also covers HDR.
+  supports_texture_compression_astc_hdr_ =
+      desc->HasExtension(kTextureCompressionAstcHdrExt) ||
       desc->HasExtension(kTextureCompressionAstcOesExt);
   supports_texture_compression_etc2_ =
       desc->IsES() && desc->GetGlVersion().major_version >= 3;
@@ -279,6 +290,8 @@ bool CapabilitiesGLES::SupportsTextureCompression(
       return supports_texture_compression_etc2_;
     case CompressedTextureFamily::kASTC:
       return supports_texture_compression_astc_;
+    case CompressedTextureFamily::kASTCHDR:
+      return supports_texture_compression_astc_hdr_;
   }
   return false;
 }

@@ -266,4 +266,18 @@ MTLPixelFormat SafeMTLPixelFormatASTC_8x8_sRGB() {
   return MTLPixelFormatInvalid;
 }
 
+MTLPixelFormat SafeMTLPixelFormatASTC_4x4_HDR() {
+  if (@available(macOS 11.0, *)) {
+    return MTLPixelFormatASTC_4x4_HDR;
+  }
+  return MTLPixelFormatInvalid;
+}
+
+MTLPixelFormat SafeMTLPixelFormatASTC_8x8_HDR() {
+  if (@available(macOS 11.0, *)) {
+    return MTLPixelFormatASTC_8x8_HDR;
+  }
+  return MTLPixelFormatInvalid;
+}
+
 }  // namespace impeller
