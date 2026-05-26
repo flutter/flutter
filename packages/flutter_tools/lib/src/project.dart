@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// @dart = 3.12
-
 import 'dart:collection';
 
 import 'package:glob/glob.dart';

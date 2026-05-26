@@ -431,8 +431,16 @@ class LazyGit implements Git {
   final Git Function() _gitGetter;
 
   @override
-  RunResult logSync(List<String> arguments, {String? workingDirectory}) {
-    return _gitGetter().logSync(arguments, workingDirectory: workingDirectory);
+  RunResult logSync(
+    List<String> arguments, {
+    Map<String, String>? environment,
+    String? workingDirectory,
+  }) {
+    return _gitGetter().logSync(
+      arguments,
+      environment: environment,
+      workingDirectory: workingDirectory,
+    );
   }
 
   @override
