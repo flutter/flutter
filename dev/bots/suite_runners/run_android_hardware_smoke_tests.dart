@@ -35,18 +35,13 @@ Future<void> runAndroidHardwareSmokeTests({required ImpellerBackend backend}) as
       ),
     );
 
-    await runCommand(
-      'flutter',
-      <String>[
-        'drive',
-        '--driver=test_driver/driver_test.dart',
-        '--target=integration_test/integration_test_wrapper.dart',
-        '--no-dds',
-        '--no-enable-dart-profiling',
-      ],
-      workingDirectory: testDir,
-      environment: <String, String>{'ANDROID_HARDWARE_SMOKE_TEST_GOLDEN_VARIANT': backend.name},
-    );
+    await runCommand('flutter', <String>[
+      'drive',
+      '--driver=test_driver/driver_test.dart',
+      '--target=integration_test/integration_test_wrapper.dart',
+      '--no-dds',
+      '--no-enable-dart-profiling',
+    ], workingDirectory: testDir);
   } finally {
     // Restore original contents.
     androidManifestXml.writeAsStringSync(androidManifestContents);

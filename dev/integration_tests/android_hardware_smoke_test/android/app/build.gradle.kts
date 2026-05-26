@@ -76,7 +76,7 @@ tasks.register("embedTestResultImages") {
         imagesDir.mkdirs()
 
         val packageId = "com.example.android_hardware_smoke_test"
-        val discoveredTests = mutableListOf<String>()
+        val discoveredTests = mutableListOf<Pair<String, String>>()
 
         // 1. Query the device sandbox to list all files in cache/results/
         val stdout = ByteArrayOutputStream()
@@ -84,7 +84,7 @@ tasks.register("embedTestResultImages") {
             exec {
                 commandLine("adb", "shell", "run-as", packageId, "ls", "cache/results")
                 standardOutput = stdout
-                isIgnoreExitValue = true
+                isIgnoreExitValue = true 
             }
 
             // Parse the output lines into a clean list of filenames
@@ -94,8 +94,9 @@ tasks.register("embedTestResultImages") {
             for (rawFileName in files) {
                 val fileName = rawFileName.trim()
                 if (fileName.endsWith(".png")) {
-                    val testName = fileName.substring(0, fileName.lastIndexOf(".png"))
-                    discoveredTests.add(testName)
+                    // Extract the clean test case name (e.g. "blueRectangleTest") before any dot-separators
+                    val testName = fileName.split(".")[0]
+                    discoveredTests.add(Pair(testName, fileName))
 
                     val destinationFile = File(imagesDir, fileName)
                     FileOutputStream(destinationFile).use { os ->
@@ -119,12 +120,14 @@ tasks.register("embedTestResultImages") {
                     var htmlContent = file.readText()
                     var modified = false
 
-                    for (testName in discoveredTests) {
+                    for (testInfo in discoveredTests) {
+                        val testName = testInfo.first
+                        val fileName = testInfo.second
                         val targetCell = "<td>$testName</td>"
                         if (htmlContent.contains(targetCell)) {
                             htmlContent = htmlContent.replace(
                                 targetCell,
-                                "<td>$testName<br/><img src=\"test_result_images/$testName.png\" width=\"300\" style=\"border: 2px solid #ccc; margin-top: 10px;\" /></td>"
+                                "<td>$testName<br/><img src=\"test_result_images/$fileName\" width=\"300\" style=\"border: 2px solid #ccc; margin-top: 10px;\" /><br/><span style=\"font-size: 12px; color: #555; font-style: italic;\">Result Image: $fileName</span></td>"
                             )
                             modified = true
                         }

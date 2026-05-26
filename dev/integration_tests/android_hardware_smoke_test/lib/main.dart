@@ -32,19 +32,24 @@ class MyWidget extends StatefulWidget {
 }
 
 class _MyState extends State<MyWidget> {
-  final channel = BasicMessageChannel<Object?>(
+  static const MethodChannel nativeChannel = MethodChannel(
+    "com.example.android_hardware_smoke_test/native_support",
+  );
+
+  final testChannel = BasicMessageChannel<Object?>(
     "com.example.android_hardware_smoke_test/test_channel",
     const JSONMessageCodec(),
   );
 
   String _message = "Waiting for message...";
+  late Future<String?> _goldenVariantFuture;
 
   Future<Map<String, Object?>?> handler(Object? message) {
     final Map<String, Object?>? messageMap = (message as Map<Object?, Object?>?)
         ?.cast<String, Object?>();
-    final String? testName = messageMap?['testName'] as String?;
+    final String? testName = messageMap?["testName"] as String?;
     final bool performAppSideGoldenCompare =
-        messageMap?['performAppSideGoldenCompare'] as bool? ?? true;
+        messageMap?["performAppSideGoldenCompare"] as bool? ?? true;
     final Completer<Map<String, Object?>> completer =
         Completer<Map<String, Object?>>();
 
@@ -58,6 +63,7 @@ class _MyState extends State<MyWidget> {
         completer,
         performAppSideGoldenCompare,
         targetKey,
+        _goldenVariantFuture,
       );
     }, debugLabel: "Rendered $testName");
 
@@ -68,13 +74,18 @@ class _MyState extends State<MyWidget> {
   void initState() {
     super.initState();
 
-    channel.setMessageHandler(handler);
+    // Request the golden variant from the native side, but don't await it yet.
+    // We only need it to be resolved by the time of the postFrameCallback in the handler.
+    _goldenVariantFuture = nativeChannel.invokeMethod<String>(
+      "impeller_backend",
+    );
+    testChannel.setMessageHandler(handler);
   }
 
   @override
   void dispose() {
     super.dispose();
-    channel.setMessageHandler(null);
+    testChannel.setMessageHandler(null);
   }
 
   @override

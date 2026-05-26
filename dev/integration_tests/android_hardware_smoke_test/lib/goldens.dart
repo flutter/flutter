@@ -20,11 +20,18 @@ Future<void> handleGoldenRequest(
   Completer<Map<String, Object?>> completer,
   bool performAppSideGoldenCompare,
   GlobalKey targetKey,
+  Future<String?> goldenVariant,
 ) async {
+  final String? goldenVariantValue = await goldenVariant;
   final Uint8List resultImageBytes = await _capturePng(testName, targetKey);
 
   if (performAppSideGoldenCompare) {
-    return _compareGoldenOnDevice(testName, resultImageBytes, completer);
+    return _compareGoldenOnDevice(
+      testName,
+      resultImageBytes,
+      completer,
+      goldenVariantValue,
+    );
   } else {
     completer.complete(<String, Object?>{
       "message": "Rendered $testName",
@@ -37,20 +44,17 @@ Future<void> _compareGoldenOnDevice(
   String testName,
   Uint8List resultImageBytes,
   Completer<Map<String, Object?>> completer,
+  String? goldenVariant,
 ) async {
   final io.Directory tempDir = await getTemporaryDirectory();
-  final String testFileName = "$testName.png";
-  final String goldenAssetPath = path.join("test_driver/goldens", testFileName);
-  final String tempGoldenPath = path.join(
-    tempDir.path,
-    "goldens",
-    testFileName,
-  );
-  final String tempResultPath = path.join(
-    tempDir.path,
-    "results",
-    testFileName,
-  );
+  final String variantSuffix =
+      (goldenVariant != null && goldenVariant.isNotEmpty)
+      ? ".$goldenVariant"
+      : "";
+  final String fileName = "$testName$variantSuffix.png";
+  final String goldenAssetPath = path.join("test_driver/goldens", fileName);
+  final String tempGoldenPath = path.join(tempDir.path, "goldens", fileName);
+  final String tempResultPath = path.join(tempDir.path, "results", fileName);
 
   await _copyGoldenAssetToTemp(goldenAssetPath, tempGoldenPath);
 

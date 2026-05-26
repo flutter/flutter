@@ -116,6 +116,23 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
   ```
 
 > [!NOTE]
+> **Statically Compiled Single Source of Truth**:
+> The app's compiled `AndroidManifest.xml` `<meta-data>` tag is the single source of truth for the graphics backend configuration under **both** Instrumented Mode (OEM) and Driver Mode (CI).
+> 
+> * **Instrumented Mode (OEM)**: The native Java JUnit harness (`FlutterActivityTest.java`) reads this value dynamically using the `PackageManager` API and routes it to Dart.
+> * **Driver Mode (CI / Host)**: The Dart app queries the native Android embedder via a custom `MethodChannel` to self-discover its compiled backend and self-reports it to the host test script inside its JSON reply payload, completely eliminating the need for environment variables on the host PC.
+> 
+> To switch the active graphics backend manually for local runs, open `android/app/src/main/AndroidManifest.xml` and update the `io.flutter.embedding.android.ImpellerBackend` value:
+> 
+> ```xml
+> <!-- Enable Vulkan: -->
+> <meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="vulkan" />
+> 
+> <!-- Enable OpenGLES: -->
+> <meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="opengles" />
+> ```
+
+> [!NOTE]
 > **Automated HTML Screenshot Embedding (`embedTestResultImages`)**:
 > When running the Gradle command above, a custom Kotlin DSL task named **`embedTestResultImages`** executes automatically once the tests finish.
 >

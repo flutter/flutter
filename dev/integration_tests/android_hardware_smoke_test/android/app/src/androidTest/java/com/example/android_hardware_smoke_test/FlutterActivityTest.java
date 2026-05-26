@@ -53,7 +53,6 @@ public class FlutterActivityTest
 
       // Send a message to the flutter app telling it which test state to enter.
       // Place the reply into the future.
-      Log.d(TAG, "Sending '"+testName+"' on message channel");
       try {
         JSONObject message = new JSONObject();
         message.put("testName", testName);
