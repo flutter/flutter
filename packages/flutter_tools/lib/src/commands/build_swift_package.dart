@@ -28,6 +28,7 @@ import '../flutter_plugins.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/cocoapods.dart';
+import '../macos/darwin_dependency_management.dart';
 import '../macos/swift_package_manager.dart';
 import '../macos/swift_packages.dart';
 import '../macos/xcode.dart';
@@ -1081,32 +1082,58 @@ class FlutterPluginSwiftDependencies {
     required List<String> targetNames,
     required Directory workingDirectory,
   }) async {
-    final ProcessResult result = await _utils.processManager.run([
-      'swift',
-      'package',
-      'add-dependency',
-      '../FlutterFramework',
-      '--type',
-      'path',
-    ], workingDirectory: workingDirectory.path);
-    if (result.exitCode != 0) {
-      throwToolExit('Failed to add FlutterFramework as a dependency. ${result.stderr}');
-    }
-    for (final targetName in targetNames) {
-      final ProcessResult targetResult = await _utils.processManager.run([
+    try {
+      final ProcessResult result = await _utils.processManager.run([
         'swift',
         'package',
-        'add-target-dependency',
-        kFlutterGeneratedFrameworkSwiftPackageTargetName,
-        targetName,
-        '--package',
-        kFlutterGeneratedFrameworkSwiftPackageTargetName,
+        'add-dependency',
+        '../FlutterFramework',
+        '--type',
+        'path',
       ], workingDirectory: workingDirectory.path);
-      if (targetResult.exitCode != 0) {
-        throwToolExit(
-          'Failed to add FlutterFramework as a target dependency. ${targetResult.stderr}',
-        );
+      if (result.exitCode != 0) {
+        throwToolExit('Failed to add FlutterFramework as a dependency. ${result.stderr}');
       }
+      for (final targetName in targetNames) {
+        final ProcessResult targetResult = await _utils.processManager.run([
+          'swift',
+          'package',
+          'add-target-dependency',
+          kFlutterGeneratedFrameworkSwiftPackageTargetName,
+          targetName,
+          '--package',
+          kFlutterGeneratedFrameworkSwiftPackageTargetName,
+        ], workingDirectory: workingDirectory.path);
+        if (targetResult.exitCode != 0) {
+          throwToolExit(
+            'Failed to add FlutterFramework as a target dependency. ${targetResult.stderr}',
+          );
+        }
+      }
+      final ProcessResult modifiedManifest = await _utils.processManager.run([
+        'swift',
+        'package',
+        'dump-package',
+      ], workingDirectory: workingDirectory.path);
+      if (modifiedManifest.exitCode != 0) {
+        throwToolExit('Failed to parse modified package. ${modifiedManifest.stderr}');
+      }
+    } on ToolExit catch (e) {
+      final buffer = StringBuffer();
+      if (e.message != null) {
+        buffer.writeln(e.message);
+      }
+      buffer.writeln();
+      buffer.writeln(
+        'Failed to add FlutterFramework to package ${workingDirectory.basename}. $_kFileAnIssue '
+        'and include the above error.',
+      );
+      buffer.writeln();
+      buffer.writeln(
+        'Please also contact the plugin maintainer and request they adopt the FlutterFramework '
+        "dependency in their plugin's Package.swift file as instructed in $kSwiftPackageManagerDocsUrl.",
+      );
+      throwToolExit(buffer.toString());
     }
   }
 
