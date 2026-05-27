@@ -248,6 +248,57 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext(
+      'AndroidApk.fromAndroidProject returns null if launch activity has no android:name',
+      () async {
+        final logger = BufferLogger.test();
+        final FlutterProject project = await aModuleProject();
+        project.android.hostAppGradleRoot.childFile('build.gradle').createSync(recursive: true);
+        final File appGradle = project.android.hostAppGradleRoot.childFile(
+          fs.path.join('app', 'build.gradle'),
+        );
+        appGradle.createSync(recursive: true);
+        appGradle.writeAsStringSync("def flutterPluginVersion = 'managed'");
+
+        // Create AndroidManifest.xml with launcher but missing name
+        final File manifestFile = project.android.appManifestFile;
+        manifestFile.createSync(recursive: true);
+        manifestFile.writeAsStringSync('''
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="io.flutter.examples.hello_world">
+    <application android:name="io.flutter.app.FlutterApplication">
+        <activity android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+''');
+
+        final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
+          project.android,
+          androidSdk: sdk,
+          processManager: fakeProcessManager,
+          userMessages: UserMessages(),
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          logger: logger,
+          fileSystem: fs,
+          buildInfo: const BuildInfo(
+            BuildMode.debug,
+            null,
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+        );
+
+        expect(androidApk, isNull);
+      },
+      overrides: overrides,
+    );
+
+    testUsingContext(
       'Licenses not available, platform and buildtools available, apk exists',
       () async {
         const aaptPath = 'aaptPath';

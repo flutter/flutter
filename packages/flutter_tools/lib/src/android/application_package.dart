@@ -199,6 +199,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
         continue;
       }
 
+      var foundLauncher = false;
       for (final XmlElement element in activity.findElements('intent-filter')) {
         String? actionName = '';
         String? categoryName = '';
@@ -218,9 +219,15 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
             actionName.isNotEmpty &&
             categoryName.isNotEmpty) {
           final String? activityName = activity.getAttribute('android:name');
-          launchActivity = '$packageId/$activityName';
-          break;
+          if (activityName != null && activityName.isNotEmpty) {
+            launchActivity = '$packageId/$activityName';
+            foundLauncher = true;
+            break;
+          }
         }
+      }
+      if (foundLauncher) {
+        break;
       }
     }
 
