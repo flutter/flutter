@@ -204,10 +204,7 @@ class SwiftPackageManager {
   /// to avoid potential Xcode parallel target build race conditions.
   /// If creation fails due to sharing violations or locks (e.g., when Xcode is open),
   /// throws a descriptive [ToolExit] advising the user to close Xcode and run "flutter clean".
-  void _createPluginSymlink({
-    required Link pluginSymlink,
-    required String packagePath,
-  }) {
+  void _createPluginSymlink({required Link pluginSymlink, required String packagePath}) {
     final FileSystemEntityType type = _fileSystem.typeSync(pluginSymlink.path, followLinks: false);
     var skipCreation = false;
     if (type == FileSystemEntityType.link) {
@@ -229,8 +226,12 @@ class SwiftPackageManager {
     try {
       pluginSymlink.createSync(packagePath);
     } on FileSystemException catch (e) {
-      if (e.osError?.errorCode == 17) { // OS Error: File exists, errno = 17
-        final FileSystemEntityType postCrashType = _fileSystem.typeSync(pluginSymlink.path, followLinks: false);
+      if (e.osError?.errorCode == 17) {
+        // OS Error: File exists, errno = 17
+        final FileSystemEntityType postCrashType = _fileSystem.typeSync(
+          pluginSymlink.path,
+          followLinks: false,
+        );
         if (postCrashType == FileSystemEntityType.link) {
           try {
             if (pluginSymlink.targetSync() == packagePath) {
