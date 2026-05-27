@@ -129,7 +129,7 @@ void _onPackageConfigChangeDetectedRoot(String path) {
 /// Test the files included in [filesWithErrors] contain errors after executing [changeOperation].
 Future<void> expectHasErrors({
   required WidgetPreviewProject project,
-  required void Function() changeOperation,
+  required FutureOr<void> Function() changeOperation,
   required Set<WidgetPreviewSourceFile> filesWithErrors,
 }) async {
   await waitForChangeDetected(
@@ -146,7 +146,7 @@ Future<void> expectHasErrors({
 /// errors.
 Future<void> expectHasNoErrors({
   required WidgetPreviewProject project,
-  required void Function() changeOperation,
+  required FutureOr<void> Function() changeOperation,
 }) async {
   await expectHasErrors(
     project: project,
@@ -156,7 +156,7 @@ Future<void> expectHasNoErrors({
 }
 
 /// Waits for a pubspec changed event to be detected after executing [changeOperation].
-Future<String> waitForPubspecChangeDetected({required void Function() changeOperation}) {
+Future<String> waitForPubspecChangeDetected({required FutureOr<void> Function() changeOperation}) async {
   final completer = Completer<String>();
   _onPubspecChangeDetected = (String path) {
     if (completer.isCompleted) {
@@ -164,12 +164,12 @@ Future<String> waitForPubspecChangeDetected({required void Function() changeOper
     }
     completer.complete(path);
   };
-  changeOperation();
+  await changeOperation();
   return completer.future;
 }
 
 /// Waits for a package_config.json changed event to be detected after executing [changeOperation].
-Future<String> waitForPackageConfigChangeDetected({required void Function() changeOperation}) {
+Future<String> waitForPackageConfigChangeDetected({required FutureOr<void> Function() changeOperation}) async {
   final completer = Completer<String>();
   _onPackageConfigChangeDetected = (String path) {
     if (completer.isCompleted) {
@@ -177,7 +177,7 @@ Future<String> waitForPackageConfigChangeDetected({required void Function() chan
     }
     completer.complete(path);
   };
-  changeOperation();
+  await changeOperation();
   return completer.future;
 }
 
@@ -203,7 +203,7 @@ Future<void> waitForChangeDetected({
 /// Waits for [n] change detected events after executing [changeOperation].
 Future<void> waitForNChangesDetected({
   required int n,
-  required void Function() changeOperation,
+  required FutureOr<void> Function() changeOperation,
 }) async {
   var changeCount = 0;
   final completer = Completer<void>();
@@ -216,7 +216,7 @@ Future<void> waitForNChangesDetected({
       completer.complete();
     }
   };
-  changeOperation();
+  await changeOperation();
   await completer.future;
 }
 
