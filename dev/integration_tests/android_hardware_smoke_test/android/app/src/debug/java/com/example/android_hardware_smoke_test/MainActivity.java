@@ -21,10 +21,6 @@ public class MainActivity extends FlutterActivity {
   private String impellerBackend = "vulkan";
 
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-  }
-  @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
     super.configureFlutterEngine(flutterEngine);
 
