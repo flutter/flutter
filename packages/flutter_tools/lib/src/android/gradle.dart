@@ -171,6 +171,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _artifacts = artifacts,
        _analytics = analytics,
        _gradleUtils = gradleUtils,
+       _platform = platform,
        _androidStudio = androidStudio,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
@@ -182,6 +183,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final Artifacts _artifacts;
   final Analytics _analytics;
   final GradleUtils _gradleUtils;
+  final Platform _platform;
   final FileSystemUtils _fileSystemUtils;
   final AndroidStudio? _androidStudio;
 
@@ -361,11 +363,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       if (detectedGradleError != null) {
         // This will proceed to throw in exitCode check or error handling below.
       } else {
-        throwToolExit(
-          'Gradle build failed to start.\n'
-          'This can happen if the Gradle wrapper is missing, corrupted, or has incorrect permissions.\n'
-          'Details: $exception',
-        );
+        _handleProcessException(exception);
       }
     } finally {
       status.stop();
@@ -880,11 +878,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
         environment: _java?.environment,
       );
     } on ProcessException catch (exception) {
-      throwToolExit(
-        'Gradle build failed to start.\n'
-        'This can happen if the Gradle wrapper is missing, corrupted, or has incorrect permissions.\n'
-        'Details: $exception',
-      );
+      _handleProcessException(exception);
     } finally {
       status.stop();
     }
@@ -1005,6 +999,28 @@ class AndroidGradleBuilder implements AndroidBuilder {
       throwToolExit('Gradle task $taskName failed with exit code $exitCode');
     }
     return outputPath;
+  }
+
+  Never _handleProcessException(ProcessException exception) {
+    // 2 corresponds to ENOENT (File not found) on Unix, and ERROR_FILE_NOT_FOUND on Windows.
+    if (exception.errorCode == 2) {
+      throwToolExit(
+        'The Gradle wrapper script "gradlew" could not be found in your Android project directory.\n'
+        'Ensure that the "android" directory is correctly configured, or run "flutter create ." in your project root to regenerate the Android template.',
+      );
+    }
+    // 13 corresponds to EACCES (Permission denied) on Unix.
+    if (exception.errorCode == 13 && (_platform.isLinux || _platform.isMacOS)) {
+      throwToolExit(
+        'The Gradle wrapper script "gradlew" does not have executable permissions.\n'
+        'To fix this, run: chmod +x android/gradlew',
+      );
+    }
+    throwToolExit(
+      'Gradle build failed to start.\n'
+      'This can happen if the Gradle wrapper is missing, corrupted, or has incorrect permissions.\n'
+      'Details: $exception',
+    );
   }
 }
 

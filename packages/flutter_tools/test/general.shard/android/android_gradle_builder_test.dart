@@ -494,6 +494,223 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
 
+    testUsingContext(
+      'converts ProcessException (ENOENT) into ToolExit with missing gradlew message',
+      () async {
+        final builder = AndroidGradleBuilder(
+          java: FakeJava(),
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          artifacts: Artifacts.test(),
+          analytics: fakeAnalytics,
+          gradleUtils: FakeGradleUtils(),
+          platform: FakePlatform(),
+          androidStudio: FakeAndroidStudio(),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'gradlew',
+              '-q',
+              '-Ptarget-platform=android-arm,android-arm64,android-x64',
+              '-Ptarget=lib/main.dart',
+              '-Pbase-application-name=android.app.Application',
+              '-Pdart-obfuscation=false',
+              '-Ptrack-widget-creation=false',
+              '-Ptree-shake-icons=false',
+              'assembleRelease',
+            ],
+            exitCode: 1,
+            exception: ProcessException('', <String>[], 'No such file or directory', 2),
+          ),
+        );
+
+        fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
+        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        );
+        project.android.appManifestFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+        await expectLater(
+          () async {
+            await builder.buildGradleApp(
+              project: project,
+              androidBuildInfo: const AndroidBuildInfo(
+                BuildInfo(
+                  BuildMode.release,
+                  null,
+                  treeShakeIcons: false,
+                  packageConfigPath: '.dart_tool/package_config.json',
+                ),
+              ),
+              target: 'lib/main.dart',
+              isBuildingBundle: false,
+              configOnly: false,
+              localGradleErrors: const <GradleHandledError>[],
+            );
+          },
+          throwsToolExit(
+            message:
+                'The Gradle wrapper script "gradlew" could not be found in your Android project directory.\n'
+                'Ensure that the "android" directory is correctly configured, or run "flutter create ." in your project root to regenerate the Android template.',
+          ),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
+    );
+
+    testUsingContext(
+      'converts ProcessException (EACCES) into ToolExit with permission denied message on Linux',
+      () async {
+        final builder = AndroidGradleBuilder(
+          java: FakeJava(),
+          logger: logger,
+          processManager: processManager,
+          fileSystem: fileSystem,
+          artifacts: Artifacts.test(),
+          analytics: fakeAnalytics,
+          gradleUtils: FakeGradleUtils(),
+          platform: FakePlatform(),
+          androidStudio: FakeAndroidStudio(),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'gradlew',
+              '-q',
+              '-Ptarget-platform=android-arm,android-arm64,android-x64',
+              '-Ptarget=lib/main.dart',
+              '-Pbase-application-name=android.app.Application',
+              '-Pdart-obfuscation=false',
+              '-Ptrack-widget-creation=false',
+              '-Ptree-shake-icons=false',
+              'assembleRelease',
+            ],
+            exitCode: 1,
+            exception: ProcessException('', <String>[], 'Permission denied', 13),
+          ),
+        );
+
+        fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
+        fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+        fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          fileSystem.currentDirectory,
+        );
+        project.android.appManifestFile
+          ..createSync(recursive: true)
+          ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+        await expectLater(
+          () async {
+            await builder.buildGradleApp(
+              project: project,
+              androidBuildInfo: const AndroidBuildInfo(
+                BuildInfo(
+                  BuildMode.release,
+                  null,
+                  treeShakeIcons: false,
+                  packageConfigPath: '.dart_tool/package_config.json',
+                ),
+              ),
+              target: 'lib/main.dart',
+              isBuildingBundle: false,
+              configOnly: false,
+              localGradleErrors: const <GradleHandledError>[],
+            );
+          },
+          throwsToolExit(
+            message:
+                'The Gradle wrapper script "gradlew" does not have executable permissions.\n'
+                'To fix this, run: chmod +x android/gradlew',
+          ),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()},
+    );
+
+    testUsingContext('converts ProcessException (EACCES) into generic ToolExit on Windows', () async {
+      final builder = AndroidGradleBuilder(
+        java: FakeJava(),
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        analytics: fakeAnalytics,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(operatingSystem: 'windows'),
+        androidStudio: FakeAndroidStudio(),
+      );
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'gradlew',
+            '-q',
+            '-Ptarget-platform=android-arm,android-arm64,android-x64',
+            '-Ptarget=lib/main.dart',
+            '-Pbase-application-name=android.app.Application',
+            '-Pdart-obfuscation=false',
+            '-Ptrack-widget-creation=false',
+            '-Ptree-shake-icons=false',
+            'assembleRelease',
+          ],
+          exitCode: 1,
+          exception: ProcessException('', <String>[], 'Access is denied', 13),
+        ),
+      );
+
+      fileSystem.directory('android').childFile('build.gradle').createSync(recursive: true);
+      fileSystem.directory('android').childFile('gradle.properties').createSync(recursive: true);
+      fileSystem.directory('android').childDirectory('app').childFile('build.gradle')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      project.android.appManifestFile
+        ..createSync(recursive: true)
+        ..writeAsStringSync(minimalV2EmbeddingManifest);
+
+      await expectLater(
+        () async {
+          await builder.buildGradleApp(
+            project: project,
+            androidBuildInfo: const AndroidBuildInfo(
+              BuildInfo(
+                BuildMode.release,
+                null,
+                treeShakeIcons: false,
+                packageConfigPath: '.dart_tool/package_config.json',
+              ),
+            ),
+            target: 'lib/main.dart',
+            isBuildingBundle: false,
+            configOnly: false,
+            localGradleErrors: const <GradleHandledError>[],
+          );
+        },
+        throwsToolExit(
+          message:
+              'Gradle build failed to start.\n'
+              'This can happen if the Gradle wrapper is missing, corrupted, or has incorrect permissions.\n'
+              'Details: ProcessException: Access is denied',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{AndroidStudio: () => FakeAndroidStudio()});
+
     testUsingContext('logs success event after a successful retry', () async {
       final builder = AndroidGradleBuilder(
         java: FakeJava(),
