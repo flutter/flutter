@@ -325,6 +325,19 @@ void main() {
         ),
       );
     });
+
+    testWidgets('FractionalTranslation does not crash at zero area', (WidgetTester tester) async {
+      tester.view.physicalSize = Size.zero;
+      const offset = Offset(0.4, 0.4);
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(child: FractionalTranslation(translation: offset)),
+        ),
+      );
+      expect(tester.getSize(find.byType(FractionalTranslation)), Size.zero);
+    });
   });
 
   group('Semantics', () {
@@ -1843,6 +1856,20 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byKey(key)), Size.zero);
+  });
+
+  testWidgets('Padding does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Padding(padding: EdgeInsets.all(5), child: Placeholder()),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Padding)), Size.zero);
   });
 
   testWidgets('Offstage does not crash at zero area', (WidgetTester tester) async {

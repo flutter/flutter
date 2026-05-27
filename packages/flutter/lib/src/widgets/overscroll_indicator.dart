@@ -649,7 +649,7 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
 /// Created by [MaterialScrollBehavior.buildOverscrollIndicator] on platforms
 /// (e.g., Android) that commonly use this type of overscroll indication when
 /// [ThemeData.useMaterial3] is true. Otherwise, when [ThemeData.useMaterial3]
-/// is false, a [GlowingOverscrollIndicator] is used instead.=
+/// is false, a [GlowingOverscrollIndicator] is used instead.
 ///
 /// See also:
 ///

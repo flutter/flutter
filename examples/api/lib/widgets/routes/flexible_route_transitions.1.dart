@@ -269,19 +269,13 @@ class _MyPageScaffold extends StatelessWidget {
 
 // A Page that applies a _VerticalPageTransition.
 class _VerticalTransitionPage<T> extends Page<T> {
-  const _VerticalTransitionPage({
-    required this.child,
-    this.allowSnapshotting = true,
-    super.restorationId,
-  });
+  const _VerticalTransitionPage({required this.child, super.restorationId});
 
   final Widget child;
 
   final bool maintainState = true;
 
   final bool fullscreenDialog = false;
-
-  final bool allowSnapshotting;
 
   @override
   Route<T> createRoute(BuildContext context) {
@@ -290,10 +284,8 @@ class _VerticalTransitionPage<T> extends Page<T> {
 }
 
 class _PageBasedVerticalPageRoute<T> extends PageRoute<T> {
-  _PageBasedVerticalPageRoute({
-    required _VerticalTransitionPage<T> page,
-    super.allowSnapshotting,
-  }) : super(settings: page);
+  _PageBasedVerticalPageRoute({required _VerticalTransitionPage<T> page})
+    : super(settings: page);
 
   _VerticalTransitionPage<T> get _page =>
       settings as _VerticalTransitionPage<T>;
