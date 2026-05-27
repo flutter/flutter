@@ -33,7 +33,10 @@ impeller::PlaygroundImpl* DlSurfaceProviderImpellerMetal::GetPlayground()
     const {
   if (playground_ == nullptr) {
     FML_CHECK(::glfwInit() == GLFW_TRUE);
-    playground_ = MakePlayground(impeller::PlaygroundBackend::kMetal);
+    impeller::PlaygroundSwitches switches;
+    switches.enable_wide_gamut = true;
+    switches.flags.use_sdfs = false;
+    playground_ = MakePlayground(impeller::PlaygroundBackend::kMetal, switches);
   }
   return playground_.get();
 }
@@ -42,7 +45,11 @@ impeller::PlaygroundImpl* DlSurfaceProviderImpellerMetalSDF::GetPlayground()
     const {
   if (playground_ == nullptr) {
     FML_CHECK(::glfwInit() == GLFW_TRUE);
-    playground_ = MakePlayground(impeller::PlaygroundBackend::kMetalSDF);
+    impeller::PlaygroundSwitches switches;
+    switches.enable_wide_gamut = true;
+    switches.flags.use_sdfs = true;
+    playground_ =
+        MakePlayground(impeller::PlaygroundBackend::kMetalSDF, switches);
   }
   return playground_.get();
 }

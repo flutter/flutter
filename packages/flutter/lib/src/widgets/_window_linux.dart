@@ -162,7 +162,17 @@ class WindowingOwnerLinux extends WindowingOwner {
     required WindowPositioner positioner,
     required BaseWindowController parent,
   }) {
-    throw UnimplementedError('Popup windows are not yet implemented on Linux.');
+    final controller = PopupWindowControllerLinux(
+      owner: this,
+      delegate: delegate,
+      preferredConstraints: preferredConstraints,
+      anchorRect: anchorRect,
+      positioner: positioner,
+      parent: parent,
+    );
+    _windows[controller.rootView.viewId] = controller._window;
+    _views[controller.rootView.viewId] = controller._view;
+    return controller;
   }
 
   @internal
@@ -792,6 +802,188 @@ class TooltipWindowControllerLinux extends TooltipWindowController
   }
 }
 
+/// Implementation of [PopupWindowController] for the Linux platform.
+///
+/// {@macro flutter.widgets.windowing.experimental}
+///
+/// See also:
+///
+///  * [PopupWindowController], the base class for popup windows.
+class PopupWindowControllerLinux extends PopupWindowController {
+  /// Creates a new popup window controller for Linux.
+  ///
+  /// When this constructor completes the native window has been created and
+  /// has a view associated with it.
+  ///
+  /// {@macro flutter.widgets.windowing.experimental}
+  ///
+  /// See also:
+  ///
+  ///  * [PopupWindowController], the base class for popup windows.
+  @internal
+  PopupWindowControllerLinux({
+    required WindowingOwnerLinux owner,
+    required PopupWindowControllerDelegate delegate,
+    required BoxConstraints preferredConstraints,
+    required Rect anchorRect,
+    required WindowPositioner positioner,
+    required BaseWindowController parent,
+  }) : _owner = owner,
+       _delegate = delegate,
+       _parent = parent,
+       _window = _GtkWindow(_GtkWindowType.popup),
+       super.empty() {
+    if (!isWindowingEnabled) {
+      throw UnsupportedError(_kWindowingDisabledErrorMessage);
+    }
+
+    _window.setDecorated(false);
+    _window.realize();
+
+    _windowMonitor = _FlWindowMonitor(
+      _window,
+      onConfigure: notifyListeners,
+      onMovedToRect: (x, y, width, height) {
+        _offsetFromParent = Offset(x.toDouble(), y.toDouble());
+      },
+      onDestroy: _delegate.onWindowDestroyed,
+    );
+    setConstraints(preferredConstraints);
+    final engine = _FlEngine.current();
+    _view = _FlView(engine, isSizedToContent: true);
+    _viewMonitor = _FlViewMonitor(
+      _view,
+      onFirstFrame: () {
+        _window.show();
+      },
+    );
+    final int viewId = _view.getId();
+    rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
+      (FlutterView view) => view.viewId == viewId,
+    );
+    _view.show();
+    _window.add(_view);
+
+    final _GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
+    if (parentWindow == null) {
+      throw Exception('Failed to find popup parent window');
+    }
+    _window.setTransientFor(parentWindow);
+    updatePosition(anchorRect: anchorRect, positioner: positioner);
+  }
+
+  final WindowingOwnerLinux _owner;
+  final PopupWindowControllerDelegate _delegate;
+  final _GtkWindow _window;
+  late Rect _anchorRect;
+  late WindowPositioner _positioner;
+  final BaseWindowController _parent;
+  late final _FlView _view;
+  late final _FlViewMonitor _viewMonitor;
+  late final _FlWindowMonitor _windowMonitor;
+  Offset? _offsetFromParent;
+  bool _destroyed = false;
+
+  @override
+  @internal
+  Size get contentSize => _window.getSize();
+
+  @override
+  void destroy() {
+    if (_destroyed) {
+      return;
+    }
+    _viewMonitor.close();
+    _viewMonitor.unref();
+    _window.destroy();
+    _windowMonitor.close();
+    _windowMonitor.unref();
+    _destroyed = true;
+    _owner._windows.remove(rootView.viewId);
+    _owner._views.remove(rootView.viewId);
+  }
+
+  @override
+  void updatePosition({Rect? anchorRect, WindowPositioner? positioner}) {
+    if (anchorRect != null) {
+      _anchorRect = anchorRect;
+    }
+    if (positioner != null) {
+      _positioner = positioner;
+    }
+
+    final _GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
+    final _FlView? view = _owner._views[_parent.rootView.viewId];
+    var offset = (0, 0);
+    if (parentWindow != null && view != null) {
+      offset = view.translateCoordinates(parentWindow, (0, 0)) ?? (0, 0);
+    }
+    // This is only applied in GTK3 the first time the popup is shown as GTK3
+    // only sends updates when the popup surface configure event is
+    // received. Since GTK3 does not set the [reactive flag](https://wayland.app/protocols/xdg-shell#xdg_positioner:request:set_reactive)
+    // on the positioner it is only [received once](https://wayland.app/protocols/xdg-shell#xdg_popup:event:configure).
+    // This means if a Linux popup is resized it will not be repositioned.
+    _window.getWindow().moveToRect(
+      x: _anchorRect.left.toInt() + offset.$1,
+      y: _anchorRect.top.toInt() + offset.$2,
+      width: (_anchorRect.right - _anchorRect.left).toInt(),
+      height: (_anchorRect.bottom - _anchorRect.top).toInt(),
+      rectAnchor: _anchorToGravity(_positioner.parentAnchor),
+      windowAnchor: _anchorToGravity(_positioner.childAnchor),
+      anchorHints: _constraintAdjustmentToHints(_positioner.constraintAdjustment),
+      rectAnchorDx: _positioner.offset.dx.toInt(),
+      rectAnchorDy: _positioner.offset.dy.toInt(),
+    );
+  }
+
+  @override
+  Offset get offsetFromParent {
+    return _offsetFromParent ?? Offset.zero;
+  }
+
+  _GdkGravity _anchorToGravity(WindowPositionerAnchor anchor) {
+    return switch (anchor) {
+      WindowPositionerAnchor.center => _GdkGravity.center,
+      WindowPositionerAnchor.top => _GdkGravity.north,
+      WindowPositionerAnchor.bottom => _GdkGravity.south,
+      WindowPositionerAnchor.left => _GdkGravity.west,
+      WindowPositionerAnchor.right => _GdkGravity.east,
+      WindowPositionerAnchor.topLeft => _GdkGravity.northWest,
+      WindowPositionerAnchor.bottomLeft => _GdkGravity.southWest,
+      WindowPositionerAnchor.topRight => _GdkGravity.northEast,
+      WindowPositionerAnchor.bottomRight => _GdkGravity.southEast,
+    };
+  }
+
+  Set<_GdkAnchorHint> _constraintAdjustmentToHints(
+    WindowPositionerConstraintAdjustment adjustment,
+  ) {
+    return <_GdkAnchorHint>{
+      if (adjustment.flipX) _GdkAnchorHint.flipX,
+      if (adjustment.flipY) _GdkAnchorHint.flipY,
+      if (adjustment.slideX) _GdkAnchorHint.slideX,
+      if (adjustment.slideY) _GdkAnchorHint.slideY,
+      if (adjustment.resizeX) _GdkAnchorHint.resizeX,
+      if (adjustment.resizeY) _GdkAnchorHint.resizeY,
+    };
+  }
+
+  @override
+  @internal
+  BaseWindowController get parent => _parent;
+
+  @override
+  @internal
+  void setConstraints(BoxConstraints constraints) {
+    _window.setGeometryHints(
+      minWidth: constraints.minWidth.toInt(),
+      minHeight: constraints.minHeight.toInt(),
+      maxWidth: constraints.maxWidth.isInfinite ? 0x7fffffff : constraints.maxWidth.toInt(),
+      maxHeight: constraints.maxHeight.isInfinite ? 0x7fffffff : constraints.maxHeight.toInt(),
+    );
+  }
+}
+
 // The following classes are thin wrappers around the corresponding GTK/GDK
 // objects, with only the methods we need implemented. The method signatures
 // and enum values are designed to match the corresponding C APIs as closely
@@ -849,7 +1041,6 @@ enum _GdkWindowTypeHint {
   dropdown_menu,
   // ignore: unused_field
   popup_menu,
-  // ignore: unused_field
   tooltip,
   // ignore: unused_field
   notification,
@@ -1462,16 +1653,21 @@ class _FlWindowMonitor extends _GObject {
     VoidCallback? onStateChanged,
     VoidCallback? onIsActiveNotify,
     VoidCallback? onTitleNotify,
+    void Function(int, int, int, int)? onMovedToRect,
     VoidCallback? onClose,
     VoidCallback? onDestroy,
   }) {
     void noop() {}
+    void noopMovedToRect(int x, int y, int width, int height) {}
     return _FlWindowMonitor._internal(
       window.instance,
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onConfigure ?? noop),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onStateChanged ?? noop),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onIsActiveNotify ?? noop),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onTitleNotify ?? noop),
+      ffi.NativeCallable<ffi.Void Function(ffi.Int, ffi.Int, ffi.Int, ffi.Int)>.isolateLocal(
+        onMovedToRect ?? noopMovedToRect,
+      ),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onClose ?? noop),
       ffi.NativeCallable<ffi.Void Function()>.isolateLocal(onDestroy ?? noop),
     );
@@ -1483,6 +1679,7 @@ class _FlWindowMonitor extends _GObject {
     this._onStateChangedFunction,
     this._onIsActiveNotifyFunction,
     this._onTitleNotifyFunction,
+    this._onMovedToRectFunction,
     this._onCloseFunction,
     this._onDestroyFunction,
   ) : super(
@@ -1492,6 +1689,7 @@ class _FlWindowMonitor extends _GObject {
           _onStateChangedFunction.nativeFunction,
           _onIsActiveNotifyFunction.nativeFunction,
           _onTitleNotifyFunction.nativeFunction,
+          _onMovedToRectFunction.nativeFunction,
           _onCloseFunction.nativeFunction,
           _onDestroyFunction.nativeFunction,
         ),
@@ -1501,6 +1699,8 @@ class _FlWindowMonitor extends _GObject {
   final ffi.NativeCallable<ffi.Void Function()> _onStateChangedFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onIsActiveNotifyFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onTitleNotifyFunction;
+  final ffi.NativeCallable<ffi.Void Function(ffi.Int, ffi.Int, ffi.Int, ffi.Int)>
+  _onMovedToRectFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onCloseFunction;
   final ffi.NativeCallable<ffi.Void Function()> _onDestroyFunction;
 
@@ -1510,6 +1710,7 @@ class _FlWindowMonitor extends _GObject {
     _onStateChangedFunction.close();
     _onIsActiveNotifyFunction.close();
     _onTitleNotifyFunction.close();
+    _onMovedToRectFunction.close();
     _onCloseFunction.close();
     _onDestroyFunction.close();
   }
@@ -1521,6 +1722,7 @@ class _FlWindowMonitor extends _GObject {
       ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>,
       ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>,
       ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>,
+      ffi.Pointer<ffi.NativeFunction<ffi.Void Function(ffi.Int, ffi.Int, ffi.Int, ffi.Int)>>,
       ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>,
       ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>>,
     )
@@ -1531,6 +1733,8 @@ class _FlWindowMonitor extends _GObject {
     ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> onStateChanged,
     ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> onIsActiveNotify,
     ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> onTitleNotify,
+    ffi.Pointer<ffi.NativeFunction<ffi.Void Function(ffi.Int, ffi.Int, ffi.Int, ffi.Int)>>
+    onMovedToRect,
     ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> onClose,
     ffi.Pointer<ffi.NativeFunction<ffi.Void Function()>> onDestroy,
   );
