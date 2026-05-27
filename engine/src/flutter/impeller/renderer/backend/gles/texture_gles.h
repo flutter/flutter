@@ -13,6 +13,7 @@
 #include "impeller/core/texture.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
+#include "impeller/renderer/backend/gles/unique_handle_gles.h"
 
 namespace impeller {
 
@@ -79,9 +80,6 @@ class TextureGLES final : public Texture,
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,
               TextureDescriptor desc,
               bool threadsafe = false);
-
-  // |Texture|
-  ~TextureGLES() override;
 
   // |Texture|
   bool IsValid() const override;
@@ -173,8 +171,8 @@ class TextureGLES final : public Texture,
  private:
   std::shared_ptr<ReactorGLES> reactor_;
   const Type type_;
-  HandleGLES handle_;
-  std::optional<HandleGLES> fence_ = std::nullopt;
+  UniqueHandleGLES handle_;
+  UniqueHandleGLES fence_;
   // Tracks which `(slice, mip_level)` pairs have had their storage allocated
   // by a `glTexImage2D` call. Allocation is performed lazily on first write
   // to a level so the only-renders-then-mipmaps path (Impeller's snapshot
@@ -187,7 +185,7 @@ class TextureGLES final : public Texture,
   std::array<std::bitset<kMaxTrackedMipLevels>, 6> slice_mip_initialized_ = {};
   const bool is_wrapped_;
   const std::optional<GLuint> wrapped_fbo_;
-  HandleGLES cached_fbo_ = HandleGLES::DeadHandle();
+  UniqueHandleGLES cached_fbo_;
   bool is_valid_ = false;
 
   TextureGLES(std::shared_ptr<ReactorGLES> reactor,
