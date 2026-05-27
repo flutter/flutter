@@ -198,15 +198,15 @@ abstract class WebParagraphPainter {
     final quarterWave = thickness;
 
     var waveCount = 0;
-    // START FIX: Initialize xStart with the actual starting x offset
+    // Initialize xStart with the actual starting x offset
     var xStart = x;
     final double yStart = y + quarterWave;
 
     pathBuilder.moveTo(xStart, yStart);
 
-    // START FIX: Calculate width limit relative to the starting x
+    // Calculate width limit relative to the starting x
     while ((xStart - x) + quarterWave * 2 < textWidth) {
-      // START FIX: Control point x1 must be halfway between start and end
+      // Control point x1 must be halfway between start and end
       final double x1 = xStart + quarterWave;
       final double y1 = yStart + quarterWave * (waveCount.isOdd ? 1 : -1);
       final double x2 = xStart + quarterWave * 2;
@@ -220,7 +220,7 @@ abstract class WebParagraphPainter {
     // The rest of the wave
     final double remaining = textWidth - (xStart - x);
     if (remaining > 0) {
-      // START FIX: Control point in the middle of the remaining distance
+      // Control point in the middle of the remaining distance
       final double x1 = xStart + (remaining / 2);
       final double y1 = yStart + quarterWave * (waveCount.isOdd ? 1 : -1);
       final double x2 = xStart + remaining;
@@ -235,7 +235,7 @@ abstract class WebParagraphPainter {
     if (block.style.decoration == null || block.style.decorationStyle == null) {
       return;
     }
-    
+
     final snappedRect = ui.Rect.fromLTRB(
       rect.left.roundToDouble(),
       rect.top.roundToDouble(),
