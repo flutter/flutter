@@ -41,6 +41,7 @@ import io.flutter.view.AccessibilityStringBuilder.LocaleStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.SpellOutStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.StringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.StringAttributeType;
+import io.flutter.view.accessibility.configurator.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -206,7 +207,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // accessibility system.
   //
   // This is null when a node embedded by the AccessibilityViewEmbedder has the focus.
-  @Nullable private SemanticsNode accessibilityFocusedSemanticsNode;
+  public @Nullable SemanticsNode accessibilityFocusedSemanticsNode;
 
   // The virtual ID of the currently embedded node with accessibility focus.
   //
@@ -678,7 +679,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     accessibilityChannel.setAccessibilityFeatures(accessibilityFeatureFlags);
   }
 
-  private boolean shouldSetCollectionInfo(final SemanticsNode semanticsNode) {
+  public boolean shouldSetCollectionInfo(final SemanticsNode semanticsNode) {
     // TalkBack expects a number of rows and/or columns greater than 0 to announce
     // in list and out of list.  For an infinite or growing list, you have to
     // specify something > 0 to get "in list" announcements.
@@ -696,7 +697,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 accessibilityFocusedSemanticsNode, o -> o.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)));
   }
 
-  private boolean shouldSetCollectionItemInfo(final SemanticsNode semanticsNode) {
+  public boolean shouldSetCollectionItemInfo(final SemanticsNode semanticsNode) {
     return semanticsNode.parent != null
         && shouldSetCollectionInfo(semanticsNode.parent)
         && semanticsNode.parent.hasFlag(Flag.HAS_IMPLICIT_SCROLLING);
@@ -2139,7 +2140,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
   // Must match SemanticsRole in semantics.dart
   // https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
-  enum Role {
+  public enum Role {
     NONE(0),
     TAB(1),
     TAB_BAR(2),
@@ -2191,7 +2192,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
   // Must match SemanticsFlag in semantics.dart
   // https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
-  /* Package */ enum Flag {
+  public enum Flag {
     HAS_CHECKED_STATE(1 << 0),
     IS_CHECKED(1 << 1),
     IS_SELECTED(1 << 2),
@@ -2324,25 +2325,25 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * semantics.dart:
    * https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
    */
-  private static class SemanticsNode {
+  public static class SemanticsNode {
     private static boolean nullableHasAncestor(
         SemanticsNode target, Predicate<SemanticsNode> tester) {
       return target != null && target.getAncestor(tester) != null;
     }
 
-    final AccessibilityBridge accessibilityBridge;
+    public final AccessibilityBridge accessibilityBridge;
 
     // Flutter ID of this {@code SemanticsNode}.
-    private int id = -1;
+    public int id = -1;
 
     private long flags;
     private int actions;
-    private int maxValueLength;
-    private int currentValueLength;
-    private int textSelectionBase;
-    private int textSelectionExtent;
+    public int maxValueLength;
+    public int currentValueLength;
+    public int textSelectionBase;
+    public int textSelectionExtent;
     private int platformViewId;
-    private int scrollChildren;
+    public int scrollChildren;
     private int scrollIndex;
     private int traversalParent;
     private float scrollPosition;
@@ -2351,7 +2352,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private String identifier;
     private String label;
     private List<StringAttribute> labelAttributes;
-    private String value;
+    public String value;
     private List<StringAttribute> valueAttributes;
     private String increasedValue;
     private List<StringAttribute> increasedValueAttributes;
@@ -2364,16 +2365,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     //
     // The tooltip is attached through AccessibilityNodeInfo.setTooltipText if
     // API level >= 28; otherwise, this is attached to the end of content description.
-    @Nullable private String tooltip;
+    public @Nullable String tooltip;
 
     // The Url this node points to.
-    @Nullable private String linkUrl;
+    public @Nullable String linkUrl;
 
     // The locale of the content of this node.
     @Nullable private String locale;
 
-    @Nullable private String minValue;
-    @Nullable private String maxValue;
+    public @Nullable String minValue;
+    public @Nullable String maxValue;
 
     // The role of this node.
     private int role;
@@ -2415,8 +2416,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private float[] transform;
     private float[] hitTestTransform;
 
-    private SemanticsNode parent;
-    private List<SemanticsNode> childrenInTraversalOrder = new ArrayList<>();
+    public SemanticsNode parent;
+    public List<SemanticsNode> childrenInTraversalOrder = new ArrayList<>();
     private List<SemanticsNode> childrenInHitTestOrder = new ArrayList<>();
     private List<CustomAccessibilityAction> customAccessibilityActions;
     private CustomAccessibilityAction onTapOverride;
@@ -2454,7 +2455,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
      * <p>This method only applies to this {@code SemanticsNode} and does not implicitly search its
      * children.
      */
-    private boolean hasAction(@NonNull Action action) {
+    public boolean hasAction(@NonNull Action action) {
       return (actions & action.value) != 0;
     }
 
@@ -2466,7 +2467,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return (previousActions & action.value) != 0;
     }
 
-    private boolean hasFlag(@NonNull Flag flag) {
+    public boolean hasFlag(@NonNull Flag flag) {
       return (flags & flag.value) != 0;
     }
 
@@ -2477,7 +2478,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return (previousFlags & flag.value) != 0;
     }
 
-    private boolean shouldBeTreatedAsButton() {
+    public boolean shouldBeTreatedAsButton() {
       if (hasFlag(Flag.IS_BUTTON)) {
         return true;
       }
@@ -2953,7 +2954,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return Math.max(a, Math.max(b, Math.max(c, d)));
     }
 
-    private CharSequence getValue() {
+    public CharSequence getValue() {
       return new AccessibilityStringBuilder()
           .addString(value)
           .addAttributes(valueAttributes)
@@ -2978,7 +2979,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           .build();
     }
 
-    private CharSequence getValueLabelHint() {
+    public CharSequence getValueLabelHint() {
       CharSequence[] array = new CharSequence[] {getValue(), getLabel(), getHint()};
       CharSequence result = null;
       for (CharSequence word : array) {
@@ -2993,7 +2994,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return result;
     }
 
-    private CharSequence getTextFieldHint() {
+    public CharSequence getTextFieldHint() {
       CharSequence[] array = new CharSequence[] {getLabel(), getHint()};
       CharSequence result = null;
       for (CharSequence word : array) {
@@ -3009,419 +3010,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
   }
 
-  public interface AccessibilityNodeConfigurator {
-    void configure(AccessibilityNodeInfo result, SemanticsNode node);
-  }
 
-  /** Factory for creating {@link AccessibilityNodeConfigurator} instances based on fRole}. */
-  public static class RoleConfiguratorFactory {
-    public static AccessibilityNodeConfigurator getConfigurator(Role role) {
-      switch (role) {
-        case PROGRESS_BAR:
-          return new ProgressBarRoleConfigurator();
-        case COMBO_BOX:
-          return new ComboBoxRoleConfigurator();
-        case MENU:
-          return new MenuRoleConfigurator();
-        case LIST:
-          return new ClassNameRoleConfigurator("android.widget.ListView");
-        case RADIO_GROUP:
-          return new ClassNameRoleConfigurator("android.widget.RadioGroup");
-        case MENU_ITEM:
-        case MENU_ITEM_CHECKBOX:
-        case MENU_ITEM_RADIO:
-          return new ClassNameRoleConfigurator("android.view.MenuItem");
-        case NONE:
-        default:
-          return new GenericRoleConfigurator();
-      }
-    }
-  }
-
-  /**
-   * Configurator for the {@link Role#NONE} role. Implements the legacy behavior of determining the
-   * class name based on semantics properties and flags.
-   */
-  public static class GenericRoleConfigurator implements AccessibilityNodeConfigurator {
-    @Override
-    public void configure(AccessibilityNodeInfo result, SemanticsNode node) {
-      configureTextField(result, node);
-
-      if (node.shouldBeTreatedAsButton()) {
-        result.setClassName("android.widget.Button");
-      }
-      if (node.hasFlag(Flag.IS_IMAGE)) {
-        result.setClassName("android.widget.ImageView");
-        // TODO(jonahwilliams): Figure out a way conform to the expected id from TalkBack's
-        // CustomLabelManager. talkback/src/main/java/labeling/CustomLabelManager.java#L525
-      }
-
-      if (!node.hasAction(Action.TAP) && node.hasFlag(Flag.IS_SLIDER)) {
-        // Prevent Slider to receive a regular tap which will change the value.
-        //
-        // This is needed because it causes slider to select to middle if it
-        // doesn't have a semantics tap.
-        result.addAction(AccessibilityNodeInfo.ACTION_CLICK);
-        result.setClickable(true);
-      }
-
-      configureScrollable(result, node);
-
-      // We should prefer setCollectionInfo to the class names, as this way we get "In List"
-      // and "Out of list" announcements.  But we don't always know the counts, so we
-      // can fallback to the generic scroll view class names.
-      //
-      // On older APIs, we always fall back to the generic scroll view class names here.
-      //
-      // TODO(dnfield): We should add semantics properties for rows and columns in 2 dimensional
-      // lists, e.g.
-      // GridView.  Right now, we're only supporting ListViews and only if they have scroll
-      // children.
-      if (node.accessibilityBridge.shouldSetCollectionInfo(node)) {
-        if (node.hasAction(Action.SCROLL_LEFT) || node.hasAction(Action.SCROLL_RIGHT)) {
-          // This code will only run on devices with API level 32 or lower.
-          // The obtain method was deprecated in API 33.
-          if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
-            result.setCollectionInfo(
-                AccessibilityNodeInfo.CollectionInfo.obtain(
-                    1, // row count
-                    node.scrollChildren, // column count
-                    false // hierarchical
-                    ));
-          } else {
-            result.setCollectionInfo(
-                new AccessibilityNodeInfo.CollectionInfo(
-                    1, // row count
-                    node.scrollChildren, // column count
-                    false // hierarchical
-                    ));
-          }
-        } else {
-          // This code will only run on devices with API level 32 or lower.
-          // The obtain method was deprecated in API 33.
-          if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
-            result.setCollectionInfo(
-                AccessibilityNodeInfo.CollectionInfo.obtain(
-                    node.scrollChildren, // row count
-                    1, // column count
-                    false // hierarchical
-                    ));
-          } else {
-            result.setCollectionInfo(
-                new AccessibilityNodeInfo.CollectionInfo(
-                    node.scrollChildren, // row count
-                    1, // column count
-                    false // hierarchical
-                    ));
-          }
-        }
-      }
-
-      if (node.accessibilityBridge.shouldSetCollectionItemInfo(node)) {
-        SemanticsNode parent = node.parent;
-        List<SemanticsNode> scrollChildren = parent.childrenInTraversalOrder;
-        boolean verticalScroll =
-            !(parent.hasAction(Action.SCROLL_LEFT) || parent.hasAction(Action.SCROLL_RIGHT));
-        int nodeIndex = scrollChildren.indexOf(node);
-        if (verticalScroll) {
-          // This code will only run on devices with API level 32 or lower.
-          // The obtain method was deprecated in API 33.
-          if (Build.VERSION.SDK_INT < 33) {
-            result.setCollectionItemInfo(
-                AccessibilityNodeInfo.CollectionItemInfo.obtain(
-                    nodeIndex, // row index
-                    1, // row span
-                    0, // column index
-                    1, // column span
-                    node.hasFlag(Flag.IS_HEADER) // is heading
-                    ));
-          } else {
-            result.setCollectionItemInfo(
-                new AccessibilityNodeInfo.CollectionItemInfo(
-                    nodeIndex, // row index
-                    1, // row span
-                    0, // column index
-                    1, // column span
-                    node.hasFlag(Flag.IS_HEADER) // is heading
-                    ));
-          }
-        } else {
-          // This code will only run on devices with API level 32 or lower.
-          // The obtain method was deprecated in API 33.
-          if (Build.VERSION.SDK_INT < 33) {
-            result.setCollectionItemInfo(
-                AccessibilityNodeInfo.CollectionItemInfo.obtain(
-                    0, // row index
-                    1, // row span
-                    nodeIndex, // column index
-                    1, // column span
-                    node.hasFlag(Flag.IS_HEADER) // is heading
-                    ));
-          } else {
-            result.setCollectionItemInfo(
-                new AccessibilityNodeInfo.CollectionItemInfo(
-                    0, // row index
-                    1, // row span
-                    nodeIndex, // column index
-                    1, // column span
-                    node.hasFlag(Flag.IS_HEADER) // is heading
-                    ));
-          }
-        }
-      }
-
-      // TODO(ianh): Once we're on SDK v23+, call addAction to
-      // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
-      // _UP, and _DOWN when appropriate.
-      if (node.hasAction(Action.SCROLL_LEFT) || node.hasAction(Action.SCROLL_UP)) {
-        result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-      }
-      if (node.hasAction(Action.SCROLL_RIGHT) || node.hasAction(Action.SCROLL_DOWN)) {
-        result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
-      }
-
-      if (node.hasAction(Action.INCREASE) || node.hasAction(Action.DECREASE)) {
-        // TODO(jonahwilliams): support AccessibilityAction.ACTION_SET_PROGRESS once SDK is
-        // updated.
-        result.setClassName("android.widget.SeekBar");
-        if (node.hasAction(Action.INCREASE)) {
-          result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-        }
-        if (node.hasAction(Action.DECREASE)) {
-          result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
-        }
-      }
-
-      // Scopes routes are not focusable, only need to set the content
-      // for non-scopes-routes semantics nodes.
-      if (node.hasFlag(Flag.IS_TEXT_FIELD)) {
-        result.setText(node.getValue());
-        if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
-          result.setHintText(node.getTextFieldHint());
-        }
-      } else if (!node.hasFlag(Flag.SCOPES_ROUTE)) {
-        CharSequence content = node.getValueLabelHint();
-        if (Build.VERSION.SDK_INT < API_LEVELS.API_28) {
-          if (node.tooltip != null) {
-            // For backward compatibility with Flutter SDK before Android API
-            // level 28, the tooltip is appended at the end of content description.
-            content = content != null ? content : "";
-            content = content + "\n" + node.tooltip;
-          }
-        }
-        if (content != null) {
-          result.setContentDescription(content);
-        }
-      }
-
-      if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
-        if (node.tooltip != null) {
-          result.setTooltipText(node.tooltip);
-          // Tooltips are not announced when a node is focused resulting in no
-          // message. This is only announced after a long press and the tooltip
-          // is shown.
-          // To be consistent with platforms other than Android and prevent
-          // TalkBack from announcing the node as unlabeled, a content
-          // description is set.
-          if (node.getValueLabelHint() == null) {
-            result.setContentDescription(node.tooltip);
-          }
-        }
-      }
-
-      boolean hasCheckedState = node.hasFlag(Flag.HAS_CHECKED_STATE);
-      boolean hasToggledState = node.hasFlag(Flag.HAS_TOGGLED_STATE);
-      if (BuildConfig.DEBUG && (hasCheckedState && hasToggledState)) {
-        Log.e(TAG, "Expected semanticsNode to have checked state and toggled state.");
-      }
-      result.setCheckable(hasCheckedState || hasToggledState);
-      if (hasCheckedState) {
-        if (node.hasFlag(Flag.IS_IN_MUTUALLY_EXCLUSIVE_GROUP)) {
-          result.setClassName("android.widget.RadioButton");
-        } else {
-          result.setClassName("android.widget.CheckBox");
-        }
-        // Starting on API level 36, setChecked takes int instead.
-        if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
-          result.setChecked(
-              node.hasFlag(Flag.IS_CHECK_STATE_MIXED)
-                  ? AccessibilityNodeInfo.CHECKED_STATE_PARTIAL
-                  : node.hasFlag(Flag.IS_CHECKED)
-                      ? AccessibilityNodeInfo.CHECKED_STATE_TRUE
-                      : AccessibilityNodeInfo.CHECKED_STATE_FALSE);
-        } else {
-          result.setChecked(node.hasFlag(Flag.IS_CHECKED));
-        }
-      } else if (hasToggledState) {
-        result.setClassName("android.widget.Switch");
-        // Starting on API level 36, setChecked takes int instead.
-        if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
-          result.setChecked(
-              node.hasFlag(Flag.IS_TOGGLED)
-                  ? AccessibilityNodeInfo.CHECKED_STATE_TRUE
-                  : AccessibilityNodeInfo.CHECKED_STATE_FALSE);
-        } else {
-          result.setChecked(node.hasFlag(Flag.IS_TOGGLED));
-        }
-      }
-
-      if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
-        if (node.hasFlag(Flag.HAS_EXPANDED_STATE)) {
-          final boolean isExpanded = node.hasFlag(Flag.IS_EXPANDED);
-          result.setExpandedState(
-              isExpanded
-                  ? AccessibilityNodeInfo.EXPANDED_STATE_FULL
-                  : AccessibilityNodeInfo.EXPANDED_STATE_COLLAPSED);
-          if (node.hasAction(Action.EXPAND)) {
-            result.addAction(AccessibilityNodeInfo.ACTION_EXPAND);
-          }
-          if (node.hasAction(Action.COLLAPSE)) {
-            result.addAction(AccessibilityNodeInfo.ACTION_COLLAPSE);
-          }
-        }
-      }
-    }
-
-    private void configureTextField(AccessibilityNodeInfo result, SemanticsNode node) {
-      if (node.hasFlag(Flag.IS_TEXT_FIELD)) {
-        result.setPassword(node.hasFlag(Flag.IS_OBSCURED));
-        if (!node.hasFlag(Flag.IS_READ_ONLY)) {
-          result.setClassName("android.widget.EditText");
-        }
-        result.setEditable(!node.hasFlag(Flag.IS_READ_ONLY));
-        if (node.textSelectionBase != -1 && node.textSelectionExtent != -1) {
-          result.setTextSelection(node.textSelectionBase, node.textSelectionExtent);
-        }
-        if (node.accessibilityBridge.accessibilityFocusedSemanticsNode != null
-            && node.accessibilityBridge.accessibilityFocusedSemanticsNode.id == node.id) {
-          result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
-        }
-
-        int granularities = 0;
-        if (node.hasAction(Action.MOVE_CURSOR_FORWARD_BY_CHARACTER)) {
-          result.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
-          granularities |= AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER;
-        }
-        if (node.hasAction(Action.MOVE_CURSOR_BACKWARD_BY_CHARACTER)) {
-          result.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
-          granularities |= AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER;
-        }
-        if (node.hasAction(Action.MOVE_CURSOR_FORWARD_BY_WORD)) {
-          result.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
-          granularities |= AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD;
-        }
-        if (node.hasAction(Action.MOVE_CURSOR_BACKWARD_BY_WORD)) {
-          result.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
-          granularities |= AccessibilityNodeInfo.MOVEMENT_GRANULARITY_WORD;
-        }
-        result.setMovementGranularities(granularities);
-        if (node.maxValueLength >= 0) {
-          final int length = node.value == null ? 0 : node.value.length();
-          result.setMaxTextLength(length - node.currentValueLength + node.maxValueLength);
-        }
-      }
-    }
-
-    private void configureScrollable(AccessibilityNodeInfo result, SemanticsNode node) {
-      if (node.hasAction(Action.SCROLL_LEFT)
-          || node.hasAction(Action.SCROLL_UP)
-          || node.hasAction(Action.SCROLL_RIGHT)
-          || node.hasAction(Action.SCROLL_DOWN)) {
-        result.setScrollable(true);
-        if (node.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)) {
-          if (node.hasAction(Action.SCROLL_LEFT) || node.hasAction(Action.SCROLL_RIGHT)) {
-            result.setClassName("android.widget.HorizontalScrollView");
-          } else {
-            result.setClassName("android.widget.ScrollView");
-          }
-        }
-      }
-    }
-  }
-
-  /** Configurator that simply sets the class name of the accessibility node. */
-  public static class ClassNameRoleConfigurator implements AccessibilityNodeConfigurator {
-    private final String className;
-
-    public ClassNameRoleConfigurator(String className) {
-      this.className = className;
-    }
-
-    @Override
-    public void configure(AccessibilityNodeInfo result, SemanticsNode node) {
-      result.setClassName(className);
-    }
-  }
-
-  /**
-   * Configurator for the {@link Role#COMBO_BOX} role. Sets the class name to Spinner and indicates
-   * it can open a popup.
-   */
-  public static class ComboBoxRoleConfigurator implements AccessibilityNodeConfigurator {
-    @Override
-    public void configure(AccessibilityNodeInfo result, SemanticsNode node) {
-      result.setClassName("android.widget.Spinner");
-      result.setCanOpenPopup(true);
-    }
-  }
-
-  /**
-   * Configurator for the {@link Role#MENU} role. Sets the class name to Spinner and indicates it
-   * can open a popup.
-   */
-  public static class MenuRoleConfigurator implements AccessibilityNodeConfigurator {
-    @Override
-    public void configure(AccessibilityNodeInfo result, SemanticsNode node) {
-      result.setClassName("android.widget.Spinner");
-      result.setCanOpenPopup(true);
-    }
-  }
-
-  /**
-   * Configurator for the {@link Role#PROGRESS_BAR} role. Sets the class name to ProgressBar and
-   * handles range info.
-   */
-  public static class ProgressBarRoleConfigurator implements AccessibilityNodeConfigurator {
-    @Override
-    public void configure(AccessibilityNodeInfo result, SemanticsNode node) {
-      result.setClassName("android.widget.ProgressBar");
-      if (node.value != null) {
-        float min = Float.NEGATIVE_INFINITY;
-        float max = Float.POSITIVE_INFINITY;
-        if (node.minValue != null) {
-          try {
-            min = Float.parseFloat(node.minValue);
-          } catch (NumberFormatException e) {
-            // Fallback to default min.
-          }
-        }
-        if (node.maxValue != null) {
-          try {
-            max = Float.parseFloat(node.maxValue);
-          } catch (NumberFormatException e) {
-            // Fallback to default max.
-          }
-        }
-        try {
-          float parsedValue = Float.parseFloat(node.value);
-          result.setRangeInfo(
-              AccessibilityNodeInfo.RangeInfo.obtain(
-                  AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, min, max, parsedValue));
-        } catch (NumberFormatException e) {
-          if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
-            result.setRangeInfo(
-                AccessibilityNodeInfo.RangeInfo.obtain(
-                    AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INDETERMINATE, 0.0f, 0.0f, 0.0f));
-          } else {
-            // Fallback to RANGE_TYPE_FLOAT with 0.0.
-            result.setRangeInfo(
-                AccessibilityNodeInfo.RangeInfo.obtain(
-                    AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, 0.0f, 0.0f, 0.0f));
-          }
-        }
-      }
-    }
-  }
 
   /**
    * Delegates handling of {@link android.view.ViewParent#requestSendAccessibilityEvent} to the
