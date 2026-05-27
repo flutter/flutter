@@ -51,7 +51,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
           {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
           {"dependency": "open_jdk", "version": "version:21"},
@@ -74,7 +74,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
           {"dependency": "avd_cipd_version", "version": "build_id:8702262057250908257"},
           {"dependency": "open_jdk", "version": "version:21"},
@@ -98,7 +98,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
           {"dependency": "avd_cipd_version", "version": "build_id:8733065022087935185"},
           {"dependency": "open_jdk", "version": "version:21"},
@@ -115,7 +115,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
@@ -127,7 +127,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
@@ -138,7 +138,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
@@ -149,7 +149,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
@@ -252,7 +252,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
@@ -264,7 +264,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       os: Mac-15.7
@@ -342,7 +342,7 @@ platform_properties:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
@@ -375,7 +375,7 @@ targets:
       test_timeout_secs: "3600" # 1 hour
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "curl", "version": "version:7.64.0"}
         ]
@@ -409,7 +409,7 @@ targets:
       # Requires Android SDK since we may re-generate Gradle lockfiles
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "gh_cli", "version": "version:2.8.0-2-g32256d38"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
@@ -430,7 +430,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -453,7 +453,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
@@ -471,7 +471,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
@@ -489,7 +489,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
@@ -507,7 +507,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
@@ -525,7 +525,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
@@ -684,7 +684,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -703,7 +703,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -792,7 +792,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -828,7 +828,7 @@ targets:
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "ninja", "version": "version:1.9.0"},
           {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"}
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"}
         ]
       shard: framework_tests
       subshard: misc
@@ -899,7 +899,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -921,7 +921,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -943,7 +943,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -965,7 +965,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -988,7 +988,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1011,7 +1011,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1034,7 +1034,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1057,7 +1057,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1081,7 +1081,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1105,7 +1105,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1128,7 +1128,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1155,7 +1155,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1297,7 +1297,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -1360,7 +1360,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"}
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"}
         ]
       tags: >
         ["devicelab", "hostonly", "linux"]
@@ -1388,7 +1388,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1416,7 +1416,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1444,7 +1444,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1472,7 +1472,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1500,7 +1500,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1528,7 +1528,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1556,7 +1556,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1614,7 +1614,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
@@ -1640,7 +1640,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:11"}
         ]
       task_name: android_java11_dependency_smoke_tests
@@ -1663,7 +1663,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:17"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1689,7 +1689,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "clang", "version": "git_revision:5d5aba78dbbee75508f01bcaa69aedb2ab79065a"},
           {"dependency": "cmake", "version": "build_id:8787856497187628321"},
@@ -1714,7 +1714,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       shard: tool_tests
@@ -1736,7 +1736,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       shard: tool_tests
@@ -1772,7 +1772,7 @@ targets:
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
 
@@ -3718,7 +3718,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
@@ -3736,7 +3736,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
@@ -3754,7 +3754,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
@@ -3772,7 +3772,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
@@ -3790,7 +3790,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
@@ -3807,7 +3807,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
@@ -3824,7 +3824,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
@@ -3841,7 +3841,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
@@ -3858,7 +3858,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
@@ -3875,7 +3875,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
@@ -4086,7 +4086,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"}
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"}
         ]
       shard: framework_tests
       subshard: misc
@@ -4117,7 +4117,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
           {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"}
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"}
         ]
       shard: framework_tests
       subshard: misc
@@ -4173,7 +4173,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -4221,7 +4221,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -4241,7 +4241,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -4261,7 +4261,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -4282,7 +4282,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -4364,7 +4364,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
         ]
@@ -4426,7 +4426,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -4446,7 +4446,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -4549,7 +4549,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
@@ -4576,7 +4576,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
@@ -4603,7 +4603,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
@@ -4630,7 +4630,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
@@ -4657,7 +4657,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
@@ -4683,7 +4683,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       shard: tool_tests_commands
@@ -4698,7 +4698,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       shard: tool_tests_commands
@@ -4713,7 +4713,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       shard: tool_tests
@@ -5744,7 +5744,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5761,7 +5761,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5778,7 +5778,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5795,7 +5795,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5812,7 +5812,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5829,7 +5829,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5846,7 +5846,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5863,7 +5863,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5880,7 +5880,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "vs_build", "version": "version:vs2019"}
@@ -5968,7 +5968,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "vs_build", "version": "version:vs2019"},
           {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"}
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"}
         ]
       shard: framework_tests
       subshard: misc
@@ -6000,7 +6000,7 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
           {"dependency": "vs_build", "version": "version:vs2019"},
           {"dependency": "open_jdk", "version": "version:21"},
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"}
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"}
         ]
       shard: framework_tests
       subshard: misc
@@ -6086,7 +6086,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -6131,7 +6131,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -6151,7 +6151,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -6171,7 +6171,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -6193,7 +6193,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -6240,7 +6240,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -6260,7 +6260,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -6280,7 +6280,7 @@ targets:
     properties:
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       tags: >
@@ -6421,7 +6421,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
@@ -6447,7 +6447,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
@@ -6473,7 +6473,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
@@ -6499,7 +6499,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
@@ -6525,7 +6525,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
@@ -6551,7 +6551,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
@@ -6577,7 +6577,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
@@ -6603,7 +6603,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
@@ -6629,7 +6629,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
@@ -6655,7 +6655,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"},
@@ -6681,7 +6681,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"},
           {"dependency": "vs_build", "version": "version:vs2019"}
         ]
@@ -6728,7 +6728,7 @@ targets:
       add_recipes_cq: "true"
       dependencies: >-
         [
-          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       shard: tool_tests
