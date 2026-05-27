@@ -224,6 +224,8 @@ struct GLProc {
   PROC(StencilOpSeparate);                   \
   PROC(TexImage2D);                          \
   PROC(TexSubImage2D);                       \
+  PROC(CompressedTexImage2D);                \
+  PROC(CompressedTexSubImage2D);             \
   PROC(TexParameteri);                       \
   PROC(TexParameterfv);                      \
   PROC(Uniform1fv);                          \
