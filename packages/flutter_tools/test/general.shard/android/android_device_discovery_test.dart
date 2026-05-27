@@ -308,6 +308,52 @@ List of devices attached
     expect(diagnostics, hasLength(1));
     expect(diagnostics.first, contains('no permissions'));
   });
+
+  testWithoutContext(
+    'AndroidDevices handles other device states (unauthorized, offline, bootloader, unknown)',
+    () async {
+      final androidDevices = AndroidDevices(
+        userMessages: UserMessages(),
+        androidWorkflow: androidWorkflow,
+        androidSdk: FakeAndroidSdk(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['adb', 'devices', '-l'],
+            stdout: '''
+List of devices attached
+device1       unauthorized usb:3-4
+device2       offline usb:3-5
+device3       bootloader usb:3-6
+device4       unknown usb:3-7
+''',
+          ),
+          const FakeCommand(
+            command: <String>['adb', 'devices', '-l'],
+            stdout: '''
+List of devices attached
+device1       unauthorized usb:3-4
+device2       offline usb:3-5
+device3       bootloader usb:3-6
+device4       unknown usb:3-7
+''',
+          ),
+        ]),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+      );
+
+      final List<Device> devices = await androidDevices.pollingGetDevices();
+      expect(devices, hasLength(2));
+      expect(devices[0].id, 'device3');
+      expect(devices[1].id, 'device4');
+
+      final List<String> diagnostics = await androidDevices.getDiagnostics();
+      expect(diagnostics, hasLength(2));
+      expect(diagnostics[0], contains('device1 is not authorized'));
+      expect(diagnostics[1], contains('device2 is offline'));
+    },
+  );
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {

@@ -111,7 +111,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
   }
 
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
-  static final _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)(.*)');
+  static final _kDeviceRegex = RegExp(r'^(\S+)\s+(no permissions|\S+)\s*(.*)');
 
   /// Parse the given `adb devices` output in [text], and fill out the given list
   /// of devices and possible device issue diagnostics. Either argument can be null,
@@ -147,13 +147,8 @@ class AndroidDevices extends PollingDeviceDiscovery {
         final Match match = _kDeviceRegex.firstMatch(line)!;
 
         final String deviceID = match[1]!;
-        String deviceState = match[2]!;
+        final String deviceState = match[2]!;
         String? rest = match[3];
-
-        if (deviceState == 'no' && rest != null && rest.trim().startsWith('permissions')) {
-          deviceState = 'no permissions';
-          rest = rest.trim().substring('permissions'.length);
-        }
 
         final info = <String, String>{};
         if (rest != null && rest.isNotEmpty) {
