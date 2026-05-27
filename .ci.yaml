@@ -3710,7 +3710,8 @@ targets:
       - engine/**
       - DEPS
 
-  - name: Mac_x64 build_tests_1_5
+  - name: Mac_x64 build_tests_1_6
+    bringup: true
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
@@ -3724,11 +3725,12 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "1_5"
+      subshard: "1_6"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_x64 build_tests_2_5
+  - name: Mac_x64 build_tests_2_6
+    bringup: true
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
@@ -3742,11 +3744,12 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "2_5"
+      subshard: "2_6"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_x64 build_tests_3_5
+  - name: Mac_x64 build_tests_3_6
+    bringup: true
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
@@ -3760,11 +3763,12 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "3_5"
+      subshard: "3_6"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_x64 build_tests_4_5
+  - name: Mac_x64 build_tests_4_6
+    bringup: true
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
@@ -3778,11 +3782,12 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "4_5"
+      subshard: "4_6"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
-  - name: Mac_x64 build_tests_5_5
+  - name: Mac_x64 build_tests_5_6
+    bringup: true
     recipe: flutter/flutter_drone
     presubmit: false # Rely on Mac_arm build_tests in presubmit.
     timeout: 60
@@ -3796,7 +3801,26 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
         ]
       shard: build_tests
-      subshard: "5_5"
+      subshard: "5_6"
+      tags: >
+        ["framework", "hostonly", "shard", "mac"]
+
+  - name: Mac_x64 build_tests_6_6
+    bringup: true
+    recipe: flutter/flutter_drone
+    presubmit: false # Rely on Mac_arm build_tests in presubmit.
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v8unmodified"},
+          {"dependency": "open_jdk", "version": "version:21"},
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+      shard: build_tests
+      subshard: "6_6"
       tags: >
         ["framework", "hostonly", "shard", "mac"]
 
