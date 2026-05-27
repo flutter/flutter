@@ -59,12 +59,14 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 {
     int offsetInBytes,
     int lengthInBytes,
     int vertexCount,
+    int slot,
   ) {
     renderPass._bindVertexBufferDevice(
       this,
       offsetInBytes,
       lengthInBytes,
       vertexCount,
+      slot,
     );
   }
 

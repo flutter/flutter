@@ -872,8 +872,8 @@ extension type DomPerformanceMeasure._(JSObject _) implements DomPerformanceEntr
 
 @JS('HTMLCanvasElement')
 extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement, DomCanvasImageSource {
-  external double? width;
-  external double? height;
+  external num? width;
+  external num? height;
 
   @JS('toDataURL')
   external JSString _toDataURL(JSString type);
@@ -1571,16 +1571,16 @@ extension type DomTextMetrics._(JSObject _) implements JSObject {
   external JSArray<JSAny?> _getTextClusters();
   List<DomTextCluster> getTextClusters() => _getTextClusters().toDart.cast<DomTextCluster>();
 
-  external DomRectReadOnly getActualBoundingBox(int begin, int end);
+  external DomRectReadOnly getActualBoundingBox(int start, int end);
 
   external double get fontBoundingBoxAscent;
 
   external double get fontBoundingBoxDescent;
 
   @JS('getSelectionRects')
-  external JSArray<JSAny> _getSelectionRects(int begin, int end);
-  List<DomRectReadOnly> getSelectionRects(int begin, int end) =>
-      _getSelectionRects(begin, end).toDart.cast<DomRectReadOnly>();
+  external JSArray<JSAny> _getSelectionRects(int start, int end);
+  List<DomRectReadOnly> getSelectionRects(int start, int end) =>
+      _getSelectionRects(start, end).toDart.cast<DomRectReadOnly>();
 }
 
 @JS('DOMException')
@@ -1646,8 +1646,11 @@ extension type DomFontFaceSet._(JSObject _) implements DomEventTarget {
   void forEach(DomFontFaceSetForEachCallback callback) => _forEach(callback.toJS);
 }
 
-typedef DomFontFaceSetForEachCallback =
-    void Function(DomFontFace fontFace, DomFontFace fontFaceAgain, DomFontFaceSet set);
+typedef DomFontFaceSetForEachCallback = void Function(
+  DomFontFace fontFace,
+  DomFontFace fontFaceAgain,
+  DomFontFaceSet set,
+);
 
 @JS('VisualViewport')
 extension type DomVisualViewport._(JSObject _) implements DomEventTarget {
@@ -2331,8 +2334,10 @@ extension type DomResizeObserverObserveOptions._(JSObject _) implements JSObject
 }
 
 /// Type of the function used to create a Resize Observer.
-typedef DomResizeObserverCallbackFn =
-    void Function(List<DomResizeObserverEntry> entries, DomResizeObserver observer);
+typedef DomResizeObserverCallbackFn = void Function(
+  List<DomResizeObserverEntry> entries,
+  DomResizeObserver observer,
+);
 
 /// The object passed to the [DomResizeObserverCallbackFn], which allows access to the new dimensions of the observed element.
 ///

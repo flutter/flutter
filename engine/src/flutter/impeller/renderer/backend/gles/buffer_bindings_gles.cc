@@ -474,7 +474,13 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     //--------------------------------------------------------------------------
     /// Bind the texture.
     ///
-    if (!texture_gles.Bind()) {
+    // The `texture_gles` reference is bound `const` because it is reached
+    // via a const view into the bound texture list, but `Bind()` mutates
+    // GLES-specific lazy-init bookkeeping (`slice_mip_initialized_`,
+    // `fence_`). The mutation is implementation detail of the GLES backend
+    // and is invisible to the higher abstraction; the `const_cast` is
+    // confined to this one call site.
+    if (!const_cast<TextureGLES&>(texture_gles).Bind()) {
       return std::nullopt;
     }
 
