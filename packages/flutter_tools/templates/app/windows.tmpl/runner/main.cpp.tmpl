@@ -2,7 +2,9 @@
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
 
+#include <filesystem>
 #include <string>
+#include <string_view>
 
 #include "flutter_window.h"
 #include "utils.h"
@@ -32,12 +34,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   std::wstring window_title = L"{{projectName}}";
 #ifdef FLUTTER_APP_FLAVOR
   {
-    // Convert FLUTTER_APP_FLAVOR (UTF-8 literal) to wide string for window title.
-    const std::string flavor_utf8(FLUTTER_APP_FLAVOR);
-    const int wide_len = MultiByteToWideChar(CP_UTF8, 0, flavor_utf8.data(), static_cast<int>(flavor_utf8.size()), nullptr, 0);
-    if (wide_len > 0) {
-      std::wstring flavor_wide(wide_len, L'\0');
-      MultiByteToWideChar(CP_UTF8, 0, flavor_utf8.data(), static_cast<int>(flavor_utf8.size()), flavor_wide.data(), wide_len);
+    const std::string_view flavor_u8(FLUTTER_APP_FLAVOR);
+    if (!flavor_u8.empty()) {
+      std::wstring flavor_wide = std::filesystem::path(flavor_u8).wstring();
       window_title += L" (" + flavor_wide + L")";
     }
   }
