@@ -20,6 +20,8 @@ jobs:
     if: ${{ github.repository == 'flutter/flutter' }}
     steps:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+      - name: Bootstrap Flutter tool
+        run: ./bin/flutter --version
       - name: ./bin/flutter test --coverage
         run: pushd packages/flutter;../../bin/flutter test --coverage -j 1;popd
       - name: upload coverage
