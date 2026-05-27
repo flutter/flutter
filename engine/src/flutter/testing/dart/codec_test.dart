@@ -318,7 +318,7 @@ void main() {
   test('Decodes truncated JPEG successfully', () async {
     final Uint8List data = await _getSkiaResource('flutter_logo.jpg').readAsBytes();
     // Truncate the JPEG data slightly (removing the EOI marker at the end)
-    final truncatedData = Uint8List.view(data.buffer, 0, data.length - 100);
+    final Uint8List truncatedData = data.sublist(0, data.length - 100);
     final ui.Codec codec = await ui.instantiateImageCodec(truncatedData);
     try {
       final ui.FrameInfo frameInfo = await codec.getNextFrame();
