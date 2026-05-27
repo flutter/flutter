@@ -311,7 +311,7 @@ TEST_F(RenderPassGLESViewportTest, ViewportCachedAcrossCommands) {
   // first override. We set a catch-all to 0 to ensure no other calls occur.
   EXPECT_CALL(mock_gl_impl_ref, Viewport(_, _, _, _)).Times(0);
   EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 100, 100)).Times(1);
-  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 50, 50, 50)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 50, 50)).Times(1);
 
   EXPECT_TRUE(render_pass->EncodeCommands());
   EXPECT_TRUE(reactor->React());
@@ -344,7 +344,7 @@ TEST_F(RenderPassGLESViewportTest,
 
   EXPECT_CALL(mock_gl_impl_ref, Viewport(_, _, _, _)).Times(0);
   EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 100, 100)).Times(2);
-  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 50, 50, 50)).Times(1);
+  EXPECT_CALL(mock_gl_impl_ref, Viewport(0, 0, 50, 50)).Times(1);
 
   EXPECT_TRUE(render_pass->EncodeCommands());
   EXPECT_TRUE(reactor->React());

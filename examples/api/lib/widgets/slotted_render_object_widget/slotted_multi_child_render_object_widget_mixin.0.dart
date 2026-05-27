@@ -67,6 +67,7 @@ class RenderDiagonal extends RenderBox
     with
         SlottedContainerRenderObjectMixin<DiagonalSlot, RenderBox>,
         DebugOverflowIndicatorMixin {
+  // ignore: prefer_initializing_formals
   RenderDiagonal({Color? backgroundColor}) : _backgroundColor = backgroundColor;
 
   // Getters and setters to configure the [RenderObject] with the configuration
