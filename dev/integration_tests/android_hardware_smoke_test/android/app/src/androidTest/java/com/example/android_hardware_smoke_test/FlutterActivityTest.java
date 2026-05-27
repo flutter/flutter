@@ -4,7 +4,7 @@
 
 package com.example.android_hardware_smoke_test;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import android.util.Log;
 import androidx.lifecycle.Lifecycle;
