@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../system_context_menu_utils.dart';
 import '../widgets/clipboard_utils.dart';
+import '../widgets/widgets_app_tester.dart';
 import 'text_input_utils.dart';
 
 void main() {
@@ -467,7 +468,7 @@ void main() {
     });
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         home: Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
@@ -482,12 +483,12 @@ void main() {
                   showSelectionHandles: true,
                   autofocus: true,
                   focusNode: focusNode,
-                  style: Typography.material2018().black.titleMedium!,
-                  cursorColor: Colors.blue,
-                  backgroundCursorColor: Colors.grey,
+                  style: const TextStyle(),
+                  cursorColor: const Color(0xFF0000FF),
+                  backgroundCursorColor: const Color(0xFF808080),
                   keyboardType: TextInputType.text,
                   textAlign: TextAlign.right,
-                  selectionControls: materialTextSelectionHandleControls,
+                  selectionControls: emptyTextSelectionControls,
                 );
               },
             ),
@@ -502,9 +503,11 @@ void main() {
     final List<IOSSystemContextMenuItem> defaultItems = SystemContextMenu.getDefaultItems(
       editableTextState,
     );
-    expect(defaultItems, hasLength(2));
-    expect(defaultItems[1], const IOSSystemContextMenuItemSelectAll());
-    expect(defaultItems.first, const IOSSystemContextMenuItemPaste());
+    expect(defaultItems, hasLength(4));
+    expect(defaultItems[0], const IOSSystemContextMenuItemCut());
+    expect(defaultItems[1], const IOSSystemContextMenuItemCopy());
+    expect(defaultItems[2], const IOSSystemContextMenuItemPaste());
+    expect(defaultItems[3], const IOSSystemContextMenuItemSelectAll());
 
     final (startGlyphHeight: double startGlyphHeight, endGlyphHeight: double endGlyphHeight) =
         editableTextState.getGlyphHeights();
