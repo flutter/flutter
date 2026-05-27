@@ -4,7 +4,6 @@
 
 package io.flutter.view.accessibility.configurator;
 
-import android.annotation.SuppressLint;
 import android.os.Build;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -34,7 +33,8 @@ public class GenericRoleConfigurator implements AccessibilityNodeConfigurator {
       // CustomLabelManager. talkback/src/main/java/labeling/CustomLabelManager.java#L525
     }
 
-    if (!node.hasAction(AccessibilityBridge.Action.TAP) && node.hasFlag(AccessibilityBridge.Flag.IS_SLIDER)) {
+    if (!node.hasAction(AccessibilityBridge.Action.TAP)
+        && node.hasFlag(AccessibilityBridge.Flag.IS_SLIDER)) {
       // Prevent Slider to receive a regular tap which will change the value.
       //
       // This is needed because it causes slider to select to middle if it
@@ -56,7 +56,8 @@ public class GenericRoleConfigurator implements AccessibilityNodeConfigurator {
     // GridView.  Right now, we're only supporting ListViews and only if they have scroll
     // children.
     if (node.accessibilityBridge.shouldSetCollectionInfo(node)) {
-      if (node.hasAction(AccessibilityBridge.Action.SCROLL_LEFT) || node.hasAction(AccessibilityBridge.Action.SCROLL_RIGHT)) {
+      if (node.hasAction(AccessibilityBridge.Action.SCROLL_LEFT)
+          || node.hasAction(AccessibilityBridge.Action.SCROLL_RIGHT)) {
         // This code will only run on devices with API level 32 or lower.
         // The obtain method was deprecated in API 33.
         if (Build.VERSION.SDK_INT < API_LEVELS.API_33) {
@@ -99,7 +100,8 @@ public class GenericRoleConfigurator implements AccessibilityNodeConfigurator {
       AccessibilityBridge.SemanticsNode parent = node.parent;
       List<AccessibilityBridge.SemanticsNode> scrollChildren = parent.childrenInTraversalOrder;
       boolean verticalScroll =
-          !(parent.hasAction(AccessibilityBridge.Action.SCROLL_LEFT) || parent.hasAction(AccessibilityBridge.Action.SCROLL_RIGHT));
+          !(parent.hasAction(AccessibilityBridge.Action.SCROLL_LEFT)
+              || parent.hasAction(AccessibilityBridge.Action.SCROLL_RIGHT));
       int nodeIndex = scrollChildren.indexOf(node);
       if (verticalScroll) {
         // This code will only run on devices with API level 32 or lower.
@@ -151,14 +153,17 @@ public class GenericRoleConfigurator implements AccessibilityNodeConfigurator {
     // TODO(ianh): Once we're on SDK v23+, call addAction to
     // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
     // _UP, and _DOWN when appropriate.
-    if (node.hasAction(AccessibilityBridge.Action.SCROLL_LEFT) || node.hasAction(AccessibilityBridge.Action.SCROLL_UP)) {
+    if (node.hasAction(AccessibilityBridge.Action.SCROLL_LEFT)
+        || node.hasAction(AccessibilityBridge.Action.SCROLL_UP)) {
       result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
     }
-    if (node.hasAction(AccessibilityBridge.Action.SCROLL_RIGHT) || node.hasAction(AccessibilityBridge.Action.SCROLL_DOWN)) {
+    if (node.hasAction(AccessibilityBridge.Action.SCROLL_RIGHT)
+        || node.hasAction(AccessibilityBridge.Action.SCROLL_DOWN)) {
       result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
     }
 
-    if (node.hasAction(AccessibilityBridge.Action.INCREASE) || node.hasAction(AccessibilityBridge.Action.DECREASE)) {
+    if (node.hasAction(AccessibilityBridge.Action.INCREASE)
+        || node.hasAction(AccessibilityBridge.Action.DECREASE)) {
       // TODO(jonahwilliams): support AccessibilityAction.ACTION_SET_PROGRESS once SDK is
       // updated.
       result.setClassName("android.widget.SeekBar");
@@ -219,7 +224,10 @@ public class GenericRoleConfigurator implements AccessibilityNodeConfigurator {
       } else {
         result.setClassName("android.widget.CheckBox");
       }
-      setChecked(result, node.hasFlag(AccessibilityBridge.Flag.IS_CHECKED), node.hasFlag(AccessibilityBridge.Flag.IS_CHECK_STATE_MIXED));
+      setChecked(
+          result,
+          node.hasFlag(AccessibilityBridge.Flag.IS_CHECKED),
+          node.hasFlag(AccessibilityBridge.Flag.IS_CHECK_STATE_MIXED));
     } else if (hasToggledState) {
       result.setClassName("android.widget.Switch");
       setChecked(result, node.hasFlag(AccessibilityBridge.Flag.IS_TOGGLED), false);
@@ -257,7 +265,8 @@ public class GenericRoleConfigurator implements AccessibilityNodeConfigurator {
     }
   }
 
-  private void configureTextField(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureTextField(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.hasFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD)) {
       result.setPassword(node.hasFlag(AccessibilityBridge.Flag.IS_OBSCURED));
       if (!node.hasFlag(AccessibilityBridge.Flag.IS_READ_ONLY)) {
@@ -297,14 +306,16 @@ public class GenericRoleConfigurator implements AccessibilityNodeConfigurator {
     }
   }
 
-  private void configureScrollable(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureScrollable(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.hasAction(AccessibilityBridge.Action.SCROLL_LEFT)
         || node.hasAction(AccessibilityBridge.Action.SCROLL_UP)
         || node.hasAction(AccessibilityBridge.Action.SCROLL_RIGHT)
         || node.hasAction(AccessibilityBridge.Action.SCROLL_DOWN)) {
       result.setScrollable(true);
       if (node.hasFlag(AccessibilityBridge.Flag.HAS_IMPLICIT_SCROLLING)) {
-        if (node.hasAction(AccessibilityBridge.Action.SCROLL_LEFT) || node.hasAction(AccessibilityBridge.Action.SCROLL_RIGHT)) {
+        if (node.hasAction(AccessibilityBridge.Action.SCROLL_LEFT)
+            || node.hasAction(AccessibilityBridge.Action.SCROLL_RIGHT)) {
           result.setClassName("android.widget.HorizontalScrollView");
         } else {
           result.setClassName("android.widget.ScrollView");

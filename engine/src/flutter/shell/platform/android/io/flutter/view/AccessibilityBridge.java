@@ -3010,8 +3010,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     }
   }
 
-
-
   /**
    * Delegates handling of {@link android.view.ViewParent#requestSendAccessibilityEvent} to the
    * accessibility bridge.
