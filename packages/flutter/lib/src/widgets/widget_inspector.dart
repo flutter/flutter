@@ -3328,7 +3328,7 @@ class InspectorSelection with ChangeNotifier {
   set current(RenderObject? value) {
     if (_current != value) {
       _current = value;
-      _currentElement = (value?.debugCreator as DebugCreator?)?.element;
+      _currentElement = _elementForRenderObject(value);
       notifyListeners();
     }
   }
@@ -3488,7 +3488,7 @@ const Color _kTooltipBackgroundColor = Color.fromARGB(230, 60, 60, 60);
 const Color _kHighlightedRenderObjectFillColor = Color.fromARGB(128, 128, 128, 255);
 const Color _kHighlightedRenderObjectBorderColor = Color.fromARGB(128, 64, 64, 128);
 
-Element? _elementForInspectorRenderObject(RenderObject? object) {
+Element? _elementForRenderObject(RenderObject? object) {
   final Object? creator = object?.debugCreator;
   if (creator is DebugCreator) {
     return creator.element;
@@ -3496,8 +3496,8 @@ Element? _elementForInspectorRenderObject(RenderObject? object) {
   return null;
 }
 
-ModalRoute<Object?>? _modalRouteForInspectorRenderObject(RenderObject? object) {
-  final Element? element = _elementForInspectorRenderObject(object);
+ModalRoute<Object?>? _modalRouteForRenderObject(RenderObject? object) {
+  final Element? element = _elementForRenderObject(object);
   if (element == null) {
     return null;
   }
@@ -3506,8 +3506,8 @@ ModalRoute<Object?>? _modalRouteForInspectorRenderObject(RenderObject? object) {
 
 bool _inspectorRenderObjectsShareModalRouteScope(RenderObject a, RenderObject b) {
   return identical(
-    _modalRouteForInspectorRenderObject(a),
-    _modalRouteForInspectorRenderObject(b),
+    _modalRouteForRenderObject(a),
+    _modalRouteForRenderObject(b),
   );
 }
 
@@ -3518,7 +3518,7 @@ double _inspectorHitArea(RenderObject object) {
 
 ModalRoute<Object?>? _inspectorScopeRouteForHits(List<RenderObject> hits) {
   for (final RenderObject hit in hits) {
-    final ModalRoute<Object?>? route = _modalRouteForInspectorRenderObject(hit);
+    final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
     if (route?.isCurrent ?? false) {
       return route;
     }
@@ -3529,7 +3529,7 @@ ModalRoute<Object?>? _inspectorScopeRouteForHits(List<RenderObject> hits) {
   RenderObject? smallestHit;
   var smallestArea = double.infinity;
   for (final RenderObject hit in hits) {
-    final ModalRoute<Object?>? route = _modalRouteForInspectorRenderObject(hit);
+    final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
     if (route == null) {
       continue;
     }
@@ -3540,10 +3540,10 @@ ModalRoute<Object?>? _inspectorScopeRouteForHits(List<RenderObject> hits) {
     }
   }
   if (smallestHit != null) {
-    return _modalRouteForInspectorRenderObject(smallestHit);
+    return _modalRouteForRenderObject(smallestHit);
   }
 
-  return _modalRouteForInspectorRenderObject(hits.first);
+  return _modalRouteForRenderObject(hits.first);
 }
 
 List<RenderObject> _filterInspectorHitCandidatesToModalRouteScope(List<RenderObject> hits) {
@@ -3554,7 +3554,7 @@ List<RenderObject> _filterInspectorHitCandidatesToModalRouteScope(List<RenderObj
   // Ignore widgets that belong to offstage modal routes.
   final List<RenderObject> onstageHits = hits
       .where((RenderObject hit) {
-        final ModalRoute<Object?>? route = _modalRouteForInspectorRenderObject(hit);
+        final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
         return route == null || !route.offstage;
       })
       .toList();
@@ -3566,7 +3566,7 @@ List<RenderObject> _filterInspectorHitCandidatesToModalRouteScope(List<RenderObj
   final List<RenderObject> scopedHits = onstageHits
       .where(
         (RenderObject hit) =>
-            identical(_modalRouteForInspectorRenderObject(hit), scopeRoute),
+            identical(_modalRouteForRenderObject(hit), scopeRoute),
       )
       .toList();
 
