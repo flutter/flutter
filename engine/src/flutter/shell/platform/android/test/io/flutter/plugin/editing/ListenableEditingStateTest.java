@@ -409,10 +409,12 @@ public class ListenableEditingStateTest {
 
     editingState.addEditingStateListener(listener);
   }
+
   @Test
   public void testDirectSetSelectionNotifiesListener() {
-    final ListenableEditingState editingState = new ListenableEditingState(
-        new TextInputChannel.TextEditState("hello", 0, 0, -1, -1), new View(ctx));
+    final ListenableEditingState editingState =
+        new ListenableEditingState(
+            new TextInputChannel.TextEditState("hello", 0, 0, -1, -1), new View(ctx));
     final Listener listener = new Listener();
     editingState.addEditingStateListener(listener);
 
@@ -426,7 +428,8 @@ public class ListenableEditingStateTest {
 
   private Object getComposingSpan() {
     try {
-      java.lang.reflect.Field composingField = BaseInputConnection.class.getDeclaredField("COMPOSING");
+      java.lang.reflect.Field composingField =
+          BaseInputConnection.class.getDeclaredField("COMPOSING");
       composingField.setAccessible(true);
       return composingField.get(null);
     } catch (Exception e) {
@@ -436,8 +439,9 @@ public class ListenableEditingStateTest {
 
   @Test
   public void testDirectSetComposingRegionNotifiesListener() {
-    final ListenableEditingState editingState = new ListenableEditingState(
-        new TextInputChannel.TextEditState("hello", 0, 0, -1, -1), new View(ctx));
+    final ListenableEditingState editingState =
+        new ListenableEditingState(
+            new TextInputChannel.TextEditState("hello", 0, 0, -1, -1), new View(ctx));
     final Listener listener = new Listener();
     editingState.addEditingStateListener(listener);
 
@@ -451,8 +455,9 @@ public class ListenableEditingStateTest {
 
   @Test
   public void testDirectRemoveComposingRegionNotifiesListener() {
-    final ListenableEditingState editingState = new ListenableEditingState(
-        new TextInputChannel.TextEditState("hello", 0, 0, 1, 4), new View(ctx));
+    final ListenableEditingState editingState =
+        new ListenableEditingState(
+            new TextInputChannel.TextEditState("hello", 0, 0, 1, 4), new View(ctx));
     final Listener listener = new Listener();
     editingState.addEditingStateListener(listener);
 
@@ -460,6 +465,23 @@ public class ListenableEditingStateTest {
     editingState.removeSpan(getComposingSpan());
 
     assertTrue("Listener should be called on direct composing region removal", listener.isCalled());
+    assertTrue("Composing region change should be detected", listener.composingRegionChanged);
+    assertFalse("Text should not be changed", listener.textChanged);
+  }
+
+  @Test
+  public void testClearSpansNotifiesListener() {
+    final ListenableEditingState editingState =
+        new ListenableEditingState(
+            new TextInputChannel.TextEditState("hello", 1, 3, 1, 4), new View(ctx));
+    final Listener listener = new Listener();
+    editingState.addEditingStateListener(listener);
+
+    // Clear all spans (including selection and composing).
+    editingState.clearSpans();
+
+    assertTrue("Listener should be called on clearSpans", listener.isCalled());
+    assertTrue("Selection change should be detected", listener.selectionChanged);
     assertTrue("Composing region change should be detected", listener.composingRegionChanged);
     assertFalse("Text should not be changed", listener.textChanged);
   }
