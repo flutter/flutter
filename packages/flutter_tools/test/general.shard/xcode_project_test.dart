@@ -566,6 +566,59 @@ void main() {
     });
 
     group('prefetchSwiftPackages', () {
+      testWithoutContext('returns early if usesSwiftPackageManager is false', () async {
+        final fs = MemoryFileSystem.test();
+        final testLogger = BufferLogger.test();
+        const projectPath = 'path/to/project';
+        final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+        final fakeProcessManager = FakeProcessManager.empty();
+        final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
+
+        final iosProject = FakeIosProjectWithCustomFlags.fromFlutter(
+          FakeFlutterProject(fileSystem: fs),
+          usesSwiftPackageManager: false,
+        );
+        await iosProject.prefetchSwiftPackages(
+          xcodebuildProjectCommandArguments: <String>[
+            'xcrun',
+            'xcodebuild',
+            '-clonedSourcePackagesDirPath',
+            '/${buildDirectory.path}/SourcePackages',
+          ],
+          processUtils: processUtils,
+          logger: testLogger,
+        );
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      });
+
+      testWithoutContext(
+        'returns early if flutterPluginSwiftPackageInProjectSettings is false',
+        () async {
+          final fs = MemoryFileSystem.test();
+          final testLogger = BufferLogger.test();
+          const projectPath = 'path/to/project';
+          final Directory buildDirectory = fs.directory('$projectPath/build/ios');
+          final fakeProcessManager = FakeProcessManager.empty();
+          final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
+
+          final iosProject = FakeIosProjectWithCustomFlags.fromFlutter(
+            FakeFlutterProject(fileSystem: fs),
+            flutterPluginSwiftPackageInProjectSettings: false,
+          );
+          await iosProject.prefetchSwiftPackages(
+            xcodebuildProjectCommandArguments: <String>[
+              'xcrun',
+              'xcodebuild',
+              '-clonedSourcePackagesDirPath',
+              '/${buildDirectory.path}/SourcePackages',
+            ],
+            processUtils: processUtils,
+            logger: testLogger,
+          );
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        },
+      );
+
       testWithoutContext('starts the process and resolves packages successfully', () async {
         final fs = MemoryFileSystem.test();
         final testLogger = BufferLogger.test();
@@ -869,4 +922,18 @@ class FakeMacOSProject extends MacOSProject {
 
   @override
   bool flutterPluginSwiftPackageInProjectSettings = true;
+}
+
+class FakeIosProjectWithCustomFlags extends IosProject {
+  FakeIosProjectWithCustomFlags.fromFlutter(
+    super.parent, {
+    this.usesSwiftPackageManager = true,
+    this.flutterPluginSwiftPackageInProjectSettings = true,
+  }) : super.fromFlutter();
+
+  @override
+  final bool usesSwiftPackageManager;
+
+  @override
+  final bool flutterPluginSwiftPackageInProjectSettings;
 }
