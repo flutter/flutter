@@ -40,6 +40,9 @@ void main() {
     }
 
     if (frag_info.text_contrast != 1.0) {
+      // Applies gamma correction to take into account we are performing in
+      // linear space but some fonts are expecting to operate in gamma space.
+      // https://www.desmos.com/calculator/gsblcyg5vv
       coverage =
           1.0 - pow(clamp(1.0 - coverage, 0.0, 1.0), frag_info.text_contrast);
     }
