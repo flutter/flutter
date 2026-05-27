@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import io.flutter.view.AccessibilityBridge;
+import io.flutter.view.accessibility.AccessibilityBridge;
 
 /**
  * Delegates accessibility events to the currently attached accessibility bridge if one is attached.

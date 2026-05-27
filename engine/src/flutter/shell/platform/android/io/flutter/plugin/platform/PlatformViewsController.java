@@ -38,7 +38,7 @@ import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.util.ViewUtils;
-import io.flutter.view.AccessibilityBridge;
+import io.flutter.view.accessibility.AccessibilityBridge;
 import io.flutter.view.TextureRegistry;
 import java.util.ArrayList;
 import java.util.HashMap;

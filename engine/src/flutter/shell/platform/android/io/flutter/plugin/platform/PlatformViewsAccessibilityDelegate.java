@@ -7,7 +7,7 @@ package io.flutter.plugin.platform;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import io.flutter.view.AccessibilityBridge;
+import io.flutter.view.accessibility.AccessibilityBridge;
 
 /** Facilitates interaction between the accessibility bridge and embedded platform views. */
 public interface PlatformViewsAccessibilityDelegate {

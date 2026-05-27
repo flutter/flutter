@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.view.accessibility.configurator;
+package io.flutter.view.accessibility;
 
 import android.os.Build;
 import android.view.View;
@@ -10,7 +10,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import io.flutter.Build.API_LEVELS;
 import io.flutter.BuildConfig;
 import io.flutter.Log;
-import io.flutter.view.AccessibilityBridge;
 import java.util.List;
 
 /**

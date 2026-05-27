@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.view.accessibility.configurator;
+package io.flutter.view.accessibility;
 
 import android.os.Build;
 import android.view.accessibility.AccessibilityNodeInfo;
 import io.flutter.Build.API_LEVELS;
-import io.flutter.view.AccessibilityBridge;
 
 /**
  * Configurator for the {@link AccessibilityBridge.Role#PROGRESS_BAR} role. Sets the class name to
@@ -18,22 +17,8 @@ public class ProgressBarRoleConfigurator implements AccessibilityNodeConfigurato
   public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     result.setClassName("android.widget.ProgressBar");
     if (node.value != null) {
-      float min = Float.NEGATIVE_INFINITY;
-      float max = Float.POSITIVE_INFINITY;
-      if (node.minValue != null) {
-        try {
-          min = Float.parseFloat(node.minValue);
-        } catch (NumberFormatException e) {
-          // Fallback to default min.
-        }
-      }
-      if (node.maxValue != null) {
-        try {
-          max = Float.parseFloat(node.maxValue);
-        } catch (NumberFormatException e) {
-          // Fallback to default max.
-        }
-      }
+      float min = parseFloat(node.minValue, Float.NEGATIVE_INFINITY);
+      float max = parseFloat(node.maxValue, Float.POSITIVE_INFINITY);
       try {
         float parsedValue = Float.parseFloat(node.value);
         result.setRangeInfo(
@@ -51,6 +36,17 @@ public class ProgressBarRoleConfigurator implements AccessibilityNodeConfigurato
                   AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT, 0.0f, 0.0f, 0.0f));
         }
       }
+    }
+  }
+
+  private float parseFloat(String value, float defaultValue) {
+    if (value == null) {
+      return defaultValue;
+    }
+    try {
+      return Float.parseFloat(value);
+    } catch (NumberFormatException e) {
+      return defaultValue;
     }
   }
 }

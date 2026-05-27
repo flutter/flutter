@@ -12,7 +12,7 @@ import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.PlatformViewCreationRequest;
 import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
-import io.flutter.view.AccessibilityBridge;
+import io.flutter.view.accessibility.AccessibilityBridge;
 import io.flutter.view.TextureRegistry;
 
 public class PlatformViewsControllerDelegator

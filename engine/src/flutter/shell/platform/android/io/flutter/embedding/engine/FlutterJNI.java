@@ -39,7 +39,7 @@ import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import io.flutter.util.Preconditions;
-import io.flutter.view.AccessibilityBridge;
+import io.flutter.view.accessibility.AccessibilityBridge;
 import io.flutter.view.FlutterCallbackInformation;
 import io.flutter.view.TextureRegistry;
 import java.lang.ref.WeakReference;
