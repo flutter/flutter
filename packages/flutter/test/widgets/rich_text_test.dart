@@ -241,9 +241,7 @@ void main() {
         data: const MediaQueryData(devicePixelRatio: 3.0),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: RichText(
-            text: const TextSpan(text: 'Hello'),
-          ),
+          child: RichText(text: const TextSpan(text: 'Hello')),
         ),
       ),
     );
@@ -256,9 +254,7 @@ void main() {
         data: const MediaQueryData(devicePixelRatio: 4.0),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: RichText(
-            text: const TextSpan(text: 'Hello'),
-          ),
+          child: RichText(text: const TextSpan(text: 'Hello')),
         ),
       ),
     );

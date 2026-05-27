@@ -400,7 +400,7 @@ void main() {
   });
 
   test('RenderParagraph devicePixelRatio control test', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(text: 'Hello'),
       textDirection: TextDirection.ltr,
     );
@@ -426,7 +426,7 @@ void main() {
   });
 
   test('RenderParagraph devicePixelRatio constructor test', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(text: 'Hello'),
       textDirection: TextDirection.ltr,
       devicePixelRatio: 2.0,
@@ -435,16 +435,19 @@ void main() {
   });
 
   test('RenderParagraph.debugFillProperties', () {
-    final RenderParagraph paragraph = RenderParagraph(
+    final paragraph = RenderParagraph(
       const TextSpan(text: 'Hello'),
       textDirection: TextDirection.ltr,
       devicePixelRatio: 2.5,
     );
-    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    final builder = DiagnosticPropertiesBuilder();
     paragraph.debugFillProperties(builder);
 
     final List<DiagnosticsNode> nodes = builder.properties;
-    expect(nodes.any((DiagnosticsNode node) => node.name == 'devicePixelRatio' && node.value == 2.5), isTrue);
+    expect(
+      nodes.any((DiagnosticsNode node) => node.name == 'devicePixelRatio' && node.value == 2.5),
+      isTrue,
+    );
   });
 
   group('didExceedMaxLines', () {
