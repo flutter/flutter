@@ -82,17 +82,10 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
 * **Command to capture/update reference golden baselines**:
   Running with `UPDATE_GOLDENS=1` writes or overwrites the local PNG baselines under `integration_test/goldens/` on the host.
 
-  To support rendering differences between graphics backends, you can pass the `ANDROID_HARDWARE_SMOKE_TEST_GOLDEN_VARIANT` environment variable to separate Vulkan and OpenGLES baselines (generating `blueRectangleTest.vulkan.png` vs `blueRectangleTest.opengles.png`):
+  Because the statically compiled `AndroidManifest.xml` is the single source of truth, the app will automatically self-report its active backend variant. To capture or update the baseline for a specific graphics variant, simply edit `android/app/src/main/AndroidManifest.xml` to set the desired `io.flutter.embedding.android.ImpellerBackend` value, then execute:
 
   ```sh
-  # Establish/Update Vulkan goldens locally:
-  UPDATE_GOLDENS=1 ANDROID_HARDWARE_SMOKE_TEST_GOLDEN_VARIANT=vulkan flutter drive -v \
-    --driver=test_driver/driver_test.dart \
-    --target=integration_test/integration_test_wrapper.dart \
-    --no-dds
-
-  # Establish/Update OpenGLES goldens locally:
-  UPDATE_GOLDENS=1 ANDROID_HARDWARE_SMOKE_TEST_GOLDEN_VARIANT=opengles flutter drive -v \
+  UPDATE_GOLDENS=1 flutter drive -v \
     --driver=test_driver/driver_test.dart \
     --target=integration_test/integration_test_wrapper.dart \
     --no-dds
@@ -118,16 +111,16 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
 > [!NOTE]
 > **Statically Compiled Single Source of Truth**:
 > The app's compiled `AndroidManifest.xml` `<meta-data>` tag is the single source of truth for the graphics backend configuration under **both** Instrumented Mode (OEM) and Driver Mode (CI).
-> 
+>
 > * **Instrumented Mode (OEM)**: The native Java JUnit harness (`FlutterActivityTest.java`) reads this value dynamically using the `PackageManager` API and routes it to Dart.
 > * **Driver Mode (CI / Host)**: The Dart app queries the native Android embedder via a custom `MethodChannel` to self-discover its compiled backend and self-reports it to the host test script inside its JSON reply payload, completely eliminating the need for environment variables on the host PC.
-> 
+>
 > To switch the active graphics backend manually for local runs, open `android/app/src/main/AndroidManifest.xml` and update the `io.flutter.embedding.android.ImpellerBackend` value:
-> 
+>
 > ```xml
 > <!-- Enable Vulkan: -->
 > <meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="vulkan" />
-> 
+>
 > <!-- Enable OpenGLES: -->
 > <meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="opengles" />
 > ```
@@ -168,8 +161,8 @@ If you prefer to bypass Gradle entirely for custom debugging, you can manually b
 3. **Manually pull the generated snapshot off the device's sandbox**:
    Since the app remains installed during raw `adb` runs, you can copy the rendering result files manually:
    ```sh
-   adb shell "run-as com.example.android_hardware_smoke_test cat cache/results/blueRectangleTest.png" \
-     > integration_test/results/blueRectangleTest.png
+   adb exec-out "run-as com.example.android_hardware_smoke_test cat cache/results/blueRectangleTest.png" \
+     > test_driver/results/blueRectangleTest.png
    ```
 
 ---
