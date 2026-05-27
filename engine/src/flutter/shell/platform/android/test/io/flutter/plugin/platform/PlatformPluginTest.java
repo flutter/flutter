@@ -652,16 +652,15 @@ public class PlatformPluginTest {
       PlatformChannel.SystemUiMode.IMMERSIVE,
       PlatformChannel.SystemUiMode.IMMERSIVE_STICKY
     };
+    try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
+      for (PlatformChannel.SystemUiMode mode : modes) {
+        View fakeDecorView = mock(View.class);
+        Window fakeWindow = mock(Window.class);
+        Activity mockActivity = mock(Activity.class);
+        when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+        when(mockActivity.getWindow()).thenReturn(fakeWindow);
+        PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
 
-    for (PlatformChannel.SystemUiMode mode : modes) {
-      View fakeDecorView = mock(View.class);
-      Window fakeWindow = mock(Window.class);
-      Activity mockActivity = mock(Activity.class);
-      when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
-      when(mockActivity.getWindow()).thenReturn(fakeWindow);
-      PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
-
-      try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
         platformPlugin.mPlatformMessageHandler.showSystemUiMode(mode);
         platformPlugin.mPlatformMessageHandler.showSystemUiMode(
             PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
