@@ -107,13 +107,10 @@ void main() {
   });
 
   testWithoutContext('getNameForTargetPlatform on Darwin arches', () {
-    expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.arm64), 'ios-arm64');
-    expect(getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.armv7), 'ios-armv7');
-    expect(
-      getNameForTargetPlatform(TargetPlatform.ios, darwinArch: DarwinArch.x86_64),
-      'ios-x86_64',
-    );
-    expect(getNameForTargetPlatform(TargetPlatform.android), isNot(contains('ios')));
+    expect(TargetPlatform.ios.getName(darwinArch: DarwinArch.arm64), 'ios-arm64');
+    expect(TargetPlatform.ios.getName(darwinArch: DarwinArch.armv7), 'ios-armv7');
+    expect(TargetPlatform.ios.getName(darwinArch: DarwinArch.x86_64), 'ios-x86_64');
+    expect(TargetPlatform.android.getName(), isNot(contains('ios')));
   });
 
   testUsingContext(

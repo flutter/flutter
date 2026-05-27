@@ -11,6 +11,8 @@ import 'package:test/test.dart';
 
 import 'check_backticks_relative_paths_rule.dart';
 
+const String _configFileName = 'dart_skills_lint.yaml';
+
 Directory _findSkillsDir() {
   Directory dir = Directory.current;
   while (dir.path != dir.parent.path) {
@@ -47,14 +49,10 @@ void main() {
   });
 
   test('Validate Flutter Skills', () async {
-    final bool isValid = await validateSkills(
-      skillDirPaths: [skillsDirectory],
-      resolvedRules: {
-        'check-relative-paths': AnalysisSeverity.error,
-        'check-absolute-paths': AnalysisSeverity.error,
-        'check-trailing-whitespace': AnalysisSeverity.error,
-      },
+    final Configuration config = await ConfigParser.loadConfig(
+      path: path.join(repoRoot.path, 'dev', 'tools', _configFileName),
     );
+    final bool isValid = await validateSkills(skillDirPaths: [skillsDirectory], config: config);
     expect(isValid, isTrue, reason: 'Skills validation failed. See above for details.');
   });
 
@@ -85,7 +83,15 @@ void main() {
     final bool isValid = await validateSkills(
       skillDirPaths: [skillsDirectory],
       customRules: [CheckBackticksRelativePathsRule(valid2SegmentPaths, repoRoot.path)],
-      resolvedRules: {'check-absolute-paths': AnalysisSeverity.disabled},
+      resolvedRules: {
+        'check-absolute-paths': AnalysisSeverity.disabled,
+        'check-relative-paths': AnalysisSeverity.disabled,
+        'check-trailing-whitespace': AnalysisSeverity.disabled,
+        'description-too-long': AnalysisSeverity.disabled,
+        'disallowed-field': AnalysisSeverity.disabled,
+        'invalid-skill-name': AnalysisSeverity.disabled,
+        'valid-yaml-metadata': AnalysisSeverity.disabled,
+      },
     );
     expect(isValid, isTrue, reason: 'Skills validation failed. See above for details.');
   });

@@ -34,7 +34,6 @@ import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
@@ -114,7 +113,6 @@ void testUsingContext(
               Logger: () => BufferLogger.test(),
               OperatingSystemUtils: () => FakeOperatingSystemUtils(),
               PersistentToolState: () => buildPersistentToolState(globals.fs),
-              Usage: () => TestUsage(),
               XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
               FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
               PlistParser: () => FakePlistParser(),
@@ -367,7 +365,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     XcodeProjectBuildContext? buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
@@ -384,6 +382,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   Future<void> cleanWorkspace(
+    XcodeBasedProject xcodeProject,
     String workspacePath,
     String scheme, {
     required Directory buildDirectory,
@@ -392,7 +391,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   Future<XcodeProjectInfo> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
   }) async {
@@ -405,8 +404,8 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   List<String> xcrunCommand() => <String>['xcrun'];
 
   @override
-  Future<void> prefetchSwiftPackages(
-    String projectPath, {
+  Future<void> prefetchSwiftPackagesForProject(
+    XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
     bool quiet = true,
     bool waitForCompletion = true,
@@ -414,7 +413,7 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
-    String projectPath,
+    XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
     bool skipPackageUpdatesAndValidation = true,
   }) async {

@@ -156,8 +156,8 @@ extension type CanvasKit(JSObject _) implements JSObject {
   /// parameters specified in [SkImageInfo] passed [SkImage.readPixels] must
   /// match [info].
   @JS('MakeImage')
-  external SkImage? _MakeImage(SkImageInfo info, JSUint8Array pixels, double bytesPerRow);
-  SkImage? MakeImage(SkImageInfo info, Uint8List pixels, double bytesPerRow) =>
+  external SkImage? _MakeImage(SkImageInfo info, JSUint8Array pixels, int bytesPerRow);
+  SkImage? MakeImage(SkImageInfo info, Uint8List pixels, int bytesPerRow) =>
       _MakeImage(info, pixels.toJS, bytesPerRow);
 
   @JS('MakeLazyImageFromTextureSource')
