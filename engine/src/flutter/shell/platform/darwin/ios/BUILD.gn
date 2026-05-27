@@ -48,6 +48,7 @@ source_set("InternalFlutterSwift") {
   visibility = [
     ":flutter_framework_source",
     ":ios_test_flutter",
+    ":ios_test_flutter_swift",
   ]
   configs += [ "//flutter/shell/platform/darwin/common:config" ]
   deps = [
@@ -63,9 +64,11 @@ source_set("InternalFlutterSwift") {
   sources = [
     "framework/Source/AccessibilityFeatures.swift",
     "framework/Source/ConnectionCollection.swift",
+    "framework/Source/DisplayLinkManager.swift",
     "framework/Source/LaunchEngine.swift",
     "framework/Source/SplashScreenManager.swift",
     "framework/Source/UIPressProxy.swift",
+    "framework/Source/VSyncClient.swift",
   ]
   public = _flutter_framework_headers + framework_common_headers
 }
@@ -161,6 +164,8 @@ source_set("flutter_framework_source") {
     "framework/Source/platform_message_response_darwin.mm",
     "framework/Source/profiler_metrics_ios.h",
     "framework/Source/profiler_metrics_ios.mm",
+    "framework/Source/vsync_waiter_ios.h",
+    "framework/Source/vsync_waiter_ios.mm",
     "ios_context.h",
     "ios_context.mm",
     "ios_context_metal_impeller.h",
@@ -232,7 +237,6 @@ if (enable_ios_unittests) {
     sources = [
       "framework/Source/FlutterFMLTaskRunnerTestHelper.h",
       "framework/Source/FlutterFMLTaskRunnerTestHelper.mm",
-      "framework/Source/FlutterVSyncClient+Testing.h",
     ]
     deps = [
       ":flutter_engine_bindings",
@@ -259,8 +263,9 @@ if (enable_ios_unittests) {
       "framework/Source/TaskRunnerTests.swift",
       "framework/Source/VSyncClientTest.swift",
     ]
-    frameworks = [ "XCTest.framework" ]
+    frameworks = [ "Testing.framework" ]
     deps = [
+      ":InternalFlutterSwift",
       ":flutter_engine_bindings",
       ":flutter_engine_bindings_test_helpers",
       ":flutter_framework_source",
@@ -268,16 +273,19 @@ if (enable_ios_unittests) {
     ]
   }
 
+  # The tests here are run in a host application on an iOS simulator thus
+  # considerably slower to start than the tests in
+  # "//flutter/shell/platform/darwin/common:framework_common_swift_unittests".
+  # If your tests do not have to be run on a simulator (no UIKit dependencies
+  # for example), consider adding them to the
+  # ":framework_common_swift_unittests" target.
   shared_library("ios_test_flutter") {
     testonly = true
     visibility = [ "*" ]
 
     cflags_objc = flutter_cflags_objc
     cflags_objcc = flutter_cflags_objcc
-    cflags = [
-      "-fvisibility=default",
-      "-mios-simulator-version-min=$ios_testing_deployment_target",
-    ]
+    cflags = [ "-fvisibility=default" ]
 
     ldflags =
         [ "-Wl,-install_name,@rpath/Frameworks/libios_test_flutter.dylib" ]
@@ -285,10 +293,6 @@ if (enable_ios_unittests) {
     include_dirs = [ target_gen_dir ]
 
     configs += [ "//flutter/shell/platform/darwin/common:test_config" ]
-    configs -= [
-      "//build/config/gcc:symbol_visibility_hidden",
-      "//build/config:symbol_visibility_hidden",
-    ]
 
     sources = [
       "framework/Source/FlutterAppDelegateTest.mm",
@@ -321,6 +325,7 @@ if (enable_ios_unittests) {
       "framework/Source/SemanticsObjectTest.mm",
       "framework/Source/SemanticsObjectTestMocks.h",
       "framework/Source/UIViewController_FlutterScreenAndSceneIfLoadedTest.mm",
+      "framework/Source/VsyncWaiterIOSTest.mm",
       "framework/Source/accessibility_bridge_test.mm",
       "framework/Source/availability_version_check_test.mm",
       "ios_context_noop_unittests.mm",
@@ -372,10 +377,6 @@ source_set("flutter_engine_bindings") {
     "framework/Source/FlutterFMLTaskRunner.mm",
     "framework/Source/FlutterFMLTaskRunners.h",
     "framework/Source/FlutterFMLTaskRunners.mm",
-    "framework/Source/FlutterVSyncClient.h",
-    "framework/Source/FlutterVSyncClient.mm",
-    "framework/Source/vsync_waiter_ios.h",
-    "framework/Source/vsync_waiter_ios.mm",
   ]
   deps = [
     "//flutter/common",
