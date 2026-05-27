@@ -1272,8 +1272,11 @@ abstract class ResidentRunner extends ResidentHandlers {
     _finished = Completer<int>();
     // Listen for service protocol connection to close.
     for (final FlutterDevice? device in flutterDevices) {
+      if (device == null) {
+        continue;
+      }
       try {
-        await device!.connect(
+        await device.connect(
           debuggingOptions: debuggingOptions,
           reloadSources: reloadSources,
           restart: restart,
@@ -1283,7 +1286,7 @@ abstract class ResidentRunner extends ResidentHandlers {
         );
       } catch (error) {
         // Allow time for buffered/async log messages (e.g. engine crash logs) to arrive and flush.
-        await Future<void>.delayed(device!.logFlushDelay);
+        await Future<void>.delayed(device.logFlushDelay);
         rethrow;
       }
       await device.vmService!.getFlutterViews();
