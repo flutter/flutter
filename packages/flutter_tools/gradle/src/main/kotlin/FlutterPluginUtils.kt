@@ -715,11 +715,11 @@ object FlutterPluginUtils {
         // CMake will print warnings when you try to build an empty project.
         // These arguments silence the warnings - our project is intentionally
         // empty.
-        gradleProjectAndroidExtension.buildTypes.forEach { buildType ->
-            buildType.externalNativeBuild.cmake.arguments(
+        gradleProjectAndroidExtension.buildTypes.all {
+            externalNativeBuild.cmake.arguments(
                 "-Wno-dev",
                 "--no-warn-unused-cli",
-                "-DCMAKE_BUILD_TYPE=${buildType.name}"
+                "-DCMAKE_BUILD_TYPE=$name"
             )
         }
     }

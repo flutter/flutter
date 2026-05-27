@@ -25,6 +25,7 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -34,8 +35,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.PluginManager
-import org.gradle.internal.impldep.junit.framework.TestCase.assertFalse
-import org.gradle.internal.impldep.junit.framework.TestCase.assertTrue
+import kotlin.test.assertTrue
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
@@ -1590,19 +1590,7 @@ class FlutterPluginUtilsTest {
         every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig } returns mockDefaultConfig
 
         every { mockCmakeOptions.path } returns null
-        every { mockCmakeOptions.path(any()) } returns Unit
-        every { mockCmakeOptions.buildStagingDirectory(any()) } returns Unit
         every { mockNdkBuildOptions.path } returns fakeAndroidMkFile
-
-        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
-        every {
-            project.extensions
-                .findByType(BaseExtension::class.java)!!
-                .buildTypes
-                .iterator()
-        } returns mutableListOf(mockBuildType).iterator()
-        every { mockBuildType.name } returns "Debug"
-        every { mockBuildType.externalNativeBuild.cmake.arguments(any(), any(), any()) } returns Unit
 
         FlutterPluginUtils.forceNdkDownload(project, "ignored")
 
@@ -1646,15 +1634,19 @@ class FlutterPluginUtilsTest {
         every { project.layout.buildDirectory } returns mockDirectoryProperty
         every { mockDirectoryProperty.dir(any<String>()) } returns mockDirectoryProperty
         every { mockDirectoryProperty.get() } returns mockDirectory
-        every { mockDirectory.asFile.path } returns fakeBuildPath
+        val realFile = File(fakeBuildPath)
+        every { mockDirectory.asFile } returns realFile
 
         val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
+        val mockBuildTypes = mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
         every {
             project.extensions
                 .findByType(BaseExtension::class.java)!!
                 .buildTypes
-                .iterator()
-        } returns mutableListOf(mockBuildType).iterator()
+        } returns mockBuildTypes
+        every { mockBuildTypes.all(any<Action<com.android.build.gradle.internal.dsl.BuildType>>()) } answers {
+            firstArg<Action<com.android.build.gradle.internal.dsl.BuildType>>().execute(mockBuildType)
+        }
         every { mockBuildType.name } returns "Debug"
         every { mockBuildType.externalNativeBuild.cmake.arguments(any(), any(), any()) } returns Unit
 
