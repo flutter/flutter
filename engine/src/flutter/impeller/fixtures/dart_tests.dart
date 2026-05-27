@@ -101,11 +101,11 @@ void canCreateRenderPassAndSubmit(int width, int height) {
       0, 1, 0, 1, // color
     ]),
   );
-  encoder.bindVertexBuffer(vertices);
+  encoder.bindVertexBuffer(vertices, 3);
 
   final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
   encoder.bindUniform(vertInfo, vertInfoData);
-  encoder.draw(3);
+  encoder.draw();
 
   commandBuffer.submit();
 
