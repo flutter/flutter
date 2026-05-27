@@ -16,7 +16,7 @@ export const loadCanvasKit = (deps, config, browserEnvironment, canvasKitBaseUrl
       throw "Chromium CanvasKit variant specifically requested, but unsupported in this browser";
     }
     const useChromiumCanvasKit = supportsChromiumCanvasKit && (config.canvasKitVariant !== "full");
-    const useWebParagraphCanvasKit = useChromiumCanvasKit && config.enableWebParagraph && browserEnvironment.hasTextCluster;
+    const useWebParagraphCanvasKit = useChromiumCanvasKit && config.enableWebParagraph && browserEnvironment.hasTextCluster();
     let baseUrl = canvasKitBaseUrl;
     if (useWebParagraphCanvasKit) {
       baseUrl = resolveUrlWithSegments(baseUrl, "webparagraph");
