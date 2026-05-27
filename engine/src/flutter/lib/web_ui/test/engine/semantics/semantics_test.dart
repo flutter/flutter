@@ -2826,6 +2826,9 @@ void _testIncrementables() {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
+    addTearDown(() {
+      semantics().semanticsEnabled = false;
+    });
 
     semantics().receiveGlobalEvent(createDomEvent('Event', 'pointerdown'));
     expect(semantics().gestureMode, GestureMode.pointerEvents);
@@ -2856,8 +2859,6 @@ void _testIncrementables() {
       isTrue,
       reason: 'Input must remain disabled while gesture mode is pointer-events.',
     );
-
-    semantics().semanticsEnabled = false;
   });
 
   test('sends focus events', () async {
