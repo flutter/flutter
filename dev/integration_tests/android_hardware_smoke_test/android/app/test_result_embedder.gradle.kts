@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import java.io.File
-import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 
 tasks.register("embedTestResultImages") {
@@ -29,39 +28,42 @@ tasks.register("embedTestResultImages") {
         val packageId = "com.example.android_hardware_smoke_test"
         val discoveredTests = mutableListOf<Pair<String, String>>()
 
-        // 1. Query the device sandbox to list all files in cache/results/
-        val stdout = ByteArrayOutputStream()
+        // 1. Query the device sandbox to list all files in cache/results/ using ProcessBuilder
+        var files = listOf<String>()
         try {
-            exec {
-                commandLine("adb", "shell", "run-as", packageId, "ls", "cache/results")
-                standardOutput = stdout
-                isIgnoreExitValue = true 
-            }
+            val process = ProcessBuilder("adb", "shell", "run-as", packageId, "ls", "cache/results")
+                .redirectErrorStream(true)
+                .start()
+            val output = process.inputStream.readBytes()
+            process.waitFor()
+            files = String(output).trim().split(Regex("\\r?\\n"))
+        } catch (e: Exception) {
+            println("Failed to query sandbox files from device: ${e.message}")
+        }
 
-            // Parse the output lines into a clean list of filenames
-            val files = stdout.toString().trim().split(Regex("\\r?\\n"))
+        // 2. Iterate through all discovered files and pull PNGs
+        for (rawFileName in files) {
+            val fileName = rawFileName.trim()
+            if (fileName.endsWith(".png")) {
+                // Extract the clean test case name (e.g. "blueRectangleTest") before any dot-separators
+                val testName = fileName.split(".")[0]
+                discoveredTests.add(Pair(testName, fileName))
 
-            // 2. Iterate through all discovered files and pull PNGs
-            for (rawFileName in files) {
-                val fileName = rawFileName.trim()
-                if (fileName.endsWith(".png")) {
-                    // Extract the clean test case name (e.g. "blueRectangleTest") before any dot-separators
-                    val testName = fileName.split(".")[0]
-                    discoveredTests.add(Pair(testName, fileName))
-
-                    val destinationFile = File(imagesDir, fileName)
+                val destinationFile = File(imagesDir, fileName)
+                try {
+                    // Direct binary safe copy using JDK ProcessBuilder and Kotlin stdlib copyTo
+                    val process = ProcessBuilder("adb", "exec-out", "run-as", packageId, "cat", "cache/results/$fileName")
+                        .start()
+                    
                     FileOutputStream(destinationFile).use { os ->
-                        exec {
-                            commandLine("adb", "exec-out", "run-as", packageId, "cat", "cache/results/$fileName")
-                            standardOutput = os
-                            isIgnoreExitValue = true
-                        }
+                        process.inputStream.copyTo(os)
                     }
+                    process.waitFor()
                     println("Successfully pulled test result image: ${destinationFile.absolutePath}")
+                } catch (e: Exception) {
+                    println("Failed to pull test result image $fileName from device: ${e.message}")
                 }
             }
-        } catch (e: Exception) {
-            println("Failed to query or pull test result images from device: ${e.message}")
         }
 
         // 3. Dynamically parse and inject <img> tags for all discovered tests
@@ -103,14 +105,8 @@ tasks.register("embedTestResultImages") {
         // This ensures the device is left completely clean, matching standard test runner behaviors.
         println("🧹 Performing automated post-test device cleanup...")
         try {
-            exec {
-                commandLine("adb", "uninstall", packageId)
-                isIgnoreExitValue = true
-            }
-            exec {
-                commandLine("adb", "uninstall", "$packageId.test")
-                isIgnoreExitValue = true
-            }
+            ProcessBuilder("adb", "uninstall", packageId).start().waitFor()
+            ProcessBuilder("adb", "uninstall", "$packageId.test").start().waitFor()
             println("Successfully uninstalled test APKs from device.")
         } catch (e: Exception) {
             println("Failed to execute automated device cleanup: ${e.message}")
