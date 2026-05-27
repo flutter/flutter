@@ -189,7 +189,8 @@ TEST_P(RendererGoldenTest, CanRenderBC1CompressedTexture) {
 
 // Uploads an ETC2 RGB8 texture and samples it onto a fullscreen quad. ETC2 is
 // the standard compressed family on OpenGL ES 3.0 and mobile GPUs; backends
-// without it are skipped. The golden is a single flat mid-gray fill.
+// without it are skipped. The 8x8 image is a 2x2 grid of solid color blocks, so
+// the golden is the same four colored quadrants as the BC1 and ASTC goldens.
 TEST_P(RendererGoldenTest, CanRenderETC2CompressedTexture) {
   std::shared_ptr<Context> context = GetContext();
   ASSERT_TRUE(context);
@@ -198,25 +199,34 @@ TEST_P(RendererGoldenTest, CanRenderETC2CompressedTexture) {
     GTEST_SKIP() << "Backend does not support ETC2 texture compression.";
   }
 
-  // In "individual" mode (the differential bit is 0), an ETC2 RGB8 block
-  // decodes exactly like ETC1. With both 4x4 sub-blocks sharing one base color
-  // and every pixel selecting the same intensity modifier, the block resolves
-  // to a single flat color. The 8x8 image is a 2x2 grid of identical 4x4
-  // blocks.
-  const std::array<uint8_t, 8> etc2_solid_block = {0x88, 0x88, 0x88, 0x00,
-                                                   0xFF, 0xFF, 0x00, 0x00};
+  // A solid-color ETC2 RGB8 block in "individual" mode (differential bit 0,
+  // which decodes like ETC1). The 64-bit block is laid out big-endian (byte 0
+  // most significant): byte 0 = R nibbles (R1,R2), byte 1 = G, byte 2 = B,
+  // byte 3 = codeword/diff/flip bits (all 0), bytes 4..7 = the two pixel-index
+  // bit planes. Both sub-blocks share the base color and every texel uses index
+  // 0 (all-zero planes), so the block is one flat color.
+  auto etc2_solid_block = [](uint8_t r, uint8_t g,
+                             uint8_t b) -> std::array<uint8_t, 8> {
+    return {{r, g, b, 0x00, 0x00, 0x00, 0x00, 0x00}};
+  };
+  // Red, green, blue, white. Each channel byte is 0xFF (nibble 0xF, ~255) or
+  // 0x00.
+  const std::array<std::array<uint8_t, 8>, 4> blocks = {
+      {etc2_solid_block(0xFF, 0x00, 0x00), etc2_solid_block(0x00, 0xFF, 0x00),
+       etc2_solid_block(0x00, 0x00, 0xFF), etc2_solid_block(0xFF, 0xFF, 0xFF)}};
   std::vector<uint8_t> data;
-  for (int i = 0; i < 4; ++i) {
-    data.insert(data.end(), etc2_solid_block.begin(), etc2_solid_block.end());
+  for (const auto& block : blocks) {
+    data.insert(data.end(), block.begin(), block.end());
   }
 
   DrawCompressedTextureGolden(*this, PixelFormat::kETC2RGB8UNormInt, data,
                               ISize{8, 8});
 }
 
-// Uploads an ASTC 8x8 LDR texture and samples it onto a fullscreen quad. ASTC
+// Uploads an ASTC 4x4 LDR texture and samples it onto a fullscreen quad. ASTC
 // is common on modern mobile and some desktop GPUs; backends without it are
-// skipped. The golden is a single solid opaque-blue fill.
+// skipped. The 8x8 image is a 2x2 grid of solid color blocks, so the golden is
+// the same four colored quadrants as the BC1 and ETC2 goldens.
 TEST_P(RendererGoldenTest, CanRenderASTCCompressedTexture) {
   std::shared_ptr<Context> context = GetContext();
   ASSERT_TRUE(context);
@@ -227,14 +237,27 @@ TEST_P(RendererGoldenTest, CanRenderASTCCompressedTexture) {
 
   // An ASTC void-extent block encodes one constant color directly: the 0xFC
   // 0xFD header marks a 2D LDR void-extent with the "no extent" sentinel
-  // coordinates (all ones), followed by four little-endian UNORM16 channels.
-  // This block is opaque blue (R=0, G=0, B=1, A=1). A single 8x8 ASTC block
-  // tiles the 8x8 image exactly once.
-  const std::vector<uint8_t> data = {0xFC, 0xFD, 0xFF, 0xFF, 0xFF, 0xFF,
-                                     0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00,
-                                     0xFF, 0xFF, 0xFF, 0xFF};
+  // coordinates (all ones), followed by four little-endian UNORM16 channels
+  // (R, G, B, A). Alpha is opaque.
+  auto astc_solid_block = [](uint16_t r, uint16_t g,
+                             uint16_t b) -> std::array<uint8_t, 16> {
+    return {{0xFC, 0xFD, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+             static_cast<uint8_t>(r & 0xFF), static_cast<uint8_t>(r >> 8),
+             static_cast<uint8_t>(g & 0xFF), static_cast<uint8_t>(g >> 8),
+             static_cast<uint8_t>(b & 0xFF), static_cast<uint8_t>(b >> 8), 0xFF,
+             0xFF}};
+  };
+  // Red, green, blue, white.
+  const std::array<std::array<uint8_t, 16>, 4> blocks = {
+      {astc_solid_block(0xFFFF, 0, 0), astc_solid_block(0, 0xFFFF, 0),
+       astc_solid_block(0, 0, 0xFFFF),
+       astc_solid_block(0xFFFF, 0xFFFF, 0xFFFF)}};
+  std::vector<uint8_t> data;
+  for (const auto& block : blocks) {
+    data.insert(data.end(), block.begin(), block.end());
+  }
 
-  DrawCompressedTextureGolden(*this, PixelFormat::kASTC8x8LDR, data,
+  DrawCompressedTextureGolden(*this, PixelFormat::kASTC4x4LDR, data,
                               ISize{8, 8});
 }
 
