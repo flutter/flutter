@@ -92,11 +92,17 @@ class TextFrame {
 
   fml::StatusOr<flutter::DlPath> GetPath() const;
 
-  void SetEnableGammaCorrectionOverride(std::optional<bool> value) {
-    enable_gamma_correction_override_ = value;
+  /// @brief Toggle the platform-specific contrast and gamma correction in the
+  ///        fragment shader.
+  ///
+  ///        By default, this is true on Linux to compensate for FreeType
+  ///        rasterization in linear space, and false elsewhere. Setting a
+  ///        value overrides this default behavior.
+  void SetEnableGammaCorrection(std::optional<bool> value) {
+    enable_gamma_correction_ = value;
   }
-  std::optional<bool> GetEnableGammaCorrectionOverride() const {
-    return enable_gamma_correction_override_;
+  std::optional<bool> GetEnableGammaCorrection() const {
+    return enable_gamma_correction_;
   }
 
  private:
@@ -104,7 +110,7 @@ class TextFrame {
   Rect bounds_;
   bool has_color_;
   const PathCreator path_creator_;
-  std::optional<bool> enable_gamma_correction_override_ = std::nullopt;
+  std::optional<bool> enable_gamma_correction_ = std::nullopt;
 };
 
 }  // namespace impeller

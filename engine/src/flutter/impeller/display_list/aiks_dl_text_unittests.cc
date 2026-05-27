@@ -1112,13 +1112,13 @@ TEST_P(AiksTest, TextGammaCorrectionGoldenTest) {
       SkTextBlob::MakeFromString("Gamma Corrected (true)", sk_font);
   ASSERT_TRUE(blob_corrected);
   auto text_frame_corrected = MakeTextFrameFromTextBlobSkia(blob_corrected);
-  text_frame_corrected->SetEnableGammaCorrectionOverride(true);
+  text_frame_corrected->SetEnableGammaCorrection(true);
 
   auto blob_uncorrected =
       SkTextBlob::MakeFromString("Gamma Corrected (false)", sk_font);
   ASSERT_TRUE(blob_uncorrected);
   auto text_frame_uncorrected = MakeTextFrameFromTextBlobSkia(blob_uncorrected);
-  text_frame_uncorrected->SetEnableGammaCorrectionOverride(false);
+  text_frame_uncorrected->SetEnableGammaCorrection(false);
 
   auto callback = [&]() -> sk_sp<flutter::DisplayList> {
     DisplayListBuilder builder;

@@ -42,20 +42,12 @@ Point SizeToPoint(Size size) {
 using VS = GlyphAtlasPipeline::VertexShader;
 using FS = GlyphAtlasPipeline::FragmentShader;
 
-TextContents::TextContents()
-    : enable_gamma_correction_(kPlatformGammaCorrectionDefault) {}
+TextContents::TextContents() {}
 
 TextContents::~TextContents() = default;
 
 void TextContents::SetTextFrame(const std::shared_ptr<TextFrame>& frame) {
   frame_ = frame;
-  if (frame) {
-    std::optional<bool> override_value =
-        frame->GetEnableGammaCorrectionOverride();
-    if (override_value.has_value()) {
-      enable_gamma_correction_ = override_value.value();
-    }
-  }
 }
 
 void TextContents::SetColor(Color color) {
@@ -80,10 +72,6 @@ void TextContents::SetScreenTransform(const Matrix& transform) {
 
 void TextContents::SetForceTextColor(bool value) {
   force_text_color_ = value;
-}
-
-void TextContents::SetEnableGammaCorrection(bool value) {
-  enable_gamma_correction_ = value;
 }
 
 std::optional<Rect> TextContents::GetCoverage(const Entity& entity) const {
@@ -296,7 +284,9 @@ bool TextContents::Render(const ContentContext& renderer,
   frag_info.use_text_color = force_text_color_ ? 1.0 : 0.0;
   frag_info.text_color = ToVector(color.Premultiply());
   frag_info.is_color_glyph = type == GlyphAtlas::Type::kColorBitmap;
-  if (enable_gamma_correction_) {
+  bool enable_gamma_correction = frame_->GetEnableGammaCorrection().value_or(
+      kPlatformGammaCorrectionDefault);
+  if (enable_gamma_correction) {
     // Calculate relative luminance using Rec. 709 luma coefficients.
     Scalar luma =
         color.red * 0.2126f + color.green * 0.7152f + color.blue * 0.0722f;
