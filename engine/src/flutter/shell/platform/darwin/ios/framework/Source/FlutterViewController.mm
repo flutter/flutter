@@ -31,8 +31,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient+FML.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
@@ -1302,9 +1300,11 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
         // Do nothing in this block. Just trigger system to callback touch events with correct rate.
       };
-  _touchRateCorrectionVSyncClient =
-      [[FlutterVSyncClient alloc] initWithTaskRunner:self.engine.platformTaskRunner
-                                            callback:callback];
+  _touchRateCorrectionVSyncClient = [[FlutterVSyncClient alloc]
+                initWithTaskRunner:self.engine.platformTaskRunner
+      isVariableRefreshRateEnabled:FlutterDisplayLinkManager.maxRefreshRateEnabledOnIPhone
+                    maxRefreshRate:FlutterDisplayLinkManager.displayRefreshRate
+                          callback:callback];
   _touchRateCorrectionVSyncClient.allowPauseAfterVsync = NO;
 }
 

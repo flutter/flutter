@@ -772,8 +772,7 @@ class FlutterVmService {
     } on vm_service.RPCError catch (err) {
       // If an application is not using the framework or the VM service
       // disappears while handling a request, return null.
-      if (err.code == vm_service.RPCErrorKind.kMethodNotFound.code ||
-          err.isConnectionDisposedException) {
+      if (err.isServiceExtensionUnregisteredError || err.isConnectionDisposedException) {
         return null;
       }
       rethrow;
@@ -1000,8 +999,12 @@ enum Brightness {
 }
 
 /// Process a VM service log event into a string message.
+///
+/// Uses a permissive UTF-8 decoder because app-generated logs may contain
+/// invalid UTF-8 from external sources (Bluetooth devices, network APIs, etc.).
 String processVmServiceMessage(vm_service.Event event) {
-  final String message = utf8.decode(base64.decode(event.bytes!));
+  // Use permissive decoder for app logs that may have invalid UTF-8
+  final String message = utf8AllowMalformed.decode(base64.decode(event.bytes!));
   // Remove extra trailing newlines appended by the vm service.
   if (message.endsWith('\n')) {
     return message.substring(0, message.length - 1);
@@ -1014,4 +1017,13 @@ extension RPCErrorExtension on vm_service.RPCError {
       code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
       code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
       message.contains('Service connection disposed');
+
+  /// DWDS throws an internal error (-32603) when a service extension is called
+  /// but has not been registered yet, due to a null-assertion on the looked up method in JS.
+  /// On native platforms, this throws `kMethodNotFound` (-32601).
+  // TODO(kevmoo): Remove this work-around once https://github.com/dart-lang/sdk/issues/63424 is fixed.
+  bool get isServiceExtensionUnregisteredError =>
+      code == vm_service.RPCErrorKind.kMethodNotFound.code ||
+      (code == vm_service.RPCErrorKind.kInternalError.code &&
+          message.contains('Unexpected null value'));
 }

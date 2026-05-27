@@ -17,6 +17,7 @@
 #include "impeller/playground/playground.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/pipeline_library.h"
+#include "impeller/renderer/shader_key.h"
 #include "impeller/renderer/shader_library.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 #include "impeller/runtime_stage/runtime_stage_flatbuffers.h"
@@ -482,6 +483,101 @@ TEST_P(RuntimeStageTest, ContainsExpectedShaderTypesNoSksl) {
   EXPECT_TRUE(stages[RuntimeStageBackend::kOpenGLES]);
   EXPECT_TRUE(stages[RuntimeStageBackend::kMetal]);
   EXPECT_TRUE(stages[RuntimeStageBackend::kVulkan]);
+}
+
+TEST(ShaderKeyTest, MakeUserScopedNameProducesScopedString) {
+  EXPECT_EQ(ShaderKey::MakeUserScopedName(ShaderKey::kScopeRuntimeEffect,
+                                          "assets/foo.frag", "main"),
+            "re:assets/foo.frag:main");
+  EXPECT_EQ(
+      ShaderKey::MakeUserScopedName(
+          ShaderKey::kScopeFlutterGPU,
+          "packages/pkg_a/assets/shaders.shaderbundle",
+          "solid_fill_fragment_main"),
+      "fg:packages/pkg_a/assets/shaders.shaderbundle:solid_fill_fragment_main");
+}
+
+TEST(ShaderKeyTest, MakeUserScopedNameContainsColonSeparator) {
+  // The colon separator is what makes user-scoped names unspoofable from
+  // engine-internal entrypoints, since impellerc-generated entrypoints are
+  // valid identifiers and cannot contain ':'.
+  std::string scoped = ShaderKey::MakeUserScopedName(
+      ShaderKey::kScopeRuntimeEffect, "asset", "entry");
+  EXPECT_NE(scoped.find(':'), std::string::npos);
+}
+
+TEST(ShaderKeyTest, MakeUserScopedNameDifferentLibraryIdsDoNotCollide) {
+  // Two user shaders that share an entrypoint name but come from different
+  // logical sources must produce different registry keys, so they cannot
+  // overwrite each other in the shared shader library.
+  std::string a = ShaderKey::MakeUserScopedName(
+      ShaderKey::kScopeFlutterGPU, "packages/pkg_a/bundle", "main");
+  std::string b = ShaderKey::MakeUserScopedName(
+      ShaderKey::kScopeFlutterGPU, "packages/pkg_b/bundle", "main");
+  EXPECT_NE(a, b);
+}
+
+TEST(ShaderKeyTest, MakeUserScopedNameDifferentScopesDoNotCollide) {
+  // A FragmentProgram and a Flutter GPU shader can independently share an
+  // asset path and an entrypoint and must still produce different keys.
+  std::string runtime_effect = ShaderKey::MakeUserScopedName(
+      ShaderKey::kScopeRuntimeEffect, "asset", "main");
+  std::string flutter_gpu = ShaderKey::MakeUserScopedName(
+      ShaderKey::kScopeFlutterGPU, "asset", "main");
+  EXPECT_NE(runtime_effect, flutter_gpu);
+}
+
+TEST(ShaderKeyTest, MakeUserScopedNameHandlesLongInputs) {
+  // The scoped name is used solely as a `std::string` key in the per-process
+  // shader library registry; there is no fixed length limit. Confirm that
+  // long inputs (e.g. deeply-nested package asset paths) round-trip through
+  // the builder without truncation.
+  const std::string long_library_id(4096, 'a');
+  const std::string long_entrypoint(2048, 'b');
+  std::string scoped = ShaderKey::MakeUserScopedName(
+      ShaderKey::kScopeFlutterGPU, long_library_id, long_entrypoint);
+  EXPECT_EQ(scoped.size(), ShaderKey::kScopeFlutterGPU.size() + 1 +
+                               long_library_id.size() + 1 +
+                               long_entrypoint.size());
+  EXPECT_EQ(scoped.substr(0, 3), "fg:");
+  EXPECT_EQ(scoped.substr(3, long_library_id.size()), long_library_id);
+  EXPECT_EQ(scoped.substr(3 + long_library_id.size(), 1), ":");
+  EXPECT_EQ(scoped.substr(3 + long_library_id.size() + 1), long_entrypoint);
+}
+
+TEST_P(RuntimeStageTest, RuntimeStageHasUniqueLibraryIdByDefault) {
+  // Two stages decoded independently must get distinct fallback library ids
+  // so that programmatically-constructed stages cannot collide with each
+  // other in the shared shader library.
+  const std::shared_ptr<fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
+  ASSERT_TRUE(fixture);
+  auto stages_a = RuntimeStage::DecodeRuntimeStages(fixture);
+  ABSL_ASSERT_OK(stages_a);
+  auto stages_b = RuntimeStage::DecodeRuntimeStages(fixture);
+  ABSL_ASSERT_OK(stages_b);
+  auto stage_a = stages_a.value()[GetRuntimeStageBackend()];
+  auto stage_b = stages_b.value()[GetRuntimeStageBackend()];
+  ASSERT_TRUE(stage_a);
+  ASSERT_TRUE(stage_b);
+  EXPECT_FALSE(stage_a->GetLibraryId().empty());
+  EXPECT_FALSE(stage_b->GetLibraryId().empty());
+  EXPECT_NE(stage_a->GetLibraryId(), stage_b->GetLibraryId());
+}
+
+TEST_P(RuntimeStageTest, RuntimeStageLibraryIdCanBeOverridden) {
+  // FragmentProgram::initFromAsset overrides the fallback id with the asset
+  // path so that hot reload of the same asset evicts and replaces the same
+  // registry slot rather than leaking a new one.
+  const std::shared_ptr<fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping("ink_sparkle.frag.iplr");
+  ASSERT_TRUE(fixture);
+  auto stages = RuntimeStage::DecodeRuntimeStages(fixture);
+  ABSL_ASSERT_OK(stages);
+  auto stage = stages.value()[GetRuntimeStageBackend()];
+  ASSERT_TRUE(stage);
+  stage->SetLibraryId("packages/my_pkg/assets/shader.frag");
+  EXPECT_EQ(stage->GetLibraryId(), "packages/my_pkg/assets/shader.frag");
 }
 
 }  // namespace testing

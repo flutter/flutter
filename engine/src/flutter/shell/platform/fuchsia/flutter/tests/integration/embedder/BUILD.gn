@@ -50,14 +50,14 @@ executable("flutter-embedder-test-bin") {
 }
 
 fuchsia_test_archive("flutter-embedder-test") {
-  deps = [
-    ":flutter-embedder-test-bin",
+  deps = [ ":flutter-embedder-test-bin" ]
+  subpackages = [
+    "${fuchsia_sdk}/packages/realm_builder_server",
     "child-view:package",
     "parent-view:package",
-
-    # "OOT" copies of the runners used by tests, to avoid conflicting with the
-    # runners in the base fuchsia image.
-    # TODO(fxbug.dev/106575): Fix this with subpackages.
-    "//flutter/shell/platform/fuchsia/flutter:oot_flutter_jit_runner",
+    "//flutter/shell/platform/fuchsia/flutter:flutter_aot_product_runner",
+    "//flutter/shell/platform/fuchsia/flutter:flutter_aot_runner",
+    "//flutter/shell/platform/fuchsia/flutter:flutter_jit_product_runner",
+    "//flutter/shell/platform/fuchsia/flutter:flutter_jit_runner",
   ]
 }
