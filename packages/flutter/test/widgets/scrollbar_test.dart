@@ -3623,46 +3623,44 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/141348.
-  testWidgets(
-    'Scrollbar should not shown due to precision error on desktop',
-    (WidgetTester tester) async {
-      Widget buildFrame(Size size) {
-        tester.view.physicalSize = size;
-        tester.view.devicePixelRatio = 1.0;
-        addTearDown(tester.view.reset);
-        return MaterialApp(
-          home: Scaffold(
-            body: Center(
-              child: DatePickerDialog(
-                initialDate: DateTime(2020, DateTime.may), // Month with six rows.
-                firstDate: DateTime(2010),
-                lastDate: DateTime(2030),
-              ),
+  testWidgets('Scrollbar should not shown due to precision error on desktop', (
+    WidgetTester tester,
+  ) async {
+    Widget buildFrame(Size size) {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      return MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: DatePickerDialog(
+              initialDate: DateTime(2020, DateTime.may), // Month with six rows.
+              firstDate: DateTime(2010),
+              lastDate: DateTime(2030),
             ),
           ),
-        );
-      }
+        ),
+      );
+    }
 
-      const screenSizePortrait = Size(400, 600);
-      await tester.pumpWidget(buildFrame(screenSizePortrait));
-      await tester.pumpAndSettle();
+    const screenSizePortrait = Size(400, 600);
+    await tester.pumpWidget(buildFrame(screenSizePortrait));
+    await tester.pumpAndSettle();
 
-      // Scrollbar is not shown.
-      expect(find.byType(Scrollbar), findsOneWidget);
-      expect(find.byType(Scrollbar), isNot(paints..rect()));
+    // Scrollbar is not shown.
+    expect(find.byType(Scrollbar), findsOneWidget);
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
 
-      // Scroll on the Scrollbar.
-      final pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
-      pointer.hover(tester.getCenter(find.byType(Scrollbar)));
-      await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 10.0)));
-      await tester.pumpAndSettle();
+    // Scroll on the Scrollbar.
+    final pointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    pointer.hover(tester.getCenter(find.byType(Scrollbar)));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 10.0)));
+    await tester.pumpAndSettle();
 
-      // Scrollbar is still not shown.
-      expect(find.byType(Scrollbar), findsOneWidget);
-      expect(find.byType(Scrollbar), isNot(paints..rect()));
-    },
-    variant: TargetPlatformVariant.desktop(),
-  );
+    // Scrollbar is still not shown.
+    expect(find.byType(Scrollbar), findsOneWidget);
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
+  }, variant: TargetPlatformVariant.desktop());
 
   test('with EdgeInsetsDirectional', () {
     const size = Size(60, 80);
@@ -3808,6 +3806,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
   ) async {
     final controller = ScrollController();
     addTearDown(controller.dispose);
+    final resolvedStates = <Set<WidgetState>>[];
 
     await tester.pumpWidget(
       Directionality(
@@ -3819,7 +3818,10 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
             child: RawScrollbar(
               controller: controller,
               thumbVisibility: true,
-              mouseCursor: const WidgetStatePropertyAll<MouseCursor?>(SystemMouseCursors.basic),
+              mouseCursor: WidgetStateProperty.resolveWith<MouseCursor?>((Set<WidgetState> states) {
+                resolvedStates.add(Set<WidgetState>.of(states));
+                return SystemMouseCursors.basic;
+              }),
               child: SingleChildScrollView(
                 controller: controller,
                 child: const SizedBox(width: 4000.0, height: 4000.0),
@@ -3852,6 +3854,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,
     );
+    expect(resolvedStates.last, isNot(contains(WidgetState.hovered)));
 
     // Move back to the content area: the override should yield again.
     await gesture.moveTo(const Offset(100.0, 100.0));

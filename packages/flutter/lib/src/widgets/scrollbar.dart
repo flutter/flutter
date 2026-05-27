@@ -1351,7 +1351,9 @@ class RawScrollbar extends StatefulWidget {
   ///
   /// Resolves in the following [WidgetState]s:
   ///  * [WidgetState.dragged].
-  ///  * [WidgetState.hovered].
+  ///
+  /// The hovered state is not included because the cursor is only resolved for
+  /// a mouse pointer that is already hovering over the painted scrollbar.
   ///
   /// The cursor is applied while the pointer is over the painted scrollbar
   /// (using the same hit test area as the hover interaction) and while the
@@ -1387,7 +1389,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   late AnimationController _fadeoutAnimationController;
   late CurvedAnimation _fadeoutOpacityAnimation;
   final GlobalKey _scrollbarPainterKey = GlobalKey();
-  bool _hoverIsActive = false;
+  bool _pointerIsOverScrollbar = false;
   bool _dragIsActive = false;
   MouseCursor _effectiveMouseCursor = MouseCursor.defer;
   Drag? _thumbDrag;
@@ -2165,18 +2167,18 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void handleHover(PointerHoverEvent event) {
     // Check if the position of the pointer falls over the painted scrollbar
     if (isPointerOverScrollbar(event.position, event.kind, forHover: true)) {
-      final bool wasHoverActive = _hoverIsActive;
-      _hoverIsActive = true;
+      final bool wasPointerOverScrollbar = _pointerIsOverScrollbar;
+      _pointerIsOverScrollbar = true;
       // Bring the scrollbar back into view if it has faded or started to fade
       // away.
       _fadeoutAnimationController.forward();
       _fadeoutTimer?.cancel();
-      if (!wasHoverActive) {
+      if (!wasPointerOverScrollbar) {
         updateMouseCursor();
       }
-    } else if (_hoverIsActive) {
+    } else if (_pointerIsOverScrollbar) {
       // Pointer is not over painted scrollbar.
-      _hoverIsActive = false;
+      _pointerIsOverScrollbar = false;
       _maybeStartFadeoutTimer();
       updateMouseCursor();
     }
@@ -2188,7 +2190,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleHoverExit(PointerExitEvent event) {
-    _hoverIsActive = false;
+    _pointerIsOverScrollbar = false;
     _maybeStartFadeoutTimer();
     updateMouseCursor();
   }
@@ -2197,10 +2199,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   ///
   /// Subclasses can override this to add additional states.
   @protected
-  Set<WidgetState> get cursorStates => <WidgetState>{
-    if (_hoverIsActive) WidgetState.hovered,
-    if (_dragIsActive) WidgetState.dragged,
-  };
+  Set<WidgetState> get cursorStates => <WidgetState>{if (_dragIsActive) WidgetState.dragged};
 
   /// Recomputes the cursor applied by the [MouseRegion] wrapping the
   /// scrollbar. The cursor is only overridden while the pointer is over the
@@ -2213,7 +2212,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @mustCallSuper
   void updateMouseCursor() {
     final MouseCursor? resolved = widget.mouseCursor?.resolve(cursorStates);
-    final MouseCursor desired = ((_hoverIsActive || _dragIsActive) && resolved != null)
+    final MouseCursor desired = ((_pointerIsOverScrollbar || _dragIsActive) && resolved != null)
         ? resolved
         : MouseCursor.defer;
     if (desired != _effectiveMouseCursor) {
