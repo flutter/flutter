@@ -2107,6 +2107,9 @@ void main() {
           Locale('my'),
           Locale('th'),
           Locale('ne'),
+          Locale('fr'),
+          Locale('de'),
+          Locale('pt')
         ];
 
         Future<void> verifyLocale(Locale locale) async {
