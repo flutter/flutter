@@ -2,14 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.view.accessibility.configurator;
+package io.flutter.view;
 
-import io.flutter.view.AccessibilityBridge;
-
-/**
- * Factory for creating {@link AccessibilityNodeConfigurator} instances based on {@link
- * AccessibilityBridge.Role}.
- */
+/** Factory for creating {@link AccessibilityNodeConfigurator} instances based on {@link AccessibilityBridge.Role}. */
 public class RoleConfiguratorFactory {
   public static AccessibilityNodeConfigurator getConfigurator(AccessibilityBridge.Role role) {
     switch (role) {

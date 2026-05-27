@@ -41,7 +41,6 @@ import io.flutter.view.AccessibilityStringBuilder.LocaleStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.SpellOutStringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.StringAttribute;
 import io.flutter.view.AccessibilityStringBuilder.StringAttributeType;
-import io.flutter.view.accessibility.configurator.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -207,7 +206,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // accessibility system.
   //
   // This is null when a node embedded by the AccessibilityViewEmbedder has the focus.
-  public @Nullable SemanticsNode accessibilityFocusedSemanticsNode;
+  @Nullable SemanticsNode accessibilityFocusedSemanticsNode;
 
   // The virtual ID of the currently embedded node with accessibility focus.
   //
@@ -2140,7 +2139,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
   // Must match SemanticsRole in semantics.dart
   // https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
-  public enum Role {
+  enum Role {
     NONE(0),
     TAB(1),
     TAB_BAR(2),
@@ -2192,7 +2191,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
   // Must match SemanticsFlag in semantics.dart
   // https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
-  public enum Flag {
+  enum Flag {
     HAS_CHECKED_STATE(1 << 0),
     IS_CHECKED(1 << 1),
     IS_SELECTED(1 << 2),
@@ -2325,25 +2324,25 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * semantics.dart:
    * https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
    */
-  public static class SemanticsNode {
+  static class SemanticsNode {
     private static boolean nullableHasAncestor(
         SemanticsNode target, Predicate<SemanticsNode> tester) {
       return target != null && target.getAncestor(tester) != null;
     }
 
-    public final AccessibilityBridge accessibilityBridge;
+    final AccessibilityBridge accessibilityBridge;
 
     // Flutter ID of this {@code SemanticsNode}.
-    public int id = -1;
+    int id = -1;
 
     private long flags;
     private int actions;
-    public int maxValueLength;
-    public int currentValueLength;
-    public int textSelectionBase;
-    public int textSelectionExtent;
+    int maxValueLength;
+    int currentValueLength;
+    int textSelectionBase;
+    int textSelectionExtent;
     private int platformViewId;
-    public int scrollChildren;
+    int scrollChildren;
     private int scrollIndex;
     private int traversalParent;
     private float scrollPosition;
@@ -2352,7 +2351,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private String identifier;
     private String label;
     private List<StringAttribute> labelAttributes;
-    public String value;
+    String value;
     private List<StringAttribute> valueAttributes;
     private String increasedValue;
     private List<StringAttribute> increasedValueAttributes;
@@ -2365,16 +2364,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     //
     // The tooltip is attached through AccessibilityNodeInfo.setTooltipText if
     // API level >= 28; otherwise, this is attached to the end of content description.
-    public @Nullable String tooltip;
+    @Nullable String tooltip;
 
     // The Url this node points to.
-    public @Nullable String linkUrl;
+    @Nullable private String linkUrl;
 
     // The locale of the content of this node.
     @Nullable private String locale;
 
-    public @Nullable String minValue;
-    public @Nullable String maxValue;
+    @Nullable String minValue;
+    @Nullable String maxValue;
 
     // The role of this node.
     private int role;
@@ -2416,8 +2415,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private float[] transform;
     private float[] hitTestTransform;
 
-    public SemanticsNode parent;
-    public List<SemanticsNode> childrenInTraversalOrder = new ArrayList<>();
+    SemanticsNode parent;
+    List<SemanticsNode> childrenInTraversalOrder = new ArrayList<>();
     private List<SemanticsNode> childrenInHitTestOrder = new ArrayList<>();
     private List<CustomAccessibilityAction> customAccessibilityActions;
     private CustomAccessibilityAction onTapOverride;
@@ -2455,7 +2454,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
      * <p>This method only applies to this {@code SemanticsNode} and does not implicitly search its
      * children.
      */
-    public boolean hasAction(@NonNull Action action) {
+    boolean hasAction(@NonNull Action action) {
       return (actions & action.value) != 0;
     }
 
@@ -2467,7 +2466,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return (previousActions & action.value) != 0;
     }
 
-    public boolean hasFlag(@NonNull Flag flag) {
+    boolean hasFlag(@NonNull Flag flag) {
       return (flags & flag.value) != 0;
     }
 
@@ -2478,7 +2477,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return (previousFlags & flag.value) != 0;
     }
 
-    public boolean shouldBeTreatedAsButton() {
+    boolean shouldBeTreatedAsButton() {
       if (hasFlag(Flag.IS_BUTTON)) {
         return true;
       }
@@ -2954,7 +2953,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return Math.max(a, Math.max(b, Math.max(c, d)));
     }
 
-    public CharSequence getValue() {
+    CharSequence getValue() {
       return new AccessibilityStringBuilder()
           .addString(value)
           .addAttributes(valueAttributes)
@@ -2979,7 +2978,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           .build();
     }
 
-    public CharSequence getValueLabelHint() {
+    CharSequence getValueLabelHint() {
       CharSequence[] array = new CharSequence[] {getValue(), getLabel(), getHint()};
       CharSequence result = null;
       for (CharSequence word : array) {
@@ -2994,7 +2993,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return result;
     }
 
-    public CharSequence getTextFieldHint() {
+    CharSequence getTextFieldHint() {
       CharSequence[] array = new CharSequence[] {getLabel(), getHint()};
       CharSequence result = null;
       for (CharSequence word : array) {

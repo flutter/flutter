@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.view.accessibility.configurator;
+package io.flutter.view;
 
 import android.view.accessibility.AccessibilityNodeInfo;
-import io.flutter.view.AccessibilityBridge;
 
 /** Configurator that simply sets the class name of the accessibility node. */
 public class ClassNameRoleConfigurator implements AccessibilityNodeConfigurator {

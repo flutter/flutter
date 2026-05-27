@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.view.accessibility.configurator;
+package io.flutter.view;
 
 import android.os.Build;
 import android.view.accessibility.AccessibilityNodeInfo;
 import io.flutter.Build.API_LEVELS;
-import io.flutter.view.AccessibilityBridge;
 
 /**
  * Configurator for the {@link AccessibilityBridge.Role#PROGRESS_BAR} role. Sets the class name to
