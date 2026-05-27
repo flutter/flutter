@@ -391,6 +391,13 @@ class ResidentWebRunner extends ResidentRunner {
       appFailedToStart();
       _logger.printError(error.toString(), stackTrace: stackTrace);
       throwToolExit(kExitMessage);
+    } on TimeoutException catch (error, stackTrace) {
+      appFailedToStart();
+      _logger.printError(
+        'Failed to establish connection with the web debug service: $error',
+        stackTrace: stackTrace,
+      );
+      throwToolExit('Failed to connect to the web debug service.');
     } on DartDevelopmentServiceException catch (error) {
       // The application may have started shutting down before DDS was able to finish establishing
       // its connection to DWDS. Don't treat this as an unhandled exception.
@@ -448,7 +455,7 @@ class ResidentWebRunner extends ResidentRunner {
       status = _logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
     }
 
-    final String targetPlatform = getNameForTargetPlatform(TargetPlatform.web_javascript);
+    final String targetPlatform = TargetPlatform.web_javascript.getName();
     final String sdkName = await flutterDevice!.device!.sdkNameAndVersion;
 
     // Will be null if there is no report.
