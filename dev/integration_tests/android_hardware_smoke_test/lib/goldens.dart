@@ -119,15 +119,30 @@ Future<void> _copyGoldenAssetToTemp(
 
 Future<Uint8List> _capturePng(String testName, GlobalKey targetKey) async {
   try {
+    final BuildContext? context = targetKey.currentContext;
+    if (context == null) {
+      throw StateError(
+        "Failed to capture screenshot for $testName: targetKey is not mounted in the widget tree.",
+      );
+    }
+
     final RenderRepaintBoundary boundary =
-        targetKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+        context.findRenderObject() as RenderRepaintBoundary;
     final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
     final ByteData? byteData = await image.toByteData(
       format: ui.ImageByteFormat.png,
     );
-    final Uint8List pngBytes = byteData!.buffer.asUint8List();
+    if (byteData == null) {
+      throw StateError(
+        "Failed to capture screenshot for $testName: ui.Image.toByteData returned null.",
+      );
+    }
+
+    final Uint8List pngBytes = byteData.buffer.asUint8List();
     if (pngBytes.isEmpty) {
-      throw Exception('pngBytes from RenderRepaintBoundary.toImage was empty');
+      throw StateError(
+        "Failed to capture screenshot for $testName: pngBytes from RenderRepaintBoundary.toImage was empty.",
+      );
     }
     return pngBytes;
   } catch (e) {
