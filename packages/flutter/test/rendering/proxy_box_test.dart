@@ -7,8 +7,7 @@ import 'dart:ui' as ui show Gradient, Image, ImageFilter;
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart' hide Alignment, BoxDecoration, CircleBorder, StadiumBorder;
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
