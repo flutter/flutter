@@ -47,7 +47,6 @@ tasks.register("embedTestResultImages") {
             if (fileName.endsWith(".png")) {
                 // Extract the clean test case name (e.g. "blueRectangleTest") before any dot-separators
                 val testName = fileName.split(".")[0]
-                discoveredTests.add(Pair(testName, fileName))
 
                 val destinationFile = File(imagesDir, fileName)
                 try {
@@ -58,9 +57,20 @@ tasks.register("embedTestResultImages") {
                     FileOutputStream(destinationFile).use { os ->
                         process.inputStream.copyTo(os)
                     }
-                    process.waitFor()
-                    println("Successfully pulled test result image: ${destinationFile.absolutePath}")
+                    
+                    val exitCode = process.waitFor()
+                    if (exitCode == 0) {
+                        discoveredTests.add(Pair(testName, fileName))
+                        println("Successfully pulled test result image: ${destinationFile.absolutePath}")
+                    } else {
+                        destinationFile.delete()
+                        val errorMsg = String(process.errorStream.readBytes()).trim()
+                        println("❌ Failed to pull $fileName (exit code $exitCode): $errorMsg")
+                    }
                 } catch (e: Exception) {
+                    if (destinationFile.exists()) {
+                        destinationFile.delete()
+                    }
                     println("Failed to pull test result image $fileName from device: ${e.message}")
                 }
             }
