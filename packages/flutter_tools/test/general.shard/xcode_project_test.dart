@@ -566,27 +566,13 @@ void main() {
     });
 
     group('prefetchSwiftPackages', () {
-      testWithoutContext('kills previously running process before starting new one', () async {
+      testWithoutContext('starts the process and resolves packages successfully', () async {
         final fs = MemoryFileSystem.test();
         final testLogger = BufferLogger.test();
         const projectPath = 'path/to/project';
         final Directory buildDirectory = fs.directory('$projectPath/build/ios');
         final fakeProcessManager = FakeProcessManager.empty();
         fakeProcessManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'pgrep',
-              '-n',
-              '-f',
-              '-l',
-              'xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
-            ],
-            stdout:
-                '12345 /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild '
-                '-clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages '
-                '-resolvePackageDependencies',
-          ),
-          const FakeCommand(command: <String>['kill', '12345']),
           FakeCommand(
             command: <String>[
               'xcrun',
@@ -629,7 +615,6 @@ Resolved source packages:
           ],
           processUtils: processUtils,
           logger: testLogger,
-          quiet: false,
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
         expect(
@@ -637,31 +622,17 @@ Resolved source packages:
           contains('''
 Xcode is fetching Swift Package Manager dependencies. This may take several minutes...
   Fetching from https://github.com/apple/swift-algorithms.git (cached)...
-  Fetching from https://github.com/apple/swift-numerics.git (cached)...
-'''),
+  Fetching from https://github.com/apple/swift-numerics.git (cached)...'''),
         );
       });
 
-      testWithoutContext('does not kill process if pid is invalid', () async {
+      testWithoutContext('skips running if already completed or in progress', () async {
         final fs = MemoryFileSystem.test();
         final testLogger = BufferLogger.test();
         const projectPath = 'path/to/project';
         final Directory buildDirectory = fs.directory('$projectPath/build/ios');
         final fakeProcessManager = FakeProcessManager.empty();
         fakeProcessManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'pgrep',
-              '-n',
-              '-f',
-              '-l',
-              'xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
-            ],
-            stdout:
-                'abc /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild '
-                '-clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages '
-                '-resolvePackageDependencies',
-          ),
           FakeCommand(
             command: <String>[
               'xcrun',
@@ -684,164 +655,10 @@ Xcode is fetching Swift Package Manager dependencies. This may take several minu
           ],
           processUtils: processUtils,
           logger: testLogger,
-          quiet: false,
-        );
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      });
-
-      testWithoutContext('does not kill process if command does not match', () async {
-        final fs = MemoryFileSystem.test();
-        final testLogger = BufferLogger.test();
-        const projectPath = 'path/to/project';
-        final Directory buildDirectory = fs.directory('$projectPath/build/ios');
-        final fakeProcessManager = FakeProcessManager.empty();
-        fakeProcessManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'pgrep',
-              '-n',
-              '-f',
-              '-l',
-              'xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
-            ],
-            stdout: '12345 xcodebuild something else',
-          ),
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'xcodebuild',
-              '-clonedSourcePackagesDirPath',
-              '/${buildDirectory.path}/SourcePackages',
-              '-resolvePackageDependencies',
-            ],
-          ),
-        ]);
-        final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
-
-        final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-        await iosProject.prefetchSwiftPackages(
-          xcodebuildProjectCommandArguments: <String>[
-            'xcrun',
-            'xcodebuild',
-            '-clonedSourcePackagesDirPath',
-            '/${buildDirectory.path}/SourcePackages',
-          ],
-          processUtils: processUtils,
-          logger: testLogger,
-          quiet: false,
-        );
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      });
-
-      testWithoutContext('skips running if already completed', () async {
-        final fs = MemoryFileSystem.test();
-        final testLogger = BufferLogger.test();
-        const projectPath = 'path/to/project';
-        final Directory buildDirectory = fs.directory('$projectPath/build/ios');
-        final fakeProcessManager = FakeProcessManager.empty();
-        fakeProcessManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'pgrep',
-              '-n',
-              '-f',
-              '-l',
-              'xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
-            ],
-            exitCode: 1,
-          ),
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'xcodebuild',
-              '-clonedSourcePackagesDirPath',
-              '/${buildDirectory.path}/SourcePackages',
-              '-resolvePackageDependencies',
-            ],
-          ),
-        ]);
-        final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
-
-        final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-        await iosProject.prefetchSwiftPackages(
-          xcodebuildProjectCommandArguments: <String>[
-            'xcrun',
-            'xcodebuild',
-            '-clonedSourcePackagesDirPath',
-            '/${buildDirectory.path}/SourcePackages',
-          ],
-          processUtils: processUtils,
-          logger: testLogger,
-          quiet: false,
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
 
-        await iosProject.prefetchSwiftPackages(
-          xcodebuildProjectCommandArguments: <String>[
-            'xcrun',
-            'xcodebuild',
-            '-clonedSourcePackagesDirPath',
-            '/${buildDirectory.path}/SourcePackages',
-          ],
-          processUtils: processUtils,
-          logger: testLogger,
-          quiet: false,
-        );
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      });
-
-      testWithoutContext('does not print when quiet is true', () async {
-        final fs = MemoryFileSystem.test();
-        final testLogger = BufferLogger.test();
-        const projectPath = 'path/to/project';
-        final Directory buildDirectory = fs.directory('$projectPath/build/ios');
-        final fakeProcessManager = FakeProcessManager.empty();
-        fakeProcessManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'pgrep',
-              '-n',
-              '-f',
-              '-l',
-              'xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
-            ],
-            stdout:
-                '12345 xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
-          ),
-          const FakeCommand(command: <String>['kill', '12345']),
-          FakeCommand(
-            command: <String>[
-              'xcrun',
-              'xcodebuild',
-              '-clonedSourcePackagesDirPath',
-              '/${buildDirectory.path}/SourcePackages',
-              '-resolvePackageDependencies',
-            ],
-            stdout: '''
-Resolve Package Graph
-
-Fetching from https://github.com/apple/swift-algorithms.git (cached)
-
-Fetching from https://github.com/apple/swift-numerics.git (cached)
-
-Creating working copy of package ‘swift-numerics’
-
-Creating working copy of package ‘swift-algorithms’
-
-Checking out 1.2.2 of package ‘swift-algorithms’
-
-Checking out 1.1.1 of package ‘swift-numerics’
-
-
-Resolved source packages:
-  swift-numerics: https://github.com/apple/swift-numerics.git @ 1.1.1
-  swift-algorithms: https://github.com/apple/swift-algorithms.git @ 1.2.2
-''',
-          ),
-        ]);
-        final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
-
-        final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+        // Second call should skip starting a new process
         await iosProject.prefetchSwiftPackages(
           xcodebuildProjectCommandArguments: <String>[
             'xcrun',
@@ -853,84 +670,7 @@ Resolved source packages:
           logger: testLogger,
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
-        expect(testLogger.statusText, isEmpty);
       });
-
-      testWithoutContext(
-        'does not wait for command to complete when waitForCompletion is false',
-        () async {
-          final fs = MemoryFileSystem.test();
-          final testLogger = BufferLogger.test();
-          const projectPath = 'path/to/project';
-          final Directory buildDirectory = fs.directory('$projectPath/build/ios');
-          final fakeProcessManager = FakeProcessManager.empty();
-          final commandCompleter = Completer<void>();
-          fakeProcessManager.addCommands(<FakeCommand>[
-            FakeCommand(
-              command: <String>[
-                'pgrep',
-                '-n',
-                '-f',
-                '-l',
-                'xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
-              ],
-              stdout:
-                  '12345 /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild '
-                  '-clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages '
-                  '-resolvePackageDependencies',
-            ),
-            const FakeCommand(command: <String>['kill', '12345']),
-            FakeCommand(
-              command: <String>[
-                'xcrun',
-                'xcodebuild',
-                '-clonedSourcePackagesDirPath',
-                '/${buildDirectory.path}/SourcePackages',
-                '-resolvePackageDependencies',
-              ],
-              stdout: '''
-Resolve Package Graph
-
-Fetching from https://github.com/apple/swift-algorithms.git (cached)
-
-Fetching from https://github.com/apple/swift-numerics.git (cached)
-
-Creating working copy of package ‘swift-numerics’
-
-Creating working copy of package ‘swift-algorithms’
-
-Checking out 1.2.2 of package ‘swift-algorithms’
-
-Checking out 1.1.1 of package ‘swift-numerics’
-
-
-Resolved source packages:
-  swift-numerics: https://github.com/apple/swift-numerics.git @ 1.1.1
-  swift-algorithms: https://github.com/apple/swift-algorithms.git @ 1.2.2
-''',
-              completer: commandCompleter,
-            ),
-          ]);
-          final processUtils = ProcessUtils(logger: testLogger, processManager: fakeProcessManager);
-
-          final iosProject = FakeIosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
-          await iosProject.prefetchSwiftPackages(
-            xcodebuildProjectCommandArguments: <String>[
-              'xcrun',
-              'xcodebuild',
-              '-clonedSourcePackagesDirPath',
-              '/${buildDirectory.path}/SourcePackages',
-            ],
-            processUtils: processUtils,
-            logger: testLogger,
-            waitForCompletion: false,
-          );
-          expect(fakeProcessManager, hasNoRemainingExpectations);
-          expect(testLogger.statusText, isEmpty);
-          expect(commandCompleter.isCompleted, isFalse);
-          commandCompleter.complete();
-        },
-      );
 
       testWithoutContext('throws exception when resolving fails', () async {
         final fs = MemoryFileSystem.test();
@@ -939,15 +679,6 @@ Resolved source packages:
         final Directory buildDirectory = fs.directory('$projectPath/build/ios');
         final fakeProcessManager = FakeProcessManager.empty();
         fakeProcessManager.addCommands(<FakeCommand>[
-          FakeCommand(
-            command: <String>[
-              'pgrep',
-              '-n',
-              '-f',
-              '-l',
-              'xcodebuild -clonedSourcePackagesDirPath /${buildDirectory.path}/SourcePackages -resolvePackageDependencies',
-            ],
-          ),
           FakeCommand(
             command: <String>[
               'xcrun',
@@ -973,11 +704,11 @@ Resolved source packages:
             ],
             processUtils: processUtils,
             logger: testLogger,
-            quiet: false,
           ),
           throwsToolExit(),
         );
       });
+
       testWithoutContext('prefetchSwiftPackages can run for both platforms', () async {
         final fs = MemoryFileSystem.test();
         final testLogger = BufferLogger.test();
@@ -989,32 +720,12 @@ Resolved source packages:
         fakeProcessManager.addCommands(<FakeCommand>[
           FakeCommand(
             command: <String>[
-              'pgrep',
-              '-n',
-              '-f',
-              '-l',
-              'xcodebuild -clonedSourcePackagesDirPath /${iosBuildDirectory.path}/SourcePackages -resolvePackageDependencies',
-            ],
-            exitCode: 1,
-          ),
-          FakeCommand(
-            command: <String>[
               'xcrun',
               'xcodebuild',
               '-clonedSourcePackagesDirPath',
               '/${iosBuildDirectory.path}/SourcePackages',
               '-resolvePackageDependencies',
             ],
-          ),
-          FakeCommand(
-            command: <String>[
-              'pgrep',
-              '-n',
-              '-f',
-              '-l',
-              'xcodebuild -clonedSourcePackagesDirPath /${macosBuildDirectory.path}/SourcePackages -resolvePackageDependencies',
-            ],
-            exitCode: 1,
           ),
           FakeCommand(
             command: <String>[
@@ -1038,7 +749,6 @@ Resolved source packages:
           ],
           processUtils: processUtils,
           logger: testLogger,
-          quiet: false,
         );
 
         final macosProject = FakeMacOSProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
@@ -1051,7 +761,6 @@ Resolved source packages:
           ],
           processUtils: processUtils,
           logger: testLogger,
-          quiet: false,
         );
         expect(fakeProcessManager, hasNoRemainingExpectations);
       });
