@@ -4,7 +4,10 @@
 
 package io.flutter.view;
 
-/** Factory for creating {@link AccessibilityNodeConfigurator} instances based on {@link AccessibilityBridge.Role}. */
+/**
+ * Factory for creating {@link AccessibilityNodeConfigurator} instances based on {@link
+ * AccessibilityBridge.Role}.
+ */
 public class RoleConfiguratorFactory {
   public static AccessibilityNodeConfigurator getConfigurator(AccessibilityBridge.Role role) {
     switch (role) {

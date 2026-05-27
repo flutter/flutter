@@ -7,8 +7,8 @@ package io.flutter.view;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
- * Configurator for the {@link AccessibilityBridge.Role#MENU} role. Sets the class name to Spinner and
- * indicates it can open a popup.
+ * Configurator for the {@link AccessibilityBridge.Role#MENU} role. Sets the class name to Spinner
+ * and indicates it can open a popup.
  */
 public class MenuRoleConfigurator implements AccessibilityNodeConfigurator {
   @Override
