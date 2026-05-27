@@ -187,122 +187,124 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
     // If any of the encoding structure or length is changed, those locations
     // must be updated (at a minimum).
     std::vector<uint8_t> buffer(num_bytes);
-    int32_t* buffer_int32 = reinterpret_cast<int32_t*>(&buffer[0]);
-    float* buffer_float32 = reinterpret_cast<float*>(&buffer[0]);
 
-    std::vector<std::string> strings;
-    std::vector<std::vector<uint8_t>> string_attribute_args;
-    size_t position = 0;
-    for (const auto& value : update) {
-      // If you edit this code, make sure you update kBytesPerNode
-      // and/or kBytesPerChild above to match the number of values you are
-      // sending.
-      const flutter::SemanticsNode& node = value.second;
-      buffer_int32[position++] = node.id;
-      int64_t flags = flagsToInt64(node.flags);
-      std::memcpy(&buffer_int32[position], &flags, 8);
-      position += 2;
-      buffer_int32[position++] = node.actions;
-      buffer_int32[position++] = node.maxValueLength;
-      buffer_int32[position++] = node.currentValueLength;
-      buffer_int32[position++] = node.textSelectionBase;
-      buffer_int32[position++] = node.textSelectionExtent;
-      buffer_int32[position++] = node.platformViewId;
-      buffer_int32[position++] = node.scrollChildren;
-      buffer_int32[position++] = node.scrollIndex;
-      buffer_int32[position++] = node.traversalParent;
-      buffer_float32[position++] = static_cast<float>(node.scrollPosition);
-      buffer_float32[position++] = static_cast<float>(node.scrollExtentMax);
-      buffer_float32[position++] = static_cast<float>(node.scrollExtentMin);
-      buffer_int32[position++] = static_cast<int32_t>(node.role);
+    if (!buffer.empty()) {
+      int32_t* buffer_int32 = reinterpret_cast<int32_t*>(&buffer[0]);
+      float* buffer_float32 = reinterpret_cast<float*>(&buffer[0]);
 
-      putStringIntoBuffer(node.identifier, buffer_int32, &position, strings);
+      std::vector<std::string> strings;
+      std::vector<std::vector<uint8_t>> string_attribute_args;
+      size_t position = 0;
+      for (const auto& value : update) {
+        // If you edit this code, make sure you update kBytesPerNode
+        // and/or kBytesPerChild above to match the number of values you are
+        // sending.
+        const flutter::SemanticsNode& node = value.second;
+        buffer_int32[position++] = node.id;
+        int64_t flags = flagsToInt64(node.flags);
+        std::memcpy(&buffer_int32[position], &flags, 8);
+        position += 2;
+        buffer_int32[position++] = node.actions;
+        buffer_int32[position++] = node.maxValueLength;
+        buffer_int32[position++] = node.currentValueLength;
+        buffer_int32[position++] = node.textSelectionBase;
+        buffer_int32[position++] = node.textSelectionExtent;
+        buffer_int32[position++] = node.platformViewId;
+        buffer_int32[position++] = node.scrollChildren;
+        buffer_int32[position++] = node.scrollIndex;
+        buffer_int32[position++] = node.traversalParent;
+        buffer_float32[position++] = static_cast<float>(node.scrollPosition);
+        buffer_float32[position++] = static_cast<float>(node.scrollExtentMax);
+        buffer_float32[position++] = static_cast<float>(node.scrollExtentMin);
+        buffer_int32[position++] = static_cast<int32_t>(node.role);
 
-      putStringIntoBuffer(node.label, buffer_int32, &position, strings);
-      putStringAttributesIntoBuffer(node.labelAttributes, buffer_int32,
-                                    &position, string_attribute_args);
+        putStringIntoBuffer(node.identifier, buffer_int32, &position, strings);
 
-      putStringIntoBuffer(node.value, buffer_int32, &position, strings);
-      putStringAttributesIntoBuffer(node.valueAttributes, buffer_int32,
-                                    &position, string_attribute_args);
+        putStringIntoBuffer(node.label, buffer_int32, &position, strings);
+        putStringAttributesIntoBuffer(node.labelAttributes, buffer_int32,
+                                      &position, string_attribute_args);
 
-      putStringIntoBuffer(node.increasedValue, buffer_int32, &position,
-                          strings);
-      putStringAttributesIntoBuffer(node.increasedValueAttributes, buffer_int32,
-                                    &position, string_attribute_args);
+        putStringIntoBuffer(node.value, buffer_int32, &position, strings);
+        putStringAttributesIntoBuffer(node.valueAttributes, buffer_int32,
+                                      &position, string_attribute_args);
 
-      putStringIntoBuffer(node.decreasedValue, buffer_int32, &position,
-                          strings);
-      putStringAttributesIntoBuffer(node.decreasedValueAttributes, buffer_int32,
-                                    &position, string_attribute_args);
+        putStringIntoBuffer(node.increasedValue, buffer_int32, &position,
+                            strings);
+        putStringAttributesIntoBuffer(node.increasedValueAttributes,
+                                      buffer_int32, &position,
+                                      string_attribute_args);
 
-      putStringIntoBuffer(node.hint, buffer_int32, &position, strings);
-      putStringAttributesIntoBuffer(node.hintAttributes, buffer_int32,
-                                    &position, string_attribute_args);
+        putStringIntoBuffer(node.decreasedValue, buffer_int32, &position,
+                            strings);
+        putStringAttributesIntoBuffer(node.decreasedValueAttributes,
+                                      buffer_int32, &position,
+                                      string_attribute_args);
 
-      putStringIntoBuffer(node.tooltip, buffer_int32, &position, strings);
-      putStringIntoBuffer(node.linkUrl, buffer_int32, &position, strings);
-      putStringIntoBuffer(node.locale, buffer_int32, &position, strings);
-      putStringIntoBuffer(node.minValue, buffer_int32, &position, strings);
-      putStringIntoBuffer(node.maxValue, buffer_int32, &position, strings);
+        putStringIntoBuffer(node.hint, buffer_int32, &position, strings);
+        putStringAttributesIntoBuffer(node.hintAttributes, buffer_int32,
+                                      &position, string_attribute_args);
 
-      buffer_int32[position++] = node.headingLevel;
-      buffer_int32[position++] = node.textDirection;
-      buffer_float32[position++] = node.rect.left();
-      buffer_float32[position++] = node.rect.top();
-      buffer_float32[position++] = node.rect.right();
-      buffer_float32[position++] = node.rect.bottom();
-      node.transform.getColMajor(&buffer_float32[position]);
-      position += 16;
-      node.hitTestTransform.getColMajor(&buffer_float32[position]);
-      position += 16;
-      buffer_int32[position++] = node.childrenInTraversalOrder.size();
-      for (int32_t child : node.childrenInTraversalOrder) {
-        buffer_int32[position++] = child;
+        putStringIntoBuffer(node.tooltip, buffer_int32, &position, strings);
+        putStringIntoBuffer(node.linkUrl, buffer_int32, &position, strings);
+        putStringIntoBuffer(node.locale, buffer_int32, &position, strings);
+        putStringIntoBuffer(node.minValue, buffer_int32, &position, strings);
+        putStringIntoBuffer(node.maxValue, buffer_int32, &position, strings);
+
+        buffer_int32[position++] = node.headingLevel;
+        buffer_int32[position++] = node.textDirection;
+        buffer_float32[position++] = node.rect.left();
+        buffer_float32[position++] = node.rect.top();
+        buffer_float32[position++] = node.rect.right();
+        buffer_float32[position++] = node.rect.bottom();
+        node.transform.getColMajor(&buffer_float32[position]);
+        position += 16;
+        node.hitTestTransform.getColMajor(&buffer_float32[position]);
+        position += 16;
+        buffer_int32[position++] = node.childrenInTraversalOrder.size();
+        for (int32_t child : node.childrenInTraversalOrder) {
+          buffer_int32[position++] = child;
+        }
+
+        buffer_int32[position++] = node.childrenInHitTestOrder.size();
+        for (int32_t child : node.childrenInHitTestOrder) {
+          buffer_int32[position++] = child;
+        }
+
+        buffer_int32[position++] = node.customAccessibilityActions.size();
+        for (int32_t child : node.customAccessibilityActions) {
+          buffer_int32[position++] = child;
+        }
       }
-
-      buffer_int32[position++] = node.childrenInHitTestOrder.size();
-      for (int32_t child : node.childrenInHitTestOrder) {
-        buffer_int32[position++] = child;
-      }
-
-      buffer_int32[position++] = node.customAccessibilityActions.size();
-      for (int32_t child : node.customAccessibilityActions) {
-        buffer_int32[position++] = child;
-      }
+      jni_facade_->FlutterViewUpdateSemantics(buffer, strings,
+                                              string_attribute_args);
     }
 
     // custom accessibility actions.
     size_t num_action_bytes = actions.size() * kBytesPerAction;
     std::vector<uint8_t> actions_buffer(num_action_bytes);
-    int32_t* actions_buffer_int32 =
-        reinterpret_cast<int32_t*>(&actions_buffer[0]);
 
-    std::vector<std::string> action_strings;
-    size_t actions_position = 0;
-    for (const auto& value : actions) {
-      // If you edit this code, make sure you update kBytesPerAction
-      // to match the number of values you are
-      // sending.
-      const flutter::CustomAccessibilityAction& action = value.second;
-      actions_buffer_int32[actions_position++] = action.id;
-      actions_buffer_int32[actions_position++] = action.overrideId;
-      putStringIntoBuffer(action.label, actions_buffer_int32, &actions_position,
-                          action_strings);
-      putStringIntoBuffer(action.hint, actions_buffer_int32, &actions_position,
-                          action_strings);
-    }
-
-    // Calling NewDirectByteBuffer in API level 22 and below with a size of zero
-    // will cause a JNI crash.
     if (!actions_buffer.empty()) {
+      int32_t* actions_buffer_int32 =
+          reinterpret_cast<int32_t*>(&actions_buffer[0]);
+
+      std::vector<std::string> action_strings;
+      size_t actions_position = 0;
+      for (const auto& value : actions) {
+        // If you edit this code, make sure you update kBytesPerAction
+        // to match the number of values you are
+        // sending.
+        const flutter::CustomAccessibilityAction& action = value.second;
+        actions_buffer_int32[actions_position++] = action.id;
+        actions_buffer_int32[actions_position++] = action.overrideId;
+        putStringIntoBuffer(action.label, actions_buffer_int32,
+                            &actions_position, action_strings);
+        putStringIntoBuffer(action.hint, actions_buffer_int32,
+                            &actions_position, action_strings);
+      }
+      // Calling NewDirectByteBuffer in API level 22 and below with a size of
+      // zero will cause a JNI crash.
       jni_facade_->FlutterViewUpdateCustomAccessibilityActions(actions_buffer,
                                                                action_strings);
-    }
-
-    if (!buffer.empty()) {
-      jni_facade_->FlutterViewUpdateSemantics(buffer, strings,
-                                              string_attribute_args);
     }
   }
 }
