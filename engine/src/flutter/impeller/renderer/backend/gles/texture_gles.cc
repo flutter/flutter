@@ -649,13 +649,10 @@ bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
 
 // |Texture|
 Scalar TextureGLES::GetYCoordScale() const {
-  switch (GetCoordinateSystem()) {
-    case TextureCoordinateSystem::kUploadFromHost:
-      return 1.0;
-    case TextureCoordinateSystem::kRenderToTexture:
-      return -1.0;
-  }
-  FML_UNREACHABLE();
+  // GLES render-to-texture content is stored top-down via the
+  // vertex-stage y-flip; see
+  // https://github.com/flutter/flutter/issues/186554.
+  return 1.0;
 }
 
 bool TextureGLES::IsWrapped() const {

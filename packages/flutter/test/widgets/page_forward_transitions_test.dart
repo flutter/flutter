@@ -29,8 +29,7 @@ class TestTransition extends AnimatedWidget {
 }
 
 class TestRoute<T> extends PageRoute<T> {
-  TestRoute({required this.child, required RouteSettings settings, this.barrierColor})
-    : super(settings: settings);
+  TestRoute({required this.child, required RouteSettings super.settings, this.barrierColor});
 
   final Widget child;
 
