@@ -20,8 +20,8 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
-import '../convert.dart';
-import '../reporting/reporting.dart';
+import '../macos/swift_package_manager.dart';
+import '../plugins.dart';
 import '../xcode_project.dart';
 
 final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
@@ -73,7 +73,7 @@ class XcodeProjectInterpreter {
   ///
   /// Defaults to installed with sufficient version,
   /// a memory file system, fake platform, buffer logger,
-  /// test [Usage], and test [Terminal].
+  /// test [Analytics], and test [Terminal].
   /// Set [version] to null to simulate Xcode not being installed.
   factory XcodeProjectInterpreter.test({
     required ProcessManager processManager,
@@ -194,7 +194,11 @@ class XcodeProjectInterpreter {
     // All `xcodebuild` project commands will download and resolve Swift packages.
     // We should always prefetch Swift packages before running any `xcodebuild` project command
     // to control the output.
-    await prefetchSwiftPackages(xcodeProject, buildDirectory: buildDirectory, quiet: false);
+    await prefetchSwiftPackagesForProject(
+      xcodeProject,
+      buildDirectory: buildDirectory,
+      quiet: false,
+    );
 
     return _xcodebuildProjectCommandArguments(
       buildDirectory,
@@ -387,117 +391,25 @@ class XcodeProjectInterpreter {
     ], workingDirectory: projectPath);
   }
 
-  /// The process used to fetch Swift packages.
-  Process? _swiftPackageFetchProcess;
-
-  /// The stdout subscription for the Swift package fetch process.
-  StreamSubscription<String>? _swiftPackageFetchStdoutSubscription;
-
-  /// The stderr subscription for the Swift package fetch process.
-  StreamSubscription<String>? _swiftPackageFetchStderrSubscription;
-
   /// Prefetches Swift packages for the given Xcode project.
-  ///
-  /// If a process is already running from a previous Flutter command, kill it before starting
-  /// the command. If the process is already running from the same Flutter command, wait for it to
-  /// complete if [waitForCompletion] is true.
-  ///
-  /// If [quiet] is false, it will print a spinner while the command is running and print logs of
-  /// what Swift packages are being fetched.
-  Future<void> prefetchSwiftPackages(
+  Future<void> prefetchSwiftPackagesForProject(
     XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
     bool quiet = true,
     bool waitForCompletion = true,
   }) async {
-    final String projectPath = xcodeProject.hostAppRoot.path;
-    Status? status;
-    try {
-      final command = <String>[
-        ..._xcodebuildProjectCommandArguments(
-          buildDirectory,
-          // skipPackageUpdatesAndValidation should be false so that when subsequent xcodebuild
-          // commands run, packages should already be resolved, downloaded, updated, and validated.
-          skipPackageUpdatesAndValidation: false,
-        ),
-        '-resolvePackageDependencies',
-      ];
-      if (_swiftPackageFetchProcess == null) {
-        // Remove the `xcrun` prefixes from the command before comparing because the process name
-        // will resolve to the actual xcodebuild path, such as this:
-        // /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild
-        final int xcodebuildIndex = command.indexOf('xcodebuild');
-        if (xcodebuildIndex == -1) {
-          // This should never happen. The _xcodebuildProjectCommandArguments always includes
-          // xcodebuild.
-          throw StateError('Command "${command.join(' ')}" is expected to contain `xcodebuild`.');
-        }
-        final String commandToMatch = command.sublist(xcodebuildIndex).join(' ');
-
-        // Check if process is already running from a previous Flutter command. If it is, kill it
-        // so we don't have the process running twice. When this process is run twice, it'll cause
-        // one to error. The new process will pick up where the old one left off.
-        final RunResult result = await _processUtils.run([
-          'pgrep',
-          '-n', // Select only the newest
-          '-f', // Match against full argument lists
-          '-l', // Print the process name and process ID
-          commandToMatch, // command must be a string rather than a list so it matches on all of it
-        ]);
-        if (result.exitCode == 0) {
-          final String processOutput = result.stdout.trim();
-          // Process output is formatted like this:
-          // 89012 /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -clonedSourcePackagesDirPath...
-          final int? pid = int.tryParse(processOutput.split(' ').firstOrNull ?? '');
-          if (pid != null && processOutput.endsWith(commandToMatch)) {
-            _logger.printTrace(
-              'Swift Package Manager dependencies are already being fetched by PID $pid',
-            );
-            await _processUtils.run(['kill', '$pid']);
-          }
-        }
-      }
-
-      final Process process =
-          _swiftPackageFetchProcess ??
-          await _processUtils.start(command, workingDirectory: projectPath);
-      _swiftPackageFetchProcess ??= process;
-      if (!waitForCompletion) {
-        return;
-      }
-      if (!quiet) {
-        var printFetchWarnings = false;
-        _swiftPackageFetchStdoutSubscription ??= process.stdout
-            .transform(utf8.decoder)
-            .transform(const LineSplitter())
-            .listen((String line) {
-              if (line.startsWith('Fetching')) {
-                status?.cancel();
-                if (!printFetchWarnings) {
-                  _logger.printStatus(
-                    'Xcode is fetching Swift Package Manager dependencies. This may take several minutes...',
-                  );
-                  printFetchWarnings = true;
-                }
-                status = _logger.startProgress('  $line...');
-              }
-            });
-      }
-      final stderrBuffer = StringBuffer();
-      _swiftPackageFetchStderrSubscription ??= process.stderr
-          .transform<String>(const Utf8Decoder(reportErrors: false))
-          .listen(stderrBuffer.write);
-
-      final int exitCode = await process.exitCode.whenComplete(() async {
-        await _swiftPackageFetchStdoutSubscription?.cancel();
-        await _swiftPackageFetchStderrSubscription?.cancel();
-      });
-      if (exitCode != 0) {
-        throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrBuffer');
-      }
-    } finally {
-      status?.cancel();
-    }
+    await xcodeProject.prefetchSwiftPackages(
+      xcodebuildProjectCommandArguments: _xcodebuildProjectCommandArguments(
+        buildDirectory,
+        // skipPackageUpdatesAndValidation should be false so that when subsequent xcodebuild
+        // commands run, packages should already be resolved, downloaded, updated, and validated.
+        skipPackageUpdatesAndValidation: false,
+      ),
+      processUtils: _processUtils,
+      logger: _logger,
+      quiet: quiet,
+      waitForCompletion: waitForCompletion,
+    );
   }
 
   Future<XcodeProjectInfo?> getInfo(
@@ -530,7 +442,75 @@ class XcodeProjectInterpreter {
       // User configuration error, tool exit instead of crashing.
       throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
     }
-    return XcodeProjectInfo.fromXcodeBuildOutput(result.toString(), _logger);
+    return XcodeProjectInfo.fromXcodeBuildOutput(
+      result.toString(),
+      _logger,
+      ignoredSchemes: await _ignoredSwiftPackageSchemes(xcodeProject, buildDirectory),
+    );
+  }
+
+  /// Returns scheme-name candidates for Swift packages that should be excluded from
+  /// [XcodeProjectInfo.schemes] to avoid expensive iterations through the scheme list, such as
+  /// during `flutter clean` or during [IosProject.containsWatchCompanion].
+  ///
+  /// Local Swift packages are automatically included by Xcode in `xcodebuild -list` despite not
+  /// being declared in the host `.xcodeproj`. Remote Swift packages may also be included (see
+  /// [_swiftPackageCheckoutSchemes]).
+  ///
+  /// Covers Flutter's generated SwiftPM packages, plugin names in snake_case
+  /// and dashed forms, and transitive SwiftPM checkout schemes.
+  Future<Set<String>> _ignoredSwiftPackageSchemes(
+    XcodeBasedProject xcodeProject,
+    Directory buildDirectory,
+  ) async {
+    final ignoredSchemes = <String>{
+      kFlutterGeneratedPluginSwiftPackageName,
+      kFlutterGeneratedFrameworkSwiftPackageTargetName,
+      ..._swiftPackageCheckoutSchemes(buildDirectory),
+    };
+    try {
+      for (final Plugin plugin in await xcodeProject.getPlugins()) {
+        ignoredSchemes.add(plugin.name);
+        ignoredSchemes.add(plugin.name.replaceAll('_', '-'));
+      }
+    } on Object catch (error) {
+      _logger.printTrace('Failed to get plugins while filtering Xcode schemes: $error');
+    }
+    return ignoredSchemes;
+  }
+
+  /// Returns scheme names contributed by direct and transitive Swift package checkouts.
+  ///
+  /// When a Swift package ships its own `.swiftpm/xcode/xcshareddata/xcschemes/`
+  /// directory, Xcode auto-merges those schemes into the host project's scheme
+  /// list, so they appear in `xcodebuild -list` despite not being declared in
+  /// the host `.xcodeproj`. See
+  /// https://www.jessesquires.com/blog/2025/03/10/swiftpm-schemes-in-xcode/.
+  Set<String> _swiftPackageCheckoutSchemes(Directory buildDirectory) {
+    final Directory checkoutsDirectory = buildDirectory
+        .childDirectory(kSwiftPackageCacheDirectoryName)
+        .childDirectory('checkouts');
+    if (!checkoutsDirectory.existsSync()) {
+      return const <String>{};
+    }
+    final schemes = <String>{};
+    for (final Directory checkoutDirectory
+        in checkoutsDirectory.listSync().whereType<Directory>()) {
+      final Directory schemeDirectory = checkoutDirectory
+          .childDirectory('.swiftpm')
+          .childDirectory('xcode')
+          .childDirectory('xcshareddata')
+          .childDirectory('xcschemes');
+      if (!schemeDirectory.existsSync()) {
+        continue;
+      }
+      for (final File schemeFile in schemeDirectory.listSync().whereType<File>()) {
+        if (_fileSystem.path.extension(schemeFile.path) == '.xcscheme') {
+          schemes.add(_fileSystem.path.basenameWithoutExtension(schemeFile.path));
+        }
+      }
+    }
+    return schemes;
   }
 }
 
@@ -647,7 +627,17 @@ class XcodeProjectInfo {
   const XcodeProjectInfo(this.targets, this.buildConfigurations, this.schemes, Logger logger)
     : _logger = logger;
 
-  factory XcodeProjectInfo.fromXcodeBuildOutput(String output, Logger logger) {
+  /// Parses the output of `xcodebuild -list`.
+  ///
+  /// [ignoredSchemes] is matched case-insensitively against parsed schemes.
+  factory XcodeProjectInfo.fromXcodeBuildOutput(
+    String output,
+    Logger logger, {
+    Set<String> ignoredSchemes = const <String>{},
+  }) {
+    final ignoredSchemeLookup = <String>{
+      for (final String scheme in ignoredSchemes) scheme.toLowerCase(),
+    };
     final targets = <String>[];
     final buildConfigurations = <String>[];
     final schemes = <String>[];
@@ -668,6 +658,7 @@ class XcodeProjectInfo {
       }
       collector?.add(line.trim());
     }
+    schemes.removeWhere((String scheme) => ignoredSchemeLookup.contains(scheme.toLowerCase()));
     if (schemes.isEmpty) {
       schemes.add('Runner');
     }

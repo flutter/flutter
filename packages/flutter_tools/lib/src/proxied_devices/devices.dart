@@ -119,7 +119,7 @@ class ProxiedDevices extends PollingDeviceDiscovery {
       enableDdsProxy: _enableDdsProxy,
       category: Category.fromString(_cast<String>(device['category'])),
       platformType: PlatformType.fromString(_cast<String>(device['platformType'])),
-      targetPlatform: getTargetPlatformForName(_cast<String>(device['platform'])),
+      targetPlatform: TargetPlatform.fromName(_cast<String>(device['platform'])),
       ephemeral: _cast<bool>(device['ephemeral']),
       isConnected: _cast<bool?>(device['isConnected']) ?? true,
       connectionInterface: connectionInterface ?? DeviceConnectionInterface.attached,
@@ -481,7 +481,7 @@ class ProxiedDevice extends Device {
 
     final String id = _cast<String>(
       await connection.sendRequest('device.uploadApplicationPackage', <String, Object>{
-        'targetPlatform': getNameForTargetPlatform(_targetPlatform),
+        'targetPlatform': _targetPlatform.getName(),
         'applicationBinary': fileName,
       }),
     );

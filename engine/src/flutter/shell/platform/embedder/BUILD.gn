@@ -249,6 +249,7 @@ test_fixtures("fixtures") {
     "fixtures/dpr_noxform.png",
     "fixtures/dpr_xform.png",
     "fixtures/gradient.png",
+    "fixtures/impeller_render_platform_view.png",
     "fixtures/impeller_test.png",
     "fixtures/impeller_text_test.png",
     "fixtures/vk_dpr_noxform.png",

@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
@@ -240,7 +239,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -248,7 +247,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -308,7 +307,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'reload-barred',
-            targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -316,7 +315,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -361,7 +360,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -369,7 +368,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
@@ -579,11 +578,8 @@ void main() {
       final Event event = fakeAnalytics.sentEvents.first;
       expect(event.eventName.label, 'hot_runner_info');
       expect(event.eventData['label'], 'reload');
-      expect(
-        event.eventData['targetPlatform'],
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-      );
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+      expect(event.eventData['targetPlatform'], TargetPlatform.android_arm.getName());
+    }),
   );
 
   testUsingContext(
@@ -662,7 +658,6 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(),
         ProjectFileInvalidator: () => FakeProjectFileInvalidator(),
-        Usage: () => TestUsage(),
       },
     ),
   );
@@ -729,11 +724,8 @@ void main() {
       expect(hotRunnerInfoEvents, hasLength(1));
       final Event newEvent = hotRunnerInfoEvents.first;
       expect(newEvent.eventData['label'], 'restart');
-      expect(
-        newEvent.eventData['targetPlatform'],
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-      );
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+      expect(newEvent.eventData['targetPlatform'], TargetPlatform.android_arm.getName());
+    }),
   );
 
   testUsingContext(
@@ -950,7 +942,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: true,
@@ -958,7 +950,7 @@ void main() {
         ),
       );
       expect(fakeVmServiceHost?.hasRemainingExpectations, false);
-    }, overrides: <Type, Generator>{Usage: () => TestUsage()}),
+    }),
   );
 
   testUsingContext(
