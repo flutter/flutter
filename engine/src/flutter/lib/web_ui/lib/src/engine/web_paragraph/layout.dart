@@ -71,6 +71,15 @@ class TextLayout {
     wrapText(width);
     formatLines(width);
 
+    if (paragraph.text.isNotEmpty) {
+      // When the paragraph is empty, instead of setting the bounds to a zero rect, we let it unset.
+      // This will make it easy to detect when there's a bug in our painting pipeline that's trying
+      // to paint an empty paragraph.
+
+      // Calculate the actual paint bounds of the paragraph.
+      _calculatePaintBounds();
+    }
+
     // TODO(jlavrova): Optimize. If lines are the same as the previous layout, we don't need to
     // clear the paint cache.
     paragraph.clearPaintCache();
@@ -381,15 +390,7 @@ class TextLayout {
             (line.visualBlocks.last as TextBlock).whitespacesWidth = trailingSpacesWidth;
           }
 
-          // Line always counts multipled metrics (no need for the others)
-          line.fontBoundingBoxAscent = math.max(
-            line.fontBoundingBoxAscent,
-            block.multipliedFontBoundingBoxAscent,
-          );
-          line.fontBoundingBoxDescent = math.max(
-            line.fontBoundingBoxDescent,
-            block.multipliedFontBoundingBoxDescent,
-          );
+          line.updateBoundingBox(block);
           blockWidth = block.advance.width;
         }
 
@@ -420,6 +421,7 @@ class TextLayout {
         // We place the ellipsis block at the beginning of the line (for RTL paragraph)
         line.visualBlocks.insert(0, ellipsisBlock);
       }
+      line.updateBoundingBox(ellipsisBlock);
     }
 
     // Now when we calculated all line metrics we have to correct placeholders that depend on it
@@ -428,9 +430,7 @@ class TextLayout {
         continue;
       }
       block.calculatePlaceholderTop(line.fontBoundingBoxAscent, line.fontBoundingBoxDescent);
-      // Line always counts multipled metrics (no need for the others)
-      line.fontBoundingBoxAscent = math.max(line.fontBoundingBoxAscent, block.ascent);
-      line.fontBoundingBoxDescent = math.max(line.fontBoundingBoxDescent, block.descent);
+      line.updateBoundingBox(block);
     }
 
     line.advance = ui.Rect.fromLTWH(
@@ -482,7 +482,23 @@ class TextLayout {
     }
   }
 
-  static double epsilon = 0.001;
+  void _calculatePaintBounds() {
+    double left = double.infinity;
+    double top = double.infinity;
+    double right = double.negativeInfinity;
+    double bottom = double.negativeInfinity;
+
+    for (final TextLine line in lines) {
+      left = math.min(left, line.formattingShift + line.paintBoundsLeft);
+      top = math.min(top, line.baseline - line.paintBoundsAscent);
+      right = math.max(right, line.formattingShift + line.paintBoundsRight);
+      bottom = math.max(bottom, line.baseline + line.paintBoundsDescent);
+    }
+
+    paragraph.paintBounds = ui.Rect.fromLTRB(left, top, right, bottom);
+  }
+
+  static const epsilon = 0.001;
 
   List<ui.TextBox> getBoxesForRange(
     int start,
@@ -940,21 +956,17 @@ abstract class WebCluster {
   int get endInSpan;
 
   // TODO(mdebbar): DISCUSS:
-  // Cluster's `bounds` and `advance` are relative to the span, which isn't very useful
-  // most of the time. Should we hide those and only show `width`/`height` since those
+  // Cluster's `advance` is relative to the span, which isn't very useful
+  // most of the time. Should we hide it and only show `width`/`height` since those
   // are still useful?
-  // Callsites that need `bounds` and `advance` are usually performing some kind of
+  // Callsites that need `advance` are usually performing some kind of
   // coordinate conversion to make them relative to the line, for example. We should
   // encapsulate that logic here and make it convenient to use.
-  ui.Rect get bounds;
-
   ui.Rect get advance;
 
   ParagraphSpan get span;
 
   WebTextStyle get style;
-
-  void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y});
 
   void addToContext(DomCanvasRenderingContext2D context, double x, double y);
 
@@ -979,26 +991,13 @@ class TextCluster extends WebCluster {
   final int endInSpan;
 
   @override
-  late final ui.Rect bounds = span.getClusterBounds(this);
-  @override
   late final ui.Rect advance = span.getClusterSelection(this);
 
   final DomTextCluster _cluster;
 
   @override
-  void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y}) {
-    context.fillTextCluster(
-      _cluster,
-      /*left:*/ 0,
-      /*top:*/ span.fontBoundingBoxAscent,
-      // TODO(mdebbar): Create a JS TextClusterOptions object instead of a Dart Map
-      <String, double>{'x': x, 'y': y},
-    );
-  }
-
-  @override
   void addToContext(DomCanvasRenderingContext2D context, double x, double y) {
-    context.fillTextCluster(_cluster, /*left:*/ x, /*top:*/ y + span.fontBoundingBoxAscent);
+    context.fillTextCluster(_cluster, /*left:*/ x, /*top:*/ y);
   }
 
   @override
@@ -1024,14 +1023,7 @@ class EmptyCluster extends WebCluster {
   final int endInSpan = 0;
 
   @override
-  late final ui.Rect bounds = ui.Rect.fromLTWH(0, 0, 0, height);
-  @override
   late final ui.Rect advance = ui.Rect.fromLTWH(0, 0, 0, height);
-
-  @override
-  void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y}) {
-    throw UnsupportedError('We should not call "fillOnContext" on an EmptyCluster');
-  }
 
   @override
   String toString() {
@@ -1059,16 +1051,7 @@ class PlaceholderCluster extends WebCluster {
   WebTextStyle get style => span.style;
 
   @override
-  late final ui.Rect bounds = ui.Rect.fromLTWH(0, 0, span.width, span.height);
-
-  @override
-  // For placeholders bounds == advance
-  ui.Rect get advance => bounds;
-
-  @override
-  void fillOnContext(DomCanvasRenderingContext2D context, {required double x, required double y}) {
-    // No-op. Placeholders don't draw anything.
-  }
+  late final ui.Rect advance = ui.Rect.fromLTWH(0, 0, span.width, span.height);
 
   @override
   void addToContext(DomCanvasRenderingContext2D context, double x, double y) {
@@ -1149,6 +1132,11 @@ class TextBlock extends LineBlock {
 
   @override
   late final ui.Rect advance = span.getBlockSelection(this);
+
+  late final ui.Rect paintBounds = span.getBlockBounds(this);
+
+  double get paintBoundsAscent => -paintBounds.top;
+  double get paintBoundsDescent => paintBounds.bottom;
 
   @override
   double spanShiftFromLineStart;
@@ -1291,11 +1279,15 @@ class TextLine {
       unscaledAscent: fontBoundingBoxAscent,
       height: advance.height,
       width: advance.width,
+      // TODO(jlavrova): This should be set to `formattingShift`, right?
+      //                 `advance.left` is always zero.
       left: advance.left,
-      baseline: advance.top + fontBoundingBoxAscent,
+      baseline: baseline,
       lineNumber: lineNumber,
     );
   }
+
+  double get baseline => advance.top + fontBoundingBoxAscent;
 
   double get height => fontBoundingBoxAscent + fontBoundingBoxDescent;
 
@@ -1310,10 +1302,43 @@ class TextLine {
   ui.Rect advance = ui.Rect.zero;
   double fontBoundingBoxAscent = 0.0;
   double fontBoundingBoxDescent = 0.0;
+
+  double paintBoundsAscent = 0.0;
+  double paintBoundsDescent = 0.0;
+  double paintBoundsLeft = double.infinity;
+  double paintBoundsRight = double.negativeInfinity;
+
   double formattingShift = 0.0; // For centered or right aligned text
   double trailingSpacesWidth = 0.0;
 
+  double get fullWidth => advance.width + formattingShift + trailingSpacesWidth;
+
   List<LineBlock> visualBlocks = <LineBlock>[];
+
+  void updateBoundingBox(LineBlock block) {
+    if (block is TextBlock) {
+      // Line always counts multipled metrics.
+      fontBoundingBoxAscent = math.max(
+        fontBoundingBoxAscent,
+        block.multipliedFontBoundingBoxAscent,
+      );
+      fontBoundingBoxDescent = math.max(
+        fontBoundingBoxDescent,
+        block.multipliedFontBoundingBoxDescent,
+      );
+      paintBoundsAscent = math.max(paintBoundsAscent, block.paintBoundsAscent);
+      paintBoundsDescent = math.max(paintBoundsDescent, block.paintBoundsDescent);
+      paintBoundsLeft = math.min(paintBoundsLeft, block.paintBounds.left);
+      paintBoundsRight = math.max(paintBoundsRight, block.paintBounds.right);
+    } else if (block is PlaceholderBlock) {
+      fontBoundingBoxAscent = math.max(fontBoundingBoxAscent, block.ascent);
+      fontBoundingBoxDescent = math.max(fontBoundingBoxDescent, block.descent);
+      // There's no need to update paint bounds because placeholders aren't painted by the
+      // paragraph.
+    } else {
+      throw UnsupportedError('Unknown block type: $block');
+    }
+  }
 }
 
 extension DomTextMetricsExtension on DomTextMetrics {
