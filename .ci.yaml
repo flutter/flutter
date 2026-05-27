@@ -25,6 +25,7 @@ platform_properties:
       os: Ubuntu
       cores: "8"
       device_type: none
+      cpu: x86
       ignore_flakiness: "true"
 
   linux:
@@ -35,6 +36,7 @@ platform_properties:
         ]
       os: Ubuntu
       cores: "8"
+      cpu: x86
       device_type: none
 
   # The current android emulator config names can be found here:
