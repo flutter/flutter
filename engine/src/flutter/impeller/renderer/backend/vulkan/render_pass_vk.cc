@@ -250,8 +250,18 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
                          : vk::ImageLayout::eShaderReadOnlyOptimal);
   }
   if (color_image_vk_) {
+    // Mirror the Vulkan render pass's `finalLayout` for the color attachment
+    // (see ComputeFinalLayout in render_pass_builder_vk.cc): swapchain and
+    // MSAA targets stay in eGeneral, but a non-swapchain, single-sampled
+    // color attachment transitions to eShaderReadOnlyOptimal on
+    // endRenderPass. Tracking it as eGeneral here desyncs the bookkeeping
+    // and produces an incorrect oldLayout on the next barrier (caught by
+    // Vulkan validation as VUID-vkCmdDraw-None-09600).
     TextureVK::Cast(*color_image_vk_)
-        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
+        .SetLayoutWithoutEncoding(
+            (is_swapchain || sample_count != SampleCount::kCount1)
+                ? vk::ImageLayout::eGeneral
+                : vk::ImageLayout::eShaderReadOnlyOptimal);
   }
 
   // Set the initial viewport.
@@ -268,8 +278,8 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   command_buffer_vk_.setScissor(0, 1, &scissor);
 
   // Set the initial stencil reference.
-  command_buffer_vk_.setStencilReference(
-      vk::StencilFaceFlagBits::eVkStencilFrontAndBack, 0u);
+  command_buffer_vk_.setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack,
+                                         0u);
 
   is_valid_ = true;
 }
@@ -387,8 +397,8 @@ void RenderPassVK::SetStencilReference(uint32_t value) {
     return;
   }
   current_stencil_ = value;
-  command_buffer_vk_.setStencilReference(
-      vk::StencilFaceFlagBits::eVkStencilFrontAndBack, value);
+  command_buffer_vk_.setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack,
+                                         value);
 }
 
 // |RenderPass|

@@ -1647,6 +1647,41 @@ Future<void> render_impeller_image_snapshot_test() async {
 }
 
 @pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
+void render_impeller_platform_view() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    final builder = SceneBuilder();
+
+    // Background
+    builder.addPicture(
+      Offset.zero,
+      createColoredBox(const Color.fromARGB(255, 128, 128, 128), const Size(800.0, 600.0)),
+    );
+
+    // The top bar and the platform view are pushed to the side.
+    builder.pushOffset(100.0, 0.0);
+
+    // Platform view offset from the top
+    builder.pushOffset(0.0, 150.0);
+    builder.addPlatformView(1, width: 700.0, height: 450.0);
+    builder.pop();
+
+    // Top bar
+    builder.addPicture(
+      Offset.zero,
+      createColoredBox(const Color.fromARGB(255, 255, 0, 0), const Size(800.0, 150.0)),
+    );
+
+    builder.pop();
+
+    signalNativeTest(); // Signal 2
+    PlatformDispatcher.instance.views.first.render(builder.build());
+  };
+  signalNativeTest(); // Signal 1
+  PlatformDispatcher.instance.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
 void testSendViewFocusEvent() {
   PlatformDispatcher.instance.onViewFocusChange = (ViewFocusEvent event) {
     notifyStringValue('${event.viewId} ${event.state} ${event.direction}');
