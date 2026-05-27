@@ -67,7 +67,7 @@ TEST_P(TextureGLESTest, CanSetSyncFence) {
   ASSERT_FALSE(sync_fence.has_value());
 }
 
-TEST_P(TextureGLESTest, TextueDtorDeletesFence) {
+TEST_P(TextureGLESTest, TextureDtorDeletesFence) {
   ContextGLES& context_gles = ContextGLES::Cast(*GetContext());
   if (!context_gles.GetReactor()
            ->GetProcTable()
