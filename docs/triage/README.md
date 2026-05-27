@@ -8,7 +8,7 @@ PRs are triaged directly by teams during secondary triage, and assigned reviewer
 
 # Primary issue triage process
 
-The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20no%3Aassignee%20-label%3A%22will%20need%20additional%20triage%22%20-label%3Ateam-devexp%2Cteam-accessibility%2Cteam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-framework%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-text-input) as described in this section, so as to make that list empty.
+The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20no%3Aassignee%20-label%3A%22will%20need%20additional%20triage%22%20-label%3Ateam-devexp%2Cteam-accessibility%2Cteam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-fluttergpu%2Cteam-framework%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-text-input) as described in this section, so as to make that list empty.
 
 _See also: [Issue triage reports](https://github.com/flutter/flutter/wiki/Issue-triage-reports)_
 
@@ -16,9 +16,9 @@ _See also: [Issue triage reports](https://github.com/flutter/flutter/wiki/Issue-
 
 To triage an issue, first look at the bug report, and try to understand what the described problem is. Edit the original comment to remove boilerplate that the bug reporter didn't remove. Edit the original comment to add backticks (\`\`\`) around blocks of stack traces, code, the output of shell scripts like `flutter doctor`, etc. Ensure that the title is a meaningful summary of the issue. These changes make the bug much easier to manage.
 
-If their report is **unclear**, doesn't give sufficient steps to reproduce, or is otherwise lacking in sufficient detail for us to act on it, add a polite comment asking for additional information, add the `waiting for customer response` label, then skip the remaining steps.
+If their report is **unclear**, doesn't give sufficient steps to reproduce, or is otherwise lacking in sufficient detail for us to act on it, add a polite comment asking for additional information, add the `waiting for response` label, then skip the remaining steps.
 
-If the bug is **still unclear** -- we have previously asked for more detail, and the bug reporter has had a chance to provide additional feedback, but has not been able to do so in a way that makes the bug actionable -- either apologize for us not being able to fix it and then close the bug, or add the `waiting for customer response` label, depending on your confidence that the reporter will be able to eventually provide sufficient detail. Then, skip the remaining steps. It is fine to be aggressive in closing bugs where the issue is not clear, because we have plenty of other issues where the bug _is_ clear and there's really no value to us in having low-quality bugs open in our bug database.
+If the bug is **still unclear** -- we have previously asked for more detail, and the bug reporter has had a chance to provide additional feedback, but has not been able to do so in a way that makes the bug actionable -- either apologize for us not being able to fix it and then close the bug, or add the `waiting for response` label, depending on your confidence that the reporter will be able to eventually provide sufficient detail. Then, skip the remaining steps. It is fine to be aggressive in closing bugs where the issue is not clear, because we have plenty of other issues where the bug _is_ clear and there's really no value to us in having low-quality bugs open in our bug database.
 
 If the issue describes something that you know for a fact has been **fixed** since the bug report was filed, add a cheerful comment saying so, close the issue, and skip the remaining steps.
 
@@ -62,7 +62,7 @@ When closing an issue because it is a help request rather than an actionable iss
 
 #### Issues in other products.
 
-If an issue is in a product that is not part of the Flutter project, such as a third-party package, close the issue with a comment suggesting that the reporter file the issue with the authors of that product, and add `r: invalid`. However, if there's a reason to believe that an issue involving a third-party product is *caused* by Flutter (for exmaple, a tool or engine change that unexpectedly breaks a third-party plugin), don't close it, and triage it based on the potential Flutter cause.
+If an issue is in a product that is not part of the Flutter project, such as a third-party package, close the issue with a comment suggesting that the reporter file the issue with the authors of that product, and add `r: invalid`. However, if there's a reason to believe that an issue involving a third-party product is *caused* by Flutter (for example, a tool or engine change that unexpectedly breaks a third-party plugin), don't close it, and triage it based on the potential Flutter cause.
 
 ### Labels
 
@@ -84,6 +84,7 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about a codelab, add `team-codelab`.
 - If it's about the release process or tooling (e.g., `packages_autoroller`), add `team-infra` and `infra: release`.
 - If it's about the Flutter team's CI or infrastructure, add `team-infra`.
+- If it's about Flutter GPU (the `flutter_gpu` Dart library or its native bindings), add `team-fluttergpu`.
 - If it's about Impeller, add `team-engine`.
 - If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`. And:
   - if it's specific to a single platform, also add that platform's `fyi-*` label.
@@ -230,7 +231,7 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-accessibility%2Cfyi-accessibility+-label%3Atriaged-accessibility+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-accessibility+label%3AP0+sort%3Aupdated-asc+)
-- [Package PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+accessibility%22+sort%3Aupdated-asc+-is%3Adraft+)
+- [Package PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22a%3A+accessibility%22+sort%3Aupdated-asc+-is%3Adraft+-label%3A%22waiting+for+response%22)
 
 ### Android platform team (`team-android`)
 
@@ -245,7 +246,7 @@ For more guidance on reviewing PRs, see [Tree Hygiene](../contributing/Tree-hygi
 
 ### Design Languages team (`team-design`)
 
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-design%2Cfyi-design+-label%3Atriaged-design+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+-label%3A%22waiting+for+customer+response%22+)
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-design%2Cfyi-design+-label%3Atriaged-design+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+-label%3A%22waiting+for+response%22+)
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-design+label%3AP0+sort%3Aupdated-asc)
 - [Design Languages PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3A%22f%3A+material+design%22%2C%22f%3A+cupertino%22+sort%3Aupdated-asc+draft%3Afalse)
 
@@ -268,15 +269,21 @@ In addition, consider these issues that fall under another team's triage, but ar
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-engine+label%3AP0+sort%3Aupdated-asc)
 - [Buildroot PRs](https://github.com/flutter/buildroot/pulls)
 - [Approved PRs that have not yet landed](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+-label%3A%22Work+in+progress+%28WIP%29%22+review%3Aapproved+NOT+%22Roll+Skia%22+-label%3Aplatform-web+sort%3Acreated-asc+label%3Aengine)
-- [PRs awaiting review](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+-label%3A%22Work+in+progress+%28WIP%29%22+-label%3A%22waiting+for+tree+to+go+green%22+-label%3Aplatform-web+-review%3Aapproved+-label%3A%22waiting+for+customer+response%22+NOT+%22Roll+Skia%22+NOT+%22Roll+Dart%22+NOT+%22Roll+Fuchsia%22+sort%3Aupdated-asc+-label%3Aplatform-web+label%3Aengine)
-- [Draft PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+-label%3A%22waiting+for+tree+to+go+green%22+-label%3Aplatform-web+-review%3Aapproved+-label%3A%22waiting+for+customer+response%22+NOT+%22Roll+Skia%22+sort%3Aupdated-asc+-label%3Aplatform-web+draft%3Atrue+label%3Aengine)
+- [PRs awaiting review](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+-label%3A%22Work+in+progress+%28WIP%29%22+-label%3A%22waiting+for+tree+to+go+green%22+-label%3Aplatform-web+-review%3Aapproved+-label%3A%22waiting+for+response%22+NOT+%22Roll+Skia%22+NOT+%22Roll+Dart%22+NOT+%22Roll+Fuchsia%22+sort%3Aupdated-asc+-label%3Aplatform-web+label%3Aengine)
+- [Draft PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+-label%3A%22waiting+for+tree+to+go+green%22+-label%3Aplatform-web+-review%3Aapproved+-label%3A%22waiting+for+response%22+NOT+%22Roll+Skia%22+sort%3Aupdated-asc+-label%3Aplatform-web+draft%3Atrue+label%3Aengine)
+
+### Flutter GPU team (`team-fluttergpu`)
+
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-fluttergpu%2Cfyi-fluttergpu+-label%3Atriaged-fluttergpu+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
+- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-fluttergpu+label%3AP0+sort%3Aupdated-asc)
+- [PRs awaiting review](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3Ateam-fluttergpu%2Cfyi-fluttergpu+-review%3Aapproved+-label%3A%22waiting+for+response%22+sort%3Aupdated-asc)
 
 ### Framework team (`team-framework`)
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%20label%3AP0%20sort%3Aupdated-desc)
-- [Framework PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+draft%3Afalse+sort%3Aupdated-desc+)
-- [Framework-owned Package PR list](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3A%22p%3A+two_dimensional_scrollables%22%2C%22p%3A+go_router%22%2C%22p%3A+go_router_builder%22%2C%22p%3A+google_fonts%22%2C%22p%3A+animation%22%2C%22p%3A+animations%22%2C%22p%3A+cupertino_icons%22%2C%22p%3A+flutter_lints%22+)
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2Cfyi-framework%20-label%3Atriaged-framework%20-label%3A%22will%20need%20additional%20triage%22%20-label%3A%22waiting%20for%20customer%20response%22%20sort%3Aupdated-desc)
+- [Framework PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+-label%3A%22a%3A+text+input%22+draft%3Afalse+sort%3Aupdated-desc+)
+- [Framework-owned Package PR list](https://github.com/flutter/packages/pulls?q=sort%3Aupdated-desc+is%3Aopen+is%3Apr+label%3A%22triage-framework%22)
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2Cfyi-framework%20-label%3Atriaged-framework%20-label%3A%22will%20need%20additional%20triage%22%20-label%3A%22waiting%20for%20response%22%20sort%3Aupdated-desc)
 
 ### Infrastructure team (`team-infra`)
 
@@ -285,8 +292,8 @@ See the [Flutter Infra Team Triage](./Infra-Triage.md) page.
 ### iOS and macOS platform team (`team-ios` and `team-macos`)
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios%2Cteam-macos+label%3AP0+sort%3Aupdated-asc+)
-- [iOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios%2Cfyi-ios+-label%3Atriaged-ios+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+customer+response%22+sort%3Aupdated-asc+)
-- [macOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-macos%2Cfyi-macos+-label%3Atriaged-macos+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+customer+response%22+sort%3Aupdated-asc)
+- [iOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-ios%2Cfyi-ios+-label%3Atriaged-ios+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+response%22+sort%3Aupdated-asc+)
+- [macOS incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-macos%2Cfyi-macos+-label%3Atriaged-macos+-label%3A%22will+need+additional+triage%22+-label%3A%22waiting+for+response%22+sort%3Aupdated-asc)
 - [Apple news](https://developer.apple.com/news) - check for updates that might affect us.
 - [hackers-ios channel on Discord](https://discord.com/channels/608014603317936148/846507953959862273)
 - [hackers-desktop channel on Discord](https://discord.com/channels/608014603317936148/608020180177780791)
@@ -308,8 +315,10 @@ PRs are reviewed weekly across the framework, packages, and engine repositories:
 ### Text Input team (`team-text-input`)
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3A%22a%3A%20text%20input%22%2C%22f%3A%20selection%22%2Cteam-text-input%2Cfyi-text-input%20sort%3Aupdated-asc%20label%3AP0)
-- [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2C%22f%3A+selection%22%2Cteam-text-input%2Cfyi-text-input)
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Ateam-text-input%2Cfyi-text-input%20no%3Aassignee%20-label%3Atriaged-text-input%20-label%3A%22waiting%20for%20customer%20response%22)
+- [PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+sort%3Acreated-desc+draft%3Afalse+label%3A%22a%3A+text+input%22%2C%22f%3A+selection%22%2Cteam-text-input%2Cfyi-text-input+-label%3A%22waiting+for+response%22)
+  - Make sure that any PR that still needs review by a platform team has the appropriate `team-<platform>` label(s) on it, so that it shows up in the regular platform team triages. Once reviewed, the platform team can add the `triaged-<platform>` label to remove the PR from their triage queue.
+  - When finishing a PR review (and no other platform team review is needed), add the `waiting for response` label on it, so that it is filtered out of the `team-text-input` PR triage queue.
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aopen%20is%3Aissue%20label%3Ateam-text-input%2Cfyi-text-input%20no%3Aassignee%20-label%3Atriaged-text-input%20-label%3A%22waiting%20for%20response%22)
 
 ### Flutter Tool team (`team-tool`)
 

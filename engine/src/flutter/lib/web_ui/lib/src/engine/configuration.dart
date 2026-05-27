@@ -146,13 +146,11 @@ class FlutterConfiguration {
   }
 
   FlutterConfiguration withOverrides(JsFlutterConfiguration? overrides) {
-    final newJsConfig =
-        objectConstructor.assign(
-              <String, Object>{}.jsify(),
-              _configuration.jsify(),
-              overrides.jsify(),
-            )
-            as JsFlutterConfiguration;
+    final newJsConfig = objectConstructor.assign(
+      <String, Object>{}.jsify(),
+      _configuration.jsify(),
+      overrides.jsify(),
+    ) as JsFlutterConfiguration;
     final newConfig = FlutterConfiguration();
     newConfig._configuration = newJsConfig;
     return newConfig;
@@ -193,14 +191,18 @@ class FlutterConfiguration {
   // runtime. They must be static constants for the compiler to remove dead code
   // effectively.
 
+  /// Whether to use the Skwasm rendering backend.
+  ///
+  /// If this is `false`, the engine will use the CanvasKit rendering backend.
+  ///
+  /// Using flutter tools option "--web-renderer=skwasm" sets this to `true`.
   static const bool flutterWebUseSkwasm = bool.fromEnvironment('FLUTTER_WEB_USE_SKWASM');
 
-  /// Enable the Skia-based rendering backend.
+  /// Whether to use the CanvasKit rendering backend.
   ///
-  /// Using flutter tools option "--web-renderer=canvaskit" would set the value to
-  /// true.
+  /// If this is `false`, the engine will use the Skwasm rendering backend.
   ///
-  /// Using flutter tools option "--web-renderer=html" would set the value to false.
+  /// Using flutter tools option "--web-renderer=canvaskit" sets this to `true`.
   static const bool useSkia = bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
 
   // Runtime parameters.
@@ -361,6 +363,12 @@ class FlutterConfiguration {
   String get fontFallbackBaseUrl =>
       _configuration?.fontFallbackBaseUrl ?? 'https://fonts.gstatic.com/s/';
 
+  /// If set to true, the engine will skip the 1 second delay between font
+  /// download retries.
+  ///
+  /// This is used for testing.
+  bool get debugSkipFontRetryDelay => _configuration?.debugSkipFontRetryDelay ?? false;
+
   bool get forceSingleThreadedSkwasm => _configuration?.forceSingleThreadedSkwasm ?? false;
 }
 
@@ -382,6 +390,7 @@ extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
     String? nonce,
     String? renderer,
     String? fontFallbackBaseUrl,
+    bool? debugSkipFontRetryDelay,
     bool? forceSingleThreadedSkwasm,
   });
 
@@ -397,6 +406,7 @@ extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
   external String? get nonce;
   external String? get renderer;
   external String? get fontFallbackBaseUrl;
+  external bool? get debugSkipFontRetryDelay;
   external bool? get forceSingleThreadedSkwasm;
 }
 

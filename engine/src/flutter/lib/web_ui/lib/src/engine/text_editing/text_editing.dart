@@ -1151,8 +1151,10 @@ class InputConfiguration {
   final bool enableInteractiveSelection;
 }
 
-typedef OnChangeCallback =
-    void Function(EditingState? editingState, TextEditingDeltaState? editingDeltaState);
+typedef OnChangeCallback = void Function(
+  EditingState? editingState,
+  TextEditingDeltaState? editingDeltaState,
+);
 typedef OnActionCallback = void Function(String? inputAction);
 
 /// Provides HTML DOM functionality for editable text.
@@ -2716,7 +2718,7 @@ class EditableTextGeometry {
     assert(encodedGeometry.containsKey('transform'));
 
     final transformList = List<double>.from(
-      encodedGeometry.readList('transform').map((final dynamic e) => (e as num).toDouble()),
+      encodedGeometry.readList('transform').map((dynamic e) => (e as num).toDouble()),
     );
     return EditableTextGeometry(
       width: encodedGeometry.readDouble('width'),

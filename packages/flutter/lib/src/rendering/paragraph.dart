@@ -1017,6 +1017,19 @@ class RenderParagraph extends RenderBox
       return true;
     }());
 
+    if (_lastSelectableFragments != null) {
+      if (_needsClipping) {
+        context.canvas.save();
+        context.canvas.clipRect(offset & size);
+      }
+      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+        fragment.paintSelection(context, offset);
+      }
+      if (_needsClipping) {
+        context.canvas.restore();
+      }
+    }
+
     if (_needsClipping) {
       final Rect bounds = offset & size;
       if (_overflowShader != null) {
@@ -1027,12 +1040,6 @@ class RenderParagraph extends RenderBox
         context.canvas.save();
       }
       context.canvas.clipRect(bounds);
-    }
-
-    if (_lastSelectableFragments != null) {
-      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
-        fragment.paint(context, offset);
-      }
     }
 
     assert(() {
@@ -1053,6 +1060,12 @@ class RenderParagraph extends RenderBox
         context.canvas.drawRect(Offset.zero & size, paint);
       }
       context.canvas.restore();
+    }
+
+    if (_lastSelectableFragments != null) {
+      for (final _SelectableFragment fragment in _lastSelectableFragments!) {
+        fragment.paintHandles(context, offset);
+      }
     }
   }
 
@@ -1234,37 +1247,45 @@ class RenderParagraph extends RenderBox
     var placeholderIndex = 0;
     var childConfigsIndex = 0;
     var attributedLabelCacheIndex = 0;
-    InlineSpanSemanticsInformation? seenTextInfo;
     _cachedCombinedSemanticsInfos ??= combineSemanticsInfo(_semanticsInfo!);
     for (final InlineSpanSemanticsInformation info in _cachedCombinedSemanticsInfos!) {
       if (info.isPlaceholder) {
-        if (seenTextInfo != null) {
-          builder.markAsMergeUp(
-            _createSemanticsConfigForTextInfo(seenTextInfo, attributedLabelCacheIndex),
-          );
-          attributedLabelCacheIndex += 1;
-        }
         // Mark every childConfig belongs to this placeholder to merge up group.
         while (childConfigsIndex < childConfigs.length &&
-            childConfigs[childConfigsIndex].tagsChildrenWith(
-              PlaceholderSpanIndexSemanticsTag(placeholderIndex),
-            )) {
+            _childConfigBelongsToPlaceholder(childConfigs[childConfigsIndex], placeholderIndex)) {
           builder.markAsMergeUp(childConfigs[childConfigsIndex]);
           childConfigsIndex += 1;
         }
         placeholderIndex += 1;
       } else {
-        seenTextInfo = info;
+        builder.markAsMergeUp(_createSemanticsConfigForTextInfo(info, attributedLabelCacheIndex));
+        attributedLabelCacheIndex += 1;
       }
     }
-
-    // Handle plain text info at the end.
-    if (seenTextInfo != null) {
-      builder.markAsMergeUp(
-        _createSemanticsConfigForTextInfo(seenTextInfo, attributedLabelCacheIndex),
-      );
-    }
     return builder.build();
+  }
+
+  /// Returns whether [childConfig] belongs to the placeholder at
+  /// [placeholderIndex] in this paragraph.
+  ///
+  /// Nested paragraphs may inherit [PlaceholderSpanIndexSemanticsTag]s from
+  /// ancestors with colliding indexes. The first placeholder tag is the one
+  /// added by this paragraph, so later inherited tags must not decide ownership
+  /// here.
+  static bool _childConfigBelongsToPlaceholder(
+    SemanticsConfiguration childConfig,
+    int placeholderIndex,
+  ) {
+    final Iterable<SemanticsTag>? tags = childConfig.tagsForChildren;
+    if (tags == null) {
+      return false;
+    }
+    for (final SemanticsTag tag in tags) {
+      if (tag is PlaceholderSpanIndexSemanticsTag) {
+        return tag.index == placeholderIndex;
+      }
+    }
+    return false;
   }
 
   SemanticsConfiguration _createSemanticsConfigForTextInfo(
@@ -1510,11 +1531,11 @@ class _SelectableFragment
     final int selectionEnd = _textSelectionEnd!.offset;
     final bool isReversed = selectionStart > selectionEnd;
     final Offset startOffsetInParagraphCoordinates = paragraph._getOffsetForPosition(
-      TextPosition(offset: selectionStart),
+      _textSelectionStart!,
     );
     final Offset endOffsetInParagraphCoordinates = selectionStart == selectionEnd
         ? startOffsetInParagraphCoordinates
-        : paragraph._getOffsetForPosition(TextPosition(offset: selectionEnd));
+        : paragraph._getOffsetForPosition(_textSelectionEnd!);
     final flipHandles = isReversed != (TextDirection.rtl == paragraph.textDirection);
     final selection = TextSelection(baseOffset: selectionStart, extentOffset: selectionEnd);
     final selectionRects = <Rect>[];
@@ -1860,7 +1881,14 @@ class _SelectableFragment
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
     if (_rect.isEmpty) {
-      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      final SelectionResult result = SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      _setSelectionPosition(
+        result == SelectionResult.next
+            ? TextPosition(offset: range.end)
+            : TextPosition(offset: range.start, affinity: TextAffinity.upstream),
+        isEnd: isEnd,
+      );
+      return result;
     }
     final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
       _rect,
@@ -1926,7 +1954,14 @@ class _SelectableFragment
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
     if (_rect.isEmpty) {
-      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      final SelectionResult result = SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      _setSelectionPosition(
+        result == SelectionResult.next
+            ? TextPosition(offset: range.end)
+            : TextPosition(offset: range.start, affinity: TextAffinity.upstream),
+        isEnd: isEnd,
+      );
+      return result;
     }
     final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
       _rect,
@@ -2834,7 +2869,14 @@ class _SelectableFragment
     transform.invert();
     final Offset localPosition = MatrixUtils.transformPoint(transform, globalPosition);
     if (_rect.isEmpty) {
-      return SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      final SelectionResult result = SelectionUtils.getResultBasedOnRect(_rect, localPosition);
+      _setSelectionPosition(
+        result == SelectionResult.next
+            ? TextPosition(offset: range.end)
+            : TextPosition(offset: range.start, affinity: TextAffinity.upstream),
+        isEnd: isEnd,
+      );
+      return result;
     }
     final Offset adjustedOffset = SelectionUtils.adjustDragOffset(
       _rect,
@@ -3556,7 +3598,7 @@ class _SelectableFragment
     return _rect.size;
   }
 
-  void paint(PaintingContext context, Offset offset) {
+  void paintSelection(PaintingContext context, Offset offset) {
     if (_textSelectionStart == null || _textSelectionEnd == null) {
       return;
     }
@@ -3571,6 +3613,12 @@ class _SelectableFragment
       for (final TextBox textBox in paragraph.getBoxesForSelection(selection)) {
         context.canvas.drawRect(textBox.toRect().shift(offset), selectionPaint);
       }
+    }
+  }
+
+  void paintHandles(PaintingContext context, Offset offset) {
+    if (_textSelectionStart == null || _textSelectionEnd == null) {
+      return;
     }
     if (_startHandleLayerLink != null && value.startSelectionPoint != null) {
       context.pushLayer(

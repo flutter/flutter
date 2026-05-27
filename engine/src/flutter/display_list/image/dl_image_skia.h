@@ -10,24 +10,28 @@
 
 namespace flutter {
 
-class DlImageSkia final : public DlImage {
+class DlImageSkia : public DlImage {
  public:
+  static sk_sp<DlImage> Make(const SkImage* image);
+  static sk_sp<DlImage> Make(sk_sp<SkImage> image);
+
   explicit DlImageSkia(sk_sp<SkImage> image);
 
   // |DlImage|
   ~DlImageSkia() override;
 
   // |DlImage|
-  sk_sp<SkImage> skia_image() const override;
-
+  Type GetImageType() const override { return Type::kSkia; }
   // |DlImage|
-  std::shared_ptr<impeller::Texture> impeller_texture() const override;
+  const DlImageSkia* asSkiaImage() const override { return this; }
 
-  // |DlImage|
-  bool isOpaque() const override;
+  virtual sk_sp<SkImage> skia_image() const;
 
   // |DlImage|
   bool isTextureBacked() const override;
+
+  // |DlImage|
+  bool isOpaque() const override;
 
   // |DlImage|
   bool isUIThreadSafe() const override;
@@ -37,6 +41,9 @@ class DlImageSkia final : public DlImage {
 
   // |DlImage|
   size_t GetApproximateByteSize() const override;
+
+  // |DlImage|
+  DlColorSpace GetColorSpace() const override;
 
  private:
   sk_sp<SkImage> image_;

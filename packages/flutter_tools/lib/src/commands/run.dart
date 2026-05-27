@@ -243,6 +243,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
     addEnableHcppFlag(verboseHelp: verboseHelp);
+    addTestFlag(verboseHelp: verboseHelp);
   }
 
   bool get traceStartup => boolArg('trace-startup');
@@ -260,6 +261,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
   bool get enableHcpp => boolArg('enable-hcpp');
+  bool get testFlag => boolArg('test-flag');
 
   @override
   bool get refreshWirelessDevices => true;
@@ -325,6 +327,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         debugLogsDirectoryPath: debugLogsDirectoryPath,
         webDevServerConfig: webDevServerConfig,
         enableHcpp: enableHcpp,
+        testFlag: testFlag,
       );
     } else {
       return DebuggingOptions.enabled(
@@ -389,6 +392,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
         enableHcpp: enableHcpp,
         webDevServerConfig: webDevServerConfig,
+        testFlag: testFlag,
       );
     }
   }
@@ -551,7 +555,7 @@ class RunCommand extends RunCommandBase {
     if (devices!.length > 1) {
       return '$command/all';
     }
-    return '$command/${getNameForTargetPlatform(await devices![0].targetPlatform)}';
+    return '$command/${(await devices![0].targetPlatform).getName()}';
   }
 
   @override
@@ -594,7 +598,7 @@ class RunCommand extends RunCommandBase {
       if (device is IOSDevice && device.isWirelesslyConnected) {
         anyWirelessIOSDevices = true;
       }
-      deviceType = getNameForTargetPlatform(platform);
+      deviceType = platform.getName();
       deviceOsVersion = await device.sdkNameAndVersion;
       isEmulator = await device.isLocalEmulator;
     } else {
@@ -960,10 +964,7 @@ class RunCommand extends RunCommandBase {
       timingLabelParts: <String?>[
         if (hotMode) 'hot' else 'cold',
         getBuildMode().cliName,
-        if (devices!.length == 1)
-          getNameForTargetPlatform(await devices![0].targetPlatform)
-        else
-          'multiple',
+        if (devices!.length == 1) (await devices![0].targetPlatform).getName() else 'multiple',
         if (devices!.length == 1 && await devices![0].isLocalEmulator) 'emulator' else null,
       ],
       endTimeOverride: appStartedTime,

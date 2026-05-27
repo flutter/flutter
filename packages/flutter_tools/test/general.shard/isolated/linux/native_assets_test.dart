@@ -63,10 +63,11 @@ void main() {
         buildRunner: _BuildRunnerWithoutClang(),
         buildCodeAssets: BuildCodeAssetsOptions(appBuildDirectory: environment.outputDir),
         buildDataAssets: true,
+        recordedUsesFile: null,
       );
       expect(
         (globals.logger as BufferLogger).traceText,
-        isNot(contains('Building native assets for ')),
+        isNot(contains('Running build hooks for ')),
       );
     },
   );

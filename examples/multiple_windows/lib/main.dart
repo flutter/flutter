@@ -8,9 +8,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'app/models.dart';
-import 'app/main_window.dart';
 import 'package:flutter/src/widgets/_window.dart';
+
+import 'app/main_window.dart';
+import 'app/models.dart';
 
 class MainControllerWindowDelegate with RegularWindowControllerDelegate {
   @override
@@ -22,7 +23,7 @@ class MainControllerWindowDelegate with RegularWindowControllerDelegate {
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runWidget(MultiWindowApp());
+  runWidget(const MultiWindowApp());
 }
 
 class MultiWindowApp extends StatefulWidget {
