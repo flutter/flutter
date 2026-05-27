@@ -49,6 +49,22 @@ static vk::ClearDepthStencilValue VKClearValueFromDepthStencil(uint32_t stencil,
   return value;
 }
 
+/// Converts an Impeller `Viewport` to a `vk::Viewport`. Impeller specifies
+/// viewports in top-left-origin framebuffer coordinates, so the
+/// negative-height trick from VK_KHR_maintenance1 is used to flip the Y axis
+/// to match the GL convention that the rest of the engine assumes (NDC +Y
+/// maps to the smaller framebuffer Y).
+static vk::Viewport ToVkViewport(const Viewport& viewport) {
+  const auto& rect = viewport.rect;
+  return vk::Viewport()
+      .setX(rect.GetX())
+      .setY(rect.GetY() + rect.GetHeight())
+      .setWidth(rect.GetWidth())
+      .setHeight(-rect.GetHeight())
+      .setMinDepth(viewport.depth_range.z_near)
+      .setMaxDepth(viewport.depth_range.z_far);
+}
+
 static size_t GetVKClearValues(
     const RenderTarget& target,
     std::array<vk::ClearValue, kMaxAttachments>& values) {
@@ -234,18 +250,23 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
                          : vk::ImageLayout::eShaderReadOnlyOptimal);
   }
   if (color_image_vk_) {
+    // Mirror the Vulkan render pass's `finalLayout` for the color attachment
+    // (see ComputeFinalLayout in render_pass_builder_vk.cc): swapchain and
+    // MSAA targets stay in eGeneral, but a non-swapchain, single-sampled
+    // color attachment transitions to eShaderReadOnlyOptimal on
+    // endRenderPass. Tracking it as eGeneral here desyncs the bookkeeping
+    // and produces an incorrect oldLayout on the next barrier (caught by
+    // Vulkan validation as VUID-vkCmdDraw-None-09600).
     TextureVK::Cast(*color_image_vk_)
-        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
+        .SetLayoutWithoutEncoding(
+            (is_swapchain || sample_count != SampleCount::kCount1)
+                ? vk::ImageLayout::eGeneral
+                : vk::ImageLayout::eShaderReadOnlyOptimal);
   }
 
   // Set the initial viewport.
   const auto vp = Viewport{.rect = Rect::MakeSize(target_size)};
-  vk::Viewport viewport = vk::Viewport()
-                              .setWidth(vp.rect.GetWidth())
-                              .setHeight(-vp.rect.GetHeight())
-                              .setY(vp.rect.GetHeight())
-                              .setMinDepth(0.0f)
-                              .setMaxDepth(1.0f);
+  vk::Viewport viewport = ToVkViewport(vp);
   command_buffer_vk_.setViewport(0, 1, &viewport);
 
   // Set the initial scissor.
@@ -257,8 +278,8 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   command_buffer_vk_.setScissor(0, 1, &scissor);
 
   // Set the initial stencil reference.
-  command_buffer_vk_.setStencilReference(
-      vk::StencilFaceFlagBits::eVkStencilFrontAndBack, 0u);
+  command_buffer_vk_.setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack,
+                                         0u);
 
   is_valid_ = true;
 }
@@ -376,8 +397,8 @@ void RenderPassVK::SetStencilReference(uint32_t value) {
     return;
   }
   current_stencil_ = value;
-  command_buffer_vk_.setStencilReference(
-      vk::StencilFaceFlagBits::eVkStencilFrontAndBack, value);
+  command_buffer_vk_.setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack,
+                                         value);
 }
 
 // |RenderPass|
@@ -387,12 +408,7 @@ void RenderPassVK::SetBaseVertex(uint64_t value) {
 
 // |RenderPass|
 void RenderPassVK::SetViewport(Viewport viewport) {
-  vk::Viewport viewport_vk = vk::Viewport()
-                                 .setWidth(viewport.rect.GetWidth())
-                                 .setHeight(-viewport.rect.GetHeight())
-                                 .setY(viewport.rect.GetHeight())
-                                 .setMinDepth(0.0f)
-                                 .setMaxDepth(1.0f);
+  vk::Viewport viewport_vk = ToVkViewport(viewport);
   command_buffer_vk_.setViewport(0, 1, &viewport_vk);
 }
 

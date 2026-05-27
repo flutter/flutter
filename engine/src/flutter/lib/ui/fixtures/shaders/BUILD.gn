@@ -59,24 +59,59 @@ if (enable_unittests) {
     shaders = [
       "//flutter/impeller/fixtures/flutter_gpu_unlit.frag",
       "//flutter/impeller/fixtures/flutter_gpu_unlit.vert",
+      "//flutter/impeller/fixtures/flutter_gpu_unlit_alt_instance.frag",
       "//flutter/impeller/fixtures/flutter_gpu_texture.frag",
       "//flutter/impeller/fixtures/flutter_gpu_texture.vert",
     ]
 
     fixtures = rebase_path("//flutter/impeller/fixtures")
-    shader_bundle = "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_texture.vert\"}}"
+    shader_bundle = "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}, \"UnlitFragmentAltInstance\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit_alt_instance.frag\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_texture.vert\"}}"
     shader_bundle_output = "test.shaderbundle"
+  }
+
+  # A second shader bundle that exposes the same entrypoint names as
+  # `flutter_gpu_shaders` above. Used by `gpu_test.dart` to verify that two
+  # user shader bundles with colliding entrypoint names register at distinct
+  # scoped keys in the shared shader registry and can both be used in the
+  # same process without one evicting the other.
+  impellerc("flutter_gpu_shaders_alt") {
+    shaders = [
+      "//flutter/impeller/fixtures/flutter_gpu_unlit.frag",
+      "//flutter/impeller/fixtures/flutter_gpu_unlit.vert",
+    ]
+
+    fixtures = rebase_path("//flutter/impeller/fixtures")
+    shader_bundle = "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}}"
+    shader_bundle_output = "test_alt.shaderbundle"
+  }
+
+  # Same entrypoint names as `flutter_gpu_shaders` but `UnlitFragment` maps
+  # to a different source. Used by `shader_reload_test.dart` to reload a
+  # bundle in place and verify only the changed shader is marked dirty.
+  impellerc("flutter_gpu_shaders_reload") {
+    shaders = [
+      "//flutter/impeller/fixtures/flutter_gpu_unlit_reload.frag",
+      "//flutter/impeller/fixtures/flutter_gpu_unlit.vert",
+    ]
+
+    fixtures = rebase_path("//flutter/impeller/fixtures")
+    shader_bundle = "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit_reload.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}}"
+    shader_bundle_output = "test_reload.shaderbundle"
   }
 
   test_fixtures("fixtures") {
     deps = [
       ":flutter_gpu_shaders",
+      ":flutter_gpu_shaders_alt",
+      ":flutter_gpu_shaders_reload",
       ":ink_sparkle",
       ":ink_sparkle_web",
       ":sampler_order_fixture",
     ]
     fixtures = get_target_outputs(":ink_sparkle") +
-               get_target_outputs(":flutter_gpu_shaders")
+               get_target_outputs(":flutter_gpu_shaders") +
+               get_target_outputs(":flutter_gpu_shaders_alt") +
+               get_target_outputs(":flutter_gpu_shaders_reload")
     dest = "$root_gen_dir/flutter/lib/ui"
   }
 }
