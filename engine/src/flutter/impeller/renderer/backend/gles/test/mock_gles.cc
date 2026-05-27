@@ -272,6 +272,27 @@ void mockTexSubImage2D(GLenum target,
 static_assert(CheckSameSignature<decltype(mockTexSubImage2D),  //
                                  decltype(glTexSubImage2D)>::value);
 
+void mockTexImage2D(GLenum target,
+                    GLint level,
+                    GLint internalformat,
+                    GLsizei width,
+                    GLsizei height,
+                    GLint border,
+                    GLenum format,
+                    GLenum type,
+                    const void* pixels) {
+  CallMockMethod(&IMockGLESImpl::TexImage2D, target, level, internalformat,
+                 width, height, border, format, type, pixels);
+}
+static_assert(CheckSameSignature<decltype(mockTexImage2D),  //
+                                 decltype(glTexImage2D)>::value);
+
+void mockBindTexture(GLenum target, GLuint texture) {
+  CallMockMethod(&IMockGLESImpl::BindTexture, target, texture);
+}
+static_assert(CheckSameSignature<decltype(mockBindTexture),  //
+                                 decltype(glBindTexture)>::value);
+
 GLboolean mockIsTexture(GLuint texture) {
   return CallMockMethod(&IMockGLESImpl::IsTexture, texture);
 }
@@ -423,6 +444,10 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockGenTextures);
   } else if (strcmp(name, "glTexSubImage2D") == 0) {
     return reinterpret_cast<void*>(mockTexSubImage2D);
+  } else if (strcmp(name, "glTexImage2D") == 0) {
+    return reinterpret_cast<void*>(mockTexImage2D);
+  } else if (strcmp(name, "glBindTexture") == 0) {
+    return reinterpret_cast<void*>(mockBindTexture);
   } else if (strcmp(name, "glObjectLabelKHR") == 0) {
     return reinterpret_cast<void*>(mockObjectLabelKHR);
   } else if (strcmp(name, "glGenBuffers") == 0) {

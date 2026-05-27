@@ -477,13 +477,13 @@ public class FlutterLoader {
                 + flutterApplicationInfo.isolateSnapshotData);
       } else {
         // Add default AOT shared library name arg. Note that if a different library
-        // is set in the manifest, that value will take precendence and the default
+        // is set in the manifest, that value will take precedence and the default
         // libraries will be used as fallbacks in the order that they are added.
         shellArgs.add(
             FlutterEngineFlags.AOT_SHARED_LIBRARY_NAME.engineArgument
                 + flutterApplicationInfo.aotSharedLibraryName);
 
-        // Some devices cannot load the an AOT shared library based on the library name
+        // Some devices cannot load the AOT shared library based on the library name
         // with no directory path. So, we provide a fully qualified path to the default library
         // as a workaround for devices where that fails.
         shellArgs.add(
@@ -516,8 +516,7 @@ public class FlutterLoader {
         activityManager.getMemoryInfo(memInfo);
         int oldGenHeapSizeMegaBytes = (int) (memInfo.totalMem / 1e6 / 2);
         shellArgs.add(
-            FlutterEngineFlags.OLD_GEN_HEAP_SIZE.engineArgument
-                + String.valueOf(oldGenHeapSizeMegaBytes));
+            FlutterEngineFlags.OLD_GEN_HEAP_SIZE.engineArgument + oldGenHeapSizeMegaBytes);
       }
 
       DisplayMetrics displayMetrics = applicationContext.getResources().getDisplayMetrics();
