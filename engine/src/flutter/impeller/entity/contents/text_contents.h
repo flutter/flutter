@@ -36,6 +36,13 @@ class TextContents final : public Contents {
   ///        This is used to ensure that mask blurs work correctly on emoji.
   void SetForceTextColor(bool value);
 
+  /// @brief Toggle the platform-specific contrast and gamma correction in the
+  ///        fragment shader.
+  ///
+  ///        By default, this is true on Linux to compensate for FreeType
+  ///        rasterization in linear space, and false elsewhere.
+  void SetEnableGammaCorrection(bool value);
+
   /// Must be set after text frame.
   void SetTextProperties(Color color,
                          const std::optional<StrokeParameters>& stroke);
@@ -104,6 +111,7 @@ class TextContents final : public Contents {
   Point position_;
   Matrix screen_transform_;
   bool force_text_color_ = false;
+  bool enable_gamma_correction_ = false;
   Color color_;
   GlyphProperties properties_;
 
