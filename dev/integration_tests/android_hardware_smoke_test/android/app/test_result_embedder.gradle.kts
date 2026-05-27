@@ -52,7 +52,7 @@ tasks.register("embedTestResultImages") {
                     val destinationFile = File(imagesDir, fileName)
                     FileOutputStream(destinationFile).use { os ->
                         exec {
-                            commandLine("adb", "shell", "run-as", packageId, "cat", "cache/results/$fileName")
+                            commandLine("adb", "exec-out", "run-as", packageId, "cat", "cache/results/$fileName")
                             standardOutput = os
                             isIgnoreExitValue = true
                         }
