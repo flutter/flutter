@@ -1258,7 +1258,7 @@ class AppFrameworkAndNativeAssetsDependencies {
       flutterRootDir: _utils.fileSystem.directory(_utils.flutterRoot),
       defines: <String, String>{
         kTargetFile: targetFile,
-        kTargetPlatform: getNameForTargetPlatform(platform.targetPlatform),
+        kTargetPlatform: platform.targetPlatform.getName(),
         ...await _platformDefines(platform, sdk),
         ...buildInfo.toBuildSystemEnvironment(),
         kBuildSwiftPackage: 'true',
