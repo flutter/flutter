@@ -96,5 +96,117 @@ void main() {
       expect(results[0].name, 'io.flutter.embedding.android.EnableImpeller');
       expect(results[0].value, 'Declared in <activity> but must be declared in <application>');
     });
+
+    testWithoutContext('warns if AndroidManifest.xml is missing', () async {
+      fs.directory('android').createSync();
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
+      const validator = AndroidManifestProjectValidator();
+      final List<ProjectValidatorResult> results = await validator.start(project);
+
+      expect(results.length, 1);
+      expect(results[0].status, StatusProjectValidator.warning);
+      expect(results[0].name, 'AndroidManifest.xml');
+      expect(results[0].value, 'Manifest file not found');
+    });
+
+    testWithoutContext('errors if AndroidManifest.xml is malformed XML', () async {
+      createFakeAndroidProject('malformed xml <manifest>');
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
+      const validator = AndroidManifestProjectValidator();
+      final List<ProjectValidatorResult> results = await validator.start(project);
+
+      expect(results.length, 1);
+      expect(results[0].status, StatusProjectValidator.error);
+      expect(results[0].name, 'AndroidManifest.xml');
+      expect(results[0].value, contains('Error parsing XML'));
+    });
+
+    testWithoutContext('warns if activity key is under service', () async {
+      createFakeAndroidProject('''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:name="io.flutter.app.FlutterApplication">
+        <service android:name=".MyService">
+            <meta-data android:name="io.flutter.Entrypoint" android:value="customMain" />
+        </service>
+    </application>
+</manifest>
+''');
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
+      const validator = AndroidManifestProjectValidator();
+      final List<ProjectValidatorResult> results = await validator.start(project);
+
+      expect(results.length, 1);
+      expect(results[0].status, StatusProjectValidator.error);
+      expect(results[0].name, 'io.flutter.Entrypoint');
+      expect(results[0].value, 'Declared in <service> but must be declared in <activity>');
+    });
+
+    testWithoutContext('warns if application key is under receiver', () async {
+      createFakeAndroidProject('''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:name="io.flutter.app.FlutterApplication">
+        <receiver android:name=".MyReceiver">
+            <meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="true" />
+        </receiver>
+    </application>
+</manifest>
+''');
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
+      const validator = AndroidManifestProjectValidator();
+      final List<ProjectValidatorResult> results = await validator.start(project);
+
+      expect(results.length, 1);
+      expect(results[0].status, StatusProjectValidator.error);
+      expect(results[0].name, 'io.flutter.embedding.android.EnableImpeller');
+    });
+
+    testWithoutContext('warns if activity key is under provider', () async {
+      createFakeAndroidProject('''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:name="io.flutter.app.FlutterApplication">
+        <provider android:name=".MyProvider" android:authorities="com.example.provider">
+            <meta-data android:name="io.flutter.Entrypoint" android:value="customMain" />
+        </provider>
+    </application>
+</manifest>
+''');
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
+      const validator = AndroidManifestProjectValidator();
+      final List<ProjectValidatorResult> results = await validator.start(project);
+
+      expect(results.length, 1);
+      expect(results[0].status, StatusProjectValidator.error);
+      expect(results[0].name, 'io.flutter.Entrypoint');
+      expect(results[0].value, 'Declared in <provider> but must be declared in <activity>');
+    });
+
+    testWithoutContext('reports multiple misplaced keys', () async {
+      createFakeAndroidProject('''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:name="io.flutter.app.FlutterApplication">
+        <meta-data android:name="io.flutter.Entrypoint" android:value="customMain" />
+        <activity android:name=".MainActivity">
+            <meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="true" />
+        </activity>
+    </application>
+</manifest>
+''');
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
+      const validator = AndroidManifestProjectValidator();
+      final List<ProjectValidatorResult> results = await validator.start(project);
+
+      expect(results.length, 2);
+      expect(results[0].status, StatusProjectValidator.error);
+      expect(results[0].name, 'io.flutter.Entrypoint');
+      expect(results[0].value, 'Declared in <application> but must be declared in <activity>');
+
+      expect(results[1].status, StatusProjectValidator.error);
+      expect(results[1].name, 'io.flutter.embedding.android.EnableImpeller');
+      expect(results[1].value, 'Declared in <activity> but must be declared in <application>');
+    });
   });
 }

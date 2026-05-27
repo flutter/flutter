@@ -61,6 +61,7 @@ class AndroidManifestProjectValidator extends ProjectValidator {
     'io.flutter.EntrypointUri',
     'io.flutter.InitialRoute',
     'io.flutter.embedding.android.NormalTheme',
+    'io.flutter.embedding.android.SplashScreenDrawable',
     'flutter_deeplinking_enabled',
   };
 
@@ -113,26 +114,22 @@ class AndroidManifestProjectValidator extends ProjectValidator {
       final XmlNode? parent = metaData.parent;
       if (parent is XmlElement) {
         final String parentName = parent.name.local;
-        if (parentName == 'application') {
-          if (_activityKeys.contains(name)) {
-            results.add(
-              ProjectValidatorResult(
-                name: name,
-                value: 'Declared in <application> but must be declared in <activity>',
-                status: StatusProjectValidator.error,
-              ),
-            );
-          }
-        } else if (parentName == 'activity') {
-          if (_applicationKeys.contains(name)) {
-            results.add(
-              ProjectValidatorResult(
-                name: name,
-                value: 'Declared in <activity> but must be declared in <application>',
-                status: StatusProjectValidator.error,
-              ),
-            );
-          }
+        if (_activityKeys.contains(name) && parentName != 'activity') {
+          results.add(
+            ProjectValidatorResult(
+              name: name,
+              value: 'Declared in <$parentName> but must be declared in <activity>',
+              status: StatusProjectValidator.error,
+            ),
+          );
+        } else if (_applicationKeys.contains(name) && parentName != 'application') {
+          results.add(
+            ProjectValidatorResult(
+              name: name,
+              value: 'Declared in <$parentName> but must be declared in <application>',
+              status: StatusProjectValidator.error,
+            ),
+          );
         }
       }
     }
