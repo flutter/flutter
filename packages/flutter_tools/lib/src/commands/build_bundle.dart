@@ -109,7 +109,7 @@ class BuildBundleCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final String targetPlatform = stringArg('target-platform')!;
-    final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
+    final platform = TargetPlatform.fromName(targetPlatform);
     // Check for target platforms that are only allowed via feature flags.
     switch (platform) {
       case TargetPlatform.darwin:
