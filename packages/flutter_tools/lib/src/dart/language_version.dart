@@ -56,6 +56,10 @@ LanguageVersion determineLanguageVersion(File file, Package? package, String flu
   // command will likely fail later in the process with a better error
   // message.
   List<String> lines;
+  // If the file is missing, check existsSync() defensively first. Calling
+  // readAsLinesSync on a missing file inside our wrapped ErrorHandlingFileSystem
+  // throws a fatal ToolExit which would escape the FileSystemException catch
+  // block and crash the process prematurely.
   if (!file.existsSync()) {
     return currentLanguageVersion(file.fileSystem, flutterRoot);
   }
