@@ -288,6 +288,8 @@ class ResidentWebRunner extends ResidentRunner {
             ? WebExpressionCompiler(flutterDevice!.generator!, fileSystem: _fileSystem)
             : null;
 
+        flutterDevice!.developmentShaderCompiler.configureCompiler(TargetPlatform.web_javascript);
+
         flutterDevice!.devFS = WebDevFS(
           webDevServerConfig: updatedConfig,
           packagesFilePath: packagesFilePath,
@@ -585,6 +587,7 @@ class ResidentWebRunner extends ResidentRunner {
             }
             return OperationResult(1, reloadFailedMessage);
           }
+          await evictDirtyAssets();
           String? failedReassemble;
           final DateTime reassembleStart = _systemClock.now();
           await _vmService
