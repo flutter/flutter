@@ -457,7 +457,7 @@ class ResidentWebRunner extends ResidentRunner {
       status = _logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
     }
 
-    final String targetPlatform = getNameForTargetPlatform(TargetPlatform.web_javascript);
+    final String targetPlatform = TargetPlatform.web_javascript.getName();
     final String sdkName = await flutterDevice!.device!.sdkNameAndVersion;
 
     // Will be null if there is no report.

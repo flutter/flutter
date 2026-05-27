@@ -64,9 +64,11 @@ source_set("InternalFlutterSwift") {
   sources = [
     "framework/Source/AccessibilityFeatures.swift",
     "framework/Source/ConnectionCollection.swift",
+    "framework/Source/DisplayLinkManager.swift",
     "framework/Source/LaunchEngine.swift",
     "framework/Source/SplashScreenManager.swift",
     "framework/Source/UIPressProxy.swift",
+    "framework/Source/VSyncClient.swift",
   ]
   public = _flutter_framework_headers + framework_common_headers
 }
@@ -162,6 +164,8 @@ source_set("flutter_framework_source") {
     "framework/Source/platform_message_response_darwin.mm",
     "framework/Source/profiler_metrics_ios.h",
     "framework/Source/profiler_metrics_ios.mm",
+    "framework/Source/vsync_waiter_ios.h",
+    "framework/Source/vsync_waiter_ios.mm",
     "ios_context.h",
     "ios_context.mm",
     "ios_context_metal_impeller.h",
@@ -233,7 +237,6 @@ if (enable_ios_unittests) {
     sources = [
       "framework/Source/FlutterFMLTaskRunnerTestHelper.h",
       "framework/Source/FlutterFMLTaskRunnerTestHelper.mm",
-      "framework/Source/FlutterVSyncClient+Testing.h",
     ]
     deps = [
       ":flutter_engine_bindings",
@@ -374,10 +377,6 @@ source_set("flutter_engine_bindings") {
     "framework/Source/FlutterFMLTaskRunner.mm",
     "framework/Source/FlutterFMLTaskRunners.h",
     "framework/Source/FlutterFMLTaskRunners.mm",
-    "framework/Source/FlutterVSyncClient.h",
-    "framework/Source/FlutterVSyncClient.mm",
-    "framework/Source/vsync_waiter_ios.h",
-    "framework/Source/vsync_waiter_ios.mm",
   ]
   deps = [
     "//flutter/common",

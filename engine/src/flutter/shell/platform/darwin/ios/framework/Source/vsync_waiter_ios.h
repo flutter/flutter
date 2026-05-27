@@ -5,15 +5,17 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_VSYNC_WAITER_IOS_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_VSYNC_WAITER_IOS_H_
 
+#include <CoreFoundation/CoreFoundation.h>
+
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/variable_refresh_rate_reporter.h"
 #include "flutter/shell/common/vsync_waiter.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient.h"
+
+@class FlutterVSyncClient;
 
 namespace flutter {
 
-class VsyncWaiterIOS final : public VsyncWaiter,
-                             public VariableRefreshRateReporter {
+class VsyncWaiterIOS final : public VsyncWaiter, public VariableRefreshRateReporter {
  public:
   explicit VsyncWaiterIOS(const flutter::TaskRunners& task_runners);
 
@@ -31,8 +33,7 @@ class VsyncWaiterIOS final : public VsyncWaiter,
   //        durations, which can occur on paused/unpaused transitions.
   //
   // Visible for testing.
-  static CFTimeInterval SnapDuration(CFTimeInterval duration,
-                                     double max_refresh_rate);
+  static CFTimeInterval SnapDuration(CFTimeInterval duration, double max_refresh_rate);
 
  private:
   // |VsyncWaiter|
