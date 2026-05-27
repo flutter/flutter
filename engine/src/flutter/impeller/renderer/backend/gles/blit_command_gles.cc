@@ -17,29 +17,6 @@
 
 namespace impeller {
 
-namespace {
-static void FlipImage(uint8_t* buffer,
-                      size_t width,
-                      size_t height,
-                      size_t stride) {
-  if (buffer == nullptr || stride == 0) {
-    return;
-  }
-
-  const auto byte_width = width * stride;
-
-  for (size_t top = 0; top < height; top++) {
-    size_t bottom = height - top - 1;
-    if (top >= bottom) {
-      break;
-    }
-    auto* top_row = buffer + byte_width * top;
-    auto* bottom_row = buffer + byte_width * bottom;
-    std::swap_ranges(top_row, top_row + byte_width, bottom_row);
-  }
-}
-}  // namespace
-
 BlitEncodeGLES::~BlitEncodeGLES() = default;
 
 static void DeleteFBO(const ProcTableGLES& gl, GLuint fbo, GLenum type) {
@@ -288,8 +265,6 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
     return false;
   }
 
-  TextureCoordinateSystem coord_system = source->GetCoordinateSystem();
-
   GLuint read_fbo = GL_NONE;
   fml::ScopedCleanupClosure delete_fbos(
       [&gl, &read_fbo]() { DeleteFBO(gl, read_fbo, GL_FRAMEBUFFER); });
@@ -303,27 +278,15 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
   }
 
   DeviceBufferGLES::Cast(*destination)
-      .UpdateBufferData(
-          [&gl,                                                          //
-           this,                                                         //
-           format = gles_format->external_format,                        //
-           type = gles_format->type,                                     //
-           coord_system,                                                 //
-           bytes_per_pixel = BytesPerPixelForPixelFormat(source_format)  //
+      .UpdateBufferData([&gl,                                    //
+                         this,                                   //
+                         format = gles_format->external_format,  //
+                         type = gles_format->type                //
   ](uint8_t* data, size_t length) {
-            gl.ReadPixels(source_region.GetX(), source_region.GetY(),
-                          source_region.GetWidth(), source_region.GetHeight(),
-                          format, type, data + destination_offset);
-            switch (coord_system) {
-              case TextureCoordinateSystem::kUploadFromHost:
-                break;
-              case TextureCoordinateSystem::kRenderToTexture:
-                // The texture is upside down, and must be inverted when copying
-                // byte data out.
-                FlipImage(data + destination_offset, source_region.GetWidth(),
-                          source_region.GetHeight(), bytes_per_pixel);
-            }
-          });
+        gl.ReadPixels(source_region.GetX(), source_region.GetY(),
+                      source_region.GetWidth(), source_region.GetHeight(),
+                      format, type, data + destination_offset);
+      });
 
   return true;
 };

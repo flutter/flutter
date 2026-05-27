@@ -70,7 +70,7 @@ class BuildLinuxCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = await getBuildInfo();
-    final TargetPlatform targetPlatform = getTargetPlatformForName(stringArg('target-platform')!);
+    final targetPlatform = TargetPlatform.fromName(stringArg('target-platform')!);
     final needCrossBuild =
         _operatingSystemUtils.hostPlatform.platformName != targetPlatform.simpleName;
 
