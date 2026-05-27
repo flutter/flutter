@@ -1330,8 +1330,14 @@ typedef enum {
 /// is `kFlutterPointerDeviceKindStylus` or
 /// `kFlutterPointerDeviceKindInvertedStylus`.
 typedef enum {
+  /// Whether the stylus has contact with the screen.
+  /// This matches the framework's `kStylusContact`.
   kFlutterPointerButtonStylusContact = 1 << 0,
+  /// Whether the stylus's primary button is pressed.
+  /// This matches the framework's `kPrimaryStylusButton`.
   kFlutterPointerButtonStylusPrimary = 1 << 1,
+  /// Whether the stylus's secondary button is pressed.
+  /// This matches the framework's `kSecondaryStylusButton`.
   kFlutterPointerButtonStylusSecondary = 1 << 2,
 } FlutterPointerStylusButtons;
 
@@ -1370,6 +1376,7 @@ typedef struct {
   /// correct buttons.
   FlutterPointerDeviceKind device_kind;
   /// The buttons currently pressed, if any.
+  /// See `FlutterPointerMouseButtons` or `FlutterPointerStylusButtons`.
   int64_t buttons;
   /// The x offset of the pan/zoom in physical pixels.
   double pan_x;
