@@ -167,7 +167,6 @@ export 'engine/view_embedder/style_manager.dart';
 export 'engine/web_paragraph/bidi.dart';
 export 'engine/web_paragraph/code_unit_flags.dart';
 export 'engine/web_paragraph/debug.dart';
-export 'engine/web_paragraph/decorations.dart';
 export 'engine/web_paragraph/font_collection.dart';
 export 'engine/web_paragraph/layout.dart';
 export 'engine/web_paragraph/painter.dart';
