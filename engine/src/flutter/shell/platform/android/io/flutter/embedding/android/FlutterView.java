@@ -71,7 +71,7 @@ import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.mouse.MouseCursorPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.util.ViewUtils;
-import io.flutter.view.accessibility.AccessibilityBridge;
+import io.flutter.view.AccessibilityBridge;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;

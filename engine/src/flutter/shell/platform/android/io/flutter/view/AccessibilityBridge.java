@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.view.accessibility;
+package io.flutter.view;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -37,8 +37,11 @@ import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.plugin.platform.PlatformViewsAccessibilityDelegate;
 import io.flutter.util.ViewUtils;
-
-
+import io.flutter.view.AccessibilityStringBuilder.LocaleStringAttribute;
+import io.flutter.view.AccessibilityStringBuilder.SpellOutStringAttribute;
+import io.flutter.view.AccessibilityStringBuilder.StringAttribute;
+import io.flutter.view.AccessibilityStringBuilder.StringAttributeType;
+import io.flutter.view.accessibility.configurator.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -204,7 +207,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // accessibility system.
   //
   // This is null when a node embedded by the AccessibilityViewEmbedder has the focus.
-  @Nullable SemanticsNode accessibilityFocusedSemanticsNode;
+  public @Nullable SemanticsNode accessibilityFocusedSemanticsNode;
 
   // The virtual ID of the currently embedded node with accessibility focus.
   //
@@ -676,7 +679,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     accessibilityChannel.setAccessibilityFeatures(accessibilityFeatureFlags);
   }
 
-  boolean shouldSetCollectionInfo(final SemanticsNode semanticsNode) {
+  public boolean shouldSetCollectionInfo(final SemanticsNode semanticsNode) {
     // TalkBack expects a number of rows and/or columns greater than 0 to announce
     // in list and out of list.  For an infinite or growing list, you have to
     // specify something > 0 to get "in list" announcements.
@@ -694,7 +697,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 accessibilityFocusedSemanticsNode, o -> o.hasFlag(Flag.HAS_IMPLICIT_SCROLLING)));
   }
 
-  boolean shouldSetCollectionItemInfo(final SemanticsNode semanticsNode) {
+  public boolean shouldSetCollectionItemInfo(final SemanticsNode semanticsNode) {
     return semanticsNode.parent != null
         && shouldSetCollectionInfo(semanticsNode.parent)
         && semanticsNode.parent.hasFlag(Flag.HAS_IMPLICIT_SCROLLING);
@@ -2137,7 +2140,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
   // Must match SemanticsRole in semantics.dart
   // https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
-  enum Role {
+  public enum Role {
     NONE(0),
     TAB(1),
     TAB_BAR(2),
@@ -2189,7 +2192,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
   // Must match SemanticsFlag in semantics.dart
   // https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
-  enum Flag {
+  public enum Flag {
     HAS_CHECKED_STATE(1 << 0),
     IS_CHECKED(1 << 1),
     IS_SELECTED(1 << 2),
@@ -2322,25 +2325,25 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * semantics.dart:
    * https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
    */
-  static class SemanticsNode {
+  public static class SemanticsNode {
     private static boolean nullableHasAncestor(
         SemanticsNode target, Predicate<SemanticsNode> tester) {
       return target != null && target.getAncestor(tester) != null;
     }
 
-    final AccessibilityBridge accessibilityBridge;
+    public final AccessibilityBridge accessibilityBridge;
 
     // Flutter ID of this {@code SemanticsNode}.
-    int id = -1;
+    public int id = -1;
 
     private long flags;
     private int actions;
-    int maxValueLength;
-    int currentValueLength;
-    int textSelectionBase;
-    int textSelectionExtent;
+    public int maxValueLength;
+    public int currentValueLength;
+    public int textSelectionBase;
+    public int textSelectionExtent;
     private int platformViewId;
-    int scrollChildren;
+    public int scrollChildren;
     private int scrollIndex;
     private int traversalParent;
     private float scrollPosition;
@@ -2349,7 +2352,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private String identifier;
     private String label;
     private List<StringAttribute> labelAttributes;
-    String value;
+    public String value;
     private List<StringAttribute> valueAttributes;
     private String increasedValue;
     private List<StringAttribute> increasedValueAttributes;
@@ -2362,16 +2365,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     //
     // The tooltip is attached through AccessibilityNodeInfo.setTooltipText if
     // API level >= 28; otherwise, this is attached to the end of content description.
-    @Nullable String tooltip;
+    public @Nullable String tooltip;
 
     // The Url this node points to.
-    @Nullable String linkUrl;
+    public @Nullable String linkUrl;
 
     // The locale of the content of this node.
     @Nullable private String locale;
 
-    @Nullable String minValue;
-    @Nullable String maxValue;
+    public @Nullable String minValue;
+    public @Nullable String maxValue;
 
     // The role of this node.
     private int role;
@@ -2413,8 +2416,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private float[] transform;
     private float[] hitTestTransform;
 
-    SemanticsNode parent;
-    List<SemanticsNode> childrenInTraversalOrder = new ArrayList<>();
+    public SemanticsNode parent;
+    public List<SemanticsNode> childrenInTraversalOrder = new ArrayList<>();
     private List<SemanticsNode> childrenInHitTestOrder = new ArrayList<>();
     private List<CustomAccessibilityAction> customAccessibilityActions;
     private CustomAccessibilityAction onTapOverride;
@@ -2452,7 +2455,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
      * <p>This method only applies to this {@code SemanticsNode} and does not implicitly search its
      * children.
      */
-    boolean hasAction(@NonNull Action action) {
+    public boolean hasAction(@NonNull Action action) {
       return (actions & action.value) != 0;
     }
 
@@ -2464,7 +2467,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return (previousActions & action.value) != 0;
     }
 
-    boolean hasFlag(@NonNull Flag flag) {
+    public boolean hasFlag(@NonNull Flag flag) {
       return (flags & flag.value) != 0;
     }
 
@@ -2475,7 +2478,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return (previousFlags & flag.value) != 0;
     }
 
-    boolean shouldBeTreatedAsButton() {
+    public boolean shouldBeTreatedAsButton() {
       if (hasFlag(Flag.IS_BUTTON)) {
         return true;
       }
@@ -2951,7 +2954,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return Math.max(a, Math.max(b, Math.max(c, d)));
     }
 
-    CharSequence getValue() {
+    public CharSequence getValue() {
       return new AccessibilityStringBuilder()
           .addString(value)
           .addAttributes(valueAttributes)
@@ -2976,7 +2979,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           .build();
     }
 
-    CharSequence getValueLabelHint() {
+    public CharSequence getValueLabelHint() {
       CharSequence[] array = new CharSequence[] {getValue(), getLabel(), getHint()};
       CharSequence result = null;
       for (CharSequence word : array) {
@@ -2991,7 +2994,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       return result;
     }
 
-    CharSequence getTextFieldHint() {
+    public CharSequence getTextFieldHint() {
       CharSequence[] array = new CharSequence[] {getLabel(), getHint()};
       CharSequence result = null;
       for (CharSequence word : array) {

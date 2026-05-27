@@ -12,7 +12,7 @@ import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.StandardMessageCodec;
-import io.flutter.view.accessibility.AccessibilityBridge;
+import io.flutter.view.AccessibilityBridge;
 import java.util.HashMap;
 
 /**
