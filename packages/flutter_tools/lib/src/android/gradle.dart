@@ -1057,6 +1057,7 @@ void printHowToConsumeAar({
   logger.printStatus('To learn more, visit https://flutter.dev/to/integrate-android-archive');
 }
 
+/// Calculates the SHA-1 hash of the given [file] using chunked reading.
 @visibleForTesting
 String calculateSha(File file) {
   final RandomAccessFile openedFile = file.openSync();
