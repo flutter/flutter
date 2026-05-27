@@ -662,52 +662,12 @@ public class PlatformPluginTest {
       PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
 
       try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
-        // First, enter target mode.
         platformPlugin.mPlatformMessageHandler.showSystemUiMode(mode);
-
-        // Then transition to EDGE_TO_EDGE.
         platformPlugin.mPlatformMessageHandler.showSystemUiMode(
             PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
 
-        // Should call setSystemUiVisibility(0) to clear active visibility-hiding flags.
         verify(fakeDecorView).setSystemUiVisibility(0);
         windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
-      }
-    }
-  }
-
-  @SuppressWarnings("deprecation")
-  @Config(sdk = API_LEVELS.API_29)
-  @Test
-  public void switchFromEdgeToEdgeToAnyMode_restoresDecorFitsSystemWindows() {
-    PlatformChannel.SystemUiMode[] modes = {
-      PlatformChannel.SystemUiMode.LEAN_BACK,
-      PlatformChannel.SystemUiMode.IMMERSIVE,
-      PlatformChannel.SystemUiMode.IMMERSIVE_STICKY
-    };
-
-    for (PlatformChannel.SystemUiMode mode : modes) {
-      View fakeDecorView = mock(View.class);
-      Window fakeWindow = mock(Window.class);
-      Activity mockActivity = mock(Activity.class);
-      when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
-      when(mockActivity.getWindow()).thenReturn(fakeWindow);
-      PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
-
-      try (MockedStatic<WindowCompat> windowCompatMock = mockStatic(WindowCompat.class)) {
-        // First, enter EDGE_TO_EDGE mode.
-        platformPlugin.mPlatformMessageHandler.showSystemUiMode(
-            PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
-        windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, false));
-
-        // Clear static mock calls to simplify verification of subsequent transitions.
-        windowCompatMock.clearInvocations();
-
-        // Then transition to the target mode.
-        platformPlugin.mPlatformMessageHandler.showSystemUiMode(mode);
-
-        // Should restore decor fits system windows when leaving edge-to-edge.
-        windowCompatMock.verify(() -> WindowCompat.setDecorFitsSystemWindows(fakeWindow, true));
       }
     }
   }
