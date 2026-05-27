@@ -29,6 +29,7 @@ import 'android_console.dart';
 import 'android_sdk.dart';
 import 'application_package.dart';
 import 'gradle_utils.dart' as gradle_utils;
+import 'ini_utils.dart';
 
 /// Whether the [AndroidDevice] is believed to be a physical device or an emulator.
 enum HardwareType { emulator, physical }
@@ -213,7 +214,7 @@ class AndroidDevice extends Device {
       return;
     }
     try {
-      final Map<String, String> ini = _parseIniLines(iniFile.readAsLinesSync());
+      final Map<String, String> ini = parseIniLines(iniFile.readAsLinesSync());
       final String? path = ini['path'];
       if (path == null) {
         return;
@@ -222,7 +223,7 @@ class AndroidDevice extends Device {
       if (!configFile.existsSync()) {
         return;
       }
-      final Map<String, String> properties = _parseIniLines(configFile.readAsLinesSync());
+      final Map<String, String> properties = parseIniLines(configFile.readAsLinesSync());
       final String? displayName = properties['avd.ini.displayname'];
       if (displayName != null && displayName.isNotEmpty) {
         _emulatorName = displayName;
@@ -232,25 +233,6 @@ class AndroidDevice extends Device {
     } on Exception catch (e) {
       _logger.printTrace('Failed to resolve AVD name for $avdId: $e');
     }
-  }
-
-  Map<String, String> _parseIniLines(List<String> contents) {
-    final results = <String, String>{};
-
-    final Iterable<List<String>> properties = contents
-        .map<String>((String l) => l.trim())
-        // Strip blank lines/comments
-        .where((String l) => l != '' && !l.startsWith('#'))
-        // Discard anything that isn't simple name=value
-        .where((String l) => l.contains('='))
-        // Split into name/value
-        .map<List<String>>((String l) => l.split('='));
-
-    for (final property in properties) {
-      results[property[0].trim()] = property[1].trim();
-    }
-
-    return results;
   }
 
   @override
@@ -642,12 +624,10 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage =
-          await ApplicationPackageFactory.instance!.getPackageForPlatform(
-                devicePlatform,
-                buildInfo: debuggingOptions.buildInfo,
-              )
-              as AndroidApk?;
+      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+        devicePlatform,
+        buildInfo: debuggingOptions.buildInfo,
+      ) as AndroidApk?;
     }
     // There was a failure parsing the android project information.
     if (builtPackage == null) {

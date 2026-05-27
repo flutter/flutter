@@ -4,14 +4,19 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_emulator.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/emulator.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 const emulatorID = 'i1234';
 const errorText = '[Android emulator test error]';
@@ -98,21 +103,6 @@ void main() {
       );
 
       expect(emulator.name, 'This is my ID');
-    });
-
-    testWithoutContext('parses ini files', () {
-      const iniFile = '''
-        hw.device.name=My Test Name
-        #hw.device.name=Bad Name
-
-        hw.device.manufacturer=Me
-        avd.ini.displayname = dispName
-      ''';
-      final Map<String, String> results = parseIniLines(iniFile.split('\n'));
-
-      expect(results['hw.device.name'], 'My Test Name');
-      expect(results['hw.device.manufacturer'], 'Me');
-      expect(results['avd.ini.displayname'], 'dispName');
     });
   });
 
@@ -216,10 +206,82 @@ void main() {
         ),
       );
     });
+
+    group('AndroidEmulators discovery', () {
+      late MemoryFileSystem fileSystem;
+      late FakeAndroidSdk mockSdk;
+
+      setUp(() {
+        fileSystem = MemoryFileSystem.test();
+        mockSdk = FakeAndroidSdk()
+          ..emulatorPath = 'emulator'
+          ..adbPath = 'adb'
+          ..avdPath = '/fake/avd';
+      });
+
+      testWithoutContext('discovers emulators and parses displayname and manufacturer', () async {
+        // 1. Setup fake AVD directory structures and INI files.
+        final Directory avdDir = fileSystem.directory('/fake/avd')..createSync(recursive: true);
+
+        // Emulator 1: Nexus_5X. Has a display name.
+        avdDir.childFile('Nexus_5X.ini').writeAsStringSync('path=/fake/avd/Nexus_5X.avd');
+        final Directory nexus5xDir = fileSystem.directory('/fake/avd/Nexus_5X.avd')
+          ..createSync(recursive: true);
+        nexus5xDir.childFile('config.ini').writeAsStringSync('''
+          avd.ini.displayname=My Custom Nexus 5X
+          hw.device.manufacturer=Google
+        ''');
+
+        // Emulator 2: Pixel_6. Does not have a display name.
+        avdDir.childFile('Pixel_6.ini').writeAsStringSync('path=/fake/avd/Pixel_6.avd');
+        final Directory pixel6Dir = fileSystem.directory('/fake/avd/Pixel_6.avd')
+          ..createSync(recursive: true);
+        pixel6Dir.childFile('config.ini').writeAsStringSync('''
+          hw.device.manufacturer=Google
+        ''');
+
+        final androidWorkflow = AndroidWorkflow(
+          androidSdk: mockSdk,
+          featureFlags: TestFeatureFlags(),
+        );
+
+        final discoverer = AndroidEmulators(
+          androidSdk: mockSdk,
+          androidWorkflow: androidWorkflow,
+          fileSystem: fileSystem,
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['emulator', '-list-avds'],
+              stdout: 'Nexus_5X\nPixel_6',
+            ),
+          ]),
+        );
+
+        final List<Emulator> emulators = await discoverer.emulators;
+        expect(emulators, hasLength(2));
+
+        expect(emulators[0].id, 'Nexus_5X');
+        expect(emulators[0].name, 'My Custom Nexus 5X');
+        expect(emulators[0].manufacturer, 'Google');
+
+        expect(emulators[1].id, 'Pixel_6');
+        expect(emulators[1].name, 'Pixel 6'); // Underscores replaced with space
+        expect(emulators[1].manufacturer, 'Google');
+      });
+    });
   });
 }
 
 class FakeAndroidSdk extends Fake implements AndroidSdk {
   @override
   String? emulatorPath;
+
+  @override
+  String? adbPath;
+
+  String? avdPath;
+
+  @override
+  String? getAvdPath() => avdPath;
 }
