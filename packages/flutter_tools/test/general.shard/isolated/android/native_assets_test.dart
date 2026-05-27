@@ -78,8 +78,14 @@ void main() {
         ];
         final buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
-          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
-          linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+          buildResult: buildMode == BuildMode.debug
+              ? FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets)
+              : FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                  codeAssetsForLinking: <String, List<CodeAsset>>{'package:bar': codeAssets},
+                ),
+          linkResult: buildMode == BuildMode.debug
+              ? null
+              : FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
         );
         final environmentDefines = <String, String>{
           kBuildMode: buildMode.cliName,
