@@ -546,7 +546,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
         return false;
       }
       index_offset = reinterpret_cast<const GLvoid*>(
-          static_cast<GLsizei>(index_buffer_view.GetRange().offset));
+          static_cast<uintptr_t>(index_buffer_view.GetRange().offset));
     }
 
     // A non-instanced draw of the bound geometry. Used directly for ordinary

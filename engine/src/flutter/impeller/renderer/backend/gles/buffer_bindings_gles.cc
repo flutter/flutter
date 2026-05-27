@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/backend/gles/buffer_bindings_gles.h"
 
+#include <cstdint>
 #include <cstring>
 #include <vector>
 
@@ -201,6 +202,22 @@ bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
     return false;
   }
 
+  // For an emulated instanced draw (instance > 0), a binding whose attributes
+  // are all vertex-rate (divisor 0) does not change across instances, so the
+  // state bound for instance 0 still applies. Skip the redundant re-binding.
+  if (instance > 0u) {
+    bool has_instance_rate = false;
+    for (const auto& array : vertex_attrib_arrays_[binding]) {
+      if (array.vertex_attrib_divisor != 0u) {
+        has_instance_rate = true;
+        break;
+      }
+    }
+    if (!has_instance_rate) {
+      return true;
+    }
+  }
+
   if (!gl.GetCapabilities()->IsES()) {
     FML_DCHECK(vertex_array_object_ == 0);
     gl.GenVertexArrays(1, &vertex_array_object_);
@@ -223,7 +240,7 @@ bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
                            array.normalized,  // normalized
                            array.stride,      // stride
                            reinterpret_cast<const GLvoid*>(
-                               static_cast<GLsizei>(attribute_offset))  // ptr
+                               static_cast<uintptr_t>(attribute_offset))  // ptr
     );
     // Set the instancing divisor when the driver supports it. It is core
     // on ES 3.0+ and comes from GL_EXT_instanced_arrays on ES 2.0. When
