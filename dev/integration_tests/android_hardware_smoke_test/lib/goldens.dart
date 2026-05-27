@@ -22,20 +22,29 @@ Future<void> handleGoldenRequest(
   GlobalKey targetKey,
   Future<String?> goldenVariant,
 ) async {
-  final String? goldenVariantValue = await goldenVariant;
-  final Uint8List resultImageBytes = await _capturePng(testName, targetKey);
+  try {
+    final String? goldenVariantValue = await goldenVariant;
+    final Uint8List resultImageBytes = await _capturePng(testName, targetKey);
 
-  if (performAppSideGoldenCompare) {
-    return _compareGoldenOnDevice(
-      testName,
-      resultImageBytes,
-      completer,
-      goldenVariantValue,
-    );
-  } else {
+    if (performAppSideGoldenCompare) {
+      // Await execution so that any unhandled exceptions inside it are caught here
+      await _compareGoldenOnDevice(
+        testName,
+        resultImageBytes,
+        completer,
+        goldenVariantValue,
+      );
+    } else {
+      completer.complete(<String, Object?>{
+        "message": "Rendered $testName",
+        "imageBytes": base64.encode(resultImageBytes),
+      });
+    }
+  } catch (e, stackTrace) {
+    // Guarantee that the completer completes even under unhandled exceptions
     completer.complete(<String, Object?>{
-      "message": "Rendered $testName",
-      "imageBytes": base64.encode(resultImageBytes),
+      "message":
+          "Error occurred during golden request handling: $e\n$stackTrace",
     });
   }
 }
@@ -58,14 +67,7 @@ Future<void> _compareGoldenOnDevice(
 
   await _copyGoldenAssetToTemp(goldenAssetPath, tempGoldenPath);
 
-  try {
-    await _writeBytesToFile(tempResultPath, resultImageBytes, "compareGolden");
-  } catch (e) {
-    completer.complete(<String, Object?>{
-      "message": "Failed to write result image: $e",
-    });
-    return;
-  }
+  await _writeBytesToFile(tempResultPath, resultImageBytes, "compareGolden");
 
   final String? result = await matchesGoldenFile(
     tempGoldenPath,
