@@ -379,7 +379,7 @@ void main() {
                 )
                 .toList()
               ..sort();
-        final List<String> ndkProvisioningProperties = <String>[
+        final ndkProvisioningProperties = <String>[
           '-Pflutter.androidSdkRoot=${androidSdk.directory.path}',
           '-Pflutter.installedNdkVersions=${installedNdkVersions.join(',')}',
           if (androidSdk.sdkManagerPath != null &&
