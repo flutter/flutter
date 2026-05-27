@@ -16,6 +16,11 @@ enum SwipeEdge {
 
   /// Indicates that the swipe gesture starts from the right edge of the screen.
   right,
+
+  /// Indicates that the swipe gesture does not start from either edge.
+  ///
+  /// Introduced in Android API 36 (BackEvent.EDGE_NONE).
+  none,
 }
 
 /// Object used to report back gesture progress in Android.
@@ -54,7 +59,7 @@ final class PredictiveBackEvent {
     if (rawSwipeEdge is int && rawSwipeEdge >= 0 && rawSwipeEdge < SwipeEdge.values.length) {
       parsedSwipeEdge = SwipeEdge.values[rawSwipeEdge];
     } else {
-      parsedSwipeEdge = SwipeEdge.left;
+      parsedSwipeEdge = SwipeEdge.none;
     }
 
     return PredictiveBackEvent._(

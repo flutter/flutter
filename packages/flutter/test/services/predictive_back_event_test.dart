@@ -26,6 +26,16 @@ void main() {
     expect(event.isButtonEvent, isFalse);
   });
 
+  test('fromMap can be created with valid Map - SwipeEdge.none', () async {
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
+      'progress': 0.0,
+      'swipeEdge': 2,
+    });
+    expect(event.swipeEdge, SwipeEdge.none);
+    expect(event.isButtonEvent, isFalse);
+  });
+
   test('fromMap can be created with valid Map - isButtonEvent zero position', () async {
     final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 0.0],
@@ -73,13 +83,40 @@ void main() {
     expect(event.touchOffset, isNull);
   });
 
-  test('fromMap handles invalid swipeEdge safely', () async {
+  test('fromMap handles invalid swipeEdge safely - out of bounds positive', () async {
     final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
       'touchOffset': <double>[0.0, 100.0],
       'progress': 0.0,
-      'swipeEdge': 2,
+      'swipeEdge': 3,
     });
-    expect(event.swipeEdge, SwipeEdge.left);
+    expect(event.swipeEdge, SwipeEdge.none);
+  });
+
+  test('fromMap handles invalid swipeEdge safely - out of bounds negative', () async {
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
+      'progress': 0.0,
+      'swipeEdge': -1,
+    });
+    expect(event.swipeEdge, SwipeEdge.none);
+  });
+
+  test('fromMap handles invalid swipeEdge safely - invalid type', () async {
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
+      'progress': 0.0,
+      'swipeEdge': 'invalid',
+    });
+    expect(event.swipeEdge, SwipeEdge.none);
+  });
+
+  test('fromMap handles invalid swipeEdge safely - null', () async {
+    final event = PredictiveBackEvent.fromMap(const <String?, Object?>{
+      'touchOffset': <double>[0.0, 100.0],
+      'progress': 0.0,
+      'swipeEdge': null,
+    });
+    expect(event.swipeEdge, SwipeEdge.none);
   });
 
   test('equality when created with the same parameters', () async {
