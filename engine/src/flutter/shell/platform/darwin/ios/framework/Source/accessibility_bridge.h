@@ -27,8 +27,9 @@ namespace flutter {
 class PlatformViewIOS;
 
 /**
- * An accessibility instance is bound to one `FlutterViewController` and
- * `FlutterView` instance.
+ * An accessibility instance is bound to the `FlutterEngine` through
+ * `PlatformViewIOS` and can be rebound to sequential `FlutterViewController`
+ * and `FlutterView` instances.
  *
  * It helps populate the UIView's accessibilityElements property from Flutter's
  * semantics nodes.
@@ -53,6 +54,8 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
                       std::unique_ptr<IosDelegate> ios_delegate = nullptr);
   ~AccessibilityBridge();
 
+  void SetViewController(FlutterViewController* view_controller,
+                         __weak FlutterPlatformViewsController* platform_views_controller);
   void UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
                        const flutter::CustomAccessibilityActionUpdates& actions);
   void HandleEvent(NSDictionary<NSString*, id>* annotatedEvent);
@@ -68,6 +71,12 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
 
   UIView* view() const override { return view_controller_.view; }
 
+  UIView* viewIfLoaded() const override { return view_; }
+
+  UIView* accessibilityContainerView() const override {
+    return view_ ? view_ : fallback_accessibility_container_view_;
+  }
+
   bool isVoiceOverRunning() const override { return view_controller_.isVoiceOverRunning; }
 
   fml::WeakPtr<AccessibilityBridge> GetWeakPtr();
@@ -79,6 +88,8 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
   void clearState();
 
  private:
+  void UpdateAccessibilityElementsForViewController();
+  void UpdateSemanticsObjectsForViewController();
   SemanticsObject* GetOrCreateObject(int32_t id, flutter::SemanticsNodeUpdates& updates);
   SemanticsObject* FindNextFocusableIfNecessary();
   // Finds the first focusable SemanticsObject rooted at the parent. This includes the parent itself
@@ -90,6 +101,8 @@ class AccessibilityBridge final : public AccessibilityBridgeIos {
                                         NSMutableArray<NSNumber*>* doomed_uids);
 
   __weak FlutterViewController* view_controller_;
+  __weak UIView* view_;
+  UIView* fallback_accessibility_container_view_;
   PlatformViewIOS* platform_view_;
   __weak FlutterPlatformViewsController* platform_views_controller_;
 

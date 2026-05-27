@@ -63,7 +63,9 @@ void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner
   if (ios_surface_ || !owner_controller) {
     NotifyDestroyed();
     ios_surface_.reset();
-    accessibility_bridge_.reset();
+    if (accessibility_bridge_) {
+      accessibility_bridge_->SetViewController(nil, nil);
+    }
   }
   owner_controller_ = owner_controller;
   ApplyLocaleToOwnerController();
@@ -76,12 +78,16 @@ void PlatformViewIOS::SetOwnerViewController(__weak FlutterViewController* owner
                    queue:[NSOperationQueue mainQueue]
               usingBlock:^(NSNotification* note) {
                 // Implicit copy of 'this' is fine.
-                accessibility_bridge_.reset();
+                if (accessibility_bridge_) {
+                  accessibility_bridge_->SetViewController(nil, nil);
+                }
                 owner_controller_ = nil;
               }]);
 
   if (owner_controller_ && owner_controller_.isViewLoaded) {
     this->attachView();
+  } else {
+    UpdateAccessibilityBridgeViewController();
   }
   // Do not call `NotifyCreated()` here - let FlutterViewController take care
   // of that when its Viewport is sized.  If `NotifyCreated()` is called here,
@@ -98,10 +104,7 @@ void PlatformViewIOS::attachView() {
   ios_surface_ = IOSSurface::Create(ios_context_, ca_layer);
   FML_DCHECK(ios_surface_ != nullptr);
 
-  if (accessibility_bridge_) {
-    accessibility_bridge_ = std::make_unique<AccessibilityBridge>(
-        owner_controller_, this, owner_controller_.platformViewsController);
-  }
+  UpdateAccessibilityBridgeViewController();
 }
 
 PointerDataDispatcherMaker PlatformViewIOS::GetDispatcherMaker() {
@@ -151,9 +154,12 @@ void PlatformViewIOS::SetAccessibilityFeatures(int32_t flags) {
 void PlatformViewIOS::UpdateSemantics(int64_t view_id,
                                       flutter::SemanticsNodeUpdates update,
                                       flutter::CustomAccessibilityActionUpdates actions) {
-  FML_DCHECK(owner_controller_);
-  if (accessibility_bridge_) {
-    accessibility_bridge_.get()->UpdateSemantics(std::move(update), actions);
+  UpdateAccessibilityBridgeViewController();
+  if (!accessibility_bridge_) {
+    return;
+  }
+  accessibility_bridge_.get()->UpdateSemantics(std::move(update), actions);
+  if (owner_controller_ && owner_controller_.isViewLoaded) {
     [[NSNotificationCenter defaultCenter] postNotificationName:FlutterSemanticsUpdateNotification
                                                         object:owner_controller_];
   }
@@ -167,13 +173,9 @@ void PlatformViewIOS::SetApplicationLocale(std::string locale) {
 
 // |PlatformView|
 void PlatformViewIOS::SetSemanticsTreeEnabled(bool enabled) {
-  FML_DCHECK(owner_controller_);
+  semantics_tree_enabled_ = enabled;
   if (enabled) {
-    if (accessibility_bridge_) {
-      return;
-    }
-    accessibility_bridge_ =
-        std::make_unique<AccessibilityBridge>(owner_controller_, this, platform_views_controller_);
+    UpdateAccessibilityBridgeViewController();
   } else {
     accessibility_bridge_.reset();
   }
@@ -236,6 +238,25 @@ void PlatformViewIOS::ApplyLocaleToOwnerController() {
   if (owner_controller_) {
     owner_controller_.applicationLocale =
         application_locale_.empty() ? nil : @(application_locale_.data());
+  }
+}
+
+void PlatformViewIOS::UpdateAccessibilityBridgeViewController() {
+  if (!semantics_tree_enabled_) {
+    return;
+  }
+  FlutterPlatformViewsController* platform_views_controller =
+      owner_controller_ ? owner_controller_.platformViewsController : nil;
+  if (!platform_views_controller) {
+    platform_views_controller = platform_views_controller_;
+  }
+  if (accessibility_bridge_) {
+    accessibility_bridge_->SetViewController(owner_controller_, platform_views_controller);
+    return;
+  }
+  if (owner_controller_) {
+    accessibility_bridge_ =
+        std::make_unique<AccessibilityBridge>(owner_controller_, this, platform_views_controller);
   }
 }
 

@@ -38,6 +38,8 @@ class MockAccessibilityBridge : public AccessibilityBridgeIos {
   }
   bool isVoiceOverRunning() const override { return isVoiceOverRunningValue; }
   UIView* view() const override { return view_; }
+  UIView* viewIfLoaded() const override { return view_; }
+  UIView* accessibilityContainerView() const override { return view_; }
   UIView<UITextInput>* textInputView() override { return nil; }
 
   NSString* GetDefaultLocale() override { return mockedLocale; }
@@ -70,6 +72,8 @@ class MockAccessibilityBridgeNoWindow : public AccessibilityBridgeIos {
   }
   bool isVoiceOverRunning() const override { return isVoiceOverRunningValue; }
   UIView* view() const override { return view_; }
+  UIView* viewIfLoaded() const override { return view_; }
+  UIView* accessibilityContainerView() const override { return view_; }
   UIView<UITextInput>* textInputView() override { return nil; }
   void DispatchSemanticsAction(int32_t id, SemanticsAction action) override {
     SemanticsActionObservation observation(id, action);

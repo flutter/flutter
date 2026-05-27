@@ -135,6 +135,11 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   auto runner = thread->GetTaskRunner();
   return runner;
 }
+
+void StubLoadedView(id view_controller, id view) {
+  OCMStub([view_controller view]).andReturn(view);
+  OCMStub([view_controller viewIfLoaded]).andReturn(view);
+}
 }  // namespace
 
 @interface AccessibilityBridgeTest : XCTestCase
@@ -164,6 +169,47 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
                                                      /*platform_view=*/platform_view.get(),
                                                      /*platform_views_controller=*/nil);
   XCTAssertTrue(bridge.get());
+}
+
+- (void)testSetViewControllerRebindsWhenSameViewControllerLoadsView {
+  flutter::MockDelegate mock_delegate;
+  auto thread_task_runner = CreateNewThread("AccessibilityBridgeTest");
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*rendering_api=*/mock_delegate.settings_.enable_impeller
+          ? flutter::IOSRenderingAPI::kMetal
+          : flutter::IOSRenderingAPI::kSoftware,
+      /*platform_views_controller=*/nil,
+      /*task_runners=*/runners,
+      /*worker_task_runner=*/nil,
+      /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  id messenger = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
+  id engine = OCMClassMock([FlutterEngine class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  __block UIView* viewIfLoaded = nil;
+  OCMStub([mockFlutterViewController viewIfLoaded]).andDo(^(NSInvocation* invocation) {
+    [invocation setReturnValue:&viewIfLoaded];
+  });
+  OCMStub([mockFlutterViewController engine]).andReturn(engine);
+  OCMStub([engine binaryMessenger]).andReturn(messenger);
+
+  auto bridge =
+      std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
+                                                     /*platform_view=*/platform_view.get(),
+                                                     /*platform_views_controller=*/nil);
+  viewIfLoaded = mockFlutterView;
+  OCMExpect([mockFlutterView setAccessibilityElements:[OCMArg isNil]]);
+  bridge->SetViewController(mockFlutterViewController, nil);
+  OCMVerifyAll(mockFlutterView);
+
+  [engine stopMocking];
 }
 
 - (void)testUpdateSemanticsEmpty {
@@ -216,7 +262,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
   std::string label = "some label";
 
   __block auto bridge =
@@ -265,7 +311,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
   OCMStub([mockFlutterViewController isVoiceOverRunning]).andReturn(YES);
 
   __block auto bridge =
@@ -301,7 +347,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
         /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
     id mockFlutterView = OCMClassMock([FlutterView class]);
     id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-    OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+    StubLoadedView(mockFlutterViewController, mockFlutterView);
     std::string label = "some label";
     flutterPlatformViewsController.flutterView = mockFlutterView;
 
@@ -422,7 +468,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
                                                             opaque:YES
                                                    enableWideGamut:NO];
-  OCMStub([mockFlutterViewController view]).andReturn(flutterView);
+  StubLoadedView(mockFlutterViewController, flutterView);
   std::string label = "some label";
   auto bridge = std::make_unique<flutter::AccessibilityBridge>(
       /*view_controller=*/mockFlutterViewController,
@@ -521,7 +567,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
                                                             opaque:YES
                                                    enableWideGamut:NO];
-  OCMStub([mockFlutterViewController view]).andReturn(flutterView);
+  StubLoadedView(mockFlutterViewController, flutterView);
   std::string label = "some label";
   @autoreleasepool {
     auto bridge = std::make_unique<flutter::AccessibilityBridge>(
@@ -596,7 +642,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
                                                             opaque:YES
                                                    enableWideGamut:NO];
-  OCMStub([mockFlutterViewController view]).andReturn(flutterView);
+  StubLoadedView(mockFlutterViewController, flutterView);
   std::string label = "some label";
   @autoreleasepool {
     auto bridge = std::make_unique<flutter::AccessibilityBridge>(
@@ -667,7 +713,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -740,7 +786,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
                                                             opaque:YES
                                                    enableWideGamut:NO];
-  OCMStub([mockFlutterViewController view]).andReturn(flutterView);
+  StubLoadedView(mockFlutterViewController, flutterView);
   auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
   __block auto bridge =
       std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
@@ -788,7 +834,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
                                                             opaque:YES
                                                    enableWideGamut:NO];
-  OCMStub([mockFlutterViewController view]).andReturn(flutterView);
+  StubLoadedView(mockFlutterViewController, flutterView);
   auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
   __block auto bridge =
       std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
@@ -833,7 +879,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
                                                             opaque:YES
                                                    enableWideGamut:NO];
-  OCMStub([mockFlutterViewController view]).andReturn(flutterView);
+  StubLoadedView(mockFlutterViewController, flutterView);
   auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
   __block auto bridge =
       std::make_unique<flutter::AccessibilityBridge>(/*view_controller=*/mockFlutterViewController,
@@ -884,7 +930,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
                                                             opaque:YES
                                                    enableWideGamut:NO];
-  OCMStub([mockFlutterViewController view]).andReturn(flutterView);
+  StubLoadedView(mockFlutterViewController, flutterView);
 
   @autoreleasepool {
     auto bridge = std::make_unique<flutter::AccessibilityBridge>(
@@ -941,7 +987,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -1027,7 +1073,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -1104,7 +1150,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -1180,7 +1226,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   OCMExpect([mockFlutterView
       setAccessibilityElements:[OCMArg checkWithBlock:^BOOL(NSArray* value) {
@@ -1239,7 +1285,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -1338,7 +1384,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -1426,7 +1472,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -1520,7 +1566,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -1619,7 +1665,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -1691,7 +1737,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -1762,7 +1808,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -1839,7 +1885,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -1918,7 +1964,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -1993,7 +2039,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
   id mockFlutterView = OCMClassMock([FlutterView class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -2070,7 +2116,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
   std::string label = "some label";
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
@@ -2129,7 +2175,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -2193,7 +2239,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   NSMutableArray<NSDictionary<NSString*, id>*>* accessibility_notifications =
       [[NSMutableArray alloc] init];
@@ -2300,7 +2346,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
       /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
   id mockFlutterView = OCMClassMock([FlutterView class]);
   id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-  OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+  StubLoadedView(mockFlutterViewController, mockFlutterView);
 
   auto ios_delegate = std::make_unique<flutter::MockIosDelegate>();
   __block auto bridge =
@@ -2433,8 +2479,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   @autoreleasepool {
     id mockFlutterView = OCMClassMock([FlutterView class]);
     id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
-    OCMStub([mockFlutterViewController viewIfLoaded]).andReturn(mockFlutterView);
-    OCMStub([mockFlutterViewController view]).andReturn(mockFlutterView);
+    StubLoadedView(mockFlutterViewController, mockFlutterView);
 
     bridge = std::make_unique<flutter::AccessibilityBridge>(
         /*view_controller=*/mockFlutterViewController,
