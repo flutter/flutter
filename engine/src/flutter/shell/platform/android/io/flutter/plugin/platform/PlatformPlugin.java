@@ -456,6 +456,7 @@ public class PlatformPlugin {
    * io.flutter.embedding.android.FlutterFragmentActivity}.
    */
   private void enableEdgeToEdge() {
+    activity.getWindow().getDecorView().setSystemUiVisibility(0);
     WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), false);
   }
 
