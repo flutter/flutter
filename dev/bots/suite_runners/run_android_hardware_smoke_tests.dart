@@ -28,6 +28,11 @@ Future<void> runAndroidHardwareSmokeTests({required ImpellerBackend backend}) as
   try {
     // Replace whatever the current backend is with the specified backend.
     final impellerBackendMetadata = RegExp(_impellerBackendMetadata(value: '.*'));
+    if (!impellerBackendMetadata.hasMatch(androidManifestContents)) {
+      throw StateError(
+        'Could not find io.flutter.embedding.android.ImpellerBackend meta-data tag inside AndroidManifest.xml',
+      );
+    }
     androidManifestXml.writeAsStringSync(
       androidManifestContents.replaceFirst(
         impellerBackendMetadata,

@@ -21,12 +21,12 @@ found in the LICENSE file. -->
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="true"/>
-        <meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="vulkan"/>
-        <meta-data android:name="flutterEmbedding" android:value="2"/>
+        <meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="true" />
+        <meta-data android:name="io.flutter.embedding.android.ImpellerBackend" android:value="vulkan" />
+        <meta-data android:name="flutterEmbedding" android:value="2" />
     </application>
 </manifest>
