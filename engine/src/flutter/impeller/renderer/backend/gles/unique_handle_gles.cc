@@ -66,9 +66,11 @@ UniqueHandleGLES::UniqueHandleGLES(UniqueHandleGLES&& other) {
 }
 
 UniqueHandleGLES& UniqueHandleGLES::operator=(UniqueHandleGLES&& other) {
-  reactor_ = std::move(other.reactor_);
-  handle_ = other.handle_;
-  other.handle_ = HandleGLES::DeadHandle();
+  if (this != &other) {
+    Reset();
+    std::swap(reactor_, other.reactor_);
+    std::swap(handle_, other.handle_);
+  }
   return *this;
 }
 
