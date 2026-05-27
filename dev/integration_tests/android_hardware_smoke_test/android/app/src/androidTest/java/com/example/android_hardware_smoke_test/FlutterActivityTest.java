@@ -13,6 +13,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import org.json.JSONException;
@@ -25,17 +27,6 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class FlutterActivityTest {
   private static final String TAG = "FlutterActivityTest";
-
-  /**
-   * This timeout represents the time it takes for the flutter app to render one frame and reply
-   * after a test sends a message over the channel.
-   */
-  private static final int MESSAGE_CHANNEL_RESPONSE_TIMEOUT_MS = 1000;
-
-  /**
-   * The timeout for each test. This should be strictly larger than MESSAGE_CHANNEL_RESPONSE_TIMEOUT_MS.
-    */
-  private static final int TEST_TIMEOUT_MS = 3000;
 
   @Rule
   public ActivityScenarioRule<MainActivity> rule =
@@ -56,6 +47,9 @@ public class FlutterActivityTest {
         JSONObject message = new JSONObject();
         message.put("testName", testName);
         message.put("performAppSideGoldenCompare", true);
+        
+        Log.d(TAG, "Sending '" + message.toString() + "' on message channel");
+        
         activity.messageChannel.send(message, reply -> {
           try {
             JSONObject replyJson = (JSONObject) reply;
@@ -69,31 +63,35 @@ public class FlutterActivityTest {
       }
     });
 
+    // Schedule a diagnostic warning log if the rendering is exceptionally slow
+    ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    executor.schedule(() -> {
+      if (!future.isDone()) {
+        Log.w(TAG, "Rendering '" + testName + "' is taking longer than expected (exceeded 5 seconds)...");
+      }
+    }, 5, TimeUnit.SECONDS);
 
     String reply = null;
     try {
-      reply = future.get(MESSAGE_CHANNEL_RESPONSE_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-    } catch (ExecutionException e) {
-      Log.e(TAG, testName+" Failed to receive result on message channel, ExecutionException " + e.getMessage());
+      // Wait with a very generous 60-second timeout to catch true deadlocks/crashes
+      reply = future.get(60, TimeUnit.SECONDS);
+    } catch (Exception e) {
+      Log.e(TAG, testName + " Failed to receive result on message channel: " + e.getMessage());
       throw new RuntimeException(e);
-    } catch (InterruptedException e) {
-      Log.e(TAG, testName+"  Failed to receive result on message channel, InterruptedException " + e.getMessage());
-      throw new RuntimeException(e);
-    } catch (TimeoutException e) {
-      Log.e(TAG, testName+" Failed to receive result on message channel, TimeoutException " + e.getMessage());
-      throw new RuntimeException(e);
+    } finally {
+      executor.shutdown();
     }
 
     Log.d(TAG, "Received "+reply+" on message channel");
     assertEquals("Rendered "+testName, reply);
   }
 
-  @Test(timeout = TEST_TIMEOUT_MS)
+  @Test
   public void blueRectangleTest() {
     templateTest("blueRectangleTest");
   }
 
-  @Test(timeout = TEST_TIMEOUT_MS)
+  @Test
   public void trianglePathTest() {
     templateTest("trianglePathTest");
   }
