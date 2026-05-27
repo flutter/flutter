@@ -1027,6 +1027,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
           settings.disable_service_auth_codes,  // disable VM service auth codes
           settings.enable_service_port_fallback,  // enable fallback to port 0
                                                   // when bind fails.
+          settings.enable_experimental_vm_service, // enable experimental VM Service
           error                                   // error (out)
           )) {
     // Error is populated by call to startup.

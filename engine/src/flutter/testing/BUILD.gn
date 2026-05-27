@@ -100,7 +100,7 @@ source_set("skia") {
 }
 
 dart_snapshot_kernel("vmservice_kernel") {
-  dart_main = "//flutter/shell/vmservice/empty.dart"
+  dart_main = "//flutter/third_party/dart/pkg/dart_runtime_service_vm/bin/vm_service_entrypoint.dart"
   dart_kernel = "$target_gen_dir/assets/vmservice_kernel.bin"
 }
 
@@ -271,7 +271,9 @@ if (use_swiftshader) {
       "//flutter/fml",
     ]
 
-    configs -= [ "//build/config/clang:extra_warnings" ]
+    if (is_clang) {
+      configs -= [ "//build/config/clang:extra_warnings" ]
+    }
     configs += [ "//flutter/third_party/angle:gl_prototypes" ]
   }
 }

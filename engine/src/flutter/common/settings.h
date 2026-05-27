@@ -188,6 +188,7 @@ struct Settings {
   // On iOS 14 this prompts a local network permission dialog,
   // which cannot be accepted or dismissed in a CI environment.
   bool enable_vm_service_publication = true;
+  bool enable_experimental_vm_service = false;
 
   // The IP address to which the Dart VM service is bound.
   std::string vm_service_host;

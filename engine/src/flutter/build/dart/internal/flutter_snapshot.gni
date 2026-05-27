@@ -113,6 +113,18 @@ template("flutter_snapshot") {
           "--snapshot_kind=app-aot-elf",
           "--elf=" + rebase_path(libapp),
         ]
+      } else if (is_linux) {
+        if (defined(invoker.output_aot_lib)) {
+          output_aot_lib = invoker.output_aot_lib
+        } else {
+          output_aot_lib = "libapp.so"
+        }
+        libapp = "$root_out_dir/$output_aot_lib"
+        outputs += [ libapp ]
+        args += [
+          "--snapshot_kind=app-aot-elf",
+          "--elf=" + rebase_path(libapp),
+        ]
       } else {
         assert(false)
       }
