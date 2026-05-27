@@ -110,6 +110,10 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   /// This method should be preferred to checking if it exists and
   /// then deleting, because it handles the edge case where the file or directory
   /// is deleted by a different program between the two calls.
+  ///
+  /// Note: Disk presence is checked type-agnostically (followLinks: false)
+  /// to safely resolve and delete broken symlinks, sockets, or type-mismatched
+  /// folders from disk, preventing subsequent recreation failures.
   static bool deleteIfExists(FileSystemEntity entity, {bool recursive = false}) {
     final FileSystemEntityType type = entity.fileSystem.typeSync(entity.path, followLinks: false);
     if (type == .notFound) {
