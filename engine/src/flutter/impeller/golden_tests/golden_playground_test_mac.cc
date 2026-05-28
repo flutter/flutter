@@ -69,7 +69,8 @@ std::unique_ptr<PlaygroundImpl> MakeOpenGLESPlayground() {
                                 playground_switches);
 }
 
-// Returns a static instance to an OpenGL ES playground that can be used across tests.
+// Returns a static instance to an OpenGL ES playground that can be used across
+// tests.
 const std::unique_ptr<PlaygroundImpl>& GetSharedOpenGLESPlayground() {
   static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>> opengl_playground(
       MakeOpenGLESPlayground());
