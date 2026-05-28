@@ -2,6 +2,18 @@
 
 An integration and compatibility smoke test suite designed to verify visual rendering correctness on Android hardware.
 
+## Prerequisites & Initial Setup
+
+Because this integration test project follows a minimal-boilerplate pattern, standard binary Gradle wrappers and properties are not committed to the repository.
+
+Before compiling or running any connected JUnit/instrumented tests locally for the first time, simply run the standard Flutter project regeneration command in this directory to restore the missing wrappers:
+
+```sh
+flutter create --platform=android --no-overwrite .
+```
+
+This will cleanly restore the missing wrapper scripts (`gradlew`, `gradlew.bat`) and wrapper configurations without modifying any of the customized build definitions, Java/Kotlin test harnesses, or package sources.
+
 ## 1. Overview & Purpose
 The primary objective of the `android_hardware_smoke_test` is to provide a **fully self-contained Android instrumented test suite**.
 
