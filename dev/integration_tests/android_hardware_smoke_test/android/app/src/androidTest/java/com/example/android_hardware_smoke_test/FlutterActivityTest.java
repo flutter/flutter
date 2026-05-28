@@ -82,7 +82,7 @@ public class FlutterActivityTest {
     } catch (Exception e) {
       Log.e(TAG, testName + " Failed to receive result on message channel: " + e.getMessage());
       throw new RuntimeException(e);
-    }
+    } finally {
       warningTask.cancel(true);
       executor.shutdown();
     }
