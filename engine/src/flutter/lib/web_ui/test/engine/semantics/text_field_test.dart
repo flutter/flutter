@@ -11,6 +11,7 @@ import 'package:ui/src/engine.dart' hide window;
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
+import '../../common/spy.dart';
 import '../../common/test_initialization.dart';
 import 'semantics_tester.dart';
 
@@ -613,6 +614,284 @@ void testMain() {
       expect(textField.editableElement.getAttribute('aria-description'), isNull);
     });
   });
+
+  // Group autofill in semantics mode. See https://github.com/flutter/flutter/issues/180652
+  group('$SemanticsTextEditingStrategy autofill group', () {
+    late HybridTextEditing testTextEditing;
+    late SemanticsTextEditingStrategy strategy;
+
+    setUp(() {
+      testTextEditing = HybridTextEditing();
+      SemanticsTextEditingStrategy.ensureInitialized(testTextEditing);
+      strategy = SemanticsTextEditingStrategy.instance;
+      testTextEditing.debugTextEditingStrategyOverride = strategy;
+      testTextEditing.configuration = singlelineConfig;
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+    });
+
+    tearDown(() {
+      if (strategy.isEnabled) {
+        strategy.disable();
+      }
+      cleanForms();
+      semantics().semanticsEnabled = false;
+      domDocument.activeElement?.blur();
+    });
+
+    // Builds a focused-username + password autofill group and drives the
+    // semantics path so the focused field is activated.
+    ({EngineAutofillForm form, SemanticTextField textField}) activateGroup() {
+      final List<Map<String, Object?>> fields = _autofillFields(
+        <String>['username', 'password'],
+        <String>['field1', 'field2'],
+      );
+      final focusedMap = fields.first['autofill']! as Map<String, Object?>;
+      final EngineAutofillForm form = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        focusedMap,
+        fields,
+      )!;
+      final config = InputConfiguration(
+        viewId: kImplicitViewId,
+        autofill: AutofillInfo.fromFrameworkMessage(focusedMap),
+        autofillGroup: form,
+      );
+      strategy.enable(config, onChange: (_, _) {}, onAction: (_) {});
+      final SemanticsObject semanticsObject = createTextFieldSemantics(value: '', isFocused: true);
+      return (form: form, textField: semanticsObject.semanticRole! as SemanticTextField);
+    }
+
+    test('builds the form and links the focused field by attribute', () {
+      final (form: EngineAutofillForm form, textField: SemanticTextField textField) =
+          activateGroup();
+      final DomHTMLFormElement formElement = form.formElement!;
+
+      // Form is inserted into the text-editing host with the stable id used
+      // for the form= association.
+      expect(flutterView.dom.textEditingHost.contains(formElement), isTrue);
+      expect(formElement.id, form.formDomId);
+      expect(formElement.getElementsByClassName('submitBtn'), hasLength(1));
+
+      // The non-focused member is a synthetic placeholder inside the form.
+      final DomHTMLElement password = form.elements['field2']!;
+      expect(formElement.contains(password), isTrue);
+      expect((password as DomHTMLInputElement).name, 'current-password');
+
+      // The focused member is NOT synthesized into the form (would be
+      // submitted twice), it is linked by attribute instead.
+      expect(form.elements['field1'], isNull);
+      expect(textField.editableElement.getAttribute('form'), form.formDomId);
+
+      // Regression guard for the 2021 tab-traversal regression
+      // (flutter/engine#25797): the editing element must stay in the
+      // semantics host and must NOT be moved into the form / text-editing
+      // host.
+      expect(flutterView.dom.semanticsHost.contains(textField.editableElement), isTrue);
+      expect(formElement.contains(textField.editableElement), isFalse);
+
+      // Autofill hint is applied and not clobbered back to 'off' by
+      // _updateInputType during the same semantics update.
+      expect((textField.editableElement as DomHTMLInputElement).autocomplete, 'username');
+    });
+
+    test('autocomplete survives a later semantics update', () {
+      final (form: EngineAutofillForm form, textField: SemanticTextField textField) =
+          activateGroup();
+      expect((textField.editableElement as DomHTMLInputElement).autocomplete, 'username');
+
+      // A second semantics update re-runs _updateInputType; it must not stomp
+      // the autofill hint while the field is the active group member.
+      createTextFieldSemantics(value: '', isFocused: true);
+      expect((textField.editableElement as DomHTMLInputElement).autocomplete, 'username');
+      expect(textField.editableElement.getAttribute('form'), form.formDomId);
+    });
+
+    test('autofill on a synthetic sibling propagates to the framework', () {
+      final spy = PlatformMessagesSpy()..setUp();
+      try {
+        final (form: EngineAutofillForm form, textField: _) = activateGroup();
+        final password = form.elements['field2']! as DomHTMLInputElement;
+
+        // Simulate the browser autofilling the (non-focused) password field.
+        password.value = 'p4ssw0rd';
+        password.dispatchEvent(createDomEvent('Event', 'input'));
+
+        final Iterable<PlatformMessage> tagged = spy.messages.where(
+          (m) =>
+              m.channel == 'flutter/textinput' &&
+              m.methodName == 'TextInputClient.updateEditingStateWithTag',
+        );
+        expect(tagged, isNotEmpty);
+        final args = tagged.last.methodArguments as List<dynamic>;
+        expect(args[1], isA<Map<dynamic, dynamic>>());
+        expect((args[1] as Map<dynamic, dynamic>).containsKey('field2'), isTrue);
+      } finally {
+        spy.tearDown();
+      }
+    });
+
+    test('demotes the focused field to a synthetic placeholder on blur', () {
+      final (form: EngineAutofillForm form, textField: SemanticTextField textField) =
+          activateGroup();
+      expect(textField.editableElement.getAttribute('form'), form.formDomId);
+
+      strategy.disable();
+
+      // The real element is detached from the form...
+      expect(textField.editableElement.getAttribute('form'), isNull);
+      // ...and replaced by a synthetic placeholder so the field still submits
+      // for credential save, and the form is kept dormant in the DOM.
+      final DomHTMLElement? placeholder = form.elements['field1'];
+      expect(placeholder, isNotNull);
+      expect(form.formElement!.contains(placeholder), isTrue);
+      expect(dormantForms[form.formIdentifier], form);
+    });
+
+    // Focus A, autofill A, focus B, autofill a different credential, focus A
+    // again, then assert each field is represented in the form exactly once
+    // with its latest value and the focused field is linked by attribute (not
+    // duplicated). This is the property that makes TextInput.finishAutofillContext
+    // submit correct values. Exercises wakeUp dormant-reuse, demote, and promote
+    // together. See https://github.com/flutter/flutter/issues/180652
+    test('promote/demote keeps each field represented once across A->B->A', () {
+      // Each focus change arrives as a fresh InputConfiguration whose `autofill`
+      // is the focused field and whose group shares the same formIdentifier, so
+      // it reuses the dormant form. `values` mirrors how the framework re-sends
+      // the config with each field's current editing value after an autofilled
+      // value has propagated back. Non-focused synthetic values come from this
+      // editing state via _updateFieldValues, not from DOM scraping, so this is
+      // the faithful way to simulate autofill.
+      InputConfiguration configFor(int focusedIndex, List<String> values) {
+        final List<Map<String, Object?>> f = _autofillFields(
+          <String>['username', 'password'],
+          <String>['field1', 'field2'],
+          values: values,
+        );
+        final focusedMap = f[focusedIndex]['autofill']! as Map<String, Object?>;
+        return InputConfiguration(
+          viewId: kImplicitViewId,
+          autofill: AutofillInfo.fromFrameworkMessage(focusedMap),
+          autofillGroup: EngineAutofillForm.fromFrameworkMessage(kImplicitViewId, focusedMap, f),
+        );
+      }
+
+      final tester = SemanticsTester(owner());
+      void focusNode(int nodeId) {
+        tester.updateNode(
+          id: 0,
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: 1,
+              flags: ui.SemanticsFlags(
+                isEnabled: ui.Tristate.isTrue,
+                isTextField: true,
+                isFocused: nodeId == 1 ? ui.Tristate.isTrue : ui.Tristate.isFalse,
+              ),
+              value: '',
+              rect: const ui.Rect.fromLTRB(0, 0, 50, 10),
+            ),
+            tester.updateNode(
+              id: 2,
+              flags: ui.SemanticsFlags(
+                isEnabled: ui.Tristate.isTrue,
+                isTextField: true,
+                isFocused: nodeId == 2 ? ui.Tristate.isTrue : ui.Tristate.isFalse,
+              ),
+              value: '',
+              rect: const ui.Rect.fromLTRB(0, 20, 50, 10),
+            ),
+          ],
+        );
+        tester.apply();
+      }
+
+      // Node 1 == field1 (username/A), node 2 == field2 (password/B).
+      // Focus A. Nothing autofilled yet.
+      strategy.enable(configFor(0, <String>['', '']), onChange: (_, _) {}, onAction: (_) {});
+      focusNode(1);
+      final EngineAutofillForm formA = strategy.inputConfiguration.autofillGroup!;
+      // Browser autofills the focused field A. Its live value is what save
+      // submits for the focused, form-associated element.
+      (tester.getTextField(1).editableElement as DomHTMLInputElement).value = 'userA';
+
+      // Focus B. The framework now knows A's value and re-sends the config.
+      strategy.enable(configFor(1, <String>['userA', '']), onChange: (_, _) {}, onAction: (_) {});
+      focusNode(2);
+      (tester.getTextField(2).editableElement as DomHTMLInputElement).value = 'passB';
+
+      // Focus A again. The framework now knows both values.
+      strategy.enable(
+        configFor(0, <String>['userA', 'passB']),
+        onChange: (_, _) {},
+        onAction: (_) {},
+      );
+      focusNode(1);
+
+      final EngineAutofillForm group = strategy.inputConfiguration.autofillGroup!;
+      final DomHTMLFormElement formElement = group.formElement!;
+
+      // Same DOM form reused across every wake/dormant cycle.
+      expect(formElement, formA.formElement);
+
+      // A is focused: real element linked by attribute, never moved into or
+      // duplicated in the form.
+      expect(tester.getTextField(1).editableElement.getAttribute('form'), group.formDomId);
+      expect(formElement.contains(tester.getTextField(1).editableElement), isFalse);
+      expect((tester.getTextField(1).editableElement as DomHTMLInputElement).value, 'userA');
+
+      // B is not focused: exactly one synthetic carrying its latest value, no
+      // stale/duplicate synthetic for either field, B's real element released.
+      final List<DomHTMLInputElement> synthetics = formElement
+          .querySelectorAll('input')
+          .cast<DomHTMLInputElement>()
+          .where((DomHTMLInputElement e) => e.type != 'submit')
+          .toList();
+      expect(synthetics, hasLength(1));
+      expect(synthetics.single.name, 'current-password');
+      expect(synthetics.single.value, 'passB');
+      expect(group.elements.length, 1);
+      expect(group.elements['field2'], synthetics.single);
+      expect(group.elements.containsKey('field1'), isFalse);
+      expect(tester.getTextField(2).editableElement.getAttribute('form'), isNull);
+    });
+  });
+}
+
+/// Builds the `fields` list of a `TextInputConfiguration` autofill group, the
+/// same shape the framework sends over the `flutter/textinput` channel.
+List<Map<String, Object?>> _autofillFields(
+  List<String> hints,
+  List<String> uniqueIds, {
+  List<String>? values,
+}) {
+  assert(hints.length == uniqueIds.length);
+  assert(values == null || values.length == hints.length);
+  return <Map<String, Object?>>[
+    for (var i = 0; i < hints.length; i++)
+      <String, Object?>{
+        'inputType': <String, Object?>{
+          'name': 'TextInputType.text',
+          'signed': null,
+          'decimal': null,
+        },
+        'textCapitalization': 'TextCapitalization.none',
+        'autofill': <String, dynamic>{
+          'uniqueIdentifier': uniqueIds[i],
+          'hints': <String>[hints[i]],
+          'editingValue': <String, dynamic>{
+            'text': values?[i] ?? '',
+            'selectionBase': 0,
+            'selectionExtent': 0,
+            'selectionAffinity': 'TextAffinity.downstream',
+            'selectionIsDirectional': false,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        },
+      },
+  ];
 }
 
 SemanticsObject createTextFieldSemantics({

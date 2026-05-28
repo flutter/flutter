@@ -218,6 +218,29 @@ class EngineAutofillForm {
       textEditing.strategy is SafariDesktopTextEditingStrategy ||
       textEditing.strategy is IOSTextEditingStrategy;
 
+  /// Whether autofill elements must remain sized and on-screen for the browser
+  /// to autofill them.
+  ///
+  /// In the non-semantics path this is captured by [_isSafariStrategy]. In
+  /// semantics mode the active strategy is [SemanticsTextEditingStrategy] (not
+  /// the Safari/iOS strategy), so the strategy type alone misses Safari there.
+  /// Fall back to a browser check so synthetic fields are not zero-sized on
+  /// Safari/WebKit, which would defeat autofill.
+  bool get _treatAsSafariForAutofill => _isSafariStrategy || ui_web.browser.isSafari;
+
+  /// Stable DOM id for the form, used so a focused element that lives outside
+  /// the form, in semantics mode, can be associated with it via the HTML `form`
+  /// attribute.
+  ///
+  /// It is a deterministic function of [formIdentifier] so it stays the same
+  /// when the form goes dormant and is woken again by a new instance. It is
+  /// also injective, distinct identifiers map to distinct ids, so when multiple
+  /// autofill forms coexist in one document, for example multi-view, multiple
+  /// autofill groups, or a dormant form left in the DOM, a focused element is
+  /// never associated with the wrong form. A hash would not guarantee this.
+  String get formDomId =>
+      'flt-af-${formIdentifier.codeUnits.map((int u) => u.toRadixString(16)).join('-')}';
+
   /// Creates an [EngineAutofillForm] from the JSON representation of a Flutter
   /// framework `TextInputConfiguration` object.
   ///
@@ -297,8 +320,21 @@ class EngineAutofillForm {
 
   /// Wakes up the form with the given focused element.
   ///
-  /// The [focusedElement] is inserted into the form, replacing the old focused element.
-  void wakeUp(DomHTMLElement focusedElement, AutofillInfo focusedAutofill) {
+  /// The [focusedElement] is inserted into the form, replacing the old focused
+  /// element.
+  ///
+  /// When [associateFocusedByAttribute] is true (semantics mode), the focused
+  /// element is a real `<input>` owned by the semantics tree and must stay in
+  /// its `<flt-semantics>` node. Moving it into the form regressed a11y tab
+  /// traversal (see flutter/flutter#180652, originally flutter/engine#25797).
+  /// Instead it is linked to the form via the HTML `form` attribute, and any
+  /// synthetic placeholder previously created for that field is removed so the
+  /// field is represented in the form exactly once.
+  void wakeUp(
+    DomHTMLElement focusedElement,
+    AutofillInfo focusedAutofill, {
+    bool associateFocusedByAttribute = false,
+  }) {
     // Since we're disabling pointer events on the form to fix Safari autofill,
     // we need to explicitly set pointer events on the active input element in
     // order to calculate the correct pointer event offsets.
@@ -319,16 +355,33 @@ class EngineAutofillForm {
         formElement = existingForm.formElement;
         elements.addAll(existingForm.elements);
       } else {
-        formElement = _createFormElementAndFields(focusedElement, focusedAutofill);
+        formElement = _createFormElementAndFields(
+          focusedElement,
+          focusedAutofill,
+          associateFocusedByAttribute: associateFocusedByAttribute,
+        );
         _insertEditingElementInView(formElement!, viewId);
       }
     }
 
-    // There's potentially a new focused element that needs to be inserted into the existing form.
-    //
-    // Do not cause DOM disturbance unless necessary. Doing superfluous DOM operations may seem
-    // harmless, but it actually causes focus changes that could break things.
-    if (!formElement!.contains(focusedElement)) {
+    if (associateFocusedByAttribute) {
+      // Promote the focused field to its real (semantics-owned) element: drop
+      // any synthetic placeholder so the field is not submitted twice, then
+      // link the real element to the form by attribute.
+      final DomElement? synthetic = elements[focusedAutofill.uniqueIdentifier];
+      if (synthetic != null && synthetic != focusedElement) {
+        synthetic.remove();
+      }
+      elements.remove(focusedAutofill.uniqueIdentifier);
+      focusedElement.setAttribute('form', formDomId);
+    } else if (!formElement!.contains(focusedElement)) {
+      // There's potentially a new focused element that needs to be inserted
+      // into the existing form.
+      //
+      // Do not cause DOM disturbance unless necessary. Doing superfluous DOM
+      // operations may seem harmless, but it actually causes focus changes that
+      // could break things.
+      //
       // Find the matching element and replace it with the new focused element.
       final DomElement oldFocusedElement = elements[focusedAutofill.uniqueIdentifier]!;
       elements[focusedAutofill.uniqueIdentifier] = focusedElement;
@@ -336,6 +389,40 @@ class EngineAutofillForm {
     }
 
     _updateFieldValues();
+  }
+
+  /// Demotes a field that is losing focus in semantics mode back to a synthetic
+  /// in-form placeholder.
+  ///
+  /// In semantics mode the focused field is represented by its real element via
+  /// the `form` attribute (see [wakeUp]). When it blurs, the real element must
+  /// be detached from the form and replaced by a synthetic element carrying its
+  /// last value, so the field still participates in form submission (credential
+  /// save via `TextInput.finishAutofillContext`) and stays grouped when another
+  /// field in the group is focused.
+  void demoteFocusedToSynthetic(DomHTMLElement realElement, AutofillInfo autofill) {
+    realElement.removeAttribute('form');
+    final String id = autofill.uniqueIdentifier;
+    final FieldItem? field = items[id];
+    if (field == null || formElement == null) {
+      return;
+    }
+    if (elements[id] != null && elements[id] != realElement) {
+      // A synthetic placeholder already represents this field.
+      return;
+    }
+    final DomHTMLElement synthetic = field.inputType.createDomElement();
+    field.autofillInfo.applyToDomElement(synthetic);
+    // Preserve the value the user (or autofill) just put in the real element so
+    // the field still submits correctly for credential save.
+    EditingState.fromDomElement(realElement).applyTextToDomElement(synthetic);
+    _styleAutofillElements(
+      synthetic,
+      shouldHideElement: !_treatAsSafariForAutofill,
+      shouldDisablePointerEvents: _treatAsSafariForAutofill,
+    );
+    elements[id] = synthetic;
+    formElement!.append(synthetic);
   }
 
   /// Makes the form dormant.
@@ -354,8 +441,9 @@ class EngineAutofillForm {
 
   DomHTMLFormElement _createFormElementAndFields(
     DomHTMLElement focusedElement,
-    AutofillInfo focusedAutofill,
-  ) {
+    AutofillInfo focusedAutofill, {
+    bool associateFocusedByAttribute = false,
+  }) {
     assert(this.formElement == null);
     assert(elements.isEmpty);
 
@@ -364,16 +452,25 @@ class EngineAutofillForm {
     formElement.noValidate = true;
     formElement.method = 'post';
     formElement.action = '#';
+    formElement.id = formDomId;
     formElement.addEventListener('submit', preventDefaultListener);
 
     // We need to explicitly disable pointer events on the form in Safari Desktop and iOS,
     // so that we don't have pointer event collisions if users hover over or click
     // into the invisible autofill elements within the form.
-    _styleAutofillElements(formElement, shouldDisablePointerEvents: _isSafariStrategy);
+    _styleAutofillElements(formElement, shouldDisablePointerEvents: _treatAsSafariForAutofill);
 
     for (final FieldItem field in items.values) {
       final DomHTMLElement htmlElement;
       if (field.autofillInfo.uniqueIdentifier == focusedAutofill.uniqueIdentifier) {
+        if (associateFocusedByAttribute) {
+          // The focused element is a real semantics-owned element that stays
+          // in its `<flt-semantics>` node and is linked via the `form`
+          // attribute by [wakeUp]. Do not create or append a synthetic
+          // placeholder for it here, otherwise the field would be submitted
+          // twice.
+          continue;
+        }
         // Do not create the focused element here since it is created already. Use the provided one.
         htmlElement = focusedElement;
       } else {
@@ -388,8 +485,8 @@ class EngineAutofillForm {
         // sized and placed on the DOM, we also have to disable pointer events.
         _styleAutofillElements(
           htmlElement,
-          shouldHideElement: !_isSafariStrategy,
-          shouldDisablePointerEvents: _isSafariStrategy,
+          shouldHideElement: !_treatAsSafariForAutofill,
+          shouldDisablePointerEvents: _treatAsSafariForAutofill,
         );
       }
 
@@ -1151,10 +1248,8 @@ class InputConfiguration {
   final bool enableInteractiveSelection;
 }
 
-typedef OnChangeCallback = void Function(
-  EditingState? editingState,
-  TextEditingDeltaState? editingDeltaState,
-);
+typedef OnChangeCallback =
+    void Function(EditingState? editingState, TextEditingDeltaState? editingDeltaState);
 typedef OnActionCallback = void Function(String? inputAction);
 
 /// Provides HTML DOM functionality for editable text.
