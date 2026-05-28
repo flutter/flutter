@@ -1728,6 +1728,68 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         },
       );
 
+      // Regression test for https://github.com/flutter/flutter/issues/177158.
+      //
+      // An explicit `"optional": false` should behave identically to omitting
+      // the field: the parameter remains non-nullable.
+      testWithoutContext('"optional": false leaves placeholder non-nullable', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "greet": "Hi {name}",
+  "@greet": {
+    "placeholders": {
+      "name": { "type": "String", "optional": false }
+    }
+  }
+}''',
+        });
+        expect(getGeneratedFileContent(locale: 'en'), contains('String greet(String name) {'));
+      });
+
+      // Regression test for https://github.com/flutter/flutter/issues/177158.
+      //
+      // The nullable suffix should be appended regardless of the placeholder's
+      // declared type, not just for `String`.
+      testWithoutContext('"optional": true marks non-String placeholders nullable', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "items": "You have {count} items",
+  "@items": {
+    "placeholders": {
+      "count": { "type": "int", "optional": true }
+    }
+  }
+}''',
+        });
+        expect(getGeneratedFileContent(locale: 'en'), contains('String items(int? count) {'));
+      });
+
+      // Regression test for https://github.com/flutter/flutter/issues/177158.
+      //
+      // When a message mixes required and optional placeholders, only the
+      // optional one should drop `required` and gain the nullable suffix;
+      // siblings remain `required` and non-nullable.
+      testWithoutContext('"optional": true is applied per-placeholder, not message-wide', () {
+        setupLocalizations(<String, String>{
+          'en': '''
+{
+  "greet": "Hi {name}{title}",
+  "@greet": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "title": { "type": "String", "optional": true }
+    }
+  }
+}''',
+        }, useNamedParameters: true);
+        expect(
+          getGeneratedFileContent(locale: 'en'),
+          contains('String greet({required String name, String? title}) {'),
+        );
+      });
+
       testWithoutContext(
         'braces are ignored as special characters if placeholder does not exist',
         () {
