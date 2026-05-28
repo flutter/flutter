@@ -113,7 +113,10 @@ Future<void> _copyGoldenAssetToTemp(
     );
     await _writeBytesToFile(tempGoldenPath, bytes, "postFrameCallback");
   } catch (e) {
-    // Maybe golden does not exist in asset path. Allow test to continue to either fail or write results.
+    throw StateError(
+      'Failed to load golden asset "$goldenAssetPath" from package assets. '
+      'Ensure the golden image was generated and bundled correctly. Error: $e',
+    );
   }
 }
 
