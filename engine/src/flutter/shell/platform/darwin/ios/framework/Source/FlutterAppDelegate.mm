@@ -45,6 +45,11 @@ static NSString* const kBackgroundFetchCapatibility = @"fetch";
 
 - (BOOL)application:(UIApplication*)application
     willFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+
+  if ([self respondsToSelector:@selector(pluginRegistrant)]) {
+    [self.pluginRegistrant registerWithRegistry:self];
+  }
+  [[self.launchEngine acquireEngine] performImplicitEngineCallback];
   return [self.lifeCycleDelegate application:application
               willFinishLaunchingWithOptions:launchOptions];
 }

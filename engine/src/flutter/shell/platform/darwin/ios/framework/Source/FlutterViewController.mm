@@ -284,7 +284,9 @@ typedef struct MouseState {
       [appDelegate takeLaunchEngine];
     }
   }
+  BOOL engineNeedsRegistration = NO;
   if (!engine) {
+    engineNeedsRegistration = YES;
     // Need the project to get settings for the view. Initializing it here means
     // the Engine class won't initialize it later.
     if (!project) {
@@ -307,31 +309,33 @@ typedef struct MouseState {
                                        enableWideGamut:engine.project.isWideGamutEnabled];
   [_engine createShell:nil libraryURI:nil initialRoute:initialRoute];
 
-  // We call this from the FlutterViewController instead of the FlutterEngine directly because this
-  // is only needed when the FlutterEngine is implicit. If it's not implicit there's no need for
-  // them to have a callback to expose the engine since they created the FlutterEngine directly.
-  // This is the earliest this can be called because it depends on the shell being created.
-  BOOL performedCallback = [_engine performImplicitEngineCallback];
+  if (engineNeedsRegistration) {
+    // We call this from the FlutterViewController instead of the FlutterEngine directly because this
+    // is only needed when the FlutterEngine is implicit. If it's not implicit there's no need for
+    // them to have a callback to expose the engine since they created the FlutterEngine directly.
+    // This is the earliest this can be called because it depends on the shell being created.
+     BOOL performedCallback = [_engine performImplicitEngineCallback];
 
-  // TODO(vashworth): Deprecate, see https://github.com/flutter/flutter/issues/176424
-  if ([FlutterSharedApplication.application.delegate
-          respondsToSelector:@selector(pluginRegistrant)]) {
-    NSObject<FlutterPluginRegistrant>* pluginRegistrant =
-        [FlutterSharedApplication.application.delegate performSelector:@selector(pluginRegistrant)];
-    [pluginRegistrant registerWithRegistry:self];
-    performedCallback = YES;
-  }
-  // When migrated to scenes, the FlutterViewController from the storyboard is initialized after the
-  // application launch events. Therefore, plugins may not be registered yet since they're expected
-  // to be registered during the implicit engine callbacks. As a workaround, send the app launch
-  // events after the application callbacks.
-  if (self.awokenFromNib && performedCallback && FlutterSharedApplication.hasSceneDelegate &&
-      [appDelegate isKindOfClass:[FlutterAppDelegate class]]) {
-    id applicationLifeCycleDelegate = ((FlutterAppDelegate*)appDelegate).lifeCycleDelegate;
-    [applicationLifeCycleDelegate
-        sceneFallbackWillFinishLaunchingApplication:FlutterSharedApplication.application];
-    [applicationLifeCycleDelegate
-        sceneFallbackDidFinishLaunchingApplication:FlutterSharedApplication.application];
+    // TODO(vashworth): Deprecate, see https://github.com/flutter/flutter/issues/176424
+     if ([FlutterSharedApplication.application.delegate
+             respondsToSelector:@selector(pluginRegistrant)]) {
+       NSObject<FlutterPluginRegistrant>* pluginRegistrant =
+           [FlutterSharedApplication.application.delegate performSelector:@selector(pluginRegistrant)];
+       [pluginRegistrant registerWithRegistry:self];
+       // performedCallback = YES;
+     }
+//     When migrated to scenes, the FlutterViewController from the storyboard is initialized after the
+//     application launch events. Therefore, plugins may not be registered yet since they're expected
+//     to be registered during the implicit engine callbacks. As a workaround, send the app launch
+//     events after the application callbacks.
+     if (self.awokenFromNib && performedCallback && FlutterSharedApplication.hasSceneDelegate &&
+         [appDelegate isKindOfClass:[FlutterAppDelegate class]]) {
+       id applicationLifeCycleDelegate = ((FlutterAppDelegate*)appDelegate).lifeCycleDelegate;
+       [applicationLifeCycleDelegate
+           sceneFallbackWillFinishLaunchingApplication:FlutterSharedApplication.application];
+       [applicationLifeCycleDelegate
+           sceneFallbackDidFinishLaunchingApplication:FlutterSharedApplication.application];
+     }
   }
 
   _engineNeedsLaunch = YES;
