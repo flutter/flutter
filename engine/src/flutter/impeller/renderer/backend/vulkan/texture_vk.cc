@@ -193,18 +193,23 @@ vk::ImageLayout TextureVK::GetLayout() const {
   return source_ ? source_->GetLayout() : vk::ImageLayout::eUndefined;
 }
 
-vk::ImageView TextureVK::GetRenderTargetView() const {
-  return source_->GetRenderTargetView();
+vk::ImageView TextureVK::GetRenderTargetView(uint32_t mip_level,
+                                             uint32_t array_layer) const {
+  return source_->GetRenderTargetView(mip_level, array_layer);
 }
 
 void TextureVK::SetCachedFrameData(const FramebufferAndRenderPass& data,
-                                   SampleCount sample_count) {
-  source_->SetCachedFrameData(data, sample_count);
+                                   SampleCount sample_count,
+                                   uint32_t mip_level,
+                                   uint32_t slice) {
+  source_->SetCachedFrameData(data, sample_count, mip_level, slice);
 }
 
-const FramebufferAndRenderPass& TextureVK::GetCachedFrameData(
-    SampleCount sample_count) const {
-  return source_->GetCachedFrameData(sample_count);
+FramebufferAndRenderPass TextureVK::GetCachedFrameData(
+    SampleCount sample_count,
+    uint32_t mip_level,
+    uint32_t slice) const {
+  return source_->GetCachedFrameData(sample_count, mip_level, slice);
 }
 
 void TextureVK::SetMipMapGenerated() {
