@@ -136,7 +136,10 @@ Future<Uint8List> _capturePng(String testName, GlobalKey targetKey) async {
       );
     }
 
-    final Uint8List pngBytes = byteData.buffer.asUint8List();
+    final Uint8List pngBytes = byteData.buffer.asUint8List(
+      byteData.offsetInBytes,
+      byteData.lengthInBytes,
+    );
     if (pngBytes.isEmpty) {
       throw StateError(
         "Failed to capture screenshot for $testName: pngBytes from RenderRepaintBoundary.toImage was empty.",
