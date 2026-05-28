@@ -12,7 +12,7 @@ tasks.register("embedTestResultImages") {
     doLast {
         val buildDir = layout.buildDirectory.get().asFile
         val reportsDir = File(buildDir, "reports/androidTests/connected")
-        
+
         // Dynamically find the active variant directory (e.g. "debug") where HTML files exist
         var targetVariantDir = File(reportsDir, "debug")
         if (!targetVariantDir.exists()) {
@@ -32,11 +32,26 @@ tasks.register("embedTestResultImages") {
         var files = listOf<String>()
         try {
             val process = ProcessBuilder("adb", "shell", "run-as", packageId, "ls", "cache/results")
-                .redirectErrorStream(true)
+                .redirectErrorStream(false) // Keep stderr separate to distinguish failures!
                 .start()
-            val output = process.inputStream.readBytes()
-            process.waitFor()
-            files = String(output).trim().split(Regex("\\r?\\n"))
+
+            val stdoutBytes = process.inputStream.readBytes()
+            val stderrBytes = process.errorStream.readBytes()
+            val exitCode = process.waitFor()
+
+            if (exitCode == 0) {
+                val output = String(stdoutBytes).trim()
+                if (output.isNotEmpty()) {
+                    files = output.split(Regex("\\r?\\n"))
+                }
+            } else {
+                val errorMsg = String(stderrBytes).trim()
+                if (errorMsg.contains("No such file or directory")) {
+                    println("ℹ️ No test result images sandbox directory exists on-device (this is normal if no on-device screenshots were generated).")
+                } else {
+                    println("❌ Failed to list sandbox directory cache/results (exit code $exitCode): $errorMsg")
+                }
+            }
         } catch (e: Exception) {
             println("Failed to query sandbox files from device: ${e.message}")
         }
@@ -53,11 +68,11 @@ tasks.register("embedTestResultImages") {
                     // Direct binary safe copy using JDK ProcessBuilder and Kotlin stdlib copyTo
                     val process = ProcessBuilder("adb", "exec-out", "run-as", packageId, "cat", "cache/results/$fileName")
                         .start()
-                    
+
                     FileOutputStream(destinationFile).use { os ->
                         process.inputStream.copyTo(os)
                     }
-                    
+
                     val exitCode = process.waitFor()
                     if (exitCode == 0) {
                         discoveredTests.add(Pair(testName, fileName))
