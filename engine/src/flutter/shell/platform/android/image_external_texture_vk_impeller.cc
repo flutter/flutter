@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/image_external_texture_vk_impeller.h"
+#include "flutter/fml/closure.h"
 
 #include <cstdint>
 
@@ -42,10 +43,21 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
   if (image.is_null()) {
     return;
   }
+  // Ensure that the JNI android.media.Image reference is closed upon function
+  // exit (including early returns) to prevent leaking sync_file file
+  // descriptors and freezing rendering.
+  fml::ScopedCleanupClosure image_cleanup(
+      [this, &image]() { CloseImage(image); });
+
   JavaLocalRef hardware_buffer = HardwareBufferFor(image);
   if (hardware_buffer.is_null()) {
     return;
   }
+  // Ensure that the JNI android.hardware.HardwareBuffer reference is closed
+  // upon function exit.
+  fml::ScopedCleanupClosure hardware_buffer_cleanup(
+      [this, &hardware_buffer]() { CloseHardwareBuffer(hardware_buffer); });
+
   AHardwareBuffer* latest_hardware_buffer = AHardwareBufferFor(hardware_buffer);
 
   auto hb_desc =
@@ -56,15 +68,12 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
   auto existing_image = image_lru_.FindImage(key);
   if (existing_image != nullptr || !hb_desc.has_value()) {
     dl_image_ = existing_image;
-
-    CloseHardwareBuffer(hardware_buffer);
     return;
   }
 
   auto texture_source = std::make_shared<impeller::AHBTextureSourceVK>(
       impeller_context_, latest_hardware_buffer, hb_desc.value());
   if (!texture_source->IsValid()) {
-    CloseHardwareBuffer(hardware_buffer);
     return;
   }
 
@@ -100,7 +109,6 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
   if (key.has_value()) {
     image_lru_.AddImage(dl_image_, key.value());
   }
-  CloseHardwareBuffer(hardware_buffer);
 }
 
 }  // namespace flutter

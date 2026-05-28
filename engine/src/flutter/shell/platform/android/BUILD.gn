@@ -47,6 +47,7 @@ executable("flutter_shell_native_unittests") {
     "android_shell_holder_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
+    "image_external_texture_reproduce_test.cc",
     "image_lru_unittests.cc",
     "platform_view_android_jni_impl_unittests.cc",
     "platform_view_android_unittests.cc",

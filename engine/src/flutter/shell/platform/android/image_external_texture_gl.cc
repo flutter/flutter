@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/android/image_external_texture_gl.h"
+#include "flutter/fml/closure.h"
 
 #include <android/hardware_buffer_jni.h>
 #include <android/sensor.h>
@@ -71,12 +72,22 @@ void ImageExternalTextureGL::ProcessFrame(PaintContext& context,
   if (image.is_null()) {
     return;
   }
+  // Ensure that the JNI android.media.Image reference is closed upon function
+  // exit (including early returns) to prevent leaking sync_file file
+  // descriptors and freezing rendering.
+  fml::ScopedCleanupClosure image_cleanup(
+      [this, &image]() { CloseImage(image); });
+
   JavaLocalRef hardware_buffer = HardwareBufferFor(image);
   if (hardware_buffer.is_null()) {
     return;
   }
+  // Ensure that the JNI android.hardware.HardwareBuffer reference is closed
+  // upon function exit.
+  fml::ScopedCleanupClosure hardware_buffer_cleanup(
+      [this, &hardware_buffer]() { CloseHardwareBuffer(hardware_buffer); });
+
   UpdateImage(hardware_buffer, bounds, context);
-  CloseHardwareBuffer(hardware_buffer);
 }
 
 void ImageExternalTextureGL::Detach() {
