@@ -12,8 +12,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  path_provider: ^2.1.5
-  path: ^1.9.1
+  path_provider: any
+  path: any
   android_driver_extensions:
     path: ../../tools/android_driver_extensions
   flutter_driver:
@@ -29,7 +29,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^6.0.0
+  flutter_lints: any
   integration_test:
     sdk: flutter
 

@@ -23,9 +23,18 @@ class FlutterActivityTest {
         private const val TAG = "FlutterActivityTest"
     }
 
-    @get:Rule
-    val rule = ActivityScenarioRule(MainActivity::class.java)
+    @get:Rule val rule = ActivityScenarioRule(MainActivity::class.java)
 
+    /**
+     * Common test body for executing a test on the device by sending a command to the Flutter
+     * application.
+     *
+     * Sends a JSON message over the [BasicMessageChannel] containing the [testName] and an
+     * on-device comparison request instruction. The test awaits a completed frame render reply up
+     * to 60 seconds, logging warning diagnostics if the operation is exceptionally slow.
+     *
+     * @param testName The descriptive identifier of the test case to render and compare.
+     */
     private fun templateTest(testName: String) {
         Log.d(TAG, "Starting $testName")
         val future = CompletableFuture<String>()
@@ -35,10 +44,11 @@ class FlutterActivityTest {
             assertEquals(Lifecycle.State.RESUMED, activity.lifecycle.currentState)
 
             try {
-                val message = JSONObject().apply {
-                    put("testName", testName)
-                    put("performAppSideGoldenCompare", true)
-                }
+                val message =
+                        JSONObject().apply {
+                            put("testName", testName)
+                            put("performAppSideGoldenCompare", true)
+                        }
 
                 Log.d(TAG, "Sending '$message' on message channel")
 
@@ -57,11 +67,18 @@ class FlutterActivityTest {
 
         // Schedule a diagnostic warning log if the rendering is exceptionally slow
         val executor = Executors.newSingleThreadScheduledExecutor()
-        executor.schedule({
-            if (!future.isDone) {
-                Log.w(TAG, "Rendering '$testName' is taking longer than expected (exceeded 5 seconds)...")
-            }
-        }, 5, TimeUnit.SECONDS)
+        executor.schedule(
+                {
+                    if (!future.isDone) {
+                        Log.w(
+                                TAG,
+                                "Rendering '$testName' is taking longer than expected (exceeded 5 seconds)..."
+                        )
+                    }
+                },
+                5,
+                TimeUnit.SECONDS
+        )
 
         val reply: String
         try {

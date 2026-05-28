@@ -5,6 +5,8 @@
 import java.io.File
 import java.io.FileOutputStream
 
+data class DiscoveredTest(val testName: String, val fileName: String)
+
 tasks.register("embedTestResultImages") {
     group = "verification"
     description = "Dynamically discovers, pulls, and embeds all on-device test result images into the AGP HTML report."
@@ -12,7 +14,7 @@ tasks.register("embedTestResultImages") {
     doLast {
         val buildDir = layout.buildDirectory.get().asFile
         val reportsDir = File(buildDir, "reports/androidTests/connected")
-
+        
         // Dynamically find the active variant directory (e.g. "debug") where HTML files exist
         var targetVariantDir = File(reportsDir, "debug")
         if (!targetVariantDir.exists()) {
@@ -26,7 +28,7 @@ tasks.register("embedTestResultImages") {
         imagesDir.mkdirs()
 
         val packageId = "com.example.android_hardware_smoke_test"
-        val discoveredTests = mutableListOf<Pair<String, String>>()
+        val discoveredTests = mutableListOf<DiscoveredTest>()
 
         // Resolve binary safe adb executable from Android Gradle Plugin BaseExtension
         val android = project.extensions.getByType(com.android.build.gradle.BaseExtension::class.java)
@@ -37,7 +39,7 @@ tasks.register("embedTestResultImages") {
         var files = listOf<String>()
         try {
             val process = ProcessBuilder(adbPath, "shell", "run-as", packageId, "ls", "cache/results")
-                .redirectErrorStream(true)
+                .redirectErrorStream(true) // Safely merge stdout and stderr to prevent thread deadlocks!
                 .start()
 
             val outputBytes = process.inputStream.readBytes()
@@ -61,24 +63,25 @@ tasks.register("embedTestResultImages") {
 
         // 2. Iterate through all discovered files and pull PNGs
         for (rawFileName in files) {
-            val fileName = rawFileName.trim()
-            if (fileName.endsWith(".png")) {
+            val file = File(rawFileName.trim())
+            if (file.extension.equals("png", ignoreCase = true)) {
                 // Extract the clean test case name (e.g. "blueRectangleTest") before any dot-separators
-                val testName = fileName.split(".")[0]
+                val testName = file.nameWithoutExtension.substringBefore(".")
+                val fileName = file.name
 
                 val destinationFile = File(imagesDir, fileName)
                 try {
                     // Direct binary safe copy using JDK ProcessBuilder and Kotlin stdlib copyTo
                     val process = ProcessBuilder(adbPath, "exec-out", "run-as", packageId, "cat", "cache/results/$fileName")
                         .start()
-
+                    
                     FileOutputStream(destinationFile).use { os ->
                         process.inputStream.copyTo(os)
                     }
-
+                    
                     val exitCode = process.waitFor()
                     if (exitCode == 0) {
-                        discoveredTests.add(Pair(testName, fileName))
+                        discoveredTests.add(DiscoveredTest(testName, fileName))
                         println("Successfully pulled test result image: ${destinationFile.absolutePath}")
                     } else {
                         destinationFile.delete()
@@ -97,13 +100,13 @@ tasks.register("embedTestResultImages") {
         // 3. Dynamically parse and inject <img> tags for all discovered tests
         if (discoveredTests.isNotEmpty()) {
             targetVariantDir.walk().forEach { file ->
-                if (file.name.endsWith(".html")) {
+                if (file.extension.equals("html", ignoreCase = true)) {
                     var htmlContent = file.readText()
                     var modified = false
 
-                    for (testInfo in discoveredTests) {
-                        val testName = testInfo.first
-                        val fileName = testInfo.second
+                    for (test in discoveredTests) {
+                        val testName = test.testName
+                        val fileName = test.fileName
                         val targetCell = "<td>$testName</td>"
                         if (htmlContent.contains(targetCell)) {
                             htmlContent = htmlContent.replace(

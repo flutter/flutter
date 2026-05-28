@@ -19,10 +19,6 @@ class MainActivity : FlutterActivity() {
     var messageChannel: BasicMessageChannel<Any>? = null
     private var impellerBackend = "vulkan"
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 

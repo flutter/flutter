@@ -43,7 +43,7 @@ While both suites verify rendering correctness, they are architected differently
                                            │
                   ┌────────────────────────┴────────────────────────┐
                   ▼                                                 ▼
-       [ Mode A: Instrumented ]                            [ Mode B: Driver ]
+       [ On-Device Instrumented ]                          [ Host-Driven Driver ]
     (OEM / Self-Contained Testing)                       (CI / Host-Driven Testing)
                   │                                                 │
                   ▼                                                 ▼
@@ -64,11 +64,11 @@ While both suites verify rendering correctness, they are architected differently
       Java; JUnit reports result                         image bytes and asserts match
 ```
 
-### Mode A: Instrumented Mode (OEM / Standalone)
+### Instrumented On-Device Mode (OEM / Standalone)
 * **Orchestration**: Runs purely on the device under Android `AndroidJUnit4` runner.
 * **Execution**: Java JUnit code (`FlutterActivityTest.java`) launches the main activity and sends the test payload over a JSON message channel. The app (`lib/main.dart`) renders the widget, performs a local pixel-by-pixel on-device comparison against baseline images bundled within the APK assets, and replies with the status to the Java runner to pass or fail the JUnit assertion.
 
-### Mode B: Driver Mode (CI / Host-Driven)
+### Host-Driven Driver Mode (CI / Host-Driven)
 * **Orchestration**: Orchestrated by the host PC using `flutter drive`.
 * **Execution**: The host script (`test_driver/driver_test.dart`) commands the target app (`integration_test/integration_test_wrapper.dart`) to transition states. The app captures the repaint boundary, base64-encodes it, and streams the bytes back to the host over a WebSocket channel. The host driver decodes the bytes and asserts visual matches against local repository baselines on the host filesystem.
 
@@ -78,7 +78,7 @@ While both suites verify rendering correctness, they are architected differently
 
 Unlock your connected Android device or emulator and ensure it is active before executing any of these commands.
 
-### A. Mode B: Running via Host Driver (CI / Host-Driven)
+### A. Running via Host Driver (CI / Host-Driven)
 
 This mode is used to execute visual assertions locally on your PC or in CI pipelines, and to manage the local golden baselines.
 
@@ -105,11 +105,11 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
 
 ---
 
-### B. Mode A: Running Instrumented Tests (OEM / Self-Contained)
+### B. Running Instrumented Tests (OEM / Self-Contained)
 
 > [!IMPORTANT]
 > **Asset Bundling Precondition**:
-> Because instrumented tests run completely standalone on the device, they compare pixels against baseline images bundled as read-only assets inside the APK. You **must** first generate the local baselines under `integration_test/goldens/` using the **Driver Mode (with `UPDATE_GOLDENS=1`)** before compiling and building the instrumented APK.
+> Because instrumented tests run completely standalone on the device, they compare pixels against baseline images bundled as read-only assets inside the APK. You **must** first generate the local baselines under `integration_test/goldens/` using the **Host-Driven Driver Mode (with `UPDATE_GOLDENS=1`)** before compiling and building the instrumented APK.
 
 * **Command to compile and run the native JUnit suite**:
   ```sh
@@ -122,10 +122,10 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
 
 > [!NOTE]
 > **Statically Compiled Single Source of Truth**:
-> The app's compiled `AndroidManifest.xml` `<meta-data>` tag is the single source of truth for the graphics backend configuration under **both** Instrumented Mode (OEM) and Driver Mode (CI).
+> The app's compiled `AndroidManifest.xml` `<meta-data>` tag is the single source of truth for the graphics backend configuration under **both** Instrumented On-Device Mode (OEM) and Host-Driven Driver Mode (CI).
 >
-> * **Instrumented Mode (OEM)**: The native Java JUnit harness (`FlutterActivityTest.java`) reads this value dynamically using the `PackageManager` API and routes it to Dart.
-> * **Driver Mode (CI / Host)**: The Dart app queries the native Android embedder via a custom `MethodChannel` to self-discover its compiled backend and self-reports it to the host test script inside its JSON reply payload, completely eliminating the need for environment variables on the host PC.
+> * **Instrumented On-Device Mode (OEM)**: The native Java JUnit harness (`FlutterActivityTest.java`) reads this value dynamically using the `PackageManager` API and routes it to Dart.
+> * **Host-Driven Driver Mode (CI / Host)**: The Dart app queries the native Android embedder via a custom `MethodChannel` to self-discover its compiled backend and self-reports it to the host test script inside its JSON reply payload, completely eliminating the need for environment variables on the host PC.
 >
 > To switch the active graphics backend manually for local runs, open `android/app/src/main/AndroidManifest.xml` and update the `io.flutter.embedding.android.ImpellerBackend` value:
 >
