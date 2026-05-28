@@ -61,6 +61,25 @@ const std::unique_ptr<PlaygroundImpl>& GetSharedVulkanPlayground(
   }
 }
 
+std::unique_ptr<PlaygroundImpl> MakeOpenGLESPlayground() {
+  FML_CHECK(::glfwInit() == GLFW_TRUE);
+  PlaygroundSwitches playground_switches;
+  playground_switches.use_angle = true;
+  return PlaygroundImpl::Create(PlaygroundBackend::kOpenGLES,
+                                playground_switches);
+}
+
+// Returns a static instance to an OpenGL ES playground that can be used across tests.
+const std::unique_ptr<PlaygroundImpl>& GetSharedOpenGLESPlayground() {
+  static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>> opengl_playground(
+      MakeOpenGLESPlayground());
+  // TODO(142237): This can be removed when the thread local storage is
+  // removed.
+  static fml::ScopedCleanupClosure context_cleanup(
+      [&] { (*opengl_playground)->GetContext()->Shutdown(); });
+  return *opengl_playground;
+}
+
 }  // namespace
 
 #define IMP_AIKSTEST(name)                         \
@@ -203,13 +222,10 @@ void GoldenPlaygroundTest::SetUp() {
         GTEST_SKIP()
             << "OpenGLES doesn't support antialiased lines golden tests.";
       }
-      FML_CHECK(::glfwInit() == GLFW_TRUE);
-      PlaygroundSwitches playground_switches;
-      playground_switches.use_angle = true;
-      pimpl_->test_opengl_playground = PlaygroundImpl::Create(
-          PlaygroundBackend::kOpenGLES, playground_switches);
-      pimpl_->screenshotter = std::make_unique<testing::VulkanScreenshotter>(
-          pimpl_->test_opengl_playground);
+      const std::unique_ptr<PlaygroundImpl>& playground =
+          GetSharedOpenGLESPlayground();
+      pimpl_->screenshotter =
+          std::make_unique<testing::VulkanScreenshotter>(playground);
       break;
     }
   }
@@ -346,7 +362,8 @@ std::shared_ptr<Context> GoldenPlaygroundTest::GetContext() const {
 }
 
 std::shared_ptr<Context> GoldenPlaygroundTest::MakeContext() const {
-  if (GetParam() == PlaygroundBackend::kMetal) {
+  if (GetParam() == PlaygroundBackend::kMetal ||
+      GetParam() == PlaygroundBackend::kMetalSDF) {
     /// On Metal we create a context for each test.
     return GetContext();
   } else if (GetParam() == PlaygroundBackend::kVulkan) {
@@ -358,9 +375,16 @@ std::shared_ptr<Context> GoldenPlaygroundTest::MakeContext() const {
     pimpl_->screenshotter = std::make_unique<testing::VulkanScreenshotter>(
         pimpl_->test_vulkan_playground);
     return pimpl_->test_vulkan_playground->GetContext();
+  } else if (GetParam() == PlaygroundBackend::kOpenGLES) {
+    FML_CHECK(!pimpl_->test_opengl_playground)
+        << "We don't support creating multiple contexts for one test";
+    pimpl_->test_opengl_playground = MakeOpenGLESPlayground();
+    pimpl_->screenshotter = std::make_unique<testing::VulkanScreenshotter>(
+        pimpl_->test_opengl_playground);
+    return pimpl_->test_opengl_playground->GetContext();
   } else {
-    /// On OpenGL we create a context for each test.
-    return GetContext();
+    FML_CHECK(false);
+    return nullptr;
   }
 }
 
