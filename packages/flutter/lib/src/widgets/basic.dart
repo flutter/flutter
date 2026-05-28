@@ -4763,9 +4763,7 @@ class Stack extends MultiChildRenderObjectWidget {
   ///
   /// Even when this is set to [Clip.none], the stack itself does not extend its
   /// hit-test region: pointer events that fall outside the stack's own bounds
-  /// will not reach a child even if that child is painted in that area. This
-  /// matches the historical behavior of the (since-removed) `Overflow.visible`
-  /// value on [Stack].
+  /// will not reach a child even if that child is painted in that area.
   ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
