@@ -174,9 +174,8 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   TextureVK& frame_data_texture = TextureVK::Cast(
       resolve_image_vk_ ? *resolve_image_vk_ : *color_image_vk_);
   is_swapchain = frame_data_texture.IsSwapchainImage();
-  frame_data = frame_data_texture.GetCachedFrameData(sample_count,
-                                                     cache_mip_level,
-                                                     cache_slice);
+  frame_data = frame_data_texture.GetCachedFrameData(
+      sample_count, cache_mip_level, cache_slice);
 
   const auto& target_size = render_target_.GetRenderTargetSize();
 

@@ -205,10 +205,9 @@ void TextureVK::SetCachedFrameData(const FramebufferAndRenderPass& data,
   source_->SetCachedFrameData(data, sample_count, mip_level, slice);
 }
 
-FramebufferAndRenderPass TextureVK::GetCachedFrameData(
-    SampleCount sample_count,
-    uint32_t mip_level,
-    uint32_t slice) const {
+FramebufferAndRenderPass TextureVK::GetCachedFrameData(SampleCount sample_count,
+                                                       uint32_t mip_level,
+                                                       uint32_t slice) const {
   return source_->GetCachedFrameData(sample_count, mip_level, slice);
 }
 
