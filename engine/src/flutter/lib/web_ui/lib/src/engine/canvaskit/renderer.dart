@@ -11,8 +11,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-bool get isWebParagraphEnabled => canvasKit.isWebParagraphEnabled;
-
 class CanvasKitRenderer extends Renderer {
   static CanvasKitRenderer get instance => _instance;
   static late CanvasKitRenderer _instance;
@@ -25,7 +23,7 @@ class CanvasKitRenderer extends Renderer {
   /// Whether the renderer is using software rendering.
   bool get isSoftware => _pictureToImageSurface.isSoftware;
 
-  late final FlutterFontCollection _fontCollection = isWebParagraphEnabled
+  late final FlutterFontCollection _fontCollection = configuration.enableWebParagraph
       ? WebFontCollection()
       : SkiaFontCollection();
 
@@ -331,7 +329,7 @@ class CanvasKitRenderer extends Renderer {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
     List<ui.FontVariation>? fontVariations,
-  }) => isWebParagraphEnabled
+  }) => configuration.enableWebParagraph
       ? WebTextStyle(
           color: color,
           decoration: decoration,
@@ -393,7 +391,7 @@ class CanvasKitRenderer extends Renderer {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
-  }) => isWebParagraphEnabled
+  }) => configuration.enableWebParagraph
       ? WebParagraphStyle(
           textAlign: textAlign,
           textDirection: textDirection,
@@ -434,7 +432,7 @@ class CanvasKitRenderer extends Renderer {
     ui.FontWeight? fontWeight,
     ui.FontStyle? fontStyle,
     bool? forceStrutHeight,
-  }) => isWebParagraphEnabled
+  }) => configuration.enableWebParagraph
       ? WebStrutStyle(
           fontFamily: fontFamily,
           fontFamilyFallback: fontFamilyFallback,
@@ -460,7 +458,7 @@ class CanvasKitRenderer extends Renderer {
 
   @override
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style) =>
-      isWebParagraphEnabled ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
+      configuration.enableWebParagraph ? WebParagraphBuilder(style) : CkParagraphBuilder(style);
 
   @override
   WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) =>
