@@ -266,10 +266,7 @@ void main() {
 
       test('getMemoryStats throws DeviceException if dumpsys meminfo fails to parse', () async {
         FakeDevice.output = 'Some garbage output';
-        expect(
-          () async => await device.getMemoryStats('com.example'),
-          throwsA(isA<DeviceException>()),
-        );
+        expect(() => device.getMemoryStats('com.example'), throwsA(isA<DeviceException>()));
       });
     });
   });
