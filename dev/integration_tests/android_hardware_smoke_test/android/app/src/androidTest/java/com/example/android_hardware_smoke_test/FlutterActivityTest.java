@@ -75,10 +75,14 @@ public class FlutterActivityTest {
     try {
       // Wait with a very generous 60-second timeout to catch true deadlocks/crashes
       reply = future.get(60, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      Log.e(TAG, testName + " Thread was interrupted: " + e.getMessage());
+      throw new RuntimeException(e);
     } catch (Exception e) {
       Log.e(TAG, testName + " Failed to receive result on message channel: " + e.getMessage());
       throw new RuntimeException(e);
-    } finally {
+    }
       warningTask.cancel(true);
       executor.shutdown();
     }
