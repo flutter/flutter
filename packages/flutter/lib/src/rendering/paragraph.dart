@@ -41,8 +41,10 @@ typedef _TextBoundaryAtPosition = _TextBoundaryRecord Function(TextPosition posi
 
 /// Signature for a function that determines the [_TextBoundaryRecord] at the given
 /// [TextPosition], for the given [String].
-typedef _TextBoundaryAtPositionInText =
-    _TextBoundaryRecord Function(TextPosition position, String text);
+typedef _TextBoundaryAtPositionInText = _TextBoundaryRecord Function(
+  TextPosition position,
+  String text,
+);
 
 const String _kEllipsis = '\u2026';
 
