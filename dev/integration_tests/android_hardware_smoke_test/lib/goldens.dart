@@ -27,13 +27,14 @@ Future<void> handleGoldenRequest(
     final Uint8List resultImageBytes = await _capturePng(testName, targetKey);
 
     if (performAppSideGoldenCompare) {
-      // Await execution so that any unhandled exceptions inside it are caught here
-      await _compareGoldenOnDevice(
+      final String? failureMessage = await _compareGoldenOnDevice(
         testName,
         resultImageBytes,
-        completer,
         goldenVariantValue,
       );
+      completer.complete(<String, Object?>{
+        "message": failureMessage ?? "Rendered $testName",
+      });
     } else {
       completer.complete(<String, Object?>{
         "message": "Rendered $testName",
@@ -49,10 +50,9 @@ Future<void> handleGoldenRequest(
   }
 }
 
-Future<void> _compareGoldenOnDevice(
+Future<String?> _compareGoldenOnDevice(
   String testName,
   Uint8List resultImageBytes,
-  Completer<Map<String, Object?>> completer,
   String? goldenVariant,
 ) async {
   final io.Directory tempDir = await getTemporaryDirectory();
@@ -69,17 +69,7 @@ Future<void> _compareGoldenOnDevice(
 
   await _writeBytesToFile(tempResultPath, resultImageBytes, "compareGolden");
 
-  final String? result = await matchesGoldenFile(
-    tempGoldenPath,
-  ).matchAsync(resultImageBytes);
-
-  if (result == null) {
-    completer.complete(<String, Object?>{"message": "Rendered $testName"});
-  } else {
-    completer.complete(<String, Object?>{
-      "message": "Failed to render $testName, match result: $result",
-    });
-  }
+  return matchesGoldenFile(tempGoldenPath).matchAsync(resultImageBytes);
 }
 
 Future<void> _writeBytesToFile(
