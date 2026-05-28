@@ -28,10 +28,15 @@ tasks.register("embedTestResultImages") {
         val packageId = "com.example.android_hardware_smoke_test"
         val discoveredTests = mutableListOf<Pair<String, String>>()
 
+        // Resolve binary safe adb executable from Android Gradle Plugin BaseExtension
+        val android = project.extensions.getByType(com.android.build.gradle.BaseExtension::class.java)
+        val adbPath = android.adbExecutable.absolutePath
+        println("Resolved binary-safe adb executable from AGP: $adbPath")
+
         // 1. Query the device sandbox to list all files in cache/results/ using ProcessBuilder
         var files = listOf<String>()
         try {
-            val process = ProcessBuilder("adb", "shell", "run-as", packageId, "ls", "cache/results")
+            val process = ProcessBuilder(adbPath, "shell", "run-as", packageId, "ls", "cache/results")
                 .redirectErrorStream(true)
                 .start()
 
@@ -64,7 +69,7 @@ tasks.register("embedTestResultImages") {
                 val destinationFile = File(imagesDir, fileName)
                 try {
                     // Direct binary safe copy using JDK ProcessBuilder and Kotlin stdlib copyTo
-                    val process = ProcessBuilder("adb", "exec-out", "run-as", packageId, "cat", "cache/results/$fileName")
+                    val process = ProcessBuilder(adbPath, "exec-out", "run-as", packageId, "cat", "cache/results/$fileName")
                         .start()
 
                     FileOutputStream(destinationFile).use { os ->
@@ -128,9 +133,19 @@ tasks.register("embedTestResultImages") {
         // This ensures the device is left completely clean, matching standard test runner behaviors.
         println("🧹 Performing automated post-test device cleanup...")
         try {
-            ProcessBuilder("adb", "uninstall", packageId).start().waitFor()
-            ProcessBuilder("adb", "uninstall", "$packageId.test").start().waitFor()
-            println("Successfully uninstalled test APKs from device.")
+            val exitCodeMain = ProcessBuilder(adbPath, "uninstall", packageId).start().waitFor()
+            if (exitCodeMain == 0) {
+                println("Successfully uninstalled main APK ($packageId) from device.")
+            } else {
+                println("ℹ️ Main APK uninstallation returned exit code $exitCodeMain (this is normal if it wasn't installed).")
+            }
+
+            val exitCodeTest = ProcessBuilder(adbPath, "uninstall", "$packageId.test").start().waitFor()
+            if (exitCodeTest == 0) {
+                println("Successfully uninstalled test APK ($packageId.test) from device.")
+            } else {
+                println("ℹ️ Test APK uninstallation returned exit code $exitCodeTest (this is normal if it wasn't installed).")
+            }
         } catch (e: Exception) {
             println("Failed to execute automated device cleanup: ${e.message}")
         }
