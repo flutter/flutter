@@ -129,8 +129,13 @@ Future<Uint8List> _capturePng(String testName, GlobalKey targetKey) async {
       );
     }
 
-    final RenderRepaintBoundary boundary =
-        context.findRenderObject() as RenderRepaintBoundary;
+    final RenderObject? renderObject = context.findRenderObject();
+    if (renderObject is! RenderRepaintBoundary) {
+      throw StateError(
+        "Failed to capture screenshot for $testName: the associated RenderObject is not a RenderRepaintBoundary.",
+      );
+    }
+    final RenderRepaintBoundary boundary = renderObject;
     final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
     final ByteData? byteData = await image.toByteData(
       format: ui.ImageByteFormat.png,
