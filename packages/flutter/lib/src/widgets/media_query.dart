@@ -4,7 +4,9 @@
 
 /// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/semantics.dart';
 /// @docImport 'package:flutter/services.dart';
+/// @docImport 'package:flutter/widgets.dart';
 ///
 /// @docImport 'app.dart';
 /// @docImport 'display_feature_sub_screen.dart';
@@ -622,9 +624,10 @@ class MediaQueryData {
   /// color palette to meet higher accessibility standards.
   ///
   /// Changing this value manually in a [MediaQuery] override will not
-  /// automatically trigger a theme change in [MaterialApp]. Instead,
-  /// [MaterialApp] uses this value to decide whether to use [highContrastTheme]
-  /// or [highContrastDarkTheme].
+  /// automatically trigger a theme change in [MaterialApp]. Instead, [MaterialApp]
+  /// uses this value to decide whether to use [MaterialApp.highContrastTheme]
+  /// or [MaterialApp.highContrastDarkTheme].
+
   ///
   /// This flag is currently only updated on iOS devices running iOS 13+
   /// and Android devices running API 34+.
@@ -642,14 +645,24 @@ class MediaQueryData {
   /// Whether the platform is requesting that animations be disabled or reduced
   /// as much as possible.
   ///
-  /// This flag indicates an OS-level user preference (such as "Reduce Motion"
-  /// on iOS or "Remove animations" on Android).
+  /// This corresponds to Android's "Remove animations" accessibility setting.
   ///
-  /// Manually overriding this value in a [MediaQuery] widget will not
-  /// globally stop animations across the framework, but it can be used to
-  /// test how custom widgets respond to a reduced-motion request. If you are
-  /// building custom explicit animations, you should check this property to
-  /// conditionally shorten or skip the animation duration.
+  /// On iOS, reduced motion is exposed separately via
+  /// [dart:ui.AccessibilityFeatures.reduceMotion] and does not set this flag.
+  ///
+  /// This value is read directly from the engine via
+  /// [SemanticsBinding.disableAnimations]. As a result, it is used by
+  /// framework-level animation APIs such as [AnimationController] and cannot be
+  /// overridden using [MediaQuery].
+  ///
+  /// Manually overriding this value in a [MediaQuery] widget will not affect
+  /// framework animations (for example those driven by [AnimationController]).
+  /// However, it can still be useful for testing or for custom widgets that
+  /// explicitly read [MediaQueryData.disableAnimations].
+  ///
+  /// When implementing custom explicit animations, you should check this
+  /// property and adjust behavior accordingly (for example, by reducing
+  /// duration or skipping non-essential animations when it is true).
   ///
   /// See also:
   ///
