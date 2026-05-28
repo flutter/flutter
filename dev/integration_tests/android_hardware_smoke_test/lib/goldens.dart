@@ -80,15 +80,11 @@ Future<void> _writeBytesToFile(
   assert(filePath.isNotEmpty);
   assert(bytes.isNotEmpty);
   assert(logTag.isNotEmpty);
-  try {
-    final io.File file = io.File(filePath);
-    if (!file.existsSync()) {
-      await file.create(recursive: true);
-    }
-    await file.writeAsBytes(bytes);
-  } catch (e) {
-    rethrow;
+  final io.File file = io.File(filePath);
+  if (!file.existsSync()) {
+    await file.create(recursive: true);
   }
+  await file.writeAsBytes(bytes);
 }
 
 Future<void> _copyGoldenAssetToTemp(
@@ -111,42 +107,38 @@ Future<void> _copyGoldenAssetToTemp(
 }
 
 Future<Uint8List> _capturePng(String testName, GlobalKey targetKey) async {
-  try {
-    final BuildContext? context = targetKey.currentContext;
-    if (context == null) {
-      throw StateError(
-        "Failed to capture screenshot for $testName: targetKey is not mounted in the widget tree.",
-      );
-    }
-
-    final RenderObject? renderObject = context.findRenderObject();
-    if (renderObject is! RenderRepaintBoundary) {
-      throw StateError(
-        "Failed to capture screenshot for $testName: the associated RenderObject is not a RenderRepaintBoundary.",
-      );
-    }
-    final RenderRepaintBoundary boundary = renderObject;
-    final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-    final ByteData? byteData = await image.toByteData(
-      format: ui.ImageByteFormat.png,
+  final BuildContext? context = targetKey.currentContext;
+  if (context == null) {
+    throw StateError(
+      "Failed to capture screenshot for $testName: targetKey is not mounted in the widget tree.",
     );
-    if (byteData == null) {
-      throw StateError(
-        "Failed to capture screenshot for $testName: ui.Image.toByteData returned null.",
-      );
-    }
-
-    final Uint8List pngBytes = byteData.buffer.asUint8List(
-      byteData.offsetInBytes,
-      byteData.lengthInBytes,
-    );
-    if (pngBytes.isEmpty) {
-      throw StateError(
-        "Failed to capture screenshot for $testName: pngBytes from RenderRepaintBoundary.toImage was empty.",
-      );
-    }
-    return pngBytes;
-  } catch (e) {
-    rethrow;
   }
+
+  final RenderObject? renderObject = context.findRenderObject();
+  if (renderObject is! RenderRepaintBoundary) {
+    throw StateError(
+      "Failed to capture screenshot for $testName: the associated RenderObject is not a RenderRepaintBoundary.",
+    );
+  }
+  final RenderRepaintBoundary boundary = renderObject;
+  final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+  final ByteData? byteData = await image.toByteData(
+    format: ui.ImageByteFormat.png,
+  );
+  if (byteData == null) {
+    throw StateError(
+      "Failed to capture screenshot for $testName: ui.Image.toByteData returned null.",
+    );
+  }
+
+  final Uint8List pngBytes = byteData.buffer.asUint8List(
+    byteData.offsetInBytes,
+    byteData.lengthInBytes,
+  );
+  if (pngBytes.isEmpty) {
+    throw StateError(
+      "Failed to capture screenshot for $testName: pngBytes from RenderRepaintBoundary.toImage was empty.",
+    );
+  }
+  return pngBytes;
 }
