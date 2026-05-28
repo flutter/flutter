@@ -12,7 +12,7 @@ import 'package:async_helper/async_minitest.dart';
 
 /// Helper method to turn a [String] into a [ByteData] containing the
 /// text of the string encoded as UTF-8.
-ByteData utf8Bytes(String text) {
+ByteData utf8Bytes(final String text) {
   return ByteData.sublistView(utf8.encode(text));
 }
 

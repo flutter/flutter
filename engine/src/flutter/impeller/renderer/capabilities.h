@@ -127,6 +127,13 @@ class Capabilities {
   /// Vulkan and GLES.
   virtual bool SupportsExtendedRangeFormats() const = 0;
 
+  /// @brief Whether the given family of block-compressed texture formats is
+  ///        supported by this device. Compressed formats are sample-only and
+  ///        their support varies by hardware, so callers must check this before
+  ///        allocating a compressed texture.
+  virtual bool SupportsTextureCompression(
+      CompressedTextureFamily family) const = 0;
+
   /// @brief The minimum alignment of uniform value offsets in bytes.
   virtual size_t GetMinimumUniformAlignment() const = 0;
 
@@ -177,6 +184,10 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetSupportsExtendedRangeFormats(bool value);
 
+  CapabilitiesBuilder& SetSupportsTextureCompression(
+      CompressedTextureFamily family,
+      bool value);
+
   CapabilitiesBuilder& SetDefaultGlyphAtlasFormat(PixelFormat value);
 
   CapabilitiesBuilder& SetSupportsTriangleFan(bool value);
@@ -202,6 +213,10 @@ class CapabilitiesBuilder {
   bool supports_triangle_fan_ = false;
   bool supports_extended_range_formats_ = false;
   bool needs_partitioned_host_buffer_ = false;
+  bool supports_texture_compression_bc_ = false;
+  bool supports_texture_compression_etc2_ = false;
+  bool supports_texture_compression_astc_ = false;
+  bool supports_texture_compression_astc_hdr_ = false;
   std::optional<PixelFormat> default_color_format_ = std::nullopt;
   std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
   std::optional<PixelFormat> default_depth_stencil_format_ = std::nullopt;

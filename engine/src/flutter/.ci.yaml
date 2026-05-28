@@ -22,6 +22,7 @@ platform_properties:
       device_type: none
       os: Ubuntu
       cores: "8"
+      cpu: x86
   mac:
     properties:
       # CIPD flutter/java/openjdk/$platform
