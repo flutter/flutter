@@ -61,7 +61,7 @@ Future<String?> _compareGoldenOnDevice(
       ? ".$goldenVariant"
       : "";
   final String fileName = "$testName$variantSuffix.png";
-  final String goldenAssetPath = path.join("test_driver/goldens", fileName);
+  final String goldenAssetPath = 'test_driver/goldens/$fileName';
   final String tempGoldenPath = path.join(tempDir.path, "goldens", fileName);
   final String tempResultPath = path.join(tempDir.path, "results", fileName);
 
