@@ -67,19 +67,14 @@ Future<String?> _compareGoldenOnDevice(
 
   await _copyGoldenAssetToTemp(goldenAssetPath, tempGoldenPath);
 
-  await _writeBytesToFile(tempResultPath, resultImageBytes, "compareGolden");
+  await _writeBytesToFile(tempResultPath, resultImageBytes);
 
   return matchesGoldenFile(tempGoldenPath).matchAsync(resultImageBytes);
 }
 
-Future<void> _writeBytesToFile(
-  String filePath,
-  Uint8List bytes,
-  String logTag,
-) async {
+Future<void> _writeBytesToFile(String filePath, Uint8List bytes) async {
   assert(filePath.isNotEmpty);
   assert(bytes.isNotEmpty);
-  assert(logTag.isNotEmpty);
   final io.File file = io.File(filePath);
   if (!file.existsSync()) {
     await file.create(recursive: true);
@@ -97,7 +92,7 @@ Future<void> _copyGoldenAssetToTemp(
       byteData.offsetInBytes,
       byteData.lengthInBytes,
     );
-    await _writeBytesToFile(tempGoldenPath, bytes, "postFrameCallback");
+    await _writeBytesToFile(tempGoldenPath, bytes);
   } catch (e) {
     throw StateError(
       'Failed to load golden asset "$goldenAssetPath" from package assets. '
