@@ -106,11 +106,13 @@ std::string PlaygroundTest::GetWindowTitle() const {
     case PlaygroundBackend::kMetalSDF:
       break;
     case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
       if (switches_.use_angle) {
         stream << " (Angle) ";
       }
       break;
     case PlaygroundBackend::kVulkan:
+    case PlaygroundBackend::kVulkanSDF:
       if (switches_.use_swiftshader) {
         stream << " (SwiftShader) ";
       }

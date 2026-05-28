@@ -63,7 +63,8 @@ class PlaygroundTest : public Playground,
       Play, playground,                                                      \
       ::testing::Values(                                                     \
           PlaygroundBackend::kMetal, PlaygroundBackend::kMetalSDF,           \
-          PlaygroundBackend::kOpenGLES, PlaygroundBackend::kVulkan),         \
+          PlaygroundBackend::kOpenGLES, PlaygroundBackend::kOpenGLESSDF,     \
+          PlaygroundBackend::kVulkan, PlaygroundBackend::kVulkanSDF),        \
       [](const ::testing::TestParamInfo<PlaygroundTest::ParamType>& info) {  \
         return PlaygroundBackendToString(info.param);                        \
       });

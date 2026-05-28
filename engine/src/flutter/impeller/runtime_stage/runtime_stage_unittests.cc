@@ -88,7 +88,9 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       [[fallthrough]];
     case PlaygroundBackend::kMetalSDF:
       [[fallthrough]];
-    case PlaygroundBackend::kOpenGLES: {
+    case PlaygroundBackend::kOpenGLES:
+      [[fallthrough]];
+    case PlaygroundBackend::kOpenGLESSDF: {
       ASSERT_EQ(stage->GetUniforms().size(), 14u);
       {
         // uFloat
@@ -238,7 +240,8 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       }
       break;
     }
-    case PlaygroundBackend::kVulkan: {
+    case PlaygroundBackend::kVulkan:
+    case PlaygroundBackend::kVulkanSDF: {
       EXPECT_EQ(stage->GetUniforms().size(), 1u);
       const RuntimeUniformDescription* uni =
           stage->GetUniform(RuntimeStage::kVulkanUBOName);

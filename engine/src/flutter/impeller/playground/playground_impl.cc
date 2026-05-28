@@ -36,6 +36,9 @@ std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
 #if IMPELLER_ENABLE_OPENGLES
     case PlaygroundBackend::kOpenGLES:
       return std::make_unique<PlaygroundImplGLES>(switches);
+    case PlaygroundBackend::kOpenGLESSDF:
+      switches.flags.use_sdfs = true;
+      return std::make_unique<PlaygroundImplGLES>(switches);
 #endif  // IMPELLER_ENABLE_OPENGLES
 #if IMPELLER_ENABLE_VULKAN
     case PlaygroundBackend::kVulkan:
@@ -44,6 +47,15 @@ std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
                             "isn't available or was disabled on this platform: "
                          << PlaygroundBackendToString(backend);
       }
+      switches.enable_vulkan_validation = true;
+      return std::make_unique<PlaygroundImplVK>(switches);
+    case PlaygroundBackend::kVulkanSDF:
+      if (!PlaygroundImplVK::IsVulkanDriverPresent()) {
+        FML_CHECK(false) << "Attempted to create playground with backend that "
+                            "isn't available or was disabled on this platform: "
+                         << PlaygroundBackendToString(backend);
+      }
+      switches.flags.use_sdfs = true;
       switches.enable_vulkan_validation = true;
       return std::make_unique<PlaygroundImplVK>(switches);
 #endif  // IMPELLER_ENABLE_VULKAN

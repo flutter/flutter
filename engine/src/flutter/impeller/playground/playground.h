@@ -27,7 +27,9 @@ enum class PlaygroundBackend {
   kMetal,
   kMetalSDF,
   kOpenGLES,
+  kOpenGLESSDF,
   kVulkan,
+  kVulkanSDF,
 };
 
 std::string PlaygroundBackendToString(PlaygroundBackend backend);

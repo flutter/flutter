@@ -52,8 +52,12 @@ std::string PlaygroundBackendToString(PlaygroundBackend backend) {
       return "MetalSDF";
     case PlaygroundBackend::kOpenGLES:
       return "OpenGLES";
+    case PlaygroundBackend::kOpenGLESSDF:
+      return "OpenGLESSDF";
     case PlaygroundBackend::kVulkan:
       return "Vulkan";
+    case PlaygroundBackend::kVulkanSDF:
+      return "VulkanSDF";
   }
   FML_UNREACHABLE();
 }
@@ -111,12 +115,14 @@ bool Playground::SupportsBackend(PlaygroundBackend backend) {
       return false;
 #endif  // IMPELLER_ENABLE_METAL
     case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
 #if IMPELLER_ENABLE_OPENGLES
       return true;
 #else   // IMPELLER_ENABLE_OPENGLES
       return false;
 #endif  // IMPELLER_ENABLE_OPENGLES
     case PlaygroundBackend::kVulkan:
+    case PlaygroundBackend::kVulkanSDF:
 #if IMPELLER_ENABLE_VULKAN
       return PlaygroundImplVK::IsVulkanDriverPresent();
 #else   // IMPELLER_ENABLE_VULKAN

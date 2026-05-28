@@ -181,6 +181,9 @@ void GoldenPlaygroundTest::SetUp() {
       pimpl_->screenshotter =
           std::make_unique<testing::MetalScreenshotter>(switches);
       break;
+    case PlaygroundBackend::kVulkanSDF:
+      switches.flags.use_sdfs = true;
+      [[fallthrough]];
     case PlaygroundBackend::kVulkan: {
       if (switches.enable_wide_gamut) {
         GTEST_SKIP() << "Vulkan doesn't support wide gamut golden tests.";
@@ -195,6 +198,9 @@ void GoldenPlaygroundTest::SetUp() {
           std::make_unique<testing::VulkanScreenshotter>(playground);
       break;
     }
+    case PlaygroundBackend::kOpenGLESSDF:
+      switches.flags.use_sdfs = true;
+      [[fallthrough]];
     case PlaygroundBackend::kOpenGLES: {
       if (switches.enable_wide_gamut) {
         GTEST_SKIP() << "OpenGLES doesn't support wide gamut golden tests.";
@@ -206,8 +212,9 @@ void GoldenPlaygroundTest::SetUp() {
       FML_CHECK(::glfwInit() == GLFW_TRUE);
       PlaygroundSwitches playground_switches;
       playground_switches.use_angle = true;
-      pimpl_->test_opengl_playground = PlaygroundImpl::Create(
-          PlaygroundBackend::kOpenGLES, playground_switches);
+      playground_switches.flags.use_sdfs = switches.flags.use_sdfs;
+      pimpl_->test_opengl_playground =
+          PlaygroundImpl::Create(GetParam(), playground_switches);
       pimpl_->screenshotter = std::make_unique<testing::VulkanScreenshotter>(
           pimpl_->test_opengl_playground);
       break;
