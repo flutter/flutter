@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ffi' as ffi;
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
@@ -50,8 +49,6 @@ const kWindowsEdgeExecutable = r'Microsoft\Edge\Application\msedge.exe';
 const _kGlibcError = 'Inconsistency detected by ld.so';
 
 typedef BrowserFinder = String Function(Platform, FileSystem);
-
-final bool _isMacosArm = ffi.Abi.current() == ffi.Abi.macosArm64;
 
 /// Find the chrome executable on the current platform.
 ///
@@ -130,6 +127,8 @@ class ChromiumLauncher {
   final OperatingSystemUtils _operatingSystemUtils;
   final BrowserFinder _browserFinder;
   final Logger _logger;
+
+  bool get _isMacosArm => _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
 
   bool get hasChromeInstance => currentCompleter.isCompleted;
 

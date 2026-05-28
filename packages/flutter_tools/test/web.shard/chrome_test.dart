@@ -412,6 +412,35 @@ void main() {
     await expectReturnsNormallyLater(chromiumLauncher.launch('example_url', skipCheck: true));
   });
 
+  testWithoutContext('can launch Chrome on ARM macOS and appends --use-angle=metal', () async {
+    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(
+      hostPlatform: HostPlatform.darwin_arm64,
+    );
+    final chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: macOSUtils,
+      browserFinder: findChromeExecutable,
+      logger: BufferLogger.test(),
+    );
+
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=12345',
+          ...kChromeArgs,
+          '--use-angle=metal',
+          'example_url',
+        ],
+        stderr: kDevtoolsStderr,
+      ),
+    );
+
+    await expectReturnsNormallyLater(chromiumLauncher.launch('example_url', skipCheck: true));
+  });
   testWithoutContext('can launch chrome with a custom debug port', () async {
     processManager.addCommand(
       const FakeCommand(
