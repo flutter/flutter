@@ -153,7 +153,7 @@ class MyPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return oldDelegate is MyPainter && message != oldDelegate.message;
+  bool shouldRepaint(covariant MyPainter oldDelegate) {
+    return message != oldDelegate.message;
   }
 }

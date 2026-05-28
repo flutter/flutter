@@ -1,6 +1,5 @@
 package com.example.android_hardware_smoke_test;
 
-import android.os.Bundle;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.util.Log;
