@@ -65,10 +65,12 @@ Future<String?> _compareGoldenOnDevice(
   final String tempGoldenPath = path.join(tempDir.path, "goldens", fileName);
   final String tempResultPath = path.join(tempDir.path, "results", fileName);
 
+  // In this context, `matchesGoldenFile` uses a NaiveLocalFileComparator.
+  // That comparator does not support reading bundled assets, so we need to create a temp file.
+  // To avoid the risk that the temp copy was modified somehow, we copy every time we execute a comparison.
   await _copyGoldenAssetToTemp(goldenAssetPath, tempGoldenPath);
-
+  // Write the result bytes to a temp file so they can be pulled off the device for debugging when a comparison fails.
   await _writeBytesToFile(tempResultPath, resultImageBytes);
-
   return matchesGoldenFile(tempGoldenPath).matchAsync(resultImageBytes);
 }
 

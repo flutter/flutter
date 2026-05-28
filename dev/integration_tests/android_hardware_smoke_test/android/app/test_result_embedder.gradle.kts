@@ -14,7 +14,7 @@ tasks.register("embedTestResultImages") {
     doLast {
         val buildDir = layout.buildDirectory.get().asFile
         val reportsDir = File(buildDir, "reports/androidTests/connected")
-        
+
         // Dynamically find the active variant directory (e.g. "debug") where HTML files exist
         var targetVariantDir = File(reportsDir, "debug")
         if (!targetVariantDir.exists()) {
@@ -71,14 +71,16 @@ tasks.register("embedTestResultImages") {
 
                 val destinationFile = File(imagesDir, fileName)
                 try {
-                    // Direct binary safe copy using JDK ProcessBuilder and Kotlin stdlib copyTo
+                    // Copy the file from the device's temp folder.
+                    // Because we write the result images to a temp folder on the device, `adb pull` won't have access.
+                    // `run-as` resolves the temp folder permissions, but this means we have to use `cat` with `adb exec-out` to read the file contents and write them locally.
                     val process = ProcessBuilder(adbPath, "exec-out", "run-as", packageId, "cat", "cache/results/$fileName")
                         .start()
-                    
+
                     FileOutputStream(destinationFile).use { os ->
                         process.inputStream.copyTo(os)
                     }
-                    
+
                     val exitCode = process.waitFor()
                     if (exitCode == 0) {
                         discoveredTests.add(DiscoveredTest(testName, fileName))
