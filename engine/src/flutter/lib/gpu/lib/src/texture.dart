@@ -148,9 +148,15 @@ base class Texture extends NativeFieldWrapperClass1 {
   /// (where `mipWidth` and `mipHeight` are the base dimensions right-shifted
   /// by [mipLevel], floored at 1).
   ///
-  /// Throws an exception if the write fails due to an internal error or if
-  /// any of the parameters are out of range.
-  void overwrite(ByteData sourceBytes, {int mipLevel = 0, int slice = 0}) {
+  /// Completes when the backend reports that the write is complete.
+  ///
+  /// Completes with an exception if the write fails due to an internal error
+  /// or if any of the parameters are out of range.
+  Future<void> overwrite(
+    ByteData sourceBytes, {
+    int mipLevel = 0,
+    int slice = 0,
+  }) async {
     if (mipLevel < 0 || mipLevel >= mipLevelCount) {
       throw Exception(
         'mipLevel ($mipLevel) must be in the range [0, $mipLevelCount) for this texture',
@@ -168,10 +174,24 @@ base class Texture extends NativeFieldWrapperClass1 {
         'The length of sourceBytes (bytes: ${sourceBytes.lengthInBytes}) must exactly match the size of mip level $mipLevel (bytes: $expectedSize)',
       );
     }
-    bool success = _overwrite(_gpuContext, sourceBytes, mipLevel, slice);
-    if (!success) {
-      throw Exception("Texture overwrite failed");
+    final Completer<void> completer = Completer<void>();
+    final String? error = _overwrite(
+      _gpuContext,
+      sourceBytes,
+      (bool success) {
+        if (success) {
+          completer.complete();
+        } else {
+          completer.completeError(Exception('Texture overwrite failed'));
+        }
+      },
+      mipLevel,
+      slice,
+    );
+    if (error != null) {
+      throw Exception(error);
     }
+    await completer.future;
   }
 
   ui.Image asImage() {
@@ -226,12 +246,13 @@ base class Texture extends NativeFieldWrapperClass1 {
   )
   external int _bytesPerTexel();
 
-  @Native<Bool Function(Pointer<Void>, Pointer<Void>, Handle, Int, Int)>(
-    symbol: 'InternalFlutterGpu_Texture_Overwrite',
-  )
-  external bool _overwrite(
+  @Native<
+    Handle Function(Pointer<Void>, Pointer<Void>, Handle, Handle, Int, Int)
+  >(symbol: 'InternalFlutterGpu_Texture_Overwrite')
+  external String? _overwrite(
     GpuContext gpuContext,
     ByteData bytes,
+    CompletionCallback completionCallback,
     int mipLevel,
     int slice,
   );

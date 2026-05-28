@@ -20,6 +20,7 @@
 ///  * [Flutter GPU documentation](https://github.com/flutter/flutter/blob/main/docs/engine/impeller/Flutter-GPU.md).
 library flutter_gpu;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:ffi';

@@ -395,7 +395,7 @@ void main() async {
 
     const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
     const green = ui.Color.fromARGB(0xFF, 0, 0xFF, 0);
-    texture.overwrite(
+    await texture.overwrite(
       Int32List.fromList(<int>[red.value, green.value, green.value, red.value]).buffer.asByteData(),
     );
   }, skip: !(impellerEnabled && flutterGpuEnabled));
@@ -405,7 +405,7 @@ void main() async {
 
     const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
     try {
-      texture.overwrite(
+      await texture.overwrite(
         Int32List.fromList(<int>[red.value, red.value, red.value, red.value]).buffer.asByteData(),
       );
       fail('Exception not thrown for wrong buffer size.');
@@ -430,14 +430,16 @@ void main() async {
     const blue = ui.Color.fromARGB(0xFF, 0, 0, 0xFF);
 
     // Mip 0: 8x8 = 64 texels.
-    texture.overwrite(Int32List.fromList(List<int>.filled(64, red.value)).buffer.asByteData());
+    await texture.overwrite(
+      Int32List.fromList(List<int>.filled(64, red.value)).buffer.asByteData(),
+    );
     // Mip 1: 4x4 = 16 texels.
-    texture.overwrite(
+    await texture.overwrite(
       Int32List.fromList(List<int>.filled(16, blue.value)).buffer.asByteData(),
       mipLevel: 1,
     );
     // Mip 2: 2x2 = 4 texels.
-    texture.overwrite(
+    await texture.overwrite(
       Int32List.fromList(List<int>.filled(4, red.value)).buffer.asByteData(),
       mipLevel: 2,
     );
@@ -452,7 +454,10 @@ void main() async {
     );
     const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
     try {
-      texture.overwrite(Int32List.fromList(<int>[red.value]).buffer.asByteData(), mipLevel: 2);
+      await texture.overwrite(
+        Int32List.fromList(<int>[red.value]).buffer.asByteData(),
+        mipLevel: 2,
+      );
       fail('Exception not thrown for out-of-range mipLevel.');
     } catch (e) {
       expect(e.toString(), contains('mipLevel (2) must be in the range [0, 2)'));
@@ -463,7 +468,7 @@ void main() async {
     final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);
     const red = ui.Color.fromARGB(0xFF, 0xFF, 0, 0);
     try {
-      texture.overwrite(
+      await texture.overwrite(
         Int32List.fromList(List<int>.filled(4, red.value)).buffer.asByteData(),
         slice: 1,
       );
@@ -491,7 +496,10 @@ void main() async {
     ];
     for (var slice = 0; slice < 6; slice++) {
       final int v = colors[slice].value;
-      texture.overwrite(Int32List.fromList(<int>[v, v, v, v]).buffer.asByteData(), slice: slice);
+      await texture.overwrite(
+        Int32List.fromList(<int>[v, v, v, v]).buffer.asByteData(),
+        slice: slice,
+      );
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 

@@ -4,6 +4,8 @@
 
 #include "flutter/lib/gpu/texture.h"
 
+#include <atomic>
+
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -23,6 +25,7 @@
 #if IMPELLER_SUPPORTS_RENDERING
 #include "impeller/display_list/dl_image_impeller.h"  // nogncheck
 #endif
+#include "tonic/converter/dart_converter.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
@@ -54,6 +57,13 @@ static int32_t MipDimensionAtLevel(int32_t base_dimension, uint32_t mip_level) {
   return shifted > 0 ? shifted : 1;
 }
 
+static void CompleteOverwriteWithError(
+    const impeller::CommandBuffer::CompletionCallback& completion_callback) {
+  if (completion_callback) {
+    completion_callback(impeller::CommandBuffer::Status::kError);
+  }
+}
+
 // Records a blit-pass that copies `source_bytes` into the given mip level and
 // slice of `texture` on `context`, then submits the command buffer. Returns
 // true if the encode and submit both succeed. The actual GPU upload may
@@ -65,33 +75,46 @@ static bool EncodeAndSubmitOverwrite(
     size_t source_length,
     impeller::IRect destination_region,
     uint32_t mip_level,
-    uint32_t slice) {
+    uint32_t slice,
+    const impeller::CommandBuffer::CompletionCallback& completion_callback) {
   auto command_buffer = context.CreateCommandBuffer();
   if (!command_buffer) {
     FML_LOG(ERROR) << "Failed to create command buffer for texture overwrite.";
+    CompleteOverwriteWithError(completion_callback);
     return false;
   }
   auto blit_pass = command_buffer->CreateBlitPass();
   if (!blit_pass) {
     FML_LOG(ERROR) << "Failed to create blit pass for texture overwrite.";
+    CompleteOverwriteWithError(completion_callback);
     return false;
   }
   impeller::BufferView buffer_view(staging_buffer,
                                    impeller::Range(0, source_length));
   if (!blit_pass->AddCopy(std::move(buffer_view), texture, destination_region,
                           /*label=*/"Texture.overwrite", mip_level, slice)) {
+    CompleteOverwriteWithError(completion_callback);
     return false;
   }
   if (!blit_pass->EncodeCommands()) {
+    CompleteOverwriteWithError(completion_callback);
     return false;
   }
-  return context.GetCommandQueue()->Submit({std::move(command_buffer)}).ok();
+  if (!context.GetCommandQueue()
+           ->Submit({std::move(command_buffer)}, completion_callback)
+           .ok()) {
+    CompleteOverwriteWithError(completion_callback);
+    return false;
+  }
+  return true;
 }
 
-bool Texture::Overwrite(Context& gpu_context,
-                        const tonic::DartByteData& source_bytes,
-                        uint32_t mip_level,
-                        uint32_t slice) {
+void Texture::Overwrite(
+    Context& gpu_context,
+    const tonic::DartByteData& source_bytes,
+    uint32_t mip_level,
+    uint32_t slice,
+    const impeller::CommandBuffer::CompletionCallback& completion_callback) {
   const uint8_t* data = static_cast<const uint8_t*>(source_bytes.data());
   const size_t length = source_bytes.length_in_bytes();
 
@@ -102,7 +125,8 @@ bool Texture::Overwrite(Context& gpu_context,
   if (!staging_buffer) {
     FML_LOG(ERROR) << "Failed to allocate staging buffer for texture "
                       "overwrite.";
-    return false;
+    CompleteOverwriteWithError(completion_callback);
+    return;
   }
 
   // Compute the destination region for the requested mip level. The
@@ -125,24 +149,27 @@ bool Texture::Overwrite(Context& gpu_context,
     auto context_shared = gpu_context.GetContextShared();
     task_runners.GetRasterTaskRunner()->PostTask(fml::MakeCopyable(
         [context_shared, texture = texture_, staging_buffer, length,
-         destination_region, mip_level, slice]() mutable {
+         destination_region, mip_level, slice,
+         completion_callback]() mutable {
           if (!EncodeAndSubmitOverwrite(*context_shared, texture,
                                         staging_buffer, length,
-                                        destination_region, mip_level, slice)) {
-            FML_LOG(ERROR) << "Failed to encode texture overwrite blit on the "
+                                        destination_region, mip_level, slice,
+                                        completion_callback)) {
+            FML_LOG(ERROR) << "Failed to submit Texture.overwrite on the "
                               "raster thread.";
           }
           context_shared->DisposeThreadLocalCachedResources();
         }));
-    return true;
+    return;
   }
 
   if (!EncodeAndSubmitOverwrite(impeller_context, texture_, staging_buffer,
-                                length, destination_region, mip_level, slice)) {
-    return false;
+                                length, destination_region, mip_level, slice,
+                                completion_callback)) {
+    impeller_context.DisposeThreadLocalCachedResources();
+    return;
   }
   impeller_context.DisposeThreadLocalCachedResources();
-  return true;
 }
 
 size_t Texture::GetBytesPerTexel() {
@@ -243,17 +270,59 @@ void InternalFlutterGpu_Texture_SetCoordinateSystem(
       flutter::gpu::ToImpellerTextureCoordinateSystem(coordinate_system));
 }
 
-bool InternalFlutterGpu_Texture_Overwrite(flutter::gpu::Texture* texture,
-                                          flutter::gpu::Context* gpu_context,
-                                          Dart_Handle source_byte_data,
-                                          int mip_level,
-                                          int slice) {
+Dart_Handle InternalFlutterGpu_Texture_Overwrite(
+    flutter::gpu::Texture* texture,
+    flutter::gpu::Context* gpu_context,
+    Dart_Handle source_byte_data,
+    Dart_Handle completion_callback,
+    int mip_level,
+    int slice) {
   if (mip_level < 0 || slice < 0) {
-    return false;
+    return tonic::ToDart("mipLevel and slice must be non-negative");
   }
-  return texture->Overwrite(*gpu_context, tonic::DartByteData(source_byte_data),
-                            static_cast<uint32_t>(mip_level),
-                            static_cast<uint32_t>(slice));
+  if (!Dart_IsClosure(completion_callback)) {
+    return tonic::ToDart("Completion callback must be a function");
+  }
+
+  auto dart_state = flutter::UIDartState::Current();
+  auto& task_runners = dart_state->GetTaskRunners();
+  auto persistent_completion_callback =
+      std::make_unique<tonic::DartPersistentValue>(dart_state,
+                                                   completion_callback);
+  auto completion_sent = std::make_shared<std::atomic_bool>(false);
+
+  auto ui_task_completion_callback = fml::MakeCopyable(
+      [callback = std::move(persistent_completion_callback),
+       task_runners,
+       completion_sent](impeller::CommandBuffer::Status status) mutable {
+        if (completion_sent->exchange(true)) {
+          return;
+        }
+        bool success = status != impeller::CommandBuffer::Status::kError;
+
+        auto ui_completion_task = fml::MakeCopyable(
+            [callback = std::move(callback), success]() mutable {
+              auto dart_state = callback->dart_state().lock();
+              if (!dart_state) {
+                // The root isolate could have died in the meantime.
+                return;
+              }
+              tonic::DartState::Scope scope(dart_state);
+
+              tonic::DartInvoke(callback->Get(), {tonic::ToDart(success)});
+
+              // callback is associated with the Dart isolate and must be
+              // deleted on the UI thread.
+              callback.reset();
+            });
+        task_runners.GetUITaskRunner()->PostTask(ui_completion_task);
+      });
+
+  texture->Overwrite(*gpu_context, tonic::DartByteData(source_byte_data),
+                     static_cast<uint32_t>(mip_level),
+                     static_cast<uint32_t>(slice),
+                     ui_task_completion_callback);
+  return Dart_Null();
 }
 
 extern int InternalFlutterGpu_Texture_BytesPerTexel(

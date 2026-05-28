@@ -9,6 +9,7 @@
 #include "flutter/lib/gpu/export.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "impeller/core/formats.h"
+#include "impeller/renderer/command_buffer.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
@@ -27,10 +28,12 @@ class Texture : public RefCountedDartWrappable<Texture> {
 
   void SetCoordinateSystem(impeller::TextureCoordinateSystem coordinate_system);
 
-  bool Overwrite(Context& gpu_context,
-                 const tonic::DartByteData& source_bytes,
-                 uint32_t mip_level,
-                 uint32_t slice);
+  void Overwrite(
+      Context& gpu_context,
+      const tonic::DartByteData& source_bytes,
+      uint32_t mip_level,
+      uint32_t slice,
+      const impeller::CommandBuffer::CompletionCallback& completion_callback);
 
   size_t GetBytesPerTexel();
 
@@ -73,10 +76,11 @@ extern void InternalFlutterGpu_Texture_SetCoordinateSystem(
     int coordinate_system);
 
 FLUTTER_GPU_EXPORT
-extern bool InternalFlutterGpu_Texture_Overwrite(
+extern Dart_Handle InternalFlutterGpu_Texture_Overwrite(
     flutter::gpu::Texture* wrapper,
     flutter::gpu::Context* gpu_context,
     Dart_Handle source_byte_data,
+    Dart_Handle completion_callback,
     int mip_level,
     int slice);
 
