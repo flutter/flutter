@@ -42,7 +42,7 @@ public class MainActivity extends FlutterActivity {
     // Set up a method channel to expose the Impeller backend to the Flutter app.
     new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), METHOD_CHANNEL_NAME)
         .setMethodCallHandler((call, result) -> {
-          if (call.method.equals("impeller_backend")) {
+          if ("impeller_backend".equals(call.method)) {
             result.success(this.impellerBackend);
           } else {
             result.notImplemented();
