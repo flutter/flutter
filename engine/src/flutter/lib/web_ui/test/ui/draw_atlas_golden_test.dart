@@ -257,4 +257,48 @@ Future<void> testMain() async {
       await matchGoldenFile('ui_draw_atlas_filter_${filterQuality.name}.png', region: region);
     });
   }
+
+  // Regression test for the pre-existing null-`colors` deref in
+  // skwasm's `canvas_drawAtlas`. The dart wrapper passes nullptr
+  // when the caller's `colors` list is null, but the C++ side used
+  // to loop `colors[i]` regardless — only saved from crashing by
+  // WASM reads at address 0 returning zero. Three stacked sprites
+  // with null colors force the loop bound past index 0, so any
+  // future regression that reintroduces the unguarded read would
+  // surface here.
+  test('drawAtlas with null colors does not read past nullptr', () async {
+    final atlasRecorder = ui.PictureRecorder();
+    final atlasCanvas = ui.Canvas(atlasRecorder);
+    atlasCanvas.drawColor(const ui.Color(0xFFFFFFFF), ui.BlendMode.src);
+    final blackFill = ui.Paint()..color = const ui.Color(0xFF000000);
+    atlasCanvas.drawRect(const ui.Rect.fromLTWH(0, 0, 1, 1), blackFill);
+    atlasCanvas.drawRect(const ui.Rect.fromLTWH(1, 1, 1, 1), blackFill);
+    final ui.Image checker = atlasRecorder.endRecording().toImageSync(2, 2);
+
+    const scale = 40.0;
+    final transforms = <ui.RSTransform>[
+      ui.RSTransform(scale, 0.0, 16.0, 16.0),
+      ui.RSTransform(scale, 0.0, 16.0, 110.0),
+      ui.RSTransform(scale, 0.0, 16.0, 204.0),
+    ];
+    const rects = <ui.Rect>[
+      ui.Rect.fromLTWH(0, 0, 2, 2),
+      ui.Rect.fromLTWH(0, 0, 2, 2),
+      ui.Rect.fromLTWH(0, 0, 2, 2),
+    ];
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder, region);
+    canvas.drawAtlas(
+      checker,
+      transforms,
+      rects,
+      null,
+      null,
+      null,
+      ui.Paint()..filterQuality = ui.FilterQuality.none,
+    );
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('ui_draw_atlas_null_colors.png', region: region);
+  });
 }
