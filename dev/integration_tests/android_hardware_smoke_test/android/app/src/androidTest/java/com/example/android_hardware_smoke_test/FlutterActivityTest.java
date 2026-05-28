@@ -65,7 +65,7 @@ public class FlutterActivityTest {
 
     // Schedule a diagnostic warning log if the rendering is exceptionally slow
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    executor.schedule(() -> {
+    java.util.concurrent.ScheduledFuture<?> warningTask = executor.schedule(() -> {
       if (!future.isDone()) {
         Log.w(TAG, "Rendering '" + testName + "' is taking longer than expected (exceeded 5 seconds)...");
       }
@@ -79,6 +79,7 @@ public class FlutterActivityTest {
       Log.e(TAG, testName + " Failed to receive result on message channel: " + e.getMessage());
       throw new RuntimeException(e);
     } finally {
+      warningTask.cancel(true);
       executor.shutdown();
     }
 
