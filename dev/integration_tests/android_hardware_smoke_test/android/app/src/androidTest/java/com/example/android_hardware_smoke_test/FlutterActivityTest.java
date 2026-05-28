@@ -33,7 +33,7 @@ public class FlutterActivityTest {
       new ActivityScenarioRule<>(MainActivity.class);
 
   private void templateTest(String testName) {
-    Log.d(TAG, "Starting "+testName);
+    Log.d(TAG, "Starting " + testName);
     CompletableFuture<String> future = new CompletableFuture<>();
 
     rule.getScenario().onActivity(activity -> {
@@ -47,9 +47,9 @@ public class FlutterActivityTest {
         JSONObject message = new JSONObject();
         message.put("testName", testName);
         message.put("performAppSideGoldenCompare", true);
-        
+
         Log.d(TAG, "Sending '" + message.toString() + "' on message channel");
-        
+
         activity.messageChannel.send(message, reply -> {
           try {
             JSONObject replyJson = (JSONObject) reply;
@@ -82,8 +82,8 @@ public class FlutterActivityTest {
       executor.shutdown();
     }
 
-    Log.d(TAG, "Received "+reply+" on message channel");
-    assertEquals("Rendered "+testName, reply);
+    Log.d(TAG, "Received " + reply + " on message channel");
+    assertEquals("Rendered " + testName, reply);
   }
 
   @Test
