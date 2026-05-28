@@ -535,9 +535,16 @@ static void EncodeViewport(const ProcTableGLES& gl,
     const bool emulate_instanced = instanced && !hardware_instanced;
     const GLsizei instance_count = static_cast<GLsizei>(command.instance_count);
 
+    // A draw is indexed only when a real index type was set. A command that
+    // never bound an index buffer leaves `index_type` at its `kUnknown`
+    // default, which must be treated as non-indexed (matching the Metal and
+    // Vulkan backends, which key off the presence of the index buffer).
+    const bool is_indexed = command.index_type != IndexType::kNone &&
+                            command.index_type != IndexType::kUnknown;
+
     // Bind the index buffer once, before any (possibly repeated) draw.
     const GLvoid* index_offset = nullptr;
-    if (command.index_type != IndexType::kNone) {
+    if (is_indexed) {
       auto index_buffer_view = command.index_buffer;
       const DeviceBuffer* index_buffer = index_buffer_view.GetBuffer();
       const auto& index_buffer_gles = DeviceBufferGLES::Cast(*index_buffer);
@@ -552,7 +559,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
     // A non-instanced draw of the bound geometry. Used directly for ordinary
     // draws and once per instance when emulating instancing.
     const auto draw_geometry = [&]() {
-      if (command.index_type == IndexType::kNone) {
+      if (!is_indexed) {
         gl.DrawArrays(mode, command.base_vertex, command.element_count);
       } else {
         gl.DrawElements(mode, command.element_count,
@@ -582,7 +589,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
       }
     } else if (hardware_instanced) {
       // A single instanced call covers every instance.
-      if (command.index_type == IndexType::kNone) {
+      if (!is_indexed) {
         gl.DrawArraysInstancedEXT(mode, command.base_vertex,
                                   command.element_count, instance_count);
       } else {
