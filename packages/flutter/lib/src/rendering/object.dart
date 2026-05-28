@@ -5310,6 +5310,7 @@ final class _SemanticsParentData {
         other.blocksUserActions == blocksUserActions &&
         other.explicitChildNodes == explicitChildNodes &&
         other.localeForChildren == localeForChildren &&
+        other.accessibilityFocusBlockType == accessibilityFocusBlockType &&
         setEquals<SemanticsTag>(other.tagsForChildren, tagsForChildren);
   }
 
@@ -5320,6 +5321,7 @@ final class _SemanticsParentData {
       blocksUserActions,
       explicitChildNodes,
       localeForChildren,
+      accessibilityFocusBlockType,
       Object.hashAllUnordered(tagsForChildren ?? const <SemanticsTag>{}),
     );
   }

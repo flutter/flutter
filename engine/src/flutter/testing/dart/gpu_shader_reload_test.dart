@@ -63,13 +63,12 @@ void drawUnlitTriangle(RenderPassState state, gpu.RenderPipeline pipeline) {
   final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
   state.renderPass.bindVertexBuffer(
     transients.emplace(float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5])),
-    3,
   );
   state.renderPass.bindUniform(
     pipeline.vertexShader.getUniformSlot('VertInfo'),
     transients.emplace(unlitUBO(Matrix4.identity(), Vector4(0, 1, 0, 1))),
   );
-  state.renderPass.draw();
+  state.renderPass.draw(3);
   state.commandBuffer.submit();
 }
 

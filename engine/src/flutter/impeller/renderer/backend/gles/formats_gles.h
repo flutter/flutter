@@ -200,6 +200,9 @@ struct PixelFormatGLES {
   GLint internal_format = 0;
   GLenum external_format = GL_NONE;
   GLenum type = GL_NONE;
+  // When true, the data must be uploaded with glCompressedTexImage2D and only
+  // `internal_format` is meaningful.
+  bool is_compressed = false;
 };
 
 std::optional<PixelFormatGLES> ToPixelFormatGLES(PixelFormat format,
