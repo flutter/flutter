@@ -32,24 +32,22 @@ tasks.register("embedTestResultImages") {
         var files = listOf<String>()
         try {
             val process = ProcessBuilder("adb", "shell", "run-as", packageId, "ls", "cache/results")
-                .redirectErrorStream(false) // Keep stderr separate to distinguish failures!
+                .redirectErrorStream(true)
                 .start()
 
-            val stdoutBytes = process.inputStream.readBytes()
-            val stderrBytes = process.errorStream.readBytes()
+            val outputBytes = process.inputStream.readBytes()
             val exitCode = process.waitFor()
+            val output = String(outputBytes).trim()
 
             if (exitCode == 0) {
-                val output = String(stdoutBytes).trim()
                 if (output.isNotEmpty()) {
                     files = output.split(Regex("\\r?\\n"))
                 }
             } else {
-                val errorMsg = String(stderrBytes).trim()
-                if (errorMsg.contains("No such file or directory")) {
+                if (output.contains("No such file or directory")) {
                     println("ℹ️ No test result images sandbox directory exists on-device (this is normal if no on-device screenshots were generated).")
                 } else {
-                    println("❌ Failed to list sandbox directory cache/results (exit code $exitCode): $errorMsg")
+                    println("❌ Failed to list sandbox directory cache/results (exit code $exitCode): $output")
                 }
             }
         } catch (e: Exception) {
