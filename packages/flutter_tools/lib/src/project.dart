@@ -52,11 +52,14 @@ enum SupportedPlatform {
 
 class FlutterProjectFactory {
   FlutterProjectFactory({
-    required this._logger,
-    required this._fileSystem,
-    required this._xcode,
-    required this._xcodeProjectInterpreter,
-  });
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Xcode? xcode,
+    required XcodeProjectInterpreter? xcodeProjectInterpreter,
+  }) : _logger = logger,
+       _fileSystem = fileSystem,
+       _xcode = xcode,
+       _xcodeProjectInterpreter = xcodeProjectInterpreter;
 
   final Logger _logger;
   final FileSystem _fileSystem;

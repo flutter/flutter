@@ -75,8 +75,8 @@ class DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   DefaultDoctorValidatorsProvider({
     required this.featureFlags,
     required this.platform,
-    required this._xcode,
-  });
+    required Xcode? xcode,
+  }) : _xcode = xcode;
 
   List<DoctorValidator>? _validators;
   List<Workflow>? _workflows;

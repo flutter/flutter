@@ -24,11 +24,9 @@ import 'channel.dart';
 const _flutterInstallDocs = 'https://flutter.dev/setup';
 
 class UpgradeCommand extends FlutterCommand {
-  UpgradeCommand({
-    required this._git,
-    required bool verboseHelp,
-    UpgradeCommandRunner? commandRunner,
-  }) : _commandRunner = commandRunner ?? UpgradeCommandRunner(git: _git) {
+  UpgradeCommand({required Git git, required bool verboseHelp, UpgradeCommandRunner? commandRunner})
+    : _git = git,
+      _commandRunner = commandRunner ?? UpgradeCommandRunner(git: git) {
     argParser
       ..addFlag(
         'force',
@@ -141,7 +139,7 @@ final class _SecondHalf implements UpgradePhase {
 
 @visibleForTesting
 class UpgradeCommandRunner {
-  UpgradeCommandRunner({required this._git});
+  UpgradeCommandRunner({required Git git}) : _git = git;
 
   final Git _git;
   String? workingDirectory; // set in runCommand() above

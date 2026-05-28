@@ -41,7 +41,11 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform {
-  XcodeBasedProject({required this._xcode, required this._xcodeProjectInterpreter});
+  XcodeBasedProject({
+    required Xcode? xcode,
+    required XcodeProjectInterpreter? xcodeProjectInterpreter,
+  }) : _xcode = xcode,
+       _xcodeProjectInterpreter = xcodeProjectInterpreter;
 
   final Xcode? _xcode;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;

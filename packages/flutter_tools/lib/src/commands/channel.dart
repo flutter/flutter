@@ -14,7 +14,7 @@ import '../version.dart';
 import 'upgrade.dart' show precacheArtifacts;
 
 class ChannelCommand extends FlutterCommand {
-  ChannelCommand({required this._git, bool verboseHelp = false}) {
+  ChannelCommand({required Git git, bool verboseHelp = false}) : _git = git {
     argParser.addFlag(
       'all',
       abbr: 'a',

@@ -19,9 +19,11 @@ class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({
     required super.logger,
     required bool verboseHelp,
-    required this._xcode,
-    required this._xcodeProjectInterpreter,
-  }) : super(verboseHelp: verboseHelp) {
+    required Xcode? xcode,
+    required XcodeProjectInterpreter? xcodeProjectInterpreter,
+  }) : _xcode = xcode,
+       _xcodeProjectInterpreter = xcodeProjectInterpreter,
+       super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesFlavorOption();
     argParser.addFlag(
