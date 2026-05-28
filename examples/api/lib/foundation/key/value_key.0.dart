@@ -49,7 +49,7 @@ class _KeyValueComparisonPageState extends State<KeyValueComparisonPage> {
             ),
             ..._colors.map(
               (Color color) => ColoredWidgetsList(
-                // Adding the Key ensures the state stays in sync with the color
+                // Adding the Key ensures the state stays in sync with the color.
                 key: ValueKey(color),
                 color: color,
               ),

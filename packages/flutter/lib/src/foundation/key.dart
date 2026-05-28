@@ -15,9 +15,9 @@ import 'diagnostics.dart';
 /// A new widget will only be used to update an existing element if its key is
 /// the same as the key of the current widget associated with the element.
 ///
-/// If no key is provided, the default value is `null`, meaning the widget is
-/// considered unkeyed. In this case, Flutter matches widgets based on their
-/// [Widget.runtimeType] and position in the tree during rebuilds.
+/// Typically, if no key is provided, the default value is null, meaning the
+/// widget is considered unkeyed. In this case, Flutter matches widgets based
+/// on their [Widget.runtimeType] and position in the tree during rebuilds.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=kn0EOS-ZiIc}
 ///
@@ -27,7 +27,7 @@ import 'diagnostics.dart';
 ///
 /// A common mistake is to rebuild the widget tree in such a way that Flutter
 /// attaches the incorrect State object to an unkeyed StatefulWidget. This can
-/// often be solved by using an appropriate Key on the StatefulWidget.
+/// often be solved by using an appropriate [Key] on the [StatefulWidget].
 ///
 /// See [ValueKey], which explains how that class can be used as a solution to a
 /// common case of this problem.
@@ -111,7 +111,7 @@ class UniqueKey extends LocalKey {
 /// stable and unique for each item, such as an identifier from the data model.
 ///
 /// {@tool dartpad}
-/// the following example demonstrates the importance of using [ValueKey]s when reordering
+/// The following example demonstrates the importance of using [ValueKey]s when reordering
 /// a list of [StatefulWidget]s.
 ///
 /// ### The Key Difference
