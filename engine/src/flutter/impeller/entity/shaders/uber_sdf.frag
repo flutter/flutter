@@ -23,11 +23,9 @@ uniform FragInfo {
   vec2 superellipse_semi_axis;
   vec2 angle_span;
   float octant_offset_c;
-  vec2 radius;
   vec2 circle_center_top;
   vec2 circle_center_right;
   vec2 superellipse_scale;
-  vec2 quadrant_center;
   vec4 radii;
 }
 frag_info;
@@ -74,100 +72,67 @@ float distanceFromChamferRect(vec2 p, vec2 half_size, float chamfer_size) {
   return max(d1, d2);
 }
 
-float getQuadrantDistanceSymmetric(vec2 p,
-                                   vec2 se_degree,
-                                   vec2 se_a,
-                                   vec2 angle_span,
-                                   float c,
-                                   vec2 radius,
-                                   vec2 circle_center_top,
-                                   vec2 circle_center_right,
-                                   vec2 scale,
-                                   vec2 q_center) {
-  vec2 p_local = p - q_center;
-  vec2 p_clamped = max(p_local, 0.0);
+float distanceFromRoundedSuperellipse(vec2 p,
+                                      vec2 degree,
+                                      vec2 se_a,
+                                      vec2 radii,
+                                      vec2 angle_span,
+                                      vec2 circle_center_top,
+                                      vec2 circle_center_right,
+                                      float c,
+                                      vec2 scale) {
+  // Do work in the first quadrant to simply things.
+  p = abs(p);
+  // Map p in to a square.
+  vec2 p_norm = p / scale;
 
-  vec2 extents = vec2(scale.x * se_a.x, scale.y * se_a.y);
-  vec2 d_rect = p_local - extents;
-  float dist_rect_local =
-      length(max(d_rect, 0.0)) + min(max(d_rect.x, d_rect.y), 0.0);
-
-  if (p_local.x <= 0.0 || p_local.y <= 0.0) {
-    return dist_rect_local;
-  }
-
-  vec2 p_norm = p_clamped / scale;
-
-  float se_d;
-  float span;
-  float r;
+  // Declare all RSE params for a single octant.
+  float se_degree, span, radius, axis_length;
   vec2 circle_center;
-  float axis_length;
 
+  // 'p' in the coordinate system of the octant.
   vec2 p_oct;
 
+  // We split the quadrant along the diagonal of the transition (p_norm.y + c ==
+  // p_norm.x). This allows us to grab the correct set of parameters for the
+  // "top" and "right" halves of the corner.
   if (p_norm.y + c > p_norm.x) {
     p_oct = p_norm + vec2(0.0, c);
-    se_d = se_degree.x;
+    se_degree = degree.x;
     span = angle_span.x;
-    r = radius.x;
+    radius = radii.x;
     circle_center = circle_center_top;
     axis_length = se_a.x;
   } else {
+    // For the 'right' octant, we flip the point and shift it according to
+    // the CPU's OctantContains/Flip logic.
     p_oct = p_norm.yx - vec2(0.0, c);
-    se_d = se_degree.y;
+    se_degree = degree.y;
     span = angle_span.y;
-    r = radius.y;
+    radius = radii.y;
     circle_center = circle_center_right;
     axis_length = se_a.y;
   }
 
+  // Move the point to the corner circle's coordinate system.
   vec2 p_rel = p_oct - circle_center;
+
+  // Grab the angle offset of the point.
   float theta = atan(p_rel.y, p_rel.x);
 
+  // The angular distance between the point and the 45 degree midline.
   float d_theta = theta - PI_OVER_FOUR;
   d_theta = mod(d_theta + PI, TWO_PI) - PI;
 
-  float dist_raw;
-  vec2 grad_oct;
-
+  // If the point is within the span of the corner circle's arc,
+  // use a circle SDF.
+  // This works because the normals of the circular and superelliptical sections
+  // agree at the transition angle, the total RSE curve is continuous and
+  // the closest point on a continuous curve to a point lies along the normal.
   if (abs(d_theta) < abs(span)) {
-    dist_raw = distanceFromCircle(p_rel, r);
-    grad_oct = normalize(p_rel);
-  } else {
-    dist_raw = sdSuperellipse(p_oct / axis_length, se_d) * axis_length;
-    vec2 p_oct_clamped = max(p_oct, vec2(0.001));
-    float max_p = max(p_oct_clamped.x, p_oct_clamped.y);
-    vec2 p_safe = p_oct_clamped / max_p;
-    grad_oct = normalize(pow(p_safe, vec2(se_d - 1.0)));
+    return distanceFromCircle(p_rel, radius);
   }
-
-  if (p_norm.y + c <= p_norm.x) {
-    grad_oct = grad_oct.yx;
-  }
-
-  float corner_dist = dist_raw / length(grad_oct / scale);
-
-  return max(dist_rect_local, corner_dist);
-}
-
-float distanceFromSymmetricRoundedSuperellipse(vec2 p,
-                                               vec2 superellipse_degree,
-                                               vec2 superellipse_semi_axis,
-                                               vec2 angle_span,
-                                               float octant_offset_c,
-                                               vec2 radius,
-                                               vec2 circle_center_top,
-                                               vec2 circle_center_right,
-                                               vec2 superellipse_scale,
-                                               vec2 quadrant_center) {
-  // Fold the pixel into the Top-Right quadrant (x > 0, y < 0)
-  vec2 p_folded = vec2(abs(p.x), -abs(p.y));
-
-  return getQuadrantDistanceSymmetric(
-      p_folded, superellipse_degree, superellipse_semi_axis, angle_span,
-      octant_offset_c, radius, circle_center_top, circle_center_right,
-      superellipse_scale, quadrant_center);
+  return sdSuperellipse(p_oct / axis_length, se_degree) * axis_length;
 }
 
 float pixelSize(float sdf) {
@@ -186,11 +151,11 @@ vec2 filledSDF(vec2 p) {
   } else if (frag_info.type < 3.5) {  // Rounded Rect
     sdf = distanceFromRoundedRect(p, frag_info.size, frag_info.radii);
   } else {  // Symmetric Rounded Superellipse
-    sdf = distanceFromSymmetricRoundedSuperellipse(
+    sdf = distanceFromRoundedSuperellipse(
         p, frag_info.superellipse_degree, frag_info.superellipse_semi_axis,
-        frag_info.angle_span, frag_info.octant_offset_c, frag_info.radius,
-        frag_info.circle_center_top, frag_info.circle_center_right,
-        frag_info.superellipse_scale, frag_info.quadrant_center);
+        frag_info.radii.xy, frag_info.angle_span, frag_info.circle_center_top,
+        frag_info.circle_center_right, frag_info.octant_offset_c,
+        frag_info.superellipse_scale);
   }
   return vec2(sdf, pixelSize(sdf));
 }

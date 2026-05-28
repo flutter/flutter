@@ -82,11 +82,9 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.superellipse_semi_axis = params_.superellipse_semi_axis;
   frag_info.angle_span = params_.angle_span;
   frag_info.octant_offset_c = params_.octant_offset_c;
-  frag_info.radius = params_.radius;
   frag_info.circle_center_top = params_.circle_center_top;
   frag_info.circle_center_right = params_.circle_center_right;
   frag_info.superellipse_scale = params_.superellipse_scale;
-  frag_info.quadrant_center = params_.quadrant_center;
   frag_info.radii = params_.radii;
 
   auto geometry_result =

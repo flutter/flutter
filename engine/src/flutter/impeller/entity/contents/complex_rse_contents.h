@@ -18,6 +18,9 @@
 
 namespace impeller {
 
+/// A contents class that renders asymmetric rounded superellipses using SDFs.
+///
+/// Separated from 'UberSDFContents' to reduce uniform bloat
 class ComplexRoundedSuperellipseContents : public ColorSourceContents {
  public:
   static std::unique_ptr<ComplexRoundedSuperellipseContents> Make(

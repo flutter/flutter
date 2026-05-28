@@ -92,10 +92,6 @@ struct UberSDFParameters {
   /// The geometric offset 'c' used to connect the two octants of each quadrant.
   float octant_offset_c;
 
-  /// The corner radii for rounded shapes and circular caps of superellipses for
-  /// top and right octants.
-  Point radius;
-
   /// The circular cap center for the top octant of each
   /// quadrant.
   Point circle_center_top;
@@ -108,11 +104,8 @@ struct UberSDFParameters {
   /// true size.
   Point superellipse_scale;
 
-  /// The geometric center for the corner
-  /// quadrant.
-  Point quadrant_center;
-
-  /// Rounding radii for standard rounded rects.
+  /// Rounding radii for standard rounded rects and corner radii for circular
+  /// caps of superellipses for top and right octants.
   Vector4 radii;
 };
 

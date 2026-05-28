@@ -145,9 +145,9 @@ TEST(UberSDFParametersTest, MakeRoundedSuperellipse) {
   EXPECT_EQ(params.size, Point(50, 50));
   EXPECT_FALSE(params.stroke.has_value());
 
-  EXPECT_EQ(params.radius.x,
+  EXPECT_EQ(params.radii.x,
             round_superellipse_params.top_right.top.circle_radius);
-  EXPECT_EQ(params.radius.y,
+  EXPECT_EQ(params.radii.y,
             round_superellipse_params.top_right.right.circle_radius);
 
   EXPECT_EQ(params.superellipse_degree.x,

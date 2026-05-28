@@ -84,8 +84,6 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
   RoundSuperellipseParam::Quadrant top_right =
       round_superellipse_params.top_right;
 
-  Point top_right_center_relative = top_right.offset - center;
-
   Point size = Point(bounds.GetSize() * 0.5f);
 
   return UberSDFParameters{
@@ -99,12 +97,11 @@ UberSDFParameters UberSDFParameters::MakeRoundedSuperellipse(
       .angle_span = Point(top_right.top.circle_max_angle.radians,
                           top_right.right.circle_max_angle.radians),
       .octant_offset_c = top_right.top.se_a - top_right.right.se_a,
-      .radius =
-          Point(top_right.top.circle_radius, top_right.right.circle_radius),
       .circle_center_top = top_right.top.circle_center,
       .circle_center_right = top_right.right.circle_center,
       .superellipse_scale = top_right.signed_scale.Abs(),
-      .quadrant_center = top_right_center_relative};
+      .radii = Vector4(top_right.top.circle_radius,
+                       top_right.right.circle_radius, 0.0f, 0.0f)};
 }
 
 }  // namespace impeller
