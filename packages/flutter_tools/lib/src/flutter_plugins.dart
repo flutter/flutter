@@ -1458,8 +1458,6 @@ Future<void> injectPlugins(
           fileSystem: globals.fs,
           featureFlags: featureFlags,
           analytics: globals.analytics,
-          xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
-          config: globals.config,
         );
     if (iosPlatform) {
       await darwinDependencyManagerSetup.setUp(
