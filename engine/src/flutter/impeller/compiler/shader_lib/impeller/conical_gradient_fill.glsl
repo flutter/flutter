@@ -27,12 +27,11 @@ vec4 DoConicalGradientTextureFill(vec2 res) {
   }
 
   float t = res.x;
-  vec4 result =
-      IPSampleLinearWithTileMode(texture_sampler,             //
-                                 vec2(t, 0.5),                //
-                                 frag_info.half_texel,        //
-                                 frag_info.tile_mode,         //
-                                 frag_info.decal_border_color);
+  vec4 result = IPSampleLinearWithTileMode(texture_sampler,       //
+                                           vec2(t, 0.5),          //
+                                           frag_info.half_texel,  //
+                                           frag_info.tile_mode,   //
+                                           frag_info.decal_border_color);
   result = IPPremultiply(result) * frag_info.alpha;
   return result;
 }

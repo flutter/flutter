@@ -27,11 +27,10 @@ out vec4 frag_color;
 void main() {
   float len = length(v_position - frag_info.center);
   float t = len / frag_info.radius;
-  frag_color =
-      IPSampleLinearWithTileMode(texture_sampler,             //
-                                 vec2(t, 0.5),                //
-                                 frag_info.half_texel,        //
-                                 frag_info.tile_mode,         //
-                                 frag_info.decal_border_color);
+  frag_color = IPSampleLinearWithTileMode(texture_sampler,       //
+                                          vec2(t, 0.5),          //
+                                          frag_info.half_texel,  //
+                                          frag_info.tile_mode,   //
+                                          frag_info.decal_border_color);
   frag_color = IPPremultiply(frag_color) * frag_info.alpha;
 }

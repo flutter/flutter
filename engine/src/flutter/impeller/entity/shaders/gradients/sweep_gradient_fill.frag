@@ -31,11 +31,10 @@ void main() {
   float angle = atan(-coord.y, -coord.x);
 
   float t = (angle * k1Over2Pi + 0.5 + frag_info.bias) * frag_info.scale;
-  frag_color =
-      IPSampleLinearWithTileMode(texture_sampler,             //
-                                 vec2(t, 0.5),                //
-                                 frag_info.half_texel,        //
-                                 frag_info.tile_mode,         //
-                                 frag_info.decal_border_color);
+  frag_color = IPSampleLinearWithTileMode(texture_sampler,       //
+                                          vec2(t, 0.5),          //
+                                          frag_info.half_texel,  //
+                                          frag_info.tile_mode,   //
+                                          frag_info.decal_border_color);
   frag_color = IPPremultiply(frag_color) * frag_info.alpha;
 }

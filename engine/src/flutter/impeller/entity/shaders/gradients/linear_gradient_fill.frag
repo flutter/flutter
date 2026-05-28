@@ -29,11 +29,10 @@ void main() {
   vec2 start_to_position = v_position - frag_info.start_point;
   float t =
       dot(start_to_position, start_to_end) / dot(start_to_end, start_to_end);
-  frag_color =
-      IPSampleLinearWithTileMode(texture_sampler,             //
-                                 vec2(t, 0.5),                //
-                                 frag_info.half_texel,        //
-                                 frag_info.tile_mode,         //
-                                 frag_info.decal_border_color);
+  frag_color = IPSampleLinearWithTileMode(texture_sampler,       //
+                                          vec2(t, 0.5),          //
+                                          frag_info.half_texel,  //
+                                          frag_info.tile_mode,   //
+                                          frag_info.decal_border_color);
   frag_color = IPPremultiply(frag_color) * frag_info.alpha;
 }

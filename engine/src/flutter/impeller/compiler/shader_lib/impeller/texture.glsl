@@ -21,9 +21,7 @@ vec4 IPSample(sampler2D texture_sampler, vec2 coords) {
 ///
 /// The range of `coords` will be mapped from [0, 1] to [half_texel, 1 -
 /// half_texel]
-vec4 IPSampleLinear(sampler2D texture_sampler,
-                    vec2 coords,
-                    vec2 half_texel) {
+vec4 IPSampleLinear(sampler2D texture_sampler, vec2 coords, vec2 half_texel) {
   coords.x = mix(half_texel.x, 1 - half_texel.x, coords.x);
   coords.y = mix(half_texel.y, 1 - half_texel.y, coords.y);
   return IPSample(texture_sampler, coords);
