@@ -137,6 +137,25 @@ constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
       return FlutterGPUPixelFormat::kD24UnormS8Uint;
     case impeller::PixelFormat::kD32FloatS8UInt:
       return FlutterGPUPixelFormat::kD32FloatS8UInt;
+    // Block-compressed formats are not yet exposed by the Flutter GPU API.
+    case impeller::PixelFormat::kBC1RGBAUNormInt:
+    case impeller::PixelFormat::kBC1RGBAUNormIntSRGB:
+    case impeller::PixelFormat::kBC3RGBAUNormInt:
+    case impeller::PixelFormat::kBC3RGBAUNormIntSRGB:
+    case impeller::PixelFormat::kBC5RGUNormInt:
+    case impeller::PixelFormat::kBC7RGBAUNormInt:
+    case impeller::PixelFormat::kBC7RGBAUNormIntSRGB:
+    case impeller::PixelFormat::kETC2RGB8UNormInt:
+    case impeller::PixelFormat::kETC2RGB8UNormIntSRGB:
+    case impeller::PixelFormat::kETC2RGBA8UNormInt:
+    case impeller::PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case impeller::PixelFormat::kASTC4x4LDR:
+    case impeller::PixelFormat::kASTC4x4LDRSRGB:
+    case impeller::PixelFormat::kASTC8x8LDR:
+    case impeller::PixelFormat::kASTC8x8LDRSRGB:
+    case impeller::PixelFormat::kASTC4x4HDR:
+    case impeller::PixelFormat::kASTC8x8HDR:
+      return FlutterGPUPixelFormat::kUnknown;
   }
 }
 

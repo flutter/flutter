@@ -250,8 +250,18 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
                          : vk::ImageLayout::eShaderReadOnlyOptimal);
   }
   if (color_image_vk_) {
+    // Mirror the Vulkan render pass's `finalLayout` for the color attachment
+    // (see ComputeFinalLayout in render_pass_builder_vk.cc): swapchain and
+    // MSAA targets stay in eGeneral, but a non-swapchain, single-sampled
+    // color attachment transitions to eShaderReadOnlyOptimal on
+    // endRenderPass. Tracking it as eGeneral here desyncs the bookkeeping
+    // and produces an incorrect oldLayout on the next barrier (caught by
+    // Vulkan validation as VUID-vkCmdDraw-None-09600).
     TextureVK::Cast(*color_image_vk_)
-        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
+        .SetLayoutWithoutEncoding(
+            (is_swapchain || sample_count != SampleCount::kCount1)
+                ? vk::ImageLayout::eGeneral
+                : vk::ImageLayout::eShaderReadOnlyOptimal);
   }
 
   // Set the initial viewport.

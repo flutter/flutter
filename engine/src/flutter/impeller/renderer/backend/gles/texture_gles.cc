@@ -40,6 +40,23 @@ static bool IsDepthStencilFormat(PixelFormat format) {
     case PixelFormat::kB10G10R10XRSRGB:
     case PixelFormat::kB10G10R10A10XR:
     case PixelFormat::kR32Float:
+    case PixelFormat::kBC1RGBAUNormInt:
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+    case PixelFormat::kBC3RGBAUNormInt:
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+    case PixelFormat::kBC5RGUNormInt:
+    case PixelFormat::kBC7RGBAUNormInt:
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+    case PixelFormat::kETC2RGB8UNormInt:
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+    case PixelFormat::kETC2RGBA8UNormInt:
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case PixelFormat::kASTC4x4LDR:
+    case PixelFormat::kASTC4x4LDRSRGB:
+    case PixelFormat::kASTC8x8LDR:
+    case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return false;
   }
   FML_UNREACHABLE();
@@ -265,41 +282,54 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
     return false;
   }
 
-  ReactorGLES::Operation texture_upload = [handle = handle_,              //
-                                           mapping,                       //
-                                           format = gles_format.value(),  //
-                                           size = tex_descriptor.size,    //
-                                           texture_type,                  //
-                                           texture_target                 //
+  ReactorGLES::Operation texture_upload =
+      [handle = handle_,                                         //
+       mapping,                                                  //
+       format = gles_format.value(),                             //
+       size = tex_descriptor.size,                               //
+       image_size = tex_descriptor.GetByteSizeOfBaseMipLevel(),  //
+       texture_type,                                             //
+       texture_target                                            //
   ](const auto& reactor) {
-    auto gl_handle = reactor.GetGLHandle(handle);
-    if (!gl_handle.has_value()) {
-      VALIDATION_LOG
-          << "Texture was collected before it could be uploaded to the GPU.";
-      return;
-    }
-    const auto& gl = reactor.GetProcTable();
-    gl.BindTexture(texture_type, gl_handle.value());
-    const GLvoid* tex_data = nullptr;
-    if (mapping) {
-      tex_data = mapping->GetMapping();
-    }
+        auto gl_handle = reactor.GetGLHandle(handle);
+        if (!gl_handle.has_value()) {
+          VALIDATION_LOG << "Texture was collected before it could be uploaded "
+                            "to the GPU.";
+          return;
+        }
+        const auto& gl = reactor.GetProcTable();
+        gl.BindTexture(texture_type, gl_handle.value());
+        const GLvoid* tex_data = nullptr;
+        if (mapping) {
+          tex_data = mapping->GetMapping();
+        }
 
-    {
-      TRACE_EVENT1("impeller", "TexImage2DUpload", "Bytes",
-                   std::to_string(mapping->GetSize()).c_str());
-      gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      gl.TexImage2D(texture_target,          // target
-                    0u,                      // LOD level
-                    format.internal_format,  // internal format
-                    size.width,              // width
-                    size.height,             // height
-                    0u,                      // border
-                    format.external_format,  // format
-                    format.type,             // type
-                    tex_data);               // data
-    }
-  };
+        {
+          TRACE_EVENT1("impeller", "TexImage2DUpload", "Bytes",
+                       std::to_string(mapping->GetSize()).c_str());
+          gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
+          if (format.is_compressed) {
+            gl.CompressedTexImage2D(texture_target,          // target
+                                    0u,                      // LOD level
+                                    format.internal_format,  // internal format
+                                    size.width,              // width
+                                    size.height,             // height
+                                    0u,                      // border
+                                    image_size,              // image size
+                                    tex_data);               // data
+          } else {
+            gl.TexImage2D(texture_target,          // target
+                          0u,                      // LOD level
+                          format.internal_format,  // internal format
+                          size.width,              // width
+                          size.height,             // height
+                          0u,                      // border
+                          format.external_format,  // format
+                          format.type,             // type
+                          tex_data);               // data
+          }
+        }
+      };
 
   const bool added = reactor_->AddOperation(texture_upload);
   if (added) {
@@ -338,6 +368,23 @@ static std::optional<GLenum> ToRenderBufferFormat(PixelFormat format) {
     case PixelFormat::kB10G10R10XR:
     case PixelFormat::kB10G10R10A10XR:
     case PixelFormat::kR32Float:
+    case PixelFormat::kBC1RGBAUNormInt:
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+    case PixelFormat::kBC3RGBAUNormInt:
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+    case PixelFormat::kBC5RGUNormInt:
+    case PixelFormat::kBC7RGBAUNormInt:
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+    case PixelFormat::kETC2RGB8UNormInt:
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+    case PixelFormat::kETC2RGBA8UNormInt:
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+    case PixelFormat::kASTC4x4LDR:
+    case PixelFormat::kASTC4x4LDRSRGB:
+    case PixelFormat::kASTC8x8LDR:
+    case PixelFormat::kASTC8x8LDRSRGB:
+    case PixelFormat::kASTC4x4HDR:
+    case PixelFormat::kASTC8x8HDR:
       return std::nullopt;
   }
   FML_UNREACHABLE();
@@ -649,13 +696,10 @@ bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
 
 // |Texture|
 Scalar TextureGLES::GetYCoordScale() const {
-  switch (GetCoordinateSystem()) {
-    case TextureCoordinateSystem::kUploadFromHost:
-      return 1.0;
-    case TextureCoordinateSystem::kRenderToTexture:
-      return -1.0;
-  }
-  FML_UNREACHABLE();
+  // GLES render-to-texture content is stored top-down via the
+  // vertex-stage y-flip; see
+  // https://github.com/flutter/flutter/issues/186554.
+  return 1.0;
 }
 
 bool TextureGLES::IsWrapped() const {

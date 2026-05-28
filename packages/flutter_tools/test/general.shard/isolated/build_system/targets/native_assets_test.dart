@@ -39,7 +39,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
+        kTargetPlatform: TargetPlatform.ios.getName(),
         kIosArchs: 'arm64',
         kSdkRoot: 'path/to/iPhoneOS.sdk',
       },
@@ -53,7 +53,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android),
+        kTargetPlatform: TargetPlatform.android.getName(),
         kAndroidArchs: AndroidArch.arm64_v8a.platformName,
       },
       inputs: <String, String>{},
@@ -66,23 +66,15 @@ void main() {
     androidEnvironment.buildDir.createSync(recursive: true);
   });
 
-  testUsingContext(
-    'no dependency on KernelSnapshot',
-    () async {
-      const target = BuildHooks();
-      expect(target.dependencies, isNot(isA<KernelSnapshot>()));
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-  );
+  testUsingContext('no dependency on KernelSnapshot', () async {
+    const target = BuildHooks();
+    expect(target.dependencies, isNot(isA<KernelSnapshot>()));
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
-  testUsingContext(
-    'NativeAssets throws error if missing target platform',
-    () async {
-      iosEnvironment.defines.remove(kTargetPlatform);
-      expect(const BuildHooks().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-  );
+  testUsingContext('NativeAssets throws error if missing target platform', () async {
+    iosEnvironment.defines.remove(kTargetPlatform);
+    expect(const BuildHooks().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
   testUsingContext('NativeAssets defaults to ios archs if missing', () async {
     writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
