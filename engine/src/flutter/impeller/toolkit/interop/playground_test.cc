@@ -76,7 +76,6 @@ ScopedObject<Context> PlaygroundTest::CreateContext() const {
           &playground_gl_proc_address_callback));
     }
     case PlaygroundBackend::kVulkan:
-    case PlaygroundBackend::kVulkanSDF:
       ImpellerContextVulkanSettings settings = {};
       struct UserData {
         Playground::VKProcAddressResolver resolver;
@@ -121,7 +120,6 @@ static ScopedObject<Surface> CreateSharedSurface(
 
 #if IMPELLER_ENABLE_VULKAN
     case PlaygroundBackend::kVulkan:
-    case PlaygroundBackend::kVulkanSDF:
       return Adopt<Surface>(new SurfaceVK(context, std::move(shared_surface)));
 #endif
     default:
@@ -165,7 +163,6 @@ static ScopedObject<Context> CreateSharedContext(
 #endif
 #if IMPELLER_ENABLE_VULKAN
     case PlaygroundBackend::kVulkan:
-    case PlaygroundBackend::kVulkanSDF:
       return ContextVK::Create(std::move(shared_context));
 #endif
     default:

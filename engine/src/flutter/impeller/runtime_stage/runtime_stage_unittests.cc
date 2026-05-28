@@ -240,8 +240,7 @@ TEST_P(RuntimeStageTest, CanReadUniforms) {
       }
       break;
     }
-    case PlaygroundBackend::kVulkan:
-    case PlaygroundBackend::kVulkanSDF: {
+    case PlaygroundBackend::kVulkan: {
       EXPECT_EQ(stage->GetUniforms().size(), 1u);
       const RuntimeUniformDescription* uni =
           stage->GetUniform(RuntimeStage::kVulkanUBOName);

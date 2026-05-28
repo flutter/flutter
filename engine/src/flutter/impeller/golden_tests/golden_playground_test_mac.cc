@@ -181,9 +181,6 @@ void GoldenPlaygroundTest::SetUp() {
       pimpl_->screenshotter =
           std::make_unique<testing::MetalScreenshotter>(switches);
       break;
-    case PlaygroundBackend::kVulkanSDF:
-      switches.flags.use_sdfs = true;
-      [[fallthrough]];
     case PlaygroundBackend::kVulkan: {
       if (switches.enable_wide_gamut) {
         GTEST_SKIP() << "Vulkan doesn't support wide gamut golden tests.";

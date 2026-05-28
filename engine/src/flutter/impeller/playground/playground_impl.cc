@@ -49,15 +49,6 @@ std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
       }
       switches.enable_vulkan_validation = true;
       return std::make_unique<PlaygroundImplVK>(switches);
-    case PlaygroundBackend::kVulkanSDF:
-      if (!PlaygroundImplVK::IsVulkanDriverPresent()) {
-        FML_CHECK(false) << "Attempted to create playground with backend that "
-                            "isn't available or was disabled on this platform: "
-                         << PlaygroundBackendToString(backend);
-      }
-      switches.flags.use_sdfs = true;
-      switches.enable_vulkan_validation = true;
-      return std::make_unique<PlaygroundImplVK>(switches);
 #endif  // IMPELLER_ENABLE_VULKAN
     default:
       FML_CHECK(false) << "Attempted to create playground with backend that "

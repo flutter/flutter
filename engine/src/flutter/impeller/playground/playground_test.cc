@@ -112,7 +112,6 @@ std::string PlaygroundTest::GetWindowTitle() const {
       }
       break;
     case PlaygroundBackend::kVulkan:
-    case PlaygroundBackend::kVulkanSDF:
       if (switches_.use_swiftshader) {
         stream << " (SwiftShader) ";
       }
