@@ -156,7 +156,9 @@ Future<void> expectHasNoErrors({
 }
 
 /// Waits for a pubspec changed event to be detected after executing [changeOperation].
-Future<String> waitForPubspecChangeDetected({required FutureOr<void> Function() changeOperation}) async {
+Future<String> waitForPubspecChangeDetected({
+  required FutureOr<void> Function() changeOperation,
+}) async {
   final completer = Completer<String>();
   _onPubspecChangeDetected = (String path) {
     if (completer.isCompleted) {
@@ -169,7 +171,9 @@ Future<String> waitForPubspecChangeDetected({required FutureOr<void> Function() 
 }
 
 /// Waits for a package_config.json changed event to be detected after executing [changeOperation].
-Future<String> waitForPackageConfigChangeDetected({required FutureOr<void> Function() changeOperation}) async {
+Future<String> waitForPackageConfigChangeDetected({
+  required FutureOr<void> Function() changeOperation,
+}) async {
   final completer = Completer<String>();
   _onPackageConfigChangeDetected = (String path) {
     if (completer.isCompleted) {
