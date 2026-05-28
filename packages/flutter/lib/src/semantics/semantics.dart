@@ -4082,7 +4082,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   Int32List _childrenIdInHitTestOrder() {
     final List<SemanticsNode> children = _childrenInHitTestOrder();
-    return Int32List.fromList(children.reversed.map<int>((SemanticsNode c) => c.id).toList());
+    return Int32List.fromList(children.reversed.map<int>((SemanticsNode node) => node.id).toList());
   }
 
   void _addToUpdate(SemanticsUpdateBuilder builder, Set<int> customSemanticsActionIdsUpdate) {
