@@ -6,7 +6,6 @@
 /// @docImport 'package:flutter/material.dart';
 /// @docImport 'package:flutter/semantics.dart';
 /// @docImport 'package:flutter/services.dart';
-/// @docImport 'package:flutter/widgets.dart';
 ///
 /// @docImport 'app.dart';
 /// @docImport 'display_feature_sub_screen.dart';
