@@ -225,6 +225,8 @@ void GoldenPlaygroundTest::SetUp() {
       }
       const std::unique_ptr<PlaygroundImpl>& playground =
           GetSharedOpenGLESPlayground();
+      ::glfwMakeContextCurrent(
+          reinterpret_cast<GLFWwindow*>(playground->GetWindowHandle()));
       pimpl_->screenshotter =
           std::make_unique<testing::VulkanScreenshotter>(playground);
       break;
