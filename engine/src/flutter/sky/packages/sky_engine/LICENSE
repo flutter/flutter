@@ -8908,12 +8908,6 @@ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
-dart
-
-Copyright (c) %d, the Dart project authors.  Please see the AUTHORS file
-for details. All rights reserved. Use of this source code is governed by a
-BSD-style license that can be found in the LICENSE file.
---------------------------------------------------------------------------------
 expat
 
 Copyright (c) 1998-2000 Thai Open Source Software Center Ltd and Clark Cooper
@@ -15664,7 +15658,6 @@ Use of this source code is governed by a BSD-style license that can be
 found in the Chromium source repository LICENSE file.
 --------------------------------------------------------------------------------
 accessibility
-dart
 skia
 
 Copyright 2019 The Chromium Authors. All rights reserved.
