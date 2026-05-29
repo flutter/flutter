@@ -218,15 +218,16 @@ class EngineAutofillForm {
       textEditing.strategy is SafariDesktopTextEditingStrategy ||
       textEditing.strategy is IOSTextEditingStrategy;
 
-  /// Whether autofill elements must remain sized and on-screen for the browser
-  /// to autofill them.
+  /// Whether the current browser engine is WebKit (Safari and all iOS
+  /// browsers).
   ///
-  /// In the non-semantics path this is captured by [_isSafariStrategy]. In
-  /// semantics mode the active strategy is [SemanticsTextEditingStrategy] (not
-  /// the Safari/iOS strategy), so the strategy type alone misses Safari there.
-  /// Fall back to a browser check so synthetic fields are not zero-sized on
-  /// Safari/WebKit, which would defeat autofill.
-  bool get _treatAsSafariForAutofill => _isSafariStrategy || ui_web.browser.isSafari;
+  /// WebKit refuses to autofill an input that is zero-sized, so synthetic
+  /// autofill fields must keep a real size on WebKit, while other engines
+  /// tolerate zero-sized fields. An engine check is used rather than the active
+  /// text editing strategy because in semantics mode the active strategy is
+  /// [SemanticsTextEditingStrategy], not the Safari/iOS strategy, so the
+  /// strategy type alone would miss WebKit there.
+  bool get _isWebKit => ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit;
 
   /// Stable DOM id for the form, used so a focused element that lives outside
   /// the form, in semantics mode, can be associated with it via the HTML `form`
@@ -418,8 +419,8 @@ class EngineAutofillForm {
     EditingState.fromDomElement(realElement).applyTextToDomElement(synthetic);
     _styleAutofillElements(
       synthetic,
-      shouldHideElement: !_treatAsSafariForAutofill,
-      shouldDisablePointerEvents: _treatAsSafariForAutofill,
+      shouldHideElement: !_isWebKit,
+      shouldDisablePointerEvents: _isWebKit,
     );
     elements[id] = synthetic;
     formElement!.append(synthetic);
@@ -458,7 +459,7 @@ class EngineAutofillForm {
     // We need to explicitly disable pointer events on the form in Safari Desktop and iOS,
     // so that we don't have pointer event collisions if users hover over or click
     // into the invisible autofill elements within the form.
-    _styleAutofillElements(formElement, shouldDisablePointerEvents: _treatAsSafariForAutofill);
+    _styleAutofillElements(formElement, shouldDisablePointerEvents: _isWebKit);
 
     for (final FieldItem field in items.values) {
       final DomHTMLElement htmlElement;
@@ -485,8 +486,8 @@ class EngineAutofillForm {
         // sized and placed on the DOM, we also have to disable pointer events.
         _styleAutofillElements(
           htmlElement,
-          shouldHideElement: !_treatAsSafariForAutofill,
-          shouldDisablePointerEvents: _treatAsSafariForAutofill,
+          shouldHideElement: !_isWebKit,
+          shouldDisablePointerEvents: _isWebKit,
         );
       }
 

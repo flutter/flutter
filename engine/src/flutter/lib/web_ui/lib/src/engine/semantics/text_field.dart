@@ -131,7 +131,9 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     // another field is focused.
     if (_formIsActive && inputConfiguration.autofillGroup != null) {
       final EngineAutofillForm group = inputConfiguration.autofillGroup!;
-      group.demoteFocusedToSynthetic(activeDomElement, inputConfiguration.autofill!);
+      if (inputConfiguration.autofill != null) {
+        group.demoteFocusedToSynthetic(activeDomElement, inputConfiguration.autofill!);
+      }
       if (group.formElement != null) {
         group.goDormant();
       }
@@ -182,12 +184,15 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     // placement path in semantics mode ([initializeElementPlacement] is a
     // no-op), so the form must be set up explicitly here.
     //
-    // Safari and other WebKit browsers already autofill grouped credential
-    // fields by heuristic, without a form. The attribute-linked form regresses
-    // that: a non-focused field's real input is left outside the form and stops
-    // being filled (flutter/flutter#180652). Skip the form on WebKit and let
-    // the native heuristic fill the whole group. `_formIsActive` stays false,
-    // so [disable] skips the demote/dormant cleanup too.
+    // Safari autofills grouped credential fields by heuristic without needing a
+    // form. The attribute-linked form regresses that: a non-focused field's real
+    // input is left outside the form and stops being filled
+    // (flutter/flutter#180652). Skip the form on Safari and let its native
+    // heuristic fill the whole group. `_formIsActive` stays false, so [disable]
+    // skips the demote/dormant cleanup too.
+    //
+    // Other WebKit browsers (Chrome, Firefox on iOS) do not fill by heuristic
+    // and need the form path, so they are not skipped here.
     if (hasAutofillGroup && !ui_web.browser.isSafari) {
       placeForm();
     }
@@ -427,7 +432,7 @@ class SemanticTextField extends SemanticRole {
   /// reliable, order-independent signal that [_updateInputType] must not
   /// overwrite `autocomplete`, otherwise grouped autofill silently breaks on
   /// the next semantics update (flutter/flutter#180652).
-  bool get _isAutofillOwned => (editableElement as DomHTMLInputElement).name?.isNotEmpty ?? false;
+  bool get _isAutofillOwned => editableElement.getAttribute('name')?.isNotEmpty ?? false;
 
   void _updateInputType() {
     if (semanticsObject.flags.isMultiline) {
