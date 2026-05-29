@@ -38,27 +38,31 @@ void testMain() {
     });
 
     test('Conical gradient', () {
-      final gradient = ui.Gradient.radial(
-        ui.Offset.zero,
-        10,
-        testColors,
-        null,
-        ui.TileMode.clamp,
-        null,
-        const ui.Offset(10, 10),
-        40,
-      ) as CkGradientConical;
+      final gradient =
+          ui.Gradient.radial(
+                ui.Offset.zero,
+                10,
+                testColors,
+                null,
+                ui.TileMode.clamp,
+                null,
+                const ui.Offset(10, 10),
+                40,
+              )
+              as CkGradientConical;
       expect(gradient.getSkShader(ui.FilterQuality.none), isNotNull);
     });
 
     test('Image shader initialize/dispose cycle', () async {
       final CkImage image = await createImageFromBytes(kTransparentImage);
-      final imageShader = ui.ImageShader(
-        image,
-        ui.TileMode.clamp,
-        ui.TileMode.repeated,
-        Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
-      ) as CkImageShader;
+      final imageShader =
+          ui.ImageShader(
+                image,
+                ui.TileMode.clamp,
+                ui.TileMode.repeated,
+                Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
+              )
+              as CkImageShader;
       expect(imageShader, isA<CkImageShader>());
 
       final CkUniqueRef<SkShader> ref = imageShader.ref!;
@@ -75,12 +79,14 @@ void testMain() {
 
     test('Image shader withQuality', () async {
       final CkImage image = await createImageFromBytes(kTransparentImage);
-      final imageShader = ui.ImageShader(
-        image,
-        ui.TileMode.clamp,
-        ui.TileMode.repeated,
-        Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
-      ) as CkImageShader;
+      final imageShader =
+          ui.ImageShader(
+                image,
+                ui.TileMode.clamp,
+                ui.TileMode.repeated,
+                Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
+              )
+              as CkImageShader;
       expect(imageShader, isA<CkImageShader>());
 
       final CkUniqueRef<SkShader> ref1 = imageShader.ref!;
@@ -135,26 +141,30 @@ void testMain() {
       expect(radialGradient.isGradient, isTrue);
       radialGradient.dispose();
 
-      final conicalGradient = ui.Gradient.radial(
-        ui.Offset.zero,
-        10,
-        testColors,
-        null,
-        ui.TileMode.clamp,
-        null,
-        const ui.Offset(10, 10),
-        40,
-      ) as CkGradientConical;
+      final conicalGradient =
+          ui.Gradient.radial(
+                ui.Offset.zero,
+                10,
+                testColors,
+                null,
+                ui.TileMode.clamp,
+                null,
+                const ui.Offset(10, 10),
+                40,
+              )
+              as CkGradientConical;
       expect(conicalGradient.isGradient, isTrue);
       conicalGradient.dispose();
 
       final CkImage image = await createImageFromBytes(kTransparentImage);
-      final imageShader = ui.ImageShader(
-        image,
-        ui.TileMode.clamp,
-        ui.TileMode.repeated,
-        Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
-      ) as CkImageShader;
+      final imageShader =
+          ui.ImageShader(
+                image,
+                ui.TileMode.clamp,
+                ui.TileMode.repeated,
+                Float64List.fromList(Matrix4.diagonal3Values(1, 2, 3).storage),
+              )
+              as CkImageShader;
       expect(imageShader.isGradient, isFalse);
       imageShader.dispose();
 

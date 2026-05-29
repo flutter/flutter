@@ -73,6 +73,27 @@ MTLPixelFormat SafeMTLPixelFormatBGR10_XR();
 /// Returns PixelFormat::kUnknown if MTLPixelFormatBGR10_XR isn't supported.
 MTLPixelFormat SafeMTLPixelFormatBGRA10_XR();
 
+/// Safe accessors for the block-compressed formats. Each returns
+/// MTLPixelFormatInvalid on platforms or OS versions where the format is not
+/// available (BC is macOS only; ETC2 and ASTC require macOS 11.0+).
+MTLPixelFormat SafeMTLPixelFormatBC1_RGBA();
+MTLPixelFormat SafeMTLPixelFormatBC1_RGBA_sRGB();
+MTLPixelFormat SafeMTLPixelFormatBC3_RGBA();
+MTLPixelFormat SafeMTLPixelFormatBC3_RGBA_sRGB();
+MTLPixelFormat SafeMTLPixelFormatBC5_RGUnorm();
+MTLPixelFormat SafeMTLPixelFormatBC7_RGBAUnorm();
+MTLPixelFormat SafeMTLPixelFormatBC7_RGBAUnorm_sRGB();
+MTLPixelFormat SafeMTLPixelFormatETC2_RGB8();
+MTLPixelFormat SafeMTLPixelFormatETC2_RGB8_sRGB();
+MTLPixelFormat SafeMTLPixelFormatEAC_RGBA8();
+MTLPixelFormat SafeMTLPixelFormatEAC_RGBA8_sRGB();
+MTLPixelFormat SafeMTLPixelFormatASTC_4x4_LDR();
+MTLPixelFormat SafeMTLPixelFormatASTC_4x4_sRGB();
+MTLPixelFormat SafeMTLPixelFormatASTC_8x8_LDR();
+MTLPixelFormat SafeMTLPixelFormatASTC_8x8_sRGB();
+MTLPixelFormat SafeMTLPixelFormatASTC_4x4_HDR();
+MTLPixelFormat SafeMTLPixelFormatASTC_8x8_HDR();
+
 constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
   switch (format) {
     case PixelFormat::kUnknown:
@@ -109,6 +130,40 @@ constexpr MTLPixelFormat ToMTLPixelFormat(PixelFormat format) {
       return SafeMTLPixelFormatBGRA10_XR();
     case PixelFormat::kR32Float:
       return MTLPixelFormatR32Float;
+    case PixelFormat::kBC1RGBAUNormInt:
+      return SafeMTLPixelFormatBC1_RGBA();
+    case PixelFormat::kBC1RGBAUNormIntSRGB:
+      return SafeMTLPixelFormatBC1_RGBA_sRGB();
+    case PixelFormat::kBC3RGBAUNormInt:
+      return SafeMTLPixelFormatBC3_RGBA();
+    case PixelFormat::kBC3RGBAUNormIntSRGB:
+      return SafeMTLPixelFormatBC3_RGBA_sRGB();
+    case PixelFormat::kBC5RGUNormInt:
+      return SafeMTLPixelFormatBC5_RGUnorm();
+    case PixelFormat::kBC7RGBAUNormInt:
+      return SafeMTLPixelFormatBC7_RGBAUnorm();
+    case PixelFormat::kBC7RGBAUNormIntSRGB:
+      return SafeMTLPixelFormatBC7_RGBAUnorm_sRGB();
+    case PixelFormat::kETC2RGB8UNormInt:
+      return SafeMTLPixelFormatETC2_RGB8();
+    case PixelFormat::kETC2RGB8UNormIntSRGB:
+      return SafeMTLPixelFormatETC2_RGB8_sRGB();
+    case PixelFormat::kETC2RGBA8UNormInt:
+      return SafeMTLPixelFormatEAC_RGBA8();
+    case PixelFormat::kETC2RGBA8UNormIntSRGB:
+      return SafeMTLPixelFormatEAC_RGBA8_sRGB();
+    case PixelFormat::kASTC4x4LDR:
+      return SafeMTLPixelFormatASTC_4x4_LDR();
+    case PixelFormat::kASTC4x4LDRSRGB:
+      return SafeMTLPixelFormatASTC_4x4_sRGB();
+    case PixelFormat::kASTC8x8LDR:
+      return SafeMTLPixelFormatASTC_8x8_LDR();
+    case PixelFormat::kASTC8x8LDRSRGB:
+      return SafeMTLPixelFormatASTC_8x8_sRGB();
+    case PixelFormat::kASTC4x4HDR:
+      return SafeMTLPixelFormatASTC_4x4_HDR();
+    case PixelFormat::kASTC8x8HDR:
+      return SafeMTLPixelFormatASTC_8x8_HDR();
   }
   return MTLPixelFormatInvalid;
 };
