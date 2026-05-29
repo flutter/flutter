@@ -1166,14 +1166,18 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
             'This error happens if you call setState() on a State object for a widget that '
             'no longer appears in the widget tree (e.g., whose parent widget no longer '
             'includes the widget in its build). This error can occur when code calls '
-            'setState() from a timer or an animation callback.',
+            'setState() from a timer, from an animation callback, or after an '
+            'asynchronous operation (such as an awaited network request or other '
+            'Future) completes once the widget has already been removed from the tree.',
           ),
           ErrorHint(
             'The preferred solution is '
             'to cancel the timer or stop listening to the animation in the dispose() '
             'callback. Another solution is to check the "mounted" property of this '
             'object before calling setState() to ensure the object is still in the '
-            'tree.',
+            'tree; this is especially important after an "await", since the widget '
+            'may have been removed from the tree while the asynchronous work was in '
+            'progress.',
           ),
           ErrorHint(
             'This error might indicate a memory leak if setState() is being called '
