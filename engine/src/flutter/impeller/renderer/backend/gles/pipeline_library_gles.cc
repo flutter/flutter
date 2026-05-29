@@ -322,7 +322,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
     FML_CHECK(result);
   };
 
-  if (async) {
+  if (async && compile_queue_) {
     compile_queue_->PostJobForDescriptor(descriptor,
                                          std::move(generation_task));
   } else {

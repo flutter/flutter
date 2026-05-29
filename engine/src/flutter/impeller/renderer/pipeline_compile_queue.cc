@@ -24,8 +24,8 @@ bool PipelineCompileQueue::PostJobForDescriptor(const PipelineDescriptor& desc,
     // place, someone gave the compile queue a job for the same description.
     // This is highly unusual but technically not impossible. Just run the job
     // eagerly.
-    FML_LOG(ERROR) << "Got multiple compile jobs for the same descriptor. "
-                      "Running eagerly.";
+    FML_LOG(WARNING) << "Got multiple compile jobs for the same descriptor. "
+                        "Running eagerly.";
     PostJob(job);
     return true;
   }
