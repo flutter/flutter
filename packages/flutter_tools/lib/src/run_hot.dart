@@ -23,7 +23,6 @@ import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 import 'project.dart';
-import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
@@ -157,7 +156,7 @@ class HotRunner extends ResidentRunner {
       case 1:
         final Device device = flutterDevices.first.device!;
         final TargetPlatform targetPlatform = await device.targetPlatform;
-        _targetPlatformName = getNameForTargetPlatform(targetPlatform);
+        _targetPlatformName = targetPlatform.getName();
         _targetPlatforms.add(targetPlatform);
         _sdkName = await device.sdkNameAndVersion;
         _emulator = await device.isLocalEmulator;
@@ -438,17 +437,6 @@ class HotRunner extends ResidentRunner {
 
     unawaited(
       appStartedCompleter?.future.then((_) {
-        HotEvent(
-          'reload-ready',
-          targetPlatform: _targetPlatformName!,
-          sdkName: _sdkName!,
-          emulator: _emulator!,
-          fullRestart: false,
-          overallTimeInMs: appStartedTimer.elapsed.inMilliseconds,
-          compileTimeInMs: totalCompileTime.inMilliseconds,
-          transferTimeInMs: totalLaunchAppTime.inMilliseconds,
-        ).send();
-
         _analytics.send(
           Event.hotRunnerInfo(
             label: 'reload-ready',
@@ -865,27 +853,12 @@ class HotRunner extends ResidentRunner {
       if (!result.isOk) {
         restartEvent = 'restart-failed';
       } else {
-        HotEvent(
-          'restart',
-          targetPlatform: targetPlatform!,
-          sdkName: sdkName!,
-          emulator: emulator!,
-          fullRestart: true,
-          reason: reason,
-          overallTimeInMs: restartTimer.elapsed.inMilliseconds,
-          syncedBytes: result.updateFSReport?.syncedBytes,
-          invalidatedSourcesCount: result.updateFSReport?.invalidatedSourcesCount,
-          transferTimeInMs: result.updateFSReport?.transferDuration.inMilliseconds,
-          compileTimeInMs: result.updateFSReport?.compileDuration.inMilliseconds,
-          findInvalidatedTimeInMs: result.updateFSReport?.findInvalidatedDuration.inMilliseconds,
-          scannedSourcesCount: result.updateFSReport?.scannedSourcesCount,
-        ).send();
         _analytics.send(
           Event.hotRunnerInfo(
             label: 'restart',
-            targetPlatform: targetPlatform,
-            sdkName: sdkName,
-            emulator: emulator,
+            targetPlatform: targetPlatform!,
+            sdkName: sdkName!,
+            emulator: emulator!,
             fullRestart: true,
             reason: reason,
             overallTimeInMs: restartTimer.elapsed.inMilliseconds,
@@ -908,20 +881,12 @@ class HotRunner extends ResidentRunner {
       // The `restartEvent` variable will be null if restart succeeded. We will
       // only handle the case when it failed here.
       if (restartEvent != null) {
-        HotEvent(
-          restartEvent,
-          targetPlatform: targetPlatform!,
-          sdkName: sdkName!,
-          emulator: emulator!,
-          fullRestart: true,
-          reason: reason,
-        ).send();
         _analytics.send(
           Event.hotRunnerInfo(
             label: restartEvent,
-            targetPlatform: targetPlatform,
-            sdkName: sdkName,
-            emulator: emulator,
+            targetPlatform: targetPlatform!,
+            sdkName: sdkName!,
+            emulator: emulator!,
             fullRestart: true,
             reason: reason,
           ),
@@ -966,39 +931,23 @@ class HotRunner extends ResidentRunner {
             'the source code. Please address the error and then use "R" to '
             'restart the app.\n'
             '${error.message} (error code: ${error.code})';
-        HotEvent(
-          'reload-barred',
-          targetPlatform: targetPlatform!,
-          sdkName: sdkName!,
-          emulator: emulator!,
-          fullRestart: false,
-          reason: reason,
-        ).send();
         _analytics.send(
           Event.hotRunnerInfo(
             label: 'reload-barred',
-            targetPlatform: targetPlatform,
-            sdkName: sdkName,
-            emulator: emulator,
+            targetPlatform: targetPlatform!,
+            sdkName: sdkName!,
+            emulator: emulator!,
             fullRestart: false,
             reason: reason,
           ),
         );
       } else {
-        HotEvent(
-          'exception',
-          targetPlatform: targetPlatform!,
-          sdkName: sdkName!,
-          emulator: emulator!,
-          fullRestart: false,
-          reason: reason,
-        ).send();
         _analytics.send(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: targetPlatform,
-            sdkName: sdkName,
-            emulator: emulator,
+            targetPlatform: targetPlatform!,
+            sdkName: sdkName!,
+            emulator: emulator!,
             fullRestart: false,
             reason: reason,
           ),
@@ -1111,33 +1060,12 @@ class HotRunner extends ResidentRunner {
     // many libraries were affected by the hot reload request.
     // Relation of [invalidatedSourcesCount] to [syncedLibraryCount] should help
     // understand sync/transfer "overhead" of updating this number of source files.
-    HotEvent(
-      'reload',
-      targetPlatform: targetPlatform!,
-      sdkName: sdkName!,
-      emulator: emulator!,
-      fullRestart: false,
-      reason: reason,
-      overallTimeInMs: reloadInMs,
-      finalLibraryCount: firstReloadDetails['finalLibraryCount'] as int? ?? 0,
-      syncedLibraryCount: firstReloadDetails['receivedLibraryCount'] as int? ?? 0,
-      syncedClassesCount: firstReloadDetails['receivedClassesCount'] as int? ?? 0,
-      syncedProceduresCount: firstReloadDetails['receivedProceduresCount'] as int? ?? 0,
-      syncedBytes: updatedDevFS.syncedBytes,
-      invalidatedSourcesCount: updatedDevFS.invalidatedSourcesCount,
-      transferTimeInMs: updatedDevFS.transferDuration.inMilliseconds,
-      compileTimeInMs: updatedDevFS.compileDuration.inMilliseconds,
-      findInvalidatedTimeInMs: updatedDevFS.findInvalidatedDuration.inMilliseconds,
-      scannedSourcesCount: updatedDevFS.scannedSourcesCount,
-      reassembleTimeInMs: reassembleTimer.elapsed.inMilliseconds,
-      reloadVMTimeInMs: reloadVMTimer.elapsed.inMilliseconds,
-    ).send();
     _analytics.send(
       Event.hotRunnerInfo(
         label: 'reload',
-        targetPlatform: targetPlatform,
-        sdkName: sdkName,
-        emulator: emulator,
+        targetPlatform: targetPlatform!,
+        sdkName: sdkName!,
+        emulator: emulator!,
         fullRestart: false,
         reason: reason,
         overallTimeInMs: reloadInMs,
@@ -1180,67 +1108,33 @@ class HotRunner extends ResidentRunner {
     );
   }
 
-  @visibleForTesting
-  Future<void> evictDirtyAssets() async {
-    final futures = <Future<void>>[];
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS!.assetPathsToEvict.isEmpty && device.devFS!.shaderPathsToEvict.isEmpty) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
-
-      // If this is the first time we update the assets, make sure to call the setAssetDirectory
-      if (!device.devFS!.hasSetAssetDirectory) {
-        final Uri deviceAssetsDirectoryUri = device.devFS!.baseUri!.resolveUri(
-          globals.fs.path.toUri(getAssetBuildDirectory()),
-        );
-        await Future.wait<void>(
-          views.map<Future<void>>(
-            (FlutterView view) => device.vmService!.setAssetDirectory(
-              assetsDirectory: deviceAssetsDirectoryUri,
-              uiIsolateId: view.uiIsolate!.id,
-              viewId: view.id,
-              windows:
-                  (device.targetPlatform == TargetPlatform.tester && globals.platform.isWindows) ||
-                  device.targetPlatform == TargetPlatform.windows_x64 ||
-                  device.targetPlatform == TargetPlatform.windows_arm64,
-            ),
+  @override
+  Future<void> confirmAssetDirectory(FlutterDevice device, List<FlutterView> views) async {
+    if (!device.devFS!.hasSetAssetDirectory) {
+      final Uri deviceAssetsDirectoryUri = device.devFS!.baseUri!.resolveUri(
+        globals.fs.path.toUri(getAssetBuildDirectory()),
+      );
+      final List<FlutterView> activeViews = views
+          .where((FlutterView view) => view.uiIsolate != null)
+          .toList();
+      await Future.wait<void>(
+        activeViews.map<Future<void>>(
+          (FlutterView view) => device.vmService!.setAssetDirectory(
+            assetsDirectory: deviceAssetsDirectoryUri,
+            uiIsolateId: view.uiIsolate!.id,
+            viewId: view.id,
+            windows:
+                (device.targetPlatform == TargetPlatform.tester && globals.platform.isWindows) ||
+                device.targetPlatform == TargetPlatform.windows_x64 ||
+                device.targetPlatform == TargetPlatform.windows_arm64,
           ),
-        );
-        for (final view in views) {
-          globals.printTrace('Set asset directory in $view.');
-        }
-        device.devFS!.hasSetAssetDirectory = true;
+        ),
+      );
+      for (final view in activeViews) {
+        globals.printTrace('Set asset directory in $view.');
       }
-
-      if (views.first.uiIsolate == null) {
-        globals.printError('Application isolate not found for $device');
-        continue;
-      }
-
-      if (device.devFS!.didUpdateFontManifest) {
-        futures.add(
-          device.vmService!.reloadAssetFonts(
-            isolateId: views.first.uiIsolate!.id!,
-            viewId: views.first.id,
-          ),
-        );
-      }
-
-      for (final String assetPath in device.devFS!.assetPathsToEvict) {
-        futures.add(
-          device.vmService!.flutterEvictAsset(assetPath, isolateId: views.first.uiIsolate!.id!),
-        );
-      }
-      for (final String assetPath in device.devFS!.shaderPathsToEvict) {
-        futures.add(
-          device.vmService!.flutterEvictShader(assetPath, isolateId: views.first.uiIsolate!.id!),
-        );
-      }
-      device.devFS!.assetPathsToEvict.clear();
-      device.devFS!.shaderPathsToEvict.clear();
+      device.devFS!.hasSetAssetDirectory = true;
     }
-    await Future.wait<void>(futures);
   }
 
   @override
@@ -1271,18 +1165,17 @@ class HotRunner extends ResidentRunner {
   }
 }
 
-typedef ReloadSourcesHelper =
-    Future<OperationResult> Function(
-      HotRunner hotRunner,
-      List<FlutterDevice?> flutterDevices,
-      bool? pause,
-      Map<String, dynamic> firstReloadDetails,
-      String? targetPlatform,
-      String? sdkName,
-      bool? emulator,
-      String? reason,
-      Analytics analytics,
-    );
+typedef ReloadSourcesHelper = Future<OperationResult> Function(
+  HotRunner hotRunner,
+  List<FlutterDevice?> flutterDevices,
+  bool? pause,
+  Map<String, dynamic> firstReloadDetails,
+  String? targetPlatform,
+  String? sdkName,
+  bool? emulator,
+  String? reason,
+  Analytics analytics,
+);
 
 @visibleForTesting
 Future<OperationResult> defaultReloadSourcesHelper(
@@ -1397,13 +1290,12 @@ class ReassembleResult {
   final bool shouldReportReloadTime;
 }
 
-typedef ReassembleHelper =
-    Future<ReassembleResult> Function(
-      List<FlutterDevice?> flutterDevices,
-      Map<FlutterDevice?, List<FlutterView>> viewCache,
-      void Function(String message)? onSlow,
-      String reloadMessage,
-    );
+typedef ReassembleHelper = Future<ReassembleResult> Function(
+  List<FlutterDevice?> flutterDevices,
+  Map<FlutterDevice?, List<FlutterView>> viewCache,
+  void Function(String message)? onSlow,
+  String reloadMessage,
+);
 
 Future<ReassembleResult> _defaultReassembleHelper(
   List<FlutterDevice?> flutterDevices,

@@ -59,7 +59,7 @@ class BundleBuilder {
           : globals.flutterVersion.engineRevision,
       defines: <String, String>{
         // used by the KernelSnapshot target
-        kTargetPlatform: getNameForTargetPlatform(platform),
+        kTargetPlatform: platform.getName(),
         kTargetFile: mainPath,
         kDeferredComponents: 'false',
         ...buildInfo.toBuildSystemEnvironment(),
