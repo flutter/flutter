@@ -151,6 +151,7 @@ class ContentContext {
   PipelineRef GetBlendSoftLightPipeline(ContentContextOptions opts) const;
   PipelineRef GetBorderMaskBlurPipeline(ContentContextOptions opts) const;
   PipelineRef GetCirclePipeline(ContentContextOptions opts) const;
+  PipelineRef GetPathSdfTestPipeline(ContentContextOptions opts) const;
   PipelineRef GetClearBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetClipPipeline(ContentContextOptions opts) const;
   PipelineRef GetColorMatrixColorFilterPipeline(ContentContextOptions opts) const;

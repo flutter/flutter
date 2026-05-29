@@ -46,6 +46,8 @@
 #include "impeller/entity/radial_gradient_fill.frag.h"
 #include "impeller/entity/radial_gradient_ssbo_fill.frag.h"
 #include "impeller/entity/radial_gradient_uniform_fill.frag.h"
+#include "impeller/entity/path_sdf_test.frag.h"
+#include "impeller/entity/path_sdf_test.vert.h"
 #include "impeller/entity/rrect_blur.frag.h"
 #include "impeller/entity/rrect_like_blur.vert.h"
 #include "impeller/entity/rsuperellipse_blur.frag.h"
@@ -144,6 +146,7 @@ using LinearGradientUniformFillPipeline = GradientPipelineHandle<LinearGradientU
 using LinearToSrgbFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, LinearToSrgbFilterFragmentShader>;
 using MorphologyFilterPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, MorphologyFilterFragmentShader>;
 using PorterDuffBlendPipeline = RenderPipelineHandle<PorterDuffBlendVertexShader, PorterDuffBlendFragmentShader>;
+using PathSdfTestPipeline = RenderPipelineHandle<PathSdfTestVertexShader, PathSdfTestFragmentShader>;
 using RadialGradientFillPipeline = GradientPipelineHandle<RadialGradientFillFragmentShader>;
 using RadialGradientSSBOFillPipeline = GradientPipelineHandle<RadialGradientSsboFillFragmentShader>;
 using RadialGradientUniformFillPipeline = GradientPipelineHandle<RadialGradientUniformFillFragmentShader>;

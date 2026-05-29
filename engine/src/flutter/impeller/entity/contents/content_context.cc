@@ -233,6 +233,7 @@ struct ContentContext::Pipelines {
   Variants<BlendSoftLightPipeline> blend_softlight;
   Variants<BorderMaskBlurPipeline> border_mask_blur;
   Variants<CirclePipeline> circle;
+  Variants<PathSdfTestPipeline> path_sdf_test;
   Variants<ClipPipeline> clip;
   Variants<ColorMatrixColorFilterPipeline> color_matrix_color_filter;
   Variants<ConicalGradientFillConicalPipeline> conical_gradient_fill;
@@ -637,6 +638,7 @@ ContentContext::ContentContext(
     pipelines_->fast_gradient.CreateDefault(*context_, options);
     pipelines_->line.CreateDefault(*context_, options);
     pipelines_->circle.CreateDefault(*context_, options);
+    pipelines_->path_sdf_test.CreateDefault(*context_, options);
     if (context_->GetFlags().use_sdfs) {
       pipelines_->uber_sdf.CreateDefault(*context_, options);
       pipelines_->complex_rse.CreateDefault(*context_, options);
@@ -1537,6 +1539,11 @@ PipelineRef ContentContext::GetDrawVerticesUberPipeline(
 PipelineRef ContentContext::GetCirclePipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->circle, opts);
+}
+
+PipelineRef ContentContext::GetPathSdfTestPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->path_sdf_test, opts);
 }
 
 PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {
