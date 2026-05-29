@@ -344,6 +344,7 @@ void main() {
         logger.warningText,
         contains('Failed to extract manifest from APK: falling back to source AndroidManifest.xml'),
       );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: overrides);
 
     testUsingContext(
@@ -420,6 +421,7 @@ void main() {
           ),
         );
         expect(logger.errorText, contains('Failed to parse manifest from APK'));
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       },
       overrides: overrides,
     );
