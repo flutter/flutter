@@ -359,10 +359,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       );
     } on ProcessException catch (exception) {
       consumeLog(exception.toString());
-      // Rethrow the exception if the error is handled by any of the `localGradleErrors`.
-      if (detectedGradleError != null) {
-        // This will proceed to throw in exitCode check or error handling below.
-      } else {
+      if (detectedGradleError == null) {
         _handleProcessException(exception);
       }
     } finally {
