@@ -19,6 +19,7 @@ impeller_component("gles_unittests") {
     "device_buffer_gles_unittests.cc",
     "render_pass_gles_unittests.cc",
     "test/capabilities_unittests.cc",
+    "test/egl_unittests.cc",
     "test/formats_gles_unittests.cc",
     "test/gpu_tracer_gles_unittests.cc",
     "test/mock_gles.cc",
@@ -37,6 +38,16 @@ impeller_component("gles_unittests") {
     "//flutter/impeller/playground:playground_test",
     "//flutter/testing:testing_lib",
   ]
+
+  if (is_mac) {
+    deps += [
+      "//flutter/impeller/toolkit/egl:egl_angle",
+      "//flutter/third_party/angle:libEGL_static",
+      "//flutter/third_party/angle:libGLESv2_static",
+    ]
+  } else {
+    deps += [ "//flutter/impeller/toolkit/egl" ]
+  }
 }
 
 impeller_component("gles") {

@@ -16,8 +16,13 @@ impeller_component("glvk") {
     "../../renderer",
     "../../renderer/backend/gles",
     "../../renderer/backend/vulkan",
-    "../../toolkit/egl",
     "../../toolkit/gles",
     "//flutter/fml",
   ]
+
+  if (is_mac) {
+    public_deps += [ "../../toolkit/egl:egl_angle" ]
+  } else {
+    public_deps += [ "../../toolkit/egl" ]
+  }
 }

@@ -4,29 +4,42 @@
 
 import("../../tools/impeller.gni")
 
-impeller_component("egl") {
-  sources = [
-    "config.cc",
-    "config.h",
-    "context.cc",
-    "context.h",
-    "display.cc",
-    "display.h",
-    "egl.cc",
-    "egl.h",
-    "image.cc",
-    "image.h",
-    "surface.cc",
-    "surface.h",
-  ]
+config("egl_config") {
+  include_dirs = [ "//flutter/third_party/angle/include" ]
+}
 
-  deps = [
-    "../../base",
-    "//flutter/fml",
-  ]
+template("egl_target") {
+  impeller_component(target_name) {
+    forward_variables_from(invoker, "*")
+    sources = [
+      "config.cc",
+      "config.h",
+      "context.cc",
+      "context.h",
+      "display.cc",
+      "display.h",
+      "egl.cc",
+      "egl.h",
+      "image.cc",
+      "image.h",
+      "surface.cc",
+      "surface.h",
+    ]
 
+    deps = [
+      "../../base",
+      "//flutter/fml",
+    ]
+  }
+}
+
+egl_target("egl") {
   libs = []
   if (is_android) {
     libs = [ "EGL" ]
   }
+}
+
+egl_target("egl_angle") {
+  public_configs = [ ":egl_config" ]
 }
