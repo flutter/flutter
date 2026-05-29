@@ -524,6 +524,7 @@ Uptime: 441088659 Realtime: 521464097
 
     expect(device.name, 'TestModel');
     expect(await device.isLocalEmulator, true);
+    await device.resolveEmulatorName();
     expect(device.name, 'My Custom Pixel 6');
   });
 

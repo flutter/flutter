@@ -141,9 +141,6 @@ class AndroidDevice extends Device {
       _logger.printTrace('ro.build.characteristics = $characteristics');
       isEmu = characteristics != null && characteristics.contains('emulator');
     }
-    if (isEmu) {
-      await _resolveEmulatorName();
-    }
     return isEmu;
   }();
 
@@ -200,20 +197,20 @@ class AndroidDevice extends Device {
     }
   }
 
-  Future<void> _resolveEmulatorName() async {
-    final String? avdId = await _getEmulatorId();
-    if (avdId == null) {
-      return;
-    }
-    final String? avdPath = _androidSdk.getAvdPath();
-    if (avdPath == null) {
-      return;
-    }
-    final File iniFile = _fileSystem.file(_fileSystem.path.join(avdPath, '$avdId.ini'));
-    if (!iniFile.existsSync()) {
-      return;
-    }
+  Future<void> resolveEmulatorName() async {
     try {
+      final String? avdId = await _getEmulatorId();
+      if (avdId == null) {
+        return;
+      }
+      final String? avdPath = _androidSdk.getAvdPath();
+      if (avdPath == null) {
+        return;
+      }
+      final File iniFile = _fileSystem.file(_fileSystem.path.join(avdPath, '$avdId.ini'));
+      if (!iniFile.existsSync()) {
+        return;
+      }
       final Map<String, String> ini = parseIniLines(iniFile.readAsLinesSync());
       final String? path = ini['path'];
       if (path == null) {
@@ -231,7 +228,7 @@ class AndroidDevice extends Device {
         _emulatorName = avdId.replaceAll('_', ' ').trim();
       }
     } on Exception catch (e) {
-      _logger.printTrace('Failed to resolve AVD name for $avdId: $e');
+      _logger.printTrace('Failed to resolve AVD name: $e');
     }
   }
 
@@ -624,10 +621,12 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
-        devicePlatform,
-        buildInfo: debuggingOptions.buildInfo,
-      ) as AndroidApk?;
+      builtPackage =
+          await ApplicationPackageFactory.instance!.getPackageForPlatform(
+                devicePlatform,
+                buildInfo: debuggingOptions.buildInfo,
+              )
+              as AndroidApk?;
     }
     // There was a failure parsing the android project information.
     if (builtPackage == null) {
