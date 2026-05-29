@@ -278,7 +278,7 @@ extension on BuildInput {
 Future<void> pinDependencies(File pubspecFile) async {
   expect(pubspecFile, exists);
   final String oldPubspec = await pubspecFile.readAsString();
-  final String newPubspec = oldPubspec.replaceAll(RegExp(r'(?<!sdk):\s*\^'), ': ');
+  final String newPubspec = oldPubspec.replaceAll(RegExp(r':\s*\^'), ': ');
   expect(newPubspec, isNot(oldPubspec));
   await pubspecFile.writeAsString(newPubspec);
 }

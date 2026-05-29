@@ -46,12 +46,11 @@ const kIsolateReloadBarred = 1005;
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [io.WebSocket]s (used by tests).
-typedef WebSocketConnector =
-    Future<io.WebSocket> Function(
-      String url, {
-      io.CompressionOptions compression,
-      required Logger logger,
-    });
+typedef WebSocketConnector = Future<io.WebSocket> Function(
+  String url, {
+  io.CompressionOptions compression,
+  required Logger logger,
+});
 
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
@@ -80,20 +79,19 @@ typedef ReloadSources = Future<void> Function(String isolateId, {bool force, boo
 
 typedef Restart = Future<void> Function({bool pause});
 
-typedef CompileExpression =
-    Future<String> Function(
-      String isolateId,
-      String expression,
-      List<String> definitions,
-      List<String> definitionTypes,
-      List<String> typeDefinitions,
-      List<String> typeBounds,
-      List<String> typeDefaults,
-      String libraryUri,
-      String? klass,
-      String? method,
-      bool isStatic,
-    );
+typedef CompileExpression = Future<String> Function(
+  String isolateId,
+  String expression,
+  List<String> definitions,
+  List<String> definitionTypes,
+  List<String> typeDefinitions,
+  List<String> typeBounds,
+  List<String> typeDefaults,
+  String libraryUri,
+  String? klass,
+  String? method,
+  bool isStatic,
+);
 
 Future<io.WebSocket> _defaultOpenChannel(
   String url, {
@@ -159,18 +157,17 @@ Future<io.WebSocket> _defaultOpenChannel(
 
 /// Override `VMServiceConnector` in [context] to return a different
 /// [vm_service.VmService] from [connectToVmService] (used by tests).
-typedef VMServiceConnector =
-    Future<FlutterVmService> Function(
-      Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device? device,
-      required Logger logger,
-    });
+typedef VMServiceConnector = Future<FlutterVmService> Function(
+  Uri httpUri, {
+  ReloadSources? reloadSources,
+  Restart? restart,
+  CompileExpression? compileExpression,
+  FlutterProject? flutterProject,
+  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+  io.CompressionOptions compression,
+  Device? device,
+  required Logger logger,
+});
 
 /// Set up the VM Service client by attaching services for each of the provided
 /// callbacks.
@@ -827,11 +824,20 @@ class FlutterVmService {
   /// Tell the provided flutter view that the font manifest has been updated
   /// and asset fonts should be reloaded.
   Future<void> reloadAssetFonts({required String isolateId, required String viewId}) async {
-    await callMethodWrapper(
-      kReloadAssetFonts,
-      isolateId: isolateId,
-      args: <String, Object?>{'viewId': viewId},
-    );
+    try {
+      await callMethodWrapper(
+        kReloadAssetFonts,
+        isolateId: isolateId,
+        args: <String, Object?>{'viewId': viewId},
+      );
+    } on vm_service.RPCError catch (e) {
+      if (e.code == vm_service.RPCErrorKind.kMethodNotFound.code) {
+        // Some platforms or embedders (like web) may not implement this VM
+        // service protocol method. Just ignore the error and return.
+        return;
+      }
+      rethrow;
+    }
   }
 
   /// Waits for a signal from the VM service that [extensionName] is registered.
