@@ -1076,7 +1076,7 @@ abstract class BoxScrollView extends ScrollView {
 ///         child: Center(child: Text('Entry ${entries[index]}')),
 ///       );
 ///     },
-///     separatorBuilder: (BuildContext context, int index) => const Divider(),
+///     separatorBuilder: (BuildContext context, int index) => Container(height: 1.0, color: const Color(0xFFF5F5F5)),
 ///   );
 /// }
 /// ```
@@ -1483,7 +1483,7 @@ class ListView extends BoxScrollView {
   /// ```dart
   /// ListView.separated(
   ///   itemCount: 25,
-  ///   separatorBuilder: (BuildContext context, int index) => const Divider(),
+  ///   separatorBuilder: (BuildContext context, int index) => Container(height: 1.0, color: const Color(0xFFF5F5F5)),
   ///   itemBuilder: (BuildContext context, int index) {
   ///     return ListTile(
   ///       title: Text('item $index'),
