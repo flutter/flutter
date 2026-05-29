@@ -15,7 +15,7 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  'skia_revision': 'd9d6b440c4e787c7b09068a2a31e11ce0e7f7c48',
+  'skia_revision': 'c480ba2eb2eba29a78b28b188cf2e8a3fb44dd49',
   'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
