@@ -528,10 +528,14 @@ static void EncodeViewport(const ProcTableGLES& gl,
     /// instance in between.
     ///
     const bool instanced = command.instance_count > 1u;
-    const bool hardware_instanced = instanced &&  //
-                                    gl.DrawArraysInstancedEXT.IsAvailable() &&
-                                    gl.DrawElementsInstancedEXT.IsAvailable() &&
-                                    gl.VertexAttribDivisorEXT.IsAvailable();
+    const bool hardware_instanced =
+        instanced &&
+        (gl.DrawArraysInstanced.IsAvailable() ||
+         gl.DrawArraysInstancedEXT.IsAvailable()) &&
+        (gl.DrawElementsInstanced.IsAvailable() ||
+         gl.DrawElementsInstancedEXT.IsAvailable()) &&
+        (gl.VertexAttribDivisor.IsAvailable() ||
+         gl.VertexAttribDivisorEXT.IsAvailable());
     const bool emulate_instanced = instanced && !hardware_instanced;
     const GLsizei instance_count = static_cast<GLsizei>(command.instance_count);
 
@@ -590,12 +594,19 @@ static void EncodeViewport(const ProcTableGLES& gl,
     } else if (hardware_instanced) {
       // A single instanced call covers every instance.
       if (!is_indexed) {
-        gl.DrawArraysInstancedEXT(mode, command.base_vertex,
-                                  command.element_count, instance_count);
+        const auto& gl_draw_arrays_instanced =
+            gl.DrawArraysInstanced.IsAvailable() ? gl.DrawArraysInstanced
+                                                 : gl.DrawArraysInstancedEXT;
+        gl_draw_arrays_instanced(mode, command.base_vertex,
+                                 command.element_count, instance_count);
       } else {
-        gl.DrawElementsInstancedEXT(mode, command.element_count,
-                                    ToIndexType(command.index_type),
-                                    index_offset, instance_count);
+        const auto& gl_draw_elements_instanced =
+            gl.DrawElementsInstanced.IsAvailable()
+                ? gl.DrawElementsInstanced
+                : gl.DrawElementsInstancedEXT;
+        gl_draw_elements_instanced(mode, command.element_count,
+                                   ToIndexType(command.index_type),
+                                   index_offset, instance_count);
       }
     } else {
       draw_geometry();
