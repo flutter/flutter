@@ -856,6 +856,62 @@ void testMain() {
       expect(group.elements.containsKey('field1'), isFalse);
       expect(tester.getTextField(2).editableElement.getAttribute('form'), isNull);
     });
+    // The attribute-linked form is only built on non-Safari browsers. Safari
+    // fills grouped fields by its own heuristic, so the form is intentionally
+    // skipped there (see [SemanticsTextEditingStrategy.initializeTextEditing]).
+    // The Safari path is covered by the group below.
+  }, skip: ui_web.browser.isSafari);
+
+  // On Safari the autofill form is not built; the native heuristic fills the
+  // group instead. See https://github.com/flutter/flutter/issues/180652
+  group('$SemanticsTextEditingStrategy autofill group on Safari', () {
+    late HybridTextEditing testTextEditing;
+    late SemanticsTextEditingStrategy strategy;
+
+    setUp(() {
+      testTextEditing = HybridTextEditing();
+      SemanticsTextEditingStrategy.ensureInitialized(testTextEditing);
+      strategy = SemanticsTextEditingStrategy.instance;
+      testTextEditing.debugTextEditingStrategyOverride = strategy;
+      testTextEditing.configuration = singlelineConfig;
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+    });
+
+    tearDown(() {
+      if (strategy.isEnabled) {
+        strategy.disable();
+      }
+      cleanForms();
+      semantics().semanticsEnabled = false;
+      domDocument.activeElement?.blur();
+    });
+
+    test('does not build the form and does not link the focused field', () {
+      final List<Map<String, Object?>> fields = _autofillFields(
+        <String>['username', 'password'],
+        <String>['field1', 'field2'],
+      );
+      final focusedMap = fields.first['autofill']! as Map<String, Object?>;
+      final EngineAutofillForm form = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        focusedMap,
+        fields,
+      )!;
+      final config = InputConfiguration(
+        viewId: kImplicitViewId,
+        autofill: AutofillInfo.fromFrameworkMessage(focusedMap),
+        autofillGroup: form,
+      );
+      strategy.enable(config, onChange: (_, _) {}, onAction: (_) {});
+      final SemanticsObject semanticsObject = createTextFieldSemantics(value: '', isFocused: true);
+      final textField = semanticsObject.semanticRole! as SemanticTextField;
+
+      // No form is created and the focused field is not linked by attribute.
+      expect(form.formElement, isNull);
+      expect(textField.editableElement.getAttribute('form'), isNull);
+    }, skip: !ui_web.browser.isSafari);
   });
 }
 
