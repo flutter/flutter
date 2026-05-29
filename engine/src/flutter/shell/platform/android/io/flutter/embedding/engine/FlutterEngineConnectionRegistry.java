@@ -340,14 +340,15 @@ import java.util.Set;
     // As part of https://github.com/flutter/flutter/issues/172553, the ability to set
     // --enable-software-rendering via Intent will be removed. Inform
     // developers about the new method for doing so if this was attempted.
-    // TODO(camsim99): Remove this warning after a stable release has passed:
+    // TODO(camsim99): Remove this warning after a stable release has passed after support for
+    // setting engine flags via Intent is removed:
     // https://github.com/flutter/flutter/issues/179274.
     if (useSoftwareRendering) {
-      Log.i(
+      Log.e(
           TAG,
-          "If you are attempting to set --enable-software-rendering via Intent extras to launch a Flutter component outside of using the Flutter CLI, note that support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/172553 for more information on this breaking change. To migrate, set the "
+          "Support for setting engine flags on Android via Intent will soon be dropped; see https://github.com/flutter/flutter/issues/172553 for more information on this breaking change. To set "
               + FlutterEngineFlags.ENABLE_SOFTWARE_RENDERING.metadataKey
-              + " metadata in the application manifest. See https://github.com/flutter/flutter/blob/main/docs/engine/Flutter-Android-Engine-Flags.md for more info.");
+              + ", see INSERT_BREAKING_CHANGE_PAGE_HERE to learn how to migrate.");
     } else {
       // Check manifest for software rendering configuration.
       useSoftwareRendering = flutterLoader.getSofwareRenderingEnabledViaManifest();
