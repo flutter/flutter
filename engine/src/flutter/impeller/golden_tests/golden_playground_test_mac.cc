@@ -66,22 +66,24 @@ std::unique_ptr<PlaygroundImpl> MakeOpenGLESPlayground(bool use_sdfs = false) {
   PlaygroundSwitches playground_switches;
   playground_switches.use_angle = true;
   playground_switches.flags.use_sdfs = use_sdfs;
-  return PlaygroundImpl::Create(use_sdfs ? PlaygroundBackend::kOpenGLESSDF : PlaygroundBackend::kOpenGLES,
-                                playground_switches);
+  return PlaygroundImpl::Create(
+      use_sdfs ? PlaygroundBackend::kOpenGLESSDF : PlaygroundBackend::kOpenGLES,
+      playground_switches);
 }
 
 // Returns a static instance to an OpenGL ES playground that can be used across
 // tests.
-const std::unique_ptr<PlaygroundImpl>& GetSharedOpenGLESPlayground(bool use_sdfs) {
+const std::unique_ptr<PlaygroundImpl>& GetSharedOpenGLESPlayground(
+    bool use_sdfs) {
   if (use_sdfs) {
-    static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>> opengl_playground(
-        MakeOpenGLESPlayground(/*use_sdfs=*/true));
+    static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
+        opengl_playground(MakeOpenGLESPlayground(/*use_sdfs=*/true));
     static fml::ScopedCleanupClosure context_cleanup(
         [&] { (*opengl_playground)->GetContext()->Shutdown(); });
     return *opengl_playground;
   } else {
-    static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>> opengl_playground(
-        MakeOpenGLESPlayground(/*use_sdfs=*/false));
+    static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
+        opengl_playground(MakeOpenGLESPlayground(/*use_sdfs=*/false));
     // TODO(142237): This can be removed when the thread local storage is
     // removed.
     static fml::ScopedCleanupClosure context_cleanup(
