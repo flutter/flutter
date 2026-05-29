@@ -14,7 +14,8 @@ namespace testing {
 TEST(EGLTest, ClearCurrentGuard) {
   Display display;
   if (!display.IsValid()) {
-    GTEST_SKIP() << "EGL display is not valid or not supported on this platform.";
+    GTEST_SKIP()
+        << "EGL display is not valid or not supported on this platform.";
   }
 
   ConfigDescriptor desc;
@@ -41,7 +42,8 @@ TEST(EGLTest, ClearCurrentGuard) {
 TEST(EGLTest, ClearCurrentDoesNotDeactivateOtherContext) {
   Display display;
   if (!display.IsValid()) {
-    GTEST_SKIP() << "EGL display is not valid or not supported on this platform.";
+    GTEST_SKIP()
+        << "EGL display is not valid or not supported on this platform.";
   }
 
   ConfigDescriptor desc;
