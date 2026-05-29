@@ -199,7 +199,7 @@ class ReleaseBundleWindowsAssets extends BundleWindowsAssets {
   const ReleaseBundleWindowsAssets(super.targetPlatform);
 
   @override
-  String get name => 'release_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'release_bundle_${targetPlatform.getName()}_assets';
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -215,7 +215,7 @@ class ProfileBundleWindowsAssets extends BundleWindowsAssets {
   const ProfileBundleWindowsAssets(super.targetPlatform);
 
   @override
-  String get name => 'profile_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'profile_bundle_${targetPlatform.getName()}_assets';
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -231,7 +231,7 @@ class DebugBundleWindowsAssets extends BundleWindowsAssets {
   const DebugBundleWindowsAssets(super.targetPlatform);
 
   @override
-  String get name => 'debug_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
+  String get name => 'debug_bundle_${targetPlatform.getName()}_assets';
 
   @override
   List<Source> get inputs => <Source>[const Source.pattern('{BUILD_DIR}/app.dill')];
