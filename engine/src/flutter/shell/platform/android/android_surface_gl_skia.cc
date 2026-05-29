@@ -94,11 +94,7 @@ bool AndroidSurfaceGLSkia::ResourceContextMakeCurrent() {
 
 bool AndroidSurfaceGLSkia::ResourceContextClearCurrent() {
   FML_DCHECK(IsValid());
-  if (eglGetCurrentContext() == EGL_NO_CONTEXT) {
-    return true;
-  }
   EGLBoolean result = eglMakeCurrent(eglGetCurrentDisplay(), EGL_NO_SURFACE,
-                                     //
                                      EGL_NO_SURFACE, EGL_NO_CONTEXT);
   return result == EGL_TRUE;
 }
