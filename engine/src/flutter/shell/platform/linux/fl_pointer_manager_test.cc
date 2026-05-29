@@ -466,6 +466,155 @@ TEST_F(FlPointerManagerTest, ButtonPressButtonReleaseThreeButtons) {
   EXPECT_EQ(pointer_events[6].buttons, 0);
 }
 
+TEST_F(FlPointerManagerTest, ButtonPressStylusPrimaryButton) {
+  StartEngine();
+
+  constexpr int64_t kStylusContact = 1 << 0;
+  constexpr int64_t kStylusPrimary = 1 << 1;
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  FlPointerDeviceState device_state = {};
+  device_state.pressure = 0.5;
+  fl_pointer_manager_handle_button_press(manager, 1234,
+                                         kFlutterPointerDeviceKindStylus, 4.0,
+                                         8.0, GDK_BUTTON_PRIMARY, device_state);
+  fl_pointer_manager_handle_button_press(
+      manager, 1235, kFlutterPointerDeviceKindStylus, 4.0, 8.0,
+      GDK_BUTTON_SECONDARY, device_state);
+
+  EXPECT_EQ(pointer_events.size(), 3u);
+  EXPECT_EQ(pointer_events[2].device_kind, kFlutterPointerDeviceKindStylus);
+  EXPECT_EQ(pointer_events[2].buttons, kStylusContact | kStylusPrimary);
+}
+
+TEST_F(FlPointerManagerTest, ButtonPressStylusContact) {
+  StartEngine();
+
+  constexpr int64_t kStylusContact = 1 << 0;
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  FlPointerDeviceState device_state = {};
+  device_state.pressure = 0.5;
+  fl_pointer_manager_handle_button_press(manager, 1234,
+                                         kFlutterPointerDeviceKindStylus, 4.0,
+                                         8.0, GDK_BUTTON_PRIMARY, device_state);
+
+  EXPECT_EQ(pointer_events.size(), 2u);
+  EXPECT_EQ(pointer_events[1].device_kind, kFlutterPointerDeviceKindStylus);
+  EXPECT_EQ(pointer_events[1].buttons, kStylusContact);
+}
+
+TEST_F(FlPointerManagerTest, ButtonPressInvertedStylusContact) {
+  StartEngine();
+
+  constexpr int64_t kStylusContact = 1 << 0;
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  FlPointerDeviceState device_state = {};
+  device_state.pressure = 0.5;
+  fl_pointer_manager_handle_button_press(
+      manager, 1234, kFlutterPointerDeviceKindInvertedStylus, 4.0, 8.0,
+      GDK_BUTTON_PRIMARY, device_state);
+
+  EXPECT_EQ(pointer_events.size(), 2u);
+  EXPECT_EQ(pointer_events[1].device_kind,
+            kFlutterPointerDeviceKindInvertedStylus);
+  EXPECT_EQ(pointer_events[1].buttons, kStylusContact);
+}
+
+TEST_F(FlPointerManagerTest, ButtonPressStylusSecondaryButton) {
+  StartEngine();
+
+  constexpr int64_t kStylusContact = 1 << 0;
+  constexpr int64_t kStylusSecondary = 1 << 2;
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  FlPointerDeviceState device_state = {};
+  device_state.pressure = 0.5;
+  fl_pointer_manager_handle_button_press(manager, 1234,
+                                         kFlutterPointerDeviceKindStylus, 4.0,
+                                         8.0, GDK_BUTTON_PRIMARY, device_state);
+  fl_pointer_manager_handle_button_press(manager, 1235,
+                                         kFlutterPointerDeviceKindStylus, 4.0,
+                                         8.0, GDK_BUTTON_MIDDLE, device_state);
+
+  EXPECT_EQ(pointer_events.size(), 3u);
+  EXPECT_EQ(pointer_events[2].device_kind, kFlutterPointerDeviceKindStylus);
+  EXPECT_EQ(pointer_events[2].buttons, kStylusContact | kStylusSecondary);
+}
+
+TEST_F(FlPointerManagerTest, ButtonPressStylusUnknownButton) {
+  StartEngine();
+
+  std::vector<FlutterPointerEvent> pointer_events;
+  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
+      SendPointerEvent,
+      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
+                         size_t events_count) {
+        for (size_t i = 0; i < events_count; i++) {
+          pointer_events.push_back(events[i]);
+        }
+
+        return kSuccess;
+      }));
+
+  g_autoptr(FlPointerManager) manager = fl_pointer_manager_new(42, engine);
+  FlPointerDeviceState device_state = {};
+  fl_pointer_manager_handle_button_press(manager, 1234,
+                                         kFlutterPointerDeviceKindStylus, 4.0,
+                                         8.0, 8, device_state);
+
+  EXPECT_EQ(pointer_events.size(), 0u);
+}
+
 TEST_F(FlPointerManagerTest, ButtonPressButtonPressButtonRelease) {
   StartEngine();
 

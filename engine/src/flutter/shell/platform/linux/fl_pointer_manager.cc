@@ -33,6 +33,10 @@ static constexpr guint kMouseButtonBack = 8;
 // 9 corresponds to mouse forward button on both x11 and wayland
 static constexpr guint kMouseButtonForward = 9;
 
+static constexpr int64_t kFlutterPointerButtonStylusContact = 1 << 0;
+static constexpr int64_t kFlutterPointerButtonStylusPrimary = 1 << 1;
+static constexpr int64_t kFlutterPointerButtonStylusSecondary = 1 << 2;
+
 // Convert a GDK button ID into a Flutter button ID
 static gboolean get_mouse_button(guint gdk_button, int64_t* button) {
   switch (gdk_button) {
@@ -54,6 +58,33 @@ static gboolean get_mouse_button(guint gdk_button, int64_t* button) {
     default:
       return FALSE;
   }
+}
+
+static gboolean get_button(FlutterPointerDeviceKind device_kind,
+                           guint gdk_button,
+                           FlPointerDeviceState device_state,
+                           int64_t* button) {
+  if (device_kind == kFlutterPointerDeviceKindStylus) {
+    if (device_state.is_eraser && gdk_button == GDK_BUTTON_PRIMARY) {
+      *button = kFlutterPointerButtonStylusPrimary;
+      return TRUE;
+    }
+    switch (gdk_button) {
+      case GDK_BUTTON_PRIMARY:
+        *button = kFlutterPointerButtonStylusContact;
+        return TRUE;
+      case GDK_BUTTON_SECONDARY:
+        *button = kFlutterPointerButtonStylusPrimary;
+        return TRUE;
+      case GDK_BUTTON_MIDDLE:
+        *button = kFlutterPointerButtonStylusSecondary;
+        return TRUE;
+      default:
+        return FALSE;
+    }
+  }
+
+  return get_mouse_button(gdk_button, button);
 }
 
 // Generates a mouse pointer event if the pointer appears inside the window.
@@ -114,7 +145,7 @@ gboolean fl_pointer_manager_handle_button_press(
   g_return_val_if_fail(FL_IS_POINTER_MANAGER(self), FALSE);
 
   int64_t button;
-  if (!get_mouse_button(gdk_button, &button)) {
+  if (!get_button(device_kind, gdk_button, device_state, &button)) {
     return FALSE;
   }
 
@@ -153,7 +184,7 @@ gboolean fl_pointer_manager_handle_button_release(
   g_return_val_if_fail(FL_IS_POINTER_MANAGER(self), FALSE);
 
   int64_t button;
-  if (!get_mouse_button(gdk_button, &button)) {
+  if (!get_button(device_kind, gdk_button, device_state, &button)) {
     return FALSE;
   }
 

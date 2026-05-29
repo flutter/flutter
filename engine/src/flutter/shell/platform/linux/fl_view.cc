@@ -141,6 +141,9 @@ static FlPointerDeviceState get_pointer_device_state(GdkEvent* event) {
 
   gdk_event_get_axis(event, GDK_AXIS_PRESSURE, &state.pressure);
   gdk_event_get_axis(event, GDK_AXIS_ROTATION, &state.rotation);
+  GdkDeviceTool* tool = gdk_event_get_device_tool(event);
+  state.is_eraser = tool != nullptr && gdk_device_tool_get_tool_type(tool) ==
+                                           GDK_DEVICE_TOOL_TYPE_ERASER;
   return state;
 }
 
