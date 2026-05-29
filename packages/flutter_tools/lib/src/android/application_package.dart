@@ -189,10 +189,9 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     final String? packageId = manifests.first.getAttribute('package') ?? androidProject.namespace;
 
     String? launchActivity;
-    final activities = <XmlElement>[
-      ...document.findAllElements('activity'),
-      ...document.findAllElements('activity-alias'),
-    ];
+    final Iterable<XmlElement> activities = document
+        .findAllElements('activity')
+        .followedBy(document.findAllElements('activity-alias'));
     for (final activity in activities) {
       final String? enabled = activity.getAttribute('android:enabled');
       if (enabled != null && enabled == 'false') {
@@ -219,7 +218,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
             actionName.isNotEmpty &&
             categoryName.isNotEmpty) {
           final String? activityName = activity.getAttribute('android:name');
-          if (activityName != null && activityName.isNotEmpty) {
+          if (packageId != null && activityName != null && activityName.isNotEmpty) {
             launchActivity = '$packageId/$activityName';
             foundLauncher = true;
             break;
