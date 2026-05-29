@@ -7,6 +7,7 @@
 
 // ignore_for_file: avoid_relative_lib_imports
 
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -39,6 +40,27 @@ ByteData mvpUBO(Matrix4 mvp) {
     mvp[8], mvp[9], mvp[10], mvp[11], //
     mvp[12], mvp[13], mvp[14], mvp[15], //
   ]);
+}
+
+Future<void> submitAndWait(gpu.CommandBuffer commandBuffer) {
+  final completer = Completer<void>();
+  commandBuffer.submit(
+    completionCallback: (bool success) {
+      if (success) {
+        completer.complete();
+      } else {
+        completer.completeError(Exception('CommandBuffer submit failed'));
+      }
+    },
+  );
+  return completer.future;
+}
+
+Future<ByteData> readTextureBytes(gpu.Texture texture) async {
+  final ui.Image image = texture.asImage();
+  final ByteData? bytes = await image.toByteData();
+  expect(bytes, isNotNull);
+  return bytes!;
 }
 
 gpu.RenderPipeline createUnlitRenderPipeline() {
@@ -619,6 +641,129 @@ void main() async {
     texture.overwrite(
       Int32List.fromList(<int>[red.value, green.value, green.value, red.value]).buffer.asByteData(),
     );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('CommandBuffer.copyBufferToTexture writes tightly packed texture regions', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);
+    final ByteData pixels = Uint8List.fromList(<int>[
+      0xFF, 0x00, 0x00, 0xFF, // red
+      0x00, 0xFF, 0x00, 0xFF, // green
+      0x00, 0x00, 0xFF, 0xFF, // blue
+      0xFF, 0xFF, 0x00, 0xFF, // yellow
+    ]).buffer.asByteData();
+    final gpu.DeviceBuffer source = gpu.gpuContext.createDeviceBufferWithCopy(pixels);
+
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    commandBuffer.copyBufferToTexture(
+      gpu.BufferView(source, offsetInBytes: 0, lengthInBytes: 4),
+      gpu.TextureRegion(texture, width: 1, height: 1),
+    );
+    commandBuffer.copyBufferToTexture(
+      gpu.BufferView(source, offsetInBytes: 4, lengthInBytes: 4),
+      gpu.TextureRegion(texture, x: 1, width: 1, height: 1),
+    );
+    commandBuffer.copyBufferToTexture(
+      gpu.BufferView(source, offsetInBytes: 8, lengthInBytes: 8),
+      gpu.TextureRegion(texture, y: 1, width: 2, height: 1),
+    );
+    await submitAndWait(commandBuffer);
+
+    final ByteData bytes = await readTextureBytes(texture);
+    expect(bytes.getUint8(0), 0xFF);
+    expect(bytes.getUint8(1), 0x00);
+    expect(bytes.getUint8(2), 0x00);
+    expect(bytes.getUint8(3), 0xFF);
+    final int bottomRightOffset = (1 + 1 * texture.width) * 4;
+    expect(bytes.getUint8(bottomRightOffset), 0xFF);
+    expect(bytes.getUint8(bottomRightOffset + 1), 0xFF);
+    expect(bytes.getUint8(bottomRightOffset + 2), 0x00);
+    expect(bytes.getUint8(bottomRightOffset + 3), 0xFF);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('CommandBuffer.copyTextureToTexture copies a texture region', () async {
+    final gpu.Texture sourceTexture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      2,
+      2,
+    );
+    final gpu.Texture destinationTexture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      2,
+      2,
+    );
+    final ByteData pixels = Uint8List.fromList(<int>[
+      0x00,
+      0x00,
+      0x00,
+      0xFF,
+      0x11,
+      0x22,
+      0x33,
+      0xFF,
+      0x44,
+      0x55,
+      0x66,
+      0xFF,
+      0xAA,
+      0xBB,
+      0xCC,
+      0xFF,
+    ]).buffer.asByteData();
+    sourceTexture.overwrite(pixels);
+
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    commandBuffer.copyTextureToTexture(
+      gpu.TextureRegion(sourceTexture, x: 1, y: 1, width: 1, height: 1),
+      gpu.TextureDestinationRegion(destinationTexture),
+    );
+    await submitAndWait(commandBuffer);
+
+    final ByteData bytes = await readTextureBytes(destinationTexture);
+    expect(bytes.getUint8(0), 0xAA);
+    expect(bytes.getUint8(1), 0xBB);
+    expect(bytes.getUint8(2), 0xCC);
+    expect(bytes.getUint8(3), 0xFF);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('CommandBuffer.copyTextureToBuffer appends successfully', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 4, 4);
+    final ByteData pixels = Uint8List.fromList(
+      List<int>.filled(4 * 4 * 4, 0xFF),
+    ).buffer.asByteData();
+    texture.overwrite(pixels);
+
+    final gpu.DeviceBuffer destination = gpu.gpuContext.createDeviceBuffer(
+      gpu.StorageMode.hostVisible,
+      2 * 2 * texture.format.bytesPerBlock,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    commandBuffer.copyTextureToBuffer(
+      gpu.TextureRegion(texture, width: 2, height: 2),
+      gpu.BufferView(
+        destination,
+        offsetInBytes: 0,
+        lengthInBytes: 2 * 2 * texture.format.bytesPerBlock,
+      ),
+    );
+    await submitAndWait(commandBuffer);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('CommandBuffer.copyBufferToTexture validates copy size', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);
+    final gpu.DeviceBuffer source = gpu.gpuContext.createDeviceBufferWithCopy(
+      Uint8List.fromList(<int>[0xFF, 0x00, 0x00, 0xFF]).buffer.asByteData(),
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+
+    try {
+      commandBuffer.copyBufferToTexture(
+        gpu.BufferView(source, offsetInBytes: 0, lengthInBytes: 4),
+        gpu.TextureRegion(texture),
+      );
+      fail('Exception not thrown for wrong copy size.');
+    } catch (e) {
+      expect(e.toString(), contains('must match the destination texture region size'));
+    }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Texture.overwrite throws for wrong buffer size', () async {
