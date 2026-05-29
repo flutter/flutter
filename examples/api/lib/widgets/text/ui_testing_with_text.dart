@@ -15,6 +15,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  Widget buildDivider() {
+    return Padding(
+      padding: const EdgeInsets.all(4),
+      child: Container(
+        color: const Color(0xFF000000),
+        height: 4,
+        width: double.infinity,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final TextStyle? bodyStyle = Theme.of(context).textTheme.bodyLarge;
@@ -46,7 +57,7 @@ class _MyAppState extends State<MyApp> {
                   const Text(
                     'The identifier property in Semantics widget is used for UI testing with tools that work by querying the native accessibility, like UIAutomator, XCUITest, or Appium. It can be matched with CommonFinders.bySemanticsIdentifier.',
                   ),
-                  const Divider(),
+                  buildDivider(),
                   Text('Text Example:', style: bodyStyle),
                   const Text(
                     'This text has a custom label and an identifier. In Android, the label is used as the content-desc, and the identifier is used as the resource-id.',
@@ -54,7 +65,7 @@ class _MyAppState extends State<MyApp> {
                     semanticsIdentifier:
                         'This is a custom identifier that only the automation tools are able to see',
                   ),
-                  const Divider(),
+                  buildDivider(),
                   Text('Text.rich Example:', style: bodyStyle),
                   Text.rich(
                     TextSpan(
@@ -80,7 +91,7 @@ class _MyAppState extends State<MyApp> {
                       ],
                     ),
                   ),
-                  const Divider(),
+                  buildDivider(),
                   Text('Multi-tenant Example:', style: bodyStyle),
                   const SizedBox(height: 16),
                   Column(

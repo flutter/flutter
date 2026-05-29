@@ -91,9 +91,9 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
                 child: ListView(
                   children: [
                     _buildRegularEditor(),
-                    const Divider(),
+                    _buildDivider(),
                     _buildDialogEditor(),
-                    const Divider(),
+                    _buildDivider(),
                     _buildTooltipEditor(),
                   ],
                 ),
@@ -356,6 +356,13 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Padding(
+      padding: const EdgeInsets.all(4),
+      child: Container(color: const Color(0xFF000000), height: 4, width: double.infinity),
     );
   }
 
