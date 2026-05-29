@@ -420,7 +420,13 @@ TEST_P(RendererTest, CanRenderToTexture) {
 
 TEST_P(RendererTest, CanRenderInstanced) {
   if (GetParam() == PlaygroundBackend::kOpenGLES) {
-    GTEST_SKIP() << "Instancing is not supported on OpenGL.";
+    // This test drives instancing through gl_InstanceIndex and a storage
+    // buffer, both of which require OpenGL ES 3.1. The portable instance-rate
+    // vertex attribute path, which works down to OpenGL ES 2.0, is covered by
+    // CanRenderInstancedWithVertexAttributes.
+    GTEST_SKIP() << "This test's instance-ID mechanism requires OpenGL ES 3.1; "
+                    "CanRenderInstancedWithVertexAttributes covers the "
+                    "portable instance-rate path.";
   }
   using VS = InstancedDrawVertexShader;
   using FS = InstancedDrawFragmentShader;

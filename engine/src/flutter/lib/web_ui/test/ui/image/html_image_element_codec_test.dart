@@ -228,12 +228,14 @@ Future<void> testMain() async {
     test('provides image loading progress from web', () async {
       final Uri uri = Uri.base.resolve('sample_image1.png');
       final buffer = StringBuffer();
-      final codec = await ui_web.createImageCodecFromUrl(
-        uri,
-        chunkCallback: (int loaded, int total) {
-          buffer.write('$loaded/$total,');
-        },
-      ) as HtmlImageElementCodec;
+      final codec =
+          await ui_web.createImageCodecFromUrl(
+                uri,
+                chunkCallback: (int loaded, int total) {
+                  buffer.write('$loaded/$total,');
+                },
+              )
+              as HtmlImageElementCodec;
       await codec.getNextFrame();
       expect(buffer.toString(), '0/100,100/100,');
     });
