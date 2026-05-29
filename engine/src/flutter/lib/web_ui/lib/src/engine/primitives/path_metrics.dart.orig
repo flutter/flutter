@@ -1,0 +1,124 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:collection';
+
+import 'package:ui/src/engine.dart';
+import 'package:ui/ui.dart' as ui;
+
+
+class EnginePathMetrics extends IterableBase<ui.PathMetric> implements ui.PathMetrics {
+  EnginePathMetrics({required EnginePath path, required bool forceClosed})
+    : iterator = EnginePathMetricIterator(path, forceClosed);
+
+  @override
+  final EnginePathMetricIterator iterator;
+}
+
+class EnginePathMetricIterator implements Iterator<ui.PathMetric>, Collectable {
+  EnginePathMetricIterator(this.path, this.forceClosed);
+
+  final EnginePath path;
+  final bool forceClosed;
+  int _nextIndex = 0;
+  BackendPathMetricIterator? _cachedIterator;
+  final List<BackendPathMetric> _metrics = [];
+  bool _isAtEnd = false;
+
+  @override
+  ui.PathMetric get current {
+    if (_nextIndex == 0 || _isAtEnd) {
+      throw RangeError(
+        'PathMetricIterator is not pointing to a PathMetric. This can happen in two situations:\n'
+        '- The iteration has not started yet. If so, call "moveNext" to start iteration.\n'
+        '- The iterator ran out of elements. If so, check that "moveNext" returns true prior to calling "current".',
+      );
+    }
+    return EnginePathMetric(this, _nextIndex - 1);
+  }
+
+  @override
+  bool moveNext() {
+    if (_isAtEnd) {
+      return false;
+    }
+    buildIterator();
+    assert(_cachedIterator != null);
+    assert(_nextIndex == _metrics.length);
+    _nextIndex++;
+    if (_cachedIterator!.moveNext()) {
+      _metrics.add(_cachedIterator!.current);
+      return true;
+    } else {
+      _isAtEnd = true;
+      return false;
+    }
+  }
+
+  @override
+  void collect() {
+    _cachedIterator?.dispose();
+    _cachedIterator = null;
+
+    for (final BackendPathMetric metric in _metrics) {
+      metric.dispose();
+    }
+    _metrics.clear();
+  }
+
+  void buildIterator() {
+    if (_cachedIterator != null) {
+      return;
+    }
+    _cachedIterator = path.backendPath.computeMetrics(forceClosed: forceClosed);
+    for (var i = 0; i < _nextIndex; i++) {
+      if (_cachedIterator!.moveNext()) {
+        _metrics.add(_cachedIterator!.current);
+      } else {
+        break;
+      }
+    }
+    EnginePlatformDispatcher.instance.frameArena.add(this);
+  }
+
+  BackendPathMetric builtMetricAtIndex(int index) {
+    buildIterator();
+    return _metrics[index];
+  }
+}
+
+class EnginePathMetric implements ui.PathMetric {
+  EnginePathMetric(this.iterator, this.contourIndex);
+
+  final EnginePathMetricIterator iterator;
+
+  @override
+  final int contourIndex;
+
+  BackendPathMetric get builtMetric => iterator.builtMetricAtIndex(contourIndex);
+
+  @override
+  ui.Path extractPath(double start, double end, {bool startWithMoveTo = true}) {
+    return EnginePath.extracted(iterator.path, this, start, end, startWithMoveTo: startWithMoveTo);
+  }
+
+  BackendPathBuilder buildExtractedPath(
+    double start,
+    double end, {
+    required bool startWithMoveTo,
+  }) {
+    return builtMetric.extractPath(start, end, startWithMoveTo: startWithMoveTo);
+  }
+
+  @override
+  ui.Tangent? getTangentForOffset(double distance) {
+    return builtMetric.getTangentForOffset(distance);
+  }
+
+  @override
+  bool get isClosed => builtMetric.isClosed;
+
+  @override
+  double get length => builtMetric.length;
+}
