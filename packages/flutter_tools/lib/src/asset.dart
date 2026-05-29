@@ -1104,7 +1104,7 @@ class ManifestAssetBundle implements AssetBundle {
 
     result.removeWhere((_Asset asset, List<_Asset> variants) {
       if (!asset.matchesFlavor(flavor)) {
-        _logger.printWarning(
+        _logger.printTrace(
           'Skipping assets entry "${asset.entryUri.path}" since '
           'its configured flavor(s) did not match the provided flavor (if any).\n'
           'Configured flavors: ${asset.flavors.join(', ')}\n',
@@ -1112,7 +1112,7 @@ class ManifestAssetBundle implements AssetBundle {
         return true;
       }
       if (!asset.matchesPlatform(targetPlatform)) {
-        _logger.printWarning(
+        _logger.printTrace(
           'Skipping assets entry "${asset.entryUri.path}" since '
           'its configured platform(s) did not match the target platform.\n'
           'Configured platforms: ${asset.platforms.join(', ')}\n'
