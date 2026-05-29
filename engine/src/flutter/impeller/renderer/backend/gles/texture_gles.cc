@@ -694,14 +694,6 @@ bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
   return true;
 }
 
-// |Texture|
-Scalar TextureGLES::GetYCoordScale() const {
-  // GLES render-to-texture content is stored top-down via the
-  // vertex-stage y-flip; see
-  // https://github.com/flutter/flutter/issues/186554.
-  return 1.0;
-}
-
 bool TextureGLES::IsWrapped() const {
   return is_wrapped_;
 }

@@ -214,9 +214,6 @@ class TextureGLES final : public Texture,
   // |Texture|
   ISize GetSize() const override;
 
-  // |Texture|
-  Scalar GetYCoordScale() const override;
-
   void InitializeContentsIfNecessary();
 
   TextureGLES(const TextureGLES&) = delete;
