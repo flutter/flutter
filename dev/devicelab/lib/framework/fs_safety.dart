@@ -41,7 +41,14 @@ bool _isAllowedPath(String entityPath) {
   final String canonicalEntity = path.canonicalize(entityPath);
 
   // Allow system temp
-  final String canonicalTemp = path.canonicalize(io.Directory.systemTemp.path);
+  String canonicalTemp;
+  final io.IOOverrides? currentOverrides = io.IOOverrides.current;
+  if (currentOverrides is FSGuardIOOverrides) {
+    canonicalTemp = currentOverrides._canonicalSystemTemp;
+  } else {
+    canonicalTemp = path.canonicalize(io.Directory.systemTemp.path);
+  }
+
   if (path.isWithin(canonicalTemp, canonicalEntity) || canonicalEntity == canonicalTemp) {
     return true;
   }
@@ -565,6 +572,17 @@ final class FSGuardIOOverrides extends io.IOOverrides {
   FSGuardIOOverrides() : _parent = io.IOOverrides.current;
 
   final io.IOOverrides? _parent;
+
+  late final String _canonicalSystemTemp = () {
+    final io.Directory rawTemp = _parent != null
+        ? _parent.getSystemTempDirectory()
+        : super.getSystemTempDirectory();
+    try {
+      return path.canonicalize(rawTemp.resolveSymbolicLinksSync());
+    } on Exception catch (_) {
+      return path.canonicalize(rawTemp.path);
+    }
+  }();
 
   @override
   io.File createFile(String path) {
