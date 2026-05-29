@@ -30,7 +30,7 @@ More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
 -->
 
-## Flutter 3.44 Changes 
+## Flutter 3.44 Changes
 
 ### [3.44.1](https://github.com/flutter/flutter/releases/tag/3.44.1)
 - [flutter/186962]((https://github.com/flutter/flutter/issues/186962) When the analysis server exits unexpectedly, the `flutter` tool can crash instead of outputting a descriptive error message.
@@ -40,7 +40,19 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 
 Learn about what's new in this release in [the blog post](https://blog.flutter.dev/whats-new-in-flutter-3-44-b0cc1ad3c527), and check out the [CHANGELOG](https://docs.flutter.dev/release/release-notes/release-notes-3.44.0) for a detailed list of all the new changes.
 
+
 ## Flutter 3.41 Changes
+
+### [3.41.9](https://github.com/flutter/flutter/releases/tag/3.41.9)
+- [flutter/185621](https://github.com/flutter/flutter/pull/185621) Fixes a potential integer overflow that can happen when handling some animated PNG files.
+
+### [3.41.8](https://github.com/flutter/flutter/releases/tag/3.41.8)
+- [flutter/185150](https://github.com/flutter/flutter/issues/185150) When using profile mode on a physical iOS device, the app may fail to connect to the Dart VM.
+
+### [3.41.7](https://github.com/flutter/flutter/releases/tag/3.41.7)
+- [flutter/184376](https://github.com/flutter/flutter/issues/184376) When building an iOS or macOS app, the build may fail due to git multi-pack-index error.
+- [flutter/184254](https://github.com/flutter/flutter/issues/184254) When debugging on physical iOS devices and Xcode 26.4+, app often crashes.
+- [flutter/184689](https://github.com/flutter/flutter/issues/184689) When using an ffi Windows package, don't require a plugin class.
 
 ### [3.41.6](https://github.com/flutter/flutter/releases/tag/3.41.6)
 - [flutter/184025](https://github.com/flutter/flutter/pull/184025) Include a fix from Skia that ensures that the correct atlas for the glyph mask format is used consistently.
