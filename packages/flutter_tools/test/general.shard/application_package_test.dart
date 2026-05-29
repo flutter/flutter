@@ -543,12 +543,10 @@ void main() {
 
     testUsingContext('returns null when there is no ios or .ios directory', () async {
       globals.fs.file('pubspec.yaml').createSync();
-      final iosApp =
-          await IOSApp.fromIosProject(
-                FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
-                null,
-              )
-              as BuildableIOSApp?;
+      final iosApp = await IOSApp.fromIosProject(
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        null,
+      ) as BuildableIOSApp?;
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -556,12 +554,10 @@ void main() {
     testUsingContext('returns null when there is no Runner.xcodeproj', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('ios/FooBar.xcodeproj').createSync(recursive: true);
-      final iosApp =
-          await IOSApp.fromIosProject(
-                FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
-                null,
-              )
-              as BuildableIOSApp?;
+      final iosApp = await IOSApp.fromIosProject(
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        null,
+      ) as BuildableIOSApp?;
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -569,12 +565,10 @@ void main() {
     testUsingContext('returns null when there is no Runner.xcodeproj/project.pbxproj', () async {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
-      final iosApp =
-          await IOSApp.fromIosProject(
-                FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
-                null,
-              )
-              as BuildableIOSApp?;
+      final iosApp = await IOSApp.fromIosProject(
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        null,
+      ) as BuildableIOSApp?;
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -584,12 +578,10 @@ void main() {
       final Directory project = globals.fs.directory('ios/Runner.xcodeproj')
         ..createSync(recursive: true);
       project.childFile('project.pbxproj').createSync();
-      final iosApp =
-          await IOSApp.fromIosProject(
-                FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
-                null,
-              )
-              as BuildableIOSApp?;
+      final iosApp = await IOSApp.fromIosProject(
+        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        null,
+      ) as BuildableIOSApp?;
 
       expect(iosApp, null);
     }, overrides: overrides);
