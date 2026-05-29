@@ -59,6 +59,9 @@ bool Context::MakeCurrent(const Surface& surface) const {
 }
 
 bool Context::ClearCurrent() const {
+  if (::eglGetCurrentContext() != context_) {
+    return true;
+  }
   DispatchLifecyleEvent(LifecycleEvent::kWillClearCurrent);
   const auto result = EGLMakeCurrentIfNecessary(display_,        //
                                                 EGL_NO_SURFACE,  //
