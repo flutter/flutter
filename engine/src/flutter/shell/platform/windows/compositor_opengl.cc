@@ -16,8 +16,9 @@ constexpr uint32_t kWindowFrameBufferId = 0;
 
 // The metadata for an OpenGL framebuffer backing store.
 struct FramebufferBackingStore {
-  uint32_t framebuffer_id;
-  uint32_t texture_id;
+  uint32_t framebuffer_id = 0;
+  uint32_t texture_id = 0;
+  uint32_t depth_stencil_id = 0;
 };
 
 typedef const impeller::GLProc<decltype(glBlitFramebuffer)> BlitFramebufferProc;
@@ -77,9 +78,8 @@ bool CompositorOpenGL::CreateBackingStore(
     }
 
     // Impeller always requires depth/stencil attachment.
-    GLuint depth_stencil = 0;
-    gl_->GenRenderbuffers(1, &depth_stencil);
-    gl_->BindRenderbuffer(GL_RENDERBUFFER, depth_stencil);
+    gl_->GenRenderbuffers(1, &store->depth_stencil_id);
+    gl_->BindRenderbuffer(GL_RENDERBUFFER, store->depth_stencil_id);
     if (supports_implicit_msaa_) {
       gl_->RenderbufferStorageMultisampleEXT(
           GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, config.size.width,
@@ -89,9 +89,9 @@ bool CompositorOpenGL::CreateBackingStore(
                                config.size.width, config.size.height);
     }
     gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                 GL_RENDERBUFFER, depth_stencil);
+                                 GL_RENDERBUFFER, store->depth_stencil_id);
     gl_->FramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-                                 GL_RENDERBUFFER, depth_stencil);
+                                 GL_RENDERBUFFER, store->depth_stencil_id);
   } else {
     gl_->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                               GL_TEXTURE_2D, store->texture_id, 0);
@@ -119,6 +119,10 @@ bool CompositorOpenGL::CollectBackingStore(const FlutterBackingStore* store) {
 
   gl_->DeleteFramebuffers(1, &user_data->framebuffer_id);
   gl_->DeleteTextures(1, &user_data->texture_id);
+
+  if (user_data->depth_stencil_id != 0) {
+    gl_->DeleteRenderbuffers(1, &user_data->depth_stencil_id);
+  }
 
   delete user_data;
   return true;
