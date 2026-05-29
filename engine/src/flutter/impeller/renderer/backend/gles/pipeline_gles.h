@@ -16,7 +16,7 @@ namespace impeller {
 class PipelineLibraryGLES;
 
 namespace testing {
-class RenderPassGLESViewportTest;
+class RenderPassGLESCommandTest;
 }  // namespace testing
 
 class PipelineGLES final
@@ -45,7 +45,7 @@ class PipelineGLES final
 
  private:
   friend PipelineLibraryGLES;
-  friend class testing::RenderPassGLESViewportTest;
+  friend class testing::RenderPassGLESCommandTest;
 
   std::shared_ptr<ReactorGLES> reactor_;
   std::shared_ptr<UniqueHandleGLES> handle_;
