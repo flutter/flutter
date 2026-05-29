@@ -23,12 +23,9 @@ Future<TaskResult> run() async {
     await inDirectory(appDir, () async {
       await flutter('packages', options: <String>['get']);
 
-      // Test running with --enable-impeller. Since macOS always uses SDF rendering when Impeller is enabled,
+      // Test running by default. Since macOS always uses SDF rendering when Impeller is enabled,
       // we should see "Using the Impeller rendering backend (MetalSDF)." in the output by default.
-      final Process process = await startFlutter(
-        'run',
-        options: <String>['--enable-impeller', '-d', 'macos'],
-      );
+      final Process process = await startFlutter('run', options: <String>['-d', 'macos']);
 
       final completer = Completer<void>();
       var sawMetalSdfsMessage = false;
