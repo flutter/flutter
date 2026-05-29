@@ -77,19 +77,6 @@ bool WindowsProcTable::GetHighContrastEnabled() const {
   return high_contrast.dwFlags & HCF_HIGHCONTRASTON;
 }
 
-bool WindowsProcTable::DwmIsCompositionEnabled() const {
-  BOOL composition_enabled;
-  if (SUCCEEDED(::DwmIsCompositionEnabled(&composition_enabled))) {
-    return composition_enabled;
-  }
-
-  return true;
-}
-
-HRESULT WindowsProcTable::DwmFlush() const {
-  return ::DwmFlush();
-}
-
 HCURSOR WindowsProcTable::LoadCursor(HINSTANCE instance,
                                      LPCWSTR cursor_name) const {
   return ::LoadCursorW(instance, cursor_name);

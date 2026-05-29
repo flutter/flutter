@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/windows/testing/flutter_windows_engine_builder.h"
 
 #include "flutter/fml/macros.h"
+#include "flutter/shell/platform/windows/testing/test_presentation_surface.h"
 #include "flutter/shell/platform/windows/windows_proc_table.h"
 
 namespace flutter {
@@ -100,8 +101,13 @@ std::unique_ptr<FlutterWindowsEngine> FlutterWindowsEngineBuilder::Build() {
   FlutterProjectBundle project(properties_);
   project.SetSwitches(switches_);
 
-  return std::make_unique<TestFlutterWindowsEngine>(
+  auto engine = std::make_unique<TestFlutterWindowsEngine>(
       project, get_key_state_, map_vk_to_scan_, std::move(windows_proc_table_));
+  engine->SetPresentationSurfaceFactoryForTesting(
+      [](HWND hwnd, size_t width, size_t height, egl::Manager* egl_manager) {
+        return std::make_unique<TestPresentationSurface>(width, height);
+      });
+  return engine;
 }
 
 }  // namespace testing

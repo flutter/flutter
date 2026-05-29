@@ -13,6 +13,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
+#include "flutter/shell/platform/windows/testing/test_presentation_surface.h"
 #include "flutter/shell/platform/windows/testing/windows_test_context.h"
 
 namespace flutter {
@@ -87,7 +88,15 @@ FlutterDesktopEngineProperties WindowsConfigBuilder::GetEngineProperties()
 
 EnginePtr WindowsConfigBuilder::InitializeEngine() const {
   FlutterDesktopEngineProperties engine_properties = GetEngineProperties();
-  return EnginePtr{FlutterDesktopEngineCreate(&engine_properties)};
+  EnginePtr engine{FlutterDesktopEngineCreate(&engine_properties)};
+  if (engine) {
+    auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+    windows_engine->SetPresentationSurfaceFactoryForTesting(
+        [](HWND hwnd, size_t width, size_t height, egl::Manager* egl_manager) {
+          return std::make_unique<TestPresentationSurface>(width, height);
+        });
+  }
+  return engine;
 }
 
 EnginePtr WindowsConfigBuilder::RunHeadless() const {

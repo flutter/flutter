@@ -48,11 +48,6 @@ class EngineModifier {
     engine_->views_[viewId] = view;
   }
 
-  /// Reset the start_time field that is used to align vsync events.
-  void SetStartTime(uint64_t start_time_nanos) {
-    engine_->start_time_ = std::chrono::nanoseconds(start_time_nanos);
-  }
-
   /// Override the frame interval to the provided nanosecond interval.
   ///
   /// This will prevent the windows engine from delegating to dwm to
@@ -60,6 +55,13 @@ class EngineModifier {
   void SetFrameInterval(uint64_t frame_interval_nanos) {
     engine_->frame_interval_override_ =
         std::optional<std::chrono::nanoseconds>(frame_interval_nanos);
+  }
+
+  void SetFrameClockForTesting(WindowsFrameClock::VsyncWaiter vsync_waiter) {
+    engine_->frame_clock_ = std::make_unique<WindowsFrameClock>(
+        engine_->task_runner_.get(), engine_->embedder_api_.GetCurrentTime,
+        [engine = engine_](HWND hwnd) { return engine->FrameInterval(hwnd); },
+        std::move(vsync_waiter));
   }
 
   // Explicitly releases the egl::Manager being used by the

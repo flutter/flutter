@@ -24,7 +24,6 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/egl/context.h"
 #include "flutter/shell/platform/windows/egl/surface.h"
-#include "flutter/shell/platform/windows/egl/window_surface.h"
 
 namespace flutter {
 namespace egl {
@@ -45,20 +44,6 @@ class Manager {
 
   // Whether the manager is currently valid.
   bool IsValid() const;
-
-  // Creates an EGL surface that can be used to render a Flutter view into a
-  // win32 HWND.
-  //
-  // After the surface is created, |WindowSurface::SetVSyncEnabled| should be
-  // called on a thread that can make the surface current.
-  //
-  // HWND is the window backing the surface. Width and height are the surface's
-  // physical pixel dimensions.
-  //
-  // Returns nullptr on failure.
-  virtual std::unique_ptr<WindowSurface> CreateWindowSurface(HWND hwnd,
-                                                             size_t width,
-                                                             size_t height);
 
   // Check if the current thread has a context bound.
   bool HasContextCurrent();

@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_FLUTTER_WINDOWS_ENGINE_H_
 
 #include <chrono>
+#include <functional>
 #include <map>
 #include <memory>
 #include <optional>
@@ -43,6 +44,7 @@
 #include "flutter/shell/platform/windows/text_input_plugin.h"
 #include "flutter/shell/platform/windows/window_proc_delegate_manager.h"
 #include "flutter/shell/platform/windows/window_state.h"
+#include "flutter/shell/platform/windows/windows_frame_clock.h"
 #include "flutter/shell/platform/windows/windows_lifecycle_manager.h"
 #include "flutter/shell/platform/windows/windows_proc_table.h"
 #include "third_party/rapidjson/include/rapidjson/document.h"
@@ -57,6 +59,7 @@ constexpr FlutterViewId kImplicitViewId = 0;
 
 class FlutterWindowsView;
 class DisplayManagerWin32;
+class PresentationSurface;
 
 // Update the thread priority for the Windows engine.
 static void WindowsPlatformThreadPrioritySetter(
@@ -91,6 +94,9 @@ static void WindowsPlatformThreadPrioritySetter(
 // run in headless mode.
 class FlutterWindowsEngine {
  public:
+  using PresentationSurfaceFactory = std::function<std::unique_ptr<
+      PresentationSurface>(HWND, size_t, size_t, egl::Manager*)>;
+
   // Creates a new Flutter engine object configured to run |project|.
   FlutterWindowsEngine(
       const FlutterProjectBundle& project,
@@ -171,6 +177,9 @@ class FlutterWindowsEngine {
   void UpdateDisplay(const std::vector<FlutterEngineDisplay>& displays);
 
   TaskRunner* task_runner() { return task_runner_.get(); }
+
+  void RegisterFramePacingWindow(FlutterViewId view_id, HWND hwnd);
+  void UnregisterFramePacingWindow(FlutterViewId view_id);
 
   BinaryMessenger* messenger_wrapper() { return messenger_wrapper_.get(); }
 
@@ -303,8 +312,6 @@ class FlutterWindowsEngine {
                               AppExitType exit_type);
 
   // Called when a WM_DWMCOMPOSITIONCHANGED message is received.
-  void OnDwmCompositionChanged();
-
   // Called when a Window receives an event that may alter the application
   // lifecycle state.
   void OnWindowStateEvent(HWND hwnd, WindowStateEvent event);
@@ -337,6 +344,15 @@ class FlutterWindowsEngine {
   // Returns the root view associated with the top-level window with |hwnd| as
   // the window handle or nullptr if no such view could be found.
   FlutterWindowsView* GetViewFromTopLevelWindow(HWND hwnd) const;
+
+  std::unique_ptr<PresentationSurface> CreatePresentationSurface(
+      HWND hwnd,
+      size_t width,
+      size_t height,
+      egl::Manager* egl_manager);
+
+  void SetPresentationSurfaceFactoryForTesting(
+      PresentationSurfaceFactory presentation_surface_factory);
 
  protected:
   // Creates the keyboard key handler.
@@ -497,13 +513,17 @@ class FlutterWindowsEngine {
 
   // The approximate time between vblank events.
   std::chrono::nanoseconds FrameInterval();
-
-  // The start time used to align frames.
-  std::chrono::nanoseconds start_time_ = std::chrono::nanoseconds::zero();
+  std::chrono::nanoseconds FrameInterval(HWND hwnd);
 
   // An override of the frame interval used by EngineModifier for testing.
   std::optional<std::chrono::nanoseconds> frame_interval_override_ =
       std::nullopt;
+
+  std::unique_ptr<WindowsFrameClock> frame_clock_;
+
+  PresentationSurfaceFactory presentation_surface_factory_;
+
+  std::map<FlutterViewId, HWND> frame_pacing_windows_;
 
   bool semantics_enabled_ = false;
 

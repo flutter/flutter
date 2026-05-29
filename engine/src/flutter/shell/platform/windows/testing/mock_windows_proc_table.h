@@ -40,10 +40,6 @@ class MockWindowsProcTable : public WindowsProcTable {
 
   MOCK_METHOD(bool, GetHighContrastEnabled, (), (const, override));
 
-  MOCK_METHOD(bool, DwmIsCompositionEnabled, (), (const, override));
-
-  MOCK_METHOD(HRESULT, DwmFlush, (), (const, override));
-
   MOCK_METHOD(HCURSOR,
               LoadCursor,
               (HINSTANCE instance, LPCWSTR cursor_name),

@@ -19,6 +19,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
+#include "flutter/shell/platform/windows/presentation_surface.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/window_binding_handler.h"
 #include "flutter/shell/platform/windows/window_binding_handler_delegate.h"
@@ -83,10 +84,10 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // This is a no-op if using software rasterization.
   void CreateRenderSurface();
 
-  // Get the EGL surface that backs the Flutter view.
+  // Get the Presentation Manager surface that backs the Flutter view.
   //
   // This might be nullptr or an invalid surface.
-  egl::WindowSurface* surface() const;
+  PresentationSurface* presentation_surface() const;
 
   // Return the currently configured HWND.
   virtual HWND GetWindowHandle() const;
@@ -125,15 +126,14 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Called on the raster thread when |CompositorOpenGL| receives an empty
   // frame. Returns true if the frame can be presented.
   //
-  // This destroys and then re-creates the view's surface if a resize is
-  // pending.
+  // This resizes the view's presentation surface if a resize is pending.
   bool OnEmptyFrameGenerated();
 
   // Called on the raster thread when |CompositorOpenGL| receives a frame.
   // Returns true if the frame can be presented.
   //
-  // This destroys and then re-creates the view's surface if a resize is pending
-  // and |width| and |height| match the target size.
+  // This resizes the view's presentation surface if a resize is pending and
+  // |width| and |height| match the target size.
   bool OnFrameGenerated(size_t width, size_t height);
 
   // Called on the raster thread after |CompositorOpenGL| presents a frame.
@@ -250,9 +250,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Notifies the delegate that the system IME composing state should be reset.
   virtual void OnResetImeComposing();
 
-  // Called when a WM_ONCOMPOSITIONCHANGED message is received.
-  void OnDwmCompositionChanged();
-
   // Get a pointer to the alert node for this view.
   ui::AXPlatformNodeWin* AlertNode() const;
 
@@ -332,16 +329,17 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
     kDone,
   };
 
-  // Resize the surface to the desired size.
+  // Resize the presentation surface to the desired size.
   //
-  // If the dimensions have changed, this destroys the original surface and
-  // creates a new one.
-  //
-  // This must be run on the raster thread. This binds the surface to the
-  // current thread.
+  // This must be run on the raster thread. This binds a presentation buffer's
+  // EGL surface to the current thread.
   //
   // Width and height are the surface's desired physical pixel dimensions.
   bool ResizeRenderSurface(size_t width, size_t height);
+
+  // Creates a Presentation Manager surface for this view with explicit
+  // dimensions.
+  bool CreateRenderSurface(size_t width, size_t height);
 
   // Sends a window metrics update to the Flutter engine using current window
   // dimensions in physical pixels.
@@ -445,10 +443,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // it. Called from the raster thread after a frame is presented.
   void FireFirstFrameCallbackIfSet();
 
-  // If true, rendering to the window should synchronize with the vsync
-  // to prevent screen tearing.
-  bool NeedsVsync() const;
-
   // If true, the view is sized to its content via a sizing delegate.
   // If false, the view is sized by its parent HWND or by the user.
   //
@@ -467,11 +461,11 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // Mocks win32 APIs.
   std::shared_ptr<WindowsProcTable> windows_proc_table_;
 
-  // The EGL surface backing the view.
+  // The Presentation Manager surface backing the view.
   //
-  // Null if using software rasterization, the surface hasn't been created yet,
-  // or if surface creation failed.
-  std::unique_ptr<egl::WindowSurface> surface_ = nullptr;
+  // Null if using software rasterization, the presentation surface hasn't been
+  // created yet, or if presentation surface creation failed.
+  std::unique_ptr<PresentationSurface> presentation_surface_ = nullptr;
 
   // Keeps track of pointer states in relation to the window.
   std::unordered_map<int32_t, std::unique_ptr<PointerState>> pointer_states_;

@@ -65,19 +65,6 @@ class WindowsProcTable {
   // https://learn.microsoft.com/windows/win32/winauto/high-contrast-parameter
   virtual bool GetHighContrastEnabled() const;
 
-  // Get whether the system compositor, DWM, is enabled.
-  //
-  // See:
-  // https://learn.microsoft.com/windows/win32/api/dwmapi/nf-dwmapi-dwmiscompositionenabled
-  virtual bool DwmIsCompositionEnabled() const;
-
-  // Issues a flush call that blocks the caller until all of the outstanding
-  // surface updates have been made.
-  //
-  // See:
-  // https://learn.microsoft.com/windows/win32/api/dwmapi/nf-dwmapi-dwmflush
-  virtual HRESULT DwmFlush() const;
-
   // Loads the specified cursor resource from the executable (.exe) file
   // associated with an application instance.
   //

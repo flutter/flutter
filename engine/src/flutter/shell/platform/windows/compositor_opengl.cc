@@ -156,11 +156,12 @@ bool CompositorOpenGL::Present(FlutterWindowsView* view,
     return false;
   }
 
-  // |OnFrameGenerated| should return false if the surface isn't valid.
-  FML_DCHECK(view->surface() != nullptr);
-  FML_DCHECK(view->surface()->IsValid());
+  // |OnFrameGenerated| should return false if the presentation surface isn't
+  // valid.
+  FML_DCHECK(view->presentation_surface() != nullptr);
+  FML_DCHECK(view->presentation_surface()->IsValid());
 
-  egl::WindowSurface* surface = view->surface();
+  PresentationSurface* surface = view->presentation_surface();
   if (!surface->MakeCurrent()) {
     return false;
   }
@@ -187,7 +188,8 @@ bool CompositorOpenGL::Present(FlutterWindowsView* view,
                   GL_NEAREST            // filter
   );
 
-  if (!surface->SwapBuffers()) {
+  gl_->Flush();
+  if (!surface->Present()) {
     return false;
   }
 
@@ -239,11 +241,12 @@ bool CompositorOpenGL::Clear(FlutterWindowsView* view) {
     return false;
   }
 
-  // |OnEmptyFrameGenerated| should return false if the surface isn't valid.
-  FML_DCHECK(view->surface() != nullptr);
-  FML_DCHECK(view->surface()->IsValid());
+  // |OnEmptyFrameGenerated| should return false if the presentation surface
+  // isn't valid.
+  FML_DCHECK(view->presentation_surface() != nullptr);
+  FML_DCHECK(view->presentation_surface()->IsValid());
 
-  egl::WindowSurface* surface = view->surface();
+  PresentationSurface* surface = view->presentation_surface();
   if (!surface->MakeCurrent()) {
     return false;
   }
@@ -251,7 +254,8 @@ bool CompositorOpenGL::Clear(FlutterWindowsView* view) {
   gl_->ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   gl_->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-  if (!surface->SwapBuffers()) {
+  gl_->Flush();
+  if (!surface->Present()) {
     return false;
   }
 
