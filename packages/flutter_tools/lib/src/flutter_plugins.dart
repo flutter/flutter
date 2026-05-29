@@ -1448,7 +1448,6 @@ Future<void> injectPlugins(
         darwinDependencyManagement ??
         DarwinDependencyManagement(
           project: project,
-          plugins: plugins,
           cocoapods: globals.cocoaPods,
           swiftPackageManager: SwiftPackageManager(
             fileSystem: globals.fs,
@@ -1459,14 +1458,18 @@ Future<void> injectPlugins(
           fileSystem: globals.fs,
           featureFlags: featureFlags,
           analytics: globals.analytics,
-          xcodeProjectInterpreter: globals.xcodeProjectInterpreter,
-          config: globals.config,
         );
     if (iosPlatform) {
-      await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.ios);
+      await darwinDependencyManagerSetup.setUp(
+        platform: FlutterDarwinPlatform.ios,
+        plugins: pluginsByPlatform[IOSPlugin.kConfigKey]!,
+      );
     }
     if (macOSPlatform) {
-      await darwinDependencyManagerSetup.setUp(platform: FlutterDarwinPlatform.macos);
+      await darwinDependencyManagerSetup.setUp(
+        platform: FlutterDarwinPlatform.macos,
+        plugins: pluginsByPlatform[MacOSPlugin.kConfigKey]!,
+      );
     }
   }
 }
@@ -1476,6 +1479,26 @@ Future<void> injectPlugins(
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 bool hasPlugins(FlutterProject project) {
   return _readFileContent(project.flutterPluginsDependenciesFile) != null;
+}
+
+/// Resolves the plugin implementations for the platform specified by [platformKey].
+///
+/// Uses [_resolvePluginImplementations] with [_PluginResolutionType.nativeOrDart]
+/// to find which plugins are resolved for the given platform.
+///
+/// If [quiet] is true, validation and resolution errors or warnings will not
+/// be printed.
+List<Plugin> resolvePluginImplementationsForPlatform(
+  List<Plugin> plugins,
+  String platformKey, {
+  bool quiet = false,
+}) {
+  final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
+    plugins,
+    pluginResolutionType: _PluginResolutionType.nativeOrDart,
+    quiet: quiet,
+  );
+  return pluginsByPlatform[platformKey] ?? [];
 }
 
 /// Resolves the plugin implementations for all platforms.
@@ -1514,9 +1537,13 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 /// see [resolvePlatformImplementation].
 ///
 /// Only plugins which provide the according platform implementation are returned.
+///
+/// If [quiet] is true, validation and resolution errors or warnings will not
+/// be printed.
 Map<String, List<Plugin>> _resolvePluginImplementations(
   List<Plugin> plugins, {
   required _PluginResolutionType pluginResolutionType,
+  bool quiet = false,
 }) {
   final pluginsByPlatform = <String, List<Plugin>>{
     AndroidPlugin.kConfigKey: <Plugin>[],
@@ -1539,6 +1566,7 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
       plugins,
       platformKey,
       pluginResolutionType: pluginResolutionType,
+      quiet: quiet,
     );
 
     if (hasPlatformPluginPubspecError) {
@@ -1560,11 +1588,15 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
 
 /// Resolves the plugins for the given [platformKey] (Dart-only or native
 /// implementations).
+///
+/// If [quiet] is true, validation and resolution errors or warnings will not
+/// be printed.
 (List<Plugin> pluginImplementations, bool hasPluginPubspecError, bool hasResolutionError)
 _resolvePluginImplementationsByPlatform(
   Iterable<Plugin> plugins,
   String platformKey, {
   _PluginResolutionType pluginResolutionType = _PluginResolutionType.nativeOrDart,
+  bool quiet = false,
 }) {
   var hasPluginPubspecError = false;
   var hasResolutionError = false;
@@ -1582,7 +1614,9 @@ _resolvePluginImplementationsByPlatform(
       pluginResolutionType: pluginResolutionType,
     );
     if (error != null) {
-      globals.printError(error);
+      if (!quiet) {
+        globals.printError(error);
+      }
       hasPluginPubspecError = true;
       continue;
     }
@@ -1621,18 +1655,22 @@ _resolvePluginImplementationsByPlatform(
           }
         } else {
           // Only warn, if neither an implementation for native nor for Dart is given.
-          globals.printWarning(
-            'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but it does not provide an inline implementation.\n'
-            'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
-            'or add an inline implementation to $defaultImplPluginName via `platforms: $platformKey:` `pluginClass` or `dartPluginClass`.\n',
-          );
+          if (!quiet) {
+            globals.printWarning(
+              'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but it does not provide an inline implementation.\n'
+              'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
+              'or add an inline implementation to $defaultImplPluginName via `platforms: $platformKey:` `pluginClass` or `dartPluginClass`.\n',
+            );
+          }
         }
       } else {
-        globals.printWarning(
-          'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but the package does not exist, or is not a plugin package.\n'
-          'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
-          'or create a plugin named $defaultImplPluginName.\n',
-        );
+        if (!quiet) {
+          globals.printWarning(
+            'Package ${plugin.name}:$platformKey references $defaultImplPluginName:$platformKey as the default plugin, but the package does not exist, or is not a plugin package.\n'
+            'Ask the maintainers of ${plugin.name} to either avoid referencing a default implementation via `platforms: $platformKey: default_package: $defaultImplPluginName` '
+            'or create a plugin named $defaultImplPluginName.\n',
+          );
+        }
       }
     }
     if (implementsPluginName != null) {
@@ -1654,7 +1692,9 @@ _resolvePluginImplementationsByPlatform(
       defaultPackage: defaultImplementations[implCandidatesEntry.key],
     );
     if (error != null) {
-      globals.printError(error);
+      if (!quiet) {
+        globals.printError(error);
+      }
       hasResolutionError = true;
     } else if (resolution != null) {
       pluginResolution[implCandidatesEntry.key] = resolution;
