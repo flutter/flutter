@@ -3,17 +3,16 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardInsetManager.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient+FML.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
-#import "flutter/shell/platform/embedder/embedder.h"
-#import "flutter/third_party/spring_animation/spring_animation.h"
 
 #include <memory>
 
 #include "flutter/fml/platform/darwin/platform_version.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
+#import "flutter/shell/platform/embedder/embedder.h"
+#import "flutter/third_party/spring_animation/spring_animation.h"
 
 @interface FlutterKeyboardInsetManager ()
 
@@ -273,7 +272,7 @@
   // Set animation begin value and DisplayLink tracking values.
   CGFloat currentInset = delegate.physicalViewInsetBottom;
   self.keyboardAnimationView.frame = CGRectMake(0, currentInset, 0, 0);
-  self.keyboardAnimationStartTime = fml::TimePoint::Now().ToEpochDelta().ToSeconds();
+  self.keyboardAnimationStartTime = CACurrentMediaTime();
   self.originalViewInsetBottom = currentInset;
 
   // Invalidate old vsync client if old animation is not completed.

@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:js_interop';
+import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
@@ -144,7 +145,7 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
           );
           assert(missingCodePointCount == returnedCodePointCount);
           FallbackFontService.instance.addMissingCodePoints(
-            List<int>.generate(missingCodePointCount, (int index) => codePointBuffer[index]),
+            codePointBuffer.toUint32List(missingCodePointCount),
           );
         });
       }
@@ -978,8 +979,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
       text = '';
       jsText = ''.toJS;
     } else {
-      final codeUnitList = List<int>.generate(outSize.value, (int index) => utf8Data[index]);
-      text = utf8.decode(codeUnitList);
+      text = utf8.decode(utf8Data.toUint8List(outSize.value));
       jsText = _utf8Decoder.decode(
         // In an ideal world we would just use a subview of wasm memory rather
         // than a slice, but the TextDecoder API doesn't work on shared buffer
@@ -1089,5 +1089,31 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     textStyle.applyToNative(nativeStyle);
     textStyleStack.add(nativeStyle);
     paragraphBuilderPushStyle(handle, nativeStyle.handle);
+  }
+}
+
+/// Using a specialized local extension rather than a generic List<int>.generate
+/// prevents dart2wasm from dynamically boxing the primitive integers into
+/// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+extension on Pointer<Uint8> {
+  Uint8List toUint8List(int length) {
+    final list = Uint8List(length);
+    for (int i = length - 1; i >= 0; i--) {
+      list[i] = this[i];
+    }
+    return list;
+  }
+}
+
+/// Using a specialized local extension rather than a generic List<int>.generate
+/// prevents dart2wasm from dynamically boxing the primitive integers into
+/// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+extension on Pointer<Uint32> {
+  Uint32List toUint32List(int length) {
+    final list = Uint32List(length);
+    for (int i = length - 1; i >= 0; i--) {
+      list[i] = this[i];
+    }
+    return list;
   }
 }

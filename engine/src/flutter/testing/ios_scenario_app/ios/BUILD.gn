@@ -39,22 +39,17 @@ copy("copy_info_plist") {
   outputs = [ "$_app_framework_dir/Info.plist" ]
 }
 
-copy_trees("scenario_ios") {
-  sources = [
-    {
-      target = "copy_ios_xcodeproj"
-      visibility = [ ":*" ]
-      source = "."
-      dest = "$root_out_dir/ios_scenario_app"
+copy_tree("copy_ios_xcodeproj") {
+  visibility = [ ":*" ]
+  source = "."
+  dest = "$root_out_dir/ios_scenario_app"
 
-      # Ignore any stale App.framework or Flutter.xcframework files from
-      # historical builds.
-      # This can eventually be set to "{}" when all CI builder caches have been
-      # flushed that might still have these stale gitignored files from previous
-      # build scripts.
-      ignore_patterns = "*.*framework"
-    },
-  ]
+  # Ignore any stale App.framework or Flutter.xcframework files from
+  # historical builds.
+  # This can eventually be set to "{}" when all CI builder caches have been
+  # flushed that might still have these stale gitignored files from previous
+  # build scripts.
+  exclude = "*.*framework"
 }
 
 group("ios") {

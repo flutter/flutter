@@ -33,7 +33,7 @@ std::optional<Rect> UberSDFGeometry::GetCoverage(
 }
 
 bool UberSDFGeometry::CoversArea(const Matrix& transform,
-                                 const Rect& rect) const {
+                                 const IRect& rect) const {
   if (params_.type == UberSDFParameters::Type::kRect && !params_.stroke &&
       transform.IsTranslationScaleOnly()) {
     // The SDF is a filled axis-aligned rectangle. It "covers" the input rect if
