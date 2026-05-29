@@ -58,6 +58,37 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getSupportsOffscreenMSAA();
   }
 
+  /// Whether this device supports the given family of block-compressed
+  /// texture formats. Hardware support is granted on a per-family basis.
+  ///
+  /// Compressed textures are always sample-only (no render target, no shader
+  /// write, no multisampling, and dimensions must be a multiple of the format
+  /// block size). [supportsTextureFormat] can be used for a per-format check.
+  bool supportsTextureCompression(TextureCompressionFamily family) {
+    return _supportsTextureCompression(family.index);
+  }
+
+  /// Whether this device can allocate a texture of the given [format] with
+  /// the requested usage flags.
+  ///
+  /// For block-compressed formats this returns false if either [renderTarget]
+  /// or [shaderWrite] is true, since compressed formats are sample-only.
+  /// For uncompressed formats this currently returns true: today the
+  /// underlying capability surface does not vary by per-format usage.
+  bool supportsTextureFormat(
+    PixelFormat format, {
+    bool renderTarget = false,
+    bool shaderRead = true,
+    bool shaderWrite = false,
+  }) {
+    return _supportsTextureFormat(
+      format.index,
+      renderTarget,
+      shaderRead,
+      shaderWrite,
+    );
+  }
+
   /// Allocates a new region of GPU-resident memory.
   ///
   /// The [storageMode] must be either [StorageMode.hostVisible] or
@@ -144,6 +175,27 @@ base class GpuContext extends NativeFieldWrapperClass1 {
         'for a ${width}x$height texture',
       );
     }
+    if (format.isCompressed) {
+      if (enableRenderTargetUsage ||
+          enableShaderWriteUsage ||
+          !enableShaderReadUsage ||
+          sampleCount != 1 ||
+          storageMode == StorageMode.deviceTransient) {
+        throw Exception(
+          'Compressed pixel format $format can only be used as a sample-only '
+          'texture (sampleCount=1, enableShaderReadUsage=true, no render '
+          'target, no shader write, and storageMode != deviceTransient)',
+        );
+      }
+      final int bw = format.blockWidth;
+      final int bh = format.blockHeight;
+      if (width % bw != 0 || height % bh != 0) {
+        throw Exception(
+          'Compressed pixel format $format requires width and height to be a '
+          'multiple of the block size (${bw}x$bh), got ${width}x$height',
+        );
+      }
+    }
     Texture result = Texture._initialize(
       this,
       storageMode,
@@ -210,6 +262,21 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetSupportsOffscreenMSAA',
   )
   external bool _getSupportsOffscreenMSAA();
+
+  @Native<Bool Function(Pointer<Void>, Int)>(
+    symbol: 'InternalFlutterGpu_Context_SupportsTextureCompression',
+  )
+  external bool _supportsTextureCompression(int family);
+
+  @Native<Bool Function(Pointer<Void>, Int, Bool, Bool, Bool)>(
+    symbol: 'InternalFlutterGpu_Context_SupportsTextureFormat',
+  )
+  external bool _supportsTextureFormat(
+    int format,
+    bool renderTarget,
+    bool shaderRead,
+    bool shaderWrite,
+  );
 }
 
 /// The default graphics context.
