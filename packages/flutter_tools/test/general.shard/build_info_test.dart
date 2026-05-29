@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -289,7 +288,7 @@ void main() {
     });
   });
 
-  testWithoutContext('toGradleConfig encoding of standard values', () {
+  testUsingContext('toGradleConfig encoding of standard values', () {
     const buildInfo = BuildInfo(
       BuildMode.debug,
       '',
@@ -306,20 +305,33 @@ void main() {
       androidProjectArgs: <String>['foo=bar', 'fizz=bazz'],
     );
 
-    expect(buildInfo.toGradleConfig(), <String>[
-      '-Pdart-defines=${encodeDartDefinesMap(<String, String>{'foo': '2', 'bar': '2'})}',
-      '-Pdart-obfuscation=true',
-      '-Pfrontend-server-starter-path=foo/bar/frontend_server_starter.dart',
-      '-Pextra-front-end-options=--enable-experiment=non-nullable,bar',
-      '-Pextra-gen-snapshot-options=--enable-experiment=non-nullable,fizz',
-      '-Psplit-debug-info=foo/',
-      '-Ptrack-widget-creation=true',
-      '-Ptree-shake-icons=true',
-      '-Pcode-size-directory=foo/code-size',
-      '-Pfoo=bar',
-      '-Pfizz=bazz',
-    ]);
-  });
+    expect(
+      encodeDartDefines(buildInfo.dartDefines),
+      encodeDartDefinesMap(<String, String>{'foo': '2', 'bar': '2'}),
+    );
+
+    final List<String> gradleConfig = buildInfo.toGradleConfig();
+    expect(gradleConfig.first, startsWith('-Pdart-defines-file='));
+    expect(
+      gradleConfig.skip(1).toList(),
+      <String>[
+        '-Pdart-obfuscation=true',
+        '-Pfrontend-server-starter-path=foo/bar/frontend_server_starter.dart',
+        '-Pextra-front-end-options=--enable-experiment=non-nullable,bar',
+        '-Pextra-gen-snapshot-options=--enable-experiment=non-nullable,fizz',
+        '-Psplit-debug-info=foo/',
+        '-Ptrack-widget-creation=true',
+        '-Ptree-shake-icons=true',
+        '-Pcode-size-directory=foo/code-size',
+        '-Pfoo=bar',
+        '-Pfizz=bazz',
+      ],
+    );
+  },
+  overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
 
   testWithoutContext('encodeDartDefines encodes define values with base64 encoded components', () {
     expect(encodeDartDefines(<String>['"hello"']), 'ImhlbGxvIg==');

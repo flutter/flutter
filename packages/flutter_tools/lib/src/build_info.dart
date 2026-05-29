@@ -407,9 +407,27 @@ class BuildInfo {
   /// Convert this config to a series of project level arguments to be passed
   /// on the command line to gradle.
   List<String> toGradleConfig() {
+  String? dartDefinesFilePath;
+
+  if (dartDefines.isNotEmpty) {
+    final buildId = DateTime.now().millisecondsSinceEpoch.toString();
+    final String encoded = encodeDartDefines(dartDefines);
+    final String buildDir = getAndroidBuildDirectory();
+    final Directory dartDefinesDir = globals.fs.directory(buildDir)
+        .childDirectory('app')
+        .childDirectory('intermediates')
+        .childDirectory('flutter')
+        .childDirectory(buildId);
+
+    dartDefinesDir.createSync(recursive: true);
+    final File dartDefinesFile = dartDefinesDir.childFile('dart_defines.properties');
+    dartDefinesFile.writeAsStringSync(encoded);
+    dartDefinesFilePath = dartDefinesFile.path;
+  }
+
     // PACKAGE_CONFIG not currently supported.
     return <String>[
-      if (dartDefines.isNotEmpty) '-Pdart-defines=${encodeDartDefines(dartDefines)}',
+      if (dartDefinesFilePath != null) '-Pdart-defines-file=$dartDefinesFilePath',
       '-Pdart-obfuscation=$dartObfuscation',
       if (frontendServerStarterPath != null)
         '-Pfrontend-server-starter-path=$frontendServerStarterPath',

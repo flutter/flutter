@@ -272,7 +272,7 @@ class FlutterPlugin : Plugin<Project> {
             defaultValue
         )
     }
-
+    
     private fun addTaskForLockfileGeneration(rootProject: Project) {
         rootProject.tasks.register("generateLockfiles") {
             doLast {
@@ -605,7 +605,21 @@ class FlutterPlugin : Plugin<Project> {
                 project.findProperty("dart-obfuscation")?.toString()?.toBoolean() ?: false
             val treeShakeIconsOptionsValue: Boolean =
                 project.findProperty("tree-shake-icons")?.toString()?.toBoolean() ?: false
-            val dartDefinesValue: String? = project.findProperty("dart-defines")?.toString()
+            // Read dart-defines from a dedicated file specified by -Pdart-defines-file.
+            // Using providers.fileContents is Gradle configuration cache compliant and
+            // avoids the race conditions of reading from a shared local.properties file.
+            val dartDefinesValue: String? =
+                project.findProperty("dart-defines-file")?.toString()?.let { filePath ->
+                    val file = project.file(filePath)
+                    if (file.exists()) {
+                        val content = project.providers.fileContents(
+                            project.layout.projectDirectory.file(file.absolutePath)
+                        ).asText.orNull?.trim()
+                        content?.ifEmpty { null }
+                    } else {
+                        null
+                    }
+                } ?: project.findProperty("dart-defines")?.toString()
             val performanceMeasurementFileValue: String? =
                 project.findProperty("performance-measurement-file")?.toString()
             val codeSizeDirectoryValue: String? =
