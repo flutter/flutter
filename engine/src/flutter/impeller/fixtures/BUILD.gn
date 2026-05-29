@@ -51,6 +51,8 @@ impeller_shaders("shader_fixtures") {
     "impeller.vert",
     "inactive_uniforms.frag",
     "inactive_uniforms.vert",
+    "instanced_attributes.frag",
+    "instanced_attributes.vert",
     "instanced_draw.frag",
     "instanced_draw.vert",
     "mipmaps.frag",
@@ -183,6 +185,7 @@ test_fixtures("file_fixtures") {
     "wtf.otf",
     "texture_lookup.frag",
     "mat2_test.frag",
+    "y_flip_early_return.vert",
   ]
   if (host_os == "mac") {
     fixtures += [ "/System/Library/Fonts/Apple Color Emoji.ttc" ]

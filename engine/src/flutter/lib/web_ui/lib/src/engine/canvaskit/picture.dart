@@ -138,7 +138,7 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
     if (pixels == null) {
       throw StateError('Unable to convert read pixels from SkImage.');
     }
-    final SkImage? rasterImage = canvasKit.MakeImage(imageInfo, pixels, (4 * width).toDouble());
+    final SkImage? rasterImage = canvasKit.MakeImage(imageInfo, pixels, 4 * width);
     if (rasterImage == null) {
       throw StateError('Unable to convert image pixels into SkImage.');
     }
