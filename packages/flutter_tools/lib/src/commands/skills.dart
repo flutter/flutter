@@ -41,13 +41,14 @@ class SkillsCommand extends FlutterCommand {
 /// Fetches the skills registry from the remote repository.
 Future<List<Map<String, dynamic>>> _fetchSkillsRegistry() async {
   final Uri registryUrl = Uri.parse(
-    'https://raw.githubusercontent.com/flutter/skills/main/registry.json',
+    'https://raw.githubusercontent.com/flutter/skills/main/README.md',
   );
 
   final fallbackSkills = <Map<String, dynamic>>[
     <String, dynamic>{
       'name': 'clear_logs_skill',
       'description': 'Cleans up and rolls back build log artifacts automatically.',
+      'path': 'skills/clear_logs_skill/SKILL.md',
       'content': '# Clear Logs Skill\n\nAlways analyze target directory for stale .log profiles.',
     },
   ];
@@ -61,31 +62,31 @@ Future<List<Map<String, dynamic>>> _fetchSkillsRegistry() async {
 
     if (response.statusCode == 200) {
       final String body = await response.transform(utf8.decoder).join();
-      final dynamic decoded = jsonDecode(body);
-      if (decoded is Map<String, dynamic>) {
-        final dynamic rawSkills = decoded['skills'];
-        if (rawSkills is List) {
-          final skills = <Map<String, dynamic>>[];
-          for (final Map<dynamic, dynamic> rawSkill
-              in rawSkills.whereType<Map<dynamic, dynamic>>()) {
-            final dynamic name = rawSkill['name'];
-            final dynamic description = rawSkill['description'];
-            final dynamic content = rawSkill['content'];
-            if (name is String && description is String) {
-              skills.add(<String, dynamic>{
-                'name': name,
-                'description': description,
-                'content': content is String ? content : '',
-              });
-            }
-          }
-          return skills;
-        }
+      final skills = <Map<String, dynamic>>[];
+      final tableLineRegex = RegExp(
+        r'^\| \[([^\]]+)\]\(([^)]+)\) \| ([^|]+) \| ([^|]+) \|$',
+        multiLine: true,
+      );
+
+      for (final RegExpMatch match in tableLineRegex.allMatches(body)) {
+        final String name = match.group(1)!.trim();
+        final String path = match.group(2)!.trim();
+        final String description = match.group(3)!.trim();
+        final String prompt = match.group(4)!.trim();
+
+        skills.add(<String, dynamic>{
+          'name': name,
+          'description': description,
+          'path': path,
+          'prompt': prompt,
+        });
       }
+      return skills;
     }
   } on Exception {
     // Graceful fallback.
   }
+
   return fallbackSkills;
 }
 
@@ -197,7 +198,7 @@ class SkillsInstallCommand extends FlutterCommand {
     final String dirPath = globals.fs.path.join('.flutter_skills');
     final String filePath = globals.fs.path.join(dirPath, '$targetSkill.md');
     globals.fs.directory(dirPath).createSync(recursive: true);
-    globals.fs.file(filePath).writeAsStringSync(_skillContent(match, targetSkill));
+    globals.fs.file(filePath).writeAsStringSync(await _fetchSkillContent(match, targetSkill));
 
     globals.printStatus('🎉 Installed: $filePath');
     return FlutterCommandResult.success();
@@ -263,7 +264,32 @@ String _skillDescription(Map<String, dynamic> skill) {
   return description is String ? description : '';
 }
 
-String _skillContent(Map<String, dynamic> skill, String targetSkill) {
+Future<String> _fetchSkillContent(Map<String, dynamic> skill, String targetSkill) async {
   final dynamic content = skill['content'];
-  return content is String ? content : '# $targetSkill\nGeneric instruction file.';
+  if (content is String && content.isNotEmpty) {
+    return content;
+  }
+
+  final dynamic path = skill['path'];
+  if (path is! String) {
+    return '# $targetSkill\nGeneric instruction file.';
+  }
+
+  final Uri skillUrl = Uri.parse('https://raw.githubusercontent.com/flutter/skills/main/$path');
+
+  try {
+    final HttpClient client = globals.httpClientFactory?.call() ?? HttpClient();
+    final HttpClientRequest request = await client
+        .getUrl(skillUrl)
+        .timeout(const Duration(seconds: 3));
+    final HttpClientResponse response = await request.close();
+
+    if (response.statusCode == 200) {
+      return await response.transform(utf8.decoder).join();
+    }
+  } on Exception {
+    // Graceful fallback.
+  }
+
+  return '# $targetSkill\nGeneric instruction file.';
 }
