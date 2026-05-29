@@ -258,7 +258,7 @@ end
         flutterRootDir: globals.fs.directory(Cache.flutterRoot),
         defines: <String, String>{
           kTargetFile: targetFile,
-          kTargetPlatform: getNameForTargetPlatform(TargetPlatform.darwin),
+          kTargetPlatform: TargetPlatform.darwin.getName(),
           kDarwinArchs: defaultMacOSArchsForEnvironment(
             globals.artifacts!,
           ).map((DarwinArch e) => e.name).join(' '),
