@@ -7,7 +7,6 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:android_driver_extensions/native_driver.dart';
-// ignore: unused_import
 import 'package:android_driver_extensions/skia_gold.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
