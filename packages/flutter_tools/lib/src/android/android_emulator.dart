@@ -181,7 +181,7 @@ class AndroidEmulator extends Emulator {
     final Process process = await _processUtils.start(command);
 
     final completer = Completer<void>();
-    var streamsCancelled = false;
+    var hasAvdLockError = false;
 
     // Record output from the emulator process.
     final stdoutList = <String>[];
@@ -207,9 +207,7 @@ class AndroidEmulator extends Emulator {
             : '$explanation\nin your AVD directory.';
 
         try {
-          streamsCancelled = true;
-          unawaited(stdoutSubscription.cancel());
-          unawaited(stderrSubscription.cancel());
+          hasAvdLockError = true;
           throwToolExit(message);
         } on Object catch (error, stackTrace) {
           if (!completer.isCompleted) {
@@ -231,7 +229,7 @@ class AndroidEmulator extends Emulator {
     var earlyFailure = true;
     unawaited(
       process.exitCode.then((int status) async {
-        if (streamsCancelled) {
+        if (hasAvdLockError) {
           return;
         }
         if (status == 0) {
@@ -243,6 +241,9 @@ class AndroidEmulator extends Emulator {
         }
         // Make sure the process' stdout and stderr are drained.
         await stdioFuture;
+        if (hasAvdLockError) {
+          return;
+        }
         unawaited(stdoutSubscription.cancel());
         unawaited(stderrSubscription.cancel());
         if (stdoutList.isNotEmpty) {
