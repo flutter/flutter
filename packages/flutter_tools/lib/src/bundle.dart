@@ -35,7 +35,7 @@ String getDefaultCachedKernelPath({
   final List<String> cacheFrontEndOptions = extraFrontEndOptions.toList()
     ..removeWhere((String arg) => arg.startsWith('--enable-experiment='));
   if (targetModel != null) {
-    buffer.write(targetModel.toString());
+    buffer.write('$targetModel;');
   }
   buffer.writeAll(dartDefines);
   buffer.writeAll(cacheFrontEndOptions);
