@@ -9,6 +9,7 @@ import '../project.dart';
 import '../project_validator.dart';
 import '../project_validator_result.dart';
 
+/// A validator that checks the AndroidManifest.xml file for misplaced Flutter metadata keys.
 class AndroidManifestProjectValidator extends ProjectValidator {
   const AndroidManifestProjectValidator();
 
@@ -83,7 +84,7 @@ class AndroidManifestProjectValidator extends ProjectValidator {
 
     XmlDocument document;
     try {
-      document = XmlDocument.parse(manifestFile.readAsStringSync());
+      document = XmlDocument.parse(await manifestFile.readAsString());
     } on XmlException catch (e) {
       results.add(
         ProjectValidatorResult(
@@ -106,7 +107,10 @@ class AndroidManifestProjectValidator extends ProjectValidator {
 
     final Iterable<XmlElement> metaDataElements = document.findAllElements('meta-data');
     for (final metaData in metaDataElements) {
-      final String? name = metaData.getAttribute('android:name');
+      final String? name = metaData.getAttribute(
+        'name',
+        namespace: 'http://schemas.android.com/apk/res/android',
+      );
       if (name == null) {
         continue;
       }
@@ -114,11 +118,13 @@ class AndroidManifestProjectValidator extends ProjectValidator {
       final XmlNode? parent = metaData.parent;
       if (parent is XmlElement) {
         final String parentName = parent.name.local;
-        if (_activityKeys.contains(name) && parentName != 'activity') {
+        final bool isActivityParent = parentName == 'activity' || parentName == 'activity-alias';
+        if (_activityKeys.contains(name) && !isActivityParent) {
           results.add(
             ProjectValidatorResult(
               name: name,
-              value: 'Declared in <$parentName> but must be declared in <activity>',
+              value:
+                  'Declared in <$parentName> but must be declared in <activity> or <activity-alias>',
               status: StatusProjectValidator.error,
             ),
           );

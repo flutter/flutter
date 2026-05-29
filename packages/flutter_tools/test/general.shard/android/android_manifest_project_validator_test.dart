@@ -73,7 +73,10 @@ void main() {
       expect(results.length, 1);
       expect(results[0].status, StatusProjectValidator.error);
       expect(results[0].name, 'io.flutter.Entrypoint');
-      expect(results[0].value, 'Declared in <application> but must be declared in <activity>');
+      expect(
+        results[0].value,
+        'Declared in <application> but must be declared in <activity> or <activity-alias>',
+      );
     });
 
     testWithoutContext('warns if application key is under activity', () async {
@@ -139,7 +142,10 @@ void main() {
       expect(results.length, 1);
       expect(results[0].status, StatusProjectValidator.error);
       expect(results[0].name, 'io.flutter.Entrypoint');
-      expect(results[0].value, 'Declared in <service> but must be declared in <activity>');
+      expect(
+        results[0].value,
+        'Declared in <service> but must be declared in <activity> or <activity-alias>',
+      );
     });
 
     testWithoutContext('warns if application key is under receiver', () async {
@@ -180,7 +186,10 @@ void main() {
       expect(results.length, 1);
       expect(results[0].status, StatusProjectValidator.error);
       expect(results[0].name, 'io.flutter.Entrypoint');
-      expect(results[0].value, 'Declared in <provider> but must be declared in <activity>');
+      expect(
+        results[0].value,
+        'Declared in <provider> but must be declared in <activity> or <activity-alias>',
+      );
     });
 
     testWithoutContext('reports multiple misplaced keys', () async {
@@ -202,11 +211,36 @@ void main() {
       expect(results.length, 2);
       expect(results[0].status, StatusProjectValidator.error);
       expect(results[0].name, 'io.flutter.Entrypoint');
-      expect(results[0].value, 'Declared in <application> but must be declared in <activity>');
+      expect(
+        results[0].value,
+        'Declared in <application> but must be declared in <activity> or <activity-alias>',
+      );
 
       expect(results[1].status, StatusProjectValidator.error);
       expect(results[1].name, 'io.flutter.embedding.android.EnableImpeller');
       expect(results[1].value, 'Declared in <activity> but must be declared in <application>');
+    });
+
+    testWithoutContext('succeeds if activity key is under activity-alias', () async {
+      createFakeAndroidProject('''
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:name="io.flutter.app.FlutterApplication">
+        <activity-alias android:name=".MainActivityAlias" android:targetActivity=".MainActivity">
+            <meta-data android:name="io.flutter.Entrypoint" android:value="customMain" />
+        </activity-alias>
+        <activity android:name=".MainActivity">
+        </activity>
+    </application>
+</manifest>
+''');
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fs.currentDirectory);
+      const validator = AndroidManifestProjectValidator();
+      final List<ProjectValidatorResult> results = await validator.start(project);
+
+      expect(results.length, 1);
+      expect(results[0].status, StatusProjectValidator.success);
+      expect(results[0].value, 'No issues found');
     });
   });
 }
