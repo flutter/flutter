@@ -10,6 +10,7 @@
 
 namespace impeller::android::testing {
 
+using impeller::testing::GetMockVulkanFunctions;
 using impeller::testing::MockVulkanContextBuilder;
 
 const std::vector<std::string> kAndroidDeviceExtensions = {
@@ -54,6 +55,22 @@ TEST(AndroidAHBSwapchainTest,
 
   ahb_swapchain->AcquireNextDrawable();
   EXPECT_FALSE(wait_for_fences_called);
+}
+
+TEST(AndroidAHBSwapchainTest, AHBSwapchainDtorCallsWaitIdle) {
+  auto const context = MockVulkanContextBuilder()
+                           .SetDeviceExtensions(kAndroidDeviceExtensions)
+                           .Build();
+
+  auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
+      context, std::make_shared<FakeSurfaceControl>(), {}, {100, 100}, false));
+
+  ahb_swapchain.reset();
+
+  auto called_functions = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_NE(std::find(called_functions->begin(), called_functions->end(),
+                      "vkDeviceWaitIdle"),
+            called_functions->end());
 }
 
 }  // namespace impeller::android::testing
