@@ -1744,6 +1744,12 @@ void main() {
       expect(macosXcodeConfig, contains('PRODUCT_NAME = flutter_project'));
       expect(macosXcodeConfig, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
       expect(macosXcodeConfig, contains('PRODUCT_COPYRIGHT ='));
+      for (final configName in ['Debug.xcconfig', 'Release.xcconfig']) {
+        final File configFile = globals.fs.file(
+          globals.fs.path.join(projectDir.path, 'macos', 'Runner', 'Configs', configName),
+        );
+        expect(configFile.readAsStringSync(), contains('#include "AppInfo.xcconfig"'));
+      }
 
       // Xcode project
       final String xcodeProjectPath = globals.fs.path.join(
@@ -1758,6 +1764,48 @@ void main() {
       final String xcodeProject = xcodeProjectFile.readAsStringSync();
       expect(xcodeProject, contains('path = "flutter_project.app";'));
       expect(xcodeProject, contains('LastUpgradeCheck = 1510;'));
+      String xcodeBuildConfiguration(String identifier) {
+        final RegExpMatch? match = RegExp(
+          '\\t\\t$identifier /\\* [^*]+ \\*/ = \\{\\r?\\n([\\s\\S]*?)\\r?\\n\\t\\t\\};',
+        ).firstMatch(xcodeProject);
+        expect(match, isNotNull);
+        return match!.group(1)!;
+      }
+
+      Map<String, String> xcodeBuildConfigurationsFor(String ownerComment) {
+        final int start = xcodeProject.indexOf(
+          '/* Build configuration list for $ownerComment */ = {',
+        );
+        expect(start, isNot(-1));
+        final int end = xcodeProject.indexOf(RegExp(r'\r?\n\t\t};'), start);
+        expect(end, isNot(-1));
+        final String configurationList = xcodeProject.substring(start, end);
+        return <String, String>{
+          for (final RegExpMatch match in RegExp(
+            r'\t\t\t\t([A-Z0-9]+) /\* (Debug|Release|Profile) \*/,',
+          ).allMatches(configurationList))
+            match.group(2)!: xcodeBuildConfiguration(match.group(1)!),
+        };
+      }
+
+      final Map<String, String> projectConfigurations = xcodeBuildConfigurationsFor(
+        'PBXProject "Runner"',
+      );
+      expect(projectConfigurations.keys, unorderedEquals(<String>['Debug', 'Release', 'Profile']));
+      for (final String configuration in projectConfigurations.values) {
+        expect(configuration, isNot(contains('baseConfigurationReference')));
+      }
+
+      final Map<String, String> runnerTargetConfigurations = xcodeBuildConfigurationsFor(
+        'PBXNativeTarget "Runner"',
+      );
+      expect(
+        runnerTargetConfigurations.keys,
+        unorderedEquals(<String>['Debug', 'Release', 'Profile']),
+      );
+      expect(runnerTargetConfigurations['Debug'], contains('/* Debug.xcconfig */'));
+      expect(runnerTargetConfigurations['Release'], contains('/* Release.xcconfig */'));
+      expect(runnerTargetConfigurations['Profile'], contains('/* Release.xcconfig */'));
 
       // Xcode workspace shared data
       final Directory workspaceSharedData = globals.fs.directory(
