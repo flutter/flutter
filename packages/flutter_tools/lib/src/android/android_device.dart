@@ -577,12 +577,10 @@ class AndroidDevice extends Device {
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      builtPackage =
-          await ApplicationPackageFactory.instance!.getPackageForPlatform(
-                devicePlatform,
-                buildInfo: debuggingOptions.buildInfo,
-              )
-              as AndroidApk?;
+      builtPackage = await ApplicationPackageFactory.instance!.getPackageForPlatform(
+        devicePlatform,
+        buildInfo: debuggingOptions.buildInfo,
+      ) as AndroidApk?;
     }
     // There was a failure parsing the android project information.
     if (builtPackage == null) {
@@ -1059,8 +1057,10 @@ class AdbLogReader extends DeviceLogReader {
     Process adbProcess,
     String name,
     Logger logger, {
-    bool adbLogFiltering,
-  }) = AdbLogReader._;
+    bool adbLogFiltering = true,
+  }) {
+    return AdbLogReader._(adbProcess, name, logger, adbLogFiltering: adbLogFiltering);
+  }
 
   /// Create a new [AdbLogReader] from an [AndroidDevice] instance.
   static Future<AdbLogReader> createLogReader(

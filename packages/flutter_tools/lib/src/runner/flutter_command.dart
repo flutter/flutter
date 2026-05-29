@@ -2056,7 +2056,9 @@ abstract class FlutterCommand extends Command<void> {
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );
-    if (devices != null && argParser.options.containsKey(FlutterOptions.kAdbLogFiltering)) {
+    if (devices != null &&
+        argResults != null &&
+        argParser.options.containsKey(FlutterOptions.kAdbLogFiltering)) {
       final bool filtering = boolArg(FlutterOptions.kAdbLogFiltering);
       for (final Device device in devices) {
         device.adbLogFiltering = filtering;
