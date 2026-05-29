@@ -385,7 +385,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
             // Use binary exponential backoff before retriggering the build.
             // The expected wait times are: 100ms, 200ms, 400ms, and so on...
             final int waitTime = min(
-              pow(2, min(retry, 7)).toInt() * 100,
+              (1 << min(retry, 7)) * 100,
               kMaxRetryTime.inMilliseconds,
             );
             retry += 1;
