@@ -415,8 +415,10 @@ public class TextInputChannel {
      * Sets the active text input client identifier along with its input text configurations (e.g.,
      * text capitalization rules, obscure text flags, and input actions such as done, go, or next).
      *
-     * @param textInputClientId The unique ID of the text input client sent by the Dart framework.
-     * @param configuration The text editing configuration containing layout and behavior options.
+     * @param textInputClientId The unique ID of the text input client sent by the Dart framework
+     *     via {@code TextInput.setClient}.
+     * @param configuration The {@link Configuration} text editing configuration containing layout
+     *     and behavior options.
      */
     void setClient(int textInputClientId, @NonNull Configuration configuration);
 
@@ -446,7 +448,8 @@ public class TextInputChannel {
      * Sets the current text selection, composing ranges, and raw string contents for the active
      * text input client.
      *
-     * @param editingState The text state model containing selections and composing offsets.
+     * @param editingState The text state model containing the text, selections, and composing
+     *     offsets.
      */
     void setEditingState(@NonNull TextEditState editingState);
 
