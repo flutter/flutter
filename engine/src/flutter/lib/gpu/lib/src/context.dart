@@ -158,9 +158,7 @@ base class GpuContext extends NativeFieldWrapperClass1 {
       enableShaderWriteUsage,
       mipLevelCount,
     );
-    if (!result.isValid) {
-      throw Exception('Texture creation failed');
-    }
+    // `Texture._initialize` throws on failure, so `result` is always valid here.
     return result;
   }
 
