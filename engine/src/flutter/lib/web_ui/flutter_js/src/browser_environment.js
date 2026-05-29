@@ -87,6 +87,7 @@ export const browserEnvironment = {
   browserEngine: browserEngine,
   hasImageCodecs: hasImageCodecs(),
   hasChromiumBreakIterators: hasChromiumBreakIterators(),
+  hasTextCluster: hasTextCluster(),
   supportsWasmGC: supportsWasmGC(),
   crossOriginIsolated: window.crossOriginIsolated,
   webGLVersion: detectWebGLVersion(),
