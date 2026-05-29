@@ -264,9 +264,9 @@ void main() {
         ]);
       });
 
-      test('getMemoryStats throws DeviceException if dumpsys meminfo fails to parse', () async {
+      test('getMemoryStats throws DeviceException if dumpsys meminfo fails to parse', () {
         FakeDevice.output = 'Some garbage output';
-        expect(() => device.getMemoryStats('com.example'), throwsA(isA<DeviceException>()));
+        expect(device.getMemoryStats('com.example'), throwsA(isA<DeviceException>()));
       });
     });
   });
