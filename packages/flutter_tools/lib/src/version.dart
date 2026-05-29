@@ -86,7 +86,17 @@ abstract class FlutterVersion {
         flutterRoot: flutterRoot,
       );
       if (version != null) {
-        return version;
+        final bool isGitRepo = fs.directory(fs.path.join(flutterRoot, '.git')).existsSync();
+        if (!isGitRepo) {
+          return version;
+        }
+        // If the cached version looks suspicious, we fall back to git detection.
+        // This handles cases where the cache was poisoned by an app repo's git environment.
+        final bool isSuspicious =
+            version.frameworkVersion == kUnknownFrameworkVersion || version.channel == kUserBranch;
+        if (!isSuspicious) {
+          return version;
+        }
       }
     }
 
@@ -132,7 +142,7 @@ abstract class FlutterVersion {
   }) {
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
       globals.platform,
-      git: globals.git,
+      git: git,
       gitRef: frameworkRevision,
       workingDirectory: flutterRoot,
       fetchTags: fetchTags,
@@ -702,9 +712,7 @@ class _FlutterVersionGit extends FlutterVersion {
     _ensureLegacyVersionFile(fs: fs, flutterRoot: flutterRoot, frameworkVersion: frameworkVersion);
     const encoder = JsonEncoder.withIndent('  ');
     final File newVersionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
-    if (!newVersionFile.existsSync()) {
-      newVersionFile.writeAsStringSync(encoder.convert(toJson()));
-    }
+    newVersionFile.writeAsStringSync(encoder.convert(toJson()));
   }
 
   @override
@@ -795,7 +803,8 @@ class VersionUpstreamValidator {
         'Set the environment variable "FLUTTER_GIT_URL" to '
         '"$repositoryUrl". '
         'If this is intentional, it is recommended to use "git" directly to '
-        'manage the SDK.',
+        'manage the SDK.\n'
+        r'If this is NOT intentional, try deleting the version cache: `rm $FLUTTER_ROOT/bin/cache/flutter.version.json`.',
       );
     }
     return null;

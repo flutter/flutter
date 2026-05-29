@@ -74,6 +74,18 @@ CommandPoolVK::~CommandPoolVK() {
     return;
   }
 
+  std::shared_ptr<DeviceHolderVK> device_holder = device_holder_.lock();
+  if (!device_holder) {
+    pool_.release();
+    for (auto& buffer : collected_buffers_) {
+      buffer.release();
+    }
+    for (auto& buffer : unused_command_buffers_) {
+      buffer.release();
+    }
+    return;
+  }
+
   auto const context = context_.lock();
   if (!context) {
     return;
@@ -138,6 +150,7 @@ void CommandPoolVK::CollectCommandBuffer(vk::UniqueCommandBuffer&& buffer) {
 }
 
 void CommandPoolVK::Destroy() {
+  FML_DCHECK(device_holder_.lock());
   Lock lock(pool_mutex_);
   pool_.reset();
 
@@ -211,7 +224,8 @@ std::shared_ptr<CommandPoolVK> CommandPoolRecyclerVK::Get() {
   }
 
   auto const resource = std::make_shared<CommandPoolVK>(
-      std::move(data->pool), std::move(data->buffers), context_);
+      std::move(data->pool), std::move(data->buffers), context_,
+      strong_context->GetDeviceHolder());
   pool_map.emplace(context_hash_, resource);
 
   {
