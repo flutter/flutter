@@ -1168,7 +1168,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
             'includes the widget in its build). This error can occur when code calls '
             'setState() from a timer, from an animation callback, or after an '
             'asynchronous operation (such as an awaited network request or other '
-            'Future) completes once the widget has already been removed from the tree.',
+            'Future) completes after the widget has been removed from the tree.',
           ),
           ErrorHint(
             'The preferred solution is '
