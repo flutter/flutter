@@ -111,6 +111,23 @@ void main() {
 
     expect(tester.getRect(find.byType(BaselineDetector)).top, 160.0);
   });
+
+  testWidgets('Baseline does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(
+          child: Baseline(
+            baseline: 180.0,
+            baselineType: TextBaseline.alphabetic,
+            child: Placeholder(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Baseline)), Size.zero);
+  });
 }
 
 class TestChip extends StatelessWidget {
