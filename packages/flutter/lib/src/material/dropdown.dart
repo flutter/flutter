@@ -1133,6 +1133,9 @@ class DropdownButton<T> extends StatefulWidget {
   ///
   /// The dropdown button is enabled when [enabled] is true.
   ///
+  /// If [enabled] is null, then the dropdown button will be enabled if
+  /// [onChanged] is provided, and disabled otherwise.
+  ///
   /// If [enabled] is false, or the list of [DropdownButton.items] is null or empty,
   /// then the dropdown button will be disabled. When disabled, the arrow is
   /// displayed in grey and the button does not respond to input.

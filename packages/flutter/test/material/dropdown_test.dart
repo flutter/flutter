@@ -4189,36 +4189,34 @@ void main() {
     );
   });
 
-  testWidgets(
-    'Conflicting scrollbars are not applied by ScrollBehavior to Dropdown',
-    (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/83819
-      // Open the dropdown menu
-      final Key buttonKey = UniqueKey();
-      await tester.pumpWidget(
-        buildFrame(
-          buttonKey: buttonKey,
-          initialValue: null, // nothing selected
-          items: List<String>.generate(100, (int index) => index.toString()),
-          onChanged: onChanged,
-        ),
-      );
-      await tester.tap(find.byKey(buttonKey));
-      await tester.pump();
-      await tester.pumpAndSettle(); // finish the menu animation
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to Dropdown', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/83819
+    // Open the dropdown menu
+    final Key buttonKey = UniqueKey();
+    await tester.pumpWidget(
+      buildFrame(
+        buttonKey: buttonKey,
+        initialValue: null, // nothing selected
+        items: List<String>.generate(100, (int index) => index.toString()),
+        onChanged: onChanged,
+      ),
+    );
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pump();
+    await tester.pumpAndSettle(); // finish the menu animation
 
-      // The inherited ScrollBehavior should not apply Scrollbars since they are
-      // already built in to the widget. For iOS platform, ScrollBar directly returns
-      // CupertinoScrollbar
-      expect(
-        find.byType(CupertinoScrollbar),
-        debugDefaultTargetPlatformOverride == TargetPlatform.iOS ? findsOneWidget : findsNothing,
-      );
-      expect(find.byType(Scrollbar), findsOneWidget);
-      expect(find.byType(RawScrollbar), findsNothing);
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    // The inherited ScrollBehavior should not apply Scrollbars since they are
+    // already built in to the widget. For iOS platform, ScrollBar directly returns
+    // CupertinoScrollbar
+    expect(
+      find.byType(CupertinoScrollbar),
+      debugDefaultTargetPlatformOverride == TargetPlatform.iOS ? findsOneWidget : findsNothing,
+    );
+    expect(find.byType(Scrollbar), findsOneWidget);
+    expect(find.byType(RawScrollbar), findsNothing);
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('borderRadius property works properly', (WidgetTester tester) async {
     const radius = 20.0;
@@ -5016,7 +5014,9 @@ void main() {
     },
   );
 
-  testWidgets('DropdownButton enabled property fallback behavior', (WidgetTester tester) async {
+  testWidgets('DropdownButton is disabled when enabled is false even with onChanged provided', (
+    WidgetTester tester,
+  ) async {
     Widget buildDropdown({bool? enabled, ValueChanged<int?>? onChanged}) {
       return MaterialApp(
         home: Material(
@@ -5033,32 +5033,85 @@ void main() {
       );
     }
 
-    // 1. If enabled is false, it is disabled even with onChanged provided.
     await tester.pumpWidget(buildDropdown(enabled: false, onChanged: (int? v) {}));
     await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
     expect(find.text('two'), findsNothing); // Menu did not open
+  });
 
-    // 2. If enabled is true, it is enabled even without onChanged.
+  testWidgets('DropdownButton is enabled when enabled is true even without onChanged', (
+    WidgetTester tester,
+  ) async {
+    Widget buildDropdown({bool? enabled, ValueChanged<int?>? onChanged}) {
+      return MaterialApp(
+        home: Material(
+          child: DropdownButton<int>(
+            value: 1,
+            items: const <DropdownMenuItem<int>>[
+              DropdownMenuItem<int>(value: 1, child: Text('one')),
+              DropdownMenuItem<int>(value: 2, child: Text('two')),
+            ],
+            onChanged: onChanged,
+            enabled: enabled,
+          ),
+        ),
+      );
+    }
+
     await tester.pumpWidget(buildDropdown(enabled: true));
     await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
     expect(find.text('two'), findsOneWidget); // Menu opened
+  });
 
-    // Close the previous menu first by tapping the item.
-    await tester.tap(find.text('one').last);
-    await tester.pumpAndSettle();
+  testWidgets('DropdownButton falls back to disabled when enabled is null and onChanged is null', (
+    WidgetTester tester,
+  ) async {
+    Widget buildDropdown({bool? enabled, ValueChanged<int?>? onChanged}) {
+      return MaterialApp(
+        home: Material(
+          child: DropdownButton<int>(
+            value: 1,
+            items: const <DropdownMenuItem<int>>[
+              DropdownMenuItem<int>(value: 1, child: Text('one')),
+              DropdownMenuItem<int>(value: 2, child: Text('two')),
+            ],
+            onChanged: onChanged,
+            enabled: enabled,
+          ),
+        ),
+      );
+    }
 
-    // 3. If enabled is null, it falls back to checking if onChanged is provided (disabled).
     await tester.pumpWidget(buildDropdown());
     await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
     expect(find.text('two'), findsNothing); // Menu did not open
-
-    // 4. If enabled is null, it falls back to checking if onChanged is provided (enabled).
-    await tester.pumpWidget(buildDropdown(onChanged: (int? v) {}));
-    await tester.tap(find.text('one'));
-    await tester.pumpAndSettle();
-    expect(find.text('two'), findsOneWidget); // Menu opened
   });
+
+  testWidgets(
+    'DropdownButton falls back to enabled when enabled is null and onChanged is provided',
+    (WidgetTester tester) async {
+      Widget buildDropdown({bool? enabled, ValueChanged<int?>? onChanged}) {
+        return MaterialApp(
+          home: Material(
+            child: DropdownButton<int>(
+              value: 1,
+              items: const <DropdownMenuItem<int>>[
+                DropdownMenuItem<int>(value: 1, child: Text('one')),
+                DropdownMenuItem<int>(value: 2, child: Text('two')),
+              ],
+              onChanged: onChanged,
+              enabled: enabled,
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildDropdown(onChanged: (int? v) {}));
+      await tester.tap(find.text('one'));
+      await tester.pumpAndSettle();
+      expect(find.text('two'), findsOneWidget); // Menu opened
+    },
+  );
 }
