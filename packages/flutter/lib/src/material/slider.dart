@@ -695,7 +695,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     enableController.value = widget.onChanged != null ? 1.0 : 0.0;
     positionController.value = _convert(widget.value);
     _actionMap = <Type, Action<Intent>>{
-      _AdjustSliderIntent: CallbackAction<_AdjustSliderIntent>(onInvoke: _actionHandler),
+      _AdjustSliderIntent: CallbackAction<_AdjustSliderIntent>(onInvoke: _handleAdjustSliderIntent),
       ScrollIntent: CallbackAction<ScrollIntent>(onInvoke: _handleScrollIntent),
     };
     if (widget.focusNode == null) {
@@ -741,7 +741,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     widget.onChangeEnd?.call(_lerp(value));
   }
 
-  void _actionHandler(_AdjustSliderIntent intent) {
+  void _handleAdjustSliderIntent(_AdjustSliderIntent intent) {
     _handleDirectionalInput(
       shouldIncrease: switch (intent.type) {
         _SliderAdjustmentType.up => true,
@@ -753,9 +753,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   void _handleScrollIntent(ScrollIntent intent) {
-    if (!_enabled) {
-      return;
-    }
     _handleDirectionalInput(
       shouldIncrease: switch (intent.direction) {
         AxisDirection.right => !_isRtl,
@@ -768,7 +765,11 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
   void _handleDirectionalInput({required bool shouldIncrease}) {
     final slider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
-    return shouldIncrease ? slider.increaseAction() : slider.decreaseAction();
+    if (shouldIncrease) {
+      slider.increaseAction();
+    } else {
+      slider.decreaseAction();
+    }
   }
 
   bool get _isRtl => Directionality.of(_renderObjectKey.currentContext!) == TextDirection.rtl;
