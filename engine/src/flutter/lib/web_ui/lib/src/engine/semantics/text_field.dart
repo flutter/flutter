@@ -122,10 +122,6 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
 
   @override
   void addEventHandlers() {
-    if (inputConfiguration.autofillGroup != null) {
-      subscriptions.addAll(inputConfiguration.autofillGroup!.addInputEventListeners());
-    }
-
     // Subscribe to text and selection changes.
     subscriptions.add(
       DomSubscription(activeDomElement, 'input', createDomEventListener(handleChange)),

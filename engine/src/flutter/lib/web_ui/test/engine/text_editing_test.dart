@@ -3273,6 +3273,148 @@ Future<void> testMain() async {
       }
     });
 
+    test('does not erase a browser-autofilled value from a non-focused field', () {
+      // Regression test for https://github.com/flutter/flutter/issues/185327.
+      // The browser autofills the synthetic (non-focused) password field. A
+      // later form update must not overwrite that value with the engine's
+      // stale, empty editing state. On iOS Chrome that overwrite caused a
+      // fill/clear loop that left the password blank.
+      Map<String, Object?> emptyField(String hint, String id) => <String, Object?>{
+        'inputType': <String, Object?>{
+          'name': 'TextInputType.text',
+          'signed': null,
+          'decimal': null,
+        },
+        'textCapitalization': 'TextCapitalization.none',
+        'autofill': <String, dynamic>{
+          'uniqueIdentifier': id,
+          'hints': <String>[hint],
+          'editingValue': <String, dynamic>{
+            'text': '',
+            'selectionBase': 0,
+            'selectionExtent': 0,
+            'selectionAffinity': 'TextAffinity.downstream',
+            'selectionIsDirectional': false,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        },
+      };
+
+      final fields = <Map<String, Object?>>[
+        emptyField('username', 'field1'),
+        emptyField('password', 'field2'),
+      ];
+      final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
+      final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+        kImplicitViewId,
+        focusedAutofillMap,
+        fields,
+      )!;
+
+      final focusedAutofill = AutofillInfo.fromFrameworkMessage(focusedAutofillMap);
+      final DomHTMLInputElement focusedElement = createDomHTMLInputElement();
+      autofillForm.wakeUp(focusedElement, focusedAutofill);
+
+      final passwordElement = autofillForm.elements['field2']! as DomHTMLInputElement;
+      // The field starts empty: nothing has been autofilled yet.
+      expect(passwordElement.value, isEmpty);
+
+      // Simulate the browser autofilling the synthetic password field.
+      passwordElement.value = 'secret123';
+
+      // A later form update (e.g. a geometry change wakes the form again) must
+      // keep the autofilled value instead of clearing it back to empty.
+      autofillForm.wakeUp(focusedElement, focusedAutofill);
+
+      expect(passwordElement.value, 'secret123');
+    });
+
+    test('forwards a browser-autofilled value from a non-focused field', () {
+      // Regression test for https://github.com/flutter/flutter/issues/185327.
+      // The browser fills the synthetic (non-focused) field; the engine must
+      // forward that value to the framework as an updateEditingStateWithTag.
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+      try {
+        final List<Map<String, Object?>> fields = createFieldValues(
+          <String>['username', 'password'],
+          <String>['field1', 'field2'],
+        );
+        final focusedAutofillMap = fields.first['autofill']! as Map<String, Object?>;
+        final EngineAutofillForm autofillForm = EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          focusedAutofillMap,
+          fields,
+        )!;
+        autofillForm.wakeUp(
+          createDomHTMLInputElement(),
+          AutofillInfo.fromFrameworkMessage(focusedAutofillMap),
+        );
+
+        final passwordElement = autofillForm.elements['field2']! as DomHTMLInputElement;
+        spy.messages.clear();
+        passwordElement.value = 'secret123';
+        passwordElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+        expect(
+          spy.messages.where((m) => m.methodName == 'TextInputClient.updateEditingStateWithTag'),
+          isNotEmpty,
+        );
+      } finally {
+        spy.tearDown();
+        clearForms();
+      }
+    });
+
+    test('forwards autofill from a field that lost focus to another group field', () {
+      // Regression test for https://github.com/flutter/flutter/issues/185327.
+      // A field that was focused when the form was created, then lost focus to
+      // another field in the same group, must still forward a later autofill of
+      // itself. The listener is re-attached on every wakeUp for this reason.
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+      try {
+        final List<Map<String, Object?>> fields = createFieldValues(
+          <String>['username', 'password'],
+          <String>['field1', 'field2'],
+        );
+        final field1Map = fields[0]['autofill']! as Map<String, Object?>;
+        final field2Map = fields[1]['autofill']! as Map<String, Object?>;
+
+        // The username field is focused when the form is first created.
+        final EngineAutofillForm form1 = EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          field1Map,
+          fields,
+        )!;
+        form1.wakeUp(createDomHTMLInputElement(), AutofillInfo.fromFrameworkMessage(field1Map));
+        form1.goDormant();
+
+        // Focus moves to the password field: a new form for the same group
+        // reuses the dormant one, and the username field is now non-focused.
+        final EngineAutofillForm form2 = EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          field2Map,
+          fields,
+        )!;
+        form2.wakeUp(createDomHTMLInputElement(), AutofillInfo.fromFrameworkMessage(field2Map));
+
+        final nonFocusedUsername = form2.elements['field1']! as DomHTMLInputElement;
+        spy.messages.clear();
+        nonFocusedUsername.value = 'autofilled_user';
+        nonFocusedUsername.dispatchEvent(createDomEvent('Event', 'input'));
+
+        expect(
+          spy.messages.where((m) => m.methodName == 'TextInputClient.updateEditingStateWithTag'),
+          isNotEmpty,
+        );
+      } finally {
+        spy.tearDown();
+        clearForms();
+      }
+    });
+
     test('validate multi element form ids sorted for form id', () {
       final List<dynamic> fields = createFieldValues(
         <String>['username', 'password', 'newPassword'],

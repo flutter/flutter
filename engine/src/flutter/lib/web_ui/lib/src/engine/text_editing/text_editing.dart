@@ -145,6 +145,22 @@ void _styleAutofillElements(
   elementStyle.setProperty('caret-color', 'transparent');
 }
 
+/// Whether [element] currently holds non-empty text, for example a value the
+/// browser autofilled into it.
+bool _domElementHasValue(DomHTMLElement element) {
+  if (element.isA<DomHTMLInputElement>()) {
+    return (element as DomHTMLInputElement).value.isNotEmpty;
+  }
+  if (element.isA<DomHTMLTextAreaElement>()) {
+    return (element as DomHTMLTextAreaElement).value.isNotEmpty;
+  }
+  return false;
+}
+
+/// Marks a form field that already has an autofill `input` listener, so
+/// [EngineAutofillForm.wakeUp] does not attach a second one to it.
+const String _autofillListenerAttribute = 'flt-autofill-listener';
+
 void _ensureEditingElementInView(DomElement element, int viewId) {
   final bool isAlreadyAppended = element.isConnected ?? false;
   if (!isAlreadyAppended) {
@@ -335,6 +351,7 @@ class EngineAutofillForm {
       oldFocusedElement.replaceWith(focusedElement);
     }
 
+    _attachAutofillListenersToNonFocusedFields();
     _updateFieldValues();
   }
 
@@ -416,6 +433,16 @@ class EngineAutofillForm {
       final AutofillInfo autofill = items[key]!.autofillInfo;
       // Focused elements are updated directly through `setEditingState`.
       if (key != focusedElementId) {
+        // Don't overwrite a value the browser autofilled into this non-focused
+        // field with our stale, empty editing state. Autofilled values for
+        // non-focused fields are forwarded to the framework and never stored
+        // back here, so re-applying the empty state would erase the autofill
+        // and, on iOS Chrome, drive a repeated fill/clear loop.
+        // See https://github.com/flutter/flutter/issues/185327.
+        final String storedText = autofill.editingState.text;
+        if (storedText.isEmpty && _domElementHasValue(element)) {
+          continue;
+        }
         // Non-focused elements do not have selection, and applying selection on them may cause them
         // to gain focus unexpectedly.
         autofill.editingState.applyTextToDomElement(element);
@@ -423,41 +450,37 @@ class EngineAutofillForm {
     }
   }
 
-  /// Listens to `onInput` event on the form fields.
+  /// Attaches an `input` listener to every field that is not currently focused,
+  /// so the browser's autofill of that field is forwarded to the framework.
   ///
-  /// Registering to the listeners could have been done in the constructor.
-  /// On the other hand, overall for text editing there is already a lifecycle
-  /// for subscriptions: All the subscriptions of the DOM elements are to the
-  /// `subscriptions` property of [DefaultTextEditingStrategy].
-  /// [TextEditingStrategy] manages all subscription lifecyle. All
-  /// listeners with no exceptions are added during
-  /// [TextEditingStrategy.addEventHandlers] method call and all
-  /// listeners are removed during [TextEditingStrategy.disable] method call.
-  List<DomSubscription> addInputEventListeners() {
-    final Iterable<String> keys = elements.keys;
-    final subscriptions = <DomSubscription>[];
-
-    void addSubscriptionForKey(String key) {
+  /// The listener is attached directly to the element rather than through the
+  /// text editing strategy's `subscriptions`, so it survives the strategy being
+  /// disabled and re-enabled around autofill on iOS, where a strategy-scoped
+  /// listener would be torn down before the browser fills the field.
+  ///
+  /// This runs on every [wakeUp] rather than once at form creation, because a
+  /// field can become non-focused later when focus moves to another field in
+  /// the group; that field must forward its autofill too. The marker attribute
+  /// keeps the attachment idempotent so a field never gets two listeners.
+  /// See https://github.com/flutter/flutter/issues/185327.
+  void _attachAutofillListenersToNonFocusedFields() {
+    for (final String key in elements.keys) {
+      if (key == focusedElementId) {
+        continue;
+      }
       final DomHTMLElement element = elements[key]!;
-      subscriptions.add(
-        DomSubscription(
-          element,
-          'input',
-          createDomEventListener((DomEvent e) {
-            if (items[key] == null) {
-              throw StateError('AutofillInfo must have a valid uniqueIdentifier.');
-            } else if (key != focusedElementId) {
-              // `input` events on the focused element are handled elsewhere.
-              final AutofillInfo autofillInfo = items[key]!.autofillInfo;
-              _handleChange(element, autofillInfo);
-            }
-          }),
-        ),
+      if (element.hasAttribute(_autofillListenerAttribute)) {
+        continue;
+      }
+      element.setAttribute(_autofillListenerAttribute, '');
+      final AutofillInfo autofillInfo = items[key]!.autofillInfo;
+      element.addEventListener(
+        'input',
+        createDomEventListener((DomEvent _) {
+          _handleChange(element, autofillInfo);
+        }),
       );
     }
-
-    keys.forEach(addSubscriptionForKey);
-    return subscriptions;
   }
 
   void _handleChange(DomHTMLElement domElement, AutofillInfo autofillInfo) {
@@ -1456,10 +1479,6 @@ abstract class DefaultTextEditingStrategy
 
   @override
   void addEventHandlers() {
-    if (inputConfiguration.autofillGroup != null) {
-      subscriptions.addAll(inputConfiguration.autofillGroup!.addInputEventListeners());
-    }
-
     // Subscribe to text and selection changes.
     subscriptions.add(
       DomSubscription(activeDomElement, 'input', createDomEventListener(handleChange)),
@@ -1858,10 +1877,6 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
   @override
   void addEventHandlers() {
-    if (inputConfiguration.autofillGroup != null) {
-      subscriptions.addAll(inputConfiguration.autofillGroup!.addInputEventListeners());
-    }
-
     // Subscribe to text and selection changes.
     subscriptions.add(
       DomSubscription(activeDomElement, 'input', createDomEventListener(handleChange)),
@@ -2005,10 +2020,6 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
   @override
   void addEventHandlers() {
-    if (inputConfiguration.autofillGroup != null) {
-      subscriptions.addAll(inputConfiguration.autofillGroup!.addInputEventListeners());
-    }
-
     // Subscribe to text and selection changes.
     subscriptions.add(
       DomSubscription(activeDomElement, 'input', createDomEventListener(handleChange)),
@@ -2071,10 +2082,6 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
   @override
   void addEventHandlers() {
-    if (inputConfiguration.autofillGroup != null) {
-      subscriptions.addAll(inputConfiguration.autofillGroup!.addInputEventListeners());
-    }
-
     // Subscribe to text and selection changes.
     subscriptions.add(
       DomSubscription(activeDomElement, 'input', createDomEventListener(handleChange)),

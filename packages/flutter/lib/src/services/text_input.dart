@@ -2201,7 +2201,12 @@ class TextInput {
         }
         return false;
     }
-    if (_currentConnection == null) {
+    // An autofill (updateEditingStateWithTag) message can arrive when there is
+    // no current connection. On iOS the connection is closed when focus moves
+    // to the browser's autofill UI, just before the autofilled values arrive.
+    // Let it through so it can be routed via the most recent connection below.
+    // See https://github.com/flutter/flutter/issues/185327.
+    if (_currentConnection == null && method != 'TextInputClient.updateEditingStateWithTag') {
       return;
     }
 
@@ -2219,10 +2224,13 @@ class TextInput {
     final args = methodCall.arguments as List<dynamic>;
 
     // The updateEditingStateWithTag request (autofill) can come up even to a
-    // text field that doesn't have a connection.
+    // text field that doesn't have a connection. Fall back to the most recent
+    // connection when the current one was closed (e.g. by the autofill UI
+    // taking focus on iOS) so the autofilled value still routes to its
+    // AutofillScope. See https://github.com/flutter/flutter/issues/185327.
     if (method == 'TextInputClient.updateEditingStateWithTag') {
-      final TextInputClient client = _currentConnection!._client;
-      final AutofillScope? scope = client.currentAutofillScope;
+      final TextInputConnection? connection = _currentConnection ?? _lastConnection;
+      final AutofillScope? scope = connection?._client.currentAutofillScope;
       final editingValue = args[1] as Map<String, dynamic>;
       for (final String tag in editingValue.keys) {
         final textEditingValue = TextEditingValue.fromJSON(
@@ -2928,6 +2936,7 @@ class SystemContextMenuController with SystemContextMenuClient, Diagnosticable {
     );
     callback?.call();
   }
+
   // End SystemContextMenuClient.
 
   /// Shows the system context menu anchored on the given [Rect].

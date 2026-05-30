@@ -90,6 +90,57 @@ void main() {
         expect(client2.currentTextEditingValue, text2);
       },
     );
+
+    test(
+      'updateEditingStateWithTag routes via the last connection after the current one is closed',
+      () async {
+        // Regression test for https://github.com/flutter/flutter/issues/185327.
+        // On iOS the active connection is closed when focus moves to the
+        // browser's autofill UI, just before the autofilled values arrive. The
+        // tagged value must still route to the non-focused field's client.
+        final client1 = FakeAutofillClient(const TextEditingValue(text: 'test1'));
+        final client2 = FakeAutofillClient(const TextEditingValue(text: 'test2'));
+
+        client1.textInputConfiguration = TextInputConfiguration(
+          autofillConfiguration: AutofillConfiguration(
+            uniqueIdentifier: client1.autofillId,
+            autofillHints: const <String>['client1'],
+            currentEditingValue: client1.currentTextEditingValue,
+          ),
+        );
+        client2.textInputConfiguration = TextInputConfiguration(
+          autofillConfiguration: AutofillConfiguration(
+            uniqueIdentifier: client2.autofillId,
+            autofillHints: const <String>['client2'],
+            currentEditingValue: client2.currentTextEditingValue,
+          ),
+        );
+
+        scope.register(client1);
+        scope.register(client2);
+        client1.currentAutofillScope = scope;
+        client2.currentAutofillScope = scope;
+
+        final TextInputConnection connection = scope.attach(
+          client1,
+          client1.textInputConfiguration,
+        );
+
+        // Close the active connection, as the autofill UI does on iOS, before the
+        // autofilled value for the non-focused field arrives.
+        connection.close();
+
+        const text2 = TextEditingValue(text: 'Text 2');
+        fakeTextChannel.incoming?.call(
+          MethodCall('TextInputClient.updateEditingStateWithTag', <dynamic>[
+            0,
+            <String, dynamic>{client2.autofillId: text2.toJSON()},
+          ]),
+        );
+
+        expect(client2.currentTextEditingValue, text2);
+      },
+    );
   });
 
   group('AutoFillConfiguration', () {
