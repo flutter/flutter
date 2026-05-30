@@ -498,6 +498,12 @@ void main() {
     expect(children.sublist(42, 60).every((RenderBox r) => r.attached), true);
   });
 
+  test('RenderSliverPadding setter asserts for negative padding', () {
+    final RenderSliverPadding renderSliverPadding = RenderSliverPadding(padding: EdgeInsets.zero);
+
+    expect(() => renderSliverPadding.padding = const EdgeInsets.all(-1.0), throwsAssertionError);
+  });
+
   test('RenderSliverPadding calculates correct geometry', () {
     // Viewport is 800x600, each item is 100px high with 50px before and after = 200px
 
