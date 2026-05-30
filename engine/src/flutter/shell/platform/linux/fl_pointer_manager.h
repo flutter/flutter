@@ -20,14 +20,12 @@ G_DECLARE_FINAL_TYPE(FlPointerManager,
  * FlPointerDeviceState:
  * @pressure: the pressure of the device.
  * @rotation: the rotation of the device.
- * @is_eraser: whether the device tool is an eraser.
  *
  * A structure representing the state of a pointer device.
  */
 typedef struct {
   double pressure;
   double rotation;
-  gboolean is_eraser;
 } FlPointerDeviceState;
 
 /**

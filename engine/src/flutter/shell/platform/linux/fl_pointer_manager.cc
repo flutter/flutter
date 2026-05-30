@@ -33,10 +33,6 @@ static constexpr guint kMouseButtonBack = 8;
 // 9 corresponds to mouse forward button on both x11 and wayland
 static constexpr guint kMouseButtonForward = 9;
 
-static constexpr int64_t kFlutterPointerButtonStylusContact = 1 << 0;
-static constexpr int64_t kFlutterPointerButtonStylusPrimary = 1 << 1;
-static constexpr int64_t kFlutterPointerButtonStylusSecondary = 1 << 2;
-
 // Convert a GDK button ID into a Flutter button ID
 static gboolean get_mouse_button(guint gdk_button, int64_t* button) {
   switch (gdk_button) {
@@ -62,13 +58,9 @@ static gboolean get_mouse_button(guint gdk_button, int64_t* button) {
 
 static gboolean get_button(FlutterPointerDeviceKind device_kind,
                            guint gdk_button,
-                           FlPointerDeviceState device_state,
                            int64_t* button) {
-  if (device_kind == kFlutterPointerDeviceKindStylus) {
-    if (device_state.is_eraser && gdk_button == GDK_BUTTON_PRIMARY) {
-      *button = kFlutterPointerButtonStylusPrimary;
-      return TRUE;
-    }
+  if (device_kind == kFlutterPointerDeviceKindStylus ||
+      device_kind == kFlutterPointerDeviceKindInvertedStylus) {
     switch (gdk_button) {
       case GDK_BUTTON_PRIMARY:
         *button = kFlutterPointerButtonStylusContact;
@@ -145,7 +137,7 @@ gboolean fl_pointer_manager_handle_button_press(
   g_return_val_if_fail(FL_IS_POINTER_MANAGER(self), FALSE);
 
   int64_t button;
-  if (!get_button(device_kind, gdk_button, device_state, &button)) {
+  if (!get_button(device_kind, gdk_button, &button)) {
     return FALSE;
   }
 
@@ -184,7 +176,7 @@ gboolean fl_pointer_manager_handle_button_release(
   g_return_val_if_fail(FL_IS_POINTER_MANAGER(self), FALSE);
 
   int64_t button;
-  if (!get_button(device_kind, gdk_button, device_state, &button)) {
+  if (!get_button(device_kind, gdk_button, &button)) {
     return FALSE;
   }
 

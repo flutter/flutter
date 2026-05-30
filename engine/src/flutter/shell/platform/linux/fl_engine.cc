@@ -1224,7 +1224,6 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   fl_event.buttons = buttons;
   fl_event.device = kMousePointerDeviceId;
   fl_event.view_id = view_id;
-  fl_event.pressure = device_state.pressure;
   // GDK reports tablet pressure through GDK_AXIS_PRESSURE. Flutter expects
   // normalized pressure values, so use the conventional Flutter pressure range.
   // Note that these min and max values are not found in the gdk documentation,
@@ -1232,7 +1231,7 @@ void fl_engine_send_mouse_pointer_event(FlEngine* self,
   fl_event.pressure = device_state.pressure;
   fl_event.pressure_min = 0.0;
   fl_event.pressure_max = 1.0;
-  fl_event.rotation = device_state.rotation;
+  fl_event.rotation = device_state.rotation * G_PI / 180.0;
   if (self->embedder_api.SendPointerEvent(self->engine, &fl_event, 1) !=
       kSuccess) {
     g_warning("Failed to send pointer event");

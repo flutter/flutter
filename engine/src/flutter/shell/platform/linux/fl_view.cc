@@ -118,10 +118,11 @@ static FlutterPointerDeviceKind get_pointer_device_kind(GdkEvent* event) {
   GdkInputSource source = gdk_device_get_source(device);
   switch (source) {
     case GDK_SOURCE_PEN:
-    case GDK_SOURCE_ERASER:
     case GDK_SOURCE_CURSOR:
     case GDK_SOURCE_TABLET_PAD:
       return kFlutterPointerDeviceKindStylus;
+    case GDK_SOURCE_ERASER:
+      return kFlutterPointerDeviceKindInvertedStylus;
     case GDK_SOURCE_TOUCHSCREEN:
       return kFlutterPointerDeviceKindTouch;
     case GDK_SOURCE_TOUCHPAD:  // trackpad device type is reserved for gestures
@@ -141,9 +142,6 @@ static FlPointerDeviceState get_pointer_device_state(GdkEvent* event) {
 
   gdk_event_get_axis(event, GDK_AXIS_PRESSURE, &state.pressure);
   gdk_event_get_axis(event, GDK_AXIS_ROTATION, &state.rotation);
-  GdkDeviceTool* tool = gdk_event_get_device_tool(event);
-  state.is_eraser = tool != nullptr && gdk_device_tool_get_tool_type(tool) ==
-                                           GDK_DEVICE_TOOL_TYPE_ERASER;
   return state;
 }
 
