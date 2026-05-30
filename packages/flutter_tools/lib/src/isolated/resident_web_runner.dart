@@ -421,6 +421,10 @@ class ResidentWebRunner extends ResidentRunner {
   List<WebCompilerConfig> get debugCompilerConfigs => _compilerConfigs;
 
   List<WebCompilerConfig> get _compilerConfigs {
+    final JsCompilerConfig jsConfig = JsCompilerConfig.run(
+      nativeNullAssertions: debuggingOptions.nativeNullAssertions,
+      renderer: debuggingOptions.webRenderer,
+    );
     if (debuggingOptions.webUseWasm) {
       return <WebCompilerConfig>[
         WasmCompilerConfig(
@@ -429,18 +433,10 @@ class ResidentWebRunner extends ResidentRunner {
           renderer: debuggingOptions.webRenderer,
         ),
         // JS fallback for browsers that don't support WasmGC.
-        JsCompilerConfig.run(
-          nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-          renderer: debuggingOptions.webRenderer,
-        ),
+        jsConfig,
       ];
     }
-    return <WebCompilerConfig>[
-      JsCompilerConfig.run(
-        nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-        renderer: debuggingOptions.webRenderer,
-      ),
-    ];
+    return <WebCompilerConfig>[jsConfig];
   }
 
   /// Handles the no clients available scenario gracefully.
