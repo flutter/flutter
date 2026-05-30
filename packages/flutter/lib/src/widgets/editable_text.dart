@@ -3525,8 +3525,11 @@ class EditableTextState extends State<EditableText>
           _obscureLatestCharIndex = null;
         }
 
-        // If textInputAction changed, restart the connection to force IME refresh
-        if (textInputActionChanged) {
+        // If textInputAction changed, we need to update the input configuration.
+        // However, restarting the connection can break composition state (e.g., CJK input).
+        // Only restart the connection if there's no active composition.
+        if (textInputActionChanged && !_value.composing.isValid) {
+          // No active composition - safe to restart connection
           _scheduleRestartConnection();
         } else {
           _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
