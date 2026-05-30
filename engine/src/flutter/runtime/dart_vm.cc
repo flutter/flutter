@@ -34,6 +34,7 @@ namespace flutter {
 // Arguments passed to the Dart VM in all configurations.
 static const char* kDartAllConfigsArgs[] = {
     // clang-format off
+    "--check_core_snapshot_match",
     "--enable_mirrors=false",
     "--background_compilation",
     // 'mark_when_idle' appears to cause a regression, turning off for now.

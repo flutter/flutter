@@ -56,6 +56,7 @@ template("create_kernel_core_snapshot") {
     tool = gen_snapshot_to_use
 
     args = [
+      "--check_core_snapshot_match",
       "--enable_mirrors=false",
       "--deterministic",
       "--snapshot_kind=core",

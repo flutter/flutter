@@ -41,7 +41,7 @@ const char* kDartVMArgs[] = {
 
     "--timeline_recorder=systrace",
     "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,VM",
-
+    "--check_core_snapshot_match",
 #if defined(AOT_RUNTIME)
     "--precompilation",
 #else
