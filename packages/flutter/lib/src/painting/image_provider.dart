@@ -1264,7 +1264,7 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   ///
   /// At least one of `width` and `height` must be non-null.
   ///
-  /// Set [useLogicalSize] to specify `width` and `height` in logical pixels.
+  /// {@macro flutter.painting.ResizeImage.useLogicalSize}
   const ResizeImage(
     this.imageProvider, {
     this.width,
@@ -1303,11 +1303,20 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
   /// to use an appropriate [Image.fit].
   final bool allowUpscaling;
 
-  /// Whether [width] and [height] are interpreted as logical pixels rather
-  /// than physical pixels.
+  /// {@template flutter.painting.ResizeImage.useLogicalSize}
+  /// Whether [width] and [height] are interpreted as logical pixels.
   ///
-  /// Set this to true when [width] and [height] describe the image's on-screen
-  /// size in logical pixels.
+  /// When `false` (the default), [width] and [height] are treated as physical
+  /// pixels. On high-density displays, this can result in images being decoded
+  /// at fewer pixels than the screen can render, producing lower-quality output.
+  /// When `true`, [width] and [height] are multiplied by the device pixel ratio
+  /// from the current [ImageConfiguration], so the image is decoded at the
+  /// resolution that matches the rendered display.
+  ///
+  /// Typically in the framework, pixel dimensions are interpreted as logical
+  /// rather than physical. However, this defaults to physical for backwards
+  /// compatibility.
+  /// {@endtemplate}
   final bool useLogicalSize;
 
   /// Composes the `provider` in a [ResizeImage] only when `cacheWidth` and
