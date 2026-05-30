@@ -485,13 +485,13 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentResizable) {
 
   std::optional<Isolate> isolate;
 
-  bool signalled = false;
+  bool signaled = false;
   AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      signalled = true;
+                      signaled = true;
                       isolate = Isolate::Current();
                     }));
 
-  while (!signalled) {
+  while (!signaled) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
   }
 
@@ -540,13 +540,13 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentNotResizable) {
 
   std::optional<Isolate> isolate;
 
-  bool signalled = false;
+  bool signaled = false;
   AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-                      signalled = true;
+                      signaled = true;
                       isolate = Isolate::Current();
                     }));
 
-  while (!signalled) {
+  while (!signaled) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
   }
 
