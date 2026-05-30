@@ -20,6 +20,8 @@
 ///  * [Flutter GPU documentation](https://github.com/flutter/flutter/blob/main/docs/engine/impeller/Flutter-GPU.md).
 library flutter_gpu;
 
+import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:ffi';
 import 'dart:nativewrappers';
 import 'dart:typed_data';
@@ -32,6 +34,7 @@ part 'src/buffer.dart';
 part 'src/command_buffer.dart';
 part 'src/context.dart';
 part 'src/formats.dart';
+part 'src/natives.dart';
 part 'src/texture.dart';
 part 'src/render_pass.dart';
 part 'src/render_pipeline.dart';

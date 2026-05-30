@@ -116,11 +116,49 @@ TEST(UberSDFParametersTest, MakeRoundedRect) {
   EXPECT_EQ(params.color, Color::Red());
   EXPECT_EQ(params.center, Point(60, 70));
   EXPECT_EQ(params.size, Point(50, 50));
-  EXPECT_EQ(params.radii.top_left.width, 1.0f);
-  EXPECT_EQ(params.radii.top_right.width, 2.0f);
-  EXPECT_EQ(params.radii.bottom_left.width, 3.0f);
-  EXPECT_EQ(params.radii.bottom_right.width, 4.0f);
+  EXPECT_EQ(params.radii.w, 1.0f);
+  EXPECT_EQ(params.radii.y, 2.0f);
+  EXPECT_EQ(params.radii.z, 3.0f);
+  EXPECT_EQ(params.radii.x, 4.0f);
   EXPECT_FALSE(params.stroke.has_value());
+}
+
+TEST(UberSDFParametersTest, MakeRoundedSuperellipse) {
+  Rect rect = Rect::MakeXYWH(10, 20, 100, 100);
+  RoundingRadii radii = {
+      .top_left = Size(10.0f, 10.0f),
+      .top_right = Size(10.0f, 10.0f),
+      .bottom_left = Size(10.0f, 10.0f),
+      .bottom_right = Size(10.0f, 10.0f),
+  };
+  auto round_superellipse_params =
+      RoundSuperellipseParam::MakeBoundsRadii(rect, radii);
+  auto params = UberSDFParameters::MakeRoundedSuperellipse(
+      /*color=*/Color::Red(), /*bounds=*/rect,
+      /*round_superellipse_params=*/round_superellipse_params,
+      /*stroke=*/std::nullopt);
+
+  EXPECT_EQ(params.type,
+            UberSDFParameters::Type::kRoundedSuperellipseSymmetric);
+  EXPECT_EQ(params.color, Color::Red());
+  EXPECT_EQ(params.center, Point(60, 70));
+  EXPECT_EQ(params.size, Point(50, 50));
+  EXPECT_FALSE(params.stroke.has_value());
+
+  EXPECT_EQ(params.radii.x,
+            round_superellipse_params.top_right.top.circle_radius);
+  EXPECT_EQ(params.radii.y,
+            round_superellipse_params.top_right.right.circle_radius);
+
+  EXPECT_EQ(params.superellipse_degree.x,
+            round_superellipse_params.top_right.top.se_n);
+  EXPECT_EQ(params.superellipse_degree.y,
+            round_superellipse_params.top_right.right.se_n);
+
+  EXPECT_EQ(params.superellipse_scale.x,
+            round_superellipse_params.top_right.signed_scale.Abs().x);
+  EXPECT_EQ(params.superellipse_scale.y,
+            round_superellipse_params.top_right.signed_scale.Abs().y);
 }
 
 }  // namespace testing
