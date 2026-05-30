@@ -65,6 +65,11 @@ export interface FlutterConfiguration {
   entryPointBaseUrl?: string;
   entrypointBaseUrl?: string;
   forceSingleThreadedSkwasm?: boolean;
+  /** When true, silences the console warning emitted by skwasm when the
+   *  hosting page is not cross-origin isolated. Use this if you are aware
+   *  of the multi-threading constraints and cannot enable cross-origin
+   *  isolation (e.g. in a browser extension or embedded environment). */
+  suppressMultithreadingWarning?: boolean;
   wasmAllowList?: WasmAllowList;
 }
 
