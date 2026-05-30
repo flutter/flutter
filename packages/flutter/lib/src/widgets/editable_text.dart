@@ -81,8 +81,10 @@ export 'package:flutter/services.dart'
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
-typedef SelectionChangedCallback =
-    void Function(TextSelection selection, SelectionChangedCause? cause);
+typedef SelectionChangedCallback = void Function(
+  TextSelection selection,
+  SelectionChangedCause? cause,
+);
 
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
@@ -94,8 +96,10 @@ typedef AppPrivateCommandCallback = void Function(String action, Map<String, dyn
 ///
 ///  * [SelectableRegionContextMenuBuilder], which performs the same role for
 ///    [SelectableRegion].
-typedef EditableTextContextMenuBuilder =
-    Widget Function(BuildContext context, EditableTextState editableTextState);
+typedef EditableTextContextMenuBuilder = Widget Function(
+  BuildContext context,
+  EditableTextState editableTextState,
+);
 
 // Signature for a function that determines the target location of the given
 // [TextPosition] after applying the given [TextBoundary].
