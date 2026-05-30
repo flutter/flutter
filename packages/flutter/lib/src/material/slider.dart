@@ -40,6 +40,32 @@ import 'theme.dart';
 /// value indicator in a [RenderBox] that appears in the [Overlay].
 typedef PaintValueIndicator = void Function(PaintingContext context, Offset offset);
 
+/// Signature for a function that calculates the increment for scroll inputs.
+typedef SliderScrollIncrementCalculator = double Function(SliderScrollIncrementDetails details);
+
+/// Details passed to [SliderScrollIncrementCalculator].
+class SliderScrollIncrementDetails {
+  /// Creates a [SliderScrollIncrementDetails].
+  const SliderScrollIncrementDetails({required this.type, required this.semanticActionUnit});
+
+  /// The type of scroll increment (line or page).
+  final SliderScrollIncrementType type;
+
+  /// The semantic action unit for this slider.
+  /// For discrete sliders: 1.0 / divisions
+  /// For continuous sliders: platform-dependent (0.05 or 0.1)
+  final double semanticActionUnit;
+}
+
+/// Types of scroll increments.
+enum SliderScrollIncrementType {
+  /// Small increment (e.g., mouse wheel scroll).
+  line,
+
+  /// Large increment (e.g., Page Up/Down).
+  page,
+}
+
 enum _SliderType { material, adaptive }
 
 /// Possible ways for a user to interact with a [Slider].
@@ -190,6 +216,7 @@ class Slider extends StatefulWidget {
     this.allowedInteraction,
     this.padding,
     this.showValueIndicator,
+    this.scrollIncrementCalculator,
     @Deprecated(
       'Set this flag to false to opt into the 2024 slider appearance. Defaults to true. '
       'In the future, this flag will default to false. Use SliderThemeData to customize individual properties. '
@@ -242,6 +269,7 @@ class Slider extends StatefulWidget {
     this.autofocus = false,
     this.allowedInteraction,
     this.showValueIndicator,
+    this.scrollIncrementCalculator,
     @Deprecated(
       'Set this flag to false to opt into the 2024 slider appearance. Defaults to true. '
       'In the future, this flag will default to false. Use SliderThemeData to customize individual properties. '
@@ -577,6 +605,28 @@ class Slider extends StatefulWidget {
   /// null, defaults to [ShowValueIndicator.onlyForDiscrete].
   final ShowValueIndicator? showValueIndicator;
 
+  /// Calculates the increment amount for scroll inputs.
+  ///
+  /// If null, a default calculator is used that handles both
+  /// [SliderScrollIncrementType.line] and [SliderScrollIncrementType.page].
+  ///
+  /// The calculator receives a [SliderScrollIncrementDetails] object containing:
+  /// - [SliderScrollIncrementDetails.type]: Whether this is a line or page scroll
+  /// - [SliderScrollIncrementDetails.semanticActionUnit]: The base increment unit
+  ///
+  /// For example, to use 5x the increment for page scrolls:
+  /// ```dart
+  /// Slider(
+  ///   scrollIncrementCalculator: (details) {
+  ///     if (details.type == SliderScrollIncrementType.page) {
+  ///       return details.semanticActionUnit * 5;
+  ///     }
+  ///     return details.semanticActionUnit;
+  ///   },
+  /// )
+  /// ```
+  final SliderScrollIncrementCalculator? scrollIncrementCalculator;
+
   /// When true, the [Slider] will use the 2023 Material Design 3 appearance.
   /// Defaults to true.
   ///
@@ -621,6 +671,12 @@ class Slider extends StatefulWidget {
     );
     properties.add(ObjectFlagProperty<FocusNode>.has('focusNode', focusNode));
     properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'autofocus'));
+    properties.add(
+      ObjectFlagProperty<SliderScrollIncrementCalculator>.has(
+        'scrollIncrementCalculator',
+        scrollIncrementCalculator,
+      ),
+    );
   }
 }
 
@@ -753,14 +809,43 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   void _handleScrollIntent(ScrollIntent intent) {
-    _handleDirectionalInput(
+    final double increment = _calculateScrollIncrement(intent.type);
+
+    if (increment == 0) {
+      return;
+    }
+
+    _handleDirectionalInputWithIncrement(
       shouldIncrease: switch (intent.direction) {
         AxisDirection.right => !_isRtl,
         AxisDirection.left => _isRtl,
         AxisDirection.up => true,
         AxisDirection.down => false,
       },
+      increment: increment,
     );
+  }
+
+  double _calculateScrollIncrement(ScrollIncrementType scrollIncrementType) {
+    final SliderScrollIncrementCalculator calculator =
+        widget.scrollIncrementCalculator ?? _defaultScrollIncrementCalculator;
+
+    return calculator(
+      SliderScrollIncrementDetails(
+        type: switch (scrollIncrementType) {
+          ScrollIncrementType.line => SliderScrollIncrementType.line,
+          ScrollIncrementType.page => SliderScrollIncrementType.page,
+        },
+        semanticActionUnit: _semanticActionUnit,
+      ),
+    );
+  }
+
+  static double _defaultScrollIncrementCalculator(SliderScrollIncrementDetails details) {
+    return switch (details.type) {
+      SliderScrollIncrementType.line => details.semanticActionUnit,
+      SliderScrollIncrementType.page => details.semanticActionUnit * 5,
+    };
   }
 
   void _handleDirectionalInput({required bool shouldIncrease}) {
@@ -769,6 +854,26 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       slider.increaseAction();
     } else {
       slider.decreaseAction();
+    }
+  }
+
+  void _handleDirectionalInputWithIncrement({
+    required bool shouldIncrease,
+    required double increment,
+  }) {
+    if (!_enabled) {
+      return;
+    }
+
+    final slider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
+    final double newValue = shouldIncrease
+        ? clampDouble(slider.value + increment, 0.0, 1.0)
+        : clampDouble(slider.value - increment, 0.0, 1.0);
+
+    if (slider.onChanged != null) {
+      slider.onChangeStart?.call(_lerp(slider.value));
+      slider.onChanged!(_lerp(newValue));
+      slider.onChangeEnd?.call(_lerp(newValue));
     }
   }
 
@@ -821,6 +926,11 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     assert(value <= widget.max);
     assert(value >= widget.min);
     return widget.max > widget.min ? (value - widget.min) / (widget.max - widget.min) : 0.0;
+  }
+
+  double get _semanticActionUnit {
+    final slider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
+    return slider._semanticActionUnit;
   }
 
   @override
