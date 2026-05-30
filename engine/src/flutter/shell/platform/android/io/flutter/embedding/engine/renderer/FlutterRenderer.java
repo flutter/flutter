@@ -88,7 +88,8 @@ public class FlutterRenderer implements TextureRegistry {
       if ("HUAWEI".equalsIgnoreCase(Build.MANUFACTURER)) {
         return true;
       }
-      String hardware = Build.HARDWARE != null ? Build.HARDWARE.toLowerCase(java.util.Locale.ENGLISH) : "";
+      String hardware =
+          Build.HARDWARE != null ? Build.HARDWARE.toLowerCase(java.util.Locale.ENGLISH) : "";
       String board = Build.BOARD != null ? Build.BOARD.toLowerCase(java.util.Locale.ENGLISH) : "";
       if (hardware.startsWith("mt6762")
           || hardware.startsWith("mt6765")
