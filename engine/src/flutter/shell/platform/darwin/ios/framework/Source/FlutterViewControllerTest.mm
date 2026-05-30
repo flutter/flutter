@@ -20,7 +20,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterVSyncClient+Testing.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
@@ -619,6 +618,64 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
       setUpKeyboardAnimationVsyncClient:^(NSTimeInterval targetTime){
       }];
   [engine destroyContext];
+}
+
+- (void)testKeyboardAnimationFirstVsyncCallbackCalculatesSafeInset {
+  FlutterEnginePartialMock* engine = [[FlutterEnginePartialMock alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+  OCMStub([viewControllerMock isViewLoaded]).andReturn(YES);
+  [viewControllerMock view];
+  viewController.keyboardInsetManager.delegate =
+      (id<FlutterKeyboardInsetManagerDelegate>)viewControllerMock;
+
+  engine.viewController = viewControllerMock;
+
+  XCTestExpectation* expectation = [self expectationWithDescription:@"metrics updated"];
+  // Stub updateViewportMetricsWithInset: to capture the inset value passed.
+  __block CGFloat capturedInset = -1.0;
+  __block BOOL fulfilled = NO;
+  OCMStub([viewControllerMock updateViewportMetricsWithInset:0])
+      .ignoringNonObjectArgs()
+      .andDo(^(NSInvocation* invocation) {
+        [invocation getArgument:&capturedInset atIndex:2];
+        if (!fulfilled) {
+          fulfilled = YES;
+          // Prevent the instant UIView animation completion block from overriding the captured
+          // vsync inset.
+          [viewController.keyboardInsetManager invalidateKeyboardAnimationVSyncClient];
+          [expectation fulfill];
+        }
+      });
+
+  // Configure keyboard spring animation.
+  CASpringAnimation* springAnimation = [CASpringAnimation animation];
+  springAnimation.mass = 1.0;
+  springAnimation.stiffness = 100.0;
+  springAnimation.damping = 10.0;
+  springAnimation.keyPath = @"position";
+
+  viewController.keyboardInsetManager.targetViewInsetBottom = 300.0;
+
+  // Start the keyboard animation.
+  [viewController.keyboardInsetManager startKeyBoardAnimation:0.25];
+  [viewController.keyboardInsetManager setUpKeyboardSpringAnimationIfNeeded:springAnimation];
+
+  // Simulate the first vsync callback passing the initial CADisplayLink directly.
+  FlutterVSyncClient* client = viewController.keyboardInsetManager.keyboardAnimationVSyncClient;
+  [client onDisplayLink:client.displayLink];
+
+  // Wait for task runner to execute callback on main queue.
+  [self waitForExpectationsWithTimeout:5.0 handler:nil];
+
+  // The captured inset must be a finite, non-NaN, non-negative value (close to start of animation).
+  XCTAssertFalse(isnan(capturedInset));
+  XCTAssertFalse(isinf(capturedInset));
+  XCTAssertGreaterThanOrEqual(capturedInset, 0.0);
+  XCTAssertLessThan(capturedInset, 300.0);
 }
 
 - (void)testKeyboardAnimationWillWaitUIThreadVsync {
@@ -2437,11 +2494,11 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)testSetupKeyboardAnimationVsyncClientWillCreateNewVsyncClientForFlutterViewController {
   id bundleMock = OCMPartialMock([NSBundle mainBundle]);
-  OCMStub([bundleMock objectForInfoDictionaryKey:kCADisableMinimumFrameDurationOnPhoneKey])
+  OCMStub([bundleMock objectForInfoDictionaryKey:@"CADisableMinimumFrameDurationOnPhone"])
       .andReturn(@YES);
   id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -2473,7 +2530,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
     testCreateTouchRateCorrectionVSyncClientWillCreateVsyncClientWhenRefreshRateIsLargerThan60HZ {
   id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -2486,7 +2543,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateNewVSyncClientWhenClientAlreadyExists {
   id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
 
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
@@ -2507,7 +2564,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateVsyncClientWhenRefreshRateIs60HZ {
   id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 60;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -2520,7 +2577,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 - (void)testTriggerTouchRateCorrectionVSyncClientCorrectly {
   id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine

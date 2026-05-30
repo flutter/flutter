@@ -122,7 +122,7 @@ void main() {
             outputRunnerBinaryDebugDylib = outputApp.childFile('Runner.debug.dylib');
 
             // Exists only if the plugin is built as a dynamic framework.
-            // This is is the default for CocoaPods but not Swift Package Manager.
+            // This is the default for CocoaPods but not Swift Package Manager.
             outputPluginFrameworkBinary = frameworkDirectory
                 .childDirectory('hello.framework')
                 .childFile('hello');

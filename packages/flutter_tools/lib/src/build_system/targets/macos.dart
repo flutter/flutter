@@ -286,7 +286,7 @@ class CompileMacOSFramework extends Target {
       environment.defines,
       kExtraGenSnapshotOptions,
     );
-    final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
+    final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
     final List<DarwinArch> darwinArchs = getDarwinArchsFromEnv(environment.defines);
     if (targetPlatform != TargetPlatform.darwin) {
       throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');

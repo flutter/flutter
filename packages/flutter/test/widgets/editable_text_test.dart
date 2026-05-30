@@ -9448,42 +9448,40 @@ void main() {
     }),
   );
 
-  testWidgets(
-    'single-line field cannot be scrolled with touch on iOS',
-    (WidgetTester tester) async {
-      controller.text = 'This is a long string that should overflow the TextField.';
+  testWidgets('single-line field cannot be scrolled with touch on iOS', (
+    WidgetTester tester,
+  ) async {
+    controller.text = 'This is a long string that should overflow the TextField.';
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Align(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 100,
-              child: EditableText(
-                showSelectionHandles: true,
-                controller: controller,
-                focusNode: focusNode,
-                style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
-                selectionControls: materialTextSelectionControls,
-                keyboardType: TextInputType.text,
-              ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            child: EditableText(
+              showSelectionHandles: true,
+              controller: controller,
+              focusNode: focusNode,
+              style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
-      final double initialScrollOffset = scrollable.controller!.position.pixels;
+    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+    final double initialScrollOffset = scrollable.controller!.position.pixels;
 
-      await tester.drag(find.byType(EditableText), const Offset(-100.0, 0.0));
-      await tester.pumpAndSettle();
+    await tester.drag(find.byType(EditableText), const Offset(-100.0, 0.0));
+    await tester.pumpAndSettle();
 
-      expect(scrollable.controller!.position.pixels, initialScrollOffset);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    expect(scrollable.controller!.position.pixels, initialScrollOffset);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets('default text selection height style', (WidgetTester tester) async {
     controller.text = 'a b c d e f g';
@@ -9524,44 +9522,40 @@ void main() {
     );
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets(
-    'multi-line field can scroll with touch on iOS',
-    (WidgetTester tester) async {
-      // 3 lines of text, where the last line overflows and requires scrolling.
-      controller.text = 'XXXXX\nXXXXX\nXXXXX';
+  testWidgets('multi-line field can scroll with touch on iOS', (WidgetTester tester) async {
+    // 3 lines of text, where the last line overflows and requires scrolling.
+    controller.text = 'XXXXX\nXXXXX\nXXXXX';
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Align(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              width: 100,
-              child: EditableText(
-                maxLines: 2,
-                showSelectionHandles: true,
-                controller: controller,
-                focusNode: focusNode,
-                style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
-                cursorColor: Colors.blue,
-                backgroundCursorColor: Colors.grey,
-                selectionControls: materialTextSelectionControls,
-                keyboardType: TextInputType.text,
-              ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            child: EditableText(
+              maxLines: 2,
+              showSelectionHandles: true,
+              controller: controller,
+              focusNode: focusNode,
+              style: Typography.material2018().black.titleMedium!.copyWith(fontFamily: 'Roboto'),
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
-      final double initialScrollOffset = scrollable.controller!.position.pixels;
+    final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
+    final double initialScrollOffset = scrollable.controller!.position.pixels;
 
-      await tester.drag(find.byType(EditableText), const Offset(0.0, -100.0));
-      await tester.pumpAndSettle();
+    await tester.drag(find.byType(EditableText), const Offset(0.0, -100.0));
+    await tester.pumpAndSettle();
 
-      expect(scrollable.controller!.position.pixels, isNot(initialScrollOffset));
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    expect(scrollable.controller!.position.pixels, isNot(initialScrollOffset));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets("scrolling doesn't bounce", (WidgetTester tester) async {
     // 3 lines of text, where the last line overflows and requires scrolling.
@@ -15508,6 +15502,49 @@ void main() {
   );
 
   testWidgets(
+    'contextMenuBuilder can be updated with inline lambda without crash',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/155514.
+      late StateSetter setState;
+      var buildCount = 0;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              return TestTextField(
+                autofocus: true,
+                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                  buildCount++;
+                  return _EditableTextStatefulMenu(value: buildCount);
+                },
+              );
+            },
+          ),
+        ),
+      );
+
+      await tester.pump();
+
+      final Finder textFinder = find.byType(EditableText);
+      tester.state<EditableTextState>(textFinder).showToolbar();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Initial: 1, Current: 1'), findsOneWidget);
+
+      // First rebuild: the inline lambda produces a new function reference.
+      // With the fix the entry is updated in-place and initState is never
+      // called again.
+      setState(() {});
+
+      await tester.pumpAndSettle();
+      expect(find.text('Initial: 1, Current: 2'), findsOneWidget);
+    },
+    skip: kIsWeb, // [intended] on web the browser handles the context menu.
+  );
+
+  testWidgets(
     'selectionControls can be updated',
     (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/142077.
@@ -15936,6 +15973,204 @@ void main() {
         state.spellCheckConfiguration.spellCheckService.runtimeType,
         equals(FakeSpellCheckService),
       );
+    });
+
+    testWidgets('Spell check disabled when obscureText is true', (WidgetTester tester) async {
+      final fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            obscureText: true,
+            style: const TextStyle(),
+            cursorColor: const Color(0xFF0000FF),
+            backgroundCursorColor: const Color(0xFF808080),
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: fakeSpellCheckService,
+              misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+    });
+
+    testWidgets('Spell check disabled for visible password input type', (
+      WidgetTester tester,
+    ) async {
+      final fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            keyboardType: TextInputType.visiblePassword,
+            style: const TextStyle(),
+            cursorColor: const Color(0xFF0000FF),
+            backgroundCursorColor: const Color(0xFF808080),
+            cursorOpacityAnimates: true,
+            autofillHints: null,
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: fakeSpellCheckService,
+              misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+    });
+
+    testWidgets('Spell check disabled for password autofill hints', (WidgetTester tester) async {
+      final fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: const TextStyle(),
+            cursorColor: const Color(0xFF0000FF),
+            backgroundCursorColor: const Color(0xFF808080),
+            cursorOpacityAnimates: true,
+            autofillHints: const <String>[AutofillHints.password],
+            spellCheckConfiguration: SpellCheckConfiguration(
+              spellCheckService: fakeSpellCheckService,
+              misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+            ),
+          ),
+        ),
+      );
+
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+    });
+
+    testWidgets('Spell check updates when non-password obscureText changes', (
+      WidgetTester tester,
+    ) async {
+      const suggestionSpans = <SuggestionSpan>[
+        SuggestionSpan(TextRange(start: 0, end: 1), <String>['a']),
+      ];
+      final fakeSpellCheckService = FakeSpellCheckService(
+        suggestionSpansByText: const <String, List<SuggestionSpan>?>{'A': suggestionSpans},
+      );
+      controller.text = 'A';
+      var obscureText = false;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              return EditableText(
+                controller: controller,
+                focusNode: focusNode,
+                obscureText: obscureText,
+                style: const TextStyle(),
+                cursorColor: const Color(0xFF0000FF),
+                backgroundCursorColor: const Color(0xFF808080),
+                cursorOpacityAnimates: true,
+                autofillHints: null,
+                spellCheckConfiguration: SpellCheckConfiguration(
+                  spellCheckService: fakeSpellCheckService,
+                  misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      void setObscureText(bool value) {
+        setState(() {
+          obscureText = value;
+        });
+      }
+
+      EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isTrue);
+      state.spellCheckResults = const SpellCheckResults('A', suggestionSpans);
+
+      setObscureText(true);
+      await tester.pump();
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+      expect(state.spellCheckResults, isNull);
+      expect(fakeSpellCheckService.fetchSpellCheckSuggestionsCallCount, 0);
+
+      setObscureText(false);
+      await tester.pump();
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isTrue);
+      expect(fakeSpellCheckService.fetchSpellCheckSuggestionsCallCount, 1);
+      expect(fakeSpellCheckService.lastSpellCheckText, 'A');
+      expect(state.spellCheckResults, const SpellCheckResults('A', suggestionSpans));
+    });
+
+    testWidgets('Spell check stays disabled for visible password when obscureText changes', (
+      WidgetTester tester,
+    ) async {
+      final fakeSpellCheckService = FakeSpellCheckService();
+      controller.text = 'A';
+      var obscureText = true;
+      late StateSetter setState;
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter localSetState) {
+              setState = localSetState;
+              return EditableText(
+                controller: controller,
+                focusNode: focusNode,
+                keyboardType: TextInputType.visiblePassword,
+                obscureText: obscureText,
+                style: const TextStyle(),
+                cursorColor: const Color(0xFF0000FF),
+                backgroundCursorColor: const Color(0xFF808080),
+                cursorOpacityAnimates: true,
+                autofillHints: null,
+                spellCheckConfiguration: SpellCheckConfiguration(
+                  spellCheckService: fakeSpellCheckService,
+                  misspelledTextStyle: const TextStyle(decoration: TextDecoration.underline),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+
+      setState(() {
+        obscureText = false;
+      });
+      await tester.pump();
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(state.spellCheckEnabled, isFalse);
+      expect(state.spellCheckConfiguration, equals(const SpellCheckConfiguration.disabled()));
+      expect(fakeSpellCheckService.fetchSpellCheckSuggestionsCallCount, 0);
     });
 
     testWidgets(
@@ -17135,71 +17370,69 @@ void main() {
       expect(controller.selection, collapsedAtEnd('Flutter!').selection);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets(
-      'moving focus after the app resumed should select all the content on desktop',
-      (WidgetTester tester) async {
-        final controller1 = TextEditingController.fromValue(collapsedAtEnd('Flutter!'));
-        addTearDown(controller1.dispose);
-        final controller2 = TextEditingController.fromValue(collapsedAtEnd('Dart!'));
-        addTearDown(controller2.dispose);
-        final focusNode1 = FocusNode();
-        addTearDown(focusNode1.dispose);
-        final focusNode2 = FocusNode();
-        addTearDown(focusNode2.dispose);
+    testWidgets('moving focus after the app resumed should select all the content on desktop', (
+      WidgetTester tester,
+    ) async {
+      final controller1 = TextEditingController.fromValue(collapsedAtEnd('Flutter!'));
+      addTearDown(controller1.dispose);
+      final controller2 = TextEditingController.fromValue(collapsedAtEnd('Dart!'));
+      addTearDown(controller2.dispose);
+      final focusNode1 = FocusNode();
+      addTearDown(focusNode1.dispose);
+      final focusNode2 = FocusNode();
+      addTearDown(focusNode2.dispose);
 
-        await tester.pumpWidget(
-          MaterialApp(
-            home: Center(
-              child: Column(
-                children: <Widget>[
-                  EditableText(
-                    key: ValueKey<String>(controller1.text),
-                    controller: controller1,
-                    focusNode: focusNode1,
-                    autofocus: true,
-                    style: Typography.material2018().black.titleMedium!,
-                    cursorColor: Colors.blue,
-                    backgroundCursorColor: Colors.grey,
-                  ),
-                  EditableText(
-                    key: ValueKey<String>(controller2.text),
-                    controller: controller2,
-                    focusNode: focusNode2,
-                    style: Typography.material2018().black.titleMedium!,
-                    cursorColor: Colors.blue,
-                    backgroundCursorColor: Colors.grey,
-                  ),
-                ],
-              ),
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: Column(
+              children: <Widget>[
+                EditableText(
+                  key: ValueKey<String>(controller1.text),
+                  controller: controller1,
+                  focusNode: focusNode1,
+                  autofocus: true,
+                  style: Typography.material2018().black.titleMedium!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                ),
+                EditableText(
+                  key: ValueKey<String>(controller2.text),
+                  controller: controller2,
+                  focusNode: focusNode2,
+                  style: Typography.material2018().black.titleMedium!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                ),
+              ],
             ),
           ),
-        );
+        ),
+      );
 
-        expect(focusNode1.hasFocus, true);
-        expect(focusNode2.hasFocus, false);
-        expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
-        expect(controller2.selection, collapsedAtEnd('Dart!').selection);
+      expect(focusNode1.hasFocus, true);
+      expect(focusNode2.hasFocus, false);
+      expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
+      expect(controller2.selection, collapsedAtEnd('Dart!').selection);
 
-        // Pause and resume the application.
-        await setAppLifecycleState(AppLifecycleState.inactive);
-        await setAppLifecycleState(AppLifecycleState.resumed);
+      // Pause and resume the application.
+      await setAppLifecycleState(AppLifecycleState.inactive);
+      await setAppLifecycleState(AppLifecycleState.resumed);
 
-        // Change focus to the second EditableText.
-        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-        await tester.pumpAndSettle();
+      // Change focus to the second EditableText.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
 
-        expect(focusNode1.hasFocus, false);
-        expect(focusNode2.hasFocus, true);
-        expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
+      expect(focusNode1.hasFocus, false);
+      expect(focusNode2.hasFocus, true);
+      expect(controller1.selection, collapsedAtEnd('Flutter!').selection);
 
-        // The text of the second EditableText should be entirely selected.
-        expect(
-          controller2.selection,
-          TextSelection(baseOffset: 0, extentOffset: controller2.text.length),
-        );
-      },
-      variant: TargetPlatformVariant.desktop(),
-    );
+      // The text of the second EditableText should be entirely selected.
+      expect(
+        controller2.selection,
+        TextSelection(baseOffset: 0, extentOffset: controller2.text.length),
+      );
+    }, variant: TargetPlatformVariant.desktop());
   });
 
   testWidgets('EditableText respects MediaQuery.boldText', (WidgetTester tester) async {
@@ -19037,7 +19270,22 @@ class _TestScrollController extends ScrollController {
   bool get attached => hasListeners;
 }
 
-class FakeSpellCheckService extends DefaultSpellCheckService {}
+class FakeSpellCheckService extends DefaultSpellCheckService {
+  FakeSpellCheckService({this.suggestionSpansByText = const <String, List<SuggestionSpan>?>{}});
+
+  final Map<String, List<SuggestionSpan>?> suggestionSpansByText;
+  int fetchSpellCheckSuggestionsCallCount = 0;
+  String? lastSpellCheckText;
+
+  @override
+  Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(Locale locale, String text) async {
+    fetchSpellCheckSuggestionsCallCount += 1;
+    lastSpellCheckText = text;
+    return suggestionSpansByText.containsKey(text)
+        ? suggestionSpansByText[text]
+        : const <SuggestionSpan>[];
+  }
+}
 
 class FakeFlutterView extends TestFlutterView {
   FakeFlutterView(TestFlutterView view, {required this.viewId})
@@ -19045,4 +19293,38 @@ class FakeFlutterView extends TestFlutterView {
 
   @override
   final int viewId;
+}
+
+// A stateful context menu.
+//
+// When the overlay entry is updated in-place (via OverlayEntry.markNeedsBuild),
+// initState is not called again and initialValue remains unchanged.
+//
+// When the overlay entry is recreated from scratch, initState runs again and
+// initialValue is reset to the new widget.value.
+class _EditableTextStatefulMenu extends StatefulWidget {
+  const _EditableTextStatefulMenu({required this.value});
+
+  final int value;
+
+  @override
+  State<_EditableTextStatefulMenu> createState() => _EditableTextStatefulMenuState();
+}
+
+class _EditableTextStatefulMenuState extends State<_EditableTextStatefulMenu> {
+  late int initialValue;
+
+  @override
+  void initState() {
+    super.initState();
+    initialValue = widget.value;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      'Initial: $initialValue, Current: ${widget.value}',
+      textDirection: TextDirection.ltr,
+    );
+  }
 }

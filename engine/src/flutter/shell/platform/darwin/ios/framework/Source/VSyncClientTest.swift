@@ -4,6 +4,8 @@
 
 import XCTest
 
+@testable import InternalFlutterSwift
+
 class VSyncClientTest: XCTestCase {
   var threadTaskRunner: TaskRunner!
 
@@ -17,9 +19,88 @@ class VSyncClientTest: XCTestCase {
     super.tearDown()
   }
 
+  /// Verifies that the vsync client safely synthesizes a target timestamp when the display link's
+  /// `targetTimestamp` is invalid (i.e. evaluates to 0.0).
+  ///
+  /// Apple's `CADisplayLink` documentation specifies:
+  /// > "The targetTimestamp value is only valid after the display link has delivered at least one
+  /// > frame. Before the first frame is delivered, or when the display link is paused, the value
+  /// > of targetTimestamp is 0."
+  ///
+  /// Our vsync waiter operates on-demand in a request-and-pause cycle. This means every new frame
+  /// sequence begins (e.g. in response to a gesture) with a paused-to-unpaused transition, causing
+  /// the first callback to receive `targetTimestamp = 0.0`.
+  ///
+  /// Without a fallback, passing `targetTime = 0.0` downstream causes a negative presentation time
+  /// when subtracted from the start time.
+  ///
+  /// This test passes a newly created, paused `CADisplayLink` (whose properties both evaluate to
+  /// 0.0) and asserts that the client intercepts the invalid state and synthesizes a safe, positive
+  /// next-frame target timestamp based on the display's maximum refresh rate.
+  func testRealDisplayLinkVsyncTimestampsCorrect() {
+    var callbackStartTime: CFTimeInterval = -1
+    var callbackTargetTime: CFTimeInterval = -1
+    let vsyncClient = VSyncClient(
+      taskRunner: threadTaskRunner,
+      isVariableRefreshRateEnabled: false,
+      maxRefreshRate: 60.0
+    ) { startTime, targetTime in
+      callbackStartTime = startTime
+      callbackTargetTime = targetTime
+    }
+    let link = vsyncClient.displayLink!
+
+    vsyncClient.onDisplayLink(link)
+
+    // Since the display link is paused and has not delivered a frame yet, both timestamp and
+    // targetTimestamp are 0.0. Verify the client synthesizes a valid target timestamp using the max
+    // refresh rate.
+    XCTAssertGreaterThan(callbackStartTime, 0.0)
+    XCTAssertEqual(callbackTargetTime - callbackStartTime, 1.0 / 60.0, accuracy: 0.0001)
+  }
+
+  func testVsyncClientPreventsZeroRefreshRateDivision() {
+    var callbackStartTime: CFTimeInterval = -1
+    var callbackTargetTime: CFTimeInterval = -1
+    // Initialize with maxRefreshRate = 0.0 to simulate uninitialized/zero max refresh rate.
+    let vsyncClient = VSyncClient(
+      taskRunner: threadTaskRunner,
+      isVariableRefreshRateEnabled: false,
+      maxRefreshRate: 0.0
+    ) { startTime, targetTime in
+      callbackStartTime = startTime
+      callbackTargetTime = targetTime
+    }
+    let link = vsyncClient.displayLink!
+
+    vsyncClient.onDisplayLink(link)
+
+    XCTAssertGreaterThan(callbackStartTime, 0.0)
+    // Should fallback to effectiveRefreshRate of 60.0.
+    XCTAssertEqual(callbackTargetTime - callbackStartTime, 1.0 / 60.0, accuracy: 0.0001)
+    XCTAssertFalse(callbackTargetTime.isNaN)
+    XCTAssertFalse(callbackTargetTime.isInfinite)
+  }
+
+  func testRefreshRatePropertyFallsBackToDefaultWhenInvalid() {
+    // Initialize with 0.0 to simulate invalid state.
+    let vsyncClient = VSyncClient(
+      taskRunner: threadTaskRunner,
+      isVariableRefreshRateEnabled: false,
+      maxRefreshRate: 0.0
+    ) { _, _ in }
+
+    // Should return default rate (60.0).
+    XCTAssertEqual(vsyncClient.refreshRate, 60.0)
+  }
+
   func testSetAllowPauseAfterVsyncCorrect() {
-    let vsyncClient = VSyncClient(taskRunner: threadTaskRunner) { _, _ in }!
-    let link = vsyncClient.displayLink
+    let vsyncClient = VSyncClient(
+      taskRunner: threadTaskRunner,
+      isVariableRefreshRateEnabled: false,
+      maxRefreshRate: 60.0
+    ) { _, _ in }
+    let link = vsyncClient.displayLink!
 
     vsyncClient.allowPauseAfterVsync = false
     vsyncClient.await()
@@ -38,8 +119,8 @@ class VSyncClientTest: XCTestCase {
       taskRunner: threadTaskRunner,
       isVariableRefreshRateEnabled: true,
       maxRefreshRate: maxFrameRate
-    ) { _, _ in }!
-    let link = vsyncClient.displayLink
+    ) { _, _ in }
+    let link = vsyncClient.displayLink!
 
     if #available(iOS 15.0, *) {
       XCTAssertEqual(Double(link.preferredFrameRateRange.maximum), maxFrameRate, accuracy: 0.1)
@@ -57,8 +138,8 @@ class VSyncClientTest: XCTestCase {
       taskRunner: threadTaskRunner,
       isVariableRefreshRateEnabled: false,
       maxRefreshRate: maxFrameRate
-    ) { _, _ in }!
-    let link = vsyncClient.displayLink
+    ) { _, _ in }
+    let link = vsyncClient.displayLink!
 
     if #available(iOS 15.0, *) {
       XCTAssertEqual(Double(link.preferredFrameRateRange.maximum), 0, accuracy: 0.1)
@@ -70,8 +151,12 @@ class VSyncClientTest: XCTestCase {
   }
 
   func testAwaitAndPauseWillWorkCorrectly() {
-    let vsyncClient = VSyncClient(taskRunner: threadTaskRunner) { _, _ in }!
-    let link = vsyncClient.displayLink
+    let vsyncClient = VSyncClient(
+      taskRunner: threadTaskRunner,
+      isVariableRefreshRateEnabled: false,
+      maxRefreshRate: 60.0
+    ) { _, _ in }
+    let link = vsyncClient.displayLink!
 
     XCTAssertTrue(link.isPaused)
     vsyncClient.await()
@@ -86,9 +171,13 @@ class VSyncClientTest: XCTestCase {
 
     autoreleasepool {
       let vsyncExpectation = expectation(description: "vsync")
-      let client = VSyncClient(taskRunner: threadTaskRunner) { _, _ in
+      let client = VSyncClient(
+        taskRunner: threadTaskRunner,
+        isVariableRefreshRateEnabled: false,
+        maxRefreshRate: 60.0
+      ) { _, _ in
         vsyncExpectation.fulfill()
-      }!
+      }
       weakClient = client
 
       threadTaskRunner.postTask {
@@ -107,5 +196,72 @@ class VSyncClientTest: XCTestCase {
 
     waitForExpectations(timeout: 1.0, handler: nil)
     XCTAssertNil(weakClient)
+  }
+
+  func testDeallocatesWithoutExplicitInvalidation() {
+    let threadTaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "VSyncClientTest")
+    weak var weakClient: VSyncClient?
+
+    autoreleasepool {
+      let client = VSyncClient(
+        taskRunner: threadTaskRunner,
+        isVariableRefreshRateEnabled: false,
+        maxRefreshRate: 60.0
+      ) { _, _ in }
+      weakClient = client
+    }
+
+    XCTAssertNil(weakClient)
+  }
+
+  /// Verifies that when `VSyncClient` is deallocated, and its display link is successfully
+  /// invalidated and deallocated on the thread where it was created.
+  ///
+  /// Since `deinit` can run on an arbitrary thread, calling `CADisplayLink.invalidate()` directly
+  /// from `deinit` violates Apple's thread-affinity contract (invalidation must happen on the
+  /// registering thread). If this fails, the run loop will strongly retain and leak both the
+  /// display link and the relay.
+  func testDisplayLinkIsDeallocatedOnTaskRunnerThread() {
+    let threadTaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "VSyncClientTest")
+    weak var weakClient: VSyncClient?
+    weak var weakDisplayLink: CADisplayLink?
+
+    // Scope the lifetime of VSyncClient using an autorelease pool.
+    //
+    // When this block exits, the client will be released on the main (test) thread. Since deinit
+    // runs on the main thread but the display link was registered on the task runner's thread, the
+    // client must post the invalidation task to the task runner to execute it safely.
+    autoreleasepool {
+      let client = VSyncClient(
+        taskRunner: threadTaskRunner,
+        isVariableRefreshRateEnabled: false,
+        maxRefreshRate: 60.0
+      ) { _, _ in }
+
+      weakClient = client
+      weakDisplayLink = client.displayLink
+
+      // Ensure the display link is added to the run loop on the task runner thread.
+      let registerExpectation = expectation(description: "Wait for display link registration")
+      threadTaskRunner.postTask {
+        registerExpectation.fulfill()
+      }
+      waitForExpectations(timeout: 1.0, handler: nil)
+    }
+
+    // Deallocate on the main (test) thread. deinit calls invalidate(), which must post the
+    // invalidation task to the task runner.
+    XCTAssertNil(weakClient)
+
+    // Flush the task runner queue to ensure invalidation executes on the task runner thread.
+    let flushExpectation = expectation(description: "Flush invalidation task")
+    threadTaskRunner.postTask {
+      flushExpectation.fulfill()
+    }
+    waitForExpectations(timeout: 1.0, handler: nil)
+
+    // If the invalidation succeeded on the correct thread, the run loop dropped its strong
+    // reference, and the display link must have been deallocated.
+    XCTAssertNil(weakDisplayLink)
   }
 }
