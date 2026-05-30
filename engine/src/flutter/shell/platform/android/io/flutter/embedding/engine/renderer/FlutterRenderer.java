@@ -84,8 +84,20 @@ public class FlutterRenderer implements TextureRegistry {
     // app.
     /// If the video plays then that is a strong signal that this method should be updated to
     // include the tested device.
-    return Build.VERSION.SDK_INT <= API_LEVELS.API_29
-        && "HUAWEI".equalsIgnoreCase(Build.MANUFACTURER);
+    if (Build.VERSION.SDK_INT <= API_LEVELS.API_29) {
+      if ("HUAWEI".equalsIgnoreCase(Build.MANUFACTURER)) {
+        return true;
+      }
+      String hardware = Build.HARDWARE.toLowerCase(java.util.Locale.ENGLISH);
+      String board = Build.BOARD.toLowerCase(java.util.Locale.ENGLISH);
+      if (hardware.startsWith("mt6762")
+          || hardware.startsWith("mt6765")
+          || board.startsWith("mt6762")
+          || board.startsWith("mt6765")) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /** Whether to disable clearing of the Surface used to render platform views. */
