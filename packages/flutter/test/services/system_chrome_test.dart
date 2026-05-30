@@ -109,9 +109,10 @@ void main() {
   });
 
   group('preferredOrientations', () {
-    setUp(() {
-      // Reset cached state so each test starts from the "never set" state and
-      // mutations don't leak to other tests in the same process.
+    setUpAll(() {
+      // Reset cached state once before the group runs so any leftover state
+      // from earlier tests in the file is cleared. Per-test cleanup is handled
+      // by `tearDown` below.
       SystemChrome.debugResetPreferredOrientations();
     });
 
