@@ -20,6 +20,8 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/fixtures/baby.frag.h"
 #include "impeller/fixtures/baby.vert.h"
+#include "impeller/fixtures/instanced_attributes.frag.h"
+#include "impeller/fixtures/instanced_attributes.vert.h"
 #include "impeller/fixtures/texture.frag.h"
 #include "impeller/fixtures/texture.vert.h"
 #include "impeller/geometry/color.h"
@@ -85,6 +87,115 @@ TEST_P(RendererGoldenTest, BabysFirstTriangle) {
     FS::FragInfo frag_info;
     frag_info.time = 0.0f;
     FS::BindFragInfo(pass, host_buffer->EmplaceUniform(frag_info));
+
+    return pass.Draw().ok();
+  }));
+}
+
+// Ported from RendererTest.CanRenderInstancedWithVertexAttributes. Renders an
+// instanced draw whose per-instance data arrives through an instance-rate
+// vertex buffer binding rather than an instance-ID builtin. This is the only
+// portable instancing mechanism on OpenGL ES. Per-instance offsets and colors
+// are fixed so the golden is deterministic.
+TEST_P(RendererGoldenTest, CanRenderInstancedWithVertexAttributes) {
+  using VS = InstancedAttributesVertexShader;
+  using FS = InstancedAttributesFragmentShader;
+
+  std::shared_ptr<Context> context = GetContext();
+  ASSERT_TRUE(context);
+
+  auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+  // Match the golden harness render target: single-sampled, no depth/stencil.
+  desc->SetSampleCount(SampleCount::kCount1);
+  desc->ClearStencilAttachments();
+  desc->ClearDepthAttachment();
+
+  // Per-instance data is laid out contiguously, one record per instance.
+  struct InstanceData {
+    Vector2 offset;
+    Vector4 color;
+  };
+
+  // Two vertex bindings: binding 0 carries per-vertex geometry and advances
+  // once per vertex; binding 1 carries per-instance data and advances once
+  // per instance.
+  auto vertex_desc = std::make_shared<VertexDescriptor>();
+  ShaderStageIOSlot position_slot = VS::kInputVertexPosition;
+  ShaderStageIOSlot offset_slot = VS::kInputInstanceOffset;
+  ShaderStageIOSlot color_slot = VS::kInputInstanceColor;
+  position_slot.binding = 0;
+  position_slot.offset = 0;
+  offset_slot.binding = 1;
+  offset_slot.offset = offsetof(InstanceData, offset);
+  color_slot.binding = 1;
+  color_slot.offset = offsetof(InstanceData, color);
+  const std::vector<ShaderStageIOSlot> io_slots = {position_slot, offset_slot,
+                                                   color_slot};
+  const std::vector<ShaderStageBufferLayout> layouts = {
+      ShaderStageBufferLayout{.stride = sizeof(Vector2),
+                              .binding = 0,
+                              .input_rate = VertexInputRate::kVertex},
+      ShaderStageBufferLayout{.stride = sizeof(InstanceData),
+                              .binding = 1,
+                              .input_rate = VertexInputRate::kInstance},
+  };
+  vertex_desc->RegisterDescriptorSetLayouts(VS::kDescriptorSetLayouts);
+  vertex_desc->RegisterDescriptorSetLayouts(FS::kDescriptorSetLayouts);
+  vertex_desc->SetStageInputs(io_slots, layouts);
+  desc->SetVertexDescriptor(std::move(vertex_desc));
+  auto pipeline =
+      context->GetPipelineLibrary()->GetPipeline(std::move(desc)).Get();
+  ASSERT_TRUE(pipeline);
+
+  // A single triangle, drawn once per instance.
+  std::array<Vector2, 3> geometry = {
+      Vector2{0, 0},
+      Vector2{0, 100},
+      Vector2{100, 0},
+  };
+
+  static constexpr size_t kInstanceCount = 4u;
+  std::array<InstanceData, kInstanceCount> instances = {
+      InstanceData{Vector2{0, 0}, Vector4{1, 0, 0, 1}},
+      InstanceData{Vector2{120, 0}, Vector4{0, 1, 0, 1}},
+      InstanceData{Vector2{0, 120}, Vector4{0, 0, 1, 1}},
+      InstanceData{Vector2{120, 120}, Vector4{1, 1, 0, 1}},
+  };
+
+  auto geometry_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
+      reinterpret_cast<uint8_t*>(geometry.data()),
+      geometry.size() * sizeof(Vector2));
+  auto instance_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
+      reinterpret_cast<uint8_t*>(instances.data()),
+      instances.size() * sizeof(InstanceData));
+  ASSERT_TRUE(geometry_buffer && instance_buffer);
+
+  auto host_buffer = HostBuffer::Create(
+      context->GetResourceAllocator(), context->GetIdleWaiter(),
+      context->GetCapabilities()->GetMinimumUniformAlignment());
+
+  ASSERT_TRUE(OpenPlaygroundHere([&](RenderPass& pass) -> bool {
+    // The harness runs the callback once per pass; start each from a clean
+    // host buffer.
+    host_buffer->Reset();
+    pass.SetCommandLabel("InstancedAttributes");
+    pass.SetPipeline(pipeline);
+
+    std::array<BufferView, 2> vertex_buffers = {
+        BufferView(geometry_buffer,
+                   Range(0, geometry.size() * sizeof(Vector2))),
+        BufferView(instance_buffer,
+                   Range(0, instances.size() * sizeof(InstanceData))),
+    };
+    pass.SetVertexBuffer(vertex_buffers.data(), vertex_buffers.size());
+    pass.SetElementCount(geometry.size());
+    pass.SetInstanceCount(kInstanceCount);
+
+    VS::FrameInfo frame_info;
+    frame_info.mvp =
+        pass.GetOrthographicTransform() * Matrix::MakeScale(GetContentScale());
+    VS::BindFrameInfo(pass, host_buffer->EmplaceUniform(frame_info));
 
     return pass.Draw().ok();
   }));
