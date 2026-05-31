@@ -81,7 +81,7 @@
  *
  *  * When a keyboard notification (e.g., UIKeyboardWillShow) is received, the manager animates a
  *    hidden UIView's frame using the native iOS duration and curve.
- *  * A VSyncClient tracks the 'presentationLayer' of this hidden view on every vsync.
+ *  * A FlutterVSyncClient tracks the 'presentationLayer' of this hidden view on every vsync.
  *  * The intermediate positions are then translated into physical pixel insets and sent to the
  *    engine until the animation completes.
  *

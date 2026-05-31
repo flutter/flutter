@@ -87,10 +87,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
 
   final buildStart = DateTime.now();
 
-  final (
-    results: SerializedBuildResults results,
-    dependencies: List<Uri> dependencies,
-  ) = await runFlutterSpecificBuildHooks(
+  final (:SerializedBuildResults results, buildResult: _) = await runFlutterSpecificBuildHooks(
     environmentDefines: environmentDefines,
     buildRunner: buildRunner,
     targetPlatform: targetPlatform,
@@ -100,24 +97,44 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     buildDataAssets: buildDataAssets,
   );
 
-  final DartHooksResult linkResult = await runFlutterSpecificLinkHooks(
+  final BuildMode buildMode = _getBuildMode(
+    environmentDefines,
+    targetPlatform == TargetPlatform.tester,
+  );
+  final bool linkingEnabled = _nativeAssetsLinkingEnabled(buildMode);
+  final DartHooksResult linkResult;
+  if (linkingEnabled) {
+    linkResult = await runFlutterSpecificLinkHooks(
+      environmentDefines: environmentDefines,
+      buildRunner: buildRunner,
+      targetPlatform: targetPlatform,
+      projectUri: projectUri,
+      fileSystem: fileSystem,
+      buildCodeAssets: buildCodeAssets,
+      buildDataAssets: buildDataAssets,
+      buildResults: results,
+      recordedUsesFile: recordedUsesFile,
+    );
+  } else {
+    linkResult = DartHooksResult.empty();
+  }
+
+  final DartHooksResult combinedResult = combineBuildAndLinkResults(
     environmentDefines: environmentDefines,
-    buildRunner: buildRunner,
     targetPlatform: targetPlatform,
-    projectUri: projectUri,
     fileSystem: fileSystem,
     buildCodeAssets: buildCodeAssets,
     buildDataAssets: buildDataAssets,
     buildResults: results,
-    recordedUsesFile: recordedUsesFile,
+    linkResult: linkResult,
   );
 
   return DartHooksResult(
     buildStart: buildStart,
-    buildEnd: linkResult.buildEnd,
-    codeAssets: linkResult.codeAssets,
-    dataAssets: linkResult.dataAssets,
-    dependencies: <Uri>{...dependencies, ...linkResult.dependencies}.toList(),
+    buildEnd: combinedResult.buildEnd,
+    codeAssets: combinedResult.codeAssets,
+    dataAssets: combinedResult.dataAssets,
+    dependencies: combinedResult.dependencies,
   );
 }
 
@@ -125,7 +142,8 @@ Future<DartHooksResult> runFlutterSpecificHooks({
 ///
 /// Returns the serialized build results per target and the list of dependencies
 /// collected during the build stage.
-Future<({SerializedBuildResults results, List<Uri> dependencies})> runFlutterSpecificBuildHooks({
+Future<({SerializedBuildResults results, DartHooksResult buildResult})>
+runFlutterSpecificBuildHooks({
   required Map<String, String> environmentDefines,
   required FlutterNativeAssetsBuildRunner buildRunner,
   required TargetPlatform targetPlatform,
@@ -135,8 +153,10 @@ Future<({SerializedBuildResults results, List<Uri> dependencies})> runFlutterSpe
   required bool buildDataAssets,
 }) async {
   if (!await _hookRunRequired(buildRunner)) {
-    return (results: const <String, Map<String, Object?>>{}, dependencies: const <Uri>[]);
+    return (results: const <String, Map<String, Object?>>{}, buildResult: DartHooksResult.empty());
   }
+
+  final buildStart = DateTime.now();
 
   final (
     targets: List<AssetBuildTarget> targets,
@@ -158,6 +178,9 @@ Future<({SerializedBuildResults results, List<Uri> dependencies})> runFlutterSpe
 
   final results = <String, Map<String, Object?>>{};
   final dependencies = <Uri>{};
+  final codeAssets = <FlutterCodeAsset>[];
+  final dataAssets = <DataAsset>[];
+
   for (var i = 0; i < targets.length; i++) {
     final AssetBuildTarget target = targets[i];
     // Only run non-code extensions (like data assets) for the first target,
@@ -168,9 +191,25 @@ Future<({SerializedBuildResults results, List<Uri> dependencies})> runFlutterSpe
     final BuildResult buildResult = await _build(buildRunner, extensions, linkingEnabled);
     results[target.targetString] = buildResult.toJson();
     dependencies.addAll(buildResult.dependencies);
+    _decodeAssets(
+      encodedAssets: buildResult.encodedAssets,
+      target: target,
+      codeAssetsAccumulator: codeAssets,
+      dataAssetsAccumulator: dataAssets,
+    );
   }
+  _checkForDuplicateAssets(codeAssets: codeAssets, dataAssets: dataAssets, targets: targets);
   globals.logger.printTrace('Running build hooks for $targetString done.');
-  return (results: results, dependencies: dependencies.toList());
+  return (
+    results: results,
+    buildResult: DartHooksResult(
+      buildStart: buildStart,
+      buildEnd: DateTime.now(),
+      codeAssets: codeAssets,
+      dataAssets: dataAssets,
+      dependencies: dependencies.toList(),
+    ),
+  );
 }
 
 List<AssetBuildTarget> _getTargets({
@@ -241,11 +280,8 @@ Future<({List<AssetBuildTarget> targets, BuildMode buildMode, bool linkingEnable
 
 /// Invokes the link hooks of all transitive Dart package hooks.
 ///
-/// It takes the [buildResults] produced by [runFlutterSpecificBuildHooks] and
-/// returns a [DartHooksResult] containing the aggregated assets from both the
-/// build results and the link hooks.
-///
 /// The returned dependencies only include those collected during the link stage.
+/// The returned assets only include those produced during the link stage.
 Future<DartHooksResult> runFlutterSpecificLinkHooks({
   required Map<String, String> environmentDefines,
   required FlutterNativeAssetsBuildRunner buildRunner,
@@ -297,53 +333,25 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
     }
     final buildResult = BuildResult.fromJson(buildResultJson);
 
-    LinkResult? linkResult;
     if (linkingEnabled) {
-      linkResult = await _link(buildRunner, extensions, buildResult, recordedUsesFile);
+      final LinkResult linkResult = await _link(
+        buildRunner,
+        extensions,
+        buildResult,
+        recordedUsesFile,
+      );
 
-      if (target is CodeAssetTarget) {
-        codeAssets
-          ..addAll(
-            _filterCodeAssets(
-              linkResult.encodedAssets,
-              Target.fromArchitectureAndOS(target.architecture, target.os),
-            ),
-          )
-          ..addAll(
-            _filterCodeAssets(
-              buildResult.encodedAssets,
-              Target.fromArchitectureAndOS(target.architecture, target.os),
-            ),
-          );
-      }
-      dataAssets
-        ..addAll(_filterDataAssets(linkResult.encodedAssets))
-        ..addAll(_filterDataAssets(buildResult.encodedAssets));
+      _decodeAssets(
+        encodedAssets: linkResult.encodedAssets,
+        target: target,
+        codeAssetsAccumulator: codeAssets,
+        dataAssetsAccumulator: dataAssets,
+      );
       dependencies.addAll(linkResult.dependencies);
-    } else {
-      if (target is CodeAssetTarget) {
-        codeAssets.addAll(
-          _filterCodeAssets(
-            buildResult.encodedAssets,
-            Target.fromArchitectureAndOS(target.architecture, target.os),
-          ),
-        );
-      }
-      dataAssets.addAll(_filterDataAssets(buildResult.encodedAssets));
     }
   }
 
-  if (dataAssets.map((DataAsset asset) => asset.id).toSet().length != dataAssets.length) {
-    throwToolExit(
-      'Found duplicates in the data assets: ${dataAssets.map((DataAsset e) => e.id).toList()} while compiling for ${targets.map((AssetBuildTarget e) => e.targetString).toList()}.',
-    );
-  }
-
-  if (codeAssets.toSet().length != codeAssets.length) {
-    throwToolExit(
-      'Found duplicates in the code assets: ${codeAssets.map((FlutterCodeAsset e) => e.codeAsset.id).toList()} while compiling for ${targets.map((AssetBuildTarget e) => e.targetString).toList()}.',
-    );
-  }
+  _checkForDuplicateAssets(codeAssets: codeAssets, dataAssets: dataAssets, targets: targets);
 
   globals.logger.printTrace('Running link hooks for $targetString done.');
 
@@ -354,6 +362,117 @@ Future<DartHooksResult> runFlutterSpecificLinkHooks({
     dataAssets: dataAssets,
     dependencies: dependencies.toList(),
   );
+}
+
+/// Combines build-stage and link-stage results into a single, combined [DartHooksResult].
+///
+/// The combined result contains all code and data assets from both stages,
+/// and the union of all dependencies from both stages.
+DartHooksResult combineBuildAndLinkResults({
+  required Map<String, String> environmentDefines,
+  required TargetPlatform targetPlatform,
+  required FileSystem fileSystem,
+  required BuildCodeAssetsOptions? buildCodeAssets,
+  required bool buildDataAssets,
+  required SerializedBuildResults buildResults,
+  required DartHooksResult linkResult,
+}) {
+  final List<AssetBuildTarget> targets = _getTargets(
+    environmentDefines: environmentDefines,
+    targetPlatform: targetPlatform,
+    fileSystem: fileSystem,
+    buildCodeAssets: buildCodeAssets,
+    buildDataAssets: buildDataAssets,
+  );
+
+  final codeAssets = <FlutterCodeAsset>[...linkResult.codeAssets];
+  final dataAssets = <DataAsset>[...linkResult.dataAssets];
+  final dependencies = <Uri>{...linkResult.dependencies};
+
+  for (final target in targets) {
+    final Map<String, Object?>? buildResultJson = buildResults[target.targetString];
+    if (buildResultJson == null) {
+      continue;
+    }
+    final buildResult = BuildResult.fromJson(buildResultJson);
+    _decodeAssets(
+      encodedAssets: buildResult.encodedAssets,
+      target: target,
+      codeAssetsAccumulator: codeAssets,
+      dataAssetsAccumulator: dataAssets,
+    );
+    dependencies.addAll(buildResult.dependencies);
+  }
+
+  _checkForDuplicateAssets(codeAssets: codeAssets, dataAssets: dataAssets, targets: targets);
+
+  return DartHooksResult(
+    buildStart: linkResult.buildStart,
+    buildEnd: linkResult.buildEnd,
+    codeAssets: codeAssets,
+    dataAssets: dataAssets,
+    dependencies: dependencies.toList(),
+  );
+}
+
+/// Extracts and categorizes code and data assets from [encodedAssets] for the given [target].
+///
+/// The extracted assets are appended to the optional accumulator lists:
+/// - [codeAssetsAccumulator]: Collects matching [FlutterCodeAsset]s.
+/// - [dataAssetsAccumulator]: Collects matching [DataAsset]s.
+void _decodeAssets({
+  required Iterable<EncodedAsset> encodedAssets,
+  required AssetBuildTarget target,
+  List<FlutterCodeAsset>? codeAssetsAccumulator,
+  List<DataAsset>? dataAssetsAccumulator,
+}) {
+  if (target is CodeAssetTarget) {
+    final Iterable<FlutterCodeAsset> filteredCode = _filterCodeAssets(
+      encodedAssets,
+      Target.fromArchitectureAndOS(target.architecture, target.os),
+    );
+    codeAssetsAccumulator?.addAll(filteredCode);
+  }
+  final Iterable<DataAsset> filteredData = _filterDataAssets(encodedAssets);
+  dataAssetsAccumulator?.addAll(filteredData);
+}
+
+void _checkForDuplicateAssets({
+  required List<FlutterCodeAsset> codeAssets,
+  required List<DataAsset> dataAssets,
+  required List<AssetBuildTarget> targets,
+}) {
+  final List<String> targetStrings = targets.map((AssetBuildTarget e) => e.targetString).toList();
+
+  final dataAssetIds = <String>{};
+  final duplicateDataAssetIds = <String>{};
+  for (final asset in dataAssets) {
+    if (!dataAssetIds.add(asset.id)) {
+      duplicateDataAssetIds.add(asset.id);
+    }
+  }
+  if (duplicateDataAssetIds.isNotEmpty) {
+    throwToolExit(
+      'Found duplicates in the data assets: '
+      '${duplicateDataAssetIds.toList()} while compiling for '
+      '$targetStrings.',
+    );
+  }
+
+  final codeAssetIds = <(String, Target)>{};
+  final duplicateCodeAssetIds = <String>{};
+  for (final asset in codeAssets) {
+    if (!codeAssetIds.add((asset.codeAsset.id, asset.target))) {
+      duplicateCodeAssetIds.add(asset.codeAsset.id);
+    }
+  }
+  if (duplicateCodeAssetIds.isNotEmpty) {
+    throwToolExit(
+      'Found duplicates in the code assets: '
+      '${duplicateCodeAssetIds.toList()} while compiling for '
+      '$targetStrings.',
+    );
+  }
 }
 
 Future<List<File>> installCodeAssets({
