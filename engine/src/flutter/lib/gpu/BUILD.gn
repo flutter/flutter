@@ -50,6 +50,8 @@ source_set("gpu") {
       "shader.h",
       "shader_library.cc",
       "shader_library.h",
+      "surface.cc",
+      "surface.h",
       "texture.cc",
       "texture.h",
     ]

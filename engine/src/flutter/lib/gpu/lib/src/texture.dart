@@ -72,6 +72,24 @@ base class Texture extends NativeFieldWrapperClass1 {
     }
   }
 
+  Texture._surface(
+    GpuContext gpuContext,
+    PixelFormat format,
+    int width,
+    int height,
+  ) : _gpuContext = gpuContext,
+      storageMode = StorageMode.devicePrivate,
+      format = format,
+      width = width,
+      height = height,
+      sampleCount = 1,
+      textureType = TextureType.texture2D,
+      enableRenderTargetUsage = true,
+      enableShaderReadUsage = true,
+      enableShaderWriteUsage = false,
+      mipLevelCount = 1,
+      _coordinateSystem = TextureCoordinateSystem.renderToTexture;
+
   GpuContext _gpuContext;
 
   final StorageMode storageMode;

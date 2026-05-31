@@ -26,6 +26,9 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
 
   void AddRenderPass(std::shared_ptr<impeller::RenderPass> render_pass);
 
+  bool AddCompletionCallback(
+      impeller::CommandBuffer::CompletionCallback completion_callback);
+
   bool Submit();
   bool Submit(
       const impeller::CommandBuffer::CompletionCallback& completion_callback);
@@ -36,6 +39,9 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
   std::shared_ptr<impeller::Context> context_;
   std::shared_ptr<impeller::CommandBuffer> command_buffer_;
   std::vector<std::shared_ptr<impeller::RenderPass>> encodables_;
+  std::vector<impeller::CommandBuffer::CompletionCallback>
+      completion_callbacks_;
+  bool submitted_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CommandBuffer);
 };

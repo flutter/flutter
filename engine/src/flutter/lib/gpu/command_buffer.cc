@@ -33,12 +33,44 @@ void CommandBuffer::AddRenderPass(
   encodables_.push_back(std::move(render_pass));
 }
 
+bool CommandBuffer::AddCompletionCallback(
+    impeller::CommandBuffer::CompletionCallback completion_callback) {
+  if (submitted_) {
+    return false;
+  }
+  if (completion_callback) {
+    completion_callbacks_.push_back(std::move(completion_callback));
+  }
+  return true;
+}
+
 bool CommandBuffer::Submit() {
   return CommandBuffer::Submit({});
 }
 
 bool CommandBuffer::Submit(
     const impeller::CommandBuffer::CompletionCallback& completion_callback) {
+  if (submitted_) {
+    return false;
+  }
+  submitted_ = true;
+
+  std::vector<impeller::CommandBuffer::CompletionCallback> callbacks =
+      std::move(completion_callbacks_);
+  if (completion_callback) {
+    callbacks.push_back(completion_callback);
+  }
+  impeller::CommandBuffer::CompletionCallback combined_completion_callback;
+  if (!callbacks.empty()) {
+    combined_completion_callback =
+        [callbacks = std::move(callbacks)](
+            impeller::CommandBuffer::Status status) mutable {
+          for (auto& callback : callbacks) {
+            callback(status);
+          }
+        };
+  }
+
   // For the GLES backend, command queue submission just flushes the reactor,
   // which needs to happen on the raster thread.
   if (context_->GetBackendType() == impeller::Context::BackendType::kOpenGLES) {
@@ -47,14 +79,17 @@ bool CommandBuffer::Submit(
 
     task_runners.GetRasterTaskRunner()->PostTask(
         fml::MakeCopyable([context = context_, command_buffer = command_buffer_,
-                           completion_callback = completion_callback,
+                           completion_callback = combined_completion_callback,
                            encodables = encodables_]() mutable {
           for (auto& encodable : encodables) {
             encodable->EncodeCommands();
           }
 
-          context->GetCommandQueue()->Submit({command_buffer},
-                                             completion_callback);
+          auto status = context->GetCommandQueue()->Submit({command_buffer},
+                                                           completion_callback);
+          if (!status.ok() && completion_callback) {
+            completion_callback(impeller::CommandBuffer::Status::kError);
+          }
           context->DisposeThreadLocalCachedResources();
         }));
     return true;
@@ -64,9 +99,12 @@ bool CommandBuffer::Submit(
     encodable->EncodeCommands();
   }
 
-  auto status = context_->GetCommandQueue()->Submit({command_buffer_},
-                                                    completion_callback);
+  auto status = context_->GetCommandQueue()->Submit(
+      {command_buffer_}, combined_completion_callback);
   context_->DisposeThreadLocalCachedResources();
+  if (!status.ok() && combined_completion_callback) {
+    combined_completion_callback(impeller::CommandBuffer::Status::kError);
+  }
   return status.ok();
 }
 
