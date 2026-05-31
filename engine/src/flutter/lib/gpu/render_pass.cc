@@ -152,10 +152,11 @@ RenderPass::GetOrCreatePipeline() {
 
   if (context.GetBackendType() == impeller::Context::BackendType::kOpenGLES &&
       !context.GetPipelineLibrary()->HasPipeline(pipeline_desc)) {
-    // For GLES, new pipeline creation must be done on the reactor (raster)
-    // thread. We're about the draw, so we need to synchronize with a raster
-    // task in order to get the new pipeline. Depending on how busy the raster
-    // thread is, this could hang the UI thread long enough to miss a frame.
+    // New pipeline creation for this backend must be done on the reactor
+    // (raster) thread. We're about the draw, so we need to synchronize with a
+    // raster task in order to get the new pipeline. Depending on how busy the
+    // raster thread is, this could hang the UI thread long enough to miss a
+    // frame.
 
     // Note that this branch is only called if a new pipeline actually needs to
     // be built.
@@ -181,7 +182,9 @@ RenderPass::GetOrCreatePipeline() {
   return pipeline;
 }
 
-bool RenderPass::Draw(size_t element_count, bool indexed) {
+bool RenderPass::Draw(size_t element_count,
+                      size_t instance_count,
+                      bool indexed) {
   if (indexed && index_buffer_type == impeller::IndexType::kNone) {
     // drawIndexed was called without an index buffer bound.
     return false;
@@ -228,6 +231,7 @@ bool RenderPass::Draw(size_t element_count, bool indexed) {
                                  impeller::IndexType::kNone);
   }
   render_pass_->SetElementCount(element_count);
+  render_pass_->SetInstanceCount(instance_count);
 
   render_pass_->SetStencilReference(stencil_reference);
 
@@ -649,14 +653,18 @@ void InternalFlutterGpu_RenderPass_SetPolygonMode(
 }
 
 bool InternalFlutterGpu_RenderPass_Draw(flutter::gpu::RenderPass* wrapper,
-                                        int vertex_count) {
-  // Guard the cast to the size_t element count; a negative value would wrap.
-  return vertex_count >= 0 && wrapper->Draw(vertex_count, /*indexed=*/false);
+                                        int vertex_count,
+                                        int instance_count) {
+  // Guard the casts to size_t; a negative value would wrap.
+  return vertex_count >= 0 && instance_count >= 0 &&
+         wrapper->Draw(vertex_count, instance_count, /*indexed=*/false);
 }
 
 bool InternalFlutterGpu_RenderPass_DrawIndexed(
     flutter::gpu::RenderPass* wrapper,
-    int index_count) {
-  // Guard the cast to the size_t element count; a negative value would wrap.
-  return index_count >= 0 && wrapper->Draw(index_count, /*indexed=*/true);
+    int index_count,
+    int instance_count) {
+  // Guard the casts to size_t; a negative value would wrap.
+  return index_count >= 0 && instance_count >= 0 &&
+         wrapper->Draw(index_count, instance_count, /*indexed=*/true);
 }

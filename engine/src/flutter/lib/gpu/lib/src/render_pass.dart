@@ -311,12 +311,9 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// otherwise they throw a [StateError] naming the unbound slots. Slots
   /// can be bound in any order.
   ///
-  /// [slot] must be in `[0, 16)` (Impeller's HAL caps vertex buffer
-  /// bindings at 16). On the OpenGL ES backend, the per-pipeline limit on
-  /// the *total attribute count* across all bound buffers is whatever the
-  /// device reports for `GL_MAX_VERTEX_ATTRIBS` (minimum 8 on GL ES 2.0,
-  /// minimum 16 on GL ES 3.0+), and is enforced by the driver rather than
-  /// by this method.
+  /// [slot] must be in `[0, 16)` (the current Flutter GPU limit for vertex
+  /// buffer bindings). Some devices may also impose a lower limit on the
+  /// total number of vertex attributes used by a single pipeline.
   void bindVertexBuffer(BufferView bufferView, {int slot = 0}) {
     if (slot < 0 || slot >= _kMaxVertexBufferSlots) {
       throw RangeError.range(
@@ -499,22 +496,45 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     _setWindingOrder(windingOrder.index);
   }
 
-  /// Appends a non-indexed draw of [vertexCount] vertices, read from the
-  /// bound vertex buffers.
-  void draw(int vertexCount) {
+  /// Appends a non-indexed draw of [vertexCount] vertices.
+  ///
+  /// The vertices are read from the vertex buffers previously bound with
+  /// [bindVertexBuffer]. Buffers whose [VertexBuffer.stepMode] is
+  /// [VertexStepMode.vertex] advance once per vertex. Buffers whose
+  /// [VertexBuffer.stepMode] is [VertexStepMode.instance] advance once per
+  /// instance.
+  ///
+  /// Set [instanceCount] greater than 1 to repeat the same vertex range
+  /// multiple times while reading a new element from each instance-rate vertex
+  /// buffer for each instance. An [instanceCount] of 0 is valid and records no
+  /// drawing work.
+  void draw(int vertexCount, {int instanceCount = 1}) {
     RangeError.checkNotNegative(vertexCount, 'vertexCount');
+    RangeError.checkNotNegative(instanceCount, 'instanceCount');
     _validateVertexBindings();
-    if (!_draw(vertexCount)) {
+    if (!_draw(vertexCount, instanceCount)) {
       throw Exception("Failed to append draw");
     }
   }
 
-  /// Appends an indexed draw of [indexCount] indices, read from the index
-  /// buffer bound with [bindIndexBuffer].
-  void drawIndexed(int indexCount) {
+  /// Appends an indexed draw of [indexCount] indices.
+  ///
+  /// Indices are read from the index buffer previously bound with
+  /// [bindIndexBuffer]. Vertex data is read from the vertex buffers previously
+  /// bound with [bindVertexBuffer]. Buffers whose [VertexBuffer.stepMode] is
+  /// [VertexStepMode.vertex] advance once per vertex selected by the index
+  /// buffer. Buffers whose [VertexBuffer.stepMode] is [VertexStepMode.instance]
+  /// advance once per instance.
+  ///
+  /// Set [instanceCount] greater than 1 to repeat the same indexed geometry
+  /// multiple times while reading a new element from each instance-rate vertex
+  /// buffer for each instance. An [instanceCount] of 0 is valid and records no
+  /// drawing work.
+  void drawIndexed(int indexCount, {int instanceCount = 1}) {
     RangeError.checkNotNegative(indexCount, 'indexCount');
+    RangeError.checkNotNegative(instanceCount, 'instanceCount');
     _validateVertexBindings();
-    if (!_drawIndexed(indexCount)) {
+    if (!_drawIndexed(indexCount, instanceCount)) {
       throw Exception("Failed to append drawIndexed");
     }
   }
@@ -747,13 +767,13 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   )
   external void _setPolygonMode(int polygonMode);
 
-  @Native<Bool Function(Pointer<Void>, Int)>(
+  @Native<Bool Function(Pointer<Void>, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_Draw',
   )
-  external bool _draw(int vertexCount);
+  external bool _draw(int vertexCount, int instanceCount);
 
-  @Native<Bool Function(Pointer<Void>, Int)>(
+  @Native<Bool Function(Pointer<Void>, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_DrawIndexed',
   )
-  external bool _drawIndexed(int indexCount);
+  external bool _drawIndexed(int indexCount, int instanceCount);
 }
