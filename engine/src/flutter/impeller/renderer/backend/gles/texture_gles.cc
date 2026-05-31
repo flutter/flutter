@@ -150,11 +150,13 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
       type_(GetTextureTypeFromDescriptor(
           GetTextureDescriptor(),
           reactor_->GetProcTable().GetCapabilities())),
-      handle_(external_handle.has_value()
-                  ? external_handle.value()
-                  : (threadsafe ? reactor_->CreateHandle(ToHandleType(type_))
-                                : reactor_->CreateUntrackedHandle(
-                                      ToHandleType(type_)))),
+      handle_(
+          external_handle.has_value()
+              ? UniqueHandleGLES(reactor_, external_handle.value())
+              : (threadsafe
+                     ? UniqueHandleGLES(reactor_, ToHandleType(type_))
+                     : UniqueHandleGLES::MakeUntracked(reactor_,
+                                                       ToHandleType(type_)))),
       is_wrapped_(fbo.has_value() || external_handle.has_value()),
       wrapped_fbo_(fbo) {
   // Ensure the texture descriptor itself is valid.
@@ -174,16 +176,8 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
   is_valid_ = true;
 }
 
-// |Texture|
-TextureGLES::~TextureGLES() {
-  reactor_->CollectHandle(handle_);
-  if (!cached_fbo_.IsDead()) {
-    reactor_->CollectHandle(cached_fbo_);
-  }
-}
-
 void TextureGLES::Leak() {
-  handle_ = HandleGLES::DeadHandle();
+  handle_.Release();
 }
 
 // |Texture|
@@ -194,7 +188,7 @@ bool TextureGLES::IsValid() const {
 // |Texture|
 void TextureGLES::SetLabel(std::string_view label) {
 #ifdef IMPELLER_DEBUG
-  reactor_->SetDebugLabel(handle_, label);
+  reactor_->SetDebugLabel(handle_.Get(), label);
 #endif  // IMPELLER_DEBUG
 }
 
@@ -202,7 +196,8 @@ void TextureGLES::SetLabel(std::string_view label) {
 void TextureGLES::SetLabel(std::string_view label, std::string_view trailing) {
 #ifdef IMPELLER_DEBUG
   if (reactor_->CanSetDebugLabels()) {
-    reactor_->SetDebugLabel(handle_, std::format("{} {}", label, trailing));
+    reactor_->SetDebugLabel(handle_.Get(),
+                            std::format("{} {}", label, trailing));
   }
 #endif  // IMPELLER_DEBUG
 }
@@ -283,7 +278,7 @@ bool TextureGLES::OnSetContents(std::shared_ptr<const fml::Mapping> mapping,
   }
 
   ReactorGLES::Operation texture_upload =
-      [handle = handle_,                                         //
+      [handle = handle_.Get(),                                   //
        mapping,                                                  //
        format = gles_format.value(),                             //
        size = tex_descriptor.size,                               //
@@ -418,7 +413,7 @@ void TextureGLES::InitializeContentsIfNecessary() {
   }
 
   const auto& gl = reactor_->GetProcTable();
-  std::optional<GLuint> handle = reactor_->GetGLHandle(handle_);
+  std::optional<GLuint> handle = reactor_->GetGLHandle(handle_.Get());
   if (!handle.has_value()) {
     VALIDATION_LOG << "Could not initialize the contents of texture.";
     return;
@@ -531,7 +526,7 @@ std::optional<GLuint> TextureGLES::GetGLHandle() const {
   if (!IsValid()) {
     return std::nullopt;
   }
-  return reactor_->GetGLHandle(handle_);
+  return reactor_->GetGLHandle(handle_.Get());
 }
 
 bool TextureGLES::Bind() {
@@ -541,13 +536,12 @@ bool TextureGLES::Bind() {
   }
   const auto& gl = reactor_->GetProcTable();
 
-  if (fence_.has_value()) {
-    std::optional<GLsync> fence = reactor_->GetGLFence(fence_.value());
+  if (fence_.IsValid()) {
+    std::optional<GLsync> fence = reactor_->GetGLFence(fence_.Get());
     if (fence.has_value()) {
       gl.WaitSync(fence.value(), 0, GL_TIMEOUT_IGNORED);
     }
-    reactor_->CollectHandle(fence_.value());
-    fence_ = std::nullopt;
+    fence_.Reset();
   }
 
   switch (type_) {
@@ -694,14 +688,6 @@ bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
   return true;
 }
 
-// |Texture|
-Scalar TextureGLES::GetYCoordScale() const {
-  // GLES render-to-texture content is stored top-down via the
-  // vertex-stage y-flip; see
-  // https://github.com/flutter/flutter/issues/186554.
-  return 1.0;
-}
-
 bool TextureGLES::IsWrapped() const {
   return is_wrapped_;
 }
@@ -711,21 +697,21 @@ std::optional<GLuint> TextureGLES::GetFBO() const {
 }
 
 void TextureGLES::SetFence(HandleGLES fence) {
-  FML_DCHECK(!fence_.has_value());
-  fence_ = fence;
+  FML_DCHECK(!fence_.IsValid());
+  fence_ = UniqueHandleGLES(reactor_, fence);
 }
 
 // Visible for testing.
 std::optional<HandleGLES> TextureGLES::GetSyncFence() const {
-  return fence_;
+  return fence_.IsValid() ? std::optional(fence_.Get()) : std::nullopt;
 }
 
 void TextureGLES::SetCachedFBO(HandleGLES fbo) {
-  cached_fbo_ = fbo;
+  cached_fbo_ = UniqueHandleGLES(reactor_, fbo);
 }
 
 const HandleGLES& TextureGLES::GetCachedFBO() const {
-  return cached_fbo_;
+  return cached_fbo_.Get();
 }
 
 }  // namespace impeller

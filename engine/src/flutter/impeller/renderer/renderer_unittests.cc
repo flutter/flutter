@@ -419,7 +419,8 @@ TEST_P(RendererTest, CanRenderToTexture) {
 }
 
 TEST_P(RendererTest, CanRenderInstanced) {
-  if (GetParam() == PlaygroundBackend::kOpenGLES) {
+  if (GetParam() == PlaygroundBackend::kOpenGLES ||
+      GetParam() == PlaygroundBackend::kOpenGLESSDF) {
     // This test drives instancing through gl_InstanceIndex and a storage
     // buffer, both of which require OpenGL ES 3.1. The portable instance-rate
     // vertex attribute path, which works down to OpenGL ES 2.0, is covered by
@@ -485,7 +486,8 @@ TEST_P(RendererTest, CanRenderInstanced) {
 }
 
 TEST_P(RendererTest, CanBlitTextureToTexture) {
-  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP() << "Mipmap test shader not supported on GLES.";
   }
   auto context = GetContext();
@@ -595,7 +597,8 @@ TEST_P(RendererTest, CanBlitTextureToTexture) {
 }
 
 TEST_P(RendererTest, CanBlitTextureToBuffer) {
-  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP() << "Mipmap test shader not supported on GLES.";
   }
   auto context = GetContext();
@@ -724,7 +727,8 @@ TEST_P(RendererTest, CanBlitTextureToBuffer) {
 }
 
 TEST_P(RendererTest, CanGenerateMipmaps) {
-  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP() << "Mipmap test shader not supported on GLES.";
   }
   auto context = GetContext();
