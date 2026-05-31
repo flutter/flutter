@@ -1062,6 +1062,17 @@ void main() async {
     expect(() => state.renderPass.drawIndexed(3, instanceCount: -1), throwsRangeError);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('draw calls with zero count or instanceCount are no-ops', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    state.renderPass.draw(0);
+    state.renderPass.draw(3, instanceCount: 0);
+    state.renderPass.drawIndexed(0);
+    state.renderPass.drawIndexed(3, instanceCount: 0);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('createRenderPipeline rejects VertexAttribute with unknown name', () async {
     final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
     try {

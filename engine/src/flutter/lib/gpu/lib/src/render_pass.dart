@@ -506,11 +506,14 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   ///
   /// Set [instanceCount] greater than 1 to repeat the same vertex range
   /// multiple times while reading a new element from each instance-rate vertex
-  /// buffer for each instance. An [instanceCount] of 0 is valid and records no
-  /// drawing work.
+  /// buffer for each instance. A [vertexCount] or [instanceCount] of 0 is
+  /// valid and records no drawing work.
   void draw(int vertexCount, {int instanceCount = 1}) {
     RangeError.checkNotNegative(vertexCount, 'vertexCount');
     RangeError.checkNotNegative(instanceCount, 'instanceCount');
+    if (vertexCount == 0 || instanceCount == 0) {
+      return;
+    }
     _validateVertexBindings();
     if (!_draw(vertexCount, instanceCount)) {
       throw Exception("Failed to append draw");
@@ -528,11 +531,14 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   ///
   /// Set [instanceCount] greater than 1 to repeat the same indexed geometry
   /// multiple times while reading a new element from each instance-rate vertex
-  /// buffer for each instance. An [instanceCount] of 0 is valid and records no
-  /// drawing work.
+  /// buffer for each instance. An [indexCount] or [instanceCount] of 0 is valid
+  /// and records no drawing work.
   void drawIndexed(int indexCount, {int instanceCount = 1}) {
     RangeError.checkNotNegative(indexCount, 'indexCount');
     RangeError.checkNotNegative(instanceCount, 'instanceCount');
+    if (indexCount == 0 || instanceCount == 0) {
+      return;
+    }
     _validateVertexBindings();
     if (!_drawIndexed(indexCount, instanceCount)) {
       throw Exception("Failed to append drawIndexed");
