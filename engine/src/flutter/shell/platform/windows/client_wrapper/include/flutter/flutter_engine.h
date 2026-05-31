@@ -85,6 +85,13 @@ class FlutterEngine : public PluginRegistry {
   // once on the platform thread.
   void SetNextFrameCallback(std::function<void()> callback);
 
+  // Schedule a callback to be called on the platform thread.
+  //
+  // This can be called on any thread. The callback is executed only
+  // once on the platform thread. If this is called from the platform thread,
+  // the callback will be executed before this method returns.
+  void RunNowOrPostPlatformThreadTask(std::function<void()> callback);
+
   // Called to pass an external window message to the engine for lifecycle
   // state updates. Non-Flutter windows must call this method in their WndProc
   // in order to be included in the logic for application lifecycle state

@@ -129,6 +129,16 @@ void FlutterDesktopEngineSetNextFrameCallback(FlutterDesktopEngineRef engine,
   }
 }
 
+void FlutterDesktopEngineRunNowOrPostPlatformThreadTask(
+    FlutterDesktopEngineRef engine,
+    VoidCallback callback,
+    void* user_data) {
+  if (s_stub_implementation) {
+    s_stub_implementation->EngineRunNowOrPostPlatformThreadTask(callback,
+                                                                user_data);
+  }
+}
+
 void FlutterDesktopEngineReloadSystemFonts(FlutterDesktopEngineRef engine) {
   if (s_stub_implementation) {
     s_stub_implementation->EngineReloadSystemFonts();

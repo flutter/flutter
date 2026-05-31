@@ -407,6 +407,76 @@ TEST_F(WindowsTest, PresentHeadless) {
   }
 }
 
+// Verify a task can be posted to the platform thread while on the platform
+// thread.
+TEST_F(WindowsTest, RunNowOrPostPlatformThreadTaskFromPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  struct Captures {
+    std::thread::id thread_id;
+    bool done = false;
+  } captures;
+
+  FlutterDesktopEngineRunNowOrPostPlatformThreadTask(
+      engine.get(),
+      [](void* user_data) {
+        auto captures = static_cast<Captures*>(user_data);
+        captures->thread_id = std::this_thread::get_id();
+        captures->done = true;
+      },
+      &captures);
+
+  EXPECT_TRUE(captures.done);
+  EXPECT_EQ(captures.thread_id, std::this_thread::get_id());
+}
+
+// Verify a task can be posted to the platform thread while on a background
+// thread.
+TEST_F(WindowsTest, RunNowOrPostPlatformThreadTaskFromBackgroundThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  std::mutex background_thread_id_mutex;
+  struct Captures {
+    std::thread::id background_thread_id;
+    std::thread::id platform_thread_id;
+    bool done = false;
+  } captures;
+
+  std::thread background([&]() {
+    {
+      std::scoped_lock lock{background_thread_id_mutex};
+      captures.background_thread_id = std::this_thread::get_id();
+    }
+
+    FlutterDesktopEngineRunNowOrPostPlatformThreadTask(
+        engine.get(),
+        [](void* user_data) {
+          auto captures = static_cast<Captures*>(user_data);
+          captures->platform_thread_id = std::this_thread::get_id();
+          captures->done = true;
+        },
+        &captures);
+  });
+  background.join();
+
+  while (!captures.done) {
+    PumpMessage();
+  }
+
+  std::scoped_lock lock{background_thread_id_mutex};
+  EXPECT_NE(captures.background_thread_id, std::thread::id{});
+  EXPECT_NE(captures.background_thread_id, captures.platform_thread_id);
+  EXPECT_EQ(captures.platform_thread_id, std::this_thread::get_id());
+}
+
 // Implicit view has the implicit view ID.
 TEST_F(WindowsTest, GetViewId) {
   auto& context = GetContext();

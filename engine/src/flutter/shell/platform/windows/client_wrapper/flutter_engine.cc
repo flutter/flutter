@@ -110,6 +110,18 @@ void FlutterEngine::SetNextFrameCallback(std::function<void()> callback) {
       this);
 }
 
+void FlutterEngine::RunNowOrPostPlatformThreadTask(
+    std::function<void()> callback) {
+  FlutterDesktopEngineRunNowOrPostPlatformThreadTask(
+      engine_,
+      [](void* user_data) {
+        std::unique_ptr<std::function<void()>> cb{
+            static_cast<std::function<void()>*>(user_data)};
+        (*cb)();
+      },
+      new std::function<void()>(std::move(callback)));
+}
+
 std::optional<LRESULT> FlutterEngine::ProcessExternalWindowMessage(
     HWND hwnd,
     UINT message,

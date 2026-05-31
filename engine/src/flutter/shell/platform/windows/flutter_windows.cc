@@ -250,6 +250,14 @@ void FlutterDesktopEngineSetNextFrameCallback(FlutterDesktopEngineRef engine,
       [callback, user_data]() { callback(user_data); });
 }
 
+void FlutterDesktopEngineRunNowOrPostPlatformThreadTask(
+    FlutterDesktopEngineRef engine,
+    VoidCallback callback,
+    void* user_data) {
+  EngineFromHandle(engine)->task_runner()->RunNowOrPostTask(
+      [callback, user_data]() { callback(user_data); });
+}
+
 HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view) {
   return ViewFromHandle(view)->GetWindowHandle();
 }
