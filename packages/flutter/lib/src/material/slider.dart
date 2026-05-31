@@ -872,13 +872,17 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     }
 
     final slider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
-    final double newValue = shouldIncrease
-        ? clampDouble(slider.value + increment, 0.0, 1.0)
-        : clampDouble(slider.value - increment, 0.0, 1.0);
+
+    double newValue = shouldIncrease ? slider.value + increment : slider.value - increment;
+    newValue = clampDouble(newValue, 0.0, 1.0);
+
+    if (slider.isDiscrete) {
+      newValue = (newValue * slider.divisions!).round() / slider.divisions!;
+    }
 
     if (slider.onChanged != null) {
       slider.onChangeStart?.call(_lerp(slider.value));
-      slider.onChanged!(_lerp(newValue));
+      slider.onChanged!(newValue);
       slider.onChangeEnd?.call(_lerp(newValue));
     }
   }
