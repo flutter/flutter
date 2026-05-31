@@ -1251,6 +1251,7 @@ void main() {
   });
 }
 
+/// A fake [FlutterView] used to verify Material ownership across multiple views.
 class _FakeView extends TestFlutterView {
   _FakeView(FlutterView view)
     : super(
