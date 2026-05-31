@@ -977,6 +977,41 @@ void main() {
       );
       expect(focusWidgetExcluded.includeSemantics, isFalse);
     });
+
+    testWidgets('FocusableActionDetector passes skipTraversal to Focus', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: FocusableActionDetector(
+            child: const Text('child'),
+          ),
+        ),
+      );
+
+      // By default, skipTraversal is false.
+      Focus focusWidget = tester.widget<Focus>(
+        find
+            .descendant(of: find.byType(FocusableActionDetector), matching: find.byType(Focus))
+            .first,
+      );
+      expect(focusWidget.skipTraversal, isFalse);
+
+      // When skipTraversal is set to true, it is forwarded to the Focus widget.
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: FocusableActionDetector(
+            skipTraversal: true,
+            child: const Text('child'),
+          ),
+        ),
+      );
+
+      focusWidget = tester.widget<Focus>(
+        find
+            .descendant(of: find.byType(FocusableActionDetector), matching: find.byType(Focus))
+            .first,
+      );
+      expect(focusWidget.skipTraversal, isTrue);
+    });
   });
 
   group('Action subclasses', () {

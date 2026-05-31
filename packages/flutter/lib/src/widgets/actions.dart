@@ -1144,6 +1144,7 @@ class FocusableActionDetector extends StatefulWidget {
     this.enabled = true,
     this.focusNode,
     this.autofocus = false,
+    this.skipTraversal = false,
     this.descendantsAreFocusable = true,
     this.descendantsAreTraversable = true,
     this.shortcuts,
@@ -1170,6 +1171,9 @@ class FocusableActionDetector extends StatefulWidget {
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
+
+  /// {@macro flutter.widgets.Focus.skipTraversal}
+  final bool skipTraversal;
 
   /// {@macro flutter.widgets.Focus.descendantsAreFocusable}
   final bool descendantsAreFocusable;
@@ -1361,6 +1365,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       child: Focus(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
+        skipTraversal: widget.skipTraversal,
         descendantsAreFocusable: widget.descendantsAreFocusable,
         descendantsAreTraversable: widget.descendantsAreTraversable,
         canRequestFocus: _canRequestFocus,

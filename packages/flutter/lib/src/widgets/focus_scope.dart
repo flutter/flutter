@@ -286,6 +286,7 @@ class Focus extends StatefulWidget {
   bool get canRequestFocus => _canRequestFocus ?? focusNode?.canRequestFocus ?? true;
   final bool? _canRequestFocus;
 
+  /// {@template flutter.widgets.Focus.skipTraversal}
   /// Sets the [FocusNode.skipTraversal] flag on the focus node so that it won't
   /// be visited by the [FocusTraversalPolicy].
   ///
@@ -295,6 +296,7 @@ class Focus extends StatefulWidget {
   /// This is different from [FocusNode.canRequestFocus] because it only implies
   /// that the widget can't be reached via traversal, not that it can't be
   /// focused. It may still be focused explicitly.
+  /// {@endtemplate}
   bool get skipTraversal => _skipTraversal ?? focusNode?.skipTraversal ?? false;
   final bool? _skipTraversal;
 
