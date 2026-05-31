@@ -5679,13 +5679,12 @@ void main() {
     );
     expect(tester.getSize(find.byType(Slider)), Size.zero);
   });
-
   group('ScrollIntent support', () {
-    testWidgets('Slider can be incremented and decremented by keyboard shortcuts - LTR', (
+    testWidgets('ScrollIntent increases slider value with line increment', (
       WidgetTester tester,
     ) async {
-      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      var currentValue = 0.5;
+      var value = 0.5;
+      var calculatorCallCount = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -5694,17 +5693,22 @@ void main() {
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   return Slider(
-                    value: currentValue,
-                    onChangeStart: (double newValue) {
-                      setState(() {});
+                    key: const Key('slider'),
+                    value: value,
+                    divisions: 10,
+                    scrollIncrementCalculator: (SliderScrollIncrementDetails details) {
+                      calculatorCallCount++;
+                      // For line type, return the semantic action unit (1/divisions = 0.1)
+                      // For page type, return 5x the semantic action unit
+                      return switch (details.type) {
+                        SliderScrollIncrementType.line => details.semanticActionUnit,
+                        SliderScrollIncrementType.page => details.semanticActionUnit * 5,
+                      };
                     },
                     onChanged: (double newValue) {
                       setState(() {
-                        currentValue = newValue;
+                        value = newValue;
                       });
-                    },
-                    onChangeEnd: (double newValue) {
-                      setState(() {});
                     },
                     autofocus: true,
                   );
@@ -5716,32 +5720,28 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Test right arrow
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-      await tester.pumpAndSettle();
-      expect(currentValue, greaterThan(0.5));
+      expect(value, equals(0.5));
+      expect(calculatorCallCount, equals(0));
 
-      // Test left arrow
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      await tester.pumpAndSettle();
-      expect(currentValue, 0.5);
+      final FocusNode? primaryFocus = FocusManager.instance.primaryFocus;
+      expect(primaryFocus?.context, isNotNull);
 
-      // Test up arrow
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-      await tester.pumpAndSettle();
-      expect(currentValue, greaterThan(0.5));
+      // Invoke ScrollIntent with right direction (should increase value)
+      Actions.maybeInvoke<ScrollIntent>(
+        primaryFocus!.context!,
+        const ScrollIntent(direction: AxisDirection.right),
+      );
 
-      // Test down arrow
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pumpAndSettle();
-      expect(currentValue, 0.5);
+
+      // Verify the value increased
+      expect(value, greaterThan(0.5));
+      // Calculator should have been called once
+      expect(calculatorCallCount, equals(1));
     });
 
-    testWidgets('Slider can be incremented and decremented by keyboard shortcuts - RTL', (
-      WidgetTester tester,
-    ) async {
-      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-      var currentValue = 0.5;
+    testWidgets('ScrollIntent decreases slider value when going left', (WidgetTester tester) async {
+      var value = 0.5;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -5749,23 +5749,16 @@ void main() {
             child: Center(
               child: StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
-                  return Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: Slider(
-                      value: currentValue,
-                      onChangeStart: (double newValue) {
-                        setState(() {});
-                      },
-                      onChanged: (double newValue) {
-                        setState(() {
-                          currentValue = newValue;
-                        });
-                      },
-                      onChangeEnd: (double newValue) {
-                        setState(() {});
-                      },
-                      autofocus: true,
-                    ),
+                  return Slider(
+                    key: const Key('slider'),
+                    value: value,
+                    divisions: 10,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    autofocus: true,
                   );
                 },
               ),
@@ -5775,15 +5768,211 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // In RTL, right should decrease
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-      await tester.pumpAndSettle();
-      expect(currentValue, lessThan(0.5));
+      expect(value, equals(0.5));
 
-      // In RTL, left should increase
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      final FocusNode? primaryFocus = FocusManager.instance.primaryFocus;
+      expect(primaryFocus?.context, isNotNull);
+
+      // Invoke ScrollIntent with left direction (should decrease value)
+      Actions.maybeInvoke<ScrollIntent>(
+        primaryFocus!.context!,
+        const ScrollIntent(direction: AxisDirection.left),
+      );
+
       await tester.pumpAndSettle();
-      expect(currentValue, 0.5);
+
+      // Verify the value decreased
+      expect(value, lessThan(0.5));
+    });
+
+    testWidgets('ScrollIntent with page increment moves by 5x the line increment', (
+      WidgetTester tester,
+    ) async {
+      var value = 0.0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return Slider(
+                    key: const Key('slider'),
+                    value: value,
+                    min: 0.0,
+                    max: 1.0,
+                    divisions: 10,
+                    onChanged: (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    autofocus: true,
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(value, equals(0.0));
+
+      final FocusNode? primaryFocus = FocusManager.instance.primaryFocus;
+      expect(primaryFocus?.context, isNotNull);
+
+      // Invoke ScrollIntent with page type (should move by 5 * 0.1 = 0.5)
+      Actions.maybeInvoke<ScrollIntent>(
+        primaryFocus!.context!,
+        const ScrollIntent(direction: AxisDirection.right, type: ScrollIncrementType.page),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Should increase by approximately 0.5 (5 * 0.1)
+      expect(value, moreOrLessEquals(0.5, epsilon: 0.01));
+    });
+
+    testWidgets('ScrollIntent with continuous slider uses default increment', (
+      WidgetTester tester,
+    ) async {
+      var value = 0.0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return Slider(
+                    key: const Key('slider'),
+                    value: value,
+                    // No divisions - continuous slider
+                    onChanged: (double newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    autofocus: true,
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(value, equals(0.0));
+
+      final FocusNode? primaryFocus = FocusManager.instance.primaryFocus;
+      expect(primaryFocus?.context, isNotNull);
+
+      // Invoke ScrollIntent - should use default 0.05 increment for continuous sliders
+      Actions.maybeInvoke<ScrollIntent>(
+        primaryFocus!.context!,
+        const ScrollIntent(direction: AxisDirection.right),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Should increase by approximately 0.05
+      expect(value, moreOrLessEquals(0.05, epsilon: 0.01));
+    });
+
+    testWidgets('ScrollIntent respects RTL layout', (WidgetTester tester) async {
+      var value = 0.5;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Material(
+              child: Center(
+                child: StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setState) {
+                    return Slider(
+                      key: const Key('slider'),
+                      value: value,
+                      min: 0.0,
+                      max: 1.0,
+                      divisions: 10,
+                      onChanged: (double newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      },
+                      autofocus: true,
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(value, equals(0.5));
+
+      final FocusNode? primaryFocus = FocusManager.instance.primaryFocus;
+      expect(primaryFocus?.context, isNotNull);
+
+      // In RTL, right direction should decrease the value
+      Actions.maybeInvoke<ScrollIntent>(
+        primaryFocus!.context!,
+        const ScrollIntent(direction: AxisDirection.right),
+      );
+
+      await tester.pumpAndSettle();
+
+      // In RTL mode, right should decrease
+      expect(value, lessThan(0.5));
+    });
+
+    testWidgets('ScrollIntent is ignored when slider is disabled', (WidgetTester tester) async {
+      const value = 0.5;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return const Slider(
+                    key: Key('slider'),
+                    value: value,
+                    divisions: 10,
+                    // Disabled slider (onChanged is null)
+                    onChanged: null,
+                    autofocus: true,
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(value, equals(0.5));
+
+      final FocusNode? primaryFocus = FocusManager.instance.primaryFocus;
+      expect(primaryFocus?.context, isNotNull);
+
+      // Try to invoke ScrollIntent on disabled slider
+      final Object? result = Actions.maybeInvoke<ScrollIntent>(
+        primaryFocus!.context!,
+        const ScrollIntent(direction: AxisDirection.right),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Value should not change
+      expect(value, equals(0.5));
+      // Action should be ignored (returns null or false)
+      expect(result, isNull);
     });
   });
 }

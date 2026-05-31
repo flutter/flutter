@@ -797,7 +797,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     widget.onChangeEnd?.call(_lerp(value));
   }
 
-  void _handleAdjustSliderIntent(_AdjustSliderIntent intent) {
+  Object _handleAdjustSliderIntent(_AdjustSliderIntent intent) {
     _handleDirectionalInput(
       shouldIncrease: switch (intent.type) {
         _SliderAdjustmentType.up => true,
@@ -806,13 +806,14 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
         _SliderAdjustmentType.right => !_isRtl,
       },
     );
+    return true;
   }
 
-  void _handleScrollIntent(ScrollIntent intent) {
+  Object _handleScrollIntent(ScrollIntent intent) {
     final double increment = _calculateScrollIncrement(intent.type);
 
     if (increment == 0) {
-      return;
+      return false;
     }
 
     _handleDirectionalInputWithIncrement(
@@ -824,6 +825,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       },
       increment: increment,
     );
+
+    return true;
   }
 
   double _calculateScrollIncrement(ScrollIncrementType scrollIncrementType) {
@@ -849,6 +852,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   }
 
   void _handleDirectionalInput({required bool shouldIncrease}) {
+    if (!_enabled) {
+      return;
+    }
     final slider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
     if (shouldIncrease) {
       slider.increaseAction();
