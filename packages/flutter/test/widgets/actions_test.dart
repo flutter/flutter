@@ -988,12 +988,12 @@ void main() {
       );
 
       // By default, skipTraversal is false.
-      Focus focusWidget = tester.widget<Focus>(
+     final Focus defaultFocus = tester.widget<Focus>(
         find
             .descendant(of: find.byType(FocusableActionDetector), matching: find.byType(Focus))
             .first,
       );
-      expect(focusWidget.skipTraversal, isFalse);
+      expect(defaultFocus.skipTraversal, isFalse);
 
       // When skipTraversal is set to true, it is forwarded to the Focus widget.
       await tester.pumpWidget(
@@ -1005,12 +1005,12 @@ void main() {
         ),
       );
 
-      focusWidget = tester.widget<Focus>(
+      final Focus updatedFocus = tester.widget<Focus>(
         find
             .descendant(of: find.byType(FocusableActionDetector), matching: find.byType(Focus))
             .first,
       );
-      expect(focusWidget.skipTraversal, isTrue);
+      expect(updatedFocus.skipTraversal, isTrue);
     });
   });
 
