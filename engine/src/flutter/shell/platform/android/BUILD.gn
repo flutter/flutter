@@ -48,6 +48,7 @@ executable("flutter_shell_native_unittests") {
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
     "image_lru_unittests.cc",
+    "platform_view_android_jni_impl_unittests.cc",
     "platform_view_android_unittests.cc",
   ]
   if (!slimpeller) {
@@ -58,6 +59,7 @@ executable("flutter_shell_native_unittests") {
     ":flutter_shell_native_src",
     "//flutter/fml",
     "//flutter/shell/platform/android/jni:jni_mock",
+    "//flutter/shell/platform/android/jni:mock_jni_env",
     "//flutter/third_party/googletest:gmock",
     "//flutter/third_party/googletest:gtest",
   ]

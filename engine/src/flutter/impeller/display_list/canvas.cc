@@ -18,6 +18,7 @@
 #include "display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/color_filter.h"
@@ -29,6 +30,7 @@
 #include "impeller/entity/contents/circle_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/color_source_contents.h"
+#include "impeller/entity/contents/complex_rse_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
@@ -58,7 +60,10 @@
 #include "impeller/entity/save_layer_utils.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
+#include "impeller/geometry/round_superellipse_param.h"
+#include "impeller/geometry/rounding_radii.h"
 #include "impeller/geometry/rstransform.h"
+#include "impeller/geometry/scalar.h"
 #include "impeller/geometry/vector.h"
 #include "impeller/renderer/command_buffer.h"
 
@@ -186,13 +191,6 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
       renderer.GetDeviceCapabilities().SupportsReadFromResolve(),       //
       renderer.GetDeviceCapabilities().SupportsImplicitResolvingMSAA()  //
   );
-}
-
-bool AreCornersCircular(const RoundingRadii& radii) {
-  return ScalarNearlyEqual(radii.top_left.width, radii.top_left.height) &&
-         ScalarNearlyEqual(radii.top_right.width, radii.top_right.height) &&
-         ScalarNearlyEqual(radii.bottom_left.width, radii.bottom_left.height) &&
-         ScalarNearlyEqual(radii.bottom_right.width, radii.bottom_right.height);
 }
 
 }  // namespace
@@ -834,7 +832,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      IsCompatibleWithSDFRendering(paint)) {
     auto params = UberSDFParameters::MakeRect(
         /*color=*/paint.color,
         /*rect=*/rect,
@@ -889,7 +887,7 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      IsCompatibleWithSDFRendering(paint)) {
     UberSDFParameters params;
 
     if (paint.style == Paint::Style::kStroke) {
@@ -973,7 +971,7 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   const RoundingRadii& radii = round_rect.GetRadii();
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value() && AreCornersCircular(radii)) {
+      IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
     auto params = UberSDFParameters::MakeRoundedRect(
         /*color=*/paint.color,
         /*rect=*/round_rect.GetBounds(),
@@ -1038,6 +1036,53 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
+  if (renderer_.GetContext()->GetFlags().use_sdfs &&
+      IsCompatibleWithSDFRendering(paint)) {
+    auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
+        round_superellipse.GetBounds(), round_superellipse.GetRadii());
+
+    if (round_superellipse_params.all_corners_same) {
+      auto params = UberSDFParameters::MakeRoundedSuperellipse(
+          /*color=*/paint.color,
+          /*bounds=*/round_superellipse.GetBounds(),
+          /*round_superellipse_params=*/round_superellipse_params,
+          /*stroke=*/paint.GetStroke());
+
+      AddRenderSDFEntityToCurrentPass(paint, params);
+      return;
+    } else {
+      auto contents = ComplexRoundedSuperellipseContents::Make(
+          /*color=*/paint.color_source ? Color::White() : paint.color,
+          /*bounds=*/round_superellipse.GetBounds(),
+          /*round_superellipse_params=*/round_superellipse_params,
+          /*stroke=*/paint.GetStroke());
+
+      const Geometry* geom = contents->GetGeometry();
+
+      if (paint.color_source) {
+        std::shared_ptr<Contents> color_source_contents =
+            paint.CreateContents(renderer_, geom);
+        std::shared_ptr<Contents> final_contents =
+            ColorFilterContents::MakeBlend(
+                BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
+                                    FilterInput::Make(color_source_contents)});
+
+        Paint new_paint = paint;
+        new_paint.color_source = nullptr;
+        AddRenderEntityWithFiltersToCurrentPass(entity, geom, new_paint,
+                                                /*reuse_depth=*/false,
+                                                /*override_contents=*/
+                                                std::move(final_contents));
+      } else {
+        AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
+                                                /*reuse_depth=*/false,
+                                                /*override_contents=*/
+                                                std::move(contents));
+      }
+      return;
+    }
+  }
+
   if (paint.style == Paint::Style::kFill) {
     RoundSuperellipseGeometry geom(round_superellipse.GetBounds(),
                                    round_superellipse.GetRadii());
@@ -1060,7 +1105,7 @@ void Canvas::DrawCircle(const Point& center,
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value()) {
+      IsCompatibleWithSDFRendering(paint)) {
     auto params = UberSDFParameters::MakeCircle(
         /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
         /*stroke=*/paint.GetStroke());
@@ -2419,6 +2464,50 @@ void Canvas::EndReplay() {
 
   Reset();
   Initialize(initial_cull_rect_);
+}
+
+bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
+  if (!paint.anti_alias) {
+    return false;
+  }
+  if (paint.mask_blur_descriptor.has_value()) {
+    return false;
+  }
+  switch (paint.blend_mode) {
+    // Incompatible blend modes:
+    case BlendMode::kClear:
+    case BlendMode::kSrc:
+    case BlendMode::kSrcIn:
+    case BlendMode::kDstIn:
+    case BlendMode::kSrcOut:
+    case BlendMode::kDstATop:
+    case BlendMode::kPlus:
+    case BlendMode::kModulate:
+      return false;
+    // Compatible blend modes:
+    case BlendMode::kDst:
+    case BlendMode::kSrcOver:
+    case BlendMode::kDstOver:
+    case BlendMode::kDstOut:
+    case BlendMode::kSrcATop:
+    case BlendMode::kXor:
+    case BlendMode::kScreen:
+    case BlendMode::kOverlay:
+    case BlendMode::kDarken:
+    case BlendMode::kLighten:
+    case BlendMode::kColorDodge:
+    case BlendMode::kColorBurn:
+    case BlendMode::kHardLight:
+    case BlendMode::kSoftLight:
+    case BlendMode::kDifference:
+    case BlendMode::kExclusion:
+    case BlendMode::kMultiply:
+    case BlendMode::kHue:
+    case BlendMode::kSaturation:
+    case BlendMode::kColor:
+    case BlendMode::kLuminosity:
+      return true;
+  }
 }
 
 LazyRenderingConfig::LazyRenderingConfig(

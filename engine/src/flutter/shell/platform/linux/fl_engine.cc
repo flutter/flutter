@@ -223,9 +223,9 @@ static void view_removed_cb(const FlutterRemoveViewResult* result) {
 }
 
 static void free_locale(FlutterLocale* locale) {
-  free(const_cast<gchar*>(locale->language_code));
-  free(const_cast<gchar*>(locale->country_code));
-  free(locale);
+  g_free(const_cast<gchar*>(locale->language_code));
+  g_free(const_cast<gchar*>(locale->country_code));
+  g_free(locale);
 }
 
 // Passes locale information to the Flutter engine.
@@ -818,6 +818,8 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   for (const auto& env_switch : flutter::GetSwitchesFromEnvironment()) {
     g_ptr_array_add(command_line_args, g_strdup(env_switch.c_str()));
   }
+  // Linux (and other desktop platforms) always uses SDFs.
+  g_ptr_array_add(command_line_args, g_strdup("--impeller-use-sdfs"));
 
   gchar** dart_entrypoint_args =
       fl_dart_project_get_dart_entrypoint_arguments(self->project);
@@ -1086,6 +1088,7 @@ void fl_engine_send_platform_message(FlEngine* self,
     if (self->engine == nullptr) {
       g_task_return_new_error(task, fl_engine_error_quark(),
                               FL_ENGINE_ERROR_FAILED, "No engine to send to");
+      g_object_unref(task);
       return;
     }
 
