@@ -178,7 +178,7 @@ std::unique_ptr<Skwasm::RenderContext> Skwasm::RenderContext::Make(
 
   auto context = impeller::ContextGLES::Create(
       impeller::Flags{}, std::move(gl), ShaderLibraryMappingsForApplication(),
-      false);
+      false, nullptr);
 
   auto worker = std::make_shared<ReactorWorker>();
   context->AddReactorWorker(worker);

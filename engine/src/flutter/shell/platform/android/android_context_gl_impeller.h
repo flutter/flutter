@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_CONTEXT_GL_IMPELLER_H_
 
 #include "flutter/fml/macros.h"
+#include "flutter/fml/task_runner.h"
 #include "flutter/impeller/toolkit/egl/display.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 
@@ -14,7 +15,8 @@ namespace flutter {
 class AndroidContextGLImpeller : public AndroidContext {
  public:
   AndroidContextGLImpeller(std::unique_ptr<impeller::egl::Display> display,
-                           bool enable_gpu_tracing);
+                           bool enable_gpu_tracing,
+                           fml::RefPtr<fml::TaskRunner> io_task_runner);
 
   ~AndroidContextGLImpeller();
 
@@ -42,6 +44,7 @@ class AndroidContextGLImpeller : public AndroidContext {
   std::unique_ptr<impeller::egl::Context> onscreen_context_;
   std::unique_ptr<impeller::egl::Context> offscreen_context_;
   bool is_valid_ = false;
+  fml::RefPtr<fml::TaskRunner> io_task_runner_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidContextGLImpeller);
 };

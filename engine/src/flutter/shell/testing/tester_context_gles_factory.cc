@@ -217,7 +217,7 @@ class TesterContextGLES : public TesterContext {
             impeller_framebuffer_blend_shaders_gles3_length),
     };
     context_ = impeller::ContextGLES::Create(impeller::Flags{}, std::move(gl),
-                                             shader_mappings, false);
+                                             shader_mappings, false, nullptr);
 
     if (!context_ ||
         !static_cast<std::shared_ptr<impeller::Context>>(context_)->IsValid()) {
