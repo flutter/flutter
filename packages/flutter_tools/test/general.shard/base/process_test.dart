@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -527,21 +526,13 @@ void main() {
 
         await analytics.setTelemetry(false);
 
-        final fakePlatform = FakePlatform(
-          environment: const <String, String>{'DASH__TOOL': 'parent-tool'},
-        );
-
-        expect(
-          context.run<void>(
-            overrides: <Type, Generator>{Platform: () => fakePlatform},
-            body: () async {
-              expect((await processUtils.run(<String>['whoohoo'])).exitCode, 0);
-            },
-          ),
-          completes,
-        );
+        expect((await processUtils.run(<String>['whoohoo'])).exitCode, 0);
       },
-      overrides: <Type, Generator>{Analytics: () => analytics},
+      overrides: <Type, Generator>{
+        Analytics: () => analytics,
+        Platform: () =>
+            FakePlatform(environment: const <String, String>{'DASH__TOOL': 'parent-tool'}),
+      },
     );
   });
 }
