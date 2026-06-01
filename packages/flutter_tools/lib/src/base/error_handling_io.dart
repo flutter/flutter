@@ -633,8 +633,6 @@ class ErrorHandlingProcessManager extends ProcessManager {
       // triggers a circular dependency cycle (`FlutterVersion -> Process -> Analytics -> FlutterVersion`).
       // Catching `ContextDependencyCycleException` breaks this cycle, allowing us to safely
       // skip analytics environment propagation for these early initialization commands.
-    } on UnsupportedError {
-      // context.get is not supported in tests without context.
     }
 
     // Propagate the unified analytics suppression flag.
