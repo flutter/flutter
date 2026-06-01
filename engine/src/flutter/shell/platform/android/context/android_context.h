@@ -43,6 +43,8 @@ class AndroidContext {
 
   virtual bool IsValid() const;
 
+  bool ShouldClearContextBetweenFrames() const;
+
   //----------------------------------------------------------------------------
   /// @brief      Setter for the Skia context to be used by subsequent
   ///             AndroidSurfaces.

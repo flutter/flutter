@@ -4,11 +4,35 @@
 
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
 
+#include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/fml/logging.h"
 #include "flutter/impeller/toolkit/egl/surface.h"
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
 
 namespace flutter {
+
+namespace {
+
+class AndroidSwitchableGLContextImpeller : public SwitchableGLContext {
+ public:
+  explicit AndroidSwitchableGLContextImpeller(
+      std::shared_ptr<AndroidContextGLImpeller> android_context)
+      : android_context_(std::move(android_context)) {}
+
+  bool SetCurrent() override { return true; }
+
+  bool RemoveCurrent() override {
+    if (auto context = android_context_.lock()) {
+      return context->OnscreenContextClearCurrent();
+    }
+    return false;
+  }
+
+ private:
+  std::weak_ptr<AndroidContextGLImpeller> android_context_;
+};
+
+}  // namespace
 
 AndroidSurfaceGLImpeller::AndroidSurfaceGLImpeller(
     const std::shared_ptr<AndroidContextGLImpeller>& android_context)
@@ -111,7 +135,15 @@ AndroidSurfaceGLImpeller::GetImpellerContext() {
 // |GPUSurfaceGLDelegate|
 std::unique_ptr<GLContextResult>
 AndroidSurfaceGLImpeller::GLContextMakeCurrent() {
-  return std::make_unique<GLContextDefaultResult>(OnGLContextMakeCurrent());
+  bool success = OnGLContextMakeCurrent();
+  if (!success) {
+    return std::make_unique<GLContextDefaultResult>(false);
+  }
+  if (android_context_->ShouldClearContextBetweenFrames()) {
+    return std::make_unique<GLContextSwitch>(
+        std::make_unique<AndroidSwitchableGLContextImpeller>(android_context_));
+  }
+  return std::make_unique<GLContextDefaultResult>(true);
 }
 
 bool AndroidSurfaceGLImpeller::OnGLContextMakeCurrent() {
