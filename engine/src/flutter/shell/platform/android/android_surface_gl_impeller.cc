@@ -17,8 +17,24 @@ namespace flutter {
 
 namespace {
 
+// On some older MediaTek devices running Android 10 or below (specifically
+// MT6762/Helio P22 and MT6765/Helio P35 with PowerVR Rogue GE8320 GPUs),
+// keeping the EGL context current on the raster thread while the thread is idle
+// triggers a driver-level race condition/crash inside the system RenderThread's
+// eglMakeCurrent call during activity transitions or platform view rendering.
+// Clearing the current context at the end of every frame resolves the conflict
+// and avoids the driver crashes.
 bool ShouldClearContextBetweenFrames() {
 #if defined(__ANDROID__)
+  char sdk_value[PROP_VALUE_MAX];
+  int sdk_version = 0;
+  if (__system_property_get("ro.build.version.sdk", sdk_value) > 0) {
+    sdk_version = atoi(sdk_value);
+  }
+  if (sdk_version == 0 || sdk_version > 29) {
+    return false;
+  }
+
   auto is_bad_platform = [](const char* name) -> bool {
     char value[PROP_VALUE_MAX];
     if (__system_property_get(name, value) > 0) {
