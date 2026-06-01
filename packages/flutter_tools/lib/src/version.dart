@@ -92,8 +92,29 @@ abstract class FlutterVersion {
         }
         // If the cached version looks suspicious, we fall back to git detection.
         // This handles cases where the cache was poisoned by an app repo's git environment.
-        final bool isSuspicious =
-            version.frameworkVersion == kUnknownFrameworkVersion || version.channel == kUserBranch;
+        var isSuspicious = version.frameworkVersion == kUnknownFrameworkVersion;
+        if (!isSuspicious && version.channel == kUserBranch) {
+          // Under a detached HEAD state (extremely common in CI/LUCI environments),
+          // git's branch detection fails and defaults the channel to '[user-branch]'.
+          //
+          // To avoid considering all detached HEAD checkouts as suspicious (which
+          // completely invalidates the version cache and inflicts a heavy startup
+          // latency by forcing slow, synchronous git subprocess spawns on startup),
+          // we inspect the local `.git/HEAD` file directly. If it contains a raw
+          // commit SHA (indicating a detached HEAD state) instead of a branch
+          // pointer (starting with `ref:`), we know the `[user-branch]` channel is
+          // expected and the cache is valid.
+          final File headFile = fs.file(fs.path.join(flutterRoot, '.git', 'HEAD'));
+          if (headFile.existsSync()) {
+            final String headContent = headFile.readAsStringSync().trim();
+            final bool isDetachedStr = !headContent.startsWith('ref:');
+            if (!isDetachedStr) {
+              isSuspicious = true;
+            }
+          } else {
+            isSuspicious = true;
+          }
+        }
         if (!isSuspicious) {
           return version;
         }

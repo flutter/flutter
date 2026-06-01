@@ -1704,6 +1704,47 @@ void main() {
     );
 
     testUsingContext(
+      'FlutterVersion stays with cache if channel is [user-branch] and git is in detached HEAD state',
+      () async {
+        final Directory cacheDir =
+            fs.directory(flutterRoot).childDirectory('bin').childDirectory('cache')
+              ..createSync(recursive: true);
+        final File versionFile = cacheDir.childFile('flutter.version.json');
+
+        final Directory gitDir = fs.directory(flutterRoot).childDirectory('.git')..createSync();
+        final File headFile = gitDir.childFile('HEAD');
+        headFile.writeAsStringSync('3ac51d8ee8960cac3fe806b4bb1c38684df055a1\n');
+
+        // Cache says [user-branch]
+        versionFile.writeAsStringSync(
+          jsonEncode(<String, String>{
+            'frameworkVersion': '1.0.0',
+            'channel': '[user-branch]',
+            'repositoryUrl': 'https://github.com/flutter/flutter.git',
+            'frameworkRevision': 'REVISION_A',
+            'frameworkCommitDate': '2021-01-01',
+            'engineRevision': 'abc',
+            'dartSdkVersion': '1.0.0',
+            'devToolsVersion': '1.0.0',
+            'flutterVersion': '1.0.0',
+          }),
+        );
+
+        // No git commands should be run because we are detached and cache expects [user-branch]
+        final version = FlutterVersion(fs: fs, git: git, flutterRoot: flutterRoot);
+
+        expect(version.channel, '[user-branch]');
+        expect(version.frameworkRevision, 'REVISION_A');
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        Git: () => git,
+        ProcessManager: () => processManager,
+        Cache: () => cache,
+      },
+    );
+
+    testUsingContext(
       'FlutterVersion stays with cache if git revision and channel matches',
       () async {
         final Directory cacheDir =
