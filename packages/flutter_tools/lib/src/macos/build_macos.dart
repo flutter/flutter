@@ -135,7 +135,7 @@ Future<void> buildMacOS({
   // regardless of the project name so long as there is exactly one project.
   final String? xcodeProjectName = xcodeProject.existsSync() ? xcodeProject.basename : null;
   final XcodeProjectInfo? projectInfo = await globals.xcodeProjectInterpreter?.getInfo(
-    xcodeProject.parent.path,
+    flutterProject.macos,
     projectFilename: xcodeProjectName,
     buildDirectory: flutterBuildDir,
   );
@@ -227,7 +227,7 @@ Future<void> buildMacOS({
   try {
     final List<String> xcodebuildCommandArgs = await globals.xcode!
         .fetchDependenciesAndGenerateXcodebuildArgs(
-          flutterProject.macos.hostAppRoot.path,
+          flutterProject.macos,
           globals.fs.directory(buildDirectoryPath),
           skipPackageUpdatesAndValidation: false,
         );

@@ -109,6 +109,11 @@ class SkwasmRenderer extends Renderer {
   }
 
   @override
+  WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) {
+    throw UnimplementedError('Skwasm not implemented on this platform.');
+  }
+
+  @override
   ui.ParagraphStyle createParagraphStyle({
     ui.TextAlign? textAlign,
     ui.TextDirection? textDirection,

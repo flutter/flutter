@@ -184,5 +184,62 @@ TEST(BufferBindingsGLESTest, BindUniformFailsWithoutFloatType) {
                                         Range{0, 1}));
 }
 
+// An instanced draw reaches per-instance data through instance-rate vertex
+// attributes. A vertex layout with an instance-rate binding must set a
+// glVertexAttribDivisor of 1 on that binding's attributes, while a
+// per-vertex binding keeps a divisor of 0.
+TEST(BufferBindingsGLESTest, BindVertexAttributesSetsInstanceRateDivisor) {
+  auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisorEXT(0, 0)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisorEXT(1, 1)).Times(1);
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+
+  BufferBindingsGLES bindings;
+
+  ShaderStageIOSlot per_vertex_input = {
+      .name = "position",
+      .location = 0,
+      .set = 0,
+      .binding = 0,
+      .type = ShaderType::kFloat,
+      .bit_width = sizeof(float) * 8,
+      .vec_size = 2,
+      .columns = 1,
+      .offset = 0,
+  };
+  ShaderStageIOSlot per_instance_input = {
+      .name = "instance_offset",
+      .location = 1,
+      .set = 0,
+      .binding = 1,
+      .type = ShaderType::kFloat,
+      .bit_width = sizeof(float) * 8,
+      .vec_size = 2,
+      .columns = 1,
+      .offset = 0,
+  };
+  std::vector<ShaderStageIOSlot> inputs = {per_vertex_input,
+                                           per_instance_input};
+  std::vector<ShaderStageBufferLayout> layouts = {
+      ShaderStageBufferLayout{.stride = sizeof(float) * 2,
+                              .binding = 0,
+                              .input_rate = VertexInputRate::kVertex},
+      ShaderStageBufferLayout{.stride = sizeof(float) * 2,
+                              .binding = 1,
+                              .input_rate = VertexInputRate::kInstance},
+  };
+
+  ASSERT_TRUE(bindings.RegisterVertexStageInput(mock_gl->GetProcTable(), inputs,
+                                                layouts));
+  // Binding 0 is per-vertex (divisor 0); binding 1 is per-instance
+  // (divisor 1).
+  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
+                                            /*binding=*/0, /*vertex_offset=*/0,
+                                            /*instance=*/0));
+  EXPECT_TRUE(bindings.BindVertexAttributes(mock_gl->GetProcTable(),
+                                            /*binding=*/1, /*vertex_offset=*/0,
+                                            /*instance=*/0));
+}
+
 }  // namespace testing
 }  // namespace impeller
