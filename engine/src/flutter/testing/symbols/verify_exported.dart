@@ -47,7 +47,13 @@ void main(List<String> arguments) {
   if (Platform.isLinux) {
     platform = 'linux-x64';
   } else if (Platform.isMacOS) {
-    platform = 'mac-x64';
+    final ProcessResult unameResult = Process.runSync('uname', <String>['-m']);
+    if (unameResult.exitCode != 0) {
+      print('ERROR: failed to execute "uname -m":\n${unameResult.stderr}');
+      exit(1);
+    }
+    final arch = unameResult.stdout.toString().trim() == 'x86_64' ? 'x64' : 'arm64';
+    platform = 'mac-$arch';
   } else {
     throw UnimplementedError('Script only support running on Linux or MacOS.');
   }
@@ -109,8 +115,39 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
           (entry.type == '(__DATA,__objc_data)' || entry.type == '(__DATA,__data)') &&
           (entry.name.startsWith(r'_OBJC_METACLASS_$_Flutter') ||
               entry.name.startsWith(r'_OBJC_CLASS_$_Flutter'));
+
       // Swift's name mangling uses s followed by symbol length followed by symbol.
       final swiftInternalRegExp = RegExp(r'^_\$s\d+InternalFlutterSwift');
+
+      // Swift extensions on Objective-C classes (in Swift's 'So' namespace)
+      // mangle differently than standard Swift symbols. Instead of starting
+      // with the module name (e.g. _$s25InternalFlutterSwift...), they start
+      // with the extended type (e.g. _$sSo14FlutterTracingC...) and have the
+      // module name embedded inside.
+      //
+      // The Swift compiler may compress repeated tokens in the module name
+      // (e.g. substituting 'Flutter' with 'A' in 'InternalFlutterSwiftCommon'
+      // if 'Flutter' was already used in the type name being extended.
+      //
+      // This matches extensions defined in internal modules starting with
+      // 'Internal.*Swift' such as 'InternalFlutterSwiftCommon' from our shared
+      // iOS/macOS code, which the compiler shortens to
+      // 'InternalA11SwiftCommon'.
+      //
+      // Swift encodes these as a string of ${TYPE}|${LENGTH}${Symbol}|${SUBSTITUTION}s.
+      // In the above example:
+      // * $sSo: global static function extension.
+      // * 14FlutterTracing: 14 bytes long, "FlutterTracing".
+      // * C: class
+      // * 08InternalA11SwiftCommon: [8 bytes long, "Internal"] + [substitution A
+      //   ("Flutter" from earlier in the symbol)] + [11 bytes long, "SwiftCommon"].
+      // * E: extension.
+      //
+      // Details: https://github.com/swiftlang/swift/blob/main/docs/ABI/Mangling.rst
+      final swiftInternalExtensionRegExp = RegExp(
+        r'^_\$sSo\d+[A-Za-z0-9_]+[CP]\d+Internal.*Swift.*E',
+      );
+
       final bool swiftInternalSymbol =
           (entry.type == '(__TEXT,__text)' ||
               entry.type == '(__TEXT,__const)' ||
@@ -118,7 +155,8 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
               entry.type == '(__DATA_CONST,__const)' ||
               entry.type == '(__DATA,__data)' ||
               entry.type == '(__DATA,__objc_data)') &&
-          swiftInternalRegExp.hasMatch(entry.name);
+          (swiftInternalRegExp.hasMatch(entry.name) ||
+              swiftInternalExtensionRegExp.hasMatch(entry.name));
       return !(cSymbol || cInternalSymbol || objcSymbol || swiftInternalSymbol);
     });
     if (unexpectedEntries.isNotEmpty) {

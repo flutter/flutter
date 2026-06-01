@@ -2051,6 +2051,11 @@ class EditableText extends StatefulWidget {
   /// Specifies the [SpellCheckService] used to spell check text input and the
   /// [TextStyle] used to style text with misspelled words.
   ///
+  /// Spell check is disabled for password input, including when [obscureText]
+  /// is true, [keyboardType] is [TextInputType.visiblePassword], or
+  /// [autofillHints] contains [AutofillHints.password] or
+  /// [AutofillHints.newPassword].
+  ///
   /// If the [SpellCheckService] is left null, spell check is disabled by
   /// default unless the [DefaultSpellCheckService] is supported, in which case
   /// it is used. It is currently supported only on Android and iOS.
@@ -2140,15 +2145,15 @@ class EditableText extends StatefulWidget {
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which builds the button
   ///   Widgets for the current platform given [ContextMenuButtonItem]s.
   static List<ContextMenuButtonItem> getEditableButtonItems({
-    required final ClipboardStatus? clipboardStatus,
-    required final VoidCallback? onCopy,
-    required final VoidCallback? onCut,
-    required final VoidCallback? onPaste,
-    required final VoidCallback? onSelectAll,
-    required final VoidCallback? onLookUp,
-    required final VoidCallback? onSearchWeb,
-    required final VoidCallback? onShare,
-    required final VoidCallback? onLiveTextInput,
+    required ClipboardStatus? clipboardStatus,
+    required VoidCallback? onCopy,
+    required VoidCallback? onCut,
+    required VoidCallback? onPaste,
+    required VoidCallback? onSelectAll,
+    required VoidCallback? onLookUp,
+    required VoidCallback? onSearchWeb,
+    required VoidCallback? onShare,
+    required VoidCallback? onLiveTextInput,
   }) {
     final resultButtonItem = <ContextMenuButtonItem>[];
 
@@ -3050,18 +3055,27 @@ class EditableTextState extends State<EditableText>
   /// If spell check is enabled, this will try to infer a value for
   /// the [SpellCheckService] if left unspecified.
   static SpellCheckConfiguration _inferSpellCheckConfiguration(
-    SpellCheckConfiguration? configuration,
-  ) {
+    SpellCheckConfiguration? configuration, {
+    required bool obscureText,
+    required TextInputType keyboardType,
+    required Iterable<String>? autofillHints,
+  }) {
     final SpellCheckService? spellCheckService = configuration?.spellCheckService;
     final bool spellCheckAutomaticallyDisabled =
-        configuration == null || configuration == const SpellCheckConfiguration.disabled();
+        _isPasswordInput(
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          autofillHints: autofillHints,
+        ) ||
+        configuration == null ||
+        configuration == const SpellCheckConfiguration.disabled();
     final bool spellCheckServiceIsConfigured =
         spellCheckService != null ||
         WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
     if (spellCheckAutomaticallyDisabled || !spellCheckServiceIsConfigured) {
       // Only enable spell check if a non-disabled configuration is provided
-      // and if that configuration does not specify a spell check service,
-      // a native spell checker must be supported.
+      // for non-password input and, if that configuration does not specify a
+      // spell check service, a native spell checker must be supported.
       assert(() {
         if (!spellCheckAutomaticallyDisabled && !spellCheckServiceIsConfigured) {
           FlutterError.reportError(
@@ -3086,6 +3100,19 @@ class EditableTextState extends State<EditableText>
     return configuration.copyWith(
       spellCheckService: spellCheckService ?? DefaultSpellCheckService(),
     );
+  }
+
+  static bool _isPasswordInput({
+    required bool obscureText,
+    required TextInputType keyboardType,
+    required Iterable<String>? autofillHints,
+  }) {
+    return obscureText ||
+        keyboardType == TextInputType.visiblePassword ||
+        (autofillHints?.any(
+              (String hint) => hint == AutofillHints.password || hint == AutofillHints.newPassword,
+            ) ??
+            false);
   }
 
   /// Returns the [ContextMenuButtonItem]s for the given [ToolbarOptions].
@@ -3284,7 +3311,12 @@ class EditableTextState extends State<EditableText>
     widget.controller.addListener(_didChangeTextEditingValue);
     widget.focusNode.addListener(_handleFocusChanged);
     _cursorVisibilityNotifier.value = widget.showCursor;
-    _spellCheckConfiguration = _inferSpellCheckConfiguration(widget.spellCheckConfiguration);
+    _spellCheckConfiguration = _inferSpellCheckConfiguration(
+      widget.spellCheckConfiguration,
+      obscureText: widget.obscureText,
+      keyboardType: widget.keyboardType,
+      autofillHints: widget.autofillHints,
+    );
     _appLifecycleListener = AppLifecycleListener(onResume: _onResume);
     _initProcessTextActions();
   }
@@ -3408,8 +3440,29 @@ class EditableTextState extends State<EditableText>
       _updateRemoteEditingValueIfNeeded();
     }
 
+    // If only the identity of the context menu builder closure changed (e.g.
+    // an inline lambda on every rebuild), the [TextSelectionOverlay] does
+    // not need to be recreated.
+    //
+    // We just need to trigger a rebuild of the currently-shown toolbar so its
+    // overlay entry picks up the new closure.
+    final TextSelectionOverlay? selectionOverlay = _selectionOverlay;
+    if (selectionOverlay != null &&
+        selectionOverlay.toolbarIsVisible &&
+        widget.contextMenuBuilder != oldWidget.contextMenuBuilder &&
+        (widget.contextMenuBuilder == null) == (oldWidget.contextMenuBuilder == null)) {
+      // Deferred to the next frame because showToolbar() calls
+      // renderBox.localToGlobal(), which requires a fully laid-out render
+      // tree, and didUpdateWidget is called before layout.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && (_selectionOverlay?.toolbarIsVisible ?? false)) {
+          _selectionOverlay!.showToolbar();
+        }
+      });
+    }
+
     if (_selectionOverlay != null &&
-        (widget.contextMenuBuilder != oldWidget.contextMenuBuilder ||
+        ((widget.contextMenuBuilder == null) != (oldWidget.contextMenuBuilder == null) ||
             widget.selectionControls != oldWidget.selectionControls ||
             widget.onSelectionHandleTapped != oldWidget.onSelectionHandleTapped ||
             widget.dragStartBehavior != oldWidget.dragStartBehavior ||
@@ -3469,6 +3522,28 @@ class EditableTextState extends State<EditableText>
           _obscureLatestCharIndex = null;
         }
         _textInputConnection!.updateConfig(_effectiveAutofillClient.textInputConfiguration);
+      }
+    }
+
+    if (oldWidget.spellCheckConfiguration != widget.spellCheckConfiguration ||
+        oldWidget.obscureText != widget.obscureText ||
+        oldWidget.keyboardType != widget.keyboardType ||
+        !listEquals<String>(
+          oldWidget.autofillHints?.toList(growable: false),
+          widget.autofillHints?.toList(growable: false),
+        )) {
+      _spellCheckConfiguration = _inferSpellCheckConfiguration(
+        widget.spellCheckConfiguration,
+        obscureText: widget.obscureText,
+        keyboardType: widget.keyboardType,
+        autofillHints: widget.autofillHints,
+      );
+      if (spellCheckEnabled) {
+        if (textEditingValue.text.isNotEmpty) {
+          _performSpellCheck(textEditingValue.text);
+        }
+      } else {
+        spellCheckResults = null;
       }
     }
 
@@ -4382,8 +4457,17 @@ class EditableTextState extends State<EditableText>
     return true;
   }
 
+  // Stable method reference that dispatches to the current
+  // widget.contextMenuBuilder.
+  //
+  // The identity of this method is constant across rebuilds, so passing it to
+  // the TextSelectionOverlay means the overlay never has to be recreated when
+  // only the builder closure changes.
+  Widget _contextMenuBuilder(BuildContext context) {
+    return widget.contextMenuBuilder!(context, this);
+  }
+
   TextSelectionOverlay _createSelectionOverlay() {
-    final EditableTextContextMenuBuilder? contextMenuBuilder = widget.contextMenuBuilder;
     final selectionOverlay = TextSelectionOverlay(
       clipboardStatus: clipboardStatus,
       context: context,
@@ -4397,11 +4481,9 @@ class EditableTextState extends State<EditableText>
       selectionDelegate: this,
       dragStartBehavior: widget.dragStartBehavior,
       onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      contextMenuBuilder: contextMenuBuilder == null || _webContextMenuEnabled
+      contextMenuBuilder: widget.contextMenuBuilder == null || _webContextMenuEnabled
           ? null
-          : (BuildContext context) {
-              return contextMenuBuilder(context, this);
-            },
+          : _contextMenuBuilder,
       magnifierConfiguration: widget.magnifierConfiguration,
     );
 
@@ -4574,7 +4656,7 @@ class EditableTextState extends State<EditableText>
     _lastBottomViewInset = view.viewInsets.bottom;
   }
 
-  Future<void> _performSpellCheck(final String text) async {
+  Future<void> _performSpellCheck(String text) async {
     try {
       final Locale? localeForSpellChecking = widget.locale ?? Localizations.maybeLocaleOf(context);
 
@@ -4586,9 +4668,10 @@ class EditableTextState extends State<EditableText>
       final List<SuggestionSpan>? suggestions = await _spellCheckConfiguration.spellCheckService!
           .fetchSpellCheckSuggestions(localeForSpellChecking!, text);
 
-      if (suggestions == null || !mounted) {
+      if (suggestions == null || !mounted || !spellCheckEnabled) {
         // The request to fetch spell check suggestions was canceled due to ongoing request,
-        // or the widget was unmounted.
+        // the widget was unmounted, or spell check was disabled before the
+        // request completed.
         return;
       }
 
@@ -5155,9 +5238,7 @@ class EditableTextState extends State<EditableText>
   /// available for click-and-replace.
   bool showSpellCheckSuggestionsToolbar() {
     // Spell check suggestions toolbars are intended to be shown on non-web
-    // platforms. Additionally, the Cupertino style toolbar can't be drawn on
-    // the web with the HTML renderer due to
-    // https://github.com/flutter/flutter/issues/123560.
+    // platforms.
     if (!spellCheckEnabled ||
         _webContextMenuEnabled ||
         widget.readOnly ||
