@@ -304,6 +304,8 @@ team-tool:
 team-web:
   - changed-files:
     - any-glob-to-any-file:
+      - dev/**/*web*
+      - dev/**/*web*/**/*
       - docs/platforms/web/**/*
       - engine/src/flutter/lib/web_ui/**/*
       - engine/src/flutter/web_sdk/**/*
