@@ -86,14 +86,18 @@ abstract class FlutterVersion {
         flutterRoot: flutterRoot,
       );
       if (version != null) {
-        final bool isGitRepo = fs.directory(fs.path.join(flutterRoot, '.git')).existsSync();
+        final String gitPath = fs.path.join(flutterRoot, '.git');
+        // In a standard git clone, .git is a directory. In a git worktree, .git is a file.
+        final bool isGitRepo = fs.directory(gitPath).existsSync() || fs.file(gitPath).existsSync();
         if (!isGitRepo) {
           return version;
         }
         // If the cached version looks suspicious, we fall back to git detection.
         // This handles cases where the cache was poisoned by an app repo's git environment.
         final bool isSuspicious =
-            version.frameworkVersion == kUnknownFrameworkVersion || version.channel == kUserBranch;
+            version.frameworkVersion == kUnknownFrameworkVersion ||
+            version.repositoryUrl == 'unknown source' ||
+            !_isStandardRemote(version.repositoryUrl);
         if (!isSuspicious) {
           return version;
         }
@@ -660,22 +664,36 @@ class _FlutterVersionGit extends FlutterVersion {
   @override
   String? get repositoryUrl {
     if (_repositoryUrl == null) {
-      final String gitChannel = _git
-          .runSync([
-            'rev-parse',
-            '--abbrev-ref',
-            '--symbolic',
-            kGitTrackingUpstream,
-          ], workingDirectory: flutterRoot)
-          .stdout
-          .trim();
-      final int slash = gitChannel.indexOf('/');
-      if (slash != -1) {
-        final String remote = gitChannel.substring(0, slash);
-        _repositoryUrl = _git
-            .runSync(['ls-remote', '--get-url', remote], workingDirectory: flutterRoot)
-            .stdout
-            .trim();
+      final RunResult trackingResult = _git.runSync([
+        'rev-parse',
+        '--abbrev-ref',
+        '--symbolic',
+        kGitTrackingUpstream,
+      ], workingDirectory: flutterRoot);
+      if (trackingResult.exitCode == 0) {
+        final String gitChannel = trackingResult.stdout.trim();
+        final int slash = gitChannel.indexOf('/');
+        if (slash != -1) {
+          final String remote = gitChannel.substring(0, slash);
+          final RunResult remoteResult = _git.runSync([
+            'ls-remote',
+            '--get-url',
+            remote,
+          ], workingDirectory: flutterRoot);
+          if (remoteResult.exitCode == 0) {
+            _repositoryUrl = remoteResult.stdout.trim();
+          }
+        }
+      }
+      if (_repositoryUrl == null || _repositoryUrl!.isEmpty) {
+        final RunResult originResult = _git.runSync([
+          'remote',
+          'get-url',
+          'origin',
+        ], workingDirectory: flutterRoot);
+        if (originResult.exitCode == 0) {
+          _repositoryUrl = originResult.stdout.trim();
+        }
       }
     }
     return _repositoryUrl;
@@ -1399,4 +1417,18 @@ final class FlutterEngineStampFromFile {
     }
     return null;
   }
+}
+
+bool _isStandardRemote(String remote) {
+  final String sanitized = VersionUpstreamValidator.stripDotGit(remote);
+  for (final standard in const <String>[
+    'https://github.com/flutter/flutter.git',
+    'git@github.com:flutter/flutter.git',
+    'ssh://git@github.com/flutter/flutter.git',
+  ]) {
+    if (VersionUpstreamValidator.stripDotGit(standard) == sanitized) {
+      return true;
+    }
+  }
+  return false;
 }

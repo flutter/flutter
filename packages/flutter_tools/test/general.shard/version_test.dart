@@ -924,6 +924,10 @@ void main() {
       const FakeCommand(
         command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
       ),
+      const FakeCommand(
+        command: <String>['git', 'remote', 'get-url', 'origin'],
+        stdout: 'https://github.com/flutter/flutter.git',
+      ),
       FakeCommand(
         command: const <String>[
           'git',
@@ -977,7 +981,7 @@ void main() {
 {
   "frameworkVersion": "0.0.0-unknown",
   "channel": "[user-branch]",
-  "repositoryUrl": "unknown source",
+  "repositoryUrl": "https://github.com/flutter/flutter.git",
   "frameworkRevision": "1234abcd",
   "frameworkCommitDate": "2014-10-02 00:00:00.000Z",
   "engineRevision": "abcdefg",
@@ -1159,6 +1163,10 @@ void main() {
       const FakeCommand(
         command: <String>['git', 'rev-parse', '--abbrev-ref', '--symbolic', '@{upstream}'],
         stdout: 'feature-branch',
+      ),
+      const FakeCommand(
+        command: <String>['git', 'remote', 'get-url', 'origin'],
+        stdout: 'https://github.com/flutter/flutter.git',
       ),
       FakeCommand(
         command: const <String>[
@@ -1651,7 +1659,7 @@ void main() {
     );
 
     testUsingContext(
-      'FlutterVersion re-detects if git branch was suspicious (user-branch)',
+      'FlutterVersion re-detects if git repository was suspicious (non-standard remote)',
       () async {
         final Directory cacheDir =
             fs.directory(flutterRoot).childDirectory('bin').childDirectory('cache')
@@ -1660,12 +1668,12 @@ void main() {
 
         fs.directory(flutterRoot).childDirectory('.git').createSync();
 
-        // Cache says [user-branch]
+        // Cache says non-standard remote
         versionFile.writeAsStringSync(
           jsonEncode(<String, String>{
             'frameworkVersion': '1.0.0',
-            'channel': '[user-branch]',
-            'repositoryUrl': 'https://github.com/flutter/flutter.git',
+            'channel': 'master',
+            'repositoryUrl': 'https://github.com/some_user/some_app.git',
             'frameworkRevision': 'REVISION_A',
             'frameworkCommitDate': '2021-01-01',
             'engineRevision': 'abc',
@@ -1718,6 +1726,44 @@ void main() {
             'frameworkVersion': '1.0.0',
             'channel': 'master',
             'repositoryUrl': 'https://github.com/flutter/flutter.git',
+            'frameworkRevision': 'REVISION_A',
+            'frameworkCommitDate': '2021-01-01',
+            'engineRevision': 'abc',
+            'dartSdkVersion': '1.0.0',
+            'devToolsVersion': '1.0.0',
+            'flutterVersion': '1.0.0',
+          }),
+        );
+
+        // No git commands should be run
+        final version = FlutterVersion(fs: fs, git: git, flutterRoot: flutterRoot);
+
+        expect(version.frameworkRevision, 'REVISION_A');
+        expect(version.channel, 'master');
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        Git: () => git,
+        ProcessManager: () => processManager,
+        Cache: () => cache,
+      },
+    );
+
+    testUsingContext(
+      'FlutterVersion stays with cache if git repository has standard SSH remote',
+      () async {
+        final Directory cacheDir =
+            fs.directory(flutterRoot).childDirectory('bin').childDirectory('cache')
+              ..createSync(recursive: true);
+        final File versionFile = cacheDir.childFile('flutter.version.json');
+
+        fs.directory(flutterRoot).childDirectory('.git').createSync();
+
+        versionFile.writeAsStringSync(
+          jsonEncode(<String, String>{
+            'frameworkVersion': '1.0.0',
+            'channel': 'master',
+            'repositoryUrl': 'ssh://git@github.com/flutter/flutter.git',
             'frameworkRevision': 'REVISION_A',
             'frameworkCommitDate': '2021-01-01',
             'engineRevision': 'abc',
