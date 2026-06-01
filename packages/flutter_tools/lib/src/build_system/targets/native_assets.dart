@@ -379,7 +379,7 @@ TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String
   if (targetPlatformEnvironment == null) {
     throw MissingDefineException(kTargetPlatform, name);
   }
-  return getTargetPlatformForName(targetPlatformEnvironment);
+  return TargetPlatform.fromName(targetPlatformEnvironment);
 }
 
 Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(
