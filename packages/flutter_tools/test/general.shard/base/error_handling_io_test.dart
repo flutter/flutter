@@ -37,6 +37,7 @@ final Platform macOSPlatform = FakePlatform(
   operatingSystem: 'macos',
   environment: <String, String>{},
 );
+
 ProcessManager createProcessManager({
   required ProcessManager delegate,
   required Platform platform,
