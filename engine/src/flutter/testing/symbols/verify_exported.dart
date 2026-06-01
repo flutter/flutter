@@ -110,9 +110,7 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
     final unexpectedEntries = <NmEntry>[];
 
     for (final NmEntry entry in NmEntry.parse(nmResult.stdout as String)) {
-      final bool cInternalSymbol =
-          entry.type == '(__TEXT,__text)' && entry.name.startsWith('_InternalFlutter');
-      if (cInternalSymbol || entry.isAllowedCSymbol || entry.isAllowedObjCSymbol) {
+      if (entry.isCInternalSymbol || entry.isAllowedCSymbol || entry.isAllowedObjCSymbol) {
         continue;
       }
       final bool isSwiftSymbol = switch (entry.type) {
@@ -274,6 +272,10 @@ final class NmEntry {
             name.startsWith(r'_OBJC_CLASS_$_Flutter')),
       _ => false,
     };
+  }
+
+  bool get isCInternalSymbol {
+    return type == '(__TEXT,__text)' && name.startsWith('_InternalFlutter');
   }
 
   @override
