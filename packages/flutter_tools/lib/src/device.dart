@@ -1290,6 +1290,7 @@ class DebuggingOptions {
         if (dartFlags.isNotEmpty) ...<String>['--dart-flags=$dartFlags'],
         if (useTestFonts) ...<String>['--use-test-fonts'],
         if (verboseSystemLogs) ...<String>['--verbose-logging'],
+        if (testFlag) ...<String>['--test-flag'],
       ],
     };
 

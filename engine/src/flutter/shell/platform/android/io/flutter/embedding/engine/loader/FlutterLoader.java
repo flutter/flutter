@@ -562,7 +562,9 @@ public class FlutterLoader {
     if (flag == FlutterEngineFlags.TEST_FLAG) {
       Log.w(
           TAG,
-          "For testing purposes only: test flag specified in the manifest was loaded by the FlutterLoader.");
+          "For testing purposes only: test flag specified in the "
+              + (specifiedViaManifest ? "manifest" : "command line")
+              + " was loaded by the FlutterLoader.");
       return false;
     } else if (FlutterEngineFlags.isDisabled(flag)) {
       // Do not allow disabled flags.

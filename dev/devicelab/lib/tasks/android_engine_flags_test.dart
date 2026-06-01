@@ -217,7 +217,7 @@ TaskFunction _testCommandLineFlagPrecedence() {
             if (commandLinePrecedenceCompleter.isCompleted) {
               return;
             } else if (line.contains(
-              'For testing purposes only: test flag specified on the command line was loaded by the FlutterLoader.',
+              'For testing purposes only: test flag specified in the command line was loaded by the FlutterLoader.',
             )) {
               commandLinePrecedenceCompleter.complete(foundManifestLogBeforeCommandLineLog);
             } else if (line.contains(
