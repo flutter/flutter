@@ -53,9 +53,12 @@ enum ClipOverlapBehavior {
 ///
 /// This widget is particularly useful when used in a [CustomScrollView] with
 /// pinned slivers (like [SliverAppBar] with [SliverAppBar.pinned] set to true).
-/// When [clipOverlap] is true (the default), it automatically clips the portion
+///
+/// {@template flutter.widgets.sliver_clip.SliverClipRect.clipOverlap}
+/// When [clipOverlap] is `true` (the default), it automatically clips the portion
 /// of the child that is overlapped by the pinned sliver, preventing the child
 /// from being visible underneath a semi-transparent or translucent pinned header.
+/// {@endtemplate}
 ///
 /// {@tool snippet}
 ///
@@ -99,7 +102,14 @@ enum ClipOverlapBehavior {
 ///  * [ClipRect], which clips a box widget.
 ///  * [CustomClipper], for creating custom clips.
 class SliverClipRect extends SingleChildRenderObjectWidget {
-  /// Creates a sliver that clips its child.
+  /// Creates a sliver that clips its child using a rectangle.
+  ///
+  /// If [clipper] is null, the clip will match the layout size and position of
+  /// the child.
+  ///
+  /// If [clipBehavior] is [Clip.none], no clipping will be applied.
+  ///
+  /// {@macro flutter.widgets.sliver_clip.SliverClipRect.clipOverlap}
   const SliverClipRect({
     super.key,
     required Widget sliver,
@@ -245,6 +255,8 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
 ///
 /// This widget is particularly useful when used in a [CustomScrollView] with
 /// pinned slivers (like [SliverAppBar] with [SliverAppBar.pinned] set to true).
+///
+/// {@template flutter.widgets.sliver_clip.SliverClipRRect.clipOverlap}
 /// The [clipOverlap] parameter controls how the clip reacts to the area that
 /// overlaps with a preceding pinned sliver:
 ///
@@ -256,6 +268,7 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
 ///    smoother visual when items scroll underneath a pinned header.
 ///  * [ClipOverlapBehavior.none]: the overlap is ignored and no additional
 ///    clipping is applied.
+/// {@endtemplate}
 ///
 /// {@tool snippet}
 ///
@@ -303,7 +316,16 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
 ///    strategies.
 ///  * [CustomClipper], for creating custom clips.
 class SliverClipRRect extends SingleChildRenderObjectWidget {
-  /// Creates a sliver that clips its child using a rounded rectangle.
+  /// Creates a sliver that clips its child using a rounded-rectangle.
+  ///
+  /// The [borderRadius] defaults to [BorderRadius.zero], i.e. a rectangle with
+  /// right-angled corners.
+  ///
+  /// If [clipper] is non-null, then [borderRadius] is ignored.
+  ///
+  /// If [clipBehavior] is [Clip.none], no clipping will be applied.
+  ///
+  /// {@macro flutter.widgets.sliver_clip.SliverClipRRect.clipOverlap}
   const SliverClipRRect({
     super.key,
     required Widget sliver,
