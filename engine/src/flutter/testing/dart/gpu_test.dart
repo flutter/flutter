@@ -402,6 +402,7 @@ void main() async {
 
   test('Texture.getMipLevelSizeInBytes is block-aware for compressed formats', () async {
     if (!gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc)) {
+      markTestSkipped('BC texture compression is not supported on this device.');
       return;
     }
     final gpu.Texture texture = gpu.gpuContext.createTexture(
@@ -422,6 +423,7 @@ void main() async {
 
   test('GpuContext.createTexture allocates a compressed texture when supported', () async {
     if (!gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc)) {
+      markTestSkipped('BC texture compression is not supported on this device.');
       return;
     }
     final gpu.Texture texture = gpu.gpuContext.createTexture(
@@ -439,6 +441,7 @@ void main() async {
 
   test('Texture.overwrite uploads block-aligned compressed data', () async {
     if (!gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc)) {
+      markTestSkipped('BC texture compression is not supported on this device.');
       return;
     }
     final gpu.Texture texture = gpu.gpuContext.createTexture(
@@ -454,6 +457,7 @@ void main() async {
 
   test('Texture.overwrite rejects wrong size for compressed format', () async {
     if (!gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc)) {
+      markTestSkipped('BC texture compression is not supported on this device.');
       return;
     }
     final gpu.Texture texture = gpu.gpuContext.createTexture(

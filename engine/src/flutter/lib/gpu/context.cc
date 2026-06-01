@@ -170,6 +170,5 @@ extern bool InternalFlutterGpu_Context_SupportsTextureFormat(
   // For uncompressed formats, today's Impeller capability surface does not
   // expose a per-format usage query, so this returns true. As that surface
   // grows it should be wired in here.
-  (void)shader_read;
   return true;
 }

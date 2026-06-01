@@ -181,7 +181,7 @@ base class GpuContext extends NativeFieldWrapperClass1 {
           !enableShaderReadUsage ||
           sampleCount != 1 ||
           storageMode == StorageMode.deviceTransient) {
-        throw Exception(
+        throw ArgumentError(
           'Compressed pixel format $format can only be used as a sample-only '
           'texture (sampleCount=1, enableShaderReadUsage=true, no render '
           'target, no shader write, and storageMode != deviceTransient)',
@@ -190,7 +190,7 @@ base class GpuContext extends NativeFieldWrapperClass1 {
       final int bw = format.blockWidth;
       final int bh = format.blockHeight;
       if (width % bw != 0 || height % bh != 0) {
-        throw Exception(
+        throw ArgumentError(
           'Compressed pixel format $format requires width and height to be a '
           'multiple of the block size (${bw}x$bh), got ${width}x$height',
         );
