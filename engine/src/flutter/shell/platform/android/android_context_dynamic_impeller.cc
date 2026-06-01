@@ -145,9 +145,11 @@ GetActualRenderingAPIForImpeller(
 }  // namespace
 
 AndroidContextDynamicImpeller::AndroidContextDynamicImpeller(
-    const AndroidContext::ContextSettings& settings)
+    const AndroidContext::ContextSettings& settings,
+    fml::RefPtr<fml::TaskRunner> io_task_runner)
     : AndroidContext(AndroidRenderingAPI::kImpellerVulkan),
-      settings_(settings) {}
+      settings_(settings),
+      io_task_runner_(std::move(io_task_runner)) {}
 
 AndroidContextDynamicImpeller::~AndroidContextDynamicImpeller() = default;
 
@@ -191,7 +193,7 @@ void AndroidContextDynamicImpeller::SetupImpellerContext() {
   if (!vk_context_) {
     gl_context_ = std::make_shared<AndroidContextGLImpeller>(
         std::make_unique<impeller::egl::Display>(),
-        settings_.enable_gpu_tracing);
+        settings_.enable_gpu_tracing, io_task_runner_);
   }
 }
 
