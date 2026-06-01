@@ -46,13 +46,9 @@ DlDeferredImageGPUImpeller::DlDeferredImageGPUImpeller(
 DlDeferredImageGPUImpeller::~DlDeferredImageGPUImpeller() = default;
 
 // |DlImage|
-sk_sp<SkImage> DlDeferredImageGPUImpeller::skia_image() const {
-  return nullptr;
-};
-
-// |DlImage|
 std::shared_ptr<impeller::Texture>
-DlDeferredImageGPUImpeller::impeller_texture() const {
+DlDeferredImageGPUImpeller::GetImpellerTexture(
+    const std::shared_ptr<impeller::Context>& context) const {
   if (!wrapper_) {
     return nullptr;
   }
@@ -60,14 +56,27 @@ DlDeferredImageGPUImpeller::impeller_texture() const {
 }
 
 // |DlImage|
-bool DlDeferredImageGPUImpeller::isOpaque() const {
-  // Impeller doesn't currently implement opaque alpha types.
-  return false;
+flutter::DlColorSpace DlDeferredImageGPUImpeller::GetColorSpace() const {
+  if (!wrapper_) {
+    return flutter::DlColorSpace::kSRGB;
+  }
+  std::shared_ptr<impeller::Texture> texture = wrapper_->texture();
+  if (!texture) {
+    return flutter::DlColorSpace::kSRGB;
+  }
+  switch (texture->GetTextureDescriptor().format) {
+    case impeller::PixelFormat::kB10G10R10XR:
+    case impeller::PixelFormat::kR16G16B16A16Float:
+      return flutter::DlColorSpace::kExtendedSRGB;
+    default:
+      return flutter::DlColorSpace::kSRGB;
+  }
 }
 
 // |DlImage|
-bool DlDeferredImageGPUImpeller::isTextureBacked() const {
-  return wrapper_ && wrapper_->isTextureBacked();
+bool DlDeferredImageGPUImpeller::isOpaque() const {
+  // Impeller doesn't currently implement opaque alpha types.
+  return false;
 }
 
 // |DlImage|
@@ -142,11 +151,6 @@ DlDeferredImageGPUImpeller::ImageWrapper::texture() const {
   return std::atomic_load(&texture_);
 }
 
-bool DlDeferredImageGPUImpeller::ImageWrapper::isTextureBacked() const {
-  std::shared_ptr<impeller::Texture> tex = texture();
-  return tex && tex->IsValid();
-}
-
 void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
     std::variant<sk_sp<DisplayList>, std::unique_ptr<LayerTree>> content) {
   fml::TaskRunner::RunNowOrPostTask(
@@ -176,14 +180,14 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
               snapshot_delegate->GetTextureRegistry());
         }
 
-        auto snapshot = snapshot_delegate->MakeRasterSnapshotSync(
+        auto texture = snapshot_delegate->MakeImpellerSnapshotSync(
             display_list, wrapper->size_, wrapper->pixel_format_);
-        if (!snapshot) {
+        if (!texture) {
           std::scoped_lock lock(wrapper->error_mutex_);
           wrapper->error_ = "Failed to create snapshot.";
           return;
         }
-        std::atomic_store(&wrapper->texture_, snapshot->impeller_texture());
+        std::atomic_store(&wrapper->texture_, texture);
       }));
 }
 

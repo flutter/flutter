@@ -1156,12 +1156,7 @@ void main() {
             logger: globals.logger,
             throwOnError: false,
           );
-          await generateMainDartWithPluginRegistrant(
-            flutterProject,
-            packageConfig,
-            'package:app/main.dart',
-            mainFile,
-          );
+          await generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile);
           expect(
             flutterProject.dartPluginRegistrant.readAsStringSync(),
             '//\n'
@@ -1281,12 +1276,7 @@ void main() {
             throwOnError: false,
           );
           await expectLater(
-            generateMainDartWithPluginRegistrant(
-              flutterProject,
-              packageConfig,
-              'package:app/main.dart',
-              mainFile,
-            ),
+            generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile),
             throwsToolExit(
               message:
                   'Invalid plugin specification url_launcher_macos.\n'
@@ -1324,12 +1314,7 @@ void main() {
             throwOnError: false,
           );
           await expectLater(
-            generateMainDartWithPluginRegistrant(
-              flutterProject,
-              packageConfig,
-              'package:app/main.dart',
-              mainFile,
-            ),
+            generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile),
             throwsToolExit(
               message:
                   'Invalid plugin specification url_launcher_macos.\n'
@@ -1361,12 +1346,7 @@ void main() {
             logger: globals.logger,
             throwOnError: false,
           );
-          await generateMainDartWithPluginRegistrant(
-            flutterProject,
-            packageConfig,
-            'package:app/main.dart',
-            mainFile,
-          );
+          await generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile);
           expect(flutterProject.dartPluginRegistrant.existsSync(), isFalse);
         },
         overrides: <Type, Generator>{
@@ -1401,23 +1381,13 @@ void main() {
             logger: globals.logger,
             throwOnError: false,
           );
-          await generateMainDartWithPluginRegistrant(
-            flutterProject,
-            packageConfig,
-            'package:app/main.dart',
-            mainFile,
-          );
+          await generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile);
           expect(flutterProject.dartPluginRegistrant.existsSync(), isTrue);
 
           // No plugins.
           createFakeDartPlugins(flutterProject, flutterManifest, fs, <String, String>{});
 
-          await generateMainDartWithPluginRegistrant(
-            flutterProject,
-            packageConfig,
-            'package:app/main.dart',
-            mainFile,
-          );
+          await generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile);
           expect(flutterProject.dartPluginRegistrant.existsSync(), isFalse);
         },
         overrides: <Type, Generator>{

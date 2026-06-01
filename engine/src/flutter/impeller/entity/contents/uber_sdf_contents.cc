@@ -26,6 +26,12 @@ Scalar ToShaderType(UberSDFParameters::Type type) {
       return 0.0f;
     case UberSDFParameters::Type::kRect:
       return 1.0f;
+    case UberSDFParameters::Type::kOval:
+      return 2.0f;
+    case UberSDFParameters::Type::kRoundedRect:
+      return 3.0f;
+    case UberSDFParameters::Type::kRoundedSuperellipseSymmetric:
+      return 4.0f;
   }
 }
 
@@ -72,6 +78,14 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.stroke_join =
       params_.stroke ? ToShaderStrokeJoin(params_.stroke->join) : 0.0f;
   frag_info.aa_pixels = UberSDFParameters::kAntialiasPixels;
+  frag_info.superellipse_degree = params_.superellipse_degree;
+  frag_info.superellipse_semi_axis = params_.superellipse_semi_axis;
+  frag_info.angle_span = params_.angle_span;
+  frag_info.octant_offset_c = params_.octant_offset_c;
+  frag_info.circle_center_top = params_.circle_center_top;
+  frag_info.circle_center_right = params_.circle_center_right;
+  frag_info.superellipse_scale = params_.superellipse_scale;
+  frag_info.radii = params_.radii;
 
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);
@@ -114,6 +128,22 @@ bool UberSDFContents::ApplyColorFilter(
     const ColorFilterProc& color_filter_proc) {
   params_.color = color_filter_proc(params_.color);
   return true;
+}
+
+std::optional<Color> UberSDFContents::AsBackgroundColor(
+    const Entity& entity,
+    ISize target_size) const {
+  if (params_.type != UberSDFParameters::Type::kRect) {
+    return std::nullopt;
+  }
+  const Geometry* geometry = GetGeometry();
+  if (geometry == nullptr) {
+    return std::nullopt;
+  }
+  IRect target_rect = IRect::MakeSize(target_size);
+  return geometry->CoversArea(entity.GetTransform(), target_rect)
+             ? GetColor()
+             : std::optional<Color>();
 }
 
 }  // namespace impeller

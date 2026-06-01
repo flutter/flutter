@@ -19,20 +19,4 @@ void testMain() {
     final Float32List m32 = toMatrix32(Float64List.fromList(data));
     expect(m32, Float32List.fromList(data));
   });
-
-  test('FastMatrix32.transform', () {
-    final fast = FastMatrix32(
-      Float32List.fromList(<double>[2, 1, 0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 4, 5, 0, 1]),
-    );
-    fast.transform(6, 7);
-
-    // Just make sure that the fast version produces a result consistent with
-    // the slow version.
-    final slow = Matrix4.fromFloat32List(fast.matrix);
-    final slowTransformed = Float32List.fromList(<double>[6, 7, 0]);
-    slow.transform3(slowTransformed);
-
-    expect(fast.transformedX, slowTransformed[0]);
-    expect(fast.transformedY, slowTransformed[1]);
-  });
 }

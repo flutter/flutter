@@ -603,9 +603,7 @@ dependencies:
       if (!xcodebuildOutput.contains(
             RegExp('flutter.*--local-engine-src-path=bogus assemble'),
           ) || // Verbose output
-          !xcodebuildOutput.contains(
-            'Unable to detect a Flutter engine build directory in bogus',
-          )) {
+          !xcodebuildOutput.contains('No Flutter engine build directory found at: bogus')) {
         return TaskResult.failure(
           'Host Objective-C app build succeeded though flutter script failed',
         );
@@ -673,7 +671,7 @@ Future<bool> _isAppAotBuild(Directory app) async {
 
   final String symbolTable = await dumpSymbolTable(binary);
 
-  return symbolTable.contains('kDartIsolateSnapshotInstructions');
+  return symbolTable.contains('kDartSnapshotText');
 }
 
 Future<void> _createFakeDartPlugin(String name, Directory parent) async {
