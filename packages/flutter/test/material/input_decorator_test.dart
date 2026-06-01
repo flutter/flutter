@@ -1828,7 +1828,7 @@ void main() {
           ..path(style: PaintingStyle.stroke)
           ..restore(),
       );
-    }, skip: isBrowser);
+    }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
     testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (
       WidgetTester tester,
