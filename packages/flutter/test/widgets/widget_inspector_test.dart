@@ -3211,7 +3211,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         expect(count, equals(5));
       });
 
-      testWidgets('clearOverlayCandidates preserves current selection', (
+      testWidgets('clearCandidates preserves current selection', (
         WidgetTester tester,
       ) async {
         await pumpWidgetTreeWithABC(tester);
@@ -3227,7 +3227,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         selection.candidates = <RenderObject>[renderObjectA, renderObjectB];
         expect(selection.current, renderObjectA);
 
-        selection.clearOverlayCandidates();
+        selection.clearCandidates();
         expect(selection.candidates, isEmpty);
         expect(selection.current, renderObjectA);
       });
@@ -3241,20 +3241,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       final GlobalKey behindKey = GlobalKey();
       final GlobalKey sheetTextKey = GlobalKey();
 
-      Widget exitWidgetSelectionButtonBuilder(
-        BuildContext context, {
-        required VoidCallback onPressed,
-        required String semanticsLabel,
-        required GlobalKey key,
-      }) {
-        return SizedBox(key: key);
-      }
-
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
-            exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+            exitWidgetSelectionButtonBuilder: null,
             moveExitWidgetSelectionButtonBuilder: null,
             tapBehaviorButtonBuilder: null,
             child: Navigator(
@@ -3322,20 +3313,11 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
       final GlobalKey innerTextKey = GlobalKey();
 
-      Widget exitWidgetSelectionButtonBuilder(
-        BuildContext context, {
-        required VoidCallback onPressed,
-        required String semanticsLabel,
-        required GlobalKey key,
-      }) {
-        return SizedBox(key: key);
-      }
-
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: WidgetInspector(
-            exitWidgetSelectionButtonBuilder: exitWidgetSelectionButtonBuilder,
+            exitWidgetSelectionButtonBuilder: null,
             moveExitWidgetSelectionButtonBuilder: null,
             tapBehaviorButtonBuilder: null,
             child: Navigator(

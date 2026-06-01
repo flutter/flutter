@@ -1610,12 +1610,12 @@ mixin WidgetInspectorService {
   bool setSelection(Object? object, [String? groupName]) {
     switch (object) {
       case Element() when object != selection.currentElement:
-        selection.clearOverlayCandidates();
+        selection.clearCandidates();
         selection.currentElement = object;
         _notifyToolsOfSelection(selection.currentElement);
         return true;
       case RenderObject() when object != selection.current:
-        selection.clearOverlayCandidates();
+        selection.clearCandidates();
         selection.current = object;
         _notifyToolsOfSelection(selection.current);
         return true;
@@ -3309,7 +3309,7 @@ class InspectorSelection with ChangeNotifier {
   ///
   /// Used when the selection is updated from DevTools or another tool so stale
   /// on-device hit-test candidates are not drawn on the overlay.
-  void clearOverlayCandidates() {
+  void clearCandidates() {
     if (_candidates.isEmpty) {
       return;
     }
@@ -3504,13 +3504,6 @@ ModalRoute<Object?>? _modalRouteForRenderObject(RenderObject? object) {
   return ModalRoute.of<Object?>(element);
 }
 
-bool _inspectorRenderObjectsShareModalRouteScope(RenderObject a, RenderObject b) {
-  return identical(
-    _modalRouteForRenderObject(a),
-    _modalRouteForRenderObject(b),
-  );
-}
-
 double _inspectorHitArea(RenderObject object) {
   final Size size = object.semanticBounds.size;
   return size.width * size.height;
@@ -3649,7 +3642,10 @@ class _InspectorOverlayLayer extends Layer {
       if (candidate == selected ||
           !candidate.attached ||
           !_isInInspectorRenderObjectTree(candidate) ||
-          !_inspectorRenderObjectsShareModalRouteScope(candidate, selected)) {
+          !identical(
+            _modalRouteForRenderObject(candidate),
+            _modalRouteForRenderObject(selected),
+          )) {
         continue;
       }
       candidates.add(_TransformedRect(candidate, rootRenderObject));
