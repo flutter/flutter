@@ -198,7 +198,9 @@ bool VertexDescriptorMTL::SetStageInputsAndLayout(
                            layout.binding];
     vertex_layout.stride = layout.stride;
     vertex_layout.stepRate = 1u;
-    vertex_layout.stepFunction = MTLVertexStepFunctionPerVertex;
+    vertex_layout.stepFunction = layout.input_rate == VertexInputRate::kInstance
+                                     ? MTLVertexStepFunctionPerInstance
+                                     : MTLVertexStepFunctionPerVertex;
   }
   return true;
 }
