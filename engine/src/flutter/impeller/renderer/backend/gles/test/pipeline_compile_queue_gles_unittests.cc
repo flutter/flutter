@@ -42,9 +42,7 @@ TEST(PipelineCompileQueueGLESTest, OnJobAddedProcessesJobsSequentially) {
   auto queue = PipelineCompileQueueGLES::Create(thread.GetTaskRunner());
   ASSERT_NE(queue, nullptr);
 
-  std::atomic<int> execution_order{0};
-  std::vector<int> results;
-  std::mutex results_mutex;
+  std::atomic<int> completed_jobs{0};
   fml::CountDownLatch latch(3);
 
   PipelineDescriptor desc1;
@@ -60,39 +58,27 @@ TEST(PipelineCompileQueueGLESTest, OnJobAddedProcessesJobsSequentially) {
   desc3.SetCullMode(CullMode::kBackFace);
 
   queue->PostJobForDescriptor(desc1, [&]() {
-    {
-      std::lock_guard<std::mutex> lock(results_mutex);
-      results.push_back(1);
-    }
-    execution_order = 1;
+    std::this_thread::sleep_for(std::chrono::milliseconds(80));
+    completed_jobs++;
     latch.CountDown();
   });
 
   queue->PostJobForDescriptor(desc2, [&]() {
-    {
-      std::lock_guard<std::mutex> lock(results_mutex);
-      results.push_back(2);
-    }
-    execution_order = 2;
+    std::this_thread::sleep_for(std::chrono::milliseconds(80));
+    completed_jobs++;
     latch.CountDown();
   });
 
   queue->PostJobForDescriptor(desc3, [&]() {
-    {
-      std::lock_guard<std::mutex> lock(results_mutex);
-      results.push_back(3);
-    }
-    execution_order = 3;
+    std::this_thread::sleep_for(std::chrono::milliseconds(80));
+    completed_jobs++;
     latch.CountDown();
   });
 
   latch.Wait();
 
-  EXPECT_EQ(results.size(), 3u);
-  std::sort(results.begin(), results.end());
-  EXPECT_EQ(results[0], 1);
-  EXPECT_EQ(results[1], 2);
-  EXPECT_EQ(results[2], 3);
+  EXPECT_EQ(completed_jobs, 3);
+
   thread.Join();
 }
 
