@@ -175,12 +175,8 @@ class AndroidDevices extends PollingDeviceDiscovery {
           case 'offline':
             diagnostics?.add('Device $deviceID is offline.');
           case 'no permissions':
-            final String udevMessage = _platform.isLinux
-                ? '\nPlease check your udev rules.'
-                : '';
-            diagnostics?.add(
-              'Device $deviceID has no permissions.$udevMessage',
-            );
+            final udevMessage = _platform.isLinux ? '\nPlease check your udev rules.' : '';
+            diagnostics?.add('Device $deviceID has no permissions.$udevMessage');
           default:
             devices?.add(
               AndroidDevice(
