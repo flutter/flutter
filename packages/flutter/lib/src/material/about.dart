@@ -691,11 +691,7 @@ class _LicensePageState extends State<LicensePage> {
       version: widget.applicationVersion ?? _defaultApplicationVersion(context),
       legalese: widget.applicationLegalese,
     );
-    return _PackagesView(
-      about: about,
-      isLateral: isLateral,
-      selectedId: selectedId,
-    );
+    return _PackagesView(about: about, isLateral: isLateral, selectedId: selectedId);
   }
 }
 
@@ -965,7 +961,6 @@ class _LicenseData {
           },
     );
   }
-
 }
 
 @immutable

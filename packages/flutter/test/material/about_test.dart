@@ -2000,7 +2000,6 @@ void main() {
     final Finder xText = find.text('X');
     expect(tester.getSize(xText).isEmpty, isTrue);
   });
-
 }
 
 class FakeLicenseEntry extends LicenseEntry {
