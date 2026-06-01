@@ -744,7 +744,7 @@ class RunCommand extends RunCommandBase {
     );
     if (flavor != null && !flavorsSupportedOnEveryDevice) {
       globals.printWarning(
-        '--flavor is only supported for Android, macOS, and iOS devices. '
+        '--flavor is only supported for Android, Linux, macOS, and iOS devices. '
         'Flavor-related features may not function properly and could '
         'behave differently in a future release.',
       );
