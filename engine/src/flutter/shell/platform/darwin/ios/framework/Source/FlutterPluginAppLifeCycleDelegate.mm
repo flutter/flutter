@@ -183,6 +183,9 @@ static BOOL IsPowerOfTwo(NSUInteger x) {
                                                         }
                                                        isFallbackForScene:YES];
 
+  // Based on Apple's sample code it seems we can assume there will be at most one activity.
+  // Example:
+  // https://developer.apple.com/documentation/uikit/supporting-multiple-windows-on-ipad#Add-a-scene-delegate
   for (NSUserActivity* activity in connectionOptions.userActivities) {
     if ([self application:application
             continueUserActivity:activity
