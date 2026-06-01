@@ -180,7 +180,10 @@ AndroidSurfaceGLImpeller::GLContextMakeCurrent() {
   if (!success) {
     return std::make_unique<GLContextDefaultResult>(false);
   }
-  if (ShouldClearContextBetweenFrames()) {
+  if (!should_clear_context_between_frames_.has_value()) {
+    should_clear_context_between_frames_ = ShouldClearContextBetweenFrames();
+  }
+  if (should_clear_context_between_frames_.value()) {
     return std::make_unique<GLContextSwitch>(
         std::make_unique<AndroidSwitchableGLContextImpeller>(android_context_));
   }
