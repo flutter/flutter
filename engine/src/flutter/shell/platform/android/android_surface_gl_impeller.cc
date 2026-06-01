@@ -4,6 +4,10 @@
 
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
 
+#if defined(__ANDROID__)
+#include <sys/system_properties.h>
+#endif
+
 #include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/fml/logging.h"
 #include "flutter/impeller/toolkit/egl/surface.h"
@@ -12,6 +16,27 @@
 namespace flutter {
 
 namespace {
+
+bool ShouldClearContextBetweenFrames() {
+#if defined(__ANDROID__)
+  auto is_bad_platform = [](const char* name) -> bool {
+    char value[PROP_VALUE_MAX];
+    if (__system_property_get(name, value) > 0) {
+      std::string_view platform(value);
+      if (platform.starts_with("mt6762") || platform.starts_with("mt6765") ||
+          platform.starts_with("MT6762") || platform.starts_with("MT6765")) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  return is_bad_platform("ro.board.platform") ||
+         is_bad_platform("ro.vendor.mediatek.platform");
+#else
+  return false;
+#endif
+}
 
 class AndroidSwitchableGLContextImpeller : public SwitchableGLContext {
  public:
@@ -139,7 +164,7 @@ AndroidSurfaceGLImpeller::GLContextMakeCurrent() {
   if (!success) {
     return std::make_unique<GLContextDefaultResult>(false);
   }
-  if (android_context_->ShouldClearContextBetweenFrames()) {
+  if (ShouldClearContextBetweenFrames()) {
     return std::make_unique<GLContextSwitch>(
         std::make_unique<AndroidSwitchableGLContextImpeller>(android_context_));
   }
