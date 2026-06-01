@@ -614,8 +614,6 @@ class FlutterPlugin : Plugin<Project> {
                 project.findProperty("deferred-components")?.toString()?.toBoolean() ?: false
             val validateDeferredComponentsValue: Boolean =
                 project.findProperty("validate-deferred-components")?.toString()?.toBoolean() ?: true
-            val deferredComponentNamesValue: String? =
-                project.findProperty("deferred-component-names") as? String
 
             if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
                 variant.outputs.forEach { output ->
@@ -713,31 +711,6 @@ class FlutterPlugin : Plugin<Project> {
                     flavor = flavorValue
                 }
             val flutterCompileTask: FlutterTask = compileTaskProvider.get()
-
-            // Set up cross-project task dependencies to ensure that when building
-            // deferred components, the mergeAssets and mergeJniLibFolders tasks of
-            // the dynamic feature subprojects run after compileFlutterTask of the
-            // app project. This prevents race conditions during clean builds, where
-            // subprojects might otherwise pack empty directories before assets/libs
-            // have been compiled/produced under the app build directory.
-            if (deferredComponentsValue && deferredComponentNamesValue != null) {
-                deferredComponentNamesValue
-                    .split(',')
-                    .map { it.trim() }
-                    .filter { it.isNotEmpty() }
-                    .forEach { componentName ->
-                        val subproject = project.rootProject.findProject(":$componentName")
-                        if (subproject != null) {
-                            val mergeAssetsTaskName = "merge${FlutterPluginUtils.capitalize(variant.name)}Assets"
-                            val mergeJniLibsTaskName = "merge${FlutterPluginUtils.capitalize(variant.name)}JniLibFolders"
-                            subproject.tasks.configureEach {
-                                if (name == mergeAssetsTaskName || name == mergeJniLibsTaskName) {
-                                    dependsOn(flutterCompileTask)
-                                }
-                            }
-                        }
-                    }
-            }
             val jniLibsDir =
                 project.layout.buildDirectory.dir(
                     "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/jniLibs"
