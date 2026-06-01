@@ -138,8 +138,8 @@ def get_host_os():
   return 'linux'
 
 
-# Runs true if the currently executing python interpreter is running under
-# Rosetta. I.e., python3 is an x64 executable and we're on an arm64 Mac.
+# Returns true if the currently executing Python interpreter is running under
+# Rosetta. i.e., python3 is an x64 executable and we're on an arm64 Mac.
 def is_rosetta():
   if platform.system() == 'Darwin':
     proc = subprocess.Popen(['sysctl', '-in', 'sysctl.proc_translated'],

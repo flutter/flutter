@@ -156,8 +156,8 @@ extension type CanvasKit(JSObject _) implements JSObject {
   /// parameters specified in [SkImageInfo] passed [SkImage.readPixels] must
   /// match [info].
   @JS('MakeImage')
-  external SkImage? _MakeImage(SkImageInfo info, JSUint8Array pixels, double bytesPerRow);
-  SkImage? MakeImage(SkImageInfo info, Uint8List pixels, double bytesPerRow) =>
+  external SkImage? _MakeImage(SkImageInfo info, JSUint8Array pixels, int bytesPerRow);
+  SkImage? MakeImage(SkImageInfo info, Uint8List pixels, int bytesPerRow) =>
       _MakeImage(info, pixels.toJS, bytesPerRow);
 
   @JS('MakeLazyImageFromTextureSource')
@@ -2264,6 +2264,13 @@ extension type SkParagraph(JSObject _) implements JSObject {
   external SkGlyphClusterInfo? _getClosestGlyphInfoAtCoordinate(double x, double y);
   ui.GlyphInfo? getClosestGlyphInfoAt(double x, double y) =>
       _getClosestGlyphInfoAtCoordinate(x, y)?._glyphInfo;
+
+  @JS('unresolvedCodepoints')
+  external JSArray<JSNumber> _getUnresolvedCodePoints();
+  List<int> getUnresolvedCodePoints() {
+    final List<JSNumber> jsNumbers = _getUnresolvedCodePoints().toDart;
+    return List<int>.generate(jsNumbers.length, (int i) => jsNumbers[i].toDartInt);
+  }
 
   external SkTextRange getWordBoundary(double position);
   external void layout(double width);

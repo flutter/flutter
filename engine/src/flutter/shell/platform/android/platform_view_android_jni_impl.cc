@@ -1697,7 +1697,9 @@ JavaLocalRef PlatformViewAndroidJNIImpl::ImageGetHardwareBuffer(
   JavaLocalRef r = JavaLocalRef(
       env,
       env->CallObjectMethod(image.obj(), g_image_get_hardware_buffer_method));
-  FML_CHECK(fml::jni::CheckException(env));
+  if (fml::jni::ClearException(env, false)) {
+    return JavaLocalRef();
+  }
   return r;
 }
 

@@ -275,7 +275,7 @@ class _PosixUtils extends OperatingSystemUtils {
           '  exit code: ${hostPlatformCheck.exitCode}\n'
           '  stdout: ${hostPlatformCheck.stdout.trimRight()}\n'
           '  stderr: ${hostPlatformCheck.stderr.trimRight()}\n'
-          'Assuming host platform is ${getNameForHostPlatform(_hostPlatform!)}.',
+          'Assuming host platform is ${_hostPlatform!.cliName}.',
         );
       } else if (hostPlatformCheck.stdout.trim().endsWith('x86_64')) {
         _hostPlatform = HostPlatform.linux_x64;
@@ -377,7 +377,7 @@ class _MacOSUtils extends _PosixUtils {
         _processUtils.runSync(<String>['uname', '-m']),
       ];
       if (results.every((RunResult result) => result.exitCode == 0)) {
-        String osName = getNameForHostPlatform(hostPlatform);
+        String osName = hostPlatform.cliName;
         // If the script is running in Rosetta, "uname -m" will return x86_64.
         if (hostPlatform == HostPlatform.darwin_arm64 && results[3].stdout.contains('x86_64')) {
           osName = '$osName (Rosetta)';
@@ -531,6 +531,9 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   void _unpackArchive(Archive archive, Directory targetDirectory) {
+    // The target directory does not change across entries, so compute its
+    // canonical form once instead of per file.
+    final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(targetDirectory.path);
     for (final ArchiveFile archiveFile in archive.files) {
       // The archive package doesn't correctly set isFile.
       if (!archiveFile.isFile || archiveFile.name.endsWith('/')) {
@@ -548,10 +551,12 @@ class _WindowsUtils extends OperatingSystemUtils {
       //
       // See https://snyk.io/research/zip-slip-vulnerability for more context.
       final String destinationFileCanonicalPath = _fileSystem.path.canonicalize(destFile.path);
-      final String targetDirectoryCanonicalPath = _fileSystem.path.canonicalize(
-        targetDirectory.path,
+      final bool isAtRoot = _fileSystem.path.equals(
+        targetDirectoryCanonicalPath,
+        destinationFileCanonicalPath,
       );
-      if (!destinationFileCanonicalPath.startsWith(targetDirectoryCanonicalPath)) {
+      if (!isAtRoot &&
+          !_fileSystem.path.isWithin(targetDirectoryCanonicalPath, destinationFileCanonicalPath)) {
         throw StateError(
           'Tried to extract the file $destinationFileCanonicalPath outside of the '
           'target directory $targetDirectoryCanonicalPath',
@@ -609,33 +614,20 @@ String? findProjectRoot(FileSystem fileSystem, [String? directory]) {
 }
 
 enum HostPlatform {
-  darwin_x64,
-  darwin_arm64,
-  linux_x64,
-  linux_arm64,
-  linux_riscv64,
-  windows_x64,
-  windows_arm64;
+  darwin_x64('darwin-x64', 'x64'),
+  darwin_arm64('darwin-arm64', 'arm64'),
+  linux_x64('linux-x64', 'x64'),
+  linux_arm64('linux-arm64', 'arm64'),
+  linux_riscv64('linux-riscv64', 'riscv64'),
+  windows_x64('windows-x64', 'x64'),
+  windows_arm64('windows-arm64', 'arm64');
 
-  String get platformName => switch (this) {
-    darwin_x64 => 'x64',
-    darwin_arm64 => 'arm64',
-    linux_x64 => 'x64',
-    linux_arm64 => 'arm64',
-    linux_riscv64 => 'riscv64',
-    windows_x64 => 'x64',
-    windows_arm64 => 'arm64',
-  };
+  const HostPlatform(this.cliName, this.platformName);
+
+  final String cliName;
+  final String platformName;
 }
 
-String getNameForHostPlatform(HostPlatform platform) {
-  return switch (platform) {
-    HostPlatform.darwin_x64 => 'darwin-x64',
-    HostPlatform.darwin_arm64 => 'darwin-arm64',
-    HostPlatform.linux_x64 => 'linux-x64',
-    HostPlatform.linux_arm64 => 'linux-arm64',
-    HostPlatform.linux_riscv64 => 'linux-riscv64',
-    HostPlatform.windows_x64 => 'windows-x64',
-    HostPlatform.windows_arm64 => 'windows-arm64',
-  };
-}
+// flutter_ignore: deprecation_syntax (see analyze.dart)
+@Deprecated('Use HostPlatform.cliName instead')
+String getNameForHostPlatform(HostPlatform platform) => platform.cliName;

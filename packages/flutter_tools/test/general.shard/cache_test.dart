@@ -260,46 +260,38 @@ void main() {
       expect(artifact2.didUpdate, true);
     });
 
-    testUsingContext(
-      'should skip EngineCachedArtifacts when local engine is provided',
-      () async {
-        final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
-        final fileSystem = MemoryFileSystem.test();
-        final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
-        final artifact2 = FakeEngineCachedArtifact(cache)..upToDate = false;
+    testUsingContext('should skip EngineCachedArtifacts when local engine is provided', () async {
+      final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
+      final fileSystem = MemoryFileSystem.test();
+      final cache = Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.any());
+      final artifact2 = FakeEngineCachedArtifact(cache)..upToDate = false;
 
-        final cacheWithArtifacts = Cache.test(
-          fileSystem: fileSystem,
-          artifacts: <CachedArtifact>[artifact1, artifact2],
-          processManager: FakeProcessManager.any(),
-        );
+      final cacheWithArtifacts = Cache.test(
+        fileSystem: fileSystem,
+        artifacts: <CachedArtifact>[artifact1, artifact2],
+        processManager: FakeProcessManager.any(),
+      );
 
-        await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
-        expect(artifact1.didUpdate, true);
-        expect(artifact2.didUpdate, false);
-      },
-      overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()},
-    );
+      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+      expect(artifact1.didUpdate, true);
+      expect(artifact2.didUpdate, false);
+    }, overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()});
 
-    testUsingContext(
-      'should skip engine_stamp artifact when local engine is provided',
-      () async {
-        final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
-        final fileSystem = MemoryFileSystem.test();
-        final artifact2 = FakeEngineStampArtifact()..upToDate = false;
+    testUsingContext('should skip engine_stamp artifact when local engine is provided', () async {
+      final artifact1 = FakeSecondaryCachedArtifact()..upToDate = false;
+      final fileSystem = MemoryFileSystem.test();
+      final artifact2 = FakeEngineStampArtifact()..upToDate = false;
 
-        final cacheWithArtifacts = Cache.test(
-          fileSystem: fileSystem,
-          artifacts: <CachedArtifact>[artifact1, artifact2],
-          processManager: FakeProcessManager.any(),
-        );
+      final cacheWithArtifacts = Cache.test(
+        fileSystem: fileSystem,
+        artifacts: <CachedArtifact>[artifact1, artifact2],
+        processManager: FakeProcessManager.any(),
+      );
 
-        await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
-        expect(artifact1.didUpdate, true);
-        expect(artifact2.didUpdate, false);
-      },
-      overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()},
-    );
+      await cacheWithArtifacts.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+      expect(artifact1.didUpdate, true);
+      expect(artifact2.didUpdate, false);
+    }, overrides: <Type, Generator>{Artifacts: () => FakeLocalEngineArtifacts()});
 
     testWithoutContext(
       "getter dyLdLibEntry concatenates the output of each artifact's dyLdLibEntry getter",

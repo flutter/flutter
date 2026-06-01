@@ -81,7 +81,7 @@ std::optional<Rect> FillPathSourceGeometry::GetCoverage(
 }
 
 bool FillPathSourceGeometry::CoversArea(const Matrix& transform,
-                                        const Rect& rect) const {
+                                        const IRect& rect) const {
   if (!inner_rect_.has_value()) {
     return false;
   }
