@@ -352,7 +352,7 @@ class DriveCommand extends RunCommandBase {
           mainPath: targetFile,
           platformArgs: <String, Object>{
             if (traceStartup) 'trace-startup': traceStartup,
-            if (web) '--no-launch-chrome': true,
+            if (web) 'no-launch-chrome': true,
           },
         );
       } else {
