@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--   
+   Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
+   
+   DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   
+   The contents of this file are subject to the terms of either the Universal Permissive License 
+   v 1.0 as shown at http://oss.oracle.com/licenses/upl
+   
+   or the following license:
+   
+   Redistribution and use in source and binary forms, with or without modification, are permitted
+   provided that the following conditions are met:
+   
+   1. Redistributions of source code must retain the above copyright notice, this list of conditions
+   and the following disclaimer.
+   
+   2. Redistributions in binary form must reproduce the above copyright notice, this list of
+   conditions and the following disclaimer in the documentation and/or other materials provided with
+   the distribution.
+   
+   3. Neither the name of the copyright holder nor the names of its contributors may be used to
+   endorse or promote products derived from this software without specific prior written permission.
+   
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+   IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+   DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+   WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+   WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<feature
+      id="org.openjdk.jmc.feature.rcp.ja"
+      label="%name"
+      version="7.1.1.202604182019"
+      provider-name="%provider">
+
+   <description url="%descriptionUrl">
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+   <includes
+         id="org.eclipse.babel.nls_eclipse_ja"
+         version="4.12.0.v20190713060001"/>
+
+   <requires>
+      <import feature="org.openjdk.jmc.feature.core" match="equivalent"/>
+   </requires>
+
+   <plugin
+         id="org.openjdk.jmc.alert.ja"
+         download-size="8"
+         install-size="14"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.browser.attach.ja"
+         download-size="10"
+         install-size="22"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.browser.jdp.ja"
+         download-size="8"
+         install-size="12"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.browser.ja"
+         download-size="15"
+         install-size="31"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.console.persistence.ja"
+         download-size="22"
+         install-size="28"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.console.ui.ja"
+         download-size="17"
+         install-size="42"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.console.ui.mbeanbrowser.ja"
+         download-size="14"
+         install-size="22"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.console.ui.notification.ja"
+         download-size="22"
+         install-size="52"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.ui.ja"
+         download-size="26"
+         install-size="47"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.docs.ja"
+         download-size="208"
+         install-size="835"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.flightrecorder.ui.ja"
+         download-size="22"
+         install-size="75"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.flightrecorder.controlpanel.ui.ja"
+         download-size="14"
+         install-size="34"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.greychart.ui.ja"
+         download-size="7"
+         install-size="11"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.rcp.application.ja"
+         download-size="10"
+         install-size="16"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.rcp.intro.ja"
+         download-size="10"
+         install-size="17"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.rjmx.ja"
+         download-size="16"
+         install-size="35"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.rjmx.ui.ja"
+         download-size="17"
+         install-size="30"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.console.ui.diagnostic.ja"
+         download-size="10"
+         install-size="15"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+<license url="%licenseUrl">
+      %license
+   </license></feature>

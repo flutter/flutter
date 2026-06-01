@@ -1,0 +1,37 @@
+#
+# Web Start launch options
+#
+# variables:
+# - localdir: path to directory where javaws.exe resides
+# - jdkdir: path to JDK directory
+# - wsdir: path to directory where ITW config and cache are stored
+
+# JVM options, emulated client, see https://developers.redhat.com/blog/2017/04/04/openjdk-and-containers/
+-XX:+TieredCompilation
+-XX:TieredStopAtLevel=1
+-XX:+UseSerialGC
+-XX:MinHeapFreeRatio=20
+-XX:MaxHeapFreeRatio=40
+
+# uncomment for remote debug
+# -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005
+
+# other JVM options
+-splash:"{{localdir}}javaws_splash.png"
+-Xbootclasspath/a:"{{localdir}}javaws.jar"
+
+# classpath
+-classpath
+"{{jdkdir}}jre/lib/rt.jar"
+
+# IcedTea-Web options
+-Ditw.userdata="{{wsdir}}"
+-Dicedtea-web.bin.name=javaws.exe
+-Dicedtea-web.bin.location="{{localdir}}javaws.exe"
+
+# main class
+net.sourceforge.jnlp.runtime.Boot
+
+# other options
+-Xnofork
+-helpurl="https://docs.redhat.com/en/documentation/red_hat_build_of_openjdk/8/html/troubleshooting_red_hat_build_of_openjdk_8_for_windows/openjdk8-windows-troubleshoot-java-webstart"

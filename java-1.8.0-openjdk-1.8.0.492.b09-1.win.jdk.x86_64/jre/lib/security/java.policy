@@ -1,0 +1,52 @@
+
+// Standard extensions get all permissions by default
+
+grant codeBase "file:${{java.ext.dirs}}/*" {
+        permission java.security.AllPermission;
+};
+
+// default permissions granted to all domains
+
+grant {
+        // Allows any thread to stop itself using the java.lang.Thread.stop()
+        // method that takes no argument.
+        // Note that this permission is granted by default only to remain
+        // backwards compatible.
+        // It is strongly recommended that you either remove this permission
+        // from this policy file or further restrict it to code sources
+        // that you specify, because Thread.stop() is potentially unsafe.
+        // See the API specification of java.lang.Thread.stop() for more
+        // information.
+        permission java.lang.RuntimePermission "stopThread";
+
+        // allows anyone to listen on dynamic ports
+        permission java.net.SocketPermission "localhost:0", "listen";
+
+        // "standard" properies that can be read by anyone
+
+        permission java.util.PropertyPermission "java.version", "read";
+        permission java.util.PropertyPermission "java.vendor", "read";
+        permission java.util.PropertyPermission "java.vendor.url", "read";
+        permission java.util.PropertyPermission "java.class.version", "read";
+        permission java.util.PropertyPermission "os.name", "read";
+        permission java.util.PropertyPermission "os.version", "read";
+        permission java.util.PropertyPermission "os.arch", "read";
+        permission java.util.PropertyPermission "file.separator", "read";
+        permission java.util.PropertyPermission "path.separator", "read";
+        permission java.util.PropertyPermission "line.separator", "read";
+
+        permission java.util.PropertyPermission "java.specification.version", "read";
+        permission java.util.PropertyPermission "java.specification.maintenance.version", "read";
+        permission java.util.PropertyPermission "java.specification.vendor", "read";
+        permission java.util.PropertyPermission "java.specification.name", "read";
+
+        permission java.util.PropertyPermission "java.vm.specification.version", "read";
+        permission java.util.PropertyPermission "java.vm.specification.vendor", "read";
+        permission java.util.PropertyPermission "java.vm.specification.name", "read";
+        permission java.util.PropertyPermission "java.vm.version", "read";
+        permission java.util.PropertyPermission "java.vm.vendor", "read";
+        permission java.util.PropertyPermission "java.vm.name", "read";
+
+        permission java.util.PropertyPermission "sun.security.pkcs11.disableKeyExtraction", "read";
+};
+

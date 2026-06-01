@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.ecf.filetransfer.httpclient45.feature"
+      label="%featureName"
+      version="1.0.0.v20190530-1947"
+      provider-name="%providerName">
+
+   <description url="%descriptionURL">
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <requires>
+      <import feature="org.eclipse.ecf.filetransfer.feature" version="3.9.0" match="compatible"/>
+   </requires>
+
+   <plugin
+         id="org.eclipse.ecf.provider.filetransfer.httpclient45"
+         download-size="81"
+         install-size="179"
+         version="1.0.0.v20190530-1947"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.filetransfer.httpclient45.win32"
+         os="win32"
+         download-size="23"
+         install-size="47"
+         version="1.0.0.v20190502-2116"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.codec"
+         download-size="304"
+         install-size="591"
+         version="1.10.0.v20180409-1845"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.commons.logging"
+         download-size="71"
+         install-size="145"
+         version="1.2.0.v20180409-1502"
+         unpack="false"/>
+
+   <plugin
+         id="com.sun.jna"
+         os="win32"
+         download-size="1432"
+         install-size="3897"
+         version="4.5.1.v20180403-1933"
+         unpack="false"/>
+
+   <plugin
+         id="com.sun.jna.platform"
+         os="win32"
+         download-size="1167"
+         install-size="2368"
+         version="4.5.1.v20180403-1933"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.httpcomponents.httpclient"
+         download-size="1005"
+         install-size="2164"
+         version="4.5.6.v20190213-1430"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.httpcomponents.httpclient.win"
+         os="win32"
+         download-size="30"
+         install-size="59"
+         version="4.5.6.v20190213-1947"
+         unpack="false"/>
+
+   <plugin
+         id="org.apache.httpcomponents.httpcore"
+         download-size="348"
+         install-size="689"
+         version="4.4.10.v20190123-2214"
+         unpack="false"/>
+
+</feature>

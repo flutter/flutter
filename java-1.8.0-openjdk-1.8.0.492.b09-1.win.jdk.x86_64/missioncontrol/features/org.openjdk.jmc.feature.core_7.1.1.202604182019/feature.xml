@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--   
+   Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved.
+   
+   DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   
+   The contents of this file are subject to the terms of either the Universal Permissive License 
+   v 1.0 as shown at http://oss.oracle.com/licenses/upl
+   
+   or the following license:
+   
+   Redistribution and use in source and binary forms, with or without modification, are permitted
+   provided that the following conditions are met:
+   
+   1. Redistributions of source code must retain the above copyright notice, this list of conditions
+   and the following disclaimer.
+   
+   2. Redistributions in binary form must reproduce the above copyright notice, this list of
+   conditions and the following disclaimer in the documentation and/or other materials provided with
+   the distribution.
+   
+   3. Neither the name of the copyright holder nor the names of its contributors may be used to
+   endorse or promote products derived from this software without specific prior written permission.
+   
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+   IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+   DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+   WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+   WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<feature
+      id="org.openjdk.jmc.feature.core"
+      label="%name"
+      version="7.1.1.202604182019"
+      provider-name="%provider"
+      plugin="org.openjdk.jmc.ui">
+
+   <description url="%descriptionUrl">
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.ui.forms"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.help"/>
+      <import plugin="org.eclipse.help.ui"/>
+      <import plugin="org.eclipse.help.webapp"/>
+      <import plugin="org.eclipse.osgi"/>
+      <import plugin="org.apache.commons.codec"/>
+      <import plugin="org.eclipse.e4.core.di"/>
+      <import plugin="org.eclipse.e4.core.contexts"/>
+   </requires>
+
+   <plugin
+         id="org.openjdk.jmc.attach"
+         download-size="6"
+         install-size="9"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.browser"
+         download-size="160"
+         install-size="297"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.common"
+         download-size="411"
+         install-size="901"
+         version="7.1.1.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.ui"
+         download-size="652"
+         install-size="1145"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.docs"
+         download-size="177"
+         install-size="474"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.jdp"
+         download-size="24"
+         install-size="38"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.rjmx"
+         download-size="444"
+         install-size="1176"
+         version="7.1.1.202604182019"/>
+
+   <plugin
+         id="org.openjdk.jmc.greychart"
+         download-size="135"
+         install-size="249"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.browser.jdp"
+         download-size="19"
+         install-size="31"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.browser.attach"
+         download-size="43"
+         install-size="82"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.rjmx.ui"
+         download-size="310"
+         install-size="622"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.commands"
+         download-size="44"
+         install-size="87"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.ui.common"
+         download-size="83"
+         install-size="140"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.rjmx.ext"
+         download-size="12"
+         install-size="20"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="com.sun.mail.jakarta.mail"
+         download-size="646"
+         install-size="1212"
+         version="1.6.3"
+         unpack="false"/>
+
+   <plugin
+         id="com.sun.activation.jakarta.activation"
+         download-size="64"
+         install-size="113"
+         version="1.2.1"
+         unpack="false"/>
+
+ 
+
+<license url="%licenseUrl">
+      %license
+   </license></feature>

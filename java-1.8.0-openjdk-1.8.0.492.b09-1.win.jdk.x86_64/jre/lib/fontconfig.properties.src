@@ -1,0 +1,302 @@
+#
+# 
+# Copyright (c) 2003, 2018, Oracle and/or its affiliates. All rights reserved.
+# DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+#
+# This code is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 only, as
+# published by the Free Software Foundation.  Oracle designates this
+# particular file as subject to the "Classpath" exception as provided
+# by Oracle in the LICENSE file that accompanied this code.
+#
+# This code is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# version 2 for more details (a copy is included in the LICENSE file that
+# accompanied this code).
+#
+# You should have received a copy of the GNU General Public License version
+# 2 along with this work; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+# or visit www.oracle.com if you need additional information or have any
+# questions.
+#
+
+# Version
+
+version=1
+
+# Component Font Mappings
+
+allfonts.chinese-ms936=SimSun
+allfonts.chinese-ms936-extb=SimSun-ExtB
+allfonts.chinese-gb18030=SimSun-18030
+allfonts.chinese-gb18030-extb=SimSun-ExtB
+allfonts.chinese-hkscs=MingLiU_HKSCS
+allfonts.chinese-ms950-extb=MingLiU-ExtB
+allfonts.devanagari=Mangal
+allfonts.dingbats=Wingdings
+allfonts.lucida=Lucida Sans Regular
+allfonts.symbol=Symbol
+allfonts.symbols=Segoe UI Symbol
+allfonts.thai=Lucida Sans Regular
+allfonts.georgian=Sylfaen
+
+serif.plain.alphabetic=Times New Roman
+serif.plain.chinese-ms950=MingLiU
+serif.plain.chinese-ms950-extb=MingLiU-ExtB
+serif.plain.hebrew=David
+serif.plain.japanese=MS Mincho
+serif.plain.korean=Batang
+
+serif.bold.alphabetic=Times New Roman Bold
+serif.bold.chinese-ms950=PMingLiU
+serif.bold.chinese-ms950-extb=PMingLiU-ExtB
+serif.bold.hebrew=David Bold
+serif.bold.japanese=MS Mincho
+serif.bold.korean=Batang
+
+serif.italic.alphabetic=Times New Roman Italic
+serif.italic.chinese-ms950=PMingLiU
+serif.italic.chinese-ms950-extb=PMingLiU-ExtB
+serif.italic.hebrew=David
+serif.italic.japanese=MS Mincho
+serif.italic.korean=Batang
+
+serif.bolditalic.alphabetic=Times New Roman Bold Italic
+serif.bolditalic.chinese-ms950=PMingLiU
+serif.bolditalic.chinese-ms950-extb=PMingLiU-ExtB
+serif.bolditalic.hebrew=David Bold
+serif.bolditalic.japanese=MS Mincho
+serif.bolditalic.korean=Batang
+
+sansserif.plain.alphabetic=Arial
+sansserif.plain.chinese-ms950=MingLiU
+sansserif.plain.chinese-ms950-extb=MingLiU-ExtB
+sansserif.plain.hebrew=David
+sansserif.plain.japanese=MS Gothic
+sansserif.plain.korean=Gulim
+
+sansserif.bold.alphabetic=Arial Bold
+sansserif.bold.chinese-ms950=PMingLiU
+sansserif.bold.chinese-ms950-extb=PMingLiU-ExtB
+sansserif.bold.hebrew=David Bold
+sansserif.bold.japanese=MS Gothic
+sansserif.bold.korean=Gulim
+
+sansserif.italic.alphabetic=Arial Italic
+sansserif.italic.chinese-ms950=PMingLiU
+sansserif.italic.chinese-ms950-extb=PMingLiU-ExtB
+sansserif.italic.hebrew=David
+sansserif.italic.japanese=MS Gothic
+sansserif.italic.korean=Gulim
+
+sansserif.bolditalic.alphabetic=Arial Bold Italic
+sansserif.bolditalic.chinese-ms950=PMingLiU
+sansserif.bolditalic.chinese-ms950-extb=PMingLiU-ExtB
+sansserif.bolditalic.hebrew=David Bold
+sansserif.bolditalic.japanese=MS Gothic
+sansserif.bolditalic.korean=Gulim
+
+monospaced.plain.alphabetic=Courier New
+monospaced.plain.chinese-ms950=MingLiU
+monospaced.plain.chinese-ms950-extb=MingLiU-ExtB
+monospaced.plain.hebrew=Courier New
+monospaced.plain.japanese=MS Gothic
+monospaced.plain.korean=GulimChe
+
+monospaced.bold.alphabetic=Courier New Bold
+monospaced.bold.chinese-ms950=PMingLiU
+monospaced.bold.chinese-ms950-extb=PMingLiU-ExtB
+monospaced.bold.hebrew=Courier New Bold
+monospaced.bold.japanese=MS Gothic
+monospaced.bold.korean=GulimChe
+
+monospaced.italic.alphabetic=Courier New Italic
+monospaced.italic.chinese-ms950=PMingLiU
+monospaced.italic.chinese-ms950-extb=PMingLiU-ExtB
+monospaced.italic.hebrew=Courier New
+monospaced.italic.japanese=MS Gothic
+monospaced.italic.korean=GulimChe
+
+monospaced.bolditalic.alphabetic=Courier New Bold Italic
+monospaced.bolditalic.chinese-ms950=PMingLiU
+monospaced.bolditalic.chinese-ms950-extb=PMingLiU-ExtB
+monospaced.bolditalic.hebrew=Courier New Bold
+monospaced.bolditalic.japanese=MS Gothic
+monospaced.bolditalic.korean=GulimChe
+
+dialog.plain.alphabetic=Arial
+dialog.plain.chinese-ms950=MingLiU
+dialog.plain.chinese-ms950-extb=MingLiU-ExtB
+dialog.plain.hebrew=David
+dialog.plain.japanese=MS Gothic
+dialog.plain.korean=Gulim
+
+dialog.bold.alphabetic=Arial Bold
+dialog.bold.chinese-ms950=PMingLiU
+dialog.bold.chinese-ms950-extb=PMingLiU-ExtB
+dialog.bold.hebrew=David Bold
+dialog.bold.japanese=MS Gothic
+dialog.bold.korean=Gulim
+
+dialog.italic.alphabetic=Arial Italic
+dialog.italic.chinese-ms950=PMingLiU
+dialog.italic.chinese-ms950-extb=PMingLiU-ExtB
+dialog.italic.hebrew=David
+dialog.italic.japanese=MS Gothic
+dialog.italic.korean=Gulim
+
+dialog.bolditalic.alphabetic=Arial Bold Italic
+dialog.bolditalic.chinese-ms950=PMingLiU
+dialog.bolditalic.chinese-ms950-extb=PMingLiU-ExtB
+dialog.bolditalic.hebrew=David Bold
+dialog.bolditalic.japanese=MS Gothic
+dialog.bolditalic.korean=Gulim
+
+dialoginput.plain.alphabetic=Courier New
+dialoginput.plain.chinese-ms950=MingLiU
+dialoginput.plain.chinese-ms950-extb=MingLiU-ExtB
+dialoginput.plain.hebrew=David
+dialoginput.plain.japanese=MS Gothic
+dialoginput.plain.korean=Gulim
+
+dialoginput.bold.alphabetic=Courier New Bold
+dialoginput.bold.chinese-ms950=PMingLiU
+dialoginput.bold.chinese-ms950-extb=PMingLiU-ExtB
+dialoginput.bold.hebrew=David Bold
+dialoginput.bold.japanese=MS Gothic
+dialoginput.bold.korean=Gulim
+
+dialoginput.italic.alphabetic=Courier New Italic
+dialoginput.italic.chinese-ms950=PMingLiU
+dialoginput.italic.chinese-ms950-extb=PMingLiU-ExtB
+dialoginput.italic.hebrew=David
+dialoginput.italic.japanese=MS Gothic
+dialoginput.italic.korean=Gulim
+
+dialoginput.bolditalic.alphabetic=Courier New Bold Italic
+dialoginput.bolditalic.chinese-ms950=PMingLiU
+dialoginput.bolditalic.chinese-ms950-extb=PMingLiU-ExtB
+dialoginput.bolditalic.hebrew=David Bold
+dialoginput.bolditalic.japanese=MS Gothic
+dialoginput.bolditalic.korean=Gulim
+
+# Search Sequences
+
+sequence.allfonts=alphabetic/default,dingbats,symbol
+
+sequence.serif.GBK=alphabetic,chinese-ms936,dingbats,symbol,chinese-ms936-extb
+sequence.sansserif.GBK=alphabetic,chinese-ms936,dingbats,symbol,chinese-ms936-extb
+sequence.monospaced.GBK=chinese-ms936,alphabetic,dingbats,symbol,chinese-ms936-extb
+sequence.dialog.GBK=alphabetic,chinese-ms936,dingbats,symbol,chinese-ms936-extb
+sequence.dialoginput.GBK=alphabetic,chinese-ms936,dingbats,symbol,chinese-ms936-extb
+
+sequence.serif.GB18030=alphabetic,chinese-gb18030,dingbats,symbol,chinese-gb18030-extb
+sequence.sansserif.GB18030=alphabetic,chinese-gb18030,dingbats,symbol,chinese-gb18030-extb
+sequence.monospaced.GB18030=chinese-gb18030,alphabetic,dingbats,symbol,chinese-gb18030-extb
+sequence.dialog.GB18030=alphabetic,chinese-gb18030,dingbats,symbol,chinese-gb18030-extb
+sequence.dialoginput.GB18030=alphabetic,chinese-gb18030,dingbats,symbol,chinese-gb18030-extb
+
+sequence.serif.x-windows-950=alphabetic,chinese-ms950,dingbats,symbol,chinese-ms950-extb
+sequence.sansserif.x-windows-950=alphabetic,chinese-ms950,dingbats,symbol,chinese-ms950-extb
+sequence.monospaced.x-windows-950=chinese-ms950,alphabetic,dingbats,symbol,chinese-ms950-extb
+sequence.dialog.x-windows-950=alphabetic,chinese-ms950,dingbats,symbol,chinese-ms950-extb
+sequence.dialoginput.x-windows-950=alphabetic,chinese-ms950,dingbats,symbol,chinese-ms950-extb
+
+sequence.serif.x-MS950-HKSCS=alphabetic,chinese-ms950,chinese-hkscs,dingbats,symbol,chinese-ms950-extb
+sequence.sansserif.x-MS950-HKSCS=alphabetic,chinese-ms950,chinese-hkscs,dingbats,symbol,chinese-ms950-extb
+sequence.monospaced.x-MS950-HKSCS=chinese-ms950,alphabetic,chinese-hkscs,dingbats,symbol,chinese-ms950-extb
+sequence.dialog.x-MS950-HKSCS=alphabetic,chinese-ms950,chinese-hkscs,dingbats,symbol,chinese-ms950-extb
+sequence.dialoginput.x-MS950-HKSCS=alphabetic,chinese-ms950,chinese-hkscs,dingbats,symbol,chinese-ms950-extb
+
+sequence.serif.x-MS950-HKSCS-XP=alphabetic,chinese-ms950,chinese-hkscs,dingbats,symbol,chinese-ms950-extb
+sequence.sansserif.x-MS950-HKSCS-XP=alphabetic,chinese-ms950,chinese-hkscs,dingbats,symbol,chinese-ms950-extb
+sequence.monospaced.x-MS950-HKSCS-XP=chinese-ms950,alphabetic,chinese-hkscs,dingbats,symbol,chinese-ms950-extb
+sequence.dialog.x-MS950-HKSCS-XP=alphabetic,chinese-ms950,chinese-hkscs,dingbats,symbol,chinese-ms950-extb
+sequence.dialoginput.x-MS950-HKSCS-XP=alphabetic,chinese-ms950,chinese-hkscs,dingbats,symbol,chinese-ms950-extb
+
+sequence.allfonts.UTF-8.hi=alphabetic/1252,devanagari,dingbats,symbol
+sequence.allfonts.UTF-8.ja=alphabetic,japanese,devanagari,dingbats,symbol
+
+sequence.allfonts.windows-1255=hebrew,alphabetic/1252,dingbats,symbol
+
+sequence.serif.windows-31j=alphabetic,japanese,dingbats,symbol
+sequence.sansserif.windows-31j=alphabetic,japanese,dingbats,symbol
+sequence.monospaced.windows-31j=japanese,alphabetic,dingbats,symbol
+sequence.dialog.windows-31j=alphabetic,japanese,dingbats,symbol
+sequence.dialoginput.windows-31j=alphabetic,japanese,dingbats,symbol
+
+sequence.serif.x-windows-949=alphabetic,korean,dingbats,symbol
+sequence.sansserif.x-windows-949=alphabetic,korean,dingbats,symbol
+sequence.monospaced.x-windows-949=korean,alphabetic,dingbats,symbol
+sequence.dialog.x-windows-949=alphabetic,korean,dingbats,symbol
+sequence.dialoginput.x-windows-949=alphabetic,korean,dingbats,symbol
+
+sequence.allfonts.x-windows-874=alphabetic,thai,dingbats,symbol
+
+sequence.fallback=lucida,symbols,\
+                  chinese-ms950,chinese-hkscs,chinese-ms936,chinese-gb18030,\
+                  japanese,korean,chinese-ms950-extb,chinese-ms936-extb,georgian
+
+# Exclusion Ranges
+
+exclusion.alphabetic=0700-1cff,1d80-1e9f,1f00-2017,2020-20ab,20ad-f8ff
+exclusion.chinese-gb18030=0390-03d6,2200-22ef,2701-27be
+exclusion.hebrew=0041-005a,0060-007a,007f-00ff,20ac-20ac
+
+# Monospaced to Proportional width variant mapping
+# (Experimental private syntax)
+proportional.MS_Gothic=MS PGothic
+proportional.MS_Mincho=MS PMincho
+proportional.MingLiU=PMingLiU
+proportional.MingLiU-ExtB=PMingLiU-ExtB
+
+# Font File Names
+
+filename.Arial=ARIAL.TTF
+filename.Arial_Bold=ARIALBD.TTF
+filename.Arial_Italic=ARIALI.TTF
+filename.Arial_Bold_Italic=ARIALBI.TTF
+
+filename.Courier_New=COUR.TTF
+filename.Courier_New_Bold=COURBD.TTF
+filename.Courier_New_Italic=COURI.TTF
+filename.Courier_New_Bold_Italic=COURBI.TTF
+
+filename.Times_New_Roman=TIMES.TTF
+filename.Times_New_Roman_Bold=TIMESBD.TTF
+filename.Times_New_Roman_Italic=TIMESI.TTF
+filename.Times_New_Roman_Bold_Italic=TIMESBI.TTF
+
+filename.SimSun=SIMSUN.TTC
+filename.SimSun-18030=SIMSUN18030.TTC
+filename.SimSun-ExtB=SIMSUNB.TTF
+
+filename.MingLiU=MINGLIU.TTC
+filename.MingLiU-ExtB=MINGLIUB.TTC
+filename.PMingLiU=MINGLIU.TTC
+filename.PMingLiU-ExtB=MINGLIUB.TTC
+filename.MingLiU_HKSCS=hkscsm3u.ttf
+
+filename.David=DAVID.TTF
+filename.David_Bold=DAVIDBD.TTF
+
+filename.MS_Mincho=MSMINCHO.TTC
+filename.MS_PMincho=MSMINCHO.TTC
+filename.MS_Gothic=MSGOTHIC.TTC
+filename.MS_PGothic=MSGOTHIC.TTC
+
+filename.Gulim=gulim.TTC
+filename.Batang=batang.TTC
+filename.GulimChe=gulim.TTC
+
+filename.Lucida_Sans_Regular=LucidaSansRegular.ttf
+filename.Mangal=MANGAL.TTF
+filename.Symbol=SYMBOL.TTF
+filename.Wingdings=WINGDING.TTF
+
+filename.Sylfaen=sylfaen.ttf
+filename.Segoe_UI_Symbol=SEGUISYM.TTF

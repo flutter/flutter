@@ -1,0 +1,110 @@
+# ----------------------------------------------------------------------
+#           Template for SNMP Access Control List File
+#
+# o Copy this template to snmp.acl
+# o Set access control for SNMP support
+# o Change the permission of snmp.acl to be read-only
+#   by the owner.
+#
+# See below for the location of snmp.acl file.
+# ----------------------------------------------------------------------
+
+############################################################
+#            SNMP Access Control List File  
+############################################################
+#
+# Default location of this file is $JRE/lib/management/snmp.acl.
+# You can specify an alternate location by specifying a property in 
+# the management config file $JRE/lib/management/management.properties
+# or by specifying a system property (See that file for details).
+#
+
+
+##############################################################
+#        File permissions of the snmp.acl file
+##############################################################
+# 
+#      Since there are cleartext community strings stored in this file,
+#      this ACL file must be readable by ONLY the owner,
+#      otherwise the program will exit with an error. 
+#
+##############################################################
+#		Format of the acl group
+##############################################################
+#
+# communities: a list of SNMP community strings to which the
+#              access control applies separated by commas.
+#
+# access: either "read-only" or "read-write".
+#
+# managers: a list of hosts to be granted the access rights.
+#    Each can be expressed as any one of the following:
+#    - hostname: hubble
+#    - ip v4 and v6 addresses: 123.456.789.12 , fe80::a00:20ff:fe9b:ea82
+#    - ip v4 and v6 netmask prefix notation: 123.456.789.0/24, 
+#         fe80::a00:20ff:fe9b:ea82/64  
+#      see RFC 2373 (http://www.ietf.org/rfc/rfc2373.txt)
+#
+# An example of two community groups for multiple hosts:
+#    acl = {
+#     {
+#       communities = public, private
+#       access = read-only
+#       managers = hubble, snowbell, nanak
+#     }
+#     {
+#       communities = jerry
+#       access = read-write
+#       managers = hubble, telescope
+#     }
+#    }
+# 
+##############################################################
+#                   Format of the trap group
+##############################################################
+#
+# trap-community: a single SNMP community string that will be included
+#                 in  the traps sent to the hosts.
+#
+# hosts: a list of hosts to which the SNMP agent will send traps.
+#
+# An example of two trap community definitions for multiple hosts:
+#    trap = {
+#      {
+#        trap-community = public
+#        hosts = hubble, snowbell
+#      }
+#      {
+#        trap-community = private
+#        hosts = telescope
+#      }
+#    }
+#
+############################################################
+#
+#  Update the community strings (public and private) below
+#  before copying this template file
+# 	
+# Common SNMP ACL Example
+# ------------------------
+#
+# o Only localhost can connect, and access rights
+#   are limited to read-only
+# o Traps are sent to localhost only
+#
+#
+# acl = {
+#  {
+#    communities = public, private
+#    access = read-only
+#    managers = localhost
+#  }
+# }
+# 
+# 
+# trap = {
+#   {
+#     trap-community = public
+#     hosts = localhost 
+#   }
+# }

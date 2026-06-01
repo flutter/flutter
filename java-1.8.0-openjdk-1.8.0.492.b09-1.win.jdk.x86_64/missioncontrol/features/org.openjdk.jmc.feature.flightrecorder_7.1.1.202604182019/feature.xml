@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--   
+   Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
+   
+   DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+   
+   The contents of this file are subject to the terms of either the Universal Permissive License 
+   v 1.0 as shown at http://oss.oracle.com/licenses/upl
+   
+   or the following license:
+   
+   Redistribution and use in source and binary forms, with or without modification, are permitted
+   provided that the following conditions are met:
+   
+   1. Redistributions of source code must retain the above copyright notice, this list of conditions
+   and the following disclaimer.
+   
+   2. Redistributions in binary form must reproduce the above copyright notice, this list of
+   conditions and the following disclaimer in the documentation and/or other materials provided with
+   the distribution.
+   
+   3. Neither the name of the copyright holder nor the names of its contributors may be used to
+   endorse or promote products derived from this software without specific prior written permission.
+   
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+   IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+   FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+   DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+   WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+   WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<feature
+      id="org.openjdk.jmc.feature.flightrecorder"
+      label="%name"
+      version="7.1.1.202604182019"
+      provider-name="%provider">
+
+   <description url="%descriptionUrl">
+      %description
+   </description>
+
+   <copyright>
+      %copyright
+   </copyright>
+
+   <requires>
+      <import feature="org.openjdk.jmc.feature.core" match="equivalent"/>
+   </requires>
+
+   <plugin
+         id="org.openjdk.jmc.flightrecorder"
+         download-size="462"
+         install-size="996"
+         version="7.1.1.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.flightrecorder.ui"
+         download-size="983"
+         install-size="2375"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.greychart.ui"
+         download-size="63"
+         install-size="120"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.flightrecorder.controlpanel.ui"
+         download-size="222"
+         install-size="491"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.flightrecorder.controlpanel.ui.configuration"
+         download-size="70"
+         install-size="146"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.flightrecorder.configuration"
+         download-size="59"
+         install-size="127"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.flightrecorder.rules.extensionprovider"
+         download-size="8"
+         install-size="11"
+         version="7.1.1.202604182019"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.flightrecorder.rules"
+         download-size="139"
+         install-size="299"
+         version="7.1.1.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.flightrecorder.rules.jdk"
+         download-size="393"
+         install-size="1102"
+         version="7.1.1.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="org.openjdk.jmc.rjmx.services.jfr"
+         download-size="75"
+         install-size="167"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+   <plugin
+         id="org.owasp.encoder"
+         download-size="36"
+         install-size="63"
+         version="1.2.2"
+         unpack="false"/>
+
+   <plugin
+         id="org.hdrhistogram.HdrHistogram"
+         download-size="120"
+         install-size="248"
+         version="2.1.11"
+         unpack="false"/>
+         
+   <plugin
+         id="org.openjdk.jmc.flightrecorder.flameview"
+         download-size="128"
+         install-size="342"
+         version="7.1.1.202604182019"
+         unpack="false"/>
+
+<license url="%licenseUrl">
+      %license
+   </license></feature>

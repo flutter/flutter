@@ -1,0 +1,88 @@
+% VERSION 2
+% WARNING: this file is auto-generated; do not edit
+% UNSUPPORTED: this file and its format may change and/or
+%   may be removed in a future release
+# charsets.jar
+sun/awt
+sun/nio
+! jce.jar
+javax/crypto
+sun/security
+# jfr.jar
+jdk/management
+jdk/jfr
+! jsse.jar
+com/sun/net/
+sun/security
+! management-agent.jar
+@ resources.jar
+META-INF/services/javax.sound.sampled.spi.AudioFileWriter
+com/sun/imageio/
+sun/print
+META-INF/mimetypes.default
+META-INF/services/javax.sound.midi.spi.MidiDeviceProvider
+com/sun/java/util/jar/pack/
+javax/swing
+META-INF/services/sun.java2d.cmm.CMMServiceProvider
+META-INF/services/javax.sound.midi.spi.SoundbankReader
+META-INF/mailcap.default
+META-INF/services/javax.print.PrintServiceLookup
+com/sun/java/swing/
+META-INF/services/javax.sound.sampled.spi.MixerProvider
+META-INF/services/javax.sound.midi.spi.MidiFileWriter
+META-INF/services/sun.util.spi.XmlPropertiesProvider
+javax/xml
+sun/net
+META-INF/services/javax.sound.sampled.spi.FormatConversionProvider
+META-INF/services/sun.java2d.pipe.RenderingEngine
+com/sun/jndi/
+javax/sql
+com/sun/org/
+java/lang
+sun/text
+META-INF/services/com.sun.tools.internal.xjc.Plugin
+sun/rmi
+META-INF/services/javax.sound.midi.spi.MidiFileReader
+META-INF/services/javax.sound.sampled.spi.AudioFileReader
+META-INF/services/javax.print.StreamPrintServiceFactory
+com/sun/corba/
+com/sun/rowset/
+com/sun/xml/
+META-INF/services/com.sun.tools.internal.ws.wscompile.Plugin
+! rt.jar
+com/sun/imageio/
+com/sun/rmi/
+com/sun/media/
+com/sun/security/
+com/sun/java_cup/
+com/oracle/
+org/ietf/
+com/sun/beans/
+com/sun/java/util/jar/pack/
+com/sun/naming/
+com/sun/management/
+com/sun/istack/
+java/
+com/sun/accessibility/
+sun/
+com/sun/java/swing/
+com/sun/swing/
+com/sun/demo/
+com/sun/nio/
+com/sun/jmx/
+com/sun/java/browser/
+org/omg/
+com/sun/awt/
+com/sun/jndi/
+com/sun/tracing/
+org/w3c/
+com/sun/org/
+jdk/
+com/sun/net/
+com/sun/activation/
+javax/
+org/jcp/
+org/xml/
+com/sun/corba/
+com/sun/rowset/
+com/sun/xml/

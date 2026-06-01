@@ -1,0 +1,79 @@
+######################################################################
+#     Default Access Control File for Remote JMX(TM) Monitoring
+######################################################################
+#
+# Access control file for Remote JMX API access to monitoring.
+# This file defines the allowed access for different roles.  The
+# password file (jmxremote.password by default) defines the roles and their
+# passwords.  To be functional, a role must have an entry in
+# both the password and the access files.
+#
+# The default location of this file is $JRE/lib/management/jmxremote.access
+# You can specify an alternate location by specifying a property in 
+# the management config file $JRE/lib/management/management.properties
+# (See that file for details)
+#
+# The file format for password and access files is syntactically the same
+# as the Properties file format.  The syntax is described in the Javadoc
+# for java.util.Properties.load.
+# A typical access file has multiple lines, where each line is blank,
+# a comment (like this one), or an access control entry.
+#
+# An access control entry consists of a role name, and an
+# associated access level.  The role name is any string that does not
+# itself contain spaces or tabs.  It corresponds to an entry in the
+# password file (jmxremote.password).  The access level is one of the
+# following:
+#       "readonly" grants access to read attributes of MBeans.
+#                   For monitoring, this means that a remote client in this
+#                   role can read measurements but cannot perform any action
+#                   that changes the environment of the running program.
+#       "readwrite" grants access to read and write attributes of MBeans,
+#                   to invoke operations on them, and optionally
+#                   to create or remove them. This access should be granted
+#                   only to trusted clients, since they can potentially
+#                   interfere with the smooth operation of a running program.
+#
+# The "readwrite" access level can optionally be followed by the "create" and/or
+# "unregister" keywords.  The "unregister" keyword grants access to unregister
+# (delete) MBeans.  The "create" keyword grants access to create MBeans of a
+# particular class or of any class matching a particular pattern.  Access
+# should only be granted to create MBeans of known and trusted classes.
+#
+# For example, the following entry would grant readwrite access
+# to "controlRole", as well as access to create MBeans of the class
+# javax.management.monitor.CounterMonitor and to unregister any MBean:
+#  controlRole readwrite \
+#              create javax.management.monitor.CounterMonitorMBean \
+#              unregister
+# or equivalently:
+#  controlRole readwrite unregister create javax.management.monitor.CounterMBean
+#
+# The following entry would grant readwrite access as well as access to create
+# MBeans of any class in the packages javax.management.monitor and
+# javax.management.timer:
+#  controlRole readwrite \
+#              create javax.management.monitor.*,javax.management.timer.* \
+#              unregister
+#
+# The \ character is defined in the Properties file syntax to allow continuation
+# lines as shown here.  A * in a class pattern matches a sequence of characters
+# other than dot (.), so javax.management.monitor.* matches
+# javax.management.monitor.CounterMonitor but not
+# javax.management.monitor.foo.Bar.
+#
+# A given role should have at most one entry in this file.  If a role
+# has no entry, it has no access.
+# If multiple entries are found for the same role name, then the last
+# access entry is used.
+#
+#
+# Default access control entries:
+# o The "monitorRole" role has readonly access.  
+# o The "controlRole" role has readwrite access and can create the standard
+#   Timer and Monitor MBeans defined by the JMX API.
+
+monitorRole   readonly
+controlRole   readwrite \
+              create javax.management.monitor.*,javax.management.timer.* \
+              unregister

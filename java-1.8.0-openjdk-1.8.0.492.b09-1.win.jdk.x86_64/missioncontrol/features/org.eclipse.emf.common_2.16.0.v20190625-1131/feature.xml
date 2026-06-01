@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.emf.common"
+      label="%featureName"
+      version="2.16.0.v20190625-1131"
+      provider-name="%providerName">
+
+   <description>
+      %description
+   </description>
+
+   <copyright url="http://www.eclipse.org/legal/epl-v20.html">
+      Copyright (c) 2002-2018 IBM Corporation and others.
+All rights reserved.   This program and the accompanying materials
+are made available under the terms of the Eclipse Public License v2.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/epl-v20.html
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <url>
+      <update label="%EMFUpdateSiteName" url="http://download.eclipse.org/modeling/emf/emf/builds/"/>
+      <discovery label="%EMFUpdateSiteName" url="http://download.eclipse.org/modeling/emf/emf/builds/"/>
+   </url>
+
+   <requires>
+      <import plugin="org.eclipse.core.runtime"/>
+   </requires>
+
+   <plugin
+         id="org.eclipse.emf.common"
+         download-size="366"
+         install-size="766"
+         version="2.16.0.v20190625-1131"
+         unpack="false"/>
+
+</feature>

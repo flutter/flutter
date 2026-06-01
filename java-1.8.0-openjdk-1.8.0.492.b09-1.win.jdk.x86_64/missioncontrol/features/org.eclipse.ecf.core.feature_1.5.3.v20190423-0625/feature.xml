@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.ecf.core.feature"
+      label="ECF Core Feature"
+      version="1.5.3.v20190423-0625"
+      provider-name="Eclipse.org - ECF">
+
+   <description url="http://www.eclipse.org/ecf">
+      This feature provides the ECF core (org.eclipse.ecf) and ECF identity (org.eclipse.ecf.identity) bundles.  These two bundles are required for all other parts of ECF.
+   </description>
+
+   <copyright>
+      Copyright (c) 2009 Composent, Inc. and others. All rights
+reserved.
+This program and the accompanying materials are made available
+under the terms of the Eclipse Public License v1.0 which accompanies
+this distribution, and is available at 
+http://www.eclipse.org/legal/epl-v10.html
+ 
+Contributors: Composent, Inc. - initial API and implementation
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <requires>
+      <import plugin="org.eclipse.equinox.common" version="3.6" match="compatible"/>
+      <import plugin="org.eclipse.equinox.registry" version="3.5" match="compatible"/>
+      <import plugin="org.eclipse.equinox.concurrent" version="1.0" match="compatible"/>
+      <import plugin="org.eclipse.core.jobs" version="3.5" match="compatible"/>
+   </requires>
+
+   <plugin
+         id="org.eclipse.ecf"
+         download-size="121"
+         install-size="239"
+         version="3.9.3.v20190423-0625"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.identity"
+         download-size="63"
+         install-size="124"
+         version="3.9.1.v20181107-1749"
+         unpack="false"/>
+
+</feature>
