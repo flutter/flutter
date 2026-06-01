@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/windows/host_window_sized.h"
-
+#include "flutter/shell/platform/windows/dpi_utils.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view_controller.h"
 
@@ -24,21 +24,20 @@ void HostWindowSized::DidUpdateViewSize(int32_t width, int32_t height) {
     if (!view_alive) {
       return;
     }
-    if (width_ == width && height_ == height) {
+    if (physical_width_ == width && physical_width_ == height) {
       return;
     }
     if (is_being_destroyed_) {
       return;
     }
-    width_ = width;
-    height_ = height;
+    physical_width_ = width;
+    physical_width_ = height;
 
     WINDOWINFO window_info = {.cbSize = sizeof(WINDOWINFO)};
     GetWindowInfo(window_handle_, &window_info);
 
     // Convert physical pixels to logical pixels.
-    UINT const dpi =
-        engine_->windows_proc_table()->GetDpiForWindow(window_handle_);
+    UINT const dpi = GetDpiForHWND(window_handle_);
     double const scale = static_cast<double>(dpi > 0 ? dpi : 96) / 96.0;
     std::optional<Size> const window_size = GetWindowSizeForClientSize(
         *engine_->windows_proc_table(), Size(width / scale, height / scale),

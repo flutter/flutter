@@ -165,7 +165,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     return ListTile(
       title: const Text('Dialog'),
       subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           Row(
             children: [

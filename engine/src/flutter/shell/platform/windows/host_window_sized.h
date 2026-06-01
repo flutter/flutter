@@ -41,8 +41,8 @@ class HostWindowSized : public HostWindow,
   std::shared_ptr<int> view_alive_;
 
   // The last physical-pixel size reported to DidUpdateViewSize.
-  int width_ = 0;
-  int height_ = 0;
+  int physical_width_ = 0;
+  int physical_height_ = 0;
 
  private:
   // FlutterWindowsViewSizingDelegate:
