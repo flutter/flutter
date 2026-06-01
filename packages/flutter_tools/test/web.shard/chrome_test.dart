@@ -412,27 +412,98 @@ void main() {
     await expectReturnsNormallyLater(chromiumLauncher.launch('example_url', skipCheck: true));
   });
 
-  testWithoutContext('can launch Chrome on ARM macOS and appends --use-angle=metal', () async {
-    final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(
-      hostPlatform: HostPlatform.darwin_arm64,
+  testWithoutContext(
+    'can launch Chrome on ARM macOS and appends --use-angle=metal in headless mode',
+    () async {
+      final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(
+        hostPlatform: HostPlatform.darwin_arm64,
+      );
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: macOSUtils,
+        browserFinder: findChromeExecutable,
+        logger: BufferLogger.test(),
+      );
+
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'example_chrome',
+            '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+            '--remote-debugging-port=12345',
+            ...kChromeArgs,
+            '--use-angle=metal',
+            '--no-sandbox',
+            '--headless',
+            '--window-size=2400,1800',
+            'example_url',
+          ],
+          stderr: kDevtoolsStderr,
+        ),
+      );
+
+      await expectReturnsNormallyLater(
+        chromiumLauncher.launch('example_url', headless: true, skipCheck: true),
+      );
+    },
+  );
+
+  testWithoutContext(
+    'can launch Chrome on ARM macOS in headed mode and does not append --use-angle=metal',
+    () async {
+      final OperatingSystemUtils macOSUtils = FakeOperatingSystemUtils(
+        hostPlatform: HostPlatform.darwin_arm64,
+      );
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: macOSUtils,
+        browserFinder: findChromeExecutable,
+        logger: BufferLogger.test(),
+      );
+
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'example_chrome',
+            '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+            '--remote-debugging-port=12345',
+            ...kChromeArgs,
+            'example_url',
+          ],
+          stderr: kDevtoolsStderr,
+        ),
+      );
+
+      await expectReturnsNormallyLater(chromiumLauncher.launch('example_url', skipCheck: true));
+    },
+  );
+
+  testWithoutContext('does not append --use-mock-keychain on non-macOS platforms', () async {
+    final Platform linuxPlatform = FakePlatform(
+      environment: <String, String>{kChromeEnvironment: 'example_chrome'},
     );
     final chromiumLauncher = ChromiumLauncher(
       fileSystem: fileSystem,
-      platform: platform,
+      platform: linuxPlatform,
       processManager: processManager,
-      operatingSystemUtils: macOSUtils,
+      operatingSystemUtils: operatingSystemUtils,
       browserFinder: findChromeExecutable,
       logger: BufferLogger.test(),
     );
 
+    final List<String> kChromeArgsLinux = kChromeArgs.toList()..remove('--use-mock-keychain');
+
     processManager.addCommand(
-      const FakeCommand(
+      FakeCommand(
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
           '--remote-debugging-port=12345',
-          ...kChromeArgs,
-          '--use-angle=metal',
+          ...kChromeArgsLinux,
           'example_url',
         ],
         stderr: kDevtoolsStderr,

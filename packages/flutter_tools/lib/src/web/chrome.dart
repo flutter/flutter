@@ -243,7 +243,7 @@ class ChromiumLauncher {
       '--disable-default-apps',
       '--disable-translate',
       '--password-store=basic',
-      '--use-mock-keychain',
+      if (_platform.isMacOS) '--use-mock-keychain',
 
       // Remove the search engine choice screen. It's irrelevant for app
       // debugging purposes.
@@ -255,7 +255,7 @@ class ChromiumLauncher {
       // headless Chrome, the default is to use SwiftShader as a software renderer
       // for WebGL contexts. In order to work around this limitation, we can force
       // GPU rendering with this flag.
-      if (_isMacosArm) '--use-angle=metal',
+      if (_isMacosArm && headless) '--use-angle=metal',
 
       if (headless) ...<String>['--no-sandbox', '--headless', '--window-size=2400,1800'],
       ...webBrowserFlags,
