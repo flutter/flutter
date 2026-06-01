@@ -123,7 +123,7 @@ void main() {
           'add keys in $buildConfiguration under ${verbose ? 'verbose' : 'non-verbose'} mode',
           () async {
             infoPlist.writeAsStringSync(emptyPlist);
-            final File pipe = fileSystem.file('/tmp/pipe')..createSync(recursive: true);
+            final File pipe = buildDirectory.childFile('pipe')..createSync(recursive: true);
 
             final ProcessResult result = await Process.run(
               xcodeBackendPath,

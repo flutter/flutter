@@ -62,7 +62,8 @@ TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipeline) {
 // GL_OES_EGL_image_external isn't supported on MacOS hosts.
 #if !defined(FML_OS_MACOSX)
 TEST_P(EntityTest, TiledTextureContentsRendersWithCorrectPipelineExternalOES) {
-  if (GetParam() != PlaygroundBackend::kOpenGLES) {
+  if (GetParam() != PlaygroundBackend::kOpenGLES &&
+      GetParam() != PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP()
         << "External OES textures are only valid for the OpenGLES backend.";
   }
