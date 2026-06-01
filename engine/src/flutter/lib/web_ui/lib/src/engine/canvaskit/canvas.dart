@@ -148,6 +148,7 @@ class CkCanvas implements LayerCanvas {
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
     assert(rectIsValid(src));
     assert(rectIsValid(dst));
+
     final ui.FilterQuality filterQuality = paint.filterQuality;
     final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
     if (filterQuality == ui.FilterQuality.high) {

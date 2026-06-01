@@ -61,9 +61,12 @@ extension AnnotationExtension on Annotation {
 
 /// Convenience getters for examining [String] paths.
 extension StringExtension on String {
+  static final RegExp _pathSeparator = RegExp(r'[/\\]');
+
   bool get isDartFile => endsWith('.dart');
   bool get isPubspec => endsWith('pubspec.yaml');
   bool get doesContainDartTool => contains('.dart_tool');
+  bool get doesContainWidgetPreview => split(_pathSeparator).contains('.widget_preview');
 }
 
 extension LibraryElementExtension on LibraryElement {

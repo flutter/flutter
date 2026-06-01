@@ -484,6 +484,39 @@ void main() {
     expect(tester.getSemantics(find.byType(Text)), matchesSemantics(label: 'before \nfoo\n after'));
   });
 
+  testWidgets('semantics label is in order with nested rich text widget spans', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/176570.
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: .ltr,
+        child: Text.rich(
+          TextSpan(
+            children: <InlineSpan>[
+              WidgetSpan(
+                child: Text.rich(
+                  TextSpan(
+                    children: <InlineSpan>[
+                      WidgetSpan(child: Text('before')),
+                      TextSpan(text: 'foo'),
+                      WidgetSpan(child: Text('after')),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getSemantics(find.byType(Text).first),
+      matchesSemantics(label: 'before\nfoo\nafter'),
+    );
+  });
+
   testWidgets('semantics can handle some widget spans without semantics', (
     WidgetTester tester,
   ) async {
@@ -1822,6 +1855,16 @@ void main() {
     }
 
     semantics.dispose();
+  });
+
+  testWidgets('Text does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: SizedBox.shrink(child: Text('X'))),
+      ),
+    );
+    expect(tester.getSize(find.byType(Text)), Size.zero);
   });
 }
 

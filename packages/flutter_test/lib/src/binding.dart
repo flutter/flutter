@@ -925,8 +925,8 @@ class _TestWindowingOwner extends WindowingOwner {
     required RegularWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    required bool resizable,
     String? title,
-    bool decorated = true,
   }) {
     return _TestRegularWindowController(
       delegate: delegate,
@@ -944,9 +944,9 @@ class _TestWindowingOwner extends WindowingOwner {
     required DialogWindowControllerDelegate delegate,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    required bool resizable,
     BaseWindowController? parent,
     String? title,
-    bool decorated = true,
   }) {
     return _TestDialogWindowController(
       delegate: delegate,
@@ -1006,6 +1006,7 @@ class _TestWindowingOwner extends WindowingOwner {
     Rect? initialAnchorRect,
     Size? preferredSize,
     BoxConstraints? preferredConstraints,
+    required bool resizable,
     String? title,
   }) {
     return _TestSatelliteWindowController(

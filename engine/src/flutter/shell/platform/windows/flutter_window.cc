@@ -33,6 +33,23 @@ static const int kLinesPerScrollWindowsDefault = 3;
 
 static constexpr int32_t kDefaultPointerDeviceId = 0;
 
+static int GetCursorPositionForComposition(const TextInputManager& manager,
+                                           LPARAM lparam,
+                                           size_t text_length) {
+  if (!(lparam & GCS_CURSORPOS)) {
+    // Some IMEs update the composition string without reporting an explicit
+    // cursor position. In that case, keep the framework caret at the end of
+    // the latest composition text.
+    return static_cast<int>(text_length);
+  }
+
+  int position = static_cast<int>(manager.GetComposingCursorPosition());
+  if (position < 0 || static_cast<size_t>(position) > text_length) {
+    return static_cast<int>(text_length);
+  }
+  return static_cast<int>(position);
+}
+
 // This method is only valid during a window message related to mouse/touch
 // input.
 // See
@@ -545,10 +562,10 @@ FlutterWindow::HandleMessage(UINT const message,
     case WM_POINTERUPDATE:
     case WM_POINTERUP:
     case WM_POINTERLEAVE: {
-      x_pos = GET_X_LPARAM(lparam);
-      y_pos = GET_Y_LPARAM(lparam);
-      auto const x = static_cast<double>(x_pos);
-      auto const y = static_cast<double>(y_pos);
+      POINT pt = {GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
+      ScreenToClient(window_handle_, &pt);
+      auto const x = static_cast<double>(pt.x);
+      auto const y = static_cast<double>(pt.y);
       auto const pointerId = GET_POINTERID_WPARAM(wparam);
       POINTER_INFO pointerInfo;
       if (windows_proc_table_->GetPointerInfo(pointerId, &pointerInfo)) {
@@ -885,19 +902,21 @@ void FlutterWindow::OnImeComposition(UINT const message,
   if (lparam & GCS_RESULTSTR) {
     // Commit but don't end composing.
     // Read the committed composing string.
-    long pos = text_input_manager_->GetComposingCursorPosition();
     std::optional<std::u16string> text = text_input_manager_->GetResultString();
     if (text) {
+      int pos = GetCursorPositionForComposition(*text_input_manager_, lparam,
+                                                text->length());
       OnComposeChange(text.value(), pos);
       OnComposeCommit();
     }
   }
   if (lparam & GCS_COMPSTR) {
     // Read the in-progress composing string.
-    long pos = text_input_manager_->GetComposingCursorPosition();
     std::optional<std::u16string> text =
         text_input_manager_->GetComposingString();
     if (text) {
+      int pos = GetCursorPositionForComposition(*text_input_manager_, lparam,
+                                                text->length());
       OnComposeChange(text.value(), pos);
     }
   }

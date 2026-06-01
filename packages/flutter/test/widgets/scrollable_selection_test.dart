@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'clipboard_utils.dart';
+import 'editable_text_tester.dart' show testTextSelectionHandleControls;
 import 'keyboard_utils.dart';
 import 'widgets_app_tester.dart';
 
@@ -1271,86 +1272,84 @@ void main() {
     expect(controller.offset, 352.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets(
-    'keyboard selection should auto scroll - horizontal reversed',
-    (WidgetTester tester) async {
-      final node = FocusNode();
-      addTearDown(node.dispose);
-      final controller = ScrollController();
-      addTearDown(controller.dispose);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: SelectionArea(
-            focusNode: node,
-            selectionControls: materialTextSelectionControls,
-            child: ListView.builder(
-              controller: controller,
-              scrollDirection: Axis.horizontal,
-              reverse: true,
-              itemCount: 100,
-              itemBuilder: (BuildContext context, int index) {
-                return Text('Item $index');
-              },
-            ),
+  testWidgets('keyboard selection should auto scroll - horizontal reversed', (
+    WidgetTester tester,
+  ) async {
+    final node = FocusNode();
+    addTearDown(node.dispose);
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SelectionArea(
+          focusNode: node,
+          selectionControls: materialTextSelectionControls,
+          child: ListView.builder(
+            controller: controller,
+            scrollDirection: Axis.horizontal,
+            reverse: true,
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
           ),
         ),
-      );
-      await tester.pumpAndSettle();
-      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(
-        find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)),
-      );
-      final TestGesture gesture = await tester.startGesture(
-        textOffsetToPosition(paragraph1, 5) + const Offset(0, 5),
-        kind: ui.PointerDeviceKind.mouse,
-      );
-      addTearDown(gesture.removePointer);
-      await gesture.moveTo(textOffsetToPosition(paragraph1, 4) + const Offset(0, 5));
-      await tester.pumpAndSettle();
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(paragraph1.selections.length, 1);
-      expect(paragraph1.selections[0].start, 4);
-      expect(paragraph1.selections[0].end, 5);
-      expect(controller.offset, 0.0);
+      ),
+    );
+    await tester.pumpAndSettle();
+    final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Item 1'), matching: find.byType(RichText)),
+    );
+    final TestGesture gesture = await tester.startGesture(
+      textOffsetToPosition(paragraph1, 5) + const Offset(0, 5),
+      kind: ui.PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(textOffsetToPosition(paragraph1, 4) + const Offset(0, 5));
+    await tester.pumpAndSettle();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 4);
+    expect(paragraph1.selections[0].end, 5);
+    expect(controller.offset, 0.0);
 
-      await sendKeyCombination(
-        tester,
-        const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
-      );
-      await tester.pump();
-      expect(paragraph1.selections.length, 1);
-      expect(paragraph1.selections[0].start, 0);
-      expect(paragraph1.selections[0].end, 5);
-      expect(controller.offset, 0.0);
+    await sendKeyCombination(
+      tester,
+      const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
+    );
+    await tester.pump();
+    expect(paragraph1.selections.length, 1);
+    expect(paragraph1.selections[0].start, 0);
+    expect(paragraph1.selections[0].end, 5);
+    expect(controller.offset, 0.0);
 
-      await sendKeyCombination(
-        tester,
-        const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
-      );
-      await tester.pump();
-      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(
-        find.descendant(of: find.text('Item 2'), matching: find.byType(RichText)),
-      );
-      expect(paragraph2.selections.length, 1);
-      expect(paragraph2.selections[0].start, 0);
-      expect(paragraph2.selections[0].end, 6);
-      expect(controller.offset, 64.0);
+    await sendKeyCombination(
+      tester,
+      const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
+    );
+    await tester.pump();
+    final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Item 2'), matching: find.byType(RichText)),
+    );
+    expect(paragraph2.selections.length, 1);
+    expect(paragraph2.selections[0].start, 0);
+    expect(paragraph2.selections[0].end, 6);
+    expect(controller.offset, 64.0);
 
-      await sendKeyCombination(
-        tester,
-        const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
-      );
-      await tester.pump();
-      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(
-        find.descendant(of: find.text('Item 3'), matching: find.byType(RichText)),
-      );
-      expect(paragraph3.selections.length, 1);
-      expect(paragraph3.selections[0].start, 0);
-      expect(paragraph3.selections[0].end, 6);
-      expect(controller.offset, 352.0);
-    },
-    variant: TargetPlatformVariant.all(),
-  );
+    await sendKeyCombination(
+      tester,
+      const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
+    );
+    await tester.pump();
+    final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(
+      find.descendant(of: find.text('Item 3'), matching: find.byType(RichText)),
+    );
+    expect(paragraph3.selections.length, 1);
+    expect(paragraph3.selections[0].start, 0);
+    expect(paragraph3.selections[0].end, 6);
+    expect(controller.offset, 352.0);
+  }, variant: TargetPlatformVariant.all());
 
   testWidgets('Starting selection in empty padding of scrollable should not crash', (
     WidgetTester tester,
@@ -1443,6 +1442,62 @@ void main() {
     // the scrollable will have started auto-scrolling downwards.
     expect(position.pixels, greaterThan(0.0));
     await gesture.up();
+  });
+
+  testWidgets('automatic edge scrolling respects NeverScrollableScrollPhysics', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/140654.
+    // When a scrollable view with non-scrollable physics (e.g.,
+    // NeverScrollableScrollPhysics) is wrapped in a SelectableRegion, dragging
+    // a selection past the viewport boundary must not advance the scroll offset
+    // or throw exceptions.
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: testTextSelectionHandleControls,
+          child: ListView.builder(
+            controller: controller,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: 100,
+            itemBuilder: (BuildContext context, int index) {
+              return Text('Item $index');
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.text('Item 0')),
+      kind: ui.PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    expect(controller.offset, 0.0);
+
+    // Drag past the bottom of the scrollable; this would normally trigger
+    // edge auto-scroll.
+    await gesture.moveTo(tester.getBottomRight(find.byType(ListView)) + const Offset(0.0, 40.0));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // The scroll position must not have advanced, and no exception must have
+    // been thrown.
+    expect(controller.offset, 0.0);
+    expect(tester.takeException(), isNull);
+
+    await tester.pump(const Duration(seconds: 1));
+    expect(controller.offset, 0.0);
+    expect(tester.takeException(), isNull);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
+    expect(tester.takeException(), isNull);
   });
 
   group('Complex cases', () {

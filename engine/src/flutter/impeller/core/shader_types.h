@@ -82,6 +82,48 @@ struct ShaderStructMemberMetadata {
   std::optional<ShaderFloatType> float_type;
 };
 
+/// @brief Derive the `ShaderFloatType` from the base `ShaderType` and
+///        the (vec_size, columns) dimensions reported by SPIR-V Cross.
+///
+/// `vec_size` is the component count of a single column (the vector length
+/// for non-matrix types, the row count for matrices). `columns` is 1 for
+/// vectors and N for an NxN matrix. Returns `std::nullopt` for non-float
+/// types and for shapes that don't map to a `ShaderFloatType`.
+constexpr std::optional<ShaderFloatType> DeriveShaderFloatType(ShaderType type,
+                                                               size_t vec_size,
+                                                               size_t columns) {
+  if (type != ShaderType::kFloat) {
+    return std::nullopt;
+  }
+  if (columns == 1) {
+    switch (vec_size) {
+      case 1:
+        return ShaderFloatType::kFloat;
+      case 2:
+        return ShaderFloatType::kVec2;
+      case 3:
+        return ShaderFloatType::kVec3;
+      case 4:
+        return ShaderFloatType::kVec4;
+      default:
+        return std::nullopt;
+    }
+  }
+  if (vec_size == columns) {
+    switch (vec_size) {
+      case 2:
+        return ShaderFloatType::kMat2;
+      case 3:
+        return ShaderFloatType::kMat3;
+      case 4:
+        return ShaderFloatType::kMat4;
+      default:
+        return std::nullopt;
+    }
+  }
+  return std::nullopt;
+}
+
 struct ShaderMetadata {
   // This must match the uniform name in the shader program.
   std::string name;
@@ -154,15 +196,36 @@ struct ShaderStageIOSlot {
   }
 };
 
+/// @brief  Whether a vertex buffer binding advances its read position once
+///         per vertex or once per instance.
+///
+///         An instance-rate binding supplies per-instance data (such as a
+///         per-instance model transform) to an instanced draw. It maps to
+///         `MTLVertexStepFunctionPerInstance`, `VK_VERTEX_INPUT_RATE_INSTANCE`,
+///         and a `glVertexAttribDivisor` of 1.
+enum class VertexInputRate {
+  /// The binding is read once per vertex. This is the default.
+  kVertex,
+  /// The binding is read once per instance.
+  kInstance,
+};
+
 struct ShaderStageBufferLayout {
   size_t stride;
   size_t binding;
+  /// The rate at which this binding advances during a draw. Defaults to
+  /// per-vertex; an instanced draw reads per-instance bindings once per
+  /// instance.
+  VertexInputRate input_rate = VertexInputRate::kVertex;
 
-  constexpr size_t GetHash() const { return fml::HashCombine(stride, binding); }
+  constexpr size_t GetHash() const {
+    return fml::HashCombine(stride, binding, input_rate);
+  }
 
   constexpr bool operator==(const ShaderStageBufferLayout& other) const {
-    return stride == other.stride &&  //
-           binding == other.binding;
+    return stride == other.stride &&    //
+           binding == other.binding &&  //
+           input_rate == other.input_rate;
   }
 };
 
