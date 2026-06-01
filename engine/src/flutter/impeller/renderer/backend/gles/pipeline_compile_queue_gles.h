@@ -40,7 +40,7 @@ class PipelineCompileQueueGLES : public PipelineCompileQueue {
   void OnJobAdded() override;
 
  private:
-  void ProcessJobsSequentially();
+  void DrainPendingJobs();
 
   fml::RefPtr<fml::TaskRunner> worker_task_runner_;
   Mutex processing_mutex_;

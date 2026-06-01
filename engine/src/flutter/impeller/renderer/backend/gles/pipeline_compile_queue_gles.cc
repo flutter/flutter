@@ -6,6 +6,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "impeller/base/validation.h"
 
 namespace impeller {
 
@@ -28,7 +29,7 @@ void PipelineCompileQueueGLES::OnJobAdded() {
   Lock lock(processing_mutex_);
   if (!is_processing_) {
     is_processing_ = true;
-    ProcessJobsSequentially();
+    DrainPendingJobs();
   }
 }
 
@@ -40,7 +41,7 @@ void PipelineCompileQueueGLES::PostJob(const fml::closure& job) {
   worker_task_runner_->PostTask(job);
 }
 
-void PipelineCompileQueueGLES::ProcessJobsSequentially() {
+void PipelineCompileQueueGLES::DrainPendingJobs() {
   PostJob([weak_queue = weak_from_this()]() {
     if (auto queue = std::static_pointer_cast<PipelineCompileQueueGLES>(
             weak_queue.lock())) {
@@ -52,7 +53,7 @@ void PipelineCompileQueueGLES::ProcessJobsSequentially() {
           return;
         }
       }
-      queue->ProcessJobsSequentially();
+      queue->DrainPendingJobs();
     }
   });
 }
