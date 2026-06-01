@@ -23,7 +23,8 @@ class DialogWindowContent extends StatelessWidget {
       alwaysSizeToContent: true,
       child: FocusScope(
         autofocus: true,
-        child: Material(
+        child: IntrinsicWidth(
+          child: Material(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -83,6 +84,7 @@ class DialogWindowContent extends StatelessWidget {
               ),
             ],
           ),
+        ),
         ),
       ),
     );
