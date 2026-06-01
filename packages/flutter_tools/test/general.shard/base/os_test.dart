@@ -384,6 +384,46 @@ void main() {
         ),
       );
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/185794.
+    // A canonical archive entry that resolves to a sibling directory sharing
+    // a name prefix with the extraction root (e.g. `<target>-sibling/x.txt`)
+    // must NOT be accepted: the previous `startsWith` check on canonical
+    // paths returned true for sibling directories with a name that started
+    // with the target's name.
+    testWithoutContext(
+      'Windows rejects archive entries that escape into a sibling directory with a name prefix',
+      () {
+        final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
+        final fs = MemoryFileSystem.test();
+        final File fakeZipFile = fs.file('archive.zip');
+        // Extract into `<cwd>/cache/windows-x64`. A crafted archive entry of
+        // `../windows-x64-profile/poc_marker.txt` resolves to
+        // `<cwd>/cache/windows-x64-profile/poc_marker.txt`, a sibling of the
+        // target whose canonical path shares the `windows-x64` prefix.
+        final Directory targetDirectory = fs.directory('cache/windows-x64')
+          ..createSync(recursive: true);
+        const content = 'malicious';
+        final archive = Archive()
+          ..addFile(
+            ArchiveFile('../windows-x64-profile/poc_marker.txt', content.length, content.codeUnits),
+          );
+        final List<int> zipData = ZipEncoder().encode(archive)!;
+        fakeZipFile.writeAsBytesSync(zipData);
+        expect(
+          () => utils.unzip(fakeZipFile, targetDirectory),
+          throwsA(
+            isA<StateError>().having(
+              (StateError error) => error.message,
+              'correct error message',
+              contains('Tried to extract the file '),
+            ),
+          ),
+        );
+        // The sibling file must not have been written.
+        expect(fs.file('cache/windows-x64-profile/poc_marker.txt').existsSync(), isFalse);
+      },
+    );
   });
 
   testWithoutContext('If unzip fails, include stderr in exception text', () {

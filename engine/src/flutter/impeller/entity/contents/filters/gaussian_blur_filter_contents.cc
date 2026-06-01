@@ -207,38 +207,6 @@ Scalar FloorToDivisible(Scalar val, Scalar divisor) {
   }
 }
 
-// If `y_coord_scale` < 0.0, the Y coordinate is flipped. This is useful
-// for Impeller graphics backends that use a flipped framebuffer coordinate
-// space.
-//
-// Both input and output quads are expected to be in the order of [Top-Left,
-// Top-Right, Bottom-Left, Bottom-Right], a "Z-order" layout that conforms to
-// the return format of Rect::GetPoints().
-//
-// See also: IPRemapCoords in convergions.glsl.
-Quad RemapQuadCoords(const Quad& input, Scalar texture_sampler_y_coord_scale) {
-  if (texture_sampler_y_coord_scale < 0.0f) {
-    // The 4 points need reordering, because vertically flipping the quad:
-    //
-    //   0 → 1
-    //     ↙
-    //   2 → 3
-    //
-    // should be flipped to:
-    //
-    //   2 → 3
-    //     ↙
-    //   0 → 1
-    auto remap_point = [&](const Point& p) -> Point {
-      return Point(p.x, 1.0f - p.y);
-    };
-    return Quad{remap_point(input[2]), remap_point(input[3]),
-                remap_point(input[0]), remap_point(input[1])};
-  } else {
-    return input;
-  }
-}
-
 // Precomputes the line equation parameters for a quadrilateral's bounds.
 //
 // This function takes an array of 4 vertices and returns an array of 4
@@ -465,8 +433,6 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
 
           TextureFillVertexShader::FrameInfo frame_info;
           frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-          frame_info.texture_sampler_y_coord_scale =
-              input_texture->GetYCoordScale();
 
           TextureFillFragmentShader::FragInfo frag_info;
           frag_info.alpha = 1.0;
@@ -522,9 +488,8 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
                 renderer.GetDownsampleBoundedPipeline(pipeline_options));
 
             TextureDownsampleBoundedFragmentShader::BoundInfo bound_info;
-            bound_info.quad_line_params = PrecomputeQuadLineParameters(
-                RemapQuadCoords(pass_args.uv_bounds.value(),
-                                input_texture->GetYCoordScale()));
+            bound_info.quad_line_params =
+                PrecomputeQuadLineParameters(pass_args.uv_bounds.value());
             TextureDownsampleBoundedFragmentShader::BindBoundInfo(
                 pass, data_host_buffer.EmplaceUniform(bound_info));
           } else {
@@ -547,8 +512,6 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
 
           TextureFillVertexShader::FrameInfo frame_info;
           frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-          frame_info.texture_sampler_y_coord_scale =
-              input_texture->GetYCoordScale();
 
           TextureDownsampleFragmentShader::FragInfo frag_info;
           frag_info.edge = edge;
@@ -609,9 +572,7 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
   ContentContext::SubpassCallback subpass_callback =
       [&](const ContentContext& renderer, RenderPass& pass) {
         GaussianBlurVertexShader::FrameInfo frame_info;
-        frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1)),
-        frame_info.texture_sampler_y_coord_scale =
-            input_texture->GetYCoordScale();
+        frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
 
         HostBuffer& data_host_buffer = renderer.GetTransientsDataBuffer();
 

@@ -10,16 +10,6 @@ class NotoFont {
 
   final int index = _index++;
   static int _index = 0;
-
-  /// During fallback font selection this is the number of missing code points
-  /// that are covered by (i.e. in) this font.
-  int coverCount = 0;
-
-  /// During fallback font selection this is a list of [FallbackFontComponent]s
-  /// from this font that are required to cover some of the missing code
-  /// points. The cover count for the font is the sum of the cover counts for
-  /// the components that make up the font.
-  final List<FallbackFontComponent> coverComponents = <FallbackFontComponent>[];
 }
 
 /// A component is a set of code points common to some fonts. Each code point is
@@ -31,8 +21,4 @@ class NotoFont {
 class FallbackFontComponent {
   FallbackFontComponent(this.fonts);
   final List<NotoFont> fonts;
-
-  /// During fallback font selection this is the number of missing code points
-  /// that are covered by this component.
-  int coverCount = 0;
 }

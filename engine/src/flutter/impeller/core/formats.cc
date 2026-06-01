@@ -123,7 +123,7 @@ std::string AttachmentToString(const Attachment& attachment) {
 std::string ColorAttachmentToString(const ColorAttachment& color) {
   std::stringstream stream;
   stream << AttachmentToString(color) << ",";
-  stream << "ClearColor=(" << ColorToString(color.clear_color) << ")";
+  stream << "ClearColor=" << color.clear_color;
   return stream.str();
 }
 
