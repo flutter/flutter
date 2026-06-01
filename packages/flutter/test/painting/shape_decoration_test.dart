@@ -99,6 +99,43 @@ void main() {
     expect(b.hitTest(size, const Offset(20.0, 50.0)), isTrue);
   });
 
+  test('ShapeDecoration.lerp between gradient and color does not throw', () {
+    // Regression test for https://github.com/flutter/flutter/issues/93953
+    const colorR = Color(0xffff0000);
+    const colorG = Color(0xff00ff00);
+    const Gradient gradient = LinearGradient(colors: <Color>[colorR, colorG]);
+    const colorDecoration = ShapeDecoration(color: colorR, shape: CircleBorder());
+    const gradientDecoration = ShapeDecoration(
+      gradient: gradient,
+      shape: RoundedRectangleBorder(),
+    );
+
+    // The end points are returned unchanged.
+    expect(ShapeDecoration.lerp(colorDecoration, gradientDecoration, 0.0), colorDecoration);
+    expect(ShapeDecoration.lerp(colorDecoration, gradientDecoration, 1.0), gradientDecoration);
+
+    // color and gradient are mutually exclusive, so only one of them is set at
+    // any point during the interpolation: the source's fill type is used before
+    // the half-way point and the target's after it.
+    final ShapeDecoration beforeMid =
+        ShapeDecoration.lerp(colorDecoration, gradientDecoration, 0.49)!;
+    expect(beforeMid.color, isNotNull);
+    expect(beforeMid.gradient, isNull);
+
+    final ShapeDecoration afterMid =
+        ShapeDecoration.lerp(colorDecoration, gradientDecoration, 0.5)!;
+    expect(afterMid.color, isNull);
+    expect(afterMid.gradient, isNotNull);
+
+    // Interpolating across the full range never violates the color/gradient
+    // invariant (which would otherwise throw an assertion).
+    for (final t in <double>[0.1, 0.25, 0.49, 0.5, 0.51, 0.75, 0.9]) {
+      expect(ShapeDecoration.lerp(colorDecoration, gradientDecoration, t), isNotNull);
+      // Also exercise the reverse direction (gradient -> color).
+      expect(ShapeDecoration.lerp(gradientDecoration, colorDecoration, t), isNotNull);
+    }
+  });
+
   test('ShapeDecoration.image RTL test', () async {
     final ui.Image image = await createTestImage(width: 100, height: 200);
     final log = <int>[];

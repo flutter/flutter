@@ -228,9 +228,26 @@ class ShapeDecoration extends Decoration {
         return b;
       }
     }
+    Color? color = Color.lerp(a?.color, b?.color, t);
+    Gradient? gradient = Gradient.lerp(a?.gradient, b?.gradient, t);
+    // A ShapeDecoration's color and gradient are mutually exclusive (see the
+    // assert in the constructor). When interpolating between a decoration that
+    // uses a color and one that uses a gradient, both lerped values can be
+    // non-null at the same time. Resolve the conflict by using the source's
+    // fill type before the half-way point and the target's after it.
+    // See https://github.com/flutter/flutter/issues/93953
+    if (color != null && gradient != null) {
+      if (t < 0.5) {
+        color = a?.color == null ? null : color;
+        gradient = a?.gradient == null ? null : gradient;
+      } else {
+        color = b?.color == null ? null : color;
+        gradient = b?.gradient == null ? null : gradient;
+      }
+    }
     return ShapeDecoration(
-      color: Color.lerp(a?.color, b?.color, t),
-      gradient: Gradient.lerp(a?.gradient, b?.gradient, t),
+      color: color,
+      gradient: gradient,
       image: DecorationImage.lerp(a?.image, b?.image, t),
       shadows: BoxShadow.lerpList(a?.shadows, b?.shadows, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t)!,
