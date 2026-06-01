@@ -51,7 +51,7 @@ Once a PR is submitted, it will show up on the Dashboard at a specific URL:
 The engine is then built and uploaded to GCS, and every test is automatically
 marked as skipped.
 
-_Manually_, tests can be scheduled against a sucessfully built engine. Either
+_Manually_, tests can be scheduled against a successfully built engine. Either
 click the individual test, and hit "re-run", or, for supported branches, use the
 "Run all tasks" feature to schedule every task for the commit to be run
 asynchronously (typically a few minutes, though may take longer when postsubmit

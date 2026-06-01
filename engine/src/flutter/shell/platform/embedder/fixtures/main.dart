@@ -1601,16 +1601,26 @@ void render_impeller_text_test() {
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
     final builder = SceneBuilder();
     builder.pushOffset(0.0, 0.0);
-    final paint = Paint();
-    paint.color = const Color.fromARGB(255, 0, 0, 255);
+    const darkColor = Color.fromARGB(255, 25, 25, 25);
+    const lightColor = Color.fromARGB(255, 230, 230, 230);
     final baseRecorder = PictureRecorder();
     final canvas = Canvas(baseRecorder);
 
-    final paragraphBuilder = ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
+    final paragraphBuilder1 = ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
+      ..pushStyle(TextStyle(color: darkColor, background: Paint()..color = lightColor))
       ..addText('Flutter is the best!');
-    final Paragraph paragraph = paragraphBuilder.build()
+    final Paragraph paragraph1 = paragraphBuilder1.build()
       ..layout(const ParagraphConstraints(width: 400));
-    canvas.drawParagraph(paragraph, const Offset(20, 20));
+    canvas.drawParagraph(paragraph1, const Offset(20, 20));
+
+    canvas.translate(0, 40);
+
+    final paragraphBuilder2 = ParagraphBuilder(ParagraphStyle(fontFamily: 'sans-serif'))
+      ..pushStyle(TextStyle(color: lightColor, background: Paint()..color = darkColor))
+      ..addText('Flutter is the best!');
+    final Paragraph paragraph2 = paragraphBuilder2.build()
+      ..layout(const ParagraphConstraints(width: 400));
+    canvas.drawParagraph(paragraph2, const Offset(20, 20));
 
     builder.addPicture(Offset.zero, baseRecorder.endRecording());
     builder.pop();
@@ -1634,6 +1644,41 @@ Future<void> render_impeller_image_snapshot_test() async {
 
   final bool result = (pixel & 0xFF) == color.alpha && ((pixel >> 8) & 0xFF) == color.blue;
   notifyBoolValue(result);
+}
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
+void render_impeller_platform_view() {
+  PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    final builder = SceneBuilder();
+
+    // Background
+    builder.addPicture(
+      Offset.zero,
+      createColoredBox(const Color.fromARGB(255, 128, 128, 128), const Size(800.0, 600.0)),
+    );
+
+    // The top bar and the platform view are pushed to the side.
+    builder.pushOffset(100.0, 0.0);
+
+    // Platform view offset from the top
+    builder.pushOffset(0.0, 150.0);
+    builder.addPlatformView(1, width: 700.0, height: 450.0);
+    builder.pop();
+
+    // Top bar
+    builder.addPicture(
+      Offset.zero,
+      createColoredBox(const Color.fromARGB(255, 255, 0, 0), const Size(800.0, 150.0)),
+    );
+
+    builder.pop();
+
+    signalNativeTest(); // Signal 2
+    PlatformDispatcher.instance.views.first.render(builder.build());
+  };
+  signalNativeTest(); // Signal 1
+  PlatformDispatcher.instance.scheduleFrame();
 }
 
 @pragma('vm:entry-point')
