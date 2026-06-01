@@ -15,7 +15,7 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  'skia_revision': 'd9d6b440c4e787c7b09068a2a31e11ce0e7f7c48',
+  'skia_revision': 'c97e939eb5c9fabb7f8f8b54ba6fc1b7713650b8',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
@@ -210,7 +210,7 @@ vars = {
 
   # The version / instance id of the cipd:chromium/fuchsia/gn-sdk which will be
   # used altogether with fuchsia-sdk to generate gn based build rules.
-  'fuchsia_gn_sdk_version': 'SEfYx3xgueX3aFAY3ajyl7GPSTa6KPiTqFZteezpq1IC',
+  'fuchsia_gn_sdk_version': 'oOAcFhkoE2_-Sy67zP0e4OnqpGYRWEMHDE5UUOFHVkoC',
 }
 
 gclient_gn_args_file = 'engine/src/flutter/third_party/dart/build/config/gclient_args.gni'
@@ -805,7 +805,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'jMR_VXQi07kAk8vbRLr-z7C7XwPqdGsL_N9WbBUldKsC'
+        'version': 'q27k7_um1GvVrySZSBZuOTBnWsC2e3cCdOt_qAMnGU0C'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
