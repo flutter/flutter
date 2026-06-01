@@ -137,12 +137,12 @@ void drawTriangle(RenderPassState state, Vector4 color) {
     ]),
   );
   final gpu.BufferView vertInfoData = transients.emplace(unlitUBO(Matrix4.identity(), color));
-  state.renderPass.bindVertexBuffer(vertices, 3);
+  state.renderPass.bindVertexBuffer(vertices);
 
   final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
   state.renderPass.bindUniform(vertInfo, vertInfoData);
 
-  state.renderPass.draw();
+  state.renderPass.draw(3);
 }
 
 void main() async {
@@ -324,6 +324,19 @@ void main() async {
     expect(texture.getBaseMipLevelSizeInBytes(), 40000);
     expect(texture.mipLevelCount, 1);
     expect(texture.sliceCount, 1);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.createTexture allocates an r32Float texture', () async {
+    // Verifies the single-channel float format round-trips through allocation.
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      4,
+      4,
+      format: gpu.PixelFormat.r32Float,
+    );
+    expect(texture.format, gpu.PixelFormat.r32Float);
+    expect(texture.bytesPerTexel, 4);
+    expect(texture.getBaseMipLevelSizeInBytes(), 4 * 4 * 4);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Texture.fullMipCount', () async {
@@ -674,6 +687,60 @@ void main() async {
     await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  // Renders the same green triangle as the non-indexed test, this time by
+  // walking a 3-entry index buffer with drawIndexed.
+  test('Can render triangle with drawIndexed', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(
+      float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
+    );
+    final gpu.BufferView indices = transients.emplace(
+      Uint16List.fromList(<int>[0, 1, 2]).buffer.asByteData(),
+    );
+    state.renderPass.bindVertexBuffer(vertices);
+    state.renderPass.bindIndexBuffer(indices, gpu.IndexType.int16);
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+    state.renderPass.drawIndexed(3);
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('drawIndexed throws when no index buffer is bound', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(
+      float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
+    );
+    state.renderPass.bindVertexBuffer(vertices);
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+
+    expect(
+      () => state.renderPass.drawIndexed(3),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains('Failed to append drawIndexed'),
+        ),
+      ),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   // Regression test for flutter/flutter#186393: a Flutter GPU shader whose
   // uniform block uses an instance variable name that does not normalize
   // to the block name (e.g. `uniform ColorParams { ... } params;`) used
@@ -695,7 +762,7 @@ void main() async {
     final gpu.BufferView vertices = transients.emplace(
       float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
     );
-    state.renderPass.bindVertexBuffer(vertices, 3);
+    state.renderPass.bindVertexBuffer(vertices);
 
     // Vertex shader writes v_color from VertInfo.color; pick white so the
     // final pixel color is dictated entirely by ColorParams.base_color.
@@ -712,7 +779,7 @@ void main() async {
       transients.emplace(float32(<double>[1.0, 0.0, 0.0, 1.0])),
     );
 
-    state.renderPass.draw();
+    state.renderPass.draw(3);
     state.commandBuffer.submit();
 
     final ui.Image image = state.renderTexture.asImage();
@@ -773,9 +840,9 @@ void main() async {
       float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
     );
     final gpu.BufferView vertInfo = transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime));
-    state.renderPass.bindVertexBuffer(vertices, 3);
+    state.renderPass.bindVertexBuffer(vertices);
     state.renderPass.bindUniform(pipeline.vertexShader.getUniformSlot('VertInfo'), vertInfo);
-    state.renderPass.draw();
+    state.renderPass.draw(3);
     state.commandBuffer.submit();
 
     final ui.Image image = state.renderTexture.asImage();
@@ -882,8 +949,8 @@ void main() async {
       float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
     );
 
-    expect(() => state.renderPass.bindVertexBuffer(vertices, 3, slot: -1), throwsRangeError);
-    expect(() => state.renderPass.bindVertexBuffer(vertices, 3, slot: 16), throwsRangeError);
+    expect(() => state.renderPass.bindVertexBuffer(vertices, slot: -1), throwsRangeError);
+    expect(() => state.renderPass.bindVertexBuffer(vertices, slot: 16), throwsRangeError);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('draw throws StateError on sparse vertex buffer bindings', () async {
@@ -899,9 +966,9 @@ void main() async {
     // Bind only slot 1 (skipping slot 0). draw() must surface a clear
     // error rather than letting the underlying HAL validation fail
     // silently or render with an empty slot.
-    state.renderPass.bindVertexBuffer(vertices, 3, slot: 1);
+    state.renderPass.bindVertexBuffer(vertices, slot: 1);
     expect(
-      () => state.renderPass.draw(),
+      () => state.renderPass.draw(3),
       throwsA(
         isA<StateError>().having(
           (StateError e) => e.message,
@@ -983,10 +1050,10 @@ void main() async {
         float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
       );
       final gpu.BufferView vertInfoData = transients.emplace(unlitUBO(Matrix4.identity(), color));
-      state.renderPass.bindVertexBuffer(vertices, 3);
+      state.renderPass.bindVertexBuffer(vertices);
       final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
       state.renderPass.bindUniform(vertInfo, vertInfoData);
-      state.renderPass.draw();
+      state.renderPass.draw(3);
     }
 
     final RenderPassState stateA = createSimpleRenderPass();
@@ -1029,11 +1096,11 @@ void main() async {
         0, 1, 0, 1, // color
       ]),
     );
-    state.renderPass.bindVertexBuffer(vertices, 3);
+    state.renderPass.bindVertexBuffer(vertices);
 
     final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
     state.renderPass.bindUniform(vertInfo, vertInfoData);
-    state.renderPass.draw();
+    state.renderPass.draw(3);
 
     state.commandBuffer.submit();
 
@@ -1104,7 +1171,7 @@ void main() async {
         0, 1, 0, 1, // color
       ]),
     );
-    state.renderPass.bindVertexBuffer(vertices, 3);
+    state.renderPass.bindVertexBuffer(vertices);
 
     final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
 
@@ -1122,7 +1189,7 @@ void main() async {
         stencilFailureOperation: gpu.StencilOperation.incrementClamp,
       ),
     );
-    state.renderPass.draw();
+    state.renderPass.draw(3);
 
     // Next, render the outer triangle with the stencil ref set to zero, so that
     // the stencil test passes everywhere except where the inner triangle was
@@ -1136,7 +1203,7 @@ void main() async {
       gpu.StencilConfig(compareFunction: gpu.CompareFunction.equal),
     );
     state.renderPass.bindUniform(vertInfo, outerGreenVertInfo);
-    state.renderPass.draw();
+    state.renderPass.draw(3);
 
     state.commandBuffer.submit();
 
@@ -1168,9 +1235,9 @@ void main() async {
       );
 
       final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
-      state.renderPass.bindVertexBuffer(vertices, 3);
+      state.renderPass.bindVertexBuffer(vertices);
       state.renderPass.bindUniform(vertInfo, vertInfoUboFront);
-      state.renderPass.draw();
+      state.renderPass.draw(3);
     }
 
     // Draw the green rectangle.
@@ -1221,11 +1288,11 @@ void main() async {
         0, 1, 0, 1, // color
       ]),
     );
-    state.renderPass.bindVertexBuffer(vertices, 7);
+    state.renderPass.bindVertexBuffer(vertices);
 
     final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
     state.renderPass.bindUniform(vertInfo, vertInfoData);
-    state.renderPass.draw();
+    state.renderPass.draw(7);
 
     state.commandBuffer.submit();
 
@@ -1263,11 +1330,11 @@ void main() async {
         0, 1, 0, 1, // color
       ]),
     );
-    state.renderPass.bindVertexBuffer(vertices, 3);
+    state.renderPass.bindVertexBuffer(vertices);
 
     final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
     state.renderPass.bindUniform(vertInfo, vertInfoData);
-    state.renderPass.draw();
+    state.renderPass.draw(3);
 
     state.commandBuffer.submit();
 
@@ -1355,11 +1422,11 @@ void main() async {
         0, 1, 0, 1, // color
       ]),
     );
-    state.renderPass.bindVertexBuffer(vertices, 3);
+    state.renderPass.bindVertexBuffer(vertices);
 
     final gpu.UniformSlot vertInfo = pipeline.vertexShader.getUniformSlot('VertInfo');
     state.renderPass.bindUniform(vertInfo, vertInfoData);
-    state.renderPass.draw();
+    state.renderPass.draw(3);
 
     state.commandBuffer.submit();
 
