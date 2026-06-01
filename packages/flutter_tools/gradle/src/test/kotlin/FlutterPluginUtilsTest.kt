@@ -1955,17 +1955,22 @@ class FlutterPluginUtilsTest {
     // addTaskForKGPVersion
     @Test
     fun `addTaskForKGPVersion adds task for KGP version`() {
-        val project = mockk<Project>()
+        val project = mockk<Project>(relaxed = true)
+        val mockTaskProvider = mockk<TaskProvider<PrintKgpTask>>()
+        val mockPrintTask = mockk<PrintKgpTask>(relaxed = true)
+        val captureSlot = slot<Action<PrintKgpTask>>()
 
         every {
-            project.tasks.register(eq("kgpVersion"), PrintKgpTask::class.java)
-        } returns mockk()
+            project.tasks.register(eq("kgpVersion"), any<Class<PrintKgpTask>>(), capture(captureSlot))
+        } returns mockTaskProvider
 
         FlutterPluginUtils.addTaskForKGPVersion(project)
+        captureSlot.captured.execute(mockPrintTask)
 
         verify {
-            project.tasks.register(eq("kgpVersion"), PrintKgpTask::class.java)
+            project.tasks.register(eq("kgpVersion"), any<Class<PrintKgpTask>>(), any<Action<PrintKgpTask>>())
         }
+        verify { mockPrintTask.kgpVersion.set(any<org.gradle.api.provider.Provider<String>>()) }
     }
 
     // addTaskForPrintBuildVariants

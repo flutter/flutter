@@ -948,7 +948,15 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForKGPVersion")
     internal fun addTaskForKGPVersion(project: Project) {
-        project.tasks.register<PrintKgpTask>("kgpVersion")
+        // Resolve KGP version through a Provider so the task action never
+        // calls Task.getProject() during execution (deprecated, Gradle 10 error).
+        project.tasks.register<PrintKgpTask>("kgpVersion") {
+            kgpVersion.set(
+                project.provider {
+                    VersionFetcher.getKGPVersion(project)?.toString() ?: "null"
+                }
+            )
+        }
     }
 
     // Add a task that can be called on Flutter projects that prints the available build variants

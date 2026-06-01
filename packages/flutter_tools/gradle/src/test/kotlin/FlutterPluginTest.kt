@@ -128,7 +128,7 @@ class FlutterPluginTest {
             project.tasks.register(capture(registeredPrintTasks), PrintTaskDeferred::class.java, any())
         }
         verify {
-            project.tasks.register(capture(registeredPrintTasks), PrintKgpTask::class.java)
+            project.tasks.register(capture(registeredPrintTasks), PrintKgpTask::class.java, any<Action<PrintKgpTask>>())
         }
 
         assertContains(registeredPrintTasks, "javaVersion")
