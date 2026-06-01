@@ -39,14 +39,16 @@ ELFAOTSymbols LoadELFSymbolFromFixturesIfNeccessary(std::string elf_filename) {
   const char* error = nullptr;
 
   auto loaded_elf =
-      Dart_LoadELF(elf_path.c_str(),             // file path
-                   0,                            // file offset
-                   &error,                       // error (out)
-                   &symbols.vm_snapshot_data,    // vm snapshot data (out)
-                   &symbols.vm_snapshot_instrs,  // vm snapshot instrs (out)
-                   &symbols.vm_isolate_data,     // vm isolate data (out)
-                   &symbols.vm_isolate_instrs    // vm isolate instr (out)
+      Dart_LoadELF2(elf_path.c_str(),           // file path
+                    0,                          // file offset
+                    &error,                     // error (out)
+                    &symbols.vm_isolate_data,   // vm isolate data (out)
+                    &symbols.vm_isolate_instrs  // vm isolate instr (out)
       );
+  if (loaded_elf != nullptr) {
+    symbols.vm_snapshot_data = symbols.vm_isolate_data;
+    symbols.vm_snapshot_instrs = symbols.vm_isolate_instrs;
+  }
 
   if (loaded_elf == nullptr) {
     FML_LOG(ERROR)
@@ -89,14 +91,16 @@ ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary(
   const char* error = nullptr;
 
   auto loaded_elf =
-      Dart_LoadELF(elf_path.c_str(),             // file path
-                   0,                            // file offset
-                   &error,                       // error (out)
-                   &symbols.vm_snapshot_data,    // vm snapshot data (out)
-                   &symbols.vm_snapshot_instrs,  // vm snapshot instrs (out)
-                   &symbols.vm_isolate_data,     // vm isolate data (out)
-                   &symbols.vm_isolate_instrs    // vm isolate instr (out)
+      Dart_LoadELF2(elf_path.c_str(),           // file path
+                    0,                          // file offset
+                    &error,                     // error (out)
+                    &symbols.vm_isolate_data,   // vm isolate data (out)
+                    &symbols.vm_isolate_instrs  // vm isolate instr (out)
       );
+  if (loaded_elf != nullptr) {
+    symbols.vm_snapshot_data = symbols.vm_isolate_data;
+    symbols.vm_snapshot_instrs = symbols.vm_isolate_instrs;
+  }
 
   if (loaded_elf == nullptr) {
     FML_LOG(ERROR)
