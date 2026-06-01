@@ -1572,8 +1572,19 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     final Orientation newOrientation = _getOrientation(context);
     _lastOrientation ??= newOrientation;
     if (newOrientation != _lastOrientation) {
-      _removeDropdownRoute();
       _lastOrientation = newOrientation;
+      // The open menu's layout is computed for the previous orientation, so it
+      // must be dismissed. Removing the route mutates the Navigator, which is
+      // not allowed during build, so defer the dismissal until after the
+      // current frame.
+      // See https://github.com/flutter/flutter/issues/171011
+      if (_dropdownRoute != null) {
+        WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
+          if (mounted) {
+            _removeDropdownRoute();
+          }
+        }, debugLabel: 'DropdownButton.dismissOnOrientationChange');
+      }
     }
 
     // The width of the button and the menu are defined by the widest
