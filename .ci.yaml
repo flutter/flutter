@@ -164,7 +164,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       os: Mac-15.5|Mac-15.7
       device_type: none
@@ -181,7 +181,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       os: Mac-15.5|Mac-15.7
       device_type: none
@@ -199,7 +199,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       device_type: none
       mac_model: "Macmini8,1"
@@ -219,7 +219,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       os: Mac-15.5|Mac-15.7
       device_type: none
@@ -238,7 +238,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       os: Mac-15.5|Mac-15.7
       device_type: none
@@ -280,7 +280,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
       device_os: iOS-18
@@ -298,7 +298,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       os: Mac-15.1|Mac-15.5|Mac-15.6|Mac-15.7
       cpu: x86
