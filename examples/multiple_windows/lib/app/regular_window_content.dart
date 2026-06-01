@@ -49,34 +49,37 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
     final double dpr = MediaQuery.of(context).devicePixelRatio;
     final Size windowSize = WindowScope.contentSizeOf(context);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Regular Window')),
-      body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [RotatedWireCube(cubeColor: cubeColor)],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _WindowCreationButtons(regularWindowController: widget.regularWindowController),
-                const SizedBox(height: 20),
-                TooltipButton(parentController: widget.regularWindowController),
-                const SizedBox(height: 20),
-                PopupButton(parentController: widget.regularWindowController),
-                const SizedBox(height: 20),
-                Text(
-                  'View #${widget.regularWindowController.rootView.viewId}\n'
-                  'Size: ${windowSize.width.toStringAsFixed(1)}\u00D7${windowSize.height.toStringAsFixed(1)}\n'
-                  'Device Pixel Ratio: $dpr',
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ],
+    return Overlay.wrap(
+      alwaysSizeToContent: true,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Regular Window')),
+        body: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [RotatedWireCube(cubeColor: cubeColor)],
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _WindowCreationButtons(regularWindowController: widget.regularWindowController),
+                  const SizedBox(height: 20),
+                  TooltipButton(parentController: widget.regularWindowController),
+                  const SizedBox(height: 20),
+                  PopupButton(parentController: widget.regularWindowController),
+                  const SizedBox(height: 20),
+                  Text(
+                    'View #${widget.regularWindowController.rootView.viewId}\n'
+                    'Size: ${windowSize.width.toStringAsFixed(1)}\u00D7${windowSize.height.toStringAsFixed(1)}\n'
+                    'Device Pixel Ratio: $dpr',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
