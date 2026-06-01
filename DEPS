@@ -15,6 +15,7 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
+  'dart_ai_rev': '9c96bfe5f091c9451eff5b59c9bffeb2e806b875',
   'skia_revision': '3c73323d12686f4d9e571f3a9fa02fb76a19b967',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
@@ -285,6 +286,9 @@ deps = {
 
   'engine/src/flutter/third_party/boringssl/src':
   'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_rev'),
+
+  'engine/src/flutter/third_party/ai':
+   Var('dart_git') + '/ai.git' + '@' + Var('dart_ai_rev'),
 
   'engine/src/flutter/third_party/dart':
    Var('dart_git') + '/sdk.git' + '@' + Var('dart_revision'),
