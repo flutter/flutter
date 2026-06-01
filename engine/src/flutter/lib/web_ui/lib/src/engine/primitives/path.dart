@@ -635,7 +635,7 @@ class EnginePath implements ui.Path, Collectable {
   BackendPathBuilder? _cachedBuilder;
   final List<PathCommand> _commands;
 
-  BackendPathBuilder get _builtPathBuilder {
+  BackendPathBuilder get _backendPathBuilder {
     assert(
       _combineSource == null || _extractSource == null,
       'An EnginePath cannot have both a combine source and an extract source.',
@@ -669,7 +669,7 @@ class EnginePath implements ui.Path, Collectable {
 
   /// Returns the underlying [BackendPath] built from this path's commands.
   BackendPath get backendPath {
-    _cachedPath ??= _builtPathBuilder.build();
+    _cachedPath ??= _backendPathBuilder.build();
     return _cachedPath!;
   }
 
@@ -842,7 +842,7 @@ class EnginePath implements ui.Path, Collectable {
 
   @override
   bool contains(ui.Offset point) {
-    return _builtPathBuilder.contains(point);
+    return _backendPathBuilder.contains(point);
   }
 
   @override
@@ -865,7 +865,7 @@ class EnginePath implements ui.Path, Collectable {
 
   @override
   ui.Rect getBounds() {
-    return _builtPathBuilder.getBounds();
+    return _backendPathBuilder.getBounds();
   }
 
   @override

@@ -100,7 +100,7 @@ class EnginePathMetricIterator implements Iterator<ui.PathMetric>, Collectable {
   }
 
   /// Returns the built backend path metric at the given [index].
-  BackendPathMetric builtMetricAtIndex(int index) {
+  BackendPathMetric backendMetricAtIndex(int index) {
     buildIterator();
     return _metrics[index];
   }
@@ -120,7 +120,7 @@ class EnginePathMetric implements ui.PathMetric {
   final int contourIndex;
 
   /// The underlying [BackendPathMetric] for this contour.
-  BackendPathMetric get builtMetric => iterator.builtMetricAtIndex(contourIndex);
+  BackendPathMetric get backendMetric => iterator.backendMetricAtIndex(contourIndex);
 
   /// Extracts a segment of the contour from [start] to [end] as a new [ui.Path].
   @override
@@ -130,20 +130,20 @@ class EnginePathMetric implements ui.PathMetric {
 
   /// Builds a backend path segment of this contour from [start] to [end].
   BackendPathBuilder buildExtractedPath(double start, double end, {required bool startWithMoveTo}) {
-    return builtMetric.extractPath(start, end, startWithMoveTo: startWithMoveTo);
+    return backendMetric.extractPath(start, end, startWithMoveTo: startWithMoveTo);
   }
 
   /// Computes the position and tangent vector of the contour at the given [distance].
   @override
   ui.Tangent? getTangentForOffset(double distance) {
-    return builtMetric.getTangentForOffset(distance);
+    return backendMetric.getTangentForOffset(distance);
   }
 
   /// Whether this contour is closed.
   @override
-  bool get isClosed => builtMetric.isClosed;
+  bool get isClosed => backendMetric.isClosed;
 
   /// The total length of this contour in logical pixels.
   @override
-  double get length => builtMetric.length;
+  double get length => backendMetric.length;
 }
