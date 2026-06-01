@@ -45,8 +45,24 @@ class ShaderLibrary : public RefCountedDartWrappable<ShaderLibrary> {
   /// Sets a return override for `MakeFromAsset` for testing purposes.
   static void SetOverride(fml::RefPtr<ShaderLibrary> override_shader_library);
 
+  /// Re-fetches `name` from the AssetManager and reparses it into this
+  /// library, preserving Dart object identity and the `library_id` so any
+  /// already-handed-out `Shader` instances continue to work. Existing
+  /// `Shader` entries whose names appear in the new bundle are mutated in
+  /// place and marked dirty so the next pipeline build evicts and
+  /// re-registers them. Returns the empty string on success.
+  std::string ReloadFromAsset(impeller::Context::BackendType backend_type,
+                              const std::string& name);
+
+  /// Reparses `payload` into this library, preserving Dart object identity
+  /// and the `library_id`. Returns the empty string on success.
+  std::string ReloadFromFlatbuffer(impeller::Context::BackendType backend_type,
+                                   std::shared_ptr<fml::Mapping> payload);
+
   fml::RefPtr<Shader> GetShader(const std::string& shader_name,
-                                Dart_Handle shader_wrapper) const;
+                                Dart_Handle shader_wrapper);
+
+  const std::string& GetLibraryId() const { return library_id_; }
 
   ~ShaderLibrary() override;
 
@@ -58,9 +74,13 @@ class ShaderLibrary : public RefCountedDartWrappable<ShaderLibrary> {
 
   std::shared_ptr<fml::Mapping> payload_;
   ShaderMap shaders_;
+  // The stable library_id assigned at construction. Reloads keep this
+  // value so the scoped registry slot a shader landed in remains the same.
+  std::string library_id_;
 
   explicit ShaderLibrary(std::shared_ptr<fml::Mapping> payload,
-                         ShaderMap shaders);
+                         ShaderMap shaders,
+                         std::string library_id = "");
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShaderLibrary);
 };
@@ -77,6 +97,11 @@ extern "C" {
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_ShaderLibrary_InitializeWithAsset(
     Dart_Handle wrapper,
+    Dart_Handle asset_name);
+
+FLUTTER_GPU_EXPORT
+extern Dart_Handle InternalFlutterGpu_ShaderLibrary_ReinitializeWithAsset(
+    flutter::gpu::ShaderLibrary* wrapper,
     Dart_Handle asset_name);
 
 FLUTTER_GPU_EXPORT

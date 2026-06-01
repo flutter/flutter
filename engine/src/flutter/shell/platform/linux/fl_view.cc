@@ -110,7 +110,7 @@ G_DEFINE_TYPE_WITH_CODE(
 
 // Redraw the view from the GTK thread.
 static gboolean redraw_cb(gpointer user_data) {
-  FlView* self = FL_VIEW(user_data);
+  g_autoptr(FlView) self = FL_VIEW(user_data);
 
   if (!self->have_first_frame) {
     self->have_first_frame = TRUE;
@@ -296,7 +296,7 @@ static void fl_view_present_layers(FlRenderable* renderable,
   fl_compositor_present_layers(self->compositor, layers, layers_count);
 
   // Perform the redraw in the GTK thead.
-  g_idle_add(redraw_cb, self);
+  g_idle_add(redraw_cb, g_object_ref(self));
 }
 
 // Implements FlPluginRegistry::get_registrar_for_plugin.

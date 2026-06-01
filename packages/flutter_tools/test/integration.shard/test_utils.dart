@@ -104,6 +104,8 @@ abstract final class AppleTestUtils {
   static const requiredSymbols = <String>[
     '_kDartIsolateSnapshotData',
     '_kDartIsolateSnapshotInstructions',
+    '_kDartSnapshotData',
+    '_kDartSnapshotText',
     '_kDartVmSnapshotData',
     '_kDartVmSnapshotInstructions',
   ];

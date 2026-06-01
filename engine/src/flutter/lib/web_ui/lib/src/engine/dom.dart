@@ -872,8 +872,8 @@ extension type DomPerformanceMeasure._(JSObject _) implements DomPerformanceEntr
 
 @JS('HTMLCanvasElement')
 extension type DomHTMLCanvasElement._(JSObject _) implements DomHTMLElement, DomCanvasImageSource {
-  external double? width;
-  external double? height;
+  external num? width;
+  external num? height;
 
   @JS('toDataURL')
   external JSString _toDataURL(JSString type);
