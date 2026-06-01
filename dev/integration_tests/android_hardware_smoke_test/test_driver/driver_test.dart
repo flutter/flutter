@@ -12,7 +12,7 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
 /// Whether the current environment is LUCI.
-bool get isLuci => io.Platform.environment["LUCI_CI"] == "True";
+bool get isLuci => io.Platform.environment['LUCI_CI'] == 'True';
 
 void main() async {
   late final FlutterDriver flutterDriver;
@@ -22,19 +22,19 @@ void main() async {
     flutterDriver = await FlutterDriver.connect();
 
     final String response = await flutterDriver.requestData(
-      json.encode(<String, Object?>{"command": "get_golden_variant"}),
+      json.encode(<String, Object?>{'command': 'get_golden_variant'}),
     );
     final Map<String, Object?> reply =
         (json.decode(response) as Map<Object?, Object?>)
             .cast<String, Object?>();
-    final String? replyVariant = reply["goldenVariant"] as String?;
+    final replyVariant = reply['goldenVariant'] as String?;
     activeGoldenVariant = (replyVariant != null && replyVariant.isNotEmpty)
-        ? ".$replyVariant"
-        : "";
+        ? '.$replyVariant'
+        : '';
 
     if (isLuci) {
       await enableSkiaGoldComparator(
-        namePrefix: "android_hardware_smoke_test$activeGoldenVariant",
+        namePrefix: 'android_hardware_smoke_test$activeGoldenVariant',
       );
     }
   });
@@ -47,8 +47,8 @@ void main() async {
     // Ask the app to render the test and return the rendered image bytes
     final String response = await flutterDriver.requestData(
       json.encode(<String, Object?>{
-        "testName": testName,
-        "performAppSideGoldenCompare": false,
+        'testName': testName,
+        'performAppSideGoldenCompare': false,
       }),
     );
 
@@ -56,22 +56,22 @@ void main() async {
     final Map<String, Object?> reply =
         (json.decode(response) as Map<Object?, Object?>)
             .cast<String, Object?>();
-    expect(reply["message"], equals("Rendered $testName"));
+    expect(reply['message'], equals('Rendered $testName'));
 
     // Compare the bytes to a golden file on the host filesystem using the cached variant
-    final String imageBase64 = reply["imageBytes"]! as String;
+    final imageBase64 = reply['imageBytes']! as String;
     final Uint8List imageBytes = base64.decode(imageBase64);
     await expectLater(
       imageBytes,
-      matchesGoldenFile("goldens/$testName$activeGoldenVariant.png"),
+      matchesGoldenFile('goldens/$testName$activeGoldenVariant.png'),
     );
   }
 
-  test("should render and match blueRectangleTest golden", () async {
-    await templateTest("blueRectangleTest");
+  test('should render and match blueRectangleTest golden', () async {
+    await templateTest('blueRectangleTest');
   }, timeout: Timeout.none);
 
-  test("should render and match trianglePathTest golden", () async {
-    await templateTest("trianglePathTest");
+  test('should render and match trianglePathTest golden', () async {
+    await templateTest('trianglePathTest');
   }, timeout: Timeout.none);
 }

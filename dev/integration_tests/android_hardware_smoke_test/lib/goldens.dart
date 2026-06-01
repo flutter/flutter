@@ -32,20 +32,17 @@ Future<void> handleGoldenRequest(
         resultImageBytes,
         goldenVariantValue,
       );
-      completer.complete(<String, Object?>{
-        "message": failureMessage ?? "Rendered $testName",
-      });
+      completer.complete(<String, Object?>{'message': failureMessage ?? 'Rendered $testName'});
     } else {
       completer.complete(<String, Object?>{
-        "message": "Rendered $testName",
-        "imageBytes": base64.encode(resultImageBytes),
+        'message': 'Rendered $testName',
+        'imageBytes': base64.encode(resultImageBytes),
       });
     }
   } catch (e, stackTrace) {
     // Guarantee that the completer completes even under unhandled exceptions
     completer.complete(<String, Object?>{
-      "message":
-          "Error occurred during golden request handling: $e\n$stackTrace",
+      'message': 'Error occurred during golden request handling: $e\n$stackTrace',
     });
   }
 }
@@ -56,14 +53,13 @@ Future<String?> _compareGoldenOnDevice(
   String? goldenVariant,
 ) async {
   final io.Directory tempDir = await getTemporaryDirectory();
-  final String variantSuffix =
-      (goldenVariant != null && goldenVariant.isNotEmpty)
-      ? ".$goldenVariant"
-      : "";
-  final String fileName = "$testName$variantSuffix.png";
-  final String goldenAssetPath = 'test_driver/goldens/$fileName';
-  final String tempGoldenPath = path.join(tempDir.path, "goldens", fileName);
-  final String tempResultPath = path.join(tempDir.path, "results", fileName);
+  final variantSuffix = (goldenVariant != null && goldenVariant.isNotEmpty)
+      ? '.$goldenVariant'
+      : '';
+  final fileName = '$testName$variantSuffix.png';
+  final goldenAssetPath = 'test_driver/goldens/$fileName';
+  final String tempGoldenPath = path.join(tempDir.path, 'goldens', fileName);
+  final String tempResultPath = path.join(tempDir.path, 'results', fileName);
 
   // In this context, `matchesGoldenFile` uses a NaiveLocalFileComparator.
   // That comparator does not support reading bundled assets, so we need to create a temp file.
@@ -71,23 +67,23 @@ Future<String?> _compareGoldenOnDevice(
   await _copyGoldenAssetToTemp(goldenAssetPath, tempGoldenPath);
   // Write the result bytes to a temp file so they can be pulled off the device for debugging when a comparison fails.
   await _writeBytesToFile(tempResultPath, resultImageBytes);
-  return matchesGoldenFile(tempGoldenPath).matchAsync(resultImageBytes);
+  final dynamic comparisonResult = await matchesGoldenFile(
+    tempGoldenPath,
+  ).matchAsync(resultImageBytes);
+  return comparisonResult as String?;
 }
 
 Future<void> _writeBytesToFile(String filePath, Uint8List bytes) async {
   assert(filePath.isNotEmpty);
   assert(bytes.isNotEmpty);
-  final io.File file = io.File(filePath);
+  final file = io.File(filePath);
   if (!file.existsSync()) {
     await file.create(recursive: true);
   }
   await file.writeAsBytes(bytes);
 }
 
-Future<void> _copyGoldenAssetToTemp(
-  String goldenAssetPath,
-  String tempGoldenPath,
-) async {
+Future<void> _copyGoldenAssetToTemp(String goldenAssetPath, String tempGoldenPath) async {
   try {
     final ByteData byteData = await rootBundle.load(goldenAssetPath);
     final Uint8List bytes = byteData.buffer.asUint8List(
@@ -107,24 +103,22 @@ Future<Uint8List> _capturePng(String testName, GlobalKey targetKey) async {
   final BuildContext? context = targetKey.currentContext;
   if (context == null) {
     throw StateError(
-      "Failed to capture screenshot for $testName: targetKey is not mounted in the widget tree.",
+      'Failed to capture screenshot for $testName: targetKey is not mounted in the widget tree.',
     );
   }
 
   final RenderObject? renderObject = context.findRenderObject();
   if (renderObject is! RenderRepaintBoundary) {
     throw StateError(
-      "Failed to capture screenshot for $testName: the associated RenderObject is not a RenderRepaintBoundary.",
+      'Failed to capture screenshot for $testName: the associated RenderObject is not a RenderRepaintBoundary.',
     );
   }
   final RenderRepaintBoundary boundary = renderObject;
   final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-  final ByteData? byteData = await image.toByteData(
-    format: ui.ImageByteFormat.png,
-  );
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
   if (byteData == null) {
     throw StateError(
-      "Failed to capture screenshot for $testName: ui.Image.toByteData returned null.",
+      'Failed to capture screenshot for $testName: ui.Image.toByteData returned null.',
     );
   }
 
@@ -134,7 +128,7 @@ Future<Uint8List> _capturePng(String testName, GlobalKey targetKey) async {
   );
   if (pngBytes.isEmpty) {
     throw StateError(
-      "Failed to capture screenshot for $testName: pngBytes from RenderRepaintBoundary.toImage was empty.",
+      'Failed to capture screenshot for $testName: pngBytes from RenderRepaintBoundary.toImage was empty.',
     );
   }
   return pngBytes;

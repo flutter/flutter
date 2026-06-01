@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Flutter android hardware smoke test",
+      title: 'Flutter android hardware smoke test',
       theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
       home: const MyWidget(),
     );
@@ -33,39 +33,38 @@ class MyWidget extends StatefulWidget {
 
 class _MyState extends State<MyWidget> {
   static const MethodChannel nativeChannel = MethodChannel(
-    "com.example.android_hardware_smoke_test/native_support",
+    'com.example.android_hardware_smoke_test/native_support',
   );
 
-  final testChannel = BasicMessageChannel<Object?>(
-    "com.example.android_hardware_smoke_test/test_channel",
-    const JSONMessageCodec(),
+  static const testChannel = BasicMessageChannel<Object?>(
+    'com.example.android_hardware_smoke_test/test_channel',
+    JSONMessageCodec(),
   );
 
-  String _message = "Waiting for message...";
+  String _message = 'Waiting for message...';
   late Future<String?> _goldenVariantFuture;
 
   Future<Map<String, Object?>?> handler(Object? message) {
     final Map<String, Object?>? messageMap = (message as Map<Object?, Object?>?)
         ?.cast<String, Object?>();
-    final String? testName = messageMap?["testName"] as String?;
+    final testName = messageMap?['testName'] as String?;
     final bool performAppSideGoldenCompare =
-        messageMap?["performAppSideGoldenCompare"] as bool? ?? true;
-    final Completer<Map<String, Object?>> completer =
-        Completer<Map<String, Object?>>();
+        messageMap?['performAppSideGoldenCompare'] as bool? ?? true;
+    final completer = Completer<Map<String, Object?>>();
 
     setState(() {
-      _message = testName ?? "Empty message";
+      _message = testName ?? 'Empty message';
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       handleGoldenRequest(
-        testName ?? "unknown",
+        testName ?? 'unknown',
         completer,
         performAppSideGoldenCompare,
         targetKey,
         _goldenVariantFuture,
       );
-    }, debugLabel: "Rendered $testName");
+    }, debugLabel: 'Rendered $testName');
 
     return completer.future;
   }
@@ -76,9 +75,7 @@ class _MyState extends State<MyWidget> {
 
     // Request the golden variant from the native side, but don't await it yet.
     // We only need it to be resolved by the time of the postFrameCallback in the handler.
-    _goldenVariantFuture = nativeChannel.invokeMethod<String>(
-      "impeller_backend",
-    );
+    _goldenVariantFuture = nativeChannel.invokeMethod<String>('impeller_backend');
     testChannel.setMessageHandler(handler);
   }
 
@@ -100,7 +97,7 @@ class _MyState extends State<MyWidget> {
               painter: MyPainter(message: _message),
             ),
           ),
-          Align(alignment: Alignment.center, child: Text(_message)),
+          Align(child: Text(_message)),
         ],
       ),
     );
@@ -108,8 +105,8 @@ class _MyState extends State<MyWidget> {
 }
 
 class MyPainter extends CustomPainter {
-  final String message;
   MyPainter({required this.message}) : assert(message.isNotEmpty);
+  final String message;
 
   void renderBlueRectangleTest(Canvas canvas, Size size) {
     final paint = Paint()
@@ -135,16 +132,16 @@ class MyPainter extends CustomPainter {
       ..color = Colors.blueGrey
       ..strokeWidth = 10
       ..style = PaintingStyle.stroke;
-    canvas.drawCircle(Offset(80, 80), 40, paint);
+    canvas.drawCircle(const Offset(80, 80), 40, paint);
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     switch (message) {
-      case "blueRectangleTest":
+      case 'blueRectangleTest':
         renderBlueRectangleTest(canvas, size);
         return;
-      case "trianglePathTest":
+      case 'trianglePathTest':
         renderTrianglePathTest(canvas, size);
         return;
       default:

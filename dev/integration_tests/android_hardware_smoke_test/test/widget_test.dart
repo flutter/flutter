@@ -15,25 +15,25 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
           const MethodChannel(
-            "com.example.android_hardware_smoke_test/native_support",
+            'com.example.android_hardware_smoke_test/native_support',
           ),
           (MethodCall methodCall) async {
-            if (methodCall.method == "impeller_backend") {
-              return "vulkan";
+            if (methodCall.method == 'impeller_backend') {
+              return 'vulkan';
             }
             return null;
           },
         );
   });
 
-  testWidgets("MyWidget displays default layout and waiting message on boot", (
+  testWidgets('MyWidget displays default layout and waiting message on boot', (
     WidgetTester tester,
   ) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
 
     // Verify that the default waiting message renders perfectly
-    expect(find.text("Waiting for message..."), findsOneWidget);
+    expect(find.text('Waiting for message...'), findsOneWidget);
 
     // Verify that the exact targetRepaintBoundary renders by checking the targetKey
     expect(find.byKey(targetKey), findsOneWidget);
