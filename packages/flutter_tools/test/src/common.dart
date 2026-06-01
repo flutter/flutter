@@ -247,12 +247,7 @@ class _NoContext implements AppContext {
   const _NoContext();
 
   @override
-  T? get<T>() {
-    // Allow Analytics and Platform lookups to return null so that process
-    // execution interception (which checks these values) does not crash context-less tests.
-    if (T == Analytics || T == Platform) {
-      return null;
-    }
+  T get<T>() {
     throw UnsupportedError(
       'context.get<$T> is not supported in test methods. '
       'Use Testbed or testUsingContext if accessing Zone injected '

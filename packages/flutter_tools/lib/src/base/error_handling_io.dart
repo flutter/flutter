@@ -591,12 +591,21 @@ T _runSync<T>(
 /// See also:
 ///   * [ErrorHandlingFileSystem], for a similar file system strategy.
 class ErrorHandlingProcessManager extends ProcessManager {
-  ErrorHandlingProcessManager({required ProcessManager delegate, required Platform platform})
-    : _delegate = delegate,
-      _platform = platform;
+  ErrorHandlingProcessManager({
+    required ProcessManager delegate,
+    required Platform platform,
+
+    /// A lazy callback to prevent eager circular dependency cycles during early
+    /// bootstrapping of the Flutter CLI (where `Analytics` depends on
+    /// `FlutterVersion`, which executes git process commands during construction).
+    required Analytics Function() analytics,
+  }) : _delegate = delegate,
+       _platform = platform,
+       _analytics = analytics;
 
   final ProcessManager _delegate;
   final Platform _platform;
+  final Analytics Function() _analytics;
 
   @override
   bool canRun(dynamic executable, {String? workingDirectory}) {
@@ -618,13 +627,9 @@ class ErrorHandlingProcessManager extends ProcessManager {
   Map<String, String>? _propagateAnalyticsEnvironment(Map<String, String>? environment) {
     // Create a mutable copy of the environment map upfront to avoid redundant allocations later.
     final environmentResult = <String, String>{...?environment};
-
-    // Safely lookup context-injected properties with a fallback for contextless unit tests.
     Analytics? analytics;
-    Platform platform = _platform;
     try {
-      analytics = context.get<Analytics>();
-      platform = context.get<Platform>() ?? _platform;
+      analytics = _analytics();
     } on ContextDependencyCycleException {
       // This exception is thrown during early startup bootstrapping of the Flutter CLI.
       // Specifically, `FlutterVersion` runs a synchronous `git log` command during its own
@@ -642,7 +647,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
     }
 
     // Propagate the parent tool identifier down to the spawned process.
-    final String? parentTool = platform.environment[DashEnvVar.tool.name];
+    final String? parentTool = _platform.environment[DashEnvVar.tool.name];
     environmentResult[DashEnvVar.tool.name] =
         parentTool ?? environmentResult[DashEnvVar.tool.name] ?? DashTool.flutterTool.label;
 

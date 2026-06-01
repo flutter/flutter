@@ -495,6 +495,7 @@ void main() {
       final errorHandlingProcessManager = ErrorHandlingProcessManager(
         delegate: fakeProcessManager,
         platform: FakePlatform(),
+        analytics: () => analytics,
       );
       processUtils = ProcessUtils(
         processManager: errorHandlingProcessManager,
@@ -520,19 +521,28 @@ void main() {
     testUsingContext(
       'preserves parent DASH__TOOL if already specified in the environment',
       () async {
+        final fakePlatform = FakePlatform(
+          environment: const <String, String>{'DASH__TOOL': 'parent-tool'},
+        );
+        final errorHandlingProcessManager = ErrorHandlingProcessManager(
+          delegate: fakeProcessManager,
+          platform: fakePlatform,
+          analytics: () => analytics,
+        );
+        final localProcessUtils = ProcessUtils(
+          processManager: errorHandlingProcessManager,
+          logger: BufferLogger.test(),
+        );
+
         fakeProcessManager.addCommand(
           const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithParentTool),
         );
 
         await analytics.setTelemetry(false);
 
-        expect((await processUtils.run(<String>['whoohoo'])).exitCode, 0);
+        expect((await localProcessUtils.run(<String>['whoohoo'])).exitCode, 0);
       },
-      overrides: <Type, Generator>{
-        Analytics: () => analytics,
-        Platform: () =>
-            FakePlatform(environment: const <String, String>{'DASH__TOOL': 'parent-tool'}),
-      },
+      overrides: <Type, Generator>{Analytics: () => analytics},
     );
   });
 }
