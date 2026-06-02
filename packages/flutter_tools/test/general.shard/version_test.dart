@@ -1788,6 +1788,50 @@ void main() {
     );
 
     testUsingContext(
+      'FlutterVersion stays with cache if git repository has custom FLUTTER_GIT_URL remote',
+      () async {
+        final Directory cacheDir =
+            fs.directory(flutterRoot).childDirectory('bin').childDirectory('cache')
+              ..createSync(recursive: true);
+        final File versionFile = cacheDir.childFile('flutter.version.json');
+
+        fs.directory(flutterRoot).childDirectory('.git').createSync();
+
+        const customUrl = 'https://github.com/my-custom-fork/flutter.git';
+        versionFile.writeAsStringSync(
+          jsonEncode(<String, String>{
+            'frameworkVersion': '1.0.0',
+            'channel': 'master',
+            'repositoryUrl': customUrl,
+            'frameworkRevision': 'REVISION_A',
+            'frameworkCommitDate': '2021-01-01',
+            'engineRevision': 'abc',
+            'dartSdkVersion': '1.0.0',
+            'devToolsVersion': '1.0.0',
+            'flutterVersion': '1.0.0',
+          }),
+        );
+
+        // No git commands should be run because repositoryUrl matches FLUTTER_GIT_URL
+        final version = FlutterVersion(fs: fs, git: git, flutterRoot: flutterRoot);
+
+        expect(version.frameworkRevision, 'REVISION_A');
+        expect(version.channel, 'master');
+        expect(processManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        Git: () => git,
+        ProcessManager: () => processManager,
+        Cache: () => cache,
+        Platform: () => FakePlatform(
+          environment: <String, String>{
+            'FLUTTER_GIT_URL': 'https://github.com/my-custom-fork/flutter.git',
+          },
+        ),
+      },
+    );
+
+    testUsingContext(
       'FlutterVersion uses clean environment for git calls',
       () async {
         fs.directory(flutterRoot).childDirectory('.git').createSync();

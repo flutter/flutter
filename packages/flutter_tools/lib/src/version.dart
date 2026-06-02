@@ -1423,10 +1423,9 @@ bool _isStandardRemote(String remote) {
   final String sanitized = VersionUpstreamValidator.stripDotGit(remote);
 
   // Whitelist custom enterprise mirror or fork if specified by environment variable
-  final String? customGitUrl = platform.environment['FLUTTER_GIT_URL'];
-  if (customGitUrl != null &&
-      VersionUpstreamValidator.stripDotGit(customGitUrl) == sanitized) {
-        return true;
+  final String? customGitUrl = globals.platform.environment['FLUTTER_GIT_URL'];
+  if (customGitUrl != null && VersionUpstreamValidator.stripDotGit(customGitUrl) == sanitized) {
+    return true;
   }
   for (final standard in const <String>[
     'https://github.com/flutter/flutter.git',
