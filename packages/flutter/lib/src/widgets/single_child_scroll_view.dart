@@ -16,6 +16,7 @@ import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_configuration.dart';
@@ -247,8 +248,37 @@ class SingleChildScrollView extends StatelessWidget {
   Widget build(BuildContext context) {
     final AxisDirection axisDirection = _getDirection(context);
     Widget? contents = child;
-    if (padding != null) {
-      contents = Padding(padding: padding!, child: contents);
+    EdgeInsetsGeometry? effectivePadding = padding;
+    if (padding == null && contents != null) {
+      final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
+      if (mediaQuery != null) {
+        // Automatically pad content with padding from MediaQuery.
+        final EdgeInsets mediaQueryHorizontalPadding = mediaQuery.padding.copyWith(
+          top: 0.0,
+          bottom: 0.0,
+        );
+        final EdgeInsets mediaQueryVerticalPadding = mediaQuery.padding.copyWith(
+          left: 0.0,
+          right: 0.0,
+        );
+        // Consume the main axis padding with Padding.
+        effectivePadding = scrollDirection == Axis.vertical
+            ? mediaQueryVerticalPadding
+            : mediaQueryHorizontalPadding;
+        // Leave behind the cross axis padding.
+        contents = MediaQuery(
+          data: mediaQuery.copyWith(
+            padding: scrollDirection == Axis.vertical
+                ? mediaQueryHorizontalPadding
+                : mediaQueryVerticalPadding,
+          ),
+          child: contents,
+        );
+      }
+    }
+
+    if (effectivePadding != null) {
+      contents = Padding(padding: effectivePadding, child: contents);
     }
     final bool effectivePrimary =
         primary ??

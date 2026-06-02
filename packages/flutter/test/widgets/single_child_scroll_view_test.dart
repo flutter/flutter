@@ -1097,4 +1097,69 @@ void main() {
     );
     expect(tester.getSize(find.byType(SingleChildScrollView)), Size.zero);
   });
+
+  testWidgets('SingleChildScrollView automatically pads MediaQuery on vertical axis', (
+    WidgetTester tester,
+  ) async {
+    EdgeInsets? innerMediaQueryPadding;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.all(30.0)),
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                const Text('top', textDirection: TextDirection.ltr),
+                Builder(
+                  builder: (BuildContext context) {
+                    innerMediaQueryPadding = MediaQuery.paddingOf(context);
+                    return Container();
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    // Automatically apply the top/bottom padding as content padding.
+    expect(tester.getTopLeft(find.text('top')).dy, 30.0);
+    // Leave left/right padding as is for children.
+    expect(innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
+  });
+
+  testWidgets('SingleChildScrollView automatically pads MediaQuery on horizontal axis', (
+    WidgetTester tester,
+  ) async {
+    EdgeInsets? innerMediaQueryPadding;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.all(30.0)),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: <Widget>[
+                const Text('start', textDirection: TextDirection.ltr),
+                Builder(
+                  builder: (BuildContext context) {
+                    innerMediaQueryPadding = MediaQuery.paddingOf(context);
+                    return Container();
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    // Automatically apply the left/right padding as content padding.
+    expect(tester.getTopLeft(find.text('start')).dx, 30.0);
+    // Leave top/bottom padding as is for children.
+    expect(innerMediaQueryPadding, const EdgeInsets.symmetric(vertical: 30.0));
+  });
 }
