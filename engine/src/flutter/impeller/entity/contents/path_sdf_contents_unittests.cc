@@ -10,9 +10,11 @@ namespace impeller {
 namespace testing {
 
 TEST(PathSdfContentsTest, SimpleMake) {
-  flutter::DlPath path = flutter::DlPath::MakeRect(Rect::MakeXYWH(0, 0, 100, 100));
+  flutter::DlPath path =
+      flutter::DlPath::MakeRect(Rect::MakeXYWH(0, 0, 100, 100));
   auto geometry = Geometry::MakeFillPath(path);
-  auto contents = PathSdfContents::Make(std::move(geometry), Color::Red());
+  auto contents =
+      PathSdfContents::Make(path, std::move(geometry), Color::Red(), 0.0f);
   ASSERT_TRUE(contents);
 
   Entity entity;

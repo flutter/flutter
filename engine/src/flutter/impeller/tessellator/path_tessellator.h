@@ -198,6 +198,10 @@ class PathTessellator {
                                    VertexWriter& writer,
                                    Scalar scale);
 
+  static void PathToStrokedVertices(const PathSource& source,
+                                    VertexWriter& writer,
+                                    Scalar scale);
+
   static void PathToTransformedFilledVertices(const PathSource& source,
                                               VertexWriter& writer,
                                               const Matrix& matrix);
