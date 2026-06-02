@@ -640,12 +640,16 @@ void main() async {
     final gpu.GpuSurface surface = gpu.gpuContext.createSurface(17, 19);
     final gpu.SurfaceFrame frame = surface.acquireNextFrame();
 
-    try {
-      surface.resize(23, 29);
-      fail('Exception not thrown for resizing with an acquired frame.');
-    } catch (e) {
-      expect(e.toString(), contains('SurfaceFrame is acquired'));
-    }
+    expect(
+      () => surface.resize(23, 29),
+      throwsA(
+        isA<StateError>().having(
+          (StateError error) => error.message,
+          'message',
+          contains('SurfaceFrame is acquired'),
+        ),
+      ),
+    );
 
     frame.discard();
     surface.resize(23, 29);
@@ -659,7 +663,7 @@ void main() async {
     resizedFrame.discard();
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test('Can render clear color into GpuSurface', () async {
+  test('GpuSurface can render clear color into presented image', () async {
     final gpu.GpuSurface surface = gpu.gpuContext.createSurface(100, 100);
     final gpu.SurfaceFrame frame = surface.acquireNextFrame();
     final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();

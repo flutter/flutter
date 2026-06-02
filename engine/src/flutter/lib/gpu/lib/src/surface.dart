@@ -18,9 +18,9 @@ part of flutter_gpu;
 ///
 /// To render a frame, call [acquireNextFrame], render into the returned
 /// [SurfaceFrame.colorTexture], call [SurfaceFrame.present] with the command
-/// buffer that contains the final writes, submit that command buffer, and draw
-/// [currentImage].
-base class GpuSurface extends NativeFieldWrapperClass1 {
+/// buffer that contains the final writes, submit that command buffer, and then
+/// draw [currentImage].
+final class GpuSurface extends NativeFieldWrapperClass1 {
   GpuSurface._(this._gpuContext, int width, int height, PixelFormat format)
     : _width = width,
       _height = height,
@@ -77,7 +77,7 @@ base class GpuSurface extends NativeFieldWrapperClass1 {
     _checkDimensions(width, height);
     final String? error = _resize(width, height);
     if (error != null) {
-      throw Exception(error);
+      throw StateError(error);
     }
     _width = width;
     _height = height;
@@ -183,7 +183,7 @@ base class GpuSurface extends NativeFieldWrapperClass1 {
 /// [present] to publish the frame as the surface's current image. If the frame
 /// will not be presented, call [discard] so the surface can reuse its backing
 /// texture.
-base class SurfaceFrame {
+final class SurfaceFrame {
   SurfaceFrame._(this._surface, this._textureIndex, this.colorTexture);
 
   final GpuSurface _surface;
@@ -201,10 +201,13 @@ base class SurfaceFrame {
   ///
   /// The [commandBuffer] must be the command buffer that contains the final
   /// writes to [colorTexture]. Call this method after recording those writes
-  /// and before submitting [commandBuffer]. The surface uses the command
-  /// buffer completion to decide when this texture can be considered for reuse.
-  /// If the command buffer is never submitted, the texture remains unavailable
-  /// for future frames.
+  /// and before submitting [commandBuffer].
+  ///
+  /// Calling this method does not submit [commandBuffer]. It registers the
+  /// frame with [commandBuffer] so the surface can use command buffer
+  /// completion to decide when this texture can be considered for reuse. If the
+  /// command buffer is never submitted, the texture remains unavailable for
+  /// future frames.
   ///
   /// The returned [ui.Image] is also available from [GpuSurface.currentImage].
   ui.Image present(CommandBuffer commandBuffer) {

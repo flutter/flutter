@@ -258,6 +258,12 @@ Dart_Handle InternalFlutterGpu_Surface_Initialize(
     return tonic::ToDart("GpuSurface dimensions must be greater than zero.");
   }
 
+#if !IMPELLER_SUPPORTS_RENDERING
+  (void)wrapper;
+  (void)gpu_context;
+  (void)format;
+  return tonic::ToDart("GpuSurface requires Impeller rendering support.");
+#else
   auto pixel_format = flutter::gpu::ToImpellerPixelFormat(format);
   if (pixel_format == impeller::PixelFormat::kUnknown) {
     return tonic::ToDart("Unsupported GpuSurface pixel format.");
@@ -268,6 +274,7 @@ Dart_Handle InternalFlutterGpu_Surface_Initialize(
       pixel_format);
   res->AssociateWithDartWrapper(wrapper);
   return Dart_Null();
+#endif
 }
 
 int InternalFlutterGpu_Surface_AcquireNextFrame(flutter::gpu::Surface* wrapper,

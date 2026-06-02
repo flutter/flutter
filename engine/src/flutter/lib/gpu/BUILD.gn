@@ -78,5 +78,18 @@ source_set("gpu") {
   }
 }
 
-if (enable_unittests) {
+if (enable_unittests && !is_fuchsia) {
+  executable("gpu_unittests") {
+    testonly = true
+
+    sources = [ "command_buffer_unittests.cc" ]
+
+    deps = [
+      ":gpu",
+      "//flutter/impeller/renderer/testing:mocks",
+      "//flutter/testing",
+      "//third_party/googletest:gmock",
+      "//third_party/googletest:gtest",
+    ]
+  }
 }
