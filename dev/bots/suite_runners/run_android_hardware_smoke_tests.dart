@@ -20,6 +20,14 @@ Future<void> runAndroidHardwareSmokeTests({required ImpellerBackend backend}) as
 
   final String testDir = path.join('dev', 'integration_tests', 'android_hardware_smoke_test');
 
+  // Regenerate standard Android Gradle wrappers
+  await runCommand('flutter', <String>[
+    'create',
+    '--platform=android',
+    '--no-overwrite',
+    '.',
+  ], workingDirectory: testDir);
+
   final File androidManifestXml = const LocalFileSystem().file(
     path.join(testDir, 'android', 'app', 'src', 'main', 'AndroidManifest.xml'),
   );
