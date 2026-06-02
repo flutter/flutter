@@ -129,6 +129,11 @@ abstract class Terminal {
   /// Useful when the console is in [singleCharMode].
   Stream<String> get keystrokes;
 
+  /// Reads a full line from the console.
+  ///
+  /// Useful when the console is not in [singleCharMode].
+  Future<String> readLine();
+
   /// Prompts the user to input a character within a given list. Re-prompts if
   /// entered character is not in the list.
   ///
@@ -360,6 +365,17 @@ class AnsiTerminal implements Terminal {
         .asBroadcastStream();
   }
 
+  Stream<String>? _broadcastStdInLines;
+
+  @override
+  Future<String> readLine() {
+    return (_broadcastStdInLines ??= _stdio.stdin
+            .transform<String>(utf8AllowMalformed.decoder)
+            .transform<String>(const LineSplitter())
+            .asBroadcastStream())
+        .first;
+  }
+
   @override
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
@@ -419,6 +435,11 @@ class _TestTerminal implements Terminal {
 
   @override
   Stream<String> get keystrokes => const Stream<String>.empty();
+
+  @override
+  Future<String> readLine() {
+    throw UnsupportedError('readLine not supported in the test terminal.');
+  }
 
   @override
   Future<String> promptForCharInput(

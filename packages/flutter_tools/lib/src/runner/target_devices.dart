@@ -364,7 +364,6 @@ class TargetDevices {
         terminal: globals.terminal,
         logger: _logger,
         deviceCount: deviceCount,
-        usesTerminalUi: true,
       );
     }
     globals.terminal.usesTerminalUi = true;
@@ -825,18 +824,12 @@ Future<String> _readDeviceChoiceLine({
   required Terminal terminal,
   required Logger logger,
   required int deviceCount,
-  bool usesTerminalUi = false,
   void Function()? onInvalidInput,
 }) async {
-  if (usesTerminalUi) {
-    terminal.usesTerminalUi = true;
-  }
-  terminal.singleCharMode = false;
   while (true) {
     logger.printStatus(_chooseOneMessage, emphasis: true, newline: false);
     logger.printStatus(': ', emphasis: true, newline: false);
-    final String choice = (await terminal.keystrokes.first).trim();
-    logger.printStatus(choice);
+    final String choice = (await terminal.readLine()).trim();
     if (_isValidDeviceChoice(choice, deviceCount)) {
       return choice;
     }
