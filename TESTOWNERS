@@ -53,7 +53,6 @@
 /dev/devicelab/bin/tasks/draw_vertices_perf_opengles__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/dynamic_path_stroke_tessellation_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/dynamic_path_tessellation_perf__timeline_summary.dart @jonahwilliams @flutter/engine
-/dev/devicelab/bin/tasks/embedded_android_views_integration_test.dart @gmackall @flutter/android
 /dev/devicelab/bin/tasks/engine_dependency_proxy_test.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/fast_scroll_heavy_gridview__memory.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_engine_group_performance.dart @jtmcdole @flutter/engine
