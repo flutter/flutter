@@ -1838,6 +1838,20 @@ void main() {
     );
     expect(tester.getSize(find.byType(IgnoreBaseline)), Size.zero);
   });
+
+  testWidgets('PositionedDirectional does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Stack(children: [PositionedDirectional(child: Placeholder())]),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(PositionedDirectional)), Size.zero);
+  });
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
