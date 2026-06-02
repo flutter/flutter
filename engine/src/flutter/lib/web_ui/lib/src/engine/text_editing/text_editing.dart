@@ -198,6 +198,8 @@ class EngineAutofillForm {
 
   final elements = <String, DomHTMLElement>{};
 
+  final Map<String, String> _lastSentAutofillText = <String, String>{};
+
   final Map<String, FieldItem> items;
 
   /// Identifier for the form.
@@ -416,6 +418,17 @@ class EngineAutofillForm {
       final AutofillInfo autofill = items[key]!.autofillInfo;
       // Focused elements are updated directly through `setEditingState`.
       if (key != focusedElementId) {
+        // If the browser autofilled a non-focused field while this form was
+        // dormant, the DOM can have the new text before the framework state
+        // does. Forward that value and leave it in place instead of overwriting
+        // it with stale autofill state.
+        final domEditingState = EditingState.fromDomElement(element);
+        if (domEditingState.text.isNotEmpty && domEditingState.text != autofill.editingState.text) {
+          if (domEditingState.text != _lastSentAutofillText[autofill.uniqueIdentifier]) {
+            _sendAutofillEditingState(autofill.uniqueIdentifier, domEditingState);
+          }
+          continue;
+        }
         // Non-focused elements do not have selection, and applying selection on them may cause them
         // to gain focus unexpectedly.
         autofill.editingState.applyTextToDomElement(element);
@@ -467,6 +480,7 @@ class EngineAutofillForm {
 
   /// Sends the 'TextInputClient.updateEditingStateWithTag' message to the framework.
   void _sendAutofillEditingState(String tag, EditingState editingState) {
+    _lastSentAutofillText[tag] = editingState.text;
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
       'flutter/textinput',
       const JSONMethodCodec().encodeMethodCall(

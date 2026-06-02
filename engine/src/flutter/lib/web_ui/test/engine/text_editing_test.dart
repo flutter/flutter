@@ -2597,6 +2597,63 @@ Future<void> testMain() async {
       hideKeyboard();
     });
 
+    test('multiTextField Autofill preserves changed dormant values on wake', () async {
+      final Map<String, dynamic> flutterMultiAutofillElementConfig = createFlutterConfig(
+        'text',
+        autofillHint: 'username',
+        autofillHintsForFields: <String>['username', 'current-password'],
+      );
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        flutterMultiAutofillElementConfig,
+      ]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      var formElement = defaultTextEditingRoot.querySelector('form')! as DomHTMLFormElement;
+      final passwordElement = formElement.childNodes.toList()[1] as DomHTMLInputElement;
+
+      const clearClient = MethodCall('TextInput.clearClient');
+      sendFrameworkMessage(codec.encodeMethodCall(clearClient));
+      passwordElement.value = 'secret-password';
+      spy.messages.clear();
+
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      formElement = defaultTextEditingRoot.querySelector('form')! as DomHTMLFormElement;
+      final restoredPasswordElement = formElement.childNodes.toList()[1] as DomHTMLInputElement;
+      expect(restoredPasswordElement.value, 'secret-password');
+      final Iterable<PlatformMessage> autofillMessages = spy.messages.where(
+        (PlatformMessage message) =>
+            message.methodName == 'TextInputClient.updateEditingStateWithTag',
+      );
+      expect(autofillMessages, hasLength(1));
+      expect(autofillMessages.single.channel, 'flutter/textinput');
+      expect(autofillMessages.single.methodArguments, <dynamic>[
+        0,
+        <String, dynamic>{
+          'current-password': <String, dynamic>{
+            'text': 'secret-password',
+            'selectionBase': 15,
+            'selectionExtent': 15,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        },
+      ]);
+    });
+
     test('Multi-line mode also works', () async {
       final setClient = MethodCall('TextInput.setClient', <dynamic>[123, flutterMultilineConfig]);
       sendFrameworkMessage(codec.encodeMethodCall(setClient));
