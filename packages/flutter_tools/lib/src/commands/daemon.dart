@@ -45,7 +45,7 @@ const protocolVersion = '0.6.1';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({required Xcode xcode, this.hidden = false}) : _xcode = xcode {
+  DaemonCommand({Xcode? xcode, this.hidden = false}) : _xcode = xcode {
     argParser.addOption(
       'listen-on-tcp-port',
       help:
@@ -54,7 +54,7 @@ class DaemonCommand extends FlutterCommand {
     );
   }
 
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   @override
   final name = 'daemon';
@@ -113,7 +113,7 @@ class DaemonServer {
     this.port,
     required this.logger,
     this.notifyingLogger,
-    required Xcode xcode,
+    Xcode? xcode,
     @visibleForTesting
     Future<ServerSocket> Function(InternetAddress address, int port) bind = ServerSocket.bind,
   }) : _bind = bind,
@@ -128,7 +128,7 @@ class DaemonServer {
   final NotifyingLogger? notifyingLogger;
 
   final Future<ServerSocket> Function(InternetAddress address, int port) _bind;
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   Future<void> run() async {
     ServerSocket? serverSocket;
@@ -185,7 +185,7 @@ class Daemon {
     this.notifyingLogger,
     this.logToStdout = false,
     FileTransfer fileTransfer = const FileTransfer(),
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _xcode = xcode {
     // Set up domains.
     registerDomain(daemonDomain = DaemonDomain(this));
@@ -207,7 +207,7 @@ class Daemon {
     );
   }
 
-  factory Daemon.createMachineDaemon(Xcode xcode) {
+  factory Daemon.createMachineDaemon(Xcode? xcode) {
     final daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
@@ -234,9 +234,9 @@ class Daemon {
 
   final NotifyingLogger? notifyingLogger;
   final bool logToStdout;
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
-  Xcode get xcode => _xcode;
+  Xcode? get xcode => _xcode;
 
   final _onExitCompleter = Completer<int>();
   final _domainMap = <String, Domain>{};

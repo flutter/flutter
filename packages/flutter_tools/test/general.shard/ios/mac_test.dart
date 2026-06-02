@@ -206,6 +206,7 @@ void main() {
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: FakeXcode(),
       );
       expect(
         fakeAnalytics.sentEvents,
@@ -235,7 +236,6 @@ Failed to build iOS app
 Error output from Xcode build:
 ↳
     ** BUILD FAILED **
-
 
     The following build commands failed:
     	Check dependencies
@@ -297,6 +297,7 @@ Error launching application on iPhone.''',
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: FakeXcode(),
       );
       expect(logger.errorText, contains(noProvisioningProfileInstruction));
     });
@@ -339,6 +340,7 @@ Error launching application on iPhone.''',
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: FakeXcode(),
       );
       expect(logger.errorText, contains(missingPlatformInstructions('iOS 17.0')));
     });
@@ -355,7 +357,6 @@ Failed to build iOS app
 Error output from Xcode build:
 ↳
     ** BUILD FAILED **
-
 
     The following build commands failed:
     	Check dependencies
@@ -383,6 +384,7 @@ Could not build the precompiled application for the device.''',
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
         project: FakeFlutterProject(fileSystem: fs),
+        xcode: FakeXcode(),
       );
       expect(
         logger.errorText,
@@ -406,7 +408,6 @@ Failed to build iOS app
 Error output from Xcode build:
 ↳
     ** BUILD FAILED **
-
 
     The following build commands failed:
     	Check dependencies
@@ -440,6 +441,7 @@ Could not build the precompiled application for the device.''',
           fileSystem: fs,
           platform: FlutterDarwinPlatform.ios,
           project: FakeFlutterProject(fileSystem: fs),
+          xcode: FakeXcode(),
         );
         expect(logger.errorText, contains('Error (Xcode): Target aot_assembly_release failed'));
         expect(
@@ -477,6 +479,7 @@ Could not build the precompiled application for the device.''',
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
         project: project,
+        xcode: FakeXcode(),
       );
       expect(
         logger.errorText,
@@ -523,6 +526,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
         project: project,
+        xcode: FakeXcode(),
       );
       expect(
         logger.errorText,
@@ -566,6 +570,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
         project: project,
+        xcode: FakeXcode(),
       );
       expect(
         logger.errorText,
@@ -608,6 +613,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
         project: project,
+        xcode: FakeXcode(),
       );
       expect(
         logger.errorText,
@@ -673,6 +679,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           fileSystem: fs,
           platform: FlutterDarwinPlatform.ios,
           project: project,
+          xcode: FakeXcode(),
         );
         expect(
           logger.errorText,
@@ -728,6 +735,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
         fileSystem: fs,
         platform: FlutterDarwinPlatform.ios,
         project: project,
+        xcode: FakeXcode(),
       );
       expect(
         logger.errorText,
@@ -811,6 +819,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
             platform: FlutterDarwinPlatform.ios,
             project: project,
             device: fakeDevice,
+            xcode: FakeXcode(),
           );
           expect(
             logger.errorText,
@@ -864,6 +873,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           fileSystem: fs,
           platform: FlutterDarwinPlatform.ios,
           project: project,
+          xcode: FakeXcode(),
         );
 
         expect(
@@ -918,6 +928,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
           fileSystem: fs,
           platform: FlutterDarwinPlatform.ios,
           project: project,
+          xcode: FakeXcode(),
         );
 
         expect(

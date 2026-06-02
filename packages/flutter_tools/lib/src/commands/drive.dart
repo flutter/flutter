@@ -66,7 +66,7 @@ class DriveCommand extends RunCommandBase {
     required Terminal terminal,
     required OutputPreferences outputPreferences,
     required this.signals,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _flutterDriverFactory = flutterDriverFactory,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -216,7 +216,7 @@ class DriveCommand extends RunCommandBase {
   final Terminal _terminal;
   final OutputPreferences _outputPreferences;
   final FileSystemUtils _fsUtils;
-  final Xcode _xcode;
+  final Xcode? _xcode;
   Timer? timeoutTimer;
   Map<ProcessSignal, Object>? screenshotTokens;
 

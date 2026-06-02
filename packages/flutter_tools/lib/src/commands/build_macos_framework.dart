@@ -37,7 +37,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     super.cache,
     super.platform,
     required super.codesign,
-    required super.xcode,
+    super.xcode,
   });
 
   @override
@@ -356,7 +356,7 @@ end
     final Status status = globals.logger.startProgress(' ├─Building plugins...');
     try {
       final pluginsBuildCommand = <String>[
-        ...xcode.xcrunCommand(),
+        ...xcode!.xcrunCommand(),
         'xcodebuild',
         '-alltargets',
         '-sdk',

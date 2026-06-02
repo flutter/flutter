@@ -33,7 +33,7 @@ import 'build.dart';
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({required super.logger, required bool verboseHelp, required Xcode xcode})
+  BuildIOSCommand({required super.logger, required bool verboseHelp, Xcode? xcode})
     : super(verboseHelp: verboseHelp, xcode: xcode) {
     addPublishPort(verboseHelp: verboseHelp);
     argParser
@@ -109,7 +109,7 @@ class _ImageAssetFileKey {
 ///
 /// Can only be run on a macOS host.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
-  BuildIOSArchiveCommand({required super.logger, required super.verboseHelp, required Xcode xcode})
+  BuildIOSArchiveCommand({required super.logger, required super.verboseHelp, Xcode? xcode})
     : super(xcode: xcode) {
     argParser.addOption(
       'export-method',
@@ -561,7 +561,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       }
 
       result = await globals.processUtils.run(<String>[
-        ..._xcode.xcrunCommand(),
+        ..._xcode!.xcrunCommand(),
         'xcodebuild',
         '-exportArchive',
         if (shouldCodesign) ...<String>[
@@ -875,7 +875,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   // are now deprecated. The new equivalents are 'app-store-connect', 'release-testing',
   // and 'debugging'.
   String _getVersionAppropriateExportMethod(String method) {
-    final Version? currVersion = _xcode.currentVersion;
+    final Version? currVersion = _xcode?.currentVersion;
     if (currVersion != null) {
       if (currVersion >= Version(15, 4, 0)) {
         switch (method) {
@@ -894,7 +894,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 }
 
 abstract class _BuildIOSSubCommand extends BuildSubCommand {
-  _BuildIOSSubCommand({required super.logger, required bool verboseHelp, required Xcode xcode})
+  _BuildIOSSubCommand({required super.logger, required bool verboseHelp, Xcode? xcode})
     : _xcode = xcode,
       super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
@@ -923,7 +923,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     DevelopmentArtifact.iOS,
   };
 
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   XcodeBuildAction get xcodeBuildAction;
 
@@ -987,7 +987,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       XcodeBuildAction.archive => 'Archiving $app...',
     });
     final XcodeBuildResult result = await buildXcodeProject(
-      xcode: _xcode,
+      xcode: _xcode!,
       app: app,
       buildInfo: buildInfo,
       targetOverride: targetFile,

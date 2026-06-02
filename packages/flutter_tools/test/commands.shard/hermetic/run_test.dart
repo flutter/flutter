@@ -30,6 +30,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart' as analytics;
 import 'package:vm_service/vm_service.dart';
@@ -2257,6 +2258,7 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
     bool machine = false,
     Future<String> Function(String)? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
+    Xcode? xcode,
   }) {
     lastOptions = debuggingOptions;
     lastWebDefines = webDefines;

@@ -41,7 +41,7 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform {
-  XcodeBasedProject({required Xcode? xcode}) : _xcode = xcode;
+  XcodeBasedProject({Xcode? xcode}) : _xcode = xcode;
 
   final Xcode? _xcode;
 
@@ -505,7 +505,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 /// Instances will reflect the contents of the `ios/` sub-folder of
 /// Flutter applications and the `.ios/` sub-folder of Flutter module projects.
 class IosProject extends XcodeBasedProject {
-  IosProject.fromFlutter(this.parent, {required super.xcode});
+  IosProject.fromFlutter(this.parent, {super.xcode});
 
   @override
   final FlutterProject parent;
@@ -1260,7 +1260,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
 
 /// The macOS sub project.
 class MacOSProject extends XcodeBasedProject {
-  MacOSProject.fromFlutter(this.parent, {required super.xcode});
+  MacOSProject.fromFlutter(this.parent, {super.xcode});
 
   @override
   final FlutterProject parent;

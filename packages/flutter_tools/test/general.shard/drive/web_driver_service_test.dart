@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
@@ -341,6 +342,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     Analytics? analytics,
     bool machine = false,
     Map<String, String> webDefines = const <String, String>{},
+    Xcode? xcode,
   }) {
     expect(stayResident, isTrue);
     return FakeResidentRunner(

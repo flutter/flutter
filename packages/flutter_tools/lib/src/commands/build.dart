@@ -55,7 +55,7 @@ class BuildCommand extends FlutterCommand {
     required TemplateRenderer templateRenderer,
     required Terminal terminal,
     required PlistParser plistParser,
-    required Xcode xcode,
+    Xcode? xcode,
     bool verboseHelp = false,
   }) {
     _addSubcommand(

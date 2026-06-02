@@ -40,7 +40,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     Platform? platform,
     required this.codesign,
     required super.logger,
-    required this.xcode,
+    this.xcode,
   }) : _injectedFlutterVersion = flutterVersion,
        _buildSystem = buildSystem,
        _injectedCache = cache,
@@ -111,7 +111,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   }
   final DarwinAddToAppCodesigning codesign;
 
-  final Xcode xcode;
+  final Xcode? xcode;
 
   final BuildSystem? _buildSystem;
   @protected
@@ -455,7 +455,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     super.cache,
     super.platform,
     required super.codesign,
-    required super.xcode,
+    super.xcode,
   }) : super(verboseHelp: verboseHelp) {
     usesFlavorOption();
 
@@ -808,7 +808,7 @@ end
               sdkType,
               globals.artifacts!,
             ).map((DarwinArch e) => e.name).join(' '),
-            kSdkRoot: await xcode.sdkLocation(sdkType),
+            kSdkRoot: await xcode!.sdkLocation(sdkType),
             ...buildInfo.toBuildSystemEnvironment(),
           },
           artifacts: globals.artifacts!,
@@ -865,7 +865,7 @@ end
     final Status status = globals.logger.startProgress(' ├─Building plugins...');
     try {
       var pluginsBuildCommand = <String>[
-        ...xcode.xcrunCommand(),
+        ...xcode!.xcrunCommand(),
         'xcodebuild',
         '-alltargets',
         '-sdk',
@@ -890,7 +890,7 @@ end
       // Always build debug for simulator.
       final String simulatorConfiguration = BuildMode.debug.uppercaseName;
       pluginsBuildCommand = <String>[
-        ...xcode.xcrunCommand(),
+        ...xcode!.xcrunCommand(),
         'xcodebuild',
         '-alltargets',
         '-sdk',

@@ -36,7 +36,7 @@ class WebDriverService extends DriverService {
     required Logger logger,
     required Terminal terminal,
     required OutputPreferences outputPreferences,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
        _platform = platform,
@@ -51,7 +51,7 @@ class WebDriverService extends DriverService {
   final Logger _logger;
   final Terminal _terminal;
   final OutputPreferences _outputPreferences;
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;

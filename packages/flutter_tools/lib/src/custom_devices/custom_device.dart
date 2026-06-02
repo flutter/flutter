@@ -430,7 +430,7 @@ class CustomDevice extends Device {
     required CustomDeviceConfig config,
     required super.logger,
     required ProcessManager processManager,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _config = config,
        _logger = logger,
        _processManager = processManager,
@@ -456,7 +456,7 @@ class CustomDevice extends Device {
   final CustomDeviceConfig _config;
   final Logger _logger;
   final ProcessManager _processManager;
-  final Xcode _xcode;
+  final Xcode? _xcode;
   final ProcessUtils _processUtils;
   final _sessions = <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
@@ -801,7 +801,7 @@ class CustomDevices extends PollingDeviceDiscovery {
     required ProcessManager processManager,
     required Logger logger,
     required CustomDevicesConfig config,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
        _logger = logger,
        _processManager = processManager,
@@ -813,7 +813,7 @@ class CustomDevices extends PollingDeviceDiscovery {
   final ProcessManager _processManager;
   final Logger _logger;
   final CustomDevicesConfig _config;
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   @override
   bool get supportsPlatform => true;

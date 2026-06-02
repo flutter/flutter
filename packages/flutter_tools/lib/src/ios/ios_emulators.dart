@@ -11,9 +11,9 @@ import '../macos/xcode.dart';
 import 'simulators.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
-  IOSEmulators({required Xcode xcode}) : _xcode = xcode;
+  IOSEmulators({Xcode? xcode}) : _xcode = xcode;
 
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   @override
   bool get supportsPlatform => globals.platform.isMacOS;
@@ -29,9 +29,9 @@ class IOSEmulators extends EmulatorDiscovery {
 }
 
 class IOSEmulator extends Emulator {
-  IOSEmulator(String id, {required Xcode xcode}) : _xcode = xcode, super(id, true);
+  IOSEmulator(String id, {Xcode? xcode}) : _xcode = xcode, super(id, true);
 
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   @override
   String get name => 'iOS Simulator';
@@ -47,7 +47,7 @@ class IOSEmulator extends Emulator {
 
   @override
   Future<void> launch({bool coldBoot = false}) async {
-    final String? simulatorPath = _xcode.getSimulatorPath();
+    final String? simulatorPath = _xcode?.getSimulatorPath();
     if (simulatorPath == null) {
       throwToolExit('Could not find Simulator app');
     }
@@ -74,8 +74,8 @@ class IOSEmulator extends Emulator {
 }
 
 /// Return the list of iOS Simulators (there can only be zero or one).
-List<IOSEmulator> getEmulators(Xcode xcode) {
-  final String? simulatorPath = xcode.getSimulatorPath();
+List<IOSEmulator> getEmulators(Xcode? xcode) {
+  final String? simulatorPath = xcode?.getSimulatorPath();
   if (simulatorPath == null) {
     return <IOSEmulator>[];
   }

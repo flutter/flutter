@@ -20,7 +20,7 @@ class BuildBundleCommand extends BuildSubCommand {
     required super.logger,
     bool verboseHelp = false,
     BundleBuilder? bundleBuilder,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _bundleBuilder = bundleBuilder ?? BundleBuilder(xcode: xcode),
        super(verboseHelp: verboseHelp) {
     usesTargetOption();

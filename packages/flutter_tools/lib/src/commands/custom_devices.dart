@@ -36,7 +36,7 @@ class CustomDevicesCommand extends FlutterCommand {
     required FileSystem fileSystem,
     required Logger logger,
     required FeatureFlags featureFlags,
-    required Xcode xcode,
+    Xcode? xcode,
   }) {
     return CustomDevicesCommand._common(
       customDevicesConfig: customDevicesConfig,
@@ -61,7 +61,7 @@ class CustomDevicesCommand extends FlutterCommand {
     required FileSystem fileSystem,
     required Logger logger,
     required FeatureFlags featureFlags,
-    required Xcode xcode,
+    Xcode? xcode,
   }) {
     return CustomDevicesCommand._common(
       customDevicesConfig: customDevicesConfig,
@@ -85,7 +85,7 @@ class CustomDevicesCommand extends FlutterCommand {
     required FileSystem fileSystem,
     required Logger logger,
     required FeatureFlags featureFlags,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _customDevicesConfig = customDevicesConfig,
        _featureFlags = featureFlags {
     addSubcommand(
@@ -305,7 +305,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     required ProcessManager processManager,
     required FileSystem super.fileSystem,
     required super.logger,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _terminal = terminal,
        _platform = platform,
@@ -367,7 +367,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   final Terminal _terminal;
   final Platform _platform;
   final ProcessManager _processManager;
-  final Xcode _xcode;
+  final Xcode? _xcode;
   late StreamQueue<String> inputs;
 
   @override

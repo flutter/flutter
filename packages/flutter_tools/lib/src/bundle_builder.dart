@@ -26,9 +26,9 @@ import 'project.dart';
 
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
-  BundleBuilder({required Xcode xcode}) : _xcode = xcode;
+  BundleBuilder({Xcode? xcode}) : _xcode = xcode;
 
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   /// Builds the bundle for the given target platform.
   ///

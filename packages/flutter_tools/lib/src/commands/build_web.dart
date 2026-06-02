@@ -22,7 +22,7 @@ class BuildWebCommand extends BuildSubCommand {
     required super.logger,
     required FileSystem fileSystem,
     required bool verboseHelp,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _fileSystem = fileSystem,
        _xcode = xcode,
        super(verboseHelp: verboseHelp) {
@@ -151,7 +151,7 @@ class BuildWebCommand extends BuildSubCommand {
   }
 
   final FileSystem _fileSystem;
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{

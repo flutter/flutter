@@ -33,7 +33,7 @@ class FlutterDriverFactory {
     required ProcessUtils processUtils,
     required String dartSdkPath,
     required DevtoolsLauncher devtoolsLauncher,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _applicationPackageFactory = applicationPackageFactory,
        _platform = platform,
        _logger = logger,
@@ -52,7 +52,7 @@ class FlutterDriverFactory {
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   /// Create a driver service for running `flutter drive`.
   DriverService createDriverService(bool web) {

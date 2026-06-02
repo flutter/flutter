@@ -65,7 +65,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required Analytics analytics,
     bool machine = false,
     Map<String, String> webDefines = const <String, String>{},
-    required Xcode xcode,
+    Xcode? xcode,
   }) {
     return ResidentWebRunner(
       device,
@@ -111,7 +111,7 @@ class ResidentWebRunner extends ResidentRunner {
     required OutputPreferences outputPreferences,
     required SystemClock systemClock,
     required Analytics analytics,
-    required Xcode xcode,
+    Xcode? xcode,
     UrlTunneller? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
   }) : _fileSystem = fileSystem,

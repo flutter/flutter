@@ -23,7 +23,6 @@ import '../native_assets.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../version.dart';
-import '../macos/xcode.dart';
 
 class FlutterTesterApp extends ApplicationPackage {
   factory FlutterTesterApp.fromCurrentDirectory(FileSystem fileSystem) {
@@ -51,7 +50,6 @@ class FlutterTesterDevice extends Device {
     required super.logger,
     required FileSystem fileSystem,
     required Artifacts artifacts,
-    required Xcode xcode,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : _processManager = processManager,
        _flutterVersion = flutterVersion,
@@ -59,7 +57,6 @@ class FlutterTesterDevice extends Device {
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _nativeAssetsBuilder = nativeAssetsBuilder,
-       _xcode = xcode,
        super(platformType: null, category: null, ephemeral: false);
 
   final ProcessManager _processManager;
@@ -68,7 +65,6 @@ class FlutterTesterDevice extends Device {
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
   final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
-  final Xcode _xcode;
 
   Process? _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
@@ -148,7 +144,7 @@ class FlutterTesterDevice extends Device {
 
     // Build assets and perform initial compilation.
     final FlutterProject project = FlutterProject.current();
-    await BundleBuilder(xcode: _xcode).build(
+    await BundleBuilder().build(
       project: project,
       buildInfo: buildInfo,
       mainPath: mainPath,
@@ -244,7 +240,6 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     required ProcessManager processManager,
     required Logger logger,
     required FlutterVersion flutterVersion,
-    required Xcode xcode,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : _testerDevice = FlutterTesterDevice(
          kTesterDeviceId,
@@ -254,7 +249,6 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
          logger: logger,
          flutterVersion: flutterVersion,
          nativeAssetsBuilder: nativeAssetsBuilder,
-         xcode: xcode,
        ),
        super('Flutter tester');
 

@@ -345,7 +345,7 @@ class Environment {
     required ProcessManager processManager,
     required Platform platform,
     required Analytics analytics,
-    required Xcode xcode,
+    Xcode? xcode,
     String? engineVersion,
     required bool generateDartPluginRegistry,
     Directory? buildDir,
@@ -458,7 +458,7 @@ class Environment {
     required this.fileSystem,
     required this.artifacts,
     required this.analytics,
-    required this.xcode,
+    this.xcode,
     this.engineVersion,
     required this.inputs,
     required this.generateDartPluginRegistry,
@@ -573,7 +573,7 @@ class Environment {
 
   final FileSystem fileSystem;
 
-  final Xcode xcode;
+  final Xcode? xcode;
 
   final Analytics analytics;
 

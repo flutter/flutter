@@ -887,7 +887,7 @@ Future<void> _createStubAppFramework(
 
     final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, fileSystem);
 
-    await environment.xcode.clang(<String>[
+    await environment.xcode!.clang(<String>[
       '-x',
       'c',
       for (final String arch in iosArchNames ?? <String>{}) ...<String>['-arch', arch],

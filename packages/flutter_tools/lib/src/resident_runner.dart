@@ -952,7 +952,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.flutterDevices, {
     required this.target,
     required this.debuggingOptions,
-    required this.xcode,
+    this.xcode,
     String? projectRootPath,
     this.stayResident = true,
     this.hotMode = true,
@@ -996,7 +996,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   @override
   final bool stayResident;
   final String? _dillOutputPath;
-  final Xcode xcode;
+  final Xcode? xcode;
 
   /// The parent location of the incremental artifacts.
   final Directory artifactDirectory;

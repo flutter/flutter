@@ -30,7 +30,7 @@ class EmulatorManager {
     required ProcessManager processManager,
     required AndroidWorkflow androidWorkflow,
     required FileSystem fileSystem,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _java = java,
        _androidSdk = androidSdk,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),

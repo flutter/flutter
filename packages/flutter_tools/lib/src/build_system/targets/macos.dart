@@ -220,7 +220,7 @@ class DebugMacOSFramework extends Target {
       ..writeAsStringSync(r'''
 static const int Moo = 88;
 ''');
-    final RunResult result = await environment.xcode.clang(<String>[
+    final RunResult result = await environment.xcode!.clang(<String>[
       '-x',
       'c',
       debugApp.path,

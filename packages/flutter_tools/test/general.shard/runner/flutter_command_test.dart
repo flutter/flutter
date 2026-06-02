@@ -1721,6 +1721,8 @@ class FakeClock extends Fake implements SystemClock {
 }
 
 class _TestRunCommandThatOnlyValidates extends RunCommand {
+  _TestRunCommandThatOnlyValidates() : super(xcode: FakeXcode());
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();

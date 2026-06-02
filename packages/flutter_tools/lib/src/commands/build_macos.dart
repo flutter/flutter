@@ -15,7 +15,7 @@ import 'build.dart';
 
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
-  BuildMacosCommand({required super.logger, required bool verboseHelp, required Xcode xcode})
+  BuildMacosCommand({required super.logger, required bool verboseHelp, Xcode? xcode})
     : _xcode = xcode,
       super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
@@ -29,7 +29,7 @@ class BuildMacosCommand extends BuildSubCommand {
     );
   }
 
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   @override
   final name = 'macos';
@@ -75,7 +75,7 @@ class BuildMacosCommand extends BuildSubCommand {
         analytics: analytics,
       ),
       usingCISystem: usingCISystem,
-      xcode: _xcode,
+      xcode: _xcode!,
     );
     return FlutterCommandResult.success();
   }

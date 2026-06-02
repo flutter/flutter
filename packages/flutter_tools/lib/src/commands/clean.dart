@@ -16,7 +16,7 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class CleanCommand extends FlutterCommand {
-  CleanCommand({required Xcode xcode, bool verbose = false}) : _xcode = xcode, _verbose = verbose {
+  CleanCommand({Xcode? xcode, bool verbose = false}) : _xcode = xcode, _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
       'scheme',
@@ -31,7 +31,7 @@ class CleanCommand extends FlutterCommand {
     );
   }
 
-  final Xcode _xcode;
+  final Xcode? _xcode;
   final bool _verbose;
 
   @override
@@ -49,7 +49,7 @@ class CleanCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final FlutterProject flutterProject = FlutterProject.current();
-    final bool cleanXcode = _xcode.isInstalledAndMeetsVersionCheck;
+    final bool cleanXcode = _xcode?.isInstalledAndMeetsVersionCheck ?? false;
 
     await _cleanProject(flutterProject, cleanXcode: cleanXcode);
     if (boolArg('include-example')) {

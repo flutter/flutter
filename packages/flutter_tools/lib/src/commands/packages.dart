@@ -25,7 +25,7 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class PackagesCommand extends FlutterCommand {
-  PackagesCommand({required Xcode xcode}) {
+  PackagesCommand({Xcode? xcode}) {
     addSubcommand(
       PackagesGetCommand(
         'get',
@@ -215,10 +215,10 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
 /// Represents the pub sub-commands that makes package-resolutions.
 class PackagesGetCommand extends FlutterCommand {
-  PackagesGetCommand(this._commandName, this._description, this._context, {required Xcode xcode})
+  PackagesGetCommand(this._commandName, this._description, this._context, {Xcode? xcode})
     : _xcode = xcode;
 
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   @override
   ArgParser argParser = ArgParser.allowAnything();

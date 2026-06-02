@@ -39,6 +39,6 @@ abstract class WebRunnerFactory {
     required Analytics analytics,
     bool machine = false,
     Map<String, String> webDefines,
-    required Xcode xcode,
+    Xcode? xcode,
   });
 }

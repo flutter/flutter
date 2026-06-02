@@ -72,7 +72,7 @@ class AttachCommand extends FlutterCommand {
     required Platform platform,
     required ProcessInfo processInfo,
     required FileSystem fileSystem,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(xcode: xcode),
        _stdio = stdio,
        _logger = logger,
@@ -152,7 +152,7 @@ class AttachCommand extends FlutterCommand {
   final Platform _platform;
   final ProcessInfo _processInfo;
   final FileSystem _fileSystem;
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   @override
   final name = 'attach';
@@ -473,9 +473,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 }
 
 class HotRunnerFactory {
-  HotRunnerFactory({required Xcode xcode}) : _xcode = xcode;
+  HotRunnerFactory({Xcode? xcode}) : _xcode = xcode;
 
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   HotRunner build(
     List<FlutterDevice> devices, {

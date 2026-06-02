@@ -25,7 +25,7 @@ class MacOSDevice extends DesktopDevice {
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _processManager = processManager,
        _logger = logger,
        _operatingSystemUtils = operatingSystemUtils,
@@ -35,7 +35,7 @@ class MacOSDevice extends DesktopDevice {
   final ProcessManager _processManager;
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   @override
   Future<bool> isSupported() async => true;
@@ -74,7 +74,7 @@ class MacOSDevice extends DesktopDevice {
       targetOverride: mainPath,
       verboseLogging: _logger.isVerbose,
       usingCISystem: usingCISystem,
-      xcode: _xcode,
+      xcode: _xcode!,
     );
   }
 
@@ -110,7 +110,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
     required Logger logger,
     required FileSystem fileSystem,
     required OperatingSystemUtils operatingSystemUtils,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _logger = logger,
        _platform = platform,
        _macOSWorkflow = macOSWorkflow,
@@ -126,7 +126,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;

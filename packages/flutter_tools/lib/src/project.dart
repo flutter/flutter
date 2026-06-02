@@ -50,13 +50,10 @@ enum SupportedPlatform {
 }
 
 class FlutterProjectFactory {
-  FlutterProjectFactory({
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Xcode? xcode,
-  }) : _logger = logger,
-       _fileSystem = fileSystem,
-       _xcode = xcode;
+  FlutterProjectFactory({required Logger logger, required FileSystem fileSystem, Xcode? xcode})
+    : _logger = logger,
+      _fileSystem = fileSystem,
+      _xcode = xcode;
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -95,12 +92,8 @@ class FlutterProjectFactory {
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(
-    this.directory,
-    FlutterManifest manifest,
-    this._exampleManifest, {
-    required Xcode? xcode,
-  }) : _xcode = xcode {
+  FlutterProject(this.directory, FlutterManifest manifest, this._exampleManifest, {Xcode? xcode})
+    : _xcode = xcode {
     _setManifest(manifest);
   }
 

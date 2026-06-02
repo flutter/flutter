@@ -50,7 +50,7 @@ class WebBuilder {
     required Analytics analytics,
     required FlutterVersion flutterVersion,
     required FileSystem fileSystem,
-    required Xcode xcode,
+    Xcode? xcode,
   }) : _logger = logger,
        _processManager = processManager,
        _buildSystem = buildSystem,
@@ -59,7 +59,7 @@ class WebBuilder {
        _fileSystem = fileSystem,
        _xcode = xcode;
 
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   final Logger _logger;
   final ProcessManager _processManager;

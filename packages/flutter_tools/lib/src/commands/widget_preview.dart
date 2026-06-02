@@ -58,7 +58,7 @@ class WidgetPreviewCommand extends FlutterCommand {
     required ProcessManager processManager,
     required Artifacts artifacts,
     required Terminal terminal,
-    required Xcode xcode,
+    Xcode? xcode,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) {
@@ -143,7 +143,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required this.processManager,
     required this.artifacts,
     required this.terminal,
-    required Xcode xcode,
+    Xcode? xcode,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) : _logger = logger,
@@ -231,7 +231,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   @override
   WidgetPreviewMachineAwareLogger get logger => _logger as WidgetPreviewMachineAwareLogger;
   final Logger _logger;
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   @override
   final FlutterProjectFactory projectFactory;
