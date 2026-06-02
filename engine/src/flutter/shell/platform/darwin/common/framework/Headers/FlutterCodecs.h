@@ -14,7 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * A message encoding/decoding mechanism.
  *
- * The implementation must be thread-safe as the codec can be used on any thread.
+ * Conforming types must be thread-safe as the codec can be initialized and
+ * used on different threads.
  */
 FLUTTER_DARWIN_EXPORT
 NS_SWIFT_SENDABLE
@@ -96,6 +97,8 @@ NS_SWIFT_SENDABLE
 /**
  * A writer of the Flutter standard binary encoding.
  *
+ * The implementation is not thread-safe.
+ *
  * See `FlutterStandardMessageCodec` for details on the encoding.
  *
  * The encoding is extensible via subclasses overriding `writeValue`.
@@ -136,6 +139,8 @@ NS_SWIFT_NONSENDABLE
 
 /**
  * A reader of the Flutter standard binary encoding.
+ *
+ * The implementation is not thread-safe.
  *
  * See `FlutterStandardMessageCodec` for details on the encoding.
  *
@@ -181,6 +186,8 @@ NS_SWIFT_NONSENDABLE
 /**
  * A factory of compatible reader/writer instances using the Flutter standard
  * binary encoding or extensions thereof.
+ *
+ * The implementation is thread-safe and subclasses must also be thread-safe.
  */
 FLUTTER_DARWIN_EXPORT
 NS_SWIFT_SENDABLE
@@ -405,6 +412,9 @@ FLUTTER_UNAVAILABLE("Unavailable on 2018-08-31. Deprecated on 2018-01-09. "
  * human-readable `NSString` error message (possibly `nil`), and a custom
  * error details `NSObject`, possibly `nil`. These data items are used to
  * populate a `FlutterError`.
+ *
+ * Conforming types must be thread-safe as the codec can be initialized and
+ * used on different threads.
  */
 FLUTTER_DARWIN_EXPORT
 NS_SWIFT_SENDABLE

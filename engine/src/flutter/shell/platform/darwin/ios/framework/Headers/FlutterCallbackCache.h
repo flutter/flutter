@@ -35,7 +35,7 @@ NS_SWIFT_NONSENDABLE
  * `FlutterHeadlessDartRunner`.
  */
 FLUTTER_DARWIN_EXPORT
-NS_SWIFT_NONSENDABLE
+NS_SWIFT_SENDABLE
 @interface FlutterCallbackCache : NSObject
 /**
  * Returns the callback information for the given callback handle.
