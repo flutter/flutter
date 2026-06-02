@@ -190,8 +190,8 @@ TEST(BufferBindingsGLESTest, BindUniformFailsWithoutFloatType) {
 // per-vertex binding keeps a divisor of 0.
 TEST(BufferBindingsGLESTest, BindVertexAttributesSetsInstanceRateDivisor) {
   auto mock_gles_impl = std::make_unique<::testing::NiceMock<MockGLESImpl>>();
-  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisorEXT(0, 0)).Times(1);
-  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisorEXT(1, 1)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(0, 0)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(1, 1)).Times(1);
   std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
 
   BufferBindingsGLES bindings;
