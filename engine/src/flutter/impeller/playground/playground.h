@@ -27,6 +27,7 @@ enum class PlaygroundBackend {
   kMetal,
   kMetalSDF,
   kOpenGLES,
+  kOpenGLESSDF,
   kVulkan,
 };
 

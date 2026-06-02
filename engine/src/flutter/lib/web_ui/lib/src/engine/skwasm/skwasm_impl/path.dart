@@ -252,8 +252,7 @@ class SkwasmPath implements DisposablePath, DisposablePathBuilder {
     final SkStringHandle skString = pathGetSvgString(handle);
     final Pointer<Int8> buffer = skStringGetData(skString);
     final int length = skStringGetLength(skString);
-    final characters = List<int>.generate(length, (int i) => buffer[i]);
-    final String svgString = utf8.decode(characters);
+    final String svgString = utf8.decode(buffer.toUint8List(length));
     skStringFree(skString);
     return svgString;
   }
@@ -269,5 +268,20 @@ class SkwasmPathConstructors implements DisposablePathConstructors {
   @override
   SkwasmPath combinePaths(ui.PathOperation operation, DisposablePath path1, DisposablePath path2) {
     return SkwasmPath.combine(operation, path1 as SkwasmPath, path2 as SkwasmPath);
+  }
+}
+
+/// Using a specialized local extension rather than a generic List<int>.generate
+/// prevents dart2wasm from dynamically boxing the primitive integers into
+/// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+/// Explicitly masks the signed Int8 values to positive unsigned bytes (& 0xFF)
+/// to guarantee correct decoding by the UTF-8 decoder.
+extension on Pointer<Int8> {
+  Uint8List toUint8List(int length) {
+    final list = Uint8List(length);
+    for (int i = length - 1; i >= 0; i--) {
+      list[i] = this[i] & 0xFF;
+    }
+    return list;
   }
 }

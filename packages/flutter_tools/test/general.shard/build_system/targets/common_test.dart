@@ -49,7 +49,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        kTargetPlatform: TargetPlatform.android_arm.getName(),
       },
       inputs: <String, String>{},
       artifacts: artifacts,
@@ -62,7 +62,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
+        kTargetPlatform: TargetPlatform.ios.getName(),
       },
       inputs: <String, String>{},
       artifacts: artifacts,
@@ -393,7 +393,7 @@ void main() {
 
       await const KernelSnapshot().build(
         androidEnvironment
-          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.darwin)
+          ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kTrackWidgetCreation] = 'false',
       );
@@ -487,7 +487,7 @@ void main() {
 
       await const KernelSnapshot().build(
         iosEnvironment
-          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.ios)
+          ..defines[kTargetPlatform] = TargetPlatform.ios.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kFlavor] = 'strawberry'
           ..defines[kXcodeConfiguration] = 'Debug-chocolate'
@@ -544,7 +544,7 @@ void main() {
 
       await const KernelSnapshot().build(
         iosEnvironment
-          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.darwin)
+          ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kFlavor] = 'strawberry'
           ..defines[kXcodeConfiguration] = 'Debug-chocolate'
@@ -600,7 +600,7 @@ void main() {
 
       await const KernelSnapshot().build(
         iosEnvironment
-          ..defines[kTargetPlatform] = getNameForTargetPlatform(TargetPlatform.darwin)
+          ..defines[kTargetPlatform] = TargetPlatform.darwin.getName()
           ..defines[kBuildMode] = BuildMode.debug.cliName
           ..defines[kDartDefines] = base64Encode(utf8.encode('FLUTTER_APP_FLAVOR=vanilla'))
           ..defines[kFlavor] = 'strawberry'
@@ -624,7 +624,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.debug.cliName,
-        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+        kTargetPlatform: TargetPlatform.android_arm.getName(),
       },
       processManager: processManager,
       artifacts: artifacts,
