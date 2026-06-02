@@ -2972,12 +2972,11 @@ class TestPollingDeviceDiscovery extends PollingDeviceDiscovery {
 class TestIOSDeviceDiscovery extends IOSDevices {
   TestIOSDeviceDiscovery({
     required super.platform,
-    required FakeXcdevice xcdevice,
+    required FakeXcdevice super.xcdevice,
     required super.iosWorkflow,
     required super.logger,
   }) : _platform = platform,
-       _xcdevice = xcdevice,
-       super(xcdevice: xcdevice);
+       _xcdevice = xcdevice;
 
   final Platform _platform;
   List<Device> deviceList = <Device>[];
