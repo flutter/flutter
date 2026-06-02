@@ -51,8 +51,12 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   /// {@template flutter.widgets.PageRoute.includeRouteSemantics}
   /// Whether this route introduces a route scope in the semantics tree.
   ///
-  /// Defaults to true. Set this to false for routes that update only part of
-  /// the screen, such as tab or shell content in a nested navigator.
+  /// Defaults to true. When true, screen readers can treat pushes and pops of
+  /// this route as navigation to a new screen.
+  ///
+  /// Set this to false for routes that update only part of the screen, such as
+  /// tab or shell content in a nested navigator. This prevents screen readers
+  /// from treating the route as a new screen.
   /// {@endtemplate}
   bool get includeRouteSemantics => _includeRouteSemantics;
   final bool _includeRouteSemantics;
