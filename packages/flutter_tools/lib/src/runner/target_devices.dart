@@ -359,6 +359,13 @@ class TargetDevices {
   }
 
   Future<String> _readUserInput(int deviceCount) async {
+    if (deviceCount >= 10) {
+      return _readDeviceChoiceLine(
+        terminal: globals.terminal,
+        logger: _logger,
+        deviceCount: deviceCount,
+      );
+    }
     globals.terminal.usesTerminalUi = true;
     final String result = await globals.terminal.promptForCharInput(
       <String>[for (int i = 0; i < deviceCount; i++) '${i + 1}', 'q', 'Q'],
@@ -787,6 +794,16 @@ class TargetDeviceSelection {
   /// Only allow input of a number or `q`.
   @visibleForTesting
   Future<String> readUserInput() async {
+    if (devices.length >= 10) {
+      return _readDeviceChoiceLine(
+        terminal: globals.terminal,
+        logger: _logger,
+        deviceCount: devices.length,
+        onInvalidInput: () {
+          invalidAttempts++;
+        },
+      );
+    }
     final pattern = RegExp(r'\d+$|q', caseSensitive: false);
     String? choice;
     globals.terminal.singleCharMode = true;
@@ -801,4 +818,32 @@ class TargetDeviceSelection {
     globals.terminal.singleCharMode = false;
     return choice;
   }
+}
+
+Future<String> _readDeviceChoiceLine({
+  required Terminal terminal,
+  required Logger logger,
+  required int deviceCount,
+  void Function()? onInvalidInput,
+}) async {
+  while (true) {
+    logger.printStatus(_chooseOneMessage, emphasis: true, newline: false);
+    logger.printStatus(': ', emphasis: true, newline: false);
+    final String choice = (await terminal.readLine()).trim();
+    if (_isValidDeviceChoice(choice, deviceCount)) {
+      return choice;
+    }
+    onInvalidInput?.call();
+  }
+}
+
+bool _isValidDeviceChoice(String? choice, int deviceCount) {
+  if (choice == null) {
+    return false;
+  }
+  if (choice.toLowerCase() == 'q') {
+    return true;
+  }
+  final int? deviceNumber = int.tryParse(choice);
+  return deviceNumber != null && deviceNumber >= 1 && deviceNumber <= deviceCount;
 }
