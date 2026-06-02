@@ -10,11 +10,8 @@
 #include "flutter/lib/ui/painting/image.h"
 #include "fml/logging.h"
 #include "impeller/core/allocator.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "tonic/converter/dart_converter.h"
-
-#if IMPELLER_SUPPORTS_RENDERING
-#include "impeller/display_list/dl_image_impeller.h"  // nogncheck
-#endif
 
 namespace flutter {
 namespace gpu {
@@ -45,10 +42,6 @@ Surface::Surface(std::shared_ptr<impeller::Context> context,
 Surface::~Surface() = default;
 
 std::shared_ptr<Surface::TextureRecord> Surface::CreateTextureRecord() const {
-#if !IMPELLER_SUPPORTS_RENDERING
-  FML_LOG(ERROR) << "Flutter GPU surfaces require Impeller rendering support.";
-  return nullptr;
-#else
   impeller::TextureDescriptor desc;
   desc.storage_mode = impeller::StorageMode::kDevicePrivate;
   desc.size = size_;
@@ -76,7 +69,6 @@ std::shared_ptr<Surface::TextureRecord> Surface::CreateTextureRecord() const {
 
   return std::make_shared<TextureRecord>(std::move(texture), std::move(image),
                                          size_, format_);
-#endif
 }
 
 bool Surface::IsReusable(const std::shared_ptr<TextureRecord>& record,
@@ -258,12 +250,6 @@ Dart_Handle InternalFlutterGpu_Surface_Initialize(
     return tonic::ToDart("GpuSurface dimensions must be greater than zero.");
   }
 
-#if !IMPELLER_SUPPORTS_RENDERING
-  (void)wrapper;
-  (void)gpu_context;
-  (void)format;
-  return tonic::ToDart("GpuSurface requires Impeller rendering support.");
-#else
   auto pixel_format = flutter::gpu::ToImpellerPixelFormat(format);
   if (pixel_format == impeller::PixelFormat::kUnknown) {
     return tonic::ToDart("Unsupported GpuSurface pixel format.");
@@ -274,7 +260,6 @@ Dart_Handle InternalFlutterGpu_Surface_Initialize(
       pixel_format);
   res->AssociateWithDartWrapper(wrapper);
   return Dart_Null();
-#endif
 }
 
 int InternalFlutterGpu_Surface_AcquireNextFrame(flutter::gpu::Surface* wrapper,
