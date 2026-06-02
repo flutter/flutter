@@ -227,7 +227,11 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         botDetector: globals.botDetector,
       ),
       Doctor: () => Doctor(logger: globals.logger, clock: globals.systemClock),
-      DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance(xcode: getXcode()),
+      DoctorValidatorsProvider: () => DoctorValidatorsProvider.create(
+        platform: globals.platform,
+        featureFlags: featureFlags,
+        xcode: getXcode(),
+      ),
       EmulatorManager: () => EmulatorManager(
         java: globals.java,
         androidSdk: globals.androidSdk,

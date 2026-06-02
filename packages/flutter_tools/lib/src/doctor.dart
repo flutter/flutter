@@ -65,13 +65,32 @@ abstract class DoctorValidatorsProvider {
     );
   }
 
-  factory DoctorValidatorsProvider.defaultInstance({required Xcode xcode}) {
+  factory DoctorValidatorsProvider.create({
+    required Platform platform,
+    required FeatureFlags featureFlags,
+    required Xcode xcode,
+  }) {
     return _DefaultDoctorValidatorsProvider(
-      platform: globals.platform,
+      platform: platform,
       featureFlags: featureFlags,
       xcode: xcode,
     );
   }
+
+  static DoctorValidatorsProvider? _defaultInstance;
+  static DoctorValidatorsProvider get defaultInstance =>
+      _defaultInstance ??= _DefaultDoctorValidatorsProvider(
+        platform: globals.platform,
+        featureFlags: featureFlags,
+        xcode:
+            context.get<Xcode>() ??
+            // ignore: invalid_use_of_visible_for_testing_member
+            Xcode.test(
+              processManager: context.get<ProcessManager>() ?? const LocalProcessManager(),
+              fileSystem: context.get<FileSystem>(),
+              logger: context.get<Logger>(),
+            ),
+      );
 
   /// The singleton instance, pulled from the [AppContext].
   static DoctorValidatorsProvider get _instance => context.get<DoctorValidatorsProvider>()!;
