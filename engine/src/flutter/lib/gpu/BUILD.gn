@@ -50,16 +50,11 @@ source_set("gpu") {
       "shader.h",
       "shader_library.cc",
       "shader_library.h",
+      "surface.cc",
+      "surface.h",
       "texture.cc",
       "texture.h",
     ]
-
-    if (impeller_supports_rendering) {
-      sources += [
-        "surface.cc",
-        "surface.h",
-      ]
-    }
   }
   deps = [
     "//flutter/assets",
