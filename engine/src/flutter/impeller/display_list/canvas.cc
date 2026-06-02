@@ -443,11 +443,10 @@ void Canvas::DrawPath(const flutter::DlPath& path, const Paint& paint) {
     geom = std::make_unique<StrokePathGeometry>(path, paint.stroke);
   }
 
-  FML_LOG(IMPORTANT) << "Routing Canvas::DrawPath to PathSdfContents";
   auto contents = PathSdfContents::Make(std::move(geom), paint.color);
-  AddRenderEntityWithFiltersToCurrentPass(entity, contents->GetGeometry(), paint,
-                                          /*reuse_depth=*/false,
-                                          std::move(contents));
+  AddRenderEntityWithFiltersToCurrentPass(
+      entity, contents->GetGeometry(), paint,
+      /*reuse_depth=*/false, std::move(contents));
 }
 
 void Canvas::DrawPaint(const Paint& paint) {

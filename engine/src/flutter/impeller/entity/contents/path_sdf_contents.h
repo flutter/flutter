@@ -14,8 +14,9 @@
 namespace impeller {
 class PathSdfContents : public ColorSourceContents {
  public:
-  static std::unique_ptr<PathSdfContents>
-  Make(std::unique_ptr<Geometry> geometry, Color color);
+  static std::unique_ptr<PathSdfContents> Make(
+      std::unique_ptr<Geometry> geometry,
+      Color color);
 
   bool Render(const ContentContext& renderer,
               const Entity& entity,
@@ -26,8 +27,7 @@ class PathSdfContents : public ColorSourceContents {
   const Geometry* GetGeometry() const override;
 
  private:
-  explicit PathSdfContents(std::unique_ptr<Geometry> geometry,
-                           Color color);
+  explicit PathSdfContents(std::unique_ptr<Geometry> geometry, Color color);
 
   std::unique_ptr<Geometry> geometry_;
   Color color_;

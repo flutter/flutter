@@ -28,34 +28,103 @@ std::unique_ptr<PathSdfContents> PathSdfContents::Make(
 
 PathSdfContents::PathSdfContents(std::unique_ptr<Geometry> geometry,
                                  Color color)
-    : geometry_(std::move(geometry)),
-      color_(color) {}
+    : geometry_(std::move(geometry)), color_(color) {}
 
 bool PathSdfContents::Render(const ContentContext& renderer,
                              const Entity& entity,
                              RenderPass& pass) const {
-  FML_LOG(IMPORTANT) << "PathSdfContents::Render executing";
+  auto coverage = GetCoverage(entity);
+  if (!coverage.has_value() || coverage->IsEmpty()) {
+    return true;
+  }
+
+  // Expand coverage slightly to account for antialiasing edges
+  Rect expanded_coverage = coverage->Expand(4.0f);
+  ISize subpass_size = ISize::Ceil(expanded_coverage.GetSize());
+
+  auto command_buffer = renderer.GetContext()->CreateCommandBuffer();
+  if (!command_buffer) {
+    return false;
+  }
+
+  auto render_target = renderer.MakeSubpass(
+      "PathSDFMaskGen", subpass_size, command_buffer,
+      [this, &entity, &expanded_coverage](const ContentContext& renderer,
+                                          RenderPass& pass) -> bool {
+        Entity sub_entity;
+        sub_entity.SetBlendMode(BlendMode::kSrcOver);
+        sub_entity.SetTransform(
+            Matrix::MakeTranslation(Vector3(-expanded_coverage.GetOrigin())) *
+            entity.GetTransform());
+
+        using VS = SolidFillPipeline::VertexShader;
+        using FS = SolidFillPipeline::FragmentShader;
+        auto& data_host_buffer = renderer.GetTransientsDataBuffer();
+
+        VS::FrameInfo frame_info;
+        FS::FragInfo frag_info;
+        frag_info.color = Color::White();
+
+        PipelineBuilderCallback pipeline_callback =
+            [&renderer](ContentContextOptions options) {
+              return renderer.GetSolidFillPipeline(options);
+            };
+
+        return ColorSourceContents::DrawGeometry<VS>(
+            this, geometry_.get(), renderer, sub_entity, pass,
+            pipeline_callback, frame_info,
+            [&frag_info, &data_host_buffer](RenderPass& pass) {
+              FS::BindFragInfo(pass,
+                               data_host_buffer.EmplaceUniform(frag_info));
+              pass.SetCommandLabel("Solid Mask Fill");
+              return true;
+            });
+      },
+      /*msaa_enabled=*/true,
+      /*depth_stencil_enabled=*/true);
+
+  if (!render_target.ok()) {
+    return false;
+  }
+  if (!renderer.GetContext()->EnqueueCommandBuffer(std::move(command_buffer))) {
+    return false;
+  }
+
+  auto texture = render_target.value().GetRenderTargetTexture();
+  if (!texture) {
+    return false;
+  }
+
   auto& data_host_buffer = renderer.GetTransientsDataBuffer();
 
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
   frag_info.color = color_.WithAlpha(color_.alpha * GetOpacityFactor());
-
-  auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
+  frag_info.bounds_origin = expanded_coverage.GetOrigin();
+  frag_info.bounds_size = Point(expanded_coverage.GetSize().width,
+                                expanded_coverage.GetSize().height);
+  frag_info.stroke_width = 0.0f;
+  frag_info.aa_pixels = 1.0f;
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
         return renderer.GetPathSdfTestPipeline(options);
       };
 
+  auto geometry_result = geometry_->GetPositionBuffer(renderer, entity, pass);
+
   return ColorSourceContents::DrawGeometry<VS>(
       this, geometry_.get(), renderer, entity, pass, pipeline_callback,
       frame_info,
       /*bind_fragment_callback=*/
-      [&frag_info, &data_host_buffer](RenderPass& pass) {
-        FML_LOG(IMPORTANT) << "PathSdfContents::Render bind_fragment_callback binding uniforms";
+      [&frag_info, &data_host_buffer, &texture, &renderer](RenderPass& pass) {
         FS::BindFragInfo(pass, data_host_buffer.EmplaceUniform(frag_info));
-        pass.SetCommandLabel("PathSDF");
+
+        auto sampler =
+            renderer.GetContext()->GetSamplerLibrary()->GetSampler({});
+        FS::BindTextureSampler(pass, texture, sampler);
+
+        pass.SetCommandLabel("PathSDFTextureMain");
         return true;
       },
       /*force_stencil=*/false,
