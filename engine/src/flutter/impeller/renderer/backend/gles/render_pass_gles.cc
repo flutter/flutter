@@ -148,7 +148,8 @@ struct RenderPassData {
 static bool BindVertexBuffer(const ProcTableGLES& gl,
                              BufferBindingsGLES* vertex_desc_gles,
                              const BufferView& vertex_buffer_view,
-                             size_t buffer_index) {
+                             size_t buffer_index,
+                             size_t instance = 0) {
   if (!vertex_buffer_view) {
     return false;
   }
@@ -169,7 +170,7 @@ static bool BindVertexBuffer(const ProcTableGLES& gl,
   /// Bind the vertex attributes associated with vertex buffer.
   ///
   if (!vertex_desc_gles->BindVertexAttributes(
-          gl, buffer_index, vertex_buffer_view.GetRange().offset)) {
+          gl, buffer_index, vertex_buffer_view.GetRange().offset, instance)) {
     return false;
   }
 
@@ -520,10 +521,34 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Finally! Invoke the draw call.
     ///
-    if (command.index_type == IndexType::kNone) {
-      gl.DrawArrays(mode, command.base_vertex, command.element_count);
-    } else {
-      // Bind the index buffer if necessary.
+    /// An instanced draw uses the hardware instanced entry points when the
+    /// driver exposes them (ES 3.0 core, or GL_EXT_instanced_arrays on ES
+    /// 2.0). When it does not, the draw is emulated by repeating it once per
+    /// instance, re-pointing the instance-rate vertex attributes at each
+    /// instance in between.
+    ///
+    const bool instanced = command.instance_count > 1u;
+    const bool hardware_instanced =
+        instanced &&
+        (gl.DrawArraysInstanced.IsAvailable() ||
+         gl.DrawArraysInstancedEXT.IsAvailable()) &&
+        (gl.DrawElementsInstanced.IsAvailable() ||
+         gl.DrawElementsInstancedEXT.IsAvailable()) &&
+        (gl.VertexAttribDivisor.IsAvailable() ||
+         gl.VertexAttribDivisorEXT.IsAvailable());
+    const bool emulate_instanced = instanced && !hardware_instanced;
+    const GLsizei instance_count = static_cast<GLsizei>(command.instance_count);
+
+    // A draw is indexed only when a real index type was set. A command that
+    // never bound an index buffer leaves `index_type` at its `kUnknown`
+    // default, which must be treated as non-indexed (matching the Metal and
+    // Vulkan backends, which key off the presence of the index buffer).
+    const bool is_indexed = command.index_type != IndexType::kNone &&
+                            command.index_type != IndexType::kUnknown;
+
+    // Bind the index buffer once, before any (possibly repeated) draw.
+    const GLvoid* index_offset = nullptr;
+    if (is_indexed) {
       auto index_buffer_view = command.index_buffer;
       const DeviceBuffer* index_buffer = index_buffer_view.GetBuffer();
       const auto& index_buffer_gles = DeviceBufferGLES::Cast(*index_buffer);
@@ -531,12 +556,60 @@ static void EncodeViewport(const ProcTableGLES& gl,
               DeviceBufferGLES::BindingType::kElementArrayBuffer)) {
         return false;
       }
-      gl.DrawElements(mode,                             // mode
-                      command.element_count,            // count
-                      ToIndexType(command.index_type),  // type
-                      reinterpret_cast<const GLvoid*>(static_cast<GLsizei>(
-                          index_buffer_view.GetRange().offset))  // indices
-      );
+      index_offset = reinterpret_cast<const GLvoid*>(
+          static_cast<uintptr_t>(index_buffer_view.GetRange().offset));
+    }
+
+    // A non-instanced draw of the bound geometry. Used directly for ordinary
+    // draws and once per instance when emulating instancing.
+    const auto draw_geometry = [&]() {
+      if (!is_indexed) {
+        gl.DrawArrays(mode, command.base_vertex, command.element_count);
+      } else {
+        gl.DrawElements(mode, command.element_count,
+                        ToIndexType(command.index_type), index_offset);
+      }
+    };
+
+    if (command.instance_count == 0u) {
+      // A zero instance count draws nothing, matching the Metal and Vulkan
+      // backends.
+    } else if (emulate_instanced) {
+      // Repeat the draw once per instance, re-pointing the instance-rate
+      // vertex attributes at each instance in between. The vertex buffers
+      // were already bound above for instance 0.
+      for (size_t instance = 0; instance < command.instance_count; instance++) {
+        if (instance > 0u) {
+          for (size_t i = 0; i < command.vertex_buffers.length; i++) {
+            if (!BindVertexBuffer(
+                    gl, vertex_desc_gles,
+                    vertex_buffers[i + command.vertex_buffers.offset], i,
+                    instance)) {
+              return false;
+            }
+          }
+        }
+        draw_geometry();
+      }
+    } else if (hardware_instanced) {
+      // A single instanced call covers every instance.
+      if (!is_indexed) {
+        const auto& gl_draw_arrays_instanced =
+            gl.DrawArraysInstanced.IsAvailable() ? gl.DrawArraysInstanced
+                                                 : gl.DrawArraysInstancedEXT;
+        gl_draw_arrays_instanced(mode, command.base_vertex,
+                                 command.element_count, instance_count);
+      } else {
+        const auto& gl_draw_elements_instanced =
+            gl.DrawElementsInstanced.IsAvailable()
+                ? gl.DrawElementsInstanced
+                : gl.DrawElementsInstancedEXT;
+        gl_draw_elements_instanced(mode, command.element_count,
+                                   ToIndexType(command.index_type),
+                                   index_offset, instance_count);
+      }
+    } else {
+      draw_geometry();
     }
 
     //--------------------------------------------------------------------------
