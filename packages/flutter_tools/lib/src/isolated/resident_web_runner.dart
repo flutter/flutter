@@ -429,7 +429,7 @@ class ResidentWebRunner extends ResidentRunner {
   List<WebCompilerConfig> get debugCompilerConfigs => _compilerConfigs;
 
   List<WebCompilerConfig> get _compilerConfigs {
-    final JsCompilerConfig jsConfig = JsCompilerConfig.run(
+    final jsConfig = JsCompilerConfig.run(
       nativeNullAssertions: debuggingOptions.nativeNullAssertions,
       renderer: debuggingOptions.webRenderer,
     );

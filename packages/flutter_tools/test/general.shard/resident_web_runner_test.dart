@@ -27,11 +27,11 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
-import 'package:flutter_tools/src/web/compiler_config.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
+import 'package:flutter_tools/src/web/compiler_config.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:package_config/package_config.dart';
@@ -1155,19 +1155,10 @@ name: my_app
   testUsingContext(
     '--wasm produces both Wasm and JS compiler configs for runtime fallback',
     () async {
-      final ResidentWebRunner residentWebRunner =
+      final residentWebRunner =
           setUpResidentRunner(
             flutterDevice,
-            debuggingOptions: DebuggingOptions.enabled(
-              const BuildInfo(
-                BuildMode.debug,
-                null,
-                trackWidgetCreation: true,
-                treeShakeIcons: false,
-                packageConfigPath: '.dart_tool/package_config.json',
-              ),
-              webUseWasm: true,
-            ),
+            debuggingOptions: DebuggingOptions.enabled(BuildInfo.dummy, webUseWasm: true),
           )
               as ResidentWebRunner;
 
@@ -1189,8 +1180,7 @@ name: my_app
   testUsingContext(
     'no --wasm produces only a JS compiler config',
     () async {
-      final ResidentWebRunner residentWebRunner =
-          setUpResidentRunner(flutterDevice) as ResidentWebRunner;
+      final residentWebRunner = setUpResidentRunner(flutterDevice) as ResidentWebRunner;
 
       final List<WebCompilerConfig> configs = residentWebRunner.debugCompilerConfigs;
 
