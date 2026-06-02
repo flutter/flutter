@@ -67,6 +67,12 @@ export interface FlutterConfiguration {
   entrypointBaseUrl?: string;
   forceSingleThreadedSkwasm?: boolean;
   wasmAllowList?: WasmAllowList;
+  /** When true, the Flutter Web loader prints a separate `console.warn`
+   *  line for every candidate build it skipped when no compatible build
+   *  could be found, including the specific reason each was rejected.
+   *  When false (default), a single concise warning is emitted instead.
+   *  Enable while debugging configuration / environment mismatches. */
+  verboseBuildSelection?: boolean;
 }
 
 /** @deprecated Flutter's service worker is deprecated and will be removed in a future Flutter release*/

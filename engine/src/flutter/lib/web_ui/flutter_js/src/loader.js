@@ -94,7 +94,7 @@ export class FlutterLoader {
             return "Skwasm requires WebGL support; this browser does not provide it.";
           }
           if (!enableWasm) {
-            return `Skwasm is disabled by the loader's WASM allowlist for browser engine "${browserEnvironment.browserEngine}".`;
+            return `Skwasm is disabled by your wasmAllowList configuration for browser engine "${browserEnvironment.browserEngine}".`;
           }
           return null;
         default:
@@ -129,11 +129,21 @@ export class FlutterLoader {
     }
 
     if (!build) {
-      // Surface every skipped build's reason so a user with a "no compatible
-      // build" failure can see exactly which constraint blocked each.
-      for (const skipped of skippedBuilds) {
+      // Default: emit a single concise warning so the console stays quiet for
+      // the typical "no compatible build" failure. Opt in to verbose per-build
+      // diagnostics by setting `verboseBuildSelection: true` in the Flutter
+      // config — useful when investigating why a specific build was rejected.
+      if (config.verboseBuildSelection) {
+        for (const skipped of skippedBuilds) {
+          console.warn(
+            `Flutter Web: build ${skipped.candidate.compileTarget}/${skipped.candidate.renderer} was rejected: ${skipped.reason}`
+          );
+        }
+      } else {
         console.warn(
-          `Flutter Web: build ${skipped.candidate.compileTarget}/${skipped.candidate.renderer} was rejected: ${skipped.reason}`
+          "Flutter Web: no compatible build found for this browser. " +
+          "Set `verboseBuildSelection: true` in your Flutter configuration " +
+          "to see why each candidate was rejected."
         );
       }
       throw new Error("FlutterLoader could not find a build compatible with configuration and environment.");
