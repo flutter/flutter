@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/android/android_image_generator.h"
 
+#include <algorithm>
 #include <memory>
 #include <utility>
 
@@ -79,8 +80,26 @@ bool AndroidImageGenerator::GetPixels(const SkImageInfo& info,
   // API level 30+ once it's updated to do symbol lookups and not get
   // preprocessed out in Skia. This will allow for avoiding this copy in
   // cases where the result image doesn't need to be resized.
-  memcpy(pixels, software_decoded_data_->data(),
-         software_decoded_data_->size());
+  // The destination buffer `pixels` is sized by the caller from `GetInfo()`,
+  // i.e. the dimensions reported by the image header decode. The decoded pixel
+  // data is sized from the bitmap actually produced by the platform decoder. On
+  // some paths (notably HEIF on API 36) the header dimensions and the decoded
+  // bitmap originate from independent decoders, so a malformed image could yield
+  // more pixel data than the destination can hold. Refuse the copy in that case
+  // rather than overflowing `pixels`.
+  const size_t dst_size = info.computeByteSize(row_bytes);
+  if (dst_size == SIZE_MAX) {
+    FML_LOG(ERROR) << "Invalid destination buffer size calculation.";
+    return false;
+  }
+  const size_t src_size = software_decoded_data_->size();
+  if (src_size > dst_size) {
+    FML_LOG(ERROR) << "Decoded image data (" << src_size
+                   << " bytes) exceeds the destination buffer (" << dst_size
+                   << " bytes); refusing to decode to avoid a buffer overflow.";
+    return false;
+  }
+  memcpy(pixels, software_decoded_data_->data(), src_size);
   return true;
 }
 

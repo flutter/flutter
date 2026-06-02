@@ -14,6 +14,10 @@
 
 namespace flutter {
 
+namespace testing {
+class AndroidImageGeneratorTest;
+}  // namespace testing
+
 class AndroidImageGenerator : public ImageGenerator {
  private:
   explicit AndroidImageGenerator(sk_sp<SkData> buffer);
@@ -59,6 +63,10 @@ class AndroidImageGenerator : public ImageGenerator {
                                         int height);
 
  private:
+  // Allows tests to inject decoded pixel data directly, bypassing the JNI/NDK
+  // decode path so the size guard in GetPixels can be exercised on host.
+  friend class testing::AndroidImageGeneratorTest;
+
   sk_sp<SkData> data_;
   sk_sp<SkData> software_decoded_data_;
 
