@@ -272,7 +272,13 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   ///       child: Text('list item $index'),
   ///     );
   ///   },
-  ///   separatorBuilder: (BuildContext context, int index) => Container(height: 1.0, color: const Color(0xFFF5F5F5)),
+  ///   separatorBuilder: (BuildContext context, int index) {
+  ///     return const SizedBox(
+  ///       height: 1.0,
+  ///       width: double.infinity,
+  ///       child: ColoredBox(color: Color(0xFF000000)),
+  ///     );
+  ///   },
   /// )
   /// ```
   /// {@end-tool}

@@ -37,7 +37,7 @@ class ExampleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return WidgetsApp(
       color: const Color(0xFFFFFFFF),
-      home: ExampleWidget(),
+      home: const ExampleWidget(),
       pageRouteBuilder: _pageRouteBuilder,
     );
   }
@@ -53,12 +53,11 @@ class ExampleWidget extends StatelessWidget {
   const ExampleWidget({super.key});
 
   Widget buildDivider() {
-    return Padding(
-      padding: const EdgeInsets.all(4),
-      child: Container(
-        color: const Color(0xFF000000),
-        height: 4,
-        width: double.infinity,
+    return const Padding(
+      padding: EdgeInsets.all(4),
+      child: ColoredBox(
+        color: Color(0xFF000000),
+        child: SizedBox(height: 4, width: double.infinity),
       ),
     );
   }

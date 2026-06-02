@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('shows font features', (WidgetTester tester) async {
-    await tester.pumpWidget(example.ExampleWidget());
+    await tester.pumpWidget(const example.ExampleWidget());
 
     expect(find.byType(Text), findsNWidgets(9));
     expect(
