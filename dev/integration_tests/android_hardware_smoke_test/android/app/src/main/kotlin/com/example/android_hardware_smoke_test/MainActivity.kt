@@ -1,7 +1,6 @@
 package com.example.android_hardware_smoke_test
 
 import android.content.pm.PackageManager
-import android.os.Bundle
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -23,10 +22,11 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
 
         try {
-            val appInfo = packageManager.getApplicationInfo(
-                packageName,
-                PackageManager.GET_META_DATA
-            )
+            val appInfo =
+                packageManager.getApplicationInfo(
+                    packageName,
+                    PackageManager.GET_META_DATA
+                )
             val manifestBackend = appInfo.metaData?.getString("io.flutter.embedding.android.ImpellerBackend")
             if (!manifestBackend.isNullOrEmpty()) {
                 impellerBackend = manifestBackend
@@ -35,11 +35,12 @@ class MainActivity : FlutterActivity() {
             Log.e(TAG, "Failed to read PackageManager metadata: ${e.message}")
         }
 
-        messageChannel = BasicMessageChannel(
-            flutterEngine.dartExecutor.binaryMessenger,
-            CHANNEL_NAME,
-            JSONMessageCodec.INSTANCE
-        )
+        messageChannel =
+            BasicMessageChannel(
+                flutterEngine.dartExecutor.binaryMessenger,
+                CHANNEL_NAME,
+                JSONMessageCodec.INSTANCE
+            )
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME)
             .setMethodCallHandler { call, result ->

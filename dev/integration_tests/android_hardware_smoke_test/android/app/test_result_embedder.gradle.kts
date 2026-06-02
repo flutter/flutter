@@ -5,7 +5,10 @@
 import java.io.File
 import java.io.FileOutputStream
 
-data class DiscoveredTest(val testName: String, val fileName: String)
+data class DiscoveredTest(
+    val testName: String,
+    val fileName: String
+)
 
 tasks.register("embedTestResultImages") {
     group = "verification"
@@ -38,9 +41,10 @@ tasks.register("embedTestResultImages") {
         // 1. Query the device sandbox to list all files in cache/results/ using ProcessBuilder
         var files = listOf<String>()
         try {
-            val process = ProcessBuilder(adbPath, "shell", "run-as", packageId, "ls", "cache/results")
-                .redirectErrorStream(true) // Safely merge stdout and stderr to prevent thread deadlocks!
-                .start()
+            val process =
+                ProcessBuilder(adbPath, "shell", "run-as", packageId, "ls", "cache/results")
+                    .redirectErrorStream(true) // Safely merge stdout and stderr to prevent thread deadlocks!
+                    .start()
 
             val outputBytes = process.inputStream.readBytes()
             val exitCode = process.waitFor()
@@ -52,7 +56,9 @@ tasks.register("embedTestResultImages") {
                 }
             } else {
                 if (output.contains("No such file or directory")) {
-                    println("ℹ️ No test result images sandbox directory exists on-device (this is normal if no on-device screenshots were generated).")
+                    println(
+                        "ℹ️ No test result images sandbox directory exists on-device (this is normal if no on-device screenshots were generated)."
+                    )
                 } else {
                     println("❌ Failed to list sandbox directory cache/results (exit code $exitCode): $output")
                 }
@@ -74,8 +80,9 @@ tasks.register("embedTestResultImages") {
                     // Copy the file from the device's temp folder.
                     // Because we write the result images to a temp folder on the device, `adb pull` won't have access.
                     // `run-as` resolves the temp folder permissions, but this means we have to use `cat` with `adb exec-out` to read the file contents and write them locally.
-                    val process = ProcessBuilder(adbPath, "exec-out", "run-as", packageId, "cat", "cache/results/$fileName")
-                        .start()
+                    val process =
+                        ProcessBuilder(adbPath, "exec-out", "run-as", packageId, "cat", "cache/results/$fileName")
+                            .start()
 
                     FileOutputStream(destinationFile).use { os ->
                         process.inputStream.copyTo(os)
@@ -111,10 +118,11 @@ tasks.register("embedTestResultImages") {
                         val fileName = test.fileName
                         val targetCell = "<td>$testName</td>"
                         if (htmlContent.contains(targetCell)) {
-                            htmlContent = htmlContent.replace(
-                                targetCell,
-                                "<td>$testName<br/><img src=\"test_result_images/$fileName\" width=\"300\" style=\"border: 2px solid #ccc; margin-top: 10px;\" /><br/><span style=\"font-size: 12px; color: #555; font-style: italic;\">Result Image: $fileName</span></td>"
-                            )
+                            htmlContent =
+                                htmlContent.replace(
+                                    targetCell,
+                                    "<td>$testName<br/><img src=\"test_result_images/$fileName\" width=\"300\" style=\"border: 2px solid #ccc; margin-top: 10px;\" /><br/><span style=\"font-size: 12px; color: #555; font-style: italic;\">Result Image: $fileName</span></td>"
+                                )
                             modified = true
                         }
                     }
@@ -124,7 +132,12 @@ tasks.register("embedTestResultImages") {
                     }
                 }
             }
-            println("🎉 Successfully embedded ${discoveredTests.size} test result images in HTML report: ${File(targetVariantDir, "index.html").absolutePath}")
+            println(
+                "🎉 Successfully embedded ${discoveredTests.size} test result images in HTML report: ${File(
+                    targetVariantDir,
+                    "index.html"
+                ).absolutePath}"
+            )
         } else {
             println("No test result images found on device to embed.")
         }

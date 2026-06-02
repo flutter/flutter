@@ -8,14 +8,14 @@ import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class FlutterActivityTest {
@@ -45,10 +45,10 @@ class FlutterActivityTest {
 
             try {
                 val message =
-                        JSONObject().apply {
-                            put("testName", testName)
-                            put("performAppSideGoldenCompare", true)
-                        }
+                    JSONObject().apply {
+                        put("testName", testName)
+                        put("performAppSideGoldenCompare", true)
+                    }
 
                 Log.d(TAG, "Sending '$message' on message channel")
 
@@ -68,16 +68,16 @@ class FlutterActivityTest {
         // Schedule a diagnostic warning log if the rendering is exceptionally slow
         val executor = Executors.newSingleThreadScheduledExecutor()
         executor.schedule(
-                {
-                    if (!future.isDone) {
-                        Log.w(
-                                TAG,
-                                "Rendering '$testName' is taking longer than expected (exceeded 5 seconds)..."
-                        )
-                    }
-                },
-                5,
-                TimeUnit.SECONDS
+            {
+                if (!future.isDone) {
+                    Log.w(
+                        TAG,
+                        "Rendering '$testName' is taking longer than expected (exceeded 5 seconds)..."
+                    )
+                }
+            },
+            5,
+            TimeUnit.SECONDS
         )
 
         val reply: String
