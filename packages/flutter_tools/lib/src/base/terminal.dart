@@ -8,6 +8,7 @@ import 'io.dart' as io;
 import 'logger.dart';
 import 'platform.dart';
 import 'process.dart';
+import 'utils.dart';
 
 enum TerminalColor { red, green, blue, cyan, yellow, magenta, grey }
 
@@ -370,8 +371,7 @@ class AnsiTerminal implements Terminal {
   @override
   Future<String> readLine() {
     return (_broadcastStdInLines ??= _stdio.stdin
-            .transform<String>(utf8AllowMalformed.decoder)
-            .transform<String>(const LineSplitter())
+            .transform<String>(utf8AllowMalformedLineDecoder)
             .asBroadcastStream())
         .first;
   }
