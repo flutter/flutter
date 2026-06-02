@@ -83,4 +83,22 @@ void main() {
       }
     }
   });
+
+  test('MaterialColor swatch comparison', () {
+    final sampleMap = <int, MaterialColor>{
+      0: Colors.lightBlue,
+      1: Colors.deepOrange,
+      2: Colors.blueGrey,
+    };
+    final anotherMap = <int, MaterialColor>{
+      0: Colors.lightBlue,
+      1: Colors.deepOrange,
+      2: Colors.blueGrey,
+    };
+    final first = MaterialColor(0, sampleMap);
+    final second = MaterialColor(0, sampleMap);
+    final third = MaterialColor(0, anotherMap);
+    expect(first, second);
+    expect(first, third);
+  });
 }
