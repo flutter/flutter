@@ -58,7 +58,7 @@ TEST(AndroidAHBSwapchainTest,
 }
 
 TEST(AndroidAHBSwapchainTest, AHBSwapchainDtorCallsWaitIdle) {
-  auto const context = MockVulkanContextBuilder()
+  const auto context = MockVulkanContextBuilder()
                            .SetDeviceExtensions(kAndroidDeviceExtensions)
                            .Build();
 
