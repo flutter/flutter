@@ -30,8 +30,7 @@ class KHRSwapchainImageVK final : public TextureSourceVK {
   vk::ImageView GetImageView() const override;
 
   // |TextureSourceVK|
-  vk::ImageView GetRenderTargetView(uint32_t mip_level,
-                                    uint32_t array_layer) const override;
+  vk::ImageView GetRenderTargetView() const override;
 
   // |TextureSourceVK|
   bool IsSwapchainImage() const override;
