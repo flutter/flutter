@@ -4499,42 +4499,6 @@ class EditableTextState extends State<EditableText>
     return true;
   }
 
-<<<<<<< HEAD
-=======
-  // Stable method reference that dispatches to the current
-  // widget.contextMenuBuilder.
-  //
-  // The identity of this method is constant across rebuilds, so passing it to
-  // the TextSelectionOverlay means the overlay never has to be recreated when
-  // only the builder closure changes.
-  Widget _contextMenuBuilder(BuildContext context) {
-    return widget.contextMenuBuilder!(context, this);
-  }
-
-  TextSelectionOverlay _createSelectionOverlay() {
-    final selectionOverlay = TextSelectionOverlay(
-      clipboardStatus: clipboardStatus,
-      context: context,
-      value: _value,
-      debugRequiredFor: widget,
-      toolbarLayerLink: _toolbarLayerLink,
-      startHandleLayerLink: _startHandleLayerLink,
-      endHandleLayerLink: _endHandleLayerLink,
-      renderObject: renderEditable,
-      selectionControls: widget.selectionControls,
-      selectionDelegate: this,
-      dragStartBehavior: widget.dragStartBehavior,
-      onSelectionHandleTapped: widget.onSelectionHandleTapped,
-      contextMenuBuilder: widget.contextMenuBuilder == null || _webContextMenuEnabled
-          ? null
-          : _contextMenuBuilder,
-      magnifierConfiguration: widget.magnifierConfiguration,
-    );
-
-    return selectionOverlay;
-  }
-
->>>>>>> upstream/master
   @pragma('vm:notify-debugger-on-exception')
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
     // We return early if the selection is not valid. This can happen when the
