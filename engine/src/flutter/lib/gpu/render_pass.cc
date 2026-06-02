@@ -185,6 +185,10 @@ RenderPass::GetOrCreatePipeline() {
 bool RenderPass::Draw(size_t element_count,
                       size_t instance_count,
                       bool indexed) {
+  if (element_count == 0u || instance_count == 0u) {
+    return true;
+  }
+
   if (indexed && index_buffer_type == impeller::IndexType::kNone) {
     // drawIndexed was called without an index buffer bound.
     return false;

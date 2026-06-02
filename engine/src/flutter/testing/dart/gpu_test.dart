@@ -859,6 +859,8 @@ void main() async {
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Can render instanced triangles with instance-rate vertex buffer', () async {
+    const int triangleVertexCount = 3;
+    const int triangleInstanceCount = 4;
     final RenderPassState state = createSimpleRenderPass();
 
     final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
@@ -910,7 +912,7 @@ void main() async {
     state.renderPass.bindVertexBuffer(vertices);
     state.renderPass.bindVertexBuffer(instances, slot: 1);
     state.renderPass.bindUniform(pipeline.vertexShader.getUniformSlot('VertInfo'), vertInfo);
-    state.renderPass.draw(3, instanceCount: 4);
+    state.renderPass.draw(triangleVertexCount, instanceCount: triangleInstanceCount);
     state.commandBuffer.submit();
 
     final ui.Image image = state.renderTexture.asImage();
