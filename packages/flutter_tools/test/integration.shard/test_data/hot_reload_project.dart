@@ -108,4 +108,16 @@ class HotReloadProject extends Project {
       writeFutureModifiedDate: true,
     );
   }
+
+  void commentHotReloadPrint() {
+    final String newMainContents = main.replaceAll(
+      'printHotReloadWorked();',
+      '// printHotReloadWorked();',
+    );
+    writeFile(
+      fileSystem.path.join(dir.path, 'lib', 'main.dart'),
+      newMainContents,
+      writeFutureModifiedDate: true,
+    );
+  }
 }
