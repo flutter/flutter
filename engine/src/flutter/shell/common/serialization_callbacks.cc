@@ -53,7 +53,7 @@ SkSerialReturnType SerializeImageWithoutData(SkImage* image, void* ctx) {
   return stream.detachAsData();
 };
 
-sk_sp<SkImage> DeserializeImageWithoutData(sk_sp<SkData> data,
+sk_sp<SkImage> DeserializeImageWithoutData(const sk_sp<SkData>& data,
                                            std::optional<SkAlphaType>,
                                            void*) {
   FML_CHECK(data->size() >= sizeof(ImageMetaData));
