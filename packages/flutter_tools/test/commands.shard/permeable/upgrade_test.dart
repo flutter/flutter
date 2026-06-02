@@ -2,16 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/git.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -42,63 +46,57 @@ void main() {
     );
 
     setUp(() {
-      fakeCommandRunner = FakeUpgradeCommandRunner()..clock = SystemClock.fixed(jan12026);
-      realCommandRunner = UpgradeCommandRunner()
-        ..workingDirectory = getFlutterRoot()
-        ..clock = SystemClock.fixed(jan12026);
       processManager = FakeProcessManager.empty();
-      fakeCommandRunner.willHaveUncommittedChanges = false;
       fakePlatform = FakePlatform()
         ..environment = Map<String, String>.unmodifiable(<String, String>{
           'ENV1': 'irrelevant',
           'ENV2': 'irrelevant',
         });
+      final lazyGit = LazyGit(platform: fakePlatform);
+      fakeCommandRunner = FakeUpgradeCommandRunner(git: lazyGit)
+        ..clock = SystemClock.fixed(jan12026);
+      realCommandRunner = UpgradeCommandRunner(git: lazyGit)
+        ..workingDirectory = getFlutterRoot()
+        ..clock = SystemClock.fixed(jan12026);
+      fakeCommandRunner.willHaveUncommittedChanges = false;
     });
 
-    testUsingContext(
-      'throws on unknown tag, official branch,  noforce',
-      () async {
-        final flutterVersion = FakeFlutterVersion(branch: 'beta');
-        const upstreamRevision = '';
-        final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
-        fakeCommandRunner.remoteVersion = latestVersion;
+    testUsingContext('throws on unknown tag, official branch,  noforce', () async {
+      final flutterVersion = FakeFlutterVersion(branch: 'beta');
+      const upstreamRevision = '';
+      final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
+      fakeCommandRunner.remoteVersion = latestVersion;
 
-        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-          const UpgradePhase.firstHalf(),
-          force: false,
-          testFlow: false,
-          gitTagVersion: const GitTagVersion.unknown(),
-          flutterVersion: flutterVersion,
-          verifyOnly: false,
-        );
-        expect(result, throwsToolExit());
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{Platform: () => fakePlatform},
-    );
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        const UpgradePhase.firstHalf(),
+        force: false,
+        testFlow: false,
+        gitTagVersion: const GitTagVersion.unknown(),
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(result, throwsToolExit());
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{Platform: () => fakePlatform});
 
-    testUsingContext(
-      'throws tool exit with uncommitted changes',
-      () async {
-        final flutterVersion = FakeFlutterVersion(branch: 'beta');
-        const upstreamRevision = '';
-        final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
-        fakeCommandRunner.remoteVersion = latestVersion;
-        fakeCommandRunner.willHaveUncommittedChanges = true;
+    testUsingContext('throws tool exit with uncommitted changes', () async {
+      final flutterVersion = FakeFlutterVersion(branch: 'beta');
+      const upstreamRevision = '';
+      final latestVersion = FakeFlutterVersion(frameworkRevision: upstreamRevision);
+      fakeCommandRunner.remoteVersion = latestVersion;
+      fakeCommandRunner.willHaveUncommittedChanges = true;
 
-        final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
-          const UpgradePhase.firstHalf(),
-          force: false,
-          testFlow: false,
-          gitTagVersion: gitTagVersion,
-          flutterVersion: flutterVersion,
-          verifyOnly: false,
-        );
-        expect(result, throwsToolExit());
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{Platform: () => fakePlatform},
-    );
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        const UpgradePhase.firstHalf(),
+        force: false,
+        testFlow: false,
+        gitTagVersion: gitTagVersion,
+        flutterVersion: flutterVersion,
+        verifyOnly: false,
+      );
+      expect(result, throwsToolExit());
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{Platform: () => fakePlatform});
 
     testUsingContext(
       'hasUncommittedChanges ignores pubspec.lock on non-stable channel',
@@ -633,7 +631,11 @@ void main() {
         );
 
         final CommandRunner<void> runner = createTestCommandRunner(
-          UpgradeCommand(verboseHelp: false, commandRunner: fakeCommandRunner),
+          UpgradeCommand(
+            git: LazyGit(platform: fakePlatform),
+            verboseHelp: false,
+            commandRunner: fakeCommandRunner,
+          ),
         );
 
         fakeCommandRunner.alreadyUpToDate = false;
@@ -854,6 +856,7 @@ void main() {
           () async {
             fakeProcessManager = FakeProcessManager.any();
             final upgradeCommand = UpgradeCommand(
+              git: LazyGit(platform: fakePlatform),
               verboseHelp: false,
               commandRunner: fakeCommandRunner,
             );
@@ -884,6 +887,8 @@ void main() {
 }
 
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
+  FakeUpgradeCommandRunner({required super.git});
+
   bool willHaveUncommittedChanges = false;
   bool alreadyUpToDate = false;
 
@@ -903,4 +908,99 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
 
   @override
   Future<void> runDoctor() async {}
+}
+
+class LazyGit implements Git {
+  LazyGit({Platform? platform}) : _platform = platform;
+
+  final Platform? _platform;
+
+  Git get _delegate =>
+      Git(currentPlatform: _platform ?? globals.platform, runProcessWith: globals.processUtils);
+
+  @override
+  RunResult logSync(
+    List<String> arguments, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+  }) {
+    return _delegate.logSync(
+      arguments,
+      workingDirectory: workingDirectory,
+      environment: environment,
+    );
+  }
+
+  @override
+  Future<RunResult> run(
+    List<String> arguments, {
+    bool throwOnError = false,
+    RunResultChecker? allowedFailures,
+    String? workingDirectory,
+    bool allowReentrantFlutter = false,
+    Map<String, String>? environment,
+    Duration? timeout,
+    int timeoutRetries = 0,
+  }) {
+    return _delegate.run(
+      arguments,
+      throwOnError: throwOnError,
+      allowedFailures: allowedFailures,
+      workingDirectory: workingDirectory,
+      allowReentrantFlutter: allowReentrantFlutter,
+      environment: environment,
+      timeout: timeout,
+      timeoutRetries: timeoutRetries,
+    );
+  }
+
+  @override
+  RunResult runSync(
+    List<String> arguments, {
+    bool throwOnError = false,
+    bool verboseExceptions = false,
+    RunResultChecker? allowedFailures,
+    bool hideStdout = false,
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool allowReentrantFlutter = false,
+    Encoding encoding = systemEncoding,
+  }) {
+    return _delegate.runSync(
+      arguments,
+      throwOnError: throwOnError,
+      verboseExceptions: verboseExceptions,
+      allowedFailures: allowedFailures,
+      hideStdout: hideStdout,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      allowReentrantFlutter: allowReentrantFlutter,
+      encoding: encoding,
+    );
+  }
+
+  @override
+  Future<int> stream(
+    List<String> arguments, {
+    String? workingDirectory,
+    bool allowReentrantFlutter = false,
+    String prefix = '',
+    bool trace = false,
+    RegExp? filter,
+    RegExp? stdoutErrorMatcher,
+    StringConverter? mapFunction,
+    Map<String, String>? environment,
+  }) {
+    return _delegate.stream(
+      arguments,
+      workingDirectory: workingDirectory,
+      allowReentrantFlutter: allowReentrantFlutter,
+      prefix: prefix,
+      trace: trace,
+      filter: filter,
+      stdoutErrorMatcher: stdoutErrorMatcher,
+      mapFunction: mapFunction,
+      environment: environment,
+    );
+  }
 }

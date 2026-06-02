@@ -5,6 +5,7 @@
 import '../base/common.dart';
 import '../base/process.dart';
 import '../cache.dart';
+import '../git.dart';
 import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
@@ -13,7 +14,7 @@ import '../version.dart';
 import 'upgrade.dart' show precacheArtifacts;
 
 class ChannelCommand extends FlutterCommand {
-  ChannelCommand({bool verboseHelp = false}) {
+  ChannelCommand({required Git git, bool verboseHelp = false}) : _git = git {
     argParser.addFlag(
       'all',
       abbr: 'a',
@@ -28,6 +29,8 @@ class ChannelCommand extends FlutterCommand {
       defaultsTo: true,
     );
   }
+
+  final Git _git;
 
   @override
   String get name => 'channel';
@@ -85,7 +88,7 @@ class ChannelCommand extends FlutterCommand {
     final rawOutput = <String>[];
 
     globals.printStatus('Flutter channels:');
-    final int result = await globals.git.stream(
+    final int result = await _git.stream(
       ['branch', '-r'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
@@ -164,7 +167,7 @@ class ChannelCommand extends FlutterCommand {
         'This is not an official channel. For a list of available channels, try "flutter channel".',
       );
     }
-    await _checkout(branchName);
+    await _checkout(branchName, _git);
     if (boolArg('cache-artifacts')) {
       await precacheArtifacts(Cache.flutterRoot);
     }
@@ -174,23 +177,21 @@ class ChannelCommand extends FlutterCommand {
     );
   }
 
-  static Future<void> upgradeChannel(FlutterVersion currentVersion) async {
+  static Future<void> upgradeChannel(FlutterVersion currentVersion, Git git) async {
     final String channel = currentVersion.channel;
     if (kObsoleteBranches.containsKey(channel)) {
       final String alternative = kObsoleteBranches[channel]!;
       globals.printStatus("Transitioning from '$channel' to '$alternative'...");
-      return _checkout(alternative);
+      return _checkout(alternative, git);
     }
   }
 
-  static Future<void> _checkout(String branchName) async {
+  static Future<void> _checkout(String branchName, Git git) async {
     // Get latest refs from upstream.
-    RunResult runResult = await globals.git.run(<String>[
-      'fetch',
-    ], workingDirectory: Cache.flutterRoot);
+    RunResult runResult = await git.run(<String>['fetch'], workingDirectory: Cache.flutterRoot);
 
     if (runResult.processResult.exitCode == 0) {
-      runResult = await globals.git.run(<String>[
+      runResult = await git.run(<String>[
         'show-ref',
         '--verify',
         '--quiet',
@@ -198,14 +199,14 @@ class ChannelCommand extends FlutterCommand {
       ], workingDirectory: Cache.flutterRoot);
       if (runResult.processResult.exitCode == 0) {
         // branch already exists, try just switching to it
-        runResult = await globals.git.run(<String>[
+        runResult = await git.run(<String>[
           'checkout',
           branchName,
           '--',
         ], workingDirectory: Cache.flutterRoot);
       } else {
         // branch does not exist, we have to create it
-        runResult = await globals.git.run(<String>[
+        runResult = await git.run(<String>[
           'checkout',
           '--track',
           '-b',

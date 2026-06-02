@@ -233,9 +233,10 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         ),
         platform: globals.platform,
       ),
-      FlutterVersion: () =>
-          FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: globals.git),
-      Git: () => Git(currentPlatform: globals.platform, runProcessWith: globals.processUtils),
+      FlutterVersion: () {
+        final git = Git(currentPlatform: globals.platform, runProcessWith: globals.processUtils);
+        return FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: git);
+      },
       GradleUtils: () => GradleUtils(
         operatingSystemUtils: globals.os,
         logger: globals.logger,

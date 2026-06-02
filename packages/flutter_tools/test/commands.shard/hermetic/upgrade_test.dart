@@ -12,6 +12,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
+import 'package:flutter_tools/src/git.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/version.dart';
 
 import '../../src/context.dart';
@@ -36,16 +38,22 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
+  });
+
+  void initializeCommand() {
+    final git = Git(currentPlatform: globals.platform, runProcessWith: globals.processUtils);
     command = UpgradeCommand(
+      git: git,
       verboseHelp: false,
-      commandRunner: UpgradeCommandRunner()..clock = SystemClock.fixed(DateTime.utc(2026)),
+      commandRunner: UpgradeCommandRunner(git: git)..clock = SystemClock.fixed(DateTime.utc(2026)),
     );
     runner = createTestCommandRunner(command);
-  });
+  }
 
   testUsingContext(
     'can auto-migrate a user from dev to beta',
     () async {
+      initializeCommand();
       const startingTag = '3.0.0-1.2.pre';
       const latestUpstreamTag = '3.0.0-1.3.pre';
       const upstreamHeadRevision = 'deadbeef';
@@ -135,6 +143,7 @@ void main() {
   testUsingContext(
     'can push people from master to beta',
     () async {
+      initializeCommand();
       final reEntryCompleter = Completer<void>();
 
       Future<void> reEnterTool(List<String> args) async {
@@ -225,6 +234,7 @@ void main() {
   testUsingContext(
     'do not push people from beta to anything else',
     () async {
+      initializeCommand();
       final reEntryCompleter = Completer<void>();
 
       Future<void> reEnterTool(List<String> command) async {
@@ -320,6 +330,7 @@ void main() {
   testUsingContext(
     'allows upgrading if the only local modifications are pubspec.lock files',
     () async {
+      initializeCommand();
       final reEntryCompleter = Completer<void>();
 
       Future<void> reEnterTool(List<String> args) async {
@@ -374,6 +385,7 @@ void main() {
   testUsingContext(
     'fails upgrading on stable if pubspec.lock files are modified',
     () async {
+      initializeCommand();
       processManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>['git', 'tag', '--points-at', 'HEAD'],

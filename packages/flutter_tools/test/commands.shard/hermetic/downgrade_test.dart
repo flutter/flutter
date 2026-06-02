@@ -9,6 +9,8 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/downgrade.dart';
+import 'package:flutter_tools/src/git.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:test/fake.dart';
 
@@ -23,6 +25,8 @@ void main() {
   late FakeTerminal terminal;
   late FakeProcessManager processManager;
   late FakeStdio stdio;
+
+  Git createGit() => Git(currentPlatform: globals.platform, runProcessWith: globals.processUtils);
 
   setUpAll(() {
     Cache.disableLocking();
@@ -46,6 +50,7 @@ void main() {
         .childFile('.flutter_tool_state')
         .writeAsStringSync('{"last-active-master-version":"invalid"}');
     final command = DowngradeCommand(
+      git: createGit(),
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
@@ -72,6 +77,7 @@ void main() {
       () async {
         final fakeFlutterVersion = FakeFlutterVersion();
         final command = DowngradeCommand(
+          git: createGit(),
           persistentToolState: PersistentToolState.test(
             directory: fileSystem.currentDirectory,
             logger: bufferLogger,
@@ -103,6 +109,7 @@ void main() {
       FakeCommand(command: ['git', 'describe', '--tags', 'abcd'], stdout: 'v1.2.3'),
     ]);
     final command = DowngradeCommand(
+      git: createGit(),
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
@@ -137,6 +144,7 @@ Channel "master" was previously on: v1.2.3.''',
       FakeCommand(command: ['git', 'describe', '--tags', 'invalid'], exitCode: 1),
     ]);
     final command = DowngradeCommand(
+      git: createGit(),
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
@@ -153,102 +161,93 @@ Channel "master" was previously on: v1.2.3.''',
     );
   }, overrides: {ProcessManager: () => processManager});
 
-  testUsingContext(
-    'Downgrade prompts for user input when terminal is attached - y',
-    () async {
-      processManager.addCommands(const [
-        FakeCommand(command: ['git', 'describe', '--tags', 'g6b00b5e88']),
-        FakeCommand(command: ['git', 'reset', '--hard', 'g6b00b5e88']),
-        FakeCommand(command: ['git', 'checkout', 'master', '--']),
-      ]);
-      final fakeFlutterVersion = FakeFlutterVersion();
-      stdio.hasTerminal = true;
-      fileSystem.currentDirectory
-          .childFile('.flutter_tool_state')
-          .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
-      final command = DowngradeCommand(
-        persistentToolState: PersistentToolState.test(
-          directory: fileSystem.currentDirectory,
-          logger: bufferLogger,
-        ),
-        terminal: terminal,
-        stdio: stdio,
-        flutterVersion: fakeFlutterVersion,
+  testUsingContext('Downgrade prompts for user input when terminal is attached - y', () async {
+    processManager.addCommands(const [
+      FakeCommand(command: ['git', 'describe', '--tags', 'g6b00b5e88']),
+      FakeCommand(command: ['git', 'reset', '--hard', 'g6b00b5e88']),
+      FakeCommand(command: ['git', 'checkout', 'master', '--']),
+    ]);
+    final fakeFlutterVersion = FakeFlutterVersion();
+    stdio.hasTerminal = true;
+    fileSystem.currentDirectory
+        .childFile('.flutter_tool_state')
+        .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
+    final command = DowngradeCommand(
+      git: createGit(),
+      persistentToolState: PersistentToolState.test(
+        directory: fileSystem.currentDirectory,
         logger: bufferLogger,
-      );
+      ),
+      terminal: terminal,
+      stdio: stdio,
+      flutterVersion: fakeFlutterVersion,
+      logger: bufferLogger,
+    );
 
-      terminal.addPrompt(const ['y', 'n'], 'y');
+    terminal.addPrompt(const ['y', 'n'], 'y');
 
-      await createTestCommandRunner(command).run(const ['downgrade']);
+    await createTestCommandRunner(command).run(const ['downgrade']);
 
-      expect(bufferLogger.statusText, contains('Success'));
-    },
-    overrides: {ProcessManager: () => processManager},
-  );
+    expect(bufferLogger.statusText, contains('Success'));
+  }, overrides: {ProcessManager: () => processManager});
 
-  testUsingContext(
-    'Downgrade prompts for user input when terminal is attached - n',
-    () async {
-      processManager.addCommands(const [
-        FakeCommand(command: ['git', 'describe', '--tags', 'g6b00b5e88']),
-        FakeCommand(command: ['git', 'reset', '--hard', 'g6b00b5e88']),
-        FakeCommand(command: ['git', 'checkout', 'master', '--']),
-      ]);
-      final fakeFlutterVersion = FakeFlutterVersion();
-      stdio.hasTerminal = true;
-      fileSystem.currentDirectory
-          .childFile('.flutter_tool_state')
-          .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
-      final command = DowngradeCommand(
-        persistentToolState: PersistentToolState.test(
-          directory: fileSystem.currentDirectory,
-          logger: bufferLogger,
-        ),
-        terminal: terminal,
-        stdio: stdio,
-        flutterVersion: fakeFlutterVersion,
+  testUsingContext('Downgrade prompts for user input when terminal is attached - n', () async {
+    processManager.addCommands(const [
+      FakeCommand(command: ['git', 'describe', '--tags', 'g6b00b5e88']),
+      FakeCommand(command: ['git', 'reset', '--hard', 'g6b00b5e88']),
+      FakeCommand(command: ['git', 'checkout', 'master', '--']),
+    ]);
+    final fakeFlutterVersion = FakeFlutterVersion();
+    stdio.hasTerminal = true;
+    fileSystem.currentDirectory
+        .childFile('.flutter_tool_state')
+        .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
+    final command = DowngradeCommand(
+      git: createGit(),
+      persistentToolState: PersistentToolState.test(
+        directory: fileSystem.currentDirectory,
         logger: bufferLogger,
-      );
+      ),
+      terminal: terminal,
+      stdio: stdio,
+      flutterVersion: fakeFlutterVersion,
+      logger: bufferLogger,
+    );
 
-      terminal.addPrompt(const ['y', 'n'], 'n');
+    terminal.addPrompt(const ['y', 'n'], 'n');
 
-      await createTestCommandRunner(command).run(const ['downgrade']);
+    await createTestCommandRunner(command).run(const ['downgrade']);
 
-      expect(bufferLogger.statusText, isNot(contains('Success')));
-    },
-    overrides: {ProcessManager: () => processManager},
-  );
+    expect(bufferLogger.statusText, isNot(contains('Success')));
+  }, overrides: {ProcessManager: () => processManager});
 
-  testUsingContext(
-    'Downgrade does not prompt when there is no terminal',
-    () async {
-      processManager.addCommands(const [
-        FakeCommand(command: ['git', 'describe', '--tags', 'g6b00b5e88']),
-        FakeCommand(command: ['git', 'reset', '--hard', 'g6b00b5e88']),
-        FakeCommand(command: ['git', 'checkout', 'master', '--']),
-      ]);
-      final fakeFlutterVersion = FakeFlutterVersion();
-      stdio.hasTerminal = false;
-      fileSystem.currentDirectory
-          .childFile('.flutter_tool_state')
-          .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
-      final command = DowngradeCommand(
-        persistentToolState: PersistentToolState.test(
-          directory: fileSystem.currentDirectory,
-          logger: bufferLogger,
-        ),
-        terminal: terminal,
-        stdio: stdio,
-        flutterVersion: fakeFlutterVersion,
+  testUsingContext('Downgrade does not prompt when there is no terminal', () async {
+    processManager.addCommands(const [
+      FakeCommand(command: ['git', 'describe', '--tags', 'g6b00b5e88']),
+      FakeCommand(command: ['git', 'reset', '--hard', 'g6b00b5e88']),
+      FakeCommand(command: ['git', 'checkout', 'master', '--']),
+    ]);
+    final fakeFlutterVersion = FakeFlutterVersion();
+    stdio.hasTerminal = false;
+    fileSystem.currentDirectory
+        .childFile('.flutter_tool_state')
+        .writeAsStringSync('{"last-active-master-version":"g6b00b5e88"}');
+    final command = DowngradeCommand(
+      git: createGit(),
+      persistentToolState: PersistentToolState.test(
+        directory: fileSystem.currentDirectory,
         logger: bufferLogger,
-      );
+      ),
+      terminal: terminal,
+      stdio: stdio,
+      flutterVersion: fakeFlutterVersion,
+      logger: bufferLogger,
+    );
 
-      await createTestCommandRunner(command).run(const ['downgrade']);
+    await createTestCommandRunner(command).run(const ['downgrade']);
 
-      expect(bufferLogger.statusText, contains('Success'));
-    },
-    overrides: {ProcessManager: () => processManager},
-  );
+    expect(bufferLogger.statusText, contains('Success'));
+  }, overrides: {ProcessManager: () => processManager});
 
   testUsingContext('Downgrade performs correct git commands', () async {
     final fakeFlutterVersion = FakeFlutterVersion();
@@ -262,6 +261,7 @@ Channel "master" was previously on: v1.2.3.''',
       FakeCommand(command: ['git', 'checkout', 'master', '--']),
     ]);
     final command = DowngradeCommand(
+      git: createGit(),
       persistentToolState: PersistentToolState.test(
         directory: fileSystem.currentDirectory,
         logger: bufferLogger,
