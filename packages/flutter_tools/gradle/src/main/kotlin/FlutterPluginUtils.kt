@@ -9,8 +9,6 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.api.BaseVariantOutput
-import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
@@ -855,12 +853,6 @@ object FlutterPluginUtils {
         }
     }
 
-    // TODO(gmackall): Migrate to AGPs variant api.
-    //    https://github.com/flutter/flutter/issues/166550
-    @Suppress("DEPRECATION")
-    private fun findProcessResources(baseVariantOutput: BaseVariantOutput): ProcessAndroidResources =
-        baseVariantOutput.processResourcesProvider?.get() ?: baseVariantOutput.processResources
-
     /**
      * Adds required tasks for the AppLinkSettings feature.
      *
@@ -908,8 +900,3 @@ object FlutterPluginUtils {
         }
     }
 }
-
-private data class PluginVersionPair(
-    val name: String,
-    val version: String
-)
