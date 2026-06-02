@@ -250,8 +250,9 @@ class SingleChildScrollView extends StatelessWidget {
     Widget? contents = child;
     EdgeInsetsGeometry? effectivePadding = padding;
     if (padding == null && contents != null) {
-      final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
-      if (mediaQuery != null) {
+      final EdgeInsets? mediaQueryPadding = MediaQuery.maybePaddingOf(context);
+      if (mediaQueryPadding != null && mediaQueryPadding != EdgeInsets.zero) {
+        final MediaQueryData mediaQuery = MediaQuery.of(context);
         // Automatically pad content with padding from MediaQuery.
         final EdgeInsets mediaQueryHorizontalPadding = mediaQuery.padding.copyWith(
           top: 0.0,
@@ -277,7 +278,7 @@ class SingleChildScrollView extends StatelessWidget {
       }
     }
 
-    if (effectivePadding != null) {
+    if (effectivePadding != null && effectivePadding != EdgeInsets.zero) {
       contents = Padding(padding: effectivePadding, child: contents);
     }
     final bool effectivePrimary =
