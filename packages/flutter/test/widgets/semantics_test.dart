@@ -222,6 +222,77 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('hasSemantics compares controlsNodes', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Semantics(
+        controlsNodes: const <String>{'actual'},
+        child: const SizedBox(width: 10, height: 10),
+      ),
+    );
+
+    expect(
+      semantics,
+      isNot(
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics.rootChild(controlsNodes: const <String>{'expected'}),
+            ],
+          ),
+          ignoreId: true,
+          ignoreRect: true,
+          ignoreTransform: true,
+        ),
+      ),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('includesNodeWith compares attributed label locale', (WidgetTester tester) async {
+    final semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      Semantics(
+        attributedLabel: AttributedString(
+          'label',
+          attributes: <StringAttribute>[
+            LocaleStringAttribute(
+              range: const TextRange(start: 0, end: 5),
+              locale: const Locale('en', 'US'),
+            ),
+          ],
+        ),
+        textDirection: TextDirection.ltr,
+        child: const SizedBox(width: 10, height: 10),
+      ),
+    );
+
+    expect(
+      semantics,
+      isNot(
+        includesNodeWith(
+          attributedLabel: AttributedString(
+            'label',
+            attributes: <StringAttribute>[
+              LocaleStringAttribute(
+                range: const TextRange(start: 0, end: 5),
+                locale: const Locale('fr', 'FR'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    semantics.dispose();
+  });
+
+  test('includesNodeWith can match minValue and maxValue', () {
+    expect(() => includesNodeWith(minValue: '0'), returnsNormally);
+    expect(() => includesNodeWith(maxValue: '100'), returnsNormally);
+  });
+
   testWidgets('Semantics and Directionality - RTL', (WidgetTester tester) async {
     final semantics = SemanticsTester(tester);
 
