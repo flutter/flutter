@@ -409,7 +409,9 @@ public class FlutterLoader {
               if (flag == null) {
                 // TODO(camsim99): Reject unknown flags specified on the command line:
                 // https://github.com/flutter/flutter/issues/182557.
-                Log.e("CAMILLE_DEBUGGING", "Adding unknown flag " + arg + " from command line to args list.");
+                Log.e(
+                    "CAMILLE_DEBUGGING",
+                    "Adding unknown flag " + arg + " from command line to args list.");
                 shellArgs.add(arg);
                 continue;
               } else if (!shouldLoadFlag(flag, isRelease, false)) {
