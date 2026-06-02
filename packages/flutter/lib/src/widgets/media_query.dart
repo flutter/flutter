@@ -580,6 +580,21 @@ class MediaQueryData {
   /// - On iOS this flag is set to true when the user setting called "24-Hour
   ///   Time" is set or the system-wide locale's default uses 24-hour
   ///   formatting.
+  /// - On macOS this flag reflects the current system locale's time format,
+  ///   which incorporates the "24-Hour Time" preference in System Settings.
+  ///   As on iOS, this only takes effect for the system locale; a custom
+  ///   locale passed to the application will ignore the 24-hour preference.
+  /// - On Windows this flag is derived from the user's "Short time" format
+  ///   in the Region settings; it is true when the configured format uses a
+  ///   24-hour pattern.
+  /// - On Linux this flag reflects the desktop environment's clock-format
+  ///   setting where available (for example,
+  ///   `org.gnome.desktop.interface.clock-format` on GNOME). On desktops
+  ///   that do not expose such a setting, it defaults to true (24-hour).
+  /// - On Web this flag is always false. The Flutter web engine does not
+  ///   currently populate it from the browser's locale settings, even though
+  ///   the browser exposes a preferred hour cycle via
+  ///   `Intl.DateTimeFormat.resolvedOptions().hourCycle`.
   final bool alwaysUse24HourFormat;
 
   /// Whether the user is using an accessibility service like TalkBack or
