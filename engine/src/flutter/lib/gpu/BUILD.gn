@@ -88,6 +88,7 @@ if (enable_unittests && !is_fuchsia) {
       ":gpu",
       "//flutter/impeller/renderer/testing:mocks",
       "//flutter/testing",
+      "//flutter/testing:dart",
       "//third_party/googletest:gmock",
       "//third_party/googletest:gtest",
     ]
