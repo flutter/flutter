@@ -32,8 +32,6 @@ class Texture : public RefCountedDartWrappable<Texture> {
                  uint32_t mip_level,
                  uint32_t slice);
 
-  size_t GetBytesPerTexel();
-
   Dart_Handle AsImage() const;
 
  private:
@@ -79,10 +77,6 @@ extern bool InternalFlutterGpu_Texture_Overwrite(
     Dart_Handle source_byte_data,
     int mip_level,
     int slice);
-
-FLUTTER_GPU_EXPORT
-extern int InternalFlutterGpu_Texture_BytesPerTexel(
-    flutter::gpu::Texture* wrapper);
 
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_Texture_AsImage(
