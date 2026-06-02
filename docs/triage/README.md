@@ -107,6 +107,7 @@ In general the flow chart for team assignment is as follows, stopping as soon as
     - `go_router`, `go_router_builder`
     - `google_fonts`
     - `two_dimensional_scrollables`
+    - `vector_math`
   - Apply `team-engine` if it's about:
     - `flutter_svg`
     - `vector_graphics`
@@ -283,6 +284,7 @@ In addition, consider these issues that fall under another team's triage, but ar
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%20label%3AP0%20sort%3Aupdated-desc)
 - [Framework PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+-label%3A%22a%3A+text+input%22+draft%3Afalse+sort%3Aupdated-desc+)
 - [Framework-owned Package PR list](https://github.com/flutter/packages/pulls?q=sort%3Aupdated-desc+is%3Aopen+is%3Apr+label%3A%22triage-framework%22)
+- [Framework-owned Core Package PR list](https://github.com/flutter/core-packages/pulls?q=sort%3Aupdated-desc+is%3Aopen+is%3Apr+label%3A%22triage-framework%22)
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2Cfyi-framework%20-label%3Atriaged-framework%20-label%3A%22will%20need%20additional%20triage%22%20-label%3A%22waiting%20for%20response%22%20sort%3Aupdated-desc)
 
 ### Infrastructure team (`team-infra`)
