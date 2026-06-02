@@ -25,6 +25,7 @@ import '../device_vm_service_discovery_for_attach.dart';
 import '../emulator.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../proxied_devices/debounce_data_stream.dart';
 import '../proxied_devices/file_transfer.dart';
@@ -44,7 +45,7 @@ const protocolVersion = '0.6.1';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({this.hidden = false}) {
+  DaemonCommand({required Xcode xcode, this.hidden = false}) : _xcode = xcode {
     argParser.addOption(
       'listen-on-tcp-port',
       help:
@@ -52,6 +53,8 @@ class DaemonCommand extends FlutterCommand {
       valueHelp: 'port',
     );
   }
+
+  final Xcode _xcode;
 
   @override
   final name = 'daemon';
@@ -83,6 +86,7 @@ class DaemonCommand extends FlutterCommand {
           outputPreferences: globals.outputPreferences,
         ),
         notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
+        xcode: _xcode,
       ).run();
       return FlutterCommandResult.success();
     }
@@ -92,6 +96,7 @@ class DaemonCommand extends FlutterCommand {
         logger: globals.logger,
       ),
       notifyingLogger: asLogger<NotifyingLogger>(globals.logger),
+      xcode: _xcode,
     );
     globals.printStatus('Device daemon started.');
     final int code = await daemon.onExit;
@@ -108,9 +113,11 @@ class DaemonServer {
     this.port,
     required this.logger,
     this.notifyingLogger,
+    required Xcode xcode,
     @visibleForTesting
     Future<ServerSocket> Function(InternetAddress address, int port) bind = ServerSocket.bind,
-  }) : _bind = bind;
+  }) : _bind = bind,
+       _xcode = xcode;
 
   final int? port;
 
@@ -121,6 +128,7 @@ class DaemonServer {
   final NotifyingLogger? notifyingLogger;
 
   final Future<ServerSocket> Function(InternetAddress address, int port) _bind;
+  final Xcode _xcode;
 
   Future<void> run() async {
     ServerSocket? serverSocket;
@@ -153,6 +161,7 @@ class DaemonServer {
           logger: logger,
         ),
         notifyingLogger: notifyingLogger,
+        xcode: _xcode,
       );
       await daemon.onExit;
       await socketDone;
@@ -165,8 +174,10 @@ class DaemonServer {
 }
 
 typedef CommandHandler = Future<Object?>? Function(Map<String, Object?> args);
-typedef CommandHandlerWithBinary =
-    Future<Object?> Function(Map<String, Object?> args, Stream<List<int>>? binary);
+typedef CommandHandlerWithBinary = Future<Object?> Function(
+  Map<String, Object?> args,
+  Stream<List<int>>? binary,
+);
 
 class Daemon {
   Daemon(
@@ -174,7 +185,8 @@ class Daemon {
     this.notifyingLogger,
     this.logToStdout = false,
     FileTransfer fileTransfer = const FileTransfer(),
-  }) {
+    required Xcode xcode,
+  }) : _xcode = xcode {
     // Set up domains.
     registerDomain(daemonDomain = DaemonDomain(this));
     registerDomain(appDomain = AppDomain(this));
@@ -195,7 +207,7 @@ class Daemon {
     );
   }
 
-  factory Daemon.createMachineDaemon() {
+  factory Daemon.createMachineDaemon(Xcode xcode) {
     final daemon = Daemon(
       DaemonConnection(
         daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
@@ -205,6 +217,7 @@ class Daemon {
           ? globals.logger as NotifyingLogger
           : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
       logToStdout: true,
+      xcode: xcode,
     );
     return daemon;
   }
@@ -221,6 +234,9 @@ class Daemon {
 
   final NotifyingLogger? notifyingLogger;
   final bool logToStdout;
+  final Xcode _xcode;
+
+  Xcode get xcode => _xcode;
 
   final _onExitCompleter = Completer<int>();
   final _domainMap = <String, Domain>{};
@@ -633,11 +649,10 @@ class DaemonDomain extends Domain {
 /// The [name] of this value will be sent as a response to daemon client.
 enum _ReasonCode { create, config }
 
-typedef RunOrAttach =
-    Future<void> Function({
-      Completer<DebugConnectionInfo>? connectionInfoCompleter,
-      Completer<void>? appStartedCompleter,
-    });
+typedef RunOrAttach = Future<void> Function({
+  Completer<DebugConnectionInfo>? connectionInfoCompleter,
+  Completer<void>? appStartedCompleter,
+});
 
 /// This domain responds to methods like [startApp] and [stop].
 ///
@@ -714,6 +729,7 @@ class AppDomain extends Domain {
         outputPreferences: globals.outputPreferences,
         fileSystem: globals.fs,
         webDefines: webDefines,
+        xcode: daemon.xcode,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -727,6 +743,7 @@ class AppDomain extends Domain {
         machine: machine,
         analytics: globals.analytics,
         logger: globals.logger,
+        xcode: daemon.xcode,
       );
     } else {
       runner = ColdRunner(
@@ -735,6 +752,7 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         machine: machine,
+        xcode: daemon.xcode,
       );
     }
 
@@ -1605,16 +1623,18 @@ class EmulatorDomain extends Domain {
     registerHandler('getEmulators', getEmulators);
     registerHandler('launch', launch);
     registerHandler('create', create);
+    emulators = EmulatorManager(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      java: globals.java,
+      androidSdk: globals.androidSdk,
+      processManager: globals.processManager,
+      androidWorkflow: androidWorkflow!,
+      xcode: daemon.xcode,
+    );
   }
 
-  EmulatorManager emulators = EmulatorManager(
-    fileSystem: globals.fs,
-    logger: globals.logger,
-    java: globals.java,
-    androidSdk: globals.androidSdk,
-    processManager: globals.processManager,
-    androidWorkflow: androidWorkflow!,
-  );
+  late final EmulatorManager emulators;
 
   Future<List<Map<String, Object?>>> getEmulators([Map<String, Object?>? args]) async {
     final List<Emulator> list = await emulators.getAllAvailableEmulators();

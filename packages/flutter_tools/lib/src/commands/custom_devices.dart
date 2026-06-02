@@ -20,6 +20,7 @@ import '../convert.dart';
 import '../custom_devices/custom_device.dart';
 import '../custom_devices/custom_device_config.dart';
 import '../custom_devices/custom_devices_config.dart';
+import '../macos/xcode.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../runner/flutter_command.dart';
@@ -35,6 +36,7 @@ class CustomDevicesCommand extends FlutterCommand {
     required FileSystem fileSystem,
     required Logger logger,
     required FeatureFlags featureFlags,
+    required Xcode xcode,
   }) {
     return CustomDevicesCommand._common(
       customDevicesConfig: customDevicesConfig,
@@ -45,6 +47,7 @@ class CustomDevicesCommand extends FlutterCommand {
       fileSystem: fileSystem,
       logger: logger,
       featureFlags: featureFlags,
+      xcode: xcode,
     );
   }
 
@@ -58,6 +61,7 @@ class CustomDevicesCommand extends FlutterCommand {
     required FileSystem fileSystem,
     required Logger logger,
     required FeatureFlags featureFlags,
+    required Xcode xcode,
   }) {
     return CustomDevicesCommand._common(
       customDevicesConfig: customDevicesConfig,
@@ -68,6 +72,7 @@ class CustomDevicesCommand extends FlutterCommand {
       fileSystem: fileSystem,
       logger: logger,
       featureFlags: featureFlags,
+      xcode: xcode,
     );
   }
 
@@ -80,6 +85,7 @@ class CustomDevicesCommand extends FlutterCommand {
     required FileSystem fileSystem,
     required Logger logger,
     required FeatureFlags featureFlags,
+    required Xcode xcode,
   }) : _customDevicesConfig = customDevicesConfig,
        _featureFlags = featureFlags {
     addSubcommand(
@@ -107,6 +113,7 @@ class CustomDevicesCommand extends FlutterCommand {
         processManager: processManager,
         fileSystem: fileSystem,
         logger: logger,
+        xcode: xcode,
       ),
     );
     addSubcommand(
@@ -298,10 +305,12 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     required ProcessManager processManager,
     required FileSystem super.fileSystem,
     required super.logger,
+    required Xcode xcode,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _terminal = terminal,
        _platform = platform,
-       _processManager = processManager {
+       _processManager = processManager,
+       _xcode = xcode {
     argParser.addFlag(
       _kCheck,
       help:
@@ -358,6 +367,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   final Terminal _terminal;
   final Platform _platform;
   final ProcessManager _processManager;
+  final Xcode _xcode;
   late StreamQueue<String> inputs;
 
   @override
@@ -373,7 +383,12 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   /// Check this config by executing some of the commands, see if they run
   /// fine.
   Future<bool> _checkConfigWithLogging(CustomDeviceConfig config) async {
-    final device = CustomDevice(config: config, logger: logger, processManager: _processManager);
+    final device = CustomDevice(
+      config: config,
+      logger: logger,
+      processManager: _processManager,
+      xcode: _xcode,
+    );
 
     var result = true;
 

@@ -34,6 +34,7 @@ import 'migrations/nsapplicationmain_deprecation_migration.dart';
 import 'migrations/remove_macos_framework_link_and_embedding_migration.dart';
 import 'migrations/secure_restorable_state_migration.dart';
 import 'swift_package_manager.dart';
+import 'xcode.dart';
 
 /// When run in -quiet mode, Xcode should only print from the underlying tasks to stdout.
 /// Passing this regexp to trace moves the stdout output to stderr.
@@ -73,6 +74,7 @@ Future<void> buildMacOS({
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
   bool usingCISystem = false,
+  required Xcode xcode,
 }) async {
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
   if (xcodeWorkspace == null) {
@@ -225,7 +227,7 @@ Future<void> buildMacOS({
   final String? excludedArches = buildSettings['EXCLUDED_ARCHS'];
 
   try {
-    final List<String> xcodebuildCommandArgs = await globals.xcode!
+    final List<String> xcodebuildCommandArgs = await xcode
         .fetchDependenciesAndGenerateXcodebuildArgs(
           flutterProject.macos,
           globals.fs.directory(buildDirectoryPath),

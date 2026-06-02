@@ -81,6 +81,7 @@ class HotRunner extends ResidentRunner {
     super.flutterDevices, {
     required super.target,
     required super.debuggingOptions,
+    required super.xcode,
     this.benchmarkMode = false,
     this.applicationBinary,
     this.hostIsIde = false,
@@ -1199,18 +1200,17 @@ class HotRunner extends ResidentRunner {
   }
 }
 
-typedef ReloadSourcesHelper =
-    Future<OperationResult> Function(
-      HotRunner hotRunner,
-      List<FlutterDevice?> flutterDevices,
-      bool? pause,
-      Map<String, dynamic> firstReloadDetails,
-      String? targetPlatform,
-      String? sdkName,
-      bool? emulator,
-      String? reason,
-      Analytics analytics,
-    );
+typedef ReloadSourcesHelper = Future<OperationResult> Function(
+  HotRunner hotRunner,
+  List<FlutterDevice?> flutterDevices,
+  bool? pause,
+  Map<String, dynamic> firstReloadDetails,
+  String? targetPlatform,
+  String? sdkName,
+  bool? emulator,
+  String? reason,
+  Analytics analytics,
+);
 
 @visibleForTesting
 Future<OperationResult> defaultReloadSourcesHelper(
@@ -1325,13 +1325,12 @@ class ReassembleResult {
   final bool shouldReportReloadTime;
 }
 
-typedef ReassembleHelper =
-    Future<ReassembleResult> Function(
-      List<FlutterDevice?> flutterDevices,
-      Map<FlutterDevice?, List<FlutterView>> viewCache,
-      void Function(String message)? onSlow,
-      String reloadMessage,
-    );
+typedef ReassembleHelper = Future<ReassembleResult> Function(
+  List<FlutterDevice?> flutterDevices,
+  Map<FlutterDevice?, List<FlutterView>> viewCache,
+  void Function(String message)? onSlow,
+  String reloadMessage,
+);
 
 Future<ReassembleResult> _defaultReassembleHelper(
   List<FlutterDevice?> flutterDevices,

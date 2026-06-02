@@ -31,6 +31,7 @@ import '../device.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../hook_runner.dart' show hookRunner;
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_hot.dart';
@@ -64,6 +65,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     required Analytics analytics,
     bool machine = false,
     Map<String, String> webDefines = const <String, String>{},
+    required Xcode xcode,
   }) {
     return ResidentWebRunner(
       device,
@@ -81,6 +83,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       platform: platform,
       outputPreferences: outputPreferences,
       webDefines: webDefines,
+      xcode: xcode,
     );
   }
 }
@@ -108,6 +111,7 @@ class ResidentWebRunner extends ResidentRunner {
     required OutputPreferences outputPreferences,
     required SystemClock systemClock,
     required Analytics analytics,
+    required Xcode xcode,
     UrlTunneller? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
   }) : _fileSystem = fileSystem,
@@ -127,6 +131,7 @@ class ResidentWebRunner extends ResidentRunner {
            outputPreferences: outputPreferences,
          ),
          dartBuilder: hookRunner,
+         xcode: xcode,
        );
 
   final FileSystem _fileSystem;
@@ -342,6 +347,7 @@ class ResidentWebRunner extends ResidentRunner {
             fileSystem: _fileSystem,
             flutterVersion: globals.flutterVersion,
             analytics: globals.analytics,
+            xcode: xcode,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -495,6 +501,7 @@ class ResidentWebRunner extends ResidentRunner {
           fileSystem: _fileSystem,
           flutterVersion: globals.flutterVersion,
           analytics: globals.analytics,
+          xcode: xcode,
         );
         await webBuilder.buildWeb(
           flutterProject,

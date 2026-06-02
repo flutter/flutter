@@ -16,7 +16,6 @@ import '../../base/version.dart';
 import '../../build_info.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals;
 import '../../ios/mac.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../macos/xcode.dart';
@@ -46,7 +45,7 @@ abstract class AotAssemblyBase extends Target {
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode!,
+      xcode: environment.xcode,
       artifacts: environment.artifacts,
       processManager: environment.processManager,
     );
@@ -888,7 +887,7 @@ Future<void> _createStubAppFramework(
 
     final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, fileSystem);
 
-    await globals.xcode!.clang(<String>[
+    await environment.xcode.clang(<String>[
       '-x',
       'c',
       for (final String arch in iosArchNames ?? <String>{}) ...<String>['-arch', arch],

@@ -73,7 +73,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     required Platform platform,
     required ProcessManager processManager,
     required TemplateRenderer templateRenderer,
-    required Xcode? xcode,
+    required Xcode xcode,
     required DarwinAddToAppCodesigning codesign,
     required bool verboseHelp,
   }) : _analytics = analytics,
@@ -137,7 +137,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
   final ProcessManager _processManager;
-  final Xcode? _xcode;
+  final Xcode _xcode;
   final Cache _cache;
   final Analytics _analytics;
   final TemplateRenderer _templateRenderer;
@@ -227,7 +227,7 @@ class BuildSwiftPackage extends BuildSubCommand {
   ///
   /// Throws a [ToolExit] if the Xcoder version is less than 15.
   void _validateXcodeVersion() {
-    final Version? xcodeVersion = _xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode.currentVersion;
     if (xcodeVersion == null || xcodeVersion.major < 15) {
       throwToolExit(
         'Flutter requires Xcode 15 or greater when using Swift Package Manager. Please ensure '
@@ -249,7 +249,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     processManager: _processManager,
     project: project,
     templateRenderer: _templateRenderer,
-    xcode: _xcode!,
+    xcode: _xcode,
   );
   late final pluginRegistrant = FlutterPluginRegistrantSwiftPackage(
     targetPlatform: _targetPlatform,
@@ -1269,6 +1269,7 @@ class AppFrameworkAndNativeAssetsDependencies {
       processManager: _utils.processManager,
       platform: _utils.platform,
       analytics: _utils.analytics,
+      xcode: _utils.xcode,
       engineVersion: _utils.artifacts.usesLocalArtifacts
           ? null
           : _utils.flutterVersion.engineRevision,

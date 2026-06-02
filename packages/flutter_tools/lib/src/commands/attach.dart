@@ -26,6 +26,7 @@ import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
 import '../mdns_discovery.dart';
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -71,14 +72,16 @@ class AttachCommand extends FlutterCommand {
     required Platform platform,
     required ProcessInfo processInfo,
     required FileSystem fileSystem,
-  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
+    required Xcode xcode,
+  }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(xcode: xcode),
        _stdio = stdio,
        _logger = logger,
        _terminal = terminal,
        _signals = signals,
        _platform = platform,
        _processInfo = processInfo,
-       _fileSystem = fileSystem {
+       _fileSystem = fileSystem,
+       _xcode = xcode {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
     usesTargetOption();
     usesPortOptions(verboseHelp: verboseHelp);
@@ -149,6 +152,7 @@ class AttachCommand extends FlutterCommand {
   final Platform _platform;
   final ProcessInfo _processInfo;
   final FileSystem _fileSystem;
+  final Xcode _xcode;
 
   @override
   final name = 'attach';
@@ -320,6 +324,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           ? _logger
           : NotifyingLogger(verbose: _logger.isVerbose, parent: _logger),
       logToStdout: true,
+      xcode: _xcode,
     );
 
     final ResidentRunner runner = await _discoverVmServiceAndCreateResidentRunner(device: device);
@@ -394,6 +399,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             target: targetFile,
             debuggingOptions: debuggingOptions,
             dartBuilder: hookRunner,
+            xcode: _xcode,
           );
   }
 
@@ -467,6 +473,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 }
 
 class HotRunnerFactory {
+  HotRunnerFactory({required Xcode xcode}) : _xcode = xcode;
+
+  final Xcode _xcode;
+
   HotRunner build(
     List<FlutterDevice> devices, {
     required String target,
@@ -496,6 +506,7 @@ class HotRunnerFactory {
     analytics: analytics,
     dartBuilder: hookRunner,
     logger: logger,
+    xcode: _xcode,
   );
 }
 

@@ -32,6 +32,7 @@ import 'platform_plugins.dart';
 import 'project_validator_result.dart';
 import 'template.dart';
 import 'xcode_project.dart';
+import 'macos/xcode.dart';
 
 export 'cmake_project.dart';
 export 'xcode_project.dart';
@@ -49,12 +50,17 @@ enum SupportedPlatform {
 }
 
 class FlutterProjectFactory {
-  FlutterProjectFactory({required Logger logger, required FileSystem fileSystem})
-    : _logger = logger,
-      _fileSystem = fileSystem;
+  FlutterProjectFactory({
+    required Logger logger,
+    required FileSystem fileSystem,
+    required Xcode? xcode,
+  }) : _logger = logger,
+       _fileSystem = fileSystem,
+       _xcode = xcode;
 
   final Logger _logger;
   final FileSystem _fileSystem;
+  final Xcode? _xcode;
 
   @visibleForTesting
   final projects = <String, FlutterProject>{};
@@ -73,7 +79,7 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(directory, manifest, exampleManifest);
+      return FlutterProject(directory, manifest, exampleManifest, xcode: _xcode);
     });
   }
 }
@@ -89,9 +95,16 @@ class FlutterProjectFactory {
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(this.directory, FlutterManifest manifest, this._exampleManifest) {
+  FlutterProject(
+    this.directory,
+    FlutterManifest manifest,
+    this._exampleManifest, {
+    required Xcode? xcode,
+  }) : _xcode = xcode {
     _setManifest(manifest);
   }
+
+  final Xcode? _xcode;
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -105,7 +118,7 @@ class FlutterProject {
 
   /// Create a [FlutterProject] and bypass the project caching.
   @visibleForTesting
-  static FlutterProject fromDirectoryTest(Directory directory, [Logger? logger]) {
+  static FlutterProject fromDirectoryTest(Directory directory, [Logger? logger, Xcode? xcode]) {
     final FileSystem fileSystem = directory.fileSystem;
     logger ??= BufferLogger.test();
     final FlutterManifest manifest = FlutterProject._readManifest(
@@ -118,7 +131,7 @@ class FlutterProject {
       logger: logger,
       fileSystem: fileSystem,
     );
-    return FlutterProject(directory, manifest, exampleManifest);
+    return FlutterProject(directory, manifest, exampleManifest, xcode: xcode);
   }
 
   /// The location of this project.
@@ -208,7 +221,7 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  late final ios = IosProject.fromFlutter(this);
+  late final ios = IosProject.fromFlutter(this, xcode: _xcode);
 
   /// The Android sub project of this project.
   late final android = AndroidProject._(this);
@@ -217,7 +230,7 @@ class FlutterProject {
   late final web = WebProject._(this);
 
   /// The MacOS sub project of this project.
-  late final macos = MacOSProject.fromFlutter(this);
+  late final macos = MacOSProject.fromFlutter(this, xcode: _xcode);
 
   /// The Linux sub project of this project.
   late final linux = LinuxProject.fromFlutter(this);
@@ -282,6 +295,7 @@ class FlutterProject {
     _exampleDirectory(directory),
     _exampleManifest,
     FlutterManifest.empty(logger: globals.logger),
+    xcode: _xcode,
   );
 
   /// The generated scaffolding project for hosting widget previews from this

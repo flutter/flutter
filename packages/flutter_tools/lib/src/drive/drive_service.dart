@@ -21,6 +21,7 @@ import '../device.dart';
 import '../resident_runner.dart';
 import '../vmservice.dart';
 import 'web_driver_service.dart';
+import '../macos/xcode.dart';
 
 class FlutterDriverFactory {
   FlutterDriverFactory({
@@ -32,6 +33,7 @@ class FlutterDriverFactory {
     required ProcessUtils processUtils,
     required String dartSdkPath,
     required DevtoolsLauncher devtoolsLauncher,
+    required Xcode xcode,
   }) : _applicationPackageFactory = applicationPackageFactory,
        _platform = platform,
        _logger = logger,
@@ -39,7 +41,8 @@ class FlutterDriverFactory {
        _outputPreferences = outputPreferences,
        _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
-       _devtoolsLauncher = devtoolsLauncher;
+       _devtoolsLauncher = devtoolsLauncher,
+       _xcode = xcode;
 
   final ApplicationPackageFactory _applicationPackageFactory;
   final Platform _platform;
@@ -49,6 +52,7 @@ class FlutterDriverFactory {
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
+  final Xcode _xcode;
 
   /// Create a driver service for running `flutter drive`.
   DriverService createDriverService(bool web) {
@@ -60,6 +64,7 @@ class FlutterDriverFactory {
         outputPreferences: _outputPreferences,
         processUtils: _processUtils,
         dartSdkPath: _dartSdkPath,
+        xcode: _xcode,
       );
     }
     return FlutterDriverService(

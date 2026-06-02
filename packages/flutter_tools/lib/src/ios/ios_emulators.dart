@@ -7,9 +7,14 @@ import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../globals.dart' as globals;
+import '../macos/xcode.dart';
 import 'simulators.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
+  IOSEmulators({required Xcode xcode}) : _xcode = xcode;
+
+  final Xcode _xcode;
+
   @override
   bool get supportsPlatform => globals.platform.isMacOS;
 
@@ -17,14 +22,16 @@ class IOSEmulators extends EmulatorDiscovery {
   bool get canListAnything => globals.iosWorkflow?.canListEmulators ?? false;
 
   @override
-  Future<List<Emulator>> get emulators async => getEmulators();
+  Future<List<Emulator>> get emulators async => getEmulators(_xcode);
 
   @override
   bool get canLaunchAnything => canListAnything;
 }
 
 class IOSEmulator extends Emulator {
-  const IOSEmulator(String id) : super(id, true);
+  IOSEmulator(String id, {required Xcode xcode}) : _xcode = xcode, super(id, true);
+
+  final Xcode _xcode;
 
   @override
   String get name => 'iOS Simulator';
@@ -40,7 +47,7 @@ class IOSEmulator extends Emulator {
 
   @override
   Future<void> launch({bool coldBoot = false}) async {
-    final String? simulatorPath = globals.xcode?.getSimulatorPath();
+    final String? simulatorPath = _xcode.getSimulatorPath();
     if (simulatorPath == null) {
       throwToolExit('Could not find Simulator app');
     }
@@ -67,11 +74,11 @@ class IOSEmulator extends Emulator {
 }
 
 /// Return the list of iOS Simulators (there can only be zero or one).
-List<IOSEmulator> getEmulators() {
-  final String? simulatorPath = globals.xcode?.getSimulatorPath();
+List<IOSEmulator> getEmulators(Xcode xcode) {
+  final String? simulatorPath = xcode.getSimulatorPath();
   if (simulatorPath == null) {
     return <IOSEmulator>[];
   }
 
-  return <IOSEmulator>[const IOSEmulator(iosSimulatorId)];
+  return <IOSEmulator>[IOSEmulator(iosSimulatorId, xcode: xcode)];
 }

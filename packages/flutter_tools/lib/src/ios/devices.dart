@@ -314,6 +314,7 @@ class IOSDevice extends Device {
     required IProxy iProxy,
     required super.logger,
     required Analytics analytics,
+    required Xcode xcode,
   }) : _sdkVersion = sdkVersion,
        _iosDeploy = iosDeploy,
        _iMobileDevice = iMobileDevice,
@@ -325,6 +326,7 @@ class IOSDevice extends Device {
        _logger = logger,
        _analytics = analytics,
        _platform = platform,
+       _xcode = xcode,
        super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true) {
     if (!_platform.isMacOS) {
       assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
@@ -343,6 +345,7 @@ class IOSDevice extends Device {
   final IOSCoreDeviceLauncher _coreDeviceLauncher;
   final XcodeDebug _xcodeDebug;
   final IProxy _iproxy;
+  final Xcode _xcode;
 
   Version? get sdkVersion {
     return Version.parse(_sdkVersion);
@@ -514,6 +517,7 @@ class IOSDevice extends Device {
 
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
+        xcode: _xcode,
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
         targetOverride: mainPath,
@@ -531,6 +535,7 @@ class IOSDevice extends Device {
           logger: globals.logger,
           platform: FlutterDarwinPlatform.ios,
           project: package.project.parent,
+          xcode: _xcode,
           device: this,
         );
         _logger.printError('');
@@ -1060,7 +1065,7 @@ class IOSDevice extends Device {
     // Xcode 16 introduced a way to start and attach to a debugserver through LLDB.
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
-    final Version? xcodeVersion = globals.xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode.currentVersion;
     final bool lldbFeatureEnabled = featureFlags.isLLDBDebuggingEnabled;
     if (xcodeVersion != null && xcodeVersion.major >= 26 && lldbFeatureEnabled) {
       final DeviceLogReader deviceLogReader = getLogReader(
@@ -1220,7 +1225,7 @@ class IOSDevice extends Device {
         app: app,
         iMobileDevice: _iMobileDevice,
         usingCISystem: usingCISystem,
-        xcode: globals.xcode,
+        xcode: _xcode,
       ),
     );
   }

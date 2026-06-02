@@ -656,6 +656,7 @@ class XCDevice {
           devModeEnabled: devModeEnabled,
           isPaired: isPaired,
           isCoreDevice: coreDevice != null,
+          xcode: _xcode,
         );
       }
     }

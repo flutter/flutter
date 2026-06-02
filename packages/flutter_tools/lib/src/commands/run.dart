@@ -29,11 +29,12 @@ import '../web/compile.dart';
 import '../web/devfs_config.dart';
 import '../web/web_constants.dart';
 import '../web/web_runner.dart';
+import '../macos/xcode.dart';
 import 'daemon.dart';
 
 /// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  RunCommandBase({required bool verboseHelp}) {
+  RunCommandBase({required bool verboseHelp, required Xcode xcode}) : _xcode = xcode {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
     usesWebDefineOption();
@@ -429,10 +430,13 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     );
     return webDevServerConfig;
   }
+
+  final Xcode _xcode;
 }
 
 class RunCommand extends RunCommandBase {
-  RunCommand({bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
+  RunCommand({required Xcode xcode, bool verboseHelp = false})
+    : super(verboseHelp: verboseHelp, xcode: xcode) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
@@ -780,6 +784,7 @@ class RunCommand extends RunCommandBase {
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
         dartBuilder: hookRunner,
         logger: globals.logger,
+        xcode: _xcode,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -796,6 +801,7 @@ class RunCommand extends RunCommandBase {
         outputPreferences: globals.outputPreferences,
         systemClock: globals.systemClock,
         webDefines: extractWebDefines(),
+        xcode: _xcode,
       );
     }
     return ColdRunner(
@@ -809,12 +815,13 @@ class RunCommand extends RunCommandBase {
           : globals.fs.file(applicationBinaryPath),
       stayResident: stayResident,
       dartBuilder: hookRunner,
+      xcode: _xcode,
     );
   }
 
   @visibleForTesting
   Daemon createMachineDaemon() {
-    return Daemon.createMachineDaemon();
+    return Daemon.createMachineDaemon(_xcode);
   }
 
   @override

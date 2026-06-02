@@ -49,6 +49,7 @@ void main() {
     late IOSCoreDeviceControl coreDeviceControl;
     late IOSCoreDeviceLauncher coreDeviceLauncher;
     late XcodeDebug xcodeDebug;
+    late Xcode xcode;
 
     setUp(() {
       final artifacts = Artifacts.test();
@@ -71,10 +72,12 @@ void main() {
       coreDeviceControl = FakeIOSCoreDeviceControl();
       coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
       xcodeDebug = FakeXcodeDebug();
+      xcode = Xcode.test(processManager: FakeProcessManager.any());
     });
 
     testWithoutContext('successfully instantiates on Mac OS', () async {
       final device = IOSDevice(
+        xcode: xcode,
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -100,6 +103,7 @@ void main() {
 
     testWithoutContext('32-bit devices are unsupported', () async {
       final device = IOSDevice(
+        xcode: xcode,
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -125,6 +129,7 @@ void main() {
     testWithoutContext('parses major version', () {
       expect(
         IOSDevice(
+          xcode: xcode,
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
@@ -149,6 +154,7 @@ void main() {
       );
       expect(
         IOSDevice(
+          xcode: xcode,
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
@@ -173,6 +179,7 @@ void main() {
       );
       expect(
         IOSDevice(
+          xcode: xcode,
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
@@ -197,6 +204,7 @@ void main() {
       );
       expect(
         IOSDevice(
+          xcode: xcode,
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
@@ -221,6 +229,7 @@ void main() {
       );
       expect(
         IOSDevice(
+          xcode: xcode,
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
@@ -247,6 +256,7 @@ void main() {
 
     testWithoutContext('parses sdk version', () {
       Version? sdkVersion = IOSDevice(
+        xcode: xcode,
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -273,6 +283,7 @@ void main() {
       expect(sdkVersion.compareTo(expectedVersion), 0);
 
       sdkVersion = IOSDevice(
+        xcode: xcode,
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -299,6 +310,7 @@ void main() {
       expect(sdkVersion.compareTo(expectedVersion), 0);
 
       sdkVersion = IOSDevice(
+        xcode: xcode,
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -325,6 +337,7 @@ void main() {
       expect(sdkVersion.compareTo(expectedVersion), 0);
 
       sdkVersion = IOSDevice(
+        xcode: xcode,
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -351,6 +364,7 @@ void main() {
       expect(sdkVersion.compareTo(expectedVersion), 0);
 
       sdkVersion = IOSDevice(
+        xcode: xcode,
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -373,6 +387,7 @@ void main() {
       expect(sdkVersion, isNull);
 
       sdkVersion = IOSDevice(
+        xcode: xcode,
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -398,6 +413,7 @@ void main() {
 
     testWithoutContext('has build number in sdkNameAndVersion', () async {
       final device = IOSDevice(
+        xcode: xcode,
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -424,6 +440,7 @@ void main() {
 
     testWithoutContext('Supports debug, profile, and release modes', () {
       final device = IOSDevice(
+        xcode: xcode,
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         fileSystem: fileSystem,
@@ -457,6 +474,7 @@ void main() {
         () {
           expect(() {
             IOSDevice(
+              xcode: xcode,
               'device-123',
               iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
               fileSystem: fileSystem,
@@ -548,6 +566,7 @@ void main() {
 
       testWithoutContext('kills all log readers & port forwarders', () async {
         device = IOSDevice(
+          xcode: xcode,
           '123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
           fileSystem: fileSystem,
@@ -595,6 +614,7 @@ void main() {
     late IOSCoreDeviceControl coreDeviceControl;
     late IOSCoreDeviceLauncher coreDeviceLauncher;
     late XcodeDebug xcodeDebug;
+    late Xcode xcode;
     late IOSDevice device1;
     late IOSDevice device2;
 
@@ -621,8 +641,10 @@ void main() {
       coreDeviceControl = FakeIOSCoreDeviceControl();
       coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
       xcodeDebug = FakeXcodeDebug();
+      xcode = Xcode.test(processManager: FakeProcessManager.any());
 
       device1 = IOSDevice(
+        xcode: xcode,
         'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
         name: 'Paired iPhone',
         sdkVersion: '13.3',
@@ -645,6 +667,7 @@ void main() {
       );
 
       device2 = IOSDevice(
+        xcode: xcode,
         '00008027-00192736010F802E',
         name: 'iPad Pro',
         sdkVersion: '13.3',
@@ -949,6 +972,7 @@ void main() {
     late IOSCoreDeviceControl coreDeviceControl;
     late IOSCoreDeviceLauncher coreDeviceLauncher;
     late XcodeDebug xcodeDebug;
+    late Xcode xcode;
     late IOSDevice notConnected1;
 
     setUp(() {
@@ -974,7 +998,9 @@ void main() {
       coreDeviceControl = FakeIOSCoreDeviceControl();
       coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
       xcodeDebug = FakeXcodeDebug();
+      xcode = Xcode.test(processManager: FakeProcessManager.any());
       notConnected1 = IOSDevice(
+        xcode: xcode,
         '00000001-0000000000000000',
         name: 'iPad',
         sdkVersion: '13.3',

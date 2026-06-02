@@ -26,6 +26,7 @@ import '../macos/cocoapod_utils.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../version.dart';
+import '../macos/xcode.dart';
 import 'build.dart';
 import 'darwin_add_to_app.dart';
 
@@ -39,6 +40,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     Platform? platform,
     required this.codesign,
     required super.logger,
+    required this.xcode,
   }) : _injectedFlutterVersion = flutterVersion,
        _buildSystem = buildSystem,
        _injectedCache = cache,
@@ -108,6 +110,8 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       );
   }
   final DarwinAddToAppCodesigning codesign;
+
+  final Xcode xcode;
 
   final BuildSystem? _buildSystem;
   @protected
@@ -451,6 +455,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     super.cache,
     super.platform,
     required super.codesign,
+    required super.xcode,
   }) : super(verboseHelp: verboseHelp) {
     usesFlavorOption();
 
@@ -803,7 +808,7 @@ end
               sdkType,
               globals.artifacts!,
             ).map((DarwinArch e) => e.name).join(' '),
-            kSdkRoot: await globals.xcode!.sdkLocation(sdkType),
+            kSdkRoot: await xcode.sdkLocation(sdkType),
             ...buildInfo.toBuildSystemEnvironment(),
           },
           artifacts: globals.artifacts!,
@@ -812,6 +817,7 @@ end
           processManager: globals.processManager,
           platform: globals.platform,
           analytics: globals.analytics,
+          xcode: xcode,
           engineVersion: globals.artifacts!.usesLocalArtifacts
               ? null
               : globals.flutterVersion.engineRevision,
@@ -859,7 +865,7 @@ end
     final Status status = globals.logger.startProgress(' ├─Building plugins...');
     try {
       var pluginsBuildCommand = <String>[
-        ...globals.xcode!.xcrunCommand(),
+        ...xcode.xcrunCommand(),
         'xcodebuild',
         '-alltargets',
         '-sdk',
@@ -884,7 +890,7 @@ end
       // Always build debug for simulator.
       final String simulatorConfiguration = BuildMode.debug.uppercaseName;
       pluginsBuildCommand = <String>[
-        ...globals.xcode!.xcrunCommand(),
+        ...xcode.xcrunCommand(),
         'xcodebuild',
         '-alltargets',
         '-sdk',

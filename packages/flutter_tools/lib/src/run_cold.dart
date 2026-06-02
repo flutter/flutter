@@ -20,6 +20,7 @@ class ColdRunner extends ResidentRunner {
     super.flutterDevices, {
     required super.target,
     required super.debuggingOptions,
+    required super.xcode,
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,

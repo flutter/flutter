@@ -28,6 +28,7 @@ import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
 import 'convert.dart';
+import 'macos/xcode.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
@@ -250,26 +251,20 @@ class FlutterDevice {
         // shuts down, including after an error. If `done` completes before `connectToVmService`,
         // something went wrong that caused DDS to shutdown early.
         try {
-          service =
-              await Future.any<dynamic>(<Future<dynamic>>[
-                    connectToVmService(
-                      debuggingOptions.enableDds
-                          ? (device!.dds.uri ?? vmServiceUri!)
-                          : vmServiceUri!,
-                      reloadSources: reloadSources,
-                      restart: restart,
-                      compileExpression: compileExpression,
-                      flutterProject: FlutterProject.current(),
-                      printStructuredErrorLogMethod: printStructuredErrorLogMethod,
-                      device: device,
-                      logger: globals.logger,
-                    ),
-                    if (!existingDds)
-                      device!.dds.done.whenComplete(
-                        () => throw Exception('DDS shut down too early'),
-                      ),
-                  ])
-                  as FlutterVmService?;
+          service = await Future.any<dynamic>(<Future<dynamic>>[
+            connectToVmService(
+              debuggingOptions.enableDds ? (device!.dds.uri ?? vmServiceUri!) : vmServiceUri!,
+              reloadSources: reloadSources,
+              restart: restart,
+              compileExpression: compileExpression,
+              flutterProject: FlutterProject.current(),
+              printStructuredErrorLogMethod: printStructuredErrorLogMethod,
+              device: device,
+              logger: globals.logger,
+            ),
+            if (!existingDds)
+              device!.dds.done.whenComplete(() => throw Exception('DDS shut down too early')),
+          ]) as FlutterVmService?;
         } on Exception catch (exception) {
           globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $exception');
           if (!completer.isCompleted && !_isListeningForVmServiceUri!) {
@@ -957,6 +952,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.flutterDevices, {
     required this.target,
     required this.debuggingOptions,
+    required this.xcode,
     String? projectRootPath,
     this.stayResident = true,
     this.hotMode = true,
@@ -1000,6 +996,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   @override
   final bool stayResident;
   final String? _dillOutputPath;
+  final Xcode xcode;
 
   /// The parent location of the incremental artifacts.
   final Directory artifactDirectory;
@@ -1029,6 +1026,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     projectDir: globals.fs.directory(projectRootPath),
     packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
     generateDartPluginRegistry: generateDartPluginRegistry,
+    xcode: xcode,
     defines: <String, String>{
       // Needed for Dart plugin registry generation.
       kTargetFile: mainPath,

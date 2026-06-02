@@ -17,6 +17,7 @@ import 'base/logger.dart';
 import 'base/process.dart';
 import 'device.dart';
 import 'ios/ios_emulators.dart';
+import 'macos/xcode.dart';
 
 EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
 
@@ -29,6 +30,7 @@ class EmulatorManager {
     required ProcessManager processManager,
     required AndroidWorkflow androidWorkflow,
     required FileSystem fileSystem,
+    required Xcode xcode,
   }) : _java = java,
        _androidSdk = androidSdk,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
@@ -38,7 +40,8 @@ class EmulatorManager {
          processManager: processManager,
          fileSystem: fileSystem,
          androidWorkflow: androidWorkflow,
-       ) {
+       ),
+       _emulatorDiscoverers = <EmulatorDiscovery>[IOSEmulators(xcode: xcode)] {
     _emulatorDiscoverers.add(_androidEmulators);
   }
 
@@ -49,7 +52,7 @@ class EmulatorManager {
 
   // Constructing EmulatorManager is cheap; they only do expensive work if some
   // of their methods are called.
-  final _emulatorDiscoverers = <EmulatorDiscovery>[IOSEmulators()];
+  final List<EmulatorDiscovery> _emulatorDiscoverers;
 
   Future<List<Emulator>> getEmulatorsMatching(String searchText) async {
     final List<Emulator> emulators = await getAllAvailableEmulators();

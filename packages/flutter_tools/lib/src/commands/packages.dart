@@ -18,31 +18,44 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../macos/xcode.dart';
 import '../package_graph.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class PackagesCommand extends FlutterCommand {
-  PackagesCommand() {
+  PackagesCommand({required Xcode xcode}) {
     addSubcommand(
-      PackagesGetCommand('get', "Get the current package's dependencies.", PubContext.pubGet),
+      PackagesGetCommand(
+        'get',
+        "Get the current package's dependencies.",
+        PubContext.pubGet,
+        xcode: xcode,
+      ),
     );
     addSubcommand(
       PackagesGetCommand(
         'upgrade',
         "Upgrade the current package's dependencies to latest versions.",
         PubContext.pubUpgrade,
+        xcode: xcode,
       ),
     );
     addSubcommand(
-      PackagesGetCommand('add', 'Add a dependency to pubspec.yaml.', PubContext.pubAdd),
+      PackagesGetCommand(
+        'add',
+        'Add a dependency to pubspec.yaml.',
+        PubContext.pubAdd,
+        xcode: xcode,
+      ),
     );
     addSubcommand(
       PackagesGetCommand(
         'remove',
         'Removes a dependency from the current package.',
         PubContext.pubRemove,
+        xcode: xcode,
       ),
     );
     addSubcommand(PackagesTestCommand());
@@ -202,7 +215,10 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
 /// Represents the pub sub-commands that makes package-resolutions.
 class PackagesGetCommand extends FlutterCommand {
-  PackagesGetCommand(this._commandName, this._description, this._context);
+  PackagesGetCommand(this._commandName, this._description, this._context, {required Xcode xcode})
+    : _xcode = xcode;
+
+  final Xcode _xcode;
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
@@ -372,6 +388,7 @@ class PackagesGetCommand extends FlutterCommand {
             projectDir: project.directory,
             packageConfigPath: packageConfigPath(),
             generateDartPluginRegistry: true,
+            xcode: _xcode,
           );
           // If localizations were enabled, but we are not using synthetic packages.
           final BuildResult result = await globals.buildSystem.build(

@@ -11,6 +11,7 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
+import '../macos/xcode.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -344,6 +345,7 @@ class Environment {
     required ProcessManager processManager,
     required Platform platform,
     required Analytics analytics,
+    required Xcode xcode,
     String? engineVersion,
     required bool generateDartPluginRegistry,
     Directory? buildDir,
@@ -386,6 +388,7 @@ class Environment {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
+      xcode: xcode,
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -409,6 +412,7 @@ class Environment {
     String? engineVersion,
     Platform? platform,
     Analytics? analytics,
+    Xcode? xcode,
     bool generateDartPluginRegistry = false,
     required FileSystem fileSystem,
     required Logger logger,
@@ -430,6 +434,10 @@ class Environment {
       processManager: processManager,
       platform: platform ?? FakePlatform(),
       analytics: analytics ?? const NoOpAnalytics(),
+      xcode:
+          xcode ??
+          // ignore: invalid_use_of_visible_for_testing_member
+          Xcode.test(processManager: processManager, fileSystem: fileSystem, logger: logger),
       engineVersion: engineVersion,
       generateDartPluginRegistry: generateDartPluginRegistry,
     );
@@ -450,12 +458,13 @@ class Environment {
     required this.fileSystem,
     required this.artifacts,
     required this.analytics,
+    required this.xcode,
     this.engineVersion,
     required this.inputs,
     required this.generateDartPluginRegistry,
   });
 
-  Environment copyWith({Directory? outputDir}) {
+  Environment copyWith({Directory? outputDir, Xcode? xcode}) {
     return Environment._(
       outputDir: outputDir ?? this.outputDir,
       projectDir: projectDir,
@@ -471,6 +480,7 @@ class Environment {
       processManager: processManager,
       platform: platform,
       analytics: analytics,
+      xcode: xcode ?? this.xcode,
       engineVersion: engineVersion,
       inputs: inputs,
       generateDartPluginRegistry: generateDartPluginRegistry,
@@ -562,6 +572,8 @@ class Environment {
   final Artifacts artifacts;
 
   final FileSystem fileSystem;
+
+  final Xcode xcode;
 
   final Analytics analytics;
 

@@ -37,6 +37,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
     super.cache,
     super.platform,
     required super.codesign,
+    required super.xcode,
   });
 
   @override
@@ -270,6 +271,7 @@ end
         processManager: globals.processManager,
         platform: globals.platform,
         analytics: globals.analytics,
+        xcode: xcode,
         engineVersion: globals.artifacts!.usesLocalArtifacts
             ? null
             : globals.flutterVersion.engineRevision,
@@ -354,7 +356,7 @@ end
     final Status status = globals.logger.startProgress(' ├─Building plugins...');
     try {
       final pluginsBuildCommand = <String>[
-        ...globals.xcode!.xcrunCommand(),
+        ...xcode.xcrunCommand(),
         'xcodebuild',
         '-alltargets',
         '-sdk',

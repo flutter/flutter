@@ -55,7 +55,7 @@ class BuildCommand extends FlutterCommand {
     required TemplateRenderer templateRenderer,
     required Terminal terminal,
     required PlistParser plistParser,
-    required Xcode? xcode,
+    required Xcode xcode,
     bool verboseHelp = false,
   }) {
     _addSubcommand(
@@ -68,12 +68,13 @@ class BuildCommand extends FlutterCommand {
     );
     _addSubcommand(BuildApkCommand(logger: logger, verboseHelp: verboseHelp));
     _addSubcommand(BuildAppBundleCommand(logger: logger, verboseHelp: verboseHelp));
-    _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildIOSCommand(logger: logger, verboseHelp: verboseHelp, xcode: xcode));
     _addSubcommand(
       BuildIOSFrameworkCommand(
         logger: logger,
         buildSystem: buildSystem,
         verboseHelp: verboseHelp,
+        xcode: xcode,
         codesign: DarwinAddToAppCodesigning(
           logger: logger,
           xcodeCodeSigningSettings: XcodeCodeSigningSettings(
@@ -94,6 +95,7 @@ class BuildCommand extends FlutterCommand {
         logger: logger,
         buildSystem: buildSystem,
         verboseHelp: verboseHelp,
+        xcode: xcode,
         codesign: DarwinAddToAppCodesigning(
           logger: logger,
           xcodeCodeSigningSettings: XcodeCodeSigningSettings(
@@ -140,12 +142,17 @@ class BuildCommand extends FlutterCommand {
       ),
     );
 
-    _addSubcommand(BuildIOSArchiveCommand(logger: logger, verboseHelp: verboseHelp));
-    _addSubcommand(BuildBundleCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildIOSArchiveCommand(logger: logger, verboseHelp: verboseHelp, xcode: xcode));
+    _addSubcommand(BuildBundleCommand(logger: logger, verboseHelp: verboseHelp, xcode: xcode));
     _addSubcommand(
-      BuildWebCommand(fileSystem: fileSystem, logger: logger, verboseHelp: verboseHelp),
+      BuildWebCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        verboseHelp: verboseHelp,
+        xcode: xcode,
+      ),
     );
-    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp));
+    _addSubcommand(BuildMacosCommand(logger: logger, verboseHelp: verboseHelp, xcode: xcode));
     _addSubcommand(
       BuildLinuxCommand(logger: logger, operatingSystemUtils: osUtils, verboseHelp: verboseHelp),
     );

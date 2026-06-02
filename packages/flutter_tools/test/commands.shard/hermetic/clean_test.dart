@@ -57,7 +57,7 @@ void main() {
           // Xcode is installed and version satisfactory.
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
-          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand(xcode: xcode));
           await runner.run(<String>['clean']);
 
           expect(buildDirectory, isNot(exists));
@@ -114,7 +114,7 @@ void main() {
 
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
-          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand(xcode: xcode));
           await runner.run(<String>['clean']);
 
           expect(buildDirectory, isNot(exists));
@@ -157,7 +157,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
-          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand(xcode: xcode));
           await runner.run(<String>['clean', '--include-example']);
 
           expect(buildDirectory, isNot(exists));
@@ -207,7 +207,7 @@ void main() {
 
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
-          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand(xcode: xcode));
           await runner.run(<String>['clean', '--include-example']);
 
           expect(testLogger.statusText, contains('No example app found'));
@@ -228,7 +228,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
-          final command = CleanCommand();
+          final command = CleanCommand(xcode: xcode);
           final CommandRunner<void> runner = createTestCommandRunner(command);
           await runner.run(<String>['clean', '--scheme=custom-scheme']);
 
@@ -252,7 +252,7 @@ void main() {
           // Xcode is installed and version satisfactory.
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
-          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand());
+          final CommandRunner<void> runner = createTestCommandRunner(CleanCommand(xcode: xcode));
           await runner.run(<String>['clean']);
 
           expect(xcodeProjectInterpreter.workspaces, const <CleanWorkspaceCall>[]);
@@ -273,7 +273,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
-          final command = CleanCommand();
+          final command = CleanCommand(xcode: xcode);
           expect(
             () => createTestCommandRunner(command).run(<String>['clean', '--scheme']),
             throwsUsageException(),
@@ -299,7 +299,7 @@ void main() {
           xcodeProjectInterpreter.isInstalled = true;
           xcodeProjectInterpreter.version = Version(1000, 0, 0);
 
-          final command = CleanCommand(verbose: true);
+          final command = CleanCommand(xcode: xcode, verbose: true);
           final CommandRunner<void> runner = createTestCommandRunner(command);
           await runner.run(<String>['clean']);
 
@@ -342,7 +342,7 @@ void main() {
             const FileSystemException('Deletion failed'),
           );
 
-          final command = CleanCommand();
+          final command = CleanCommand(xcode: xcode);
           command.deleteFile(file);
           expect(testLogger.errorText, contains('A program may still be using a file'));
         },
@@ -372,7 +372,7 @@ void main() {
 
         xcodeProjectInterpreter.isInstalled = false;
 
-        final command = CleanCommand();
+        final command = CleanCommand(xcode: xcode);
         command.deleteFile(throwingFile);
 
         expect(

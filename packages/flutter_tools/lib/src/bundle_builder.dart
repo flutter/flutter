@@ -21,10 +21,15 @@ import 'cache.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
+import 'macos/xcode.dart';
 import 'project.dart';
 
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
+  BundleBuilder({required Xcode xcode}) : _xcode = xcode;
+
+  final Xcode _xcode;
+
   /// Builds the bundle for the given target platform.
   ///
   /// The default `mainPath` is `lib/main.dart`.
@@ -70,6 +75,7 @@ class BundleBuilder {
       processManager: globals.processManager,
       analytics: globals.analytics,
       platform: globals.platform,
+      xcode: _xcode,
       generateDartPluginRegistry: true,
     );
     final Target target = buildInfo.mode == BuildMode.debug

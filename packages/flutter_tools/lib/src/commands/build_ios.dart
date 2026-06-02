@@ -26,14 +26,15 @@ import '../ios/application_package.dart';
 import '../ios/code_signing.dart';
 import '../ios/mac.dart';
 import '../ios/plist_parser.dart';
+import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({required super.logger, required bool verboseHelp})
-    : super(verboseHelp: verboseHelp) {
+  BuildIOSCommand({required super.logger, required bool verboseHelp, required Xcode xcode})
+    : super(verboseHelp: verboseHelp, xcode: xcode) {
     addPublishPort(verboseHelp: verboseHelp);
     argParser
       ..addFlag(
@@ -108,7 +109,8 @@ class _ImageAssetFileKey {
 ///
 /// Can only be run on a macOS host.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
-  BuildIOSArchiveCommand({required super.logger, required super.verboseHelp}) {
+  BuildIOSArchiveCommand({required super.logger, required super.verboseHelp, required Xcode xcode})
+    : super(xcode: xcode) {
     argParser.addOption(
       'export-method',
       defaultsTo: 'app-store',
@@ -559,7 +561,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       }
 
       result = await globals.processUtils.run(<String>[
-        ...globals.xcode!.xcrunCommand(),
+        ..._xcode.xcrunCommand(),
         'xcodebuild',
         '-exportArchive',
         if (shouldCodesign) ...<String>[
@@ -873,7 +875,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   // are now deprecated. The new equivalents are 'app-store-connect', 'release-testing',
   // and 'debugging'.
   String _getVersionAppropriateExportMethod(String method) {
-    final Version? currVersion = globals.xcode!.currentVersion;
+    final Version? currVersion = _xcode.currentVersion;
     if (currVersion != null) {
       if (currVersion >= Version(15, 4, 0)) {
         switch (method) {
@@ -892,8 +894,9 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 }
 
 abstract class _BuildIOSSubCommand extends BuildSubCommand {
-  _BuildIOSSubCommand({required super.logger, required bool verboseHelp})
-    : super(verboseHelp: verboseHelp) {
+  _BuildIOSSubCommand({required super.logger, required bool verboseHelp, required Xcode xcode})
+    : _xcode = xcode,
+      super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
@@ -920,6 +923,8 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     DevelopmentArtifact.iOS,
   };
 
+  final Xcode _xcode;
+
   XcodeBuildAction get xcodeBuildAction;
 
   /// The result of the Xcode build command. Null until it finishes.
@@ -934,12 +939,10 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   late final Future<BuildInfo> cachedBuildInfo = getBuildInfo();
 
   late final Future<BuildableIOSApp> buildableIOSApp = () async {
-    final app =
-        await applicationPackages?.getPackageForPlatform(
-              TargetPlatform.ios,
-              buildInfo: await cachedBuildInfo,
-            )
-            as BuildableIOSApp?;
+    final app = await applicationPackages?.getPackageForPlatform(
+      TargetPlatform.ios,
+      buildInfo: await cachedBuildInfo,
+    ) as BuildableIOSApp?;
 
     if (app == null) {
       throwToolExit('Application not configured for iOS');
@@ -984,6 +987,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       XcodeBuildAction.archive => 'Archiving $app...',
     });
     final XcodeBuildResult result = await buildXcodeProject(
+      xcode: _xcode,
       app: app,
       buildInfo: buildInfo,
       targetOverride: targetFile,
@@ -1007,6 +1011,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
         logger: globals.logger,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
+        xcode: _xcode,
       );
       final presentParticiple = xcodeBuildAction == XcodeBuildAction.build
           ? 'building'

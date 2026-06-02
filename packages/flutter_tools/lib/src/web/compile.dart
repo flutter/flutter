@@ -17,6 +17,7 @@ import '../cache.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../platform_plugins.dart';
+import '../macos/xcode.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../version.dart';
@@ -49,12 +50,16 @@ class WebBuilder {
     required Analytics analytics,
     required FlutterVersion flutterVersion,
     required FileSystem fileSystem,
+    required Xcode xcode,
   }) : _logger = logger,
        _processManager = processManager,
        _buildSystem = buildSystem,
        _analytics = analytics,
        _flutterVersion = flutterVersion,
-       _fileSystem = fileSystem;
+       _fileSystem = fileSystem,
+       _xcode = xcode;
+
+  final Xcode _xcode;
 
   final Logger _logger;
   final ProcessManager _processManager;
@@ -129,6 +134,7 @@ class WebBuilder {
           processManager: _processManager,
           platform: globals.platform,
           analytics: _analytics,
+          xcode: _xcode,
           cacheDir: globals.cache.getRoot(),
           engineVersion: globals.artifacts!.usesLocalArtifacts
               ? null

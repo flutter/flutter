@@ -32,6 +32,7 @@ import '../runner/flutter_command.dart'
 import '../web/devfs_config.dart';
 import '../web/web_device.dart';
 import 'run.dart';
+import '../macos/xcode.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
 ///
@@ -65,6 +66,7 @@ class DriveCommand extends RunCommandBase {
     required Terminal terminal,
     required OutputPreferences outputPreferences,
     required this.signals,
+    required Xcode xcode,
   }) : _flutterDriverFactory = flutterDriverFactory,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -72,7 +74,8 @@ class DriveCommand extends RunCommandBase {
        _terminal = terminal,
        _outputPreferences = outputPreferences,
        _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
-       super(verboseHelp: verboseHelp) {
+       _xcode = xcode,
+       super(verboseHelp: verboseHelp, xcode: xcode) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
 
@@ -213,6 +216,7 @@ class DriveCommand extends RunCommandBase {
   final Terminal _terminal;
   final OutputPreferences _outputPreferences;
   final FileSystemUtils _fsUtils;
+  final Xcode _xcode;
   Timer? timeoutTimer;
   Map<ProcessSignal, Object>? screenshotTokens;
 
@@ -322,6 +326,7 @@ class DriveCommand extends RunCommandBase {
       processUtils: globals.processUtils,
       dartSdkPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
       devtoolsLauncher: DevtoolsLauncher.instance!,
+      xcode: _xcode,
     );
     final File packageConfigFile = findPackageConfigFileOrDefault(_fileSystem.currentDirectory);
 

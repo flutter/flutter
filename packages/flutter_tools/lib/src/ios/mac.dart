@@ -134,6 +134,7 @@ class IMobileDevice {
 }
 
 Future<XcodeBuildResult> buildXcodeProject({
+  required Xcode xcode,
   required BuildableIOSApp app,
   required BuildInfo buildInfo,
   String? targetOverride,
@@ -194,7 +195,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final migration = ProjectMigration(migrators);
   await migration.run();
 
-  if (!_checkXcodeVersion()) {
+  if (!_checkXcodeVersion(xcode)) {
     return XcodeBuildResult(success: false);
   }
 
@@ -315,12 +316,11 @@ Future<XcodeBuildResult> buildXcodeProject({
       : null;
   final bool incrementalBuild = targetBuildDir != null && targetBuildDir.existsSync();
 
-  final List<String> xcodebuildCommandArgs = await globals.xcode!
-      .fetchDependenciesAndGenerateXcodebuildArgs(
-        app.project,
-        globals.fs.directory(buildDirectoryPath),
-        skipPackageUpdatesAndValidation: false,
-      );
+  final List<String> xcodebuildCommandArgs = await xcode.fetchDependenciesAndGenerateXcodebuildArgs(
+    app.project,
+    globals.fs.directory(buildDirectoryPath),
+    skipPackageUpdatesAndValidation: false,
+  );
   final buildCommands = <String>[...xcodebuildCommandArgs, '-configuration', configuration];
 
   // Check the public headers before checking Xcode version so headers fingerprinter is created
@@ -333,7 +333,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     fileSystem: globals.fs,
     logger: globals.logger,
   );
-  final Version? xcodeVersion = globals.xcode?.currentVersion;
+  final Version? xcodeVersion = xcode.currentVersion;
   if (headersChanged &&
       incrementalBuild &&
       (xcodeVersion != null && xcodeVersion >= Version(26, 0, 0))) {
@@ -597,7 +597,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         );
         final xcResultGenerator = XCResultGenerator(
           resultPath: resultBundle.absolute.path,
-          xcode: globals.xcode!,
+          xcode: xcode,
           processUtils: globals.processUtils,
         );
         xcResult = await xcResultGenerator.generate(
@@ -895,6 +895,7 @@ Future<void> diagnoseXcodeBuildFailure(
   required FileSystem fileSystem,
   required FlutterDarwinPlatform platform,
   required FlutterProject project,
+  required Xcode xcode,
   Device? device,
 }) async {
   final XcodeBuildExecution? xcodeBuildExecution = result.xcodeBuildExecution;
@@ -920,6 +921,7 @@ Future<void> diagnoseXcodeBuildFailure(
   final bool issueDetected = await _handleIssues(
     result,
     xcodeBuildExecution,
+    xcode: xcode,
     project: project,
     platform: platform,
     logger: logger,
@@ -989,7 +991,7 @@ class XcodeBuildExecution {
 
 final _xcodeRequirement = 'Xcode $xcodeRequiredVersion or greater is required to develop for iOS.';
 
-bool _checkXcodeVersion() {
+bool _checkXcodeVersion(Xcode xcode) {
   if (!globals.platform.isMacOS) {
     return false;
   }
@@ -998,7 +1000,7 @@ bool _checkXcodeVersion() {
     globals.printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
-  if (globals.xcode?.isRequiredVersionSatisfactory != true) {
+  if (!xcode.isRequiredVersionSatisfactory) {
     globals.printError('Found "${xcodeProjectInterpreter?.versionText}". $_xcodeRequirement');
     return false;
   }
@@ -1138,6 +1140,7 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
 Future<bool> _handleIssues(
   XcodeBuildResult result,
   XcodeBuildExecution? xcodeBuildExecution, {
+  required Xcode xcode,
   required FlutterProject project,
   required FlutterDarwinPlatform platform,
   required Logger logger,
@@ -1270,7 +1273,7 @@ Future<bool> _handleIssues(
       xcodeBuildExecution != null &&
       xcodeBuildExecution.environmentType == EnvironmentType.simulator &&
       device != null) {
-    final bool simulatorSupportsIntel = await _simulatorSupportsIntel(device);
+    final bool simulatorSupportsIntel = await _simulatorSupportsIntel(device, xcode);
     if (!simulatorSupportsIntel) {
       logger.printError(
         '════════════════════════════════════════════════════════════════════════════════\n'
@@ -1285,14 +1288,14 @@ Future<bool> _handleIssues(
   return issueDetected;
 }
 
-Future<bool> _simulatorSupportsIntel(Device device) async {
-  final Version? xcodeVersion = globals.xcode?.currentVersion;
+Future<bool> _simulatorSupportsIntel(Device device, Xcode xcode) async {
+  final Version? xcodeVersion = xcode.currentVersion;
   if (xcodeVersion != null && xcodeVersion.major < 26) {
     return true;
   }
   final String runtime = await device.sdkNameAndVersion;
   final RunResult result = await globals.processUtils.run([
-    ...globals.xcode!.xcrunCommand(),
+    ...xcode.xcrunCommand(),
     'simctl',
     'list',
     'runtimes',

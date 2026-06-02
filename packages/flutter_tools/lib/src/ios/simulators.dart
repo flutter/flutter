@@ -93,6 +93,7 @@ class IOSSimulatorUtils {
             simControl: _simControl,
             simulatorCategory: device.category,
             logger: _simControl._logger,
+            xcode: _xcode,
           );
         })
         .whereType<IOSSimulator>()
@@ -359,7 +360,9 @@ class IOSSimulator extends Device {
     required this.simulatorCategory,
     required SimControl simControl,
     required super.logger,
+    required Xcode xcode,
   }) : _simControl = simControl,
+       _xcode = xcode,
        super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
 
   @override
@@ -368,6 +371,7 @@ class IOSSimulator extends Device {
   final String simulatorCategory;
 
   final SimControl _simControl;
+  final Xcode _xcode;
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
@@ -556,6 +560,7 @@ class IOSSimulator extends Device {
     assert(buildInfo.isDebug);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
+      xcode: _xcode,
       app: app,
       buildInfo: buildInfo,
       targetOverride: mainPath,
@@ -570,6 +575,7 @@ class IOSSimulator extends Device {
         logger: globals.logger,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
+        xcode: _xcode,
         device: this,
       );
       throwToolExit('Could not build the application for the simulator.');
@@ -769,7 +775,11 @@ Future<Process> launchDeviceSystemLogTool(IOSSimulator device) async {
 
 /// Launches the device log reader process on the host and parses unified logging.
 @visibleForTesting
-Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName) async {
+Future<Process> launchDeviceUnifiedLogging(
+  IOSSimulator device,
+  String? appName,
+  Xcode xcode,
+) async {
   // Make NSPredicate concatenation easier to read.
   String orP(List<String> clauses) => '(${clauses.join(" OR ")})';
   String andP(List<String> clauses) => clauses.join(' AND ');
@@ -793,7 +803,7 @@ Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName)
   ]);
 
   return globals.processUtils.start(<String>[
-    ...globals.xcode!.xcrunCommand(),
+    ...xcode.xcrunCommand(),
     'simctl',
     'spawn',
     device.id,
@@ -852,7 +862,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   Future<void> _start() async {
     // Unified logging iOS 11 and greater (introduced in iOS 10).
     if (await device.sdkMajorVersion >= 11) {
-      _deviceProcess = await launchDeviceUnifiedLogging(device, _appName);
+      _deviceProcess = await launchDeviceUnifiedLogging(device, _appName, device._xcode);
       _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
       _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
     } else {

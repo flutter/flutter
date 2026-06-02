@@ -23,6 +23,7 @@ import '../build_system/targets/windows.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart' as globals;
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
@@ -94,9 +95,13 @@ var _kDefaultTargets = <Target>[
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
-  AssembleCommand({bool verboseHelp = false, required BuildSystem buildSystem})
-    : _verboseHelp = verboseHelp,
-      _buildSystem = buildSystem {
+  AssembleCommand({
+    bool verboseHelp = false,
+    required BuildSystem buildSystem,
+    required Xcode xcode,
+  }) : _verboseHelp = verboseHelp,
+       _buildSystem = buildSystem,
+       _xcode = xcode {
     requiresPubspecYaml();
     argParser.addMultiOption(
       'define',
@@ -162,6 +167,7 @@ class AssembleCommand extends FlutterCommand {
   }
 
   final bool _verboseHelp;
+  final Xcode _xcode;
 
   @override
   bool get hidden => !_verboseHelp;
@@ -283,6 +289,7 @@ class AssembleCommand extends FlutterCommand {
       processManager: globals.processManager,
       analytics: globals.analytics,
       platform: globals.platform,
+      xcode: _xcode,
       engineVersion: artifacts.usesLocalArtifacts ? null : globals.flutterVersion.engineRevision,
       generateDartPluginRegistry: true,
     );

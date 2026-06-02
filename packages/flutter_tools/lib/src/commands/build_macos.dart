@@ -9,13 +9,15 @@ import '../cache.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../macos/build_macos.dart';
+import '../macos/xcode.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
-  BuildMacosCommand({required super.logger, required bool verboseHelp})
-    : super(verboseHelp: verboseHelp) {
+  BuildMacosCommand({required super.logger, required bool verboseHelp, required Xcode xcode})
+    : _xcode = xcode,
+      super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesFlavorOption();
     argParser.addFlag(
@@ -26,6 +28,8 @@ class BuildMacosCommand extends BuildSubCommand {
           'performing duplicate work.',
     );
   }
+
+  final Xcode _xcode;
 
   @override
   final name = 'macos';
@@ -71,6 +75,7 @@ class BuildMacosCommand extends BuildSubCommand {
         analytics: analytics,
       ),
       usingCISystem: usingCISystem,
+      xcode: _xcode,
     );
     return FlutterCommandResult.success();
   }

@@ -28,6 +28,7 @@ import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../isolated/resident_web_runner.dart';
+import '../macos/xcode.dart';
 import '../migrations/widget_preview_gitignore_migration.dart';
 import '../project.dart';
 import '../resident_runner.dart';
@@ -57,6 +58,7 @@ class WidgetPreviewCommand extends FlutterCommand {
     required ProcessManager processManager,
     required Artifacts artifacts,
     required Terminal terminal,
+    required Xcode xcode,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
   }) {
@@ -75,6 +77,7 @@ class WidgetPreviewCommand extends FlutterCommand {
         dtdServicesOverride: dtdServicesOverride,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
         terminal: terminal,
+        xcode: xcode,
       ),
     );
     addSubcommand(
@@ -140,9 +143,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required this.processManager,
     required this.artifacts,
     required this.terminal,
+    required Xcode xcode,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
-  }) : _logger = logger {
+  }) : _logger = logger,
+       _xcode = xcode {
     if (dtdServicesOverride != null) {
       _dtdService = dtdServicesOverride;
     }
@@ -226,6 +231,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   @override
   WidgetPreviewMachineAwareLogger get logger => _logger as WidgetPreviewMachineAwareLogger;
   final Logger _logger;
+  final Xcode _xcode;
 
   @override
   final FlutterProjectFactory projectFactory;
@@ -594,6 +600,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           platform: platform,
           outputPreferences: globals.outputPreferences,
           systemClock: globals.systemClock,
+          xcode: _xcode,
           // Explicitly provide the project root path rather than relying on the current directory
           // as the current directory exists within $TMP. At least on MacOS, when setting the
           // current directory to the widget_preview_scaffold project created under

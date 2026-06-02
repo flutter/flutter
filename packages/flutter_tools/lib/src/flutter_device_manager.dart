@@ -30,6 +30,7 @@ import 'version.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 import 'windows/windows_workflow.dart';
+import 'macos/xcode.dart';
 
 /// A provider for all of the device discovery instances.
 class FlutterDeviceManager extends DeviceManager {
@@ -52,6 +53,7 @@ class FlutterDeviceManager extends DeviceManager {
     required WindowsWorkflow windowsWorkflow,
     required CustomDevicesConfig customDevicesConfig,
     required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    required Xcode xcode,
   }) : deviceDiscoverers = <DeviceDiscovery>[
          AndroidDevices(
            logger: logger,
@@ -76,8 +78,10 @@ class FlutterDeviceManager extends DeviceManager {
            logger: logger,
            artifacts: artifacts,
            nativeAssetsBuilder: nativeAssetsBuilder,
+           xcode: xcode,
          ),
          MacOSDevices(
+           xcode: xcode,
            processManager: processManager,
            macOSWorkflow: macOSWorkflow,
            logger: logger,
@@ -120,6 +124,7 @@ class FlutterDeviceManager extends DeviceManager {
            processManager: processManager,
            logger: logger,
            config: customDevicesConfig,
+           xcode: xcode,
          ),
        ];
 

@@ -76,6 +76,24 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
     return runner();
   }
 
+  Xcode? xcode;
+  Xcode getXcode() {
+    if (overrides != null && overrides.containsKey(Xcode)) {
+      return overrides[Xcode]!() as Xcode;
+    }
+    // Xcode is not in the context, so we instantiate it directly here.
+    // This should be removed when all global getters it depends on are no longer used.
+    xcode ??= Xcode(
+      logger: globals.logger,
+      processManager: globals.processManager,
+      platform: globals.platform,
+      fileSystem: globals.fs,
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+      userMessages: globals.userMessages,
+    );
+    return xcode!;
+  }
+
   // TODO(ianh): We should split this into two, one for tests (which should be
   // in test/), and one for production (which should be in executable.dart).
   return context.run<T>(
@@ -200,6 +218,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         operatingSystemUtils: globals.os,
         customDevicesConfig: globals.customDevicesConfig,
         nativeAssetsBuilder: globals.nativeAssetsBuilder,
+        xcode: getXcode(),
       ),
       DevtoolsLauncher: () => DevtoolsServerLauncher(
         processManager: globals.processManager,
@@ -208,7 +227,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         botDetector: globals.botDetector,
       ),
       Doctor: () => Doctor(logger: globals.logger, clock: globals.systemClock),
-      DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
+      DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance(xcode: getXcode()),
       EmulatorManager: () => EmulatorManager(
         java: globals.java,
         androidSdk: globals.androidSdk,
@@ -216,6 +235,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         logger: globals.logger,
         fileSystem: globals.fs,
         androidWorkflow: androidWorkflow!,
+        xcode: getXcode(),
       ),
       FeatureFlags: () => FlutterFeatureFlags(
         flutterVersion: globals.flutterVersion,
@@ -246,13 +266,10 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         logger: globals.logger,
         processManager: globals.processManager,
-        xcode: globals.xcode!,
+        xcode: getXcode(),
       ),
-      IOSWorkflow: () => IOSWorkflow(
-        featureFlags: featureFlags,
-        xcode: globals.xcode!,
-        platform: globals.platform,
-      ),
+      IOSWorkflow: () =>
+          IOSWorkflow(featureFlags: featureFlags, xcode: getXcode(), platform: globals.platform),
       Java: () => Java.find(
         config: globals.config,
         androidStudio: globals.androidStudio,
@@ -328,21 +345,13 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       WebWorkflow: () => WebWorkflow(featureFlags: featureFlags, platform: globals.platform),
       WindowsWorkflow: () =>
           WindowsWorkflow(featureFlags: featureFlags, platform: globals.platform),
-      Xcode: () => Xcode(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        fileSystem: globals.fs,
-        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-        userMessages: globals.userMessages,
-      ),
       XCDevice: () => XCDevice(
         processManager: globals.processManager,
         logger: globals.logger,
         artifacts: globals.artifacts!,
         cache: globals.cache,
         platform: globals.platform,
-        xcode: globals.xcode!,
+        xcode: getXcode(),
         iproxy: IProxy(
           iproxyPath: globals.artifacts!.getHostArtifact(HostArtifact.iproxy).path,
           logger: globals.logger,
@@ -360,6 +369,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         fileSystem: globals.fs,
         analytics: globals.analytics,
       ),
+      Xcode: getXcode,
     },
   );
 }

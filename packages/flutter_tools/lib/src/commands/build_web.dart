@@ -8,6 +8,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../macos/xcode.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
@@ -21,7 +22,9 @@ class BuildWebCommand extends BuildSubCommand {
     required super.logger,
     required FileSystem fileSystem,
     required bool verboseHelp,
+    required Xcode xcode,
   }) : _fileSystem = fileSystem,
+       _xcode = xcode,
        super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
@@ -148,6 +151,7 @@ class BuildWebCommand extends BuildSubCommand {
   }
 
   final FileSystem _fileSystem;
+  final Xcode _xcode;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -289,6 +293,7 @@ class BuildWebCommand extends BuildSubCommand {
       fileSystem: globals.fs,
       flutterVersion: globals.flutterVersion,
       analytics: globals.analytics,
+      xcode: _xcode,
     );
     await webBuilder.buildWeb(
       project,

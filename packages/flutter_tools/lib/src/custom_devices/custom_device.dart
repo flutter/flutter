@@ -29,6 +29,7 @@ import '../vmservice.dart';
 import 'custom_device_config.dart';
 import 'custom_device_workflow.dart';
 import 'custom_devices_config.dart';
+import '../macos/xcode.dart';
 
 /// Replace all occurrences of `${someName}` with the value found for that
 /// name inside replacementValues or additionalReplacementValues.
@@ -429,9 +430,11 @@ class CustomDevice extends Device {
     required CustomDeviceConfig config,
     required super.logger,
     required ProcessManager processManager,
+    required Xcode xcode,
   }) : _config = config,
        _logger = logger,
        _processManager = processManager,
+       _xcode = xcode,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _globalLogReader = CustomDeviceLogReader(config.label),
        portForwarder = config.usesPortForwarding
@@ -453,6 +456,7 @@ class CustomDevice extends Device {
   final CustomDeviceConfig _config;
   final Logger _logger;
   final ProcessManager _processManager;
+  final Xcode _xcode;
   final ProcessUtils _processUtils;
   final _sessions = <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
@@ -725,7 +729,7 @@ class CustomDevice extends Device {
     if (!prebuiltApplication) {
       final String assetBundleDir = getAssetBuildDirectory();
 
-      bundleBuilder ??= BundleBuilder();
+      bundleBuilder ??= BundleBuilder(xcode: _xcode);
 
       // this just builds the asset bundle, it's the same as `flutter build bundle`
       await bundleBuilder.build(
@@ -797,16 +801,19 @@ class CustomDevices extends PollingDeviceDiscovery {
     required ProcessManager processManager,
     required Logger logger,
     required CustomDevicesConfig config,
+    required Xcode xcode,
   }) : _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
        _logger = logger,
        _processManager = processManager,
        _config = config,
+       _xcode = xcode,
        super('custom devices');
 
   final CustomDeviceWorkflow _customDeviceWorkflow;
   final ProcessManager _processManager;
   final Logger _logger;
   final CustomDevicesConfig _config;
+  final Xcode _xcode;
 
   @override
   bool get supportsPlatform => true;
@@ -821,8 +828,12 @@ class CustomDevices extends PollingDeviceDiscovery {
         .tryGetDevices()
         .where((CustomDeviceConfig element) => element.enabled)
         .map(
-          (CustomDeviceConfig config) =>
-              CustomDevice(config: config, logger: _logger, processManager: _processManager),
+          (CustomDeviceConfig config) => CustomDevice(
+            config: config,
+            logger: _logger,
+            processManager: _processManager,
+            xcode: _xcode,
+          ),
         )
         .toList();
   }

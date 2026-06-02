@@ -9,6 +9,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../bundle_builder.dart';
 import '../features.dart';
+import '../macos/xcode.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -19,7 +20,8 @@ class BuildBundleCommand extends BuildSubCommand {
     required super.logger,
     bool verboseHelp = false,
     BundleBuilder? bundleBuilder,
-  }) : _bundleBuilder = bundleBuilder ?? BundleBuilder(),
+    required Xcode xcode,
+  }) : _bundleBuilder = bundleBuilder ?? BundleBuilder(xcode: xcode),
        super(verboseHelp: verboseHelp) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);

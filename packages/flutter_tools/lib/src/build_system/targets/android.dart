@@ -8,7 +8,6 @@ import '../../base/deferred_component.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals show xcode;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -218,7 +217,7 @@ class AndroidAot extends AotElfBase {
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode!,
+      xcode: environment.xcode,
       processManager: environment.processManager,
       artifacts: environment.artifacts,
     );

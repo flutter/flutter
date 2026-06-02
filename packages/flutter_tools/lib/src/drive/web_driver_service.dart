@@ -24,6 +24,7 @@ import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../web/web_runner.dart';
+import '../macos/xcode.dart';
 import 'drive_service.dart';
 
 /// An implementation of the driver service for web debug and release applications.
@@ -35,12 +36,14 @@ class WebDriverService extends DriverService {
     required Logger logger,
     required Terminal terminal,
     required OutputPreferences outputPreferences,
+    required Xcode xcode,
   }) : _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
        _platform = platform,
        _logger = logger,
        _terminal = terminal,
-       _outputPreferences = outputPreferences;
+       _outputPreferences = outputPreferences,
+       _xcode = xcode;
 
   final ProcessUtils _processUtils;
   final String _dartSdkPath;
@@ -48,6 +51,7 @@ class WebDriverService extends DriverService {
   final Logger _logger;
   final Terminal _terminal;
   final OutputPreferences _outputPreferences;
+  final Xcode _xcode;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -105,6 +109,7 @@ class WebDriverService extends DriverService {
       platform: _platform,
       outputPreferences: _outputPreferences,
       systemClock: globals.systemClock,
+      xcode: _xcode,
     );
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(

@@ -43,11 +43,11 @@ import 'ios/xcodeproj.dart';
 import 'macos/cocoapods.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/xcdevice.dart';
-import 'macos/xcode.dart';
 import 'native_assets.dart';
 import 'persistent_tool_state.dart';
 import 'pre_run_validator.dart';
 import 'project.dart';
+import 'macos/xcode.dart';
 import 'reporting/crash_reporting.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
@@ -74,7 +74,6 @@ AndroidSdk? get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
 XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 XCDevice? get xcdevice => context.get<XCDevice>();
-Xcode? get xcode => context.get<Xcode>();
 IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
 LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
 
@@ -276,7 +275,7 @@ CocoaPods? get cocoaPods => context.get<CocoaPods>();
 
 FlutterProjectFactory get projectFactory {
   return context.get<FlutterProjectFactory>() ??
-      FlutterProjectFactory(logger: logger, fileSystem: fs);
+      FlutterProjectFactory(logger: logger, fileSystem: fs, xcode: context.get<Xcode>());
 }
 
 CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>()!;
