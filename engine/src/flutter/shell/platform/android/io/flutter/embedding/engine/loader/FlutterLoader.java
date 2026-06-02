@@ -12,7 +12,6 @@ import android.content.res.AssetManager;
 import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
@@ -24,7 +23,6 @@ import io.flutter.FlutterInjector;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngineFlags;
 import io.flutter.embedding.engine.FlutterJNI;
-import io.flutter.util.HandlerCompat;
 import io.flutter.util.PathUtils;
 import io.flutter.util.TraceSection;
 import io.flutter.view.VsyncWaiter;
@@ -585,8 +583,8 @@ public class FlutterLoader {
    *
    * <p>If the library lives within the application's internal storage, this means that the
    * application developer either explicitly placed the library there or set the Android Gradle
-   * Plugin jniLibs packaging option {@code useLegacyPackaging} to true; see
-   * https://developer.android.com/build/releases/past-releases/agp-4-2-0-release-notes#compress-native-libs-dsl
+   * Plugin jniLibs packaging option {@code useLegacyPackaging} to true; see <a
+   * href="https://developer.android.com/build/releases/past-releases/agp-4-2-0-release-notes#compress-native-libs-dsl">...</a>
    * for more information.
    */
   private String getSafeAotSharedLibraryName(
@@ -630,45 +628,6 @@ public class FlutterLoader {
   @VisibleForTesting
   File getFileFromPath(String path) {
     return new File(path);
-  }
-
-  /**
-   * Same as {@link #ensureInitializationComplete(Context, String[])} but waiting on a background
-   * thread, then invoking {@code callback} on the {@code callbackHandler}.
-   */
-  public void ensureInitializationCompleteAsync(
-      @NonNull Context applicationContext,
-      @Nullable String[] args,
-      @NonNull Handler callbackHandler,
-      @NonNull Runnable callback) {
-    if (Looper.myLooper() != Looper.getMainLooper()) {
-      throw new IllegalStateException(
-          "ensureInitializationComplete must be called on the main thread");
-    }
-    if (settings == null) {
-      throw new IllegalStateException(
-          "ensureInitializationComplete must be called after startInitialization");
-    }
-    if (initialized) {
-      callbackHandler.post(callback);
-      return;
-    }
-    executorService.execute(
-        () -> {
-          InitResult result;
-          try {
-            result = initResultFuture.get();
-          } catch (Exception e) {
-            Log.e(TAG, "Flutter initialization failed.", e);
-            throw new RuntimeException(e);
-          }
-          HandlerCompat.createAsyncHandler(Looper.getMainLooper())
-              .post(
-                  () -> {
-                    ensureInitializationComplete(applicationContext.getApplicationContext(), args);
-                    callbackHandler.post(callback);
-                  });
-        });
   }
 
   /** Returns whether the FlutterLoader has finished loading the native library. */
@@ -747,15 +706,6 @@ public class FlutterLoader {
     @Nullable
     public String getLogTag() {
       return logTag;
-    }
-
-    /**
-     * Set the tag associated with Flutter app log messages.
-     *
-     * @param tag Log tag.
-     */
-    public void setLogTag(String tag) {
-      logTag = tag;
     }
   }
 }
