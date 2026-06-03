@@ -43,7 +43,7 @@ That link takes the format `"https://ci.chromium.org/ui/p/flutter/builders/prod/
 Example `https://ci.chromium.org/ui/p/flutter/builders/prod/Windows%20plugin_test/16247/overview` where `Windows%20plugin_test` is the <check_name> and `16247` is the <buildNumber>.
 
 
-The use the <buildNumber> to get the test logs metadata by running the following command.
+Then use the <buildNumber> to get the test logs metadata by running the following command.
 
 <!-- TODO include a .gitignored directory where agent can dump local files in flutter/packages -->
 
