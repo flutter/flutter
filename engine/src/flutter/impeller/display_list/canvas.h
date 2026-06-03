@@ -278,6 +278,11 @@ class Canvas {
   /// are generated.
   bool EnsureFinalMipmapGeneration() const;
 
+  /// Returns true if the paint is compatible with SDF rendering.
+  ///
+  /// Visible for testing.
+  static bool IsCompatibleWithSDFRendering(const Paint& paint);
+
  private:
   class BlurShape {
    public:

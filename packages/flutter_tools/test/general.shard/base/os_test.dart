@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi' show Abi;
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -18,6 +19,17 @@ const kExecutable = 'foo';
 const kPath1 = '/bar/bin/$kExecutable';
 const kPath2 = '/another/bin/$kExecutable';
 
+const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+// x64 host.
+const kx64CheckCommand = FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1);
+
+// ARM host.
+const kARMCheckCommand = FakeCommand(
+  command: <String>['sysctl', 'hw.optional.arm64'],
+  stdout: 'hw.optional.arm64: 1',
+);
+
 void main() {
   late FakeProcessManager fakeProcessManager;
 
@@ -25,12 +37,13 @@ void main() {
     fakeProcessManager = FakeProcessManager.empty();
   });
 
-  OperatingSystemUtils createOSUtils(Platform platform) {
+  OperatingSystemUtils createOSUtils(Platform platform, {Abi? currentAbi}) {
     return OperatingSystemUtils(
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       platform: platform,
       processManager: fakeProcessManager,
+      currentAbi: currentAbi,
     );
   }
 
@@ -110,81 +123,61 @@ void main() {
   });
 
   group('host platform', () {
-    testWithoutContext('unknown defaults to Linux', () async {
-      fakeProcessManager.addCommand(
-        const FakeCommand(command: <String>['uname', '-m'], stdout: 'x86_64'),
+    testWithoutContext('Windows x64', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(operatingSystem: 'windows'),
+        currentAbi: Abi.windowsX64,
       );
-
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'fuchsia'));
-      expect(utils.hostPlatform, HostPlatform.linux_x64);
-    });
-
-    testWithoutContext('Windows default', () async {
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
       expect(utils.hostPlatform, HostPlatform.windows_x64);
     });
 
-    testWithoutContext('Linux x64', () async {
-      fakeProcessManager.addCommand(
-        const FakeCommand(command: <String>['uname', '-m'], stdout: 'x86_64'),
+    testWithoutContext('Windows ARM64', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(operatingSystem: 'windows'),
+        currentAbi: Abi.windowsArm64,
       );
+      expect(utils.hostPlatform, HostPlatform.windows_arm64);
+    });
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
+    testWithoutContext('Linux x64', () async {
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(), currentAbi: Abi.linuxX64);
       expect(utils.hostPlatform, HostPlatform.linux_x64);
     });
 
-    testWithoutContext('Linux ARM', () async {
-      fakeProcessManager.addCommand(
-        const FakeCommand(command: <String>['uname', '-m'], stdout: 'aarch64'),
-      );
-
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform());
+    testWithoutContext('Linux ARM64', () async {
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(), currentAbi: Abi.linuxArm64);
       expect(utils.hostPlatform, HostPlatform.linux_arm64);
     });
 
-    testWithoutContext('macOS ARM', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(
-          command: <String>['sysctl', 'hw.optional.arm64'],
-          stdout: 'hw.optional.arm64: 1',
-        ),
-      ]);
+    testWithoutContext('Linux RISCV64', () async {
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(),
+        currentAbi: Abi.linuxRiscv64,
+      );
+      expect(utils.hostPlatform, HostPlatform.linux_riscv64);
+    });
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'macos'));
+    testWithoutContext('macOS x64', () async {
+      fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kx64CheckCommand]);
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(operatingSystem: 'macos'),
+        currentAbi: Abi.macosX64,
+      );
+      expect(utils.hostPlatform, HostPlatform.darwin_x64);
+    });
+
+    testWithoutContext('macOS ARM64', () async {
+      fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kARMCheckCommand]);
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(operatingSystem: 'macos'),
+        currentAbi: Abi.macosArm64,
+      );
       expect(utils.hostPlatform, HostPlatform.darwin_arm64);
     });
 
-    testWithoutContext('macOS 11 x86', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(
-          command: <String>['sysctl', 'hw.optional.arm64'],
-          stdout: 'hw.optional.arm64: 0',
-        ),
-      ]);
-
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'macos'));
-      expect(utils.hostPlatform, HostPlatform.darwin_x64);
-    });
-
-    testWithoutContext('sysctl not found', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>['which', 'sysctl'], exitCode: 1),
-      ]);
-
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'macos'));
-      expect(() => utils.hostPlatform, throwsToolExit(message: 'sysctl'));
-    });
-
-    testWithoutContext('macOS 10 x86', () async {
-      fakeProcessManager.addCommands(<FakeCommand>[
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
-      ]);
-
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'macos'));
-      expect(utils.hostPlatform, HostPlatform.darwin_x64);
+    testWithoutContext('unsupported throws', () async {
+      final OperatingSystemUtils utils = createOSUtils(FakePlatform(), currentAbi: Abi.androidArm);
+      expect(() => utils.hostPlatform, throwsUnsupportedError);
     });
 
     testWithoutContext('macOS ARM name', () async {
@@ -193,14 +186,14 @@ void main() {
         const FakeCommand(command: <String>['sw_vers', '-productVersion'], stdout: 'version'),
         const FakeCommand(command: <String>['sw_vers', '-buildVersion'], stdout: 'build'),
         const FakeCommand(command: <String>['uname', '-m'], stdout: 'arm64'),
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(
-          command: <String>['sysctl', 'hw.optional.arm64'],
-          stdout: 'hw.optional.arm64: 1',
-        ),
+        kWhichSysctlCommand,
+        kARMCheckCommand,
       ]);
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(operatingSystem: 'macos'),
+        currentAbi: Abi.macosArm64,
+      );
       expect(utils.name, 'product version build darwin-arm64');
     });
 
@@ -213,14 +206,14 @@ void main() {
           command: <String>['uname', '-m'],
           stdout: 'x86_64', // Running on Rosetta
         ),
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(
-          command: <String>['sysctl', 'hw.optional.arm64'],
-          stdout: 'hw.optional.arm64: 1',
-        ),
+        kWhichSysctlCommand,
+        kARMCheckCommand,
       ]);
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(operatingSystem: 'macos'),
+        currentAbi: Abi.macosArm64,
+      );
       expect(utils.name, 'product version build darwin-arm64 (Rosetta)');
     });
 
@@ -230,11 +223,14 @@ void main() {
         const FakeCommand(command: <String>['sw_vers', '-productVersion'], stdout: 'version'),
         const FakeCommand(command: <String>['sw_vers', '-buildVersion'], stdout: 'build'),
         const FakeCommand(command: <String>['uname', '-m'], stdout: 'x86_64'),
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
       ]);
 
-      final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'macos'));
+      final OperatingSystemUtils utils = createOSUtils(
+        FakePlatform(operatingSystem: 'macos'),
+        currentAbi: Abi.macosX64,
+      );
       expect(utils.name, 'product version build darwin-x64');
     });
 
@@ -384,6 +380,46 @@ void main() {
         ),
       );
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/185794.
+    // A canonical archive entry that resolves to a sibling directory sharing
+    // a name prefix with the extraction root (e.g. `<target>-sibling/x.txt`)
+    // must NOT be accepted: the previous `startsWith` check on canonical
+    // paths returned true for sibling directories with a name that started
+    // with the target's name.
+    testWithoutContext(
+      'Windows rejects archive entries that escape into a sibling directory with a name prefix',
+      () {
+        final OperatingSystemUtils utils = createOSUtils(FakePlatform(operatingSystem: 'windows'));
+        final fs = MemoryFileSystem.test();
+        final File fakeZipFile = fs.file('archive.zip');
+        // Extract into `<cwd>/cache/windows-x64`. A crafted archive entry of
+        // `../windows-x64-profile/poc_marker.txt` resolves to
+        // `<cwd>/cache/windows-x64-profile/poc_marker.txt`, a sibling of the
+        // target whose canonical path shares the `windows-x64` prefix.
+        final Directory targetDirectory = fs.directory('cache/windows-x64')
+          ..createSync(recursive: true);
+        const content = 'malicious';
+        final archive = Archive()
+          ..addFile(
+            ArchiveFile('../windows-x64-profile/poc_marker.txt', content.length, content.codeUnits),
+          );
+        final List<int> zipData = ZipEncoder().encode(archive)!;
+        fakeZipFile.writeAsBytesSync(zipData);
+        expect(
+          () => utils.unzip(fakeZipFile, targetDirectory),
+          throwsA(
+            isA<StateError>().having(
+              (StateError error) => error.message,
+              'correct error message',
+              contains('Tried to extract the file '),
+            ),
+          ),
+        );
+        // The sibling file must not have been written.
+        expect(fs.file('cache/windows-x64-profile/poc_marker.txt').existsSync(), isFalse);
+      },
+    );
   });
 
   testWithoutContext('If unzip fails, include stderr in exception text', () {
