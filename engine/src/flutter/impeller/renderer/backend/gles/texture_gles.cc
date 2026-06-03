@@ -669,15 +669,17 @@ bool TextureGLES::EnsureSliceMipLevelStorage(size_t slice, size_t mip_level) {
   GLenum image_target =
       is_cube ? GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice : GL_TEXTURE_2D;
   gl.BindTexture(is_cube ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, handle.value());
-  gl.TexImage2D(image_target,                                    // target
-                static_cast<GLint>(mip_level),                   // LOD level
-                gles_format->internal_format,                    // internal
-                std::max<int64_t>(1, size.width >> mip_level),   // width
-                std::max<int64_t>(1, size.height >> mip_level),  // height
-                0u,                                              // border
-                gles_format->external_format,                    // format
-                gles_format->type,                               // type
-                nullptr                                          // data
+  gl.TexImage2D(image_target,                   // target
+                static_cast<GLint>(mip_level),  // LOD level
+                gles_format->internal_format,   // internal
+                static_cast<GLsizei>(
+                    std::max<int64_t>(1, size.width >> mip_level)),  // width
+                static_cast<GLsizei>(
+                    std::max<int64_t>(1, size.height >> mip_level)),  // height
+                0u,                                                   // border
+                gles_format->external_format,                         // format
+                gles_format->type,                                    // type
+                nullptr                                               // data
   );
   MarkSliceMipLevelInitialized(slice, mip_level);
   return true;
