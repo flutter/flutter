@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -559,6 +561,182 @@ let package = Package(
 ''');
             expect(processManager, hasNoRemainingExpectations);
           });
+
+          group('robust symlink creation', () {
+            testWithoutContext('directory already exists at symlink path', () async {
+              final fs = MemoryFileSystem();
+              final processManager = FakeProcessManager.any();
+              final logger = BufferLogger.test();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+              final validPlugin1 = FakePlugin(
+                name: 'valid_plugin_1',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs
+                  .file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
+                  .createSync(recursive: true);
+
+              // Pre-create a directory at the symlink path.
+              final Directory symlinkPath = project.relativeSwiftPackagesDirectory.childDirectory(
+                'valid_plugin_1-1.0.0',
+              );
+              symlinkPath.createSync(recursive: true);
+
+              final spm = SwiftPackageManager(
+                fileSystem: fs,
+                templateRenderer: const MustacheTemplateRenderer(),
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                config: FakeConfig(),
+              );
+              await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
+
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
+                exists,
+              );
+              expect(
+                project.relativeSwiftPackagesDirectory
+                    .childLink('valid_plugin_1-1.0.0')
+                    .targetSync(),
+                '${validPlugin1.path}/${platform.name}/valid_plugin_1',
+              );
+            });
+
+            testWithoutContext('file already exists at symlink path', () async {
+              final fs = MemoryFileSystem();
+              final processManager = FakeProcessManager.any();
+              final logger = BufferLogger.test();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+              final validPlugin1 = FakePlugin(
+                name: 'valid_plugin_1',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs
+                  .file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
+                  .createSync(recursive: true);
+
+              // Pre-create a file at the symlink path.
+              final File symlinkPath = project.relativeSwiftPackagesDirectory.childFile(
+                'valid_plugin_1-1.0.0',
+              );
+              symlinkPath.createSync(recursive: true);
+
+              final spm = SwiftPackageManager(
+                fileSystem: fs,
+                templateRenderer: const MustacheTemplateRenderer(),
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                config: FakeConfig(),
+              );
+              await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
+
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
+                exists,
+              );
+              expect(
+                project.relativeSwiftPackagesDirectory
+                    .childLink('valid_plugin_1-1.0.0')
+                    .targetSync(),
+                '${validPlugin1.path}/${platform.name}/valid_plugin_1',
+              );
+            });
+
+            testWithoutContext('broken symlink already exists at symlink path', () async {
+              final fs = MemoryFileSystem();
+              final processManager = FakeProcessManager.any();
+              final logger = BufferLogger.test();
+              final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+              final validPlugin1 = FakePlugin(
+                name: 'valid_plugin_1',
+                platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+              );
+              fs
+                  .file('${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift')
+                  .createSync(recursive: true);
+
+              // Pre-create a broken symlink at the symlink path pointing to a non-existent path.
+              final Link symlinkPath = project.relativeSwiftPackagesDirectory.childLink(
+                'valid_plugin_1-1.0.0',
+              );
+              symlinkPath.parent.createSync(recursive: true);
+              symlinkPath.createSync('/nonexistent/path');
+
+              final spm = SwiftPackageManager(
+                fileSystem: fs,
+                templateRenderer: const MustacheTemplateRenderer(),
+                processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                config: FakeConfig(),
+              );
+              await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
+
+              expect(
+                project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
+                exists,
+              );
+              expect(
+                project.relativeSwiftPackagesDirectory
+                    .childLink('valid_plugin_1-1.0.0')
+                    .targetSync(),
+                '${validPlugin1.path}/${platform.name}/valid_plugin_1',
+              );
+            });
+
+            testWithoutContext(
+              'parallel build concurrently creates correct symlink and throws OS error 17',
+              () async {
+                final delegateFs = MemoryFileSystem();
+                final fs = ErrorInjectingForwardingFileSystem(delegateFs);
+                final processManager = FakeProcessManager.any();
+                final logger = BufferLogger.test();
+                final project = FakeXcodeProject(platform: platform.name, fileSystem: fs);
+
+                final validPlugin1 = FakePlugin(
+                  name: 'valid_plugin_1',
+                  platforms: <String, PluginPlatform>{platform.name: FakePluginPlatform()},
+                );
+                fs
+                    .file(
+                      '${validPlugin1.path}/${platform.name}/${validPlugin1.name}/Package.swift',
+                    )
+                    .createSync(recursive: true);
+
+                fs.errorToThrowOnLinkCreate = const FileSystemException(
+                  'File exists',
+                  '',
+                  OSError('File exists', 17),
+                );
+
+                final Link symlinkPath = project.relativeSwiftPackagesDirectory.childLink(
+                  'valid_plugin_1-1.0.0',
+                );
+                delegateFs.link(symlinkPath.path)
+                  ..parent.createSync(recursive: true)
+                  ..createSync('${validPlugin1.path}/${platform.name}/valid_plugin_1');
+
+                final spm = SwiftPackageManager(
+                  fileSystem: fs,
+                  templateRenderer: const MustacheTemplateRenderer(),
+                  processUtils: ProcessUtils(processManager: processManager, logger: logger),
+                  config: FakeConfig(),
+                );
+                await spm.generatePluginsSwiftPackage(<Plugin>[validPlugin1], platform, project);
+
+                expect(
+                  project.relativeSwiftPackagesDirectory.childLink('valid_plugin_1-1.0.0'),
+                  exists,
+                );
+                expect(
+                  project.relativeSwiftPackagesDirectory
+                      .childLink('valid_plugin_1-1.0.0')
+                      .targetSync(),
+                  '${validPlugin1.path}/${platform.name}/valid_plugin_1',
+                );
+              },
+            );
+          });
         });
       });
     }
@@ -566,7 +744,7 @@ let package = Package(
 }
 
 class FakeXcodeProject extends Fake implements IosProject {
-  FakeXcodeProject({required MemoryFileSystem fileSystem, required String platform})
+  FakeXcodeProject({required FileSystem fileSystem, required String platform})
     : hostAppRoot = fileSystem.directory('app_name').childDirectory(platform);
 
   @override
@@ -648,4 +826,49 @@ class FakePluginPlatform extends Fake implements PluginPlatform {}
 class FakeConfig extends Fake implements Config {
   @override
   Object? getValue(String key) => null;
+}
+
+class ErrorInjectingForwardingFileSystem extends ForwardingFileSystem {
+  ErrorInjectingForwardingFileSystem(super.delegate);
+
+  FileSystemException? errorToThrowOnLinkCreate;
+
+  @override
+  Link link(dynamic path) {
+    final Link delegateLink = delegate.link(path);
+    return _ErrorInjectingLink(this, delegateLink);
+  }
+}
+
+class _ErrorInjectingLink extends ForwardingFileSystemEntity<Link, io.Link> with ForwardingLink {
+  _ErrorInjectingLink(ErrorInjectingForwardingFileSystem fileSystem, io.Link delegate)
+    : _fileSystem = fileSystem,
+      delegate = delegate;
+
+  final ErrorInjectingForwardingFileSystem _fileSystem;
+
+  @override
+  final io.Link delegate;
+
+  @override
+  FileSystem get fileSystem => _fileSystem;
+
+  @override
+  File wrapFile(io.File delegate) => delegate as File;
+
+  @override
+  Directory wrapDirectory(io.Directory delegate) => delegate as Directory;
+
+  @override
+  Link wrapLink(io.Link delegate) => _ErrorInjectingLink(_fileSystem, delegate);
+
+  @override
+  void createSync(String target, {bool recursive = false}) {
+    if (_fileSystem.errorToThrowOnLinkCreate != null) {
+      final FileSystemException err = _fileSystem.errorToThrowOnLinkCreate!;
+      _fileSystem.errorToThrowOnLinkCreate = null;
+      throw err;
+    }
+    super.createSync(target, recursive: recursive);
+  }
 }
