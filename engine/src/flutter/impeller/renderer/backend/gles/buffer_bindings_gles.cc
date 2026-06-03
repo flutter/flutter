@@ -248,7 +248,9 @@ bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
     // which is the default. Setting it for every attribute (including
     // divisor 0) also clears any stale divisor left by a prior pipeline,
     // which matters on ES, where there is no vertex array object.
-    if (gl.VertexAttribDivisorEXT.IsAvailable()) {
+    if (gl.VertexAttribDivisor.IsAvailable()) {
+      gl.VertexAttribDivisor(array.index, array.vertex_attrib_divisor);
+    } else if (gl.VertexAttribDivisorEXT.IsAvailable()) {
       gl.VertexAttribDivisorEXT(array.index, array.vertex_attrib_divisor);
     }
   }
