@@ -478,6 +478,10 @@ Compiler::Compiler(const std::shared_ptr<const fml::Mapping>& source_mapping,
           source_options.target_platform ==
               TargetPlatform::kRuntimeStageGLES3) {
         spirv_options.macro_definitions.push_back("IMPELLER_TARGET_OPENGLES");
+        // A temporary macro that allows fragment shader authors to target
+        // Flutter <= 3.44 before the OpenGLES flip was removed.
+        spirv_options.macro_definitions.push_back(
+            "IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED");
       }
     } break;
     case TargetPlatform::kSkSL: {

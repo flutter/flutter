@@ -134,6 +134,14 @@ struct RenderPassData {
   std::shared_ptr<Texture> depth_attachment;
   std::shared_ptr<Texture> stencil_attachment;
 
+  // The subresource of each attachment to render into.
+  uint32_t color_mip_level = 0u;
+  uint32_t color_slice = 0u;
+  uint32_t depth_mip_level = 0u;
+  uint32_t depth_slice = 0u;
+  uint32_t stencil_mip_level = 0u;
+  uint32_t stencil_slice = 0u;
+
   bool clear_color_attachment = true;
   bool clear_depth_attachment = true;
   bool clear_stencil_attachment = true;
@@ -260,38 +268,43 @@ static void EncodeViewport(const ProcTableGLES& gl,
       gl.BindFramebuffer(GL_FRAMEBUFFER, *color_gles.GetFBO());
     }
   } else {
-    // Create and bind an offscreen FBO.
-    if (!color_gles.GetCachedFBO().IsDead()) {
-      fbo = reactor.GetGLHandle(color_gles.GetCachedFBO());
-      if (!fbo.has_value()) {
-        return false;
-      }
-      gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
-    } else {
-      HandleGLES cached_fbo =
-          reactor.CreateUntrackedHandle(HandleType::kFrameBuffer);
-      color_gles.SetCachedFBO(cached_fbo);
-      fbo = reactor.GetGLHandle(cached_fbo);
-      if (!fbo.has_value()) {
-        return false;
-      }
-      gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
+    // Create (once) and bind an offscreen FBO. The cached FBO remembers which
+    // subresource it is bound to, so it is re-attached only when freshly
+    // created or when rendering into a different mip level or slice of the
+    // same texture.
+    bool needs_attachment = false;
+    if (color_gles.GetCachedFBO().IsDead()) {
+      color_gles.SetCachedFBO(
+          reactor.CreateUntrackedHandle(HandleType::kFrameBuffer));
+      needs_attachment = true;
+    }
+    fbo = reactor.GetGLHandle(color_gles.GetCachedFBO());
+    if (!fbo.has_value()) {
+      return false;
+    }
+    gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
 
+    if (needs_attachment ||
+        !color_gles.CachedFBOMatchesSubresource(pass_data.color_mip_level,
+                                                pass_data.color_slice)) {
       if (!color_gles.SetAsFramebufferAttachment(
-              GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0)) {
+              GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0,
+              pass_data.color_mip_level, pass_data.color_slice)) {
         return false;
       }
 
       if (auto depth = TextureGLES::Cast(pass_data.depth_attachment.get())) {
         if (!depth->SetAsFramebufferAttachment(
-                GL_FRAMEBUFFER, TextureGLES::AttachmentType::kDepth)) {
+                GL_FRAMEBUFFER, TextureGLES::AttachmentType::kDepth,
+                pass_data.depth_mip_level, pass_data.depth_slice)) {
           return false;
         }
       }
       if (auto stencil =
               TextureGLES::Cast(pass_data.stencil_attachment.get())) {
         if (!stencil->SetAsFramebufferAttachment(
-                GL_FRAMEBUFFER, TextureGLES::AttachmentType::kStencil)) {
+                GL_FRAMEBUFFER, TextureGLES::AttachmentType::kStencil,
+                pass_data.stencil_mip_level, pass_data.stencil_slice)) {
           return false;
         }
       }
@@ -302,6 +315,8 @@ static void EncodeViewport(const ProcTableGLES& gl,
                        << DebugToFramebufferError(status);
         return false;
       }
+      color_gles.SetCachedFBOSubresource(pass_data.color_mip_level,
+                                         pass_data.color_slice);
     }
   }
 
@@ -768,6 +783,8 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
   ///
   pass_data->color_attachment = color0.texture;
   pass_data->resolve_attachment = color0.resolve_texture;
+  pass_data->color_mip_level = color0.mip_level;
+  pass_data->color_slice = color0.slice;
   pass_data->clear_color = color0.clear_color;
   pass_data->clear_color_attachment = CanClearAttachment(color0.load_action);
   pass_data->discard_color_attachment =
@@ -789,6 +806,8 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
   ///
   if (depth0.has_value()) {
     pass_data->depth_attachment = depth0->texture;
+    pass_data->depth_mip_level = depth0->mip_level;
+    pass_data->depth_slice = depth0->slice;
     pass_data->clear_depth = depth0->clear_depth;
     pass_data->clear_depth_attachment = CanClearAttachment(depth0->load_action);
     pass_data->discard_depth_attachment =
@@ -800,6 +819,8 @@ bool RenderPassGLES::OnEncodeCommands(const Context& context) const {
   ///
   if (stencil0.has_value()) {
     pass_data->stencil_attachment = stencil0->texture;
+    pass_data->stencil_mip_level = stencil0->mip_level;
+    pass_data->stencil_slice = stencil0->slice;
     pass_data->clear_stencil = stencil0->clear_stencil;
     pass_data->clear_stencil_attachment =
         CanClearAttachment(stencil0->load_action);
