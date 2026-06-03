@@ -573,51 +573,54 @@ void main() {
     expect(result.combinedLicenses, isEmpty);
   });
 
-  testWithoutContext('allowedPackageNames excludes additional licenses for non-allowed packages', () async {
-    fileSystem.file('foo/NOTICES')
-      ..createSync(recursive: true)
-      ..writeAsStringSync(_kMitLicense);
-    fileSystem.file('bar/NOTICES')
-      ..createSync(recursive: true)
-      ..writeAsStringSync(_kApacheLicense);
-    fileSystem.file('foo.txt').writeAsStringSync('foo-extra');
-    fileSystem.file('bar.txt').writeAsStringSync('bar-extra');
+  testWithoutContext(
+    'allowedPackageNames excludes additional licenses for non-allowed packages',
+    () async {
+      fileSystem.file('foo/NOTICES')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_kMitLicense);
+      fileSystem.file('bar/NOTICES')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_kApacheLicense);
+      fileSystem.file('foo.txt').writeAsStringSync('foo-extra');
+      fileSystem.file('bar.txt').writeAsStringSync('bar-extra');
 
-    final File packageConfigFile = fileSystem.file('package_config.json')
-      ..writeAsStringSync(
-        json.encode(<String, Object>{
-          'configVersion': 2,
-          'packages': <Object>[
-            <String, Object>{
-              'name': 'foo',
-              'rootUri': 'file:///foo/',
-              'packageUri': 'lib/',
-              'languageVersion': '2.2',
-            },
-            <String, Object>{
-              'name': 'bar',
-              'rootUri': 'file:///bar/',
-              'packageUri': 'lib/',
-              'languageVersion': '2.2',
-            },
-          ],
-        }),
+      final File packageConfigFile = fileSystem.file('package_config.json')
+        ..writeAsStringSync(
+          json.encode(<String, Object>{
+            'configVersion': 2,
+            'packages': <Object>[
+              <String, Object>{
+                'name': 'foo',
+                'rootUri': 'file:///foo/',
+                'packageUri': 'lib/',
+                'languageVersion': '2.2',
+              },
+              <String, Object>{
+                'name': 'bar',
+                'rootUri': 'file:///bar/',
+                'packageUri': 'lib/',
+                'languageVersion': '2.2',
+              },
+            ],
+          }),
+        );
+      final PackageConfig packageConfig = await loadPackageConfig(packageConfigFile.absolute);
+      final LicenseResult result = licenseCollector.obtainLicenses(
+        packageConfig,
+        <String, List<File>>{
+          'foo': <File>[fileSystem.file('foo.txt').absolute],
+          'bar': <File>[fileSystem.file('bar.txt').absolute],
+        },
+        allowedPackageNames: <String>{'foo'},
       );
-    final PackageConfig packageConfig = await loadPackageConfig(packageConfigFile.absolute);
-    final LicenseResult result = licenseCollector.obtainLicenses(
-      packageConfig,
-      <String, List<File>>{
-        'foo': <File>[fileSystem.file('foo.txt').absolute],
-        'bar': <File>[fileSystem.file('bar.txt').absolute],
-      },
-      allowedPackageNames: <String>{'foo'},
-    );
 
-    // Only foo's license and foo's additional license are included.
-    expect(result.combinedLicenses, contains(_kMitLicense));
-    expect(result.combinedLicenses, contains('foo-extra'));
-    // bar's license and bar's additional license are excluded.
-    expect(result.combinedLicenses, isNot(contains(_kApacheLicense)));
-    expect(result.combinedLicenses, isNot(contains('bar-extra')));
-  });
+      // Only foo's license and foo's additional license are included.
+      expect(result.combinedLicenses, contains(_kMitLicense));
+      expect(result.combinedLicenses, contains('foo-extra'));
+      // bar's license and bar's additional license are excluded.
+      expect(result.combinedLicenses, isNot(contains(_kApacheLicense)));
+      expect(result.combinedLicenses, isNot(contains('bar-extra')));
+    },
+  );
 }

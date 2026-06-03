@@ -635,9 +635,9 @@ class ManifestAssetBundle implements AssetBundle {
     final DevFSByteContent assetManifestBinary = _createAssetManifestBinary(assetManifest);
     final fontManifest = DevFSStringContent(json.encode(fonts));
     final Set<String> allowedPackageNames = transitiveDependencies
-      .where((Dependency d) => includeAssetsFromDevDependencies || !d.isExclusiveDevDependency)
-      .map((Dependency d) => d.name)
-      .toSet();
+        .where((Dependency d) => includeAssetsFromDevDependencies || !d.isExclusiveDevDependency)
+        .map((Dependency d) => d.name)
+        .toSet();
 
     final LicenseResult licenseResult = _licenseCollector.obtainLicenses(
       packageConfig,
