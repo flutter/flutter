@@ -169,15 +169,9 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     return switch (webHtmlElementStrategy) {
       image_provider.WebHtmlElementStrategy.never => loadViaDecode(),
       image_provider.WebHtmlElementStrategy.prefer => loadViaImgElement(),
-      image_provider.WebHtmlElementStrategy.fallback => () async {
-        try {
-          // Await here so that errors occurred during the asynchronous process
-          // of `loadViaDecode` are caught and triggers `loadViaImgElement`.
-          return await loadViaDecode();
-        } catch (e) {
-          return loadViaImgElement();
-        }
-      }(),
+      image_provider.WebHtmlElementStrategy.fallback => loadViaDecode().catchError(
+        (Object _) => loadViaImgElement(),
+      ),
     };
   }
 
