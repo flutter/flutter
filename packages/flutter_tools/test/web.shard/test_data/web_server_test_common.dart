@@ -119,8 +119,8 @@ class WebServerDeviceTestRunner {
     /// Returns the first log message that contains [message] found in the
     /// current browser log chunk or `null` if it was not found.
     Future<String?> findNextInCurrentLogChunk(String message) async {
-      while (await _currentBrowserLogChunk!.hasNext) {
-        final LogEntry entry = await _currentBrowserLogChunk!.next;
+      while (await _currentBrowserLogChunk.hasNext) {
+        final LogEntry entry = await _currentBrowserLogChunk.next;
         final String? logMessage = entry.message;
         if (logMessage != null && logMessage.contains(message)) {
           return logMessage;
