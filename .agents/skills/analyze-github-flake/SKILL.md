@@ -14,14 +14,6 @@ Host assumptions:
 -->
 # Flake analysis instructions
 
-*Context*
-flutter/flutter repo has the following folder structure.
-* dev/ contains utilities for working on or with the repository, as well as integration test code.
-* bin/ shell scripts which can invoke the flutter tool.
-* packages/ contains dart packages and flutter plugins that are maintained by the flutter team. Each folder is either a dart packages or a root directory for a group of flutter plugins. Importantly, it contains the code for the flutter tool.
-* docs/ contains documentation about the repository.
-* engine/ contains the source code for the flutter engine, including the core c++ code and the platform specific "embedders".
-
 *Rules*
 You should not modify ANY files - you are only to provide an analysis of why the specific check is flaking.
 You should only look at the issue body, as well as comments containing links to additional builds.
@@ -49,8 +41,6 @@ Example `https://ci.chromium.org/ui/p/flutter/builders/prod/Windows%20plugin_tes
 
 
 Then use the <buildNumber> to get the test logs metadata by running the following command.
-
-<!-- TODO include a .gitignored directory where agent can dump local files in flutter/packages -->
 
 ```
 curl 'https://cr-buildbucket.appspot.com/prpc/buildbucket.v2.Builds/GetBuild' \
