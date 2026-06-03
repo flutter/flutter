@@ -1529,4 +1529,92 @@ void main() {
       SystemMouseCursors.cell,
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/169214.
+  testWidgets('DropdownButtonFormField in AlertDialog does not crash during baseline layout', (
+    WidgetTester tester,
+  ) async {
+    String? selectedValue;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return ElevatedButton(
+                key: const Key('show_dialog_button'),
+                onPressed: () {
+                  showDialog<void>(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        scrollable: true,
+                        title: const Text('Alert Dialog'),
+                        content: Wrap(
+                          children: <Widget>[
+                            SizedBox(
+                              width: 300,
+                              child: DropdownButtonFormField<String>(
+                                key: const Key('dropdown_button'),
+                                initialValue: selectedValue,
+                                items: const <DropdownMenuItem<String>>[
+                                  DropdownMenuItem<String>(
+                                    value: 'option1',
+                                    child: Text('Option 1'),
+                                  ),
+                                  DropdownMenuItem<String>(
+                                    value: 'option2',
+                                    child: Text('Option 2'),
+                                  ),
+                                  DropdownMenuItem<String>(
+                                    value: 'option3',
+                                    child: Text('Option 3'),
+                                  ),
+                                ],
+                                onChanged: (String? value) {
+                                  selectedValue = value;
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const Text('Show Alert'),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('show_dialog_button')));
+    await tester.pumpAndSettle();
+
+    final Finder dropdownButton = find.byKey(const Key('dropdown_button'));
+    expect(dropdownButton, findsOneWidget);
+
+    await tester.tap(dropdownButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Option 1'), findsOneWidget);
+    expect(find.text('Option 2'), findsOneWidget);
+    expect(find.text('Option 3'), findsOneWidget);
+
+    await tester.tap(find.text('Option 2'));
+    await tester.pumpAndSettle();
+
+    expect(selectedValue, equals('option2'));
+  });
 }
