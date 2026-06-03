@@ -86,26 +86,25 @@ class ShapeDecoration extends Decoration {
   /// [RoundedRectangleBorder]; the [BoxDecoration] class cannot animate the
   /// transition from a [BoxShape.circle] to [BoxShape.rectangle]).
   factory ShapeDecoration.fromBoxDecoration(BoxDecoration source) {
-    final ShapeBorder shape;
-    switch (source.shape) {
-      case BoxShape.circle:
+    final ShapeBorder shape = switch (source.shape) {
+      BoxShape.circle => () {
         if (source.border != null) {
           assert(source.border!.isUniform);
-          shape = CircleBorder(side: source.border!.top);
-        } else {
-          shape = const CircleBorder();
+          return CircleBorder(side: source.border!.top);
         }
-      case BoxShape.rectangle:
+        return const CircleBorder();
+      }(),
+      BoxShape.rectangle => () {
         if (source.borderRadius != null) {
           assert(source.border == null || source.border!.isUniform);
-          shape = RoundedRectangleBorder(
+          return RoundedRectangleBorder(
             side: source.border?.top ?? BorderSide.none,
             borderRadius: source.borderRadius!,
           );
-        } else {
-          shape = source.border ?? const Border();
         }
-    }
+        return source.border ?? const Border();
+      }(),
+    };
     return ShapeDecoration(
       color: source.color,
       image: source.image,

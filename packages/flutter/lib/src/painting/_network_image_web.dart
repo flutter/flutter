@@ -166,12 +166,10 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       return loadViaDecode();
     }
 
-    switch (webHtmlElementStrategy) {
-      case image_provider.WebHtmlElementStrategy.never:
-        return loadViaDecode();
-      case image_provider.WebHtmlElementStrategy.prefer:
-        return loadViaImgElement();
-      case image_provider.WebHtmlElementStrategy.fallback:
+    return switch (webHtmlElementStrategy) {
+      image_provider.WebHtmlElementStrategy.never => loadViaDecode(),
+      image_provider.WebHtmlElementStrategy.prefer => loadViaImgElement(),
+      image_provider.WebHtmlElementStrategy.fallback => () async {
         try {
           // Await here so that errors occurred during the asynchronous process
           // of `loadViaDecode` are caught and triggers `loadViaImgElement`.
@@ -179,7 +177,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
         } catch (e) {
           return loadViaImgElement();
         }
-    }
+      }(),
+    };
   }
 
   Future<ui.Codec> _fetchImageBytes(_SimpleDecoderCallback decode) async {

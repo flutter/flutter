@@ -222,18 +222,18 @@ class BorderSide with Diagnosticable {
   /// non-uniform rectangular [Border]s have beveled edges and so paint their
   /// border sides as filled shapes rather than using a stroke.
   Paint toPaint() {
-    switch (style) {
-      case BorderStyle.solid:
-        return Paint()
+    return switch (style) {
+      BorderStyle.solid =>
+        Paint()
           ..color = color
           ..strokeWidth = width
-          ..style = PaintingStyle.stroke;
-      case BorderStyle.none:
-        return Paint()
+          ..style = PaintingStyle.stroke,
+      BorderStyle.none =>
+        Paint()
           ..color = const Color(0x00000000)
           ..strokeWidth = 0.0
-          ..style = PaintingStyle.stroke;
-    }
+          ..style = PaintingStyle.stroke,
+    };
   }
 
   /// Whether the two given [BorderSide]s can be merged using

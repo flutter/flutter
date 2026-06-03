@@ -1364,23 +1364,36 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
       return decode(
         buffer,
         getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
-          switch (policy) {
-            case ResizeImagePolicy.exact:
-              int? targetWidth = width;
-              int? targetHeight = height;
-
-              if (!allowUpscaling) {
-                if (targetWidth != null && targetWidth > intrinsicWidth) {
-                  targetWidth = intrinsicWidth;
+          return switch (policy) {
+            ResizeImagePolicy.exact => ui.TargetImageSize(
+              width: width == null
+                  ? null
+                  : (allowUpscaling ? width : math.min(width!, intrinsicWidth)),
+              height: height == null
+                  ? null
+                  : (allowUpscaling ? height : math.min(height!, intrinsicHeight)),
+            ),
+            ResizeImagePolicy.fit => () {
+              final double aspectRatio = intrinsicWidth / intrinsicHeight;
+              if (allowUpscaling) {
+                final int targetWidth;
+                final int targetHeight;
+                if (width == null) {
+                  assert(height != null);
+                  targetHeight = height!;
+                  targetWidth = (targetHeight * aspectRatio).floor();
+                } else if (height == null) {
+                  targetWidth = width!;
+                  targetHeight = targetWidth ~/ aspectRatio;
+                } else {
+                  final int derivedMaxWidth = (height! * aspectRatio).floor();
+                  final int derivedMaxHeight = width! ~/ aspectRatio;
+                  targetWidth = math.min(width!, derivedMaxWidth);
+                  targetHeight = math.min(height!, derivedMaxHeight);
                 }
-                if (targetHeight != null && targetHeight > intrinsicHeight) {
-                  targetHeight = intrinsicHeight;
-                }
+                return ui.TargetImageSize(width: targetWidth, height: targetHeight);
               }
 
-              return ui.TargetImageSize(width: targetWidth, height: targetHeight);
-            case ResizeImagePolicy.fit:
-              final double aspectRatio = intrinsicWidth / intrinsicHeight;
               final int maxWidth = width ?? intrinsicWidth;
               final int maxHeight = height ?? intrinsicHeight;
               var targetWidth = intrinsicWidth;
@@ -1396,24 +1409,9 @@ class ResizeImage extends ImageProvider<ResizeImageKey> {
                 targetWidth = (targetHeight * aspectRatio).floor();
               }
 
-              if (allowUpscaling) {
-                if (width == null) {
-                  assert(height != null);
-                  targetHeight = height!;
-                  targetWidth = (targetHeight * aspectRatio).floor();
-                } else if (height == null) {
-                  targetWidth = width!;
-                  targetHeight = targetWidth ~/ aspectRatio;
-                } else {
-                  final int derivedMaxWidth = (maxHeight * aspectRatio).floor();
-                  final int derivedMaxHeight = maxWidth ~/ aspectRatio;
-                  targetWidth = math.min(maxWidth, derivedMaxWidth);
-                  targetHeight = math.min(maxHeight, derivedMaxHeight);
-                }
-              }
-
               return ui.TargetImageSize(width: targetWidth, height: targetHeight);
-          }
+            }(),
+          };
         },
       );
     }
