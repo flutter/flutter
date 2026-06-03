@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
@@ -72,7 +73,7 @@ class Adb {
   Future<(bool connected, String? error)> isDeviceConnected() async {
     final AdbStringResult result = await _runString(<String>['shell', 'echo', 'connected']);
     if (result.exitCode != 0) {
-      return (false, result.stderr);
+      return (false, 'stderr: ${result.stderr}, stdout: ${result.stdout}');
     } else {
       return (true, null);
     }
@@ -82,7 +83,10 @@ class Adb {
   Future<Uint8List> screencap() async {
     final AdbBinaryResult result = await _runBinary(<String>['exec-out', 'screencap', '-p']);
     if (result.exitCode != 0) {
-      throw StateError('Failed to take screenshot: ${result.stderr}');
+      final String decodedStdout = utf8.decode(result.stdout, allowMalformed: true);
+      throw StateError(
+        'Failed to take screenshot: stderr: ${result.stderr}, stdout: $decodedStdout',
+      );
     }
     return result.stdout;
   }
@@ -91,7 +95,9 @@ class Adb {
   Future<void> tap(int x, int y) async {
     final AdbStringResult result = await _runString(<String>['shell', 'input', 'tap', '$x', '$y']);
     if (result.exitCode != 0) {
-      throw StateError('Failed to tap at $x, $y: ${result.stderr}');
+      throw StateError(
+        'Failed to tap at $x, $y: stderr: ${result.stderr}, stdout: ${result.stdout}',
+      );
     }
   }
 
@@ -104,7 +110,9 @@ class Adb {
       'KEYCODE_HOME',
     ]);
     if (result.exitCode != 0) {
-      throw StateError('Failed to send to home: ${result.stderr}');
+      throw StateError(
+        'Failed to send to home: stderr: ${result.stderr}, stdout: ${result.stdout}',
+      );
     }
   }
 
@@ -118,7 +126,9 @@ class Adb {
       'MODERATE',
     ]);
     if (result.exitCode != 0) {
-      throw StateError('Failed to simulate low memory: ${result.stderr}');
+      throw StateError(
+        'Failed to simulate low memory: stderr: ${result.stderr}, stdout: ${result.stdout}',
+      );
     }
   }
 
@@ -132,7 +142,7 @@ class Adb {
       '$appName/$activityName',
     ]);
     if (result.exitCode != 0) {
-      throw StateError('Failed to resume app: ${result.stderr}');
+      throw StateError('Failed to resume app: stderr: ${result.stderr}, stdout: ${result.stdout}');
     }
   }
 
@@ -147,7 +157,9 @@ class Adb {
       'confirmed',
     ]);
     if (result.exitCode != 0) {
-      throw StateError('Failed to disable immersive mode confirmations: ${result.stderr}');
+      throw StateError(
+        'Failed to disable immersive mode confirmations: stderr: ${result.stderr}, stdout: ${result.stdout}',
+      );
     }
   }
 
@@ -169,7 +181,9 @@ class Adb {
         entry.value,
       ]);
       if (result.exitCode != 0) {
-        throw StateError('Failed to disable animations: ${result.stderr}');
+        throw StateError(
+          'Failed to disable animations: stderr: ${result.stderr}, stdout: ${result.stdout}',
+        );
       }
     }
   }
