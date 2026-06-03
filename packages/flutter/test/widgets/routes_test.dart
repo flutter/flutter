@@ -2064,6 +2064,117 @@ void main() {
     });
 
 
+    testWidgets('outgoing route receives a delegated transition from a widgets route', (
+      WidgetTester tester,
+    ) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+      const delegatedTransitionKey = Key('Delegated Transition');
+      Widget? delegatedTransition(
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+        bool allowSnapshotting,
+        Widget? child,
+      ) {
+        return KeyedSubtree(key: delegatedTransitionKey, child: child!);
+      }
+
+      final firstPageRoute = PageRouteBuilder<void>(
+        pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+          return TestButton(
+            onPressed: () {
+              final route = TestPageRouteBuilder(
+                pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+                  return const Text('Page 3');
+                },
+                delegatedTransition: delegatedTransition,
+              );
+              Navigator.of(context).push(route);
+            },
+            child: const Text('Second Page Transition'),
+          );
+        },
+      );
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          navigatorKey: navigatorKey,
+          home: TestButton(
+            onPressed: () {
+              navigatorKey.currentState!.push<void>(firstPageRoute);
+            },
+            child: const Text('Page Route Transition'),
+          ),
+        ),
+      );
+
+      expect(firstPageRoute.receivedTransition, null);
+
+      await tester.tap(find.text('Page Route Transition'));
+      await tester.pumpAndSettle();
+
+      expect(firstPageRoute.receivedTransition, null);
+
+      await tester.tap(find.text('Second Page Transition'));
+      await tester.pump();
+
+      expect(firstPageRoute.receivedTransition, same(delegatedTransition));
+      expect(find.byKey(delegatedTransitionKey), findsOneWidget);
+
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('received delegated transition is cleared when next route is removed', (
+      WidgetTester tester,
+    ) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+      const delegatedTransitionKey = Key('Delegated Transition');
+      Widget? delegatedTransition(
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+        bool allowSnapshotting,
+        Widget? child,
+      ) {
+        return KeyedSubtree(key: delegatedTransitionKey, child: child!);
+      }
+
+      final firstPageRoute = PageRouteBuilder<void>(
+        pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+          return const Text('Page 2');
+        },
+      );
+      final secondPageRoute = TestPageRouteBuilder(
+        pageBuilder: (BuildContext context, Animation<double> _, Animation<double> _) {
+          return const Text('Page 3');
+        },
+        delegatedTransition: delegatedTransition,
+      );
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          navigatorKey: navigatorKey,
+          home: const Text('Page 1'),
+        ),
+      );
+
+      navigatorKey.currentState!.push<void>(firstPageRoute);
+      await tester.pumpAndSettle();
+
+      navigatorKey.currentState!.push<void>(secondPageRoute);
+      await tester.pump();
+
+      expect(firstPageRoute.receivedTransition, same(delegatedTransition));
+      expect(find.byKey(delegatedTransitionKey), findsOneWidget);
+
+      navigatorKey.currentState!.removeRoute(secondPageRoute);
+      await tester.pump();
+
+      expect(firstPageRoute.receivedTransition, null);
+      expect(find.byKey(delegatedTransitionKey), findsNothing);
+      expect(find.text('Page 2'), findsOneWidget);
+    });
+
     testWidgets(
       'outgoing route does not receive a delegated transition from a route with the same transition',
       (WidgetTester tester) async {
@@ -2604,7 +2715,10 @@ class MockRouteAware extends Fake implements RouteAware {
 }
 
 class TestPageRouteBuilder extends PageRouteBuilder<void> {
-  TestPageRouteBuilder({required super.pageBuilder});
+  TestPageRouteBuilder({required super.pageBuilder, this.delegatedTransition});
+
+  @override
+  final DelegatedTransitionBuilder? delegatedTransition;
 
   @override
   Animation<double> createAnimation() {
