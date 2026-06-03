@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
 
@@ -83,9 +82,8 @@ class Adb {
   Future<Uint8List> screencap() async {
     final AdbBinaryResult result = await _runBinary(<String>['exec-out', 'screencap', '-p']);
     if (result.exitCode != 0) {
-      final String decodedStdout = utf8.decode(result.stdout, allowMalformed: true);
       throw StateError(
-        'Failed to take screenshot: stderr: ${result.stderr}, stdout: $decodedStdout',
+        'Failed to take screenshot: stderr: ${result.stderr}, stdout: ${result.stdout}',
       );
     }
     return result.stdout;
