@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+const Color _red500 = Color(0xFFF44336);
+const Color _blue500 = Color(0xFF2196F3);
 
 void main() {
   test('RenderConstrainedBox getters and setters', () {
@@ -55,13 +57,13 @@ void main() {
   test('RenderShaderMask getters and setters', () {
     Shader callback1(Rect bounds) {
       assert(false); // The test should not call this.
-      const gradient = LinearGradient(colors: <Color>[Colors.red]);
+      const gradient = LinearGradient(colors: [_red500]);
       return gradient.createShader(Rect.zero);
     }
 
     Shader callback2(Rect bounds) {
       assert(false); // The test should not call this.
-      const gradient = LinearGradient(colors: <Color>[Colors.blue]);
+      const gradient = LinearGradient(colors: [_blue500]);
       return gradient.createShader(Rect.zero);
     }
 
