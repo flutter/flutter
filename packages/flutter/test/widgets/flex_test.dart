@@ -82,6 +82,20 @@ void main() {
     expect(box.size.width, 100.0);
   });
 
+  testWidgets('Flexible does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Row(children: <Widget>[Flexible(child: Placeholder())]),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Flexible)), Size.zero);
+  });
+
   testWidgets("Doesn't overflow because of floating point accumulated error", (
     WidgetTester tester,
   ) async {
