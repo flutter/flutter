@@ -407,6 +407,12 @@ class MediaQueryData {
   /// The number of device pixels for each logical pixel. This number might not
   /// be a power of two. Indeed, it might not even be an integer. For example,
   /// the Nexus 6 has a device pixel ratio of 3.5.
+  ///
+  /// Typically, this property reflects the pixel ratio of the encompasing
+  /// [FlutterView].
+  ///
+  /// Overriding this property typically does not rescale the app as the
+  /// Flutter framework or its rendering pipeline usually does not read this value.
   final double devicePixelRatio;
 
   /// Deprecated. Will be removed in a future version of Flutter. Use
