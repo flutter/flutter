@@ -921,12 +921,6 @@ struct Attachment {
   std::shared_ptr<Texture> resolve_texture;
   LoadAction load_action = LoadAction::kDontCare;
   StoreAction store_action = StoreAction::kStore;
-  // The mip level of `texture` to render into. Must be < the texture's
-  // mip_count.
-  uint32_t mip_level = 0;
-  // The slice (cube map face or array layer) of `texture` to render into.
-  // Must be < the slice count implied by the texture's type.
-  uint32_t slice = 0;
 
   bool IsValid() const;
 };

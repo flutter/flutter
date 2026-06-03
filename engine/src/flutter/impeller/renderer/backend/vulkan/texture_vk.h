@@ -29,8 +29,7 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
 
   vk::ImageView GetImageView() const;
 
-  vk::ImageView GetRenderTargetView(uint32_t mip_level = 0,
-                                    uint32_t array_layer = 0) const;
+  vk::ImageView GetRenderTargetView() const;
 
   bool SetLayout(const BarrierVK& barrier) const;
 
@@ -50,22 +49,21 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
   std::shared_ptr<SamplerVK> GetImmutableSamplerVariant(
       const SamplerVK& sampler) const;
 
-  /// Store the framebuffer and render pass last used to render into the
-  /// `(sample_count, mip_level, slice)` subresource of this texture.
+  /// Store the last framebuffer and render pass object used with this texture.
   ///
-  /// Only called when this texture is being used as the resolve (or
-  /// non-MSAA color) target of a render pass.
+  /// This method is only called if this texture is used as the resolve texture
+  /// of a render pass. By construction, this framebuffer should be compatible
+  /// with any future render passes.
   void SetCachedFrameData(const FramebufferAndRenderPass& data,
-                          SampleCount sample_count,
-                          uint32_t mip_level = 0u,
-                          uint32_t slice = 0u);
+                          SampleCount sample_count);
 
-  /// Retrieve the cached framebuffer and render pass for the given
-  /// `(sample_count, mip_level, slice)` subresource. Returns an empty
-  /// `FramebufferAndRenderPass` if no entry exists.
-  FramebufferAndRenderPass GetCachedFrameData(SampleCount sample_count,
-                                              uint32_t mip_level = 0u,
-                                              uint32_t slice = 0u) const;
+  /// Retrieve the last framebuffer and render pass object used with this
+  /// texture.
+  ///
+  /// An empty FramebufferAndRenderPass is returned if there is no cached data
+  /// for a particular sample count.
+  const FramebufferAndRenderPass& GetCachedFrameData(
+      SampleCount sample_count) const;
 
  private:
   std::weak_ptr<Context> context_;
