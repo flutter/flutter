@@ -817,12 +817,11 @@ class WebStrutStyle implements ui.StrutStyle {
 
     WebTextStyle(
       fontFamily: fontFamily,
+      fontFamilyFallback: fontFamilyFallback,
       fontSize: fontSize,
       fontStyle: fontStyle,
       fontWeight: fontWeight,
-    ).applyToContext(
-      layoutContext,
-    ); //'$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
+    ).applyToContext(layoutContext);
 
     final DomTextMetrics strutTextMetrics = layoutContext.measureText('');
 
