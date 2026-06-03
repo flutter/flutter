@@ -1883,10 +1883,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    // Pump half the animation duration (100ms of 200ms) to land at mid-fade.
-    await tester.pump(const Duration(milliseconds: 100));
-
     // The departing 's' suffix should be mid-fade.
+    // Pump a small amount to ensure the animation has started but is still in progress.
+    await tester.pump(const Duration(milliseconds: 50));
+
     final Finder suffixFade = find.ancestor(
       of: find.text('s'),
       matching: find.byType(FadeTransition),

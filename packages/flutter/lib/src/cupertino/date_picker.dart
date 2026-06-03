@@ -2586,34 +2586,17 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     required int currentValue,
     required EdgeInsetsDirectional additionalPadding,
   }) {
-    // Since the base value will always be one, we define the baseLabel getting the
-    // label equivalent to it.
-    final String baseLabel = labelBuilder(1);
-    final String currentLabel = labelBuilder(currentValue);
-
-    final int commonPrefixLength = _findCommonPrefixLength(baseLabel, currentLabel);
-    final String prefix = currentLabel.substring(0, commonPrefixLength);
-    final String suffix = currentLabel.substring(commonPrefixLength);
-
-    final labelStyle = TextStyle(fontSize: _kTimerPickerLabelFontSize, fontWeight: FontWeight.w600);
+    const labelStyle = TextStyle(fontSize: _kTimerPickerLabelFontSize, fontWeight: FontWeight.w600);
 
     return _buildLabelContainer(
       additionalPadding,
       _AnimatedLabelSwitcher(
-        prefix: prefix,
-        suffix: suffix,
+        labelBuilder: labelBuilder,
+        currentValue: currentValue,
         labelStyle: labelStyle,
         textBaseline: numberLabelBaseline,
       ),
     );
-  }
-
-  int _findCommonPrefixLength(String baseLabel, String currentLabel) {
-    if (currentLabel.startsWith(baseLabel)) {
-      return baseLabel.length;
-    }
-
-    return currentLabel.length;
   }
 
   Widget _buildMinutePicker(EdgeInsetsDirectional additionalPadding, Widget? selectionOverlay) {
@@ -2995,25 +2978,88 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 }
 
-class _AnimatedLabelSwitcher extends StatelessWidget {
+/// A widget that animates label text transitions by keeping a stable prefix
+/// and cross-fading the suffix.
+///
+/// When the label changes, the longest common prefix between the old and new
+/// labels is computed. The shared prefix remains visible (no opacity dip),
+/// while only the differing suffixes cross-fade.
+///
+/// This handles two scenarios:
+/// 1. **Happy path** (e.g., English "hour"/"hours"): labelBuilder(1) is a
+///    prefix of labelBuilder(n), so the split is trivial.
+/// 2. **Non-prefix path** (e.g., Czech "hodina"/"hodiny"): labelBuilder(1)
+///    is NOT a prefix of labelBuilder(n), but they still share a common
+///    prefix ("hodin") that can remain stable during the transition.
+class _AnimatedLabelSwitcher extends StatefulWidget {
   const _AnimatedLabelSwitcher({
-    required this.prefix,
-    required this.suffix,
+    required this.labelBuilder,
+    required this.currentValue,
     required this.labelStyle,
     required this.textBaseline,
   });
 
-  final String prefix;
-  final String suffix;
+  final String Function(int) labelBuilder;
+  final int currentValue;
   final TextStyle labelStyle;
   final double textBaseline;
 
   @override
+  State<_AnimatedLabelSwitcher> createState() => _AnimatedLabelSwitcherState();
+}
+
+class _AnimatedLabelSwitcherState extends State<_AnimatedLabelSwitcher> {
+  /// The label text that was displayed before the current transition started,
+  /// used to compute the common prefix with the new label so that the stable
+  /// portion doesn't fade.
+  late String _previousLabel;
+
+  @override
+  void initState() {
+    super.initState();
+    _previousLabel = widget.labelBuilder(widget.currentValue);
+  }
+
+  @override
+  void didUpdateWidget(_AnimatedLabelSwitcher oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final String oldLabel = oldWidget.labelBuilder(oldWidget.currentValue);
+    final String newLabel = widget.labelBuilder(widget.currentValue);
+    if (oldLabel != newLabel) {
+      // The label changed. Save the old label so that build() can compute
+      // the common prefix between old and new for the animation.
+      _previousLabel = oldLabel;
+    }
+    // When the label hasn't changed, _previousLabel stays as-is. This keeps
+    // the prefix/suffix split stable across rebuilds. If a locale change
+    // causes the same value to produce a different label string, the prefix
+    // will change and the AnimatedSwitcher (keyed on prefix) will be
+    // recreated, avoiding a cross-fade between mismatched suffixes.
+  }
+
+  /// Returns the length of the longest common prefix between [a] and [b].
+  static int _commonPrefixLength(String a, String b) {
+    final int minLen = a.length < b.length ? a.length : b.length;
+    for (int i = 0; i < minLen; i++) {
+      if (a.codeUnitAt(i) != b.codeUnitAt(i)) {
+        return i;
+      }
+    }
+    return minLen;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final TextStyle effectiveStyle = DefaultTextStyle.of(context).style.merge(labelStyle);
+    final String currentLabel = widget.labelBuilder(widget.currentValue);
+
+    final int commonPrefixLen = _commonPrefixLength(_previousLabel, currentLabel);
+    final String prefix = currentLabel.substring(0, commonPrefixLen);
+    final String suffix = currentLabel.substring(commonPrefixLen);
+
+    final TextStyle effectiveStyle = DefaultTextStyle.of(context).style.merge(widget.labelStyle);
 
     return Baseline(
-      baseline: textBaseline,
+      baseline: widget.textBaseline,
       baselineType: TextBaseline.alphabetic,
       child: RichText(
         text: TextSpan(
@@ -3024,8 +3070,15 @@ class _AnimatedLabelSwitcher extends StatelessWidget {
               alignment: PlaceholderAlignment.baseline,
               baseline: TextBaseline.alphabetic,
               child: AnimatedSwitcher(
+                // Key the AnimatedSwitcher on the prefix so that when the
+                // prefix changes (e.g., after a locale change), the switcher
+                // is recreated rather than trying to cross-fade mismatched
+                // suffixes. In the normal case (e.g., "hour" → "hours"),
+                // the prefix stays the same so the switcher persists and
+                // animates the suffix transition correctly.
+                key: ValueKey<String>(prefix),
                 duration: _kTimePickerLabelAnimationDuration,
-                child: Text(key: ValueKey<String>(suffix), suffix, style: labelStyle),
+                child: Text(key: ValueKey<String>(suffix), suffix, style: widget.labelStyle),
               ),
             ),
           ],
