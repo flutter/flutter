@@ -6,6 +6,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/license_collector.dart';
+import 'package:flutter_tools/src/package_graph.dart';
 import 'package:package_config/package_config.dart';
 
 import '../src/common.dart';
@@ -572,6 +573,120 @@ void main() {
 
     expect(result.combinedLicenses, isEmpty);
   });
+
+  testWithoutContext(
+    'allowedPackageNames excludes only dev-exclusive transitive dependencies',
+    () async {
+      fileSystem.file('regular/NOTICES')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_kMitLicense);
+      fileSystem.file('devOnly/NOTICES')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_kApacheLicense);
+      fileSystem.file('transitiveOfRegular/NOTICES')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_kMitLicense);
+
+      final transitiveDependencies = <Dependency>[
+        Dependency('regular', Uri.parse('file:///regular/'), isExclusiveDevDependency: false),
+        Dependency('devOnly', Uri.parse('file:///devOnly/'), isExclusiveDevDependency: true),
+        Dependency('transitiveOfRegular', Uri.parse('file:///transitiveOfRegular/'), isExclusiveDevDependency: false),
+      ];
+
+      final Set<String> allowedPackageNames = transitiveDependencies
+          .where((Dependency d) => !d.isExclusiveDevDependency)
+          .map((Dependency d) => d.name)
+          .toSet();
+
+      final File packageConfigFile = fileSystem.file('package_config.json')
+        ..writeAsStringSync(
+          json.encode(<String, Object>{
+            'configVersion': 2,
+            'packages': <Object>[
+              <String, Object>{
+                'name': 'regular',
+                'rootUri': 'file:///regular/',
+                'packageUri': 'lib/',
+                'languageVersion': '2.2',
+              },
+              <String, Object>{
+                'name': 'devOnly',
+                'rootUri': 'file:///devOnly/',
+                'packageUri': 'lib/',
+                'languageVersion': '2.2',
+              },
+              <String, Object>{
+                'name': 'transitiveOfRegular',
+                'rootUri': 'file:///transitiveOfRegular/',
+                'packageUri': 'lib/',
+                'languageVersion': '2.2',
+              },
+            ],
+          }),
+        );
+      final PackageConfig packageConfig = await loadPackageConfig(packageConfigFile.absolute);
+      final LicenseResult result = licenseCollector.obtainLicenses(
+        packageConfig,
+        <String, List<File>>{},
+        allowedPackageNames: allowedPackageNames,
+      );
+
+      expect(result.combinedLicenses, contains(_kMitLicense));
+      expect(result.combinedLicenses, isNot(contains(_kApacheLicense)));
+    },
+  );
+
+  testWithoutContext(
+    'allowedPackageNames includes all transitive dependencies when includeAssetsFromDevDependencies is true',
+    () async {
+      fileSystem.file('regular/NOTICES')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_kMitLicense);
+      fileSystem.file('devOnly/NOTICES')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_kApacheLicense);
+
+      final transitiveDependencies = <Dependency>[
+        Dependency('regular', Uri.parse('file:///regular/'), isExclusiveDevDependency: false),
+        Dependency('devOnly', Uri.parse('file:///devOnly/'), isExclusiveDevDependency: true),
+      ];
+
+      final Set<String> allowedPackageNames = transitiveDependencies
+          .where((Dependency d) => true) // includeAssetsFromDevDependencies = true
+          .map((Dependency d) => d.name)
+          .toSet();
+
+      final File packageConfigFile = fileSystem.file('package_config.json')
+        ..writeAsStringSync(
+          json.encode(<String, Object>{
+            'configVersion': 2,
+            'packages': <Object>[
+              <String, Object>{
+                'name': 'regular',
+                'rootUri': 'file:///regular/',
+                'packageUri': 'lib/',
+                'languageVersion': '2.2',
+              },
+              <String, Object>{
+                'name': 'devOnly',
+                'rootUri': 'file:///devOnly/',
+                'packageUri': 'lib/',
+                'languageVersion': '2.2',
+              },
+            ],
+          }),
+        );
+      final PackageConfig packageConfig = await loadPackageConfig(packageConfigFile.absolute);
+      final LicenseResult result = licenseCollector.obtainLicenses(
+        packageConfig,
+        <String, List<File>>{},
+        allowedPackageNames: allowedPackageNames,
+      );
+
+      expect(result.combinedLicenses, contains(_kMitLicense));
+      expect(result.combinedLicenses, contains(_kApacheLicense));
+    },
+  );
 
   testWithoutContext(
     'allowedPackageNames excludes additional licenses for non-allowed packages',
