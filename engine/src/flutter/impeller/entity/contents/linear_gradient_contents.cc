@@ -247,8 +247,6 @@ bool LinearGradientContents::RenderTexture(const ContentContext& renderer,
         frag_info.end_point = end_point_;
         frag_info.tile_mode = static_cast<Scalar>(tile_mode_);
         frag_info.decal_border_color = decal_border_color_;
-        frag_info.texture_sampler_y_coord_scale =
-            gradient_texture->GetYCoordScale();
         frag_info.alpha =
             GetOpacityFactor() *
             GetGeometry()->ComputeAlphaCoverage(entity.GetTransform());
