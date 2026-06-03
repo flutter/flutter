@@ -27,12 +27,11 @@ void main() {
   });
 
   testWithoutContext(
-    'deferred components assets are missing on clean build without validate',
+    'deferred components assets are not missing on clean build',
     () async {
       final project = DeferredComponentsProject(BasicDeferredComponentsConfig());
       await project.setUpIn(tempDir);
 
-      // We run a clean build using --no-validate-deferred-components to build in a single pass.
       final ProcessResult result = await processManager.run(<String>[
         flutterBin,
         ...getLocalEngineArguments(),
@@ -56,7 +55,6 @@ void main() {
       final Archive archive = ZipDecoder().decodeBytes(outputFile.readAsBytesSync());
 
       // Verification: asset2.txt inside component1 should be present.
-      // Without our fix, it is NOT packaged and this check fails (findFile returns null).
       expect(
         archive.findFile('component1/assets/flutter_assets/test_assets/asset2.txt') != null,
         true,
