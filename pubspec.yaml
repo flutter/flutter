@@ -185,7 +185,7 @@ dependencies:
   test_core: 0.6.18
   typed_data: 1.4.0
   url_launcher: 6.3.2
-  url_launcher_android: 6.3.31
+  url_launcher_android: 6.3.32
   url_launcher_ios: 6.4.1
   url_launcher_linux: 3.2.2
   url_launcher_macos: 3.2.5
@@ -207,7 +207,7 @@ dependencies:
   webdriver: 3.1.0
   webkit_inspection_protocol: 1.2.1
   webview_flutter: 4.13.1
-  webview_flutter_android: 4.12.1
+  webview_flutter_android: 4.12.2
   webview_flutter_platform_interface: 2.15.1
   webview_flutter_wkwebview: 3.25.1
   xdg_directories: 1.1.0
@@ -225,4 +225,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 7arjln
+# PUBSPEC CHECKSUM: u87oqt

@@ -1123,10 +1123,10 @@ packages:
     dependency: "direct main"
     description:
       name: url_launcher_android
-      sha256: "8a46fcbcd5b865e87053fc5096101d12f56f3fe352c42aa621e7fec9290054b7"
+      sha256: b413d49b73867ac08dd2f9890efd3cc11f2a0e577618d50843440a1fb3776c32
       url: "https://pub.dev"
     source: hosted
-    version: "6.3.31"
+    version: "6.3.32"
   url_launcher_ios:
     dependency: "direct main"
     description:
@@ -1315,10 +1315,10 @@ packages:
     dependency: "direct main"
     description:
       name: webview_flutter_android
-      sha256: "72c80463ed701265d8e07b3dccf29589357efe03f148f60df2d587024068e344"
+      sha256: e37e565ed17605a4dbf3ad9c109afb06523e268963e8a9748137e6d8ecd9c955
       url: "https://pub.dev"
     source: hosted
-    version: "4.12.1"
+    version: "4.12.2"
   webview_flutter_platform_interface:
     dependency: "direct main"
     description:
