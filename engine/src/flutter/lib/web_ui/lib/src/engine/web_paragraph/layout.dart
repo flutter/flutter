@@ -412,6 +412,7 @@ class TextLayout {
     if (ellipsisBlock != null) {
       // There are no trailing spaces if we add the ellipsis block
       trailingSpacesWidth = 0.0;
+      assert(line.trailingSpacesWidth == 0.0);
       if (paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr) {
         // We need to adjust the block shift from line start because we are adding the ellipsis block at the end
         ellipsisBlock.shiftFromLineStart = blockShiftFromLineStart;
@@ -478,9 +479,6 @@ class TextLayout {
             line.formattingShift = -line.trailingSpacesWidth;
           }
         } else if (effectiveAlign == ui.TextAlign.right) {
-          // When we paint we exclude whitespaces but the advances still remain
-          // so we need to take them into account
-          line.formattingShift = delta - line.trailingSpacesWidth;
           // We shift text to the right end for right align
           if (paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr) {
             line.formattingShift = delta;
