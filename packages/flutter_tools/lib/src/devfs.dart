@@ -38,6 +38,9 @@ DevFSConfig? get devFSConfig => context.get<DevFSConfig>();
 abstract class DevFSContent {
   /// Return true if this is the first time this method is called
   /// or if the entry has been modified since this method was last called.
+  // TODO(flutter): Refactor this stateful getter to a side-effect-free getter
+  // and an explicit initialization/state-reset method (e.g. `markClean()`).
+  // Stateful getters can lead to subtle bugs and are not idiomatic.
   bool get isModified;
 
   /// Return true if this is the first time this method is called
@@ -714,6 +717,14 @@ class DevFS {
     void Function()? onFontManifestUpdated,
   }) async {
     if (bundleFirstUpload && !syncAllAssetsOnFirstUpload) {
+      for (final MapEntry<String, AssetBundleEntry> entry in bundle.entries.entries) {
+        // Access the stateful `isModified` getter to initialize the modification cache.
+        // The first call to `isModified` initializes the file stat/modification state
+        // and returns true. Subsequent calls will return false unless the file is modified on disk.
+        // If we do not query this during the first upload, the first hot restart will
+        // see `isModified` as true for all assets and unnecessarily upload/recompile them.
+        final bool _ = entry.value.content.isModified;
+      }
       return 0;
     }
 

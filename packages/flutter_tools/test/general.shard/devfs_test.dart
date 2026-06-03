@@ -994,6 +994,68 @@ void main() {
         expect(await dirtyEntries.values.first.contentsAsBytes(), utf8.encode('compiled'));
       },
     );
+
+    testWithoutContext(
+      'DevFS.updateBundle initializes isModified state of assets during first upload when sync is skipped',
+      () async {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final dirtyEntries = <Uri, DevFSContent>{};
+        final assetBundle = FakeBundle();
+        final assetContent = DevFSByteContent(<int>[1, 2, 3, 4]);
+        assetBundle.entries['asset.txt'] = AssetBundleEntry(
+          assetContent,
+          kind: AssetKind.regular,
+          transformers: const [],
+        );
+
+        const shaderCompiler = FakeShaderCompiler();
+        final assetTransformer = DevelopmentAssetTransformer(
+          fileSystem: fileSystem,
+          transformer: AssetTransformer(
+            processManager: FakeProcessManager.any(),
+            fileSystem: fileSystem,
+            dartBinaryPath: 'dart',
+            buildMode: BuildMode.debug,
+          ),
+          logger: BufferLogger.test(),
+        );
+
+        // Perform the first upload with sync skipped.
+        final int firstUploadSyncedBytes = await DevFS.updateBundle(
+          bundle: assetBundle,
+          dirtyEntries: dirtyEntries,
+          assetDirectory: 'assets',
+          assetTransformer: assetTransformer,
+          shaderCompiler: shaderCompiler,
+          fileSystem: fileSystem,
+          rootDirectoryPath: '/',
+          assetPathsToEvict: <String>{},
+          shaderPathsToEvict: <String>{},
+          bundleFirstUpload: true,
+        );
+
+        expect(firstUploadSyncedBytes, 0);
+        expect(dirtyEntries, isEmpty);
+
+        // Perform a subsequent hot restart update (where bundleFirstUpload is false).
+        // Since the asset has not been modified since the first upload, it should not be synced.
+        final int secondUploadSyncedBytes = await DevFS.updateBundle(
+          bundle: assetBundle,
+          dirtyEntries: dirtyEntries,
+          assetDirectory: 'assets',
+          assetTransformer: assetTransformer,
+          shaderCompiler: shaderCompiler,
+          fileSystem: fileSystem,
+          rootDirectoryPath: '/',
+          assetPathsToEvict: <String>{},
+          shaderPathsToEvict: <String>{},
+          bundleFirstUpload: false,
+        );
+
+        expect(secondUploadSyncedBytes, 0);
+        expect(dirtyEntries, isEmpty);
+      },
+    );
   });
 }
 
