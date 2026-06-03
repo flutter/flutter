@@ -202,9 +202,20 @@ class Canvas::RRectBlurShape : public BlurShape {
 
   Rect GetBounds() const override { return rect_; }
 
-  std::shared_ptr<SolidBlurContents> BuildBlurContent(Sigma sigma) override {
+  static Sigma GetAdjustedSigma(const Matrix& matrix,
+                                const Paint::MaskBlurDescriptor& blur) {
+    Sigma sigma = blur.sigma;
+    if (!blur.respect_ctm) {
+      sigma = Sigma(sigma.sigma / matrix.GetMaxBasisLengthXY());
+    }
+    return sigma;
+  }
+
+  std::shared_ptr<SolidBlurContents> BuildBlurContent(
+      const Matrix& matrix,
+      const Paint::MaskBlurDescriptor& blur) override {
     auto contents = std::make_shared<SolidRRectBlurContents>();
-    contents->SetSigma(sigma);
+    contents->SetSigma(GetAdjustedSigma(matrix, blur));
     contents->SetShape(rect_, corner_radius_);
     return contents;
   }
@@ -227,9 +238,11 @@ class Canvas::RSuperellipseBlurShape : public BlurShape {
 
   Rect GetBounds() const override { return rect_; }
 
-  std::shared_ptr<SolidBlurContents> BuildBlurContent(Sigma sigma) override {
+  std::shared_ptr<SolidBlurContents> BuildBlurContent(
+      const Matrix& matrix,
+      const Paint::MaskBlurDescriptor& blur) override {
     auto contents = std::make_shared<SolidRSuperellipseBlurContents>();
-    contents->SetSigma(sigma);
+    contents->SetSigma(RRectBlurShape::GetAdjustedSigma(matrix, blur));
     contents->SetShape(rect_, corner_radius_);
     return contents;
   }
@@ -272,13 +285,15 @@ class Canvas::PathBlurShape : public BlurShape {
     return shadow_vertices_->GetBounds().value_or(Rect());
   }
 
-  std::shared_ptr<SolidBlurContents> BuildBlurContent(Sigma sigma) override {
+  std::shared_ptr<SolidBlurContents> BuildBlurContent(
+      const Matrix& matrix,
+      const Paint::MaskBlurDescriptor& blur) override {
     // We have to use the sigma to generate the mesh up front in order to
     // even know if we can perform the operation, but then the method that
     // actually uses our contents informs us of the sigma, but it's too
     // late to make use of it. Instead we remember what sigma we used and
     // make sure they match.
-    FML_DCHECK(sigma_.sigma == sigma.sigma);
+    FML_DCHECK(sigma_.sigma == blur.sigma.sigma);
     return ShadowVerticesContents::Make(shadow_vertices_);
   }
 
@@ -589,6 +604,35 @@ bool Canvas::IsShadowBlurDrawOperation(const Paint& paint) {
   return true;
 }
 
+Scalar Canvas::GetShadowLocalRadius(const Matrix& matrix,
+                                    const Paint::MaskBlurDescriptor& mask) {
+  // This value was determined by empirical eyesight tests so that the
+  // shadow mesh results will match the results of the shape-specific
+  // optimized shadow shaders.
+  static constexpr Scalar kSigmaScale = 2.8f;
+
+  // In this case the basis_scale is the amount by which we should adjust the
+  // shadow radius (via division), so it is 1.0 if we are going to work in
+  // local space (== respect_ctm).
+  Scalar basis_scale = mask.respect_ctm ? 1.0f : matrix.GetMaxBasisLengthXY();
+  return basis_scale <= 0.0f ? 0.0f
+                             : mask.sigma.sigma * kSigmaScale / basis_scale;
+}
+
+Scalar Canvas::GetShadowDeviceRadius(const Matrix& matrix,
+                                     const Paint::MaskBlurDescriptor& mask) {
+  // This value was determined by empirical eyesight tests so that the
+  // shadow mesh results will match the results of the shape-specific
+  // optimized shadow shaders.
+  static constexpr Scalar kSigmaScale = 2.8f;
+
+  // In this case the basis_scale is the amount by which we should adjust the
+  // shadow radius (via multiplication), so it is 1.0 if we are going to work
+  // in device space (== !respect_ctm).
+  Scalar basis_scale = mask.respect_ctm ? matrix.GetMaxBasisLengthXY() : 1.0f;
+  return mask.sigma.sigma * kSigmaScale * basis_scale;
+}
+
 bool Canvas::AttemptDrawBlurredPathSource(const PathSource& source,
                                           const Paint& paint) {
   FML_DCHECK(IsShadowBlurDrawOperation);
@@ -598,15 +642,10 @@ bool Canvas::AttemptDrawBlurredPathSource(const PathSource& source,
   // this method, but we check again here to avoid warnings from the
   // following code.
   if (paint.mask_blur_descriptor.has_value()) {
-    // This value was determined by empirical eyesight tests so that the
-    // shadow mesh results will match the results of the shape-specific
-    // optimized shadow shaders.
-    static constexpr Scalar kSigmaScale = 2.8f;
-
     Sigma sigma = paint.mask_blur_descriptor->sigma;
     const Matrix& matrix = GetCurrentTransform();
-    Scalar basis_scale = matrix.GetMaxBasisLengthXY();
-    Scalar device_radius = sigma.sigma * kSigmaScale * basis_scale;
+    Scalar device_radius =
+        GetShadowDeviceRadius(matrix, *paint.mask_blur_descriptor);
     std::shared_ptr<ShadowVertices> shadow_vertices =
         ShadowPathGeometry::MakeAmbientShadowVertices(
             renderer_.GetTessellator(), source, device_radius, matrix);
@@ -721,14 +760,15 @@ bool Canvas::AttemptDrawBlur(BlurShape& shape, const Paint& paint) {
   }
 
   auto draw_blurred_rrect = [this, &rrect_paint, &shape]() {
+    const Matrix& matrix = GetCurrentTransform();
     std::shared_ptr<SolidBlurContents> contents =
-        shape.BuildBlurContent(rrect_paint.mask_blur_descriptor->sigma);
+        shape.BuildBlurContent(matrix, *rrect_paint.mask_blur_descriptor);
     FML_DCHECK(contents);
 
     contents->SetColor(rrect_paint.color);
 
     Entity blurred_rrect_entity;
-    blurred_rrect_entity.SetTransform(GetCurrentTransform());
+    blurred_rrect_entity.SetTransform(matrix);
     blurred_rrect_entity.SetBlendMode(rrect_paint.blend_mode);
 
     rrect_paint.mask_blur_descriptor = std::nullopt;
@@ -832,7 +872,7 @@ void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFAntialiasRendering(paint)) {
     auto params = UberSDFParameters::MakeRect(
         /*color=*/paint.color,
         /*rect=*/rect,
@@ -875,6 +915,24 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
         return;
       }
     } else {
+      if (renderer_.GetContext()->GetFlags().use_sdfs &&
+          IsCompatibleWithSDFShadowRendering(paint)) {
+        // The has_value() test should never be false in practice because
+        // the test above for |IsShadowBlurDrawOperation| would have failed
+        // before we get here, but we test anyway to keep the compiler happy.
+        if (paint.mask_blur_descriptor.has_value()) {
+          UberSDFParameters params = UberSDFParameters::MakeOvalShadow(
+              paint.color, rect, !paint.mask_blur_descriptor->respect_ctm,
+              paint.mask_blur_descriptor->sigma.sigma * 2.8f);
+
+          Paint shadow_paint;
+          shadow_paint.color = paint.color;
+          shadow_paint.blend_mode = paint.blend_mode;
+          AddRenderSDFEntityToCurrentPass(shadow_paint, params);
+          return;
+        }
+      }
+
       EllipsePathSource source(rect);
       if (AttemptDrawBlurredPathSource(source, paint)) {
         return;
@@ -887,7 +945,7 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFAntialiasRendering(paint)) {
     UberSDFParameters params;
 
     if (paint.style == Paint::Style::kStroke) {
@@ -971,7 +1029,8 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   const RoundingRadii& radii = round_rect.GetRadii();
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
+      IsCompatibleWithSDFAntialiasRendering(paint) &&
+      radii.AreAllCornersCircular()) {
     auto params = UberSDFParameters::MakeRoundedRect(
         /*color=*/paint.color,
         /*rect=*/round_rect.GetBounds(),
@@ -1037,7 +1096,7 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFAntialiasRendering(paint)) {
     auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
         round_superellipse.GetBounds(), round_superellipse.GetRadii());
 
@@ -1105,7 +1164,7 @@ void Canvas::DrawCircle(const Point& center,
   }
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint)) {
+      IsCompatibleWithSDFAntialiasRendering(paint)) {
     auto params = UberSDFParameters::MakeCircle(
         /*color=*/paint.color, /*center=*/center, /*radius=*/radius,
         /*stroke=*/paint.GetStroke());
@@ -2466,14 +2525,25 @@ void Canvas::EndReplay() {
   Initialize(initial_cull_rect_);
 }
 
-bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
+bool Canvas::IsCompatibleWithSDFAntialiasRendering(const Paint& paint) {
   if (!paint.anti_alias) {
     return false;
   }
   if (paint.mask_blur_descriptor.has_value()) {
     return false;
   }
-  switch (paint.blend_mode) {
+  return IsCompatibleWithSDFRendering(paint.blend_mode);
+}
+
+bool Canvas::IsCompatibleWithSDFShadowRendering(const Paint& paint) {
+  if (!paint.mask_blur_descriptor.has_value()) {
+    return false;
+  }
+  return IsCompatibleWithSDFRendering(paint.blend_mode);
+}
+
+bool Canvas::IsCompatibleWithSDFRendering(BlendMode blend_mode) {
+  switch (blend_mode) {
     // Incompatible blend modes:
     case BlendMode::kClear:
     case BlendMode::kSrc:

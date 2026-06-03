@@ -34,8 +34,8 @@ std::optional<Rect> UberSDFGeometry::GetCoverage(
 
 bool UberSDFGeometry::CoversArea(const Matrix& transform,
                                  const IRect& rect) const {
-  if (params_.type == UberSDFParameters::Type::kRect && !params_.stroke &&
-      transform.IsTranslationScaleOnly()) {
+  if (params_.shape_type == UberSDFParameters::ShapeType::kRect &&
+      !params_.stroke && transform.IsTranslationScaleOnly()) {
     // The SDF is a filled axis-aligned rectangle. It "covers" the input rect if
     // the SDF shader fully replaces the pixels contained in the rect parameter.
     // The SDF shader is computed by the GPU at the center of the pixels it
@@ -61,7 +61,8 @@ bool UberSDFGeometry::CoversArea(const Matrix& transform,
 }
 
 bool UberSDFGeometry::IsAxisAlignedRect() const {
-  return (params_.type == UberSDFParameters::Type::kRect && !params_.stroke);
+  return (params_.shape_type == UberSDFParameters::ShapeType::kRect &&
+          !params_.stroke);
 }
 
 Rect UberSDFGeometry::GetExpandedBounds(const Matrix& transform) const {
@@ -86,12 +87,22 @@ Rect UberSDFGeometry::GetExpandedBounds(const Matrix& transform) const {
         Size(params_.stroke->width).Max(device_pixel_size);
     stroke_padding = effective_stroke_width * 0.5f;
   }
-
-  // Padding for antialiasing.
-  Size aa_padding = UberSDFParameters::kAntialiasPixels * device_pixel_size;
+  Size filter_padding;
+  switch (params_.filter_type) {
+    case UberSDFParameters::FilterType::kAntialiasing:
+      filter_padding = params_.filter_scale * device_pixel_size * 0.5f;
+      break;
+    case UberSDFParameters::FilterType::kDeviceSpaceShadow:
+      filter_padding = params_.filter_scale * device_pixel_size;
+      break;
+    case UberSDFParameters::FilterType::kLocalSpaceShadow:
+    case UberSDFParameters::FilterType::kSDFGradient:
+      filter_padding = Size(params_.filter_scale);
+      break;
+  }
 
   return Rect::MakeEllipseBounds(params_.center, params_.size)
-      .Expand(stroke_padding + aa_padding);
+      .Expand(stroke_padding + filter_padding);
 }
 
 }  // namespace impeller

@@ -13,7 +13,9 @@ TEST(UberSDFParametersTest, MakeFillRect) {
   auto rect = Rect::MakeLTRB(100, 100, 200, 200);
   auto params = UberSDFParameters::MakeRect(Color::Red(), rect, std::nullopt);
 
-  EXPECT_EQ(params.type, UberSDFParameters::Type::kRect);
+  EXPECT_EQ(params.shape_type, UberSDFParameters::ShapeType::kRect);
+  EXPECT_EQ(params.filter_type, UberSDFParameters::FilterType::kAntialiasing);
+  EXPECT_EQ(params.filter_scale, UberSDFParameters::kAntialiasPixels);
   EXPECT_EQ(params.color, Color::Red());
   EXPECT_EQ(params.center, Point(150, 150));
   EXPECT_EQ(params.size, Point(50, 50));
@@ -25,7 +27,9 @@ TEST(UberSDFParametersTest, MakeStrokeRect) {
   StrokeParameters stroke = {.width = 4.0f};
   auto params = UberSDFParameters::MakeRect(Color::Red(), rect, stroke);
 
-  EXPECT_EQ(params.type, UberSDFParameters::Type::kRect);
+  EXPECT_EQ(params.shape_type, UberSDFParameters::ShapeType::kRect);
+  EXPECT_EQ(params.filter_type, UberSDFParameters::FilterType::kAntialiasing);
+  EXPECT_EQ(params.filter_scale, UberSDFParameters::kAntialiasPixels);
   EXPECT_EQ(params.color, Color::Red());
   EXPECT_EQ(params.center, Point(150, 150));
   EXPECT_EQ(params.size, Point(50, 50));
@@ -38,7 +42,9 @@ TEST(UberSDFParametersTest, MakeStrokeRectLowMiterLimitBecomesBevel) {
       .width = 4.0f, .join = Join::kMiter, .miter_limit = 1.0f};
   auto params = UberSDFParameters::MakeRect(Color::Red(), rect, stroke);
 
-  EXPECT_EQ(params.type, UberSDFParameters::Type::kRect);
+  EXPECT_EQ(params.shape_type, UberSDFParameters::ShapeType::kRect);
+  EXPECT_EQ(params.filter_type, UberSDFParameters::FilterType::kAntialiasing);
+  EXPECT_EQ(params.filter_scale, UberSDFParameters::kAntialiasPixels);
   EXPECT_EQ(params.color, Color::Red());
   EXPECT_EQ(params.center, Point(150, 150));
   EXPECT_EQ(params.size, Point(50, 50));
@@ -51,7 +57,9 @@ TEST(UberSDFParametersTest, MakeFillCircle) {
   auto params =
       UberSDFParameters::MakeCircle(Color::Red(), center, 10.0f, std::nullopt);
 
-  EXPECT_EQ(params.type, UberSDFParameters::Type::kCircle);
+  EXPECT_EQ(params.shape_type, UberSDFParameters::ShapeType::kCircle);
+  EXPECT_EQ(params.filter_type, UberSDFParameters::FilterType::kAntialiasing);
+  EXPECT_EQ(params.filter_scale, UberSDFParameters::kAntialiasPixels);
   EXPECT_EQ(params.color, Color::Red());
   EXPECT_EQ(params.center, center);
   EXPECT_EQ(params.size, Point(10.0f, 10.0f));
@@ -64,7 +72,9 @@ TEST(UberSDFParametersTest, MakeStrokeCircle) {
   auto params =
       UberSDFParameters::MakeCircle(Color::Red(), center, 10.0f, stroke);
 
-  EXPECT_EQ(params.type, UberSDFParameters::Type::kCircle);
+  EXPECT_EQ(params.shape_type, UberSDFParameters::ShapeType::kCircle);
+  EXPECT_EQ(params.filter_type, UberSDFParameters::FilterType::kAntialiasing);
+  EXPECT_EQ(params.filter_scale, UberSDFParameters::kAntialiasPixels);
   EXPECT_EQ(params.color, Color::Red());
   EXPECT_EQ(params.center, center);
   EXPECT_EQ(params.size, Point(10.0f, 10.0f));
@@ -78,7 +88,45 @@ TEST(UberSDFParametersTest, MakeFillOval) {
 
   auto params = UberSDFParameters::MakeOval(Color::Red(), bounds, std::nullopt);
 
-  EXPECT_EQ(params.type, UberSDFParameters::Type::kOval);
+  EXPECT_EQ(params.shape_type, UberSDFParameters::ShapeType::kOval);
+  EXPECT_EQ(params.filter_type, UberSDFParameters::FilterType::kAntialiasing);
+  EXPECT_EQ(params.filter_scale, UberSDFParameters::kAntialiasPixels);
+  EXPECT_EQ(params.color, Color::Red());
+  EXPECT_EQ(params.center, center);
+  EXPECT_EQ(params.size, Point(size) * 0.5f);
+  EXPECT_FALSE(params.stroke.has_value());
+}
+
+TEST(UberSDFParametersTest, MakeOvalDeviceShadow) {
+  Point center = {25, 25};
+  Size size = Size(50, 50);
+  Rect bounds = Rect::MakeOriginSize(Point(), size);
+
+  auto params =
+      UberSDFParameters::MakeOvalShadow(Color::Red(), bounds, true, 12.0f);
+
+  EXPECT_EQ(params.shape_type, UberSDFParameters::ShapeType::kOval);
+  EXPECT_EQ(params.filter_type,
+            UberSDFParameters::FilterType::kDeviceSpaceShadow);
+  EXPECT_EQ(params.filter_scale, 12.0f);
+  EXPECT_EQ(params.color, Color::Red());
+  EXPECT_EQ(params.center, center);
+  EXPECT_EQ(params.size, Point(size) * 0.5f);
+  EXPECT_FALSE(params.stroke.has_value());
+}
+
+TEST(UberSDFParametersTest, MakeOvalLocalShadow) {
+  Point center = {25, 25};
+  Size size = Size(50, 50);
+  Rect bounds = Rect::MakeOriginSize(Point(), size);
+
+  auto params =
+      UberSDFParameters::MakeOvalShadow(Color::Red(), bounds, false, 12.0f);
+
+  EXPECT_EQ(params.shape_type, UberSDFParameters::ShapeType::kOval);
+  EXPECT_EQ(params.filter_type,
+            UberSDFParameters::FilterType::kLocalSpaceShadow);
+  EXPECT_EQ(params.filter_scale, 12.0f);
   EXPECT_EQ(params.color, Color::Red());
   EXPECT_EQ(params.center, center);
   EXPECT_EQ(params.size, Point(size) * 0.5f);
@@ -93,7 +141,9 @@ TEST(UberSDFParametersTest, MakeStrokeOval) {
 
   auto params = UberSDFParameters::MakeOval(Color::Red(), bounds, stroke);
 
-  EXPECT_EQ(params.type, UberSDFParameters::Type::kOval);
+  EXPECT_EQ(params.shape_type, UberSDFParameters::ShapeType::kOval);
+  EXPECT_EQ(params.filter_type, UberSDFParameters::FilterType::kAntialiasing);
+  EXPECT_EQ(params.filter_scale, UberSDFParameters::kAntialiasPixels);
   EXPECT_EQ(params.color, Color::Red());
   EXPECT_EQ(params.center, center);
   EXPECT_EQ(params.size, Point(size) * 0.5f);
@@ -112,7 +162,9 @@ TEST(UberSDFParametersTest, MakeRoundedRect) {
       /*color=*/Color::Red(), /*rect=*/rect, /*radii=*/radii,
       /*stroke=*/std::nullopt);
 
-  EXPECT_EQ(params.type, UberSDFParameters::Type::kRoundedRect);
+  EXPECT_EQ(params.shape_type, UberSDFParameters::ShapeType::kRoundedRect);
+  EXPECT_EQ(params.filter_type, UberSDFParameters::FilterType::kAntialiasing);
+  EXPECT_EQ(params.filter_scale, UberSDFParameters::kAntialiasPixels);
   EXPECT_EQ(params.color, Color::Red());
   EXPECT_EQ(params.center, Point(60, 70));
   EXPECT_EQ(params.size, Point(50, 50));
@@ -138,8 +190,8 @@ TEST(UberSDFParametersTest, MakeRoundedSuperellipse) {
       /*round_superellipse_params=*/round_superellipse_params,
       /*stroke=*/std::nullopt);
 
-  EXPECT_EQ(params.type,
-            UberSDFParameters::Type::kRoundedSuperellipseSymmetric);
+  EXPECT_EQ(params.shape_type,
+            UberSDFParameters::ShapeType::kRoundedSuperellipseSymmetric);
   EXPECT_EQ(params.color, Color::Red());
   EXPECT_EQ(params.center, Point(60, 70));
   EXPECT_EQ(params.size, Point(50, 50));

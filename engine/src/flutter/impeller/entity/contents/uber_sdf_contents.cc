@@ -20,18 +20,31 @@ using PipelineBuilderCallback =
 using VS = UberSDFPipeline::VertexShader;
 using FS = UberSDFPipeline::FragmentShader;
 
-Scalar ToShaderType(UberSDFParameters::Type type) {
+Scalar ToShaderType(UberSDFParameters::ShapeType type) {
   switch (type) {
-    case UberSDFParameters::Type::kCircle:
+    case UberSDFParameters::ShapeType::kCircle:
       return 0.0f;
-    case UberSDFParameters::Type::kRect:
+    case UberSDFParameters::ShapeType::kRect:
       return 1.0f;
-    case UberSDFParameters::Type::kOval:
+    case UberSDFParameters::ShapeType::kOval:
       return 2.0f;
-    case UberSDFParameters::Type::kRoundedRect:
+    case UberSDFParameters::ShapeType::kRoundedRect:
       return 3.0f;
-    case UberSDFParameters::Type::kRoundedSuperellipseSymmetric:
+    case UberSDFParameters::ShapeType::kRoundedSuperellipseSymmetric:
       return 4.0f;
+  }
+}
+
+Scalar ToFilterType(UberSDFParameters::FilterType type) {
+  switch (type) {
+    case UberSDFParameters::FilterType::kAntialiasing:
+      return 0.0f;
+    case UberSDFParameters::FilterType::kDeviceSpaceShadow:
+      return 1.0f;
+    case UberSDFParameters::FilterType::kLocalSpaceShadow:
+      return 2.0f;
+    case UberSDFParameters::FilterType::kSDFGradient:
+      return 3.0f;
   }
 }
 
@@ -68,7 +81,9 @@ bool UberSDFContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
-  frag_info.type = ToShaderType(params_.type);
+  frag_info.shape_type = ToShaderType(params_.shape_type);
+  frag_info.filter_type = ToFilterType(params_.filter_type);
+  frag_info.filter_scale = params_.filter_scale;
   frag_info.color =
       params_.color.WithAlpha(params_.color.alpha * GetOpacityFactor());
   frag_info.center = params_.center;
@@ -77,7 +92,6 @@ bool UberSDFContents::Render(const ContentContext& renderer,
   frag_info.stroke_width = params_.stroke ? params_.stroke->width : 0.0f;
   frag_info.stroke_join =
       params_.stroke ? ToShaderStrokeJoin(params_.stroke->join) : 0.0f;
-  frag_info.aa_pixels = UberSDFParameters::kAntialiasPixels;
   frag_info.superellipse_degree = params_.superellipse_degree;
   frag_info.superellipse_semi_axis = params_.superellipse_semi_axis;
   frag_info.angle_span = params_.angle_span;
@@ -133,7 +147,7 @@ bool UberSDFContents::ApplyColorFilter(
 std::optional<Color> UberSDFContents::AsBackgroundColor(
     const Entity& entity,
     ISize target_size) const {
-  if (params_.type != UberSDFParameters::Type::kRect) {
+  if (params_.shape_type != UberSDFParameters::ShapeType::kRect) {
     return std::nullopt;
   }
   const Geometry* geometry = GetGeometry();

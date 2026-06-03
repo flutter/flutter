@@ -913,8 +913,8 @@ void DlDispatcherBase::drawShadow(const DlPath& path,
   paint.color = spot_color;
   paint.mask_blur_descriptor = Paint::MaskBlurDescriptor{
       .style = FilterContents::BlurStyle::kNormal,
-      .sigma = Radius{kLightRadius * occluder_z /
-                      GetCanvas().GetCurrentTransform().GetScale().y},
+      .sigma = Radius{kLightRadius * occluder_z},
+      .respect_ctm = false,
   };
 
   GetCanvas().Save(1u);
