@@ -7,8 +7,8 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -132,72 +132,6 @@ void main() {
     expect(material.elevation, cardTheme.elevation);
     expect(padding.padding, cardTheme.margin);
     expect(material.shape, cardTheme.shape);
-  });
-
-  testWidgets('InheritedWidgets can trigger RenderObject updates', (WidgetTester tester) async {
-    var cardThemeData = const CardThemeData(color: Colors.white);
-    late StateSetter setState;
-
-    void expectCardToMatchTheme() {
-      // Verifies that the themed card is rendered with the appropriate inherited theme data.
-      final RenderPhysicalShape renderShape = tester.renderObject(find.byType(_ThemedCard));
-
-      if (cardThemeData.color != null) {
-        expect(renderShape.color, cardThemeData.color);
-      }
-      if (cardThemeData.elevation != null) {
-        expect(renderShape.elevation, cardThemeData.elevation);
-      }
-      if (cardThemeData.shadowColor != null) {
-        expect(renderShape.shadowColor, cardThemeData.shadowColor);
-      }
-      if (cardThemeData.shape != null) {
-        final CustomClipper<Path>? clipper = renderShape.clipper;
-        expect(clipper, isA<ShapeBorderClipper>());
-        expect((clipper! as ShapeBorderClipper).shape, cardThemeData.shape);
-      }
-      if (cardThemeData.clipBehavior != null) {
-        expect(renderShape.clipBehavior, cardThemeData.clipBehavior);
-      }
-    }
-
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter stateSetter) {
-          setState = stateSetter;
-          return Theme(
-            data: ThemeData(cardTheme: cardThemeData),
-            child: const _ThemedCard(),
-          );
-        },
-      ),
-    );
-    expectCardToMatchTheme();
-
-    setState(() {
-      cardThemeData = const CardThemeData(
-        shape: BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
-      );
-    });
-    await tester.pump();
-    expectCardToMatchTheme();
-
-    setState(() {
-      cardThemeData = const CardThemeData(clipBehavior: Clip.hardEdge);
-    });
-    await tester.pump();
-    expectCardToMatchTheme();
-
-    setState(() {
-      cardThemeData = const CardThemeData(
-        elevation: 5.0,
-        shadowColor: Colors.blueGrey,
-        shape: ContinuousRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8.0))),
-        clipBehavior: Clip.antiAliasWithSaveLayer,
-      );
-    });
-    await tester.pump();
-    expectCardToMatchTheme();
   });
 
   testWidgets('Card widget properties take priority over theme', (WidgetTester tester) async {
@@ -502,35 +436,6 @@ CardThemeData _cardTheme() {
 
 ThemeData _themeData() {
   return ThemeData(cardColor: Colors.pink);
-}
-
-class _ThemedCard extends SingleChildRenderObjectWidget {
-  const _ThemedCard() : super(child: const SizedBox.expand());
-
-  @override
-  RenderPhysicalShape createRenderObject(BuildContext context) {
-    final CardThemeData cardTheme = CardTheme.of(context);
-
-    return RenderPhysicalShape(
-      clipper: ShapeBorderClipper(shape: cardTheme.shape ?? const RoundedRectangleBorder()),
-      clipBehavior: cardTheme.clipBehavior ?? Clip.antiAlias,
-      color: cardTheme.color ?? Colors.white,
-      elevation: cardTheme.elevation ?? 0.0,
-      shadowColor: cardTheme.shadowColor ?? Colors.black,
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderPhysicalShape renderObject) {
-    final CardThemeData cardTheme = CardTheme.of(context);
-
-    renderObject
-      ..clipper = ShapeBorderClipper(shape: cardTheme.shape ?? const RoundedRectangleBorder())
-      ..clipBehavior = cardTheme.clipBehavior ?? Clip.antiAlias
-      ..color = cardTheme.color ?? Colors.white
-      ..elevation = cardTheme.elevation ?? 0.0
-      ..shadowColor = cardTheme.shadowColor ?? Colors.black;
-  }
 }
 
 Material _getCardMaterial(WidgetTester tester) {

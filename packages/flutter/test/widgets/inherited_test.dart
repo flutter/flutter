@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -52,6 +53,26 @@ class ExpectFailState extends State<ExpectFail> {
 
 class ChangeNotifierInherited extends InheritedNotifier<ChangeNotifier> {
   const ChangeNotifierInherited({super.key, required super.child, super.notifier});
+}
+
+class _ValueDecoratedBox extends SingleChildRenderObjectWidget {
+  const _ValueDecoratedBox({super.key}) : super(child: const SizedBox.expand());
+
+  BoxDecoration _decorationOf(BuildContext context) {
+    final ValueInherited valueInherited = context
+        .dependOnInheritedWidgetOfExactType<ValueInherited>()!;
+    return BoxDecoration(color: Color(valueInherited.value));
+  }
+
+  @override
+  RenderDecoratedBox createRenderObject(BuildContext context) {
+    return RenderDecoratedBox(decoration: _decorationOf(context));
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderDecoratedBox renderObject) {
+    renderObject.decoration = _decorationOf(context);
+  }
 }
 
 void main() {
@@ -490,5 +511,32 @@ void main() {
 
     await tester.pumpWidget(ChangeNotifierInherited(child: builder));
     expect(buildCount, equals(3));
+  });
+
+  testWidgets('InheritedWidgets can trigger RenderObject updates', (WidgetTester tester) async {
+    var value = 0xFF0000FF;
+    late StateSetter setState;
+
+    void expectDecoratedBoxToMatchInheritedValue() {
+      // Verifies that the render object is updated with the inherited value.
+      final RenderDecoratedBox renderObject = tester.renderObject(find.byType(_ValueDecoratedBox));
+      expect(renderObject.decoration, BoxDecoration(color: Color(value)));
+    }
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          return ValueInherited(value: value, child: const _ValueDecoratedBox());
+        },
+      ),
+    );
+    expectDecoratedBoxToMatchInheritedValue();
+
+    setState(() {
+      value = 0xFFFF0000;
+    });
+    await tester.pump();
+    expectDecoratedBoxToMatchInheritedValue();
   });
 }
