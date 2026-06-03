@@ -113,18 +113,19 @@ base class Texture extends NativeFieldWrapperClass1 {
     _setCoordinateSystem(value.index);
   }
 
-  int get bytesPerTexel {
-    return _bytesPerTexel();
-  }
-
   /// Returns the size in bytes of the [mipLevel] mip level (one slice). Mip
-  /// dimensions are clamped at 1, matching standard mip chain semantics.
+  /// dimensions are clamped at 1, matching standard mip chain semantics. For
+  /// block-compressed formats the dimensions are rounded up to whole blocks.
   int getMipLevelSizeInBytes(int mipLevel) {
     final int mipWidth = width >> mipLevel;
     final int mipHeight = height >> mipLevel;
     final int w = mipWidth > 0 ? mipWidth : 1;
     final int h = mipHeight > 0 ? mipHeight : 1;
-    return bytesPerTexel * w * h;
+    final int bw = format.blockWidth;
+    final int bh = format.blockHeight;
+    final int blocksWide = (w + bw - 1) ~/ bw;
+    final int blocksHigh = (h + bh - 1) ~/ bh;
+    return blocksWide * blocksHigh * format.bytesPerBlock;
   }
 
   /// Returns the size in bytes of the base mip level (one slice). Equivalent
@@ -143,10 +144,10 @@ base class Texture extends NativeFieldWrapperClass1 {
   /// each face is a separate slice in the order
   /// `+X, -X, +Y, -Y, +Z, -Z`. Must be 0 for non-cubemap textures.
   ///
-  /// The length of [sourceBytes] must exactly match the size of the
-  /// requested mip level, which is `mipWidth * mipHeight * bytesPerTexel`
-  /// (where `mipWidth` and `mipHeight` are the base dimensions right-shifted
-  /// by [mipLevel], floored at 1).
+  /// The length of [sourceBytes] must exactly match the size returned by
+  /// [getMipLevelSizeInBytes] for the requested [mipLevel]. For
+  /// block-compressed formats, this is the number of whole-block-rounded
+  /// blocks times the bytes per block.
   ///
   /// Throws an exception if the write fails due to an internal error or if
   /// any of the parameters are out of range.
@@ -220,11 +221,6 @@ base class Texture extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Texture_SetCoordinateSystem',
   )
   external void _setCoordinateSystem(int coordinateSystem);
-
-  @Native<Int Function(Pointer<Void>)>(
-    symbol: 'InternalFlutterGpu_Texture_BytesPerTexel',
-  )
-  external int _bytesPerTexel();
 
   @Native<Bool Function(Pointer<Void>, Pointer<Void>, Handle, Int, Int)>(
     symbol: 'InternalFlutterGpu_Texture_Overwrite',
