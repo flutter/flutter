@@ -45,6 +45,12 @@ This policy is strictly enforced for two primary reasons:
 When a Dart SDK bump introduces new language features, they should not be adopted ad-hoc across the codebase. Instead:
 1. **Style Guide Updates:** The new features should be evaluated and documented in the [Style guide for Flutter repo](../contributing/Style-guide-for-Flutter-repo.md) to define standard patterns and decide if any usage should be restricted or preferred.
 2. **Organized Migration:** To maintain consistency and avoid fragmented code styles, migrations to adopt new features are usually organized as a coordinated effort. This typically involves opening a tracking issue (such as [issue #172188](https://github.com/flutter/flutter/issues/172188)) to manage and review the migration systematically.
+
+### New Language Features and Style Guide Updates
+
+When a Dart SDK bump introduces new language features, they should not be adopted ad-hoc across the codebase. Instead:
+1. **Style Guide Updates:** The new features should be evaluated and documented in the [Style guide for Flutter repo](../contributing/Style-guide-for-Flutter-repo.md) to define standard patterns and decide if any usage should be restricted or preferred.
+2. **Organized Migration:** To maintain consistency and avoid fragmented code styles, migrations to adopt new features are usually organized as a coordinated effort. This typically involves opening a tracking issue (such as [issue #172188](https://github.com/flutter/flutter/issues/172188)) to manage and review the migration systematically.
 ---
 
 ## How to Bump the Dart SDK Constraint
@@ -73,7 +79,6 @@ Run the repo-wide analysis script to verify the new constraints solve correctly 
 dart --enable-asserts dev/bots/analyze.dart
 ```
 
-
 Follow this by running the test suites on your target platforms to ensure no runtime regressions occur, e.g.:
 
 ```bash
@@ -82,9 +87,7 @@ flutter test packages/flutter
 ```
 
 ### Step 4: Open a Pull Request
-
 Commit the updated `pubspec.yaml`, `pubspec.lock` files, and checksum updates, then submit a pull request.
 
 > [!WARNING]
 > If your PR breaks Google internal (Google3) integration due to unresolved Dart SDK version mismatches, it may be reverted. Coordinate with the current Flutter roll managers to ensure alignment.
-
