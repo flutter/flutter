@@ -43,9 +43,9 @@ Then it is of the type we are looking to analyze. If it is not, you should short
 If the previous conditions are met, the title will contain the name of the flaking check, and the body will contain urls which link to instances where the check failed or flaked, each on a new line, directly after "Flaky builds:". You should also inspect the comments and find each comment made by "login": "fluttergithubbot", and extract the urls from there as well (the format will be the same, with an example flake at the top, and the full list immediately after the "Flaky builds:" header).
 
 To find information about the specific failure take one of the urls listed in the issue body.
-That link takes the format `"https://ci.chromium.org/ui/p/flutter/builders/prod/<check_name>/<buildNumber>/overview",`
+That link takes the format `"https://ci.chromium.org/ui/p/flutter/builders/<bucket>/<check_name>/<buildNumber>/overview",`
 
-Example `https://ci.chromium.org/ui/p/flutter/builders/prod/Windows%20plugin_test/16247/overview` where `Windows%20plugin_test` is the <check_name> and `16247` is the <buildNumber>.
+Example `https://ci.chromium.org/ui/p/flutter/builders/prod/Windows%20plugin_test/16247/overview` where `prod` is the <bucket>, `Windows%20plugin_test` is the <check_name> and `16247` is the <buildNumber>.
 
 
 Then use the <buildNumber> to get the test logs metadata by running the following command.
@@ -70,7 +70,7 @@ curl 'https://cr-buildbucket.appspot.com/prpc/buildbucket.v2.Builds/GetBuild' \
   -H 'sec-fetch-site: cross-site' \
   -H 'user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36' \
   -H 'x-return-encrypted-headers: all' \
-  --data-raw '{"builder":{"project":"flutter","bucket":"try","builder":"Linux repo_checks"},"buildNumber":<buildNumber>,"mask":{"fields":"id,builder,builderInfo,number,canceledBy,createdBy,createTime,startTime,endTime,cancelTime,status,statusDetails,summaryMarkdown,output,steps,tags,schedulingTimeout,executionTimeout,gracePeriod,ancestorIds,retriable"}}'
+  --data-raw '{"builder":{"project":"flutter","bucket":"<bucket>","builder":"<check_name>"},"buildNumber":<buildNumber>,"mask":{"fields":"id,builder,builderInfo,number,canceledBy,createdBy,createTime,startTime,endTime,cancelTime,status,statusDetails,summaryMarkdown,output,steps,tags,schedulingTimeout,executionTimeout,gracePeriod,ancestorIds,retriable"}}'
 ```
 Ignore the characters `)]}'` that start the response and treat the rest like json.
 
