@@ -643,34 +643,94 @@ static GLenum ToAttachmentType(TextureGLES::AttachmentType point) {
   }
 }
 
-bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
-                                             AttachmentType attachment_type) {
-  if (!IsValid()) {
-    return false;
+bool TextureGLES::EnsureSliceMipLevelStorage(size_t slice, size_t mip_level) {
+  if (IsSliceMipLevelInitialized(slice, mip_level)) {
+    return true;
   }
-  InitializeContentsIfNecessary();
+  // Renderbuffers and multisampled textures only have their single level
+  // allocated at init; only sampled 2D and cube textures allocate per-level.
+  if (type_ != Type::kTexture) {
+    return true;
+  }
   auto handle = GetGLHandle();
   if (!handle.has_value()) {
     return false;
   }
   const auto& gl = reactor_->GetProcTable();
+  const auto& desc = GetTextureDescriptor();
+  std::optional<PixelFormatGLES> gles_format = ToPixelFormatGLES(
+      desc.format,
+      gl.GetDescription()->HasExtension("GL_EXT_texture_format_BGRA8888"));
+  if (!gles_format.has_value()) {
+    return false;
+  }
+  ISize size = GetSize();
+  bool is_cube = desc.type == TextureType::kTextureCube;
+  GLenum image_target =
+      is_cube ? GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice : GL_TEXTURE_2D;
+  gl.BindTexture(is_cube ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, handle.value());
+  gl.TexImage2D(image_target,                   // target
+                static_cast<GLint>(mip_level),  // LOD level
+                gles_format->internal_format,   // internal
+                static_cast<GLsizei>(
+                    std::max<int64_t>(1, size.width >> mip_level)),  // width
+                static_cast<GLsizei>(
+                    std::max<int64_t>(1, size.height >> mip_level)),  // height
+                0u,                                                   // border
+                gles_format->external_format,                         // format
+                gles_format->type,                                    // type
+                nullptr                                               // data
+  );
+  MarkSliceMipLevelInitialized(slice, mip_level);
+  return true;
+}
+
+bool TextureGLES::SetAsFramebufferAttachment(GLenum target,
+                                             AttachmentType attachment_type,
+                                             uint32_t mip_level,
+                                             uint32_t slice) {
+  if (!IsValid()) {
+    return false;
+  }
+  InitializeContentsIfNecessary();
+  const auto& gl = reactor_->GetProcTable();
+  if (mip_level > 0 &&
+      !gl.GetCapabilities()->SupportsFramebufferRenderMipmap()) {
+    VALIDATION_LOG << "Attaching a non-zero mip level requires OpenGL ES 3.0 "
+                      "or the GL_OES_fbo_render_mipmap extension.";
+    return false;
+  }
+  if (!EnsureSliceMipLevelStorage(slice, mip_level)) {
+    return false;
+  }
+  auto handle = GetGLHandle();
+  if (!handle.has_value()) {
+    return false;
+  }
+  const GLint level = static_cast<GLint>(mip_level);
 
   switch (ComputeTypeForBinding(target)) {
-    case Type::kTexture:
+    case Type::kTexture: {
+      // Cube maps attach a specific face; 2D textures attach the 2D target.
+      GLenum textarget =
+          GetTextureDescriptor().type == TextureType::kTextureCube
+              ? GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice
+              : GL_TEXTURE_2D;
       gl.FramebufferTexture2D(target,                             // target
                               ToAttachmentType(attachment_type),  // attachment
-                              GL_TEXTURE_2D,                      // textarget
+                              textarget,                          // textarget
                               handle.value(),                     // texture
-                              0                                   // level
+                              level                               // level
       );
       break;
+    }
     case Type::kTextureMultisampled:
       gl.FramebufferTexture2DMultisampleEXT(
           target,                             // target
           ToAttachmentType(attachment_type),  // attachment
           GL_TEXTURE_2D,                      // textarget
           handle.value(),                     // texture
-          0,                                  // level
+          level,                              // level
           4                                   // samples
       );
       break;
@@ -712,6 +772,16 @@ void TextureGLES::SetCachedFBO(HandleGLES fbo) {
 
 const HandleGLES& TextureGLES::GetCachedFBO() const {
   return cached_fbo_.Get();
+}
+
+void TextureGLES::SetCachedFBOSubresource(uint32_t mip_level, uint32_t slice) {
+  cached_fbo_mip_level_ = mip_level;
+  cached_fbo_slice_ = slice;
+}
+
+bool TextureGLES::CachedFBOMatchesSubresource(uint32_t mip_level,
+                                              uint32_t slice) const {
+  return cached_fbo_mip_level_ == mip_level && cached_fbo_slice_ == slice;
 }
 
 }  // namespace impeller
