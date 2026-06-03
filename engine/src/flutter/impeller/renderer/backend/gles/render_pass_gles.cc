@@ -148,7 +148,8 @@ struct RenderPassData {
 static bool BindVertexBuffer(const ProcTableGLES& gl,
                              BufferBindingsGLES* vertex_desc_gles,
                              const BufferView& vertex_buffer_view,
-                             size_t buffer_index) {
+                             size_t buffer_index,
+                             size_t instance = 0) {
   if (!vertex_buffer_view) {
     return false;
   }
@@ -169,7 +170,7 @@ static bool BindVertexBuffer(const ProcTableGLES& gl,
   /// Bind the vertex attributes associated with vertex buffer.
   ///
   if (!vertex_desc_gles->BindVertexAttributes(
-          gl, buffer_index, vertex_buffer_view.GetRange().offset)) {
+          gl, buffer_index, vertex_buffer_view.GetRange().offset, instance)) {
     return false;
   }
 
@@ -193,6 +194,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
                            const RenderPassData& pass_data,
                            const std::optional<Viewport>& command_viewport,
                            const ISize& target_size,
+                           bool flip_y,
                            std::optional<Viewport>& current_viewport) {
   auto new_viewport = command_viewport.value_or(pass_data.viewport);
 
@@ -204,12 +206,15 @@ static void EncodeViewport(const ProcTableGLES& gl,
 
   current_viewport = new_viewport;
 
+  // FBO passes flip in the vertex shader; swapchain keeps the old
+  // top-down -> bottom-up viewport conversion.
+  const auto viewport_y_gl = flip_y ? new_viewport.rect.GetY()
+                                    : target_size.height -
+                                          new_viewport.rect.GetY() -
+                                          new_viewport.rect.GetHeight();
   gl.Viewport(new_viewport.rect.GetX(),  // x
-              target_size.height - new_viewport.rect.GetY() -
-                  new_viewport.rect.GetHeight(),  // y
-              new_viewport.rect.GetWidth(),       // width
-              new_viewport.rect.GetHeight()       // height
-  );
+              viewport_y_gl,             // y
+              new_viewport.rect.GetWidth(), new_viewport.rect.GetHeight());
   if (pass_data.depth_attachment) {
     if (gl.DepthRangef.IsAvailable()) {
       gl.DepthRangef(new_viewport.depth_range.z_near,
@@ -336,10 +341,16 @@ static void EncodeViewport(const ProcTableGLES& gl,
   // is bottom left origin, so we convert the coordinates here.
   ISize target_size = pass_data.color_attachment->GetSize();
 
+  // Offscreen FBO passes flip in the vertex shader (the swapchain is
+  // left alone); see https://github.com/flutter/flutter/issues/186554.
+  const bool flip_y = !is_wrapped_fbo;
+  const float y_flip_value = flip_y ? -1.0f : 1.0f;
+
   std::optional<Viewport> current_viewport;
   CullMode current_cull_mode = CullMode::kNone;
   WindingOrder current_winding_order = WindingOrder::kClockwise;
-  gl.FrontFace(GL_CW);
+  // Inverted to keep front-facing consistent under the vertex y-flip.
+  gl.FrontFace(flip_y ? GL_CCW : GL_CW);
 
   for (const auto& command : commands) {
 #ifdef IMPELLER_DEBUG
@@ -392,6 +403,7 @@ static void EncodeViewport(const ProcTableGLES& gl,
                    pass_data,         //
                    command.viewport,  //
                    target_size,       //
+                   flip_y,            //
                    current_viewport   //
     );
 
@@ -401,12 +413,13 @@ static void EncodeViewport(const ProcTableGLES& gl,
     if (command.scissor.has_value()) {
       const auto& scissor = command.scissor.value();
       gl.Enable(GL_SCISSOR_TEST);
-      gl.Scissor(
-          scissor.GetX(),                                             // x
-          target_size.height - scissor.GetY() - scissor.GetHeight(),  // y
-          scissor.GetWidth(),                                         // width
-          scissor.GetHeight()                                         // height
-      );
+      // Same flip handling as the viewport above.
+      const auto scissor_y_gl =
+          flip_y ? scissor.GetY()
+                 : target_size.height - scissor.GetY() - scissor.GetHeight();
+      gl.Scissor(scissor.GetX(),  // x
+                 scissor_y_gl,    // y
+                 scissor.GetWidth(), scissor.GetHeight());
     }
 
     //--------------------------------------------------------------------------
@@ -431,17 +444,18 @@ static void EncodeViewport(const ProcTableGLES& gl,
     }
 
     //--------------------------------------------------------------------------
-    /// Setup winding order.
-    ///
+    /// Setup winding order. The pipeline's winding is inverted when
+    /// `flip_y` is in effect (the vertex flip reverses the rasterizer's
+    /// view of winding).
     WindingOrder pipeline_winding_order =
         pipeline.GetDescriptor().GetWindingOrder();
     if (current_winding_order != pipeline_winding_order) {
       switch (pipeline.GetDescriptor().GetWindingOrder()) {
         case WindingOrder::kClockwise:
-          gl.FrontFace(GL_CW);
+          gl.FrontFace(flip_y ? GL_CCW : GL_CW);
           break;
         case WindingOrder::kCounterClockwise:
-          gl.FrontFace(GL_CCW);
+          gl.FrontFace(flip_y ? GL_CW : GL_CCW);
           break;
       }
       current_winding_order = pipeline_winding_order;
@@ -469,6 +483,13 @@ static void EncodeViewport(const ProcTableGLES& gl,
     ///
     if (!pipeline.BindProgram()) {
       return false;
+    }
+
+    //--------------------------------------------------------------------------
+    /// Bind the y-flip uniform if the vertex shader declares it.
+    const GLint y_flip_loc = pipeline.GetYFlipUniformLocation();
+    if (y_flip_loc >= 0) {
+      gl.Uniform1fv(y_flip_loc, 1, &y_flip_value);
     }
 
     //--------------------------------------------------------------------------
@@ -500,10 +521,34 @@ static void EncodeViewport(const ProcTableGLES& gl,
     //--------------------------------------------------------------------------
     /// Finally! Invoke the draw call.
     ///
-    if (command.index_type == IndexType::kNone) {
-      gl.DrawArrays(mode, command.base_vertex, command.element_count);
-    } else {
-      // Bind the index buffer if necessary.
+    /// An instanced draw uses the hardware instanced entry points when the
+    /// driver exposes them (ES 3.0 core, or GL_EXT_instanced_arrays on ES
+    /// 2.0). When it does not, the draw is emulated by repeating it once per
+    /// instance, re-pointing the instance-rate vertex attributes at each
+    /// instance in between.
+    ///
+    const bool instanced = command.instance_count > 1u;
+    const bool hardware_instanced =
+        instanced &&
+        (gl.DrawArraysInstanced.IsAvailable() ||
+         gl.DrawArraysInstancedEXT.IsAvailable()) &&
+        (gl.DrawElementsInstanced.IsAvailable() ||
+         gl.DrawElementsInstancedEXT.IsAvailable()) &&
+        (gl.VertexAttribDivisor.IsAvailable() ||
+         gl.VertexAttribDivisorEXT.IsAvailable());
+    const bool emulate_instanced = instanced && !hardware_instanced;
+    const GLsizei instance_count = static_cast<GLsizei>(command.instance_count);
+
+    // A draw is indexed only when a real index type was set. A command that
+    // never bound an index buffer leaves `index_type` at its `kUnknown`
+    // default, which must be treated as non-indexed (matching the Metal and
+    // Vulkan backends, which key off the presence of the index buffer).
+    const bool is_indexed = command.index_type != IndexType::kNone &&
+                            command.index_type != IndexType::kUnknown;
+
+    // Bind the index buffer once, before any (possibly repeated) draw.
+    const GLvoid* index_offset = nullptr;
+    if (is_indexed) {
       auto index_buffer_view = command.index_buffer;
       const DeviceBuffer* index_buffer = index_buffer_view.GetBuffer();
       const auto& index_buffer_gles = DeviceBufferGLES::Cast(*index_buffer);
@@ -511,12 +556,60 @@ static void EncodeViewport(const ProcTableGLES& gl,
               DeviceBufferGLES::BindingType::kElementArrayBuffer)) {
         return false;
       }
-      gl.DrawElements(mode,                             // mode
-                      command.element_count,            // count
-                      ToIndexType(command.index_type),  // type
-                      reinterpret_cast<const GLvoid*>(static_cast<GLsizei>(
-                          index_buffer_view.GetRange().offset))  // indices
-      );
+      index_offset = reinterpret_cast<const GLvoid*>(
+          static_cast<uintptr_t>(index_buffer_view.GetRange().offset));
+    }
+
+    // A non-instanced draw of the bound geometry. Used directly for ordinary
+    // draws and once per instance when emulating instancing.
+    const auto draw_geometry = [&]() {
+      if (!is_indexed) {
+        gl.DrawArrays(mode, command.base_vertex, command.element_count);
+      } else {
+        gl.DrawElements(mode, command.element_count,
+                        ToIndexType(command.index_type), index_offset);
+      }
+    };
+
+    if (command.instance_count == 0u) {
+      // A zero instance count draws nothing, matching the Metal and Vulkan
+      // backends.
+    } else if (emulate_instanced) {
+      // Repeat the draw once per instance, re-pointing the instance-rate
+      // vertex attributes at each instance in between. The vertex buffers
+      // were already bound above for instance 0.
+      for (size_t instance = 0; instance < command.instance_count; instance++) {
+        if (instance > 0u) {
+          for (size_t i = 0; i < command.vertex_buffers.length; i++) {
+            if (!BindVertexBuffer(
+                    gl, vertex_desc_gles,
+                    vertex_buffers[i + command.vertex_buffers.offset], i,
+                    instance)) {
+              return false;
+            }
+          }
+        }
+        draw_geometry();
+      }
+    } else if (hardware_instanced) {
+      // A single instanced call covers every instance.
+      if (!is_indexed) {
+        const auto& gl_draw_arrays_instanced =
+            gl.DrawArraysInstanced.IsAvailable() ? gl.DrawArraysInstanced
+                                                 : gl.DrawArraysInstancedEXT;
+        gl_draw_arrays_instanced(mode, command.base_vertex,
+                                 command.element_count, instance_count);
+      } else {
+        const auto& gl_draw_elements_instanced =
+            gl.DrawElementsInstanced.IsAvailable()
+                ? gl.DrawElementsInstanced
+                : gl.DrawElementsInstancedEXT;
+        gl_draw_elements_instanced(mode, command.element_count,
+                                   ToIndexType(command.index_type),
+                                   index_offset, instance_count);
+      }
+    } else {
+      draw_geometry();
     }
 
     //--------------------------------------------------------------------------

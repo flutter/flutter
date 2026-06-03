@@ -9,6 +9,7 @@
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/impeller/display_list/aiks_context.h"
+#include "flutter/impeller/golden_tests/metal_screenshotter.h"
 #include "flutter/impeller/playground/playground_impl.h"
 #include "flutter/impeller/renderer/surface.h"
 #include "flutter/impeller/typographer/typographer_context.h"
@@ -41,6 +42,12 @@ class DlSurfaceInstanceImpeller : public DlSurfaceInstance {
   void FlushSubmitCpuSync() override;
 
   // |DlSurfaceInstance|
+  std::unique_ptr<DlPixelData> SnapshotToPixelData() const override;
+
+  // |DlSurfaceInstance|
+  sk_sp<DlImage> SnapshotToImage() const override;
+
+  // |DlSurfaceInstance|
   bool SnapshotToFile(std::string& filename) const override;
 
   // |DlSurfaceInstance|
@@ -63,6 +70,7 @@ class DlSurfaceInstanceImpeller : public DlSurfaceInstance {
   void DoRenderDisplayList(const sk_sp<DisplayList>& display_list);
 
   static std::shared_ptr<impeller::TypographerContext> typographer_context_;
+  static impeller::testing::MetalScreenshotter snapshotter_;
 };
 
 }  // namespace testing
