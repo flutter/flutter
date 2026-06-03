@@ -404,12 +404,15 @@ class WebTextStyle implements ui.TextStyle {
   }
 
   String _buildCssFontString() {
-    final String cssFontStyle = fontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
-    final String cssFontWeight = fontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
+    final String cssFontStyle = fontStyle?.toCssString() ?? '';
+    final String cssFontWeight = fontWeight?.toCssString() ?? '';
     final int cssFontSize = (fontSize ?? StyleManager.defaultFontSize).floor();
-    final String cssFontFamily = canonicalizeFontFamily(originalFontFamily)!;
-
-    return '$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
+    final String cssFontFamily = originalFontFamily ?? StyleManager.defaultFontFamily;
+    var fontString = '$cssFontStyle $cssFontWeight ${cssFontSize}px "$cssFontFamily"';
+    if (fontFamilyFallback != null && fontFamilyFallback!.isNotEmpty) {
+      fontString += ', ${fontFamilyFallback!.join(', ')}';
+    }
+    return fontString;
   }
 
   String _buildLetterSpacingString() {
@@ -812,12 +815,15 @@ class WebStrutStyle implements ui.StrutStyle {
       return;
     }
 
-    final String cssFontStyle = fontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
-    final String cssFontWeight = fontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
-    final int cssFontSize = (fontSize ?? StyleManager.defaultFontSize).floor();
-    final String cssFontFamily = canonicalizeFontFamily(fontFamily)!;
+    WebTextStyle(
+      fontFamily: fontFamily,
+      fontSize: fontSize,
+      fontStyle: fontStyle,
+      fontWeight: fontWeight,
+    ).applyToContext(
+      layoutContext,
+    ); //'$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
 
-    layoutContext.font = '$cssFontStyle $cssFontWeight ${cssFontSize}px $cssFontFamily';
     final DomTextMetrics strutTextMetrics = layoutContext.measureText('');
 
     strutLeading = leading == null ? 0 : leading! * fontSize!;

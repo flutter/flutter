@@ -1268,4 +1268,44 @@ Future<void> testMain() async {
       ),
     );
   });
+
+  test('fallback fonts', () async {
+    final recorder = PictureRecorder();
+    const region = Rect.fromLTWH(0, 0, 800, 200);
+    final canvas = Canvas(recorder, region);
+
+    const colorText =
+        'Liberation Sans | Noto Color Emoji: \u2600\uFE0F \u2764\uFE0F \u{1F680}\uFE0F | Γειά σου Κόσμε';
+    const monoText =
+        'Liberation Serif | Noto Emoji: \u2600\uFE0E \u2764\uFE0E \u{1F680}\uFE0E | Γειά σου Κόσμε';
+
+    final colorBuilder = ParagraphBuilder(ParagraphStyle(fontSize: 30));
+    colorBuilder.pushStyle(
+      TextStyle(
+        fontFamily: 'Non-existing Font',
+        fontFamilyFallback: const ['Liberation Sans', 'Noto Color Emoji'],
+        color: const Color(0xFF000000),
+      ),
+    );
+    colorBuilder.addText(colorText);
+    final Paragraph colorParagraph = colorBuilder.build();
+    colorParagraph.layout(const ParagraphConstraints(width: 800));
+    canvas.drawParagraph(colorParagraph, const Offset(20, 50));
+
+    final monoBuilder = ParagraphBuilder(ParagraphStyle(fontSize: 30));
+    monoBuilder.pushStyle(
+      TextStyle(
+        fontFamily: 'Non-existing Font',
+        fontFamilyFallback: const ['Liberation Serif', 'Noto Emoji'],
+        color: const Color(0xFF000000),
+      ),
+    );
+    monoBuilder.addText(monoText);
+    final Paragraph monoParagraph = monoBuilder.build();
+    monoParagraph.layout(const ParagraphConstraints(width: 800));
+    canvas.drawParagraph(monoParagraph, const Offset(20, 100));
+
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph.fallback_fonts.png', region: region);
+  });
 }
