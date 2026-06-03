@@ -165,6 +165,7 @@ test_fixtures("file_fixtures") {
     "sample.frag",
     "sample.vert",
     "check_gles_definition.frag",
+    "check_gles_unflipped_definition.frag",
     "sample_with_binding.vert",
     "sample_with_positioned_uniforms.frag",
     "sample_with_uniforms.frag",
