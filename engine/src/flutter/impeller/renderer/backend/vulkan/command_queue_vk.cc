@@ -60,16 +60,9 @@ fml::Status CommandQueueVK::Submit(
     return fml::Status(fml::StatusCode::kCancelled, "Failed to create fence.");
   }
 
-  vk::SubmitInfo submit_info;
-  submit_info.setCommandBuffers(vk_buffers);
-  auto status = context->GetGraphicsQueue()->Submit(submit_info, *fence);
-  if (status != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Failed to submit queue: " << vk::to_string(status);
-    return fml::Status(fml::StatusCode::kCancelled, "Failed to submit queue: ");
-  }
-
   // Submit will proceed, call callback with true when it is done and do not
   // call when `reset` is collected.
+  vk::Fence raw_fence = fence.get();
   auto added_fence = context->GetFenceWaiter()->AddFence(
       std::move(fence), [completion_callback, tracked_objects = std::move(
                                                   tracked_objects)]() mutable {
@@ -83,6 +76,16 @@ fml::Status CommandQueueVK::Submit(
   if (!added_fence) {
     return fml::Status(fml::StatusCode::kCancelled, "Failed to add fence.");
   }
+
+  vk::SubmitInfo submit_info;
+  submit_info.setCommandBuffers(vk_buffers);
+  auto status = context->GetGraphicsQueue()->Submit(submit_info, raw_fence);
+  if (status != vk::Result::eSuccess) {
+    context->GetFenceWaiter()->RemoveFence(raw_fence);
+    VALIDATION_LOG << "Failed to submit queue: " << vk::to_string(status);
+    return fml::Status(fml::StatusCode::kCancelled, "Failed to submit queue: ");
+  }
+
   reset.Release();
   return fml::Status();
 }

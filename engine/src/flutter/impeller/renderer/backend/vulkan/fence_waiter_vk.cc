@@ -78,6 +78,14 @@ bool FenceWaiterVK::AddFence(vk::UniqueFence fence,
   return true;
 }
 
+void FenceWaiterVK::RemoveFence(vk::Fence fence) {
+  std::scoped_lock lock(wait_set_mutex_);
+  auto match = [fence](const std::shared_ptr<WaitSetEntry>& entry) {
+    return entry->GetFence() == fence;
+  };
+  std::erase_if(wait_set_, match);
+}
+
 static std::vector<vk::Fence> GetFencesForWaitSet(const WaitSet& set) {
   std::vector<vk::Fence> fences;
   for (const auto& entry : set) {
