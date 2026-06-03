@@ -40,10 +40,7 @@ class WrappedTextureSourceVK : public impeller::TextureSourceVK {
     return image_view_.get();
   }
 
-  impeller::vk::ImageView GetRenderTargetView(
-      uint32_t mip_level,
-      uint32_t array_layer) const override {
-    // Swapchain images are always a single 2D mip and layer.
+  impeller::vk::ImageView GetRenderTargetView() const override {
     return image_view_.get();
   }
 

@@ -308,10 +308,7 @@ vk::ImageView AHBTextureSourceVK::GetImageView() const {
 }
 
 // |TextureSourceVK|
-vk::ImageView AHBTextureSourceVK::GetRenderTargetView(
-    uint32_t mip_level,
-    uint32_t array_layer) const {
-  // Hardware buffer textures are always a single 2D mip and layer.
+vk::ImageView AHBTextureSourceVK::GetRenderTargetView() const {
   return image_view_.get();
 }
 

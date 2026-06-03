@@ -5,9 +5,6 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEXTURE_SOURCE_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEXTURE_SOURCE_VK_H_
 
-#include <cstdint>
-#include <vector>
-
 #include "flutter/fml/status.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
@@ -68,20 +65,17 @@ class TextureSourceVK {
   virtual vk::ImageView GetImageView() const = 0;
 
   //----------------------------------------------------------------------------
-  /// @brief      Retrieve the image view used to attach a specific
-  ///             subresource of this texture as a render target.
+  /// @brief      Retrieve the image view used for render target attachments
+  ///             with this texture source.
   ///
-  ///             The returned view covers a single mip level and a single
-  ///             array layer (or cube map face), since attachment views cannot
-  ///             span multiple levels or layers.
-  ///
-  /// @param[in]  mip_level    The mip level to attach.
-  /// @param[in]  array_layer  The array layer or cube map face to attach.
+  ///             ImageViews used as render target attachments cannot have any
+  ///             mip levels. In cases where we want to generate mipmaps with
+  ///             the result of this texture, we need to create multiple image
+  ///             views.
   ///
   /// @return     The render target view.
   ///
-  virtual vk::ImageView GetRenderTargetView(uint32_t mip_level,
-                                            uint32_t array_layer) const = 0;
+  virtual vk::ImageView GetRenderTargetView() const = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Encodes the layout transition `barrier` to
@@ -138,27 +132,21 @@ class TextureSourceVK {
 
   // These methods should only be used by render_pass_vk.h
 
-  /// Store the framebuffer and render pass last used to render into the
-  /// `(sample_count, mip_level, slice)` subresource of this texture.
+  /// Store the last framebuffer and render pass object used with this texture.
   ///
-  /// This is only called when this texture is being used as the resolve (or
-  /// non-MSAA color) target of a render pass. By construction, the cached
-  /// objects are compatible with any future render pass that targets the
-  /// same subresource.
+  /// This method is only called if this texture is used as the resolve texture
+  /// of a render pass. By construction, this framebuffer should be compatible
+  /// with any future render passes.
   void SetCachedFrameData(const FramebufferAndRenderPass& data,
-                          SampleCount sample_count,
-                          uint32_t mip_level = 0u,
-                          uint32_t slice = 0u);
+                          SampleCount sample_count);
 
-  /// Retrieve the cached framebuffer and render pass for the given
-  /// `(sample_count, mip_level, slice)` subresource.
+  /// Retrieve the last framebuffer and render pass object used with this
+  /// texture for a given sample count.
   ///
-  /// An empty `FramebufferAndRenderPass` is returned when no cached entry
-  /// exists for that key. Entries are populated lazily on first use and
-  /// live for the lifetime of the texture.
-  FramebufferAndRenderPass GetCachedFrameData(SampleCount sample_count,
-                                              uint32_t mip_level = 0u,
-                                              uint32_t slice = 0u) const;
+  /// An empty FramebufferAndRenderPass is returned if there is no cached data
+  /// for a particular sample count.
+  const FramebufferAndRenderPass& GetCachedFrameData(
+      SampleCount sample_count) const;
 
  protected:
   const TextureDescriptor desc_;
@@ -166,17 +154,7 @@ class TextureSourceVK {
   explicit TextureSourceVK(TextureDescriptor desc);
 
  private:
-  struct CachedFrameDataEntry {
-    SampleCount sample_count;
-    uint32_t mip_level;
-    uint32_t slice;
-    FramebufferAndRenderPass data;
-  };
-  // Linear-scanned because N is typically 1 and bounded by
-  // `sample_counts * mip_count * layer_count` for the rare textures that
-  // are rendered to across many subresources (e.g. a fully populated cube
-  // mip chain).
-  std::vector<CachedFrameDataEntry> frame_data_;
+  std::array<FramebufferAndRenderPass, 2> frame_data_;
   mutable vk::ImageLayout layout_ = vk::ImageLayout::eUndefined;
 };
 

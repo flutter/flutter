@@ -398,37 +398,18 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
                      << vk::to_string(result);
       return;
     }
-    // Create one 2D attachment view per (mip level, array layer) so a
-    // specific subresource can be rendered into. Render targets are usually a
-    // single 2D mip (one view); cube and mipmapped render targets get the
-    // full set. Non-render-target textures only need the base view.
-    view_info.viewType = vk::ImageViewType::e2D;
+    // Create a specialized view for render target attachments.
     view_info.subresourceRange.levelCount = 1u;
-    view_info.subresourceRange.layerCount = 1u;
-    const bool is_render_target = !!(desc.usage & TextureUsage::kRenderTarget);
-    const uint32_t rt_mip_count = is_render_target ? image_info.mipLevels : 1u;
-    const uint32_t rt_layer_count =
-        is_render_target ? ToArrayLayerCount(desc.type) : 1u;
-    std::vector<vk::UniqueImageView> rt_image_views;
-    rt_image_views.reserve(rt_mip_count * rt_layer_count);
-    for (uint32_t mip = 0; mip < rt_mip_count; mip++) {
-      for (uint32_t layer = 0; layer < rt_layer_count; layer++) {
-        view_info.subresourceRange.baseMipLevel = mip;
-        view_info.subresourceRange.baseArrayLayer = layer;
-        auto [rt_result, rt_image_view] =
-            device.createImageViewUnique(view_info);
-        if (rt_result != vk::Result::eSuccess) {
-          VALIDATION_LOG << "Unable to create a render target image view: "
-                         << vk::to_string(rt_result);
-          return;
-        }
-        rt_image_views.push_back(std::move(rt_image_view));
-      }
+    auto [rt_result, rt_image_view] = device.createImageViewUnique(view_info);
+    if (rt_result != vk::Result::eSuccess) {
+      VALIDATION_LOG << "Unable to create an image view for allocation: "
+                     << vk::to_string(rt_result);
+      return;
     }
 
     resource_.Swap(ImageResource(
         ImageVMA{allocator, allocation, image}, std::move(image_view),
-        std::move(rt_image_views), context.GetResourceAllocator(),
+        std::move(rt_image_view), context.GetResourceAllocator(),
         context.GetDeviceHolder()));
     is_valid_ = true;
   }
@@ -443,16 +424,8 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     return resource_->image_view.get();
   }
 
-  vk::ImageView GetRenderTargetView(uint32_t mip_level,
-                                    uint32_t array_layer) const override {
-    const auto& views = resource_->rt_image_views;
-    if (views.empty()) {
-      return VK_NULL_HANDLE;
-    }
-    const uint32_t layer_count = ToArrayLayerCount(GetTextureDescriptor().type);
-    const size_t index =
-        static_cast<size_t>(mip_level) * layer_count + array_layer;
-    return index < views.size() ? views[index].get() : views[0].get();
+  vk::ImageView GetRenderTargetView() const override {
+    return resource_->rt_image_view.get();
   }
 
   bool IsSwapchainImage() const override { return false; }
@@ -463,21 +436,20 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     std::shared_ptr<Allocator> allocator;
     UniqueImageVMA image;
     vk::UniqueImageView image_view;
-    // One attachment view per (mip level, array layer), row-major by mip.
-    std::vector<vk::UniqueImageView> rt_image_views;
+    vk::UniqueImageView rt_image_view;
 
     ImageResource() = default;
 
     ImageResource(ImageVMA p_image,
                   vk::UniqueImageView p_image_view,
-                  std::vector<vk::UniqueImageView> p_rt_image_views,
+                  vk::UniqueImageView p_rt_image_view,
                   std::shared_ptr<Allocator> allocator,
                   std::shared_ptr<DeviceHolderVK> device_holder)
         : device_holder(std::move(device_holder)),
           allocator(std::move(allocator)),
           image(p_image),
           image_view(std::move(p_image_view)),
-          rt_image_views(std::move(p_rt_image_views)) {}
+          rt_image_view(std::move(p_rt_image_view)) {}
 
     ImageResource(ImageResource&& o) = default;
 
