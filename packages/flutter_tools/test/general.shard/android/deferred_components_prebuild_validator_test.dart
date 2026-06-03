@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io;
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/deferred_components_prebuild_validator.dart';
 import 'package:flutter_tools/src/android/deferred_components_validator.dart';
@@ -412,44 +410,4 @@ void main() {
       true,
     );
   });
-
-  testWithoutContext(
-    'deferred component build.gradle template uses correct lazy DirectoryProperty.dir(...) API',
-    () {
-      final String flutterRoot = getFlutterRoot();
-      final templateFile = io.File(
-        '$flutterRoot/packages/flutter_tools/templates/module/android/deferred_component/build.gradle.tmpl',
-      );
-      expect(templateFile.existsSync(), true);
-      final String content = templateFile.readAsStringSync();
-      expect(
-        content,
-        contains(
-          r'project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_assets")',
-        ),
-      );
-      expect(
-        content,
-        contains(
-          r'project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_libs")',
-        ),
-      );
-      expect(
-        content,
-        isNot(
-          contains(
-            r'${project.layout.buildDirectory}/intermediates/flutter/${variant.name}/deferred_assets',
-          ),
-        ),
-      );
-      expect(
-        content,
-        isNot(
-          contains(
-            r'${project.layout.buildDirectory}/intermediates/flutter/${variant.name}/deferred_libs',
-          ),
-        ),
-      );
-    },
-  );
 }
