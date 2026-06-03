@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
+import 'file_system.dart';
+import 'logger.dart';
 
 /// Represents a configured deferred component as defined in
 /// the app's pubspec.yaml.

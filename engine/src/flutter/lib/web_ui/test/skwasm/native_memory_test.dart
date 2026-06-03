@@ -52,13 +52,5 @@ void testMain() {
       expect(clone.isDisposed, isTrue);
       expect(clone.box.refCount, 0);
     });
-
-    test('SkwasmPath uses UniqueRef', () {
-      final path = SkwasmPath();
-      expect(path.debugDisposed, isFalse);
-
-      path.dispose();
-      expect(path.debugDisposed, isTrue);
-    });
   });
 }

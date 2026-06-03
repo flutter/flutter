@@ -360,7 +360,7 @@ void main() {
           const ValidationMessage.hint(
             'Flutter version 1.0.0 on channel [user-branch] at /sdk/flutter\n'
             'Currently on an unknown channel. Run `flutter channel` to switch to an official channel.\n'
-            "If that doesn't fix the issue, reinstall Flutter by following instructions at https://flutter.dev/setup.",
+            "If that doesn't fix the issue, try deleting the 'bin/cache/flutter.version.json' file in your Flutter SDK directory and then reinstall Flutter by following instructions at https://flutter.dev/setup.",
           ),
           const ValidationMessage(
             'If those were intentional, you can disregard the above warnings; however it is '
@@ -393,7 +393,7 @@ void main() {
           const ValidationMessage.hint(
             'Flutter version 0.0.0-unknown on channel beta at /sdk/flutter\n'
             'Cannot resolve current version, possibly due to local changes.\n'
-            'Reinstall Flutter by following instructions at https://flutter.dev/setup.',
+            "If that doesn't fix the issue, try deleting the 'bin/cache/flutter.version.json' file in your Flutter SDK directory and then reinstall Flutter by following instructions at https://flutter.dev/setup.",
           ),
           const ValidationMessage(
             'If those were intentional, you can disregard the above warnings; however it is '
@@ -808,6 +808,9 @@ class FakeFlutterFeatures extends FeatureFlags {
 
   @override
   bool get isRiscv64SupportEnabled => _enabled;
+
+  @override
+  bool get isRecordUseEnabled => _enabled;
 
   @override
   final List<Feature> allFeatures;

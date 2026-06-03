@@ -116,7 +116,8 @@
 /dev/devicelab/bin/tasks/web_size__compile_test.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/wide_gamut_ios.dart @gaaclarke @flutter/engine
 /dev/devicelab/bin/tasks/wide_gamut_macos.dart @gaaclarke @flutter/engine
-
+/dev/devicelab/bin/tasks/android_engine_flags_debug_test.dart @camsim99 @flutter/android
+/dev/devicelab/bin/tasks/android_engine_flags_release_test.dart @camsim99 @flutter/android
 
 ## Windows Android DeviceLab tests
 /dev/devicelab/bin/tasks/basic_material_app_win__compile.dart @bkonyi @flutter/tool
@@ -243,8 +244,8 @@
 ## Host only DeviceLab tests
 /dev/devicelab/bin/tasks/android_display_cutout.dart @reidbaker @flutter/android
 /dev/devicelab/bin/tasks/android_release_builds_exclude_dev_dependencies_test.dart @camsim99 @flutter/android
-/dev/devicelab/bin/tasks/animated_complex_opacity_perf_macos__e2e_summary.dart @cbracken @flutter/desktop
-/dev/devicelab/bin/tasks/basic_material_app_macos__compile.dart @cbracken @flutter/desktop
+/dev/devicelab/bin/tasks/animated_complex_opacity_perf_macos__e2e_summary.dart @loic-sharma @flutter/desktop
+/dev/devicelab/bin/tasks/basic_material_app_macos__compile.dart @loic-sharma @flutter/desktop
 /dev/devicelab/bin/tasks/build_aar_module_test.dart @bkonyi @flutter/tool
 /dev/devicelab/bin/tasks/build_android_host_app_with_module_aar.dart @mboetger @flutter/android
 /dev/devicelab/bin/tasks/build_android_host_app_with_module_source.dart @mboetger @flutter/android
@@ -275,6 +276,9 @@
 /dev/devicelab/bin/tasks/gradle_plugin_bundle_test.dart @gmackall @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_plugin_fat_apk_test.dart @gmackall @flutter/plugin
 /dev/devicelab/bin/tasks/gradle_plugin_light_apk_test.dart @gmackall @flutter/plugin
+/dev/devicelab/bin/tasks/hello_world_impeller_ios_sdfs.dart @gaaclarke @flutter/engine
+/dev/devicelab/bin/tasks/hello_world_impeller_linux.dart @gaaclarke @flutter/desktop
+/dev/devicelab/bin/tasks/hello_world_impeller_macos_sdfs.dart @b-luk @flutter/desktop
 /dev/devicelab/bin/tasks/hello_world_macos__compile.dart @cbracken @flutter/desktop
 /dev/devicelab/bin/tasks/hello_world_win_desktop__compile.dart @yaakovschectman @flutter/desktop
 /dev/devicelab/bin/tasks/hot_mode_dev_cycle_ios_simulator.dart @louisehsu @flutter/tool
@@ -312,6 +316,7 @@
 /dev/devicelab/bin/tasks/run_release_test_macos.dart @cbracken @flutter/tool
 /dev/devicelab/bin/tasks/run_release_test_windows.dart @loic-sharma @flutter/tool
 /dev/devicelab/bin/tasks/technical_debt__cost.dart @Piinks @flutter/framework
+/dev/devicelab/bin/tasks/texture_impeller_linux.dart @gaaclarke @flutter/desktop
 /dev/devicelab/bin/tasks/web_benchmarks_canvaskit.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_ddc.dart @yjbanov @flutter/web
 /dev/devicelab/bin/tasks/web_benchmarks_ddc_hot_reload.dart @yjbanov @flutter/web

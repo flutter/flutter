@@ -40,7 +40,10 @@ class WrappedTextureSourceVK : public impeller::TextureSourceVK {
     return image_view_.get();
   }
 
-  impeller::vk::ImageView GetRenderTargetView() const override {
+  impeller::vk::ImageView GetRenderTargetView(
+      uint32_t mip_level,
+      uint32_t array_layer) const override {
+    // Swapchain images are always a single 2D mip and layer.
     return image_view_.get();
   }
 
@@ -190,10 +193,12 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkanImpeller::AcquireFrame(
       return nullptr;
     }
 
-    if (transients_ == nullptr) {
+    impeller::ISize frame_size{size.width, size.height};
+    if (transients_ == nullptr || transients_size_ != frame_size) {
       transients_ = std::make_shared<impeller::SwapchainTransientsVK>(
           impeller_context_, desc,
           /*enable_msaa=*/true);
+      transients_size_ = frame_size;
     }
 
     auto wrapped_onscreen = std::make_shared<WrappedTextureSourceVK>(

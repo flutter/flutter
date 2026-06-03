@@ -21,16 +21,17 @@ jobs:
       - name: Configure git
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           git config user.name "flutteractionsbot"
           git config user.email "<flutter-actions-bot@google.com>"
           git remote add upstream https://github.com/flutter/flutter.git
-          git fetch upstream ${{ github.ref_name }}
+          git fetch upstream $REF_NAME
 
           BRANCH_NAME="update-engine-$(date +%s)"
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
-          git checkout -b "$BRANCH_NAME" upstream/${{ github.ref_name }}
+          git checkout -b "$BRANCH_NAME" upstream/$REF_NAME
 
       - name: Generate and Capture Hash
         id: generate-hash
@@ -52,16 +53,15 @@ jobs:
       - name: Check for Changes
         id: git-check
         run: |
-          # -N (intent-to-add) treats untracked files as existing but empty
           # -f adds even if it's in the .gitignore (which it usually is)
-          git add -N -f bin/internal/engine.version
+          git add -f bin/internal/engine.version
 
           if git diff --cached --exit-code bin/internal/engine.version; then
             echo "changed=false" >> $GITHUB_OUTPUT
 
             # Nice big No-Op Summary
             echo "## ✅ Engine version already up to date" >> $GITHUB_STEP_SUMMARY
-            echo "The engine is already at hash \`${{ env.ENGINE_HASH }}\`. No PR was created." >> $GITHUB_STEP_SUMMARY
+            echo "The engine is already at hash \`$ENGINE_HASH\`. No PR was created." >> $GITHUB_STEP_SUMMARY
           else
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
@@ -70,20 +70,21 @@ jobs:
         if: steps.git-check.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          git commit -m "Update engine.version to ${{ env.ENGINE_HASH }}"
+          git commit -m "Update engine.version to $ENGINE_HASH"
           git push origin "$BRANCH_NAME"
 
           # Capture the PR URL
           PR_URL=$(gh pr create \
-            --title "[${{ github.ref_name }}] Sync engine.version to ${{ env.ENGINE_HASH }}" \
-            --body "Updates the engine.version file from \`${{ env.OLD_HASH }}\` to \`${{ env.ENGINE_HASH }}\`." \
+            --title "[$REF_NAME] Sync engine.version to $ENGINE_HASH" \
+            --body "Updates the engine.version file from \`$OLD_HASH\` to \`$ENGINE_HASH\`." \
             --repo flutter/flutter \
-            --base ${{ github.ref_name }} \
+            --base $REF_NAME \
             --head flutteractionsbot:$BRANCH_NAME)
 
           # Nice big PR Success Summary
           echo "## 🚀 PR Created Successfully" >> $GITHUB_STEP_SUMMARY
-          echo "Updated engine version from \`${{ env.OLD_HASH }}\` to \`${{ env.ENGINE_HASH }}\`." >> $GITHUB_STEP_SUMMARY
+          echo "Updated engine version from \`$OLD_HASH\` to \`$ENGINE_HASH\`." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "🔗 **View Pull Request:** $PR_URL" >> $GITHUB_STEP_SUMMARY

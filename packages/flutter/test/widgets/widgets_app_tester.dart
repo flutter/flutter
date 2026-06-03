@@ -75,8 +75,10 @@ class TestWidgetsApp extends StatelessWidget {
     this.home,
     this.initialRoute,
     this.onGenerateRoute,
+    this.navigatorObservers = const <NavigatorObserver>[],
     this.routes = const <String, WidgetBuilder>{},
     this.color = const Color(0xFFFFFFFF),
+    this.textStyle,
     this.pageRouteBuilder = _defaultPageRouteBuilder,
     this.builder,
     this.shortcuts,
@@ -136,6 +138,15 @@ class TestWidgetsApp extends StatelessWidget {
   ///  * [WidgetsApp.onGenerateRoute], the equivalent property in [WidgetsApp].
   final RouteFactory? onGenerateRoute;
 
+  /// A list of [NavigatorObserver] for the app's [Navigator].
+  ///
+  /// Defaults to an empty list.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.navigatorObservers], the equivalent property in [WidgetsApp].
+  final List<NavigatorObserver> navigatorObservers;
+
   /// The application's top-level routing table.
   ///
   /// Maps route names to widget builders. When navigating to a named route,
@@ -164,6 +175,12 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   ///  * [WidgetsApp.color], the equivalent property in [WidgetsApp].
   final Color color;
+
+  /// The default text style for [Text] widgets in the app.
+  ///
+  /// Passed directly to [WidgetsApp.textStyle], which wraps the widget tree
+  /// in a [DefaultTextStyle].
+  final TextStyle? textStyle;
 
   /// A function that creates page routes for named navigation.
   ///
@@ -254,7 +271,9 @@ class TestWidgetsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return WidgetsApp(
       color: color,
+      textStyle: textStyle,
       navigatorKey: navigatorKey,
+      navigatorObservers: navigatorObservers,
       home: home,
       initialRoute: initialRoute,
       onGenerateRoute: onGenerateRoute,

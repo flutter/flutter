@@ -27,6 +27,7 @@ enum class PlaygroundBackend {
   kMetal,
   kMetalSDF,
   kOpenGLES,
+  kOpenGLESSDF,
   kVulkan,
 };
 
@@ -54,6 +55,8 @@ class Playground {
   Point GetCursorPosition() const;
 
   ISize GetWindowSize() const;
+
+  IRect GetWindowBounds() const;
 
   Point GetContentScale() const;
 

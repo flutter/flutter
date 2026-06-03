@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dtd/dtd.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
@@ -59,9 +60,32 @@ Future<Stream<String>> startWidgetPreview({
     if (legacyPreviewDetection) '--legacy-preview-detection',
   ], workingDirectory: tempDir.path);
 
+  addTearDown(() async {
+    if (platform.isWindows) {
+      try {
+        processManager.runSync(<String>['taskkill', '/F', '/T', '/PID', '${process.pid}']);
+      } on Object catch (_) {
+        process.kill();
+      }
+      await process.exitCode;
+    } else {
+      process.kill();
+      await process.exitCode;
+    }
+  });
+
   final controller = StreamController<String>.broadcast();
   process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
-    controller.add(msg);
+    // ignore: avoid_print
+    print('[stdout] $msg');
+    if (!controller.isClosed) {
+      controller.add(msg);
+    }
+  });
+
+  process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String msg) {
+    // ignore: avoid_print
+    print('[stderr] $msg');
   });
 
   unawaited(
@@ -126,4 +150,13 @@ Future<Stream<String>> runWidgetPreview({
 
 void runFlutterClean(Directory tempDir, [ProcessManager processManager = _processManager]) {
   processManager.runSync(<String>[flutterBin, 'clean'], workingDirectory: tempDir.path);
+}
+
+Future<DTDResponse> getPreviews(DartToolingDaemon dtdConnection) async {
+  if (platform.isWindows) {
+    // Give the slow Windows filesystem and analysis server plenty of time
+    // to finish subsequent analysis runs and rebuild the semantic model.
+    await Future<void>.delayed(const Duration(seconds: 2));
+  }
+  return dtdConnection.call('Lsp', 'dart/workspace/getFlutterWidgetPreviews');
 }

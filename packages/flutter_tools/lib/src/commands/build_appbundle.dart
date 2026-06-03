@@ -109,6 +109,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       commandHasTerminal: hasTerminal,
       buildAppBundleTargetPlatform: stringsArg('target-platform').join(','),
       buildAppBundleBuildMode: buildMode,
+      buildBundleEnableHcpp: FlutterProject.current().android.computeHcppEnabled(),
     );
   }
 
