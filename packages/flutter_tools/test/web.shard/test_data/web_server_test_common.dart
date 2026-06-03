@@ -6,13 +6,15 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:async/async.dart';
+import 'package:flutter_tools/src/base/platform.dart' show LocalPlatform;
+import 'package:flutter_tools/src/drive/web_driver_service.dart'
+    show Browser, getDesiredCapabilities;
+import 'package:flutter_tools/src/web/chrome.dart' show kChromeEnvironment;
 import 'package:flutter_tools/src/web/web_device.dart' show WebServerDevice;
-
-import 'package:webdriver/async_io.dart';
+import 'package:webdriver/async_io.dart' hide Browser;
 
 import '../../integration.shard/test_driver.dart';
 
-const debugUrlTimeout = Duration(seconds: 15);
 const reloadRestartTimeout = Duration(seconds: 5);
 
 class WebServerDeviceTestRunner {
@@ -44,7 +46,7 @@ class WebServerDeviceTestRunner {
       // Wait for web server startup message.
       final String outputLine = await webServerOutputLine.timeout(
         debugUrlTimeout,
-        onTimeout: () => throw Exception('Web server URL not found after $debugUrlTimeout.'),
+        onTimeout: () => throw Exception('Web server URL not found after $appStartTimeout.'),
       );
 
       final debugUrlPattern = RegExp(r'lib/main.dart is being served at (http://[^\s]+)');
@@ -67,14 +69,13 @@ class WebServerDeviceTestRunner {
         attempts++;
         _webDriver = await createDriver(
           uri: Uri.parse('http://localhost:$chromeDriverPort/'),
-          desired: Capabilities.chrome
-            ..addAll(<String, dynamic>{
-              'goog:loggingPrefs': <String, String>{LogType.browser: 'INFO'},
-              Capabilities.chromeOptions: {
-                'args': ['--headless', '--disable-gpu'],
-              },
-            }),
+          desired: getDesiredCapabilities(
+            Browser.chrome,
+            true, // headless
+            chromeBinary: LocalPlatform().environment[kChromeEnvironment],
+          ),
         );
+
         break;
       } on io.SocketException {
         if (attempts >= 10) {
