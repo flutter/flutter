@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 /// A minimal wrapper around [EditableText] for use in widget tests.
@@ -170,3 +174,87 @@ class TestTextSelectionHandleControls extends TextSelectionControls
 /// A minimal instance of text selection controls to make it easier to work with
 /// text editing in tests.
 final TextSelectionControls testTextSelectionHandleControls = TestTextSelectionHandleControls();
+
+const double _kTestSelectionHandleSize = 22.0;
+
+/// Text selection controls with non-zero handles for tests that need to drag
+/// selection handles.
+class TestDraggableTextSelectionHandleControls extends TextSelectionControls {
+  @override
+  Widget buildHandle(
+    BuildContext context,
+    TextSelectionHandleType type,
+    double textLineHeight, [
+    VoidCallback? onTap,
+  ]) {
+    final Widget handle = SizedBox.square(
+      dimension: _kTestSelectionHandleSize,
+      child: CustomPaint(
+        painter: const _TestSelectionHandlePainter(),
+        child: GestureDetector(onTap: onTap, behavior: HitTestBehavior.translucent),
+      ),
+    );
+    return switch (type) {
+      TextSelectionHandleType.left => Transform.rotate(angle: math.pi / 2.0, child: handle),
+      TextSelectionHandleType.right => handle,
+      TextSelectionHandleType.collapsed => Transform.rotate(angle: math.pi / 4.0, child: handle),
+    };
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return switch (type) {
+      TextSelectionHandleType.collapsed => const Offset(_kTestSelectionHandleSize / 2, -4.0),
+      TextSelectionHandleType.left => const Offset(_kTestSelectionHandleSize, 0.0),
+      TextSelectionHandleType.right => Offset.zero,
+    };
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return const Size.square(_kTestSelectionHandleSize);
+  }
+
+  @override
+  bool canSelectAll(TextSelectionDelegate delegate) {
+    final TextEditingValue value = delegate.textEditingValue;
+    return delegate.selectAllEnabled &&
+        value.text.isNotEmpty &&
+        !(value.selection.start == 0 && value.selection.end == value.text.length);
+  }
+
+  @override
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    double textLineHeight,
+    Offset selectionMidpoint,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
+    Offset? lastSecondaryTapDownPosition,
+  ) {
+    return const SizedBox.shrink();
+  }
+}
+
+class _TestSelectionHandlePainter extends CustomPainter {
+  const _TestSelectionHandlePainter();
+
+  static final Paint _handlePaint = Paint()..color = const Color(0xFF000000);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawRect(Offset.zero & size, _handlePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+}
+
+/// A minimal instance of text selection controls with non-zero handles for
+/// tests that need to drag selection handles.
+final TextSelectionControls testDraggableTextSelectionHandleControls =
+    TestDraggableTextSelectionHandleControls();
