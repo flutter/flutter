@@ -163,7 +163,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/rendering/proxy_getters_and_setters_test.dart',
     'packages/flutter/test/rendering/view_chrome_style_test.dart',
     'packages/flutter/test/rendering/proxy_box_test.dart',
-    'packages/flutter/test/rendering/sliver_tree_test.dart',
     'packages/flutter/test/rendering/object_test.dart',
   };
   static final Set<String> knownSchedulerCrossImports = <String>{};
