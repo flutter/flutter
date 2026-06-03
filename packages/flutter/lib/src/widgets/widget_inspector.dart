@@ -3510,7 +3510,7 @@ double _inspectorHitArea(RenderObject object) {
 }
 
 ModalRoute<Object?>? _inspectorScopeRouteForHits(List<RenderObject> hits) {
-  for (final RenderObject hit in hits) {
+  for (final hit in hits) {
     final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
     if (route?.isCurrent ?? false) {
       return route;
@@ -3520,8 +3520,8 @@ ModalRoute<Object?>? _inspectorScopeRouteForHits(List<RenderObject> hits) {
   // When multiple modal routes are hit (e.g. scaffold behind a bottom sheet),
   // prefer the route for the most specific (smallest) target.
   RenderObject? smallestHit;
-  var smallestArea = double.infinity;
-  for (final RenderObject hit in hits) {
+  double smallestArea = double.infinity;
+  for (final hit in hits) {
     final ModalRoute<Object?>? route = _modalRouteForRenderObject(hit);
     if (route == null) {
       continue;
