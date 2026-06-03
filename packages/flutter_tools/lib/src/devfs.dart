@@ -717,13 +717,13 @@ class DevFS {
     void Function()? onFontManifestUpdated,
   }) async {
     if (bundleFirstUpload && !syncAllAssetsOnFirstUpload) {
-      for (final MapEntry<String, AssetBundleEntry> entry in bundle.entries.entries) {
+      for (final AssetBundleEntry entry in bundle.entries.values) {
         // Access the stateful `isModified` getter to initialize the modification cache.
         // The first call to `isModified` initializes the file stat/modification state
         // and returns true. Subsequent calls will return false unless the file is modified on disk.
         // If we do not query this during the first upload, the first hot restart will
         // see `isModified` as true for all assets and unnecessarily upload/recompile them.
-        final bool _ = entry.value.content.isModified;
+        final bool _ = entry.content.isModified;
       }
       return 0;
     }
