@@ -128,24 +128,27 @@ export class FlutterLoader {
       skippedBuilds.push({ candidate, reason });
     }
 
-    if (!build) {
-      // Default: emit a single concise warning so the console stays quiet for
-      // the typical "no compatible build" failure. Opt in to verbose per-build
-      // diagnostics by setting `verboseBuildSelection: true` in the Flutter
-      // config — useful when investigating why a specific build was rejected.
-      if (config.verboseBuildSelection) {
-        for (const skipped of skippedBuilds) {
-          console.warn(
-            `Flutter Web: build ${skipped.candidate.compileTarget}/${skipped.candidate.renderer} was rejected: ${skipped.reason}`
-          );
-        }
-      } else {
+    // Verbose mode: print why each candidate was skipped, regardless of
+    // whether a compatible build was eventually found. Useful for debugging
+    // "why does it keep falling back to X instead of Y" without staring at
+    // a blank screen. Off by default to keep the console quiet for typical
+    // production users.
+    if (config.verboseBuildSelection && skippedBuilds.length > 0) {
+      for (const skipped of skippedBuilds) {
         console.warn(
-          "Flutter Web: no compatible build found for this browser. " +
-          "Set `verboseBuildSelection: true` in your Flutter configuration " +
-          "to see why each candidate was rejected."
+          `Flutter Web: build ${skipped.candidate.compileTarget}/${skipped.candidate.renderer} was skipped: ${skipped.reason}`
         );
       }
+    }
+
+    if (!build) {
+      // Failure case: always warn (the page would otherwise be silently blank)
+      // and hint at the verbose flag if it isn't already on.
+      console.warn(
+        "Flutter Web: no compatible build found for this browser." +
+        (config.verboseBuildSelection ? "" :
+          " Set `verboseBuildSelection: true` in your Flutter configuration to see why each candidate was rejected.")
+      );
       throw new Error("FlutterLoader could not find a build compatible with configuration and environment.");
     }
 
