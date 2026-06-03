@@ -23,7 +23,7 @@ flutter/flutter repo has the following folder structure.
 * engine/ contains the source code for the flutter engine, including the core c++ code and the platform specific "embedders".
 
 *Rules*
-You should not modify ANY files - you are only to provide an analysis of the why the specific check is flaking.
+You should not modify ANY files - you are only to provide an analysis of why the specific check is flaking.
 You should only look at the issue body, as well as comments containing links to additional builds.
 You should not attempt to solve the flakes or pinpoint root causes inside of flutter/, just provide a high level summary of what is going on and bucket the failures into distinct types.
 
