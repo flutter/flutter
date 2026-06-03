@@ -925,6 +925,120 @@ class FlutterPluginUtilsTest {
         @Nested
         inner class DetectApplyingKotlinGradlePluginTests {
             @Test
+            fun `exits early when built-in Kotlin is enabled and no subproject applies KGP`(
+                @TempDir tempDir: Path
+            ) {
+                val rootDir = tempDir.toFile()
+                val gradlePropertiesFile = File(rootDir, "gradle.properties").apply {
+                    createNewFile()
+                    writeText("android.builtInKotlin=true\n")
+                }
+
+                val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
+                val appBuildGradleFile =
+                    File(appDir, "build.gradle").apply {
+                        createNewFile()
+                        writeText(
+                            """
+                            plugins {
+                                id("com.android.application")
+                            }
+                            """.trimIndent()
+                        )
+                    }
+
+                val rootProject = mockk<Project>()
+                val mockGradle = mockk<Gradle>()
+                val mockLogger = mockk<Logger>(relaxed = true)
+                val appProjectPluginManager = mockk<PluginManager>(relaxed = true)
+
+                every { rootProject.file("gradle.properties") } returns gradlePropertiesFile
+                every { rootProject.projectDir } returns rootDir
+
+                val appProject =
+                    createMockSubproject(
+                        tempDir = tempDir,
+                        buildFile = appBuildGradleFile,
+                        projectName = "app",
+                        mockLogger = mockLogger,
+                        rootProjectMock = rootProject,
+                        gradleMock = mockGradle,
+                        pluginManager = appProjectPluginManager
+                    )
+
+                every { rootProject.subprojects } returns setOf(appProject)
+
+                detectApplyingKotlinGradlePlugin(appProject)
+
+                verify(exactly = 0) { rootProject.subprojects(any<Action<Project>>()) }
+                verify(exactly = 0) { appProjectPluginManager.apply(any()) }
+            }
+
+            @Test
+            fun `does not exit early when built-in Kotlin is enabled but a subproject applies KGP`(
+                @TempDir tempDir: Path
+            ) {
+                val rootDir = tempDir.toFile()
+                val gradlePropertiesFile = File(rootDir, "gradle.properties").apply {
+                    createNewFile()
+                    writeText("android.builtInKotlin=true\n")
+                }
+
+                val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
+                val appBuildGradleFile =
+                    File(appDir, "build.gradle").apply {
+                        createNewFile()
+                        writeText(
+                            """
+                            plugins {
+                                id("com.android.application")
+                                id("kotlin-android")
+                            }
+                            """.trimIndent()
+                        )
+                    }
+
+                val rootProject = mockk<Project>()
+                val mockGradle = mockk<Gradle>()
+                val mockLogger = mockk<Logger>(relaxed = true)
+                val appProjectPluginManager = mockk<PluginManager>(relaxed = true)
+
+                every { rootProject.file("gradle.properties") } returns gradlePropertiesFile
+                every { rootProject.projectDir } returns rootDir
+
+                val appProject =
+                    createMockSubproject(
+                        tempDir = tempDir,
+                        buildFile = appBuildGradleFile,
+                        projectName = "app",
+                        mockLogger = mockLogger,
+                        rootProjectMock = rootProject,
+                        gradleMock = mockGradle,
+                        pluginManager = appProjectPluginManager
+                    )
+
+                every { rootProject.subprojects } returns setOf(appProject)
+
+                val subprojectsActionSlot = slot<Action<Project>>()
+                val projectsEvaluatedActionSlot = slot<Action<Gradle>>()
+
+                every { rootProject.subprojects(capture(subprojectsActionSlot)) } returns Unit
+                every { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) } returns Unit
+
+                detectApplyingKotlinGradlePlugin(appProject)
+
+                verify { rootProject.subprojects(capture(subprojectsActionSlot)) }
+                subprojectsActionSlot.captured.execute(appProject)
+
+                verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
+                projectsEvaluatedActionSlot.captured.execute(mockGradle)
+
+                verify {
+                    mockLogger.error(match { it.contains("applies the Kotlin Gradle Plugin, which will cause build failures") })
+                }
+            }
+
+            @Test
             fun `logs app warning when KGP is only applied in app`(
                 @TempDir tempDir: Path
             ) {

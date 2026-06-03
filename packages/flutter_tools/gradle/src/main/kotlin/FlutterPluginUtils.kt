@@ -533,6 +533,49 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("detectApplyingKotlinGradlePlugin")
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
+        val gradlePropertiesFile = project.rootProject.file("gradle.properties")
+        val properties = readPropertiesIfExist(gradlePropertiesFile)
+        val isBuiltInKotlinEnabled = properties.getProperty("android.builtInKotlin")?.toBoolean() ?: false
+
+        if (isBuiltInKotlinEnabled) {
+            val allSubprojectsDoNotApplyKgp = project.rootProject.subprojects.all { subproject ->
+                if (!subproject.buildFile.exists() || subproject.buildFile.absolutePath.contains(".android")) {
+                    true
+                } else {
+                    val scriptText: String =
+                        if (subproject.buildFile.absolutePath.contains("app/build.gradle")) {
+                            getBuildGradleFileFromProjectDir(subproject.projectDir, subproject.logger).readText()
+                        } else {
+                            subproject.buildFile.readText()
+                        }
+
+                    val (hasKgpPlugin, hasAppPlugin, hasLibPlugin) =
+                        if (subproject.buildFile.extension == "kts") {
+                            Triple(
+                                kgpRegexKotlin.containsMatchIn(scriptText),
+                                appPluginRegexKotlin.containsMatchIn(scriptText),
+                                libPluginRegexKotlin.containsMatchIn(scriptText)
+                            )
+                        } else {
+                            Triple(
+                                kgpRegexGroovy.containsMatchIn(scriptText),
+                                appPluginRegexGroovy.containsMatchIn(scriptText),
+                                libPluginRegexGroovy.containsMatchIn(scriptText)
+                            )
+                        }
+
+                    if (!hasAppPlugin && !hasLibPlugin) {
+                        true
+                    } else {
+                        !hasKgpPlugin
+                    }
+                }
+            }
+            if (allSubprojectsDoNotApplyKgp) {
+                return
+            }
+        }
+
         val pluginsWithKGPAppliedList = mutableListOf<String>()
 
         var shouldLogForApp = false
