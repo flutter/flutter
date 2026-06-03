@@ -119,6 +119,11 @@ class SkwasmRenderer extends Renderer {
       SkwasmParagraphBuilder(style as SkwasmParagraphStyle, fontCollection);
 
   @override
+  WebParagraphPainter createWebParagraphPainter(WebParagraph paragraph) {
+    throw UnimplementedError('WebParagraph is not supported on Skwasm');
+  }
+
+  @override
   ui.ParagraphStyle createParagraphStyle({
     ui.TextAlign? textAlign,
     ui.TextDirection? textDirection,
