@@ -166,7 +166,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       os: Mac-15.7
       device_type: none
@@ -183,7 +183,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       os: Mac-15.7
       device_type: none
@@ -201,7 +201,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       device_type: none
       mac_model: "Macmini8,1"
@@ -221,7 +221,7 @@ platform_properties:
         ]
       dependencies: >-
         [
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       os: Mac-15.7
       device_type: none
@@ -240,7 +240,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       os: Mac-15.7
       device_type: none
@@ -282,7 +282,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       os: Mac-15.7
       device_os: iOS-18|iOS-26
@@ -300,7 +300,7 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
-          {"dependency": "apple_signing", "version": "version:to_2026"}
+          {"dependency": "apple_signing", "version": "version:to_2027"}
         ]
       os: Mac-15.7
       cpu: x86
@@ -1222,7 +1222,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     presubmit: false
-    bringup: true
     properties:
       xvfb: "1"
       dependencies: >-
@@ -1239,7 +1238,6 @@ targets:
     recipe: devicelab/devicelab_drone
     timeout: 60
     presubmit: false
-    bringup: true
     properties:
       xvfb: "1"
       dependencies: >-
@@ -1770,6 +1768,33 @@ targets:
     timeout: 60
     properties:
       shard: android_engine_opengles_tests
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:36v9unmodified"},
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+
+  - name: Linux_android_emu_vulkan_stable android_hardware_smoke_vulkan_tests
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      shard: android_hardware_smoke_vulkan_tests
+      tags: >
+         ["framework", "hostonly", "shard", "linux"]
+      dependencies: >-
+        [
+          {"dependency": "goldctl", "version": "git_revision:031e93819017b95c3f2dfe463189c7b8d02f2f83"}
+        ]
+
+  - name: Linux_android_emu android_hardware_smoke_opengles_tests
+    recipe: flutter/flutter_drone
+    bringup: true
+    timeout: 60
+    properties:
+      shard: android_hardware_smoke_opengles_tests
       tags: >
          ["framework", "hostonly", "shard", "linux"]
       dependencies: >-

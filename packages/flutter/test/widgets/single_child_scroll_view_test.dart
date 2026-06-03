@@ -1086,4 +1086,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(textField.focusNode.hasFocus, isTrue);
   });
+
+  testWidgets('SingleChildScrollView does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(child: SingleChildScrollView(child: Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(SingleChildScrollView)), Size.zero);
+  });
 }
