@@ -35,7 +35,12 @@ Get information about the issue by using `gh issue view <issue-number> --repo fl
 
 For example to find information about the issue https://github.com/flutter/flutter/issues/174116 you can call `gh issue view 174116 --repo flutter/flutter --json=author,body,id,labels,number,state,title,url`
 
-The title will contain the name of the flaking check, and the body will contain urls which link to instances where the check failed or flaked, each on a new line, directly after "Flaky builds:". You should also inspect the comments and find each comment made by "login": "fluttergithubbot", and extract the urls from there as well (the format will be the same, with an example flake at the top, and the full list immediately after the "Flaky builds:" header).
+At this point there are two possible cases. If the issue
+1. Is filed by fluttergithubbot
+2. Has a title of the format "<ci.yaml target> is X% flaky"
+Then it is of the type we are looking to analyze. If it is not, you should short circuit here, either notifying the user that the issue is not filed by the github flake bot (if they directly asked for the skill to be invoked) or otherwise continue with your previous work (if they did not).
+
+If the previous conditions are met, the title will contain the name of the flaking check, and the body will contain urls which link to instances where the check failed or flaked, each on a new line, directly after "Flaky builds:". You should also inspect the comments and find each comment made by "login": "fluttergithubbot", and extract the urls from there as well (the format will be the same, with an example flake at the top, and the full list immediately after the "Flaky builds:" header).
 
 To find information about the specific failure take one of the urls listed in the issue body.
 That link takes the format `"https://ci.chromium.org/ui/p/flutter/builders/prod/<check_name>/<buildNumber>/overview",`
