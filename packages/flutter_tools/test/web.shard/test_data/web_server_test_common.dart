@@ -45,7 +45,7 @@ class WebServerDeviceTestRunner {
           );
       // Wait for web server startup message.
       final String outputLine = await webServerOutputLine.timeout(
-        debugUrlTimeout,
+        appStartTimeout,
         onTimeout: () => throw Exception('Web server URL not found after $appStartTimeout.'),
       );
 
