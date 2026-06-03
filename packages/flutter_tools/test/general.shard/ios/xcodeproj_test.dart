@@ -2398,7 +2398,6 @@ flutter:
       },
     );
   });
-
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {}
