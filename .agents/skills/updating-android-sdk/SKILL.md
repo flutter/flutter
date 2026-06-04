@@ -123,5 +123,3 @@ If any operation fails during package selection, authorization, or script execut
 ### 4. Missing Command-Line Tools
 * **Symptom**: The script outputs `SDK directory does not contain cmdline-tools`.
 * **Mitigation**: Ensure the path provided points to a valid Android SDK root containing `cmdline-tools/latest/bin/sdkmanager` (typically `~/Library/Android/sdk` on macOS).
-
-
