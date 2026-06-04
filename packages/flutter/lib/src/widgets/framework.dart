@@ -1175,9 +1175,7 @@ abstract class State<T extends StatefulWidget> with Diagnosticable {
             'to cancel the timer or stop listening to the animation in the dispose() '
             'callback. Another solution is to check the "mounted" property of this '
             'object before calling setState() to ensure the object is still in the '
-            'tree; this is especially important after an "await", since the widget '
-            'may have been removed from the tree while the asynchronous work was in '
-            'progress.',
+            'tree.',
           ),
           ErrorHint(
             'This error might indicate a memory leak if setState() is being called '
