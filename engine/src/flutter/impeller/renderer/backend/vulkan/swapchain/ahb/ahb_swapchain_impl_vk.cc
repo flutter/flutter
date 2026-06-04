@@ -102,7 +102,11 @@ AHBSwapchainImplVK::AHBSwapchainImplVK(
   is_valid_ = control && control->IsValid();
 }
 
-AHBSwapchainImplVK::~AHBSwapchainImplVK() = default;
+AHBSwapchainImplVK::~AHBSwapchainImplVK() {
+  // Ensure that the Vulkan device is idle before destroying objects that the
+  // device may have been using.
+  WaitIdle();
+}
 
 const ISize& AHBSwapchainImplVK::GetSize() const {
   return desc_.size;
@@ -115,6 +119,17 @@ bool AHBSwapchainImplVK::IsValid() const {
 const android::HardwareBufferDescriptor& AHBSwapchainImplVK::GetDescriptor()
     const {
   return desc_;
+}
+
+void AHBSwapchainImplVK::WaitIdle() const {
+  if (transients_) {
+    if (auto context = transients_->GetContext().lock()) {
+      auto result = ContextVK::Cast(*context).GetDevice().waitIdle();
+      if (result != vk::Result::eSuccess) {
+        FML_LOG(INFO) << "Device waitIdle failed: " << vk::to_string(result);
+      }
+    }
+  }
 }
 
 std::unique_ptr<Surface> AHBSwapchainImplVK::AcquireNextDrawable() {
