@@ -43,6 +43,53 @@ const kShaCommand = FakeCommand(
   ],
 );
 
+void testUsingAndroidDeviceContext(
+  String description,
+  dynamic Function() testMethod, {
+  Map<Type, Generator> overrides = const <Type, Generator>{},
+  bool initializeFlutterRoot = true,
+  String? testOn,
+  bool? skip,
+}) {
+  testUsingContext(
+    description,
+    testMethod,
+    overrides: <Type, Generator>{
+      FlutterProjectFactory: () =>
+          FakeFlutterProjectFactory(FakeFlutterProject(isSupportedVersion: true)),
+      ...overrides,
+    },
+    initializeFlutterRoot: initializeFlutterRoot,
+    testOn: testOn,
+    skip: skip,
+  );
+}
+
+class FakeFlutterProjectFactory extends Fake implements FlutterProjectFactory {
+  FakeFlutterProjectFactory(this.project);
+
+  final FlutterProject project;
+
+  @override
+  FlutterProject fromDirectory(Directory directory) => project;
+}
+
+class FakeFlutterProject extends Fake implements FlutterProject {
+  FakeFlutterProject({required this.isSupportedVersion});
+
+  final bool isSupportedVersion;
+
+  @override
+  late final android = FakeAndroidProject(isSupportedVersion: isSupportedVersion);
+}
+
+class FakeAndroidProject extends Fake implements AndroidProject {
+  FakeAndroidProject({required this.isSupportedVersion});
+
+  @override
+  final bool isSupportedVersion;
+}
+
 void main() {
   late FileSystem fileSystem;
   late FakeProcessManager processManager;
@@ -59,7 +106,7 @@ void main() {
     TargetPlatform.android_arm64,
     TargetPlatform.android_x64,
   ]) {
-    testUsingContext(
+    testUsingAndroidDeviceContext(
       'AndroidDevice.startApp allows release builds on $targetPlatform',
       () async {
         final String arch = getAndroidArchForName(
@@ -144,7 +191,7 @@ void main() {
     );
   }
 
-  testUsingContext(
+  testUsingAndroidDeviceContext(
     'AndroidDevice.startApp forwards only the --user flag to the Intent if specified in debugging options',
     () async {
       final device = AndroidDevice(
@@ -274,7 +321,7 @@ void main() {
   );
 
   final fakeAndroidBuilder = FakeAndroidBuilder();
-  testUsingContext(
+  testUsingAndroidDeviceContext(
     'AndroidDevice.startApp forwards Impeller and HCPP flags in release mode',
     () async {
       final device = AndroidDevice(
@@ -375,7 +422,7 @@ void main() {
       );
     });
 
-    testUsingContext(
+    testUsingAndroidDeviceContext(
       'startApp passes expected engine shell arguments from specified debugging options to build APK',
       () async {
         final device = AndroidDevice(
@@ -535,7 +582,7 @@ void main() {
       },
     );
 
-    testUsingContext(
+    testUsingAndroidDeviceContext(
       'startApp does not rebuild the APK if engine shell arguments have not changed between invocations',
       () async {
         final device = AndroidDevice(
@@ -656,7 +703,7 @@ void main() {
       },
     );
 
-    testUsingContext(
+    testUsingAndroidDeviceContext(
       'startApp rebuilds APK if engine shell arguments have changed between invocations',
       () async {
         final device = AndroidDevice(
@@ -780,7 +827,7 @@ void main() {
       },
     );
 
-    testUsingContext(
+    testUsingAndroidDeviceContext(
       'startApp rebuilds APK if engine shell arguments are specified and previous arguments are null',
       () async {
         final device = AndroidDevice(
@@ -894,6 +941,201 @@ void main() {
       overrides: <Type, Generator>{
         AndroidBuilder: () => fakeAndroidBuilder,
         ApplicationPackageFactory: () => fakeApplicationPackageFactory,
+      },
+    );
+
+    testUsingAndroidDeviceContext(
+      'startApp does not rebuild the APK if the project is a non-Gradle (unsupported version) project, '
+      'and passes engine shell arguments as Intent extras to adb am start',
+      () async {
+        final device = AndroidDevice(
+          '1234',
+          modelID: 'TestModel',
+          fileSystem: fileSystem,
+          processManager: processManager,
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          androidSdk: androidSdk,
+        );
+        final File apkFile = fileSystem.file('app-debug.apk')..createSync();
+        final apk = AndroidApk(
+          id: 'FlutterApp',
+          applicationPackage: apkFile,
+          launchActivity: 'FlutterActivity',
+          versionCode: 1,
+        );
+
+        // Set up the project directory so FlutterProject.current() doesn't throw.
+        fileSystem.file('pubspec.yaml').createSync();
+
+        // These commands are required to install and start the app
+        processManager.addCommand(kAdbVersionCommand);
+        processManager.addCommand(kStartServer);
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
+            stdout: '[ro.product.cpu.abi]: [x86_64]',
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'shell', 'am', 'force-stop', apkId],
+          ),
+        );
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'install', '-t', '-r', apkPath],
+            stdout: '\n\nThe Dart VM service is listening on http://127.0.0.1:456\n\n',
+          ),
+        );
+        processManager.addCommand(kShaCommand);
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
+          ),
+        );
+
+        // This command starts the app and MUST contain the engine shell arguments as Intent extras.
+        processManager.addCommand(
+          const FakeCommand(
+            command: <String>[
+              'adb',
+              '-s',
+              '1234',
+              'shell',
+              'am',
+              'start',
+              '-a',
+              'android.intent.action.MAIN',
+              '-c',
+              'android.intent.category.LAUNCHER',
+              '-f',
+              '0x20000000',
+              '--ez',
+              'enable-dart-profiling',
+              'true',
+              '--ez',
+              'profile-startup',
+              'true',
+              '--ez',
+              'enable-software-rendering',
+              'true',
+              '--ez',
+              'skia-deterministic-rendering',
+              'true',
+              '--ez',
+              'trace-skia',
+              'true',
+              '--es',
+              'trace-allowlist',
+              'foo',
+              '--es',
+              'trace-skia-allowlist',
+              'skia.a,skia.b',
+              '--ez',
+              'trace-systrace',
+              'true',
+              '--es',
+              'trace-to-file',
+              'path/to/trace.file',
+              '--ez',
+              'endless-trace-buffer',
+              'true',
+              '--ez',
+              'profile-microtasks',
+              'true',
+              '--ez',
+              'purge-persistent-cache',
+              'true',
+              '--ez',
+              'enable-impeller',
+              'false',
+              '--ez',
+              'enable-flutter-gpu',
+              'true',
+              '--ez',
+              'enable-vulkan-validation',
+              'true',
+              '--ez',
+              'enable-hcpp-and-surface-control',
+              'true',
+              '--ez',
+              'enable-checked-mode',
+              'true',
+              '--ez',
+              'verify-entry-points',
+              'true',
+              '--ez',
+              'start-paused',
+              'true',
+              '--ez',
+              'disable-service-auth-codes',
+              'true',
+              '--es',
+              'dart-flags',
+              '--foo',
+              '--ez',
+              'use-test-fonts',
+              'true',
+              '--ez',
+              'verbose-logging',
+              'true',
+              '--ez',
+              'test-flag',
+              'true',
+              '--ez',
+              'trace-startup',
+              'true',
+              apkLaunchActivity,
+            ],
+          ),
+        );
+
+        final debuggingOptions = DebuggingOptions.enabled(
+          BuildInfo.debug,
+          // ignore: avoid_redundant_argument_values
+          enableDartProfiling: true,
+          profileStartup: true,
+          enableSoftwareRendering: true,
+          skiaDeterministicRendering: true,
+          traceSkia: true,
+          traceAllowlist: 'foo',
+          traceSkiaAllowlist: 'skia.a,skia.b',
+          traceSystrace: true,
+          traceToFile: 'path/to/trace.file',
+          endlessTraceBuffer: true,
+          profileMicrotasks: true,
+          purgePersistentCache: true,
+          enableImpeller: ImpellerStatus.disabled,
+          enableFlutterGpu: true,
+          enableVulkanValidation: true,
+          startPaused: true,
+          disableServiceAuthCodes: true,
+          dartFlags: '--foo',
+          enableHcpp: true,
+          useTestFonts: true,
+          verboseSystemLogs: true,
+          testFlag: true,
+        );
+
+        final LaunchResult launchResult = await device.startApp(
+          apk,
+          prebuiltApplication: true, // Verification that we do not rebuild
+          debuggingOptions: debuggingOptions,
+          platformArgs: <String, dynamic>{'trace-startup': true},
+        );
+
+        expect(launchResult.started, false);
+        expect(processManager, hasNoRemainingExpectations);
+
+        // Verify AndroidBuilder.buildApk was never called
+        expect(fakeAndroidBuilder.capturedAndroidShellArgs, isNull);
+      },
+      overrides: <Type, Generator>{
+        AndroidBuilder: () => fakeAndroidBuilder,
+        ApplicationPackageFactory: () => fakeApplicationPackageFactory,
+        FlutterProjectFactory: () =>
+            FakeFlutterProjectFactory(FakeFlutterProject(isSupportedVersion: false)),
       },
     );
   });

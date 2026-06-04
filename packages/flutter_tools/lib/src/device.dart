@@ -1262,7 +1262,7 @@ class DebuggingOptions {
   /// Retrieves Android engine shell arguments from the debugging options based on the
   /// command line flags that are passed to the engine via the manifest.
   Set<String> getAndroidLaunchArguments() {
-    final androidShellArguments = <String>{
+    return <String>{
       if (enableDartProfiling) ...<String>['--enable-dart-profiling'],
       if (profileStartup) ...<String>['--profile-startup'],
       if (enableSoftwareRendering) ...<String>['--enable-software-rendering'],
@@ -1293,8 +1293,54 @@ class DebuggingOptions {
         if (testFlag) ...<String>['--test-flag'],
       ],
     };
+  }
 
-    return androidShellArguments;
+  /// Retrieves Android engine shell arguments from the debugging options based on the
+  /// command line flags that are passed to the engine via the manifest as Intent extras.
+  ///
+  /// Only to be used in the case where Fluter Android embedding flags must be communicated
+  /// to the engine via Intent extras, i.e. when the Flutter application is not a Gradle
+  /// project.
+  List<String> getAndroidLaunchArgumentsAsIntentExtras() {
+    return <String>[
+      if (enableDartProfiling) ...<String>['--ez', 'enable-dart-profiling', 'true'],
+      if (profileStartup) ...<String>['--ez', 'profile-startup', 'true'],
+      if (enableSoftwareRendering) ...<String>['--ez', 'enable-software-rendering', 'true'],
+      if (skiaDeterministicRendering) ...<String>['--ez', 'skia-deterministic-rendering', 'true'],
+      if (traceSkia) ...<String>['--ez', 'trace-skia', 'true'],
+      if (traceAllowlist != null) ...<String>['--es', 'trace-allowlist', traceAllowlist!],
+      if (traceSkiaAllowlist != null) ...<String>[
+        '--es',
+        'trace-skia-allowlist',
+        traceSkiaAllowlist!,
+      ],
+      if (traceSystrace) ...<String>['--ez', 'trace-systrace', 'true'],
+      if (traceToFile != null) ...<String>['--es', 'trace-to-file', traceToFile!],
+      if (endlessTraceBuffer) ...<String>['--ez', 'endless-trace-buffer', 'true'],
+      if (profileMicrotasks) ...<String>['--ez', 'profile-microtasks', 'true'],
+      if (purgePersistentCache) ...<String>['--ez', 'purge-persistent-cache', 'true'],
+      if (enableImpeller == ImpellerStatus.enabled) ...<String>['--ez', 'enable-impeller', 'true'],
+      if (enableImpeller == ImpellerStatus.disabled) ...<String>[
+        '--ez',
+        'enable-impeller',
+        'false',
+      ],
+      if (enableFlutterGpu) ...<String>['--ez', 'enable-flutter-gpu', 'true'],
+      if (enableVulkanValidation) ...<String>['--ez', 'enable-vulkan-validation', 'true'],
+      if (enableHcpp) ...<String>['--ez', 'enable-hcpp-and-surface-control', 'true'],
+      if (debuggingEnabled) ...<String>[
+        if (buildInfo.isDebug) ...<String>[
+          ...<String>['--ez', 'enable-checked-mode', 'true'],
+          ...<String>['--ez', 'verify-entry-points', 'true'],
+        ],
+        if (startPaused) ...<String>['--ez', 'start-paused', 'true'],
+        if (disableServiceAuthCodes) ...<String>['--ez', 'disable-service-auth-codes', 'true'],
+        if (dartFlags.isNotEmpty) ...<String>['--es', 'dart-flags', dartFlags],
+        if (useTestFonts) ...<String>['--ez', 'use-test-fonts', 'true'],
+        if (verboseSystemLogs) ...<String>['--ez', 'verbose-logging', 'true'],
+        if (testFlag) ...<String>['--ez', 'test-flag', 'true'],
+      ],
+    ];
   }
 
   Map<String, Object?> toJson() => <String, Object?>{

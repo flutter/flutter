@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: equal_elements_in_set
+
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
@@ -1100,6 +1102,79 @@ void main() {
       () async {
         final options = DebuggingOptions.disabled(BuildInfo.release, enableHcpp: true);
         expect(options.getAndroidLaunchArguments(), contains('--enable-hcpp-and-surface-control'));
+      },
+    );
+  });
+
+  group('Get Android launch arguments as Intent extras from DebuggingOptions', () {
+    testWithoutContext('getAndroidLaunchArgumentsAsIntentExtras respects DebuggingOptions', () async {
+      final options = DebuggingOptions.enabled(
+        BuildInfo.debug,
+        // ignore: avoid_redundant_argument_values
+        enableDartProfiling: true,
+        profileStartup: true,
+        enableSoftwareRendering: true,
+        skiaDeterministicRendering: true,
+        traceSkia: true,
+        traceAllowlist: 'foo',
+        traceSkiaAllowlist: 'skia.a,skia.b',
+        traceSystrace: true,
+        traceToFile: 'path/to/trace.file',
+        endlessTraceBuffer: true,
+        profileMicrotasks: true,
+        purgePersistentCache: true,
+        enableImpeller: ImpellerStatus.disabled,
+        enableFlutterGpu: true,
+        enableVulkanValidation: true,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        dartFlags: '--foo',
+        enableHcpp: true,
+        useTestFonts: true,
+        verboseSystemLogs: true,
+      );
+
+      final List<String> launchArguments = options.getAndroidLaunchArgumentsAsIntentExtras();
+
+      expect(launchArguments, <String>[
+        '--ez', 'enable-dart-profiling', 'true',
+        '--ez', 'profile-startup', 'true',
+        '--ez', 'enable-software-rendering', 'true',
+        '--ez', 'skia-deterministic-rendering', 'true',
+        '--ez', 'trace-skia', 'true',
+        '--es', 'trace-allowlist', 'foo',
+        '--es', 'trace-skia-allowlist', 'skia.a,skia.b',
+        '--ez', 'trace-systrace', 'true',
+        '--es', 'trace-to-file', 'path/to/trace.file',
+        '--ez', 'endless-trace-buffer', 'true',
+        '--ez', 'profile-microtasks', 'true',
+        '--ez', 'purge-persistent-cache', 'true',
+        '--ez', 'enable-impeller', 'false',
+        '--ez', 'enable-flutter-gpu', 'true',
+        '--ez', 'enable-vulkan-validation', 'true',
+        '--ez', 'enable-hcpp-and-surface-control', 'true',
+        '--ez', 'enable-checked-mode', 'true',
+        '--ez', 'verify-entry-points', 'true',
+        '--ez', 'start-paused', 'true',
+        '--ez', 'disable-service-auth-codes', 'true',
+        '--es', 'dart-flags', '--foo',
+        '--ez', 'use-test-fonts', 'true',
+        '--ez', 'verbose-logging', 'true',
+      ]);
+    });
+
+    testWithoutContext(
+      'getAndroidLaunchArgumentsAsIntentExtras does not set enable-checked-mode or verify-entry-points when debugging is disabled',
+      () async {
+        final releaseDisabledOptions = DebuggingOptions.disabled(BuildInfo.debug);
+        expect(
+          releaseDisabledOptions.getAndroidLaunchArgumentsAsIntentExtras(),
+          isNot(contains('enable-checked-mode')),
+        );
+        expect(
+          releaseDisabledOptions.getAndroidLaunchArgumentsAsIntentExtras(),
+          isNot(contains('verify-entry-points')),
+        );
       },
     );
   });

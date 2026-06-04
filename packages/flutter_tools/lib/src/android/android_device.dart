@@ -562,35 +562,53 @@ class AndroidDevice extends Device {
         _logger.printError('Android platforms are only supported.');
         return LaunchResult.failed();
     }
-
-    // Get flags to set from debugging options.
-    final Set<String> androidShellArguments = debuggingOptions.getAndroidLaunchArguments();
-
-    // Get additional flags from platform arguments and startApp parameters.
+    final FlutterProject project = FlutterProject.current();
+    final bool shouldSetAndroidShellArgsViaIntentExtras = !project.android.isSupportedVersion;
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
-    if (traceStartup) {
-      androidShellArguments.add('--trace-startup');
-    }
-
-    // Determine if the APK needs to be rebuilt due to the flags specified on the
-    // command line changing between invocations.
-    //
-    // This is required because flags specified on the command line or by default are loaded
-    // by the Flutter Android embedding using the engine's AndroidManifest.xml file. In
-    // particular, a custom Gradle task
-    // (packages/flutter_tools/gradle/src/main/kotlin/tasks/GenerateEngineFlagsManifestTask.kt)
-    // writes the flags to the application manifest via the
-    // <meta-data android:name="androidEngineShellArgs"> tag. Later, they are read in
-    // engine/src/flutter/shell/platform/android/io/flutter/embedding/engine/loader/FlutterLoader.java
-    // during application startup.
+    Iterable<String> androidShellArguments = const <String>[];
     var shouldRegenerateEngineShellArgsManifest = false;
-    final Set<String>? previousEngineShellArguments = package?.engineShellArgs;
-    if (previousEngineShellArguments != null) {
-      shouldRegenerateEngineShellArgsManifest =
-          previousEngineShellArguments.length != androidShellArguments.length ||
-          !previousEngineShellArguments.containsAll(androidShellArguments);
-    } else if (androidShellArguments.isNotEmpty) {
-      shouldRegenerateEngineShellArgsManifest = true;
+
+    if (shouldSetAndroidShellArgsViaIntentExtras) {
+      // Because the project is not a supported Gradle project, sending Android engine shell
+      // arguments to the embedding cannot be done via manifest injection. Instead, they
+      // will be sent via Intent extras. This behavior will later be restricted because
+      // it is not secure. See go/flutter-android-no-more-intents-by-default for details.
+      // TODO(camsim99): Restrict the ability to set engine flags via Intent extras
+      // in the Flutter embedding and update this comment.
+      androidShellArguments = <String>[
+        ...debuggingOptions.getAndroidLaunchArgumentsAsIntentExtras(),
+        if (traceStartup) ...<String>['--ez', 'trace-startup', 'true'],
+      ];
+    } else {
+      // Get flags to set from debugging options.
+      final Set<String> shellArgumentsSet = debuggingOptions.getAndroidLaunchArguments();
+
+      // Get additional flag from platform arguments.
+      if (traceStartup) {
+        shellArgumentsSet.add('--trace-startup');
+      }
+      androidShellArguments = shellArgumentsSet;
+
+      // Determine if the APK needs to be rebuilt due to the flags specified on the
+      // command line changing between invocations.
+      //
+      // This is required because flags specified on the command line or by default are loaded
+      // by the Flutter Android embedding using the engine's AndroidManifest.xml file. In
+      // particular, a custom Gradle task
+      // (packages/flutter_tools/gradle/src/main/kotlin/tasks/GenerateEngineFlagsManifestTask.kt)
+      // writes the flags to the application manifest via the
+      // <meta-data android:name="androidEngineShellArgs"> tag. Later, they are read in
+      // engine/src/flutter/shell/platform/android/io/flutter/embedding/engine/loader/FlutterLoader.java
+      // during application startup.
+
+      final Set<String>? previousEngineShellArguments = package?.engineShellArgs;
+      if (previousEngineShellArguments != null) {
+        shouldRegenerateEngineShellArgsManifest =
+            previousEngineShellArguments.length != shellArgumentsSet.length ||
+            !previousEngineShellArguments.containsAll(shellArgumentsSet);
+      } else if (shellArgumentsSet.isNotEmpty) {
+        shouldRegenerateEngineShellArgsManifest = true;
+      }
     }
 
     if (!prebuiltApplication ||
@@ -602,11 +620,11 @@ class AndroidDevice extends Device {
           ? 'Re-building APK instead of using prebuilt application binary to include updated engine flags'
           : 'Building APK';
       _logger.printTrace(buildApkLoggerMessage);
-      final FlutterProject project = FlutterProject.current();
+
       await androidBuilder!.buildApk(
         project: project,
         target: mainPath ?? 'lib/main.dart',
-        androidShellArguments: androidShellArguments,
+        androidShellArguments: androidShellArguments.toSet(),
         androidBuildInfo: AndroidBuildInfo(
           debuggingOptions.buildInfo,
           targetArchs: <AndroidArch>[androidArch],
@@ -656,6 +674,7 @@ class AndroidDevice extends Device {
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (userIdentifier != null) ...<String>['--user', userIdentifier],
       ],
+      if (shouldSetAndroidShellArgsViaIntentExtras) ...androidShellArguments,
       builtPackage.launchActivity,
     ];
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
