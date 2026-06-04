@@ -536,9 +536,9 @@ object FlutterPluginUtils {
         val gradlePropertiesFile = project.rootProject.file("gradle.properties")
         val properties = readPropertiesIfExist(gradlePropertiesFile)
         val isBuiltInKotlinEnabled =
-            properties.getProperty("android.builtInKotlin")?.toBoolean() ?: false
+            properties.getProperty("android.builtInKotlin")?.lowercase()?.toBooleanStrictOrNull()
 
-        if (isBuiltInKotlinEnabled) {
+        if (isBuiltInKotlinEnabled != false) {
             val allSubprojectsDoNotApplyKgp =
                 project.rootProject.subprojects.all { subproject ->
                     val pluginState = getSubprojectPluginState(subproject)
