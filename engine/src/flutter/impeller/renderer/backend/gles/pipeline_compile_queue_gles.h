@@ -26,17 +26,8 @@ class PipelineCompileQueueGLES : public PipelineCompileQueue {
 
   PipelineCompileQueueGLES& operator=(const PipelineCompileQueueGLES&) = delete;
 
-  //----------------------------------------------------------------------------
-  /// @brief      Post a job to the worker task runner.
-  ///
-  /// @param[in]  job   The job
-  ///
   void PostJob(const fml::closure& job) override;
 
-  //----------------------------------------------------------------------------
-  /// @brief      Called after a job has been added to the queue. Implements
-  ///             the sequential scheduling strategy for GLES.
-  ///
   void OnJobAdded() override;
 
  private:
