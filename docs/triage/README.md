@@ -8,7 +8,7 @@ PRs are triaged directly by teams during secondary triage, and assigned reviewer
 
 # Primary issue triage process
 
-The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20no%3Aassignee%20-label%3A%22will%20need%20additional%20triage%22%20-label%3Ateam-devexp%2Cteam-accessibility%2Cteam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-framework%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-text-input) as described in this section, so as to make that list empty.
+The process of triaging new incoming bugs consists of processing the list of [issues without team-* labels, with no assignees, and not labeled `will need additional triage`](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20no%3Aassignee%20-label%3A%22will%20need%20additional%20triage%22%20-label%3Ateam-devexp%2Cteam-accessibility%2Cteam-codelabs%2Cteam-ecosystem%2Cteam-infra%2Cteam-engine%2Cteam-fluttergpu%2Cteam-framework%2Cteam-ios%2Cteam-tool%2Cteam-web%2Cteam-linux%2Cteam-macos%2Cteam-windows%2Cteam-design%2Cteam-android%2Cteam-text-input) as described in this section, so as to make that list empty.
 
 _See also: [Issue triage reports](https://github.com/flutter/flutter/wiki/Issue-triage-reports)_
 
@@ -84,6 +84,7 @@ In general the flow chart for team assignment is as follows, stopping as soon as
 - If it's about a codelab, add `team-codelab`.
 - If it's about the release process or tooling (e.g., `packages_autoroller`), add `team-infra` and `infra: release`.
 - If it's about the Flutter team's CI or infrastructure, add `team-infra`.
+- If it's about Flutter GPU (the `flutter_gpu` Dart library or its native bindings), add `team-fluttergpu`.
 - If it's about Impeller, add `team-engine`.
 - If it's about accessibility (e.g. `Semantics`, `talkBack`, `voiceOver`), add `team-accessibility`. And:
   - if it's specific to a single platform, also add that platform's `fyi-*` label.
@@ -106,6 +107,7 @@ In general the flow chart for team assignment is as follows, stopping as soon as
     - `go_router`, `go_router_builder`
     - `google_fonts`
     - `two_dimensional_scrollables`
+    - `vector_math`
   - Apply `team-engine` if it's about:
     - `flutter_svg`
     - `vector_graphics`
@@ -271,11 +273,18 @@ In addition, consider these issues that fall under another team's triage, but ar
 - [PRs awaiting review](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+-label%3A%22Work+in+progress+%28WIP%29%22+-label%3A%22waiting+for+tree+to+go+green%22+-label%3Aplatform-web+-review%3Aapproved+-label%3A%22waiting+for+response%22+NOT+%22Roll+Skia%22+NOT+%22Roll+Dart%22+NOT+%22Roll+Fuchsia%22+sort%3Aupdated-asc+-label%3Aplatform-web+label%3Aengine)
 - [Draft PRs](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+-label%3A%22waiting+for+tree+to+go+green%22+-label%3Aplatform-web+-review%3Aapproved+-label%3A%22waiting+for+response%22+NOT+%22Roll+Skia%22+sort%3Aupdated-asc+-label%3Aplatform-web+draft%3Atrue+label%3Aengine)
 
+### Flutter GPU team (`team-fluttergpu`)
+
+- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-fluttergpu%2Cfyi-fluttergpu+-label%3Atriaged-fluttergpu+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
+- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-fluttergpu+label%3AP0+sort%3Aupdated-asc)
+- [PRs awaiting review](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+draft%3Afalse+label%3Ateam-fluttergpu%2Cfyi-fluttergpu+-review%3Aapproved+-label%3A%22waiting+for+response%22+sort%3Aupdated-asc)
+
 ### Framework team (`team-framework`)
 
 - [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%20label%3AP0%20sort%3Aupdated-desc)
-- [Framework PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+draft%3Afalse+sort%3Aupdated-desc+)
+- [Framework PR list](https://github.com/flutter/flutter/pulls?q=is%3Aopen+is%3Apr+label%3Aframework+-label%3A%22f%3A+material+design%22+-label%3A%22f%3A+cupertino%22+-label%3A%22a%3A+text+input%22+draft%3Afalse+sort%3Aupdated-desc+)
 - [Framework-owned Package PR list](https://github.com/flutter/packages/pulls?q=sort%3Aupdated-desc+is%3Aopen+is%3Apr+label%3A%22triage-framework%22)
+- [Framework-owned Core Package PR list](https://github.com/flutter/core-packages/pulls?q=sort%3Aupdated-desc+is%3Aopen+is%3Apr+label%3A%22triage-framework%22)
 - [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue%20is%3Aopen%20label%3Ateam-framework%2Cfyi-framework%20-label%3Atriaged-framework%20-label%3A%22will%20need%20additional%20triage%22%20-label%3A%22waiting%20for%20response%22%20sort%3Aupdated-desc)
 
 ### Infrastructure team (`team-infra`)

@@ -58,6 +58,37 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getSupportsOffscreenMSAA();
   }
 
+  /// Whether this device supports the given family of block-compressed
+  /// texture formats. Hardware support is granted on a per-family basis.
+  ///
+  /// Compressed textures are always sample-only (no render target, no shader
+  /// write, no multisampling, and dimensions must be a multiple of the format
+  /// block size). [supportsTextureFormat] can be used for a per-format check.
+  bool supportsTextureCompression(TextureCompressionFamily family) {
+    return _supportsTextureCompression(family.index);
+  }
+
+  /// Whether this device can allocate a texture of the given [format] with
+  /// the requested usage flags.
+  ///
+  /// For block-compressed formats this returns false if either [renderTarget]
+  /// or [shaderWrite] is true, since compressed formats are sample-only.
+  /// For uncompressed formats this currently returns true: today the
+  /// underlying capability surface does not vary by per-format usage.
+  bool supportsTextureFormat(
+    PixelFormat format, {
+    bool renderTarget = false,
+    bool shaderRead = true,
+    bool shaderWrite = false,
+  }) {
+    return _supportsTextureFormat(
+      format.index,
+      renderTarget,
+      shaderRead,
+      shaderWrite,
+    );
+  }
+
   /// Allocates a new region of GPU-resident memory.
   ///
   /// The [storageMode] must be either [StorageMode.hostVisible] or
@@ -108,6 +139,11 @@ base class GpuContext extends NativeFieldWrapperClass1 {
 
   /// Allocates a new texture in GPU-resident memory.
   ///
+  /// [mipLevelCount] specifies the number of mip levels to allocate for the
+  /// texture. The default is 1 (no mip chain). Use [Texture.fullMipCount] to
+  /// allocate a full chain. Must be in the range
+  /// `[1, Texture.fullMipCount(width, height)]`.
+  ///
   /// Throws an exception if the [Texture] creation failed.
   Texture createTexture(
     StorageMode storageMode,
@@ -125,12 +161,41 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     bool enableRenderTargetUsage = true,
     bool enableShaderReadUsage = true,
     bool enableShaderWriteUsage = false,
+    int mipLevelCount = 1,
   }) {
     final resolvedTextureType =
         textureType ??
         ((sampleCount == 1)
             ? TextureType.texture2D
             : TextureType.texture2DMultisample);
+    final int maxMipLevels = Texture.fullMipCount(width, height);
+    if (mipLevelCount < 1 || mipLevelCount > maxMipLevels) {
+      throw Exception(
+        'mipLevelCount ($mipLevelCount) must be in the range [1, $maxMipLevels] '
+        'for a ${width}x$height texture',
+      );
+    }
+    if (format.isCompressed) {
+      if (enableRenderTargetUsage ||
+          enableShaderWriteUsage ||
+          !enableShaderReadUsage ||
+          sampleCount != 1 ||
+          storageMode == StorageMode.deviceTransient) {
+        throw ArgumentError(
+          'Compressed pixel format $format can only be used as a sample-only '
+          'texture (sampleCount=1, enableShaderReadUsage=true, no render '
+          'target, no shader write, and storageMode != deviceTransient)',
+        );
+      }
+      final int bw = format.blockWidth;
+      final int bh = format.blockHeight;
+      if (width % bw != 0 || height % bh != 0) {
+        throw ArgumentError(
+          'Compressed pixel format $format requires width and height to be a '
+          'multiple of the block size (${bw}x$bh), got ${width}x$height',
+        );
+      }
+    }
     Texture result = Texture._initialize(
       this,
       storageMode,
@@ -143,10 +208,9 @@ base class GpuContext extends NativeFieldWrapperClass1 {
       enableRenderTargetUsage,
       enableShaderReadUsage,
       enableShaderWriteUsage,
+      mipLevelCount,
     );
-    if (!result.isValid) {
-      throw Exception('Texture creation failed');
-    }
+    // `Texture._initialize` throws on failure, so `result` is always valid here.
     return result;
   }
 
@@ -157,9 +221,15 @@ base class GpuContext extends NativeFieldWrapperClass1 {
 
   RenderPipeline createRenderPipeline(
     Shader vertexShader,
-    Shader fragmentShader,
-  ) {
-    return RenderPipeline._(this, vertexShader, fragmentShader);
+    Shader fragmentShader, {
+    VertexLayout? vertexLayout,
+  }) {
+    return RenderPipeline._(
+      this,
+      vertexShader,
+      fragmentShader,
+      vertexLayout: vertexLayout,
+    );
   }
 
   /// Associates the default Impeller context with this Context.
@@ -192,6 +262,21 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetSupportsOffscreenMSAA',
   )
   external bool _getSupportsOffscreenMSAA();
+
+  @Native<Bool Function(Pointer<Void>, Int)>(
+    symbol: 'InternalFlutterGpu_Context_SupportsTextureCompression',
+  )
+  external bool _supportsTextureCompression(int family);
+
+  @Native<Bool Function(Pointer<Void>, Int, Bool, Bool, Bool)>(
+    symbol: 'InternalFlutterGpu_Context_SupportsTextureFormat',
+  )
+  external bool _supportsTextureFormat(
+    int format,
+    bool renderTarget,
+    bool shaderRead,
+    bool shaderWrite,
+  );
 }
 
 /// The default graphics context.

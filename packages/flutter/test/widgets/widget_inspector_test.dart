@@ -283,6 +283,24 @@ void main() {
   });
 
   _TestWidgetInspectorService.runTests();
+
+  testWidgets('WidgetInspector does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const TestWidgetsApp(
+        home: Center(
+          child: WidgetInspector(
+            tapBehaviorButtonBuilder: null,
+            exitWidgetSelectionButtonBuilder: null,
+            moveExitWidgetSelectionButtonBuilder: null,
+            child: Placeholder(),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(WidgetInspector)), Size.zero);
+  });
 }
 
 class _TestWidgetInspectorService extends TestWidgetInspectorService {
@@ -3117,7 +3135,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
             // because only the RichText element is part of the summary tree.
             expect(service.toObject(summarySelection['valueId']! as String), elementA);
 
-            // Verify tha the regular getSelectedWidget method still returns
+            // Verify that the regular getSelectedWidget method still returns
             // the RichText object not the Text element.
             final regularSelection =
                 (await service.testExtension(
