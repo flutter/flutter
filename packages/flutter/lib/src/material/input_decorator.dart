@@ -4415,6 +4415,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
     VisualDensity? visualDensity,
+    EdgeInsetsGeometry? supportingTextPadding,
     InputDecorationThemeData? data,
     Widget? child,
   }) : assert(
@@ -4455,7 +4456,8 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
                      border ??
                      alignLabelWithHint ??
                      constraints ??
-                     visualDensity) ==
+                     visualDensity ??
+                     supportingTextPadding) ==
                  null,
        ),
        _labelStyle = labelStyle,
@@ -4495,6 +4497,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
        _alignLabelWithHint = alignLabelWithHint ?? false,
        _constraints = constraints,
        _visualDensity = visualDensity,
+       _supportingTextPadding = supportingTextPadding,
        _data = data,
        super(child: child ?? const SizedBox.shrink());
 
@@ -4536,6 +4539,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
   final bool _alignLabelWithHint;
   final BoxConstraints? _constraints;
   final VisualDensity? _visualDensity;
+  final EdgeInsetsGeometry? _supportingTextPadding;
 
   /// Overrides the default value for [InputDecoration.labelStyle].
   ///
@@ -4766,6 +4770,13 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
   /// please use the [InputDecorationThemeData.visualDensity] property in [data] instead.
   VisualDensity? get visualDensity => _data != null ? _data.visualDensity : _visualDensity;
 
+  /// Overrides the default value for [InputDecoration.supportingTextPadding].
+  ///
+  /// This property is obsolete and will be deprecated in a future release:
+  /// please use the [InputDecorationThemeData.supportingTextPadding] property in [data] instead.
+  EdgeInsetsGeometry? get supportingTextPadding =>
+      _data != null ? _data.supportingTextPadding : _supportingTextPadding;
+
   /// The properties used for all descendant [TabBar] widgets.
   InputDecorationThemeData get data =>
       _data ??
@@ -4807,6 +4818,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
         alignLabelWithHint: _alignLabelWithHint,
         constraints: _constraints,
         visualDensity: _visualDensity,
+        supportingTextPadding: _supportingTextPadding,
       );
 
   /// Returns the closest [InputDecorationThemeData] instance given the build context.
@@ -4868,6 +4880,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
     VisualDensity? visualDensity,
+    EdgeInsetsGeometry? supportingTextPadding,
   }) {
     return InputDecorationTheme(
       labelStyle: labelStyle ?? this.labelStyle,
@@ -4907,6 +4920,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
       visualDensity: visualDensity ?? this.visualDensity,
+      supportingTextPadding: supportingTextPadding ?? this.supportingTextPadding,
     );
   }
 
@@ -4955,6 +4969,7 @@ class InputDecorationTheme extends InheritedTheme with Diagnosticable {
       border: border ?? other.border,
       constraints: constraints ?? other.constraints,
       visualDensity: visualDensity ?? other.visualDensity,
+      supportingTextPadding: supportingTextPadding ?? other.supportingTextPadding,
     );
   }
 
