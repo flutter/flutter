@@ -13,9 +13,14 @@ import 'package:path/path.dart' as p;
 // Android binaries (libflutter.so) should only export one symbol "JNI_OnLoad"
 // of type "T".
 //
-// iOS binaries (Flutter.framework/Flutter) should only export Objective-C
-// Symbols from the Flutter namespace. These are either of type
-// "(__DATA,__common)" or "(__DATA,__objc_data)".
+// Ideally, iOS binaries (Flutter.framework/Flutter) should only export
+// Objective-C Symbols from the Flutter namespace, of type "(__DATA,__common)" or
+// "(__DATA,__objc_data)". However, to allow Swift symbols to be exported in
+// an Objective-C bridging header, they must be public or open. The framework
+// uses these types internally and never publishes these types in a public header.
+// Like `_InternalFlutter` Obj-C symbols, we allow `InternalFlutterSwift` and
+// `InternalFlutterSwiftCommon` symbols, as they are clearly marked as internal
+// in the name.
 
 /// Takes the path to the out directory as the first argument, and the path to
 /// the buildtools directory as the second argument.
@@ -101,64 +106,49 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
       failures++;
       continue;
     }
-    final Iterable<NmEntry> unexpectedEntries = NmEntry.parse(nmResult.stdout as String).where((
-      NmEntry entry,
-    ) {
-      final bool cSymbol =
-          (entry.type == '(__DATA,__common)' ||
-              entry.type == '(__DATA,__const)' ||
-              entry.type == '(__DATA_CONST,__const)') &&
-          entry.name.startsWith('_Flutter');
-      final bool cInternalSymbol =
-          entry.type == '(__TEXT,__text)' && entry.name.startsWith('_InternalFlutter');
-      final bool objcSymbol =
-          (entry.type == '(__DATA,__objc_data)' || entry.type == '(__DATA,__data)') &&
-          (entry.name.startsWith(r'_OBJC_METACLASS_$_Flutter') ||
-              entry.name.startsWith(r'_OBJC_CLASS_$_Flutter'));
+    final swiftEntries = <NmEntry>[];
+    final unexpectedEntries = <NmEntry>[];
 
-      // Swift's name mangling uses s followed by symbol length followed by symbol.
-      final swiftInternalRegExp = RegExp(r'^_\$s\d+InternalFlutterSwift');
+    for (final NmEntry entry in NmEntry.parse(nmResult.stdout as String)) {
+      if (entry.isCInternalSymbol || entry.isAllowedCSymbol || entry.isAllowedObjCSymbol) {
+        continue;
+      }
+      final bool isSwiftSymbol = switch (entry.type) {
+        '(__TEXT,__text)' ||
+        '(__TEXT,__const)' ||
+        '(__TEXT,__constg_swiftt)' ||
+        '(__DATA_CONST,__const)' ||
+        '(__DATA,__data)' ||
+        '(__DATA,__objc_data)' => entry.name.startsWith(r'_$s'),
+        _ => false,
+      };
 
-      // Swift extensions on Objective-C classes (in Swift's 'So' namespace)
-      // mangle differently than standard Swift symbols. Instead of starting
-      // with the module name (e.g. _$s25InternalFlutterSwift...), they start
-      // with the extended type (e.g. _$sSo14FlutterTracingC...) and have the
-      // module name embedded inside.
-      //
-      // The Swift compiler may compress repeated tokens in the module name
-      // (e.g. substituting 'Flutter' with 'A' in 'InternalFlutterSwiftCommon'
-      // if 'Flutter' was already used in the type name being extended.
-      //
-      // This matches extensions defined in internal modules starting with
-      // 'Internal.*Swift' such as 'InternalFlutterSwiftCommon' from our shared
-      // iOS/macOS code, which the compiler shortens to
-      // 'InternalA11SwiftCommon'.
-      //
-      // Swift encodes these as a string of ${TYPE}|${LENGTH}${Symbol}|${SUBSTITUTION}s.
-      // In the above example:
-      // * $sSo: global static function extension.
-      // * 14FlutterTracing: 14 bytes long, "FlutterTracing".
-      // * C: class
-      // * 08InternalA11SwiftCommon: [8 bytes long, "Internal"] + [substitution A
-      //   ("Flutter" from earlier in the symbol)] + [11 bytes long, "SwiftCommon"].
-      // * E: extension.
-      //
-      // Details: https://github.com/swiftlang/swift/blob/main/docs/ABI/Mangling.rst
-      final swiftInternalExtensionRegExp = RegExp(
-        r'^_\$sSo\d+[A-Za-z0-9_]+[CP]\d+Internal.*Swift.*E',
-      );
+      if (isSwiftSymbol) {
+        swiftEntries.add(entry);
+      } else {
+        unexpectedEntries.add(entry);
+      }
+    }
 
-      final bool swiftInternalSymbol =
-          (entry.type == '(__TEXT,__text)' ||
-              entry.type == '(__TEXT,__const)' ||
-              entry.type == '(__TEXT,__constg_swiftt)' ||
-              entry.type == '(__DATA_CONST,__const)' ||
-              entry.type == '(__DATA,__data)' ||
-              entry.type == '(__DATA,__objc_data)') &&
-          (swiftInternalRegExp.hasMatch(entry.name) ||
-              swiftInternalExtensionRegExp.hasMatch(entry.name));
-      return !(cSymbol || cInternalSymbol || objcSymbol || swiftInternalSymbol);
-    });
+    final Map<String, String?>? symbolToModuleNameMap = _demangleSymbols(
+      swiftEntries.map((NmEntry entry) => entry.name),
+    );
+
+    if (symbolToModuleNameMap == null) {
+      print('ERROR: failed to execute "swift demangle"');
+      failures++;
+      return failures;
+    }
+
+    unexpectedEntries.addAll(
+      swiftEntries.where(
+        (NmEntry entry) => switch (symbolToModuleNameMap[entry.name]) {
+          'InternalFlutterSwiftCommon' || 'InternalFlutterSwift' => false,
+          _ => true,
+        },
+      ),
+    );
+
     if (unexpectedEntries.isNotEmpty) {
       print('ERROR: $libFlutter exports unexpected symbols:');
       print(
@@ -253,7 +243,7 @@ int _checkLinux(String outPath, String nmPath, Iterable<String> builds) {
   return failures;
 }
 
-class NmEntry {
+final class NmEntry {
   NmEntry._(this.type, this.name);
 
   final String type;
@@ -266,6 +256,83 @@ class NmEntry {
     });
   }
 
+  bool get isAllowedCSymbol {
+    return switch (type) {
+      '(__DATA,__common)' ||
+      '(__DATA,__const)' ||
+      '(__DATA_CONST,__const)' => name.startsWith('_Flutter'),
+      _ => false,
+    };
+  }
+
+  bool get isAllowedObjCSymbol {
+    return switch (type) {
+      '(__DATA,__objc_data)' || '(__DATA,__data)' =>
+        (name.startsWith(r'_OBJC_METACLASS_$_Flutter') ||
+            name.startsWith(r'_OBJC_CLASS_$_Flutter')),
+      _ => false,
+    };
+  }
+
+  bool get isCInternalSymbol {
+    return type == '(__TEXT,__text)' && name.startsWith('_InternalFlutter');
+  }
+
   @override
   String toString() => '$name: $type';
+}
+
+final RegExp moduleLinePattern = RegExp(r'kind=Module, text="(.+)"');
+// Demangles the given `symbols` and maps each mangled name to its Swift module name.
+//
+// Returns null if the `swift demangle` command failed entirely.
+// Individual map values may be null if a symbol failed to demangle or did not belong to a Swift module.
+Map<String, String?>? _demangleSymbols(Iterable<String> symbols) {
+  if (symbols.isEmpty) {
+    return <String, String?>{};
+  }
+  final ProcessResult demangledResult = Process.runSync('swift', <String>[
+    'demangle',
+    '--tree-only',
+    ...symbols,
+  ]);
+  if (demangledResult.exitCode != 0) {
+    return null;
+  }
+
+  final symbolToModule = <String, String?>{};
+  final output = demangledResult.stdout as String;
+
+  String trim(String string) => string.trim();
+
+  for (final String symbolTree in output.split('Demangling for ').map(trim)) {
+    final List<String> lines = LineSplitter.split(symbolTree).toList();
+    if (lines.isEmpty) {
+      continue;
+    }
+    final String mangledName = lines.first;
+
+    // Parses the output from `swift demangle --tree-only` and extracts the module
+    // name of a single entry.
+    //
+    // Example `swift demangle --tree-only` output:
+    //
+    // Demangling for _$s26InternalFlutterSwiftCommon8LogLevelOSYAAMc
+    // kind=Global
+    //   kind=ProtocolConformanceDescriptor
+    //     kind=ProtocolConformance
+    //       kind=Type
+    //         kind=Enum
+    //           kind=Module, text="InternalFlutterSwiftCommon"
+    //           kind=Identifier, text="LogLevel"
+    //       kind=Type
+    //         kind=Protocol
+    //           kind=Module, text="Swift"
+    //           kind=Identifier, text="RawRepresentable"
+    //       kind=Module, text="InternalFlutterSwiftCommon"
+    final String? moduleName = moduleLinePattern.firstMatch(symbolTree)?.group(1);
+
+    symbolToModule[mangledName] = moduleName;
+  }
+  return symbolToModule;
 }
