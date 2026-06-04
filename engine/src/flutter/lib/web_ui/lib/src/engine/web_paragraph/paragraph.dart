@@ -692,6 +692,19 @@ class TextSpan extends ParagraphSpan {
     );
   }
 
+  ui.Rect getBlockBounds(TextBlock block) {
+    final ui.Rect bounds = _metrics.getBounds(
+      block.textRange.start - start,
+      block.textRange.end - start,
+    );
+    return ui.Rect.fromLTWH(
+      bounds.left + block.spanShiftFromLineStart,
+      bounds.top,
+      bounds.width,
+      bounds.height,
+    );
+  }
+
   ui.Rect getBlockSelection(LineBlock block) {
     // This `selection` is relative to the span, but blocks should be positioned relative to the line.
     final ui.Rect selection = _metrics.getSelection(
@@ -871,6 +884,9 @@ class WebParagraph implements ui.Paragraph {
   double maxLineWidthWithTrailingSpaces = 0; // without trailing spaces it would be longestLine
 
   List<TextLine> get lines => _layout.lines;
+
+  /// The actual paint bounds of the paragraph.
+  late ui.Rect paintBounds;
 
   @override
   List<ui.TextBox> getBoxesForPlaceholders() => _layout.getBoxesForPlaceholders();

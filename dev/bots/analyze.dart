@@ -317,14 +317,16 @@ List<Validation> _getValidations({
       );
       onDartAnalyzeResult(result);
     }),
-    Validation(
-      'format',
-      'Check formatting of Dart files...',
-      () => runCommand(dart, <String>[
-        '--enable-asserts',
-        path.join(flutterRoot, 'dev', 'tools', 'bin', 'format.dart'),
-      ], workingDirectory: flutterRoot),
-    ),
+    // TODO(Piinks): Re-enable once formatting changes have rolled in and the repo has been reformatted,
+    // https://github.com/flutter/flutter/issues/187204
+    // Validation(
+    //   'format',
+    //   'Check formatting of Dart files...',
+    //   () => runCommand(dart, <String>[
+    //     '--enable-asserts',
+    //     path.join(flutterRoot, 'dev', 'tools', 'bin', 'format.dart'),
+    //   ], workingDirectory: flutterRoot),
+    // ),
     Validation(
       'private-lints',
       'Private lints...',

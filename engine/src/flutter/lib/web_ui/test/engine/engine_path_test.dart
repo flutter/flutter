@@ -13,7 +13,7 @@ void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
 
-class FakePathBuilder implements DisposablePathBuilder {
+class FakePathBuilder implements BackendPathBuilder {
   int _apiCallCount = 0;
 
   int get apiCallCount => _apiCallCount;
@@ -28,7 +28,7 @@ class FakePathBuilder implements DisposablePathBuilder {
   final List<FakePath> builtPaths = [];
 
   @override
-  DisposablePath build() {
+  BackendPath build() {
     final path = FakePath();
     builtPaths.add(path);
     return path;
@@ -145,12 +145,12 @@ class FakePathBuilder implements DisposablePathBuilder {
   }
 
   @override
-  void addPath(DisposablePath path, Offset offset, {Float64List? matrix4}) {
+  void addPath(BackendPath path, Offset offset, {Float64List? matrix4}) {
     _apiCallCount++;
   }
 
   @override
-  void extendWithPath(DisposablePath path, Offset offset, {Float64List? matrix4}) {
+  void extendWithPath(BackendPath path, Offset offset, {Float64List? matrix4}) {
     _apiCallCount++;
   }
 
@@ -185,7 +185,7 @@ class FakePathBuilder implements DisposablePathBuilder {
   }
 }
 
-class FakePath implements DisposablePath {
+class FakePath implements BackendPath {
   final List<FakePathMetricsIterator> metricsIterators = [];
 
   bool isDisposed = false;
@@ -196,32 +196,22 @@ class FakePath implements DisposablePath {
   }
 
   @override
-  PathFillType fillType = PathFillType.nonZero;
-
-  @override
-  bool contains(Offset point) {
-    return false;
-  }
-
-  @override
   Rect getBounds() {
     return Rect.zero;
   }
 
   @override
-  FakePathMetricsIterator getMetricsIterator({bool forceClosed = false}) {
+  String toSvgString() => '';
+
+  @override
+  FakePathMetricsIterator computeMetrics({bool forceClosed = false}) {
     final iterator = FakePathMetricsIterator();
     metricsIterators.add(iterator);
     return iterator;
   }
-
-  @override
-  String toSvgString() {
-    return '';
-  }
 }
 
-class FakePathMetricsIterator implements DisposablePathMetricIterator {
+class FakePathMetricsIterator implements BackendPathMetricIterator {
   bool isDisposed = false;
 
   @override
@@ -240,7 +230,7 @@ class FakePathMetricsIterator implements DisposablePathMetricIterator {
   }
 }
 
-class FakePathConstructors implements DisposablePathConstructors {
+class FakePathConstructors implements BackendPathConstructors {
   final List<FakePathBuilder> createdPathBuilders = [];
 
   @override
@@ -251,16 +241,12 @@ class FakePathConstructors implements DisposablePathConstructors {
   }
 
   @override
-  FakePathBuilder fromPath(DisposablePath path) {
+  FakePathBuilder fromPath(BackendPath path) {
     throw UnimplementedError();
   }
 
   @override
-  FakePathBuilder combinePaths(
-    PathOperation operation,
-    DisposablePath path1,
-    DisposablePath path2,
-  ) {
+  FakePathBuilder combinePaths(PathOperation operation, BackendPath path1, BackendPath path2) {
     final path = FakePathBuilder();
     createdPathBuilders.add(path);
     return path;
@@ -268,9 +254,9 @@ class FakePathConstructors implements DisposablePathConstructors {
 }
 
 void testMain() {
-  test('LazyPath lifecycle', () {
+  test('EnginePath lifecycle', () {
     final constructors = FakePathConstructors();
-    final path = LazyPath(constructors);
+    final path = EnginePath(constructors);
     expect(constructors.createdPathBuilders, isEmpty);
 
     path.moveTo(0, 0);
@@ -308,18 +294,18 @@ void testMain() {
     expect(disposablePathBuilder.builtPaths, isEmpty);
 
     // Force building the path.
-    final DisposablePath builtPath = path.builtPath;
+    final BackendPath builtPath = path.backendPath;
 
     expect(disposablePathBuilder.builtPaths, hasLength(1));
     final FakePath disposablePath = disposablePathBuilder.builtPaths.single;
     expect(identical(disposablePath, builtPath), isTrue);
     expect(disposablePath.isDisposed, isFalse);
 
-    final LazyPathMetrics metrics = path.computeMetrics();
+    final EnginePathMetrics metrics = path.computeMetrics();
     expect(metrics.iterator.moveNext(), isFalse);
 
     final FakePath clonedPath = constructors.createdPathBuilders.last.builtPaths.single;
-    expect(identical(clonedPath, metrics.iterator.path.builtPath), isTrue);
+    expect(identical(clonedPath, metrics.iterator.path.backendPath), isTrue);
 
     expect(clonedPath.metricsIterators, hasLength(1));
     final FakePathMetricsIterator disposableMetricsIterator = clonedPath.metricsIterators.single;

@@ -56,7 +56,10 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   void ClearBindings();
 
-  bool Draw();
+  /// Append a draw to the underlying render pass. [element_count] is the
+  /// vertex count for a non-indexed draw, or the index count when
+  /// [indexed] is true.
+  bool Draw(size_t element_count, bool indexed);
 
   struct BufferAndUniformSlot {
     impeller::ShaderUniformSlot slot;
@@ -88,15 +91,10 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   size_t vertex_buffer_count = 0;
   impeller::BufferView index_buffer;
   impeller::IndexType index_buffer_type = impeller::IndexType::kNone;
-  size_t element_count = 0;
 
   uint32_t stencil_reference = 0;
   std::optional<impeller::IRect32> scissor;
   std::optional<impeller::Viewport> viewport;
-
-  // Helper flag to determine whether the vertex_count should override the
-  // element count. The index count takes precedent.
-  bool has_index_buffer = false;
 
  private:
   /// Lookup an Impeller pipeline by building a descriptor based on the current
@@ -174,7 +172,6 @@ extern void InternalFlutterGpu_RenderPass_BindVertexBufferDevice(
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes,
-    int vertex_count,
     int slot);
 
 FLUTTER_GPU_EXPORT
@@ -183,8 +180,7 @@ extern void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes,
-    int index_type,
-    int index_count);
+    int index_type);
 
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_BindUniformDevice(
@@ -294,7 +290,13 @@ extern void InternalFlutterGpu_RenderPass_SetPolygonMode(
 
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_Draw(
-    flutter::gpu::RenderPass* wrapper);
+    flutter::gpu::RenderPass* wrapper,
+    int vertex_count);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_RenderPass_DrawIndexed(
+    flutter::gpu::RenderPass* wrapper,
+    int index_count);
 
 }  // extern "C"
 
