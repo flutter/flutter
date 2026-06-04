@@ -57,8 +57,8 @@ bool ShouldClearContextBetweenFrames() {
 class AndroidSwitchableGLContextImpeller : public SwitchableGLContext {
  public:
   explicit AndroidSwitchableGLContextImpeller(
-      std::shared_ptr<AndroidContextGLImpeller> android_context)
-      : android_context_(std::move(android_context)) {}
+      const std::shared_ptr<AndroidContextGLImpeller>& android_context)
+      : android_context_(android_context) {}
 
   bool SetCurrent() override { return true; }
 
