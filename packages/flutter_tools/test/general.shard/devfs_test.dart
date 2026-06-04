@@ -61,6 +61,9 @@ void main() {
 
     expect(content.bytes, orderedEquals(<int>[4, 5, 6]));
     expect(content.isModified, isTrue);
+    expect(content.isModified, isTrue);
+    content.markClean();
+    expect(content.isModified, isFalse);
     expect(content.isModified, isFalse);
   });
 
@@ -70,6 +73,9 @@ void main() {
     expect(content.string, 'some string');
     expect(content.bytes, orderedEquals(utf8.encode('some string')));
     expect(content.isModified, isTrue);
+    expect(content.isModified, isTrue);
+    content.markClean();
+    expect(content.isModified, isFalse);
     expect(content.isModified, isFalse);
   });
 
@@ -77,6 +83,7 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('foo.txt');
     final content = DevFSFileContent(file);
+    content.markClean();
     expect(content.isModified, isFalse);
     expect(content.isModified, isFalse);
 
@@ -90,6 +97,8 @@ void main() {
     file.writeAsBytesSync(<int>[2, 3, 4], flush: true);
 
     expect(content.isModified, isTrue);
+    expect(content.isModified, isTrue);
+    content.markClean();
     expect(content.isModified, isFalse);
     expect(await content.contentsAsBytes(), <int>[2, 3, 4]);
 
@@ -98,6 +107,8 @@ void main() {
 
     file.deleteSync();
     expect(content.isModified, isTrue);
+    expect(content.isModified, isTrue);
+    content.markClean();
     expect(content.isModified, isFalse);
     expect(content.isModified, isFalse);
   });
@@ -108,6 +119,9 @@ void main() {
     expect(content.equals('uncompressed string'), isTrue);
     expect(content.bytes, isNotNull);
     expect(content.isModified, isTrue);
+    expect(content.isModified, isTrue);
+    content.markClean();
+    expect(content.isModified, isFalse);
     expect(content.isModified, isFalse);
   });
 
