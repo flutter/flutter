@@ -707,7 +707,7 @@ void main() {
     expect(table.row(0).length, 2);
   });
 
-  testWidgets('Table widget , MediaQuery', (WidgetTester tester) async {
+  testWidgets('Table widget diagnostics', (WidgetTester tester) async {
     GlobalKey key0;
     final Widget table = Directionality(
       textDirection: TextDirection.ltr,
