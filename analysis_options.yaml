@@ -63,7 +63,7 @@ linter:
     - avoid_init_to_null
     - avoid_js_rounded_ints
     # - avoid_multiple_declarations_per_line # seems to be a stylistic choice we don't subscribe to
-
+    - avoid_null_checks_in_equality_operators
     # - avoid_positional_boolean_parameters # would have been nice to enable this but by now there's too many places that break it
     - avoid_print
     # - avoid_private_typedef_functions # we prefer having typedef (discussion in https://github.com/flutter/flutter/pull/16356)
@@ -177,7 +177,7 @@ linter:
     - prefer_generic_function_type_aliases
     - prefer_if_elements_to_conditional_expressions
     - prefer_if_null_operators
-    # - prefer_initializing_formals
+    - prefer_initializing_formals
     - prefer_inlined_adds
     # - prefer_int_literals # conflicts with ./docs/contributing/Style-guide-for-Flutter-repo.md#use-double-literals-for-double-constants
     - prefer_interpolation_to_compose_strings
@@ -253,7 +253,7 @@ linter:
     - use_enums
     - use_full_hex_values_for_flutter_colors
     - use_function_type_syntax_for_parameters
-
+    - use_if_null_to_convert_nulls_to_bools
     - use_is_even_rather_than_modulo
     - use_key_in_widget_constructors
     - use_late_for_private_fields_and_variables
