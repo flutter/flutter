@@ -30,7 +30,7 @@ class WebServerDeviceTestRunner {
   Future<String> runWebServerDevice({List<String>? additionalCommandArgs}) async {
     try {
       final Future<String> webServerOutputLine = _flutter.stdout.firstWhere(
-        (String e) => e.contains('lib/main.dart is being served at http://'),
+        (String e) => e.contains('main.dart is being served at http://'),
       );
       // Start Flutter app using the web-server device.
       await _flutter
@@ -49,7 +49,7 @@ class WebServerDeviceTestRunner {
         onTimeout: () => throw Exception('Web server URL not found after $appStartTimeout.'),
       );
 
-      final debugUrlPattern = RegExp(r'lib/main.dart is being served at (http://[^\s]+)');
+      final debugUrlPattern = RegExp(r'main.dart is being served at (http://[^\s]+)');
       final Match? match = debugUrlPattern.firstMatch(outputLine);
       return match!.group(1)!;
     } on Exception {
