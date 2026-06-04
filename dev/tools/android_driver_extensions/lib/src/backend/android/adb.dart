@@ -83,7 +83,7 @@ class Adb {
     final AdbBinaryResult result = await _runBinary(<String>['exec-out', 'screencap', '-p']);
     if (result.exitCode != 0) {
       throw StateError(
-        'Failed to take screenshot: stderr: ${result.stderr}, stdout: ${utf8.decode(result.stdout, allowMalformed: true)}',
+        'Failed to take screenshot: stderr: ${result.stderr}',
       );
     }
     return result.stdout;
