@@ -530,6 +530,9 @@ class ConstantTween<T> extends Tween<T> {
 /// This class differs from [CurvedAnimation] in that [CurvedAnimation] applies
 /// a curve to an existing [Animation] object whereas [CurveTween] can be
 /// chained with another [Tween] prior to receiving the underlying [Animation].
+// TODO(team-framework): Remove this sentence once `CurvedAnimation.reverseCurve`
+// is removed:
+// https://github.com/flutter/flutter/issues/185468.
 /// Unlike [CurvedAnimation], a [CurveTween] does not add listeners or hold
 /// state, so it does not need to be disposed.
 ///
