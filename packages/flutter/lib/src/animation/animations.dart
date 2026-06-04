@@ -451,10 +451,12 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
 /// An animation that applies different curves to its [parent] animation
 /// depending on whether it's going forwards or backwards.
 ///
-/// [AsymmetricCurvedAnimation] operates by adding listeners to its [parent].
-/// Therefore, you shouldn't re-instantiate it every build to avoid unnecessary
-/// listener additions and potential memory leaks. Remember to dispose it
-/// (or its [parent]) when it's no longer needed.
+/// An [AsymmetricCurvedAnimation] should be disposed when no longer needed to
+/// clean up the listeners it adds to its [parent].
+/// Disposing the [parent] animation (typically the [AnimationController]) will
+/// also clean up this object.
+/// Do not create an [AsymmetricCurvedAnimation] inside a `build` method
+/// because it would leak its added listeners on every rebuild.
 ///
 /// Depending on the given curve, the output of this animation could have
 /// a wider range than its input. For example, elastic curves such as
