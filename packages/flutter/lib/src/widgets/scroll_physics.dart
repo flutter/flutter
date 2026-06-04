@@ -797,7 +797,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   @override
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = toleranceFor(position);
-    final bool isStationary = velocity.abs() <= tolerance.velocity;
+    final bool isStationary = velocity.abs() < tolerance.velocity;
     final bool isRubberBand = isStationary && position.outOfRange;
 
     if (!isStationary || position.outOfRange) {
