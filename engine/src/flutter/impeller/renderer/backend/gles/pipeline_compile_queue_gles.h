@@ -17,9 +17,6 @@ class PipelineCompileQueueGLES : public PipelineCompileQueue {
   static std::shared_ptr<PipelineCompileQueueGLES> Create(
       fml::RefPtr<fml::TaskRunner> worker_task_runner);
 
-  explicit PipelineCompileQueueGLES(
-      fml::RefPtr<fml::TaskRunner> worker_task_runner);
-
   ~PipelineCompileQueueGLES() override;
 
   PipelineCompileQueueGLES(const PipelineCompileQueueGLES&) = delete;
@@ -31,6 +28,8 @@ class PipelineCompileQueueGLES : public PipelineCompileQueue {
   void OnJobAdded() override;
 
  private:
+  explicit PipelineCompileQueueGLES(
+      fml::RefPtr<fml::TaskRunner> worker_task_runner);
   void DrainPendingJobs();
 
   fml::RefPtr<fml::TaskRunner> worker_task_runner_;
