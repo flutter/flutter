@@ -16,9 +16,6 @@ class PipelineCompileQueueVulkan : public PipelineCompileQueue {
   static std::shared_ptr<PipelineCompileQueueVulkan> Create(
       std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
 
-  explicit PipelineCompileQueueVulkan(
-      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
-
   ~PipelineCompileQueueVulkan() override;
 
   PipelineCompileQueueVulkan(const PipelineCompileQueueVulkan&) = delete;
@@ -31,6 +28,8 @@ class PipelineCompileQueueVulkan : public PipelineCompileQueue {
   void OnJobAdded() override;
 
  private:
+  explicit PipelineCompileQueueVulkan(
+      std::shared_ptr<fml::BasicTaskRunner> worker_task_runner);
   std::shared_ptr<fml::BasicTaskRunner> worker_task_runner_;
 };
 
