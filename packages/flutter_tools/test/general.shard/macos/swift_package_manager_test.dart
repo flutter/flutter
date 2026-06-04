@@ -841,9 +841,7 @@ class ErrorInjectingForwardingFileSystem extends ForwardingFileSystem {
 }
 
 class _ErrorInjectingLink extends ForwardingFileSystemEntity<Link, io.Link> with ForwardingLink {
-  _ErrorInjectingLink(ErrorInjectingForwardingFileSystem fileSystem, io.Link delegate)
-    : _fileSystem = fileSystem,
-      delegate = delegate;
+  _ErrorInjectingLink(this._fileSystem, this.delegate);
 
   final ErrorInjectingForwardingFileSystem _fileSystem;
 
