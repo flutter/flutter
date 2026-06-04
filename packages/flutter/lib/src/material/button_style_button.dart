@@ -576,7 +576,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     // See https://github.com/flutter/flutter/issues/138981
     result = GestureDetector(
       onTap: widget.enabled ? null : () {},
-      behavior: HitTestBehavior.opaque,
+      behavior: widget.enabled ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
       excludeFromSemantics: true,
       child: result,
     );
