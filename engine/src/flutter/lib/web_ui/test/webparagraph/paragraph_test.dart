@@ -1274,16 +1274,14 @@ Future<void> testMain() async {
     const region = Rect.fromLTWH(0, 0, 800, 200);
     final canvas = Canvas(recorder, region);
 
-    const colorText =
-        'Liberation Sans | Noto Color Emoji: \u2600\uFE0F \u2764\uFE0F \u{1F680}\uFE0F | Γειά σου Κόσμε';
-    const monoText =
-        'Liberation Serif | Noto Emoji: \u2600\uFE0E \u2764\uFE0E \u{1F680}\uFE0E | Γειά σου Κόσμε';
+    const colorText = 'Arial | Γειά σου Κόσμε';
+    const monoText = 'Times New Roman | Γειά σου Κόσμε';
 
     final colorBuilder = ParagraphBuilder(ParagraphStyle(fontSize: 30));
     colorBuilder.pushStyle(
       TextStyle(
         fontFamily: 'Non-existing Font',
-        fontFamilyFallback: const ['Liberation Sans', 'Noto Color Emoji'],
+        fontFamilyFallback: const ['Arial', 'sans-serif'],
         color: const Color(0xFF000000),
       ),
     );
@@ -1296,7 +1294,7 @@ Future<void> testMain() async {
     monoBuilder.pushStyle(
       TextStyle(
         fontFamily: 'Non-existing Font',
-        fontFamilyFallback: const ['Liberation Serif', 'Noto Emoji'],
+        fontFamilyFallback: const ['Times New Roman', 'serif'],
         color: const Color(0xFF000000),
       ),
     );

@@ -5,16 +5,8 @@
 import 'dart:math' as math;
 
 import 'package:meta/meta.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../dom.dart';
-import '../renderer.dart';
-import '../text/paragraph.dart';
-import '../util.dart';
-import '../view_embedder/style_manager.dart';
-import 'debug.dart';
-import 'layout.dart';
-import 'painter.dart';
 
 @visibleForTesting
 const String kPlaceholderChar = '\uFFFC';
@@ -147,7 +139,7 @@ enum StyleElements {
 
 enum ShadowDirection { left, right, top, bottom }
 
-class WebTextStyle implements ui.TextStyle {
+class WebTextStyle extends SharedTextStyle implements ui.TextStyle {
   factory WebTextStyle({
     String? fontFamily,
     List<String>? fontFamilyFallback,
@@ -241,6 +233,27 @@ class WebTextStyle implements ui.TextStyle {
   final ui.Locale? locale;
   final List<ui.FontFeature>? fontFeatures;
   final List<ui.FontVariation>? fontVariations;
+
+  @override
+  String? get sharedFontFamily => originalFontFamily;
+  @override
+  List<String>? get sharedFontFamilyFallback => fontFamilyFallback;
+  @override
+  double? get sharedFontSize => fontSize;
+  @override
+  ui.FontWeight? get sharedFontWeight => fontWeight;
+  @override
+  ui.FontStyle? get sharedFontStyle => fontStyle;
+  @override
+  ui.Locale? get sharedLocale => locale;
+  @override
+  List<ui.FontFeature>? get sharedFontFeature => fontFeatures;
+  @override
+  List<ui.FontVariation>? get sharedFontVariations => fontVariations;
+  @override
+  double? get sharedLetterSpacing => letterSpacing;
+  @override
+  double? get sharedWordSpacing => wordSpacing;
 
   /// Merges this text style with [other] and returns the new text style.
   ///
@@ -403,37 +416,215 @@ class WebTextStyle implements ui.TextStyle {
     return result;
   }
 
-  String _buildCssFontString() {
-    final String cssFontStyle = fontStyle?.toCssString() ?? '';
-    final String cssFontWeight = fontWeight?.toCssString() ?? '';
-    final int cssFontSize = (fontSize ?? StyleManager.defaultFontSize).floor();
-    final String cssFontFamily = originalFontFamily ?? StyleManager.defaultFontFamily;
-    var fontString = '$cssFontStyle $cssFontWeight ${cssFontSize}px "$cssFontFamily"';
-    if (fontFamilyFallback != null && fontFamilyFallback!.isNotEmpty) {
-      fontString += ', ${fontFamilyFallback!.join(', ')}';
+  bool hasElement(StyleElements element) {
+    switch (element) {
+      case StyleElements.background:
+        // Transparent background is equivalent to no background
+        // We do not check for transparency in other paints (like foreground) because
+        // it seems unnatural to have a transparent paint on them
+        return background != null && background!.color.a != 0;
+      case StyleElements.shadows:
+        return shadows != null && shadows!.isNotEmpty;
+      case StyleElements.decorations:
+        return decoration != null &&
+            decoration! != ui.TextDecoration.none &&
+            decorationStyle != null &&
+            decorationColor != null;
+      case StyleElements.text:
+        return true;
     }
-    return fontString;
+  }
+}
+
+class WebStrutStyle extends SharedTextStyle implements ui.StrutStyle {
+  WebStrutStyle({
+    this.fontFamily,
+    this.fontFamilyFallback,
+    this.fontSize,
+    double? height,
+    // TODO(jlavrova): Implement leadingDistribution.
+    this.leadingDistribution,
+    this.leading,
+    this.fontWeight,
+    this.fontStyle,
+    this.forceStrutHeight,
+  }) : height = height == ui.kTextHeightNone ? null : height;
+
+  final String? fontFamily;
+  final List<String>? fontFamilyFallback;
+  final double? fontSize;
+  final double? height;
+  final double? leading;
+  final ui.FontWeight? fontWeight;
+  final ui.FontStyle? fontStyle;
+  final bool? forceStrutHeight;
+  final ui.TextLeadingDistribution? leadingDistribution;
+  double strutAscent = 0;
+  double strutDescent = 0;
+  double strutLeading = 0;
+
+  @override
+  String? get sharedFontFamily => fontFamily;
+  @override
+  List<String>? get sharedFontFamilyFallback => fontFamilyFallback;
+  @override
+  double? get sharedFontSize => fontSize;
+  @override
+  ui.FontWeight? get sharedFontWeight => fontWeight;
+  @override
+  ui.FontStyle? get sharedFontStyle => fontStyle;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is WebStrutStyle &&
+        other.fontFamily == fontFamily &&
+        other.fontSize == fontSize &&
+        other.height == height &&
+        other.leading == leading &&
+        other.leadingDistribution == leadingDistribution &&
+        other.fontWeight == fontWeight &&
+        other.fontStyle == fontStyle &&
+        other.forceStrutHeight == forceStrutHeight &&
+        listEquals<String>(other.fontFamilyFallback, fontFamilyFallback);
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(
+      fontFamily,
+      fontFamilyFallback != null ? Object.hashAll(fontFamilyFallback!) : null,
+      fontSize,
+      height,
+      leading,
+      leadingDistribution,
+      fontWeight,
+      fontStyle,
+      forceStrutHeight,
+    );
+  }
+
+  void calculateMetrics() {
+    if (fontSize == null || fontSize! < 0) {
+      return;
+    }
+
+    applyToContext(layoutContext);
+
+    final DomTextMetrics strutTextMetrics = layoutContext.measureText('');
+
+    strutLeading = leading == null ? 0 : leading! * fontSize!;
+
+    if (height != null) {
+      // The half leading flag doesn't take effect unless there's height override.
+      if (leadingDistribution == ui.TextLeadingDistribution.even) {
+        final double occupiedHeight =
+            strutTextMetrics.fontBoundingBoxAscent + strutTextMetrics.fontBoundingBoxDescent;
+        // Distribute the flexible height evenly over and under.
+        final double flexibleHeight = (height! * fontSize! - occupiedHeight) / 2;
+        strutAscent = strutTextMetrics.fontBoundingBoxAscent + flexibleHeight;
+        strutDescent = strutTextMetrics.fontBoundingBoxDescent + flexibleHeight;
+      } else {
+        final double strutMetricsHeight =
+            strutTextMetrics.fontBoundingBoxAscent + strutTextMetrics.fontBoundingBoxDescent;
+        final double strutHeightMultiplier = strutMetricsHeight == 0
+            ? height!
+            : height! * fontSize! / strutMetricsHeight;
+        strutAscent = strutTextMetrics.fontBoundingBoxAscent * strutHeightMultiplier;
+        strutDescent = strutTextMetrics.fontBoundingBoxDescent * strutHeightMultiplier;
+      }
+    } else {
+      strutAscent = strutTextMetrics.fontBoundingBoxAscent;
+      strutDescent = strutTextMetrics.fontBoundingBoxDescent;
+    }
+  }
+}
+
+abstract class SharedTextStyle {
+  String? get sharedFontFamily;
+  List<String>? get sharedFontFamilyFallback;
+  double? get sharedFontSize;
+  ui.FontWeight? get sharedFontWeight;
+  ui.FontStyle? get sharedFontStyle;
+  ui.Locale? get sharedLocale => null;
+  List<ui.FontFeature>? get sharedFontFeature => null;
+  List<ui.FontVariation>? get sharedFontVariations => null;
+  double? get sharedLetterSpacing => null;
+  double? get sharedWordSpacing => null;
+
+  List<String> get _fallbackFontFamilies {
+    if (isIOS15) {
+      // Remove the "-apple-system" fallback font because it causes a crash in
+      // iOS 15.
+      //
+      // See github issue: https://github.com/flutter/flutter/issues/90705
+      // See webkit bug: https://bugs.webkit.org/show_bug.cgi?id=231686
+      return <String>['BlinkMacSystemFont'];
+    }
+    if (isMacOrIOS) {
+      return <String>['-apple-system', 'BlinkMacSystemFont'];
+    }
+    return <String>['Arial'];
+  }
+
+  String _canonicalizeFontFamily(String? fontFamily, [List<String>? fontFamilyFallback]) {
+    final processedFontFamilyFallback = fontFamilyFallback == null || fontFamilyFallback.isEmpty
+        ? ''
+        : '${fontFamilyFallback.map(_processFontFamily).join(', ')}, ';
+    return '${_processFontFamily(fontFamily)}, $processedFontFamilyFallback ${_fallbackFontFamilies.join(', ')}, sans-serif';
+  }
+
+  String? _processFontFamily(String? fontFamily) {
+    if (genericFontFamilies.contains(fontFamily)) {
+      return fontFamily;
+    }
+    if (isMacOrIOS) {
+      // Unlike Safari, Chrome on iOS does not correctly fallback to cupertino
+      // on sans-serif.
+      // Map to San Francisco Text/Display fonts, use -apple-system,
+      // BlinkMacSystemFont.
+      if (fontFamily == '.SF Pro Text' ||
+          fontFamily == '.SF Pro Display' ||
+          fontFamily == '.SF UI Text' ||
+          fontFamily == '.SF UI Display') {
+        return _fallbackFontFamilies.join(', ');
+      }
+    }
+    return '"$fontFamily"';
+  }
+
+  String _buildCssFontString() {
+    final String cssFontStyle = sharedFontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
+    final String cssFontWeight = sharedFontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
+    final int cssFontSize = (sharedFontSize ?? StyleManager.defaultFontSize).floor();
+    final String cssFontFamily = sharedFontFamily ?? StyleManager.defaultFontFamily;
+    final String fullFontName = _canonicalizeFontFamily(cssFontFamily, sharedFontFamilyFallback);
+    return '$cssFontStyle $cssFontWeight ${cssFontSize}px $fullFontName';
   }
 
   String _buildLetterSpacingString() {
-    return (letterSpacing != null) ? '${letterSpacing}px' : '0px';
+    return (sharedLetterSpacing != null) ? '${sharedLetterSpacing}px' : '0px';
   }
 
   String _buildWordSpacingString() {
-    return (wordSpacing != null) ? '${wordSpacing}px' : '0px';
+    return (sharedWordSpacing != null) ? '${sharedWordSpacing}px' : '0px';
   }
 
   String _buildLangString() {
-    return locale != null ? '${locale!.languageCode}-${locale!.countryCode}' : '';
+    return sharedLocale != null
+        ? '${sharedLocale!.languageCode}-${sharedLocale!.countryCode}'
+        : 'inherit';
   }
 
   void _applyFontFeatures(DomCanvasRenderingContext2D context) {
-    if (fontFeatures == null) {
+    if (sharedFontFeature == null) {
       return;
     }
 
     final fontFeatureSettings = <ui.FontFeature>[];
-    for (final ui.FontFeature feature in fontFeatures!) {
+    for (final ui.FontFeature feature in sharedFontFeature!) {
       switch (feature.feature) {
         case 'smcp':
           context.fontVariantCaps = feature.value != 0 ? 'small-caps' : 'normal';
@@ -465,25 +656,6 @@ class WebTextStyle implements ui.TextStyle {
     context.wordSpacing = _buildWordSpacingString();
     context.lang = _buildLangString();
     _applyFontFeatures(context);
-  }
-
-  bool hasElement(StyleElements element) {
-    switch (element) {
-      case StyleElements.background:
-        // Transparent background is equivalent to no background
-        // We do not check for transparency in other paints (like foreground) because
-        // it seems unnatural to have a transparent paint on them
-        return background != null && background!.color.a != 0;
-      case StyleElements.shadows:
-        return shadows != null && shadows!.isNotEmpty;
-      case StyleElements.decorations:
-        return decoration != null &&
-            decoration! != ui.TextDecoration.none &&
-            decorationStyle != null &&
-            decorationColor != null;
-      case StyleElements.text:
-        return true;
-    }
   }
 }
 
@@ -749,107 +921,6 @@ class TextSpan extends ParagraphSpan {
 
   @override
   int get hashCode => Object.hash(start, end, style, text);
-}
-
-class WebStrutStyle implements ui.StrutStyle {
-  WebStrutStyle({
-    this.fontFamily,
-    this.fontFamilyFallback,
-    this.fontSize,
-    double? height,
-    // TODO(jlavrova): Implement leadingDistribution.
-    this.leadingDistribution,
-    this.leading,
-    this.fontWeight,
-    this.fontStyle,
-    this.forceStrutHeight,
-  }) : height = height == ui.kTextHeightNone ? null : height;
-
-  final String? fontFamily;
-  final List<String>? fontFamilyFallback;
-  final double? fontSize;
-  final double? height;
-  final double? leading;
-  final ui.FontWeight? fontWeight;
-  final ui.FontStyle? fontStyle;
-  final bool? forceStrutHeight;
-  final ui.TextLeadingDistribution? leadingDistribution;
-  double strutAscent = 0;
-  double strutDescent = 0;
-  double strutLeading = 0;
-
-  @override
-  bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
-    return other is WebStrutStyle &&
-        other.fontFamily == fontFamily &&
-        other.fontSize == fontSize &&
-        other.height == height &&
-        other.leading == leading &&
-        other.leadingDistribution == leadingDistribution &&
-        other.fontWeight == fontWeight &&
-        other.fontStyle == fontStyle &&
-        other.forceStrutHeight == forceStrutHeight &&
-        listEquals<String>(other.fontFamilyFallback, fontFamilyFallback);
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(
-      fontFamily,
-      fontFamilyFallback != null ? Object.hashAll(fontFamilyFallback!) : null,
-      fontSize,
-      height,
-      leading,
-      leadingDistribution,
-      fontWeight,
-      fontStyle,
-      forceStrutHeight,
-    );
-  }
-
-  void calculateMetrics() {
-    if (fontSize == null || fontSize! < 0) {
-      return;
-    }
-
-    WebTextStyle(
-      fontFamily: fontFamily,
-      fontFamilyFallback: fontFamilyFallback,
-      fontSize: fontSize,
-      fontStyle: fontStyle,
-      fontWeight: fontWeight,
-    ).applyToContext(layoutContext);
-
-    final DomTextMetrics strutTextMetrics = layoutContext.measureText('');
-
-    strutLeading = leading == null ? 0 : leading! * fontSize!;
-
-    if (height != null) {
-      // The half leading flag doesn't take effect unless there's height override.
-      if (leadingDistribution == ui.TextLeadingDistribution.even) {
-        final double occupiedHeight =
-            strutTextMetrics.fontBoundingBoxAscent + strutTextMetrics.fontBoundingBoxDescent;
-        // Distribute the flexible height evenly over and under.
-        final double flexibleHeight = (height! * fontSize! - occupiedHeight) / 2;
-        strutAscent = strutTextMetrics.fontBoundingBoxAscent + flexibleHeight;
-        strutDescent = strutTextMetrics.fontBoundingBoxDescent + flexibleHeight;
-      } else {
-        final double strutMetricsHeight =
-            strutTextMetrics.fontBoundingBoxAscent + strutTextMetrics.fontBoundingBoxDescent;
-        final double strutHeightMultiplier = strutMetricsHeight == 0
-            ? height!
-            : height! * fontSize! / strutMetricsHeight;
-        strutAscent = strutTextMetrics.fontBoundingBoxAscent * strutHeightMultiplier;
-        strutDescent = strutTextMetrics.fontBoundingBoxDescent * strutHeightMultiplier;
-      }
-    } else {
-      strutAscent = strutTextMetrics.fontBoundingBoxAscent;
-      strutDescent = strutTextMetrics.fontBoundingBoxDescent;
-    }
-  }
 }
 
 /// An implementation of [ui.Paragraph] based on the new Enhanced TextMetrics API.

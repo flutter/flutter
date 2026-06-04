@@ -309,7 +309,7 @@ String colorValueToCssString(int value) {
 /// available. Generic family names are keywords and must not be quoted. A
 /// generic font family should be the last item in the list of font family
 /// names.
-const Set<String> _genericFontFamilies = <String>{
+const Set<String> genericFontFamilies = <String>{
   'serif',
   'sans-serif',
   'monospace',
@@ -350,7 +350,7 @@ String get _fallbackFontFamily {
 /// If the given [fontFamily] is a generic font-family, then just return it.
 /// Otherwise, wrap the family name in quotes and add a fallback font family.
 String? canonicalizeFontFamily(String? fontFamily) {
-  if (_genericFontFamilies.contains(fontFamily)) {
+  if (genericFontFamilies.contains(fontFamily)) {
     return fontFamily;
   }
   if (isMacOrIOS) {
