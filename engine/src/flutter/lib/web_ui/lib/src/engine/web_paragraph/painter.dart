@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
-
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../../engine.dart';
-import 'decorations.dart';
 
 final DomHTMLCanvasElement _paintCanvas = createDomCanvasElement(width: 0, height: 0);
 final _paintContext =
