@@ -254,25 +254,24 @@ class SingleChildScrollView extends StatelessWidget {
       if (mediaQueryPadding != null && mediaQueryPadding != EdgeInsets.zero) {
         final MediaQueryData mediaQuery = MediaQuery.of(context);
         // Automatically pad content with padding from MediaQuery.
-        final EdgeInsets mediaQueryHorizontalPadding = mediaQuery.padding.copyWith(
-          top: 0.0,
-          bottom: 0.0,
+        final bool vertical = scrollDirection == Axis.vertical;
+        final EdgeInsets mainAxisPadding = mediaQuery.padding.copyWith(
+          top: vertical ? null : 0.0,
+          bottom: vertical ? null : 0.0,
+          left: vertical ? 0.0 : null,
+          right: vertical ? 0.0 : null,
         );
-        final EdgeInsets mediaQueryVerticalPadding = mediaQuery.padding.copyWith(
-          left: 0.0,
-          right: 0.0,
+        final EdgeInsets crossAxisPadding = mediaQuery.padding.copyWith(
+          top: vertical ? 0.0 : null,
+          bottom: vertical ? 0.0 : null,
+          left: vertical ? null : 0.0,
+          right: vertical ? null : 0.0,
         );
         // Consume the main axis padding with Padding.
-        effectivePadding = scrollDirection == Axis.vertical
-            ? mediaQueryVerticalPadding
-            : mediaQueryHorizontalPadding;
+        effectivePadding = mainAxisPadding;
         // Leave behind the cross axis padding.
         contents = MediaQuery(
-          data: mediaQuery.copyWith(
-            padding: scrollDirection == Axis.vertical
-                ? mediaQueryHorizontalPadding
-                : mediaQueryVerticalPadding,
-          ),
+          data: mediaQuery.copyWith(padding: crossAxisPadding),
           child: contents,
         );
       }
