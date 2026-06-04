@@ -358,7 +358,7 @@ class BorderRadius extends BorderRadiusGeometry {
   /// Creates a border radius where all radii are [Radius.circular(radius)].
   ///
   /// Consider using the `const` [BorderRadius.all] constructor for better performance.
-  BorderRadius.circular(double radius) : this.all(Radius.circular(radius));
+  const BorderRadius.circular(double radius) : this.all(Radius.circular(radius));
 
   /// Creates a vertically symmetric border radius where the top and bottom
   /// sides of the rectangle have the same radii.
