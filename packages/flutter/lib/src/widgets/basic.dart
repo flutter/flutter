@@ -25,6 +25,7 @@ import 'framework.dart';
 import 'indexed_stack.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'view.dart';
 import 'widget_span.dart';
 
 export 'package:flutter/animation.dart';
@@ -6604,6 +6605,9 @@ class RichText extends MultiChildRenderObjectWidget {
   /// widgets.
   final Color? selectionColor;
 
+  double _getDevicePixelRatio(BuildContext context) =>
+      MediaQuery.maybeDevicePixelRatioOf(context) ?? View.maybeOf(context)?.devicePixelRatio ?? 1.0;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -6621,7 +6625,7 @@ class RichText extends MultiChildRenderObjectWidget {
       locale: locale ?? Localizations.maybeLocaleOf(context),
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
-      devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0,
+      devicePixelRatio: _getDevicePixelRatio(context),
     );
   }
 
@@ -6642,7 +6646,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
-      ..devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0;
+      ..devicePixelRatio = _getDevicePixelRatio(context);
   }
 
   @override
