@@ -424,6 +424,28 @@ void main() {
       expect(widgetsApp.initialRoute, isNull);
     });
 
+    testWidgets('onGenerateInitialRoutes builds the initial route list', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          initialRoute: '/details',
+          routes: <String, WidgetBuilder>{'/': (BuildContext context) => const Text('Home Page')},
+          onGenerateInitialRoutes: (String initialRoute) {
+            expect(initialRoute, '/details');
+            return <Route<void>>[
+              buildTestPageRoute<void>(
+                null,
+                (BuildContext context) => const Text('Initial Details Page'),
+              ),
+            ];
+          },
+        ),
+      );
+
+      expect(find.text('Initial Details Page'), findsOneWidget);
+    });
+
     testWidgets('builder wraps the navigator content', (WidgetTester tester) async {
       await tester.pumpWidget(
         TestWidgetsApp(

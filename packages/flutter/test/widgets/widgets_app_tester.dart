@@ -9,6 +9,23 @@ library;
 
 import 'package:flutter/widgets.dart';
 
+/// Creates a page route with no transition animation for widget tests.
+PageRoute<T> buildTestPageRoute<T>(RouteSettings? settings, WidgetBuilder builder) {
+  return PageRouteBuilder<T>(
+    settings: settings,
+    pageBuilder:
+        (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
+            builder(context),
+    transitionsBuilder:
+        (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+          Widget child,
+        ) => child,
+  );
+}
+
 /// A minimal [WidgetsApp] wrapper for use in widget tests.
 ///
 /// This provides a convenient way to wrap test widgets with the necessary
@@ -74,12 +91,13 @@ class TestWidgetsApp extends StatelessWidget {
     this.navigatorKey,
     this.home,
     this.initialRoute,
+    this.onGenerateInitialRoutes,
     this.onGenerateRoute,
     this.navigatorObservers = const <NavigatorObserver>[],
     this.routes = const <String, WidgetBuilder>{},
     this.color = const Color(0xFFFFFFFF),
     this.textStyle,
-    this.pageRouteBuilder = _defaultPageRouteBuilder,
+    this.pageRouteBuilder = buildTestPageRoute,
     this.builder,
     this.shortcuts,
     this.actions,
@@ -124,6 +142,14 @@ class TestWidgetsApp extends StatelessWidget {
   ///
   ///  * [WidgetsApp.initialRoute], the equivalent property in [WidgetsApp].
   final String? initialRoute;
+
+  /// The route generator callback used to build the initial route list.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsApp.onGenerateInitialRoutes], the equivalent property in
+  ///    [WidgetsApp].
+  final InitialRouteListFactory? onGenerateInitialRoutes;
 
   /// The route generator callback used when the app is navigated to a named
   /// route.
@@ -248,25 +274,6 @@ class TestWidgetsApp extends StatelessWidget {
   ///  * [WidgetsApp.restorationScopeId], the equivalent property in [WidgetsApp].
   final String? restorationScopeId;
 
-  static PageRoute<T> _defaultPageRouteBuilder<T>(RouteSettings settings, WidgetBuilder builder) {
-    return PageRouteBuilder<T>(
-      settings: settings,
-      pageBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-          ) => builder(context),
-      transitionsBuilder:
-          (
-            BuildContext context,
-            Animation<double> animation,
-            Animation<double> secondaryAnimation,
-            Widget child,
-          ) => child,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
@@ -276,6 +283,7 @@ class TestWidgetsApp extends StatelessWidget {
       navigatorObservers: navigatorObservers,
       home: home,
       initialRoute: initialRoute,
+      onGenerateInitialRoutes: onGenerateInitialRoutes,
       onGenerateRoute: onGenerateRoute,
       routes: routes,
       pageRouteBuilder: pageRouteBuilder,

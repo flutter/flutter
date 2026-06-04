@@ -6,6 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
+import 'widgets_app_tester.dart';
+
 void main() {
   testWidgets('Restoration Smoke Test', (WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
@@ -1076,16 +1078,14 @@ void main() {
         .withIgnoredAll(), // leaking by design because of exception
     (WidgetTester tester) async {
       await tester.pumpWidget(
-        WidgetsApp(
+        TestWidgetsApp(
           restorationScopeId: 'widgets_app',
-          color: const Color(0xFF123456),
           initialRoute: '/',
           routes: <String, WidgetBuilder>{'/': (BuildContext context) => Container()},
           onGenerateInitialRoutes: (String initialRoute) {
-            return <Route<void>>[_pageRoute<void>(builder: (BuildContext context) => Container())];
-          },
-          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
-            return _pageRoute<T>(settings: settings, builder: builder);
+            return <Route<void>>[
+              buildTestPageRoute<void>(null, (BuildContext context) => Container()),
+            ];
           },
         ),
       );
@@ -1102,20 +1102,16 @@ void main() {
 
 @pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
-  return _pageRoute<void>(
-    builder: (BuildContext context) {
-      return RouteWidget(name: arguments! as String);
-    },
-  );
+  return buildTestPageRoute<void>(const RouteSettings(), (BuildContext context) {
+    return RouteWidget(name: arguments! as String);
+  });
 }
 
 @pragma('vm:entry-point')
 Route<void> _routeFutureBuilder(BuildContext context, Object? arguments) {
-  return _pageRoute<void>(
-    builder: (BuildContext context) {
-      return const RouteFutureWidget();
-    },
-  );
+  return buildTestPageRoute<void>(const RouteSettings(), (BuildContext context) {
+    return const RouteFutureWidget();
+  });
 }
 
 class PagedTestWidget extends StatelessWidget {
@@ -1195,12 +1191,9 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
               return TestPage(name: name, key: ValueKey<String>(name));
             }).toList(),
       onGenerateRoute: (RouteSettings settings) {
-        return _pageRoute<int>(
-          settings: settings,
-          builder: (BuildContext context) {
-            return RouteWidget(name: settings.name!, arguments: settings.arguments);
-          },
-        );
+        return buildTestPageRoute<int>(settings, (BuildContext context) {
+          return RouteWidget(name: settings.name!, arguments: settings.arguments);
+        });
       },
     );
   }
@@ -1225,12 +1218,9 @@ class TestPage extends Page<void> {
 
   @override
   Route<void> createRoute(BuildContext context) {
-    return _pageRoute<void>(
-      settings: this,
-      builder: (BuildContext context) {
-        return RouteWidget(name: name!);
-      },
-    );
+    return buildTestPageRoute<void>(this, (BuildContext context) {
+      return RouteWidget(name: name!);
+    });
   }
 }
 
@@ -1251,29 +1241,15 @@ class TestWidget extends StatelessWidget {
             initialRoute: 'home',
             restorationScopeId: 'app',
             onGenerateRoute: (RouteSettings settings) {
-              return _pageRoute<int>(
-                settings: settings,
-                builder: (BuildContext context) {
-                  return RouteWidget(name: settings.name!, arguments: settings.arguments);
-                },
-              );
+              return buildTestPageRoute<int>(settings, (BuildContext context) {
+                return RouteWidget(name: settings.name!, arguments: settings.arguments);
+              });
             },
           ),
         ),
       ),
     );
   }
-}
-
-/// Creates a test page route without depending on Material.
-PageRouteBuilder<T> _pageRoute<T>({RouteSettings? settings, required WidgetBuilder builder}) {
-  return PageRouteBuilder<T>(
-    settings: settings,
-    pageBuilder:
-        (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-          return builder(context);
-        },
-  );
 }
 
 class RouteWidget extends StatefulWidget {
