@@ -329,6 +329,7 @@ class ReverseAnimation extends Animation<double>
 ///
 /// [CurvedAnimation] is useful when you want to apply a non-linear [Curve] to
 /// an animation object.
+///
 /// If you want different curves when the animation is going forward vs when it
 /// is going backward, use [AsymmetricCurvedAnimation] instead.
 ///
