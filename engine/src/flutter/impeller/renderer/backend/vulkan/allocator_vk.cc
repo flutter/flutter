@@ -5,8 +5,10 @@
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
 
 #include <memory>
+#include <mutex>
 #include <utility>
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/allocation_size.h"
@@ -343,34 +345,64 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
             desc.storage_mode, supports_memoryless_textures));
     alloc_nfo.flags = ToVmaAllocationCreateFlags(desc.storage_mode);
 
-    auto create_info_native =
-        static_cast<vk::ImageCreateInfo::NativeType>(image_info);
-
     VkImage vk_image = VK_NULL_HANDLE;
     VmaAllocation allocation = {};
     VmaAllocationInfo allocation_info = {};
-    {
-      auto result = vk::Result{::vmaCreateImage(allocator,            //
-                                                &create_info_native,  //
-                                                &alloc_nfo,           //
-                                                &vk_image,            //
-                                                &allocation,          //
-                                                &allocation_info      //
-                                                )};
-      if (result != vk::Result::eSuccess) {
-        VALIDATION_LOG << "Unable to allocate Vulkan Image: "
-                       << vk::to_string(result)
-                       << " Type: " << TextureTypeToString(desc.type)
-                       << " Mode: " << StorageModeToString(desc.storage_mode)
-                       << " Usage: " << TextureUsageMaskToString(desc.usage)
-                       << " [VK]Flags: " << vk::to_string(image_info.flags)
-                       << " [VK]Format: " << vk::to_string(image_info.format)
-                       << " [VK]Usage: " << vk::to_string(image_info.usage)
-                       << " [VK]Mem. Flags: "
-                       << vk::to_string(vk::MemoryPropertyFlags(
-                              alloc_nfo.preferredFlags));
-        return;
+
+    // Performs the VMA image allocation. When `use_compression` is false, the
+    // VkImageCompressionControlEXT struct is unlinked from the create-info
+    // chain so the image is allocated uncompressed. The native create-info is
+    // re-derived from the chain on each call so the unlink is reflected.
+    const auto try_create_image = [&](bool use_compression) -> vk::Result {
+      if (!use_compression) {
+        image_info_chain.unlink<vk::ImageCompressionControlEXT>();
       }
+      auto create_info_native = static_cast<vk::ImageCreateInfo::NativeType>(
+          image_info_chain.get<vk::ImageCreateInfo>());
+      return vk::Result{::vmaCreateImage(allocator,            //
+                                         &create_info_native,  //
+                                         &alloc_nfo,           //
+                                         &vk_image,            //
+                                         &allocation,          //
+                                         &allocation_info      //
+                                         )};
+    };
+
+    // Fixed-rate compression was requested iff a rate was selected above.
+    const bool requested_compression = frc_rate.has_value();
+    auto alloc_result =
+        try_create_image(/*use_compression=*/requested_compression);
+
+    // Some drivers (e.g. PowerVR) can return VK_ERROR_COMPRESSION_EXHAUSTED_EXT
+    // when fixed-rate compression resources are depleted. Per the Vulkan spec
+    // this error is only returned for fixed-rate compression requests, so
+    // retrying without compression is a valid recovery. Without it the
+    // allocation fails, the texture is invalid, and the resulting null render
+    // target crashes the raster thread.
+    if (alloc_result == vk::Result::eErrorCompressionExhaustedEXT &&
+        requested_compression) {
+      static std::once_flag warn_once;
+      std::call_once(warn_once, [] {
+        FML_LOG(WARNING)
+            << "Fixed-rate image compression exhausted; falling back to "
+               "uncompressed image allocation. (This message is logged once.)";
+      });
+      alloc_result = try_create_image(/*use_compression=*/false);
+    }
+
+    if (alloc_result != vk::Result::eSuccess) {
+      VALIDATION_LOG << "Unable to allocate Vulkan Image: "
+                     << vk::to_string(alloc_result)
+                     << " Type: " << TextureTypeToString(desc.type)
+                     << " Mode: " << StorageModeToString(desc.storage_mode)
+                     << " Usage: " << TextureUsageMaskToString(desc.usage)
+                     << " [VK]Flags: " << vk::to_string(image_info.flags)
+                     << " [VK]Format: " << vk::to_string(image_info.format)
+                     << " [VK]Usage: " << vk::to_string(image_info.usage)
+                     << " [VK]Mem. Flags: "
+                     << vk::to_string(
+                            vk::MemoryPropertyFlags(alloc_nfo.preferredFlags));
+      return;
     }
 
     auto image = vk::Image{vk_image};
