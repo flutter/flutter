@@ -132,19 +132,16 @@ class DevFSFileContent extends DevFSContent {
   @override
   bool isModifiedAfter(DateTime time) {
     final (FileStat? currentStat, _) = _statFile();
-    if (currentStat == null) {
+    if (_fileStat == null && currentStat == null) {
       return false;
     }
-    return currentStat.modified.isAfter(time);
+    return _fileStat == null || currentStat == null || currentStat.modified.isAfter(time);
   }
 
   @override
   int get size {
-    if (_fileStat == null) {
-      markClean();
-    }
-    // Can still be null if the file wasn't found.
-    return _fileStat?.size ?? 0;
+    final FileStat? stat = _fileStat ?? _statFile().$1;
+    return stat?.size ?? 0;
   }
 
   @override
