@@ -207,6 +207,16 @@ base class CommandBuffer extends NativeFieldWrapperClass1 {
   ) {
     source._validate(allowMipAndSlice: false);
     destination._validate(source);
+    if (source.texture.format != destination.texture.format) {
+      throw Exception(
+        'Source and destination textures must have matching formats',
+      );
+    }
+    if (source.texture.sampleCount != destination.texture.sampleCount) {
+      throw Exception(
+        'Source and destination textures must have matching sample counts',
+      );
+    }
     final String? error = _copyTextureToTexture(
       source.texture,
       destination.texture,
