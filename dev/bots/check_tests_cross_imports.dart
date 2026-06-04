@@ -191,7 +191,6 @@ class TestsCrossImportChecker {
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownFlutterTestLibraryCrossImports = <String>{
-    'packages/flutter_test/lib/src/test_text_input_key_handler.dart',
     'packages/flutter_test/lib/src/widget_tester.dart',
     'packages/flutter_test/lib/src/finders.dart',
     'packages/flutter_test/lib/src/matchers.dart',
