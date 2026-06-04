@@ -363,7 +363,9 @@ void main() {
     await drag2.up();
 
     // verify there's a ballistic animation from overscroll
-    expect(await tester.pumpAndSettle(), 9);
+    // With the introduction of the new `rubberBandSpring` (exponential decay model),
+    // the overscroll settle animation converges faster and takes 8 frames instead of 9.
+    expect(await tester.pumpAndSettle(), 8);
   });
 }
 
