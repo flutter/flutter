@@ -104,6 +104,8 @@ extension type CanvasKit(JSObject _) implements JSObject {
     return _Bidi!;
   }
 
+  bool get isWebParagraphEnabled => _Bidi != null;
+
   external SkParagraphBuilderNamespace get ParagraphBuilder;
   external SkParagraphStyle ParagraphStyle(SkParagraphStyleProperties properties);
   external SkTextStyle TextStyle(SkTextStyleProperties properties);
