@@ -181,8 +181,7 @@ Dart_Handle Surface::PresentFrame(size_t texture_index,
 
   record->producer_pending.store(true);
   if (!command_buffer.AddCompletionCallback(
-          [record](impeller::CommandBuffer::Status status) {
-            (void)status;
+          [record]([[maybe_unused]] impeller::CommandBuffer::Status status) {
             record->producer_pending.store(false);
           })) {
     record->producer_pending.store(false);
@@ -249,19 +248,16 @@ size_t Surface::GetBackingTextureCount() const {
 ///
 
 Dart_Handle InternalFlutterGpu_Surface_Initialize(
-    Dart_Handle wrapper,
-    flutter::gpu::Context* gpu_context,
+    [[maybe_unused]] Dart_Handle wrapper,
+    [[maybe_unused]] flutter::gpu::Context* gpu_context,
     int width,
     int height,
-    int format) {
+    [[maybe_unused]] int format) {
   if (width <= 0 || height <= 0) {
     return tonic::ToDart("GpuSurface dimensions must be greater than zero.");
   }
 
 #if !IMPELLER_SUPPORTS_RENDERING
-  (void)wrapper;
-  (void)gpu_context;
-  (void)format;
   return tonic::ToDart("GpuSurface requires Impeller rendering support.");
 #else
   auto pixel_format = flutter::gpu::ToImpellerPixelFormat(format);
