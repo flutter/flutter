@@ -571,6 +571,16 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       ),
     );
 
+    // When the button is disabled, absorb taps to prevent them from
+    // propagating to parent gesture detectors.
+    // See https://github.com/flutter/flutter/issues/138981
+    result = GestureDetector(
+      onTap: widget.enabled ? null : () {},
+      behavior: HitTestBehavior.opaque,
+      excludeFromSemantics: true,
+      child: result,
+    );
+
     if (widget.tooltip != null) {
       result = Tooltip(message: widget.tooltip, child: result);
     }

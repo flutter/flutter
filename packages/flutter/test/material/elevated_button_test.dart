@@ -1629,30 +1629,32 @@ void main() {
     }
   });
 
-  testWidgets('ElevatedButton uses InkSparkle only for Android non-web when useMaterial3 is true', (
-    WidgetTester tester,
-  ) async {
-    final theme = ThemeData();
+  testWidgets(
+    'ElevatedButton uses InkSparkle only for Android non-web when useMaterial3 is true',
+    (WidgetTester tester) async {
+      final theme = ThemeData();
 
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: theme,
-        home: Center(
-          child: ElevatedButton(onPressed: () {}, child: const Text('button')),
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Center(
+            child: ElevatedButton(onPressed: () {}, child: const Text('button')),
+          ),
         ),
-      ),
-    );
+      );
 
-    final InkWell buttonInkWell = tester.widget<InkWell>(
-      find.descendant(of: find.byType(ElevatedButton), matching: find.byType(InkWell)),
-    );
+      final InkWell buttonInkWell = tester.widget<InkWell>(
+        find.descendant(of: find.byType(ElevatedButton), matching: find.byType(InkWell)),
+      );
 
-    if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
-      expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
-    } else {
-      expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
-    }
-  }, variant: TargetPlatformVariant.all());
+      if (debugDefaultTargetPlatformOverride! == TargetPlatform.android && !kIsWeb) {
+        expect(buttonInkWell.splashFactory, equals(InkSparkle.splashFactory));
+      } else {
+        expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
+      }
+    },
+    variant: TargetPlatformVariant.all(),
+  );
 
   testWidgets('ElevatedButton uses InkRipple when useMaterial3 is false', (
     WidgetTester tester,
@@ -2691,5 +2693,32 @@ void main() {
 
     // The button should still be focused.
     expect(getButtonFocusNode().hasFocus, true);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/138981
+  testWidgets('Disabled ElevatedButton does not let taps pass through to parent GestureDetector', (
+    WidgetTester tester,
+  ) async {
+    var parentTapCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: GestureDetector(
+            onTap: () {
+              parentTapCount++;
+            },
+            child: const Center(child: ElevatedButton(onPressed: null, child: Text('Disabled'))),
+          ),
+        ),
+      ),
+    );
+
+    // Tap the disabled button.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+
+    // The parent GestureDetector should NOT have received the tap.
+    expect(parentTapCount, 0);
   });
 }
