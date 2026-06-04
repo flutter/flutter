@@ -136,9 +136,10 @@ bool BlitPass::AddCopy(BufferView source,
     return false;
   }
 
-  auto bytes_per_pixel =
-      BytesPerPixelForPixelFormat(destination->GetTextureDescriptor().format);
-  auto bytes_per_region = destination_region_value.Area() * bytes_per_pixel;
+  auto bytes_per_region =
+      BytesForTextureRegion(destination->GetTextureDescriptor().format,
+                            destination_region_value.GetWidth(),
+                            destination_region_value.GetHeight());
 
   if (source.GetRange().length != bytes_per_region) {
     VALIDATION_LOG

@@ -582,7 +582,6 @@ class DevFS {
     File? dartPluginRegistrant,
   }) async {
     final candidateCompileTime = DateTime.now();
-    didUpdateFontManifest = false;
     lastPackageConfig = packageConfig;
 
     // Update modified files
