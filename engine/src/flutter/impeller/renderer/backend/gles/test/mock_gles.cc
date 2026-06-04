@@ -373,35 +373,35 @@ void mockDrawElements(GLenum mode,
 static_assert(CheckSameSignature<decltype(mockDrawElements),  //
                                  decltype(glDrawElements)>::value);
 
-void mockDrawArraysInstancedEXT(GLenum mode,
-                                GLint first,
-                                GLsizei count,
-                                GLsizei instancecount) {
-  CallMockMethod(&IMockGLESImpl::DrawArraysInstancedEXT, mode, first, count,
+void mockDrawArraysInstanced(GLenum mode,
+                             GLint first,
+                             GLsizei count,
+                             GLsizei instancecount) {
+  CallMockMethod(&IMockGLESImpl::DrawArraysInstanced, mode, first, count,
                  instancecount);
 }
 
-static_assert(CheckSameSignature<decltype(mockDrawArraysInstancedEXT),  //
-                                 decltype(glDrawArraysInstancedEXT)>::value);
+static_assert(CheckSameSignature<decltype(mockDrawArraysInstanced),  //
+                                 decltype(glDrawArraysInstanced)>::value);
 
-void mockDrawElementsInstancedEXT(GLenum mode,
-                                  GLsizei count,
-                                  GLenum type,
-                                  const void* indices,
-                                  GLsizei instancecount) {
-  CallMockMethod(&IMockGLESImpl::DrawElementsInstancedEXT, mode, count, type,
+void mockDrawElementsInstanced(GLenum mode,
+                               GLsizei count,
+                               GLenum type,
+                               const void* indices,
+                               GLsizei instancecount) {
+  CallMockMethod(&IMockGLESImpl::DrawElementsInstanced, mode, count, type,
                  indices, instancecount);
 }
 
-static_assert(CheckSameSignature<decltype(mockDrawElementsInstancedEXT),  //
-                                 decltype(glDrawElementsInstancedEXT)>::value);
+static_assert(CheckSameSignature<decltype(mockDrawElementsInstanced),  //
+                                 decltype(glDrawElementsInstanced)>::value);
 
-void mockVertexAttribDivisorEXT(GLuint index, GLuint divisor) {
-  CallMockMethod(&IMockGLESImpl::VertexAttribDivisorEXT, index, divisor);
+void mockVertexAttribDivisor(GLuint index, GLuint divisor) {
+  CallMockMethod(&IMockGLESImpl::VertexAttribDivisor, index, divisor);
 }
 
-static_assert(CheckSameSignature<decltype(mockVertexAttribDivisorEXT),  //
-                                 decltype(glVertexAttribDivisorEXT)>::value);
+static_assert(CheckSameSignature<decltype(mockVertexAttribDivisor),  //
+                                 decltype(glVertexAttribDivisor)>::value);
 
 // static
 std::shared_ptr<MockGLES> MockGLES::Init(
@@ -519,12 +519,12 @@ const ProcTableGLES::Resolver kMockResolverGLES = [](const char* name) {
     return reinterpret_cast<void*>(mockDrawArrays);
   } else if (strcmp(name, "glDrawElements") == 0) {
     return reinterpret_cast<void*>(mockDrawElements);
-  } else if (strcmp(name, "glDrawArraysInstancedEXT") == 0) {
-    return reinterpret_cast<void*>(mockDrawArraysInstancedEXT);
-  } else if (strcmp(name, "glDrawElementsInstancedEXT") == 0) {
-    return reinterpret_cast<void*>(mockDrawElementsInstancedEXT);
-  } else if (strcmp(name, "glVertexAttribDivisorEXT") == 0) {
-    return reinterpret_cast<void*>(mockVertexAttribDivisorEXT);
+  } else if (strcmp(name, "glDrawArraysInstanced") == 0) {
+    return reinterpret_cast<void*>(mockDrawArraysInstanced);
+  } else if (strcmp(name, "glDrawElementsInstanced") == 0) {
+    return reinterpret_cast<void*>(mockDrawElementsInstanced);
+  } else if (strcmp(name, "glVertexAttribDivisor") == 0) {
+    return reinterpret_cast<void*>(mockVertexAttribDivisor);
   } else {
     return reinterpret_cast<void*>(&doNothing);
   }
