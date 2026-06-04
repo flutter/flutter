@@ -929,10 +929,11 @@ class FlutterPluginUtilsTest {
                 @TempDir tempDir: Path
             ) {
                 val rootDir = tempDir.toFile()
-                val gradlePropertiesFile = File(rootDir, "gradle.properties").apply {
-                    createNewFile()
-                    writeText("android.builtInKotlin=true\n")
-                }
+                val gradlePropertiesFile = File(rootDir, "gradle.properties")
+                    .apply {
+                        createNewFile()
+                        writeText("android.builtInKotlin=true\n")
+                    }
 
                 val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
                 val appBuildGradleFile =
@@ -947,10 +948,24 @@ class FlutterPluginUtilsTest {
                         )
                     }
 
+                val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
+                val pluginBuildGradleFile =
+                    File(pluginDir, "build.gradle").apply {
+                        createNewFile()
+                        writeText(
+                            """
+                            plugins {
+                                id("com.android.library")
+                            }
+                            """.trimIndent()
+                        )
+                    }
+
                 val rootProject = mockk<Project>()
                 val mockGradle = mockk<Gradle>()
                 val mockLogger = mockk<Logger>(relaxed = true)
                 val appProjectPluginManager = mockk<PluginManager>(relaxed = true)
+                val pluginProjectPluginManager = mockk<PluginManager>(relaxed = true)
 
                 every { rootProject.file("gradle.properties") } returns gradlePropertiesFile
                 every { rootProject.projectDir } returns rootDir
@@ -966,12 +981,24 @@ class FlutterPluginUtilsTest {
                         pluginManager = appProjectPluginManager
                     )
 
-                every { rootProject.subprojects } returns setOf(appProject)
+                val pluginProject =
+                    createMockSubproject(
+                        tempDir = tempDir,
+                        buildFile = pluginBuildGradleFile,
+                        projectName = "plugin",
+                        mockLogger = mockLogger,
+                        rootProjectMock = rootProject,
+                        gradleMock = mockGradle,
+                        pluginManager = pluginProjectPluginManager
+                    )
+
+                every { rootProject.subprojects } returns setOf(appProject, pluginProject)
 
                 detectApplyingKotlinGradlePlugin(appProject)
 
                 verify(exactly = 0) { rootProject.subprojects(any<Action<Project>>()) }
-                verify(exactly = 0) { appProjectPluginManager.apply(any()) }
+                verify(exactly = 0) { appProjectPluginManager.apply(any<String>()) }
+                verify(exactly = 0) { pluginProjectPluginManager.apply(any<String>()) }
             }
 
             @Test
@@ -979,10 +1006,11 @@ class FlutterPluginUtilsTest {
                 @TempDir tempDir: Path
             ) {
                 val rootDir = tempDir.toFile()
-                val gradlePropertiesFile = File(rootDir, "gradle.properties").apply {
-                    createNewFile()
-                    writeText("android.builtInKotlin=true\n")
-                }
+                val gradlePropertiesFile = File(rootDir, "gradle.properties")
+                    .apply {
+                        createNewFile()
+                        writeText("android.builtInKotlin=true\n")
+                    }
 
                 val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
                 val appBuildGradleFile =
@@ -992,6 +1020,19 @@ class FlutterPluginUtilsTest {
                             """
                             plugins {
                                 id("com.android.application")
+                            }
+                            """.trimIndent()
+                        )
+                    }
+
+                val pluginDir = tempDir.resolve("plugin").toFile().apply { mkdirs() }
+                val pluginBuildGradleFile =
+                    File(pluginDir, "build.gradle").apply {
+                        createNewFile()
+                        writeText(
+                            """
+                            plugins {
+                                id("com.android.library")
                                 id("kotlin-android")
                             }
                             """.trimIndent()
@@ -1002,6 +1043,7 @@ class FlutterPluginUtilsTest {
                 val mockGradle = mockk<Gradle>()
                 val mockLogger = mockk<Logger>(relaxed = true)
                 val appProjectPluginManager = mockk<PluginManager>(relaxed = true)
+                val pluginProjectPluginManager = mockk<PluginManager>(relaxed = true)
 
                 every { rootProject.file("gradle.properties") } returns gradlePropertiesFile
                 every { rootProject.projectDir } returns rootDir
@@ -1017,7 +1059,18 @@ class FlutterPluginUtilsTest {
                         pluginManager = appProjectPluginManager
                     )
 
-                every { rootProject.subprojects } returns setOf(appProject)
+                val pluginProject =
+                    createMockSubproject(
+                        tempDir = tempDir,
+                        buildFile = pluginBuildGradleFile,
+                        projectName = "plugin",
+                        mockLogger = mockLogger,
+                        rootProjectMock = rootProject,
+                        gradleMock = mockGradle,
+                        pluginManager = pluginProjectPluginManager
+                    )
+
+                every { rootProject.subprojects } returns setOf(appProject, pluginProject)
 
                 val subprojectsActionSlot = slot<Action<Project>>()
                 val projectsEvaluatedActionSlot = slot<Action<Gradle>>()
@@ -1029,12 +1082,16 @@ class FlutterPluginUtilsTest {
 
                 verify { rootProject.subprojects(capture(subprojectsActionSlot)) }
                 subprojectsActionSlot.captured.execute(appProject)
+                subprojectsActionSlot.captured.execute(pluginProject)
 
                 verify { mockGradle.projectsEvaluated(capture(projectsEvaluatedActionSlot)) }
                 projectsEvaluatedActionSlot.captured.execute(mockGradle)
 
+                verify(exactly = 0) {
+                    mockLogger.error(match { it.contains("Your Android app project") })
+                }
                 verify {
-                    mockLogger.error(match { it.contains("applies the Kotlin Gradle Plugin, which will cause build failures") })
+                    mockLogger.error(match { it.contains("Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): plugin") })
                 }
             }
 
