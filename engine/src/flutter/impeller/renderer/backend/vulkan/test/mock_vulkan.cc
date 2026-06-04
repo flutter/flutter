@@ -466,6 +466,12 @@ VkResult vkCreateGraphicsPipelines(
   return VK_SUCCESS;
 }
 
+VkResult vkDeviceWaitIdle(VkDevice device) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkDeviceWaitIdle");
+  return VK_SUCCESS;
+}
+
 void vkDestroyDevice(VkDevice device, const VkAllocationCallbacks* pAllocator) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
   mock_device->AddCalledFunction("vkDestroyDevice");
@@ -956,6 +962,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreatePipelineLayout);
   } else if (strcmp("vkCreateGraphicsPipelines", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateGraphicsPipelines);
+  } else if (strcmp("vkDeviceWaitIdle", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDeviceWaitIdle);
   } else if (strcmp("vkDestroyDevice", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyDevice);
   } else if (strcmp("vkDestroyInstance", pName) == 0) {
