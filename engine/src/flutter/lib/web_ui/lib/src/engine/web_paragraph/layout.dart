@@ -412,7 +412,6 @@ class TextLayout {
     if (ellipsisBlock != null) {
       // There are no trailing spaces if we add the ellipsis block
       trailingSpacesWidth = 0.0;
-      assert(line.trailingSpacesWidth == 0.0);
       if (paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr) {
         // We need to adjust the block shift from line start because we are adding the ellipsis block at the end
         ellipsisBlock.shiftFromLineStart = blockShiftFromLineStart;
@@ -1324,7 +1323,7 @@ class TextLine {
   double paintBoundsRight = double.negativeInfinity;
 
   double formattingShift = 0.0; // For centered or right aligned text
-  double trailingSpacesWidth = 0.0;
+  late final double trailingSpacesWidth;
 
   double get fullWidth => advance.width + formattingShift + trailingSpacesWidth;
 
