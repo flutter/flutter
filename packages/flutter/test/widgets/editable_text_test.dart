@@ -4073,6 +4073,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final controller = TextEditingController(text: 'Line 1\n' * 100);
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       TestWidgetsApp(home: TestTextField(controller: controller, maxLines: null)),
@@ -4123,6 +4124,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final controller = TextEditingController(text: 'Line 1\n' * 100);
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       TestWidgetsApp(home: TestTextField(controller: controller, maxLines: null)),

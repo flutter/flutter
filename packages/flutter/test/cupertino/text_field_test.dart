@@ -10949,6 +10949,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final controller = TextEditingController(text: '${'Line 1\n' * 100}FinalWord');
+    addTearDown(controller.dispose);
 
     await tester.pumpWidget(
       CupertinoApp(
