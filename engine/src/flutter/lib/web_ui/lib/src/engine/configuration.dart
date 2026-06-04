@@ -309,8 +309,10 @@ class FlutterConfiguration {
   /// Enables the new WebParagraph implementation built on top of Chrome's Text Clusters
   /// API: https://github.com/fserb/canvas2D/blob/master/spec/enhanced-textmetrics.md
   ///
+  /// If the browser doesn't support WebParagraph, this flag will have no effect.
+  ///
   /// WARNING: This is an experimental feature.
-  bool get enableWebParagraph => _configuration?.enableWebParagraph ?? false;
+  bool get preferWebParagraph => _configuration?.preferWebParagraph ?? false;
 
   /// Set this flag to `true` to cause the engine to visualize the semantics tree
   /// on the screen for debugging.
@@ -402,7 +404,7 @@ extension type JsFlutterConfiguration._(JSObject _) implements JSObject {
   external bool? get canvasKitForceCpuOnly;
   external bool? get canvasKitForceMultiSurfaceRasterizer;
   external double? get canvasKitMaximumSurfaces;
-  external bool? get enableWebParagraph;
+  external bool? get preferWebParagraph;
   external bool? get debugShowSemanticsNodes;
   external DomElement? get hostElement;
   external bool? get multiViewEnabled;

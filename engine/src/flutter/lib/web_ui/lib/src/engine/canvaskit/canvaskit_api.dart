@@ -2428,7 +2428,7 @@ String get _canvasKitBaseUrl => configuration.canvasKitBaseUrl;
 
 @visibleForTesting
 List<String> getCanvasKitJsFileNames(CanvasKitVariant variant) {
-  final bool useWebParagraph = configuration.enableWebParagraph && browserSupportsWebParagraph;
+  final bool useWebParagraph = configuration.preferWebParagraph && browserSupportsWebParagraph;
   return [
     ...switch (variant) {
       CanvasKitVariant.auto => <String>[

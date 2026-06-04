@@ -533,7 +533,7 @@ class BrowserPlatform extends PlatformPlugin {
       canvasKitBaseUrl: "/canvaskit",
       forceSingleThreadedSkwasm: ${suite.runConfig.forceSingleThreadedSkwasm},
       wasmAllowList: ${jsonEncode(suite.runConfig.wasmAllowList)},
-      enableWebParagraph: ${suite.runConfig.enableWebParagraph},
+      preferWebParagraph: ${suite.runConfig.enableWebParagraph},
       enableWimp: ${suite.runConfig.enableWimp},
     },
   });
