@@ -694,11 +694,44 @@ void main() {
       expect(find.text('Route Content'), findsOneWidget);
     });
 
+    testWidgets('onUnknownRoute builds routes from callback', (WidgetTester tester) async {
+      final navigatorKey = GlobalKey<NavigatorState>();
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          navigatorKey: navigatorKey,
+          home: const Text('Home Page'),
+          onGenerateRoute: (RouteSettings settings) => null,
+          onUnknownRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              settings: settings,
+              pageBuilder: (_, _, _) => const Text('Unknown Route'),
+            );
+          },
+        ),
+      );
+
+      expect(find.text('Home Page'), findsOneWidget);
+      expect(find.text('Unknown Route'), findsNothing);
+
+      navigatorKey.currentState!.pushNamed('/unknown');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Unknown Route'), findsOneWidget);
+    });
+
     testWidgets('onGenerateRoute defaults to null', (WidgetTester tester) async {
       await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
 
       final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
       expect(widgetsApp.onGenerateRoute, isNull);
+    });
+
+    testWidgets('onUnknownRoute defaults to null', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+
+      final WidgetsApp widgetsApp = tester.widget(find.byType(WidgetsApp));
+      expect(widgetsApp.onUnknownRoute, isNull);
     });
   });
 }
