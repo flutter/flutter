@@ -107,7 +107,7 @@ Future<TaskResult> run() async {
                 if (line.contains(vulkanBackendMessage) || line.contains(openGLBackendMessage)) {
                   sawImpellerBackendMessage = true;
                 }
-                if (line.contains('The Dart VM service is listening on')) {
+                if (line.contains('The Dart VM service is listening on') || line.contains('A Dart VM Service')) {
                   sawVMServiceMessage = true;
                   if (!completer.isCompleted) {
                     completer.complete();
@@ -161,7 +161,7 @@ Future<TaskResult> run() async {
               if (line.contains(vulkanBackendMessage) || line.contains(openGLBackendMessage)) {
                 sawImpellerBackendMessage = true;
               }
-              if (line.contains('The Dart VM service is listening on')) {
+              if (line.contains('The Dart VM service is listening on') || line.contains('A Dart VM Service')) {
                 sawVMServiceMessage = true;
                 if (!completer.isCompleted) {
                   completer.complete();
