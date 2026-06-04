@@ -54,7 +54,11 @@ ndk;28.2.13676358:ndk
 
 ## Step 2: Verify Tag Uniqueness & Run Upload Script
 
-CIPD tags and refs are immutable. Before executing the script, verify that your proposed version tag (e.g., `37v1unmodified`) has **not** already been registered:
+> [!NOTE]
+> **Standardizing CIPD Version Tags**
+> Use clean version descriptors (e.g., `37v1`, `37v2`). Do **not** append legacy speculative suffixes such as `unmodified` now that `create_cipd_packages.sh` is the standardized upload pipeline.
+
+CIPD tags and refs are immutable. Before executing the script, verify that your proposed version tag (e.g., `37v1`) has **not** already been registered:
 
 ```bash
 cipd describe flutter/android/sdk/all/mac-arm64 -version version:<VERSION_TAG>
