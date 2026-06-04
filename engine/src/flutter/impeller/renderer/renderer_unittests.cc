@@ -4,6 +4,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/time/time_point.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
@@ -1585,6 +1586,108 @@ TEST_P(RendererTest, BindingNullTexturesDoesNotCrash) {
 
   auto pass = command_buffer->CreateRenderPass(target);
   EXPECT_FALSE(FS::BindContents2(*pass, nullptr, sampler));
+}
+
+// Clears a single cube map face by attaching it as a render target slice.
+// Rendering to cube faces is portable down to OpenGL ES 2.0, so this runs on
+// every backend.
+TEST_P(RendererTest, CanRenderToTextureSlice) {
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.type = TextureType::kTextureCube;
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = {100, 100};
+  desc.usage = TextureUsage::kRenderTarget | TextureUsage::kShaderRead;
+  auto texture = context->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+
+  ColorAttachment color0;
+  color0.texture = texture;
+  color0.slice = 3u;  // +Y face.
+  color0.load_action = LoadAction::kClear;
+  color0.store_action = StoreAction::kStore;
+  color0.clear_color = Color::Green();
+  RenderTarget target;
+  target.SetColorAttachment(color0, 0u);
+
+  auto buffer = context->CreateCommandBuffer();
+  auto pass = buffer->CreateRenderPass(target);
+  ASSERT_TRUE(pass && pass->IsValid());
+  pass->EncodeCommands();
+  EXPECT_TRUE(context->GetCommandQueue()->Submit({buffer}).ok());
+}
+
+// Clears mip level 1 of a texture by attaching it as a render target. Skipped
+// on OpenGL ES, where rendering to non-zero mip levels needs ES 3.0 or
+// GL_OES_fbo_render_mipmap.
+TEST_P(RendererTest, CanRenderToMipLevel) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
+    GTEST_SKIP() << "Rendering to non-zero mip levels is gated on a GLES "
+                    "capability; covered by the Metal and Vulkan backends.";
+  }
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = {100, 100};
+  desc.mip_count = 2u;
+  desc.usage = TextureUsage::kRenderTarget | TextureUsage::kShaderRead;
+  auto texture = context->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+
+  ColorAttachment color0;
+  color0.texture = texture;
+  color0.mip_level = 1u;
+  color0.load_action = LoadAction::kClear;
+  color0.store_action = StoreAction::kStore;
+  color0.clear_color = Color::Green();
+  RenderTarget target;
+  target.SetColorAttachment(color0, 0u);
+  // The render area follows the mip level dimensions.
+  EXPECT_EQ(target.GetRenderTargetSize(), ISize(50, 50));
+
+  auto buffer = context->CreateCommandBuffer();
+  auto pass = buffer->CreateRenderPass(target);
+  ASSERT_TRUE(pass && pass->IsValid());
+  pass->EncodeCommands();
+  EXPECT_TRUE(context->GetCommandQueue()->Submit({buffer}).ok());
+}
+
+// Attachment validation rejects out-of-range mip levels and slices.
+TEST_P(RendererTest, AttachmentRejectsOutOfRangeSubresource) {
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.size = {100, 100};
+  desc.mip_count = 2u;
+  desc.usage = TextureUsage::kRenderTarget;
+  auto texture = context->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+
+  ColorAttachment color0;
+  color0.texture = texture;
+  color0.load_action = LoadAction::kClear;
+  color0.store_action = StoreAction::kStore;
+  EXPECT_TRUE(color0.IsValid());
+
+  // The out-of-range cases log validation errors on purpose.
+  ScopedValidationDisable disable_validation;
+
+  color0.mip_level = 2u;  // Only levels 0 and 1 exist.
+  EXPECT_FALSE(color0.IsValid());
+
+  color0.mip_level = 0u;
+  color0.slice = 1u;  // A 2D texture has a single slice.
+  EXPECT_FALSE(color0.IsValid());
 }
 
 }  // namespace testing
