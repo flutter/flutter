@@ -42,16 +42,14 @@ void main() {
       const _ReverseLerpToShapeBorder(),
       0.25,
     )!;
-    expect(reverseLerpToResult, isA<_LerpShapeBorder>());
-    expect((reverseLerpToResult as _LerpShapeBorder).t, 0.75);
+    expect(reverseLerpToResult, const _LerpShapeBorder(0.75));
 
     final ShapeBorder reverseLerpFromResult = ShapeBorder.lerp(
       const _ReverseLerpFromShapeBorder(),
       const _LerpShapeBorder(),
       0.25,
     )!;
-    expect(reverseLerpFromResult, isA<_LerpShapeBorder>());
-    expect((reverseLerpFromResult as _LerpShapeBorder).t, 0.75);
+    expect(reverseLerpFromResult, const _LerpShapeBorder(0.75));
   });
 
   test('OutlinedBorder.lerp tries equivalent reverse interpolation', () {
@@ -60,16 +58,14 @@ void main() {
       const _ReverseLerpToOutlinedBorder(),
       0.25,
     )!;
-    expect(reverseLerpToResult, isA<_LerpOutlinedBorder>());
-    expect((reverseLerpToResult as _LerpOutlinedBorder).t, 0.75);
+    expect(reverseLerpToResult, const _LerpOutlinedBorder(0.75));
 
     final OutlinedBorder reverseLerpFromResult = OutlinedBorder.lerp(
       const _ReverseLerpFromOutlinedBorder(),
       const _LerpOutlinedBorder(),
       0.25,
     )!;
-    expect(reverseLerpFromResult, isA<_LerpOutlinedBorder>());
-    expect((reverseLerpFromResult as _LerpOutlinedBorder).t, 0.75);
+    expect(reverseLerpFromResult, const _LerpOutlinedBorder(0.75));
   });
 
   test('Outlined shape borders interpolate symmetrically through ShapeBorder.lerp', () {
@@ -246,6 +242,17 @@ class _LerpShapeBorder extends ShapeBorder {
 
   @override
   ShapeBorder scale(double t) => _LerpShapeBorder(t);
+
+  @override
+  bool operator ==(Object other) {
+    return other is _LerpShapeBorder && other.runtimeType == runtimeType && other.t == t;
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, t);
+
+  @override
+  String toString() => '_LerpShapeBorder(t: $t)';
 }
 
 class _ReverseLerpToShapeBorder extends _LerpShapeBorder {
@@ -287,6 +294,20 @@ class _LerpOutlinedBorder extends OutlinedBorder {
 
   @override
   ShapeBorder scale(double t) => _LerpOutlinedBorder(t, side.scale(t));
+
+  @override
+  bool operator ==(Object other) {
+    return other is _LerpOutlinedBorder &&
+        other.runtimeType == runtimeType &&
+        other.t == t &&
+        other.side == side;
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, t, side);
+
+  @override
+  String toString() => '_LerpOutlinedBorder(t: $t, side: $side)';
 }
 
 class _ReverseLerpToOutlinedBorder extends _LerpOutlinedBorder {
