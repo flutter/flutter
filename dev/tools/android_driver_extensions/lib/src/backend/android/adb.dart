@@ -82,9 +82,7 @@ class Adb {
   Future<Uint8List> screencap() async {
     final AdbBinaryResult result = await _runBinary(<String>['exec-out', 'screencap', '-p']);
     if (result.exitCode != 0) {
-      throw StateError(
-        'Failed to take screenshot: stderr: ${result.stderr}',
-      );
+      throw StateError('Failed to take screenshot: stderr: ${result.stderr}');
     }
     return result.stdout;
   }
