@@ -49,7 +49,8 @@ class AHBTextureSourceVK final : public TextureSourceVK {
   vk::ImageView GetImageView() const override;
 
   // |TextureSourceVK|
-  vk::ImageView GetRenderTargetView() const override;
+  vk::ImageView GetRenderTargetView(uint32_t mip_level,
+                                    uint32_t array_layer) const override;
 
   bool IsValid() const;
 

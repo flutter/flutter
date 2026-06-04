@@ -9,6 +9,9 @@
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "fml/make_copyable.h"
+#include "impeller/core/allocator.h"
+#include "impeller/core/formats.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/context.h"
 #include "tonic/converter/dart_converter.h"
 
@@ -135,4 +138,37 @@ extern int InternalFlutterGpu_Context_GetMinimumUniformByteAlignment(
 extern bool InternalFlutterGpu_Context_GetSupportsOffscreenMSAA(
     flutter::gpu::Context* wrapper) {
   return flutter::gpu::SupportsNormalOffscreenMSAA(wrapper->GetContext());
+}
+
+extern bool InternalFlutterGpu_Context_SupportsTextureCompression(
+    flutter::gpu::Context* wrapper,
+    int family) {
+  return wrapper->GetContext().GetCapabilities()->SupportsTextureCompression(
+      flutter::gpu::ToImpellerCompressedTextureFamily(family));
+}
+
+extern bool InternalFlutterGpu_Context_SupportsTextureFormat(
+    flutter::gpu::Context* wrapper,
+    int format,
+    bool render_target,
+    bool shader_read,
+    bool shader_write) {
+  const impeller::PixelFormat impeller_format =
+      flutter::gpu::ToImpellerPixelFormat(format);
+  if (impeller_format == impeller::PixelFormat::kUnknown) {
+    return false;
+  }
+  // Compressed formats are sample-only: shader_read must be true, and
+  // render-target or shader-write usage is never available.
+  if (impeller::IsCompressed(impeller_format)) {
+    if (render_target || shader_write || !shader_read) {
+      return false;
+    }
+    return wrapper->GetContext().GetCapabilities()->SupportsTextureCompression(
+        impeller::CompressedTextureFamilyForFormat(impeller_format));
+  }
+  // For uncompressed formats, today's Impeller capability surface does not
+  // expose a per-format usage query, so this returns true. As that surface
+  // grows it should be wired in here.
+  return true;
 }

@@ -79,6 +79,47 @@ TEST(CompilerTest, Defines) {
   EXPECT_NE(compiler_2.GetSPIRVAssembly(), nullptr);
 }
 
+TEST(CompilerTest, DeprecatedUnflippedDefines) {
+  std::shared_ptr<const fml::Mapping> fixture =
+      flutter::testing::OpenFixtureAsMapping(
+          "check_gles_unflipped_definition.frag");
+
+  SourceOptions options;
+  options.source_language = SourceLanguage::kGLSL;
+  options.entry_point_name = "main";
+  options.type = SourceType::kFragmentShader;
+
+  Reflector::Options reflector_options;
+
+  // Test that IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED is defined on
+  // TargetPlatform::kRuntimeStageGLES.
+  {
+    options.target_platform = TargetPlatform::kRuntimeStageGLES;
+    reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES;
+    Compiler compiler = Compiler(fixture, options, reflector_options);
+    // Should fail as the shader has a compilation error in it.
+    EXPECT_EQ(compiler.GetSPIRVAssembly(), nullptr);
+  }
+
+  // Test that IMPELLER_OPENGLES_UNFLIPPED_DEPRECATED is defined on
+  // TargetPlatform::kRuntimeStageGLES3.
+  {
+    options.target_platform = TargetPlatform::kRuntimeStageGLES3;
+    reflector_options.target_platform = TargetPlatform::kRuntimeStageGLES3;
+    Compiler compiler = Compiler(fixture, options, reflector_options);
+    // Should fail as the shader has a compilation error in it.
+    EXPECT_EQ(compiler.GetSPIRVAssembly(), nullptr);
+  }
+
+  // Should succeed as the compilation error is ifdef'd out.
+  {
+    options.target_platform = TargetPlatform::kRuntimeStageVulkan;
+    reflector_options.target_platform = TargetPlatform::kRuntimeStageVulkan;
+    Compiler compiler = Compiler(fixture, options, reflector_options);
+    EXPECT_NE(compiler.GetSPIRVAssembly(), nullptr);
+  }
+}
+
 TEST(CompilerTest, YFlipInjectionForGLESVertexShaders) {
   // Compiles `fixture_name` for `platform` and returns the generated SL
   // source. See https://github.com/flutter/flutter/issues/186554.

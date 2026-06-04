@@ -51,6 +51,9 @@ static const constexpr char* kTextureCompressionAstcOesExt =
 static const constexpr char* kTextureCompressionAstcHdrExt =
     "GL_KHR_texture_compression_astc_hdr";
 
+// https://registry.khronos.org/OpenGL/extensions/OES/OES_fbo_render_mipmap.txt
+static const constexpr char* kFboRenderMipmapExt = "GL_OES_fbo_render_mipmap";
+
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
     GLint value = 0;
@@ -190,10 +193,20 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
       desc->HasExtension(kTextureCompressionAstcOesExt);
   supports_texture_compression_etc2_ =
       desc->IsES() && desc->GetGlVersion().major_version >= 3;
+
+  // Non-zero mip levels are renderable on desktop GL, ES 3.0+, or ES 2.0 with
+  // GL_OES_fbo_render_mipmap.
+  supports_fbo_render_mipmap_ = !desc->IsES() ||
+                                desc->GetGlVersion().major_version >= 3 ||
+                                desc->HasExtension(kFboRenderMipmapExt);
 }
 
 bool CapabilitiesGLES::IsES() const {
   return is_es_;
+}
+
+bool CapabilitiesGLES::SupportsFramebufferRenderMipmap() const {
+  return supports_fbo_render_mipmap_;
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
