@@ -54,23 +54,25 @@ class _RegularWindowContentState extends State<RegularWindowContent> {
       child: IntrinsicWidth(
         child: Material(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: [
               AppBar(title: const Text('Regular Window')),
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: .min,
                   children: [
                     Column(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: .min,
                       children: [RotatedWireCube(cubeColor: cubeColor)],
                     ),
                     const SizedBox(width: 16),
                     Column(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: .min,
                       children: [
-                        _WindowCreationButtons(regularWindowController: widget.regularWindowController),
+                        _WindowCreationButtons(
+                          regularWindowController: widget.regularWindowController,
+                        ),
                         const SizedBox(height: 20),
                         TooltipButton(parentController: widget.regularWindowController),
                         const SizedBox(height: 20),
@@ -109,7 +111,7 @@ class _WindowCreationButtons extends StatelessWidget {
     final WindowRegistry windowRegistry = WindowRegistry.of(context);
 
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       children: [
         ElevatedButton(
           onPressed: () {

@@ -25,66 +25,66 @@ class DialogWindowContent extends StatelessWidget {
         autofocus: true,
         child: IntrinsicWidth(
           child: Material(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppBar(title: const Text('Dialog')),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        final WindowRegistry windowRegistry = WindowRegistry.of(context);
+            child: Column(
+              mainAxisSize: .min,
+              children: [
+                AppBar(title: const Text('Dialog')),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: .min,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          final WindowRegistry windowRegistry = WindowRegistry.of(context);
 
-                        late final WindowEntry entry;
-                        final controller = DialogWindowController(
-                          delegate: CallbackDialogWindowControllerDelegate(
-                            onDestroyed: () => windowRegistry.unregister(entry),
-                          ),
-                          title: 'Modal Dialog',
-                          preferredSize: windowSettings.dialogSize,
-                          parent: dialogWindowController,
-                        );
+                          late final WindowEntry entry;
+                          final controller = DialogWindowController(
+                            delegate: CallbackDialogWindowControllerDelegate(
+                              onDestroyed: () => windowRegistry.unregister(entry),
+                            ),
+                            title: 'Modal Dialog',
+                            preferredSize: windowSettings.dialogSize,
+                            parent: dialogWindowController,
+                          );
 
-                        entry = WindowEntry(
-                          controller: controller,
-                          builder: (BuildContext context) =>
-                              DialogWindowContent(dialogWindowController: controller),
-                        );
-                        windowRegistry.register(entry);
-                      },
-                      child: const Text('Create Modal Dialog'),
-                    ),
-                    const SizedBox(height: 20),
-                    ListenableBuilder(
-                      listenable: dialogWindowController,
-                      builder: (BuildContext context, Widget? _) {
-                        final double dpr = MediaQuery.of(context).devicePixelRatio;
-                        final Size windowSize = WindowScope.contentSizeOf(context);
-                        return Text(
-                          'View ID: ${dialogWindowController.rootView.viewId}\n'
-                          'Parent View ID: ${dialogWindowController.parent?.rootView.viewId ?? "None"}\n'
-                          'Size: ${windowSize.width.toStringAsFixed(1)}\u00D7${windowSize.height.toStringAsFixed(1)}\n'
-                          'Device Pixel Ratio: $dpr',
-                          textAlign: TextAlign.center,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        dialogWindowController.destroy();
-                      },
-                      child: const Text('Close'),
-                    ),
-                  ],
+                          entry = WindowEntry(
+                            controller: controller,
+                            builder: (BuildContext context) =>
+                                DialogWindowContent(dialogWindowController: controller),
+                          );
+                          windowRegistry.register(entry);
+                        },
+                        child: const Text('Create Modal Dialog'),
+                      ),
+                      const SizedBox(height: 20),
+                      ListenableBuilder(
+                        listenable: dialogWindowController,
+                        builder: (BuildContext context, Widget? _) {
+                          final double dpr = MediaQuery.of(context).devicePixelRatio;
+                          final Size windowSize = WindowScope.contentSizeOf(context);
+                          return Text(
+                            'View ID: ${dialogWindowController.rootView.viewId}\n'
+                            'Parent View ID: ${dialogWindowController.parent?.rootView.viewId ?? "None"}\n'
+                            'Size: ${windowSize.width.toStringAsFixed(1)}\u00D7${windowSize.height.toStringAsFixed(1)}\n'
+                            'Device Pixel Ratio: $dpr',
+                            textAlign: TextAlign.center,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          dialogWindowController.destroy();
+                        },
+                        child: const Text('Close'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );

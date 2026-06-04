@@ -119,7 +119,7 @@ class _WindowSettingsEditorState extends State<_WindowSettingsEditor> {
     return ListTile(
       title: const Text('Regular'),
       subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
           Row(
             children: [
