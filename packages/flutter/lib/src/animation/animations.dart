@@ -348,10 +348,6 @@ class ReverseAnimation extends Animation<double>
 /// this object. Do not create a [CurvedAnimation] inside a `build` method
 /// because it would leak any added listeners on every rebuild.
 ///
-/// In a future Flutter release, the deprecated [reverseCurve] parameter will
-/// be removed and you will no longer need to call [dispose] on the
-/// [CurvedAnimation].
-///
 /// {@tool snippet}
 ///
 /// The following code snippet shows how you can apply a curve to a linear
