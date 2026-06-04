@@ -38,6 +38,8 @@ const kChromeArgs = <String>[
 ];
 
 void main() {
+  late FakeWebRunnerFactory fakeWebRunnerFactory;
+
   testWithoutContext('getDesiredCapabilities Chrome with headless on', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
@@ -250,6 +252,25 @@ void main() {
     expect(FakeResidentRunner.instance.callLog, <String>['run', 'exitApp', 'cleanupAtFinish']);
   }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
 
+  testUsingContext(
+    'WebDriverService forwards platform args to the web runner',
+    () async {
+      final WebDriverService service = setUpDriverService();
+      final device = FakeDevice();
+      await service.start(
+        BuildInfo.profile,
+        device,
+        DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
+        platformArgs: <String, Object>{'no-launch-chrome': true},
+      );
+      await service.stop();
+      expect(fakeWebRunnerFactory.lastPlatformArgs, <String, Object?>{'no-launch-chrome': true});
+    },
+    overrides: <Type, Generator>{
+      WebRunnerFactory: () => fakeWebRunnerFactory = FakeWebRunnerFactory(),
+    },
+  );
+
   testUsingContext('WebDriverService can start an app with a launch url provided', () async {
     final WebDriverService service = setUpDriverService();
     final device = FakeDevice();
@@ -322,6 +343,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   FakeWebRunnerFactory({this.doResolveToError = false});
 
   final bool doResolveToError;
+  Map<String, Object?>? lastPlatformArgs;
 
   @override
   ResidentRunner createWebRunner(
@@ -331,6 +353,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     FlutterProject? flutterProject,
     bool? ipv6,
     required DebuggingOptions debuggingOptions,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
     UrlTunneller? urlTunneller,
     Logger? logger,
     Terminal? terminal,
@@ -343,6 +366,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
     Map<String, String> webDefines = const <String, String>{},
   }) {
     expect(stayResident, isTrue);
+    lastPlatformArgs = platformArgs;
     return FakeResidentRunner(
       doResolveToError: doResolveToError,
       debuggingOptions: debuggingOptions,

@@ -115,7 +115,7 @@ Future<void> buildLinux(
   );
 
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
-    final String arch = getNameForTargetPlatform(targetPlatform);
+    final String arch = targetPlatform.getName();
     final File codeSizeFile = globals.fs
         .directory(buildInfo.codeSizeDirectory)
         .childFile('snapshot.$arch.json');
@@ -175,7 +175,7 @@ Future<void> _runCmake(
       '-G',
       'Ninja',
       '-DCMAKE_BUILD_TYPE=$buildFlag',
-      '-DFLUTTER_TARGET_PLATFORM=${getNameForTargetPlatform(targetPlatform)}',
+      '-DFLUTTER_TARGET_PLATFORM=${targetPlatform.getName()}',
       // Support cross-building for arm64 targets on x64 hosts.
       // (Cross-building for x64 on arm64 hosts isn't supported now.)
       if (needCrossBuild) '-DFLUTTER_TARGET_PLATFORM_SYSROOT=$targetSysroot',
