@@ -190,7 +190,32 @@ class TestsCrossImportChecker {
   /// The files in this set belong to `packages/flutter_test`, or one of its subdirectories.
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
-  static final Set<String> knownFlutterTestLibraryCrossImports = <String>{};
+  static final Set<String> knownFlutterTestLibraryCrossImports = <String>{
+    'packages/flutter_test/lib/src/test_text_input_key_handler.dart',
+    'packages/flutter_test/lib/src/widget_tester.dart',
+    'packages/flutter_test/lib/src/finders.dart',
+    'packages/flutter_test/lib/src/matchers.dart',
+    'packages/flutter_test/test_fixes/flutter_test/animation_sheet_builder.dart',
+    'packages/flutter_test/test_fixes/flutter_test/matchers.dart',
+    'packages/flutter_test/test/navigator_test.dart',
+    'packages/flutter_test/test/mock_canvas_test.dart',
+    'packages/flutter_test/test/semantics_finder_test.dart',
+    'packages/flutter_test/test/accessibility_window_test.dart',
+    'packages/flutter_test/test/widget_tester_live_device_test.dart',
+    'packages/flutter_test/test/all_elements_test.dart',
+    'packages/flutter_test/test/utils/memory_leak_tests.dart',
+    'packages/flutter_test/test/widget_tester_test.dart',
+    'packages/flutter_test/test/display_test.dart',
+    'packages/flutter_test/test/bindings_test.dart',
+    'packages/flutter_test/test/live_widget_controller_test.dart',
+    'packages/flutter_test/test/live_binding_test.dart',
+    'packages/flutter_test/test/accessibility_test.dart',
+    'packages/flutter_test/test/finders_test.dart',
+    'packages/flutter_test/test/controller_test.dart',
+    'packages/flutter_test/test/recording_canvas_test.dart',
+    'packages/flutter_test/test/test_text_input_test.dart',
+    'packages/flutter_test/test/multi_view_accessibility_test.dart',
+  };
 
   static final Set<String> _knownCrossImports = {
     ...knownFlutterTestLibraryCrossImports,
