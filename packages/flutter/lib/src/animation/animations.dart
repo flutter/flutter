@@ -339,6 +339,9 @@ class ReverseAnimation extends Animation<double>
 ///
 /// If you want to apply a [Curve] to a [Tween], consider using [CurveTween].
 ///
+// TODO(team-framework): Remove this paragraph once `CurvedAnimation.reverseCurve`
+// is removed:
+// https://github.com/flutter/flutter/issues/185468.
 /// A [CurvedAnimation] should be disposed when no longer needed to clean up
 /// any listeners that it may have added. Disposing the
 /// parent animation (typically the [AnimationController]) will also clean up
