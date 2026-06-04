@@ -24,7 +24,7 @@ Before modifying packages or triggering CIPD uploads, verify that the local envi
 
 The script `create_cipd_packages.sh` reads target SDK components and versions from `packages.txt`.
 
-* **Location**: `engine/src/flutter/tools/android_sdk/packages.txt`
+* **Location**: `src/flutter/tools/android_sdk/packages.txt`
 * **Format**: `<package_name>:<subdirectory_to_upload>` (delimited by `:` for multi-directory uploads)
 
 ### Querying Official Package Identifiers
@@ -70,7 +70,7 @@ cipd describe flutter/android/sdk/all/mac-arm64 -version version:<VERSION_TAG>
 Once uniqueness is confirmed, execute the script:
 
 ```bash
-cd engine/src/flutter/tools/android_sdk
+cd src/flutter/tools/android_sdk
 ./create_cipd_packages.sh <VERSION_TAG> <PATH_TO_LOCAL_SDK>
 ```
 
