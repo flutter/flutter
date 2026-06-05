@@ -520,17 +520,14 @@ def to_gn_args(args):
     gn_args['enable_lto'] = enable_lto
 
   # Set OS, CPU arch for host or target build.
+  gn_args['host_cpu'] = args.host_cpu or get_host_cpu()
+  gn_args['target_cpu'] = get_target_cpu(args)
+  gn_args['dart_target_arch'] = gn_args['target_cpu']
   if is_host_build(args):
     gn_args['host_os'] = get_host_os()
-    gn_args['host_cpu'] = args.host_cpu or get_host_cpu()
     gn_args['target_os'] = gn_args['host_os']
-    gn_args['target_cpu'] = get_target_cpu(args)
-    gn_args['dart_target_arch'] = gn_args['target_cpu']
   else:
-    gn_args['host_cpu'] = args.host_cpu or get_host_cpu()
     gn_args['target_os'] = args.target_os
-    gn_args['target_cpu'] = get_target_cpu(args)
-    gn_args['dart_target_arch'] = gn_args['target_cpu']
 
   # Cross-compiling host binaries: clang toolchain + build-time Dart SDK must
   # match the build machine, not the (overridden) target host_cpu.
@@ -991,7 +988,9 @@ def parse_args(args):
 
   parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64', 'arm'])
   parser.add_argument('--host-cpu', type=str, choices=['x64', 'arm64'],
-      help='Override the auto-detected host CPU. Use to cross-compile host binaries (e.g., gen_snapshot for linux-arm64 from a linux-x64 builder).')
+      help='Override the auto-detected host CPU. Use to cross-compile '
+           'host binaries (e.g., gen_snapshot for linux-arm64 from a '
+           'linux-x64 builder).')
   parser.add_argument('--fuchsia-cpu', type=str, choices=['x64', 'arm64'], default='x64')
   parser.add_argument('--windows-cpu', type=str, choices=['x64', 'arm64', 'x86'], default='x64')
   parser.add_argument('--simulator-cpu', type=str, choices=['x64', 'arm64'], default='x64')
