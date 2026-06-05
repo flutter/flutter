@@ -301,6 +301,9 @@ void main() {
             () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
           );
         });
+        addTearDown(() {
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel', null);
+        });
         // ignore: unawaited_futures
         channel.invokeMethod<String>('sayHello', 'hello');
 
@@ -347,6 +350,10 @@ void main() {
             const Duration(milliseconds: 20),
             () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
           );
+        });
+        addTearDown(() {
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel1', null);
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel2', null);
         });
         // ignore: unawaited_futures
         channel1.invokeMethod<String>('sayHello', 'hello');
@@ -401,6 +408,10 @@ void main() {
             () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
           );
         });
+        addTearDown(() {
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel1', null);
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel2', null);
+        });
 
         // ignore: unawaited_futures
         channel1.invokeMethod<String>('sayHello', 'hello');
@@ -443,7 +454,7 @@ void main() {
         ) {
           return Future<ByteData>.delayed(
             const Duration(milliseconds: 20),
-            () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
+            () => jsonMessage.encodeMessage(const <dynamic>['hello world'])!,
           );
         });
 
@@ -454,8 +465,13 @@ void main() {
         ) {
           return Future<ByteData>.delayed(
             const Duration(milliseconds: 10),
-            () => jsonMessage.encodeMessage(<dynamic>['hello world'])!,
+            () => jsonMessage.encodeMessage(const <dynamic>['hello world'])!,
           );
+        });
+
+        addTearDown(() {
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel1', null);
+          tester.binding.defaultBinaryMessenger.setMockMessageHandler('helloChannel2', null);
         });
 
         // ignore: unawaited_futures
@@ -483,7 +499,7 @@ void main() {
 
         // Now we receive the result.
         await tester.pump(const Duration(milliseconds: 5));
-        expect(result, <String, dynamic>{'isError': false, 'response': <String, dynamic>{}});
+        expect(result, const <String, dynamic>{'isError': false, 'response': <String, dynamic>{}});
       },
     );
   });
