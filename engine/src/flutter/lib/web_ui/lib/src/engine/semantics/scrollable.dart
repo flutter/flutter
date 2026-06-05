@@ -15,7 +15,7 @@ import 'package:ui/ui.dart' as ui;
 /// value to its scrollable and the engine receives a [ui.SemanticsUpdate]
 /// containing the new [SemanticsObject.scrollPosition] and child positions.
 class SemanticScrollable extends SemanticRole {
-  SemanticScrollable(SemanticsObject semanticsObject)
+  SemanticScrollable(SemanticsObject semanticsObject, {super.reusableElement})
     : super.withBasics(
         EngineSemanticsRole.scrollable,
         semanticsObject,
@@ -270,8 +270,9 @@ class SemanticScrollable extends SemanticRole {
     _scrollOverflowElement?.remove();
     _scrollOverflowElement = null;
     final DomCSSStyleDeclaration style = element.style;
-    style.removeProperty('overflowY');
-    style.removeProperty('overflowX');
+    style.removeProperty('overflow-y');
+    style.removeProperty('overflow-x');
+    style.removeProperty('scrollbar-width');
     style.removeProperty('touch-action');
     if (scrollListener != null) {
       removeEventListener('scroll', scrollListener);

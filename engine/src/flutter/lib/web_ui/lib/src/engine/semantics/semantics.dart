@@ -639,8 +639,9 @@ abstract class SemanticRole {
     this.kind,
     this.semanticsObject, {
     required LabelRepresentation preferredLabelRepresentation,
+    DomElement? reusableElement,
   }) {
-    element = _initElement(createElement(), semanticsObject);
+    element = _initElement(reusableElement ?? createElement(), semanticsObject);
     addFocusManagement();
     addLiveRegion();
     addRouteName();
@@ -655,8 +656,8 @@ abstract class SemanticRole {
   /// Use this constructor for highly specialized cases where
   /// [SemanticRole.withBasics] does not work, for example when the default focus
   /// management interferes with the widget's functionality.
-  SemanticRole.blank(this.kind, this.semanticsObject) {
-    element = _initElement(createElement(), semanticsObject);
+  SemanticRole.blank(this.kind, this.semanticsObject, {DomElement? reusableElement}) {
+    element = _initElement(reusableElement ?? createElement(), semanticsObject);
   }
 
   late final DomElement element;
@@ -1035,6 +1036,18 @@ abstract class SemanticRole {
     _isDisposed = true;
   }
 
+  /// Disposes behaviors when this role's host element is being reused by a new
+  /// compatible role.
+  void _disposeBehaviorsForElementReuse() {
+    final List<SemanticBehavior>? behaviors = _behaviors;
+    if (behaviors != null) {
+      for (final SemanticBehavior behavior in behaviors) {
+        behavior.dispose();
+      }
+    }
+    _behaviors = null;
+  }
+
   /// Transfers the accessibility focus to the [element] managed by this role
   /// as a result of this node taking focus by default.
   ///
@@ -1054,7 +1067,7 @@ abstract class SemanticRole {
 
 /// A role used when a more specific role couldn't be assigned to the node.
 final class GenericRole extends SemanticRole {
-  GenericRole(SemanticsObject semanticsObject)
+  GenericRole(SemanticsObject semanticsObject, {super.reusableElement})
     : super.withBasics(
         EngineSemanticsRole.generic,
         semanticsObject,
@@ -2304,10 +2317,10 @@ class SemanticsObject {
     }
   }
 
-  SemanticRole _createSemanticRole(EngineSemanticsRole role) {
+  SemanticRole _createSemanticRole(EngineSemanticsRole role, {DomElement? reusableElement}) {
     return switch (role) {
       EngineSemanticsRole.textField => SemanticTextField(this),
-      EngineSemanticsRole.scrollable => SemanticScrollable(this),
+      EngineSemanticsRole.scrollable => SemanticScrollable(this, reusableElement: reusableElement),
       EngineSemanticsRole.incrementable => SemanticIncrementable(this),
       EngineSemanticsRole.button => SemanticButton(this),
       EngineSemanticsRole.radioGroup => SemanticRadioGroup(this),
@@ -2338,7 +2351,7 @@ class SemanticsObject {
       EngineSemanticsRole.status => SemanticStatus(this),
       EngineSemanticsRole.progressBar => SemanticsProgressBar(this),
       EngineSemanticsRole.loadingSpinner => SemanticsLoadingSpinner(this),
-      EngineSemanticsRole.generic => GenericRole(this),
+      EngineSemanticsRole.generic => GenericRole(this, reusableElement: reusableElement),
       EngineSemanticsRole.complementary => SemanticComplementary(this),
       EngineSemanticsRole.contentInfo => SemanticContentInfo(this),
       EngineSemanticsRole.main => SemanticMain(this),
@@ -2354,6 +2367,7 @@ class SemanticsObject {
     SemanticRole? currentSemanticRole = semanticRole;
     final EngineSemanticsRole kind = _getEngineSemanticsRole();
     final DomElement? previousElement = semanticRole?.element;
+    DomElement? reusableElement;
 
     if (currentSemanticRole != null) {
       if (currentSemanticRole.kind == kind) {
@@ -2362,6 +2376,14 @@ class SemanticsObject {
         currentSemanticRole.update();
         return;
       } else {
+        if (_canReuseElementForRoleChange(currentSemanticRole.kind, kind)) {
+          assert(
+            previousElement?.tagName.toLowerCase() == 'flt-semantics',
+            'Generic and scrollable roles can only reuse the default <flt-semantics> host.',
+          );
+          reusableElement = previousElement;
+          currentSemanticRole._disposeBehaviorsForElementReuse();
+        }
         // Role changed. This should be avoided as much as possible, but the
         // web engine will attempt a best with the switch by cleaning old ARIA
         // role data and start anew.
@@ -2376,7 +2398,7 @@ class SemanticsObject {
     //  * (Uncommon) the node changed its role, its previous role was disposed
     //    of, and now it needs a new one.
     if (currentSemanticRole == null) {
-      currentSemanticRole = _createSemanticRole(kind);
+      currentSemanticRole = _createSemanticRole(kind, reusableElement: reusableElement);
       semanticRole = currentSemanticRole;
       currentSemanticRole.initState();
       currentSemanticRole.update();
@@ -2395,6 +2417,13 @@ class SemanticsObject {
         previousElement!.remove();
       }
     }
+  }
+
+  bool _canReuseElementForRoleChange(EngineSemanticsRole oldRole, EngineSemanticsRole newRole) {
+    // Both roles use the default <flt-semantics> host, so reuse it to avoid
+    // moving focused descendants when hasImplicitScrolling changes.
+    return (oldRole == EngineSemanticsRole.generic && newRole == EngineSemanticsRole.scrollable) ||
+        (oldRole == EngineSemanticsRole.scrollable && newRole == EngineSemanticsRole.generic);
   }
 
   /// Whether the object represents an UI element with "increase" or "decrease"
