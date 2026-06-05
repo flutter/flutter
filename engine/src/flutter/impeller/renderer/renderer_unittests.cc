@@ -1624,7 +1624,8 @@ TEST_P(RendererTest, CanRenderToTextureSlice) {
 // on OpenGL ES, where rendering to non-zero mip levels needs ES 3.0 or
 // GL_OES_fbo_render_mipmap.
 TEST_P(RendererTest, CanRenderToMipLevel) {
-  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP() << "Rendering to non-zero mip levels is gated on a GLES "
                     "capability; covered by the Metal and Vulkan backends.";
   }
