@@ -10,9 +10,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * Configurator for the {@link AccessibilityBridge.Role#MENU} role. Sets the class name to Spinner
  * and indicates it can open a popup.
  */
-public class MenuRoleConfigurator implements AccessibilityNodeConfigurator {
+public class MenuRoleConfigurator extends BaseRoleConfigurator {
   @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  protected void configureRole(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     result.setClassName("android.widget.Spinner");
     result.setCanOpenPopup(true);
   }

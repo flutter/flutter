@@ -9,25 +9,39 @@ package io.flutter.view;
  * AccessibilityBridge.Role}.
  */
 public class RoleConfiguratorFactory {
+  private static final AccessibilityNodeConfigurator progressBarConfigurator =
+      new ProgressBarRoleConfigurator();
+  private static final AccessibilityNodeConfigurator comboBoxConfigurator =
+      new ComboBoxRoleConfigurator();
+  private static final AccessibilityNodeConfigurator menuConfigurator = new MenuRoleConfigurator();
+  private static final AccessibilityNodeConfigurator listViewConfigurator =
+      new ClassNameRoleConfigurator("android.widget.ListView");
+  private static final AccessibilityNodeConfigurator radioGroupConfigurator =
+      new ClassNameRoleConfigurator("android.widget.RadioGroup");
+  private static final AccessibilityNodeConfigurator menuItemConfigurator =
+      new ClassNameRoleConfigurator("android.view.MenuItem");
+  private static final AccessibilityNodeConfigurator genericConfigurator =
+      new BaseRoleConfigurator();
+
   public static AccessibilityNodeConfigurator getConfigurator(AccessibilityBridge.Role role) {
     switch (role) {
       case PROGRESS_BAR:
-        return new ProgressBarRoleConfigurator();
+        return progressBarConfigurator;
       case COMBO_BOX:
-        return new ComboBoxRoleConfigurator();
+        return comboBoxConfigurator;
       case MENU:
-        return new MenuRoleConfigurator();
+        return menuConfigurator;
       case LIST:
-        return new ClassNameRoleConfigurator("android.widget.ListView");
+        return listViewConfigurator;
       case RADIO_GROUP:
-        return new ClassNameRoleConfigurator("android.widget.RadioGroup");
+        return radioGroupConfigurator;
       case MENU_ITEM:
       case MENU_ITEM_CHECKBOX:
       case MENU_ITEM_RADIO:
-        return new ClassNameRoleConfigurator("android.view.MenuItem");
+        return menuItemConfigurator;
       case NONE:
       default:
-        return new GenericRoleConfigurator();
+        return genericConfigurator;
     }
   }
 }

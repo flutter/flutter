@@ -246,7 +246,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // it accessibility focus, and then enable input on that text field, giving it input focus. Then
   // the user moves the accessibility focus to a nearby label to get info about the label, while
   // maintaining input focus on the original text field.
-  @Nullable private SemanticsNode inputFocusedSemanticsNode;
+  @Nullable SemanticsNode inputFocusedSemanticsNode;
 
   // Keeps track of the last semantics node that had the input focus.
   //
@@ -858,41 +858,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     result.setPackageName(rootAccessibilityView.getContext().getPackageName());
     result.setClassName("android.view.View");
     result.setSource(rootAccessibilityView, virtualViewId);
-    result.setFocusable(semanticsNode.isFocusable());
-    if (inputFocusedSemanticsNode != null) {
-      result.setFocused(inputFocusedSemanticsNode.id == virtualViewId);
-    }
-
-    if (accessibilityFocusedSemanticsNode != null) {
-      result.setAccessibilityFocused(accessibilityFocusedSemanticsNode.id == virtualViewId);
-    }
-
-    // These are non-ops on older devices. Attempting to interact with the text will cause Talkback
-    // to read the contents of the text box instead.
-    if (semanticsNode.hasAction(Action.SET_SELECTION)) {
-      result.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
-    }
-    if (semanticsNode.hasAction(Action.COPY)) {
-      result.addAction(AccessibilityNodeInfo.ACTION_COPY);
-    }
-    if (semanticsNode.hasAction(Action.CUT)) {
-      result.addAction(AccessibilityNodeInfo.ACTION_CUT);
-    }
-    if (semanticsNode.hasAction(Action.PASTE)) {
-      result.addAction(AccessibilityNodeInfo.ACTION_PASTE);
-    }
-
-    if (semanticsNode.hasAction(Action.SET_TEXT)) {
-      result.addAction(AccessibilityNodeInfo.ACTION_SET_TEXT);
-    }
-
     Role role = Role.values()[semanticsNode.role];
     AccessibilityNodeConfigurator roleConfigurator = RoleConfiguratorFactory.getConfigurator(role);
     roleConfigurator.configure(result, semanticsNode);
-    if (semanticsNode.hasAction(Action.DISMISS)) {
-      result.setDismissable(true);
-      result.addAction(AccessibilityNodeInfo.ACTION_DISMISS);
-    }
 
     if (semanticsNode.parent != null) {
       if (BuildConfig.DEBUG && semanticsNode.id <= ROOT_NODE_ID) {
@@ -925,56 +893,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     result.setVisibleToUser(true);
     result.setEnabled(
         !semanticsNode.hasFlag(Flag.HAS_ENABLED_STATE) || semanticsNode.hasFlag(Flag.IS_ENABLED));
-
-    if (semanticsNode.hasAction(Action.TAP)) {
-      if (semanticsNode.onTapOverride != null) {
-        result.addAction(
-            new AccessibilityNodeInfo.AccessibilityAction(
-                AccessibilityNodeInfo.ACTION_CLICK, semanticsNode.onTapOverride.hint));
-        result.setClickable(true);
-      } else {
-        result.addAction(AccessibilityNodeInfo.ACTION_CLICK);
-        result.setClickable(true);
-      }
-    }
-
-    if (semanticsNode.hasAction(Action.LONG_PRESS)) {
-      if (semanticsNode.onLongPressOverride != null) {
-        result.addAction(
-            new AccessibilityNodeInfo.AccessibilityAction(
-                AccessibilityNodeInfo.ACTION_LONG_CLICK, semanticsNode.onLongPressOverride.hint));
-        result.setLongClickable(true);
-      } else {
-        result.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
-        result.setLongClickable(true);
-      }
-    }
-    if (semanticsNode.hasFlag(Flag.IS_LIVE_REGION)) {
-      result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
-    }
-
-    result.setSelected(semanticsNode.hasFlag(Flag.IS_SELECTED));
-
-    // Heading support
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
-      result.setHeading(semanticsNode.headingLevel > 0);
-    }
-
-    // Accessibility Focus
-    if (accessibilityFocusedSemanticsNode != null
-        && accessibilityFocusedSemanticsNode.id == virtualViewId) {
-      result.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
-    } else {
-      result.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
-    }
-
-    // Actions on the local context menu
-    if (semanticsNode.customAccessibilityActions != null) {
-      for (CustomAccessibilityAction action : semanticsNode.customAccessibilityActions) {
-        result.addAction(
-            new AccessibilityNodeInfo.AccessibilityAction(action.resourceId, action.label));
-      }
-    }
 
     for (SemanticsNode child : semanticsNode.childrenInTraversalOrder) {
       if (child.hasFlag(Flag.IS_HIDDEN)) {
@@ -2286,29 +2204,29 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * <p>See the Flutter documentation for the Semantics widget:
    * https://api.flutter.dev/flutter/widgets/Semantics-class.html
    */
-  private static class CustomAccessibilityAction {
+  static class CustomAccessibilityAction {
     CustomAccessibilityAction() {}
 
     // The ID of the custom action plus a minimum value so that the identifier
     // does not collide with existing Android accessibility actions. This ID
     // represents and Android resource ID, not a Flutter ID.
-    private int resourceId = -1;
+    int resourceId = -1;
 
     // The Flutter ID of this custom accessibility action. See Flutter's Semantics widget for
     // custom accessibility action definitions:
     // https://api.flutter.dev/flutter/widgets/Semantics-class.html
-    private int id = -1;
+    int id = -1;
 
     // The ID of the standard Flutter accessibility action that this {@code
     // CustomAccessibilityAction}
     // overrides with a custom {@code label} and/or {@code hint}.
-    private int overrideId = -1;
+    int overrideId = -1;
 
     // The user presented value which is displayed in the local context menu.
-    private String label;
+    String label;
 
     // The text used in overridden standard actions.
-    private String hint;
+    String hint;
   }
 
   /**
@@ -2379,7 +2297,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private int role;
 
     // The heading level for this node (0 means not a heading).
-    private int headingLevel;
+    int headingLevel;
 
     // The id of the sibling node that is before this node in traversal
     // order.
@@ -2418,9 +2336,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     SemanticsNode parent;
     List<SemanticsNode> childrenInTraversalOrder = new ArrayList<>();
     private List<SemanticsNode> childrenInHitTestOrder = new ArrayList<>();
-    private List<CustomAccessibilityAction> customAccessibilityActions;
-    private CustomAccessibilityAction onTapOverride;
-    private CustomAccessibilityAction onLongPressOverride;
+    List<CustomAccessibilityAction> customAccessibilityActions;
+    CustomAccessibilityAction onTapOverride;
+    CustomAccessibilityAction onLongPressOverride;
 
     private boolean inverseTransformDirty = true;
     private float[] inverseTransform;
@@ -2775,7 +2693,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     // TODO(goderbauer): This should be decided by the framework once we have more information
     //     about focusability there.
-    private boolean isFocusable() {
+    boolean isFocusable() {
       // We enforce in the framework that no other useful semantics are merged with these
       // nodes.
       if (hasFlag(Flag.SCOPES_ROUTE)) {

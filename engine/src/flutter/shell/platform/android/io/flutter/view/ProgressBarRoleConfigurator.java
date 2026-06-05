@@ -12,9 +12,9 @@ import io.flutter.Build.API_LEVELS;
  * Configurator for the {@link AccessibilityBridge.Role#PROGRESS_BAR} role. Sets the class name to
  * ProgressBar and handles range info.
  */
-public class ProgressBarRoleConfigurator implements AccessibilityNodeConfigurator {
+public class ProgressBarRoleConfigurator extends BaseRoleConfigurator {
   @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  protected void configureRole(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     result.setClassName("android.widget.ProgressBar");
     if (node.value != null) {
       float min = Float.NEGATIVE_INFINITY;
