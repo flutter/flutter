@@ -33,7 +33,7 @@ if (use_rbe) {
   link_prefix = ""
 }
 
-if (host_clang_cpu == "arm64") {
+if (builder_cpu == "arm64") {
   rebased_clang_dir =
       rebase_path("$buildtools_path/linux-arm64/clang/bin", root_build_dir)
 } else {

@@ -148,10 +148,12 @@ declare_args() {
   is_clang = current_os == "mac" || current_os == "ios" ||
              current_os == "linux" || current_os == "chromeos"
 
-  # CPU arch of toolchain binaries that run on the build machine (clang, llvm
-  # tools). Equals host_cpu normally; differs when cross-compiling host
-  # binaries (e.g. linux-arm64 gen_snapshot on a linux-x64 builder).
-  host_clang_cpu = host_cpu
+  # CPU arch of the build machine itself -- the CPU that build-time toolchain
+  # binaries (clang, dart) actually execute on. Equals host_cpu in the normal
+  # case; diverges only when cross-compiling a host binary (e.g. linux-arm64
+  # gen_snapshot on a linux-x64 builder), where host_cpu describes the produced
+  # binary's runtime arch and builder_cpu describes the build machine's arch.
+  builder_cpu = host_cpu
 
   # Compile for Address Sanitizer to find memory bugs.
   is_asan = false

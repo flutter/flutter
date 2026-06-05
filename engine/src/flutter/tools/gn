@@ -532,7 +532,7 @@ def to_gn_args(args):
   # Cross-compiling host binaries: clang toolchain + build-time Dart SDK must
   # match the build machine, not the (overridden) target host_cpu.
   if args.host_cpu and args.host_cpu != get_host_cpu():
-    gn_args['host_clang_cpu'] = get_host_cpu()
+    gn_args['builder_cpu'] = get_host_cpu()
 
   if not args.build_engine_artifacts:
     gn_args['flutter_build_engine_artifacts'] = False
