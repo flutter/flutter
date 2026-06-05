@@ -92,12 +92,12 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
   ```
 
 * **Command to capture/update reference golden baselines**:
-  Running with `UPDATE_GOLDENS=1` writes or overwrites the local PNG baselines under `integration_test/goldens/` on the host.
+  Running with `UPDATE_GOLDENS=true` writes or overwrites the local PNG baselines under `test_driver/goldens/` on the host.
 
   Because the statically compiled `AndroidManifest.xml` is the single source of truth, the app will automatically self-report its active backend variant. To capture or update the baseline for a specific graphics variant, simply edit `android/app/src/main/AndroidManifest.xml` to set the desired `io.flutter.embedding.android.ImpellerBackend` value, then execute:
 
   ```sh
-  UPDATE_GOLDENS=1 flutter drive -v \
+  UPDATE_GOLDENS=true flutter drive -v \
     --driver=test_driver/driver_test.dart \
     --target=integration_test/integration_test_wrapper.dart \
     --no-dds
@@ -109,7 +109,7 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
 
 > [!IMPORTANT]
 > **Asset Bundling Precondition**:
-> Because instrumented tests run completely standalone on the device, they compare pixels against baseline images bundled as read-only assets inside the APK. You **must** first generate the local baselines under `integration_test/goldens/` using the **Host-Driven Driver Mode (with `UPDATE_GOLDENS=1`)** before compiling and building the instrumented APK.
+> Because instrumented tests run completely standalone on the device, they compare pixels against baseline images bundled as read-only assets inside the APK. You **must** first generate the local baselines under `test_driver/goldens/` using the **Host-Driven Driver Mode (with `UPDATE_GOLDENS=true`)** before compiling and building the instrumented APK.
 
 * **Command to compile and run the native JUnit suite**:
   ```sh
