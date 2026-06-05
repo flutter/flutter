@@ -40,7 +40,9 @@ class PlatformViewPlugin : public PlatformViewManager {
   // AddPlatformView.
   // This method will create the platform view within a task queued to the
   // engine's TaskRunner, which will run on the UI thread.
-  void InstantiatePlatformView(PlatformViewId id);
+  // Returns false if id does not correspond to a pending or created platform
+  // view.
+  bool InstantiatePlatformView(PlatformViewId id, HWND parent_window = nullptr);
 
   // | PlatformViewManager |
   // id must correspond to an identifier that has already been added with
@@ -55,7 +57,7 @@ class PlatformViewPlugin : public PlatformViewManager {
 
   std::unordered_map<PlatformViewId, HWND> platform_views_;
 
-  std::unordered_map<PlatformViewId, std::function<HWND()>>
+  std::unordered_map<PlatformViewId, std::function<HWND(HWND)>>
       pending_platform_views_;
 
   // Pointer to the task runner of the associated engine.

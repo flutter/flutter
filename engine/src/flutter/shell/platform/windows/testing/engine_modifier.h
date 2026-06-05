@@ -87,6 +87,10 @@ class EngineModifier {
     engine_->platform_view_plugin_ = std::move(manager);
   }
 
+  PlatformViewPlugin* platform_view_plugin() {
+    return engine_->platform_view_plugin_.get();
+  }
+
   void OnViewFocusChangeRequest(const FlutterViewFocusChangeRequest* request) {
     engine_->OnViewFocusChangeRequest(request);
   }

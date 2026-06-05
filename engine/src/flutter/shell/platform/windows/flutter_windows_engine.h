@@ -178,6 +178,10 @@ class FlutterWindowsEngine {
     return texture_registrar_.get();
   }
 
+  // Registers a Windows platform view type with the engine.
+  void RegisterPlatformViewType(std::string_view type_name,
+                                const FlutterPlatformViewTypeEntry& type);
+
   // The EGL manager object. If this is nullptr, then we are
   // rendering using software instead of OpenGL.
   egl::Manager* egl_manager() const { return egl_manager_.get(); }
@@ -528,6 +532,8 @@ class FlutterWindowsEngine {
   std::shared_ptr<egl::ProcTable> gl_;
 
   std::unique_ptr<PlatformViewPlugin> platform_view_plugin_;
+
+  PlatformViewPlugin* GetOrCreatePlatformViewPlugin();
 
   // Handles display-related window messages.
   bool HandleDisplayMonitorMessage(HWND hwnd,

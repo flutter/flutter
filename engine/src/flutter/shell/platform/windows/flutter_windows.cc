@@ -300,8 +300,12 @@ void FlutterDesktopEngineRegisterPlatformViewType(
     FlutterDesktopEngineRef engine,
     const char* view_type_name,
     FlutterPlatformViewTypeEntry view_type) {
-  // TODO(schectman): forward to platform view manager.
-  // https://github.com/flutter/flutter/issues/143375
+  if (engine == nullptr || view_type_name == nullptr ||
+      view_type.factory == nullptr) {
+    return;
+  }
+
+  EngineFromHandle(engine)->RegisterPlatformViewType(view_type_name, view_type);
 }
 
 FlutterDesktopViewRef FlutterDesktopPluginRegistrarGetView(

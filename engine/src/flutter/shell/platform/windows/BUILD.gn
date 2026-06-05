@@ -238,6 +238,7 @@ executable("flutter_windows_unittests") {
     "keyboard_unittests.cc",
     "keyboard_utils_unittests.cc",
     "platform_handler_unittests.cc",
+    "platform_view_plugin_unittests.cc",
     "sequential_id_generator_unittests.cc",
     "settings_plugin_unittests.cc",
     "system_utils_unittests.cc",

@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <thread>
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
+
+#include <optional>
+#include <string>
+#include <thread>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
+#include "flutter/shell/platform/windows/flutter_windows_internal.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
 #include "flutter/shell/platform/windows/testing/egl/mock_manager.h"
@@ -1411,6 +1415,48 @@ TEST_F(FlutterWindowsEngineTest, ReceivePlatformViewMessage) {
   while (!received_call) {
     engine->task_runner()->ProcessTasks();
   }
+}
+
+TEST_F(FlutterWindowsEngineTest, RegisterPlatformViewTypeForwardsToPlugin) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  auto engine = builder.Build();
+  EngineModifier modifier{engine.get()};
+
+  struct FactoryCallState {
+    int calls = 0;
+    HWND hwnd = reinterpret_cast<HWND>(0x1234);
+    PlatformViewId id = -1;
+    std::string type;
+  };
+  FactoryCallState state;
+
+  FlutterPlatformViewTypeEntry entry = {};
+  entry.struct_size = sizeof(FlutterPlatformViewTypeEntry);
+  entry.user_data = &state;
+  entry.factory = [](const FlutterPlatformViewCreationParameters* params) {
+    auto state = static_cast<FactoryCallState*>(params->user_data);
+    state->calls++;
+    state->id = params->platform_view_id;
+    state->type = params->platform_view_type;
+    return state->hwnd;
+  };
+
+  FlutterDesktopEngineRegisterPlatformViewType(
+      reinterpret_cast<FlutterDesktopEngineRef>(engine.get()), "test_view",
+      entry);
+
+  PlatformViewPlugin* plugin = modifier.platform_view_plugin();
+  ASSERT_NE(plugin, nullptr);
+  ASSERT_TRUE(plugin->AddPlatformView(42, "test_view"));
+
+  EXPECT_TRUE(plugin->InstantiatePlatformView(42, nullptr));
+
+  EXPECT_EQ(state.calls, 1);
+  EXPECT_EQ(state.id, 42);
+  EXPECT_EQ(state.type, "test_view");
+  std::optional<HWND> handle = plugin->GetNativeHandleForId(42);
+  ASSERT_TRUE(handle.has_value());
+  EXPECT_EQ(handle.value(), state.hwnd);
 }
 
 TEST_F(FlutterWindowsEngineTest, AddViewFailureDoesNotHang) {

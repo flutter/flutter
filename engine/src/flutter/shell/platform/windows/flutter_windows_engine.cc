@@ -423,10 +423,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
 
   args.custom_task_runners = &custom_task_runners;
 
-  if (!platform_view_plugin_) {
-    platform_view_plugin_ = std::make_unique<PlatformViewPlugin>(
-        messenger_wrapper_.get(), task_runner_.get());
-  }
+  GetOrCreatePlatformViewPlugin();
   if (egl_manager_) {
     auto resolver = [](const char* name) -> void* {
       return reinterpret_cast<void*>(::eglGetProcAddress(name));
@@ -710,6 +707,20 @@ FlutterWindowsView* FlutterWindowsEngine::view(FlutterViewId view_id) const {
 // Returns the currently configured Plugin Registrar.
 FlutterDesktopPluginRegistrarRef FlutterWindowsEngine::GetRegistrar() {
   return plugin_registrar_.get();
+}
+
+void FlutterWindowsEngine::RegisterPlatformViewType(
+    std::string_view type_name,
+    const FlutterPlatformViewTypeEntry& type) {
+  GetOrCreatePlatformViewPlugin()->RegisterPlatformViewType(type_name, type);
+}
+
+PlatformViewPlugin* FlutterWindowsEngine::GetOrCreatePlatformViewPlugin() {
+  if (!platform_view_plugin_) {
+    platform_view_plugin_ = std::make_unique<PlatformViewPlugin>(
+        messenger_wrapper_.get(), task_runner_.get());
+  }
+  return platform_view_plugin_.get();
 }
 
 void FlutterWindowsEngine::AddPluginRegistrarDestructionCallback(
