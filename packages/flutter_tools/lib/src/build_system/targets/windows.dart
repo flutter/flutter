@@ -169,7 +169,7 @@ class WindowsAotBundle extends Target {
   /// Create a [WindowsAotBundle] wrapper for [aotTarget].
   const WindowsAotBundle(this.aotTarget);
 
-  /// The [AotElfBase] subclass that produces the app.so.
+  /// The [AotElfBase] subclass that produces the Windows AOT library.
   final AotElfBase aotTarget;
 
   @override

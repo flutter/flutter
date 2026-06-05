@@ -6,6 +6,7 @@
 
 #include <filesystem>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/string_conversion.h"
 #include "flutter/shell/platform/common/engine_switches.h"  // nogncheck
@@ -79,8 +80,13 @@ UniqueAotDataPtr FlutterProjectBundle::LoadAotData(
   }
   std::string path_string = fml::PathToUtf8(aot_library_path_);
   FlutterEngineAOTDataSource source = {};
+#if FML_ARCH_CPU_X86_64
+  source.type = kFlutterEngineAOTDataSourceTypeDllPath;
+  source.dll_path = path_string.c_str();
+#else
   source.type = kFlutterEngineAOTDataSourceTypeElfPath;
   source.elf_path = path_string.c_str();
+#endif
   FlutterEngineAOTData data = nullptr;
   auto result = engine_procs.CreateAOTData(&source, &data);
   if (result != kSuccess) {

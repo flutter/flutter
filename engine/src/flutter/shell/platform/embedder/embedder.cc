@@ -1706,6 +1706,7 @@ using UniqueLoadedElf = std::unique_ptr<Dart_LoadedElf, LoadedElfDeleter>;
 
 struct _FlutterEngineAOTData {
   UniqueLoadedElf loaded_elf = nullptr;
+  fml::RefPtr<fml::NativeLibrary> native_library = nullptr;
   const uint8_t* vm_snapshot_data = nullptr;
   const uint8_t* vm_snapshot_instrs = nullptr;
   const uint8_t* vm_isolate_data = nullptr;
@@ -1760,6 +1761,43 @@ FlutterEngineResult FlutterEngineCreateAOTData(
 
       *data_out = aot_data.release();
       return kSuccess;
+    }
+    case kFlutterEngineAOTDataSourceTypeDllPath: {
+#if FML_OS_WIN
+      if (!source->dll_path || !fml::IsFile(source->dll_path)) {
+        return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Invalid DLL path specified.");
+      }
+
+      auto native_library = fml::NativeLibrary::Create(source->dll_path);
+      if (!native_library) {
+        return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Could not load DLL path specified.");
+      }
+
+      auto aot_data = std::make_unique<_FlutterEngineAOTData>();
+      aot_data->native_library = std::move(native_library);
+      aot_data->vm_snapshot_data =
+          aot_data->native_library->ResolveSymbol("_kDartSnapshotData");
+      aot_data->vm_snapshot_instrs =
+          aot_data->native_library->ResolveSymbol("_kDartSnapshotText");
+      aot_data->vm_isolate_data = aot_data->vm_snapshot_data;
+      aot_data->vm_isolate_instrs = aot_data->vm_snapshot_instrs;
+
+      if (aot_data->vm_snapshot_data == nullptr ||
+          aot_data->vm_snapshot_instrs == nullptr) {
+        return LOG_EMBEDDER_ERROR(
+            kInvalidArguments,
+            "Could not resolve required AOT snapshot symbols from DLL.");
+      }
+
+      *data_out = aot_data.release();
+      return kSuccess;
+#else   // FML_OS_WIN
+      return LOG_EMBEDDER_ERROR(
+          kInvalidArguments,
+          "DLL AOT data sources are only supported on Windows.");
+#endif  // FML_OS_WIN
     }
   }
 

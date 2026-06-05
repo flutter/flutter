@@ -93,9 +93,12 @@ class AOTSnapshotter {
     required Xcode xcode,
     required ProcessManager processManager,
     required Artifacts artifacts,
+    String? windowsLinkerPath,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _xcode = xcode,
+       _windowsLinkerPath = windowsLinkerPath,
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _genSnapshot = GenSnapshot(
          artifacts: artifacts,
          processManager: processManager,
@@ -105,6 +108,8 @@ class AOTSnapshotter {
   final Logger _logger;
   final FileSystem _fileSystem;
   final Xcode _xcode;
+  final String? _windowsLinkerPath;
+  final ProcessUtils _processUtils;
   final GenSnapshot _genSnapshot;
 
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
@@ -147,6 +152,9 @@ class AOTSnapshotter {
         platform == TargetPlatform.android_x64;
     _logger.printTrace('targetingAndroidPlatform = $targetingAndroidPlatform');
 
+    final bool targetingWindowsX64 = platform == TargetPlatform.windows_x64;
+    _logger.printTrace('targetingWindowsX64 = $targetingWindowsX64');
+
     // We strip snapshot by default, but allow to suppress this behavior
     // by supplying --no-strip in extraGenSnapshotOptions.
     var shouldStrip = true;
@@ -162,6 +170,8 @@ class AOTSnapshotter {
     }
 
     String aotSharedLibrary = _fileSystem.path.join(outputDir.path, 'app.so');
+    final String windowsAotObject = _fileSystem.path.join(outputDir.path, 'app.o');
+    final String defaultWindowsPdbFile = _fileSystem.path.join(outputDir.path, 'app.pdb');
     String? frameworkPath;
     if (targetingApplePlatform) {
       // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic
@@ -190,6 +200,11 @@ class AOTSnapshotter {
         '--macho-min-os-version=$minOSVersion',
         '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
         '--macho-install-name=@rpath/$frameworkName/$frameworkSnapshotName',
+      ]);
+    } else if (targetingWindowsX64) {
+      genSnapshotArgs.addAll(<String>[
+        '--snapshot_kind=app-aot-pecoff-obj',
+        '--coff=$windowsAotObject',
       ]);
     } else {
       genSnapshotArgs.addAll(<String>['--snapshot_kind=app-aot-elf', '--elf=$aotSharedLibrary']);
@@ -229,13 +244,25 @@ class AOTSnapshotter {
     final String archName = platform.getName(darwinArch: darwinArch);
     final debugFilename = 'app.$archName.symbols';
     final bool shouldSplitDebugInfo = splitDebugInfo?.isNotEmpty ?? false;
+    final String? windowsSplitDebugInfoPdb = shouldSplitDebugInfo && targetingWindowsX64
+        ? _fileSystem.path.join(splitDebugInfo!, 'app.$archName.pdb')
+        : null;
+    final String windowsPdbFile = windowsSplitDebugInfoPdb ?? defaultWindowsPdbFile;
     if (shouldSplitDebugInfo) {
       _fileSystem.directory(splitDebugInfo).createSync(recursive: true);
+      if (windowsSplitDebugInfoPdb != null) {
+        final File staleDefaultWindowsPdb = _fileSystem.file(defaultWindowsPdbFile);
+        if (staleDefaultWindowsPdb.existsSync()) {
+          staleDefaultWindowsPdb.deleteSync();
+        }
+        _logger.printTrace('Windows AOT PE/COFF uses PDB for split debug info.');
+      }
     }
+    final bool emitDwarfDebugInfo = shouldSplitDebugInfo && !targetingWindowsX64;
 
     // Debugging information.
     genSnapshotArgs.addAll(<String>[
-      if (shouldSplitDebugInfo) ...<String>[
+      if (emitDwarfDebugInfo) ...<String>[
         '--dwarf-stack-traces',
         '--resolve-dwarf-paths',
         '--save-debugging-info=${_fileSystem.path.join(splitDebugInfo!, debugFilename)}',
@@ -254,6 +281,32 @@ class AOTSnapshotter {
     if (genSnapshotExitCode != 0) {
       _logger.printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
       return genSnapshotExitCode;
+    }
+
+    if (targetingWindowsX64) {
+      final String? linkerPath = _windowsLinkerPath;
+      if (linkerPath == null) {
+        _logger.printError('Unable to find Visual Studio link.exe required to build Windows AOT.');
+        return 1;
+      }
+      final int linkerExitCode = await _processUtils.stream(<String>[
+        linkerPath,
+        '/NOLOGO',
+        '/DLL',
+        '/NOENTRY',
+        '/MACHINE:X64',
+        '/DEBUG',
+        '/INCREMENTAL:NO',
+        '/OUT:$aotSharedLibrary',
+        '/PDB:$windowsPdbFile',
+        '/EXPORT:_kDartSnapshotData,DATA',
+        '/EXPORT:_kDartSnapshotText,DATA',
+        windowsAotObject,
+      ]);
+      if (linkerExitCode != 0) {
+        _logger.printError('Windows AOT linker failed with exit code $linkerExitCode');
+        return linkerExitCode;
+      }
     }
 
     if (targetingApplePlatform) {
