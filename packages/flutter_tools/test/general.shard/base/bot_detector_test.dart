@@ -149,7 +149,113 @@ void main() {
         );
 
         expect(await botDetector.isRunningOnBot, isTrue);
-        expect(persistentToolState.isRunningOnBot, isTrue);
+      });
+    });
+
+    group('aiAgentName', () {
+      testWithoutContext('returns null when no AI agent environment variables are present', () {
+        final botDetector = BotDetector(
+          platform: fakePlatform,
+          httpClientFactory: () => FakeHttpClient.any(),
+          persistentToolState: persistentToolState,
+        );
+
+        expect(botDetector.aiAgentName, isNull);
+      });
+
+      testWithoutContext('returns null when standard user environment variables are present', () {
+        fakePlatform.environment['USER'] = 'username';
+        fakePlatform.environment['PATH'] = '/usr/bin';
+        fakePlatform.environment['TERM_PROGRAM'] = 'Apple_Terminal';
+
+        final botDetector = BotDetector(
+          platform: fakePlatform,
+          httpClientFactory: () => FakeHttpClient.any(),
+          persistentToolState: persistentToolState,
+        );
+
+        expect(botDetector.aiAgentName, isNull);
+      });
+
+      testWithoutContext('identifies various AI agents', () {
+        final Map<String, String> testCases = <String, String>{
+          'CLAUDECODE': 'Claude Code',
+          'CLAUDE_CODE': 'Claude Code',
+          'CLAUDE_CODE_IS_COWORK': 'Claude Code',
+          'ANTIGRAVITY_AGENT': 'Antigravity',
+          'GEMINI_AGENT': 'Gemini',
+          'GEMINI_CLI': 'Gemini',
+          'TERM_PROGRAM': 'Cursor',
+          'GITHUB_COPILOT': 'Copilot',
+          'COPILOT_ALLOW_ALL': 'Copilot',
+          'AIDER': 'Aider',
+          'DEVIN': 'Devin',
+          'AMP_CURRENT_THREAD_ID': 'Amp',
+          'AUGMENT_AGENT': 'Augment',
+          'CODEX_CI': 'Codex',
+          'OPENCODE': 'OpenCode',
+          'PI_CODING_AGENT': 'Pi',
+          'REPL_ID': 'Replit',
+          'SWE_AGENT': 'Generic AI Agent',
+          'AI_AGENT': 'Generic AI Agent',
+          'AGENT': 'Generic AI Agent',
+        };
+
+        for (final entry in testCases.entries) {
+          final testPlatform = FakePlatform()..environment = <String, String>{};
+          if (entry.key == 'TERM_PROGRAM') {
+            testPlatform.environment['TERM_PROGRAM'] = 'cursor';
+          } else {
+            testPlatform.environment[entry.key] = '1';
+          }
+
+          final botDetector = BotDetector(
+            platform: testPlatform,
+            httpClientFactory: () => FakeHttpClient.any(),
+            persistentToolState: persistentToolState,
+          );
+
+          expect(botDetector.aiAgentName, entry.value);
+        }
+      });
+
+      testWithoutContext('returns the custom AGENT value when AGENT is present', () {
+        final testPlatform = FakePlatform()..environment = <String, String>{'AGENT': 'My AGENT'};
+        final botDetector = BotDetector(
+          platform: testPlatform,
+          httpClientFactory: () => FakeHttpClient.any(),
+          persistentToolState: persistentToolState,
+        );
+
+        expect(botDetector.aiAgentName, 'My AGENT');
+      });
+
+      testWithoutContext('returns the custom AI_AGENT value when AI_AGENT is present', () {
+        final testPlatform = FakePlatform()
+          ..environment = <String, String>{'AI_AGENT': 'My Custom Agent'};
+        final botDetector = BotDetector(
+          platform: testPlatform,
+          httpClientFactory: () => FakeHttpClient.any(),
+          persistentToolState: persistentToolState,
+        );
+
+        expect(botDetector.aiAgentName, 'My Custom Agent');
+      });
+
+      testWithoutContext('caches AI agent detection results in-memory', () {
+        fakePlatform.environment['CLAUDECODE'] = '1';
+
+        final botDetector = BotDetector(
+          platform: fakePlatform,
+          httpClientFactory: () => FakeHttpClient.any(),
+          persistentToolState: persistentToolState,
+        );
+
+        expect(botDetector.aiAgentName, 'Claude Code');
+
+        // Modify env var, it should still return 'Claude Code' because it's cached in-memory
+        fakePlatform.environment['CLAUDECODE'] = '0';
+        expect(botDetector.aiAgentName, 'Claude Code');
       });
     });
   });

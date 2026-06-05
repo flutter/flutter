@@ -79,6 +79,88 @@ class BotDetector {
     _persistentToolState.setIsRunningOnBot(result);
     return result;
   }
+
+  /// The detected AI agent executing the tool, if any.
+  String? get aiAgentName => _aiAgentName ??= _detectAiAgent(_platform.environment);
+  String? _aiAgentName;
+
+  String? _detectAiAgent(Map<String, String> environment) {
+    const String genericAiAgent = 'Generic AI Agent';
+
+    if (environment.containsKey('CLAUDECODE') ||
+        environment.containsKey('CLAUDE_CODE') ||
+        environment.containsKey('CLAUDE_CODE_IS_COWORK')) {
+      return 'Claude Code';
+    }
+
+    if (environment.containsKey('ANTIGRAVITY_AGENT')) {
+      return 'Antigravity';
+    }
+
+    if (environment.containsKey('GEMINI_AGENT') || environment.containsKey('GEMINI_CLI')) {
+      return 'Gemini';
+    }
+
+    if (environment['TERM_PROGRAM'] == 'cursor' ||
+        environment.keys.any((String key) => key.startsWith('CURSOR_'))) {
+      return 'Cursor';
+    }
+
+    if (environment.keys.any(
+      (String key) => key.startsWith('COPILOT_') || key.startsWith('GITHUB_COPILOT'),
+    )) {
+      return 'Copilot';
+    }
+
+    if (environment.containsKey('AIDER') ||
+        environment.keys.any((String key) => key.startsWith('AIDER_'))) {
+      return 'Aider';
+    }
+
+    if (environment.containsKey('DEVIN') || environment.containsKey('DEVIN_WORKSPACE_ID')) {
+      return 'Devin';
+    }
+
+    if (environment.containsKey('AMP_CURRENT_THREAD_ID')) {
+      return 'Amp';
+    }
+
+    if (environment.containsKey('AUGMENT_AGENT')) {
+      return 'Augment';
+    }
+
+    if (environment.containsKey('CODEX_CI') ||
+        environment.containsKey('CODEX_SANDBOX') ||
+        environment.containsKey('CODEX_THREAD_ID')) {
+      return 'Codex';
+    }
+
+    if (environment.containsKey('OPENCODE') || environment.containsKey('OPENCODE_CLIENT')) {
+      return 'OpenCode';
+    }
+
+    if (environment.containsKey('PI_CODING_AGENT')) {
+      return 'Pi';
+    }
+
+    if (environment.containsKey('REPL_ID')) {
+      return 'Replit';
+    }
+
+    String? agent = environment['AGENT'];
+    if (agent != null && agent.isNotEmpty) {
+      return agent == '1' ? genericAiAgent : agent;
+    }
+    agent = environment['AI_AGENT'];
+    if (agent != null && agent.isNotEmpty) {
+      return agent == '1' ? genericAiAgent : agent;
+    }
+    if (environment.containsKey('SWE_AGENT')) {
+      return genericAiAgent;
+    }
+
+    return null;
+  }
 }
 
 // Are we running on Azure?

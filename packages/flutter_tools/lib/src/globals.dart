@@ -89,6 +89,7 @@ final _defaultBotDetector = BotDetector(
       PersistentToolState(fileSystem: fs, logger: logger, platform: platform),
 );
 Future<bool> get isRunningOnBot => botDetector.isRunningOnBot;
+String? get aiAgentName => botDetector.aiAgentName;
 
 // Analytics instance for package:unified_analytics for analytics
 // reporting for all Flutter and Dart related tooling

@@ -164,5 +164,55 @@ void main() {
 
       expect(analytics.userProperty.clientIde, 'VSCode');
     });
+
+    testWithoutContext(
+      'getAnalytics bypasses bot check when running on bots if run by an AI agent',
+      () {
+        // Normally returns NoOpAnalytics when running on bot
+        final Analytics analyticsNormalBot = getAnalytics(
+          runningOnBot: true,
+          flutterVersion: FakeFlutterVersion(),
+          environment: const <String, String>{},
+          analyticsOverride: analyticsOverride,
+          clientIde: clientIde,
+          config: config,
+        );
+        expect(analyticsNormalBot, isA<NoOpAnalytics>());
+
+        // Bypasses NoOpAnalytics check and returns analyticsOverride when AI agent is detected
+        final Analytics analyticsAgentBot = getAnalytics(
+          runningOnBot: true,
+          flutterVersion: FakeFlutterVersion(),
+          environment: const <String, String>{},
+          analyticsOverride: analyticsOverride,
+          clientIde: clientIde,
+          config: config,
+          aiAgentName: 'Claude Code',
+        );
+        expect(analyticsAgentBot, isNot(isA<NoOpAnalytics>()));
+        expect(analyticsAgentBot, equals(analyticsOverride));
+      },
+    );
+
+    testWithoutContext('Agent is passed and found in events', () {
+      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+        fs: fs,
+        fakeFlutterVersion: FakeFlutterVersion(),
+        clientIde: clientIde,
+        agent: 'Claude Code',
+      );
+
+      final Analytics analytics = getAnalytics(
+        runningOnBot: false,
+        flutterVersion: FakeFlutterVersion(),
+        environment: const <String, String>{},
+        analyticsOverride: fakeAnalytics,
+        clientIde: clientIde,
+        config: config,
+      );
+      analytics as FakeAnalytics;
+
+      expect(analytics.userProperty.aiAgent, 'Claude Code');
+    });
   });
 }

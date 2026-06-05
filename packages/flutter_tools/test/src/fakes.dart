@@ -382,12 +382,18 @@ class FakePlistParser implements PlistParser {
 }
 
 class FakeBotDetector implements BotDetector {
-  const FakeBotDetector(bool isRunningOnBot) : _isRunningOnBot = isRunningOnBot;
+  const FakeBotDetector(bool isRunningOnBot, {String? aiAgentName})
+    : _isRunningOnBot = isRunningOnBot,
+      _aiAgentName = aiAgentName;
 
   @override
   Future<bool> get isRunningOnBot async => _isRunningOnBot;
 
+  @override
+  String? get aiAgentName => _aiAgentName;
+
   final bool _isRunningOnBot;
+  final String? _aiAgentName;
 }
 
 class FakeFlutterVersion implements FlutterVersion {

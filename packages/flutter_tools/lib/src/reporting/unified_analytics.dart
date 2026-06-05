@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/config.dart';
@@ -19,24 +20,27 @@ import '../version.dart';
 ///
 /// For testing purposes, pass in a [FakeAnalytics] instance initialized with
 /// an in-memory file system to prevent writing to disk.
+@visibleForTesting
 Analytics getAnalytics({
   required bool runningOnBot,
   required FlutterVersion flutterVersion,
   required Map<String, String> environment,
   required String? clientIde,
   required Config config,
+  String? aiAgentName,
   bool enableAsserts = false,
   FakeAnalytics? analyticsOverride,
 }) {
   final String version = flutterVersion.getVersionString(redactUnknownBranches: true);
-  final suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
+  final bool suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
+  final bool hasAiAgent = aiAgentName != null;
 
   if ( // Ignore local user branches.
   version.startsWith('[user-branch]') ||
       // Many CI systems don't do a full git checkout.
       version.endsWith('/unknown') ||
-      // Ignore bots.
-      runningOnBot ||
+      // Ignore bots, unless run by an AI agent.
+      (runningOnBot && !hasAiAgent) ||
       // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
       suppressEnvFlag) {
     return const NoOpAnalytics();
@@ -56,6 +60,7 @@ Analytics getAnalytics({
     enableAsserts: enableAsserts,
     clientIde: clientIde,
     enabledFeatures: getEnabledFeatures(config),
+    agent: aiAgentName,
   );
 }
 
