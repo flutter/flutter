@@ -145,11 +145,6 @@ bool Texture::Overwrite(Context& gpu_context,
   return true;
 }
 
-size_t Texture::GetBytesPerTexel() {
-  return impeller::BytesPerPixelForPixelFormat(
-      texture_->GetTextureDescriptor().format);
-}
-
 Dart_Handle Texture::AsImage() const {
   // DlImageImpeller isn't compiled in builds with Impeller disabled. If
   // Impeller is disabled, it's impossible to get here anyhow, so just ifdef it
@@ -254,11 +249,6 @@ bool InternalFlutterGpu_Texture_Overwrite(flutter::gpu::Texture* texture,
   return texture->Overwrite(*gpu_context, tonic::DartByteData(source_byte_data),
                             static_cast<uint32_t>(mip_level),
                             static_cast<uint32_t>(slice));
-}
-
-extern int InternalFlutterGpu_Texture_BytesPerTexel(
-    flutter::gpu::Texture* wrapper) {
-  return wrapper->GetBytesPerTexel();
 }
 
 Dart_Handle InternalFlutterGpu_Texture_AsImage(flutter::gpu::Texture* wrapper) {

@@ -1,7 +1,7 @@
 name: _flutter_packages
 
 environment:
-  sdk: ^3.13.0-0
+  sdk: ^3.10.0-0
 
 workspace:
   - dev/a11y_assessments
@@ -20,6 +20,7 @@ workspace:
   - dev/devicelab
   - dev/forbidden_from_release_tests
   - dev/integration_tests/android_engine_test
+  - dev/integration_tests/android_hardware_smoke_test
   - dev/integration_tests/android_semantics_testing
   - dev/integration_tests/android_verified_input
   - dev/integration_tests/android_views
@@ -97,7 +98,7 @@ dependencies:
   checked_yaml: 2.0.4
   cli_config: 0.2.0
   clock: ^1.1.2
-  code_assets: 1.1.0
+  code_assets: 1.2.1
   collection: ^1.19.1
   convert: 3.1.2
   coverage: 1.15.0
@@ -121,7 +122,7 @@ dependencies:
   google_mobile_ads: 8.0.0
   googleapis: 14.0.0
   googleapis_auth: 2.3.1
-  hooks: 2.0.0
+  hooks: 2.0.2
   data_assets: 0.20.0
   record_use: 0.6.0
   html: 0.15.6
@@ -142,7 +143,7 @@ dependencies:
   meta: ^1.18.2
   metrics_center: 1.0.15
   mime: 2.0.0
-  native_toolchain_c: 0.19.0
+  native_toolchain_c: 0.19.1
   nested: 1.0.0
   node_preamble: 2.0.2
   package_config: 2.2.0
@@ -184,7 +185,7 @@ dependencies:
   test_core: 0.6.18
   typed_data: 1.4.0
   url_launcher: 6.3.2
-  url_launcher_android: 6.3.30
+  url_launcher_android: 6.3.31
   url_launcher_ios: 6.4.1
   url_launcher_linux: 3.2.2
   url_launcher_macos: 3.2.5
@@ -193,7 +194,7 @@ dependencies:
   url_launcher_windows: 3.1.5
   vector_math: ^2.3.0
   video_player: 2.11.1
-  video_player_android: 2.9.5
+  video_player_android: 2.9.6
   video_player_avfoundation: 2.9.7
   video_player_platform_interface: 6.7.0
   video_player_web: 2.4.0
@@ -206,7 +207,7 @@ dependencies:
   webdriver: 3.1.0
   webkit_inspection_protocol: 1.2.1
   webview_flutter: 4.13.1
-  webview_flutter_android: 4.12.0
+  webview_flutter_android: 4.12.1
   webview_flutter_platform_interface: 2.15.1
   webview_flutter_wkwebview: 3.25.1
   xdg_directories: 1.1.0
@@ -224,4 +225,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: 82uul6
+# PUBSPEC CHECKSUM: 7arjln
