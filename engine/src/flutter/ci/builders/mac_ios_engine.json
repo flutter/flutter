@@ -12,6 +12,17 @@
     },
     "builds": [
         {
+            "archives": [
+                {
+                    "base_path": "out/ci/ios_debug_sim/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/ci/ios_debug_sim/zip_archives/ios-sim-x64/impeller_sdk.zip"
+                    ],
+                    "name": "ci/ios_debug_sim",
+                    "realm": "production"
+                }
+            ],
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-15.7",
@@ -37,7 +48,10 @@
             "name": "ci/ios_debug_sim",
             "description": "Produces debug mode artifacts to target the x64 iOS simulator.",
             "ninja": {
-                "config": "ci/ios_debug_sim"
+                "config": "ci/ios_debug_sim",
+                "targets": [
+                    "flutter/impeller/toolkit/interop:sdk"
+                ]
             },
             "postsubmit_overrides": {
                 "gn": [
@@ -59,6 +73,17 @@
             }
         },
         {
+            "archives": [
+                {
+                    "base_path": "out/ci/ios_debug_sim_arm64/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/ci/ios_debug_sim_arm64/zip_archives/ios-sim-arm64/impeller_sdk.zip"
+                    ],
+                    "name": "ci/ios_debug_sim_arm64",
+                    "realm": "production"
+                }
+            ],
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-15.7",
@@ -85,7 +110,10 @@
             "name": "ci/ios_debug_sim_arm64",
             "description": "Produces debug mode artifacts to target the arm64 iOS simulator.",
             "ninja": {
-                "config": "ci/ios_debug_sim_arm64"
+                "config": "ci/ios_debug_sim_arm64",
+                "targets": [
+                    "flutter/impeller/toolkit/interop:sdk"
+                ]
             },
             "postsubmit_overrides": {
                 "gn": [
@@ -108,6 +136,17 @@
             }
         },
         {
+            "archives": [
+                {
+                    "base_path": "out/ci/ios_debug/zip_archives/",
+                    "type": "gcs",
+                    "include_paths": [
+                        "out/ci/ios_debug/zip_archives/ios-arm64/impeller_sdk.zip"
+                    ],
+                    "name": "ci/ios_debug",
+                    "realm": "production"
+                }
+            ],
             "drone_dimensions": [
                 "device_type=none",
                 "os=Mac-15.7",
@@ -134,7 +173,8 @@
                 "config": "ci/ios_debug",
                 "targets": [
                     "flutter/lib/snapshot:generate_snapshot_bins",
-                    "flutter/shell/platform/darwin/ios:flutter_framework"
+                    "flutter/shell/platform/darwin/ios:flutter_framework",
+                    "flutter/impeller/toolkit/interop:sdk"
                 ]
             },
             "postsubmit_overrides": {

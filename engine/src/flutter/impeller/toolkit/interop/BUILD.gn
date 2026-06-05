@@ -193,6 +193,8 @@ impeller_component("interop_unittests") {
 zip_bundle("sdk") {
   if (is_mac) {
     zip_out_dir = "darwin-${target_cpu}"
+  } else if (use_ios_simulator) {
+    zip_out_dir = "ios-sim-${target_cpu}"
   } else {
     zip_out_dir = "${full_target_platform_name}"
   }
