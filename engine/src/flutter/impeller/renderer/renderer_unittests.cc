@@ -492,8 +492,9 @@ TEST_P(RendererTest, CanRenderInstanced) {
 
 TEST_P(RendererTest, CanBlitTextureToTexture) {
   if (GetBackend() == PlaygroundBackend::kOpenGLES ||
-      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
-    GTEST_SKIP() << "Mipmap test shader not supported on GLES.";
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF ||
+      GetBackend() == PlaygroundBackend::kVulkan) {
+    GTEST_SKIP() << "Mipmap test shader not supported on GLES or Vulkan.";
   }
   auto context = GetContext();
   ASSERT_TRUE(context);

@@ -217,6 +217,9 @@ bool Playground::OpenPlaygroundHere(
 
   if (!switches_.enable_playground) {
     std::unique_ptr<Surface> surface = impl_->AcquireSurfaceFrame(context_);
+    if (!surface) {
+      return false;
+    }
     RenderTarget render_target = surface->GetRenderTarget();
     if (render_callback(render_target)) {
       return impl_->GetContext()->FlushCommandBuffers();

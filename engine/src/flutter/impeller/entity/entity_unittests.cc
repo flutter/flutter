@@ -1761,11 +1761,12 @@ static std::vector<std::shared_ptr<Texture>> CreateTestYUVTextures(
 }
 
 TEST_P(EntityTest, YUVToRGBFilter) {
-  if (GetParam() == PlaygroundBackend::kOpenGLES ||
-      GetParam() == PlaygroundBackend::kOpenGLESSDF) {
-    // TODO(114588) : Support YUV to RGB filter on OpenGLES backend.
-    GTEST_SKIP()
-        << "YUV to RGB filter is not supported on OpenGLES backend yet.";
+  if (GetParam() != PlaygroundBackend::kMetal &&
+      GetParam() != PlaygroundBackend::kMetalSDF) {
+    // @see (114588) : Support YUV to RGB filter on OpenGLES backend.
+    // The issue was closed as low priority as the support is only really
+    // needed for iOS. Also, Vulkan isn't supported either.
+    GTEST_SKIP() << "YUV to RGB filter is only supported on Metal backends.";
   }
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
