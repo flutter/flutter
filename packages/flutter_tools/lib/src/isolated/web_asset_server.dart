@@ -287,7 +287,7 @@ class WebAssetServer implements AssetReader {
     }
     final int selectedPort = server.selectedPort;
 
-    final cleanHost = hostname == webDevAnyHostDefault ? 'localhost' : hostname;
+    final cleanHost = hostname == webDevAnyHostDefault ? webDevServerDefaultHost : hostname;
     final scheme = httpsConfig != null ? 'https' : 'http';
     server._baseUri = Uri(
       scheme: scheme,
@@ -705,12 +705,14 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       return entrypointCacheDirectory.childFile('web_entrypoint.dart');
     }
 
-    // If this is a dart file, it must be on the local file system and is
-    // likely coming from a source map request. The tool doesn't currently
-    // consider the case of Dart files as assets.
-    final File dartFile = fileSystem.file(fileSystem.currentDirectory.uri.resolve(path));
-    if (dartFile.existsSync()) {
-      return dartFile;
+    if (path.endsWith('.dart')) {
+      // If this is a dart file, it must be on the local file system and is
+      // likely coming from a source map request. The tool doesn't currently
+      // consider the case of Dart files as assets.
+      final File dartFile = fileSystem.file(fileSystem.currentDirectory.uri.resolve(path));
+      if (dartFile.existsSync()) {
+        return dartFile;
+      }
     }
 
     final List<String> segments = path.split('/');
