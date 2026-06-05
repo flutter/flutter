@@ -56,7 +56,7 @@ void testUsingAndroidDeviceContext(
     testMethod,
     overrides: <Type, Generator>{
       FlutterProjectFactory: () =>
-          FakeFlutterProjectFactory(FakeFlutterProject(isSupportedVersion: true)),
+          FakeFlutterProjectFactory(FakeFlutterProject()),
       ...overrides,
     },
     initializeFlutterRoot: initializeFlutterRoot,
@@ -75,19 +75,19 @@ class FakeFlutterProjectFactory extends Fake implements FlutterProjectFactory {
 }
 
 class FakeFlutterProject extends Fake implements FlutterProject {
-  FakeFlutterProject({required this.isSupportedVersion});
+  FakeFlutterProject({this.isUsingGradle = true});
 
-  final bool isSupportedVersion;
+  final bool isUsingGradle;
 
   @override
-  late final android = FakeAndroidProject(isSupportedVersion: isSupportedVersion);
+  late final android = FakeAndroidProject(isUsingGradle: isUsingGradle);
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {
-  FakeAndroidProject({required this.isSupportedVersion});
+  FakeAndroidProject({this.isUsingGradle = true});
 
   @override
-  final bool isSupportedVersion;
+  final bool isUsingGradle;
 }
 
 void main() {
@@ -1135,7 +1135,7 @@ void main() {
         AndroidBuilder: () => fakeAndroidBuilder,
         ApplicationPackageFactory: () => fakeApplicationPackageFactory,
         FlutterProjectFactory: () =>
-            FakeFlutterProjectFactory(FakeFlutterProject(isSupportedVersion: false)),
+            FakeFlutterProjectFactory(FakeFlutterProject(isUsingGradle: false)),
       },
     );
   });

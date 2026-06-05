@@ -563,7 +563,7 @@ class AndroidDevice extends Device {
         return LaunchResult.failed();
     }
     final FlutterProject project = FlutterProject.current();
-    final bool shouldSetAndroidShellArgsViaIntentExtras = !project.android.isSupportedVersion;
+    final bool shouldSetAndroidShellArgsViaIntentExtras = !project.android.isUsingGradle;
     final bool traceStartup = platformArgs['trace-startup'] as bool? ?? false;
     Iterable<String> androidShellArguments = const <String>[];
     var shouldRegenerateEngineShellArgsManifest = false;
