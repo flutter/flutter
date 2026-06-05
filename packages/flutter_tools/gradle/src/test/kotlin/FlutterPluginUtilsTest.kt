@@ -1079,40 +1079,6 @@ class FlutterPluginUtilsTest {
                 }
 
                 @Test
-                fun `exits early when no subproject applies KGP and property is null`(
-                    @TempDir tempDir: Path
-                ) {
-                    val env = setupTest(
-                        tempDir = tempDir,
-                        builtInKotlin = null,
-                        captureActions = false
-                    )
-
-                    detectApplyingKotlinGradlePlugin(env.appProject)
-
-                    verify(exactly = 0) { rootProject.subprojects(any<Action<Project>>()) }
-                    verify(exactly = 0) { env.appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 0) { env.firstPluginManager.apply("kotlin-android") }
-                }
-
-                @Test
-                fun `exits early when no subproject applies KGP and property is invalid`(
-                    @TempDir tempDir: Path
-                ) {
-                    val env = setupTest(
-                        tempDir = tempDir,
-                        builtInKotlin = "5",
-                        captureActions = false
-                    )
-
-                    detectApplyingKotlinGradlePlugin(env.appProject)
-
-                    verify(exactly = 0) { rootProject.subprojects(any<Action<Project>>()) }
-                    verify(exactly = 0) { env.appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 0) { env.firstPluginManager.apply("kotlin-android") }
-                }
-
-                @Test
                 fun `does not exit early when a subproject applies KGP and property is true`(
                     @TempDir tempDir: Path
                 ) {
@@ -1138,32 +1104,73 @@ class FlutterPluginUtilsTest {
                     verify(exactly = 1) { env.appPluginManager.apply("kotlin-android") }
                     verify(exactly = 0) { env.firstPluginManager.apply("kotlin-android") }
                 }
+            }
 
+            @Nested
+            inner class BuiltInKotlinIsDisabled {
                 @Test
-                fun `does not exit early when a subproject applies KGP and property is null`(
+                fun `does not exit early when property is false`(
                     @TempDir tempDir: Path
                 ) {
                     val env = setupTest(
                         tempDir = tempDir,
-                        builtInKotlin = null,
-                        pluginConfigs = listOf(
-                            SubprojectConfig(
-                                "plugin",
-                                plugins = listOf("com.android.library", "kotlin-android")
-                            )
-                        )
+                        builtInKotlin = "false"
+                    )
+
+                    executeDetectApplyingKotlinGradlePlugin(env)
+
+                    verify(exactly = 1) { env.appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 1) { env.firstPluginManager.apply("kotlin-android") }
+                }
+
+                @Test
+                fun `does not exit early when property is FALSE`(
+                    @TempDir tempDir: Path
+                ) {
+                    val env = setupTest(
+                        tempDir = tempDir,
+                        builtInKotlin = "FALSE"
+                    )
+
+                    executeDetectApplyingKotlinGradlePlugin(env)
+
+                    verify(exactly = 1) { env.appPluginManager.apply("kotlin-android") }
+                }
+
+                @Test
+                fun `does not exit early when property is invalid`(
+                    @TempDir tempDir: Path
+                ) {
+                    val env = setupTest(
+                        tempDir = tempDir,
+                        builtInKotlin = "5"
+                    )
+
+                    executeDetectApplyingKotlinGradlePlugin(env)
+
+                    verify(exactly = 1) { env.appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 1) { env.firstPluginManager.apply("kotlin-android") }
+                }
+
+                @Test
+                fun `does not log when migrated to Built-in Kotlin`(
+                    @TempDir tempDir: Path
+                ) {
+                    val env = setupTest(
+                        tempDir = tempDir,
+                        builtInKotlin = "false",
+                        appConfig = SubprojectConfig("app", legacyPlugins = listOf("com.android.application")),
+                        pluginConfigs = listOf(SubprojectConfig("plugin", legacyPlugins = listOf("com.android.library")))
                     )
 
                     executeDetectApplyingKotlinGradlePlugin(env)
 
                     verify(exactly = 0) {
-                        mockLogger.error(match { it.contains("Your Android app project") })
+                        mockLogger.error(any())
                     }
-                    verify {
-                        mockLogger.error(match { it.contains("Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): plugin") })
-                    }
+
                     verify(exactly = 1) { env.appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 0) { env.firstPluginManager.apply("kotlin-android") }
+                    verify(exactly = 1) { env.firstPluginManager.apply("kotlin-android") }
                 }
 
                 @Test
@@ -1172,6 +1179,7 @@ class FlutterPluginUtilsTest {
                 ) {
                     val env = setupTest(
                         tempDir = tempDir,
+                        builtInKotlin = "false",
                         appConfig = SubprojectConfig("app", plugins = listOf("com.android.application", "kotlin-android"))
                     )
 
@@ -1200,6 +1208,7 @@ class FlutterPluginUtilsTest {
                 ) {
                     val env = setupTest(
                         tempDir = tempDir,
+                        builtInKotlin = "false",
                         pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library", "kotlin-android")))
                     )
 
@@ -1233,6 +1242,7 @@ class FlutterPluginUtilsTest {
                 ) {
                     val env = setupTest(
                         tempDir = tempDir,
+                        builtInKotlin = "false",
                         appConfig = SubprojectConfig("app", plugins = listOf("com.android.application", "kotlin-android")),
                         pluginConfigs = listOf(SubprojectConfig("plugin", plugins = listOf("com.android.library", "kotlin-android")))
                     )
@@ -1274,6 +1284,7 @@ class FlutterPluginUtilsTest {
                 ) {
                     val env = setupTest(
                         tempDir = tempDir,
+                        builtInKotlin = "false",
                         appConfig = SubprojectConfig("app", legacyPlugins = listOf("com.android.application", "kotlin-android")),
                         pluginConfigs = listOf(
                             SubprojectConfig("plugin1", legacyPlugins = listOf("com.android.library", "kotlin-android")),
@@ -1312,60 +1323,6 @@ class FlutterPluginUtilsTest {
                     for (plugin in env.plugins) {
                         verify(exactly = 0) { plugin.second.apply("kotlin-android") }
                     }
-                }
-            }
-
-            @Nested
-            inner class BuiltInKotlinIsDisabled {
-                @Test
-                fun `does not exit early when property is false`(
-                    @TempDir tempDir: Path
-                ) {
-                    val env = setupTest(
-                        tempDir = tempDir,
-                        builtInKotlin = "false"
-                    )
-
-                    executeDetectApplyingKotlinGradlePlugin(env)
-
-                    verify(exactly = 1) { env.appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 1) { env.firstPluginManager.apply("kotlin-android") }
-                }
-
-                @Test
-                fun `does not exit early when property is FALSE`(
-                    @TempDir tempDir: Path
-                ) {
-                    val env = setupTest(
-                        tempDir = tempDir,
-                        builtInKotlin = "FALSE"
-                    )
-
-                    executeDetectApplyingKotlinGradlePlugin(env)
-
-                    verify(exactly = 1) { env.appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 1) { env.firstPluginManager.apply("kotlin-android") }
-                }
-
-                @Test
-                fun `does not log when migrated to Built-in Kotlin`(
-                    @TempDir tempDir: Path
-                ) {
-                    val env = setupTest(
-                        tempDir = tempDir,
-                        builtInKotlin = "false",
-                        appConfig = SubprojectConfig("app", legacyPlugins = listOf("com.android.application")),
-                        pluginConfigs = listOf(SubprojectConfig("plugin", legacyPlugins = listOf("com.android.library")))
-                    )
-
-                    executeDetectApplyingKotlinGradlePlugin(env)
-
-                    verify(exactly = 0) {
-                        mockLogger.error(any())
-                    }
-
-                    verify(exactly = 1) { env.appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 1) { env.firstPluginManager.apply("kotlin-android") }
                 }
 
                 @Test
