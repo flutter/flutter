@@ -344,7 +344,11 @@ bool isCupertino(String libraryName) => libraryName == 'packages/flutter/test/cu
 File getFile(String filepath, Directory directory) {
   final String platformFilepath = filepath.replaceAll('/', Platform.pathSeparator);
   final String searchPattern = directory.basename + Platform.pathSeparator;
-  final int overlapIndex = platformFilepath.lastIndexOf(searchPattern);
+  // Don't use `lastIndexOf`, as for files in test fixes
+  // i.e. `packages/flutter_test/test_fixes/flutter_test/matchers.dart`
+  // the overlap index could appear multiple times.
+  // Only take the first one.
+  final int overlapIndex = platformFilepath.indexOf(searchPattern);
 
   if (overlapIndex < 0) {
     throw ArgumentError('filepath $filepath must be located in directory ${directory.path}.');
