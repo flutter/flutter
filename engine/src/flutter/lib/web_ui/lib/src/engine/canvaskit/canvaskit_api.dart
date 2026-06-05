@@ -2428,19 +2428,17 @@ String get _canvasKitBaseUrl => configuration.canvasKitBaseUrl;
 
 @visibleForTesting
 List<String> getCanvasKitJsFileNames(CanvasKitVariant variant) {
-  final bool useWebParagraph = configuration.preferWebParagraph && browserSupportsWebParagraph;
+  if (isWebParagraphEnabled) {
+    return <String>[_kWebParagraphCanvasKitJsFileName];
+  }
   return [
     ...switch (variant) {
       CanvasKitVariant.auto => <String>[
-        if (useWebParagraph) _kWebParagraphCanvasKitJsFileName,
         if (_enableCanvasKitChromiumInAutoMode) _kChromiumCanvasKitJsFileName,
         _kFullCanvasKitJsFileName,
       ],
       CanvasKitVariant.full => <String>[_kFullCanvasKitJsFileName],
-      CanvasKitVariant.chromium => <String>[
-        if (useWebParagraph) _kWebParagraphCanvasKitJsFileName,
-        _kChromiumCanvasKitJsFileName,
-      ],
+      CanvasKitVariant.chromium => <String>[_kChromiumCanvasKitJsFileName],
     },
   ];
 }
