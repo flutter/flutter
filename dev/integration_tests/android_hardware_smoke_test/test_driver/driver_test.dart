@@ -24,13 +24,18 @@ void main() async {
     final String response = await flutterDriver.requestData(
       json.encode(<String, Object?>{'command': 'get_golden_variant'}),
     );
-    final Map<String, Object?> reply = (json.decode(response) as Map<Object?, Object?>)
-        .cast<String, Object?>();
+    final Map<String, Object?> reply =
+        (json.decode(response) as Map<Object?, Object?>)
+            .cast<String, Object?>();
     final replyVariant = reply['goldenVariant'] as String?;
-    activeGoldenVariant = (replyVariant != null && replyVariant.isNotEmpty) ? '.$replyVariant' : '';
+    activeGoldenVariant = (replyVariant != null && replyVariant.isNotEmpty)
+        ? '.$replyVariant'
+        : '';
 
     if (isLuci) {
-      await enableSkiaGoldComparator(namePrefix: 'android_hardware_smoke_test$activeGoldenVariant');
+      await enableSkiaGoldComparator(
+        namePrefix: 'android_hardware_smoke_test$activeGoldenVariant',
+      );
     }
   });
 
@@ -41,18 +46,25 @@ void main() async {
   Future<void> templateTest(String testName) async {
     // Ask the app to render the test and return the rendered image bytes
     final String response = await flutterDriver.requestData(
-      json.encode(<String, Object?>{'testName': testName, 'performAppSideGoldenCompare': false}),
+      json.encode(<String, Object?>{
+        'testName': testName,
+        'performAppSideGoldenCompare': false,
+      }),
     );
 
     // Expect a successful reply
-    final Map<String, Object?> reply = (json.decode(response) as Map<Object?, Object?>)
-        .cast<String, Object?>();
+    final Map<String, Object?> reply =
+        (json.decode(response) as Map<Object?, Object?>)
+            .cast<String, Object?>();
     expect(reply['message'], equals('Rendered $testName'));
 
     // Compare the bytes to a golden file on the host filesystem using the cached variant
     final imageBase64 = reply['imageBytes']! as String;
     final Uint8List imageBytes = base64.decode(imageBase64);
-    await expectLater(imageBytes, matchesGoldenFile('goldens/$testName$activeGoldenVariant.png'));
+    await expectLater(
+      imageBytes,
+      matchesGoldenFile('goldens/$testName$activeGoldenVariant.png'),
+    );
   }
 
   test('should render and match blueRectangleTest golden', () async {
@@ -65,5 +77,9 @@ void main() async {
 
   test('should render and match textTest golden', () async {
     await templateTest('textTest');
+  }, timeout: Timeout.none);
+
+  test('should render and match imageTest golden', () async {
+    await templateTest('imageTest');
   }, timeout: Timeout.none);
 }

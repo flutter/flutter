@@ -109,4 +109,9 @@ class FlutterActivityTest {
     fun textTest() {
         templateTest("textTest")
     }
+
+    @Test
+    fun imageTest() {
+        templateTest("imageTest")
+    }
 }
