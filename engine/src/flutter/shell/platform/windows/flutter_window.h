@@ -84,7 +84,6 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
-                             uint64_t buttons,
                              uint32_t rotation,
                              uint32_t pressure,
                              int modifiers_state);
@@ -94,7 +93,7 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
                              double y,
                              FlutterPointerDeviceKind device_kind,
                              int32_t device_id,
-                             uint64_t buttons,
+                             UINT button,
                              uint32_t rotation,
                              uint32_t pressure);
 
@@ -104,7 +103,7 @@ class FlutterWindow : public KeyboardManager::WindowDelegate,
                            double y,
                            FlutterPointerDeviceKind device_kind,
                            int32_t device_id,
-                           uint64_t buttons);
+                           UINT button);
 
   // Called when the mouse leaves the window.
   virtual void OnPointerLeave(double x,
