@@ -69,10 +69,6 @@ class GoldenPlaygroundTest
   static bool SaveScreenshot(std::unique_ptr<testing::Screenshot> screenshot,
                              const std::string& postfix = "");
 
-  static bool ImGuiBegin(const char* name,
-                         bool* p_open,
-                         ImGuiWindowFlags flags);
-
   std::shared_ptr<Texture> CreateTextureForFixture(
       const char* fixture_name,
       bool enable_mipmapping = false) const;
@@ -99,12 +95,11 @@ class GoldenPlaygroundTest
   [[nodiscard]] fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities);
 
-  /// Returns true if `OpenPlaygroundHere` will actually render anything.
-  bool WillRenderSomething() const { return true; }
-
   RuntimeStageBackend GetRuntimeStageBackend() const;
 
-  bool IsGoldenTest() { return true; }
+  bool IsGoldenTest() const { return true; }
+
+  bool IsPlaygroundEnabled() const { return false; }
 
  protected:
   void SetWindowSize(ISize size);

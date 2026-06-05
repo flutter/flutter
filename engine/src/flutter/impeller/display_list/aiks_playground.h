@@ -30,10 +30,6 @@ class AiksPlayground : public PlaygroundTest {
 
   bool OpenPlaygroundHere(const sk_sp<flutter::DisplayList>& list);
 
-  static bool ImGuiBegin(const char* name,
-                         bool* p_open,
-                         ImGuiWindowFlags flags);
-
   bool IsGoldenTest() { return false; }
 
  private:

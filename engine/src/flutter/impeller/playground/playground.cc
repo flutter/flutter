@@ -211,12 +211,17 @@ void Playground::SetCursorPosition(Point pos) {
 
 bool Playground::OpenPlaygroundHere(
     const Playground::RenderCallback& render_callback) {
-  if (!switches_.enable_playground) {
+  if (!render_callback) {
     return true;
   }
 
-  if (!render_callback) {
-    return true;
+  if (!switches_.enable_playground) {
+    std::unique_ptr<Surface> surface = impl_->AcquireSurfaceFrame(context_);
+    RenderTarget render_target = surface->GetRenderTarget();
+    if (render_callback(render_target)) {
+      return impl_->GetContext()->FlushCommandBuffers();
+    }
+    return false;
   }
 
   IMGUI_CHECKVERSION();
@@ -522,10 +527,6 @@ bool Playground::ShouldKeepRendering() const {
 fml::Status Playground::SetCapabilities(
     const std::shared_ptr<Capabilities>& capabilities) {
   return impl_->SetCapabilities(capabilities);
-}
-
-bool Playground::WillRenderSomething() const {
-  return switches_.enable_playground;
 }
 
 Playground::GLProcAddressResolver Playground::CreateGLProcAddressResolver()

@@ -96,10 +96,12 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
 
   auto [data_host_buffer, indexes_host_buffer] = createHostBuffers(context);
   SinglePassCallback callback = [&](RenderPass& pass) {
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     static bool wireframe;
-    ImGui::Checkbox("Wireframe", &wireframe);
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::Checkbox("Wireframe", &wireframe);
+      ImGui::End();
+    }
 
     desc->SetPolygonMode(wireframe ? PolygonMode::kLine : PolygonMode::kFill);
     auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
@@ -206,10 +208,12 @@ TEST_P(RendererTest, CanRenderPerspectiveCube) {
     static Degrees fov_y(60);
     static Scalar distance = 10;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat("Field of view", &fov_y.degrees, 0, 180);
-    ImGui::SliderFloat("Camera distance", &distance, 0, 30);
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("Field of view", &fov_y.degrees, 0, 180);
+      ImGui::SliderFloat("Camera distance", &distance, 0, 30);
+      ImGui::End();
+    }
 
     pass.SetCommandLabel("Perspective Cube");
     pass.SetPipeline(pipeline);
@@ -779,13 +783,15 @@ TEST_P(RendererTest, CanGenerateMipmaps) {
     static int selected_min_filter = 0;
     static float lod = 4.5;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::Combo("Mip filter", &selected_mip_filter, mip_filter_names,
-                 sizeof(mip_filter_names) / sizeof(char*));
-    ImGui::Combo("Min filter", &selected_min_filter, min_filter_names,
-                 sizeof(min_filter_names) / sizeof(char*));
-    ImGui::SliderFloat("LOD", &lod, 0, boston->GetMipCount() - 1);
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::Combo("Mip filter", &selected_mip_filter, mip_filter_names,
+                   sizeof(mip_filter_names) / sizeof(char*));
+      ImGui::Combo("Min filter", &selected_min_filter, min_filter_names,
+                   sizeof(min_filter_names) / sizeof(char*));
+      ImGui::SliderFloat("LOD", &lod, 0, boston->GetMipCount() - 1);
+      ImGui::End();
+    }
 
     auto buffer = context->CreateCommandBuffer();
     if (!buffer) {
@@ -937,13 +943,15 @@ TEST_P(RendererTest, Planet) {
 
     auto size = pass.GetRenderTargetSize();
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat("Speed", &speed, 0.0, 10.0);
-    ImGui::SliderFloat("Planet Size", &planet_size, 0.1, 1000);
-    ImGui::Checkbox("Show Normals", &show_normals);
-    ImGui::Checkbox("Show Noise", &show_noise);
-    ImGui::InputFloat("Seed Value", &seed_value);
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("Speed", &speed, 0.0, 10.0);
+      ImGui::SliderFloat("Planet Size", &planet_size, 0.1, 1000);
+      ImGui::Checkbox("Show Normals", &show_normals);
+      ImGui::Checkbox("Show Noise", &show_noise);
+      ImGui::InputFloat("Seed Value", &seed_value);
+      ImGui::End();
+    }
 
     pass.SetPipeline(pipeline);
     pass.SetCommandLabel("Planet scene");
@@ -1262,17 +1270,21 @@ TEST_P(RendererTest, StencilMask) {
         return false;
       }
       pass->SetLabel("Stencil Buffer");
-      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-      ImGui::SliderInt("Stencil Write Value", &stencil_reference_write, 0,
-                       0xFF);
-      ImGui::SliderInt("Stencil Compare Value", &stencil_reference_read, 0,
-                       0xFF);
-      ImGui::Checkbox("Back face mode", &mirror);
-      ImGui::ListBox("Front face compare function", &current_front_compare,
-                     CompareFunctionUI().labels(), CompareFunctionUI().size());
-      ImGui::ListBox("Back face compare function", &current_back_compare,
-                     CompareFunctionUI().labels(), CompareFunctionUI().size());
-      ImGui::End();
+      if (IsPlaygroundEnabled()) {
+        ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::SliderInt("Stencil Write Value", &stencil_reference_write, 0,
+                         0xFF);
+        ImGui::SliderInt("Stencil Compare Value", &stencil_reference_read, 0,
+                         0xFF);
+        ImGui::Checkbox("Back face mode", &mirror);
+        ImGui::ListBox("Front face compare function", &current_front_compare,
+                       CompareFunctionUI().labels(),
+                       CompareFunctionUI().size());
+        ImGui::ListBox("Back face compare function", &current_back_compare,
+                       CompareFunctionUI().labels(),
+                       CompareFunctionUI().size());
+        ImGui::End();
+      }
 
       StencilAttachmentDescriptor front;
       front.stencil_compare =

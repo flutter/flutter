@@ -531,8 +531,8 @@ TEST_P(AiksTest, ClearBlendWithBlur) {
 TEST_P(AiksTest, BlurHasNoEdge) {
   Scalar sigma = 47.6;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 50);
       ImGui::End();
     }
@@ -822,8 +822,8 @@ TEST_P(AiksTest, GaussianBlurStyleSolid) {
 TEST_P(AiksTest, MaskBlurTexture) {
   Scalar sigma = 30;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 500);
       ImGui::End();
     }
@@ -851,8 +851,8 @@ TEST_P(AiksTest, MaskBlurTexture) {
 TEST_P(AiksTest, MaskBlurDoesntStretchContents) {
   Scalar sigma = 70;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 500);
       ImGui::End();
     }
@@ -953,8 +953,8 @@ TEST_P(AiksTest, GaussianBlurAnimatedBackdrop) {
   Scalar freq = 0.1;
   Scalar amp = 50.0;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Sigma", &sigma, 0, 200);
       ImGui::SliderFloat("Frequency", &freq, 0.01, 2.0);
       ImGui::SliderFloat("Amplitude", &amp, 1, 100);
@@ -1142,8 +1142,8 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClippedInteractive) {
     static float scale = 0.6;
     static int selected_tile_mode = 3;
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Rotation (degrees)", &rotation, -180, 180);
       ImGui::SliderFloat("Scale", &scale, 0, 2.0);
       ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,
@@ -1253,8 +1253,8 @@ TEST_P(AiksTest, GaussianBlurRotatedNonUniform) {
     static float scale = 0.6;
     static int selected_tile_mode = 3;
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Rotation (degrees)", &rotation, -180, 180);
       ImGui::SliderFloat("Scale", &scale, 0, 2.0);
       ImGui::Combo("Tile mode", &selected_tile_mode, tile_mode_names,

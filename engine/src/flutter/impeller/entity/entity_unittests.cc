@@ -204,16 +204,16 @@ TEST_P(EntityTest, StrokeCapAndJoinTest) {
     static Scalar miter_limit = 1.41421357;
     static Scalar width = 30;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Miter limit", &miter_limit, 0, 30);
       ImGui::SliderFloat("Stroke width", &width, 0, 100);
       if (ImGui::Button("Reset")) {
         miter_limit = 1.41421357;
         width = 30;
       }
+      ImGui::End();
     }
-    ImGui::End();
 
     auto world_matrix = Matrix::MakeScale(GetContentScale());
     auto render_path = [width = width, &context, &pass, &world_matrix](
@@ -393,10 +393,16 @@ TEST_P(EntityTest, CanDrawCorrectlyWithRotatedTransform) {
     const char* input_axis[] = {"X", "Y", "Z"};
     static int rotation_axis_index = 0;
     static float rotation = 0;
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat("Rotation", &rotation, -kPi, kPi);
-    ImGui::Combo("Rotation Axis", &rotation_axis_index, input_axis,
-                 sizeof(input_axis) / sizeof(char*));
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("Rotation", &rotation, -kPi, kPi);
+      ImGui::Combo("Rotation Axis", &rotation_axis_index, input_axis,
+                   sizeof(input_axis) / sizeof(char*));
+      if (ImGui::Button("Reset")) {
+        rotation = 0;
+      }
+      ImGui::End();
+    }
     Matrix rotation_matrix;
     switch (rotation_axis_index) {
       case 0:
@@ -413,10 +419,6 @@ TEST_P(EntityTest, CanDrawCorrectlyWithRotatedTransform) {
         break;
     }
 
-    if (ImGui::Button("Reset")) {
-      rotation = 0;
-    }
-    ImGui::End();
     Matrix current_transform =
         Matrix::MakeScale(GetContentScale())
             .MakeTranslation(
@@ -833,14 +835,16 @@ TEST_P(EntityTest, BlendingModeOptions) {
       return pass.Draw().ok();
     };
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     static Color color1(1, 0, 0, 0.5), color2(0, 1, 0, 0.5);
-    ImGui::ColorEdit4("Color 1", reinterpret_cast<float*>(&color1));
-    ImGui::ColorEdit4("Color 2", reinterpret_cast<float*>(&color2));
     static int current_blend_index = 3;
-    ImGui::ListBox("Blending mode", &current_blend_index,
-                   blend_mode_names.data(), blend_mode_names.size());
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::ColorEdit4("Color 1", reinterpret_cast<float*>(&color1));
+      ImGui::ColorEdit4("Color 2", reinterpret_cast<float*>(&color2));
+      ImGui::ListBox("Blending mode", &current_blend_index,
+                     blend_mode_names.data(), blend_mode_names.size());
+      ImGui::End();
+    }
 
     BlendMode selected_mode = blend_mode_values[current_blend_index];
 
@@ -870,9 +874,11 @@ TEST_P(EntityTest, BezierCircleScaled) {
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     static float scale = 20;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat("Scale", &scale, 1, 100);
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("Scale", &scale, 1, 100);
+      ImGui::End();
+    }
 
     Entity entity;
     entity.SetTransform(Matrix::MakeScale(GetContentScale()));
@@ -972,8 +978,8 @@ TEST_P(EntityTest, GaussianBlurFilter) {
                                  static_cast<float>(boston->GetSize().width),
                                  static_cast<float>(boston->GetSize().height)};
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Combo("Input type", &selected_input_type, input_type_names,
                    sizeof(input_type_names) / sizeof(char*));
       if (selected_input_type == 0) {
@@ -1012,8 +1018,8 @@ TEST_P(EntityTest, GaussianBlurFilter) {
       ImGui::SliderFloat2("Scale", scale, 0, 3);
       ImGui::SliderFloat2("Skew", skew, -3, 3);
       ImGui::SliderFloat4("Path XYWH", path_rect, -1000, 1000);
+      ImGui::End();
     }
-    ImGui::End();
 
     auto blur_sigma_x = Sigma{blur_amount_coarse[0] + blur_amount_fine[0]};
     auto blur_sigma_y = Sigma{blur_amount_coarse[1] + blur_amount_fine[1]};
@@ -1136,8 +1142,8 @@ TEST_P(EntityTest, MorphologyFilter) {
                                  static_cast<float>(boston->GetSize().height)};
     static float effect_transform_scale = 1;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Combo("Morphology type", &selected_morphology_type,
                    morphology_type_names,
                    sizeof(morphology_type_names) / sizeof(char*));
@@ -1154,8 +1160,8 @@ TEST_P(EntityTest, MorphologyFilter) {
       ImGui::SliderFloat4("Path XYWH", path_rect, -1000, 1000);
       ImGui::SliderFloat("Effect transform scale", &effect_transform_scale, 0,
                          3);
+      ImGui::End();
     }
-    ImGui::End();
 
     std::shared_ptr<Contents> input;
     Size input_size;
@@ -1201,16 +1207,19 @@ TEST_P(EntityTest, MorphologyFilter) {
     cover_entity.Render(context, pass);
 
     // Renders a green bounding rect of the target filter.
-    Entity bounds_entity;
-    std::unique_ptr<Geometry> bounds_geom = Geometry::MakeFillPath(
-        flutter::DlPath::MakeRect(contents->GetCoverage(entity).value()));
-    auto bounds_contents =
-        std::make_shared<SolidColorContents>(bounds_geom.get());
-    bounds_contents->SetColor(bounds_color);
-    bounds_entity.SetContents(std::move(bounds_contents));
-    bounds_entity.SetTransform(Matrix());
+    std::optional<Rect> contents_coverage = contents->GetCoverage(entity);
+    if (contents_coverage.has_value()) {
+      std::unique_ptr<Geometry> bounds_geom = Geometry::MakeFillPath(
+          flutter::DlPath::MakeRect(contents_coverage.value()));
+      auto bounds_contents =
+          std::make_shared<SolidColorContents>(bounds_geom.get());
+      bounds_contents->SetColor(bounds_color);
+      Entity bounds_entity;
+      bounds_entity.SetContents(std::move(bounds_contents));
+      bounds_entity.SetTransform(Matrix());
 
-    bounds_entity.Render(context, pass);
+      bounds_entity.Render(context, pass);
+    }
 
     return true;
   };
@@ -1438,16 +1447,18 @@ TEST_P(EntityTest, RRectShadowTest) {
     static PlaygroundPoint bottom_right_point(Point(600, 400), 30,
                                               Color::White());
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat("Corner radius", &corner_radius, 0, 300);
-    ImGui::SliderFloat("Blur radius", &blur_radius, 0, 300);
-    ImGui::ColorEdit4("Color", reinterpret_cast<Scalar*>(&color));
-    ImGui::Checkbox("Show coverage", &show_coverage);
-    if (show_coverage) {
-      ImGui::ColorEdit4("Coverage color",
-                        reinterpret_cast<Scalar*>(&coverage_color));
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("Corner radius", &corner_radius, 0, 300);
+      ImGui::SliderFloat("Blur radius", &blur_radius, 0, 300);
+      ImGui::ColorEdit4("Color", reinterpret_cast<Scalar*>(&color));
+      ImGui::Checkbox("Show coverage", &show_coverage);
+      if (show_coverage) {
+        ImGui::ColorEdit4("Coverage color",
+                          reinterpret_cast<Scalar*>(&coverage_color));
+      }
+      ImGui::End();
     }
-    ImGui::End();
 
     auto [top_left, bottom_right] =
         DrawPlaygroundLine(top_left_point, bottom_right_point);
@@ -1527,8 +1538,8 @@ TEST_P(EntityTest, ColorMatrixFilterEditable) {
     static float skew[2] = {0, 0};
 
     // Define the ImGui
-    ImGui::Begin("Color Matrix", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Color Matrix", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       std::string label = "##1";
       for (int i = 0; i < 20; i += 5) {
         ImGui::InputScalarN(label.c_str(), ImGuiDataType_Float,
@@ -1542,8 +1553,8 @@ TEST_P(EntityTest, ColorMatrixFilterEditable) {
       ImGui::SliderFloat("Rotation", &rotation, 0, kPi * 2);
       ImGui::SliderFloat2("Scale", &scale[0], 0, 3);
       ImGui::SliderFloat2("Skew", &skew[0], -3, 3);
+      ImGui::End();
     }
-    ImGui::End();
 
     // Set the color matrix filter.
     auto filter = ColorFilterContents::MakeColorMatrix(
@@ -2497,13 +2508,15 @@ TEST_P(EntityTest, DrawSuperEllipse) {
     static int degree = 4;
     static Color color = Color::Red();
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    ImGui::SliderFloat("Alpha", &alpha, 0, 100);
-    ImGui::SliderFloat("Beta", &beta, 0, 100);
-    ImGui::SliderInt("Degreee", &degree, 1, 20);
-    ImGui::SliderFloat("Radius", &radius, 0, 400);
-    ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&color));
-    ImGui::End();
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+      ImGui::SliderFloat("Alpha", &alpha, 0, 100);
+      ImGui::SliderFloat("Beta", &beta, 0, 100);
+      ImGui::SliderInt("Degreee", &degree, 1, 20);
+      ImGui::SliderFloat("Radius", &radius, 0, 400);
+      ImGui::ColorEdit4("Color", reinterpret_cast<float*>(&color));
+      ImGui::End();
+    }
 
     std::unique_ptr<SuperellipseGeometry> geom =
         std::make_unique<SuperellipseGeometry>(Point{400, 400}, radius, degree,
@@ -2565,8 +2578,8 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
       radius_br[1] = radius_br[0];
     }
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Combo("Style", &style_index, style_options,
                    sizeof(style_options) / sizeof(char*));
       ImGui::SliderFloat2("Center", &center.x, 0, 1000);
@@ -2594,9 +2607,8 @@ TEST_P(EntityTest, DrawRoundSuperEllipse) {
           radius_br = radius_tr;
         }
       }
+      ImGui::End();
     }
-
-    ImGui::End();
 
     RoundingRadii radii{
         .top_left = {radius_tl[0], radius_tl[1]},
@@ -2650,13 +2662,13 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
     // Scale so that "corner radius" is as long as half the canvas.
     float scale = screen_canvas_size / 2 / corner_radius;
 
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("log(Ratio)", &logarithm_of_ratio, 1.0, 8.0);
       ImGui::LabelText("Ratio", "%.2g", static_cast<double>(ratio));
       ImGui::Text("  where Ratio = RectSize / CornerRadius");
+      ImGui::End();
     }
-    ImGui::End();
 
     auto top_right = Vector2(screen_canvas_size * 1.3f, screen_canvas_padding);
     auto transform = Matrix::MakeTranslation(top_right) *
@@ -2709,16 +2721,18 @@ TEST_P(EntityTest, DrawRoundSuperEllipseWithLargeN) {
             screen_offset_y * GetContentScale().y / scale / rect_size;
         label = std::format("- {:.2g}", portion_of_rect);
       }
-      ImGui::GetBackgroundDrawList()->AddText(
-          nullptr, font_size,
-          // Draw the ruler at around the flat part of the curve, which is
-          // somewhere to the left of the top right corner.
-          //
-          // Offset vertically by font_size/2 so that the hyphen aligns with the
-          // top of shape.
-          {screen_top_right.x - 500,
-           screen_top_right.y + screen_offset_y - font_size / 2},
-          IM_COL32_WHITE, label.c_str());
+      if (IsPlaygroundEnabled()) {
+        ImGui::GetBackgroundDrawList()->AddText(
+            nullptr, font_size,
+            // Draw the ruler at around the flat part of the curve, which is
+            // somewhere to the left of the top right corner.
+            //
+            // Offset vertically by font_size/2 so that the hyphen aligns with
+            // the top of shape.
+            {screen_top_right.x - 500,
+             screen_top_right.y + screen_offset_y - font_size / 2},
+            IM_COL32_WHITE, label.c_str());
+      }
     }
     return success;
   };

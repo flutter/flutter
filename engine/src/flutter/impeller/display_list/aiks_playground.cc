@@ -27,13 +27,6 @@ void AiksPlayground::TearDown() {
   PlaygroundTest::TearDown();
 }
 
-bool AiksPlayground::ImGuiBegin(const char* name,
-                                bool* p_open,
-                                ImGuiWindowFlags flags) {
-  ImGui::Begin(name, p_open, flags);
-  return true;
-}
-
 bool AiksPlayground::OpenPlaygroundHere(
     const sk_sp<flutter::DisplayList>& list) {
   return OpenPlaygroundHere([list]() { return list; });

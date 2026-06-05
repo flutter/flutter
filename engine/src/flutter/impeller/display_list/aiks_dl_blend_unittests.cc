@@ -198,8 +198,8 @@ TEST_P(AiksTest, PaintBlendModeIsRespected) {
 TEST_P(AiksTest, ColorFilterBlend) {
   bool has_color_filter = true;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Checkbox("has color filter", &has_color_filter);
       ImGui::End();
     }
@@ -250,8 +250,8 @@ TEST_P(AiksTest, ColorFilterBlend) {
 TEST_P(AiksTest, ColorFilterAdvancedBlend) {
   bool has_color_filter = true;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Checkbox("has color filter", &has_color_filter);
       ImGui::End();
     }
@@ -311,9 +311,6 @@ TEST_P(AiksTest, ColorFilterAdvancedBlendNoFbFetch) {
     GTEST_SKIP()
         << "This backend doesn't yet support setting device capabilities.";
   }
-  if (!WillRenderSomething()) {
-    GTEST_SKIP() << "This test requires playgrounds.";
-  }
 
   std::shared_ptr<const Capabilities> old_capabilities =
       GetContext()->GetCapabilities();
@@ -343,8 +340,8 @@ TEST_P(AiksTest, ColorFilterAdvancedBlendNoFbFetch) {
 
   bool has_color_filter = true;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Checkbox("has color filter", &has_color_filter);
       ImGui::End();
     }
@@ -497,13 +494,14 @@ TEST_P(AiksTest, ClearBlend) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
+static sk_sp<DisplayList> BlendModeTest(AiksTest* test,
+                                        Vector2 content_scale,
                                         BlendMode blend_mode,
                                         const sk_sp<DlImageImpeller>& src_image,
                                         const sk_sp<DlImageImpeller>& dst_image,
                                         Scalar src_alpha) {
-  if (AiksTest::ImGuiBegin("Controls", nullptr,
-                           ImGuiWindowFlags_AlwaysAutoResize)) {
+  if (test->IsPlaygroundEnabled()) {
+    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::SliderFloat("Source alpha", &src_alpha, 0, 1);
     ImGui::End();
   }
@@ -658,7 +656,7 @@ static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
     auto dst_image =                                                          \
         DlImageImpeller::Make(CreateTextureForFixture("blend_mode_dst.png")); \
     auto callback = [&]() -> sk_sp<DisplayList> {                             \
-      return BlendModeTest(GetContentScale(), BlendMode::k##blend_mode,       \
+      return BlendModeTest(this, GetContentScale(), BlendMode::k##blend_mode, \
                            src_image, dst_image, /*src_alpha=*/1.0);          \
     };                                                                        \
     OpenPlaygroundHere(callback);                                             \
@@ -672,7 +670,7 @@ IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_TEST)
     auto dst_image =                                                          \
         DlImageImpeller::Make(CreateTextureForFixture("blend_mode_dst.png")); \
     auto callback = [&]() -> sk_sp<DisplayList> {                             \
-      return BlendModeTest(GetContentScale(), BlendMode::k##blend_mode,       \
+      return BlendModeTest(this, GetContentScale(), BlendMode::k##blend_mode, \
                            src_image, dst_image, /*src_alpha=*/0.5);          \
     };                                                                        \
     OpenPlaygroundHere(callback);                                             \
@@ -687,8 +685,8 @@ TEST_P(AiksTest, CanDrawPaintMultipleTimesInteractive) {
     static Color foreground = Color::Color::OrangeRed().WithAlpha(0.5);
     static int current_blend_index = 3;
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::ColorEdit4("Background", reinterpret_cast<float*>(&background));
       ImGui::ColorEdit4("Foreground", reinterpret_cast<float*>(&foreground));
       ImGui::ListBox("Blend mode", &current_blend_index,
@@ -823,8 +821,8 @@ TEST_P(AiksTest, ColorWheel) {
     static DlColor color1 = DlColor::kGreen();
     static DlColor color2 = DlColor::kBlue();
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::Checkbox("Cache the wheel", &cache_the_wheel);
       ImGui::ListBox("Blending mode", &current_blend_index,
                      blend_modes.blend_mode_names.data(),

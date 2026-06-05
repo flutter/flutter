@@ -30,10 +30,6 @@ bool DlPlayground::OpenPlaygroundHere(sk_sp<flutter::DisplayList> list) {
 }
 
 bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
-  if (!switches_.enable_playground) {
-    return true;
-  }
-
   AiksContext context(GetContext(), TypographerContextSkia::Make());
   if (!context.IsValid()) {
     return false;

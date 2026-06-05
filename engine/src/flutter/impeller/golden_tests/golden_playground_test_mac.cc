@@ -334,12 +334,6 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(
   return SaveScreenshot(std::move(screenshot));
 }
 
-bool GoldenPlaygroundTest::ImGuiBegin(const char* name,
-                                      bool* p_open,
-                                      ImGuiWindowFlags flags) {
-  return false;
-}
-
 std::shared_ptr<Texture> GoldenPlaygroundTest::CreateTextureForFixture(
     const char* fixture_name,
     bool enable_mipmapping) const {

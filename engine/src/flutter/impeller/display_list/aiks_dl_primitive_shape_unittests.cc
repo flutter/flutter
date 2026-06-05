@@ -159,8 +159,8 @@ TEST_P(AiksTest, PrimitiveShapePlayground) {
   int render_type_index = static_cast<int>(RenderType::kRectangle);
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Stroke", &params.stroke_width, 0.0f, 30.0f);
       ImGui::SliderFloat("X Scale", &params.scale_x, 1.0f, 3.0f);
       ImGui::SliderFloat("Y Scale", &params.scale_y, 1.0f, 3.0f);
