@@ -11,7 +11,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
-import 'utils.dart';
 
 const List<String> _kTestImages = <String>[
   '16x1.png',
@@ -422,11 +421,14 @@ Future<void> testMain() async {
 
     group('Codecs (default browserSupportsImageDecoder)', () {
       createTestCodecs().forEach(runCodecTest);
-    }, skip: isWimp); // https://github.com/flutter/flutter/issues/175371
+    });
 
-    if (browserSupportsImageDecoder) {
+    if (browserSupportsImageDecoder && !browserSupportsCanvaskitChromium) {
       // For the sake of completeness, test codec fallback logic on browsers that support
       // `ImageDecoder`.
+      //
+      // We skip this on Canvaskit Chromium because there is no fallback; the
+      // `ImageDecoder`-based codec is always used.
       group('Codecs (browserSupportsImageDecoder=false)', () {
         setUpAll(() {
           browserSupportsImageDecoder = false;
@@ -436,7 +438,7 @@ Future<void> testMain() async {
         });
 
         createTestCodecs().forEach(runCodecTest);
-      }, skip: isWimp); // https://github.com/flutter/flutter/issues/175371
+      });
     }
   });
 

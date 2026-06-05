@@ -2756,6 +2756,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 ///    [DisplayFeature]s can split the screen into sub-screens.
 ///  * [showDialog], which displays a Material-style dialog.
 ///  * [showCupertinoDialog], which displays an iOS-style dialog.
+@awaitNotRequired
 Future<T?> showGeneralDialog<T extends Object?>({
   required BuildContext context,
   required RoutePageBuilder pageBuilder,
@@ -2800,6 +2801,17 @@ typedef RoutePageBuilder =
 
 /// Signature for the function that builds a route's transitions.
 /// Used in [PageRouteBuilder] and [showGeneralDialog].
+///
+/// The [animation] argument drives this route's transition when it is pushed
+/// onto or popped off the [Navigator]. The [secondaryAnimation] argument lets
+/// this route coordinate with the transition of the route above it: when a new
+/// route is pushed on top of this one, this route's [secondaryAnimation] runs
+/// from 0.0 to 1.0, and when that route is popped it runs from 1.0 to 0.0.
+///
+/// A route only receives a running [secondaryAnimation] when this route's
+/// [TransitionRoute.canTransitionTo] method and the next route's
+/// [TransitionRoute.canTransitionFrom] method both return true. Otherwise,
+/// [secondaryAnimation] remains [kAlwaysDismissedAnimation].
 ///
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
 typedef RouteTransitionsBuilder =

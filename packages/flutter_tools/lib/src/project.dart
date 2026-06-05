@@ -4,12 +4,12 @@
 
 import 'dart:collection';
 
+import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
-import '../src/convert.dart';
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
@@ -21,6 +21,7 @@ import 'base/version.dart';
 import 'base/yaml.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
@@ -88,7 +89,9 @@ class FlutterProjectFactory {
 /// cached.
 class FlutterProject {
   @visibleForTesting
-  FlutterProject(this.directory, this._manifest, this._exampleManifest);
+  FlutterProject(this.directory, FlutterManifest manifest, this._exampleManifest) {
+    _setManifest(manifest);
+  }
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -132,13 +135,26 @@ class FlutterProject {
   final FlutterManifest _exampleManifest;
 
   /// List of [FlutterProject]s corresponding to the workspace entries.
-  List<FlutterProject> get workspaceProjects => manifest.workspace
-      .map(
-        (String entry) => FlutterProject.fromDirectory(
-          directory.childDirectory(directory.fileSystem.path.normalize(entry)),
-        ),
-      )
-      .toList();
+  List<FlutterProject> get workspaceProjects => _workspaceProjects;
+  late List<FlutterProject> _workspaceProjects;
+
+  void _setManifest(FlutterManifest manifest) {
+    _manifest = manifest;
+
+    // Update the workspace projects based on the new manifest.
+    _workspaceProjects = <FlutterProject>[];
+    for (final String entry in manifest.workspace) {
+      final glob = Glob(entry);
+      for (final Directory globResult
+          in glob
+              .listFileSystemSync(directory.fileSystem, root: directory.path)
+              .whereType<Directory>()) {
+        if (globResult.childFile('pubspec.yaml').existsSync()) {
+          _workspaceProjects.add(FlutterProject.fromDirectory(globResult));
+        }
+      }
+    }
+  }
 
   /// The set of organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
@@ -233,10 +249,7 @@ class FlutterProject {
 
   /// The location of the generated scaffolding project for hosting widget
   /// previews from this project.
-  // TODO(bkonyi): don't create this project in $TMP.
-  // See https://github.com/flutter/flutter/issues/179036
-  late final Directory widgetPreviewScaffold = directory.fileSystem.systemTempDirectory
-      .createTempSync('widget_preview_scaffold');
+  late final Directory widgetPreviewScaffold = directory.childDirectory('.widget_preview');
 
   /// The directory containing the generated code for this project.
   Directory get generated => directory.absolute
@@ -337,7 +350,7 @@ class FlutterProject {
 
   /// Reloads the content of [pubspecFile] and updates the contents of [manifest].
   void reloadManifest({required Logger logger, required FileSystem fs}) {
-    _manifest = _readManifest(pubspecFile.path, logger: logger, fileSystem: fs);
+    _setManifest(_readManifest(pubspecFile.path, logger: logger, fileSystem: fs));
   }
 
   /// Returns the MD5 hash of the contents of [manifest], ensuring [manifest] is up to date before
@@ -352,7 +365,7 @@ class FlutterProject {
   void replacePubspec(FlutterManifest updated) {
     final YamlMap updatedPubspecContents = updated.toYaml();
     pubspecFile.writeAsStringSync(encodeYamlAsString(updatedPubspecContents));
-    _manifest = updated;
+    _setManifest(updated);
   }
 
   /// Reapplies template files and regenerates project files and plugin
@@ -524,6 +537,10 @@ class AndroidProject extends FlutterProjectPlatform {
     '^\\s*apply plugin\\:\\s+[\'"]kotlin-android[\'"]\\s*\$',
   );
 
+  static final _kotlinCompilerOptionsPattern = RegExp(
+    r'kotlin\s*\{[\s\S]*?compilerOptions\s*\{[^}]*\}',
+  );
+
   /// Examples of strings that this regex matches:
   /// - `id "kotlin-android"`
   /// - `id("kotlin-android")`
@@ -630,11 +647,30 @@ class AndroidProject extends FlutterProjectPlatform {
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
-    final imperativeMatch = firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null;
-    final bool declarativeMatch = _declarativeKotlinPluginPatterns.any((RegExp pattern) {
-      return (firstMatchInFile(appGradleFile, pattern) != null);
-    });
-    return imperativeMatch || declarativeMatch;
+    if (appGradleFile.existsSync()) {
+      if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+        return true;
+      }
+      for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
+        if (firstMatchInFile(appGradleFile, pattern) != null) {
+          return true;
+        }
+      }
+      try {
+        final String content = appGradleFile.readAsStringSync();
+        if (_kotlinCompilerOptionsPattern.hasMatch(content)) {
+          return true;
+        }
+      } on FileSystemException {
+        // Ignore and continue with other checks.
+      }
+    }
+    final Directory kotlinSrc = hostAppGradleRoot
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('kotlin');
+    return kotlinSrc.existsSync();
   }
 
   /// Gets top-level Gradle build file.

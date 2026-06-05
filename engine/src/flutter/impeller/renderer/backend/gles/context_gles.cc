@@ -174,6 +174,11 @@ bool ContextGLES::EnqueueCommandBuffer(
   return reactor_->React();
 }
 
+bool ContextGLES::FinishQueue() {
+  reactor_->GetProcTable().Finish();
+  return true;
+}
+
 // |Context|
 bool ContextGLES::AddTrackingFence(
     const std::shared_ptr<Texture>& texture) const {

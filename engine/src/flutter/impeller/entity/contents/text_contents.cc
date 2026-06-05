@@ -18,14 +18,31 @@
 #include "impeller/typographer/glyph_atlas.h"
 
 namespace impeller {
+namespace {
+
+// TODO(gaaclarke): Investigate if this is still needed for Windows.
+// On Linux we use FreeType to rasterize glyphs. FreeType does not perform
+// gamma correction itself during rasterization. Because we render in linear
+// space, light text on a dark background would look too thin without
+// correction. To compensate, we calculate a contrast/gamma correction
+// factor based on the text color's luminance, which is used in the shader
+// to adjust the glyph's coverage.
+constexpr bool kPlatformGammaCorrectionDefault =
+#if FML_OS_LINUX
+    true;
+#else
+    false;
+#endif
+
 Point SizeToPoint(Size size) {
   return Point(size.width, size.height);
 }
+}  // namespace
 
 using VS = GlyphAtlasPipeline::VertexShader;
 using FS = GlyphAtlasPipeline::FragmentShader;
 
-TextContents::TextContents() = default;
+TextContents::TextContents() {}
 
 TextContents::~TextContents() = default;
 
@@ -58,9 +75,7 @@ void TextContents::SetForceTextColor(bool value) {
 }
 
 std::optional<Rect> TextContents::GetCoverage(const Entity& entity) const {
-  const Matrix entity_offset_transform =
-      entity.GetTransform() * Matrix::MakeTranslation(position_);
-  return frame_->GetBounds().TransformBounds(entity_offset_transform);
+  return frame_->GetBounds().TransformBounds(entity.GetTransform());
 }
 
 void TextContents::SetTextProperties(
@@ -69,7 +84,9 @@ void TextContents::SetTextProperties(
   if (frame_->HasColor()) {
     // Alpha is always applied when rendering, remove it here so
     // we do not double-apply the alpha.
-    properties_.color = color.WithAlpha(1.0);
+    properties_.tone_or_color = color.WithAlpha(1.0);
+  } else {
+    properties_.tone_or_color = GlyphProperties::ComputeTone(color);
   }
   properties_.stroke = stroke;
 }
@@ -90,14 +107,13 @@ Scalar AttractToOne(Scalar x) {
 
 }  // namespace
 
-void TextContents::ComputeVertexData(
-    VS::PerVertexData* vtx_contents,
-    const Matrix& entity_transform,
-    const std::shared_ptr<TextFrame>& frame,
-    Point position,
-    const Matrix& screen_transform,
-    std::optional<GlyphProperties> glyph_properties,
-    const std::shared_ptr<GlyphAtlas>& atlas) {
+void TextContents::ComputeVertexData(VS::PerVertexData* vtx_contents,
+                                     const Matrix& entity_offset_transform,
+                                     const std::shared_ptr<TextFrame>& frame,
+                                     Point position,
+                                     const Matrix& screen_transform,
+                                     GlyphProperties glyph_properties,
+                                     const std::shared_ptr<GlyphAtlas>& atlas) {
   // Common vertex information for all glyphs.
   // All glyphs are given the same vertex information in the form of a
   // unit-sized quad. The size of the glyph is specified in per instance data
@@ -107,9 +123,6 @@ void TextContents::ComputeVertexData(
 
   constexpr std::array<Point, 4> unit_points = {Point{0, 0}, Point{1, 0},
                                                 Point{0, 1}, Point{1, 1}};
-
-  Matrix entity_offset_transform =
-      entity_transform * Matrix::MakeTranslation(position);
 
   ISize atlas_size = atlas->GetTexture()->GetSize();
   bool is_translation_scale = entity_offset_transform.IsTranslationScaleOnly();
@@ -266,6 +279,20 @@ bool TextContents::Render(const ContentContext& renderer,
   frag_info.use_text_color = force_text_color_ ? 1.0 : 0.0;
   frag_info.text_color = ToVector(color.Premultiply());
   frag_info.is_color_glyph = type == GlyphAtlas::Type::kColorBitmap;
+  bool enable_gamma_correction = frame_->GetEnableGammaCorrection().value_or(
+      kPlatformGammaCorrectionDefault);
+  if (enable_gamma_correction) {
+    // Calculate relative luminance using Rec. 709 luma coefficients.
+    Scalar luma =
+        color.red * 0.2126f + color.green * 0.7152f + color.blue * 0.0722f;
+    // The contrast/gamma exponent applied in the shader ranges from 1.0 for
+    // black text to 2.2 (standard sRGB gamma) for white text. This interpolates
+    // the exponent based on the text color's luminance.
+    constexpr Scalar kMaxGammaCorrection = 1.2f;
+    frag_info.text_contrast = 1.0f + luma * kMaxGammaCorrection;
+  } else {
+    frag_info.text_contrast = 1.0f;
+  }
 
   FS::BindFragInfo(
       pass, renderer.GetTransientsDataBuffer().EmplaceUniform(frag_info));
@@ -334,7 +361,7 @@ bool TextContents::Render(const ContentContext& renderer,
                           /*frame=*/frame_,
                           /*position=*/position_,
                           /*screen_transform=*/screen_transform_,
-                          /*glyph_properties=*/GetGlyphProperties(),
+                          /*glyph_properties=*/properties_,
                           /*atlas=*/atlas);
       });
   BufferView index_buffer_view = indexes_host_buffer.Emplace(
@@ -357,12 +384,6 @@ bool TextContents::Render(const ContentContext& renderer,
   pass.SetElementCount(index_count);
 
   return pass.Draw().ok();
-}
-
-std::optional<GlyphProperties> TextContents::GetGlyphProperties() const {
-  return (properties_.stroke || frame_->HasColor())
-             ? std::optional<GlyphProperties>(properties_)
-             : std::nullopt;
 }
 
 }  // namespace impeller

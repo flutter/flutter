@@ -91,9 +91,9 @@ class ValidateProject {
   }
 
   void addResultString(
-    final String title,
-    final List<ProjectValidatorResult>? results,
-    final List<String> resultsString,
+    String title,
+    List<ProjectValidatorResult>? results,
+    List<String> resultsString,
   ) {
     if (results != null) {
       for (final ProjectValidatorResult result in results) {

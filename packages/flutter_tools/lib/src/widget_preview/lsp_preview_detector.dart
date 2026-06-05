@@ -12,6 +12,7 @@ import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/terminal.dart';
 import '../dart/analysis.dart';
 import '../project.dart';
@@ -42,11 +43,13 @@ class LspPreviewDetector {
     required this.suppressAnalytics,
     this.analysisServerFactory,
     required this.artifacts,
+    required this.shutdownHooks,
     @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
     @visibleForTesting this.onPackageConfigChangeDetected,
   }) : projectRoot = project.directory;
 
   final Artifacts artifacts;
+  final ShutdownHooks shutdownHooks;
   final Platform platform;
   final WidgetPreviewAnalytics previewAnalytics;
   final FlutterProject project;
@@ -165,7 +168,15 @@ class LspPreviewDetector {
     // Only process one FileSystemEntity at a time so we don't invalidate an AnalysisSession that's
     // in use when we call context.changeFile(...).
     await mutex.runGuarded(() async {
-      await _fileAddedOrUpdated(filePath: event.path);
+      final String eventPath = event.path;
+      // Ignore any files under .dart_tool, .widget_preview, or ephemeral directories created by
+      // the tool (e.g., build/, plugin directories, etc.).
+      if (eventPath.doesContainDartTool ||
+          eventPath.doesContainWidgetPreview ||
+          project.ephemeralDirectories.any((dir) => eventPath.contains(dir.path))) {
+        return;
+      }
+      await _fileAddedOrUpdated(filePath: eventPath);
     });
   }
 
@@ -175,7 +186,20 @@ class LspPreviewDetector {
       return;
     }
     await _analysisServer?.waitForAnalysis();
-    final FlutterWidgetPreviews result = await dtd.getFlutterWidgetPreviews();
-    onChangeDetected(result);
+    try {
+      final FlutterWidgetPreviews result = await dtd.getFlutterWidgetPreviews();
+      onChangeDetected(result);
+    } catch (e) {
+      if (_disposed || shutdownHooks.isShuttingDown) {
+        logger.printTrace('Failed to get widget previews during shutdown: $e');
+      } else if (e is StateError || e is Exception) {
+        logger.printWarning(
+          'Lost connection to the Dart Tooling Daemon (DTD). '
+          'Live preview updates are paused. Details: $e',
+        );
+      } else {
+        rethrow;
+      }
+    }
   }
 }
