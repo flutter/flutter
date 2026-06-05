@@ -133,7 +133,7 @@ export class FlutterLoader {
     // "why does it keep falling back to X instead of Y" without staring at
     // a blank screen. Off by default to keep the console quiet for typical
     // production users.
-    if (config.verboseBuildSelection && skippedBuilds.length > 0) {
+    if (config.verboseBuildSelection) {
       for (const skipped of skippedBuilds) {
         console.warn(
           `Flutter Web: build ${skipped.candidate.compileTarget}/${skipped.candidate.renderer} was skipped: ${skipped.reason}`
