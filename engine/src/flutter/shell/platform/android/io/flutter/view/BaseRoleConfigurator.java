@@ -16,7 +16,8 @@ import java.util.List;
  * Base class for {@link AccessibilityNodeConfigurator} implementations that compose common
  * semantics behaviors before applying role-specific configuration.
  *
- * This class also serves as the default configurator for nodes with no specific role (Role.NONE).
+ * <p>This class also serves as the default configurator for nodes with no specific role
+ * (Role.NONE).
  */
 public class BaseRoleConfigurator implements AccessibilityNodeConfigurator {
   private static final AccessibilityNodeConfigurator[] commonConfigurators =
@@ -42,7 +43,8 @@ public class BaseRoleConfigurator implements AccessibilityNodeConfigurator {
       };
 
   @Override
-  public final void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  public final void configure(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     for (AccessibilityNodeConfigurator configurator : commonConfigurators) {
       configurator.configure(result, node);
     }
@@ -50,8 +52,8 @@ public class BaseRoleConfigurator implements AccessibilityNodeConfigurator {
   }
 
   /**
-   * Override this method to apply role-specific configuration.
-   * The default implementation is a no-op, suitable for the generic role (Role.NONE).
+   * Override this method to apply role-specific configuration. The default implementation is a
+   * no-op, suitable for the generic role (Role.NONE).
    */
   protected void configureRole(
       AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {

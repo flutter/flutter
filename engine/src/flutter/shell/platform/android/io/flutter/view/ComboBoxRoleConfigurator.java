@@ -12,7 +12,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
  */
 public class ComboBoxRoleConfigurator extends BaseRoleConfigurator {
   @Override
-  protected void configureRole(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  protected void configureRole(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     result.setClassName("android.widget.Spinner");
     result.setCanOpenPopup(true);
   }

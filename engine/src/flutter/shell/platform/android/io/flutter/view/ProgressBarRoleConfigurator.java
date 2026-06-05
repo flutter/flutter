@@ -14,7 +14,8 @@ import io.flutter.Build.API_LEVELS;
  */
 public class ProgressBarRoleConfigurator extends BaseRoleConfigurator {
   @Override
-  protected void configureRole(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  protected void configureRole(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     result.setClassName("android.widget.ProgressBar");
     if (node.value != null) {
       float min = Float.NEGATIVE_INFINITY;

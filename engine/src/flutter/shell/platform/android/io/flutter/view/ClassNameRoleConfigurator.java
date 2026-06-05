@@ -15,7 +15,8 @@ public class ClassNameRoleConfigurator extends BaseRoleConfigurator {
   }
 
   @Override
-  protected void configureRole(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  protected void configureRole(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     result.setClassName(className);
   }
 }
