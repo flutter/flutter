@@ -190,3 +190,19 @@ SHARD=android_hardware_smoke_vulkan_tests bin/cache/dart-sdk/bin/dart dev/bots/t
 # Run the OpenGLES graphics backend shard locally
 SHARD=android_hardware_smoke_opengles_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 ```
+
+---
+
+## 5. Test Suite Coverage & Technical Rationales
+
+The suite is composed of targeted visual regression test cases designed to exercise distinct GPU graphics pipelines and verify compatibility with driver and hardware configurations:
+
+| Test Case | Rendering Pipeline | Impeller/Hardware Mechanism Exercised | Reference/Source |
+| :--- | :--- | :--- | :--- |
+| **`blueRectangleTest`** | **Solid Vector Fills** | Standard vector rasterization and layout transformation. | Simple `canvas.drawRect` |
+| **`trianglePathTest`** | **Complex Paths** | Path triangulation, rasterization, and hardware anti-aliasing (MSAA). | Simple canvas.drawPath` |
+| **`textTest`** | **Font Rendering** | Text layout (`TextPainter`), glyph caching, shaping, and font atlas rendering. | Simple `TextPainter.paint` |
+| **`imageTest`** | **Texture Sampling** | Image decoding, GPU texture uploading, and texture sampler rendering. Uses a 32x32 4-color checkerboard PNG to verify RGB color channel correctness. | Simple `canvas.drawImage` |
+| **`advancedBlendTest`** | **Advanced Blending** | Fragment shader blending and framebuffer fetch tile-memory optimizations (e.g. Vulkan subpass inputs, `EXT_shader_framebuffer_fetch` in GLES). Uses `BlendMode.difference`. | Mirrors [animated_advanced_blend.dart](/dev/benchmarks/macrobenchmarks/lib/src/animated_advanced_blend.dart). |
+| **`backdropFilterBlurTest`** | **Compositing & Blur** | Offscreen texture allocation, layer downscale/upscale passes, and multi-pass Gaussian blur filter execution. Uses `ImageFilter.blur(sigmaX: 5, sigmaY: 5)`. | Mirrors [backdrop_filter.dart](/dev/benchmarks/macrobenchmarks/lib/src/backdrop_filter.dart). |
+
