@@ -104,4 +104,9 @@ class FlutterActivityTest {
     fun trianglePathTest() {
         templateTest("trianglePathTest")
     }
+
+    @Test
+    fun textTest() {
+        templateTest("textTest")
+    }
 }

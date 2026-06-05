@@ -131,6 +131,18 @@ class MyPainter extends CustomPainter {
     canvas.drawPath(path, paint);
   }
 
+  void renderTextTest(Canvas canvas, Size size) {
+    final textPainter = TextPainter(
+      text: const TextSpan(
+        text: 'Flutter Text Rendering Test',
+        style: TextStyle(color: Colors.red, fontSize: 14.0, fontWeight: FontWeight.bold),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, const Offset(10.0, 50.0));
+  }
+
   void renderDefault(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.blueGrey
@@ -147,6 +159,9 @@ class MyPainter extends CustomPainter {
         return;
       case 'trianglePathTest':
         renderTrianglePathTest(canvas, size);
+        return;
+      case 'textTest':
+        renderTextTest(canvas, size);
         return;
       default:
         renderDefault(canvas, size);
