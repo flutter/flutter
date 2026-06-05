@@ -4,9 +4,9 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
-#include "flutter/fml/logging.h"
-#include <vector>
 #include <string.h>
+#include <vector>
+#include "flutter/fml/logging.h"
 
 using namespace flutter::testing;
 

@@ -14,8 +14,8 @@
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
-#include "flutter/shell/platform/linux/testing/mock_renderable.h"
 #include "flutter/shell/platform/linux/testing/mock_gtk.h"
+#include "flutter/shell/platform/linux/testing/mock_renderable.h"
 
 #include <epoxy/egl.h>
 
