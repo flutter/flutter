@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'backdrop_filter_blur.dart';
 import 'goldens.dart';
 
 final GlobalKey targetKey = GlobalKey();
@@ -147,15 +148,21 @@ class _MyState extends State<MyWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget testContent;
+    if (_message == 'backdropFilterBlurTest') {
+      testContent = const BackdropFilterBlur();
+    } else {
+      testContent = CustomPaint(
+        painter: MyPainter(message: _message, loadedImage: _loadedImage),
+      );
+    }
+
     return SafeArea(
       child: Stack(
         children: <Widget>[
           RepaintBoundary(
             key: targetKey,
-            child: CustomPaint(
-              size: const Size(150, 150),
-              painter: MyPainter(message: _message, loadedImage: _loadedImage),
-            ),
+            child: SizedBox(width: 150, height: 150, child: testContent),
           ),
           Align(child: Text(_message)),
         ],
@@ -210,6 +217,29 @@ class MyPainter extends CustomPainter {
     canvas.drawImage(loadedImage!, Offset.zero, Paint());
   }
 
+  void renderAdvancedBlendTest(Canvas canvas, Size size) {
+    final Paint paintBackground = Paint()..color = Colors.blue;
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      paintBackground,
+    );
+
+    final Paint paintCircle = Paint()..color = Colors.red;
+    canvas.drawCircle(
+      Offset(size.width / 2, size.height / 2),
+      50.0,
+      paintCircle,
+    );
+
+    final Paint paintBlend = Paint()
+      ..color = Colors.green
+      ..blendMode = BlendMode.difference;
+    canvas.drawRect(
+      Rect.fromLTWH(size.width / 2 - 30, size.height / 2 - 30, 80, 80),
+      paintBlend,
+    );
+  }
+
   void renderDefault(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.blueGrey
@@ -232,6 +262,9 @@ class MyPainter extends CustomPainter {
         return;
       case 'imageTest':
         renderImageTest(canvas, size);
+        return;
+      case 'advancedBlendTest':
+        renderAdvancedBlendTest(canvas, size);
         return;
       default:
         renderDefault(canvas, size);

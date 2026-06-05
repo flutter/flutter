@@ -114,4 +114,14 @@ class FlutterActivityTest {
     fun imageTest() {
         templateTest("imageTest")
     }
+
+    @Test
+    fun advancedBlendTest() {
+        templateTest("advancedBlendTest")
+    }
+
+    @Test
+    fun backdropFilterBlurTest() {
+        templateTest("backdropFilterBlurTest")
+    }
 }

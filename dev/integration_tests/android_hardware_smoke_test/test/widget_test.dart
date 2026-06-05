@@ -140,4 +140,82 @@ void main() {
     expect(replyMap['message'], contains('Failed to load image asset'));
     expect(replyMap['imageBytes'], isNull);
   });
+
+  testWidgets('advancedBlendTest message channel handler - success behavior', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MyApp());
+
+    final ByteData encodedMessage = const JSONMessageCodec()
+        .encodeMessage(<String, Object?>{
+          'testName': 'advancedBlendTest',
+          'performAppSideGoldenCompare': false,
+          'captureScreenshot': false,
+        })!;
+
+    final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
+        .instance
+        .defaultBinaryMessenger
+        .handlePlatformMessage(
+          'com.example.android_hardware_smoke_test/test_channel',
+          encodedMessage,
+          null,
+        );
+
+    await tester.pump();
+    await tester.pump();
+
+    final ByteData? responseBytes = await responseFuture;
+    expect(responseBytes, isNotNull);
+    final dynamic reply = const JSONMessageCodec().decodeMessage(responseBytes);
+    final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>)
+        .cast<String, Object?>();
+    expect(replyMap['message'], equals('Rendered advancedBlendTest'));
+
+    final CustomPaint customPaint = tester.widget(
+      find.byWidgetPredicate(
+        (widget) => widget is CustomPaint && widget.painter is MyPainter,
+      ),
+    );
+    final MyPainter painter = customPaint.painter! as MyPainter;
+    expect(painter.message, equals('advancedBlendTest'));
+  });
+
+  testWidgets(
+    'backdropFilterBlurTest message channel handler - success behavior',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const MyApp());
+
+      final ByteData encodedMessage = const JSONMessageCodec()
+          .encodeMessage(<String, Object?>{
+            'testName': 'backdropFilterBlurTest',
+            'performAppSideGoldenCompare': false,
+            'captureScreenshot': false,
+          })!;
+
+      final Future<ByteData?> responseFuture = TestDefaultBinaryMessengerBinding
+          .instance
+          .defaultBinaryMessenger
+          .handlePlatformMessage(
+            'com.example.android_hardware_smoke_test/test_channel',
+            encodedMessage,
+            null,
+          );
+
+      await tester.pump();
+      await tester.pump();
+
+      final ByteData? responseBytes = await responseFuture;
+      expect(responseBytes, isNotNull);
+      final dynamic reply = const JSONMessageCodec().decodeMessage(
+        responseBytes,
+      );
+      final Map<String, Object?> replyMap = (reply as Map<Object?, Object?>)
+          .cast<String, Object?>();
+      expect(replyMap['message'], equals('Rendered backdropFilterBlurTest'));
+
+      // Verify BackdropFilter widget is present in the tree
+      expect(find.byType(BackdropFilter), findsOneWidget);
+    },
+  );
 }
