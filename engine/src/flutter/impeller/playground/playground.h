@@ -69,6 +69,14 @@ class Playground {
 
   using RenderCallback = std::function<bool(RenderTarget& render_target)>;
 
+  /// @brief Whether this instance will write a golden image of the output
+  ///        from |OpenPlaygroundHere|.
+  bool ShouldWriteGoldenImage();
+
+  /// @brief Sets a particular test to either write a golden or not, false
+  ///        by default.
+  void SetEnableWriteGolden(bool write_golden);
+
   bool OpenPlaygroundHere(const RenderCallback& render_callback);
 
   bool OpenPlaygroundHere(SinglePassCallback pass_callback);
@@ -100,9 +108,6 @@ class Playground {
 
   [[nodiscard]] fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities);
-
-  /// Returns true if `OpenPlaygroundHere` will actually render anything.
-  bool WillRenderSomething() const;
 
   using GLProcAddressResolver = std::function<void*(const char* proc_name)>;
   GLProcAddressResolver CreateGLProcAddressResolver() const;
@@ -194,6 +199,7 @@ class Playground {
   Point cursor_position_;
   ISize window_size_ = ISize{1024, 768};
   std::shared_ptr<HostBuffer> host_buffer_;
+  bool should_write_golden_ = false;
 
   std::unique_ptr<PlaygroundImpl>& GetImpl() const;
 
@@ -202,6 +208,9 @@ class Playground {
   void SetupWindow();
 
   void SetCursorPosition(Point pos);
+
+  bool WriteGoldenImage(const RenderTarget& render_target,
+                        const std::string& postfix = "");
 
   Playground(const Playground&) = delete;
 

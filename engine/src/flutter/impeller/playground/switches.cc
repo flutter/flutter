@@ -27,6 +27,10 @@ PlaygroundSwitches::PlaygroundSwitches(const fml::CommandLine& args) {
   // OpenGL on macOS is busted and deprecated. Use Angle there by default.
   use_angle = true;
 #endif  // FML_OS_MACOSX
+  std::string golden_output_dir_value;
+  if (args.GetOptionValue("golden_output_dir", &golden_output_dir_value)) {
+    golden_output_dir = golden_output_dir_value;
+  }
 }
 
 }  // namespace impeller

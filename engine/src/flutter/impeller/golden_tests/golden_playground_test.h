@@ -10,8 +10,8 @@
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/impeller/display_list/aiks_context.h"
-#include "flutter/impeller/golden_tests/screenshot.h"
 #include "flutter/impeller/runtime_stage/runtime_stage.h"
+#include "flutter/impeller/testing/screenshot.h"
 #include "flutter/testing/testing.h"
 #include "impeller/playground/playground.h"
 #include "impeller/typographer/typographer_context.h"
@@ -69,10 +69,6 @@ class GoldenPlaygroundTest
   static bool SaveScreenshot(std::unique_ptr<testing::Screenshot> screenshot,
                              const std::string& postfix = "");
 
-  static bool ImGuiBegin(const char* name,
-                         bool* p_open,
-                         ImGuiWindowFlags flags);
-
   std::shared_ptr<Texture> CreateTextureForFixture(
       const char* fixture_name,
       bool enable_mipmapping = false) const;
@@ -99,12 +95,17 @@ class GoldenPlaygroundTest
   [[nodiscard]] fml::Status SetCapabilities(
       const std::shared_ptr<Capabilities>& capabilities);
 
-  /// Returns true if `OpenPlaygroundHere` will actually render anything.
-  bool WillRenderSomething() const { return true; }
-
   RuntimeStageBackend GetRuntimeStageBackend() const;
 
-  bool IsGoldenTest() { return true; }
+  /// @brief Sets a particular test to either write a golden or not.
+  ///
+  /// For purposes of the GoldenPlayground test harness, we don't maintain
+  /// a flag for this status, all tests are assumed to be golden tests and
+  /// passing false here means we should just skip this test entirely
+  /// (enforced in the implementation with a GTEST_SKIP).
+  void SetEnableWriteGolden(bool write_golden);
+
+  bool IsPlaygroundEnabled() const { return false; }
 
  protected:
   void SetWindowSize(ISize size);

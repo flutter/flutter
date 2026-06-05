@@ -223,8 +223,8 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
   bool compare = false;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("xoffset", &xoffset, -50, 50);
       ImGui::SliderFloat("yoffset", &yoffset, -50, 50);
       ImGui::SliderFloat("xscale", &xscale, 0, 1);
@@ -306,8 +306,8 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
   Scalar sigma = 20.0;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("sigma", &sigma, 0, 20);
       ImGui::End();
     }
@@ -370,8 +370,8 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
   Scalar sigma = 5.0;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("sigma", &sigma, 0, 20);
       ImGui::End();
     }
@@ -436,8 +436,8 @@ TEST_P(AiksTest, ClippedComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
   Vector2 circle_origin = Vector2(30.f, 30.f);
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("sigma", &sigma, 0, 20);
       ImGui::SliderFloat("clip_x", &clip_origin.x, 0, 2048.f);
       ImGui::SliderFloat("clip_y", &clip_origin.y, 0, 1536.f);
@@ -584,8 +584,8 @@ TEST_P(AiksTest, RuntimeEffectImageFilterRotated) {
   Scalar rotation = 45;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("rotation", &rotation, 0, 360);
       ImGui::End();
     }

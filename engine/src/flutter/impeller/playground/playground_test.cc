@@ -49,6 +49,10 @@ void PlaygroundTest::TearDown() {
   Playground::TearDownContextData();
 }
 
+bool PlaygroundTest::IsGoldenTestSuite() const {
+  return false;
+}
+
 PlaygroundBackend PlaygroundTest::GetBackend() const {
   return GetParam();
 }

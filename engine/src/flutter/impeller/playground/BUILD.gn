@@ -72,6 +72,8 @@ impeller_component("playground") {
       "AppKit.framework",
       "QuartzCore.framework",
     ]
+
+    deps += [ "//flutter/impeller/testing:metal_screenshot" ]
   }
 }
 

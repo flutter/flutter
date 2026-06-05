@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_GOLDEN_TESTS_SCREENSHOTTER_H_
-#define FLUTTER_IMPELLER_GOLDEN_TESTS_SCREENSHOTTER_H_
+#ifndef FLUTTER_IMPELLER_TESTING_SCREENSHOTTER_H_
+#define FLUTTER_IMPELLER_TESTING_SCREENSHOTTER_H_
 
-#include "flutter/impeller/golden_tests/screenshot.h"
-#include "flutter/impeller/playground/playground_impl.h"
+#include "flutter/impeller/testing/screenshot.h"
 #include "impeller/display_list/aiks_context.h"
 
 namespace impeller {
@@ -18,14 +17,16 @@ class Screenshotter {
  public:
   virtual ~Screenshotter() = default;
 
+  static std::unique_ptr<Screenshot> MakeScreenshot(
+      std::shared_ptr<Context>& context,
+      const std::shared_ptr<Texture>& texture);
+
   virtual std::unique_ptr<Screenshot> MakeScreenshot(
       const AiksContext& aiks_context,
-      const std::shared_ptr<Texture> texture) = 0;
-
-  virtual PlaygroundImpl& GetPlayground() = 0;
+      const std::shared_ptr<Texture>& texture) = 0;
 };
 
 }  // namespace testing
 }  // namespace impeller
 
-#endif  // FLUTTER_IMPELLER_GOLDEN_TESTS_SCREENSHOTTER_H_
+#endif  // FLUTTER_IMPELLER_TESTING_SCREENSHOTTER_H_
