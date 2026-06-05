@@ -435,7 +435,9 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
     GLuint texture_id;
     glGenTextures(1, &texture_id);
     glBindTexture(GL_TEXTURE_2D, texture_id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+    size_t fb_width = fl_framebuffer_get_width(self->framebuffer);
+    size_t fb_height = fl_framebuffer_get_height(self->framebuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fb_width, fb_height, 0, GL_RGBA,
                  GL_UNSIGNED_BYTE, self->pixels);
 
     gdk_cairo_draw_from_gl(cr, window, texture_id, GL_TEXTURE, scale_factor, 0,
