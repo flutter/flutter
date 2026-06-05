@@ -38,6 +38,11 @@ final class GpuSurface extends NativeFieldWrapperClass1 {
   int _height;
   PixelFormat _format;
 
+  // The command buffer used to present the most recent frame. It is retained
+  // only to detect the case where a frame is presented but its command buffer
+  // is never submitted, which would leave the presented image blank forever.
+  CommandBuffer? _pendingPresentCommandBuffer;
+
   /// The width, in pixels, of frames acquired from this surface.
   int get width => _width;
 
@@ -94,6 +99,7 @@ final class GpuSurface extends NativeFieldWrapperClass1 {
   /// If no retained backing texture is available, the surface allocates another
   /// one.
   SurfaceFrame acquireNextFrame() {
+    _checkPreviousPresentSubmitted();
     final Texture texture = Texture._surface(
       _gpuContext,
       _format,
@@ -116,7 +122,24 @@ final class GpuSurface extends NativeFieldWrapperClass1 {
     if (result is String) {
       throw Exception(result);
     }
+    _pendingPresentCommandBuffer = commandBuffer;
     return result! as ui.Image;
+  }
+
+  // Verifies that the command buffer used to present the previous frame was
+  // submitted. A presented frame is not rendered until its command buffer is
+  // submitted, so a forgotten submit would otherwise silently leave the
+  // surface's image blank.
+  void _checkPreviousPresentSubmitted() {
+    final CommandBuffer? commandBuffer = _pendingPresentCommandBuffer;
+    if (commandBuffer != null && !commandBuffer.submitted) {
+      throw StateError(
+        'The command buffer used to present the previous SurfaceFrame was '
+        'never submitted. Call commandBuffer.submit() after '
+        'SurfaceFrame.present() so the presented frame is rendered.',
+      );
+    }
+    _pendingPresentCommandBuffer = null;
   }
 
   void _discardFrame(SurfaceFrame frame) {
@@ -205,9 +228,14 @@ final class SurfaceFrame {
   ///
   /// Calling this method does not submit [commandBuffer]. It registers the
   /// frame with [commandBuffer] so the surface can use command buffer
-  /// completion to decide when this texture can be considered for reuse. If the
-  /// command buffer is never submitted, the texture remains unavailable for
-  /// future frames.
+  /// completion to decide when this texture can be considered for reuse.
+  ///
+  /// You must submit [commandBuffer] for the presented frame to be rendered.
+  /// Until it is submitted, the returned image and [GpuSurface.currentImage]
+  /// will not contain this frame's contents, and the backing texture remains
+  /// unavailable for future frames. If a frame is presented but its command
+  /// buffer is never submitted, the next [GpuSurface.acquireNextFrame] throws a
+  /// [StateError].
   ///
   /// The returned [ui.Image] is also available from [GpuSurface.currentImage].
   ui.Image present(CommandBuffer commandBuffer) {

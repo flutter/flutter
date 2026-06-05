@@ -16,15 +16,24 @@ base class CommandBuffer extends NativeFieldWrapperClass1 {
     _initialize(_gpuContext);
   }
 
+  bool _submitted = false;
+
+  /// Whether [submit] has been called on this command buffer.
+  bool get submitted => _submitted;
+
   RenderPass createRenderPass(RenderTarget renderTarget) {
     return RenderPass._(_gpuContext, this, renderTarget);
   }
 
   void submit({CompletionCallback? completionCallback}) {
+    if (_submitted) {
+      throw StateError('CommandBuffer has already been submitted.');
+    }
     String? error = _submit(completionCallback);
     if (error != null) {
       throw Exception(error);
     }
+    _submitted = true;
   }
 
   /// Wrap with native counterpart.

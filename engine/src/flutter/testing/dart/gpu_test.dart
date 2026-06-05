@@ -605,6 +605,22 @@ void main() async {
     frame.discard();
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('GpuSurface acquireNextFrame throws if the previous present was never submitted', () async {
+    final gpu.GpuSurface surface = gpu.gpuContext.createSurface(17, 19);
+    final gpu.SurfaceFrame frame = surface.acquireNextFrame();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+
+    frame.present(commandBuffer);
+    // Intentionally skip commandBuffer.submit() to simulate the footgun.
+
+    expect(surface.acquireNextFrame, throwsA(isA<StateError>()));
+
+    // Submitting clears the pending state so acquisition can resume.
+    commandBuffer.submit();
+    final gpu.SurfaceFrame nextFrame = surface.acquireNextFrame();
+    nextFrame.discard();
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('GpuSurface discard releases an unpresented frame for reuse', () async {
     final gpu.GpuSurface surface = gpu.gpuContext.createSurface(17, 19);
     final gpu.SurfaceFrame frame = surface.acquireNextFrame();
