@@ -234,7 +234,7 @@ zip_bundle("sdk") {
     },
   ]
 
-  if (is_mac) {
+  if (is_mac || is_ios) {
     files += [
       {
         source = "$root_build_dir/libimpeller.dylib"
@@ -261,7 +261,7 @@ zip_bundle("sdk") {
     ]
   }
 
-  if (is_mac || is_linux || is_android || is_qnx) {
+  if (is_mac || is_ios || is_linux || is_android || is_qnx) {
     files += [
       {
         source =
