@@ -15,6 +15,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
 #include "flutter/shell/platform/linux/testing/mock_renderable.h"
+#include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
 #include <epoxy/egl.h>
 
@@ -385,6 +386,60 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
       image_data, CAIRO_FORMAT_ARGB32, width, height, stride);
   cairo_t* cr = cairo_create(surface);
   fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, TRUE);
+  cairo_surface_destroy(surface);
+  cairo_destroy(cr);
+}
+
+TEST(FlCompositorOpenGLTest, RenderResizeCrash) {
+  ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
+  g_autoptr(FlTaskRunner) task_runner = fl_task_runner_new(engine);
+  g_autoptr(FlOpenGLManager) opengl_manager = fl_opengl_manager_new();
+
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
+  g_autoptr(FlCompositorOpenGL) compositor =
+      fl_compositor_opengl_new(task_runner, opengl_manager, FALSE);
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
+
+  // Present layer of size 100x100.
+  constexpr size_t width = 100;
+  constexpr size_t height = 100;
+  g_autoptr(FlFramebuffer) framebuffer =
+      fl_framebuffer_new(GL_RGB, width, height, FALSE);
+  FlutterBackingStore backing_store = {
+      .type = kFlutterBackingStoreTypeOpenGL,
+      .open_gl = {.framebuffer = {.user_data = framebuffer}}};
+  FlutterLayer layer = {.type = kFlutterLayerContentTypeBackingStore,
+                        .backing_store = &backing_store,
+                        .offset = {0, 0},
+                        .size = {width, height}};
+  const FlutterLayer* layers[1] = {&layer};
+  std::thread([&]() {
+    fl_compositor_present_layers(FL_COMPOSITOR(compositor), layers, 1);
+  }).join();
+
+  // Mock window size to be larger (200x200).
+  flutter::testing::MockGtk mock_gtk;
+  EXPECT_CALL(mock_gtk, gdk_window_get_width(::testing::_))
+      .WillRepeatedly(::testing::Return(200));
+  EXPECT_CALL(mock_gtk, gdk_window_get_height(::testing::_))
+      .WillRepeatedly(::testing::Return(200));
+
+  // Render with wait_for_frame = FALSE.
+  // This should not wait for a new frame, and try to render the 100x100 frame
+  // into the 200x200 window.
+  // If bug is present, it will try to read 200x200 from 100x100 buffer.
+  int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32, 200);
+  g_autofree unsigned char* image_data =
+      static_cast<unsigned char*>(g_malloc(200 * stride));
+  cairo_surface_t* surface = cairo_image_surface_create_for_data(
+      image_data, CAIRO_FORMAT_ARGB32, 200, 200, stride);
+  cairo_t* cr = cairo_create(surface);
+
+  // We expect this to not crash.
+  fl_compositor_render(FL_COMPOSITOR(compositor), cr, nullptr, FALSE);
+
   cairo_surface_destroy(surface);
   cairo_destroy(cr);
 }

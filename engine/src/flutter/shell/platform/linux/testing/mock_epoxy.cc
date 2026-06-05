@@ -5,6 +5,8 @@
 
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
 #include "flutter/fml/logging.h"
+#include <vector>
+#include <string.h>
 
 using namespace flutter::testing;
 
@@ -579,7 +581,18 @@ static void _glTexImage2D(GLenum target,
                           GLint border,
                           GLenum format,
                           GLenum type,
-                          const void* pixels) {}
+                          const void* pixels) {
+  if (pixels != nullptr) {
+    FML_CHECK(internalformat == GL_RGBA || internalformat == GL_RGBA8);
+    FML_CHECK(format == GL_RGBA);
+    FML_CHECK(type == GL_UNSIGNED_BYTE);
+
+    // Simple mock read to detect out-of-bounds reads in tests.
+    size_t size = width * height * 4;
+    std::vector<uint8_t> temp(size);
+    memcpy(temp.data(), pixels, size);
+  }
+}
 
 static GLenum _glGetError() {
   return GL_NO_ERROR;
