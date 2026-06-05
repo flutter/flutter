@@ -61,7 +61,7 @@ def main():
     parser.add_argument(
         "input",
         nargs="?",
-        type=argparse.FileType("r"),
+        type=argparse.FileType("r", encoding="utf-8"),
         default=sys.stdin,
         help="Input file (default: stdin)",
     )
