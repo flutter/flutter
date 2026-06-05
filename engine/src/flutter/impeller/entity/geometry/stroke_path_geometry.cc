@@ -155,7 +155,7 @@ class StrokePathSegmentReceiver : public PathAndArcSegmentReceiver {
  protected:
   // |SegmentReceiver|
   void BeginContour(Point origin, bool will_be_closed) override {
-    if (has_prior_contour_ && origin != last_point_) {
+    if (has_prior_contour_) {
       // We only append these extra points if we have had a prior contour.
       vtx_builder_.AppendVertex(last_point_);
       vtx_builder_.AppendVertex(last_point_);

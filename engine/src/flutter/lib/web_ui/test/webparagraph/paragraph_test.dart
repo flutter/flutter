@@ -1071,37 +1071,41 @@ Future<void> testMain() async {
 
   test('Paragraph with different locales for the same language', () async {
     final recorder = PictureRecorder();
-    const region = Rect.fromLTWH(0, 0, 1000, 500);
+    const region = Rect.fromLTWH(0, 0, 1000, 400);
     final canvas = Canvas(recorder, region);
     canvas.drawColor(const Color(0xFFFF0000), BlendMode.src);
 
-    final paragraphStyle = WebParagraphStyle(fontFamily: 'Noto Sans', fontSize: 20);
-    final styleCN = WebTextStyle(locale: const Locale('zh', 'CN'));
-    final styleTW = WebTextStyle(locale: const Locale('zh', 'TW'));
-    final styleHK = WebTextStyle(locale: const Locale('zh', 'HK'));
-    final styleJP = WebTextStyle(locale: const Locale('ja', 'JP'));
+    final paragraphStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 40);
+    final noLocaleStyle = WebTextStyle();
+    final localeStyles = [
+      WebTextStyle(locale: const Locale('zh', 'CN')),
+      WebTextStyle(locale: const Locale('zh', 'TW')),
+      WebTextStyle(locale: const Locale('zh', 'HK')),
+      WebTextStyle(locale: const Locale('ja', 'JP')),
+    ];
     const text = 'Command 刃';
 
     final builder = WebParagraphBuilder(paragraphStyle);
-    builder.pushStyle(styleCN);
-    builder.addText('$text in ${styleCN.locale?.languageCode}-${styleCN.locale?.countryCode}.\n');
+    builder.pushStyle(noLocaleStyle);
+    builder.addText('$text with no specified locale.\n');
     builder.pop();
-    builder.pushStyle(styleTW);
-    builder.addText('$text in ${styleTW.locale?.languageCode}-${styleTW.locale?.countryCode}.\n');
-    builder.pop();
-    builder.pushStyle(styleJP);
-    builder.addText('$text in ${styleJP.locale?.languageCode}-${styleJP.locale?.countryCode}.\n');
-    builder.pop();
-
-    builder.pushStyle(styleHK);
-    builder.addText('$text in ${styleHK.locale?.languageCode}-${styleHK.locale?.countryCode}.');
-    builder.pop();
+    for (final style in localeStyles) {
+      builder.pushStyle(style);
+      builder.addText('$text in ${style.locale?.languageCode}-${style.locale?.countryCode}.\n');
+      builder.pop();
+    }
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 500));
-    paragraph.paint(canvas, const Offset(100, 100));
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+    final double fullWidth = paragraph.maxIntrinsicWidth;
+    paragraph.layout(ParagraphConstraints(width: fullWidth));
+    const offset = Offset(20, 20);
+    paragraph.paint(canvas, offset);
 
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph.locales.png', region: region);
+    await matchGoldenFile(
+      'web_paragraph.locales.png',
+      region: Rect.fromLTWH(offset.dx, offset.dy, fullWidth, paragraph.height).inflate(20.0),
+    );
   });
 
   test('NoHeightMultiplier', () async {

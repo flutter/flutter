@@ -410,12 +410,13 @@ class TextLayout {
 
     // Add the ellipsis blocks if any
     if (ellipsisBlock != null) {
+      // There are no trailing spaces if we add the ellipsis block
+      trailingSpacesWidth = 0.0;
       if (paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr) {
         // We need to adjust the block shift from line start because we are adding the ellipsis block at the end
         ellipsisBlock.shiftFromLineStart = blockShiftFromLineStart;
         ellipsisBlock.spanShiftFromLineStart = blockShiftFromLineStart;
         line.visualBlocks.add(ellipsisBlock);
-        line.trailingSpacesWidth = 0.0;
         blockShiftFromLineStart += ellipsisBlock.advance.width;
       } else {
         // We place the ellipsis block at the beginning of the line (for RTL paragraph)
@@ -465,13 +466,26 @@ class TextLayout {
     for (final TextLine line in lines) {
       final double delta = paragraph.width - line.advance.width;
       if (delta > 0) {
-        // We do nothing for left align
         if (effectiveAlign == ui.TextAlign.justify) {
           // TODO(jlavrova): Implement justification
+        } else if (effectiveAlign == ui.TextAlign.left) {
+          // We do not shift text for left align
+          if (paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr) {
+            line.formattingShift = 0;
+          } else {
+            // When we paint we exclude whitespaces but the advances still remain
+            // so we need to take them into account
+            line.formattingShift = -line.trailingSpacesWidth;
+          }
         } else if (effectiveAlign == ui.TextAlign.right) {
-          // When we paint we exclude whitespaces but the advances still remain
-          // so we need to take them into account
-          line.formattingShift = delta - line.trailingSpacesWidth;
+          // We shift text to the right end for right align
+          if (paragraph.paragraphStyle.textDirection == ui.TextDirection.ltr) {
+            line.formattingShift = delta;
+          } else {
+            // When we paint we exclude whitespaces but the advances still remain
+            // so we need to take them into account
+            line.formattingShift = delta - line.trailingSpacesWidth;
+          }
         } else if (effectiveAlign == ui.TextAlign.center) {
           line.formattingShift = delta / 2;
         }
@@ -1309,7 +1323,7 @@ class TextLine {
   double paintBoundsRight = double.negativeInfinity;
 
   double formattingShift = 0.0; // For centered or right aligned text
-  double trailingSpacesWidth = 0.0;
+  late final double trailingSpacesWidth;
 
   double get fullWidth => advance.width + formattingShift + trailingSpacesWidth;
 
