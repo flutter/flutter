@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:async/async.dart';
@@ -16,6 +17,7 @@ import 'package:webdriver/async_io.dart' hide Browser;
 import '../../integration.shard/test_driver.dart';
 
 const reloadRestartTimeout = Duration(seconds: 5);
+const createWebDriverTimeout = Duration(seconds: 15);
 
 class WebServerDeviceTestRunner {
   WebServerDeviceTestRunner(this._flutter);
@@ -58,37 +60,92 @@ class WebServerDeviceTestRunner {
     }
   }
 
-  /// Launches a headless Chrome browser and navigates to [url].
-  Future<void> connectWithChrome(String url) async {
+  /// Starts the 'chromedriver' process and returns the port number that it is
+  /// listening on.
+  Future<int> _startChromeDriverProcess() async {
     final int chromeDriverPort = await findFreePort();
-    _chromedriverProcess = await io.Process.start('chromedriver', ['--port=$chromeDriverPort']);
-    var attempts = 0;
-    // Using a retry loop to allow chromedriver time to spin up.
-    while (attempts < 10) {
-      try {
-        attempts++;
-        _webDriver = await createDriver(
-          uri: Uri.parse('http://localhost:$chromeDriverPort/'),
-          desired: getDesiredCapabilities(
-            Browser.chrome,
-            true, // headless
-            chromeBinary: const LocalPlatform().environment[kChromeEnvironment],
-          ),
+    _chromedriverProcess = await io.Process.start('chromedriver', <String>[
+      '--port=$chromeDriverPort',
+    ]);
+    final completer = Completer<void>();
+    _chromedriverProcess!.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(
+          (String line) {
+            if (!completer.isCompleted &&
+                line.contains(
+                  'ChromeDriver was started successfully on port '
+                  '$chromeDriverPort.',
+                )) {
+              completer.complete();
+            }
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            if (!completer.isCompleted) {
+              completer.completeError(error, stackTrace);
+            }
+          },
+          onDone: () {
+            if (!completer.isCompleted) {
+              completer.completeError(
+                Exception('chromedriver stdout closed without startup message'),
+              );
+            }
+          },
         );
+    _chromedriverProcess!.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(
+          (String line) {
+            if (!completer.isCompleted) {
+              completer.completeError(Exception('chromedriver stderr: $line'));
+            } else {
+              throw Exception('chromedriver stderr: $line');
+            }
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            if (!completer.isCompleted) {
+              completer.completeError(error, stackTrace);
+            }
+          },
+        );
+    await completer.future;
+    return chromeDriverPort;
+  }
 
-        break;
-      } on io.SocketException {
-        if (attempts >= 10) {
-          _chromedriverProcess!.kill();
-          await _chromedriverProcess!.exitCode;
-          rethrow;
-        }
-        await Future<void>.delayed(const Duration(milliseconds: 200));
-      }
+  /// Creates a [WebDriver] instance using a running 'chromedriver' process on
+  /// [chromeDriverPort] and navigates the browser to [url].
+  Future<void> _createWebDriver(int chromeDriverPort, String url) async {
+    final Future<WebDriver> driverFuture = createDriver(
+      uri: Uri.parse('http://localhost:$chromeDriverPort/'),
+      desired: getDesiredCapabilities(
+        Browser.chrome,
+        true, // headless
+        chromeBinary: const LocalPlatform().environment[kChromeEnvironment],
+      ),
+    );
+    try {
+      _webDriver = await driverFuture.timeout(
+        createWebDriverTimeout,
+        onTimeout: () =>
+            throw Exception('Failed to create web driver after $createWebDriverTimeout'),
+      );
+    } on io.SocketException {
+      _chromedriverProcess!.kill();
+      await _chromedriverProcess!.exitCode;
+      rethrow;
     }
     _currentBrowserLogChunk = StreamQueue(_webDriver!.logs.get(LogType.browser));
     // Navigate to the application URL.
     await _webDriver!.get(url);
+  }
+
+  /// Launches a headless Chrome browser and navigates to [url].
+  Future<void> connectWithChrome(String url) async {
+    final int chromeDriverPort = await _startChromeDriverProcess();
+    await _createWebDriver(chromeDriverPort, url);
   }
 
   /// Hot reloads the running application.
@@ -113,8 +170,8 @@ class WebServerDeviceTestRunner {
     );
   }
 
-  /// Returns the next browser log entry that contains contains [message] or
-  /// throws an Exception if it is not found within [timeout].
+  /// Returns the next browser log entry that contains [message] or throws an
+  /// Exception if it is not found within [timeout].
   Future<String> findNextInBrowserLog(String message, Duration timeout) async {
     /// Returns the first log message that contains [message] found in the
     /// current browser log chunk or `null` if it was not found.
@@ -129,31 +186,21 @@ class WebServerDeviceTestRunner {
       return null;
     }
 
-    /// Returns the first log message that contains [message].
-    ///
-    /// Requests new chunks of the browser log as needed.
-    Future<String> findNext() async {
-      while (true) {
-        final String? logMessage = await findNextInCurrentLogChunk(message);
-        if (logMessage != null) {
-          return logMessage;
-        }
-        // The last fetched browser log stream has closed. Fetch the next chunk
-        // of log entries.
-        await Future<void>.delayed(const Duration(milliseconds: 200));
-        _currentBrowserLogChunk = StreamQueue(_webDriver!.logs.get(LogType.browser));
+    final stopwatch = Stopwatch()..start();
+    while (stopwatch.elapsed < timeout) {
+      final String? logMessage = await findNextInCurrentLogChunk(message);
+      if (logMessage != null) {
+        return logMessage;
       }
+      // The last fetched browser log stream has closed. Fetch the next chunk
+      // of log entries.
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      _currentBrowserLogChunk = StreamQueue(_webDriver!.logs.get(LogType.browser));
     }
-
-    return findNext().timeout(
-      timeout,
-      onTimeout: () {
-        throw Exception('Did not find "$message" in browser console logs after $timeout.');
-      },
-    );
+    throw Exception('Did not find "$message" in browser console logs after $timeout.');
   }
 
-  /// Attempts to the browser if it has been started.
+  /// Attempts to quit the browser if it has been started.
   Future<void> quitBrowser() async {
     await _webDriver?.quit().timeout(
       quitTimeout,
@@ -163,9 +210,15 @@ class WebServerDeviceTestRunner {
   }
 
   Future<void> cleanup() async {
-    await _webDriver?.quit();
-    _chromedriverProcess?.kill();
-    await _chromedriverProcess?.exitCode;
+    try {
+      await _webDriver?.quit();
+      // ignore: avoid_catches_without_on_clauses
+    } catch (_) {
+      // Ignore errors during cleanup to ensure chromedriver is killed.
+    } finally {
+      _chromedriverProcess?.kill();
+      await _chromedriverProcess?.exitCode;
+    }
   }
 }
 
