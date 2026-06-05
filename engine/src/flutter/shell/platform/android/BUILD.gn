@@ -789,7 +789,7 @@ if (target_cpu != "x86") {
     }
 
     if (host_os == "linux") {
-      output = "$android_zip_archive_dir/linux-x64.zip"
+      output = "$android_zip_archive_dir/linux-$host_cpu.zip"
     } else if (host_os == "mac") {
       output = "$android_zip_archive_dir/darwin-x64.zip"
     } else if (host_os == "win") {
@@ -803,7 +803,7 @@ if (target_cpu != "x86") {
       },
     ]
 
-    deps = [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
+    deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
 
     if (host_os == "mac") {
       deps += [ ":android_entitlement_config" ]
@@ -830,7 +830,7 @@ if (host_os == "linux" &&
     analyze_snapshot_path = "$analyze_snapshot_out_dir/$analyze_snapshot_bin"
 
     if (host_os == "linux") {
-      output = "$android_zip_archive_dir/analyze-snapshot-linux-x64.zip"
+      output = "$android_zip_archive_dir/analyze-snapshot-linux-$host_cpu.zip"
     } else if (host_os == "mac") {
       output = "$android_zip_archive_dir/analyze-snapshot-darwin-x64.zip"
     } else if (host_os == "win") {

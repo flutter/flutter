@@ -697,7 +697,7 @@ deps = {
         'version': Var('clang_version'),
       }
     ],
-    'condition': 'host_os == "linux" and host_cpu == "arm64"',
+    'condition': 'host_os == "linux"',
     'dep_type': 'cipd',
   },
 
