@@ -146,6 +146,15 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
     BlitFramebufferANGLE.Reset();
   }
 
+  if (!description_->HasExtension("GL_EXT_instanced_arrays")) {
+    VertexAttribDivisorEXT.Reset();
+  }
+
+  if (!description_->HasExtension("GL_EXT_draw_instanced")) {
+    DrawArraysInstancedEXT.Reset();
+    DrawElementsInstancedEXT.Reset();
+  }
+
   capabilities_ = std::make_shared<CapabilitiesGLES>(*this);
 
   is_valid_ = true;

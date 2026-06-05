@@ -64,6 +64,10 @@ static bool ConfigureAttachment(const Attachment& desc,
   attachment.texture = TextureMTL::Cast(*desc.texture).GetMTLTexture();
   attachment.loadAction = ToMTLLoadAction(desc.load_action);
   attachment.storeAction = ToMTLStoreAction(desc.store_action);
+  // mip_level/slice select the subresource of the primary texture. The
+  // resolve texture, if any, resolves into its own level 0 / slice 0.
+  attachment.level = desc.mip_level;
+  attachment.slice = desc.slice;
 
   if (!ConfigureResolveTextureAttachment(desc, attachment)) {
     return false;
