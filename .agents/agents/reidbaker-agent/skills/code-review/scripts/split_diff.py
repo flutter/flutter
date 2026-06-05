@@ -36,7 +36,7 @@ def split_diff(diff_content, output_dir):
         match = re.search(r"^diff --git a/(.*?) b/", file_diff, re.MULTILINE)
         if not match:
             match = re.search(r"^--- a/(.*?)$", file_diff, re.MULTILINE)
-            
+
         if match:
             file_name = match.group(1).strip()
             safe_name = file_name.replace("/", "_")
