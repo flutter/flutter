@@ -488,8 +488,12 @@ class IOSSimulator extends Device {
 
     ProtocolDiscovery? vmServiceDiscovery;
     if (debuggingOptions.debuggingEnabled) {
+      final DeviceLogReader logReader = getLogReader(app: package);
+      if (logReader is _IOSSimulatorLogReader) {
+        await logReader.start();
+      }
       vmServiceDiscovery = ProtocolDiscovery.vmService(
-        getLogReader(app: package),
+        logReader,
         ipv6: debuggingOptions.ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
@@ -831,7 +835,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   final String? _appName;
 
   late final _linesController = StreamController<String>.broadcast(
-    onListen: _start,
+    onListen: start,
     onCancel: _stop,
   );
 
@@ -848,6 +852,12 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
 
   @override
   String get name => device.name;
+
+  Future<void>? _startFuture;
+
+  Future<void> start() {
+    return _startFuture ??= _start();
+  }
 
   Future<void> _start() async {
     // Unified logging iOS 11 and greater (introduced in iOS 10).

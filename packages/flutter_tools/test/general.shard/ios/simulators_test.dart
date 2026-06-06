@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
+import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -1509,6 +1510,82 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     );
 
     testUsingContext(
+      'startApp starts the simulator log reader before launching in debug mode',
+      () async {
+        const logPredicate =
+            'eventType = logEvent AND processImagePath ENDSWITH "name" AND '
+            '(senderImagePath ENDSWITH "/Flutter" OR senderImagePath ENDSWITH "/libswiftCore.dylib" '
+            'OR processImageUUID == senderImageUUID OR eventMessage CONTAINS "`UIScene` lifecycle '
+            'will soon be required" OR eventMessage CONTAINS "This process does not adopt UIScene '
+            'lifecycle.") AND NOT(eventMessage CONTAINS ": could not find icon '
+            'for representation -> com.apple.") AND NOT(eventMessage BEGINSWITH "assertion failed: ") '
+            'AND NOT(eventMessage CONTAINS " libxpc.dylib ")';
+        final fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <Pattern>[
+              'xcrun',
+              'simctl',
+              'spawn',
+              'x',
+              'log',
+              'stream',
+              '--style',
+              'json',
+              '--predicate',
+              logPredicate,
+            ],
+          ),
+        ]);
+        final device = IOSSimulator(
+          'x',
+          name: 'iPhone SE',
+          simulatorCategory: 'iOS 11.2',
+          simControl: simControl,
+          logger: logger,
+        );
+        testPlistParser.setProperty('CFBundleIdentifier', 'correct');
+
+        final Directory mockDir = globals.fs.currentDirectory;
+        final IOSApp package = PrebuiltIOSApp(
+          projectBundleId: 'correct',
+          bundleName: 'name',
+          uncompressedBundle: mockDir,
+          applicationPackage: mockDir,
+        );
+        final logReader = device.getLogReader(app: package) as SharedIOSDeviceLogReader;
+
+        const mockInfo = BuildInfo(
+          BuildMode.debug,
+          'flavor',
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+        );
+        final mockOptions = DebuggingOptions.enabled(mockInfo);
+        simControl.onLaunch = () {
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+          logReader.linesController.add(
+            'The Dart VM Service is listening on http://127.0.0.1:12345/abc=/',
+          );
+        };
+
+        final LaunchResult result = await device.startApp(
+          package,
+          prebuiltApplication: true,
+          debuggingOptions: mockOptions,
+        );
+
+        expect(result.started, isTrue);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+      overrides: <Type, Generator>{
+        PlistParser: () => testPlistParser,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => fakeProcessManager,
+        Xcode: () => xcode,
+      },
+    );
+
+    testUsingContext(
       'startApp using route',
       () async {
         final device = IOSSimulator(
@@ -1666,6 +1743,7 @@ class FakeIosProject extends Fake implements IosProject {
 
 class FakeSimControl extends Fake implements SimControl {
   final requests = <LaunchRequest>[];
+  void Function()? onLaunch;
 
   @override
   Future<RunResult> launch(
@@ -1673,6 +1751,7 @@ class FakeSimControl extends Fake implements SimControl {
     String appIdentifier, [
     List<String>? launchArgs,
   ]) async {
+    onLaunch?.call();
     requests.add(LaunchRequest(appIdentifier, launchArgs));
     return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
   }
