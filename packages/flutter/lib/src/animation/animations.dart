@@ -397,6 +397,9 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   /// Aside from the naming, it actually makes no difference whether
   /// [_proxy] or [parent] is exposed as [AnimationWithParentMixin.parent]
   /// because the listeners can be notified through either one.
+  // TODO(team-framework): Remove once `CurvedAnimation.reverseCurve`
+  // is removed:
+  // https://github.com/flutter/flutter/issues/185468.
   late final AsymmetricCurvedAnimation _proxy;
 
   /// The animation to which this animation applies a curve.
