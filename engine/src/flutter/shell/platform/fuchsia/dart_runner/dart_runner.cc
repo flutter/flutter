@@ -27,11 +27,6 @@
 #include "third_party/tonic/dart_microtask_queue.h"
 #include "third_party/tonic/dart_state.h"
 
-#if defined(AOT_RUNTIME)
-extern "C" uint8_t _kDartVmSnapshotData[];
-extern "C" uint8_t _kDartVmSnapshotInstructions[];
-#endif
-
 namespace dart_runner {
 
 namespace {
@@ -214,16 +209,6 @@ DartRunner::DartRunner(sys::ComponentContext* context) : context_(context) {
 
   Dart_InitializeParams params = {};
   params.version = DART_INITIALIZE_PARAMS_CURRENT_VERSION;
-#if defined(AOT_RUNTIME)
-  params.vm_snapshot_data = ::_kDartVmSnapshotData;
-  params.vm_snapshot_instructions = ::_kDartVmSnapshotInstructions;
-#else
-  if (!dart_utils::MappedResource::LoadFromNamespace(
-          nullptr, "/pkg/data/vm_snapshot_data.bin", vm_snapshot_data_)) {
-    FML_LOG(FATAL) << "Failed to load vm snapshot data";
-  }
-  params.vm_snapshot_data = vm_snapshot_data_.address();
-#endif
   params.create_group = IsolateGroupCreateCallback;
   params.shutdown_isolate = IsolateShutdownCallback;
   params.cleanup_group = IsolateGroupCleanupCallback;

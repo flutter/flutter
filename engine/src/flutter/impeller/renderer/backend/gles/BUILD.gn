@@ -16,6 +16,7 @@ impeller_component("gles_unittests") {
   sources = [
     "blit_command_gles_unittests.cc",
     "buffer_bindings_gles_unittests.cc",
+    "command_buffer_gles_unittests.cc",
     "device_buffer_gles_unittests.cc",
     "render_pass_gles_unittests.cc",
     "test/capabilities_unittests.cc",

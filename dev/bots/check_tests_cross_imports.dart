@@ -150,22 +150,17 @@ class TestsCrossImportChecker {
   static final Set<String> knownHarnessCrossImports = <String>{};
   static final Set<String> knownPaintingCrossImports = <String>{
     'packages/flutter/test/painting/system_fonts_test.dart',
-    'packages/flutter/test/painting/decoration_image_lerp_test.dart',
-    'packages/flutter/test/painting/continuous_rectangle_border_test.dart',
     'packages/flutter/test/painting/colors_test.dart',
   };
   static final Set<String> knownPhysicsCrossImports = <String>{};
   static final Set<String> knownRenderingCrossImports = <String>{
     'packages/flutter/test/rendering/aligning_shifted_box_baseline_test.dart',
     'packages/flutter/test/rendering/localized_fonts_test.dart',
-    'packages/flutter/test/rendering/editable_gesture_test.dart',
     'packages/flutter/test/rendering/box_test.dart',
     'packages/flutter/test/rendering/pipeline_owner_tree_test.dart',
     'packages/flutter/test/rendering/proxy_getters_and_setters_test.dart',
     'packages/flutter/test/rendering/view_chrome_style_test.dart',
     'packages/flutter/test/rendering/proxy_box_test.dart',
-    'packages/flutter/test/rendering/sliver_tree_test.dart',
-    'packages/flutter/test/rendering/editable_test.dart',
     'packages/flutter/test/rendering/object_test.dart',
   };
   static final Set<String> knownSchedulerCrossImports = <String>{};
