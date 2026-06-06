@@ -345,13 +345,28 @@ class TestsCrossImportChecker {
     }
 
     // List the files directly under `packages/flutter_test` and then walk the subdirectories.
-    for (final File file
-        in flutterTestLibraryDirectory.listSync(recursive: true).whereType<File>()) {
-      if (!file.absolute.path.contains(dartFilePattern)) {
+    // Since packages/flutter_test is a library in itself,
+    // exclude generated directories like `packages/flutter_test/build` and `packages/flutter_test/.dart_tool`.
+    for (final FileSystemEntity fileSystemEntity in flutterTestLibraryDirectory.listSync()) {
+      if (fileSystemEntity is File && fileSystemEntity.absolute.path.contains(dartFilePattern)) {
+        mapping[flutterTestLibrary]?.add(fileSystemEntity);
+
         continue;
       }
 
-      mapping[flutterTestLibrary]?.add(file);
+      if (fileSystemEntity is Directory) {
+        final String directoryName = path.basename(fileSystemEntity.absolute.path);
+
+        if (directoryName == 'build' || directoryName == '.dart_tool') {
+          continue;
+        }
+
+        for (final File file in fileSystemEntity.listSync(recursive: true).whereType<File>()) {
+          if (file.absolute.path.contains(dartFilePattern)) {
+            mapping[flutterTestLibrary]?.add(file);
+          }
+        }
+      }
     }
 
     return mapping;

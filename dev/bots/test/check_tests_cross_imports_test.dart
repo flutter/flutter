@@ -96,6 +96,31 @@ void main() {
     expect(checker.check(), isTrue);
   });
 
+  test('files under packages/flutter_test/build are ignored', () async {
+    buildKnownCrossImportTestFiles();
+
+    final Directory buildDirectory = checker.flutterTestLibraryDirectory.childDirectory('build')
+      ..createSync();
+    buildDirectory.childFile('foo_test.dart')
+      ..createSync()
+      ..writeAsStringSync("import 'package:flutter/material.dart';");
+
+    expect(checker.check(), isTrue);
+  });
+
+  test('files under packages/flutter_test/.dart_tool are ignored', () async {
+    buildKnownCrossImportTestFiles();
+
+    final Directory dartToolDirectory = checker.flutterTestLibraryDirectory.childDirectory(
+      '.dart_tool',
+    )..createSync();
+    dartToolDirectory.childFile('foo_test.dart')
+      ..createSync()
+      ..writeAsStringSync("import 'package:flutter/material.dart';");
+
+    expect(checker.check(), isTrue);
+  });
+
   for (final (String libraryName, String knownCrossImportsListName, Set<String> knownCrossImports)
       in crossImportsTestCases) {
     test(
