@@ -93,7 +93,6 @@ Future<void> buildLinux(
       needCrossBuild,
       targetPlatform,
       targetSysroot,
-      buildInfo.flavor,
     );
     if (configOnly) {
       return;
@@ -105,7 +104,7 @@ Future<void> buildLinux(
 
   final String? binaryName = getCmakeExecutableName(linuxProject, flavor: buildInfo.flavor);
   if (binaryName == null) {
-    throw ToolExit('Unable to find BINARY_NAME in ${linuxProject.cmakeFile.path}');
+    throwToolExit('Unable to find BINARY_NAME in ${linuxProject.cmakeFile.path}');
   }
   final File binaryFile = buildDirectory.childDirectory('bundle').childFile('$binaryName');
   final FileSystemEntity buildOutput = binaryFile.existsSync() ? binaryFile : binaryFile.parent;
@@ -163,7 +162,6 @@ Future<void> _runCmake(
   bool needCrossBuild,
   TargetPlatform targetPlatform,
   String targetSysroot,
-  String? flavor,
 ) async {
   final sw = Stopwatch()..start();
 
@@ -193,7 +191,6 @@ Future<void> _runCmake(
       // Support cross-building for riscv64 targets on x64 hosts.
       if (needCrossBuildOptionsForRiscv64) '-DCMAKE_C_COMPILER_TARGET=riscv64-linux-gnu',
       if (needCrossBuildOptionsForRiscv64) '-DCMAKE_CXX_COMPILER_TARGET=riscv64-linux-gnu',
-      if (flavor != null && flavor.isNotEmpty) '-DFLUTTER_APP_FLAVOR=$flavor',
       sourceDir.path,
     ],
     workingDirectory: buildDir.path,

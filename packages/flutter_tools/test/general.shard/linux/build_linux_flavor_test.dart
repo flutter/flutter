@@ -64,7 +64,6 @@ void main() {
         'Ninja',
         '-DCMAKE_BUILD_TYPE=${sentenceCase(buildMode)}',
         '-DFLUTTER_TARGET_PLATFORM=linux-x64',
-        '-DFLUTTER_APP_FLAVOR=$flavor',
         '/linux',
       ],
       workingDirectory: '/build/linux/x64/$flavor/$buildMode',
@@ -100,7 +99,7 @@ void main() {
   }
 
   testUsingContext(
-    'Linux build with --flavor passes -DFLUTTER_APP_FLAVOR and uses flavored build dir',
+    'Linux build with --flavor uses a flavor-specific build dir',
     () async {
       final command = makeBuildCommand();
       processManager.addCommands(<FakeCommand>[
