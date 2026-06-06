@@ -148,7 +148,9 @@ abstract class BoxBorder extends ShapeBorder {
   /// over the second half of the animation.
   ///
   /// Other [BoxBorder] subclasses can support this method by overriding
-  /// [lerpFrom] or [lerpTo] to return a [BoxBorder].
+  /// [lerpFrom] or [lerpTo] to return a [BoxBorder]. If neither border can
+  /// interpolate the other, this returns `a` before `t=0.5` and `b` after
+  /// `t=0.5`.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static BoxBorder? lerp(BoxBorder? a, BoxBorder? b, double t) {
@@ -204,36 +206,7 @@ abstract class BoxBorder extends ShapeBorder {
       );
     }
     final ShapeBorder? result = b?.lerpFrom(a, t) ?? a?.lerpTo(b, t);
-    if (result == null) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('BoxBorder.lerp could not interpolate the provided BoxBorder classes.'),
-        ErrorDescription(
-          'BoxBorder.lerp() was called with two objects of type ${a.runtimeType} and ${b.runtimeType}:\n'
-          '  $a\n'
-          '  $b\n'
-          'However, neither object knew how to interpolate the other.',
-        ),
-        ErrorHint(
-          'To support custom BoxBorder interpolation, override ShapeBorder.lerpFrom or '
-          'ShapeBorder.lerpTo.',
-        ),
-      ]);
-    }
-    if (result is BoxBorder) {
-      return result;
-    }
-    throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary('BoxBorder.lerp can only return BoxBorder classes.'),
-      ErrorDescription(
-        'BoxBorder.lerp() was called with two objects of type ${a.runtimeType} and ${b.runtimeType}:\n'
-        '  $a\n'
-        '  $b\n'
-        'However, ShapeBorder.lerpFrom or ShapeBorder.lerpTo returned an object of type '
-        '${result.runtimeType}:\n'
-        '  $result\n'
-        'BoxBorder.lerp can only return BoxBorder objects.',
-      ),
-    ]);
+    return result as BoxBorder? ?? (t < 0.5 ? a : b);
   }
 
   @override
