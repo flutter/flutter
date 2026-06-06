@@ -50,6 +50,7 @@ class DecorationImage {
   const DecorationImage({
     required this.image,
     this.onError,
+    this.placeholder,
     this.colorFilter,
     this.fit,
     this.alignment = Alignment.center,
@@ -68,6 +69,11 @@ class DecorationImage {
   /// Typically this will be an [AssetImage] (for an image shipped with the
   /// application) or a [NetworkImage] (for an image obtained from the network).
   final ImageProvider image;
+
+  /// The image's placeholder.
+  ///
+  /// This should be an [AssetImage] when image is Network image.
+  final ImageProvider? placeholder;
 
   /// An optional error callback for errors emitted when loading [image].
   final ImageErrorListener? onError;
@@ -193,6 +199,7 @@ class DecorationImage {
     }
     return other is DecorationImage &&
         other.image == image &&
+        other.placeholder == placeholder &&
         other.colorFilter == colorFilter &&
         other.fit == fit &&
         other.alignment == alignment &&
@@ -209,6 +216,7 @@ class DecorationImage {
   @override
   int get hashCode => Object.hash(
     image,
+    placeholder,
     colorFilter,
     fit,
     alignment,
@@ -226,6 +234,7 @@ class DecorationImage {
   String toString() {
     final properties = <String>[
       '$image',
+      '$placeholder',
       if (colorFilter != null) '$colorFilter',
       if (fit != null &&
           !(fit == BoxFit.fill && centerSlice != null) &&
@@ -328,6 +337,13 @@ class _DecorationImagePainter implements DecorationImagePainter {
   ImageStream? _imageStream;
   ImageInfo? _image;
 
+  ImageStream? _placeholderStream;
+  ImageInfo? _placeholderImage;
+
+  late final _imageListener = ImageStreamListener(_handleImage, onError: _details.onError);
+
+  late final _placeholderListener = ImageStreamListener(_handlePlaceholder);
+
   @override
   void paint(
     Canvas canvas,
@@ -370,14 +386,23 @@ class _DecorationImagePainter implements DecorationImagePainter {
       }
     }
 
+    if (_details.placeholder != null) {
+      ImageStream placeholderStream = _details.placeholder!.resolve(configuration);
+      if (placeholderStream.key != _placeholderStream?.key) {
+        _placeholderStream?.removeListener(_placeholderListener);
+        _placeholderStream = placeholderStream;
+        _placeholderStream?.addListener(_placeholderListener);
+      }
+    }
+
     final ImageStream newImageStream = _details.image.resolve(configuration);
     if (newImageStream.key != _imageStream?.key) {
-      final listener = ImageStreamListener(_handleImage, onError: _details.onError);
-      _imageStream?.removeListener(listener);
+      _imageStream?.removeListener(_imageListener);
       _imageStream = newImageStream;
-      _imageStream!.addListener(listener);
+      _imageStream!.addListener(_imageListener);
     }
-    if (_image == null) {
+    ImageInfo? imageInfo = _image ?? _placeholderImage;
+    if (imageInfo == null) {
       return;
     }
 
@@ -389,9 +414,9 @@ class _DecorationImagePainter implements DecorationImagePainter {
     paintImage(
       canvas: canvas,
       rect: rect,
-      image: _image!.image,
-      debugImageLabel: _image!.debugLabel,
-      scale: _details.scale * _image!.scale,
+      image: imageInfo.image,
+      debugImageLabel: imageInfo.debugLabel,
+      scale: _details.scale * imageInfo.scale,
       colorFilter: _details.colorFilter,
       fit: _details.fit,
       alignment: _details.alignment.resolve(configuration.textDirection),
@@ -425,12 +450,27 @@ class _DecorationImagePainter implements DecorationImagePainter {
     }
   }
 
+  void _handlePlaceholder(ImageInfo value, bool synchronousCall) {
+    if (_placeholderImage == value) {
+      return;
+    }
+    _placeholderImage?.dispose();
+    _placeholderImage = value;
+    if (!synchronousCall) {
+      _onChanged();
+    }
+  }
+
   @override
   void dispose() {
     assert(debugMaybeDispatchDisposed(this));
-    _imageStream?.removeListener(ImageStreamListener(_handleImage, onError: _details.onError));
+    _imageStream?.removeListener(_imageListener);
     _image?.dispose();
     _image = null;
+
+    _placeholderStream?.removeListener(_placeholderListener);
+    _placeholderImage?.dispose();
+    _placeholderStream = null;
   }
 
   @override
@@ -793,6 +833,8 @@ class _BlendedDecorationImage implements DecorationImage {
 
   @override
   ImageProvider get image => b?.image ?? a!.image;
+  @override
+  ImageProvider? get placeholder => b?.placeholder ?? a!.placeholder;
   @override
   ImageErrorListener? get onError => b?.onError ?? a!.onError;
   @override
