@@ -32,6 +32,15 @@ ByteData unlitUBO(Matrix4 mvp, Vector4 color) {
   ]);
 }
 
+ByteData mvpUBO(Matrix4 mvp) {
+  return float32(<double>[
+    mvp[0], mvp[1], mvp[2], mvp[3], //
+    mvp[4], mvp[5], mvp[6], mvp[7], //
+    mvp[8], mvp[9], mvp[10], mvp[11], //
+    mvp[12], mvp[13], mvp[14], mvp[15], //
+  ]);
+}
+
 gpu.RenderPipeline createUnlitRenderPipeline() {
   final gpu.ShaderLibrary? library = gpu.ShaderLibrary.fromAsset('test.shaderbundle');
   assert(library != null);
@@ -320,14 +329,13 @@ void main() async {
     expect(texture.enableRenderTargetUsage, true);
     expect(texture.enableShaderReadUsage, true);
     expect(!texture.enableShaderWriteUsage, true);
-    expect(texture.bytesPerTexel, 4);
+    expect(texture.format.bytesPerBlock, 4);
     expect(texture.getBaseMipLevelSizeInBytes(), 40000);
     expect(texture.mipLevelCount, 1);
     expect(texture.sliceCount, 1);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('GpuContext.createTexture allocates an r32Float texture', () async {
-    // Verifies the single-channel float format round-trips through allocation.
     final gpu.Texture texture = gpu.gpuContext.createTexture(
       gpu.StorageMode.hostVisible,
       4,
@@ -335,8 +343,208 @@ void main() async {
       format: gpu.PixelFormat.r32Float,
     );
     expect(texture.format, gpu.PixelFormat.r32Float);
-    expect(texture.bytesPerTexel, 4);
+    expect(texture.format.bytesPerBlock, 4);
     expect(texture.getBaseMipLevelSizeInBytes(), 4 * 4 * 4);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('PixelFormat block introspection matches the format table', () async {
+    // Uncompressed formats report block dims of 1.
+    expect(gpu.PixelFormat.r8g8b8a8UNormInt.isCompressed, false);
+    expect(gpu.PixelFormat.r8g8b8a8UNormInt.blockWidth, 1);
+    expect(gpu.PixelFormat.r8g8b8a8UNormInt.blockHeight, 1);
+    expect(gpu.PixelFormat.r8g8b8a8UNormInt.bytesPerBlock, 4);
+    expect(gpu.PixelFormat.r8g8b8a8UNormInt.compressionFamily, isNull);
+    expect(gpu.PixelFormat.r32Float.bytesPerBlock, 4);
+
+    // BC1 / ETC2 RGB8: 4x4 blocks, 8 bytes per block.
+    expect(gpu.PixelFormat.bc1RGBAUNormInt.isCompressed, true);
+    expect(gpu.PixelFormat.bc1RGBAUNormInt.blockWidth, 4);
+    expect(gpu.PixelFormat.bc1RGBAUNormInt.blockHeight, 4);
+    expect(gpu.PixelFormat.bc1RGBAUNormInt.bytesPerBlock, 8);
+    expect(gpu.PixelFormat.bc1RGBAUNormInt.compressionFamily, gpu.TextureCompressionFamily.bc);
+    expect(gpu.PixelFormat.etc2RGB8UNormInt.bytesPerBlock, 8);
+    expect(gpu.PixelFormat.etc2RGB8UNormInt.compressionFamily, gpu.TextureCompressionFamily.etc2);
+
+    // BC7 / ETC2 RGBA / ASTC 4x4: 4x4 blocks, 16 bytes per block.
+    expect(gpu.PixelFormat.bc7RGBAUNormInt.bytesPerBlock, 16);
+    expect(gpu.PixelFormat.etc2RGBA8UNormInt.bytesPerBlock, 16);
+    expect(gpu.PixelFormat.astc4x4LDR.bytesPerBlock, 16);
+    expect(gpu.PixelFormat.astc4x4LDR.compressionFamily, gpu.TextureCompressionFamily.astc);
+
+    // ASTC 8x8: 8x8 blocks, 16 bytes per block.
+    expect(gpu.PixelFormat.astc8x8LDR.blockWidth, 8);
+    expect(gpu.PixelFormat.astc8x8LDR.blockHeight, 8);
+    expect(gpu.PixelFormat.astc8x8LDR.bytesPerBlock, 16);
+  });
+
+  test('GpuContext.supportsTextureCompression returns a bool per family', () async {
+    // The exact answer depends on the device, but each query must return.
+    expect(gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc), isA<bool>());
+    expect(
+      gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.etc2),
+      isA<bool>(),
+    );
+    expect(
+      gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.astc),
+      isA<bool>(),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.supportsTextureFormat rejects render-target on compressed', () async {
+    // Sample-only is always permitted to be queried (subject to the family
+    // capability); render-target and shader-write are always rejected for
+    // compressed formats.
+    expect(
+      gpu.gpuContext.supportsTextureFormat(gpu.PixelFormat.bc7RGBAUNormInt, renderTarget: true),
+      false,
+    );
+    expect(
+      gpu.gpuContext.supportsTextureFormat(gpu.PixelFormat.bc7RGBAUNormInt, shaderWrite: true),
+      false,
+    );
+    // Uncompressed formats are not gated by per-format usage today.
+    expect(
+      gpu.gpuContext.supportsTextureFormat(gpu.PixelFormat.r8g8b8a8UNormInt, renderTarget: true),
+      true,
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Texture.getMipLevelSizeInBytes is block-aware for compressed formats', () async {
+    if (!gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc)) {
+      markTestSkipped('BC texture compression is not supported on this device.');
+      return;
+    }
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      16,
+      16,
+      format: gpu.PixelFormat.bc1RGBAUNormInt,
+      enableRenderTargetUsage: false,
+      mipLevelCount: 3,
+    );
+    // 16x16 -> 4x4 blocks * 8 bytes = 128.
+    expect(texture.getMipLevelSizeInBytes(0), 128);
+    // 8x8 -> 2x2 blocks * 8 bytes = 32.
+    expect(texture.getMipLevelSizeInBytes(1), 32);
+    // 4x4 -> 1x1 block * 8 bytes = 8.
+    expect(texture.getMipLevelSizeInBytes(2), 8);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.createTexture allocates a compressed texture when supported', () async {
+    if (!gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc)) {
+      markTestSkipped('BC texture compression is not supported on this device.');
+      return;
+    }
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      8,
+      8,
+      format: gpu.PixelFormat.bc1RGBAUNormInt,
+      enableRenderTargetUsage: false,
+    );
+    expect(texture.format, gpu.PixelFormat.bc1RGBAUNormInt);
+    expect(texture.format.isCompressed, true);
+    // 8x8 -> 2x2 blocks * 8 bytes = 32.
+    expect(texture.getBaseMipLevelSizeInBytes(), 32);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Texture.overwrite uploads block-aligned compressed data', () async {
+    if (!gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc)) {
+      markTestSkipped('BC texture compression is not supported on this device.');
+      return;
+    }
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      8,
+      8,
+      format: gpu.PixelFormat.bc1RGBAUNormInt,
+      enableRenderTargetUsage: false,
+    );
+    final ByteData bytes = Uint8List(32).buffer.asByteData();
+    texture.overwrite(bytes);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Texture.overwrite rejects wrong size for compressed format', () async {
+    if (!gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.bc)) {
+      markTestSkipped('BC texture compression is not supported on this device.');
+      return;
+    }
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      8,
+      8,
+      format: gpu.PixelFormat.bc1RGBAUNormInt,
+      enableRenderTargetUsage: false,
+    );
+    try {
+      // 8x8 BC1 needs 32 bytes; 16 is wrong.
+      texture.overwrite(Uint8List(16).buffer.asByteData());
+      fail('Exception not thrown for wrong compressed buffer size.');
+    } catch (e) {
+      expect(e.toString(), contains('must exactly match the size of mip level 0'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.createTexture rejects compressed format as render target', () async {
+    try {
+      gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        8,
+        8,
+        format: gpu.PixelFormat.bc1RGBAUNormInt,
+      );
+      fail('Exception not thrown for compressed render target.');
+    } catch (e) {
+      expect(e.toString(), contains('sample-only'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.createTexture rejects compressed format with shader write', () async {
+    try {
+      gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        8,
+        8,
+        format: gpu.PixelFormat.bc1RGBAUNormInt,
+        enableRenderTargetUsage: false,
+        enableShaderWriteUsage: true,
+      );
+      fail('Exception not thrown for compressed shader write.');
+    } catch (e) {
+      expect(e.toString(), contains('sample-only'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.createTexture rejects compressed format with MSAA', () async {
+    try {
+      gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        8,
+        8,
+        format: gpu.PixelFormat.bc1RGBAUNormInt,
+        enableRenderTargetUsage: false,
+        sampleCount: 4,
+      );
+      fail('Exception not thrown for compressed MSAA.');
+    } catch (e) {
+      expect(e.toString(), contains('sample-only'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.createTexture rejects non-block-aligned compressed dimensions', () async {
+    try {
+      // 5 is not a multiple of the 4x4 BC1 block.
+      gpu.gpuContext.createTexture(
+        gpu.StorageMode.hostVisible,
+        5,
+        8,
+        format: gpu.PixelFormat.bc1RGBAUNormInt,
+        enableRenderTargetUsage: false,
+      );
+      fail('Exception not thrown for non-block-aligned compressed dimensions.');
+    } catch (e) {
+      expect(e.toString(), contains('multiple of the block size'));
+    }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Texture.fullMipCount', () async {
@@ -849,6 +1057,67 @@ void main() async {
     await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('Can render instanced triangles with instance-rate vertex buffer', () async {
+    const triangleVertexCount = 3;
+    const triangleInstanceCount = 4;
+    final RenderPassState state = createSimpleRenderPass();
+
+    final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
+    final gpu.RenderPipeline pipeline = gpu.gpuContext.createRenderPipeline(
+      library['InstancedVertex']!,
+      library['InstancedFragment']!,
+      vertexLayout: const gpu.VertexLayout(
+        buffers: <gpu.VertexBuffer>[
+          gpu.VertexBuffer(
+            strideInBytes: 8,
+            attributes: <gpu.VertexAttribute>[
+              gpu.VertexAttribute(name: 'position', format: gpu.VertexFormat.float32x2),
+            ],
+          ),
+          gpu.VertexBuffer(
+            strideInBytes: 24,
+            stepMode: gpu.VertexStepMode.instance,
+            attributes: <gpu.VertexAttribute>[
+              gpu.VertexAttribute(name: 'instance_offset', format: gpu.VertexFormat.float32x2),
+              gpu.VertexAttribute(
+                name: 'instance_color',
+                offsetInBytes: 8,
+                format: gpu.VertexFormat.float32x4,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(
+      float32(<double>[
+        -0.18, 0.18, //
+        0.0, -0.18, //
+        0.18, 0.18, //
+      ]),
+    );
+    final gpu.BufferView instances = transients.emplace(
+      float32(<double>[
+        -0.45, 0.45, 1, 0, 0, 1, //
+        0.45, 0.45, 0, 1, 0, 1, //
+        -0.45, -0.45, 0, 0, 1, 1, //
+        0.45, -0.45, 1, 1, 0, 1, //
+      ]),
+    );
+    final gpu.BufferView vertInfo = transients.emplace(mvpUBO(Matrix4.identity()));
+    state.renderPass.bindVertexBuffer(vertices);
+    state.renderPass.bindVertexBuffer(instances, slot: 1);
+    state.renderPass.bindUniform(pipeline.vertexShader.getUniformSlot('VertInfo'), vertInfo);
+    state.renderPass.draw(triangleVertexCount, instanceCount: triangleInstanceCount);
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_instanced_triangles.png');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('createRenderPipeline rejects VertexLayout with wrong attribute format', () async {
     final gpu.ShaderLibrary library = gpu.ShaderLibrary.fromAsset('test.shaderbundle')!;
     try {
@@ -977,6 +1246,32 @@ void main() async {
         ),
       ),
     );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('draw calls reject negative instanceCount', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(
+      float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5]),
+    );
+    state.renderPass.bindVertexBuffer(vertices);
+
+    expect(() => state.renderPass.draw(3, instanceCount: -1), throwsRangeError);
+    expect(() => state.renderPass.drawIndexed(3, instanceCount: -1), throwsRangeError);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('draw calls with zero count or instanceCount are no-ops', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    state.renderPass.draw(0);
+    state.renderPass.draw(3, instanceCount: 0);
+    state.renderPass.drawIndexed(0);
+    state.renderPass.drawIndexed(3, instanceCount: 0);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('createRenderPipeline rejects VertexAttribute with unknown name', () async {
