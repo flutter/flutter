@@ -436,9 +436,15 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   set reverseCurve(Curve? value) => _proxy.reverseCurve = value;
 
   /// True if this [CurvedAnimation] has been disposed.
+  // TODO(team-framework): Deprecate once `CurvedAnimation.reverseCurve`
+  // is removed:
+  // https://github.com/flutter/flutter/issues/185468.
   bool get isDisposed => _proxy.isDisposed;
 
   /// Cleans up any listeners added by this [CurvedAnimation].
+  // TODO(team-framework): Deprecate once `CurvedAnimation.reverseCurve`
+  // is removed:
+  // https://github.com/flutter/flutter/issues/185468.
   void dispose() => _proxy.dispose();
 
   @override
