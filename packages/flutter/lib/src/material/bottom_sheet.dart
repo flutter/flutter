@@ -1168,6 +1168,24 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
         ? SafeArea(bottom: false, child: content)
         : MediaQuery.removePadding(context: context, removeTop: true, child: content);
 
+    // Use a plain Padding (not AnimatedPadding) so the sheet tracks the
+    // keyboard's actual position on every frame rather than chasing it with a
+    // fixed 100 ms duration.  FlutterJNI sends updated viewport metrics on
+    // each frame of the keyboard animation, so viewInsets.bottom already
+    // changes smoothly — no extra interpolation is needed.
+    final EdgeInsets viewInsets = MediaQuery.viewInsetsOf(context);
+    bottomSheet = Padding(
+      padding: viewInsets,
+      child: MediaQuery.removeViewInsets(
+        removeLeft: true,
+        removeTop: true,
+        removeRight: true,
+        removeBottom: true,
+        context: context,
+        child: bottomSheet,
+      ),
+    );
+
     // Prevent clicks inside the bottom sheet from passing through to the barrier
     bottomSheet = Semantics(hitTestBehavior: SemanticsHitTestBehavior.opaque, child: bottomSheet);
 
