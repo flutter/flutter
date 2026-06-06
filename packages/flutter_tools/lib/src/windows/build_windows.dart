@@ -108,7 +108,6 @@ Future<void> buildWindows(
       targetPlatform: targetPlatform,
       buildDir: buildDirectory,
       sourceDir: windowsProject.cmakeFile.parent,
-      flavor: buildInfo.flavor,
     );
     if (visualStudio.displayVersion == '17.1.0') {
       _fixBrokenCmakeGeneration(buildDirectory);
@@ -184,7 +183,6 @@ Future<void> _runCmakeGeneration({
   required TargetPlatform targetPlatform,
   required Directory buildDir,
   required Directory sourceDir,
-  String? flavor,
 }) async {
   final sw = Stopwatch()..start();
 
@@ -202,8 +200,7 @@ Future<void> _runCmakeGeneration({
       generator,
       '-A',
       getCmakeWindowsArch(targetPlatform),
-      '-DFLUTTER_TARGET_PLATFORM=${getNameForTargetPlatform(targetPlatform)}',
-      if (flavor != null && flavor.isNotEmpty) '-DFLUTTER_APP_FLAVOR=$flavor',
+      '-DFLUTTER_TARGET_PLATFORM=${targetPlatform.getName()}',
     ], trace: true);
   } on ArgumentError {
     throwToolExit("cmake not found. Run 'flutter doctor' for more information.");

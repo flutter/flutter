@@ -1,10 +1,10 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
-project({{projectName}} LANGUAGES CXX)
+project(flavors LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "{{projectName}}")
+set(BINARY_NAME "flavors")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
@@ -59,10 +59,6 @@ endif()
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
 
-{{#withPlatformChannelPluginHook}}
-# Enable the test target.
-set(include_{{pluginProjectName}}_tests TRUE)
-{{/withPlatformChannelPluginHook}}
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.

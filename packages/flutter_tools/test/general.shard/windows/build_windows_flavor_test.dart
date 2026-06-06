@@ -19,6 +19,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -88,7 +89,6 @@ void main() {
         '-A',
         getCmakeWindowsArch(targetPlatform),
         '-DFLUTTER_TARGET_PLATFORM=windows-x64',
-        if (flavor != null && flavor.isNotEmpty) '-DFLUTTER_APP_FLAVOR=$flavor',
       ],
     );
   }
@@ -151,19 +151,33 @@ void main() {
   // ---------------------------------------------------------------------------
 
   group('getWindowsBuildDirectory', () {
-    test('returns legacy path when no flavor', () {
-      expect(
-        getWindowsBuildDirectory(TargetPlatform.windows_x64),
-        endsWith(fileSystem.path.join('windows', 'x64')),
-      );
-    });
+    testUsingContext(
+      'returns legacy path when no flavor',
+      () {
+        expect(
+          getWindowsBuildDirectory(TargetPlatform.windows_x64),
+          endsWith(fileSystem.path.join('windows', 'x64')),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
 
-    test('inserts flavor segment when flavor is set', () {
-      expect(
-        getWindowsBuildDirectory(TargetPlatform.windows_x64, 'apple'),
-        endsWith(fileSystem.path.join('windows', 'x64', 'apple')),
-      );
-    });
+    testUsingContext(
+      'inserts flavor segment when flavor is set',
+      () {
+        expect(
+          getWindowsBuildDirectory(TargetPlatform.windows_x64, 'apple'),
+          endsWith(fileSystem.path.join('windows', 'x64', 'apple')),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
   });
 
   // ---------------------------------------------------------------------------
@@ -171,7 +185,7 @@ void main() {
   // ---------------------------------------------------------------------------
 
   testUsingContext(
-    'Windows build with --flavor passes -DFLUTTER_APP_FLAVOR to cmake and uses flavor build dir',
+    'Windows build with --flavor uses a flavor-specific build dir',
     () async {
       final fakeVisualStudio = FakeVisualStudio();
       final command = BuildWindowsCommand(
