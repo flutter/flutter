@@ -14,6 +14,7 @@
 #include "impeller/entity/clip.frag.h"
 #include "impeller/entity/clip.vert.h"
 #include "impeller/entity/color_matrix_color_filter.frag.h"
+#include "impeller/entity/complex_rse.frag.h"
 #include "impeller/entity/conical_gradient_fill_conical.frag.h"
 #include "impeller/entity/conical_gradient_fill_radial.frag.h"
 #include "impeller/entity/conical_gradient_fill_strip.frag.h"
@@ -162,6 +163,7 @@ using TiledTexturePipeline = RenderPipelineHandle<TextureUvFillVertexShader, Til
 using VerticesUber1Shader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUber1FragmentShader>;
 using VerticesUber2Shader = RenderPipelineHandle<PorterDuffBlendVertexShader, VerticesUber2FragmentShader>;
 using UberSDFPipeline = RenderPipelineHandle<CircleVertexShader, UberSdfFragmentShader>;
+using ComplexRSEPipeline = RenderPipelineHandle<CircleVertexShader, ComplexRseFragmentShader>;
 using YUVToRGBFilterPipeline = RenderPipelineHandle<FilterPositionVertexShader, YuvToRgbFilterFragmentShader>;
 // clang-format on
 

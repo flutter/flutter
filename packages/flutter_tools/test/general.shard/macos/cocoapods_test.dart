@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ffi' show Abi;
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -29,6 +30,20 @@ import '../../src/throwing_pub.dart';
 enum _StdioStream { stdout, stderr }
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
+
+  // ARM host.
+  const kARMCheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    stdout: 'hw.optional.arm64: 1',
+  );
+
   late MemoryFileSystem fileSystem;
   late FakeProcessManager fakeProcessManager;
   late CocoaPods cocoaPodsUnderTest;
@@ -509,21 +524,17 @@ environement:
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
-    testUsingContext(
-      'throws, if Podfile is missing.',
-      () async {
-        final FlutterProject projectUnderTest = setupProjectUnderTest();
-        await expectLater(
-          cocoaPodsUnderTest.processPods(
-            xcodeProject: projectUnderTest.ios,
-            buildMode: BuildMode.debug,
-          ),
-          throwsToolExit(message: 'Podfile missing'),
-        );
-        expect(fakeProcessManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-    );
+    testUsingContext('throws, if Podfile is missing.', () async {
+      final FlutterProject projectUnderTest = setupProjectUnderTest();
+      await expectLater(
+        cocoaPodsUnderTest.processPods(
+          xcodeProject: projectUnderTest.ios,
+          buildMode: BuildMode.debug,
+        ),
+        throwsToolExit(message: 'Podfile missing'),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
     testUsingContext(
       "doesn't throw, if using Swift Package Manager and Podfile is missing.",
@@ -1204,6 +1215,18 @@ end''');
               ..createSync()
               ..writeAsStringSync('Existing Podfile');
 
+            cocoaPodsUnderTest = CocoaPods(
+              fileSystem: fileSystem,
+              processManager: fakeProcessManager,
+              logger: logger,
+              platform: FakePlatform(operatingSystem: 'macos'),
+              xcodeProjectInterpreter: XcodeProjectInterpreter.test(
+                processManager: fakeProcessManager,
+              ),
+              analytics: fakeAnalytics,
+              currentAbi: Abi.macosArm64,
+            );
+
             fakeProcessManager.addCommands(<FakeCommand>[
               FakeCommand(
                 command: const <String>['pod', 'install', '--verbose'],
@@ -1216,11 +1239,8 @@ end''');
                 stdout: outputStream == _StdioStream.stdout ? cocoaPodsError : '',
                 stderr: outputStream == _StdioStream.stderr ? cocoaPodsError : '',
               ),
-              const FakeCommand(command: <String>['which', 'sysctl']),
-              const FakeCommand(
-                command: <String>['sysctl', 'hw.optional.arm64'],
-                stdout: 'hw.optional.arm64: 1',
-              ),
+              kWhichSysctlCommand,
+              kARMCheckCommand,
             ]);
 
             await expectToolExitLater(
@@ -1254,6 +1274,16 @@ end''');
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
 
+      cocoaPodsUnderTest = CocoaPods(
+        fileSystem: fileSystem,
+        processManager: fakeProcessManager,
+        logger: logger,
+        platform: FakePlatform(operatingSystem: 'macos'),
+        xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager),
+        analytics: fakeAnalytics,
+        currentAbi: Abi.macosX64,
+      );
+
       fakeProcessManager.addCommands(<FakeCommand>[
         const FakeCommand(
           command: <String>['pod', 'install', '--verbose'],
@@ -1263,8 +1293,8 @@ end''');
           stderr:
               'LoadError - dlsym(0x7fbbeb6837d0, Init_ffi_c): symbol not found - /Library/Ruby/Gems/2.6.0/gems/ffi-1.13.1/lib/ffi_c.bundle',
         ),
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
       ]);
 
       // Capture Usage.test() events.

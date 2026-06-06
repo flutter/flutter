@@ -29,6 +29,31 @@ static const constexpr char* kMultisampledRenderToTexture2Ext =
 // https://registry.khronos.org/OpenGL/extensions/OES/OES_element_index_uint.txt
 static const constexpr char* kElementIndexUintExt = "GL_OES_element_index_uint";
 
+// The BC family spans three separate OpenGL ES extensions: S3TC (BC1-BC3),
+// RGTC (BC5), and BPTC (BC7). All three are required to report kBC support.
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_compression_s3tc.txt
+static const constexpr char* kTextureCompressionS3TCExt =
+    "GL_EXT_texture_compression_s3tc";
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_compression_rgtc.txt
+static const constexpr char* kTextureCompressionRGTCExt =
+    "GL_EXT_texture_compression_rgtc";
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_compression_bptc.txt
+static const constexpr char* kTextureCompressionBPTCExt =
+    "GL_EXT_texture_compression_bptc";
+
+// https://registry.khronos.org/OpenGL/extensions/KHR/KHR_texture_compression_astc_hdr.txt
+static const constexpr char* kTextureCompressionAstcLdrExt =
+    "GL_KHR_texture_compression_astc_ldr";
+// https://registry.khronos.org/OpenGL/extensions/OES/OES_texture_compression_astc.txt
+static const constexpr char* kTextureCompressionAstcOesExt =
+    "GL_OES_texture_compression_astc";
+// https://registry.khronos.org/OpenGL/extensions/KHR/KHR_texture_compression_astc_hdr.txt
+static const constexpr char* kTextureCompressionAstcHdrExt =
+    "GL_KHR_texture_compression_astc_hdr";
+
+// https://registry.khronos.org/OpenGL/extensions/OES/OES_fbo_render_mipmap.txt
+static const constexpr char* kFboRenderMipmapExt = "GL_OES_fbo_render_mipmap";
+
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
     GLint value = 0;
@@ -147,10 +172,41 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   }
   is_es_ = desc->IsES();
   is_angle_ = desc->IsANGLE();
+
+  // ETC2 and EAC are mandatory in OpenGL ES 3.0. BC and ASTC are gated behind
+  // extensions and are not present on most mobile or desktop GLES. The whole BC
+  // family requires S3TC, RGTC, and BPTC to all be present.
+  supports_texture_compression_bc_ =
+      desc->HasExtension(kTextureCompressionS3TCExt) &&
+      desc->HasExtension(kTextureCompressionRGTCExt) &&
+      desc->HasExtension(kTextureCompressionBPTCExt);
+  // Either extension is sufficient: both expose the same LDR 2D ASTC internal
+  // formats this backend uses. KHR is the common one; OES is a superset that
+  // also adds HDR and 3D, which are not used here.
+  supports_texture_compression_astc_ =
+      desc->HasExtension(kTextureCompressionAstcLdrExt) ||
+      desc->HasExtension(kTextureCompressionAstcOesExt);
+  // HDR reuses the same internal formats as LDR, gated by a separate extension.
+  // The OES extension is a superset that also covers HDR.
+  supports_texture_compression_astc_hdr_ =
+      desc->HasExtension(kTextureCompressionAstcHdrExt) ||
+      desc->HasExtension(kTextureCompressionAstcOesExt);
+  supports_texture_compression_etc2_ =
+      desc->IsES() && desc->GetGlVersion().major_version >= 3;
+
+  // Non-zero mip levels are renderable on desktop GL, ES 3.0+, or ES 2.0 with
+  // GL_OES_fbo_render_mipmap.
+  supports_fbo_render_mipmap_ = !desc->IsES() ||
+                                desc->GetGlVersion().major_version >= 3 ||
+                                desc->HasExtension(kFboRenderMipmapExt);
 }
 
 bool CapabilitiesGLES::IsES() const {
   return is_es_;
+}
+
+bool CapabilitiesGLES::SupportsFramebufferRenderMipmap() const {
+  return supports_fbo_render_mipmap_;
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
@@ -235,6 +291,21 @@ bool CapabilitiesGLES::Supports32BitPrimitiveIndices() const {
 }
 
 bool CapabilitiesGLES::SupportsExtendedRangeFormats() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsTextureCompression(
+    CompressedTextureFamily family) const {
+  switch (family) {
+    case CompressedTextureFamily::kBC:
+      return supports_texture_compression_bc_;
+    case CompressedTextureFamily::kETC2:
+      return supports_texture_compression_etc2_;
+    case CompressedTextureFamily::kASTC:
+      return supports_texture_compression_astc_;
+    case CompressedTextureFamily::kASTCHDR:
+      return supports_texture_compression_astc_hdr_;
+  }
   return false;
 }
 

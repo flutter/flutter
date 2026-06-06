@@ -297,7 +297,7 @@ public class PlatformViewsChannel {
      * This can only be returned if the {@code PlatformViewCreationRequest} sets
      * {@code TEXTURE_WITH_HYBRID_FALLBACK} as the requested display mode.
      */
-    static final long NON_TEXTURE_FALLBACK = -2;
+    long NON_TEXTURE_FALLBACK = -2;
 
     /**
      * The Flutter application would like to display a new Android {@code View}, i.e., platform
