@@ -7,6 +7,14 @@ import 'dart:io' show Platform;
 import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 
+/// A typedef for the function that checks whether a given [library] can import a given [importStatement].
+typedef CanImportFunction =
+    bool Function(
+      CrossImportCheckedLibrary library,
+      LibraryCrossImportStatementType importStatement,
+      String filePath,
+    );
+
 /// A typedef that contains a set of [File]s which import Cupertino,
 /// and a set of [File]s which import Material.
 typedef CrossImportingFiles = ({Set<File> cupertinoImports, Set<File> materialImports});
@@ -93,9 +101,12 @@ Set<String> differencePaths(Set<String> knownPaths, Set<File> files, {required P
 
 /// Get the [Map] of files, per [CrossImportCheckedLibrary],
 /// of the files that have cross imports on Material and Cupertino.
+///
+/// The [canImport] function is used to determine if an import is valid or not.
 Map<CrossImportCheckedLibrary, CrossImportingFiles> getCrossImports(
-  Map<CrossImportCheckedLibrary, Set<File>> libraries,
-) {
+  Map<CrossImportCheckedLibrary, Set<File>> libraries, {
+  required CanImportFunction canImport,
+}) {
   final Map<CrossImportCheckedLibrary, CrossImportingFiles> crossImports = {};
 
   for (final MapEntry<CrossImportCheckedLibrary, Set<File>> entry in libraries.entries) {
@@ -105,14 +116,20 @@ Map<CrossImportCheckedLibrary, CrossImportingFiles> getCrossImports(
     for (final File file in entry.value) {
       final String contents = file.readAsStringSync();
 
-      if (!entry.key.canImport(LibraryCrossImportStatementType.cupertino) &&
-          contents.contains(LibraryCrossImportStatementType.cupertino.importString)) {
-        cupertinoImports.add(file);
-      }
-
-      if (!entry.key.canImport(LibraryCrossImportStatementType.material) &&
-          contents.contains(LibraryCrossImportStatementType.material.importString)) {
-        materialImports.add(file);
+      for (final LibraryCrossImportStatementType importStatement
+          in LibraryCrossImportStatementType.values) {
+        switch (importStatement) {
+          case .cupertino:
+            if (!canImport(entry.key, importStatement, file.absolute.path) &&
+                contents.contains(importStatement.importString)) {
+              cupertinoImports.add(file);
+            }
+          case .material:
+            if (!canImport(entry.key, importStatement, file.absolute.path) &&
+                contents.contains(importStatement.importString)) {
+              materialImports.add(file);
+            }
+        }
       }
     }
 

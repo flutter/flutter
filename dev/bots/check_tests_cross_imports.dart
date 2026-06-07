@@ -287,7 +287,10 @@ class TestsCrossImportChecker {
 
     // Find all cross imports.
     final Map<CrossImportCheckedLibrary, CrossImportingFiles> crossImportsPerLibrary =
-        getCrossImports(filesByLibrary);
+        getCrossImports(
+          filesByLibrary,
+          canImport: (library, import, filePath) => library.canImport(import),
+        );
 
     var valid = true;
 

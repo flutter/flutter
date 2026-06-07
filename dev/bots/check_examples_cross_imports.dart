@@ -316,7 +316,24 @@ class ExamplesCrossImportChecker {
   };
 
   static final RegExp _examplesPrefix = RegExp(r'examples');
-  static final RegExp _examplesSlashApiLibraryPattern = RegExp(r'^examples/api/[lib|test]/[a-z_]+');
+
+  bool _canImport(
+    CrossImportCheckedLibrary library,
+    LibraryCrossImportStatementType import,
+    String filePath,
+  ) {
+    if (library is! _ExamplesLibrary) {
+      return false;
+    }
+
+    return switch (library) {
+      _ApiExampleLibrary() ||
+      _CupertinoApiExampleLibrary() ||
+      _GenericExampleLibrary() ||
+      _MaterialApiExampleLibrary() => library.canImport(import),
+      _SampleTemplatesLibrary() => library.canImportInFile(import, filePath),
+    };
+  }
 
   /// Get a list of all the filenames that end in ".dart" for the given examples directory.
   ///
@@ -413,7 +430,7 @@ class ExamplesCrossImportChecker {
 
     // Find all cross imports.
     final Map<CrossImportCheckedLibrary, CrossImportingFiles> crossImportsPerLibrary =
-        getCrossImports(filesByLibrary);
+        getCrossImports(filesByLibrary, canImport: _canImport);
 
     var valid = true;
 
@@ -480,18 +497,6 @@ class ExamplesCrossImportChecker {
     }
 
     return valid;
-  }
-
-  /// Get the directory for the given `examples/api` [libraryName].
-  ///
-  /// The library name can only contain lowercase a-z and underscores
-  /// and must start with either `examples/api/lib` or `examples/api/test`.
-  Directory getDirectoryForExamplesSlashApiLibrary(String libraryName) {
-    if (!_examplesSlashApiLibraryPattern.hasMatch(libraryName)) {
-      throw ArgumentError('Invalid library name: $libraryName', 'libraryName');
-    }
-
-    return flutterRoot.childDirectory(libraryName);
   }
 }
 
