@@ -335,10 +335,111 @@ class ExamplesCrossImportChecker {
     };
   }
 
+  /// Find the `examples/api/lib` and `examples/api/test` directories
+  /// which contain the API examples and relevant tests.
+  ///
+  /// For the cross imports checker, only the `examples/api/lib` and `examples/api/test` directories are relevant.
+  /// The other directories in `examples/api` are either generated (e.g. build or .dart_tool),
+  /// platform directories for the samples (e.g. windows or linux),
+  /// or a shim for the integration test driver.
+  ({Directory libDirectory, Directory testDirectory}) _findExamplesSlashApiDirectories(
+    Directory examplesSlashApiDirectory,
+  ) {
+    Directory? examplesSlashApiLibDirectory;
+    Directory? examplesSlashApiTestDirectory;
+
+    for (final Directory directory in examplesSlashApiDirectory.listSync().whereType<Directory>()) {
+      final String directoryName = path.basename(directory.absolute.path);
+
+      if (directoryName == 'lib' && examplesSlashApiLibDirectory == null) {
+        examplesSlashApiLibDirectory = directory;
+      } else if (directoryName == 'test' && examplesSlashApiTestDirectory == null) {
+        examplesSlashApiTestDirectory = directory;
+      }
+    }
+
+    if (examplesSlashApiLibDirectory == null) {
+      throw StateError('Could not find lib directory in examples/api.');
+    }
+
+    if (examplesSlashApiTestDirectory == null) {
+      throw StateError('Could not find test directory in examples/api.');
+    }
+
+    return (
+      libDirectory: examplesSlashApiLibDirectory,
+      testDirectory: examplesSlashApiTestDirectory,
+    );
+  }
+
+  /// Get a list of all the filenames that end in ".dart", grouped by library.
+  Map<_ExamplesLibrary, Set<File>> _getExampleFiles() {
+    final dartFilePattern = RegExp(r'\.dart$');
+
+    const _ExamplesLibrary examplesRoot = _GenericExampleLibrary('examples');
+    final Map<_ExamplesLibrary, Set<File>> mapping = {examplesRoot: {}};
+
+    // List the files directly under `examples` and then walk the subdirectories.
+    for (final FileSystemEntity fileSystemEntity in examplesDirectory.listSync()) {
+      if (fileSystemEntity is File && fileSystemEntity.absolute.path.contains(dartFilePattern)) {
+        mapping[examplesRoot]?.add(fileSystemEntity);
+
+        continue;
+      }
+
+      if (fileSystemEntity is Directory) {
+        final String directoryName = path.basename(fileSystemEntity.absolute.path);
+
+        if (directoryName == 'build' || directoryName == '.dart_tool') {
+          continue;
+        }
+
+        // The examples/api folder contains examples in a single Flutter project,
+        // grouped in subfolders in lib/ and test/, so these need to be handled separately.
+        if (directoryName == 'api') {
+          final examplesSlashApiLibrary = _ExamplesLibrary.fromDirectory(
+            fileSystemEntity,
+            flutterRoot: flutterRoot,
+          );
+
+          // First list the files directly under examples/api.
+          mapping[examplesSlashApiLibrary] = {
+            for (final File file in fileSystemEntity.listSync().whereType<File>())
+              if (file.absolute.path.contains(dartFilePattern)) file,
+          };
+
+          final (:Directory libDirectory, :Directory testDirectory) =
+              _findExamplesSlashApiDirectories(fileSystemEntity);
+
+          // Handle the files under examples/api/lib/sample_templates and examples/api/test/sample_templates,
+          // which list individual files with a specific file pattern.
+          mapping.addAll(
+            _getExamplesSlashApiSampleTemplatesFiles(
+              libDirectory: libDirectory,
+              testDirectory: testDirectory,
+              dartFilePattern: dartFilePattern,
+            ),
+          );
+
+          continue;
+        }
+
+        final library = _ExamplesLibrary.fromDirectory(fileSystemEntity, flutterRoot: flutterRoot);
+
+        mapping[library] = _getExampleFilesForDirectory(
+          fileSystemEntity,
+          dartFilePattern: dartFilePattern,
+        );
+      }
+    }
+
+    return mapping;
+  }
+
   /// Get a list of all the filenames that end in ".dart" for the given examples directory.
   ///
   /// The [directory] must not be a subdirectory of `examples/api`.
-  Set<File> _getExampleFiles(Directory directory, {required Pattern dartFilePattern}) {
+  Set<File> _getExampleFilesForDirectory(Directory directory, {required Pattern dartFilePattern}) {
     final String examplesSlashApiPath = path.join(flutterRoot.absolute.path, 'examples', 'api');
 
     if (directory.absolute.path.startsWith(examplesSlashApiPath)) {
@@ -372,61 +473,44 @@ class ExamplesCrossImportChecker {
     return files;
   }
 
-  /// Get a list of all the filenames that end in ".dart", grouped by library.
-  Map<_ExamplesLibrary, Set<File>> _getExamplesFiles() {
-    final dartFilePattern = RegExp(r'\.dart$');
+  /// Get a list of all the filenames that end in ".dart", grouped by library,
+  /// for the subdrectories of `examples/api/lib/sample_templates` and `examples/api/test/sample_templates`.
+  Map<_SampleTemplatesLibrary, Set<File>> _getExamplesSlashApiSampleTemplatesFiles({
+    required Directory libDirectory,
+    required Directory testDirectory,
+    required Pattern dartFilePattern,
+  }) {
+    final Directory sampleTemplatesLibDirectory = libDirectory.childDirectory('sample_templates');
+    final Directory sampleTemplatesTestDirectory = testDirectory.childDirectory('sample_templates');
 
-    const _ExamplesLibrary examplesRoot = _GenericExampleLibrary('examples');
-    final Map<_ExamplesLibrary, Set<File>> mapping = {examplesRoot: {}};
+    final Set<File> sampleTemplateLibFiles = {};
+    final Set<File> sampleTemplateTestFiles = {};
 
-    // List the files directly under `examples` and then walk the subdirectories.
-    for (final FileSystemEntity fileSystemEntity in examplesDirectory.listSync()) {
-      if (fileSystemEntity is File && fileSystemEntity.absolute.path.contains(dartFilePattern)) {
-        mapping[examplesRoot]?.add(fileSystemEntity);
-
-        continue;
-      }
-
-      if (fileSystemEntity is Directory) {
-        final String directoryName = path.basename(fileSystemEntity.absolute.path);
-
-        if (directoryName == 'build' || directoryName == '.dart_tool') {
-          continue;
-        }
-
-        // The examples/api folder contains examples in a single Flutter project,
-        // grouped in subfolders in lib/ and test/, so these need to be handled separately.
-        if (directoryName == 'api') {
-          // First list the files directly under examples/api.
-          final examplesSlashApiLibrary = _ExamplesLibrary.fromDirectory(
-            fileSystemEntity,
-            flutterRoot: flutterRoot,
-          );
-
-          mapping[examplesSlashApiLibrary] = {
-            for (final File file in fileSystemEntity.listSync().whereType<File>())
-              if (file.absolute.path.contains(dartFilePattern)) file,
-          };
-
-          // Then handle the subfolder examples separately.
-
-          continue;
-        }
-
-        final library = _ExamplesLibrary.fromDirectory(fileSystemEntity, flutterRoot: flutterRoot);
-
-        mapping[library] = _getExampleFiles(fileSystemEntity, dartFilePattern: dartFilePattern);
+    for (final File file
+        in sampleTemplatesLibDirectory.listSync(recursive: true).whereType<File>()) {
+      if (file.absolute.path.contains(dartFilePattern)) {
+        sampleTemplateLibFiles.add(file);
       }
     }
 
-    return mapping;
+    for (final File file
+        in sampleTemplatesTestDirectory.listSync(recursive: true).whereType<File>()) {
+      if (file.absolute.path.contains(dartFilePattern)) {
+        sampleTemplateTestFiles.add(file);
+      }
+    }
+
+    return {
+      _SampleTemplatesLibrary.libLibrary: sampleTemplateLibFiles,
+      _SampleTemplatesLibrary.testLibrary: sampleTemplateTestFiles,
+    };
   }
 
   /// Returns true if there are no errors, false otherwise.
   bool check() {
     filesystem.currentDirectory = flutterRoot;
 
-    final Map<_ExamplesLibrary, Set<File>> filesByLibrary = _getExamplesFiles();
+    final Map<_ExamplesLibrary, Set<File>> filesByLibrary = _getExampleFiles();
 
     // Find all cross imports.
     final Map<CrossImportCheckedLibrary, CrossImportingFiles> crossImportsPerLibrary =
