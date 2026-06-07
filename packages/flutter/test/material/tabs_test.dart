@@ -1733,6 +1733,65 @@ void main() {
     expect(position.pixels, 800);
   });
 
+  testWidgets('TabBarView animates using the duration passed to TabController.animateTo', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/166519.
+    const controllerAnimationDuration = Duration(milliseconds: 100);
+    const animateToDuration = Duration(seconds: 1);
+    final tabs = <String>['A', 'B', 'C'];
+
+    final TabController tabController = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      animationDuration: controllerAnimationDuration,
+    );
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+              controller: tabController,
+            ),
+            SizedBox.square(
+              dimension: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller!;
+    final ScrollPosition position = pageController.position;
+
+    expect(position.pixels, 0.0);
+
+    // Animate to an adjacent tab using a duration that's much longer than
+    // the TabController's default animationDuration.
+    tabController.animateTo(1, duration: animateToDuration);
+    await tester.pump();
+
+    // The TabBarView must keep animating for animateToDuration -- to remain
+    // in sync with the TabBar's selected tab indicator -- instead of
+    // finishing after the controller's default animationDuration.
+    await tester.pump(controllerAnimationDuration);
+    expect(position.pixels, greaterThan(0.0));
+    expect(position.pixels, lessThan(400.0));
+
+    await tester.pump(animateToDuration - controllerAnimationDuration);
+    expect(position.pixels, 400.0);
+  });
+
   testWidgets('TabBarView animation can be interrupted', (WidgetTester tester) async {
     const animationDuration = Duration(seconds: 2);
     final tabs = <String>['A', 'B', 'C'];

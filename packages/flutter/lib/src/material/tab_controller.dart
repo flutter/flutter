@@ -186,11 +186,29 @@ class TabController extends ChangeNotifier {
   Animation<double>? get animation => _animationController?.view;
   AnimationController? _animationController;
 
-  /// Controls the duration of TabController and TabBarView animations.
+  /// Controls the default duration of [TabController] and [TabBarView]
+  /// animations.
   ///
   /// Defaults to kTabScrollDuration.
+  ///
+  /// This is the duration that's used when [animateTo] is called without
+  /// an explicit `duration`. To find the duration of the animation that's
+  /// currently changing [index], use [currentAnimationDuration] instead,
+  /// since that reflects any `duration` override passed to [animateTo].
   Duration get animationDuration => _animationDuration;
   final Duration _animationDuration;
+
+  /// The duration of the animation that's currently changing [index], as
+  /// requested by the most recent call to [animateTo].
+  ///
+  /// [TabBarView] uses this value, instead of [animationDuration], to keep
+  /// its content animation in sync with the [TabBar]'s selected tab
+  /// indicator animation, even when [animateTo] is called with a `duration`
+  /// that's different from [animationDuration].
+  ///
+  /// Defaults to [animationDuration].
+  Duration get currentAnimationDuration => _currentAnimationDuration ?? _animationDuration;
+  Duration? _currentAnimationDuration;
 
   /// The total number of tabs.
   ///
@@ -208,6 +226,7 @@ class TabController extends ChangeNotifier {
     _previousIndex = index;
     _index = value;
     if (duration != null && duration > Duration.zero) {
+      _currentAnimationDuration = duration;
       _indexIsChangingCount += 1;
       notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController!
