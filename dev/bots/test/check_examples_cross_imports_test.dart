@@ -274,6 +274,39 @@ void main() {
       expect(result, equals('$lines\n'));
       expect(success, isFalse);
     });
+
+    test('files under $libraryName/build are ignored', () async {
+      buildKnownCrossImportExamplesFiles();
+
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      final Directory buildDirectory = examplesFilesDirectory.childDirectory('build')..createSync();
+      buildDirectory.childFile('foo.dart')
+        ..createSync()
+        ..writeAsStringSync("import 'package:flutter/material.dart';");
+
+      expect(checker.check(), isTrue);
+    });
+
+    test('files under $libraryName/.dart_tool are ignored', () async {
+      buildKnownCrossImportExamplesFiles();
+
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      final Directory dartToolDirectory = examplesFilesDirectory.childDirectory('.dart_tool')
+        ..createSync();
+      dartToolDirectory.childFile('foo.dart')
+        ..createSync()
+        ..writeAsStringSync("import 'package:flutter/material.dart';");
+
+      expect(checker.check(), isTrue);
+    });
   }
 }
 
