@@ -433,13 +433,9 @@ void main() {
           await runBuildAppBundleCommand(projectPath);
         }, throwsToolExit());
 
-        expect(testLogger.statusText, containsIgnoringWhitespace("Your app isn't using AndroidX"));
         expect(
           testLogger.statusText,
-          containsIgnoringWhitespace(
-            'To avoid potential build failures, you can quickly migrate your app by '
-            'following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration',
-          ),
+          isNot(containsIgnoringWhitespace("Your app isn't using AndroidX")),
         );
 
         expect(

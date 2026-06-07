@@ -302,26 +302,19 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// pipeline's `VertexLayout`. The default of 0 matches the default
   /// layout declared by a shader bundle, which is what every single-buffer
   /// call site expects. To bind multiple structure-of-arrays vertex
-  /// buffers, call this method once per slot. The [vertexCount] takes
-  /// effect only when no index buffer is bound, and is read from the
-  /// binding at slot 0, so values supplied at higher slots are ignored.
+  /// buffers, call this method once per slot.
+  ///
+  /// The number of vertices to draw is passed separately, to [draw].
   ///
   /// Sparse bindings are not supported. Every slot in `[0, highestBound]`
-  /// must have been bound before [draw] is called, otherwise [draw] throws
-  /// a [StateError] naming the unbound slots. Slots can be bound in any
-  /// order.
+  /// must have been bound before [draw] or [drawIndexed] is called,
+  /// otherwise they throw a [StateError] naming the unbound slots. Slots
+  /// can be bound in any order.
   ///
-  /// [slot] must be in `[0, 16)` (Impeller's HAL caps vertex buffer
-  /// bindings at 16). On the OpenGL ES backend, the per-pipeline limit on
-  /// the *total attribute count* across all bound buffers is whatever the
-  /// device reports for `GL_MAX_VERTEX_ATTRIBS` (minimum 8 on GL ES 2.0,
-  /// minimum 16 on GL ES 3.0+), and is enforced by the driver rather than
-  /// by this method.
-  void bindVertexBuffer(
-    BufferView bufferView,
-    int vertexCount, {
-    int slot = 0,
-  }) {
+  /// [slot] must be in `[0, 16)` (the current Flutter GPU limit for vertex
+  /// buffer bindings). Some devices may also impose a lower limit on the
+  /// total number of vertex attributes used by a single pipeline.
+  void bindVertexBuffer(BufferView bufferView, {int slot = 0}) {
     if (slot < 0 || slot >= _kMaxVertexBufferSlots) {
       throw RangeError.range(
         slot,
@@ -339,22 +332,20 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       this,
       bufferView.offsetInBytes,
       bufferView.lengthInBytes,
-      vertexCount,
       slot,
     );
   }
 
-  void bindIndexBuffer(
-    BufferView bufferView,
-    IndexType indexType,
-    int indexCount,
-  ) {
+  /// Binds [bufferView] as the index buffer.
+  ///
+  /// [indexType] is the width of each index. The number of indices to draw
+  /// is passed separately, to [drawIndexed].
+  void bindIndexBuffer(BufferView bufferView, IndexType indexType) {
     bufferView.buffer._bindAsIndexBuffer(
       this,
       bufferView.offsetInBytes,
       bufferView.lengthInBytes,
       indexType,
-      indexCount,
     );
   }
 
@@ -505,7 +496,68 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     _setWindingOrder(windingOrder.index);
   }
 
-  void draw() {
+  /// Appends a non-indexed draw of [vertexCount] vertices.
+  ///
+  /// The vertices are read from the vertex buffers previously bound with
+  /// [bindVertexBuffer]. Buffers whose [VertexBuffer.stepMode] is
+  /// [VertexStepMode.vertex] advance once per vertex. Buffers whose
+  /// [VertexBuffer.stepMode] is [VertexStepMode.instance] advance once per
+  /// instance.
+  ///
+  /// Set [instanceCount] greater than 1 to repeat the same vertex range
+  /// multiple times while reading a new element from each instance-rate vertex
+  /// buffer for each instance. A [vertexCount] or [instanceCount] of 0 is
+  /// valid and records no drawing work.
+  ///
+  /// If the bound pipeline does not use any instance-rate vertex buffers, each
+  /// instance receives the same vertex buffer data. This is valid, but every
+  /// instance will produce the same geometry unless the shader varies its output
+  /// another way.
+  void draw(int vertexCount, {int instanceCount = 1}) {
+    RangeError.checkNotNegative(vertexCount, 'vertexCount');
+    RangeError.checkNotNegative(instanceCount, 'instanceCount');
+    if (vertexCount == 0 || instanceCount == 0) {
+      return;
+    }
+    _validateVertexBindings();
+    if (!_draw(vertexCount, instanceCount)) {
+      throw Exception("Failed to append draw");
+    }
+  }
+
+  /// Appends an indexed draw of [indexCount] indices.
+  ///
+  /// Indices are read from the index buffer previously bound with
+  /// [bindIndexBuffer]. Vertex data is read from the vertex buffers previously
+  /// bound with [bindVertexBuffer]. Buffers whose [VertexBuffer.stepMode] is
+  /// [VertexStepMode.vertex] advance once per vertex selected by the index
+  /// buffer. Buffers whose [VertexBuffer.stepMode] is [VertexStepMode.instance]
+  /// advance once per instance.
+  ///
+  /// Set [instanceCount] greater than 1 to repeat the same indexed geometry
+  /// multiple times while reading a new element from each instance-rate vertex
+  /// buffer for each instance. An [indexCount] or [instanceCount] of 0 is valid
+  /// and records no drawing work.
+  ///
+  /// If the bound pipeline does not use any instance-rate vertex buffers, each
+  /// instance receives the same vertex and index buffer data. This is valid, but
+  /// every instance will produce the same geometry unless the shader varies its
+  /// output another way.
+  void drawIndexed(int indexCount, {int instanceCount = 1}) {
+    RangeError.checkNotNegative(indexCount, 'indexCount');
+    RangeError.checkNotNegative(instanceCount, 'instanceCount');
+    if (indexCount == 0 || instanceCount == 0) {
+      return;
+    }
+    _validateVertexBindings();
+    if (!_drawIndexed(indexCount, instanceCount)) {
+      throw Exception("Failed to append drawIndexed");
+    }
+  }
+
+  /// Throws a [StateError] when the bound vertex buffer slots are sparse,
+  /// naming the slots in `[0, highestBound]` that were left unbound.
+  void _validateVertexBindings() {
     if (_maxBoundVertexSlot >= 0) {
       final int expectedMask = (1 << (_maxBoundVertexSlot + 1)) - 1;
       if (_boundVertexSlotsMask != expectedMask) {
@@ -514,14 +566,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
             if ((_boundVertexSlotsMask & (1 << i)) == 0) i,
         ];
         throw StateError(
-          'draw() called with sparse vertex buffer bindings: slot(s) '
+          'draw called with sparse vertex buffer bindings: slot(s) '
           '${missing.join(', ')} were not bound but slot $_maxBoundVertexSlot '
           'was. Bind every slot in [0, $_maxBoundVertexSlot] before drawing.',
         );
       }
-    }
-    if (!_draw()) {
-      throw Exception("Failed to append draw");
     }
   }
 
@@ -591,18 +640,17 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   )
   external void _bindPipeline(RenderPipeline pipeline);
 
-  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int, Int, Int, Int)>(
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_BindVertexBufferDevice',
   )
   external void _bindVertexBufferDevice(
     DeviceBuffer buffer,
     int offsetInBytes,
     int lengthInBytes,
-    int vertexCount,
     int slot,
   );
 
-  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int, Int, Int, Int)>(
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_BindIndexBufferDevice',
   )
   external void _bindIndexBufferDevice(
@@ -610,7 +658,6 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     int offsetInBytes,
     int lengthInBytes,
     int indexType,
-    int indexCount,
   );
 
   @Native<
@@ -736,8 +783,13 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   )
   external void _setPolygonMode(int polygonMode);
 
-  @Native<Bool Function(Pointer<Void>)>(
+  @Native<Bool Function(Pointer<Void>, Int, Int)>(
     symbol: 'InternalFlutterGpu_RenderPass_Draw',
   )
-  external bool _draw();
+  external bool _draw(int vertexCount, int instanceCount);
+
+  @Native<Bool Function(Pointer<Void>, Int, Int)>(
+    symbol: 'InternalFlutterGpu_RenderPass_DrawIndexed',
+  )
+  external bool _drawIndexed(int indexCount, int instanceCount);
 }
