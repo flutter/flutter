@@ -643,13 +643,13 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
 
 /// Any API example - not related to Material or Cupertino - inside `examples/api`, and its tests.
 final class _ApiExampleLibrary extends _ExamplesLibrary {
-  _ApiExampleLibrary(super.name);
+  const _ApiExampleLibrary(super.name);
 }
 
 /// The examples in `examples/api/lib/cupertino`
 /// and their tests in `examples/api/test/cupertino`.
 final class _CupertinoApiExampleLibrary extends _ExamplesLibrary {
-  _CupertinoApiExampleLibrary(super.name);
+  const _CupertinoApiExampleLibrary(super.name);
 }
 
 /// Any non-API example, not in `examples/api`,
@@ -661,13 +661,20 @@ final class _GenericExampleLibrary extends _ExamplesLibrary {
 /// The examples in `examples/api/lib/material`
 /// and their tests in `examples/api/test/material`.
 final class _MaterialApiExampleLibrary extends _ExamplesLibrary {
-  _MaterialApiExampleLibrary(super.name);
+  const _MaterialApiExampleLibrary(super.name);
 }
 
 /// The examples in `examples/api/lib/sample_templates`
 /// and their tests in `examples/api/test/sample_templates`.
 final class _SampleTemplatesLibrary extends _ExamplesLibrary {
-  _SampleTemplatesLibrary(super.name);
+  const _SampleTemplatesLibrary._(super.name);
+
+  static const _SampleTemplatesLibrary libLibrary = _SampleTemplatesLibrary._(
+    'examples/api/lib/sample_templates',
+  );
+  static const _SampleTemplatesLibrary testLibrary = _SampleTemplatesLibrary._(
+    'examples/api/test/sample_templates',
+  );
 
   /// Check wether the given [filePath] points to a sample file that can import the given [import].
   ///
