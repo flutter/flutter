@@ -83,6 +83,198 @@ void main() {
 
     expect(checker.check(), isTrue);
   });
+
+  for (final (String libraryName, String knownCrossImportsListName, Set<String> knownCrossImports)
+      in crossImportsGenericExamplesTestCases) {
+    test(
+      'when not all $libraryName knowns have cross imports',
+      () async {
+        final String excludedSample = knownCrossImports.first;
+
+        buildKnownCrossImportExamplesFiles(excludes: <String>{excludedSample});
+
+        bool? success;
+        final String result = await capture(() async {
+          success = checker.check();
+        }, shouldHaveErrors: true);
+        final String lines = <String>[
+          '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+          '║ Huzzah! The following files in $libraryName no longer contain cross imports!',
+          '║   $excludedSample',
+          '║ However, they now need to be removed from the',
+          '║ $knownCrossImportsListName list in the script /dev/bots/check_examples_cross_imports.dart.',
+          '╚═══════════════════════════════════════════════════════════════════════════════',
+        ].join('\n');
+        expect(result, equals('$lines\n'));
+        expect(success, isFalse);
+      },
+      skip: knownCrossImports.isEmpty, // [intended]: Nothing to log if there are no known imports
+    );
+
+    test('unknown $libraryName cross import of Material', () async {
+      final dartFile = '$libraryName/foo.dart';
+
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles({dartFile}, inDirectory: examplesFilesDirectory);
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to Material.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
+    test('multiple unknown $libraryName cross imports of Material', () async {
+      final dartFileOne = '$libraryName/foo.dart';
+      final dartFileTwo = '$libraryName/bar.dart';
+
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles({dartFileOne, dartFileTwo}, inDirectory: examplesFilesDirectory);
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following 2 files in $libraryName have a disallowed import of Material. Refactor them or move them to Material.',
+        '║   $dartFileOne',
+        '║   $dartFileTwo',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
+    test('unknown $libraryName cross import of Material in test file', () async {
+      final testDartFile = '$libraryName/foo_test.dart';
+
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles(<String>{testDartFile}, inDirectory: examplesFilesDirectory);
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to Material.',
+        '║   $testDartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
+    test('unknown $libraryName cross import of Cupertino', () async {
+      final dartFile = '$libraryName/foo.dart';
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles(
+        <String>{dartFile},
+        inDirectory: examplesFilesDirectory,
+        importString: "import 'package:flutter/cupertino.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of Cupertino. Refactor it or move it to Cupertino.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
+    test('multiple unknown $libraryName cross imports of Cupertino', () async {
+      final dartFileOne = '$libraryName/foo.dart';
+      final dartFileTwo = '$libraryName/bar.dart';
+
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles(
+        {dartFileOne, dartFileTwo},
+        inDirectory: examplesFilesDirectory,
+        importString: "import 'package:flutter/cupertino.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following 2 files in $libraryName have a disallowed import of Cupertino. Refactor them or move them to Cupertino.',
+        '║   $dartFileOne',
+        '║   $dartFileTwo',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
+    test('unknown $libraryName cross import of Cupertino in test file', () async {
+      final testDartFile = '$libraryName/foo_test.dart';
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles(
+        <String>{testDartFile},
+        inDirectory: examplesFilesDirectory,
+        importString: "import 'package:flutter/cupertino.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of Cupertino. Refactor it or move it to Cupertino.',
+        '║   $testDartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+  }
 }
 
 // A utility that keeps track of the directories under test,
