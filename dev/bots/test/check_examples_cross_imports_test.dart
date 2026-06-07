@@ -282,6 +282,7 @@ void main() {
 class _CrossImportsExamplesDirectories {
   factory _CrossImportsExamplesDirectories(Directory examplesDirectory) {
     return _CrossImportsExamplesDirectories._(
+      examplesSlashApiDirectory: examplesDirectory.childDirectory('api'),
       examplesFlutterViewDirectory: examplesDirectory.childDirectory('flutter_view'),
       examplesHelloWorldDirectory: examplesDirectory.childDirectory('hello_world'),
       examplesImageListDirectory: examplesDirectory.childDirectory('image_list'),
@@ -298,6 +299,7 @@ class _CrossImportsExamplesDirectories {
   }
 
   const _CrossImportsExamplesDirectories._({
+    required this.examplesSlashApiDirectory,
     required this.examplesFlutterViewDirectory,
     required this.examplesHelloWorldDirectory,
     required this.examplesImageListDirectory,
@@ -310,6 +312,7 @@ class _CrossImportsExamplesDirectories {
     required this.examplesTextureDirectory,
   });
 
+  final Directory examplesSlashApiDirectory;
   final Directory examplesFlutterViewDirectory;
   final Directory examplesHelloWorldDirectory;
   final Directory examplesImageListDirectory;
@@ -326,6 +329,7 @@ class _CrossImportsExamplesDirectories {
   Map<Directory, Set<String>> getKnownFiles(Directory examplesDirectory) {
     return <Directory, Set<String>>{
       examplesDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
+      examplesSlashApiDirectory: ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports,
       examplesFlutterViewDirectory: ExamplesCrossImportChecker.knownExamplesFlutterViewCrossImports,
       examplesHelloWorldDirectory: ExamplesCrossImportChecker.knownExamplesHelloWorldCrossImports,
       examplesImageListDirectory: ExamplesCrossImportChecker.knownExamplesImageListCrossImports,
@@ -359,6 +363,7 @@ class _CrossImportsExamplesDirectories {
   Directory examplesFilesDirectoryFor(String libraryName, Directory examplesDirectory) {
     return switch (libraryName) {
       'examples' => examplesDirectory,
+      'examples/api' => examplesSlashApiDirectory,
       'examples/flutter_view' => examplesFlutterViewDirectory,
       'examples/hello_world' => examplesHelloWorldDirectory,
       'examples/image_list' => examplesImageListDirectory,
@@ -383,6 +388,7 @@ class _CrossImportsExamplesDirectories {
 // dart format off
 final crossImportsGenericExamplesTestCases = <(String, String, Set<String>)>[
   ('examples', 'knownExamplesCrossImports', ExamplesCrossImportChecker.knownExamplesCrossImports),
+  ('examples/api', 'knownExamplesSlashApiCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports),
   ('examples/flutter_view', 'knownExamplesFlutterViewCrossImports', ExamplesCrossImportChecker.knownExamplesFlutterViewCrossImports),
   ('examples/hello_world', 'knownExamplesHelloWorldCrossImports', ExamplesCrossImportChecker.knownExamplesHelloWorldCrossImports),
   ('examples/image_list', 'knownExamplesImageListCrossImports', ExamplesCrossImportChecker.knownExamplesImageListCrossImports),
