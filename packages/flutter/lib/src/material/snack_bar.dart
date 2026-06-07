@@ -979,25 +979,6 @@ class _RenderSnackBarLayout extends RenderBox
         : _kFixedSnackBarHorizontalPadding;
     final double availableWidth = constraints.maxWidth;
 
-    final EdgeInsets resolvedPadding =
-        _padding?.resolve(textDirection) ??
-        EdgeInsetsDirectional.only(
-          top: _singleLineVerticalPadding,
-          bottom: _singleLineVerticalPadding,
-          start: horizontalPadding,
-          end: hasButtons ? 0.0 : horizontalPadding,
-        ).resolve(textDirection);
-
-    final double topPadding = resolvedPadding.top;
-    final double bottomPadding = resolvedPadding.bottom;
-    final gapBetweenContentAndButtons = bottomPadding;
-
-    final double edgeWrapPadding = _padding != null
-        ? (isLtr ? resolvedPadding.right : resolvedPadding.left)
-        : 0.0;
-    final double contentSpacePadding = isLtr ? resolvedPadding.left : resolvedPadding.right;
-
-    // Dry Layout
     final double baseButtonMargin = _padding?.resolve(TextDirection.ltr).right ?? horizontalPadding;
     final double actionHorizontalMargin = hasAction
         ? baseButtonMargin * _kActionButtonMarginRatio
@@ -1019,14 +1000,30 @@ class _RenderSnackBarLayout extends RenderBox
     final double iconFootprint = hasCloseIcon
         ? (dryCloseIconSize.width + iconHorizontalMargin * 2)
         : 0.0;
-    final double totalActionAreaWidth = actionFootprint + iconFootprint + edgeWrapPadding;
 
-    // Overflow check
     var willOverflow = false;
     if (hasButtons && availableWidth > 0 && availableWidth < double.infinity) {
       final double buttonsAndMarginsWidth = actionFootprint + iconFootprint;
       willOverflow = (buttonsAndMarginsWidth / availableWidth) > actionOverflowThreshold;
     }
+
+    final EdgeInsets resolvedPadding =
+        _padding?.resolve(textDirection) ??
+        EdgeInsetsDirectional.only(
+          top: _singleLineVerticalPadding,
+          bottom: _singleLineVerticalPadding,
+          start: horizontalPadding,
+          end: (hasButtons && !willOverflow) ? 0.0 : horizontalPadding,
+        ).resolve(textDirection);
+
+    final double topPadding = resolvedPadding.top;
+    final double bottomPadding = resolvedPadding.bottom;
+    final gapBetweenContentAndButtons = bottomPadding;
+
+    final double edgeWrapPadding = isLtr ? resolvedPadding.right : resolvedPadding.left;
+    final double contentSpacePadding = isLtr ? resolvedPadding.left : resolvedPadding.right;
+
+    final double totalActionAreaWidth = actionFootprint + iconFootprint + edgeWrapPadding;
 
     // Calculate content sizes
     double strictContentMaxWidth;
