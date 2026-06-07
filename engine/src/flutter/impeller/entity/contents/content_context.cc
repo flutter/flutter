@@ -305,6 +305,7 @@ struct ContentContext::Pipelines {
   Variants<VerticesUber1Shader> vertices_uber_1_;
   Variants<VerticesUber2Shader> vertices_uber_2_;
   Variants<UberSDFPipeline> uber_sdf;
+  Variants<ComplexRSEPipeline> complex_rse;
   Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter;
 
 // Web doesn't support external texture OpenGL extensions
@@ -638,6 +639,7 @@ ContentContext::ContentContext(
     pipelines_->circle.CreateDefault(*context_, options);
     if (context_->GetFlags().use_sdfs) {
       pipelines_->uber_sdf.CreateDefault(*context_, options);
+      pipelines_->complex_rse.CreateDefault(*context_, options);
     }
 
     if (context_->GetCapabilities()->SupportsSSBO()) {
@@ -1205,6 +1207,11 @@ PipelineRef ContentContext::GetYUVToRGBFilterPipeline(
 PipelineRef ContentContext::GetUberSDFPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->uber_sdf, opts);
+}
+
+PipelineRef ContentContext::GetComplexRSEPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->complex_rse, opts);
 }
 
 PipelineRef ContentContext::GetPorterDuffPipeline(
