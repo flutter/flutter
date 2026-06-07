@@ -114,13 +114,15 @@ void main() {
   }
 
   // Sets up the minimal mock project files necessary for macOS builds to succeed.
-  void createMinimalMockProjectFiles() {
+  void createMinimalMockProjectFiles({bool createWorkspace = true}) {
     fileSystem
         .directory(fileSystem.path.join('macos', 'Runner.xcodeproj'))
         .createSync(recursive: true);
-    fileSystem
-        .directory(fileSystem.path.join('macos', 'Runner.xcworkspace'))
-        .createSync(recursive: true);
+    if (createWorkspace) {
+      fileSystem
+          .directory(fileSystem.path.join('macos', 'Runner.xcworkspace'))
+          .createSync(recursive: true);
+    }
     createCoreMockProjectFiles();
   }
 
@@ -143,8 +145,13 @@ void main() {
         '/usr/bin/env',
         'xcrun',
         'xcodebuild',
-        '-workspace',
-        flutterProject.macos.xcodeWorkspace!.path,
+        if (flutterProject.macos.xcodeWorkspace case final workspace?) ...<String>[
+          '-workspace',
+          workspace.path,
+        ] else ...<String>[
+          '-project',
+          flutterProject.macos.xcodeProject.path,
+        ],
         '-configuration',
         configuration,
         '-scheme',
@@ -279,6 +286,51 @@ STDERR STUFF
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
       Analytics: () => fakeAnalytics,
+    },
+  );
+
+  testUsingContext(
+    'macOS build invokes xcodebuild with -project when there is no .xcworkspace',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+
+      createMinimalMockProjectFiles(createWorkspace: false);
+
+      // The FakeCommand expects `-project` (not `-workspace`); the run only
+      // succeeds if xcodebuild is invoked with that fallback.
+      fakeProcessManager.addCommands(<FakeCommand>[setUpFakeXcodeBuildHandler('Debug')]);
+
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
 
