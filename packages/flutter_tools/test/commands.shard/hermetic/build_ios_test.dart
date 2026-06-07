@@ -103,13 +103,15 @@ void main() {
   }
 
   // Sets up the minimal mock project files necessary for iOS builds to succeed.
-  void createMinimalMockProjectFiles() {
+  void createMinimalMockProjectFiles({bool createWorkspace = true}) {
     fileSystem
         .directory(fileSystem.path.join('ios', 'Runner.xcodeproj'))
         .createSync(recursive: true);
-    fileSystem
-        .directory(fileSystem.path.join('ios', 'Runner.xcworkspace'))
-        .createSync(recursive: true);
+    if (createWorkspace) {
+      fileSystem
+          .directory(fileSystem.path.join('ios', 'Runner.xcworkspace'))
+          .createSync(recursive: true);
+    }
     fileSystem
         .file(fileSystem.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj'))
         .createSync();
@@ -167,6 +169,7 @@ void main() {
     bool verbose = false,
     bool simulator = false,
     bool customNaming = false,
+    bool noWorkspace = false,
     bool disablePortPublication = false,
     String? deviceId,
     int exitCode = 0,
@@ -182,8 +185,13 @@ void main() {
         if (verbose) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',
         '-allowProvisioningUpdates',
         '-allowProvisioningDeviceRegistration',
-        '-workspace',
-        if (customNaming) 'RenamedWorkspace.xcworkspace' else 'Runner.xcworkspace',
+        if (noWorkspace) ...<String>[
+          '-project',
+          'Runner.xcodeproj',
+        ] else ...<String>[
+          '-workspace',
+          if (customNaming) 'RenamedWorkspace.xcworkspace' else 'Runner.xcworkspace',
+        ],
         '-scheme',
         'Runner',
         'BUILD_DIR=/build/ios',
@@ -627,6 +635,55 @@ void main() {
           .file(fileSystem.path.join('ios', 'RenamedProj.xcodeproj', 'project.pbxproj'))
           .createSync();
       createCoreMockProjectFiles();
+
+      await createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']);
+      expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+      Artifacts: () => Artifacts.test(),
+    },
+  );
+
+  testUsingContext(
+    'ios build invokes xcodebuild with -project when there is no .xcworkspace',
+    () async {
+      final command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        fileSystemUtils: FakeFileSystemUtils(),
+        terminal: FakeTerminal(),
+        plistParser: FakePlistParser(),
+        processUtils: FakeProcessUtils(),
+        processManager: FakeProcessManager.any(),
+        templateRenderer: FakeTemplateRenderer(),
+        xcode: FakeXcode(),
+        artifacts: FakeArtifacts(),
+        cache: FakeCache(),
+        flutterVersion: FakeFlutterVersion(),
+      );
+      createMinimalMockProjectFiles(createWorkspace: false);
+
+      processManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler(
+          noWorkspace: true,
+          onRun: (_) {
+            fileSystem
+                .directory('build/ios/Release-iphoneos/Runner.app')
+                .createSync(recursive: true);
+          },
+        ),
+        ...postBuildCommands(),
+      ]);
 
       await createTestCommandRunner(command).run(const <String>['build', 'ios', '--no-pub']);
       expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
