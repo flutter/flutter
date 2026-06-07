@@ -434,3 +434,31 @@ final crossImportsGenericExamplesTestCases = <(String, String, Set<String>)>[
   ('examples/texture', 'knownExamplesTextureCrossImports', ExamplesCrossImportChecker.knownExamplesTextureCrossImports),
 ];
 // dart format on
+
+// A mapping of `examples/api/lib/**` and `examples/api/test/**` test cases for the cross imports checker,
+// excluding `examples/api/lib/samples_templates` and `examples/api/test/samples_templates`.
+final crossImportsExamplesApiTestCases = <(String, String, Set<String>)>[
+  // dart format off
+  ('examples/api/lib/animation', 'knownExamplesSlashApiAnimationCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports),
+  ('examples/api/lib/cupertino', 'knownExamplesSlashApiCupertinoCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiCupertinoCrossImports),
+  ('examples/api/lib/foundation', 'knownExamplesSlashApiFoundationCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiFoundationCrossImports),
+  ('examples/api/lib/gestures', 'knownExamplesSlashApiGesturesCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiGesturesCrossImports),
+  ('examples/api/lib/material', 'knownExamplesSlashApiMaterialCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiMaterialCrossImports),
+  ('examples/api/lib/painting', 'knownExamplesSlashApiPaintingCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports),
+  ('examples/api/lib/rendering', 'knownExamplesSlashApiRenderingCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiRenderingCrossImports),
+  ('examples/api/lib/services', 'knownExamplesSlashApiServicesCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiServicesCrossImports),
+  ('examples/api/lib/ui', 'knownExamplesSlashApiUICrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiUICrossImports),
+  ('examples/api/lib/widgets', 'knownExamplesSlashApiWidgetsCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiWidgetsCrossImports),
+
+  ('examples/api/test/animation', 'knownExamplesSlashApiAnimationCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports),
+  ('examples/api/test/cupertino', 'knownExamplesSlashApiCupertinoCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiCupertinoCrossImports),
+  ('examples/api/test/foundation', 'knownExamplesSlashApiFoundationCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiFoundationCrossImports),
+  ('examples/api/test/gestures', 'knownExamplesSlashApiGesturesCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiGesturesCrossImports),
+  ('examples/api/test/material', 'knownExamplesSlashApiMaterialCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiMaterialCrossImports),
+  ('examples/api/test/painting', 'knownExamplesSlashApiPaintingCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports),
+  ('examples/api/test/rendering', 'knownExamplesSlashApiRenderingCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiRenderingCrossImports),
+  ('examples/api/test/services', 'knownExamplesSlashApiServicesCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiServicesCrossImports),
+  ('examples/api/test/ui', 'knownExamplesSlashApiUICrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiUICrossImports),
+  ('examples/api/test/widgets', 'knownExamplesSlashApiWidgetsCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiWidgetsCrossImports),
+  // dart format on
+];

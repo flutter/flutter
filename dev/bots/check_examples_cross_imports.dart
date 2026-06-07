@@ -292,6 +292,17 @@ class ExamplesCrossImportChecker {
   static final Set<String> _knownCrossImports = {
     ...knownExamplesCrossImports,
     ...knownExamplesSlashApiCrossImports,
+    ...knownExamplesSlashApiAnimationCrossImports,
+    ...knownExamplesSlashApiCupertinoCrossImports,
+    ...knownExamplesSlashApiFoundationCrossImports,
+    ...knownExamplesSlashApiGesturesCrossImports,
+    ...knownExamplesSlashApiMaterialCrossImports,
+    ...knownExamplesSlashApiPaintingCrossImports,
+    ...knownExamplesSlashApiRenderingCrossImports,
+    ...knownExamplesSlashApiSamplesTemplatesCrossImports,
+    ...knownExamplesSlashApiServicesCrossImports,
+    ...knownExamplesSlashApiUICrossImports,
+    ...knownExamplesSlashApiWidgetsCrossImports,
     ...knownExamplesFlutterViewCrossImports,
     ...knownExamplesHelloWorldCrossImports,
     ...knownExamplesImageListCrossImports,
@@ -517,51 +528,31 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
   @override
   Set<String> get knownCrossImports {
     return switch (crossImportsListSymbolName) {
+      // dart format off
       'knownExamplesCrossImports' => ExamplesCrossImportChecker.knownExamplesCrossImports,
-      'knownExamplesSlashApiCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports,
-      'knownExamplesSlashApiAnimationCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports,
-      'knownExamplesSlashApiCupertinoCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesSlashApiCupertinoCrossImports,
-      'knownExamplesSlashApiFoundationCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesSlashApiFoundationCrossImports,
-      'knownExamplesSlashApiGesturesCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesSlashApiGesturesCrossImports,
-      'knownExamplesSlashApiMaterialCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesSlashApiMaterialCrossImports,
-      'knownExamplesSlashApiPaintingCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports,
-      'knownExamplesSlashApiRenderingCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesSlashApiRenderingCrossImports,
-      'knownExamplesSlashApiSamplesTemplatesCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesSlashApiSamplesTemplatesCrossImports,
-      'knownExamplesSlashApiServicesCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesSlashApiServicesCrossImports,
-      'knownExamplesSlashApiUICrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesSlashApiUICrossImports,
-      'knownExamplesSlashApiWidgetsCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesSlashApiWidgetsCrossImports,
-      'knownExamplesFlutterViewCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesFlutterViewCrossImports,
-      'knownExamplesHelloWorldCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesHelloWorldCrossImports,
-      'knownExamplesImageListCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesImageListCrossImports,
-      'knownExamplesLayersCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesLayersCrossImports,
-      'knownExamplesMultipleWindowsCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesMultipleWindowsCrossImports,
-      'knownExamplesPlatformChannelCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesPlatformChannelCrossImports,
-      'knownExamplesPlatformChannelSwiftCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesPlatformChannelSwiftCrossImports,
-      'knownExamplesPlatformViewCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesPlatformViewCrossImports,
-      'knownExamplesSplashCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesSplashCrossImports,
-      'knownExamplesTextureCrossImports' =>
-        ExamplesCrossImportChecker.knownExamplesTextureCrossImports,
+      'knownExamplesSlashApiCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports,
+      'knownExamplesSlashApiAnimationCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports,
+      'knownExamplesSlashApiCupertinoCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiCupertinoCrossImports,
+      'knownExamplesSlashApiFoundationCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiFoundationCrossImports,
+      'knownExamplesSlashApiGesturesCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiGesturesCrossImports,
+      'knownExamplesSlashApiMaterialCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiMaterialCrossImports,
+      'knownExamplesSlashApiPaintingCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports,
+      'knownExamplesSlashApiRenderingCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiRenderingCrossImports,
+      'knownExamplesSlashApiSamplesTemplatesCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiSamplesTemplatesCrossImports,
+      'knownExamplesSlashApiServicesCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiServicesCrossImports,
+      'knownExamplesSlashApiUICrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiUICrossImports,
+      'knownExamplesSlashApiWidgetsCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiWidgetsCrossImports,
+      'knownExamplesFlutterViewCrossImports' => ExamplesCrossImportChecker.knownExamplesFlutterViewCrossImports,
+      'knownExamplesHelloWorldCrossImports' => ExamplesCrossImportChecker.knownExamplesHelloWorldCrossImports,
+      'knownExamplesImageListCrossImports' => ExamplesCrossImportChecker.knownExamplesImageListCrossImports,
+      'knownExamplesLayersCrossImports' => ExamplesCrossImportChecker.knownExamplesLayersCrossImports,
+      'knownExamplesMultipleWindowsCrossImports' => ExamplesCrossImportChecker.knownExamplesMultipleWindowsCrossImports,
+      'knownExamplesPlatformChannelCrossImports' => ExamplesCrossImportChecker.knownExamplesPlatformChannelCrossImports,
+      'knownExamplesPlatformChannelSwiftCrossImports' => ExamplesCrossImportChecker.knownExamplesPlatformChannelSwiftCrossImports,
+      'knownExamplesPlatformViewCrossImports' => ExamplesCrossImportChecker.knownExamplesPlatformViewCrossImports,
+      'knownExamplesSplashCrossImports' => ExamplesCrossImportChecker.knownExamplesSplashCrossImports,
+      'knownExamplesTextureCrossImports' => ExamplesCrossImportChecker.knownExamplesTextureCrossImports,
+      // dart format on
       _ => throw UnimplementedError('Unknown cross imports list: $crossImportsListSymbolName'),
     };
   }
