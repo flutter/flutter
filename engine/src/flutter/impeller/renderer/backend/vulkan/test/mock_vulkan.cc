@@ -26,6 +26,7 @@ struct MockCommandBuffer {
       : called_functions_(std::move(called_functions)) {}
   std::shared_ptr<std::vector<std::string>> called_functions_;
   std::vector<VkImageMemoryBarrier> image_memory_barriers_;
+  std::vector<VkViewport> recorded_viewports_;
 };
 
 struct MockQueryPool {};
@@ -466,6 +467,12 @@ VkResult vkCreateGraphicsPipelines(
   return VK_SUCCESS;
 }
 
+VkResult vkDeviceWaitIdle(VkDevice device) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  mock_device->AddCalledFunction("vkDeviceWaitIdle");
+  return VK_SUCCESS;
+}
+
 void vkDestroyDevice(VkDevice device, const VkAllocationCallbacks* pAllocator) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
   mock_device->AddCalledFunction("vkDestroyDevice");
@@ -569,6 +576,9 @@ void vkCmdSetViewport(VkCommandBuffer commandBuffer,
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(commandBuffer);
   mock_command_buffer->called_functions_->push_back("vkCmdSetViewport");
+  for (uint32_t i = 0; i < viewportCount; ++i) {
+    mock_command_buffer->recorded_viewports_.push_back(pViewports[i]);
+  }
 }
 
 void vkFreeCommandBuffers(VkDevice device,
@@ -956,6 +966,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreatePipelineLayout);
   } else if (strcmp("vkCreateGraphicsPipelines", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateGraphicsPipelines);
+  } else if (strcmp("vkDeviceWaitIdle", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkDeviceWaitIdle);
   } else if (strcmp("vkDestroyDevice", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyDevice);
   } else if (strcmp("vkDestroyInstance", pName) == 0) {
@@ -1109,6 +1121,12 @@ std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
   MockCommandBuffer* mock_command_buffer =
       reinterpret_cast<MockCommandBuffer*>(buffer);
   return mock_command_buffer->image_memory_barriers_;
+}
+
+const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer) {
+  MockCommandBuffer* mock_command_buffer =
+      reinterpret_cast<MockCommandBuffer*>(buffer);
+  return mock_command_buffer->recorded_viewports_;
 }
 
 }  // namespace testing

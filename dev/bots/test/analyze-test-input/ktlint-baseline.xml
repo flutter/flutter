@@ -12,6 +12,12 @@
     <file name="dev/integration_tests/android_embedding_v2_smoke_test/android/app/src/main/kotlin/com/example/android_embedding_v2_smoke_test/MainActivity.kt">
         <error line="1" column="9" source="standard:package-name" />
     </file>
+    <file name="dev/integration_tests/android_hardware_smoke_test/android/app/src/androidTest/java/com/example/android_hardware_smoke_test/FlutterActivityTest.kt">
+        <error line="5" column="9" source="standard:package-name" />
+    </file>
+    <file name="dev/integration_tests/android_hardware_smoke_test/android/app/src/main/kotlin/com/example/android_hardware_smoke_test/MainActivity.kt">
+        <error line="1" column="9" source="standard:package-name" />
+    </file>
     <file name="dev/integration_tests/deferred_components_test/android/app/src/main/kotlin/io/flutter/integration/deferred_components_test/MainActivity.kt">
         <error line="1" column="9" source="standard:package-name" />
     </file>

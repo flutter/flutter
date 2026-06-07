@@ -133,6 +133,37 @@ void main() {
     expect(emittedLines, const <String>['W/flutter($appPid): Hello there!']);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/174783
+  testWithoutContext('AdbLogReader ignores spam from MotionEvent-JNI', () async {
+    const appPid = 1;
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: const <String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time'],
+        completer: Completer<void>.sync(),
+        stdout:
+            '$kDummyLine'
+            '05-11 12:54:46.665 W/flutter($appPid): Hello there!\n'
+            '05-11 12:54:46.665 W/MotionEvent-JNI($appPid): android_view_MotionEvent_nativeGetPointerCount: -1\n'
+            '05-11 12:54:46.666 W/MotionEvent-JNI($appPid): android_view_MotionEvent_nativeGetPointerCount: -1\n',
+      ),
+    ]);
+    final AdbLogReader logReader = await AdbLogReader.createLogReader(
+      createFakeDevice(null),
+      processManager,
+      BufferLogger.test(),
+    );
+    await logReader.provideVmService(_FakeFlutterVmService(appPid));
+    final onDone = Completer<void>.sync();
+    final emittedLines = <String>[];
+    logReader.logLines.listen((String line) {
+      emittedLines.add(line);
+    }, onDone: onDone.complete);
+    await null;
+    logReader.dispose();
+    await onDone.future;
+    expect(emittedLines, const <String>['W/flutter($appPid): Hello there!']);
+  });
+
   testWithoutContext('AdbLogReader calls adb logcat with expected flags apiVersion 21', () async {
     final processManager = FakeProcessManager.list(<FakeCommand>[
       const FakeCommand(

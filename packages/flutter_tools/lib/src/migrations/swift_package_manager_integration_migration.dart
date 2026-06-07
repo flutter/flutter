@@ -229,7 +229,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
       // Get the project info to make sure it compiles with xcodebuild
       await _xcodeProjectInterpreter.getInfo(
-        _xcodeProject.hostAppRoot.path,
+        _xcodeProject,
         buildDirectory: _fileSystem.directory(
           _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
         ),
