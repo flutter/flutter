@@ -207,6 +207,43 @@ class ExamplesCrossImportChecker {
 
   static final RegExp _examplesPrefix = RegExp(r'examples');
 
+  /// Get a list of all the filenames that end in ".dart" for the given examples directory.
+  ///
+  /// The [directory] must not be a subdirectory of `examples/api`.
+  Set<File> _getExampleFiles(Directory directory, {required Pattern dartFilePattern}) {
+    final String examplesSlashApiPath = path.join(flutterRoot.absolute.path, 'examples', 'api');
+
+    if (directory.absolute.path.startsWith(examplesSlashApiPath)) {
+      throw ArgumentError('Directory must not be an examples/api subdirectory.', 'directory');
+    }
+
+    final files = <File>{};
+
+    for (final FileSystemEntity fileSystemEntity in directory.listSync()) {
+      if (fileSystemEntity is File && fileSystemEntity.absolute.path.contains(dartFilePattern)) {
+        files.add(fileSystemEntity);
+
+        continue;
+      }
+
+      if (fileSystemEntity is Directory) {
+        final String directoryName = path.basename(fileSystemEntity.absolute.path);
+
+        if (directoryName == 'build' || directoryName == '.dart_tool') {
+          continue;
+        }
+
+        for (final File file in fileSystemEntity.listSync().whereType<File>()) {
+          if (file.absolute.path.contains(dartFilePattern)) {
+            files.add(file);
+          }
+        }
+      }
+    }
+
+    return files;
+  }
+
   /// Get a list of all the filenames that end in ".dart", grouped by library.
   Map<_ExamplesLibrary, Set<File>> _getExamplesFiles() {
     final dartFilePattern = RegExp(r'\.dart$');
@@ -250,10 +287,7 @@ class ExamplesCrossImportChecker {
 
         final library = _ExamplesLibrary.fromDirectory(fileSystemEntity, flutterRoot: flutterRoot);
 
-        mapping[library] = {
-          for (final File file in fileSystemEntity.listSync(recursive: true).whereType<File>())
-            if (file.absolute.path.contains(dartFilePattern)) file,
-        };
+        mapping[library] = _getExampleFiles(fileSystemEntity, dartFilePattern: dartFilePattern);
       }
     }
 
