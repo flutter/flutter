@@ -585,6 +585,9 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
       _GenericExampleLibrary() || _ApiExampleLibrary() => false,
       _CupertinoApiExampleLibrary() => import == LibraryCrossImportStatementType.cupertino,
       _MaterialApiExampleLibrary() => import == LibraryCrossImportStatementType.material,
+      _SampleTemplatesLibrary() => throw UnsupportedError(
+        'The sample templates should use canImportInFile()',
+      ),
     };
   }
 
@@ -654,4 +657,21 @@ final class _GenericExampleLibrary extends _ExamplesLibrary {
 /// and their tests in `examples/api/test/material`.
 final class _MaterialApiExampleLibrary extends _ExamplesLibrary {
   _MaterialApiExampleLibrary(super.name);
+}
+
+/// The examples in `examples/api/lib/sample_templates`
+/// and their tests in `examples/api/test/sample_templates`.
+final class _SampleTemplatesLibrary extends _ExamplesLibrary {
+  _SampleTemplatesLibrary(super.name);
+
+  /// Check wether the given [filePath] points to a sample file that can import the given [import].
+  ///
+  /// The Material templates can import Material, and the Cupertino templates can import Cupertino,
+  /// but otherwise sample templates should not import either.
+  bool canImportInFile(LibraryCrossImportStatementType import, String filePath) {
+    return switch (import) {
+      LibraryCrossImportStatementType.material => filePath.contains('material'),
+      LibraryCrossImportStatementType.cupertino => filePath.contains('cupertino'),
+    };
+  }
 }
