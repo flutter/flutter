@@ -590,9 +590,9 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
   String getDisallowedImportMessage(String importedLibraryName, int filesCount) {
     return filesCount < 2
         ? 'The following file in $libraryName has a disallowed import of $importedLibraryName. '
-              'Refactor it or move it to $importedLibraryName.\n'
+              'Refactor it or move it to the $importedLibraryName examples.\n'
         : 'The following $filesCount files in $libraryName have a disallowed import of $importedLibraryName. '
-              'Refactor them or move them to $importedLibraryName.\n';
+              'Refactor them or move them to the $importedLibraryName examples.\n';
   }
 
   /// The name of the variable in [ExamplesCrossImportChecker]
