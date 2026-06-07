@@ -94,6 +94,8 @@ class ExamplesCrossImportChecker {
   final Directory flutterRoot;
   final FileSystem filesystem;
 
+  static const String _kSampleTemplatesDirectoryName = 'sample_templates';
+
   /// The known cross imports in the `examples/` directory itself.
   ///
   /// These cross imports should all eventually be resolved, but until they are we allow them, so
@@ -471,8 +473,12 @@ class ExamplesCrossImportChecker {
     required Directory testDirectory,
     required Pattern dartFilePattern,
   }) {
-    final Directory sampleTemplatesLibDirectory = libDirectory.childDirectory('sample_templates');
-    final Directory sampleTemplatesTestDirectory = testDirectory.childDirectory('sample_templates');
+    final Directory sampleTemplatesLibDirectory = libDirectory.childDirectory(
+      _kSampleTemplatesDirectoryName,
+    );
+    final Directory sampleTemplatesTestDirectory = testDirectory.childDirectory(
+      _kSampleTemplatesDirectoryName,
+    );
 
     final Map<_SampleTemplatesLibraryFile, Set<File>> mapping = {};
 
@@ -504,6 +510,11 @@ class ExamplesCrossImportChecker {
     final Map<_ExamplesLibrary, Set<File>> mapping = {};
 
     for (final Directory directory in libDirectory.listSync().whereType<Directory>()) {
+      // The sample templates directory is handled separately.
+      if (path.basename(directory.absolute.path) == _kSampleTemplatesDirectoryName) {
+        continue;
+      }
+
       final library = _ExamplesLibrary.fromDirectory(directory, flutterRoot: flutterRoot);
 
       for (final File file in directory.listSync(recursive: true).whereType<File>()) {
@@ -516,6 +527,11 @@ class ExamplesCrossImportChecker {
     }
 
     for (final Directory directory in testDirectory.listSync().whereType<Directory>()) {
+      // The sample templates directory is handled separately.
+      if (path.basename(directory.absolute.path) == _kSampleTemplatesDirectoryName) {
+        continue;
+      }
+
       final library = _ExamplesLibrary.fromDirectory(directory, flutterRoot: flutterRoot);
 
       for (final File file in directory.listSync(recursive: true).whereType<File>()) {
