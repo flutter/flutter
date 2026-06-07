@@ -185,10 +185,7 @@ void main() {
         if (verbose) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',
         '-allowProvisioningUpdates',
         '-allowProvisioningDeviceRegistration',
-        if (noWorkspace) ...<String>[
-          '-project',
-          'Runner.xcodeproj',
-        ] else ...<String>[
+        if (noWorkspace) ...<String>['-project', 'Runner.xcodeproj'] else ...<String>[
           '-workspace',
           if (customNaming) 'RenamedWorkspace.xcworkspace' else 'Runner.xcworkspace',
         ],

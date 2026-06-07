@@ -149,10 +149,7 @@ void main() {
         if (noWorkspace) ...<String>[
           '-project',
           flutterProject.macos.xcodeProject.path,
-        ] else ...<String>[
-          '-workspace',
-          flutterProject.macos.xcodeWorkspace!.path,
-        ],
+        ] else ...<String>['-workspace', flutterProject.macos.xcodeWorkspace!.path],
         '-configuration',
         configuration,
         '-scheme',
@@ -315,7 +312,9 @@ STDERR STUFF
 
       createMinimalMockProjectFiles(createWorkspace: false);
 
-      fakeProcessManager.addCommands(<FakeCommand>[setUpFakeXcodeBuildHandler('Debug', noWorkspace: true)]);
+      fakeProcessManager.addCommands(<FakeCommand>[
+        setUpFakeXcodeBuildHandler('Debug', noWorkspace: true),
+      ]);
 
       await createTestCommandRunner(
         command,
