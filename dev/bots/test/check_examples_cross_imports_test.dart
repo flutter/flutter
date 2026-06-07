@@ -84,6 +84,140 @@ void main() {
     expect(checker.check(), isTrue);
   });
 
+  test('examples/api/lib/sample_templates templates produce no violations when valid', () async {
+    final Directory sampleTemplatesDirectory = checker.examplesDirectory
+        .childDirectory('api')
+        .childDirectory('lib')
+        .childDirectory('sample_templates');
+
+    for (final i in [0, 1, 2]) {
+      sampleTemplatesDirectory.childFile('cupertino.$i.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync("import 'package:flutter/cupertino.dart';");
+      sampleTemplatesDirectory.childFile('material.$i.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync("import 'package:flutter/material.dart';");
+      sampleTemplatesDirectory.childFile('widgets.$i.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync("import 'package:flutter/widgets.dart';");
+    }
+
+    buildKnownCrossImportExamplesFiles();
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    });
+    expect(result, equals(''));
+    expect(success, isTrue);
+  });
+
+  test('examples/api/lib/sample_templates templates produce violations when invalid', () async {
+    final Directory sampleTemplatesDirectory = checker.examplesDirectory
+        .childDirectory('api')
+        .childDirectory('lib')
+        .childDirectory('sample_templates');
+
+    sampleTemplatesDirectory.childFile('cupertino.0.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync("import 'package:flutter/material.dart';");
+    sampleTemplatesDirectory.childFile('material.0.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync("import 'package:flutter/cupertino.dart';");
+    sampleTemplatesDirectory.childFile('widgets.0.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync("import 'package:flutter/cupertino.dart';");
+
+    buildKnownCrossImportExamplesFiles();
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    });
+
+    final String lines = <String>[
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+      '║ The following file in examples/api/lib/sample_templates has a disallowed import of Material. Refactor it or move it to Material.',
+      '║   examples/api/lib/sample_templates/cupertino.0.dart',
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+      '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
+      '║ The following file in examples/api/lib/sample_templates has a disallowed import of Cupertino. Refactor it or move it to Cupertino.',
+      '║   examples/api/lib/sample_templates/material.0.dart',
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+      '╔═╡ERROR #3╞════════════════════════════════════════════════════════════════════',
+      '║ The following file in examples/api/lib/sample_templates has a disallowed import of Cupertino. Refactor it or move it to Cupertino.',
+      '║   examples/api/lib/sample_templates/widgets.0.dart',
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+    ].join('\n');
+    expect(result, equals('$lines\n'));
+    expect(success, isFalse);
+  });
+
+  test('examples/api/test/sample_templates templates produce violations when invalid', () async {
+    final Directory sampleTemplatesDirectory = checker.examplesDirectory
+        .childDirectory('api')
+        .childDirectory('test')
+        .childDirectory('sample_templates');
+
+    sampleTemplatesDirectory.childFile('cupertino.0.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync("import 'package:flutter/material.dart';");
+    sampleTemplatesDirectory.childFile('material.0.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync("import 'package:flutter/cupertino.dart';");
+    sampleTemplatesDirectory.childFile('widgets.0.dart')
+      ..createSync(recursive: true)
+      ..writeAsStringSync("import 'package:flutter/cupertino.dart';");
+
+    buildKnownCrossImportExamplesFiles();
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    });
+
+    final String lines = <String>[
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+      '║ The following file in examples/api/test/sample_templates has a disallowed import of Material. Refactor it or move it to Material.',
+      '║   examples/api/test/sample_templates/cupertino.0.dart',
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+      '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
+      '║ The following file in examples/api/test/sample_templates has a disallowed import of Cupertino. Refactor it or move it to Cupertino.',
+      '║   examples/api/test/sample_templates/material.0.dart',
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+      '╔═╡ERROR #3╞════════════════════════════════════════════════════════════════════',
+      '║ The following file in examples/api/test/sample_templates has a disallowed import of Cupertino. Refactor it or move it to Cupertino.',
+      '║   examples/api/test/sample_templates/widgets.0.dart',
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+    ].join('\n');
+    expect(result, equals('$lines\n'));
+    expect(success, isFalse);
+  });
+
+  test('examples/api/test/sample_templates templates produce no violations when valid', () async {
+    final Directory sampleTemplatesDirectory = checker.examplesDirectory
+        .childDirectory('api')
+        .childDirectory('test')
+        .childDirectory('sample_templates');
+
+    for (final i in [0, 1, 2]) {
+      sampleTemplatesDirectory.childFile('cupertino.$i.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync("import 'package:flutter/cupertino.dart';");
+      sampleTemplatesDirectory.childFile('material.$i.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync("import 'package:flutter/material.dart';");
+      sampleTemplatesDirectory.childFile('widgets.$i.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync("import 'package:flutter/widgets.dart';");
+    }
+
+    buildKnownCrossImportExamplesFiles();
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    });
+    expect(result, equals(''));
+    expect(success, isTrue);
+  });
+
   for (final (String libraryName, String knownCrossImportsListName, Set<String> knownCrossImports)
       in crossImportsGenericExamplesTestCases) {
     test(
