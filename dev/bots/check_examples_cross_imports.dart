@@ -403,6 +403,15 @@ class ExamplesCrossImportChecker {
             ),
           );
 
+          // Handle the other samples, which are divided per subfolder.
+          mapping.addAll(
+            _getExamplesSlashApiExamples(
+              libDirectory: libDirectory,
+              testDirectory: testDirectory,
+              dartFilePattern: dartFilePattern,
+            ),
+          );
+
           continue;
         }
 
@@ -478,6 +487,43 @@ class ExamplesCrossImportChecker {
         in sampleTemplatesTestDirectory.listSync(recursive: true).whereType<File>()) {
       if (file.absolute.path.contains(dartFilePattern)) {
         mapping[_SampleTemplatesLibraryFile.fromFile(file)] = {file};
+      }
+    }
+
+    return mapping;
+  }
+
+  /// Get a list of all the filenames that end in ".dart", grouped by library,
+  /// for the subdirectories of `examples/api`,
+  /// except `examples/api/lib/sample_templates` and `examples/api/test/sample_templates`.
+  Map<_ExamplesLibrary, Set<File>> _getExamplesSlashApiExamples({
+    required Directory libDirectory,
+    required Directory testDirectory,
+    required Pattern dartFilePattern,
+  }) {
+    final Map<_ExamplesLibrary, Set<File>> mapping = {};
+
+    for (final Directory directory in libDirectory.listSync().whereType<Directory>()) {
+      final library = _ExamplesLibrary.fromDirectory(directory, flutterRoot: flutterRoot);
+
+      for (final File file in directory.listSync(recursive: true).whereType<File>()) {
+        if (!file.absolute.path.contains(dartFilePattern)) {
+          continue;
+        }
+
+        mapping.putIfAbsent(library, () => {}).add(file);
+      }
+    }
+
+    for (final Directory directory in testDirectory.listSync().whereType<Directory>()) {
+      final library = _ExamplesLibrary.fromDirectory(directory, flutterRoot: flutterRoot);
+
+      for (final File file in directory.listSync(recursive: true).whereType<File>()) {
+        if (!file.absolute.path.contains(dartFilePattern)) {
+          continue;
+        }
+
+        mapping.putIfAbsent(library, () => {}).add(file);
       }
     }
 
@@ -578,21 +624,46 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
         .relative(directory.absolute.path, from: flutterRoot.absolute.path)
         .replaceAll(Platform.pathSeparator, '/');
 
+    const genericExamples = {
+      'examples',
+      'examples/api',
+      'examples/api/lib/animation',
+      'examples/api/lib/foundation',
+      'examples/api/lib/gestures',
+      'examples/api/lib/painting',
+      'examples/api/lib/rendering',
+      'examples/api/lib/services',
+      'examples/api/lib/ui',
+      'examples/api/lib/widgets',
+      'examples/api/test/animation',
+      'examples/api/test/foundation',
+      'examples/api/test/gestures',
+      'examples/api/test/painting',
+      'examples/api/test/rendering',
+      'examples/api/test/services',
+      'examples/api/test/ui',
+      'examples/api/test/widgets',
+      'examples/flutter_view',
+      'examples/hello_world',
+      'examples/image_list',
+      'examples/layers',
+      'examples/multiple_windows',
+      'examples/platform_channel',
+      'examples/platform_channel_swift',
+      'examples/platform_view',
+      'examples/splash',
+      'examples/texture',
+    };
+
+    if (genericExamples.contains(relativePath)) {
+      return _ApiExampleLibrary(relativePath);
+    }
+
     return switch (relativePath) {
-      'examples' => const _GenericExampleLibrary('examples'),
-      'examples/api' => const _GenericExampleLibrary('examples/api'),
-      'examples/flutter_view' => const _GenericExampleLibrary('examples/flutter_view'),
-      'examples/hello_world' => const _GenericExampleLibrary('examples/hello_world'),
-      'examples/image_list' => const _GenericExampleLibrary('examples/image_list'),
-      'examples/layers' => const _GenericExampleLibrary('examples/layers'),
-      'examples/multiple_windows' => const _GenericExampleLibrary('examples/multiple_windows'),
-      'examples/platform_channel' => const _GenericExampleLibrary('examples/platform_channel'),
-      'examples/platform_channel_swift' => const _GenericExampleLibrary(
-        'examples/platform_channel_swift',
-      ),
-      'examples/platform_view' => const _GenericExampleLibrary('examples/platform_view'),
-      'examples/splash' => const _GenericExampleLibrary('examples/splash'),
-      'examples/texture' => const _GenericExampleLibrary('examples/texture'),
+      'examples/api/lib/cupertino' ||
+      'examples/api/test/cupertino' => _CupertinoApiExampleLibrary(relativePath),
+      'examples/api/lib/material' ||
+      'examples/api/test/material' => _MaterialApiExampleLibrary(relativePath),
       _ => throw UnimplementedError('Unknown library: $relativePath'),
     };
   }
@@ -695,6 +766,8 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
 }
 
 /// Any API example - not related to Material or Cupertino - inside `examples/api`, and its tests.
+///
+/// For example `examples/api/lib/foundation` and `examples/api/test/foundation`.
 final class _ApiExampleLibrary extends _ExamplesLibrary {
   const _ApiExampleLibrary(super.name);
 }
@@ -739,15 +812,19 @@ final class _SampleTemplatesLibraryFile extends _ExamplesLibrary {
     const examplesTestPrefix = 'examples/api/test/sample_templates';
     final String filePath = file.absolute.path.replaceAll(Platform.pathSeparator, '/');
 
-    if (!filePath.startsWith(examplesLibPrefix) && !filePath.startsWith(examplesTestPrefix)) {
-      throw ArgumentError('Invalid file path: $filePath');
+    final int libIndex = filePath.indexOf(examplesLibPrefix);
+
+    if (libIndex != -1) {
+      return _SampleTemplatesLibraryFile._(examplesLibPrefix, filePath);
     }
 
-    final libraryName = filePath.startsWith(examplesLibPrefix)
-        ? examplesLibPrefix
-        : examplesTestPrefix;
+    final int testIndex = filePath.indexOf(examplesTestPrefix);
 
-    return _SampleTemplatesLibraryFile._(libraryName, filePath);
+    if (testIndex != -1) {
+      return _SampleTemplatesLibraryFile._(examplesTestPrefix, filePath);
+    }
+
+    throw ArgumentError('Invalid file path: $filePath');
   }
 
   /// The file path to the template file.
