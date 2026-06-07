@@ -317,24 +317,6 @@ class ExamplesCrossImportChecker {
 
   static final RegExp _examplesPrefix = RegExp(r'examples');
 
-  bool _canImport(
-    CrossImportCheckedLibrary library,
-    LibraryCrossImportStatementType import,
-    String filePath,
-  ) {
-    if (library is! _ExamplesLibrary) {
-      return false;
-    }
-
-    return switch (library) {
-      _ApiExampleLibrary() ||
-      _CupertinoApiExampleLibrary() ||
-      _GenericExampleLibrary() ||
-      _MaterialApiExampleLibrary() => library.canImport(import),
-      _SampleTemplatesLibrary() => library.canImportInFile(import, filePath),
-    };
-  }
-
   /// Find the `examples/api/lib` and `examples/api/test` directories
   /// which contain the API examples and relevant tests.
   ///
@@ -475,7 +457,7 @@ class ExamplesCrossImportChecker {
 
   /// Get a list of all the filenames that end in ".dart", grouped by library,
   /// for the subdrectories of `examples/api/lib/sample_templates` and `examples/api/test/sample_templates`.
-  Map<_SampleTemplatesLibrary, Set<File>> _getExamplesSlashApiSampleTemplatesFiles({
+  Map<_SampleTemplatesLibraryFile, Set<File>> _getExamplesSlashApiSampleTemplatesFiles({
     required Directory libDirectory,
     required Directory testDirectory,
     required Pattern dartFilePattern,
@@ -483,27 +465,23 @@ class ExamplesCrossImportChecker {
     final Directory sampleTemplatesLibDirectory = libDirectory.childDirectory('sample_templates');
     final Directory sampleTemplatesTestDirectory = testDirectory.childDirectory('sample_templates');
 
-    final Set<File> sampleTemplateLibFiles = {};
-    final Set<File> sampleTemplateTestFiles = {};
+    final Map<_SampleTemplatesLibraryFile, Set<File>> mapping = {};
 
     for (final File file
         in sampleTemplatesLibDirectory.listSync(recursive: true).whereType<File>()) {
       if (file.absolute.path.contains(dartFilePattern)) {
-        sampleTemplateLibFiles.add(file);
+        mapping[_SampleTemplatesLibraryFile.fromFile(file)] = {file};
       }
     }
 
     for (final File file
         in sampleTemplatesTestDirectory.listSync(recursive: true).whereType<File>()) {
       if (file.absolute.path.contains(dartFilePattern)) {
-        sampleTemplateTestFiles.add(file);
+        mapping[_SampleTemplatesLibraryFile.fromFile(file)] = {file};
       }
     }
 
-    return {
-      _SampleTemplatesLibrary.libLibrary: sampleTemplateLibFiles,
-      _SampleTemplatesLibrary.testLibrary: sampleTemplateTestFiles,
-    };
+    return mapping;
   }
 
   /// Returns true if there are no errors, false otherwise.
@@ -514,7 +492,7 @@ class ExamplesCrossImportChecker {
 
     // Find all cross imports.
     final Map<CrossImportCheckedLibrary, CrossImportingFiles> crossImportsPerLibrary =
-        getCrossImports(filesByLibrary, canImport: _canImport);
+        getCrossImports(filesByLibrary);
 
     var valid = true;
 
@@ -669,16 +647,7 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
   }
 
   @override
-  bool canImport(LibraryCrossImportStatementType import) {
-    return switch (this) {
-      _GenericExampleLibrary() || _ApiExampleLibrary() => false,
-      _CupertinoApiExampleLibrary() => import == LibraryCrossImportStatementType.cupertino,
-      _MaterialApiExampleLibrary() => import == LibraryCrossImportStatementType.material,
-      _SampleTemplatesLibrary() => throw UnsupportedError(
-        'The sample templates should use canImportInFile()',
-      ),
-    };
-  }
+  bool canImport(LibraryCrossImportStatementType import) => false;
 
   @override
   String getDisallowedImportMessage(String importedLibraryName, int filesCount) {
@@ -734,6 +703,11 @@ final class _ApiExampleLibrary extends _ExamplesLibrary {
 /// and their tests in `examples/api/test/cupertino`.
 final class _CupertinoApiExampleLibrary extends _ExamplesLibrary {
   const _CupertinoApiExampleLibrary(super.name);
+
+  @override
+  bool canImport(LibraryCrossImportStatementType import) {
+    return import == LibraryCrossImportStatementType.cupertino;
+  }
 }
 
 /// Any non-API example, not in `examples/api`,
@@ -746,28 +720,44 @@ final class _GenericExampleLibrary extends _ExamplesLibrary {
 /// and their tests in `examples/api/test/material`.
 final class _MaterialApiExampleLibrary extends _ExamplesLibrary {
   const _MaterialApiExampleLibrary(super.name);
+
+  @override
+  bool canImport(LibraryCrossImportStatementType import) {
+    return import == LibraryCrossImportStatementType.material;
+  }
 }
 
 /// The examples in `examples/api/lib/sample_templates`
 /// and their tests in `examples/api/test/sample_templates`.
-final class _SampleTemplatesLibrary extends _ExamplesLibrary {
-  const _SampleTemplatesLibrary._(super.name);
+///
+/// The sample templates are individual files, rather than directories.
+final class _SampleTemplatesLibraryFile extends _ExamplesLibrary {
+  const _SampleTemplatesLibraryFile._(super.name, this._filePath);
 
-  static const _SampleTemplatesLibrary libLibrary = _SampleTemplatesLibrary._(
-    'examples/api/lib/sample_templates',
-  );
-  static const _SampleTemplatesLibrary testLibrary = _SampleTemplatesLibrary._(
-    'examples/api/test/sample_templates',
-  );
+  factory _SampleTemplatesLibraryFile.fromFile(File file) {
+    const examplesLibPrefix = 'examples/api/lib/sample_templates';
+    const examplesTestPrefix = 'examples/api/test/sample_templates';
+    final String filePath = file.absolute.path.replaceAll(Platform.pathSeparator, '/');
 
-  /// Check wether the given [filePath] points to a sample file that can import the given [import].
-  ///
-  /// The Material templates can import Material, and the Cupertino templates can import Cupertino,
-  /// but otherwise sample templates should not import either.
-  bool canImportInFile(LibraryCrossImportStatementType import, String filePath) {
+    if (!filePath.startsWith(examplesLibPrefix) && !filePath.startsWith(examplesTestPrefix)) {
+      throw ArgumentError('Invalid file path: $filePath');
+    }
+
+    final libraryName = filePath.startsWith(examplesLibPrefix)
+        ? examplesLibPrefix
+        : examplesTestPrefix;
+
+    return _SampleTemplatesLibraryFile._(libraryName, filePath);
+  }
+
+  /// The file path to the template file.
+  final String _filePath;
+
+  @override
+  bool canImport(LibraryCrossImportStatementType import) {
     return switch (import) {
-      LibraryCrossImportStatementType.material => filePath.contains('material'),
-      LibraryCrossImportStatementType.cupertino => filePath.contains('cupertino'),
+      LibraryCrossImportStatementType.material => _filePath.contains('material'),
+      LibraryCrossImportStatementType.cupertino => _filePath.contains('cupertino'),
     };
   }
 }
