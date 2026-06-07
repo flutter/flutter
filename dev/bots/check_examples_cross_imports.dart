@@ -207,6 +207,59 @@ class ExamplesCrossImportChecker {
 
   static final RegExp _examplesPrefix = RegExp(r'examples');
 
+  /// Get a list of all the filenames that end in ".dart", grouped by library.
+  Map<_ExamplesLibrary, Set<File>> _getExamplesFiles() {
+    final dartFilePattern = RegExp(r'\.dart$');
+
+    const _ExamplesLibrary examplesRoot = _GenericExampleLibrary('examples');
+    final Map<_ExamplesLibrary, Set<File>> mapping = {examplesRoot: {}};
+
+    // List the files directly under `examples` and then walk the subdirectories.
+    for (final FileSystemEntity fileSystemEntity in examplesDirectory.listSync()) {
+      if (fileSystemEntity is File && fileSystemEntity.absolute.path.contains(dartFilePattern)) {
+        mapping[examplesRoot]?.add(fileSystemEntity);
+
+        continue;
+      }
+
+      if (fileSystemEntity is Directory) {
+        final String directoryName = path.basename(fileSystemEntity.absolute.path);
+
+        if (directoryName == 'build' || directoryName == '.dart_tool') {
+          continue;
+        }
+
+        // The examples/api folder contains examples in a single Flutter project,
+        // grouped in subfolders in lib/ and test/, so these need to be handled separately.
+        if (directoryName == 'api') {
+          // First list the files directly under examples/api.
+          final examplesSlashApiLibrary = _ExamplesLibrary.fromDirectory(
+            fileSystemEntity,
+            flutterRoot: flutterRoot,
+          );
+
+          mapping[examplesSlashApiLibrary] = {
+            for (final File file in fileSystemEntity.listSync().whereType<File>())
+              if (file.absolute.path.contains(dartFilePattern)) file,
+          };
+
+          // Then handle the subfolder examples separately.
+
+          continue;
+        }
+
+        final library = _ExamplesLibrary.fromDirectory(fileSystemEntity, flutterRoot: flutterRoot);
+
+        mapping[library] = {
+          for (final File file in fileSystemEntity.listSync(recursive: true).whereType<File>())
+            if (file.absolute.path.contains(dartFilePattern)) file,
+        };
+      }
+    }
+
+    return mapping;
+  }
+
   /// Returns true if there are no errors, false otherwise.
   bool check() {
     filesystem.currentDirectory = flutterRoot;
