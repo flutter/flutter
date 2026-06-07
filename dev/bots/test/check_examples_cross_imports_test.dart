@@ -308,6 +308,33 @@ void main() {
       expect(checker.check(), isTrue);
     });
   }
+
+  for (final (String libraryName, String knownCrossImportsListName, Set<String> knownCrossImports)
+      in crossImportsExamplesApiTestCases) {
+    test('non-Dart files are ignored in $libraryName', () async {
+      buildKnownCrossImportExamplesFiles();
+
+      final Directory directory = checker.getDirectoryForExamplesSlashApiLibrary(libraryName);
+
+      directory.childFile('README.md')
+        ..createSync()
+        ..writeAsStringSync("import 'package:flutter/material.dart';");
+
+      expect(checker.check(), isTrue);
+    });
+
+    test('non-Dart files with .dart in the filename are ignored $libraryName', () async {
+      buildKnownCrossImportExamplesFiles();
+
+      final Directory directory = checker.getDirectoryForExamplesSlashApiLibrary(libraryName);
+
+      directory.childFile('foo.dart.md')
+        ..createSync()
+        ..writeAsStringSync("import 'package:flutter/material.dart';");
+
+      expect(checker.check(), isTrue);
+    });
+  }
 }
 
 // A utility that keeps track of the directories under test,
@@ -360,9 +387,39 @@ class _CrossImportsExamplesDirectories {
   /// A mapping of `examples/xyz` directories
   /// to their corresponding known imports list in `check_examples_cross_imports.dart`
   Map<Directory, Set<String>> getKnownFiles(Directory examplesDirectory) {
+    final Directory libDirectory = examplesSlashApiDirectory.childDirectory('lib');
+    final Directory testDirectory = examplesSlashApiDirectory.childDirectory('test');
+    final Map<Directory, Set<String>> exampleSlashApiSubdirectoryMapping = {};
+
+    for (final directory in <Directory>[libDirectory, testDirectory]) {
+      exampleSlashApiSubdirectoryMapping[directory.childDirectory('animation')] =
+          ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports;
+      exampleSlashApiSubdirectoryMapping[directory.childDirectory('cupertino')] =
+          ExamplesCrossImportChecker.knownExamplesSlashApiCupertinoCrossImports;
+      exampleSlashApiSubdirectoryMapping[directory.childDirectory('foundation')] =
+          ExamplesCrossImportChecker.knownExamplesSlashApiFoundationCrossImports;
+      exampleSlashApiSubdirectoryMapping[directory.childDirectory('gestures')] =
+          ExamplesCrossImportChecker.knownExamplesSlashApiGesturesCrossImports;
+      exampleSlashApiSubdirectoryMapping[directory.childDirectory('material')] =
+          ExamplesCrossImportChecker.knownExamplesSlashApiMaterialCrossImports;
+      exampleSlashApiSubdirectoryMapping[directory.childDirectory('painting')] =
+          ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports;
+      exampleSlashApiSubdirectoryMapping[directory.childDirectory('rendering')] =
+          ExamplesCrossImportChecker.knownExamplesSlashApiRenderingCrossImports;
+      exampleSlashApiSubdirectoryMapping[directory.childDirectory('sample_templates')] =
+          ExamplesCrossImportChecker.knownExamplesSlashApiSampleTemplatesCrossImports;
+      exampleSlashApiSubdirectoryMapping[directory.childDirectory('services')] =
+          ExamplesCrossImportChecker.knownExamplesSlashApiServicesCrossImports;
+      exampleSlashApiSubdirectoryMapping[directory.childDirectory('ui')] =
+          ExamplesCrossImportChecker.knownExamplesSlashApiUICrossImports;
+      exampleSlashApiSubdirectoryMapping[directory.childDirectory('widgets')] =
+          ExamplesCrossImportChecker.knownExamplesSlashApiWidgetsCrossImports;
+    }
+
     return <Directory, Set<String>>{
       examplesDirectory: ExamplesCrossImportChecker.knownExamplesCrossImports,
       examplesSlashApiDirectory: ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports,
+      ...exampleSlashApiSubdirectoryMapping,
       examplesFlutterViewDirectory: ExamplesCrossImportChecker.knownExamplesFlutterViewCrossImports,
       examplesHelloWorldDirectory: ExamplesCrossImportChecker.knownExamplesHelloWorldCrossImports,
       examplesImageListDirectory: ExamplesCrossImportChecker.knownExamplesImageListCrossImports,
@@ -380,6 +437,7 @@ class _CrossImportsExamplesDirectories {
     };
   }
 
+  /// Create the `examples/xyz` directories for the test cases, excluding `examples/api` subdirectories.
   void createExamplesDirectories(Directory examplesDirectory) {
     final Map<Directory, Set<String>> knownFiles = getKnownFiles(examplesDirectory);
 
@@ -393,7 +451,22 @@ class _CrossImportsExamplesDirectories {
     }
   }
 
+  /// Get the examples directory for the given [libraryName].
+  ///
+  /// See also:
+  ///  * [ExamplesCrossImportChecker.getDirectoryForExamplesSlashApiLibrary]
+  ///    which supports getting an example directory for `examples/api` subdirectories.
   Directory examplesFilesDirectoryFor(String libraryName, Directory examplesDirectory) {
+    const unsupportedPrefix = 'examples/api';
+
+    if (libraryName.startsWith(unsupportedPrefix) &&
+        libraryName.length > unsupportedPrefix.length) {
+      throw ArgumentError(
+        'For $libraryName, use getDirectoryForExamplesSlashApiLibrary(libraryName) instead, '
+        'which supports getting directories for examples/api lib and test subdirectories.',
+      );
+    }
+
     return switch (libraryName) {
       'examples' => examplesDirectory,
       'examples/api' => examplesSlashApiDirectory,
@@ -436,7 +509,7 @@ final crossImportsGenericExamplesTestCases = <(String, String, Set<String>)>[
 // dart format on
 
 // A mapping of `examples/api/lib/**` and `examples/api/test/**` test cases for the cross imports checker,
-// excluding `examples/api/lib/samples_templates` and `examples/api/test/samples_templates`.
+// excluding `examples/api/lib/sample_templates` and `examples/api/test/sample_templates`.
 final crossImportsExamplesApiTestCases = <(String, String, Set<String>)>[
   // dart format off
   ('examples/api/lib/animation', 'knownExamplesSlashApiAnimationCrossImports', ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports),

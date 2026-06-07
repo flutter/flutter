@@ -173,14 +173,14 @@ class ExamplesCrossImportChecker {
   // See https://github.com/flutter/flutter/issues/187645.
   static final Set<String> knownExamplesSlashApiRenderingCrossImports = <String>{};
 
-  /// The known cross imports in the `examples/api/lib/samples_templates`
-  /// and `examples/api/test/samples_templates` directories.
+  /// The known cross imports in the `examples/api/lib/sample_templates`
+  /// and `examples/api/test/sample_templates` directories.
   ///
   /// These cross imports should all eventually be resolved, but until they are we allow them, so
   /// that we can catch any new cross imports that are added.
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesSlashApiSamplesTemplatesCrossImports = <String>{};
+  static final Set<String> knownExamplesSlashApiSampleTemplatesCrossImports = <String>{};
 
   /// The known cross imports in the `examples/api/lib/services`
   /// and `examples/api/test/services` directories.
@@ -299,7 +299,7 @@ class ExamplesCrossImportChecker {
     ...knownExamplesSlashApiMaterialCrossImports,
     ...knownExamplesSlashApiPaintingCrossImports,
     ...knownExamplesSlashApiRenderingCrossImports,
-    ...knownExamplesSlashApiSamplesTemplatesCrossImports,
+    ...knownExamplesSlashApiSampleTemplatesCrossImports,
     ...knownExamplesSlashApiServicesCrossImports,
     ...knownExamplesSlashApiUICrossImports,
     ...knownExamplesSlashApiWidgetsCrossImports,
@@ -316,6 +316,7 @@ class ExamplesCrossImportChecker {
   };
 
   static final RegExp _examplesPrefix = RegExp(r'examples');
+  static final RegExp _examplesSlashApiLibraryPattern = RegExp(r'^examples/api/[lib|test]/[a-z_]+');
 
   /// Get a list of all the filenames that end in ".dart" for the given examples directory.
   ///
@@ -480,6 +481,18 @@ class ExamplesCrossImportChecker {
 
     return valid;
   }
+
+  /// Get the directory for the given `examples/api` [libraryName].
+  ///
+  /// The library name can only contain lowercase a-z and underscores
+  /// and must start with either `examples/api/lib` or `examples/api/test`.
+  Directory getDirectoryForExamplesSlashApiLibrary(String libraryName) {
+    if (!_examplesSlashApiLibraryPattern.hasMatch(libraryName)) {
+      throw ArgumentError('Invalid library name: $libraryName', 'libraryName');
+    }
+
+    return flutterRoot.childDirectory(libraryName);
+  }
 }
 
 /// The examples that we are concerned with cross importing.
@@ -538,7 +551,7 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
       'knownExamplesSlashApiMaterialCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiMaterialCrossImports,
       'knownExamplesSlashApiPaintingCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports,
       'knownExamplesSlashApiRenderingCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiRenderingCrossImports,
-      'knownExamplesSlashApiSamplesTemplatesCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiSamplesTemplatesCrossImports,
+      'knownExamplesSlashApiSampleTemplatesCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiSampleTemplatesCrossImports,
       'knownExamplesSlashApiServicesCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiServicesCrossImports,
       'knownExamplesSlashApiUICrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiUICrossImports,
       'knownExamplesSlashApiWidgetsCrossImports' => ExamplesCrossImportChecker.knownExamplesSlashApiWidgetsCrossImports,
@@ -598,7 +611,7 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
       'examples/api/lib/material' || 'examples/api/test/material' => 'knownExamplesSlashApiMaterialCrossImports',
       'examples/api/lib/painting' || 'examples/api/test/painting' => 'knownExamplesSlashApiPaintingCrossImports',
       'examples/api/lib/rendering' || 'examples/api/test/rendering' => 'knownExamplesSlashApiRenderingCrossImports',
-      'examples/api/lib/samples_templates' || 'examples/api/test/samples_templates' => 'knownExamplesSlashApiSamplesTemplatesCrossImports',
+      'examples/api/lib/sample_templates' || 'examples/api/test/sample_templates' => 'knownExamplesSlashApiSampleTemplatesCrossImports',
       'examples/api/lib/services' || 'examples/api/test/services' => 'knownExamplesSlashApiServicesCrossImports',
       'examples/api/lib/ui' || 'examples/api/test/ui' => 'knownExamplesSlashApiUICrossImports',
       'examples/api/lib/widgets' || 'examples/api/test/widgets' => 'knownExamplesSlashApiWidgetsCrossImports',
