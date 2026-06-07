@@ -582,7 +582,9 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
   @override
   bool canImport(LibraryCrossImportStatementType import) {
     return switch (this) {
-      _GenericExampleLibrary() => false,
+      _GenericExampleLibrary() || _ApiExampleLibrary() => false,
+      _CupertinoApiExampleLibrary() => import == LibraryCrossImportStatementType.cupertino,
+      _MaterialApiExampleLibrary() => import == LibraryCrossImportStatementType.material,
     };
   }
 
@@ -631,9 +633,25 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
   }
 }
 
-/// Any example that is not related to Material or Cupertino.
-///
-/// For example `examples/flutter_view` or `examples/hello_world`.
+/// Any API example - not related to Material or Cupertino - inside `examples/api`, and its tests.
+final class _ApiExampleLibrary extends _ExamplesLibrary {
+  _ApiExampleLibrary(super.name);
+}
+
+/// The examples in `examples/api/lib/cupertino`
+/// and their tests in `examples/api/test/cupertino`.
+final class _CupertinoApiExampleLibrary extends _ExamplesLibrary {
+  _CupertinoApiExampleLibrary(super.name);
+}
+
+/// Any non-API example, not in `examples/api`,
+/// such as `examples/flutter_view` or `examples/hello_world`.
 final class _GenericExampleLibrary extends _ExamplesLibrary {
   const _GenericExampleLibrary(super.name);
+}
+
+/// The examples in `examples/api/lib/material`
+/// and their tests in `examples/api/test/material`.
+final class _MaterialApiExampleLibrary extends _ExamplesLibrary {
+  _MaterialApiExampleLibrary(super.name);
 }
