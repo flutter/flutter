@@ -110,6 +110,105 @@ class ExamplesCrossImportChecker {
   // See https://github.com/flutter/flutter/issues/187645.
   static final Set<String> knownExamplesSlashApiCrossImports = <String>{};
 
+  /// The known cross imports in the `examples/api/lib/animation`
+  /// and `examples/api/test/animation` directories.
+  ///
+  /// These cross imports should all eventually be resolved, but until they are we allow them, so
+  /// that we can catch any new cross imports that are added.
+  // TODO(justinmc): Fix all of these tests so there are no cross imports.
+  // See https://github.com/flutter/flutter/issues/187645.
+  static final Set<String> knownExamplesSlashApiAnimationCrossImports = <String>{};
+
+  /// The known cross imports in the `examples/api/lib/cupertino`
+  /// and `examples/api/test/cupertino` directories.
+  ///
+  /// These cross imports should all eventually be resolved, but until they are we allow them, so
+  /// that we can catch any new cross imports that are added.
+  // TODO(justinmc): Fix all of these tests so there are no cross imports.
+  // See https://github.com/flutter/flutter/issues/187645.
+  static final Set<String> knownExamplesSlashApiCupertinoCrossImports = <String>{};
+
+  /// The known cross imports in the `examples/api/lib/foundation`
+  /// and `examples/api/test/foundation` directories.
+  ///
+  /// These cross imports should all eventually be resolved, but until they are we allow them, so
+  /// that we can catch any new cross imports that are added.
+  // TODO(justinmc): Fix all of these tests so there are no cross imports.
+  // See https://github.com/flutter/flutter/issues/187645.
+  static final Set<String> knownExamplesSlashApiFoundationCrossImports = <String>{};
+
+  /// The known cross imports in the `examples/api/lib/gestures`
+  /// and `examples/api/test/gestures` directories.
+  ///
+  /// These cross imports should all eventually be resolved, but until they are we allow them, so
+  /// that we can catch any new cross imports that are added.
+  // TODO(justinmc): Fix all of these tests so there are no cross imports.
+  // See https://github.com/flutter/flutter/issues/187645.
+  static final Set<String> knownExamplesSlashApiGesturesCrossImports = <String>{};
+
+  /// The known cross imports in the `examples/api/lib/material`
+  /// and `examples/api/test/material` directories.
+  ///
+  /// These cross imports should all eventually be resolved, but until they are we allow them, so
+  /// that we can catch any new cross imports that are added.
+  // TODO(justinmc): Fix all of these tests so there are no cross imports.
+  // See https://github.com/flutter/flutter/issues/187645.
+  static final Set<String> knownExamplesSlashApiMaterialCrossImports = <String>{};
+
+  /// The known cross imports in the `examples/api/lib/painting`
+  /// and `examples/api/test/painting` directories.
+  ///
+  /// These cross imports should all eventually be resolved, but until they are we allow them, so
+  /// that we can catch any new cross imports that are added.
+  // TODO(justinmc): Fix all of these tests so there are no cross imports.
+  // See https://github.com/flutter/flutter/issues/187645.
+  static final Set<String> knownExamplesSlashApiPaintingCrossImports = <String>{};
+
+  /// The known cross imports in the `examples/api/lib/rendering`
+  /// and `examples/api/test/rendering` directories.
+  ///
+  /// These cross imports should all eventually be resolved, but until they are we allow them, so
+  /// that we can catch any new cross imports that are added.
+  // TODO(justinmc): Fix all of these tests so there are no cross imports.
+  // See https://github.com/flutter/flutter/issues/187645.
+  static final Set<String> knownExamplesSlashApiRenderingCrossImports = <String>{};
+
+  /// The known cross imports in the `examples/api/lib/samples_templates`
+  /// and `examples/api/test/samples_templates` directories.
+  ///
+  /// These cross imports should all eventually be resolved, but until they are we allow them, so
+  /// that we can catch any new cross imports that are added.
+  // TODO(justinmc): Fix all of these tests so there are no cross imports.
+  // See https://github.com/flutter/flutter/issues/187645.
+  static final Set<String> knownExamplesSlashApiSamplesTemplatesCrossImports = <String>{};
+
+  /// The known cross imports in the `examples/api/lib/services`
+  /// and `examples/api/test/services` directories.
+  ///
+  /// These cross imports should all eventually be resolved, but until they are we allow them, so
+  /// that we can catch any new cross imports that are added.
+  // TODO(justinmc): Fix all of these tests so there are no cross imports.
+  // See https://github.com/flutter/flutter/issues/187645.
+  static final Set<String> knownExamplesSlashApiServicesCrossImports = <String>{};
+
+  /// The known cross imports in the `examples/api/lib/ui`
+  /// and `examples/api/test/ui` directories.
+  ///
+  /// These cross imports should all eventually be resolved, but until they are we allow them, so
+  /// that we can catch any new cross imports that are added.
+  // TODO(justinmc): Fix all of these tests so there are no cross imports.
+  // See https://github.com/flutter/flutter/issues/187645.
+  static final Set<String> knownExamplesSlashApiUICrossImports = <String>{};
+
+  /// The known cross imports in the `examples/api/lib/widgets`
+  /// and `examples/api/test/widgets` directories.
+  ///
+  /// These cross imports should all eventually be resolved, but until they are we allow them, so
+  /// that we can catch any new cross imports that are added.
+  // TODO(justinmc): Fix all of these tests so there are no cross imports.
+  // See https://github.com/flutter/flutter/issues/187645.
+  static final Set<String> knownExamplesSlashApiWidgetsCrossImports = <String>{};
+
   /// The known cross imports in the `examples/flutter_view` directory.
   ///
   /// These cross imports should all eventually be resolved, but until they are we allow them, so
@@ -421,6 +520,28 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
       'knownExamplesCrossImports' => ExamplesCrossImportChecker.knownExamplesCrossImports,
       'knownExamplesSlashApiCrossImports' =>
         ExamplesCrossImportChecker.knownExamplesSlashApiCrossImports,
+      'knownExamplesSlashApiAnimationCrossImports' =>
+        ExamplesCrossImportChecker.knownExamplesSlashApiAnimationCrossImports,
+      'knownExamplesSlashApiCupertinoCrossImports' =>
+        ExamplesCrossImportChecker.knownExamplesSlashApiCupertinoCrossImports,
+      'knownExamplesSlashApiFoundationCrossImports' =>
+        ExamplesCrossImportChecker.knownExamplesSlashApiFoundationCrossImports,
+      'knownExamplesSlashApiGesturesCrossImports' =>
+        ExamplesCrossImportChecker.knownExamplesSlashApiGesturesCrossImports,
+      'knownExamplesSlashApiMaterialCrossImports' =>
+        ExamplesCrossImportChecker.knownExamplesSlashApiMaterialCrossImports,
+      'knownExamplesSlashApiPaintingCrossImports' =>
+        ExamplesCrossImportChecker.knownExamplesSlashApiPaintingCrossImports,
+      'knownExamplesSlashApiRenderingCrossImports' =>
+        ExamplesCrossImportChecker.knownExamplesSlashApiRenderingCrossImports,
+      'knownExamplesSlashApiSamplesTemplatesCrossImports' =>
+        ExamplesCrossImportChecker.knownExamplesSlashApiSamplesTemplatesCrossImports,
+      'knownExamplesSlashApiServicesCrossImports' =>
+        ExamplesCrossImportChecker.knownExamplesSlashApiServicesCrossImports,
+      'knownExamplesSlashApiUICrossImports' =>
+        ExamplesCrossImportChecker.knownExamplesSlashApiUICrossImports,
+      'knownExamplesSlashApiWidgetsCrossImports' =>
+        ExamplesCrossImportChecker.knownExamplesSlashApiWidgetsCrossImports,
       'knownExamplesFlutterViewCrossImports' =>
         ExamplesCrossImportChecker.knownExamplesFlutterViewCrossImports,
       'knownExamplesHelloWorldCrossImports' =>
@@ -478,6 +599,19 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
     return switch (libraryName) {
       'examples' => 'knownExamplesCrossImports',
       'examples/api' => 'knownExamplesSlashApiCrossImports',
+      // dart format off
+      'examples/api/lib/animation' || 'examples/api/test/animation' => 'knownExamplesSlashApiAnimationCrossImports',
+      'examples/api/lib/cupertino' || 'examples/api/test/cupertino' => 'knownExamplesSlashApiCupertinoCrossImports',
+      'examples/api/lib/foundation' || 'examples/api/test/foundation' => 'knownExamplesSlashApiFoundationCrossImports',
+      'examples/api/lib/gestures' || 'examples/api/test/gestures' => 'knownExamplesSlashApiGesturesCrossImports',
+      'examples/api/lib/material' || 'examples/api/test/material' => 'knownExamplesSlashApiMaterialCrossImports',
+      'examples/api/lib/painting' || 'examples/api/test/painting' => 'knownExamplesSlashApiPaintingCrossImports',
+      'examples/api/lib/rendering' || 'examples/api/test/rendering' => 'knownExamplesSlashApiRenderingCrossImports',
+      'examples/api/lib/samples_templates' || 'examples/api/test/samples_templates' => 'knownExamplesSlashApiSamplesTemplatesCrossImports',
+      'examples/api/lib/services' || 'examples/api/test/services' => 'knownExamplesSlashApiServicesCrossImports',
+      'examples/api/lib/ui' || 'examples/api/test/ui' => 'knownExamplesSlashApiUICrossImports',
+      'examples/api/lib/widgets' || 'examples/api/test/widgets' => 'knownExamplesSlashApiWidgetsCrossImports',
+      // dart format on
       'examples/flutter_view' => 'knownExamplesFlutterViewCrossImports',
       'examples/hello_world' => 'knownExamplesHelloWorldCrossImports',
       'examples/image_list' => 'knownExamplesImageListCrossImports',
