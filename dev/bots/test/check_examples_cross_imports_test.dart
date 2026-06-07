@@ -16,6 +16,8 @@ void main() {
   late ExamplesCrossImportChecker checker;
   late _CrossImportsExamplesDirectories checkerDirectories;
 
+  final examplesSlashApiLibraryPattern = RegExp(r'^examples/api/[lib|test]/[a-z_]+');
+
   void buildKnownCrossImportExamplesFiles({Set<String> excludes = const <String>{}}) {
     final Map<Directory, Set<String>> knownFiles = checkerDirectories.getKnownFiles(
       checker.examplesDirectory,
@@ -30,6 +32,21 @@ void main() {
         writeImport(getFile(filepath, directory));
       }
     }
+  }
+
+  /// Get the directory for the given `examples/api` [libraryName].
+  ///
+  /// The library name can only contain lowercase a-z and underscores
+  /// and must start with either `examples/api/lib` or `examples/api/test`.
+  Directory getDirectoryForExamplesSlashApiLibrary(
+    String libraryName, {
+    required Directory flutterRoot,
+  }) {
+    if (!examplesSlashApiLibraryPattern.hasMatch(libraryName)) {
+      throw ArgumentError('Invalid library name: $libraryName', 'libraryName');
+    }
+
+    return flutterRoot.childDirectory(libraryName);
   }
 
   setUp(() {
@@ -448,7 +465,10 @@ void main() {
     test('non-Dart files are ignored in $libraryName', () async {
       buildKnownCrossImportExamplesFiles();
 
-      final Directory directory = checker.getDirectoryForExamplesSlashApiLibrary(libraryName);
+      final Directory directory = getDirectoryForExamplesSlashApiLibrary(
+        libraryName,
+        flutterRoot: checker.flutterRoot,
+      );
 
       directory.childFile('README.md')
         ..createSync()
@@ -460,7 +480,10 @@ void main() {
     test('non-Dart files with .dart in the filename are ignored $libraryName', () async {
       buildKnownCrossImportExamplesFiles();
 
-      final Directory directory = checker.getDirectoryForExamplesSlashApiLibrary(libraryName);
+      final Directory directory = getDirectoryForExamplesSlashApiLibrary(
+        libraryName,
+        flutterRoot: checker.flutterRoot,
+      );
 
       directory.childFile('foo.dart.md')
         ..createSync()
@@ -497,8 +520,9 @@ void main() {
     test('unknown $libraryName cross import of Material', () async {
       final dartFile = '$libraryName/foo.dart';
 
-      final Directory examplesFilesDirectory = checker.getDirectoryForExamplesSlashApiLibrary(
+      final Directory examplesFilesDirectory = getDirectoryForExamplesSlashApiLibrary(
         libraryName,
+        flutterRoot: checker.flutterRoot,
       );
 
       buildKnownCrossImportExamplesFiles();
@@ -522,8 +546,9 @@ void main() {
       final dartFileOne = '$libraryName/foo.dart';
       final dartFileTwo = '$libraryName/bar.dart';
 
-      final Directory examplesFilesDirectory = checker.getDirectoryForExamplesSlashApiLibrary(
+      final Directory examplesFilesDirectory = getDirectoryForExamplesSlashApiLibrary(
         libraryName,
+        flutterRoot: checker.flutterRoot,
       );
 
       buildKnownCrossImportExamplesFiles();
@@ -547,8 +572,9 @@ void main() {
     test('unknown $libraryName cross import of Material in test file', () async {
       final testDartFile = '$libraryName/foo_test.dart';
 
-      final Directory examplesFilesDirectory = checker.getDirectoryForExamplesSlashApiLibrary(
+      final Directory examplesFilesDirectory = getDirectoryForExamplesSlashApiLibrary(
         libraryName,
+        flutterRoot: checker.flutterRoot,
       );
 
       buildKnownCrossImportExamplesFiles();
@@ -571,8 +597,9 @@ void main() {
     test('unknown $libraryName cross import of Cupertino', () async {
       final dartFile = '$libraryName/foo.dart';
 
-      final Directory examplesFilesDirectory = checker.getDirectoryForExamplesSlashApiLibrary(
+      final Directory examplesFilesDirectory = getDirectoryForExamplesSlashApiLibrary(
         libraryName,
+        flutterRoot: checker.flutterRoot,
       );
 
       buildKnownCrossImportExamplesFiles();
@@ -600,8 +627,9 @@ void main() {
       final dartFileOne = '$libraryName/foo.dart';
       final dartFileTwo = '$libraryName/bar.dart';
 
-      final Directory examplesFilesDirectory = checker.getDirectoryForExamplesSlashApiLibrary(
+      final Directory examplesFilesDirectory = getDirectoryForExamplesSlashApiLibrary(
         libraryName,
+        flutterRoot: checker.flutterRoot,
       );
 
       buildKnownCrossImportExamplesFiles();
@@ -629,8 +657,9 @@ void main() {
     test('unknown $libraryName cross import of Cupertino in test file', () async {
       final testDartFile = '$libraryName/foo_test.dart';
 
-      final Directory examplesFilesDirectory = checker.getDirectoryForExamplesSlashApiLibrary(
+      final Directory examplesFilesDirectory = getDirectoryForExamplesSlashApiLibrary(
         libraryName,
+        flutterRoot: checker.flutterRoot,
       );
 
       buildKnownCrossImportExamplesFiles();
@@ -782,10 +811,6 @@ class _CrossImportsExamplesDirectories {
   }
 
   /// Get the examples directory for the given [libraryName].
-  ///
-  /// See also:
-  ///  * [ExamplesCrossImportChecker.getDirectoryForExamplesSlashApiLibrary]
-  ///    which supports getting an example directory for `examples/api` subdirectories.
   Directory examplesFilesDirectoryFor(String libraryName, Directory examplesDirectory) {
     const unsupportedPrefix = 'examples/api';
 
