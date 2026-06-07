@@ -131,6 +131,7 @@ void main() {
   FakeCommand setUpFakeXcodeBuildHandler(
     String configuration, {
     bool verbose = false,
+    bool noWorkspace = false,
     void Function(List<String> command)? onRun,
     List<String>? additionalCommandArguments,
     String hostPlatformArch = 'x86_64',
@@ -145,12 +146,12 @@ void main() {
         '/usr/bin/env',
         'xcrun',
         'xcodebuild',
-        if (flutterProject.macos.xcodeWorkspace case final workspace?) ...<String>[
-          '-workspace',
-          workspace.path,
-        ] else ...<String>[
+        if (noWorkspace) ...<String>[
           '-project',
           flutterProject.macos.xcodeProject.path,
+        ] else ...<String>[
+          '-workspace',
+          flutterProject.macos.xcodeWorkspace!.path,
         ],
         '-configuration',
         configuration,
@@ -314,9 +315,7 @@ STDERR STUFF
 
       createMinimalMockProjectFiles(createWorkspace: false);
 
-      // The FakeCommand expects `-project` (not `-workspace`); the run only
-      // succeeds if xcodebuild is invoked with that fallback.
-      fakeProcessManager.addCommands(<FakeCommand>[setUpFakeXcodeBuildHandler('Debug')]);
+      fakeProcessManager.addCommands(<FakeCommand>[setUpFakeXcodeBuildHandler('Debug', noWorkspace: true)]);
 
       await createTestCommandRunner(
         command,
