@@ -16,7 +16,7 @@ void main() {
   late ExamplesCrossImportChecker checker;
   late _CrossImportsExamplesDirectories checkerDirectories;
 
-  final examplesSlashApiLibraryPattern = RegExp(r'^examples/api/[lib|test]/[a-z_]+');
+  final examplesSlashApiLibraryPattern = RegExp(r'^examples/api/(lib|test)/[a-z_]+');
 
   void buildKnownCrossImportExamplesFiles({Set<String> excludes = const <String>{}}) {
     final Map<Directory, Set<String>> knownFiles = checkerDirectories.getKnownFiles(
