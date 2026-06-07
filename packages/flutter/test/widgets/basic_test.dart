@@ -1906,6 +1906,18 @@ void main() {
     );
     expect(tester.getSize(find.byType(IntrinsicHeight)), Size.zero);
   });
+
+  testWidgets('Builder does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: Builder(builder: (_) => const Placeholder())),
+      ),
+    );
+    expect(tester.getSize(find.byType(Builder)), Size.zero);
+  });
 }
 
 HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
