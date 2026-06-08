@@ -58,11 +58,11 @@ When a Dart SDK bump introduces new language features, they should not be adopte
 Because the repository contains over 100 `pubspec.yaml` files (including packages, tools, manual/integration tests, and examples), the change must be made systematically.
 
 ### Step 1: Update `pubspec.yaml` Files
-Update the SDK constraint in all `pubspec.yaml` files across the repository. You can use a search-and-replace command or a script to automate this:
+Update the SDK constraint in all `pubspec.yaml` files across the repository. You can use the repository's Dart tool script to automate this cross-platform:
 
 ```bash
-# Example using find and sed to bump from ^3.10.0-0 to ^3.13.0-0
-find . -name "pubspec.yaml" -not -path "*/.dart_tool/*" -exec sed -i '' 's/sdk: \^3.10.0-0/sdk: \^3.13.0-0/g' {} +
+# Example to bump all files to ^3.13.0-0
+dart dev/tools/bin/bump_version_constraints.dart ^3.13.0-0
 ```
 
 ### Step 2: Force Upgrade & Update Hashes
