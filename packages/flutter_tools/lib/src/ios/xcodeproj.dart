@@ -20,8 +20,8 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
-import '../convert.dart';
 import '../reporting/reporting.dart';
+import '../xcode_project.dart';
 
 final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final _varExpr = RegExp(r'\$\(([^)]*)\)');
@@ -186,14 +186,14 @@ class XcodeProjectInterpreter {
   /// Using this method when running `xcodebuild` commands ensures that `xcrun` is used properly
   /// and that the Swift package cache is properly configured.
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
-    String projectPath,
+    XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
     bool skipPackageUpdatesAndValidation = true,
   }) async {
     // All `xcodebuild` project commands will download and resolve Swift packages.
     // We should always prefetch Swift packages before running any `xcodebuild` project command
     // to control the output.
-    await prefetchSwiftPackages(projectPath, buildDirectory: buildDirectory, quiet: false);
+    await prefetchSwiftPackagesForProject(xcodeProject, buildDirectory: buildDirectory);
 
     return _xcodebuildProjectCommandArguments(
       buildDirectory,
@@ -232,7 +232,7 @@ class XcodeProjectInterpreter {
   /// If [XcodeProjectBuildContext.scheme] is `null`, `xcodebuild` will
   /// return build settings for the first discovered target (by default this is Runner).
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     required XcodeProjectBuildContext buildContext,
     Duration timeout = const Duration(minutes: 1),
   }) async {
@@ -247,9 +247,10 @@ class XcodeProjectInterpreter {
       XcodeSdk.WatchOS || XcodeSdk.WatchSimulator => getIosBuildDirectory(),
     };
     final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
-      projectPath,
+      xcodeProject,
       _fileSystem.directory(buildDir),
     );
+    final String projectPath = xcodeProject.xcodeProject.path;
     final showBuildSettingsCommand = <String>[
       ...xcodebuildCommandArgs,
       '-project',
@@ -360,6 +361,7 @@ class XcodeProjectInterpreter {
   }
 
   Future<void> cleanWorkspace(
+    XcodeBasedProject xcodeProject,
     String workspacePath,
     String scheme, {
     required Directory buildDirectory,
@@ -367,7 +369,7 @@ class XcodeProjectInterpreter {
   }) async {
     final String projectPath = _fileSystem.currentDirectory.path;
     final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
-      projectPath,
+      xcodeProject,
       buildDirectory,
     );
     await _processUtils.run(<String>[
@@ -382,120 +384,25 @@ class XcodeProjectInterpreter {
     ], workingDirectory: projectPath);
   }
 
-  /// The process used to fetch Swift packages.
-  Process? _swiftPackageFetchProcess;
-
-  /// The stdout subscription for the Swift package fetch process.
-  StreamSubscription<String>? _swiftPackageFetchStdoutSubscription;
-
-  /// The stderr subscription for the Swift package fetch process.
-  StreamSubscription<String>? _swiftPackageFetchStderrSubscription;
-
   /// Prefetches Swift packages for the given Xcode project.
-  ///
-  /// If a process is already running from a previous Flutter command, kill it before starting
-  /// the command. If the process is already running from the same Flutter command, wait for it to
-  /// complete if [waitForCompletion] is true.
-  ///
-  /// If [quiet] is false, it will print a spinner while the command is running and print logs of
-  /// what Swift packages are being fetched.
-  Future<void> prefetchSwiftPackages(
-    String projectPath, {
+  Future<void> prefetchSwiftPackagesForProject(
+    XcodeBasedProject xcodeProject, {
     required Directory buildDirectory,
-    bool quiet = true,
-    bool waitForCompletion = true,
   }) async {
-    Status? status;
-    try {
-      final command = <String>[
-        ..._xcodebuildProjectCommandArguments(
-          buildDirectory,
-          // skipPackageUpdatesAndValidation should be false so that when subsequent xcodebuild
-          // commands run, packages should already be resolved, downloaded, updated, and validated.
-          skipPackageUpdatesAndValidation: false,
-        ),
-        '-resolvePackageDependencies',
-      ];
-      if (_swiftPackageFetchProcess == null) {
-        // Remove the `xcrun` prefixes from the command before comparing because the process name
-        // will resolve to the actual xcodebuild path, such as this:
-        // /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild
-        final int xcodebuildIndex = command.indexOf('xcodebuild');
-        if (xcodebuildIndex == -1) {
-          // This should never happen. The _xcodebuildProjectCommandArguments always includes
-          // xcodebuild.
-          throw StateError('Command "${command.join(' ')}" is expected to contain `xcodebuild`.');
-        }
-        final String commandToMatch = command.sublist(xcodebuildIndex).join(' ');
-
-        // Check if process is already running from a previous Flutter command. If it is, kill it
-        // so we don't have the process running twice. When this process is run twice, it'll cause
-        // one to error. The new process will pick up where the old one left off.
-        final RunResult result = await _processUtils.run([
-          'pgrep',
-          '-n', // Select only the newest
-          '-f', // Match against full argument lists
-          '-l', // Print the process name and process ID
-          commandToMatch, // command must be a string rather than a list so it matches on all of it
-        ]);
-        if (result.exitCode == 0) {
-          final String processOutput = result.stdout.trim();
-          // Process output is formatted like this:
-          // 89012 /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -clonedSourcePackagesDirPath...
-          final int? pid = int.tryParse(processOutput.split(' ').firstOrNull ?? '');
-          if (pid != null && processOutput.endsWith(commandToMatch)) {
-            _logger.printTrace(
-              'Swift Package Manager dependencies are already being fetched by PID $pid',
-            );
-            await _processUtils.run(['kill', '$pid']);
-          }
-        }
-      }
-
-      final Process process =
-          _swiftPackageFetchProcess ??
-          await _processUtils.start(command, workingDirectory: projectPath);
-      _swiftPackageFetchProcess ??= process;
-      if (!waitForCompletion) {
-        return;
-      }
-      if (!quiet) {
-        var printFetchWarnings = false;
-        _swiftPackageFetchStdoutSubscription ??= process.stdout
-            .transform(utf8.decoder)
-            .transform(const LineSplitter())
-            .listen((String line) {
-              if (line.startsWith('Fetching')) {
-                status?.cancel();
-                if (!printFetchWarnings) {
-                  _logger.printStatus(
-                    'Xcode is fetching Swift Package Manager dependencies. This may take several minutes...',
-                  );
-                  printFetchWarnings = true;
-                }
-                status = _logger.startProgress('  $line...');
-              }
-            });
-      }
-      final stderrBuffer = StringBuffer();
-      _swiftPackageFetchStderrSubscription ??= process.stderr
-          .transform<String>(const Utf8Decoder(reportErrors: false))
-          .listen(stderrBuffer.write);
-
-      final int exitCode = await process.exitCode.whenComplete(() async {
-        await _swiftPackageFetchStdoutSubscription?.cancel();
-        await _swiftPackageFetchStderrSubscription?.cancel();
-      });
-      if (exitCode != 0) {
-        throwToolExit('Xcode failed to resolve Swift Package Manager dependencies:\n$stderrBuffer');
-      }
-    } finally {
-      status?.cancel();
-    }
+    await xcodeProject.prefetchSwiftPackages(
+      xcodebuildProjectCommandArguments: _xcodebuildProjectCommandArguments(
+        buildDirectory,
+        // skipPackageUpdatesAndValidation should be false so that when subsequent xcodebuild
+        // commands run, packages should already be resolved, downloaded, updated, and validated.
+        skipPackageUpdatesAndValidation: false,
+      ),
+      processUtils: _processUtils,
+      logger: _logger,
+    );
   }
 
   Future<XcodeProjectInfo?> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
   }) async {
@@ -507,7 +414,7 @@ class XcodeProjectInterpreter {
     const corruptedProjectExitCode = 74;
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
-      projectPath,
+      xcodeProject,
       buildDirectory,
     );
     final RunResult result = await _processUtils.run(
@@ -518,7 +425,7 @@ class XcodeProjectInterpreter {
       ],
       throwOnError: true,
       allowedFailures: allowedFailures,
-      workingDirectory: projectPath,
+      workingDirectory: xcodeProject.hostAppRoot.path,
     );
     if (allowedFailures(result.exitCode)) {
       // User configuration error, tool exit instead of crashing.
