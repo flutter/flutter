@@ -7,6 +7,8 @@
 
 #include "image_generator.h"
 
+#include <limits>
+
 #include "flutter/fml/endianness.h"
 #include "flutter/fml/logging.h"
 
@@ -177,7 +179,12 @@ class APNGImageGenerator : public ImageGenerator {
   }
 
   static constexpr size_t GetChunkSize(const ChunkHeader* chunk) {
-    return sizeof(ChunkHeader) + chunk->get_data_length() + kChunkCrcSize;
+    const size_t data_length = static_cast<size_t>(chunk->get_data_length());
+    const size_t total = sizeof(ChunkHeader) + data_length + kChunkCrcSize;
+    if (total < data_length) {
+      return std::numeric_limits<size_t>::max();
+    }
+    return total;
   }
 
   static constexpr bool IsChunkCopySafe(const ChunkHeader* chunk) {
