@@ -262,4 +262,38 @@ TEST(StandardMessageCodec, CanEncodeAndDecodeVariableLengthCustomType) {
                     some_data_comparator);
 }
 
+TEST(StandardMessageCodec, DecodeStringWithSizeLargerThanBuffer) {
+  // type=kString(0x07), size=0xFF marker + uint32 0xFFFFFFFF (LE).
+  // The declared size far exceeds the 6-byte message. The decoder should
+  // return null rather than attempting a multi-GB allocation.
+  const uint8_t data[] = {0x07, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+  const auto& codec = StandardMessageCodec::GetInstance();
+  auto result = codec.DecodeMessage(data, sizeof(data));
+  EXPECT_TRUE(result->IsNull());
+}
+
+TEST(StandardMessageCodec, DecodeListWithSizeLargerThanBuffer) {
+  // type=kList(0x0C), size=0xFF marker + uint32 0xFFFFFFFF (LE).
+  const uint8_t data[] = {0x0C, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+  const auto& codec = StandardMessageCodec::GetInstance();
+  auto result = codec.DecodeMessage(data, sizeof(data));
+  EXPECT_TRUE(result->IsNull());
+}
+
+TEST(StandardMessageCodec, DecodeMapWithSizeLargerThanBuffer) {
+  // type=kMap(0x0D), size=0xFF marker + uint32 0xFFFFFFFF (LE).
+  const uint8_t data[] = {0x0D, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+  const auto& codec = StandardMessageCodec::GetInstance();
+  auto result = codec.DecodeMessage(data, sizeof(data));
+  EXPECT_TRUE(result->IsNull());
+}
+
+TEST(StandardMessageCodec, DecodeFloat64ListWithSizeLargerThanBuffer) {
+  // type=kFloat64List(0x0B), size=0xFF marker + uint32 0xFFFFFFFF (LE).
+  const uint8_t data[] = {0x0B, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+  const auto& codec = StandardMessageCodec::GetInstance();
+  auto result = codec.DecodeMessage(data, sizeof(data));
+  EXPECT_TRUE(result->IsNull());
+}
+
 }  // namespace flutter
