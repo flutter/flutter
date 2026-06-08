@@ -110,10 +110,10 @@ void testRenderSizedToContentResizable() {
     final canvas = Canvas(baseRecorder);
     final blackPaint = Paint()..color = const Color(0xFF000000);
     canvas.drawRect(const Rect.fromLTRB(0.0, 0.0, 300, 300.0), blackPaint);
-    final picture = baseRecorder.endRecording();
+    final Picture picture = baseRecorder.endRecording();
 
     final builder = SceneBuilder();
-    builder.addPicture(const Offset(0.0, 0.0), picture);
+    builder.addPicture(Offset.zero, picture);
     PlatformDispatcher.instance.views.last.render(builder.build(), size: const Size(300, 300));
   };
 
@@ -123,16 +123,16 @@ void testRenderSizedToContentResizable() {
 @pragma('vm:entry-point')
 // Used in FlutterWindowControllerSizeTest.SizedToContentNotResizable
 void testRenderSizedToContent() {
-  int frameCount = 0;
+  var frameCount = 0;
   PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
-    Size size = frameCount == 0 ? const Size(300, 300) : const Size(200, 200);
+    final size = frameCount == 0 ? const Size(300, 300) : const Size(200, 200);
     final baseRecorder = PictureRecorder();
     final canvas = Canvas(baseRecorder);
     final blackPaint = Paint()..color = const Color(0xFF000000);
     canvas.drawRect(Offset.zero & size, blackPaint);
-    final picture = baseRecorder.endRecording();
+    final Picture picture = baseRecorder.endRecording();
     final builder = SceneBuilder();
-    builder.addPicture(const Offset(0.0, 0.0), picture);
+    builder.addPicture(Offset.zero, picture);
     PlatformDispatcher.instance.views.last.render(builder.build(), size: size);
     ++frameCount;
     if (frameCount == 1) {
