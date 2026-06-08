@@ -357,8 +357,9 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
       if (!use_compression) {
         image_info_chain.unlink<vk::ImageCompressionControlEXT>();
       }
-      auto create_info_native = static_cast<vk::ImageCreateInfo::NativeType>(
-          image_info_chain.get<vk::ImageCreateInfo>());
+      vk::ImageCreateInfo::NativeType create_info_native =
+          static_cast<vk::ImageCreateInfo::NativeType>(
+              image_info_chain.get<vk::ImageCreateInfo>());
       return vk::Result{::vmaCreateImage(allocator,            //
                                          &create_info_native,  //
                                          &alloc_nfo,           //
@@ -370,7 +371,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
 
     // Fixed-rate compression was requested iff a rate was selected above.
     const bool requested_compression = frc_rate.has_value();
-    auto alloc_result =
+    vk::Result alloc_result =
         try_create_image(/*use_compression=*/requested_compression);
 
     // Some drivers (e.g. PowerVR) can return VK_ERROR_COMPRESSION_EXHAUSTED_EXT

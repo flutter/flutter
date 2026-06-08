@@ -279,9 +279,8 @@ VkResult vkGetPhysicalDeviceImageFormatProperties2(
   }
   auto* out =
       reinterpret_cast<VkBaseOutStructure*>(pImageFormatProperties->pNext);
-  while (out != nullptr) {
-    if (compression_requested &&
-        out->sType == VK_STRUCTURE_TYPE_IMAGE_COMPRESSION_PROPERTIES_EXT) {
+  while (compression_requested && out != nullptr) {
+    if (out->sType == VK_STRUCTURE_TYPE_IMAGE_COMPRESSION_PROPERTIES_EXT) {
       auto* props = reinterpret_cast<VkImageCompressionPropertiesEXT*>(out);
       props->imageCompressionFlags =
           VK_IMAGE_COMPRESSION_FIXED_RATE_EXPLICIT_EXT;
