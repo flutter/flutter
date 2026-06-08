@@ -565,7 +565,6 @@ object FlutterPluginUtils {
             if (!pluginState.hasKgpPlugin) {
                 try {
                     pluginManager.apply("kotlin-android")
-                    println("applied KGP in FGP")
                 } catch (_: Exception) {
                     logger.quiet(
                         """
