@@ -164,7 +164,7 @@ class WebTextStyle extends SharedTextStyle implements ui.TextStyle {
     List<ui.FontVariation>? fontVariations,
   }) {
     return WebTextStyle._(
-      originalFontFamily: fontFamily, // ?? 'Arial',
+      fontFamily: fontFamily, // ?? 'Arial',
       fontFamilyFallback: fontFamilyFallback,
       fontSize: fontSize, // ?? 14.0,
       fontStyle: fontStyle, // ?? ui.FontStyle.normal,
@@ -189,7 +189,7 @@ class WebTextStyle extends SharedTextStyle implements ui.TextStyle {
   }
 
   WebTextStyle._({
-    required this.originalFontFamily,
+    required this.fontFamily,
     required this.fontFamilyFallback,
     required this.fontSize,
     required this.fontStyle,
@@ -212,10 +212,15 @@ class WebTextStyle extends SharedTextStyle implements ui.TextStyle {
     required this.fontVariations,
   });
 
-  final String? originalFontFamily;
+  @override
+  final String? fontFamily;
+  @override
   final List<String>? fontFamilyFallback;
+  @override
   final double? fontSize;
+  @override
   final ui.FontStyle? fontStyle;
+  @override
   final ui.FontWeight? fontWeight;
   final ui.Color? color;
   final ui.Paint? foreground;
@@ -225,35 +230,19 @@ class WebTextStyle extends SharedTextStyle implements ui.TextStyle {
   final ui.Color? decorationColor; // Defaults to foreground color
   final ui.TextDecorationStyle? decorationStyle; // Defaults to none
   final double? decorationThickness; // Defaults to 1
+  @override
   final double? letterSpacing;
+  @override
   final double? wordSpacing;
   final double? height;
   final ui.TextBaseline? textBaseline;
   final ui.TextLeadingDistribution? leadingDistribution;
+  @override
   final ui.Locale? locale;
+  @override
   final List<ui.FontFeature>? fontFeatures;
+  @override
   final List<ui.FontVariation>? fontVariations;
-
-  @override
-  String? get sharedFontFamily => originalFontFamily;
-  @override
-  List<String>? get sharedFontFamilyFallback => fontFamilyFallback;
-  @override
-  double? get sharedFontSize => fontSize;
-  @override
-  ui.FontWeight? get sharedFontWeight => fontWeight;
-  @override
-  ui.FontStyle? get sharedFontStyle => fontStyle;
-  @override
-  ui.Locale? get sharedLocale => locale;
-  @override
-  List<ui.FontFeature>? get sharedFontFeature => fontFeatures;
-  @override
-  List<ui.FontVariation>? get sharedFontVariations => fontVariations;
-  @override
-  double? get sharedLetterSpacing => letterSpacing;
-  @override
-  double? get sharedWordSpacing => wordSpacing;
 
   /// Merges this text style with [other] and returns the new text style.
   ///
@@ -261,7 +250,7 @@ class WebTextStyle extends SharedTextStyle implements ui.TextStyle {
   /// overrides it.
   WebTextStyle mergeWith(WebTextStyle other) {
     return WebTextStyle._(
-      originalFontFamily: other.originalFontFamily ?? originalFontFamily,
+      fontFamily: other.fontFamily ?? fontFamily,
       fontFamilyFallback: other.fontFamilyFallback ?? fontFamilyFallback,
       fontSize: other.fontSize ?? fontSize,
       fontStyle: other.fontStyle ?? fontStyle,
@@ -293,7 +282,7 @@ class WebTextStyle extends SharedTextStyle implements ui.TextStyle {
     if (other is! WebTextStyle) {
       return false;
     }
-    return other.originalFontFamily == originalFontFamily &&
+    return other.fontFamily == fontFamily &&
         listEquals<String>(other.fontFamilyFallback, fontFamilyFallback) &&
         other.fontSize == fontSize &&
         other.fontStyle == fontStyle &&
@@ -323,7 +312,7 @@ class WebTextStyle extends SharedTextStyle implements ui.TextStyle {
     final List<ui.FontFeature>? fontFeatures = this.fontFeatures;
     final List<ui.FontVariation>? fontVariations = this.fontVariations;
     return Object.hash(
-      originalFontFamily,
+      fontFamily,
       fontFamilyFallback == null ? null : Object.hashAll(fontFamilyFallback),
       fontSize,
       fontStyle,
@@ -369,7 +358,7 @@ class WebTextStyle extends SharedTextStyle implements ui.TextStyle {
     assert(() {
       final double? fontSize = this.fontSize;
       result =
-          'fontFamily: ${originalFontFamily ?? ""} '
+          'fontFamily: ${fontFamily ?? ""} '
           'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : ""}px '
           'fontStyle: ${fontStyle != null ? fontStyle.toString().replaceFirst("FontStyle.", "") : ""} '
           'fontWeight: ${fontWeight != null ? fontWeight.toString().replaceFirst("FontWeight.", "") : ""} '
@@ -450,29 +439,23 @@ class WebStrutStyle extends SharedTextStyle implements ui.StrutStyle {
     this.forceStrutHeight,
   }) : height = height == ui.kTextHeightNone ? null : height;
 
+  @override
   final String? fontFamily;
+  @override
   final List<String>? fontFamilyFallback;
+  @override
   final double? fontSize;
   final double? height;
   final double? leading;
+  @override
   final ui.FontWeight? fontWeight;
+  @override
   final ui.FontStyle? fontStyle;
   final bool? forceStrutHeight;
   final ui.TextLeadingDistribution? leadingDistribution;
   double strutAscent = 0;
   double strutDescent = 0;
   double strutLeading = 0;
-
-  @override
-  String? get sharedFontFamily => fontFamily;
-  @override
-  List<String>? get sharedFontFamilyFallback => fontFamilyFallback;
-  @override
-  double? get sharedFontSize => fontSize;
-  @override
-  ui.FontWeight? get sharedFontWeight => fontWeight;
-  @override
-  ui.FontStyle? get sharedFontStyle => fontStyle;
 
   @override
   bool operator ==(Object other) {
@@ -543,16 +526,16 @@ class WebStrutStyle extends SharedTextStyle implements ui.StrutStyle {
 }
 
 abstract class SharedTextStyle {
-  String? get sharedFontFamily;
-  List<String>? get sharedFontFamilyFallback;
-  double? get sharedFontSize;
-  ui.FontWeight? get sharedFontWeight;
-  ui.FontStyle? get sharedFontStyle;
-  ui.Locale? get sharedLocale => null;
-  List<ui.FontFeature>? get sharedFontFeature => null;
-  List<ui.FontVariation>? get sharedFontVariations => null;
-  double? get sharedLetterSpacing => null;
-  double? get sharedWordSpacing => null;
+  String? get fontFamily;
+  List<String>? get fontFamilyFallback;
+  double? get fontSize;
+  ui.FontWeight? get fontWeight;
+  ui.FontStyle? get fontStyle;
+  ui.Locale? get locale => null;
+  List<ui.FontFeature>? get fontFeatures => null;
+  List<ui.FontVariation>? get fontVariations => null;
+  double? get letterSpacing => null;
+  double? get wordSpacing => null;
 
   List<String> get _fallbackFontFamilies {
     if (isIOS15) {
@@ -596,35 +579,33 @@ abstract class SharedTextStyle {
   }
 
   String _buildCssFontString() {
-    final String cssFontStyle = sharedFontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
-    final String cssFontWeight = sharedFontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
-    final int cssFontSize = (sharedFontSize ?? StyleManager.defaultFontSize).floor();
-    final String cssFontFamily = sharedFontFamily ?? StyleManager.defaultFontFamily;
-    final String fullFontName = _canonicalizeFontFamily(cssFontFamily, sharedFontFamilyFallback);
+    final String cssFontStyle = fontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
+    final String cssFontWeight = fontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
+    final int cssFontSize = (fontSize ?? StyleManager.defaultFontSize).floor();
+    final String cssFontFamily = fontFamily ?? StyleManager.defaultFontFamily;
+    final String fullFontName = _canonicalizeFontFamily(cssFontFamily, fontFamilyFallback);
     return '$cssFontStyle $cssFontWeight ${cssFontSize}px $fullFontName';
   }
 
   String _buildLetterSpacingString() {
-    return (sharedLetterSpacing != null) ? '${sharedLetterSpacing}px' : '0px';
+    return (letterSpacing != null) ? '${letterSpacing}px' : '0px';
   }
 
   String _buildWordSpacingString() {
-    return (sharedWordSpacing != null) ? '${sharedWordSpacing}px' : '0px';
+    return (wordSpacing != null) ? '${wordSpacing}px' : '0px';
   }
 
   String _buildLangString() {
-    return sharedLocale != null
-        ? '${sharedLocale!.languageCode}-${sharedLocale!.countryCode}'
-        : 'inherit';
+    return locale != null ? locale!.toLanguageTag() : 'inherit';
   }
 
   void _applyFontFeatures(DomCanvasRenderingContext2D context) {
-    if (sharedFontFeature == null) {
+    if (fontFeatures == null) {
       return;
     }
 
     final fontFeatureSettings = <ui.FontFeature>[];
-    for (final ui.FontFeature feature in sharedFontFeature!) {
+    for (final ui.FontFeature feature in fontFeatures!) {
       switch (feature.feature) {
         case 'smcp':
           context.fontVariantCaps = feature.value != 0 ? 'small-caps' : 'normal';
@@ -1565,7 +1546,7 @@ class ChildStyleNode extends StyleNode {
   // never null on the TextStyle object, so we use `isFontFamilyProvided` to
   // check if font family is defined or not.
   @override
-  String get _fontFamily => style.originalFontFamily ?? parent._fontFamily;
+  String get _fontFamily => style.fontFamily ?? parent._fontFamily;
 }
 
 /// The root style node for the paragraph.
@@ -1603,7 +1584,7 @@ class RootStyleNode extends StyleNode {
   ui.TextBaseline? get _textBaseline => null;
 
   @override
-  String get _fontFamily => style.originalFontFamily ?? StyleManager.defaultFontFamily;
+  String get _fontFamily => style.fontFamily ?? StyleManager.defaultFontFamily;
 
   @override
   List<String>? get _fontFamilyFallback => null;
