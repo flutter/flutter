@@ -303,6 +303,7 @@ TEST_P(TypographerTest, GlyphAtlasTextureIsRecycledIfUnchanged) {
 
   ASSERT_EQ(second_texture, first_texture);
   ASSERT_EQ(old_packer, new_packer);
+  ASSERT_TRUE(GetContext()->FlushCommandBuffers());
 }
 
 TEST_P(TypographerTest, GlyphColorIsPartOfCacheKey) {

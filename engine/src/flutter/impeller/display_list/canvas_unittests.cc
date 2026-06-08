@@ -172,6 +172,7 @@ TEST_P(AiksTest, BackdropCountDownNormal) {
                     /*total_content_depth=*/1);
   canvas->Restore();
   EXPECT_FALSE(canvas->RequiresReadback());
+  canvas->EndReplay();
 }
 
 TEST_P(AiksTest, BackdropCountDownBackdropId) {
@@ -212,6 +213,7 @@ TEST_P(AiksTest, BackdropCountDownBackdropId) {
                     /*backdrop_id=*/1);
   canvas->Restore();
   EXPECT_FALSE(canvas->RequiresReadback());
+  canvas->EndReplay();
 }
 
 TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
@@ -246,6 +248,7 @@ TEST_P(AiksTest, BackdropCountDownBackdropIdMixed) {
                     ContentBoundsPromise::kContainsContents, 1, false, 1);
   canvas->Restore();
   EXPECT_FALSE(canvas->RequiresReadback());
+  canvas->EndReplay();
 }
 
 // We only know the total number of backdrop filters, not the number of backdrop
@@ -281,6 +284,7 @@ TEST_P(AiksTest, BackdropCountDownWithNestedSaveLayers) {
 
   canvas->Restore();
   EXPECT_TRUE(canvas->RequiresReadback());
+  canvas->EndReplay();
 }
 
 TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
