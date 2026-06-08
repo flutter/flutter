@@ -15,6 +15,7 @@
 
 analyzer:
   language:
+    strict-casts: true
     strict-inference: true
   errors:
     # allow deprecated members (we do this because otherwise we have to annotate
@@ -130,7 +131,6 @@ linter:
     - missing_whitespace_between_adjacent_strings
     - no_adjacent_strings_in_list
     - no_default_cases
-    - no_dynamic_casts
     - no_duplicate_case_values
     - no_leading_underscores_for_library_prefixes
     - no_leading_underscores_for_local_identifiers
