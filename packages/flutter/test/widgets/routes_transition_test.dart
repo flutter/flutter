@@ -2,84 +2,82 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'button_tester.dart';
+import 'widgets_app_tester.dart';
+
 void main() {
-  testWidgets('navigating with transitions of different lengths', (WidgetTester tester) async {
+  testWidgets('Navigating with transitions of different lengths', (WidgetTester tester) async {
     final observer = TransitionDurationObserver();
 
     await tester.pumpWidget(
-      MaterialApp(
+      TestWidgetsApp(
         navigatorObservers: <NavigatorObserver>[observer],
         onGenerateRoute: (RouteSettings settings) {
           return switch (settings.name) {
-            // A route that uses the default page transition.
-            '/' => MaterialPageRoute<void>(
+            // A route that uses the default page transition duration.
+            '/' => _TestTransitionRoute<void>(
+              pageTransitionsBuilder: const FadeUpwardsPageTransitionsBuilder(),
               builder: (BuildContext context) {
-                return Scaffold(
-                  body: Center(
-                    child: Column(
-                      children: <Widget>[
-                        const Text('Page 1'),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/2');
-                          },
-                          child: const Text('Next'),
-                        ),
-                      ],
-                    ),
+                return Center(
+                  child: Column(
+                    children: <Widget>[
+                      const Text('Page 1'),
+                      TestButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/2');
+                        },
+                        child: const Text('Next'),
+                      ),
+                    ],
                   ),
                 );
               },
             ),
-            // A route that uses ZoomPageTransitionsBuilder.
+            // A route that uses OpenUpwardsPageTransitionsBuilder.
             '/2' => _TestTransitionRoute<void>(
               transitionDurationOverride: const Duration(milliseconds: 456),
               reverseTransitionDurationOverride: const Duration(milliseconds: 567),
-              pageTransitionsBuilder: const ZoomPageTransitionsBuilder(),
+              pageTransitionsBuilder: const OpenUpwardsPageTransitionsBuilder(),
               builder: (BuildContext context) {
-                return Scaffold(
-                  body: Center(
-                    child: Column(
-                      children: <Widget>[
-                        const Text('Page 2'),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/3');
-                          },
-                          child: const Text('Next'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Back'),
-                        ),
-                      ],
-                    ),
+                return Center(
+                  child: Column(
+                    children: <Widget>[
+                      const Text('Page 2'),
+                      TestButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/3');
+                        },
+                        child: const Text('Next'),
+                      ),
+                      TestButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Back'),
+                      ),
+                    ],
                   ),
                 );
               },
             ),
-            // A route that uses FadeForwardsPageTransitionsBuilder.
+            // A route that uses FadeUpwardsPageTransitionsBuilder.
             '/3' => _TestTransitionRoute<void>(
-              pageTransitionsBuilder: const FadeForwardsPageTransitionsBuilder(),
+              pageTransitionsBuilder: const FadeUpwardsPageTransitionsBuilder(),
               builder: (BuildContext context) {
-                return Scaffold(
-                  body: Center(
-                    child: Column(
-                      children: <Widget>[
-                        const Text('Page 3'),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text('Back'),
-                        ),
-                      ],
-                    ),
+                return Center(
+                  child: Column(
+                    children: <Widget>[
+                      const Text('Page 3'),
+                      TestButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Back'),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -128,17 +126,44 @@ void main() {
   });
 }
 
-class _TestTransitionRoute<T> extends MaterialPageRoute<T> {
+class _TestTransitionRoute<T> extends PageRoute<T> {
   _TestTransitionRoute({
-    required super.builder,
+    required this.builder,
     required this.pageTransitionsBuilder,
     this.transitionDurationOverride,
     this.reverseTransitionDurationOverride,
+    super.settings,
   });
 
+  final WidgetBuilder builder;
   final PageTransitionsBuilder pageTransitionsBuilder;
   final Duration? transitionDurationOverride;
   final Duration? reverseTransitionDurationOverride;
+
+  @override
+  Duration get transitionDuration =>
+      transitionDurationOverride ?? pageTransitionsBuilder.transitionDuration;
+  @override
+  Duration get reverseTransitionDuration =>
+      reverseTransitionDurationOverride ?? pageTransitionsBuilder.reverseTransitionDuration;
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return builder(context);
+  }
 
   @override
   Widget buildTransitions(
@@ -155,11 +180,4 @@ class _TestTransitionRoute<T> extends MaterialPageRoute<T> {
       child,
     );
   }
-
-  @override
-  Duration get transitionDuration =>
-      transitionDurationOverride ?? pageTransitionsBuilder.transitionDuration;
-  @override
-  Duration get reverseTransitionDuration =>
-      reverseTransitionDurationOverride ?? pageTransitionsBuilder.reverseTransitionDuration;
 }

@@ -108,11 +108,9 @@ class TestsCrossImportChecker {
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
   static final Set<String> knownWidgetsCrossImports = <String>{
-    'packages/flutter/test/widgets/page_transitions_test.dart',
     'packages/flutter/test/widgets/routes_test.dart',
     'packages/flutter/test/widgets/app_test.dart',
     'packages/flutter/test/widgets/implicit_animations_test.dart',
-    'packages/flutter/test/widgets/routes_transition_test.dart',
     'packages/flutter/test/widgets/editable_text_test.dart',
     'packages/flutter/test/widgets/scrollbar_test.dart',
     'packages/flutter/test/widgets/inherited_test.dart',
@@ -120,7 +118,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/drawer_test.dart',
     'packages/flutter/test/widgets/nested_scroll_view_test.dart',
     'packages/flutter/test/widgets/scrollable_selection_test.dart',
-    'packages/flutter/test/widgets/page_transitions_builder_test.dart',
     'packages/flutter/test/widgets/selectable_region_context_menu_test.dart',
     'packages/flutter/test/widgets/navigator_test.dart',
     'packages/flutter/test/widgets/navigator_restoration_test.dart',
