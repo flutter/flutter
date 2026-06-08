@@ -1740,11 +1740,11 @@ FlutterEngineResult FlutterEngineCreateAOTData(
       Dart_LoadedElf* loaded_elf = nullptr;
 #else
       Dart_LoadedElf* loaded_elf =
-          Dart_LoadELF2(source->elf_path,             // file path
-                        0,                            // file offset
-                        &error,                       // error (out)
-                        &aot_data->vm_isolate_data,   // vm isolate data (out)
-                        &aot_data->vm_isolate_instrs  // vm isolate instr (out)
+          Dart_LoadELF(source->elf_path,             // file path
+                       0,                            // file offset
+                       &error,                       // error (out)
+                       &aot_data->vm_isolate_data,   // vm isolate data (out)
+                       &aot_data->vm_isolate_instrs  // vm isolate instr (out)
           );
       if (loaded_elf != nullptr) {
         aot_data->vm_snapshot_data = aot_data->vm_isolate_data;
