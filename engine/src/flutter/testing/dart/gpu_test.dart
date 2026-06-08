@@ -866,6 +866,7 @@ void main() async {
     // Rendering into a non-zero mip level needs ES 3.0 or
     // GL_OES_fbo_render_mipmap on the GLES backend.
     if (!gpu.gpuContext.doesSupportFramebufferRenderMipmap) {
+      markTestSkipped('Backend does not support rendering into non-zero mip levels.');
       return;
     }
     final gpu.Texture texture = gpu.gpuContext.createTexture(
