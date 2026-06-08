@@ -623,6 +623,9 @@ object FlutterPluginUtils {
 
     private fun getSubprojectPluginState(subproject: Project): SubprojectPluginState? {
         val buildFile = subproject.buildFile
+
+        // Accounts for Add-to-app scenarios where the Flutter Module ephemeral .android/ directory
+        // should not be adjusted and by default does not apply KGP
         if (!buildFile.exists() || buildFile.absolutePath.contains(".android")) {
             return null
         }
