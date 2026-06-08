@@ -326,7 +326,6 @@ public class FlutterLoader {
             continue;
           }
 
-          Log.e("CAMILLE_DEBUGGING", "Loading " + metadataKey + " from manifest.");
           // Check if flag is allowed:
           if (!shouldLoadFlag(flag, isRelease, true)) {
             continue;
@@ -379,7 +378,6 @@ public class FlutterLoader {
                       + " requires a value, but no value was found. Please specify a value.");
               continue;
             }
-            Log.e("CAMILLE_DEBUGGING", "Adding " + arg + value + " from manifest to args list.");
             shellArgs.add(arg + value);
             continue;
           }
@@ -387,7 +385,6 @@ public class FlutterLoader {
           // Check if a boolean value is specified and if so, use it to determine if the
           // flags should be added.
           if (applicationMetaData.getBoolean(metadataKey, false)) {
-            Log.e("CAMILLE_DEBUGGING", "Adding " + arg + " from manifest to args list.");
             shellArgs.add(arg);
           }
         }
@@ -401,17 +398,11 @@ public class FlutterLoader {
             JSONArray shellArgsJson = new JSONArray(androidEngineShellArgsValue);
             for (int i = 0; i < shellArgsJson.length(); i++) {
               String arg = shellArgsJson.getString(i);
-              Log.e(
-                  "CAMILLE_DEBUGGING",
-                  "Attempting to add " + arg + " from command line to args list.");
 
               FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagByEngineArgument(arg);
               if (flag == null) {
                 // TODO(camsim99): Reject unknown flags specified on the command line:
                 // https://github.com/flutter/flutter/issues/182557.
-                Log.e(
-                    "CAMILLE_DEBUGGING",
-                    "Adding unknown flag " + arg + " from command line to args list.");
                 shellArgs.add(arg);
                 continue;
               } else if (!shouldLoadFlag(flag, isRelease, false)) {
@@ -426,7 +417,6 @@ public class FlutterLoader {
                     applicationContext, aotSharedLibraryPath, shellArgs);
                 continue;
               }
-              Log.e("CAMILLE_DEBUGGING", "Adding " + arg + " from command line to args list.");
               shellArgs.add(arg);
             }
           } catch (JSONException j) {
@@ -447,9 +437,6 @@ public class FlutterLoader {
       // https://github.com/flutter/flutter/issues/180686.
       if (args != null) {
         for (String arg : args) {
-          Log.e(
-              "CAMILLE_DEBUGGING",
-              "Attempting to add " + arg + " from Intent exta or other config to args list.");
           FlutterEngineFlags.Flag flag = FlutterEngineFlags.getFlagByEngineArgument(arg);
           if (flag == null) {
             // TODO(camsim99): Reject unknown flags specified on the command line:
@@ -468,9 +455,6 @@ public class FlutterLoader {
             continue;
           }
 
-          Log.e(
-              "CAMILLE_DEBUGGING",
-              "Adding " + arg + " from Intent exta or other config to args list.");
           shellArgs.add(arg);
         }
       }

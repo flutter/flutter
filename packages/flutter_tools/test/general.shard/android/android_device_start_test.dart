@@ -48,8 +48,6 @@ void testUsingAndroidDeviceContext(
   dynamic Function() testMethod, {
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
-  String? testOn,
-  bool? skip,
 }) {
   testUsingContext(
     description,
@@ -60,8 +58,6 @@ void testUsingAndroidDeviceContext(
       ...overrides,
     },
     initializeFlutterRoot: initializeFlutterRoot,
-    testOn: testOn,
-    skip: skip,
   );
 }
 
