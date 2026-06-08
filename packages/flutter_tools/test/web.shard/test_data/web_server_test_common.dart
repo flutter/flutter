@@ -24,7 +24,7 @@ class WebServerDeviceTestRunner {
 
   final FlutterRunTestDriver _flutter;
   WebDriver? _webDriver;
-  io.Process? _chromedriverProcess;
+  io.Process? _chromeDriverProcess;
   late StreamQueue<LogEntry> _currentBrowserLogChunk;
 
   /// Runs the flutter app on the 'web-server' device and returns the web server
@@ -64,11 +64,11 @@ class WebServerDeviceTestRunner {
   /// listening on.
   Future<int> _startChromeDriverProcess() async {
     final int chromeDriverPort = await findFreePort();
-    _chromedriverProcess = await io.Process.start('chromedriver', <String>[
+    _chromeDriverProcess = await io.Process.start('chromedriver', <String>[
       '--port=$chromeDriverPort',
     ]);
-    final completer = Completer<void>();
-    _chromedriverProcess!.stdout
+    final completer = Completer<int>();
+    _chromeDriverProcess!.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(
@@ -78,47 +78,41 @@ class WebServerDeviceTestRunner {
                   'ChromeDriver was started successfully on port '
                   '$chromeDriverPort.',
                 )) {
-              completer.complete();
+              completer.complete(chromeDriverPort);
             }
           },
-          onError: (Object error, StackTrace stackTrace) {
+          onError: (dynamic error, StackTrace stack) {
+            final message =
+                'chromedriver stdout error:\n'
+                '$error\n'
+                '$stack';
             if (!completer.isCompleted) {
-              completer.completeError(error, stackTrace);
+              completer.completeError(Exception(message));
+            } else {
+              throw Exception(message);
             }
           },
           onDone: () {
             if (!completer.isCompleted) {
               completer.completeError(
-                Exception('chromedriver stdout closed without startup message'),
+                'chromedriver stdout closed before finding the expected startup message.',
               );
             }
           },
         );
-    _chromedriverProcess!.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(
-          (String line) {
-            if (!completer.isCompleted) {
-              completer.completeError(Exception('chromedriver stderr: $line'));
-            } else {
-              throw Exception('chromedriver stderr: $line');
-            }
-          },
-          onError: (Object error, StackTrace stackTrace) {
-            if (!completer.isCompleted) {
-              completer.completeError(error, stackTrace);
-            }
-          },
-        );
-    await completer.future;
-    return chromeDriverPort;
+    _chromeDriverProcess!.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((
+      String line,
+    ) {
+      // Surface errors that appear on this process at any time during the test.
+      throw Exception('chromedriver stderr: $line');
+    });
+    return completer.future;
   }
 
   /// Creates a [WebDriver] instance using a running 'chromedriver' process on
-  /// [chromeDriverPort] and navigates the browser to [url].
+  /// [chromeDriverPort].
   Future<void> _createWebDriver(int chromeDriverPort, String url) async {
-    final Future<WebDriver> driverFuture = createDriver(
+    _webDriver = await createDriver(
       uri: Uri.parse('http://localhost:$chromeDriverPort/'),
       desired: getDesiredCapabilities(
         Browser.chrome,
@@ -126,26 +120,28 @@ class WebServerDeviceTestRunner {
         chromeBinary: const LocalPlatform().environment[kChromeEnvironment],
       ),
     );
-    try {
-      _webDriver = await driverFuture.timeout(
-        createWebDriverTimeout,
-        onTimeout: () =>
-            throw Exception('Failed to create web driver after $createWebDriverTimeout'),
-      );
-    } on io.SocketException {
-      _chromedriverProcess!.kill();
-      await _chromedriverProcess!.exitCode;
-      rethrow;
-    }
     _currentBrowserLogChunk = StreamQueue(_webDriver!.logs.get(LogType.browser));
-    // Navigate to the application URL.
-    await _webDriver!.get(url);
   }
 
   /// Launches a headless Chrome browser and navigates to [url].
   Future<void> connectWithChrome(String url) async {
-    final int chromeDriverPort = await _startChromeDriverProcess();
-    await _createWebDriver(chromeDriverPort, url);
+    final int chromeDriverPort = await _startChromeDriverProcess().timeout(
+      createWebDriverTimeout,
+      onTimeout: () =>
+          throw Exception('Failed to start "chromedriver" after: $createWebDriverTimeout'),
+    );
+    await _createWebDriver(chromeDriverPort, url).timeout(
+      createWebDriverTimeout,
+      onTimeout: () => throw Exception('Failed to create web driver after $createWebDriverTimeout'),
+    );
+    // Navigate to the application URL.
+    await _webDriver!
+        .get(url)
+        .timeout(
+          createWebDriverTimeout,
+          onTimeout: () =>
+              throw Exception('Failed to navigate to $url after $createWebDriverTimeout'),
+        );
   }
 
   /// Hot reloads the running application.
@@ -188,7 +184,9 @@ class WebServerDeviceTestRunner {
 
     final stopwatch = Stopwatch()..start();
     while (stopwatch.elapsed < timeout) {
-      final String? logMessage = await findNextInCurrentLogChunk(message);
+      final String? logMessage = await findNextInCurrentLogChunk(
+        message,
+      ).timeout(timeout - stopwatch.elapsed);
       if (logMessage != null) {
         return logMessage;
       }
@@ -211,13 +209,13 @@ class WebServerDeviceTestRunner {
 
   Future<void> cleanup() async {
     try {
-      await _webDriver?.quit();
+      await quitBrowser();
       // ignore: avoid_catches_without_on_clauses
     } catch (_) {
       // Ignore errors during cleanup to ensure chromedriver is killed.
     } finally {
-      _chromedriverProcess?.kill();
-      await _chromedriverProcess?.exitCode;
+      _chromeDriverProcess?.kill();
+      await _chromeDriverProcess?.exitCode;
     }
   }
 }
