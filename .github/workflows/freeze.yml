@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: Check for changes in frozen folders
         if: github.event_name != 'merge_group'
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         id: filter
         with:
           token: ${{ github.token }}
