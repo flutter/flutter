@@ -667,7 +667,7 @@ void main() async {
       texture.overwrite(Int32List.fromList(<int>[red.value]).buffer.asByteData(), mipLevel: 2);
       fail('Exception not thrown for out-of-range mipLevel.');
     } catch (e) {
-      expect(e.toString(), contains('mipLevel (2) must be in the range [0, 2)'));
+      expect(e.toString(), contains('mipLevel (2) must be in the range [0, 1]'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
@@ -681,7 +681,7 @@ void main() async {
       );
       fail('Exception not thrown for out-of-range slice.');
     } catch (e) {
-      expect(e.toString(), contains('slice (1) must be in the range [0, 1)'));
+      expect(e.toString(), contains('slice (1) must be in the range [0, 0]'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
@@ -899,7 +899,7 @@ void main() async {
       commandBuffer.createRenderPass(renderTarget);
       fail('Exception not thrown for out-of-range mipLevel.');
     } catch (e) {
-      expect(e.toString(), contains('mipLevel (2) must be in the range [0, 2)'));
+      expect(e.toString(), contains('mipLevel (2) must be in the range [0, 1]'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
@@ -913,7 +913,7 @@ void main() async {
       commandBuffer.createRenderPass(renderTarget);
       fail('Exception not thrown for out-of-range slice.');
     } catch (e) {
-      expect(e.toString(), contains('slice (1) must be in the range [0, 1)'));
+      expect(e.toString(), contains('slice (1) must be in the range [0, 0]'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 

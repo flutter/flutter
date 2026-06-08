@@ -154,13 +154,13 @@ base class Texture extends NativeFieldWrapperClass1 {
   void overwrite(ByteData sourceBytes, {int mipLevel = 0, int slice = 0}) {
     if (mipLevel < 0 || mipLevel >= mipLevelCount) {
       throw Exception(
-        'mipLevel ($mipLevel) must be in the range [0, $mipLevelCount) for this texture',
+        'mipLevel ($mipLevel) must be in the range [0, ${mipLevelCount - 1}] for this texture',
       );
     }
     final int slices = sliceCount;
     if (slice < 0 || slice >= slices) {
       throw Exception(
-        'slice ($slice) must be in the range [0, $slices) for textures of type $textureType',
+        'slice ($slice) must be in the range [0, ${slices - 1}] for textures of type $textureType',
       );
     }
     final int expectedSize = getMipLevelSizeInBytes(mipLevel);

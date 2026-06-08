@@ -312,12 +312,12 @@ void _validateAttachmentSubresource(
 ) {
   if (mipLevel < 0 || mipLevel >= texture.mipLevelCount) {
     throw Exception(
-      "$label mipLevel ($mipLevel) must be in the range [0, ${texture.mipLevelCount}) for this texture",
+      "$label mipLevel ($mipLevel) must be in the range [0, ${texture.mipLevelCount - 1}] for this texture",
     );
   }
   if (slice < 0 || slice >= texture.sliceCount) {
     throw Exception(
-      "$label slice ($slice) must be in the range [0, ${texture.sliceCount}) for textures of type ${texture.textureType}",
+      "$label slice ($slice) must be in the range [0, ${texture.sliceCount - 1}] for textures of type ${texture.textureType}",
     );
   }
 }
