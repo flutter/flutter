@@ -111,7 +111,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/page_transitions_test.dart',
     'packages/flutter/test/widgets/routes_test.dart',
     'packages/flutter/test/widgets/app_test.dart',
-    'packages/flutter/test/widgets/navigator_replacement_test.dart',
     'packages/flutter/test/widgets/implicit_animations_test.dart',
     'packages/flutter/test/widgets/routes_transition_test.dart',
     'packages/flutter/test/widgets/editable_text_test.dart',
@@ -119,7 +118,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/inherited_test.dart',
     'packages/flutter/test/widgets/heroes_test.dart',
     'packages/flutter/test/widgets/drawer_test.dart',
-    'packages/flutter/test/widgets/editable_text_cursor_test.dart',
     'packages/flutter/test/widgets/nested_scroll_view_test.dart',
     'packages/flutter/test/widgets/scrollable_selection_test.dart',
     'packages/flutter/test/widgets/page_transitions_builder_test.dart',
@@ -141,9 +139,7 @@ class TestsCrossImportChecker {
   /// and `knownSchedulerCrossImports` corresponds to `flutter/test/scheduler`.
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/177028.
-  static final Set<String> knownAnimationCrossImports = <String>{
-    'packages/flutter/test/animation/animation_sheet_test.dart',
-  };
+  static final Set<String> knownAnimationCrossImports = <String>{};
   static final Set<String> knownCupertinoCrossImports = <String>{};
   static final Set<String> knownDartCrossImports = <String>{};
   static final Set<String> knownExamplesCrossImports = <String>{};
@@ -152,22 +148,17 @@ class TestsCrossImportChecker {
   static final Set<String> knownHarnessCrossImports = <String>{};
   static final Set<String> knownPaintingCrossImports = <String>{
     'packages/flutter/test/painting/system_fonts_test.dart',
-    'packages/flutter/test/painting/decoration_image_lerp_test.dart',
-    'packages/flutter/test/painting/continuous_rectangle_border_test.dart',
     'packages/flutter/test/painting/colors_test.dart',
   };
   static final Set<String> knownPhysicsCrossImports = <String>{};
   static final Set<String> knownRenderingCrossImports = <String>{
     'packages/flutter/test/rendering/aligning_shifted_box_baseline_test.dart',
     'packages/flutter/test/rendering/localized_fonts_test.dart',
-    'packages/flutter/test/rendering/editable_gesture_test.dart',
     'packages/flutter/test/rendering/box_test.dart',
     'packages/flutter/test/rendering/pipeline_owner_tree_test.dart',
     'packages/flutter/test/rendering/proxy_getters_and_setters_test.dart',
     'packages/flutter/test/rendering/view_chrome_style_test.dart',
     'packages/flutter/test/rendering/proxy_box_test.dart',
-    'packages/flutter/test/rendering/sliver_tree_test.dart',
-    'packages/flutter/test/rendering/editable_test.dart',
     'packages/flutter/test/rendering/object_test.dart',
   };
   static final Set<String> knownSchedulerCrossImports = <String>{};

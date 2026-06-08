@@ -32,6 +32,13 @@ final Platform macosPlatform = FakePlatform(
 );
 
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
   late FakePlatform osx;
   late FileSystemUtils fsUtils;
   late MemoryFileSystem fileSystem;
@@ -902,6 +909,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
     Xcode xcode;
     Xcode xcodeBadSimctl;
     late SimControl simControl;
+    late SimControl simControlBadSimctl;
     late IOSSimulatorUtils simulatorUtils;
     late IOSSimulatorUtils simulatorUtilsBadSimctl;
     late BufferLogger logger;
@@ -913,11 +921,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       xcode = Xcode.test(processManager: FakeProcessManager.any());
 
       final fakeProcessManagerBadSimctl = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(
-          command: <String>['sysctl', 'hw.optional.arm64'],
-          stdout: 'hw.optional.arm64: 0',
-        ),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
           stderr: 'failed to run',
@@ -927,6 +932,11 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       xcodeBadSimctl = Xcode.test(processManager: fakeProcessManagerBadSimctl);
       logger = BufferLogger.test();
       simControl = SimControl(logger: logger, processManager: fakeProcessManager, xcode: xcode);
+      simControlBadSimctl = SimControl(
+        logger: logger,
+        processManager: fakeProcessManager,
+        xcode: xcodeBadSimctl,
+      );
       simulatorUtils = IOSSimulatorUtils(
         logger: logger,
         processManager: fakeProcessManager,
@@ -1004,6 +1014,51 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       final List<BootedSimDevice> devices = await simControl.getConnectedDevices();
 
       expect(devices, isEmpty);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('getConnectedDevices handles simctl not properly installed', () async {
+      final List<BootedSimDevice> devices = await simControlBadSimctl.getConnectedDevices();
+
+      expect(devices, isEmpty);
+      expect(
+        logger.traceText,
+        contains('Skipping iOS simulator discovery because simctl is not available.'),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('getConnectedDevices handles simctl process exception', () async {
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
+          exception: ProcessException('xcrun', <String>[
+            'simctl',
+          ], 'Resource temporarily unavailable'),
+        ),
+      );
+
+      final List<BootedSimDevice> devices = await simControl.getConnectedDevices();
+
+      expect(devices, isEmpty);
+      expect(logger.errorText, contains('Error executing simctl:'));
+      expect(logger.errorText, contains('Resource temporarily unavailable'));
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('getConnectedDevices handles simctl file system exception', () async {
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted', 'iOS', '--json'],
+          exception: FileSystemException('Resource temporarily unavailable'),
+        ),
+      );
+
+      final List<BootedSimDevice> devices = await simControl.getConnectedDevices();
+
+      expect(devices, isEmpty);
+      expect(logger.errorText, contains('Error executing simctl:'));
+      expect(logger.errorText, contains('Resource temporarily unavailable'));
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 

@@ -742,16 +742,7 @@ void main() {
         // The command throws a [ToolExit] because it expects an APK in the file system.
         await expectLater(() => runBuildApkCommand(projectPath), throwsToolExit());
 
-        expect(
-          testLogger.statusText,
-          allOf(
-            containsIgnoringWhitespace("Your app isn't using AndroidX"),
-            containsIgnoringWhitespace(
-              'To avoid potential build failures, you can quickly migrate your app by '
-              'following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration',
-            ),
-          ),
-        );
+        expect(testLogger.statusText, isNot(contains("Your app isn't using AndroidX")));
 
         expect(
           analytics.sentEvents,
