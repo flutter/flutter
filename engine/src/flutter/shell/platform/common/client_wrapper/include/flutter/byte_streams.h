@@ -27,7 +27,7 @@ class ByteStreamReader {
   virtual void ReadAlignment(uint8_t alignment) = 0;
 
   // Returns the number of bytes remaining in the stream.
-  virtual size_t GetRemaining() const { return 0; }
+  virtual size_t GetRemaining() const { return std::numeric_limits<size_t>::max(); }
 
   // Reads and returns the next 32-bit integer from the stream.
   int32_t ReadInt32() {
