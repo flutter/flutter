@@ -903,8 +903,8 @@ class _MacOSPlatformInterface {
         ..contentSize.height = size.height;
     }
 
-    if (preferredSize == null) {
-      preferredConstraints ??= const BoxConstraints();
+    if (size == null) {
+      constraints ??= const BoxConstraints();
     }
 
     if (constraints != null) {
@@ -962,8 +962,8 @@ class _MacOSPlatformInterface {
     }
     request.ref.resizable = resizable;
 
-    if (preferredSize == null) {
-      preferredConstraints ??= const BoxConstraints();
+    if (size == null) {
+      constraints ??= const BoxConstraints();
     }
 
     try {
