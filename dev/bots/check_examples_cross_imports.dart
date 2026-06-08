@@ -620,6 +620,8 @@ class ExamplesCrossImportChecker {
       }
     }
 
+    // TODO(justinmc): The examples checker needs an exemption list for specific core widgets
+    // For example the Material and Cupertino text magnifier or context menu builders.
     return valid;
   }
 }
