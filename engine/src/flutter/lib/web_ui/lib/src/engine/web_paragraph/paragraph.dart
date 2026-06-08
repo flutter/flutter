@@ -537,53 +537,12 @@ abstract class SharedTextStyle {
   double? get letterSpacing => null;
   double? get wordSpacing => null;
 
-  List<String> get _fallbackFontFamilies {
-    if (isIOS15) {
-      // Remove the "-apple-system" fallback font because it causes a crash in
-      // iOS 15.
-      //
-      // See github issue: https://github.com/flutter/flutter/issues/90705
-      // See webkit bug: https://bugs.webkit.org/show_bug.cgi?id=231686
-      return <String>['BlinkMacSystemFont'];
-    }
-    if (isMacOrIOS) {
-      return <String>['-apple-system', 'BlinkMacSystemFont'];
-    }
-    return <String>['Arial'];
-  }
-
-  String _canonicalizeFontFamily(String? fontFamily, [List<String>? fontFamilyFallback]) {
-    final processedFontFamilyFallback = fontFamilyFallback == null || fontFamilyFallback.isEmpty
-        ? ''
-        : '${fontFamilyFallback.map(_processFontFamily).join(', ')}, ';
-    return '${_processFontFamily(fontFamily)}, $processedFontFamilyFallback ${_fallbackFontFamilies.join(', ')}, sans-serif';
-  }
-
-  String? _processFontFamily(String? fontFamily) {
-    if (genericFontFamilies.contains(fontFamily)) {
-      return fontFamily;
-    }
-    if (isMacOrIOS) {
-      // Unlike Safari, Chrome on iOS does not correctly fallback to cupertino
-      // on sans-serif.
-      // Map to San Francisco Text/Display fonts, use -apple-system,
-      // BlinkMacSystemFont.
-      if (fontFamily == '.SF Pro Text' ||
-          fontFamily == '.SF Pro Display' ||
-          fontFamily == '.SF UI Text' ||
-          fontFamily == '.SF UI Display') {
-        return _fallbackFontFamilies.join(', ');
-      }
-    }
-    return '"$fontFamily"';
-  }
-
   String _buildCssFontString() {
     final String cssFontStyle = fontStyle?.toCssString() ?? StyleManager.defaultFontStyle;
     final String cssFontWeight = fontWeight?.toCssString() ?? StyleManager.defaultFontWeight;
     final int cssFontSize = (fontSize ?? StyleManager.defaultFontSize).floor();
     final String cssFontFamily = fontFamily ?? StyleManager.defaultFontFamily;
-    final String fullFontName = _canonicalizeFontFamily(cssFontFamily, fontFamilyFallback);
+    final String fullFontName = canonicalizeFontFamily(cssFontFamily, fontFamilyFallback)!;
     return '$cssFontStyle $cssFontWeight ${cssFontSize}px $fullFontName';
   }
 

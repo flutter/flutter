@@ -302,26 +302,49 @@ String colorValueToCssString(int value) {
   }
 }
 
-/// From: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#Syntax
-///
-/// Generic font families are a fallback mechanism, a means of preserving some
-/// of the style sheet author's intent when none of the specified fonts are
-/// available. Generic family names are keywords and must not be quoted. A
-/// generic font family should be the last item in the list of font family
-/// names.
-const Set<String> genericFontFamilies = <String>{
-  'serif',
-  'sans-serif',
-  'monospace',
-  'cursive',
-  'fantasy',
-  'system-ui',
-  'math',
-  'emoji',
-  'fangsong',
-};
+bool _isGenericFont(String? fontFamily) {
+  // From: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#Syntax
+  //
+  // Generic font families are a fallback mechanism, a means of preserving some
+  // of the style sheet author's intent when none of the specified fonts are
+  // available. Generic family names are keywords and must not be quoted. A
+  // generic font family should be the last item in the list of font family
+  // names.
+  return fontFamily != null &&
+      (fontFamily == 'serif' ||
+          fontFamily == 'sans-serif' ||
+          fontFamily == 'monospace' ||
+          fontFamily == 'cursive' ||
+          fontFamily == 'fantasy' ||
+          fontFamily == 'system-ui' ||
+          fontFamily == 'math' ||
+          fontFamily == 'emoji' ||
+          fontFamily == 'fangsong');
+}
 
-/// A default fallback font family in case an unloaded font has been requested.
+bool _isAppleFont(String? fontFamily) {
+  return isMacOrIOS &&
+      fontFamily != null &&
+      (fontFamily == '.SF Pro Text' ||
+          fontFamily == '.SF Pro Display' ||
+          fontFamily == '.SF UI Text' ||
+          fontFamily == '.SF UI Display');
+}
+
+const _iOS15Fallbacks = <String>['BlinkMacSystemFont'];
+const _macOrIOSFallbacks = <String>['-apple-system', 'BlinkMacSystemFont'];
+
+List<String> get _appleFallbacks {
+  if (isIOS15) {
+    return _iOS15Fallbacks;
+  }
+  if (isMacOrIOS) {
+    return _macOrIOSFallbacks;
+  }
+  throw StateError('Should only be called on Mac or iOS.');
+}
+
+/// Platform-specific fallback font families in case an unloaded font has been requested.
 ///
 /// -apple-system targets San Francisco in Safari (on Mac OS X and iOS),
 /// and it targets Neue Helvetica and Lucida Grande on older versions of
@@ -330,42 +353,106 @@ const Set<String> genericFontFamilies = <String>{
 ///
 /// For iOS, default to -apple-system, where it should be available, otherwise
 /// default to Arial. BlinkMacSystemFont is used for Chrome on iOS.
-String get _fallbackFontFamily {
+List<String> get _platformFallbackFontFamilies {
   if (isIOS15) {
     // Remove the "-apple-system" fallback font because it causes a crash in
     // iOS 15.
     //
     // See github issue: https://github.com/flutter/flutter/issues/90705
     // See webkit bug: https://bugs.webkit.org/show_bug.cgi?id=231686
-    return 'BlinkMacSystemFont';
+    return _iOS15Fallbacks;
   }
   if (isMacOrIOS) {
-    return '-apple-system, BlinkMacSystemFont';
+    return _appleFallbacks;
   }
-  return 'Arial';
+  return const <String>['Arial'];
 }
 
 /// Create a font-family string appropriate for CSS.
 ///
 /// If the given [fontFamily] is a generic font-family, then just return it.
 /// Otherwise, wrap the family name in quotes and add a fallback font family.
-String? canonicalizeFontFamily(String? fontFamily) {
-  if (genericFontFamilies.contains(fontFamily)) {
-    return fontFamily;
-  }
-  if (isMacOrIOS) {
-    // Unlike Safari, Chrome on iOS does not correctly fallback to cupertino
-    // on sans-serif.
-    // Map to San Francisco Text/Display fonts, use -apple-system,
-    // BlinkMacSystemFont.
-    if (fontFamily == '.SF Pro Text' ||
-        fontFamily == '.SF Pro Display' ||
-        fontFamily == '.SF UI Text' ||
-        fontFamily == '.SF UI Display') {
-      return _fallbackFontFamily;
+String? canonicalizeFontFamily(String? fontFamily, [List<String>? fontFamilyFallback]) {
+  final buffer = StringBuffer();
+
+  // The main `fontFamily`.
+  _processFontFamily(fontFamily, buffer);
+
+  // Generic and Apple fonts don't need platform fallbacks.
+  final bool needsFallbacks = !_isGenericFont(fontFamily) && !_isAppleFont(fontFamily);
+
+  if (needsFallbacks) {
+    // The fallback font families provided by the caller.
+    if (fontFamilyFallback != null && fontFamilyFallback.isNotEmpty) {
+      for (final String fontFamily in fontFamilyFallback) {
+        _processFontFamily(fontFamily, buffer);
+      }
+    }
+
+    final bool hasGenericFont = fontFamilyFallback?.any(_isGenericFont) ?? false;
+    final bool hasAppleFont = fontFamilyFallback?.any(_isAppleFont) ?? false;
+
+    final bool needsPlatformFallbacks = !hasGenericFont && !hasAppleFont;
+
+    if (needsPlatformFallbacks) {
+      // The platform-dependent fallback font families (e.g., -apple-system).
+      for (final String fontFamily in _platformFallbackFontFamilies) {
+        if (buffer.isNotEmpty) {
+          buffer.write(',');
+        }
+        // These font families are already canonicalized, so we don't need to process them.
+        buffer.write(fontFamily);
+      }
+
+      // The generic fallback font family.
+      if (buffer.isNotEmpty) {
+        buffer.write(',');
+      }
+      buffer.write('sans-serif');
     }
   }
-  return '"$fontFamily", $_fallbackFontFamily, sans-serif';
+
+  return buffer.toString();
+}
+
+/// Processes a font family and adds it to the buffer.
+///
+/// Returns true if at least one font family was added, false otherwise.
+bool _processFontFamily(String? fontFamily, StringBuffer buffer) {
+  // No font family.
+  if (fontFamily == null || fontFamily.isEmpty) {
+    return false;
+  }
+
+  // A generic font family, don't quote them.
+  if (_isGenericFont(fontFamily)) {
+    if (buffer.isNotEmpty) {
+      buffer.write(',');
+    }
+    buffer.write(fontFamily);
+    return true;
+  }
+
+  // Unlike Safari, Chrome on iOS does not correctly fallback to cupertino
+  // on sans-serif.
+  // Map to San Francisco Text/Display fonts, use -apple-system,
+  // BlinkMacSystemFont.
+  if (_isAppleFont(fontFamily)) {
+    for (final String fontFamily in _appleFallbacks) {
+      if (buffer.isNotEmpty) {
+        buffer.write(',');
+      }
+      buffer.write(fontFamily);
+    }
+    return true;
+  }
+
+  // Everything else should be quoted.
+  if (buffer.isNotEmpty) {
+    buffer.write(',');
+  }
+  buffer.write('"$fontFamily"');
+  return true;
 }
 
 /// Converts a list of [Offset] to a typed array of floats.
