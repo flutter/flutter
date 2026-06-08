@@ -313,7 +313,7 @@ class FlutterPlugin : Plugin<Project> {
                 projectToAddTasksTo.layout.buildDirectory.dir(
                     "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${sourceSet.name}/jniLibs"
                 )
-            sourceSet.jniLibs.srcDir(jniLibsDir.get().asFile)
+            sourceSet.jniLibs.srcDir(jniLibsDir)
         }
 
         val flutterPlugin = this
