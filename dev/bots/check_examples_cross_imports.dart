@@ -137,7 +137,10 @@ class ExamplesCrossImportChecker {
   /// that we can catch any new cross imports that are added.
   // TODO(justinmc): Fix all of these tests so there are no cross imports.
   // See https://github.com/flutter/flutter/issues/187645.
-  static final Set<String> knownExamplesSlashApiFoundationCrossImports = <String>{};
+  static final Set<String> knownExamplesSlashApiFoundationCrossImports = <String>{
+    'examples/api/lib/foundation/key/value_key.0.dart',
+    'examples/api/test/foundation/key/value_key.0_test.dart',
+  };
 
   /// The known cross imports in the `examples/api/lib/gestures`
   /// and `examples/api/test/gestures` directories.
