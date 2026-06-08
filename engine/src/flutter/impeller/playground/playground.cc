@@ -214,7 +214,9 @@ void Playground::TeardownWindow() {
       FML_LOG(WARNING) << "failed to flush command buffers";
     }
     context_->FinishQueue();
-    context_->Shutdown();
+    if (impl_owner_) {
+      context_->Shutdown();
+    }
   }
   context_.reset();
   impl_ = nullptr;
