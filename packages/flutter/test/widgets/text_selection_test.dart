@@ -2056,6 +2056,7 @@ void main() {
               controller: controller,
               focusNode: focusNode,
               selectionControls: customControls,
+              selectAllOnFocus: false,
             ),
           ),
         ),
