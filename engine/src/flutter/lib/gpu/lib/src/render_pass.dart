@@ -38,16 +38,6 @@ base class ColorAttachment {
   int slice;
 
   void _validate() {
-    if (mipLevel < 0 || mipLevel >= texture.mipLevelCount) {
-      throw Exception(
-        "ColorAttachment mipLevel ($mipLevel) must be in the range [0, ${texture.mipLevelCount}) for this texture",
-      );
-    }
-    if (slice < 0 || slice >= texture.sliceCount) {
-      throw Exception(
-        "ColorAttachment slice ($slice) must be in the range [0, ${texture.sliceCount}) for textures of type ${texture.textureType}",
-      );
-    }
     if (resolveTexture != null) {
       if (resolveTexture!.format != texture.format) {
         throw Exception(
@@ -117,16 +107,6 @@ base class DepthStencilAttachment {
   int slice;
 
   void _validate() {
-    if (mipLevel < 0 || mipLevel >= texture.mipLevelCount) {
-      throw Exception(
-        "DepthStencilAttachment mipLevel ($mipLevel) must be in the range [0, ${texture.mipLevelCount}) for this texture",
-      );
-    }
-    if (slice < 0 || slice >= texture.sliceCount) {
-      throw Exception(
-        "DepthStencilAttachment slice ($slice) must be in the range [0, ${texture.sliceCount}) for textures of type ${texture.textureType}",
-      );
-    }
     if (texture.storageMode == StorageMode.deviceTransient) {
       if (depthLoadAction == LoadAction.load) {
         throw Exception(
@@ -264,8 +244,80 @@ base class RenderTarget {
     }
   }
 
+  /// Validates attachment mip levels, slices, and sizes. Out-of-range
+  /// subresources and mismatched sizes are undefined behavior in the engine,
+  /// and the engine-side checks are compiled out in release builds, so this
+  /// runs unconditionally.
+  void _validateAttachments() {
+    (int, int)? size;
+    void accumulate((int, int) attachmentSize) {
+      size ??= attachmentSize;
+      if (size != attachmentSize) {
+        throw Exception(
+          "All render target attachments must render into the same size. "
+          "Check that all color and depth-stencil attachments use matching "
+          "texture sizes and mip levels.",
+        );
+      }
+    }
+
+    for (final color in colorAttachments) {
+      _validateAttachmentSubresource(
+        color.texture,
+        color.mipLevel,
+        color.slice,
+        "ColorAttachment",
+      );
+      if (color.resolveTexture != null) {
+        _validateAttachmentSubresource(
+          color.resolveTexture!,
+          color.mipLevel,
+          color.slice,
+          "ColorAttachment resolve texture",
+        );
+      }
+      accumulate(_attachmentMipSize(color.texture, color.mipLevel));
+    }
+
+    final ds = depthStencilAttachment;
+    if (ds != null) {
+      _validateAttachmentSubresource(
+        ds.texture,
+        ds.mipLevel,
+        ds.slice,
+        "DepthStencilAttachment",
+      );
+      accumulate(_attachmentMipSize(ds.texture, ds.mipLevel));
+    }
+  }
+
   final List<ColorAttachment> colorAttachments;
   final DepthStencilAttachment? depthStencilAttachment;
+}
+
+/// The dimensions of [texture] at [mipLevel], clamped to a minimum of 1x1.
+(int, int) _attachmentMipSize(Texture texture, int mipLevel) {
+  final int width = texture.width >> mipLevel;
+  final int height = texture.height >> mipLevel;
+  return (width < 1 ? 1 : width, height < 1 ? 1 : height);
+}
+
+void _validateAttachmentSubresource(
+  Texture texture,
+  int mipLevel,
+  int slice,
+  String label,
+) {
+  if (mipLevel < 0 || mipLevel >= texture.mipLevelCount) {
+    throw Exception(
+      "$label mipLevel ($mipLevel) must be in the range [0, ${texture.mipLevelCount}) for this texture",
+    );
+  }
+  if (slice < 0 || slice >= texture.sliceCount) {
+    throw Exception(
+      "$label slice ($slice) must be in the range [0, ${texture.sliceCount}) for textures of type ${texture.textureType}",
+    );
+  }
 }
 
 base class RenderPass extends NativeFieldWrapperClass1 {
@@ -291,6 +343,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     CommandBuffer commandBuffer,
     RenderTarget renderTarget,
   ) {
+    renderTarget._validateAttachments();
     assert(() {
       renderTarget._validate();
       return true;

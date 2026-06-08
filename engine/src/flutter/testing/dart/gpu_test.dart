@@ -916,6 +916,34 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('RenderTarget throws when attachment sizes do not match', () async {
+    // The color attachment renders into mip 1 (4x4) while the depth-stencil
+    // attachment renders into mip 0 (8x8).
+    final gpu.Texture color = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      8,
+      8,
+      mipLevelCount: 2,
+    );
+    final gpu.Texture depthStencil = gpu.gpuContext.createTexture(
+      gpu.StorageMode.deviceTransient,
+      8,
+      8,
+      format: gpu.gpuContext.defaultDepthStencilFormat,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final renderTarget = gpu.RenderTarget.singleColor(
+      gpu.ColorAttachment(texture: color, mipLevel: 1),
+      depthStencilAttachment: gpu.DepthStencilAttachment(texture: depthStencil),
+    );
+    try {
+      commandBuffer.createRenderPass(renderTarget);
+      fail('Exception not thrown for mismatched attachment sizes.');
+    } catch (e) {
+      expect(e.toString(), contains('must render into the same size'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   // Regression test for https://github.com/flutter/flutter/issues/157324
   test('Can bind uniforms in range', () async {
     final RenderPassState state = createSimpleRenderPass();
