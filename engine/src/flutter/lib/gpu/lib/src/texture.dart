@@ -40,14 +40,12 @@ base class Texture extends NativeFieldWrapperClass1 {
     this.width,
     this.height,
     this.sampleCount,
-    TextureCoordinateSystem coordinateSystem,
     this.textureType,
     this.enableRenderTargetUsage,
     this.enableShaderReadUsage,
     this.enableShaderWriteUsage,
     this.mipLevelCount,
-  ) : _gpuContext = gpuContext,
-      _coordinateSystem = coordinateSystem {
+  ) : _gpuContext = gpuContext {
     if (sampleCount != 1 && sampleCount != 4) {
       throw Exception("Only a sample count of 1 or 4 is currently supported");
     }
@@ -58,7 +56,6 @@ base class Texture extends NativeFieldWrapperClass1 {
       width,
       height,
       sampleCount,
-      coordinateSystem.index,
       textureType.index,
       enableRenderTargetUsage,
       enableShaderReadUsage,
@@ -102,16 +99,6 @@ base class Texture extends NativeFieldWrapperClass1 {
   /// The number of slices in this texture. Determined by [textureType]:
   /// 1 for 2D and external textures, 6 for cubemap textures.
   int get sliceCount => textureType == TextureType.textureCube ? 6 : 1;
-
-  TextureCoordinateSystem _coordinateSystem;
-  TextureCoordinateSystem get coordinateSystem {
-    return _coordinateSystem;
-  }
-
-  set coordinateSystem(TextureCoordinateSystem value) {
-    value;
-    _setCoordinateSystem(value.index);
-  }
 
   /// Returns the size in bytes of the [mipLevel] mip level (one slice). Mip
   /// dimensions are clamped at 1, matching standard mip chain semantics. For
@@ -195,7 +182,6 @@ base class Texture extends NativeFieldWrapperClass1 {
       Int,
       Int,
       Int,
-      Int,
       Bool,
       Bool,
       Bool,
@@ -209,18 +195,12 @@ base class Texture extends NativeFieldWrapperClass1 {
     int width,
     int height,
     int sampleCount,
-    int coordinateSystem,
     int textureType,
     bool enableRenderTargetUsage,
     bool enableShaderReadUsage,
     bool enableShaderWriteUsage,
     int mipLevelCount,
   );
-
-  @Native<Void Function(Handle, Int)>(
-    symbol: 'InternalFlutterGpu_Texture_SetCoordinateSystem',
-  )
-  external void _setCoordinateSystem(int coordinateSystem);
 
   @Native<Bool Function(Pointer<Void>, Pointer<Void>, Handle, Int, Int)>(
     symbol: 'InternalFlutterGpu_Texture_Overwrite',

@@ -247,17 +247,6 @@ extension PixelFormatProperties on PixelFormat {
   }
 }
 
-enum TextureCoordinateSystem {
-  /// Alternative coordinate system used when uploading texture data from the
-  /// host.
-  /// (0, 0) is the bottom-left of the image with +Y going up.
-  uploadFromHost,
-
-  /// Default coordinate system.
-  /// (0, 0) is the top-left of the image with +Y going down.
-  renderToTexture,
-}
-
 enum BlendFactor {
   zero,
   one,
