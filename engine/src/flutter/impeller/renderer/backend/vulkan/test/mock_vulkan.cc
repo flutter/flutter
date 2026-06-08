@@ -103,7 +103,7 @@ class MockDevice final {
     called_functions_->push_back(function);
   }
 
-  const MockQueue& GetQueue() const { return queue_; }
+  MockQueue& GetQueue() { return queue_; }
 
  private:
   MockDevice(const MockDevice&) = delete;
@@ -122,7 +122,7 @@ class MockDevice final {
   std::vector<std::unique_ptr<MockCommandPool>> command_pools_
       IPLR_GUARDED_BY(commmand_pools_mutex_);
 
-  const MockQueue queue_;
+  MockQueue queue_;
 };
 
 struct MockVulkanState {
@@ -641,8 +641,7 @@ void vkGetDeviceQueue(VkDevice device,
                       uint32_t queueIndex,
                       VkQueue* pQueue) {
   MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
-  *pQueue = reinterpret_cast<VkQueue>(
-      const_cast<MockQueue*>(&mock_device->GetQueue()));
+  *pQueue = reinterpret_cast<VkQueue>(&mock_device->GetQueue());
 }
 
 VkResult vkQueueSubmit(VkQueue queue,

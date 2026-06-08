@@ -17,7 +17,8 @@ TEST(CommandQueueVKTest, SubmitAfterFenceWaiterTerminated) {
   const auto context = MockVulkanContextBuilder().Build();
   auto buffer = context->CreateCommandBuffer();
   context->GetFenceWaiter()->Terminate();
-  context->GetCommandQueue()->Submit({buffer});
+  auto status = context->GetCommandQueue()->Submit({buffer});
+  EXPECT_FALSE(status.ok());
 
   // The command buffer should not be submitted to the Vulkan queue if the
   // fence waiter has been terminated.

@@ -83,7 +83,8 @@ fml::Status CommandQueueVK::Submit(
   if (status != vk::Result::eSuccess) {
     context->GetFenceWaiter()->RemoveFence(raw_fence);
     VALIDATION_LOG << "Failed to submit queue: " << vk::to_string(status);
-    return fml::Status(fml::StatusCode::kCancelled, "Failed to submit queue: ");
+    return fml::Status(fml::StatusCode::kCancelled,
+                       "Failed to submit queue: " + vk::to_string(status));
   }
 
   reset.Release();
