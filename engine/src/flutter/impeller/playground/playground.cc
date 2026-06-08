@@ -178,13 +178,9 @@ void Playground::SetupContext(PlaygroundBackend backend,
       impl_ = impl_owner_.get();
       break;
     case PlaygroundBackend::kOpenGLES:
-      // impl_owner_ = PlaygroundImpl::Create(backend, switches);
-      // impl_ = impl_owner_.get();
       impl_ = GetSharedOpenGLESPlayground(false).get();
       break;
     case PlaygroundBackend::kOpenGLESSDF:
-      // impl_owner_ = PlaygroundImpl::Create(backend, switches);
-      // impl_ = impl_owner_.get();
       impl_ = GetSharedOpenGLESPlayground(true).get();
       break;
   }
@@ -211,9 +207,7 @@ bool Playground::IsPlaygroundEnabled() const {
 
 void Playground::TeardownWindow() {
   if (host_buffer_) {
-    FML_LOG(ERROR) << ">> resetting host buffer";
     host_buffer_.reset();
-    FML_LOG(ERROR) << "<< done resetting host buffer";
   }
   if (context_) {
     if (!context_->FlushCommandBuffers()) {
