@@ -5,7 +5,6 @@
 import 'dart:io';
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:path/path.dart' as path;
 
 import '../src/common.dart';
 import 'test_utils.dart';
@@ -130,7 +129,7 @@ void main() {
       final String sdkPath = sdkDirMatch?.group(1) ?? '';
       expect(sdkPath, isNotEmpty);
 
-      final String apkAnalyzerPath = path.join(
+      final String apkAnalyzerPath = fileSystem.path.join(
         sdkPath,
         'cmdline-tools',
         'latest',
