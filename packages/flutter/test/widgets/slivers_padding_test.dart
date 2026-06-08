@@ -390,6 +390,27 @@ void main() {
     );
   });
 
+  testWidgets('Viewport+SliverPadding changing padding to negative asserts', (
+    WidgetTester tester,
+  ) async {
+    final offset = ViewportOffset.fixed(0.0);
+    addTearDown(offset.dispose);
+
+    Widget buildApp(EdgeInsetsGeometry padding) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Viewport(
+          offset: offset,
+          slivers: <Widget>[SliverPadding(padding: padding)],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(EdgeInsets.zero));
+
+    expect(() => tester.pumpWidget(buildApp(const EdgeInsets.all(-1.0))), throwsAssertionError);
+  });
+
   testWidgets('Viewport+SliverPadding changing direction', (WidgetTester tester) async {
     final offset1 = ViewportOffset.fixed(0.0);
     addTearDown(offset1.dispose);
