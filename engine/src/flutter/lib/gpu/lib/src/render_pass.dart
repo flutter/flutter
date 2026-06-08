@@ -13,6 +13,8 @@ base class ColorAttachment {
     vm.Vector4? clearValue = null,
     required this.texture,
     this.resolveTexture = null,
+    this.mipLevel = 0,
+    this.slice = 0,
   }) : clearValue = clearValue ?? vm.Vector4.zero();
 
   LoadAction loadAction;
@@ -22,7 +24,30 @@ base class ColorAttachment {
   Texture texture;
   Texture? resolveTexture;
 
+  /// The mip level of [texture] to render into. Must be in the range
+  /// `[0, texture.mipLevelCount)`.
+  ///
+  /// Rendering into a non-zero mip level requires OpenGL ES 3.0 or the
+  /// `GL_OES_fbo_render_mipmap` extension on the GLES backend. Metal and
+  /// Vulkan always support it.
+  int mipLevel;
+
+  /// The slice of [texture] to render into. For cubemap textures this selects
+  /// the face in the order `+X, -X, +Y, -Y, +Z, -Z`. Must be in the range
+  /// `[0, texture.sliceCount)` (always 0 for non-cubemap textures).
+  int slice;
+
   void _validate() {
+    if (mipLevel < 0 || mipLevel >= texture.mipLevelCount) {
+      throw Exception(
+        "ColorAttachment mipLevel ($mipLevel) must be in the range [0, ${texture.mipLevelCount}) for this texture",
+      );
+    }
+    if (slice < 0 || slice >= texture.sliceCount) {
+      throw Exception(
+        "ColorAttachment slice ($slice) must be in the range [0, ${texture.sliceCount}) for textures of type ${texture.textureType}",
+      );
+    }
     if (resolveTexture != null) {
       if (resolveTexture!.format != texture.format) {
         throw Exception(
@@ -69,6 +94,8 @@ base class DepthStencilAttachment {
     this.stencilStoreAction = StoreAction.dontCare,
     this.stencilClearValue = 0,
     required this.texture,
+    this.mipLevel = 0,
+    this.slice = 0,
   });
 
   LoadAction depthLoadAction;
@@ -81,7 +108,25 @@ base class DepthStencilAttachment {
 
   Texture texture;
 
+  /// The mip level of [texture] to render into. Must match the mip level of
+  /// the color attachments so all attachments share the same size. See
+  /// [ColorAttachment.mipLevel].
+  int mipLevel;
+
+  /// The slice of [texture] to render into. See [ColorAttachment.slice].
+  int slice;
+
   void _validate() {
+    if (mipLevel < 0 || mipLevel >= texture.mipLevelCount) {
+      throw Exception(
+        "DepthStencilAttachment mipLevel ($mipLevel) must be in the range [0, ${texture.mipLevelCount}) for this texture",
+      );
+    }
+    if (slice < 0 || slice >= texture.sliceCount) {
+      throw Exception(
+        "DepthStencilAttachment slice ($slice) must be in the range [0, ${texture.sliceCount}) for textures of type ${texture.textureType}",
+      );
+    }
     if (texture.storageMode == StorageMode.deviceTransient) {
       if (depthLoadAction == LoadAction.load) {
         throw Exception(
@@ -265,6 +310,8 @@ base class RenderPass extends NativeFieldWrapperClass1 {
         color.clearValue.a,
         color.texture,
         color.resolveTexture,
+        color.mipLevel,
+        color.slice,
       );
       if (error != null) {
         throw Exception(error);
@@ -280,6 +327,8 @@ base class RenderPass extends NativeFieldWrapperClass1 {
         ds.stencilStoreAction.index,
         ds.stencilClearValue,
         ds.texture,
+        ds.mipLevel,
+        ds.slice,
       );
       if (error != null) {
         throw Exception(error);
@@ -557,6 +606,8 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       Float,
       Pointer<Void>,
       Handle,
+      Int,
+      Int,
     )
   >(symbol: 'InternalFlutterGpu_RenderPass_SetColorAttachment')
   external String? _setColorAttachment(
@@ -570,6 +621,8 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     double clearColorA,
     Texture texture,
     Texture? resolveTexture,
+    int mipLevel,
+    int slice,
   );
 
   @Native<
@@ -582,6 +635,8 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       Int,
       Int,
       Pointer<Void>,
+      Int,
+      Int,
     )
   >(symbol: 'InternalFlutterGpu_RenderPass_SetDepthStencilAttachment')
   external String? _setDepthStencilAttachment(
@@ -592,6 +647,8 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     int stencilStoreAction,
     int stencilClearValue,
     Texture texture,
+    int mipLevel,
+    int slice,
   );
 
   @Native<Handle Function(Pointer<Void>, Pointer<Void>)>(

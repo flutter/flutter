@@ -80,10 +80,10 @@ class CapabilitiesGLES final
   /// @brief Whether this is an ES GL variant or (if false) desktop GL.
   bool IsES() const;
 
-  /// @brief Whether a non-zero mip level of a texture can be attached to a
-  ///        framebuffer. Core ES 2.0 only allows mip level 0; ES 3.0+ and the
-  ///        GL_OES_fbo_render_mipmap extension lift that restriction.
-  bool SupportsFramebufferRenderMipmap() const;
+  // |Capabilities|
+  /// Core ES 2.0 only allows mip level 0; ES 3.0+ and the
+  /// GL_OES_fbo_render_mipmap extension lift that restriction.
+  bool SupportsFramebufferRenderMipmap() const override;
 
   // |Capabilities|
   bool SupportsOffscreenMSAA() const override;

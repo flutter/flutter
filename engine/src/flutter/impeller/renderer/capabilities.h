@@ -134,6 +134,12 @@ class Capabilities {
   virtual bool SupportsTextureCompression(
       CompressedTextureFamily family) const = 0;
 
+  /// @brief Whether a non-zero mip level of a texture can be attached as a
+  ///        render target. Rendering into a cube map face or array layer is
+  ///        always supported, but core OpenGL ES 2.0 only allows attaching mip
+  ///        level 0. Metal and Vulkan always support this.
+  virtual bool SupportsFramebufferRenderMipmap() const = 0;
+
   /// @brief The minimum alignment of uniform value offsets in bytes.
   virtual size_t GetMinimumUniformAlignment() const = 0;
 
