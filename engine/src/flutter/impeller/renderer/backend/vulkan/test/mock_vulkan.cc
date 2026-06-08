@@ -38,6 +38,8 @@ class MockQueue {
   MockDevice& device() const { return device_; }
 
  private:
+  // The MockDevice owns the MockQueues, and each MockQueue holds a reference
+  // to its parent device.
   MockDevice& device_;
 };
 

@@ -18,7 +18,7 @@ TEST(CommandQueueVKTest, SubmitAfterFenceWaiterTerminated) {
   auto buffer = context->CreateCommandBuffer();
   context->GetFenceWaiter()->Terminate();
   auto status = context->GetCommandQueue()->Submit({buffer});
-  EXPECT_FALSE(status.ok());
+  EXPECT_EQ(status.code(), fml::StatusCode::kCancelled);
 
   // The command buffer should not be submitted to the Vulkan queue if the
   // fence waiter has been terminated.
