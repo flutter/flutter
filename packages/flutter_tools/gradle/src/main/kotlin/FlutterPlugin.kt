@@ -742,7 +742,7 @@ class FlutterPlugin : Plugin<Project> {
             project.tasks.configureEach {
                 if (name == mergeJniLibsTaskName) {
                     dependsOn(copyJniLibsTaskProvider)
-                    inputs.dir(jniLibsDir)
+                    inputs.dir(jniLibsDir).optional()
                 }
             }
             val copyFlutterAssetsTaskProvider: TaskProvider<Copy> =
