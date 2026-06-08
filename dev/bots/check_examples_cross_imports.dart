@@ -520,12 +520,14 @@ class ExamplesCrossImportChecker {
 
       final library = _ExamplesLibrary.fromDirectory(directory, flutterRoot: flutterRoot);
 
+      mapping.putIfAbsent(library, () => {});
+
       for (final File file in directory.listSync(recursive: true).whereType<File>()) {
         if (!file.absolute.path.contains(dartFilePattern)) {
           continue;
         }
 
-        mapping.putIfAbsent(library, () => {}).add(file);
+        mapping[library]?.add(file);
       }
     }
 
@@ -537,12 +539,14 @@ class ExamplesCrossImportChecker {
 
       final library = _ExamplesLibrary.fromDirectory(directory, flutterRoot: flutterRoot);
 
+      mapping.putIfAbsent(library, () => {});
+
       for (final File file in directory.listSync(recursive: true).whereType<File>()) {
         if (!file.absolute.path.contains(dartFilePattern)) {
           continue;
         }
 
-        mapping.putIfAbsent(library, () => {}).add(file);
+        mapping[library]?.add(file);
       }
     }
 
@@ -609,7 +613,12 @@ class ExamplesCrossImportChecker {
       final Set<File> crossImportsForLibrary = entry.value.cupertinoImports.union(
         entry.value.materialImports,
       );
-      final Set<String> knownCrossImportsForLibrary = entry.key.knownCrossImports;
+
+      final Set<String> knownCrossImportsForLibrary = {
+        for (final String element in entry.key.knownCrossImports)
+          // The known cross imports include both /lib and /test entries, so handle both.
+          if (element.startsWith('${entry.key.libraryName}/')) element,
+      };
 
       final Set<String> fixedCrossImports = differencePaths(
         knownCrossImportsForLibrary,
