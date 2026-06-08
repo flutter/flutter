@@ -52,6 +52,10 @@ class ByteBufferStreamReader : public ByteStreamReader {
     }
   }
 
+  size_t GetRemaining() const override {
+    return (location_ < size_) ? (size_ - location_) : 0;
+  }
+
  private:
   // The buffer to read from.
   const uint8_t* bytes_;
