@@ -13,8 +13,7 @@ import com.android.build.gradle.internal.core.InternalBaseVariant
 import com.android.build.gradle.tasks.MergeSourceSetFolders
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.tasks.FlutterTask
-import com.flutter.gradle.tasks.PrintKgpTask
-import com.flutter.gradle.tasks.PrintTaskDeferred
+import com.flutter.gradle.tasks.PrintTask
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
@@ -38,7 +37,7 @@ import kotlin.test.assertContains
 class FlutterPluginTest {
     @Test
     fun `FlutterPlugin apply() adds expected tasks`(
-        @TempDir tempDir: Path
+        @TempDir tempDir: Path,
     ) {
         val projectDir = tempDir.resolve("project-dir").resolve("android").resolve("app")
         projectDir.toFile().mkdirs()
@@ -56,7 +55,7 @@ class FlutterPluginTest {
         val mockAbstractAppExtension =
             mockk<AbstractAppExtension>(
                 moreInterfaces = arrayOf(ApplicationExtension::class),
-                relaxed = true
+                relaxed = true,
             )
         val mockLibraryExtension = mockk<LibraryExtension>(relaxed = true)
         every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
@@ -101,7 +100,7 @@ class FlutterPluginTest {
         val mockApplicationDefaultConfig =
             mockk<com.android.build.gradle.internal.dsl.DefaultConfig>(
                 moreInterfaces = arrayOf(ApplicationDefaultConfig::class),
-                relaxed = true
+                relaxed = true,
             )
         every { mockApplicationExtension.defaultConfig } returns mockApplicationDefaultConfig
         every { project.rootProject } returns project
@@ -125,10 +124,7 @@ class FlutterPluginTest {
         verify { project.tasks.register("generateLockfiles", any()) }
         val registeredPrintTasks = mutableListOf<String>()
         verify {
-            project.tasks.register(capture(registeredPrintTasks), PrintTaskDeferred::class.java, any())
-        }
-        verify {
-            project.tasks.register(capture(registeredPrintTasks), PrintKgpTask::class.java, any<Action<PrintKgpTask>>())
+            project.tasks.register(capture(registeredPrintTasks), PrintTask::class.java, any())
         }
 
         assertContains(registeredPrintTasks, "javaVersion")
@@ -138,7 +134,7 @@ class FlutterPluginTest {
 
     @Test
     fun `copyFlutterAssets task sets filePermissions correctly`(
-        @TempDir tempDir: Path
+        @TempDir tempDir: Path,
     ) {
         val projectDir = tempDir.resolve("project-dir").resolve("android").resolve("app")
         projectDir.toFile().mkdirs()
@@ -156,7 +152,7 @@ class FlutterPluginTest {
         val mockAbstractAppExtension =
             mockk<AbstractAppExtension>(
                 moreInterfaces = arrayOf(ApplicationExtension::class),
-                relaxed = true
+                relaxed = true,
             )
         every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
         every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockAbstractAppExtension
@@ -199,7 +195,7 @@ class FlutterPluginTest {
         val mockApplicationDefaultConfig =
             mockk<com.android.build.gradle.internal.dsl.DefaultConfig>(
                 moreInterfaces = arrayOf(ApplicationDefaultConfig::class),
-                relaxed = true
+                relaxed = true,
             )
         every { mockApplicationExtension.defaultConfig } returns mockApplicationDefaultConfig
         every { project.rootProject } returns project
@@ -272,7 +268,7 @@ class FlutterPluginTest {
             taskContainer.register(
                 match { it.contains("compileFlutterBuild") },
                 any<Class<FlutterTask>>(),
-                any()
+                any(),
             )
         } answers {
             flutterTaskProvider
@@ -284,7 +280,7 @@ class FlutterPluginTest {
             taskContainer.register(
                 match { it.startsWith("copyFlutterAssets") },
                 eq(Copy::class.java),
-                capture(copyTaskActionCaptor)
+                capture(copyTaskActionCaptor),
             )
         } answers {
             mockCopyTaskProvider
@@ -296,7 +292,7 @@ class FlutterPluginTest {
             taskContainer.register(
                 match { it.contains("packJniLibs") },
                 eq(org.gradle.api.tasks.bundling.Jar::class.java),
-                any()
+                any(),
             )
         } answers {
             mockJarTaskProvider

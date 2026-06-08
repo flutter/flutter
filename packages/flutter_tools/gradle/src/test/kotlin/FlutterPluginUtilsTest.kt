@@ -18,8 +18,7 @@ import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
 import com.flutter.gradle.FlutterPluginUtils.BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
 import com.flutter.gradle.FlutterPluginUtils.detectApplyingKotlinGradlePlugin
 import com.flutter.gradle.plugins.PluginHandler
-import com.flutter.gradle.tasks.PrintKgpTask
-import com.flutter.gradle.tasks.PrintTaskDeferred
+import com.flutter.gradle.tasks.PrintTask
 import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
@@ -60,11 +59,11 @@ class FlutterPluginUtilsTest {
                 Pair("name", "grays_fun_dev_dependency"),
                 Pair(
                     "path",
-                    "/Users/someuser/.pub-cache/hosted/pub.dev/grays_fun_dev_dependency-1.1.1/"
+                    "/Users/someuser/.pub-cache/hosted/pub.dev/grays_fun_dev_dependency-1.1.1/",
                 ),
                 Pair("native_build", true),
                 Pair("dependencies", emptyList<String>()),
-                Pair("dev_dependency", true)
+                Pair("dev_dependency", true),
             )
 
         val cameraDependency: Map<String?, Any?> =
@@ -72,11 +71,11 @@ class FlutterPluginUtilsTest {
                 Pair("name", "camera_android_camerax"),
                 Pair(
                     "path",
-                    "/Users/someuser/.pub-cache/hosted/pub.dev/camera_android_camerax-0.6.14+1/"
+                    "/Users/someuser/.pub-cache/hosted/pub.dev/camera_android_camerax-0.6.14+1/",
                 ),
                 Pair("native_build", true),
                 Pair("dependencies", emptyList<String>()),
-                Pair("dev_dependency", false)
+                Pair("dev_dependency", false),
             )
 
         val flutterPluginAndroidLifecycleDependency: Map<String?, Any?> =
@@ -84,11 +83,11 @@ class FlutterPluginUtilsTest {
                 Pair("name", "flutter_plugin_android_lifecycle"),
                 Pair(
                     "path",
-                    "/Users/someuser/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.27/"
+                    "/Users/someuser/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.27/",
                 ),
                 Pair("native_build", true),
                 Pair("dependencies", emptyList<String>()),
-                Pair("dev_dependency", false)
+                Pair("dev_dependency", false),
             )
 
         val pluginListWithoutDevDependency: List<Map<String?, Any?>> =
@@ -99,12 +98,12 @@ class FlutterPluginUtilsTest {
                     Pair("name", "in_app_purchase_android"),
                     Pair(
                         "path",
-                        "/Users/someuser/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/"
+                        "/Users/someuser/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/",
                     ),
                     Pair("native_build", true),
                     Pair("dependencies", emptyList<String>()),
-                    Pair("dev_dependency", false)
-                )
+                    Pair("dev_dependency", false),
+                ),
             )
 
         val pluginListWithDevDependency: List<Map<String?, Any?>> =
@@ -116,12 +115,12 @@ class FlutterPluginUtilsTest {
                     Pair("name", "in_app_purchase_android"),
                     Pair(
                         "path",
-                        "/Users/someuser/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/"
+                        "/Users/someuser/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/",
                     ),
                     Pair("native_build", true),
                     Pair("dependencies", emptyList<String>()),
-                    Pair("dev_dependency", false)
-                )
+                    Pair("dev_dependency", false),
+                ),
             )
         val manifestText =
             """
@@ -234,7 +233,7 @@ class FlutterPluginUtilsTest {
     // settingsGradleFile
     @Test
     fun `settingsGradleFile returns groovy settings gradle file when it exists`(
-        @TempDir tempDir: Path
+        @TempDir tempDir: Path,
     ) {
         val projectDir = tempDir.resolve("android").resolve("app")
         projectDir.toFile().mkdirs()
@@ -249,7 +248,7 @@ class FlutterPluginUtilsTest {
 
     @Test
     fun `settingsGradleFile returns groovy settings file and logs when both groovy and kotlin exist`(
-        @TempDir tempDir: Path
+        @TempDir tempDir: Path,
     ) {
         val projectDir = tempDir.resolve("android").resolve("app")
         projectDir.toFile().mkdirs()
@@ -271,7 +270,7 @@ class FlutterPluginUtilsTest {
     // buildGradleFile
     @Test
     fun `buildGradleFile returns groovy build gradle file when it exists`(
-        @TempDir tempDir: Path
+        @TempDir tempDir: Path,
     ) {
         val projectDir = tempDir.resolve("android").resolve("app")
         projectDir.toFile().mkdirs()
@@ -286,7 +285,7 @@ class FlutterPluginUtilsTest {
 
     @Test
     fun `buildGradleFile returns groovy build file and logs when both groovy and kotlin exist`(
-        @TempDir tempDir: Path
+        @TempDir tempDir: Path,
     ) {
         val projectDir = tempDir.resolve("android").resolve("app")
         projectDir.toFile().mkdirs()
@@ -452,7 +451,7 @@ class FlutterPluginUtilsTest {
         every { project.configurations.named("api") } throws
             UnknownTaskException(
                 "message",
-                mockk()
+                mockk(),
             )
         every { project.dependencies.add(any(), any()) } returns mockk()
 
@@ -544,7 +543,7 @@ class FlutterPluginUtilsTest {
     // readPropertiesIfExist
     @Test
     fun `readPropertiesIfExist returns empty Properties when file does not exist`(
-        @TempDir tempDir: Path
+        @TempDir tempDir: Path,
     ) {
         val propertiesFile = tempDir.resolve("file_that_doesnt_exist.properties")
         val result = FlutterPluginUtils.readPropertiesIfExist(propertiesFile.toFile())
@@ -553,7 +552,7 @@ class FlutterPluginUtilsTest {
 
     @Test
     fun `readPropertiesIfExist returns Properties when file exists`(
-        @TempDir tempDir: Path
+        @TempDir tempDir: Path,
     ) {
         val propertiesFile = tempDir.resolve("file_that_exists.properties").toFile()
         propertiesFile.writeText(
@@ -563,7 +562,7 @@ class FlutterPluginUtilsTest {
             flutter.buildMode=release
             flutter.versionName=1.0.0
             flutter.versionCode=1
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = FlutterPluginUtils.readPropertiesIfExist(propertiesFile)
@@ -598,7 +597,7 @@ class FlutterPluginUtilsTest {
             taskContainer.register(
                 "validateCompileSdkVersion",
                 com.flutter.gradle.tasks.ValidateCompileSdkVersionTask::class.java,
-                any<org.gradle.api.Action<com.flutter.gradle.tasks.ValidateCompileSdkVersionTask>>()
+                any<org.gradle.api.Action<com.flutter.gradle.tasks.ValidateCompileSdkVersionTask>>(),
             )
         } returns taskProvider
 
@@ -616,7 +615,7 @@ class FlutterPluginUtilsTest {
             taskContainer.register(
                 "validateCompileSdkVersion",
                 com.flutter.gradle.tasks.ValidateCompileSdkVersionTask::class.java,
-                any()
+                any(),
             )
         }
         verify { androidComponents.finalizeDsl(match<(Any) -> Unit> { true }) }
@@ -654,7 +653,7 @@ class FlutterPluginUtilsTest {
             taskContainer.register(
                 "validateCompileSdkVersion",
                 com.flutter.gradle.tasks.ValidateCompileSdkVersionTask::class.java,
-                any<org.gradle.api.Action<com.flutter.gradle.tasks.ValidateCompileSdkVersionTask>>()
+                any<org.gradle.api.Action<com.flutter.gradle.tasks.ValidateCompileSdkVersionTask>>(),
             )
         } returns taskProvider
 
@@ -676,7 +675,7 @@ class FlutterPluginUtilsTest {
             taskContainer.register(
                 "validateCompileSdkVersion",
                 com.flutter.gradle.tasks.ValidateCompileSdkVersionTask::class.java,
-                capture(actionSlot)
+                capture(actionSlot),
             )
         } returns taskProvider
 
@@ -690,7 +689,7 @@ class FlutterPluginUtilsTest {
             taskContainer.register(
                 "validateCompileSdkVersion",
                 com.flutter.gradle.tasks.ValidateCompileSdkVersionTask::class.java,
-                any()
+                any(),
             )
         }
     }
@@ -731,17 +730,17 @@ class FlutterPluginUtilsTest {
                     }
                     """.trimIndent()
                 assertTrue(
-                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlock),
                 )
                 assertTrue(
-                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlock),
                 )
 
                 assertTrue(
-                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlock),
                 )
                 assertTrue(
-                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlock),
                 )
 
                 val libProjectBuildGradlePluginsBlock =
@@ -752,17 +751,17 @@ class FlutterPluginUtilsTest {
                     }
                     """.trimIndent()
                 assertTrue(
-                    FlutterPluginUtils.libPluginRegexKotlin.containsMatchIn(libProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.libPluginRegexKotlin.containsMatchIn(libProjectBuildGradlePluginsBlock),
                 )
                 assertTrue(
-                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(libProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(libProjectBuildGradlePluginsBlock),
                 )
 
                 assertTrue(
-                    FlutterPluginUtils.libPluginRegexGroovy.containsMatchIn(libProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.libPluginRegexGroovy.containsMatchIn(libProjectBuildGradlePluginsBlock),
                 )
                 assertTrue(
-                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(libProjectBuildGradlePluginsBlock)
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(libProjectBuildGradlePluginsBlock),
                 )
 
                 val appProjectBuildGradlePluginsBlockNoParens =
@@ -773,17 +772,17 @@ class FlutterPluginUtilsTest {
                     }
                     """.trimIndent()
                 assertTrue(
-                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens)
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens),
                 )
                 assertTrue(
-                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens)
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens),
                 )
 
                 assertFalse(
-                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens)
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens),
                 )
                 assertFalse(
-                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens)
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockNoParens),
                 )
 
                 val appProjectBuildGradlePluginsBlockMixed =
@@ -794,17 +793,17 @@ class FlutterPluginUtilsTest {
                     }
                     """.trimIndent()
                 assertTrue(
-                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockMixed)
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockMixed),
                 )
                 assertTrue(
-                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockMixed)
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsBlockMixed),
                 )
 
                 assertFalse(
-                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockMixed)
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockMixed),
                 )
                 assertFalse(
-                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockMixed)
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsBlockMixed),
                 )
             }
 
@@ -819,11 +818,11 @@ class FlutterPluginUtilsTest {
 
                 assertFalse(
                     FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(kotlinSameLine),
-                    "Should fail: multi-id on one line"
+                    "Should fail: multi-id on one line",
                 )
                 assertFalse(
                     FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(kotlinSameLine),
-                    "Should fail: multi-id on one line"
+                    "Should fail: multi-id on one line",
                 )
 
                 val groovySameLine =
@@ -835,11 +834,11 @@ class FlutterPluginUtilsTest {
 
                 assertFalse(
                     FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(groovySameLine),
-                    "Should fail: multi-id on one line"
+                    "Should fail: multi-id on one line",
                 )
                 assertFalse(
                     FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(groovySameLine),
-                    "Should fail: multi-id on one line"
+                    "Should fail: multi-id on one line",
                 )
 
                 val appProjectBuildGradlePluginsCommentOnePlugin =
@@ -850,17 +849,17 @@ class FlutterPluginUtilsTest {
                     }
                     """.trimIndent()
                 assertTrue(
-                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin)
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin),
                 )
                 assertFalse(
-                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin)
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin),
                 )
 
                 assertFalse(
-                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin)
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin),
                 )
                 assertFalse(
-                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin)
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsCommentOnePlugin),
                 )
 
                 val appProjectBuildGradlePluginsComment =
@@ -871,17 +870,17 @@ class FlutterPluginUtilsTest {
                     // }
                     """.trimIndent()
                 assertFalse(
-                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsComment)
+                    FlutterPluginUtils.appPluginRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsComment),
                 )
                 assertFalse(
-                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsComment)
+                    FlutterPluginUtils.kgpRegexGroovy.containsMatchIn(appProjectBuildGradlePluginsComment),
                 )
 
                 assertFalse(
-                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsComment)
+                    FlutterPluginUtils.appPluginRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsComment),
                 )
                 assertFalse(
-                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsComment)
+                    FlutterPluginUtils.kgpRegexKotlin.containsMatchIn(appProjectBuildGradlePluginsComment),
                 )
             }
         }
@@ -889,7 +888,7 @@ class FlutterPluginUtilsTest {
         fun assertSingeLinePluginDetection(
             regex: Regex,
             pluginId: String,
-            dslType: DslType
+            dslType: DslType,
         ) {
             if (dslType == DslType.GROOVY) {
                 assertTrue(regex.containsMatchIn("apply plugin: '$pluginId'"))
@@ -929,7 +928,7 @@ class FlutterPluginUtilsTest {
         inner class DetectApplyingKotlinGradlePluginTests {
             @Test
             fun `logs app warning when KGP is only applied in app`(
-                @TempDir tempDir: Path
+                @TempDir tempDir: Path,
             ) {
                 val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
                 val appBuildGradleFile =
@@ -941,7 +940,7 @@ class FlutterPluginUtilsTest {
                                 id("com.android.application")
                                 id("kotlin-android")
                             }
-                            """.trimIndent()
+                            """.trimIndent(),
                         )
                     }
 
@@ -954,7 +953,7 @@ class FlutterPluginUtilsTest {
                             plugins {
                                 id("com.android.library")
                             }
-                            """.trimIndent()
+                            """.trimIndent(),
                         )
                     }
 
@@ -973,7 +972,7 @@ class FlutterPluginUtilsTest {
                         mockLogger = mockLogger,
                         rootProjectMock = rootProject,
                         gradleMock = mockGradle,
-                        pluginManager = appProjectPluginManager
+                        pluginManager = appProjectPluginManager,
                     )
 
                 val pluginProject =
@@ -984,7 +983,7 @@ class FlutterPluginUtilsTest {
                         mockLogger = mockLogger,
                         rootProjectMock = rootProject,
                         gradleMock = mockGradle,
-                        pluginManager = pluginProjectPluginManager
+                        pluginManager = pluginProjectPluginManager,
                     )
 
                 val subprojectsActionSlot = slot<Action<Project>>()
@@ -1009,7 +1008,7 @@ class FlutterPluginUtilsTest {
                         applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
                         Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
 
-                        """.trimIndent()
+                        """.trimIndent(),
                     )
                 }
 
@@ -1022,7 +1021,7 @@ class FlutterPluginUtilsTest {
 
             @Test
             fun `logs plugin warning when KGP is only applied in one plugin`(
-                @TempDir tempDir: Path
+                @TempDir tempDir: Path,
             ) {
                 val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
                 val appBuildGradleFile =
@@ -1033,7 +1032,7 @@ class FlutterPluginUtilsTest {
                             plugins {
                                 id("com.android.application")
                             }
-                            """.trimIndent()
+                            """.trimIndent(),
                         )
                     }
 
@@ -1047,7 +1046,7 @@ class FlutterPluginUtilsTest {
                                 id("com.android.library")
                                 id("kotlin-android")
                             }
-                            """.trimIndent()
+                            """.trimIndent(),
                         )
                     }
 
@@ -1066,7 +1065,7 @@ class FlutterPluginUtilsTest {
                         mockLogger = mockLogger,
                         rootProjectMock = rootProject,
                         gradleMock = mockGradle,
-                        pluginManager = appProjectPluginManager
+                        pluginManager = appProjectPluginManager,
                     )
 
                 val pluginProject =
@@ -1077,7 +1076,7 @@ class FlutterPluginUtilsTest {
                         mockLogger = mockLogger,
                         rootProjectMock = rootProject,
                         gradleMock = mockGradle,
-                        pluginManager = pluginProjectPluginManager
+                        pluginManager = pluginProjectPluginManager,
                     )
 
                 val subprojectsActionSlot = slot<Action<Project>>()
@@ -1106,7 +1105,7 @@ class FlutterPluginUtilsTest {
                         an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
 
                         If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
-                        """.trimIndent()
+                        """.trimIndent(),
                     )
                 }
 
@@ -1119,7 +1118,7 @@ class FlutterPluginUtilsTest {
 
             @Test
             fun `logs app and plugin warning when KGP is applied in both app and plugins`(
-                @TempDir tempDir: Path
+                @TempDir tempDir: Path,
             ) {
                 val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
                 val appBuildGradleFile =
@@ -1131,7 +1130,7 @@ class FlutterPluginUtilsTest {
                                 id("com.android.application")
                                 id("kotlin-android")
                             }
-                            """.trimIndent()
+                            """.trimIndent(),
                         )
                     }
 
@@ -1145,7 +1144,7 @@ class FlutterPluginUtilsTest {
                                 id("com.android.library")
                                 id("kotlin-android")
                             }
-                            """.trimIndent()
+                            """.trimIndent(),
                         )
                     }
 
@@ -1164,7 +1163,7 @@ class FlutterPluginUtilsTest {
                         mockLogger = mockLogger,
                         rootProjectMock = rootProject,
                         gradleMock = mockGradle,
-                        pluginManager = appProjectPluginManager
+                        pluginManager = appProjectPluginManager,
                     )
 
                 val pluginProject =
@@ -1175,7 +1174,7 @@ class FlutterPluginUtilsTest {
                         mockLogger = mockLogger,
                         rootProjectMock = rootProject,
                         gradleMock = mockGradle,
-                        pluginManager = pluginProjectPluginManager
+                        pluginManager = pluginProjectPluginManager,
                     )
 
                 val subprojectsActionSlot = slot<Action<Project>>()
@@ -1200,7 +1199,7 @@ class FlutterPluginUtilsTest {
                         applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
                         Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
 
-                        """.trimIndent()
+                        """.trimIndent(),
                     )
                 }
 
@@ -1215,7 +1214,7 @@ class FlutterPluginUtilsTest {
                         an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
 
                         If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
-                        """.trimIndent()
+                        """.trimIndent(),
                     )
                 }
 
@@ -1225,7 +1224,7 @@ class FlutterPluginUtilsTest {
 
             @Test
             fun `logs app and plugin warning when legacy KGP configuration is applied in both app and plugins`(
-                @TempDir tempDir: Path
+                @TempDir tempDir: Path,
             ) {
                 val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
                 val appBuildGradleFile =
@@ -1235,7 +1234,7 @@ class FlutterPluginUtilsTest {
                             """
                             apply plugin: 'com.android.application'
                             apply plugin: 'kotlin-android'
-                            """.trimIndent()
+                            """.trimIndent(),
                         )
                     }
 
@@ -1247,7 +1246,7 @@ class FlutterPluginUtilsTest {
                             """
                             apply plugin: 'com.android.library'
                             apply plugin: 'kotlin-android'
-                            """.trimIndent()
+                            """.trimIndent(),
                         )
                     }
 
@@ -1267,7 +1266,7 @@ class FlutterPluginUtilsTest {
                         mockLogger = mockLogger,
                         rootProjectMock = rootProject,
                         gradleMock = mockGradle,
-                        pluginManager = appProjectPluginManager
+                        pluginManager = appProjectPluginManager,
                     )
 
                 val pluginProjectOne =
@@ -1278,7 +1277,7 @@ class FlutterPluginUtilsTest {
                         mockLogger = mockLogger,
                         rootProjectMock = rootProject,
                         gradleMock = mockGradle,
-                        pluginManager = pluginProjectOnePluginManager
+                        pluginManager = pluginProjectOnePluginManager,
                     )
 
                 val pluginProjectTwo =
@@ -1289,7 +1288,7 @@ class FlutterPluginUtilsTest {
                         mockLogger = mockLogger,
                         rootProjectMock = rootProject,
                         gradleMock = mockGradle,
-                        pluginManager = pluginProjectTwoPluginManager
+                        pluginManager = pluginProjectTwoPluginManager,
                     )
 
                 val subprojectsActionSlot = slot<Action<Project>>()
@@ -1315,7 +1314,7 @@ class FlutterPluginUtilsTest {
                         applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
                         Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
 
-                        """.trimIndent()
+                        """.trimIndent(),
                     )
                 }
 
@@ -1330,7 +1329,7 @@ class FlutterPluginUtilsTest {
                         an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
 
                         If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
-                        """.trimIndent()
+                        """.trimIndent(),
                     )
                 }
 
@@ -1341,7 +1340,7 @@ class FlutterPluginUtilsTest {
 
             @Test
             fun `does not log when migrated to Built-in Kotlin`(
-                @TempDir tempDir: Path
+                @TempDir tempDir: Path,
             ) {
                 val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
                 val appBuildGradleFile =
@@ -1350,7 +1349,7 @@ class FlutterPluginUtilsTest {
                         writeText(
                             """
                             apply plugin: 'com.android.application'
-                            """.trimIndent()
+                            """.trimIndent(),
                         )
                     }
 
@@ -1361,7 +1360,7 @@ class FlutterPluginUtilsTest {
                         writeText(
                             """
                             apply plugin: 'com.android.library'
-                            """.trimIndent()
+                            """.trimIndent(),
                         )
                     }
 
@@ -1380,7 +1379,7 @@ class FlutterPluginUtilsTest {
                         mockLogger = mockLogger,
                         rootProjectMock = rootProject,
                         gradleMock = mockGradle,
-                        pluginManager = appProjectPluginManager
+                        pluginManager = appProjectPluginManager,
                     )
 
                 val pluginProject =
@@ -1391,7 +1390,7 @@ class FlutterPluginUtilsTest {
                         mockLogger = mockLogger,
                         rootProjectMock = rootProject,
                         gradleMock = mockGradle,
-                        pluginManager = pluginProjectPluginManager
+                        pluginManager = pluginProjectPluginManager,
                     )
 
                 val subprojectsActionSlot = slot<Action<Project>>()
@@ -1419,7 +1418,7 @@ class FlutterPluginUtilsTest {
 
             @Test
             fun `logs when KGP is applied but fails to apply`(
-                @TempDir tempDir: Path
+                @TempDir tempDir: Path,
             ) {
                 val appDir = tempDir.resolve("app").toFile().apply { mkdirs() }
                 val appBuildGradleFile =
@@ -1430,7 +1429,7 @@ class FlutterPluginUtilsTest {
                             plugins {
                                 id("com.android.application")
                             }
-                            """.trimIndent()
+                            """.trimIndent(),
                         )
                     }
 
@@ -1443,7 +1442,7 @@ class FlutterPluginUtilsTest {
                             plugins {
                                 id("com.android.library")
                             }
-                            """.trimIndent()
+                            """.trimIndent(),
                         )
                     }
 
@@ -1462,7 +1461,7 @@ class FlutterPluginUtilsTest {
                         mockLogger = mockLogger,
                         rootProjectMock = rootProject,
                         gradleMock = mockGradle,
-                        pluginManager = appProjectPluginManager
+                        pluginManager = appProjectPluginManager,
                     )
 
                 val pluginProject =
@@ -1473,7 +1472,7 @@ class FlutterPluginUtilsTest {
                         mockLogger = mockLogger,
                         rootProjectMock = rootProject,
                         gradleMock = mockGradle,
-                        pluginManager = pluginProjectPluginManager
+                        pluginManager = pluginProjectPluginManager,
                     )
 
                 val subprojectsActionSlot = slot<Action<Project>>()
@@ -1504,7 +1503,7 @@ class FlutterPluginUtilsTest {
                         Applying the Kotlin Android Plugin (KGP) was unsuccessful. KGP was not found on the classpath.
                         If your project uses Kotlin, ensure KGP is declared in the root plugins block.
                         For more details check: $BUILT_IN_KOTLIN_DOCS
-                        """.trimIndent()
+                        """.trimIndent(),
                     )
                 }
             }
@@ -1517,7 +1516,7 @@ class FlutterPluginUtilsTest {
             mockLogger: Logger,
             rootProjectMock: Project? = null,
             gradleMock: Gradle? = null,
-            pluginManager: PluginManager
+            pluginManager: PluginManager,
         ): Project {
             val projectDir = tempDir.resolve(projectName).toFile().apply { mkdirs() }
 
@@ -1538,7 +1537,7 @@ class FlutterPluginUtilsTest {
     // forceNdkDownload
     @Test
     fun `forceNdkDownload skips projects which are already configuring a native build`(
-        @TempDir tempDir: Path
+        @TempDir tempDir: Path,
     ) {
         val fakeCmakeFile = tempDir.resolve("CMakeLists.txt").toFile()
         fakeCmakeFile.createNewFile()
@@ -1608,7 +1607,7 @@ class FlutterPluginUtilsTest {
             mockBuildType.externalNativeBuild.cmake.arguments(
                 "-Wno-dev",
                 "--no-warn-unused-cli",
-                "-DCMAKE_BUILD_TYPE=Debug"
+                "-DCMAKE_BUILD_TYPE=Debug",
             )
         }
     }
@@ -1637,13 +1636,13 @@ class FlutterPluginUtilsTest {
             project = project,
             buildType = buildType,
             pluginHandler = pluginHandler,
-            engineVersion = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
+            engineVersion = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23",
         )
 
         verify(exactly = 1) {
             project.logger.quiet(
                 "Project does not support Flutter build mode: debug, " +
-                    "skipping adding Flutter dependencies"
+                    "skipping adding Flutter dependencies",
             )
         }
     }
@@ -1671,14 +1670,14 @@ class FlutterPluginUtilsTest {
             project = project,
             buildType = buildType,
             pluginHandler = pluginHandler,
-            engineVersion = engineVersion
+            engineVersion = engineVersion,
         )
 
         verify(exactly = 3) { project.dependencies.add(any(), any()) }
         verify {
             project.dependencies.add(
                 "debugApi",
-                "io.flutter:armeabi_v7a_debug:$engineVersion"
+                "io.flutter:armeabi_v7a_debug:$engineVersion",
             )
         }
         verify { project.dependencies.add("debugApi", "io.flutter:arm64_v8a_debug:$engineVersion") }
@@ -1709,32 +1708,32 @@ class FlutterPluginUtilsTest {
             project = project,
             buildType = buildType,
             pluginHandler = pluginHandler,
-            engineVersion = engineVersion
+            engineVersion = engineVersion,
         )
 
         verify(exactly = 4) { project.dependencies.add(any(), any()) }
         verify {
             project.dependencies.add(
                 "releaseApi",
-                "io.flutter:flutter_embedding_release:$engineVersion"
+                "io.flutter:flutter_embedding_release:$engineVersion",
             )
         }
         verify {
             project.dependencies.add(
                 "releaseApi",
-                "io.flutter:armeabi_v7a_release:$engineVersion"
+                "io.flutter:armeabi_v7a_release:$engineVersion",
             )
         }
         verify {
             project.dependencies.add(
                 "releaseApi",
-                "io.flutter:arm64_v8a_release:$engineVersion"
+                "io.flutter:arm64_v8a_release:$engineVersion",
             )
         }
         verify {
             project.dependencies.add(
                 "releaseApi",
-                "io.flutter:x86_64_release:$engineVersion"
+                "io.flutter:x86_64_release:$engineVersion",
             )
         }
     }
@@ -1763,26 +1762,26 @@ class FlutterPluginUtilsTest {
             project = project,
             buildType = buildType,
             pluginHandler = pluginHandler,
-            engineVersion = engineVersion
+            engineVersion = engineVersion,
         )
 
         verify(exactly = 3) { project.dependencies.add(any(), any()) }
         verify {
             project.dependencies.add(
                 "debugApi",
-                "io.flutter:armeabi_v7a_debug:$engineVersion"
+                "io.flutter:armeabi_v7a_debug:$engineVersion",
             )
         }
         verify {
             project.dependencies.add(
                 "debugApi",
-                "io.flutter:arm64_v8a_debug:$engineVersion"
+                "io.flutter:arm64_v8a_debug:$engineVersion",
             )
         }
         verify {
             project.dependencies.add(
                 "debugApi",
-                "io.flutter:x86_64_debug:$engineVersion"
+                "io.flutter:x86_64_debug:$engineVersion",
             )
         }
     }
@@ -1790,17 +1789,13 @@ class FlutterPluginUtilsTest {
     @Test
     fun `addTaskForJavaVersion adds task for Java version`() {
         val project = mockk<Project>()
-        val taskContainer = mockk<TaskContainer>()
-        every { project.tasks } returns taskContainer
-        val mockTaskProvider = mockk<TaskProvider<PrintTaskDeferred<Unit>>>()
-        val mockPrintTask = mockk<PrintTaskDeferred<Unit>>(relaxed = true)
-        val captureSlot = slot<Action<PrintTaskDeferred<Unit>>>()
-
-        every {
-            project.tasks.register("javaVersion", any<Class<PrintTaskDeferred<Unit>>>(), capture(captureSlot))
-        } returns mockTaskProvider
+        every { project.tasks.register(any(), eq(PrintTask::class.java), any()) } returns mockk()
+        val captureSlot = slot<Action<PrintTask>>()
 
         FlutterPluginUtils.addTaskForJavaVersion(project)
+        verify { project.tasks.register("javaVersion", eq(PrintTask::class.java), capture(captureSlot)) }
+
+        val mockPrintTask = mockk<PrintTask>(relaxed = true)
         captureSlot.captured.execute(mockPrintTask)
 
         verify {
@@ -1813,49 +1808,38 @@ class FlutterPluginUtilsTest {
     @Test
     fun `addTaskForKGPVersion adds task for KGP version`() {
         val project = mockk<Project>(relaxed = true)
-        val mockTaskProvider = mockk<TaskProvider<PrintKgpTask>>()
-        val mockPrintTask = mockk<PrintKgpTask>(relaxed = true)
-        val captureSlot = slot<Action<PrintKgpTask>>()
-
-        every {
-            project.tasks.register(eq("kgpVersion"), any<Class<PrintKgpTask>>(), capture(captureSlot))
-        } returns mockTaskProvider
+        every { project.tasks.register(any(), eq(PrintTask::class.java), any()) } returns mockk()
+        val captureSlot = slot<Action<PrintTask>>()
 
         FlutterPluginUtils.addTaskForKGPVersion(project)
+        verify { project.tasks.register("kgpVersion", eq(PrintTask::class.java), capture(captureSlot)) }
+
+        val mockPrintTask = mockk<PrintTask>(relaxed = true)
         captureSlot.captured.execute(mockPrintTask)
 
         verify {
-            project.tasks.register(eq("kgpVersion"), any<Class<PrintKgpTask>>(), any<Action<PrintKgpTask>>())
+            mockPrintTask.description = "Print the current kgp version used by the project."
         }
-        verify { mockPrintTask.kgpVersion.set(any<org.gradle.api.provider.Provider<String>>()) }
     }
 
     // addTaskForPrintBuildVariants
     @Test
     fun `addTaskForPrintBuildVariants adds task for printing build variants`() {
         val project = mockk<Project>()
-        val taskContainer = mockk<TaskContainer>()
         val androidComponents = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
         val listProperty = mockk<org.gradle.api.provider.ListProperty<String>>()
 
-        every { project.tasks } returns taskContainer
         every { project.extensions } returns mockk()
         every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns androidComponents
         every { project.objects.listProperty(String::class.java) } returns listProperty
+        every { project.tasks.register(any(), eq(PrintTask::class.java), any()) } returns mockk()
 
-        val mockTaskProvider = mockk<TaskProvider<PrintTaskDeferred<org.gradle.api.provider.ListProperty<String>>>>()
-        val mockPrintTask = mockk<PrintTaskDeferred<org.gradle.api.provider.ListProperty<String>>>(relaxed = true)
-        val captureSlot = slot<Action<PrintTaskDeferred<org.gradle.api.provider.ListProperty<String>>>>()
-
-        every {
-            project.tasks.register(
-                "printBuildVariants",
-                any<Class<PrintTaskDeferred<org.gradle.api.provider.ListProperty<String>>>>(),
-                capture(captureSlot)
-            )
-        } returns mockTaskProvider
+        val captureSlot = slot<Action<PrintTask>>()
 
         FlutterPluginUtils.addTaskForPrintBuildVariants(project)
+        verify { project.tasks.register("printBuildVariants", eq(PrintTask::class.java), capture(captureSlot)) }
+
+        val mockPrintTask = mockk<PrintTask>(relaxed = true)
         captureSlot.captured.execute(mockPrintTask)
 
         verify {

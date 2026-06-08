@@ -12,8 +12,7 @@ import com.android.build.gradle.BaseExtension
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.DeepLinkJsonFromManifestTask
-import com.flutter.gradle.tasks.PrintKgpTask
-import com.flutter.gradle.tasks.PrintTaskDeferred
+import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.tasks.ValidateCompileSdkVersionTask
 import groovy.lang.Closure
 import org.gradle.api.GradleException
@@ -147,7 +146,7 @@ object FlutterPluginUtils {
     @JvmName("compareVersionStrings")
     internal fun compareVersionStrings(
         firstString: String,
-        secondString: String
+        secondString: String,
     ): Int {
         val firstVersion = firstString.split(".")
         val secondVersion = secondString.split(".")
@@ -227,7 +226,7 @@ object FlutterPluginUtils {
     @JvmName("getSettingsGradleFileFromProjectDir")
     internal fun getSettingsGradleFileFromProjectDir(
         projectDirectory: File,
-        logger: Logger
+        logger: Logger,
     ): File {
         val settingsGradle = File(projectDirectory.parentFile, "settings.gradle")
         val settingsGradleKts = File(projectDirectory.parentFile, "settings.gradle.kts")
@@ -236,7 +235,7 @@ object FlutterPluginUtils {
                 """
                 Both settings.gradle and settings.gradle.kts exist, so
                 settings.gradle.kts is ignored. This is likely a mistake.
-                """.trimIndent()
+                """.trimIndent(),
             )
         }
 
@@ -252,7 +251,7 @@ object FlutterPluginUtils {
     @JvmName("getBuildGradleFileFromProjectDir")
     internal fun getBuildGradleFileFromProjectDir(
         projectDirectory: File,
-        logger: Logger
+        logger: Logger,
     ): File {
         val buildGradle = File(File(projectDirectory.parentFile, "app"), "build.gradle")
         val buildGradleKts = File(File(projectDirectory.parentFile, "app"), "build.gradle.kts")
@@ -261,7 +260,7 @@ object FlutterPluginUtils {
                 """
                 Both build.gradle and build.gradle.kts exist, so
                 build.gradle.kts is ignored. This is likely a mistake.
-                """.trimIndent()
+                """.trimIndent(),
             )
         }
 
@@ -273,7 +272,7 @@ object FlutterPluginUtils {
     internal fun shouldProjectSplitPerAbi(project: Project): Boolean =
         project
             .findProperty(
-                PROP_SPLIT_PER_ABI
+                PROP_SPLIT_PER_ABI,
             )?.toString()
             ?.toBoolean() ?: false
 
@@ -329,7 +328,7 @@ object FlutterPluginUtils {
     @JvmName("shouldConfigureFlutterTask")
     internal fun shouldConfigureFlutterTask(
         project: Project,
-        assembleTask: Task
+        assembleTask: Task,
     ): Boolean {
         val cliTasksNames = project.gradle.startParameter.taskNames
         if (cliTasksNames.size != 1 || !cliTasksNames.first().contains("assemble")) {
@@ -404,7 +403,7 @@ object FlutterPluginUtils {
     internal fun addApiDependencies(
         project: Project,
         variantName: String,
-        dependency: Any
+        dependency: Any,
     ) {
         addApiDependencies(project, variantName, dependency, null)
     }
@@ -415,7 +414,7 @@ object FlutterPluginUtils {
         project: Project,
         variantName: String,
         dependency: Any,
-        config: Closure<Any>?
+        config: Closure<Any>?,
     ) {
         var configuration: String
         try {
@@ -429,7 +428,7 @@ object FlutterPluginUtils {
         if (config == null) {
             project.dependencies.add(
                 configuration,
-                dependency
+                dependency,
             )
         } else {
             project.dependencies.add(configuration, dependency, config)
@@ -461,7 +460,7 @@ object FlutterPluginUtils {
     @JvmName("supportsBuildMode")
     internal fun supportsBuildMode(
         project: Project,
-        flutterBuildMode: String
+        flutterBuildMode: String,
     ): Boolean {
         if (!shouldProjectUseLocalEngine(project)) {
             return true
@@ -555,13 +554,13 @@ object FlutterPluginUtils {
                     Triple(
                         kgpRegexKotlin.containsMatchIn(scriptText),
                         appPluginRegexKotlin.containsMatchIn(scriptText),
-                        libPluginRegexKotlin.containsMatchIn(scriptText)
+                        libPluginRegexKotlin.containsMatchIn(scriptText),
                     )
                 } else {
                     Triple(
                         kgpRegexGroovy.containsMatchIn(scriptText),
                         appPluginRegexGroovy.containsMatchIn(scriptText),
-                        libPluginRegexGroovy.containsMatchIn(scriptText)
+                        libPluginRegexGroovy.containsMatchIn(scriptText),
                     )
                 }
 
@@ -577,7 +576,7 @@ object FlutterPluginUtils {
                         Applying the Kotlin Android Plugin (KGP) was unsuccessful. KGP was not found on the classpath.
                         If your project uses Kotlin, ensure KGP is declared in the root plugins block.
                         For more details check: $BUILT_IN_KOTLIN_DOCS
-                        """.trimIndent()
+                        """.trimIndent(),
                     )
                 }
                 return@subprojects
@@ -601,7 +600,7 @@ object FlutterPluginUtils {
                     applies the Kotlin Gradle Plugin, which will cause build failures in future versions of Flutter.
                     Please migrate your app to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_APPS
 
-                    """.trimIndent()
+                    """.trimIndent(),
                 )
             }
             if (pluginsWithKGPAppliedList.isEmpty()) return@projectsEvaluated
@@ -615,7 +614,7 @@ object FlutterPluginUtils {
                 an issue against a plugin: $BUILT_IN_KOTLIN_DOCS_TO_REPORT_UNMIGRATED_PLUGINS
 
                 If you are a plugin author, please migrate your plugin to Built-in Kotlin using this guide: $BUILT_IN_KOTLIN_DOCS_FOR_PLUGINS
-                """.trimIndent()
+                """.trimIndent(),
             )
         }
     }
@@ -625,7 +624,7 @@ object FlutterPluginUtils {
     @JvmName("detectLowCompileSdkVersionOrNdkVersion")
     internal fun detectLowCompileSdkVersionOrNdkVersion(
         project: Project,
-        pluginList: List<Map<String?, Any?>>
+        pluginList: List<Map<String?, Any?>>,
     ) {
         val validateTask =
             project.tasks.register("validateCompileSdkVersion", ValidateCompileSdkVersionTask::class.java) {
@@ -680,7 +679,7 @@ object FlutterPluginUtils {
     @JvmName("forceNdkDownload")
     internal fun forceNdkDownload(
         gradleProject: Project,
-        flutterSdkRootPath: String
+        flutterSdkRootPath: String,
     ) {
         // If the project is already configuring a native build, we don't need to do anything.
         val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
@@ -692,7 +691,7 @@ object FlutterPluginUtils {
 
         // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
         gradleProjectAndroidExtension.externalNativeBuild.cmake.path(
-            "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
+            "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt",
         )
 
         // AGP defaults to outputting build artifacts in `android/app/.cxx`. This directory is a
@@ -709,7 +708,7 @@ object FlutterPluginUtils {
             gradleProject.layout.buildDirectory
                 .dir("../.cxx")
                 .get()
-                .asFile.path
+                .asFile.path,
         )
 
         // CMake will print warnings when you try to build an empty project.
@@ -719,7 +718,7 @@ object FlutterPluginUtils {
             buildType.externalNativeBuild.cmake.arguments(
                 "-Wno-dev",
                 "--no-warn-unused-cli",
-                "-DCMAKE_BUILD_TYPE=${buildType.name}"
+                "-DCMAKE_BUILD_TYPE=${buildType.name}",
             )
         }
     }
@@ -728,7 +727,7 @@ object FlutterPluginUtils {
     @JvmName("isFlutterAppProject")
     internal fun isFlutterAppProject(project: Project): Boolean =
         project.extensions.findByType(
-            ApplicationExtension::class.java
+            ApplicationExtension::class.java,
         ) != null
 
     /**
@@ -746,13 +745,13 @@ object FlutterPluginUtils {
         project: Project,
         buildType: BuildType,
         pluginHandler: PluginHandler,
-        engineVersion: String
+        engineVersion: String,
     ) {
         val flutterBuildMode: String = buildModeFor(buildType)
         if (!supportsBuildMode(project, flutterBuildMode)) {
             project.logger.quiet(
                 "Project does not support Flutter build mode: $flutterBuildMode, " +
-                    "skipping adding Flutter dependencies"
+                    "skipping adding Flutter dependencies",
             )
             return
         }
@@ -774,7 +773,7 @@ object FlutterPluginUtils {
             addApiDependencies(
                 project,
                 buildType.name,
-                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
+                "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion",
             )
         }
         val platforms: List<String> = getTargetPlatforms(project)
@@ -784,7 +783,7 @@ object FlutterPluginUtils {
             addApiDependencies(
                 project,
                 buildType.name,
-                "io.flutter:${arch}_$flutterBuildMode:$engineVersion"
+                "io.flutter:${arch}_$flutterBuildMode:$engineVersion",
             )
         }
     }
@@ -799,11 +798,10 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForJavaVersion")
     internal fun addTaskForJavaVersion(project: Project) {
-        project.tasks.register<PrintTaskDeferred<Unit>>("javaVersion") {
+        project.tasks.register("javaVersion", PrintTask::class.java) {
             description = "Print the current java version used by gradle. see: " +
                 "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
-            closureInput = Unit
-            messageClosure = { VersionFetcher.getJavaVersion().toString() }
+            message.set(VersionFetcher.getJavaVersion().toString())
         }
     }
 
@@ -817,14 +815,10 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("addTaskForKGPVersion")
     internal fun addTaskForKGPVersion(project: Project) {
-        // Resolve KGP version through a Provider so the task action never
-        // calls Task.getProject() during execution (deprecated, Gradle 10 error).
-        project.tasks.register<PrintKgpTask>("kgpVersion") {
-            kgpVersion.set(
-                project.provider {
-                    VersionFetcher.getKGPVersion(project)?.toString() ?: "null"
-                }
-            )
+        project.tasks.register("kgpVersion", PrintTask::class.java) {
+            description = "Print the current kgp version used by the project."
+            val version = VersionFetcher.getKGPVersion(project)?.toString() ?: "null"
+            message.set("KGP Version: $version")
         }
     }
 
@@ -849,16 +843,9 @@ object FlutterPluginUtils {
             variantsList.add(variant.name)
         }
 
-        project.tasks.register<PrintTaskDeferred<org.gradle.api.provider.ListProperty<String>>>("printBuildVariants") {
+        project.tasks.register("printBuildVariants", PrintTask::class.java) {
             description = "Prints out all build variants for this Android project"
-            closureInput = variantsList
-            messageClosure = { listProp ->
-                val messageBuilder = StringBuilder()
-                listProp.get().forEach { name ->
-                    messageBuilder.append("BuildVariant: $name\n")
-                }
-                messageBuilder.toString()
-            }
+            message.set(variantsList.map { list -> list.joinToString("\n") { name -> "BuildVariant: $name" } })
         }
     }
 
@@ -891,7 +878,7 @@ object FlutterPluginUtils {
                     // instead of relying on passing in a path.
                     if (project.hasProperty("outputPath")) {
                         deepLinkJson.set(
-                            File(project.property("outputPath").toString())
+                            File(project.property("outputPath").toString()),
                         )
                     } else {
                         deepLinkJson.set(project.layout.buildDirectory.file("deeplink.json"))
@@ -904,7 +891,7 @@ object FlutterPluginUtils {
                 .use(manifestUpdater)
                 .wiredWithFiles(
                     DeepLinkJsonFromManifestTask::manifestFile,
-                    DeepLinkJsonFromManifestTask::updatedManifest
+                    DeepLinkJsonFromManifestTask::updatedManifest,
                 ).toTransform(SingleArtifact.MERGED_MANIFEST) // (3) Indicate the artifact and operation type.
         }
     }
