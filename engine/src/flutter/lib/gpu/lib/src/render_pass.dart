@@ -249,10 +249,19 @@ base class RenderTarget {
   /// and the engine-side checks are compiled out in release builds, so this
   /// runs unconditionally.
   void _validateAttachments() {
-    (int, int)? size;
-    void accumulate((int, int) attachmentSize) {
-      size ??= attachmentSize;
-      if (size != attachmentSize) {
+    // The size of the first attachment, against which the rest are checked.
+    // Each attachment renders into its mip level, clamped to a minimum of 1x1.
+    int? width;
+    int? height;
+    void accumulate(Texture texture, int mipLevel) {
+      final int w = texture.width >> mipLevel;
+      final int h = texture.height >> mipLevel;
+      final int mipWidth = w < 1 ? 1 : w;
+      final int mipHeight = h < 1 ? 1 : h;
+      if (width == null) {
+        width = mipWidth;
+        height = mipHeight;
+      } else if (width != mipWidth || height != mipHeight) {
         throw Exception(
           "All render target attachments must render into the same size. "
           "Check that all color and depth-stencil attachments use matching "
@@ -276,7 +285,7 @@ base class RenderTarget {
           "ColorAttachment resolve texture",
         );
       }
-      accumulate(_attachmentMipSize(color.texture, color.mipLevel));
+      accumulate(color.texture, color.mipLevel);
     }
 
     final ds = depthStencilAttachment;
@@ -287,19 +296,12 @@ base class RenderTarget {
         ds.slice,
         "DepthStencilAttachment",
       );
-      accumulate(_attachmentMipSize(ds.texture, ds.mipLevel));
+      accumulate(ds.texture, ds.mipLevel);
     }
   }
 
   final List<ColorAttachment> colorAttachments;
   final DepthStencilAttachment? depthStencilAttachment;
-}
-
-/// The dimensions of [texture] at [mipLevel], clamped to a minimum of 1x1.
-(int, int) _attachmentMipSize(Texture texture, int mipLevel) {
-  final int width = texture.width >> mipLevel;
-  final int height = texture.height >> mipLevel;
-  return (width < 1 ? 1 : width, height < 1 ? 1 : height);
 }
 
 void _validateAttachmentSubresource(
