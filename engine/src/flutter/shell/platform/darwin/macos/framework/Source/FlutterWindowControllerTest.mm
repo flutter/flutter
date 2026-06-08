@@ -13,6 +13,9 @@
 #import "flutter/testing/testing.h"
 #import "third_party/googletest/googletest/include/gtest/gtest.h"
 
+// CREATE_NATIVE_ENTRY is leaky.
+// NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+
 namespace flutter::testing {
 
 class FlutterWindowControllerTest : public FlutterEngineTest {
@@ -590,3 +593,5 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentNotResizable) {
 }
 
 }  // namespace flutter::testing
+
+// NOLINTEND(clang-analyzer-core.StackAddressEscape)
