@@ -23,13 +23,20 @@ void main() {
       checker.examplesDirectory,
     );
 
-    for (final MapEntry<Directory, Set<String>>(key: Directory directory, value: Set<String> files)
-        in knownFiles.entries) {
+    for (final Set<String> files in knownFiles.values) {
       for (final filepath in files) {
         if (excludes.contains(filepath)) {
           continue;
         }
-        writeImport(getFile(filepath, directory));
+
+        final File file = checker.filesystem.file(
+          path.join(
+            checker.flutterRoot.absolute.path,
+            filepath.replaceAll('/', Platform.pathSeparator),
+          ),
+        );
+
+        writeImport(file);
       }
     }
   }
@@ -47,6 +54,20 @@ void main() {
     }
 
     return flutterRoot.childDirectory(libraryName);
+  }
+
+  /// Get the first known cross import for the given [libraryName].
+  ///
+  /// Throws a [StateError] if there are no known cross imports for the given library.
+  String getFirstCrossImportForLibrary(String libraryName, Set<String> knownCrossImports) {
+    // Use the first entry that belongs to this library, since known imports sets
+    // are shared between lib/ and test/ directories and may contain paths for both.
+    return knownCrossImports.firstWhere((String p) => p.startsWith('$libraryName/'));
+  }
+
+  /// Returns whether there are no known cross imports for the given [libraryName].
+  bool hasNoKnownCrossImports(String libraryName, Set<String> knownCrossImports) {
+    return !knownCrossImports.any((String entry) => entry.startsWith('$libraryName/'));
   }
 
   setUp(() {
@@ -462,6 +483,12 @@ void main() {
 
   for (final (String libraryName, String knownCrossImportsListName, Set<String> knownCrossImports)
       in crossImportsExamplesApiTestCases) {
+    // This flag is defined here, instead of near the `skip:` below,
+    // due to a formatter bug with comments and named arguments,
+    // which causes `dev/bots/analyze.dart` to fail, since the skip test comment gets put on the next line.
+    // TODO(navaronbracke): Remove this when https://github.com/dart-lang/dart_style/pull/1848 rolls into Flutter
+    final bool noCrossImports = hasNoKnownCrossImports(libraryName, knownCrossImports);
+
     test('non-Dart files are ignored in $libraryName', () async {
       buildKnownCrossImportExamplesFiles();
 
@@ -495,7 +522,7 @@ void main() {
     test(
       'when not all $libraryName knowns have cross imports',
       () async {
-        final String excludedSample = knownCrossImports.first;
+        final String excludedSample = getFirstCrossImportForLibrary(libraryName, knownCrossImports);
 
         buildKnownCrossImportExamplesFiles(excludes: <String>{excludedSample});
 
@@ -514,7 +541,7 @@ void main() {
         expect(result, equals('$lines\n'));
         expect(success, isFalse);
       },
-      skip: knownCrossImports.isEmpty, // [intended]: Nothing to log if there are no known imports
+      skip: noCrossImports, // [intended]: Nothing to log if there are no known imports.
     );
 
     test('unknown $libraryName cross import of Material', () async {
