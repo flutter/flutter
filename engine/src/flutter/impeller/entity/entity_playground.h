@@ -36,6 +36,33 @@ class EntityPlayground : public PlaygroundTest {
  private:
   std::shared_ptr<TypographerContext> typographer_context_;
 
+  class ContentContextHolder {
+   public:
+    ContentContextHolder(
+        const std::shared_ptr<Context>& context,
+        const std::shared_ptr<TypographerContext>& typographer_context)
+        : content_context_(
+              std::make_shared<ContentContext>(context, typographer_context)) {}
+
+    ~ContentContextHolder() {
+      content_context_->GetTransientsDataBuffer().Reset();
+      content_context_->GetTransientsIndexesBuffer().Reset();
+      content_context_->GetTextShadowCache().MarkFrameEnd();
+      content_context_->GetLazyGlyphAtlas()->ResetTextFrames();
+      content_context_->GetContext()->DisposeThreadLocalCachedResources();
+      content_context_.reset();
+    }
+
+    std::shared_ptr<ContentContext> GetContentContext() {
+      return content_context_;
+    }
+
+   private:
+    std::shared_ptr<ContentContext> content_context_;
+  };
+
+  mutable std::shared_ptr<ContentContextHolder> context_holder_;
+
   EntityPlayground(const EntityPlayground&) = delete;
 
   EntityPlayground& operator=(const EntityPlayground&) = delete;

@@ -226,6 +226,7 @@ TEST_P(TextContentsTest, MaintainsShape) {
     EXPECT_NEAR(GetAspectRatio(position_rect[1]), GetAspectRatio(uv_rect[1]),
                 0.001)
         << i;
+    EXPECT_TRUE(GetContext()->FlushCommandBuffers());
   }
 }
 

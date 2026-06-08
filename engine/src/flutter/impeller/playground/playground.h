@@ -128,7 +128,8 @@ class Playground {
 
  private:
   fml::TimeDelta start_time_;
-  std::unique_ptr<PlaygroundImpl> impl_;
+  std::unique_ptr<PlaygroundImpl> impl_owner_;
+  PlaygroundImpl* impl_;
   std::shared_ptr<Context> context_;
   Point cursor_position_;
   ISize window_size_ = ISize{1024, 768};

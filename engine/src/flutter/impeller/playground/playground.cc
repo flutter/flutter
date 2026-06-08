@@ -31,6 +31,7 @@
 #include "impeller/renderer/backend/gles/context_gles.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
+#include "third_party/abseil-cpp/absl/base/no_destructor.h"
 #include "third_party/imgui/backends/imgui_impl_glfw.h"
 #include "third_party/imgui/imgui.h"
 
@@ -43,6 +44,42 @@
 #endif  // IMPELLER_ENABLE_VULKAN
 
 namespace impeller {
+
+namespace {
+
+std::unique_ptr<PlaygroundImpl> MakeOpenGLESPlayground(bool use_sdfs = false) {
+  FML_CHECK(::glfwInit() == GLFW_TRUE);
+  PlaygroundSwitches playground_switches;
+  playground_switches.use_angle = true;
+  playground_switches.flags.use_sdfs = use_sdfs;
+  return PlaygroundImpl::Create(
+      use_sdfs ? PlaygroundBackend::kOpenGLESSDF : PlaygroundBackend::kOpenGLES,
+      playground_switches);
+}
+
+// Returns a static instance to an OpenGL ES playground that can be used across
+// tests.
+[[maybe_unused]]
+const std::unique_ptr<PlaygroundImpl>& GetSharedOpenGLESPlayground(
+    bool use_sdfs) {
+  if (use_sdfs) {
+    static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
+        opengl_playground(MakeOpenGLESPlayground(/*use_sdfs=*/true));
+    static fml::ScopedCleanupClosure context_cleanup(
+        [&] { (*opengl_playground)->GetContext()->Shutdown(); });
+    return *opengl_playground;
+  } else {
+    static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
+        opengl_playground(MakeOpenGLESPlayground(/*use_sdfs=*/false));
+    // TODO(142237): This can be removed when the thread local storage is
+    // removed.
+    static fml::ScopedCleanupClosure context_cleanup(
+        [&] { (*opengl_playground)->GetContext()->Shutdown(); });
+    return *opengl_playground;
+  }
+}
+
+}  // namespace
 
 std::string PlaygroundBackendToString(PlaygroundBackend backend) {
   switch (backend) {
@@ -133,7 +170,24 @@ void Playground::SetupContext(PlaygroundBackend backend,
                               const PlaygroundSwitches& switches) {
   FML_CHECK(SupportsBackend(backend));
 
-  impl_ = PlaygroundImpl::Create(backend, switches);
+  switch (backend) {
+    case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
+    case PlaygroundBackend::kVulkan:
+      impl_owner_ = PlaygroundImpl::Create(backend, switches);
+      impl_ = impl_owner_.get();
+      break;
+    case PlaygroundBackend::kOpenGLES:
+      // impl_owner_ = PlaygroundImpl::Create(backend, switches);
+      // impl_ = impl_owner_.get();
+      impl_ = GetSharedOpenGLESPlayground(false).get();
+      break;
+    case PlaygroundBackend::kOpenGLESSDF:
+      // impl_owner_ = PlaygroundImpl::Create(backend, switches);
+      // impl_ = impl_owner_.get();
+      impl_ = GetSharedOpenGLESPlayground(true).get();
+      break;
+  }
   if (!impl_) {
     FML_LOG(WARNING) << "PlaygroundImpl::Create failed.";
     return;
@@ -157,13 +211,22 @@ bool Playground::IsPlaygroundEnabled() const {
 
 void Playground::TeardownWindow() {
   if (host_buffer_) {
+    FML_LOG(ERROR) << ">> resetting host buffer";
     host_buffer_.reset();
+    FML_LOG(ERROR) << "<< done resetting host buffer";
   }
   if (context_) {
+    if (!context_->FlushCommandBuffers()) {
+      FML_LOG(WARNING) << "failed to flush command buffers";
+    }
+    context_->FinishQueue();
     context_->Shutdown();
   }
   context_.reset();
-  impl_.reset();
+  impl_ = nullptr;
+  if (impl_owner_) {
+    impl_owner_.reset();
+  }
 }
 
 static std::atomic_bool gShouldOpenNewPlaygrounds = true;

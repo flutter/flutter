@@ -26,7 +26,11 @@ std::shared_ptr<TypographerContext> EntityPlayground::GetTypographerContext()
 }
 
 std::shared_ptr<ContentContext> EntityPlayground::GetContentContext() const {
-  return std::make_shared<ContentContext>(GetContext(), typographer_context_);
+  if (!context_holder_) {
+    context_holder_ = std::make_shared<ContentContextHolder>(
+        GetContext(), typographer_context_);
+  }
+  return context_holder_->GetContentContext();
 }
 
 bool EntityPlayground::OpenPlaygroundHere(Entity entity) {

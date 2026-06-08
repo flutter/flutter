@@ -22,6 +22,7 @@ impeller_component("playground") {
   deps = [
     "../renderer/backend",
     "//flutter/testing:test_swiftshader_utils",
+    "//third_party/abseil-cpp/absl/base:no_destructor",
   ]
 
   if (impeller_enable_metal) {

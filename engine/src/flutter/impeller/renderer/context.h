@@ -27,6 +27,7 @@ namespace impeller {
 class ShaderLibrary;
 class CommandBuffer;
 class PipelineLibrary;
+class Playground;
 
 /// A wrapper for provided a deferred initialization of impeller to various
 /// engine subsystems.
@@ -305,6 +306,7 @@ class Context {
   virtual bool FinishQueue() = 0;
 
   friend class flutter::testing::DlSurfaceInstanceImpeller;
+  friend class impeller::Playground;
 };
 
 }  // namespace impeller
