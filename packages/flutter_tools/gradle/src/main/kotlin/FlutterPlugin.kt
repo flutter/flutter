@@ -32,6 +32,7 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.Properties
+import java.util.concurrent.Callable
 
 class FlutterPlugin : Plugin<Project> {
     private var project: Project? = null
@@ -313,7 +314,7 @@ class FlutterPlugin : Plugin<Project> {
                 projectToAddTasksTo.layout.buildDirectory.dir(
                     "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${sourceSet.name}/jniLibs"
                 )
-            sourceSet.jniLibs.srcDir(jniLibsDir)
+            sourceSet.jniLibs.srcDir(Callable { jniLibsDir.get().asFile })
         }
 
         val flutterPlugin = this
