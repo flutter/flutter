@@ -47,7 +47,7 @@ class PrintTaskTest {
         variantsList.add("release")
 
         task.message.set(
-            variantsList.map { list -> list.joinToString("\n") { name -> "BuildVariant: $name" } },
+            variantsList.map { list -> list.joinToString("\n") { name -> "BuildVariant: $name" } }
         )
 
         task.run()
