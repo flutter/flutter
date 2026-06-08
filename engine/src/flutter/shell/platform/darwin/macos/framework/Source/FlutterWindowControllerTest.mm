@@ -504,13 +504,15 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentResizable) {
   auto controller = [engine viewControllerForIdentifier:viewId];
   auto window = controller.view.window;
   CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
-  while (window.frame.size.width != 150 && CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
+  double pixelRatio = [window backingScaleFactor];
+  while (window.frame.size.width != 300 / pixelRatio &&
+         CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
   }
 
   NSRect contentRect = [window contentRectForFrameRect:window.frame];
-  EXPECT_EQ(contentRect.size.width, 150.0);
-  EXPECT_EQ(contentRect.size.height, 150.0);
+  EXPECT_EQ(contentRect.size.width, 300 / pixelRatio);
+  EXPECT_EQ(contentRect.size.height, 300 / pixelRatio);
   EXPECT_TRUE((window.styleMask & NSWindowStyleMaskResizable) != 0);
 
   [engine.windowController closeAllWindows];
@@ -560,25 +562,28 @@ TEST_F(FlutterWindowControllerSizeTest, SizedToContentNotResizable) {
   auto window = controller.view.window;
 
   CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
-  while (window.frame.size.width != 150 && CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
+  double pixelRatio = [window backingScaleFactor];
+  while (window.frame.size.width != 300 / pixelRatio &&
+         CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
   }
 
   NSRect contentRect = [window contentRectForFrameRect:window.frame];
-  EXPECT_EQ(contentRect.size.width, 150.0);
-  EXPECT_EQ(contentRect.size.height, 150.0);
+  EXPECT_EQ(contentRect.size.width, 300 / pixelRatio);
+  EXPECT_EQ(contentRect.size.height, 300 / pixelRatio);
   EXPECT_TRUE((window.styleMask & NSWindowStyleMaskResizable) == 0);
 
   // Wait until the second frame is rendered, which should resize the window based
   // on new content.
   startTime = CFAbsoluteTimeGetCurrent();
-  while (window.frame.size.width == 150 && CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
+  while (window.frame.size.width == 300 / pixelRatio &&
+         CFAbsoluteTimeGetCurrent() - startTime < kTestTimeout) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, true);
   }
 
   contentRect = [window contentRectForFrameRect:window.frame];
-  EXPECT_EQ(contentRect.size.width, 100.0);
-  EXPECT_EQ(contentRect.size.height, 100.0);
+  EXPECT_EQ(contentRect.size.width, 200 / pixelRatio);
+  EXPECT_EQ(contentRect.size.height, 200 / pixelRatio);
 
   [engine.windowController closeAllWindows];
   [engine shutDownEngine];
