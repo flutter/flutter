@@ -43,6 +43,10 @@ sealed class GpuSurface {
 /// A frame is a temporary write lease for [colorTexture]. Record the final
 /// color writes into that texture, then call [present]. If the frame will not
 /// be presented, call [discard] so the surface can reuse its backing texture.
+///
+/// Call exactly one of [present] or [discard] for each acquired frame. Calling
+/// [discard] after [present] is a no-op, and calling [present] after [discard]
+/// throws.
 sealed class GpuSurfaceFrame {
   /// The color texture to use as the final render target for this frame.
   ///
