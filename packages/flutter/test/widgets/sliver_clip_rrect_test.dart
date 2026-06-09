@@ -17,6 +17,7 @@ Widget _buildOverlapScenario({
   Axis scrollDirection = Axis.vertical,
   bool reverse = false,
   double childExtent = 100.0,
+  Clip clipBehavior = Clip.antiAlias,
 }) {
   final isHorizontal = scrollDirection == Axis.horizontal;
 
@@ -30,6 +31,7 @@ Widget _buildOverlapScenario({
         SliverClipRRect(
           clipOverlap: clipOverlap,
           borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+          clipBehavior: clipBehavior,
           sliver: SliverToBoxAdapter(
             child: Container(
               height: isHorizontal ? 100.0 : childExtent,
@@ -57,7 +59,7 @@ void main() {
           home: CustomScrollView(
             slivers: <Widget>[
               SliverClipRRect(
-                borderRadius: .all(.circular(10.0)),
+                borderRadius: .all(Radius.circular(10.0)),
                 sliver: SliverToBoxAdapter(child: Text('Hello World')),
               ),
             ],
@@ -96,7 +98,7 @@ void main() {
         reason: 'Should hit center',
       );
       expect(
-        renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 0.0, crossAxisPosition: 0),
+        renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 0.0, crossAxisPosition: 0.0),
         isFalse,
         reason: 'Should NOT hit rounded corner',
       );
@@ -137,7 +139,7 @@ void main() {
               SliverClipRRect(
                 clipOverlap: .none,
                 clipBehavior: .hardEdge,
-                borderRadius: .all(Radius.circular(20)),
+                borderRadius: .all(Radius.circular(20.0)),
                 sliver: SliverToBoxAdapter(child: SizedBox(height: 100.0)),
               ),
             ],
@@ -148,6 +150,51 @@ void main() {
       expect(renderObject.clipOverlap, ClipOverlapBehavior.none);
       expect(renderObject.clipBehavior, Clip.hardEdge);
       expect(renderObject.borderRadius, const BorderRadius.all(Radius.circular(20.0)));
+    });
+
+    testWidgets('changing borderRadius or textDirection invalidates the cached clip', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const TestWidgetsApp(
+          home: CustomScrollView(
+            slivers: <Widget>[
+              SliverClipRRect(
+                borderRadius: BorderRadiusDirectional.only(topStart: Radius.circular(10.0)),
+                sliver: SliverToBoxAdapter(child: SizedBox(height: 100.0)),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final RenderSliverClipRRect renderObject = tester.renderObject(find.byType(SliverClipRRect));
+
+      // LTR: topStart is topLeft.
+      RRect clip = renderObject.getClip()!;
+      expect(clip.tlRadius, const Radius.circular(10.0));
+      expect(clip.trRadius, Radius.zero);
+
+      // Change borderRadius and check if getClip() returns the updated clip geometry.
+      renderObject.borderRadius = const BorderRadius.only(topRight: Radius.circular(20.0));
+      clip = renderObject.getClip()!;
+      expect(clip.tlRadius, Radius.zero);
+      expect(clip.trRadius, const Radius.circular(20.0));
+
+      // Revert to directional border radius to test textDirection.
+      renderObject.borderRadius = const BorderRadiusDirectional.only(
+        topStart: Radius.circular(10.0),
+      );
+      clip = renderObject.getClip()!;
+      expect(clip.tlRadius, const Radius.circular(10.0));
+      expect(clip.trRadius, Radius.zero);
+
+      // Change textDirection and check if getClip() returns the updated clip geometry.
+      // RTL: topStart is topRight.
+      renderObject.textDirection = TextDirection.rtl;
+      clip = renderObject.getClip()!;
+      expect(clip.tlRadius, Radius.zero);
+      expect(clip.trRadius, const Radius.circular(10.0));
     });
 
     testWidgets('updates clip when overlap changes even if geometry is same', (
@@ -186,7 +233,7 @@ void main() {
       // Scroll by 150.
       // Spacer is scrolled off. ClipRect starts at y=50.
       // Since Header is pinned at 0..100, it overlaps ClipRect by 50px.
-      controller.jumpTo(150);
+      controller.jumpTo(150.0);
       await tester.pump();
 
       expect(renderSliver.constraints.overlap, 50.0);
@@ -303,6 +350,29 @@ void main() {
           }
         });
       }
+    });
+
+    testWidgets('clipBehavior of Clip.none allows overlap hits', (WidgetTester tester) async {
+      final controller = ScrollController();
+      await tester.pumpWidget(
+        _buildOverlapScenario(controller: controller, clipBehavior: Clip.none),
+      );
+
+      controller.jumpTo(50.0);
+      await tester.pump();
+
+      final RenderSliverClipRRect renderSliver = tester.renderObject(find.byType(SliverClipRRect));
+      expect(renderSliver.constraints.overlap, 50.0);
+
+      expect(
+        renderSliver.hitTest(
+          SliverHitTestResult(),
+          mainAxisPosition: 25.0,
+          crossAxisPosition: 100.0,
+        ),
+        isTrue,
+        reason: 'Should hit in overlap area because clipBehavior is Clip.none',
+      );
     });
 
     // ---- followEdge-specific edge cases ----
