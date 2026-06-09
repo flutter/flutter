@@ -136,8 +136,8 @@ class Capabilities {
 
   /// @brief Whether a non-zero mip level of a texture can be attached as a
   ///        render target. Rendering into a cube map face or array layer is
-  ///        always supported, but core OpenGL ES 2.0 only allows attaching mip
-  ///        level 0. Metal and Vulkan always support this.
+  ///        always supported. Metal and Vulkan support this; the GLES backend
+  ///        does not yet, so it returns false there.
   virtual bool SupportsFramebufferRenderMipmap() const = 0;
 
   /// @brief The minimum alignment of uniform value offsets in bytes.

@@ -27,9 +27,9 @@ base class ColorAttachment {
   /// The mip level of [texture] to render into. Must be in the range
   /// `[0, texture.mipLevelCount)`.
   ///
-  /// Rendering into a non-zero mip level requires OpenGL ES 3.0 or the
-  /// `GL_OES_fbo_render_mipmap` extension on the GLES backend. Metal and
-  /// Vulkan always support it.
+  /// Rendering into a non-zero mip level is supported on Metal and Vulkan but
+  /// not currently on the GLES backend. See
+  /// [GpuContext.doesSupportFramebufferRenderMipmap].
   int mipLevel;
 
   /// The slice of [texture] to render into. For cubemap textures this selects

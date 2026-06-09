@@ -61,8 +61,8 @@ base class GpuContext extends NativeFieldWrapperClass1 {
   /// Whether the backend can attach a non-zero mip level of a texture as a
   /// render target (see [ColorAttachment.mipLevel]). Rendering into a cube map
   /// face or array layer is always supported; only non-zero mip levels are
-  /// gated. Always true on Metal and Vulkan; on OpenGL ES this requires ES 3.0
-  /// or the GL_OES_fbo_render_mipmap extension.
+  /// gated. True on Metal and Vulkan; currently false on the GLES backend,
+  /// where rendering into non-zero mip levels is not yet implemented.
   bool get doesSupportFramebufferRenderMipmap {
     return _getSupportsFramebufferRenderMipmap();
   }
