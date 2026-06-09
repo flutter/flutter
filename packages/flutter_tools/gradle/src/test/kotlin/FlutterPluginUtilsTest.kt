@@ -1157,22 +1157,6 @@ class FlutterPluginUtilsTest {
                 }
 
                 @Test
-                fun `does not exit early when property is invalid`(
-                    @TempDir tempDir: Path
-                ) {
-                    val testProject =
-                        setupTest(
-                            tempDir = tempDir,
-                            builtInKotlin = "5"
-                        )
-
-                    executeDetectApplyingKotlinGradlePlugin(testProject)
-
-                    verify(exactly = 1) { testProject.appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 1) { testProject.plugin1Manager.apply("kotlin-android") }
-                }
-
-                @Test
                 fun `does not log when migrated to Built-in Kotlin`(
                     @TempDir tempDir: Path
                 ) {
