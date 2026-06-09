@@ -3255,9 +3255,8 @@ public class AccessibilityBridgeTest {
   @SuppressWarnings("deprecation")
   @Test
   public void itLogsDeprecationWarningForAnnounceOnAPI36() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
     try (MockedStatic<io.flutter.Log> mockedLog = mockStatic(io.flutter.Log.class)) {
-      AccessibilityBridge accessibilityBridge = setUpBridge();
-
       accessibilityBridge.accessibilityMessageHandler.announce("Hello");
 
       mockedLog.verify(
@@ -3265,8 +3264,7 @@ public class AccessibilityBridgeTest {
               io.flutter.Log.w(
                   eq("AccessibilityBridge"),
                   contains(
-                      "Using AnnounceSemanticsEvent for accessibility is deprecated on Android")),
-          times(1));
+                      "Using AnnounceSemanticsEvent for accessibility is deprecated on Android")));
     }
   }
 
@@ -3275,9 +3273,8 @@ public class AccessibilityBridgeTest {
   @SuppressWarnings("deprecation")
   @Test
   public void itDoesNotLogDeprecationWarningForAnnounceOnAPI35() {
+    AccessibilityBridge accessibilityBridge = setUpBridge();
     try (MockedStatic<io.flutter.Log> mockedLog = mockStatic(io.flutter.Log.class)) {
-      AccessibilityBridge accessibilityBridge = setUpBridge();
-
       accessibilityBridge.accessibilityMessageHandler.announce("Hello");
 
       mockedLog.verify(
