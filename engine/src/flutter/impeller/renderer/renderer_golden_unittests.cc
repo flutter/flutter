@@ -22,6 +22,8 @@
 #include "impeller/fixtures/baby.vert.h"
 #include "impeller/fixtures/instanced_attributes.frag.h"
 #include "impeller/fixtures/instanced_attributes.vert.h"
+#include "impeller/fixtures/mipmaps.frag.h"
+#include "impeller/fixtures/mipmaps.vert.h"
 #include "impeller/fixtures/texture.frag.h"
 #include "impeller/fixtures/texture.vert.h"
 #include "impeller/geometry/color.h"
@@ -370,6 +372,99 @@ TEST_P(RendererGoldenTest, CanRenderASTCCompressedTexture) {
 
   DrawCompressedTextureGolden(*this, PixelFormat::kASTC4x4LDR, data,
                               ISize{8, 8});
+}
+
+// Samples a texture whose mip chain was populated by hand (the base level via
+// SetContents) rather than by the GenerateMipmap blit. Such a texture has
+// mip_count > 1 with NeedsMipmapGeneration() == true; sampling it used to fail
+// the (now-removed) bind-time mipmap validation on desktop Metal and OpenGL ES,
+// so the golden would have been blank there. The mipmaps shader samples at an
+// explicit LOD of 0, so the golden is the four colored quadrants of the base.
+TEST_P(RendererGoldenTest, CanSampleManuallyMippedTexture) {
+  using VS = MipmapsVertexShader;
+  using FS = MipmapsFragmentShader;
+
+  std::shared_ptr<Context> context = GetContext();
+  ASSERT_TRUE(context);
+
+  TextureDescriptor texture_desc;
+  texture_desc.storage_mode = StorageMode::kHostVisible;
+  texture_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_desc.size = ISize{8, 8};
+  texture_desc.mip_count = 2u;  // base 8x8 + one 4x4 mip; populated by hand.
+  texture_desc.usage = TextureUsage::kShaderRead;
+  auto texture = context->GetResourceAllocator()->CreateTexture(texture_desc);
+  ASSERT_TRUE(texture);
+
+  // Base level: a 2x2 grid of red/green/blue/white quadrants.
+  std::vector<uint8_t> base_data(8 * 8 * 4);
+  for (int y = 0; y < 8; ++y) {
+    for (int x = 0; x < 8; ++x) {
+      const size_t i = (static_cast<size_t>(y) * 8 + x) * 4;
+      const bool right = x >= 4;
+      const bool bottom = y >= 4;
+      uint8_t r = 0, g = 0, b = 0;
+      if (!right && !bottom) {
+        r = 0xFF;  // top-left: red.
+      } else if (right && !bottom) {
+        g = 0xFF;  // top-right: green.
+      } else if (!right && bottom) {
+        b = 0xFF;  // bottom-left: blue.
+      } else {
+        r = g = b = 0xFF;  // bottom-right: white.
+      }
+      base_data[i] = r;
+      base_data[i + 1] = g;
+      base_data[i + 2] = b;
+      base_data[i + 3] = 0xFF;
+    }
+  }
+  ASSERT_TRUE(texture->SetContents(base_data.data(), base_data.size()));
+
+  auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+  desc->SetSampleCount(SampleCount::kCount1);
+  desc->ClearStencilAttachments();
+  desc->ClearDepthAttachment();
+  auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
+  ASSERT_TRUE(pipeline);
+
+  // A fullscreen quad in normalized device coordinates with an identity MVP.
+  VertexBufferBuilder<VS::PerVertexData> vertex_buffer_builder;
+  vertex_buffer_builder.AddVertices({
+      {{-1, -1}, {0.0, 0.0}},
+      {{1, -1}, {1.0, 0.0}},
+      {{1, 1}, {1.0, 1.0}},
+      {{-1, -1}, {0.0, 0.0}},
+      {{1, 1}, {1.0, 1.0}},
+      {{-1, 1}, {0.0, 1.0}},
+  });
+  auto vertex_buffer = vertex_buffer_builder.CreateVertexBuffer(
+      *context->GetResourceAllocator());
+
+  const auto& sampler = context->GetSamplerLibrary()->GetSampler({});
+
+  auto host_buffer = HostBuffer::Create(
+      context->GetResourceAllocator(), context->GetIdleWaiter(),
+      context->GetCapabilities()->GetMinimumUniformAlignment());
+
+  ASSERT_TRUE(OpenPlaygroundHere([&](RenderPass& pass) -> bool {
+    host_buffer->Reset();
+    pass.SetPipeline(pipeline);
+    pass.SetVertexBuffer(vertex_buffer);
+
+    VS::FrameInfo frame_info;
+    frame_info.mvp = Matrix();
+    VS::BindFrameInfo(pass, host_buffer->EmplaceUniform(frame_info));
+
+    FS::FragInfo frag_info;
+    frag_info.lod = 0.0f;
+    FS::BindFragInfo(pass, host_buffer->EmplaceUniform(frag_info));
+
+    FS::BindTex(pass, texture, sampler);
+
+    return pass.Draw().ok();
+  }));
 }
 
 }  // namespace testing
