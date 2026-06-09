@@ -12,12 +12,13 @@ import 'package:flutter_tools/src/drive/web_driver_service.dart'
     show Browser, getDesiredCapabilities;
 import 'package:flutter_tools/src/web/chrome.dart' show kChromeEnvironment;
 import 'package:flutter_tools/src/web/web_device.dart' show WebServerDevice;
+import 'package:test/test.dart' show printOnFailure;
 import 'package:webdriver/async_io.dart' hide Browser;
 
 import '../../integration.shard/test_driver.dart';
 
 const reloadRestartTimeout = Duration(seconds: 5);
-const createWebDriverTimeout = Duration(seconds: 15);
+const createWebDriverTimeout = Duration(seconds: 25);
 
 class WebServerDeviceTestRunner {
   WebServerDeviceTestRunner(this._flutter);
@@ -73,6 +74,7 @@ class WebServerDeviceTestRunner {
         .transform(const LineSplitter())
         .listen(
           (String line) {
+            printOnFailure('chromedriver stdout: $line');
             if (!completer.isCompleted &&
                 line.contains(
                   'ChromeDriver was started successfully on port '
@@ -103,6 +105,7 @@ class WebServerDeviceTestRunner {
     _chromeDriverProcess!.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((
       String line,
     ) {
+      printOnFailure('chromedriver stderr: $line');
       // Surface errors that appear on this process at any time during the test.
       throw Exception('chromedriver stderr: $line');
     });
