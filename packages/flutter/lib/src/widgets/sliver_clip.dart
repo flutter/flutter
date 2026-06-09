@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui';
+import 'dart:ui' as ui show clampDouble;
 
 import 'package:flutter/rendering.dart';
 
@@ -31,10 +31,6 @@ enum ClipOverlapBehavior {
   ///
   /// The clip rectangle is truncated along the axis of the scroll view so that
   /// it never intrudes into the overlap area.
-  ///
-  /// If the clip is shaped with rounded corners (like in [SliverClipRRect]),
-  /// those corners will appear cut off (squared off) if they intersect the
-  /// overlapping boundary.
   followEdge,
 
   /// The entire shape of the clip shifts inwards to preserve its form.
@@ -450,7 +446,7 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
       return;
     }
     _borderRadius = value;
-    markNeedsPaint();
+    _markNeedsClip();
   }
 
   /// The text direction with which to resolve [borderRadius].
@@ -461,7 +457,7 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
       return;
     }
     _textDirection = value;
-    markNeedsPaint();
+    _markNeedsClip();
   }
 
   @override
@@ -662,7 +658,9 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     required double mainAxisPosition,
     required double crossAxisPosition,
   }) {
-    if (clipOverlap != ClipOverlapBehavior.none && mainAxisPosition < constraints.overlap) {
+    if (clipBehavior != Clip.none &&
+        clipOverlap != ClipOverlapBehavior.none &&
+        mainAxisPosition < constraints.overlap) {
       return false;
     }
 
@@ -710,7 +708,7 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     final double minClipOrigin = -math.min(flexibleClipExtent, constraints.scrollOffset);
 
     // When flexibleClipExtent is scrolled, we can push up the clip.
-    return clampDouble(
+    return ui.clampDouble(
       flexibleClipExtent - constraints.scrollOffset,
       minClipOrigin,
       effectiveOverlap,

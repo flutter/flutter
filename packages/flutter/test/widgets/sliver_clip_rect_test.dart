@@ -17,6 +17,7 @@ Widget _buildOverlapScenario({
   Axis scrollDirection = Axis.vertical,
   bool reverse = false,
   double childExtent = 100.0,
+  Clip clipBehavior = Clip.hardEdge,
 }) {
   final isHorizontal = scrollDirection == Axis.horizontal;
 
@@ -30,6 +31,7 @@ Widget _buildOverlapScenario({
         SliverClipRect(
           clipOverlap: clipOverlap,
           clipper: clipper,
+          clipBehavior: clipBehavior,
           sliver: SliverToBoxAdapter(
             child: Container(
               height: isHorizontal ? 100.0 : childExtent,
@@ -109,7 +111,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: CustomScrollView(
             slivers: <Widget>[
-              SliverClipRect(sliver: SliverToBoxAdapter(child: SizedBox(height: 100))),
+              SliverClipRect(sliver: SliverToBoxAdapter(child: SizedBox(height: 100.0))),
             ],
           ),
         ),
@@ -278,6 +280,29 @@ void main() {
       }
     });
 
+    testWidgets('clipBehavior of Clip.none allows overlap hits', (WidgetTester tester) async {
+      final controller = ScrollController();
+      await tester.pumpWidget(
+        _buildOverlapScenario(controller: controller, clipBehavior: Clip.none),
+      );
+
+      controller.jumpTo(50.0);
+      await tester.pump();
+
+      final RenderSliverClipRect renderSliver = tester.renderObject(find.byType(SliverClipRect));
+      expect(renderSliver.constraints.overlap, 50.0);
+
+      expect(
+        renderSliver.hitTest(
+          SliverHitTestResult(),
+          mainAxisPosition: 25.0,
+          crossAxisPosition: 100.0,
+        ),
+        isTrue,
+        reason: 'Should hit in overlap area because clipBehavior is Clip.none',
+      );
+    });
+
     // ---- Custom clipper with axis/reverse ----
 
     group('custom clipper hit testing', () {
@@ -300,7 +325,11 @@ void main() {
 
         final RenderSliver renderSliver = tester.renderObject(find.byType(SliverClipRect));
         expect(
-          renderSliver.hitTest(SliverHitTestResult(), mainAxisPosition: 25, crossAxisPosition: 50),
+          renderSliver.hitTest(
+            SliverHitTestResult(),
+            mainAxisPosition: 25.0,
+            crossAxisPosition: 50.0,
+          ),
           isTrue,
           reason: 'Should hit inside the clipped area',
         );
