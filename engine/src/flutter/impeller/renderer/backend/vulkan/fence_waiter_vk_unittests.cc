@@ -10,7 +10,7 @@
 namespace impeller {
 namespace testing {
 
-auto default_submit_callback = [](vk::Fence) { return fml::Status(); };
+const auto default_submit_callback = [](vk::Fence) { return fml::Status(); };
 
 TEST(FenceWaiterVKTest, IgnoresNullFence) {
   auto const context = MockVulkanContextBuilder().Build();
