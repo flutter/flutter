@@ -79,6 +79,10 @@ source_set("gpu") {
 }
 
 if (enable_unittests && !is_fuchsia) {
+  test_fixtures("gpu_unittests_fixtures") {
+    fixtures = []
+  }
+
   executable("gpu_unittests") {
     testonly = true
 
@@ -86,6 +90,7 @@ if (enable_unittests && !is_fuchsia) {
 
     deps = [
       ":gpu",
+      ":gpu_unittests_fixtures",
       "//flutter/impeller/renderer/testing:mocks",
       "//flutter/testing",
       "//flutter/testing:dart",
