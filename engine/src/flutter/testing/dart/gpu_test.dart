@@ -821,7 +821,7 @@ void main() async {
       texture.overwrite(Int32List.fromList(<int>[red.value]).buffer.asByteData(), mipLevel: 2);
       fail('Exception not thrown for out-of-range mipLevel.');
     } catch (e) {
-      expect(e.toString(), contains('mipLevel (2) must be in the range [0, 2)'));
+      expect(e.toString(), contains('mipLevel (2) must be in the range [0, 1]'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
@@ -835,7 +835,7 @@ void main() async {
       );
       fail('Exception not thrown for out-of-range slice.');
     } catch (e) {
-      expect(e.toString(), contains('slice (1) must be in the range [0, 1)'));
+      expect(e.toString(), contains('slice (1) must be in the range [0, 0]'));
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
@@ -993,6 +993,110 @@ void main() async {
 
     final ui.Image image = state.renderTexture.asImage();
     await comparer.addGoldenImage(image, 'flutter_gpu_test_clear_color.png');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.doesSupportFramebufferRenderMipmap returns a bool', () async {
+    expect(gpu.gpuContext.doesSupportFramebufferRenderMipmap, isA<bool>());
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Can render into a cube map slice', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      4,
+      4,
+      textureType: gpu.TextureType.textureCube,
+    );
+    expect(texture.sliceCount, 6);
+
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final renderTarget = gpu.RenderTarget.singleColor(
+      gpu.ColorAttachment(texture: texture, slice: 2, clearValue: Colors.lime),
+    );
+    commandBuffer.createRenderPass(renderTarget);
+    commandBuffer.submit();
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Can render into a non-zero mip level', () async {
+    // Rendering into a non-zero mip level needs ES 3.0 or
+    // GL_OES_fbo_render_mipmap on the GLES backend.
+    if (!gpu.gpuContext.doesSupportFramebufferRenderMipmap) {
+      markTestSkipped('Backend does not support rendering into non-zero mip levels.');
+      return;
+    }
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      8,
+      8,
+      mipLevelCount: 3,
+    );
+
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final renderTarget = gpu.RenderTarget.singleColor(
+      gpu.ColorAttachment(texture: texture, mipLevel: 1, clearValue: Colors.lime),
+    );
+    commandBuffer.createRenderPass(renderTarget);
+    commandBuffer.submit();
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('ColorAttachment throws for an out-of-range mipLevel', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      4,
+      4,
+      mipLevelCount: 2,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final renderTarget = gpu.RenderTarget.singleColor(
+      gpu.ColorAttachment(texture: texture, mipLevel: 2),
+    );
+    try {
+      commandBuffer.createRenderPass(renderTarget);
+      fail('Exception not thrown for out-of-range mipLevel.');
+    } catch (e) {
+      expect(e.toString(), contains('mipLevel (2) must be in the range [0, 1]'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('ColorAttachment throws for an out-of-range slice', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 4, 4);
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final renderTarget = gpu.RenderTarget.singleColor(
+      gpu.ColorAttachment(texture: texture, slice: 1),
+    );
+    try {
+      commandBuffer.createRenderPass(renderTarget);
+      fail('Exception not thrown for out-of-range slice.');
+    } catch (e) {
+      expect(e.toString(), contains('slice (1) must be in the range [0, 0]'));
+    }
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderTarget throws when attachment sizes do not match', () async {
+    // The color attachment renders into mip 1 (4x4) while the depth-stencil
+    // attachment renders into mip 0 (8x8).
+    final gpu.Texture color = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      8,
+      8,
+      mipLevelCount: 2,
+    );
+    final gpu.Texture depthStencil = gpu.gpuContext.createTexture(
+      gpu.StorageMode.deviceTransient,
+      8,
+      8,
+      format: gpu.gpuContext.defaultDepthStencilFormat,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final renderTarget = gpu.RenderTarget.singleColor(
+      gpu.ColorAttachment(texture: color, mipLevel: 1),
+      depthStencilAttachment: gpu.DepthStencilAttachment(texture: depthStencil),
+    );
+    try {
+      commandBuffer.createRenderPass(renderTarget);
+      fail('Exception not thrown for mismatched attachment sizes.');
+    } catch (e) {
+      expect(e.toString(), contains('must render into the same size'));
+    }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   // Regression test for https://github.com/flutter/flutter/issues/157324

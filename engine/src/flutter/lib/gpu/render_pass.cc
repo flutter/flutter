@@ -275,13 +275,17 @@ Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
     float clear_color_b,
     float clear_color_a,
     flutter::gpu::Texture* texture,
-    Dart_Handle resolve_texture_wrapper) {
+    Dart_Handle resolve_texture_wrapper,
+    int mip_level,
+    int slice) {
   impeller::ColorAttachment desc;
   desc.load_action = flutter::gpu::ToImpellerLoadAction(load_action);
   desc.store_action = flutter::gpu::ToImpellerStoreAction(store_action);
   desc.clear_color = impeller::Color(clear_color_r, clear_color_g,
                                      clear_color_b, clear_color_a);
   desc.texture = texture->GetTexture();
+  desc.mip_level = mip_level;
+  desc.slice = slice;
   if (!Dart_IsNull(resolve_texture_wrapper)) {
     flutter::gpu::Texture* resolve_texture =
         tonic::DartConverter<flutter::gpu::Texture*>::FromDart(
@@ -308,13 +312,17 @@ Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
     int stencil_load_action,
     int stencil_store_action,
     int stencil_clear_value,
-    flutter::gpu::Texture* texture) {
+    flutter::gpu::Texture* texture,
+    int mip_level,
+    int slice) {
   {
     impeller::DepthAttachment desc;
     desc.load_action = flutter::gpu::ToImpellerLoadAction(depth_load_action);
     desc.store_action = flutter::gpu::ToImpellerStoreAction(depth_store_action);
     desc.clear_depth = depth_clear_value;
     desc.texture = texture->GetTexture();
+    desc.mip_level = mip_level;
+    desc.slice = slice;
     wrapper->GetRenderTarget().SetDepthAttachment(desc);
   }
   {
@@ -324,6 +332,8 @@ Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
         flutter::gpu::ToImpellerStoreAction(stencil_store_action);
     desc.clear_stencil = stencil_clear_value;
     desc.texture = texture->GetTexture();
+    desc.mip_level = mip_level;
+    desc.slice = slice;
     wrapper->GetRenderTarget().SetStencilAttachment(desc);
   }
 
