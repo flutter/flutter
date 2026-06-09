@@ -20,6 +20,7 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
 import java.io.File
+import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.Properties
 
@@ -197,8 +198,10 @@ object FlutterPluginUtils {
                     .use { reader ->
                         result.load(reader)
                     }
-            } catch (e: Exception) {
-                // Return empty properties on error, but don't fail the build
+            } catch (e: IOException) {
+                // Return empty properties on I/O error, but don't fail the build
+            } catch (e: IllegalArgumentException) {
+                // Return empty properties on malformed properties file, but don't fail the build
             }
         }
         return result
@@ -624,12 +627,23 @@ object FlutterPluginUtils {
         }
     }
 
+    /**
+     * Represents whether Kotlin Gradle Plugin, Android Gradle Plugin (for applications), and the
+     * Android Gradle Plugin (for libraries) are declared in a subproject's build script.
+     */
     private data class SubprojectPluginState(
         val hasKgpPlugin: Boolean,
         val hasAppPlugin: Boolean,
         val hasLibPlugin: Boolean
     )
 
+    /**
+     * Scans the build script of the [subproject] to detect declarations of Kotlin Gradle Plugin,
+     * Android Gradle Plugin (for applications), and the Android Gradle Plugin (for libraries).
+     *
+     * Returns null if the build script does not exist, is inside an ephemeral `.android/` directory,
+     * or fails to read due to an [IOException].
+     */
     private fun getSubprojectPluginState(subproject: Project): SubprojectPluginState? {
         val buildFile = subproject.buildFile
 
@@ -649,7 +663,7 @@ object FlutterPluginUtils {
                 } else {
                     buildFile.readText()
                 }
-            } catch (e: Exception) {
+            } catch (e: IOException) {
                 subproject.logger.error("Failed to read build file: ${buildFile.absolutePath}", e)
                 return null
             }
