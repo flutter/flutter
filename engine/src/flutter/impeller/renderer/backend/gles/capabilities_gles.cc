@@ -54,6 +54,10 @@ static const constexpr char* kTextureCompressionAstcHdrExt =
 // https://registry.khronos.org/OpenGL/extensions/OES/OES_fbo_render_mipmap.txt
 static const constexpr char* kFboRenderMipmapExt = "GL_OES_fbo_render_mipmap";
 
+// https://registry.khronos.org/OpenGL/extensions/APPLE/APPLE_texture_max_level.txt
+static const constexpr char* kAppleTextureMaxLevelExt =
+    "GL_APPLE_texture_max_level";
+
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
     GLint value = 0;
@@ -199,6 +203,12 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   supports_fbo_render_mipmap_ = !desc->IsES() ||
                                 desc->GetGlVersion().major_version >= 3 ||
                                 desc->HasExtension(kFboRenderMipmapExt);
+
+  // GL_TEXTURE_MAX_LEVEL is core on desktop GL and ES 3.0+, and available on
+  // ES 2.0 through GL_APPLE_texture_max_level.
+  supports_texture_max_level_ = !desc->IsES() ||
+                                desc->GetGlVersion().major_version >= 3 ||
+                                desc->HasExtension(kAppleTextureMaxLevelExt);
 }
 
 bool CapabilitiesGLES::IsES() const {
@@ -207,6 +217,10 @@ bool CapabilitiesGLES::IsES() const {
 
 bool CapabilitiesGLES::SupportsFramebufferRenderMipmap() const {
   return supports_fbo_render_mipmap_;
+}
+
+bool CapabilitiesGLES::SupportsTextureMaxLevel() const {
+  return supports_texture_max_level_;
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {

@@ -89,6 +89,20 @@ bool SamplerGLES::ConfigureBoundTexture(const TextureGLES& texture,
   gl.TexParameteri(*target, GL_TEXTURE_MIN_FILTER, min_filter);
   gl.TexParameteri(*target, GL_TEXTURE_MAG_FILTER, mag_filter);
 
+  // Bound the sampled mip range to the levels the texture declares. GLES leaves
+  // GL_TEXTURE_MAX_LEVEL at its default of 1000, so a texture sampled with a
+  // mipmap filter reads as black unless every level down to 1x1 is defined.
+  // Metal and Vulkan allocate exactly mip_count levels, and clamping here gives
+  // the same behavior for a partial, manually uploaded mip chain. The parameter
+  // is unavailable on ES 2.0 without GL_APPLE_texture_max_level, and external
+  // textures have no mip levels, so it is skipped in those cases.
+  if (*target != GL_TEXTURE_EXTERNAL_OES &&
+      gl.GetCapabilities()->SupportsTextureMaxLevel()) {
+    const GLint max_level =
+        static_cast<GLint>(texture.GetTextureDescriptor().mip_count) - 1;
+    gl.TexParameteri(*target, GL_TEXTURE_MAX_LEVEL, max_level);
+  }
+
   const auto supports_decal_mode =
       gl.GetCapabilities()->SupportsDecalSamplerAddressMode();
 
