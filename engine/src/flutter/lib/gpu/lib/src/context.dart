@@ -58,6 +58,15 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getSupportsOffscreenMSAA();
   }
 
+  /// Whether the backend can attach a non-zero mip level of a texture as a
+  /// render target (see [ColorAttachment.mipLevel]). Rendering into a cube map
+  /// face or array layer is always supported; only non-zero mip levels are
+  /// gated. True on Metal and Vulkan; currently false on the GLES backend,
+  /// where rendering into non-zero mip levels is not yet implemented.
+  bool get doesSupportFramebufferRenderMipmap {
+    return _getSupportsFramebufferRenderMipmap();
+  }
+
   /// Whether this device supports the given family of block-compressed
   /// texture formats. Hardware support is granted on a per-family basis.
   ///
@@ -262,6 +271,11 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetSupportsOffscreenMSAA',
   )
   external bool _getSupportsOffscreenMSAA();
+
+  @Native<Bool Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetSupportsFramebufferRenderMipmap',
+  )
+  external bool _getSupportsFramebufferRenderMipmap();
 
   @Native<Bool Function(Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_Context_SupportsTextureCompression',
