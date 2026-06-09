@@ -350,7 +350,7 @@
 /dev/integration_tests/release_smoke_test @reidbaker @flutter/android
 
 ## Shards tests
-# TODO(keyonghan): add files/paths for below framework host only testss.
+# TODO(keyonghan): add files/paths for below framework host only tests.
 # https://github.com/flutter/flutter/issues/82068
 #
 # analyze @Piinks @flutter/framework
