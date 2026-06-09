@@ -110,7 +110,6 @@ class TestsCrossImportChecker {
   static final Set<String> knownWidgetsCrossImports = <String>{
     'packages/flutter/test/widgets/page_transitions_test.dart',
     'packages/flutter/test/widgets/app_test.dart',
-    'packages/flutter/test/widgets/navigator_replacement_test.dart',
     'packages/flutter/test/widgets/implicit_animations_test.dart',
     'packages/flutter/test/widgets/routes_transition_test.dart',
     'packages/flutter/test/widgets/editable_text_test.dart',
@@ -118,7 +117,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/inherited_test.dart',
     'packages/flutter/test/widgets/heroes_test.dart',
     'packages/flutter/test/widgets/drawer_test.dart',
-    'packages/flutter/test/widgets/editable_text_cursor_test.dart',
     'packages/flutter/test/widgets/nested_scroll_view_test.dart',
     'packages/flutter/test/widgets/scrollable_selection_test.dart',
     'packages/flutter/test/widgets/page_transitions_builder_test.dart',

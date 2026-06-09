@@ -4,6 +4,7 @@ This is an index of team-facing documentation for topics relating to Engineering
 
 - [Autorollers](Autorollers.md)
 - [Autosubmit bot](Autosubmit-bot.md)
+- [Bumping the Dart SDK version](Bumping-the-Dart-SDK-version.md)
 - [Dashboards](Dashboards.md)
 - [Experimental Branch](Experimental-Branch.md)
 - [Flutter FirebaseLab Tests](Flutter-FirebaseLab-Tests.md)
@@ -16,3 +17,5 @@ This is an index of team-facing documentation for topics relating to Engineering
 - [GitHub Action Workflows](GitHub-Action-Workflows.md)
 - [Labeling PRs](../contributing/Labeling-PRs.md)
 - [New Android Version](../platforms/android/New-Android-version.md)
+- [Rolling the Dart SDK](Rolling-Dart.md)
+- [Updating dependencies in Flutter](Updating-dependencies-in-Flutter.md)
