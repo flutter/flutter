@@ -439,6 +439,7 @@ class TextSelectionOverlay {
   /// Defaults to false.
   bool get handlesVisible => _handlesVisible;
   bool _handlesVisible = false;
+
   set handlesVisible(bool visible) {
     if (_handlesVisible == visible) {
       return;
@@ -1209,6 +1210,7 @@ class SelectionOverlay {
   /// Changing the value while the handles are visible causes them to rebuild.
   TextSelectionHandleType get startHandleType => _startHandleType;
   TextSelectionHandleType _startHandleType;
+
   set startHandleType(TextSelectionHandleType value) {
     if (_startHandleType == value) {
       return;
@@ -1224,6 +1226,7 @@ class SelectionOverlay {
   /// Changing the value while the handles are visible causes them to rebuild.
   double get lineHeightAtStart => _lineHeightAtStart;
   double _lineHeightAtStart;
+
   set lineHeightAtStart(double value) {
     if (_lineHeightAtStart == value) {
       return;
@@ -1330,6 +1333,7 @@ class SelectionOverlay {
   /// Changing the value while the handles are visible causes them to rebuild.
   TextSelectionHandleType get endHandleType => _endHandleType;
   TextSelectionHandleType _endHandleType;
+
   set endHandleType(TextSelectionHandleType value) {
     if (_endHandleType == value) {
       return;
@@ -1345,6 +1349,7 @@ class SelectionOverlay {
   /// Changing the value while the handles are visible causes them to rebuild.
   double get lineHeightAtEnd => _lineHeightAtEnd;
   double _lineHeightAtEnd;
+
   set lineHeightAtEnd(double value) {
     if (_lineHeightAtEnd == value) {
       return;
@@ -1457,6 +1462,7 @@ class SelectionOverlay {
   /// The text selection positions of selection start and end.
   List<TextSelectionPoint> get selectionEndpoints => _selectionEndpoints;
   List<TextSelectionPoint> _selectionEndpoints;
+
   set selectionEndpoints(List<TextSelectionPoint> value) {
     if (!listEquals(_selectionEndpoints, value)) {
       markNeedsBuild();
@@ -1561,6 +1567,7 @@ class SelectionOverlay {
   )
   Offset? get toolbarLocation => _toolbarLocation;
   Offset? _toolbarLocation;
+
   set toolbarLocation(Offset? value) {
     if (_toolbarLocation == value) {
       return;
@@ -1583,6 +1590,43 @@ class SelectionOverlay {
   final ContextMenuController _contextMenuController = ContextMenuController();
 
   final ContextMenuController _spellCheckToolbarController = ContextMenuController();
+
+  /// Updates the Android system gesture exclusion rects to cover the current
+  /// handle positions, preventing the system back gesture from intercepting
+  /// handle drags near screen edges.
+  void _updateSystemGestureExclusionRects() {
+    if (defaultTargetPlatform != TargetPlatform.android) {
+      return;
+    }
+    if (_handles == null) {
+      SystemChannels.platform.invokeMethod<void>(
+        'SystemChrome.setSystemGestureExclusionRects',
+        <Map<String, int>>[],
+      );
+      return;
+    }
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) {
+      return;
+    }
+    final rects = <Map<String, int>>[];
+    for (final TextSelectionPoint endpoint in _selectionEndpoints) {
+      final Offset global = renderBox.localToGlobal(endpoint.point);
+      final double dpr = WidgetsBinding.instance.window.devicePixelRatio;
+      const handleWidth = 20.0;
+      const handleHeight = 20.0;
+      rects.add(<String, int>{
+        'left': ((global.dx - handleWidth) * dpr).round(),
+        'top': (global.dy * dpr).round(),
+        'right': ((global.dx + handleWidth) * dpr).round(),
+        'bottom': ((global.dy + handleHeight) * dpr).round(),
+      });
+    }
+    SystemChannels.platform.invokeMethod<void>(
+      'SystemChrome.setSystemGestureExclusionRects',
+      rects,
+    );
+  }
 
   /// {@template flutter.widgets.SelectionOverlay.showHandles}
   /// Builds the handles by inserting them into the [context]'s overlay.
@@ -1616,6 +1660,7 @@ class SelectionOverlay {
       ),
     );
     overlay.insertAll(<OverlayEntry>[_handles!.start, _handles!.end]);
+    _updateSystemGestureExclusionRects();
   }
 
   /// {@template flutter.widgets.SelectionOverlay.hideHandles}
@@ -1628,6 +1673,7 @@ class SelectionOverlay {
       _handles!.end.remove();
       _handles!.end.dispose();
       _handles = null;
+      _updateSystemGestureExclusionRects();
     }
   }
 
@@ -1715,6 +1761,7 @@ class SelectionOverlay {
       if (_handles != null) {
         _handles!.start.markNeedsBuild();
         _handles!.end.markNeedsBuild();
+        _updateSystemGestureExclusionRects();
       }
       _toolbar?.markNeedsBuild();
       if (_contextMenuController.isShown) {
@@ -1920,6 +1967,7 @@ class _SelectionToolbarWrapper extends StatefulWidget {
 class _SelectionToolbarWrapperState extends State<_SelectionToolbarWrapper>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+
   Animation<double> get _opacity => _controller.view;
 
   @override
@@ -2014,6 +2062,7 @@ class _SelectionHandleOverlay extends StatefulWidget {
 class _SelectionHandleOverlayState extends State<_SelectionHandleOverlay>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+
   Animation<double> get _opacity => _controller.view;
 
   @override
