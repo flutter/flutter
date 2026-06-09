@@ -536,9 +536,11 @@ class SelectableRegionState extends State<SelectableRegion>
         _selectionStatusNotifier.value = SelectableRegionSelectionStatus.changing;
         _finalizeSelectableRegionStatus();
       }
-    }
-    if (_webContextMenuEnabled) {
-      PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
+    } else {
+      // has focus
+      if (_webContextMenuEnabled) {
+        PlatformSelectableRegionContextMenu.attach(_selectionDelegate);
+      }
     }
   }
 
@@ -1953,7 +1955,7 @@ class SelectableRegionState extends State<SelectableRegion>
       child: SelectionContainer(registrar: this, delegate: _selectionDelegate, child: widget.child),
     );
     if (_webContextMenuEnabled) {
-      result = PlatformSelectableRegionContextMenu(child: result);
+      result = PlatformSelectableRegionContextMenu(client: _selectionDelegate, child: result);
     }
     return TapRegion(
       groupId: SelectableRegion,

@@ -171,60 +171,142 @@ void main() {
   }, variant: _browserContextMenuEnabledVariants);
 
   // Ensure that if execCommand('copy') is called, it triggers an update of the
-  // hidden input so that the correct selected text is written to the clipboard.
-  //
-  // Regression test for https://github.com/flutter/flutter/issues/182756
-  testWidgets('copy event triggers update of hidden input', (WidgetTester tester) async {
-    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+  // hidden element so that the correct selected text is written to the clipboard.
+  testWidgets('copy event triggers update of hidden element', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          selectionControls: emptyTextSelectionControls,
+          child: const Text('Some example text'),
+        ),
+      ),
+    );
 
-    final focusNode = FocusNode();
-    addTearDown(focusNode.dispose);
+    // Select the text.
+    await _selectText(tester, 'Some example text', 'example');
+    await tester.pump();
+
+    // Dispatch the copy command on the document.
+    web.document.body!.dispatchEvent(web.Event('copy'));
+
+    // Verify the hidden element.
+    final web.HTMLElement element = _hiddenElements(fakePlatformViewRegistry).single;
+    expect(element.innerText, anyOf('example', 'example '));
+  }, variant: _browserContextMenuEnabledVariants);
+
+  testWidgets('copy event updates only the focused region', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestWidgetsApp(
         home: Column(
-          children: [
+          children: <Widget>[
             SelectableRegion(
+              // focusNode: firstFocusNode,
               selectionControls: emptyTextSelectionControls,
-              child: const Text('Some text before'),
+              child: const Text('first region text'),
             ),
             SelectableRegion(
-              focusNode: focusNode,
+              // focusNode: secondFocusNode,
               selectionControls: emptyTextSelectionControls,
-              child: const Text('Some example text'),
+              child: const Text('second region text'),
             ),
             SelectableRegion(
+              // focusNode: thirdFocusNode,
               selectionControls: emptyTextSelectionControls,
-              child: const Text('Some text after'),
+              child: const Text('third region text'),
             ),
           ],
         ),
       ),
     );
 
-    final element = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
-    expect(element, isNotNull);
-
-    // Select the text
-    final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
-      find.descendant(of: find.text('Some example text'), matching: find.byType(RichText)),
-    );
-    final Offset exampleWordStart = textOffsetToPosition(paragraph, 'Some '.length);
-    final Offset exampleWordEnd = textOffsetToPosition(paragraph, 'Some example'.length);
-    final TestGesture gesture = await tester.startGesture(exampleWordStart);
-    addTearDown(gesture.removePointer);
-    await tester.pump(const Duration(milliseconds: 500));
-    await gesture.moveTo(exampleWordEnd);
-    await tester.pump(const Duration(milliseconds: 500));
-    await gesture.up();
-    await tester.pump(const Duration(milliseconds: 500));
-
-    focusNode.requestFocus();
+    await _selectText(tester, 'second region text', 'second');
     await tester.pump();
 
-    // Dispatch the copy command on the document.
-    element.ownerDocument!.body!.dispatchEvent(web.Event('copy'));
-    expect(element.innerText, anyOf('example', 'example '));
+    web.document.body!.dispatchEvent(web.Event('copy'));
+
+    final List<web.HTMLElement> elements = _hiddenElements(fakePlatformViewRegistry);
+    expect(elements, hasLength(3));
+    expect(elements[0].innerText, isEmpty);
+    expect(elements[1].innerText, anyOf('second', 'second '));
+    expect(elements[2].innerText, isEmpty);
   }, variant: _browserContextMenuEnabledVariants);
+
+  testWidgets(
+    'disposed region does not continue responding to copy events',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: Column(
+            children: <Widget>[
+              SelectableRegion(
+                // focusNode: firstFocusNode,
+                selectionControls: emptyTextSelectionControls,
+                child: const Text('keep this region'),
+              ),
+              SelectableRegion(
+                // focusNode: secondFocusNode,
+                selectionControls: emptyTextSelectionControls,
+                child: const Text('remove this region'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final List<web.HTMLElement> initialElements = _hiddenElements(fakePlatformViewRegistry);
+      expect(initialElements, hasLength(2));
+      final web.HTMLElement removedElement = initialElements[1];
+
+      await _selectText(tester, 'remove this region', 'remove');
+      await tester.pump();
+      web.document.body!.dispatchEvent(web.Event('copy'));
+      expect(removedElement.innerText, anyOf('remove', 'remove '));
+
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SelectableRegion(
+            selectionControls: emptyTextSelectionControls,
+            child: const Text('keep this region'),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await _selectText(tester, 'keep this region', 'keep');
+      await tester.pump();
+
+      web.document.body!.dispatchEvent(web.Event('copy'));
+
+      expect(removedElement.innerText, anyOf('remove', 'remove '));
+      expect(_hiddenElements(fakePlatformViewRegistry), hasLength(1));
+      expect(_hiddenElements(fakePlatformViewRegistry).single.innerText, anyOf('keep', 'keep '));
+    },
+    variant: _browserContextMenuEnabledVariants,
+  );
+}
+
+/// Returns the hidden elements used for holding the selected text for copying.
+List<web.HTMLElement> _hiddenElements(FakePlatformViewRegistry fakePlatformViewRegistry) {
+  return fakePlatformViewRegistry.views.map((view) => view.htmlElement as web.HTMLElement).toList();
+}
+
+/// Selects the text [selection] inside [text] by tapping and dragging over it.
+Future<void> _selectText(WidgetTester tester, String text, String selection) async {
+  final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
+    find.descendant(of: find.text(text), matching: find.byType(RichText)),
+  );
+  final int startIndex = text.indexOf(selection);
+  expect(startIndex, isNonNegative);
+  final Offset start = textOffsetToPosition(paragraph, startIndex);
+  final Offset end = textOffsetToPosition(paragraph, startIndex + selection.length);
+
+  final TestGesture gesture = await tester.startGesture(start);
+  addTearDown(gesture.removePointer);
+  await tester.pump(const Duration(milliseconds: 500));
+  await gesture.moveTo(end);
+  await tester.pump(const Duration(milliseconds: 500));
+  await gesture.up();
+  await tester.pump(const Duration(milliseconds: 500));
 }
 
 void removeAllStyleElements() {
