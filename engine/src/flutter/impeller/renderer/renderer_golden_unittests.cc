@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "flutter/impeller/golden_tests/golden_playground_test.h"
+#include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/sampler_descriptor.h"
@@ -29,6 +30,9 @@
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/matrix.h"
 #include "impeller/playground/playground_test.h"
+#include "impeller/renderer/blit_pass.h"
+#include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/command_queue.h"
 #include "impeller/renderer/pipeline_builder.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/render_pass.h"
@@ -375,11 +379,12 @@ TEST_P(RendererGoldenTest, CanRenderASTCCompressedTexture) {
 }
 
 // Samples a texture whose mip chain was populated by hand (the base level via
-// SetContents) rather than by the GenerateMipmap blit. Such a texture has
-// mip_count > 1 with NeedsMipmapGeneration() == true; sampling it used to fail
-// the (now-removed) bind-time mipmap validation on desktop Metal and OpenGL ES,
-// so the golden would have been blank there. The mipmaps shader samples at an
-// explicit LOD of 0, so the golden is the four colored quadrants of the base.
+// SetContents, the second level via a blit copy) rather than by the
+// GenerateMipmap blit. Such a texture has mip_count > 1 with
+// NeedsMipmapGeneration() == true; sampling it used to fail the (now-removed)
+// bind-time mipmap validation on desktop Metal and OpenGL ES, so the golden
+// would have been blank there. The mipmaps shader samples at an explicit LOD of
+// 0, so the golden is the four colored quadrants of the base.
 TEST_P(RendererGoldenTest, CanSampleManuallyMippedTexture) {
   using VS = MipmapsVertexShader;
   using FS = MipmapsFragmentShader;
@@ -420,6 +425,25 @@ TEST_P(RendererGoldenTest, CanSampleManuallyMippedTexture) {
     }
   }
   ASSERT_TRUE(texture->SetContents(base_data.data(), base_data.size()));
+
+  // Second level (4x4), uploaded by hand via a blit copy rather than the
+  // GenerateMipmap blit, which keeps NeedsMipmapGeneration() true. This
+  // initializes the whole mip chain so the texture is complete on backends
+  // that require it (OpenGL ES samples a mipmapped texture as incomplete
+  // otherwise).
+  std::vector<uint8_t> mip_data(4 * 4 * 4, 0xFF);
+  auto mip_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
+      mip_data.data(), mip_data.size());
+  ASSERT_TRUE(mip_buffer);
+  auto cmd_buffer = context->CreateCommandBuffer();
+  ASSERT_TRUE(cmd_buffer);
+  auto blit_pass = cmd_buffer->CreateBlitPass();
+  ASSERT_TRUE(blit_pass);
+  ASSERT_TRUE(blit_pass->AddCopy(DeviceBuffer::AsBufferView(mip_buffer), texture,
+                                 /*destination_region=*/std::nullopt,
+                                 /*label=*/"Upload mip 1", /*mip_level=*/1u));
+  ASSERT_TRUE(blit_pass->EncodeCommands());
+  ASSERT_TRUE(context->GetCommandQueue()->Submit({cmd_buffer}).ok());
 
   auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(desc.has_value());
