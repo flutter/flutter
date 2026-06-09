@@ -191,12 +191,15 @@ object FlutterPluginUtils {
     internal fun readPropertiesIfExist(propertiesFile: File): Properties {
         val result = Properties()
         if (propertiesFile.exists()) {
-            propertiesFile
-                .reader(StandardCharsets.UTF_8)
-                .use { reader ->
-                    // Use Kotlin's reader with UTF-8 and 'use' for auto-closing
-                    result.load(reader)
-                }
+            try {
+                propertiesFile
+                    .reader(StandardCharsets.UTF_8)
+                    .use { reader ->
+                        result.load(reader)
+                    }
+            } catch (e: Exception) {
+                // Return empty properties on error, but don't fail the build
+            }
         }
         return result
     }
@@ -538,10 +541,17 @@ object FlutterPluginUtils {
         val isBuiltInKotlinEnabled =
             properties.getProperty("android.builtInKotlin").toBoolean()
 
+        val subprojectPluginStates = mutableMapOf<Project, SubprojectPluginState?>()
+
+        fun getPluginStateWithCaching(subproject: Project): SubprojectPluginState? =
+            subprojectPluginStates.getOrPut(subproject) {
+                getSubprojectPluginState(subproject)
+            }
+
         if (isBuiltInKotlinEnabled) {
             val allSubprojectsDoNotApplyKgp =
                 project.rootProject.subprojects.all { subproject ->
-                    val pluginState = getSubprojectPluginState(subproject)
+                    val pluginState = getPluginStateWithCaching(subproject)
                     if (pluginState == null || (!pluginState.hasAppPlugin && !pluginState.hasLibPlugin)) {
                         true
                     } else {
@@ -557,7 +567,7 @@ object FlutterPluginUtils {
 
         var shouldLogForApp = false
         project.rootProject.subprojects {
-            val pluginState = getSubprojectPluginState(this) ?: return@subprojects
+            val pluginState = getPluginStateWithCaching(this) ?: return@subprojects
 
             // Ensures applying AGP exists in the build file configuration.
             if (!pluginState.hasAppPlugin && !pluginState.hasLibPlugin) return@subprojects
@@ -630,13 +640,18 @@ object FlutterPluginUtils {
         }
 
         val scriptText: String =
-            if (buildFile.absolutePath.contains("app/build.gradle")) {
-                getBuildGradleFileFromProjectDir(
-                    subproject.projectDir,
-                    subproject.logger
-                ).readText()
-            } else {
-                buildFile.readText()
+            try {
+                if (buildFile.absolutePath.contains("app/build.gradle")) {
+                    getBuildGradleFileFromProjectDir(
+                        subproject.projectDir,
+                        subproject.logger
+                    ).readText()
+                } else {
+                    buildFile.readText()
+                }
+            } catch (e: Exception) {
+                subproject.logger.error("Failed to read build file: ${buildFile.absolutePath}", e)
+                return null
             }
 
         val (hasKgpPlugin, hasAppPlugin, hasLibPlugin) =
