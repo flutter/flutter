@@ -1397,7 +1397,56 @@ void main() {
       selectionOverlay.dispose();
       await tester.pumpAndSettle();
     });
+    testWidgets(
+      'sends system gesture exclusion rects on Android when handles shown and hidden',
+      (WidgetTester tester) async {
+        final List<MethodCall> log = <MethodCall>[];
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (
+          MethodCall call,
+        ) async {
+          log.add(call);
+          return null;
+        });
+        addTearDown(() {
+          tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          );
+        });
 
+        final spy = TextSelectionControlsSpy();
+        final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);
+        selectionOverlay
+          ..startHandleType = TextSelectionHandleType.left
+          ..endHandleType = TextSelectionHandleType.right
+          ..selectionEndpoints = const <TextSelectionPoint>[
+            TextSelectionPoint(Offset(10, 10), TextDirection.ltr),
+            TextSelectionPoint(Offset(20, 20), TextDirection.ltr),
+          ];
+
+        log.clear();
+        selectionOverlay.showHandles();
+        await tester.pump();
+
+        expect(
+          log.where((MethodCall c) => c.method == 'SystemChrome.setSystemGestureExclusionRects'),
+          isNotEmpty,
+        );
+
+        log.clear();
+        selectionOverlay.hideHandles();
+        await tester.pump();
+
+        final Iterable<MethodCall> hideCalls = log.where(
+          (MethodCall c) => c.method == 'SystemChrome.setSystemGestureExclusionRects',
+        );
+        expect(hideCalls, isNotEmpty);
+        expect((hideCalls.last.arguments as List<dynamic>), isEmpty);
+
+        selectionOverlay.dispose();
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
     testWidgets('only paints one collapsed handle', (WidgetTester tester) async {
       final spy = TextSelectionControlsSpy();
       final SelectionOverlay selectionOverlay = await pumpApp(tester, selectionControls: spy);
@@ -1990,6 +2039,7 @@ class FakeEditableTextState extends EditableTextState {
 
 class FakeEditable extends LeafRenderObjectWidget {
   const FakeEditable(this.delegate, {super.key});
+
   final EditableTextState delegate;
 
   @override
@@ -2020,6 +2070,7 @@ class FakeRenderEditable extends RenderEditable {
   ViewportOffset _offset;
 
   bool selectWordsInRangeCalled = false;
+
   @override
   void selectWordsInRange({
     required Offset from,
@@ -2032,6 +2083,7 @@ class FakeRenderEditable extends RenderEditable {
   }
 
   bool selectWordEdgeCalled = false;
+
   @override
   void selectWordEdge({required SelectionChangedCause cause}) {
     selectWordEdgeCalled = true;
@@ -2042,6 +2094,7 @@ class FakeRenderEditable extends RenderEditable {
   bool selectPositionAtCalled = false;
   Offset? selectPositionAtFrom;
   Offset? selectPositionAtTo;
+
   @override
   void selectPositionAt({required Offset from, Offset? to, required SelectionChangedCause cause}) {
     selectPositionAtCalled = true;
@@ -2052,6 +2105,7 @@ class FakeRenderEditable extends RenderEditable {
   }
 
   bool selectPositionCalled = false;
+
   @override
   void selectPosition({required SelectionChangedCause cause}) {
     selectPositionCalled = true;
@@ -2060,6 +2114,7 @@ class FakeRenderEditable extends RenderEditable {
   }
 
   bool selectWordCalled = false;
+
   @override
   void selectWord({required SelectionChangedCause cause}) {
     selectWordCalled = true;
@@ -2132,6 +2187,7 @@ class FakeClipboardStatusNotifier extends ClipboardStatusNotifier {
   FakeClipboardStatusNotifier() : super(value: ClipboardStatus.unknown);
 
   bool updateCalled = false;
+
   @override
   Future<void> update() async {
     updateCalled = true;
