@@ -448,10 +448,12 @@ static void DrawManuallyMippedTextureGolden(GoldenPlaygroundTest& test,
   ASSERT_TRUE(cmd_buffer);
   auto blit_pass = cmd_buffer->CreateBlitPass();
   ASSERT_TRUE(blit_pass);
-  ASSERT_TRUE(blit_pass->AddCopy(DeviceBuffer::AsBufferView(mip_buffer),
-                                 texture,
-                                 /*destination_region=*/std::nullopt,
-                                 /*label=*/"Upload mip 1", /*mip_level=*/1u));
+  // The destination region must match the 4x4 second level, not the 8x8 base,
+  // or the copy size check rejects the smaller source buffer.
+  ASSERT_TRUE(
+      blit_pass->AddCopy(DeviceBuffer::AsBufferView(mip_buffer), texture,
+                         /*destination_region=*/IRect::MakeSize(ISize{4, 4}),
+                         /*label=*/"Upload mip 1", /*mip_level=*/1u));
   ASSERT_TRUE(blit_pass->EncodeCommands());
   ASSERT_TRUE(context->GetCommandQueue()->Submit({cmd_buffer}).ok());
 
