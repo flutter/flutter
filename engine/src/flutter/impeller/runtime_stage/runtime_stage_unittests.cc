@@ -464,6 +464,7 @@ TEST_P(RuntimeStageTest, CanCreatePipelineFromRuntimeStage) {
   desc.SetStencilPixelFormat(stencil_fmt);
   auto pipeline = GetContext()->GetPipelineLibrary()->GetPipeline(desc).Get();
   ASSERT_NE(pipeline, nullptr);
+  UnregisterStage(*stage);
 }
 
 TEST_P(RuntimeStageTest, ContainsExpectedShaderTypes) {

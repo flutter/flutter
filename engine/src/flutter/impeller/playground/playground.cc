@@ -45,42 +45,6 @@
 
 namespace impeller {
 
-namespace {
-
-std::unique_ptr<PlaygroundImpl> MakeOpenGLESPlayground(bool use_sdfs = false) {
-  FML_CHECK(::glfwInit() == GLFW_TRUE);
-  PlaygroundSwitches playground_switches;
-  playground_switches.use_angle = true;
-  playground_switches.flags.use_sdfs = use_sdfs;
-  return PlaygroundImpl::Create(
-      use_sdfs ? PlaygroundBackend::kOpenGLESSDF : PlaygroundBackend::kOpenGLES,
-      playground_switches);
-}
-
-// Returns a static instance to an OpenGL ES playground that can be used across
-// tests.
-[[maybe_unused]]
-const std::unique_ptr<PlaygroundImpl>& GetSharedOpenGLESPlayground(
-    bool use_sdfs) {
-  if (use_sdfs) {
-    static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
-        opengl_playground(MakeOpenGLESPlayground(/*use_sdfs=*/true));
-    static fml::ScopedCleanupClosure context_cleanup(
-        [&] { (*opengl_playground)->GetContext()->Shutdown(); });
-    return *opengl_playground;
-  } else {
-    static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
-        opengl_playground(MakeOpenGLESPlayground(/*use_sdfs=*/false));
-    // TODO(142237): This can be removed when the thread local storage is
-    // removed.
-    static fml::ScopedCleanupClosure context_cleanup(
-        [&] { (*opengl_playground)->GetContext()->Shutdown(); });
-    return *opengl_playground;
-  }
-}
-
-}  // namespace
-
 std::string PlaygroundBackendToString(PlaygroundBackend backend) {
   switch (backend) {
     case PlaygroundBackend::kMetal:
@@ -177,12 +141,22 @@ void Playground::SetupContext(PlaygroundBackend backend,
       impl_owner_ = PlaygroundImpl::Create(backend, switches);
       impl_ = impl_owner_.get();
       break;
-    case PlaygroundBackend::kOpenGLES:
-      impl_ = GetSharedOpenGLESPlayground(false).get();
-      break;
-    case PlaygroundBackend::kOpenGLESSDF:
-      impl_ = GetSharedOpenGLESPlayground(true).get();
-      break;
+    case PlaygroundBackend::kOpenGLES: {
+      static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
+          opengl_playground(PlaygroundImpl::Create(backend, switches));
+      static fml::ScopedCleanupClosure context_cleanup(
+          [&] { (*opengl_playground)->GetContext()->Shutdown(); });
+      impl_ = (*opengl_playground).get();
+    }
+    case PlaygroundBackend::kOpenGLESSDF: {
+      static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
+          opengl_playground(PlaygroundImpl::Create(backend, switches));
+      // TODO(142237): This can be removed when the thread local storage is
+      // removed.
+      static fml::ScopedCleanupClosure context_cleanup(
+          [&] { (*opengl_playground)->GetContext()->Shutdown(); });
+      impl_ = (*opengl_playground).get();
+    }
   }
   if (!impl_) {
     FML_LOG(WARNING) << "PlaygroundImpl::Create failed.";
