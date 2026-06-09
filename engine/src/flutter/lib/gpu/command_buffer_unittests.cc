@@ -8,9 +8,9 @@
 #include <vector>
 
 #include "fml/status.h"
-#include "impeller/renderer/testing/mocks.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "impeller/renderer/testing/mocks.h"
 
 namespace flutter::gpu {
 namespace {
@@ -65,8 +65,7 @@ TEST(FlutterGpuCommandBufferTest,
   EXPECT_EQ(statuses[2], impeller::CommandBuffer::Status::kCompleted);
 }
 
-TEST(FlutterGpuCommandBufferTest,
-     RejectsCompletionCallbacksAfterSubmit) {
+TEST(FlutterGpuCommandBufferTest, RejectsCompletionCallbacksAfterSubmit) {
   auto context = std::make_shared<MockImpellerContext>();
   auto impeller_command_buffer = std::make_shared<MockCommandBuffer>(context);
   auto command_queue = std::make_shared<MockCommandQueue>();
@@ -75,8 +74,7 @@ TEST(FlutterGpuCommandBufferTest,
   EXPECT_CALL(*context, GetBackendType)
       .WillOnce(Return(impeller::Context::BackendType::kMetal));
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
-  EXPECT_CALL(*command_queue, Submit(_, _, _))
-      .WillOnce(Return(fml::Status()));
+  EXPECT_CALL(*command_queue, Submit(_, _, _)).WillOnce(Return(fml::Status()));
 
   EXPECT_TRUE(command_buffer.Submit());
   EXPECT_FALSE(command_buffer.AddCompletionCallback(
