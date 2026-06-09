@@ -20,7 +20,6 @@ using ::impeller::testing::MockCommandQueue;
 using ::impeller::testing::MockImpellerContext;
 using ::testing::_;
 using ::testing::DoAll;
-using ::testing::Invoke;
 using ::testing::Return;
 
 TEST(FlutterGpuCommandBufferTest,
@@ -46,14 +45,14 @@ TEST(FlutterGpuCommandBufferTest,
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
   EXPECT_CALL(*command_queue, Submit(_, _, _))
       .WillOnce(DoAll(
-          Invoke([](const std::vector<std::shared_ptr<
-                        impeller::CommandBuffer>>& buffers,
-                    const impeller::CommandQueue::CompletionCallback& callback,
-                    bool block_on_schedule) {
+          [](const std::vector<std::shared_ptr<impeller::CommandBuffer>>&
+                 buffers,
+             const impeller::CommandQueue::CompletionCallback& callback,
+             bool block_on_schedule) {
             EXPECT_EQ(buffers.size(), 1u);
             EXPECT_FALSE(block_on_schedule);
             callback(impeller::CommandBuffer::Status::kCompleted);
-          }),
+          },
           Return(fml::Status())));
 
   EXPECT_TRUE(command_buffer.Submit(
