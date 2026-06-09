@@ -36,6 +36,9 @@ std::unique_ptr<PlaygroundImpl> PlaygroundImpl::Create(
 #if IMPELLER_ENABLE_OPENGLES
     case PlaygroundBackend::kOpenGLES:
       return std::make_unique<PlaygroundImplGLES>(switches);
+    case PlaygroundBackend::kOpenGLESSDF:
+      switches.flags.use_sdfs = true;
+      return std::make_unique<PlaygroundImplGLES>(switches);
 #endif  // IMPELLER_ENABLE_OPENGLES
 #if IMPELLER_ENABLE_VULKAN
     case PlaygroundBackend::kVulkan:
