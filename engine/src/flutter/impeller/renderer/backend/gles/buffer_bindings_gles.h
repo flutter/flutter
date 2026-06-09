@@ -40,9 +40,16 @@ class BufferBindingsGLES {
 
   bool ReadUniformsBindings(const ProcTableGLES& gl, GLuint program);
 
+  /// Bind the vertex attributes for buffer slot [binding].
+  ///
+  /// [instance] re-points instance-rate attributes at the given instance,
+  /// used to emulate an instanced draw on drivers without hardware
+  /// instancing support. It is 0 for a non-instanced or hardware-instanced
+  /// draw.
   bool BindVertexAttributes(const ProcTableGLES& gl,
                             size_t binding,
-                            size_t vertex_offset);
+                            size_t vertex_offset,
+                            size_t instance = 0);
 
   bool BindUniformData(const ProcTableGLES& gl,
                        const std::vector<TextureAndSampler>& bound_textures,
@@ -69,6 +76,8 @@ class BufferBindingsGLES {
     GLenum normalized = GL_FALSE;
     GLsizei stride = 0u;
     GLsizei offset = 0u;
+    // glVertexAttribDivisor value: 0 advances per vertex, 1 per instance.
+    GLuint vertex_attrib_divisor = 0u;
   };
   std::vector<std::vector<VertexAttribPointer>> vertex_attrib_arrays_;
 
