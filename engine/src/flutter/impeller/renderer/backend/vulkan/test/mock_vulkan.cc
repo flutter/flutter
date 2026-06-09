@@ -20,6 +20,8 @@ namespace testing {
 
 namespace {
 
+class MockDevice;
+
 struct MockCommandBuffer {
   explicit MockCommandBuffer(
       std::shared_ptr<std::vector<std::string>> called_functions)
@@ -27,6 +29,18 @@ struct MockCommandBuffer {
   std::shared_ptr<std::vector<std::string>> called_functions_;
   std::vector<VkImageMemoryBarrier> image_memory_barriers_;
   std::vector<VkViewport> recorded_viewports_;
+};
+
+class MockQueue {
+ public:
+  MockQueue(MockDevice& device) : device_(device) {}
+
+  MockDevice& device() const { return device_; }
+
+ private:
+  // The MockDevice owns the MockQueues, and each MockQueue holds a reference
+  // to its parent device.
+  MockDevice& device_;
 };
 
 struct MockQueryPool {};
@@ -52,7 +66,8 @@ static ISize currentImageSize = ISize{1, 1};
 
 class MockDevice final {
  public:
-  explicit MockDevice() : called_functions_(new std::vector<std::string>()) {}
+  explicit MockDevice()
+      : called_functions_(new std::vector<std::string>()), queue_(*this) {}
 
   MockCommandBuffer* NewCommandBuffer() {
     auto buffer = std::make_unique<MockCommandBuffer>(called_functions_);
@@ -90,6 +105,8 @@ class MockDevice final {
     called_functions_->push_back(function);
   }
 
+  MockQueue& GetQueue() { return queue_; }
+
  private:
   MockDevice(const MockDevice&) = delete;
 
@@ -106,6 +123,8 @@ class MockDevice final {
   Mutex commmand_pools_mutex_;
   std::vector<std::unique_ptr<MockCommandPool>> command_pools_
       IPLR_GUARDED_BY(commmand_pools_mutex_);
+
+  MockQueue queue_;
 };
 
 struct MockVulkanState {
@@ -619,10 +638,20 @@ VkResult vkDestroyFence(VkDevice device,
   return VK_SUCCESS;
 }
 
+void vkGetDeviceQueue(VkDevice device,
+                      uint32_t queueFamilyIndex,
+                      uint32_t queueIndex,
+                      VkQueue* pQueue) {
+  MockDevice* mock_device = reinterpret_cast<MockDevice*>(device);
+  *pQueue = reinterpret_cast<VkQueue>(&mock_device->GetQueue());
+}
+
 VkResult vkQueueSubmit(VkQueue queue,
                        uint32_t submitCount,
                        const VkSubmitInfo* pSubmits,
                        VkFence fence) {
+  const MockQueue* mock_queue = reinterpret_cast<const MockQueue*>(queue);
+  mock_queue->device().AddCalledFunction("vkQueueSubmit");
   return VK_SUCCESS;
 }
 
@@ -1000,6 +1029,8 @@ PFN_vkVoidFunction GetMockVulkanProcAddress(VkInstance instance,
     return reinterpret_cast<PFN_vkVoidFunction>(vkCreateFence);
   } else if (strcmp("vkDestroyFence", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkDestroyFence);
+  } else if (strcmp("vkGetDeviceQueue", pName) == 0) {
+    return reinterpret_cast<PFN_vkVoidFunction>(vkGetDeviceQueue);
   } else if (strcmp("vkQueueSubmit", pName) == 0) {
     return reinterpret_cast<PFN_vkVoidFunction>(vkQueueSubmit);
   } else if (strcmp("vkWaitForFences", pName) == 0) {
