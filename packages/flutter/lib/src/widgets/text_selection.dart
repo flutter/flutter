@@ -16,6 +16,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '../../cupertino.dart';
 import 'basic.dart';
 import 'binding.dart';
 import 'constants.dart';
@@ -1605,14 +1606,17 @@ class SelectionOverlay {
       );
       return;
     }
+    if (!context.mounted) {
+      return;
+    }
     final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox == null) {
       return;
     }
     final rects = <Map<String, int>>[];
+    final double dpr = View.of(context).devicePixelRatio;
     for (final TextSelectionPoint endpoint in _selectionEndpoints) {
       final Offset global = renderBox.localToGlobal(endpoint.point);
-      final double dpr = WidgetsBinding.instance.window.devicePixelRatio;
       const handleWidth = 20.0;
       const handleHeight = 20.0;
       rects.add(<String, int>{
