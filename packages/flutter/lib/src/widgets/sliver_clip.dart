@@ -231,6 +231,7 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
         layer = null;
       }
     } else {
+      layer = null;
       context.paintChild(child!, offset);
     }
   }
@@ -257,8 +258,7 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
 /// overlaps with a preceding pinned sliver:
 ///
 ///  * [ClipOverlapBehavior.followEdge] (default): the clip rectangle is
-///    truncated at the overlap boundary. Rounded corners that fall within the
-///    overlapped region are squared off.
+///    truncated at the overlap boundary.
 ///  * [ClipOverlapBehavior.preserveShape]: the entire rounded rectangle shifts
 ///    inward so that corners are never hidden by the overlap. This produces a
 ///    smoother visual when items scroll underneath a pinned header.
@@ -352,8 +352,7 @@ class SliverClipRRect extends SingleChildRenderObjectWidget {
   ///
   /// When set to [ClipOverlapBehavior.followEdge] (the default), the clip
   /// rectangle is truncated at the overlap boundary defined by
-  /// [SliverConstraints.overlap]. Rounded corners that intersect this boundary
-  /// will appear squared off.
+  /// [SliverConstraints.overlap].
   ///
   /// When set to [ClipOverlapBehavior.preserveShape], the entire rounded
   /// rectangle is shifted inward so that corners remain fully visible,
@@ -529,6 +528,7 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
         layer = null;
       }
     } else {
+      layer = null;
       context.paintChild(child!, offset);
     }
   }

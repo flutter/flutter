@@ -33,10 +33,12 @@ Widget _buildOverlapScenario({
           borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
           clipBehavior: clipBehavior,
           sliver: SliverToBoxAdapter(
-            child: Container(
-              height: isHorizontal ? 100.0 : childExtent,
-              width: isHorizontal ? childExtent : null,
-              color: const Color(0xFF2196F3),
+            child: RepaintBoundary(
+              child: Container(
+                height: isHorizontal ? 100.0 : childExtent,
+                width: isHorizontal ? childExtent : null,
+                color: const Color(0xFF2196F3),
+              ),
             ),
           ),
         ),
@@ -555,6 +557,20 @@ void main() {
           reason: 'preserveShape should produce a different bottom clip in reverse',
         );
       });
+    });
+
+    testWidgets('clears layer when clipBehavior is updated to Clip.none', (
+      WidgetTester tester,
+    ) async {
+      final controller = ScrollController();
+      await tester.pumpWidget(_buildOverlapScenario(controller: controller));
+      await tester.pumpWidget(
+        _buildOverlapScenario(controller: controller, clipBehavior: Clip.none),
+      );
+
+      final RenderSliverClipRRect renderSliver = tester.renderObject(find.byType(SliverClipRRect));
+
+      expect(renderSliver.debugLayer, isNull);
     });
   });
 }

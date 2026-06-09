@@ -33,10 +33,12 @@ Widget _buildOverlapScenario({
           clipper: clipper,
           clipBehavior: clipBehavior,
           sliver: SliverToBoxAdapter(
-            child: Container(
-              height: isHorizontal ? 100.0 : childExtent,
-              width: isHorizontal ? childExtent : null,
-              color: const Color(0xFF2196F3),
+            child: RepaintBoundary(
+              child: Container(
+                height: isHorizontal ? 100.0 : childExtent,
+                width: isHorizontal ? childExtent : null,
+                color: const Color(0xFF2196F3),
+              ),
             ),
           ),
         ),
@@ -381,6 +383,20 @@ void main() {
           reason: 'Should NOT hit outside the clipped area',
         );
       });
+    });
+
+    testWidgets('clears layer when clipBehavior is updated to Clip.none', (
+      WidgetTester tester,
+    ) async {
+      final controller = ScrollController();
+      await tester.pumpWidget(_buildOverlapScenario(controller: controller));
+      await tester.pumpWidget(
+        _buildOverlapScenario(controller: controller, clipBehavior: Clip.none),
+      );
+
+      final RenderSliverClipRect renderSliver = tester.renderObject(find.byType(SliverClipRect));
+
+      expect(renderSliver.debugLayer, isNull);
     });
   });
 }
