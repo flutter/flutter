@@ -5,10 +5,10 @@
 import 'dart:io';
 
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
-import '../../lib/src/android/android_sdk.dart';
 import '../src/common.dart';
 import 'test_utils.dart';
 
@@ -175,7 +175,6 @@ void main() {
         '--release',
         '--flavor',
         'arm64',
-        '--build-number=56'
         '-P',
         'disable-abi-filtering=true',
       ], workingDirectory: projectDir.path);
@@ -195,9 +194,8 @@ void main() {
       expect(_checkLibIsInApk(projectDir, 'lib/x86/libflutter.so', productFlavor: 'arm64'), false);
     },
   );
-}
 
-testWithoutContext(
+  testWithoutContext(
     'Argument force-version-code-ignoring-abi ignores split ABI for version code',
     () async {
       final Directory projectDir = createProjectWithThirdpartyLib(tempDir);
@@ -358,9 +356,9 @@ bool _apkHasVersionCode(
   }
 
   final ProcessResult result = processManager.runSync(<String>[
-aapt,
-    'files',
-    'list',
+    aapt,
+    'dump',
+    'badging',
     apkFile.path,
   ]);
 
