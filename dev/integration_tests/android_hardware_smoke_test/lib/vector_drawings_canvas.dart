@@ -9,33 +9,46 @@ import 'package:flutter/material.dart';
 /// drawings (rectangles, paths, text, image textures, and blends) based on
 /// the active test scenario command.
 class VectorDrawingsCanvas extends StatelessWidget {
-  const VectorDrawingsCanvas({super.key, required this.message, this.loadedImage});
+  const VectorDrawingsCanvas({
+    super.key,
+    required this.message,
+    this.loadedImage,
+  });
 
+  /// The active test scenario command identifier (e.g., 'blueRectangleTest').
   final String message;
+
+  /// An optional pre-loaded image texture used for texture sampling verification.
   final ui.Image? loadedImage;
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _VectorDrawingsPainter(message: message, loadedImage: loadedImage),
+      painter: _VectorDrawingsPainter(
+        message: message,
+        loadedImage: loadedImage,
+      ),
     );
   }
 }
 
 class _VectorDrawingsPainter extends CustomPainter {
-  _VectorDrawingsPainter({required this.message, this.loadedImage}) : assert(message.isNotEmpty);
+  _VectorDrawingsPainter({required String message, ui.Image? loadedImage})
+    : _message = message,
+      _loadedImage = loadedImage,
+      assert(message.isNotEmpty);
 
-  final String message;
-  final ui.Image? loadedImage;
+  final String _message;
+  final ui.Image? _loadedImage;
 
-  void renderBlueRectangleTest(Canvas canvas, Size size) {
+  void _renderBlueRectangleTest(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.blue
       ..style = PaintingStyle.fill;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
   }
 
-  void renderTrianglePathTest(Canvas canvas, Size size) {
+  void _renderTrianglePathTest(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.blue
       ..style = PaintingStyle.fill;
@@ -47,11 +60,15 @@ class _VectorDrawingsPainter extends CustomPainter {
     canvas.drawPath(path, paint);
   }
 
-  void renderTextTest(Canvas canvas, Size size) {
+  void _renderTextTest(Canvas canvas, Size size) {
     final textPainter = TextPainter(
       text: const TextSpan(
         text: 'Flutter Text Rendering Test',
-        style: TextStyle(color: Colors.red, fontSize: 14.0, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          color: Colors.red,
+          fontSize: 14.0,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       textDirection: TextDirection.ltr,
     );
@@ -59,25 +76,35 @@ class _VectorDrawingsPainter extends CustomPainter {
     textPainter.paint(canvas, const Offset(10.0, 50.0));
   }
 
-  void renderImageTest(Canvas canvas, Size size) {
-    assert(loadedImage != null);
-    canvas.drawImage(loadedImage!, Offset.zero, Paint());
+  void _renderImageTest(Canvas canvas, Size size) {
+    assert(_loadedImage != null);
+    canvas.drawImage(_loadedImage!, Offset.zero, Paint());
   }
 
-  void renderAdvancedBlendTest(Canvas canvas, Size size) {
+  void _renderAdvancedBlendTest(Canvas canvas, Size size) {
     final paintBackground = Paint()..color = Colors.blue;
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paintBackground);
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      paintBackground,
+    );
 
     final paintCircle = Paint()..color = Colors.red;
-    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 50.0, paintCircle);
+    canvas.drawCircle(
+      Offset(size.width / 2, size.height / 2),
+      50.0,
+      paintCircle,
+    );
 
     final paintBlend = Paint()
       ..color = Colors.green
       ..blendMode = BlendMode.difference;
-    canvas.drawRect(Rect.fromLTWH(size.width / 2 - 30, size.height / 2 - 30, 80, 80), paintBlend);
+    canvas.drawRect(
+      Rect.fromLTWH(size.width / 2 - 30, size.height / 2 - 30, 80, 80),
+      paintBlend,
+    );
   }
 
-  void renderDefault(Canvas canvas, Size size) {
+  void _renderDefault(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.blueGrey
       ..strokeWidth = 10
@@ -87,29 +114,30 @@ class _VectorDrawingsPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    switch (message) {
+    switch (_message) {
       case 'blueRectangleTest':
-        renderBlueRectangleTest(canvas, size);
+        _renderBlueRectangleTest(canvas, size);
         return;
       case 'trianglePathTest':
-        renderTrianglePathTest(canvas, size);
+        _renderTrianglePathTest(canvas, size);
         return;
       case 'textTest':
-        renderTextTest(canvas, size);
+        _renderTextTest(canvas, size);
         return;
       case 'imageTest':
-        renderImageTest(canvas, size);
+        _renderImageTest(canvas, size);
         return;
       case 'advancedBlendTest':
-        renderAdvancedBlendTest(canvas, size);
+        _renderAdvancedBlendTest(canvas, size);
         return;
       default:
-        renderDefault(canvas, size);
+        _renderDefault(canvas, size);
     }
   }
 
   @override
   bool shouldRepaint(covariant _VectorDrawingsPainter oldDelegate) {
-    return message != oldDelegate.message || loadedImage != oldDelegate.loadedImage;
+    return _message != oldDelegate._message ||
+        _loadedImage != oldDelegate._loadedImage;
   }
 }

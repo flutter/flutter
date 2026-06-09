@@ -14,7 +14,9 @@ class BackdropFilterBlur extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        Positioned.fill(child: CustomPaint(painter: const BackgroundPainter())),
+        const Positioned.fill(
+          child: CustomPaint(painter: _BackgroundPainter()),
+        ),
         Center(
           child: ClipRect(
             child: BackdropFilter(
@@ -45,8 +47,8 @@ class BackdropFilterBlur extends StatelessWidget {
   }
 }
 
-class BackgroundPainter extends CustomPainter {
-  const BackgroundPainter();
+class _BackgroundPainter extends CustomPainter {
+  const _BackgroundPainter();
 
   @override
   void paint(Canvas canvas, Size size) {

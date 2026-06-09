@@ -12,41 +12,50 @@ import 'backdrop_filter_blur.dart';
 import 'goldens.dart';
 import 'vector_drawings_canvas.dart';
 
+/// The global key identifying the target [RepaintBoundary] for golden screenshot capturing.
 final GlobalKey targetKey = GlobalKey();
 
 // ImageLoader supports injecting mock assets in headless widget tests.
 typedef ImageLoader = Future<ui.Image> Function();
 
-Future<ui.Image> defaultImageLoader() async {
-  final ByteData data = await rootBundle.load('assets/test_image.png');
-  final ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
-  final ui.FrameInfo fi = await codec.getNextFrame();
-  codec.dispose();
-  return fi.image;
-}
-
 void main() async {
   runApp(const MyApp());
 }
 
+/// The root application widget for the Android hardware smoke test.
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, this.imageLoader = defaultImageLoader});
+  const MyApp({super.key, this.imageLoader = _defaultImageLoader});
 
+  /// The callback used to lazily fetch image texture assets during test runs.
   final ImageLoader imageLoader;
+
+  static Future<ui.Image> _defaultImageLoader() async {
+    final ByteData data = await rootBundle.load('assets/test_image.png');
+    final ui.Codec codec = await ui.instantiateImageCodec(
+      data.buffer.asUint8List(),
+    );
+    final ui.FrameInfo fi = await codec.getNextFrame();
+    codec.dispose();
+    return fi.image;
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter android hardware smoke test',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
       home: MyWidget(imageLoader: imageLoader),
     );
   }
 }
 
+/// A stateful widget rendering vector drawings or blur effects based on test driver requests.
 class MyWidget extends StatefulWidget {
   const MyWidget({super.key, required this.imageLoader});
 
+  /// The callback used to lazily fetch image texture assets during test runs.
   final ImageLoader imageLoader;
 
   @override
@@ -54,11 +63,11 @@ class MyWidget extends StatefulWidget {
 }
 
 class _MyState extends State<MyWidget> {
-  static const MethodChannel nativeChannel = MethodChannel(
+  static const MethodChannel _nativeChannel = MethodChannel(
     'com.example.android_hardware_smoke_test/native_support',
   );
 
-  static const testChannel = BasicMessageChannel<Object?>(
+  static const _testChannel = BasicMessageChannel<Object?>(
     'com.example.android_hardware_smoke_test/test_channel',
     JSONMessageCodec(),
   );
@@ -71,7 +80,7 @@ class _MyState extends State<MyWidget> {
     return widget.imageLoader();
   }
 
-  Future<Map<String, Object?>?> handler(Object? message) async {
+  Future<Map<String, Object?>?> _handler(Object? message) async {
     final Map<String, Object?>? messageMap = (message as Map<Object?, Object?>?)
         ?.cast<String, Object?>();
     final testName = messageMap?['testName'] as String?;
@@ -81,7 +90,8 @@ class _MyState extends State<MyWidget> {
     // Widget tests pass captureScreenshot: false.
     // Image.toByteData runs async on a native thread, which results in an unresolvable deadlock in the widget test's FakeAsync zone.
     // Comparing pixels is not a responsibility of widget tests anyway, that should be reserved for the integration tests.
-    final bool captureScreenshot = messageMap?['captureScreenshot'] as bool? ?? true;
+    final bool captureScreenshot =
+        messageMap?['captureScreenshot'] as bool? ?? true;
 
     // Lazily load the image asset only when requested. This avoids loading it
     // unnecessarily, blocks rendering until fully loaded, and catches load
@@ -102,7 +112,9 @@ class _MyState extends State<MyWidget> {
           _loadedImage = img;
         });
       } catch (e, stackTrace) {
-        return <String, Object?>{'message': 'Failed to load image asset: $e\n$stackTrace'};
+        return <String, Object?>{
+          'message': 'Failed to load image asset: $e\n$stackTrace',
+        };
       }
     }
 
@@ -122,7 +134,10 @@ class _MyState extends State<MyWidget> {
           _goldenVariantFuture,
         );
       } else {
-        completer.complete(<String, Object?>{'message': 'Rendered $testName', 'imageBytes': null});
+        completer.complete(<String, Object?>{
+          'message': 'Rendered $testName',
+          'imageBytes': null,
+        });
       }
     }, debugLabel: 'Rendered $testName');
 
@@ -133,14 +148,16 @@ class _MyState extends State<MyWidget> {
   void initState() {
     super.initState();
 
-    _goldenVariantFuture = nativeChannel.invokeMethod<String>('impeller_backend');
-    testChannel.setMessageHandler(handler);
+    _goldenVariantFuture = _nativeChannel.invokeMethod<String>(
+      'impeller_backend',
+    );
+    _testChannel.setMessageHandler(_handler);
   }
 
   @override
   void dispose() {
     _loadedImage?.dispose();
-    testChannel.setMessageHandler(null);
+    _testChannel.setMessageHandler(null);
     super.dispose();
   }
 
@@ -150,7 +167,10 @@ class _MyState extends State<MyWidget> {
     if (_message == 'backdropFilterBlurTest') {
       testContent = const BackdropFilterBlur();
     } else {
-      testContent = VectorDrawingsCanvas(message: _message, loadedImage: _loadedImage);
+      testContent = VectorDrawingsCanvas(
+        message: _message,
+        loadedImage: _loadedImage,
+      );
     }
 
     return SafeArea(
