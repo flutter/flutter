@@ -4,8 +4,8 @@
 
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 
@@ -206,14 +206,16 @@ void main() {
         'apk',
         '--release',
         '--split-per-abi',
-        '--target-platform="android-arm64"',
-        '--build-number=2',
+        '--target-platform',
+        'android-arm64',
+        '--build-number',
+        '2',
         '-P',
         'force-version-code-ignoring-abi=true',
       ], workingDirectory: projectDir.path);
 
       expect(
-        _apkHasVersionCode(projectDir, 2, productFlavor: 'arm64'),
+        _apkHasVersionCode(projectDir, 2, abi: 'arm64-v8a'),
         true,
       );
     },
@@ -319,6 +321,7 @@ bool _apkHasVersionCode(
   int versionCode, {
   BuildMode buildMode = BuildMode.release,
   String productFlavor = '',
+  String abi = '',
 }) {
   final File localPropertiesFile = appDir.childDirectory('android').childFile('local.properties');
   if (!localPropertiesFile.existsSync()) {
@@ -334,16 +337,27 @@ bool _apkHasVersionCode(
     throw StateError('SDK path not found in local.properties');
   }
 
-  final sdk = AndroidSdk(fileSystem.directory(sdkPath));
-
-  final String? aapt = sdk.latestVersion?.aaptPath;
-  if (aapt == null) {
-    throw StateError('Unable to locate aapt in system');
+  final FileSystemEntity? toolsDir = fileSystem
+      .directory(sdkPath)
+      .childDirectory('build-tools')
+      .listSync()
+      .firstWhereOrNull((FileSystemEntity entry) =>
+          entry.statSync().type == FileSystemEntityType.directory);
+  if (toolsDir == null) {
+    throw StateError('No build-tools directory found');
   }
+  final String aapt = fileSystem
+      .directory(toolsDir)
+      .childFile(Platform.isWindows ? 'aapt.bat' : 'aapt')
+      .path;
 
-  final apkName = (productFlavor.isEmpty)
-      ? 'app-${buildMode.cliName}.apk'
-      : 'app-$productFlavor-${buildMode.cliName}.apk';
+  String apkName = (productFlavor.isEmpty)
+      ? '${buildMode.cliName}.apk'
+      : '$productFlavor-${buildMode.cliName}.apk';
+  if (abi.isNotEmpty) {
+    apkName = '$abi-$apkName';
+  }
+  apkName = 'app-$apkName';
 
   final String apkDir = (productFlavor.isEmpty)
       ? buildMode.cliName
@@ -372,7 +386,6 @@ bool _apkHasVersionCode(
   }
 
   return result.stdout.toString()
-      .split('\n').first
       .contains("versionCode='$versionCode'");
 
 }
