@@ -89,6 +89,15 @@ class _MyState extends State<MyWidget> {
     if (testName == 'imageTest' && _loadedImage == null) {
       try {
         final ui.Image img = await _loadImage();
+        // When handler starts, mounted is guaranteed to be true because handler is registered in initState.
+        // However, the widget could unmount during the async gap of await _loadImage(), so we need to check mounted again before calling setState.
+        if (!mounted) {
+          img.dispose();
+          return <String, Object?>{
+            'message': 'Widget unmounted during image load',
+            'imageBytes': null,
+          };
+        }
         setState(() {
           _loadedImage = img;
         });
