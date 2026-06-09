@@ -75,10 +75,7 @@ class WebServerDeviceTestRunner {
         .listen(
           (String line) {
             printOnFailure('chromedriver stdout: $line');
-            if (!completer.isCompleted &&
-                line.contains(
-                  'ChromeDriver was started successfully on port $chromeDriverPort.',
-                )) {
+            if (!completer.isCompleted && line.contains('ChromeDriver was started successfully')) {
               completer.complete(chromeDriverPort);
             }
           },
