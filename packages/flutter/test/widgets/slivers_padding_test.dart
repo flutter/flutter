@@ -408,10 +408,8 @@ void main() {
 
     await tester.pumpWidget(buildApp(EdgeInsets.zero));
 
-    await expectLater(
-      () => tester.pumpWidget(buildApp(const EdgeInsets.all(-1.0))),
-      throwsAssertionError,
-    );
+    await tester.pumpWidget(buildApp(const EdgeInsets.all(-1.0)));
+    expect(tester.takeException(), isAssertionError);
   });
 
   testWidgets('Viewport+SliverPadding changing direction', (WidgetTester tester) async {
