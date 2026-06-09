@@ -1811,14 +1811,21 @@ class FlutterPluginUtilsTest {
         every { project.tasks.register(any(), eq(PrintTask::class.java), any()) } returns mockk()
         val captureSlot = slot<Action<PrintTask>>()
 
-        FlutterPluginUtils.addTaskForKGPVersion(project)
-        verify { project.tasks.register("kgpVersion", eq(PrintTask::class.java), capture(captureSlot)) }
+        mockkObject(VersionFetcher)
+        every { VersionFetcher.getKGPVersion(project) } returns Version(2, 2, 0)
 
-        val mockPrintTask = mockk<PrintTask>(relaxed = true)
-        captureSlot.captured.execute(mockPrintTask)
+        try {
+            FlutterPluginUtils.addTaskForKGPVersion(project)
+            verify { project.tasks.register("kgpVersion", eq(PrintTask::class.java), capture(captureSlot)) }
 
-        verify {
-            mockPrintTask.description = "Print the current kgp version used by the project."
+            val mockPrintTask = mockk<PrintTask>(relaxed = true)
+            captureSlot.captured.execute(mockPrintTask)
+
+            verify {
+                mockPrintTask.description = "Print the current kgp version used by the project."
+            }
+        } finally {
+            io.mockk.unmockkObject(VersionFetcher)
         }
     }
 
@@ -1827,7 +1834,7 @@ class FlutterPluginUtilsTest {
     fun `addTaskForPrintBuildVariants adds task for printing build variants`() {
         val project = mockk<Project>()
         val androidComponents = mockk<AndroidComponentsExtension<*, *, *>>(relaxed = true)
-        val listProperty = mockk<org.gradle.api.provider.ListProperty<String>>()
+        val listProperty = mockk<org.gradle.api.provider.ListProperty<String>>(relaxed = true)
 
         every { project.extensions } returns mockk()
         every { project.extensions.getByType(AndroidComponentsExtension::class.java) } returns androidComponents
