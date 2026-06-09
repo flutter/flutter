@@ -447,8 +447,11 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) =>
-      NoOpDeviceLogReader(name);
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) => NoOpDeviceLogReader(name);
 
   @override
   DevicePortForwarder portForwarder = const NoOpDevicePortForwarder();

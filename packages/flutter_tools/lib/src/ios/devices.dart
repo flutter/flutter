@@ -1211,6 +1211,7 @@ class IOSDevice extends Device {
     covariant IOSApp? app,
     bool includePastLogs = false,
     bool usingCISystem = false,
+    bool adbLogFiltering = true,
   }) {
     assert(!includePastLogs, 'Past log reading not supported on iOS devices.');
     return _logReaders.putIfAbsent(

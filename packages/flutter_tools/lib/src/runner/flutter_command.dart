@@ -2052,19 +2052,10 @@ abstract class FlutterCommand extends Command<void> {
   Future<List<Device>?> findAllTargetDevices({
     bool includeDevicesUnsupportedByProject = false,
   }) async {
-    final List<Device>? devices = await _targetDevices.findAllTargetDevices(
+    return _targetDevices.findAllTargetDevices(
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
     );
-    if (devices != null &&
-        argResults != null &&
-        argParser.options.containsKey(FlutterOptions.kAdbLogFiltering)) {
-      final bool filtering = boolArg(FlutterOptions.kAdbLogFiltering);
-      for (final Device device in devices) {
-        device.adbLogFiltering = filtering;
-      }
-    }
-    return devices;
   }
 
   /// Find and return the target [Device] based upon currently connected

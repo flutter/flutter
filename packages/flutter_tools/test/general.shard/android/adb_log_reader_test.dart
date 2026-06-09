@@ -309,9 +309,6 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   final String _apiVersion;
 
   @override
-  bool adbLogFiltering = true;
-
-  @override
   String get name => 'test-device';
 
   @override

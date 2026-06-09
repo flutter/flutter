@@ -63,7 +63,12 @@ class LogsCommand extends FlutterCommand {
       await cachedDevice.targetPlatform,
     );
 
-    final DeviceLogReader logReader = await cachedDevice.getLogReader(app: app);
+    final bool filtering =
+        argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering');
+    final DeviceLogReader logReader = await cachedDevice.getLogReader(
+      app: app,
+      adbLogFiltering: filtering,
+    );
 
     globals.printStatus('Showing $logReader logs:');
 

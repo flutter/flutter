@@ -88,7 +88,11 @@ abstract class ChromiumDevice extends WebDevice {
   DeviceLogReader? _logReader;
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+  DeviceLogReader getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) {
     return _logReader ??= NoOpDeviceLogReader(app?.name);
   }
 
@@ -395,7 +399,11 @@ class WebServerDevice extends WebDevice {
   DeviceLogReader? _logReader;
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+  DeviceLogReader getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) {
     return _logReader ??= NoOpDeviceLogReader(app?.name);
   }
 

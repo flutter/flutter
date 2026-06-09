@@ -622,7 +622,11 @@ class IOSSimulator extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({covariant IOSApp? app, bool includePastLogs = false}) {
+  DeviceLogReader getLogReader({
+    covariant IOSApp? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) {
     assert(!includePastLogs, 'Past log reading not supported on iOS simulators.');
     return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
   }

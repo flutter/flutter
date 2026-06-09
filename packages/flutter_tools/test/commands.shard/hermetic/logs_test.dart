@@ -63,7 +63,7 @@ void main() {
         final fakeDevice = FakeDevice('phone', deviceId);
         deviceManager.attachedDevices.add(fakeDevice);
 
-        expect(fakeDevice.adbLogFiltering, isTrue);
+        expect(fakeDevice.lastPassedAdbLogFiltering, isNull);
 
         final termSignal = FakeProcessSignal();
         final intSignal = FakeProcessSignal();
@@ -76,7 +76,7 @@ void main() {
         intSignal.send(1);
         await commandFuture;
 
-        expect(fakeDevice.adbLogFiltering, isFalse);
+        expect(fakeDevice.lastPassedAdbLogFiltering, isFalse);
       },
       overrides: <Type, Generator>{Platform: () => platform, DeviceManager: () => deviceManager},
     );
@@ -85,7 +85,7 @@ void main() {
       final fakeDevice = FakeDevice('phone', deviceId);
       deviceManager.attachedDevices.add(fakeDevice);
 
-      expect(fakeDevice.adbLogFiltering, isTrue);
+      expect(fakeDevice.lastPassedAdbLogFiltering, isNull);
 
       final termSignal = FakeProcessSignal();
       final intSignal = FakeProcessSignal();
@@ -98,7 +98,7 @@ void main() {
       intSignal.send(1);
       await commandFuture;
 
-      expect(fakeDevice.adbLogFiltering, isTrue);
+      expect(fakeDevice.lastPassedAdbLogFiltering, isTrue);
     }, overrides: <Type, Generator>{Platform: () => platform, DeviceManager: () => deviceManager});
   });
 }

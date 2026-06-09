@@ -188,8 +188,16 @@ class FakeDevice extends Device {
   Future<String> sdkNameAndVersion = Future<String>.value('Test SDK (1.2.3)');
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) =>
-      deviceLogReader ?? FakeDeviceLogReader();
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) {
+    lastPassedAdbLogFiltering = adbLogFiltering;
+    return deviceLogReader ?? FakeDeviceLogReader();
+  }
+
+  bool? lastPassedAdbLogFiltering;
 }
 
 /// Combines fake device with its canonical JSON representation.

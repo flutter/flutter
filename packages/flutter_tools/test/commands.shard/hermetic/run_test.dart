@@ -1994,7 +1994,11 @@ class FakeDevice extends Fake implements Device {
   Future<String> get targetPlatformDisplayName async => (await targetPlatform).getName();
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage? app, bool includePastLogs = false}) {
+  DeviceLogReader getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  }) {
     return FakeDeviceLogReader();
   }
 

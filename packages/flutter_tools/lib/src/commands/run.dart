@@ -337,6 +337,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         disableServiceAuthCodes: boolArg('disable-service-auth-codes'),
         cacheStartupProfile: cacheStartupProfile,
         enableDds: enableDds,
+        adbLogFiltering:
+            argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering'),
         dartEntrypointArgs: stringsArg('dart-entrypoint-args'),
         dartFlags: stringArg('dart-flags') ?? '',
         useTestFonts: argParser.options.containsKey('use-test-fonts') && boolArg('use-test-fonts'),

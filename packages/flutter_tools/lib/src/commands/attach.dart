@@ -375,6 +375,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
       ipv6: ipv6!,
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
+      adbLogFiltering:
+          argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering'),
     );
 
     return buildInfo.isDebug

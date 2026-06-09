@@ -637,10 +637,6 @@ abstract class Device {
 
   bool get isWirelesslyConnected => connectionInterface == DeviceConnectionInterface.wireless;
 
-  /// Whether to filter ADB logcat tags/messages on the Dart side.
-  /// Only used by Android devices.
-  bool adbLogFiltering = true;
-
   String get name;
 
   String get displayName {
@@ -733,7 +729,11 @@ abstract class Device {
   /// If `includePastLogs` is true and the device type supports it, the log
   /// reader will also include log messages from before the invocation time.
   /// Defaults to false.
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false});
+  FutureOr<DeviceLogReader> getLogReader({
+    ApplicationPackage? app,
+    bool includePastLogs = false,
+    bool adbLogFiltering = true,
+  });
 
   /// Get the port forwarder for this device.
   DevicePortForwarder? get portForwarder;
@@ -998,6 +998,7 @@ class DebuggingOptions {
     this.printDtd = false,
     this.webDevServerConfig,
     this.testFlag = false,
+    this.adbLogFiltering = true,
   }) : debuggingEnabled = true,
        webCrossOriginIsolation = webCrossOriginIsolation ?? webUseWasm,
        webRenderer = webRenderer ?? WebRendererMode.getDefault(useWasm: webUseWasm);
@@ -1031,6 +1032,7 @@ class DebuggingOptions {
     this.webDevServerConfig,
     this.testFlag = false,
   }) : debuggingEnabled = false,
+       adbLogFiltering = true,
        useTestFonts = false,
        startPaused = false,
        dartFlags = '',
@@ -1117,6 +1119,7 @@ class DebuggingOptions {
     required this.ipv6,
     required this.google3WorkspaceRoot,
     required this.printDtd,
+    required this.adbLogFiltering,
     this.webDevServerConfig,
   }) : testFlag = false;
 
@@ -1165,6 +1168,7 @@ class DebuggingOptions {
   final bool printDtd;
   final WebDevServerConfig? webDevServerConfig;
   final bool testFlag;
+  final bool adbLogFiltering;
 
   /// Whether the tool should try to uninstall a previously installed version of the app.
   ///
@@ -1323,6 +1327,7 @@ class DebuggingOptions {
     'ipv6': ipv6,
     'google3WorkspaceRoot': google3WorkspaceRoot,
     'printDtd': printDtd,
+    'adbLogFiltering': adbLogFiltering,
     // TODO(jsimmons): This field is required for backward compatibility with
     // the flutter_tools binary that is currently checked into Google3.
     // Remove this when that binary has been updated.
@@ -1391,6 +1396,7 @@ class DebuggingOptions {
         ipv6: (json['ipv6'] as bool?) ?? false,
         google3WorkspaceRoot: json['google3WorkspaceRoot'] as String?,
         printDtd: (json['printDtd'] as bool?) ?? false,
+        adbLogFiltering: (json['adbLogFiltering'] as bool?) ?? true,
         webDevServerConfig: WebDevServerConfig(
           port: json['port'] is int ? json['port']! as int : 8080,
           host: json['hostname'] is String ? json['hostname']! as String : 'localhost',
