@@ -161,8 +161,6 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
     return false;
   }
 
-  destination->SetCoordinateSystem(TextureCoordinateSystem::kUploadFromHost);
-
   GLenum texture_type;
   GLenum texture_target;
   switch (tex_descriptor.type) {
@@ -354,8 +352,6 @@ bool BlitResizeTextureCommandGLES::Encode(const ReactorGLES& reactor) const {
     VALIDATION_LOG << "Texture blit fallback not implemented yet for GLES2.";
     return false;
   }
-
-  destination->SetCoordinateSystem(source->GetCoordinateSystem());
 
   GLuint read_fbo = GL_NONE;
   GLuint draw_fbo = GL_NONE;
