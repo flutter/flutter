@@ -1118,8 +1118,10 @@ class FlutterPluginUtilsTest {
                             match { it.contains("Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP): plugin") }
                         )
                     }
-                    verify(exactly = 1) { testProject.appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 0) { testProject.plugin1Manager.apply("kotlin-android") }
+                    val appPluginManager = testProject.appPluginManager
+                    val plugin1Manager = testProject.plugin1Manager
+                    verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
                 }
             }
 
@@ -1137,8 +1139,10 @@ class FlutterPluginUtilsTest {
 
                     executeDetectApplyingKotlinGradlePlugin(testProject)
 
-                    verify(exactly = 1) { testProject.appPluginManager.apply("kotlin-android") }
-                    verify(exactly = 1) { testProject.plugin1Manager.apply("kotlin-android") }
+                    val appPluginManager = testProject.appPluginManager
+                    val plugin1Manager = testProject.plugin1Manager
+                    verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
                 }
 
                 @Test
@@ -1153,7 +1157,8 @@ class FlutterPluginUtilsTest {
 
                     executeDetectApplyingKotlinGradlePlugin(testProject)
 
-                    verify(exactly = 1) { testProject.appPluginManager.apply("kotlin-android") }
+                    val appPluginManager = testProject.appPluginManager
+                    verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
                 }
 
                 @Test
@@ -1166,8 +1171,10 @@ class FlutterPluginUtilsTest {
                             builtInKotlin = "false"
                         )
 
-                    every { testProject.appPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
-                    every { testProject.plugin1Manager.apply("kotlin-android") } throws Exception("KGP not on classpath")
+                    val appPluginManager = testProject.appPluginManager
+                    val plugin1Manager = testProject.plugin1Manager
+                    every { appPluginManager.apply("kotlin-android") } throws Exception("KGP not on classpath")
+                    every { plugin1Manager.apply("kotlin-android") } throws Exception("KGP not on classpath")
 
                     executeDetectApplyingKotlinGradlePlugin(testProject)
 
@@ -1206,8 +1213,10 @@ class FlutterPluginUtilsTest {
                             mockLogger.error(any())
                         }
 
-                        verify(exactly = 1) { testProject.appPluginManager.apply("kotlin-android") }
-                        verify(exactly = 1) { testProject.plugin1Manager.apply("kotlin-android") }
+                        val appPluginManager = testProject.appPluginManager
+                        val plugin1Manager = testProject.plugin1Manager
+                        verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
                     }
 
                     @Test
@@ -1237,8 +1246,10 @@ class FlutterPluginUtilsTest {
                         verify(exactly = 0) {
                             mockLogger.error(match { it.contains("Your app uses the following plugins") })
                         }
-                        verify(exactly = 0) { testProject.appPluginManager.apply("kotlin-android") }
-                        verify(exactly = 1) { testProject.plugin1Manager.apply("kotlin-android") }
+                        val appPluginManager = testProject.appPluginManager
+                        val plugin1Manager = testProject.plugin1Manager
+                        verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
                     }
 
                     @Test
@@ -1278,8 +1289,10 @@ class FlutterPluginUtilsTest {
                         verify(exactly = 0) {
                             mockLogger.error(match { it.contains("Your Android app project") })
                         }
-                        verify(exactly = 1) { testProject.appPluginManager.apply("kotlin-android") }
-                        verify(exactly = 0) { testProject.plugin1Manager.apply("kotlin-android") }
+                        val appPluginManager = testProject.appPluginManager
+                        val plugin1Manager = testProject.plugin1Manager
+                        verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
                     }
 
                     @Test
@@ -1406,8 +1419,10 @@ class FlutterPluginUtilsTest {
                             mockLogger.error(any())
                         }
 
-                        verify(exactly = 1) { testProject.appPluginManager.apply("kotlin-android") }
-                        verify(exactly = 1) { testProject.plugin1Manager.apply("kotlin-android") }
+                        val appPluginManager = testProject.appPluginManager
+                        val plugin1Manager = testProject.plugin1Manager
+                        verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
                     }
 
                     @Test
@@ -1437,8 +1452,10 @@ class FlutterPluginUtilsTest {
                         verify(exactly = 0) {
                             mockLogger.error(match { it.contains("Your app uses the following plugins") })
                         }
-                        verify(exactly = 0) { testProject.appPluginManager.apply("kotlin-android") }
-                        verify(exactly = 1) { testProject.plugin1Manager.apply("kotlin-android") }
+                        val appPluginManager = testProject.appPluginManager
+                        val plugin1Manager = testProject.plugin1Manager
+                        verify(exactly = 0) { appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 1) { plugin1Manager.apply("kotlin-android") }
                     }
 
                     @Test
@@ -1482,8 +1499,10 @@ class FlutterPluginUtilsTest {
                         verify(exactly = 0) {
                             mockLogger.error(match { it.contains("Your Android app project") })
                         }
-                        verify(exactly = 1) { testProject.appPluginManager.apply("kotlin-android") }
-                        verify(exactly = 0) { testProject.plugin1Manager.apply("kotlin-android") }
+                        val appPluginManager = testProject.appPluginManager
+                        val plugin1Manager = testProject.plugin1Manager
+                        verify(exactly = 1) { appPluginManager.apply("kotlin-android") }
+                        verify(exactly = 0) { plugin1Manager.apply("kotlin-android") }
                     }
 
                     @Test
