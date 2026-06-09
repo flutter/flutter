@@ -18,8 +18,6 @@ class RuntimeStagePlayground : public PlaygroundTest {
 
   bool RegisterStage(const RuntimeStage& stage);
 
-  void UnregisterStage(const RuntimeStage& stage);
-
  private:
   RuntimeStagePlayground(const RuntimeStagePlayground&) = delete;
 

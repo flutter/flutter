@@ -31,9 +31,4 @@ bool RuntimeStagePlayground::RegisterStage(const RuntimeStage& stage) {
   return future.get();
 }
 
-void RuntimeStagePlayground::UnregisterStage(const RuntimeStage& stage) {
-  GetContext()->GetShaderLibrary()->UnregisterFunction(
-      stage.GetEntrypoint(), ToShaderStage(stage.GetShaderStage()));
-}
-
 }  // namespace impeller

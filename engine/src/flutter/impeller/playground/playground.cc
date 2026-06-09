@@ -147,6 +147,7 @@ void Playground::SetupContext(PlaygroundBackend backend,
       static fml::ScopedCleanupClosure context_cleanup(
           [&] { (*opengl_playground)->GetContext()->Shutdown(); });
       impl_ = (*opengl_playground).get();
+      break;
     }
     case PlaygroundBackend::kOpenGLESSDF: {
       static absl::NoDestructor<std::unique_ptr<PlaygroundImpl>>
@@ -156,6 +157,7 @@ void Playground::SetupContext(PlaygroundBackend backend,
       static fml::ScopedCleanupClosure context_cleanup(
           [&] { (*opengl_playground)->GetContext()->Shutdown(); });
       impl_ = (*opengl_playground).get();
+      break;
     }
   }
   if (!impl_) {
