@@ -379,17 +379,19 @@ TEST_P(RendererGoldenTest, CanRenderASTCCompressedTexture) {
 }
 
 // Samples a texture whose mip chain was populated by hand (the base level via
-// SetContents, the second level via a blit copy) rather than by the
-// GenerateMipmap blit. Such a texture has mip_count > 1 with
-// NeedsMipmapGeneration() == true; sampling it used to fail the (now-removed)
-// bind-time mipmap validation on desktop Metal and OpenGL ES, so the golden
-// would have been blank there. The mipmaps shader samples at an explicit LOD of
-// 0, so the golden is the four colored quadrants of the base.
-TEST_P(RendererGoldenTest, CanSampleManuallyMippedTexture) {
+// SetContents, the 4x4 second level via a blit copy) rather than by the
+// GenerateMipmap blit, then samples it at the given LOD. Such a texture has
+// mip_count > 1 with NeedsMipmapGeneration() == true; sampling it used to fail
+// the (now-removed) bind-time mipmap validation on desktop Metal and OpenGL ES,
+// so the golden would have been blank there. The base is four colored quadrants
+// and the second level is solid orange, so LOD 0 renders the quadrants and LOD
+// 1 renders solid orange.
+static void DrawManuallyMippedTextureGolden(GoldenPlaygroundTest& test,
+                                            float lod) {
   using VS = MipmapsVertexShader;
   using FS = MipmapsFragmentShader;
 
-  std::shared_ptr<Context> context = GetContext();
+  std::shared_ptr<Context> context = test.GetContext();
   ASSERT_TRUE(context);
 
   TextureDescriptor texture_desc;
@@ -426,12 +428,19 @@ TEST_P(RendererGoldenTest, CanSampleManuallyMippedTexture) {
   }
   ASSERT_TRUE(texture->SetContents(base_data.data(), base_data.size()));
 
-  // Second level (4x4), uploaded by hand via a blit copy rather than the
+  // Second level (4x4), solid orange so it is distinct from the base and from
+  // an empty level. Uploaded by hand via a blit copy rather than the
   // GenerateMipmap blit, which keeps NeedsMipmapGeneration() true. This
   // initializes the whole mip chain so the texture is complete on backends
   // that require it (OpenGL ES samples a mipmapped texture as incomplete
   // otherwise).
-  std::vector<uint8_t> mip_data(4 * 4 * 4, 0xFF);
+  std::vector<uint8_t> mip_data(4 * 4 * 4);
+  for (size_t i = 0; i < mip_data.size(); i += 4) {
+    mip_data[i] = 0xFF;      // r
+    mip_data[i + 1] = 0x80;  // g
+    mip_data[i + 2] = 0x00;  // b
+    mip_data[i + 3] = 0xFF;  // a
+  }
   auto mip_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
       mip_data.data(), mip_data.size());
   ASSERT_TRUE(mip_buffer);
@@ -439,7 +448,8 @@ TEST_P(RendererGoldenTest, CanSampleManuallyMippedTexture) {
   ASSERT_TRUE(cmd_buffer);
   auto blit_pass = cmd_buffer->CreateBlitPass();
   ASSERT_TRUE(blit_pass);
-  ASSERT_TRUE(blit_pass->AddCopy(DeviceBuffer::AsBufferView(mip_buffer), texture,
+  ASSERT_TRUE(blit_pass->AddCopy(DeviceBuffer::AsBufferView(mip_buffer),
+                                 texture,
                                  /*destination_region=*/std::nullopt,
                                  /*label=*/"Upload mip 1", /*mip_level=*/1u));
   ASSERT_TRUE(blit_pass->EncodeCommands());
@@ -472,7 +482,7 @@ TEST_P(RendererGoldenTest, CanSampleManuallyMippedTexture) {
       context->GetResourceAllocator(), context->GetIdleWaiter(),
       context->GetCapabilities()->GetMinimumUniformAlignment());
 
-  ASSERT_TRUE(OpenPlaygroundHere([&](RenderPass& pass) -> bool {
+  ASSERT_TRUE(test.OpenPlaygroundHere([&](RenderPass& pass) -> bool {
     host_buffer->Reset();
     pass.SetPipeline(pipeline);
     pass.SetVertexBuffer(vertex_buffer);
@@ -482,13 +492,23 @@ TEST_P(RendererGoldenTest, CanSampleManuallyMippedTexture) {
     VS::BindFrameInfo(pass, host_buffer->EmplaceUniform(frame_info));
 
     FS::FragInfo frag_info;
-    frag_info.lod = 0.0f;
+    frag_info.lod = lod;
     FS::BindFragInfo(pass, host_buffer->EmplaceUniform(frag_info));
 
     FS::BindTex(pass, texture, sampler);
 
     return pass.Draw().ok();
   }));
+}
+
+// LOD 0 reads the base level, so the golden is the four colored quadrants.
+TEST_P(RendererGoldenTest, CanSampleManuallyMippedTexture) {
+  DrawManuallyMippedTextureGolden(*this, /*lod=*/0.0f);
+}
+
+// LOD 1 reads the hand-uploaded second level, so the golden is solid orange.
+TEST_P(RendererGoldenTest, CanSampleManuallyMippedTextureLod1) {
+  DrawManuallyMippedTextureGolden(*this, /*lod=*/1.0f);
 }
 
 }  // namespace testing
