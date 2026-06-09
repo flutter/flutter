@@ -3519,14 +3519,18 @@ class _MenuLayout extends SingleChildLayoutDelegate {
           y = allowedRect.top;
         }
       } else if (offBottom(y)) {
-        final double newY = anchorRect.top - childSize.height;
+        final double newY;
+        if (parentOrientation == Axis.horizontal) {
+          // For cross-axis menus (e.g. MenuBar→dropdown), flip above the
+          // anchor's top edge.
+          newY = anchorRect.top - childSize.height - alignmentOffset.dy;
+        } else {
+          // For same-axis submenus (e.g. vertical→vertical), align the
+          // submenu's bottom edge with the anchor item's bottom edge.
+          newY = anchorRect.bottom - childSize.height;
+        }
         if (!offTop(newY)) {
-          // Only move the menu up if its parent is horizontal (MenuAnchor/MenuBar).
-          if (parentOrientation == Axis.horizontal) {
-            y = newY - alignmentOffset.dy;
-          } else {
-            y = newY;
-          }
+          y = newY;
         } else {
           y = allowedRect.bottom - childSize.height;
         }

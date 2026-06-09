@@ -898,6 +898,81 @@ void main() {
       );
     });
 
+    testWidgets('submenu vertical flip aligns bottom with anchor bottom', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/181895.
+      // When a submenu flips upward because it can't fit below, its bottom
+      // edge should align with the anchor item's bottom edge.
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Material(
+            child: Column(
+              children: <Widget>[
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 50),
+                  child: MenuAnchor(
+                    menuChildren: <Widget>[
+                      const MenuItemButton(child: Text('Item 1')),
+                      SubmenuButton(
+                        menuChildren: const <Widget>[
+                          MenuItemButton(child: Text('Sub A')),
+                          MenuItemButton(child: Text('Sub B')),
+                          MenuItemButton(child: Text('Sub C')),
+                          MenuItemButton(child: Text('Sub D')),
+                          MenuItemButton(child: Text('Sub E')),
+                          MenuItemButton(child: Text('Sub F')),
+                        ],
+                        child: const Text('Submenu'),
+                      ),
+                      const MenuItemButton(child: Text('Item 2')),
+                    ],
+                    builder: (BuildContext context, MenuController controller, Widget? child) {
+                      return FilledButton(
+                        onPressed: () {
+                          if (controller.isOpen) {
+                            controller.close();
+                          } else {
+                            controller.open();
+                          }
+                        },
+                        child: const Text('Open'),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      // Open the parent menu.
+      await tester.tap(find.text('Open'));
+      await tester.pump();
+
+      // Hover over the submenu button to open the submenu.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.moveTo(tester.getCenter(find.text('Submenu')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      final Rect anchorItemRect = tester.getRect(
+        find.widgetWithText(SubmenuButton, 'Submenu'),
+      );
+      final Rect submenuRect = tester.getRect(
+        find.ancestor(of: find.text('Sub A'), matching: find.byType(FocusScope)).first,
+      );
+
+      // The submenu's bottom edge should align with the anchor item's bottom
+      // edge (not the top edge) when it flips upward.
+      expect(
+        submenuRect.bottom,
+        moreOrLessEquals(anchorItemRect.bottom, epsilon: 1.0),
+        reason: 'Flipped submenu bottom should align with anchor item bottom',
+      );
+    });
+
     testWidgets('menu position in LTR', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestApp(alignmentOffset: const Offset(100, 50)));
 
