@@ -44,39 +44,48 @@ void main() {
       }
       io.ProcessResult result = io.Process.runSync(chromeExecutable, <String>['--version']);
 
-      var message =
-          '\n'
-          'kChromeEnvironment\n'
-          'Executable: $chromeExecutable\n'
-          '$chromeExecutable --version:\n${result.stdout}\n'
-          '=========================================================\n';
-
-      final String chromedriverPath = join(
-        dirname(dirname(chromeExecutable)),
-        'driver',
-        'chromedriver',
+      printOnFailure(
+        '\n'
+        'kChromeEnvironment\n'
+        'Executable: $chromeExecutable\n'
+        '$chromeExecutable --version:\n${result.stdout}\n'
+        '=========================================================\n',
       );
+
+      var chromedriverPath = '';
+
+      for (final String pathPart in split(chromeExecutable)) {
+        join(chromedriverPath, pathPart);
+        if (pathPart == 'chrome') {
+          break;
+        }
+      }
+      chromedriverPath = join(chromedriverPath, 'drivers', 'chromedriver');
+
       result = io.Process.runSync(chromedriverPath, <String>['--version']);
-      message +=
-          'chromedriver next to chrome from CIPD\n'
-          'Executable: $chromedriverPath\n'
-          '$chromedriverPath --version: ${result.stdout}\n'
-          '=========================================================\n';
+      printOnFailure(
+        'chromedriver next to chrome from CIPD\n'
+        'Executable: $chromedriverPath\n'
+        '$chromedriverPath --version: ${result.stdout}\n'
+        '=========================================================\n',
+      );
 
       result = io.Process.runSync('which', <String>['chromedriver']);
       final String whichChromeDriverStdout = result.stdout.toString().trim();
       result = io.Process.runSync(whichChromeDriverStdout, <String>['--version']);
-      message +=
-          'which chromedriver: $whichChromeDriverStdout\n'
-          '$whichChromeDriverStdout --version: ${result.stdout}'
-          '=========================================================\n';
+      printOnFailure(
+        'which chromedriver: $whichChromeDriverStdout\n'
+        '$whichChromeDriverStdout --version: ${result.stdout}'
+        '=========================================================\n',
+      );
 
       final String? pathEnv = const LocalPlatform().environment['PATH'];
-      message +=
-          'PATH:\n'
-          '$pathEnv\n'
-          '=========================================================\n';
-      throw Exception(message);
+      printOnFailure(
+        'PATH:\n'
+        '$pathEnv\n'
+        '=========================================================\n',
+      );
+      throw Exception('FAIL TEST ON PURPOSE TO GET PRINTING!');
       // These could all be individual test cases but are combined here to share
       // the overhead of flutter run with can take 20 seconds or more on CI.
       // final testRunner = WebServerDeviceTestRunner(flutter);
