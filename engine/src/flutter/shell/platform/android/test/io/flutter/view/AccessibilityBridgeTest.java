@@ -11,12 +11,14 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -64,6 +66,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 import org.mockito.invocation.InvocationOnMock;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -3245,6 +3248,41 @@ public class AccessibilityBridgeTest {
         contentResolver,
         accessibilityViewEmbedder,
         platformViewsAccessibilityDelegate);
+  }
+
+  @Config(sdk = API_LEVELS.API_36)
+  @TargetApi(API_LEVELS.API_36)
+  @SuppressWarnings("deprecation")
+  @Test
+  public void itLogsDeprecationWarningForAnnounceOnAPI36() {
+    try (MockedStatic<io.flutter.Log> mockedLog = mockStatic(io.flutter.Log.class)) {
+      AccessibilityBridge accessibilityBridge = setUpBridge();
+
+      accessibilityBridge.accessibilityMessageHandler.announce("Hello");
+
+      mockedLog.verify(
+          () ->
+              io.flutter.Log.w(
+                  eq("AccessibilityBridge"),
+                  contains(
+                      "Using AnnounceSemanticsEvent for accessibility is deprecated on Android")),
+          times(1));
+    }
+  }
+
+  @Config(sdk = API_LEVELS.API_35)
+  @TargetApi(API_LEVELS.API_35)
+  @SuppressWarnings("deprecation")
+  @Test
+  public void itDoesNotLogDeprecationWarningForAnnounceOnAPI35() {
+    try (MockedStatic<io.flutter.Log> mockedLog = mockStatic(io.flutter.Log.class)) {
+      AccessibilityBridge accessibilityBridge = setUpBridge();
+
+      accessibilityBridge.accessibilityMessageHandler.announce("Hello");
+
+      mockedLog.verify(
+          () -> io.flutter.Log.w(eq("AccessibilityBridge"), any(String.class)), never());
+    }
   }
 
   /// The encoding for semantics is described in platform_view_android.cc
