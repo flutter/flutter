@@ -162,9 +162,10 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return result;
   }
 
-  /// Creates a surface for rendering content that will be presented to Flutter.
+  /// Creates an image surface for rendering content that Flutter draws as a
+  /// [ui.Image].
   ///
-  /// A [GpuSurface] owns the final color textures that are converted into
+  /// A [GpuImageSurface] owns the final color textures that are converted into
   /// [ui.Image] handles and drawn by Flutter. Use it for animated or frequently
   /// updated render targets where the app should not have to guess how many
   /// textures are needed to avoid overwriting a frame Flutter may still be
@@ -173,8 +174,12 @@ base class GpuContext extends NativeFieldWrapperClass1 {
   /// The surface manages only the final presentable color texture. Renderers
   /// should continue to create ordinary [Texture] objects for depth, stencil,
   /// multisample, and intermediate color attachments.
-  GpuSurface createSurface(int width, int height, {PixelFormat? format}) {
-    return GpuSurface._(this, width, height, format ?? defaultColorFormat);
+  GpuImageSurface createImageSurface(
+    int width,
+    int height, {
+    PixelFormat? format,
+  }) {
+    return GpuImageSurface._(this, width, height, format ?? defaultColorFormat);
   }
 
   /// Create a new command buffer that can be used to submit GPU commands.

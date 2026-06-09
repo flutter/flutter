@@ -535,8 +535,8 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test('GpuSurface acquireNextFrame returns a presentable color texture', () async {
-    final gpu.GpuSurface surface = gpu.gpuContext.createSurface(17, 19);
+  test('GpuImageSurface acquireNextFrame returns a presentable color texture', () async {
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
 
     expect(surface.width, 17);
     expect(surface.height, 19);
@@ -544,7 +544,7 @@ void main() async {
     expect(surface.currentImage, isNull);
     expect(surface.debugBackingTextureCount, 0);
 
-    final gpu.SurfaceFrame frame = surface.acquireNextFrame();
+    final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
 
     expect(frame.colorTexture.width, 17);
     expect(frame.colorTexture.height, 19);
@@ -558,14 +558,13 @@ void main() async {
     expect(frame.colorTexture.isValid, isFalse);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test('GpuSurface present returns an image and updates currentImage', () async {
-    final gpu.GpuSurface surface = gpu.gpuContext.createSurface(17, 19);
-    final gpu.SurfaceFrame frame = surface.acquireNextFrame();
+  test('GpuImageSurface present updates currentImage', () async {
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
+    final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
     final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
-    final ui.Image presentedImage = frame.present(commandBuffer);
-    expect(presentedImage.width, 17);
-    expect(presentedImage.height, 19);
+    final gpu.GpuPresentStatus status = frame.present(commandBuffer);
+    expect(status, gpu.GpuPresentStatus.success);
     expect(frame.colorTexture.isValid, isFalse);
 
     final ui.Image? currentImage = surface.currentImage;
@@ -576,9 +575,9 @@ void main() async {
     commandBuffer.submit();
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test('GpuSurface present must happen before command buffer submit', () async {
-    final gpu.GpuSurface surface = gpu.gpuContext.createSurface(17, 19);
-    final gpu.SurfaceFrame frame = surface.acquireNextFrame();
+  test('GpuImageSurface present must happen before command buffer submit', () async {
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
+    final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
     final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
     commandBuffer.submit();
 
@@ -591,9 +590,9 @@ void main() async {
     frame.discard();
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test('GpuSurface cannot present or discard the same frame twice', () async {
-    final gpu.GpuSurface surface = gpu.gpuContext.createSurface(17, 19);
-    final gpu.SurfaceFrame frame = surface.acquireNextFrame();
+  test('GpuImageSurface cannot present or discard the same frame twice', () async {
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
+    final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
     final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
     frame.present(commandBuffer);
@@ -605,56 +604,60 @@ void main() async {
     frame.discard();
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test('GpuSurface acquireNextFrame throws if the previous present was never submitted', () async {
-    final gpu.GpuSurface surface = gpu.gpuContext.createSurface(17, 19);
-    final gpu.SurfaceFrame frame = surface.acquireNextFrame();
-    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+  test(
+    'GpuImageSurface acquireNextFrame throws if the previous present was never submitted',
+    () async {
+      final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
+      final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
+      final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
-    frame.present(commandBuffer);
-    // Intentionally skip commandBuffer.submit() to simulate the footgun.
+      frame.present(commandBuffer);
+      // Intentionally skip commandBuffer.submit() to simulate the footgun.
 
-    expect(surface.acquireNextFrame, throwsA(isA<StateError>()));
+      expect(surface.acquireNextFrame, throwsA(isA<StateError>()));
 
-    // Submitting clears the pending state so acquisition can resume.
-    commandBuffer.submit();
-    final gpu.SurfaceFrame nextFrame = surface.acquireNextFrame();
-    nextFrame.discard();
-  }, skip: !(impellerEnabled && flutterGpuEnabled));
+      // Submitting clears the pending state so acquisition can resume.
+      commandBuffer.submit();
+      final gpu.GpuImageSurfaceFrame nextFrame = surface.acquireNextFrame();
+      nextFrame.discard();
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
 
-  test('GpuSurface discard releases an unpresented frame for reuse', () async {
-    final gpu.GpuSurface surface = gpu.gpuContext.createSurface(17, 19);
-    final gpu.SurfaceFrame frame = surface.acquireNextFrame();
+  test('GpuImageSurface discard releases an unpresented frame for reuse', () async {
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
+    final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
     expect(surface.debugBackingTextureCount, 1);
 
     frame.discard();
     expect(frame.colorTexture.isValid, isFalse);
 
-    final gpu.SurfaceFrame nextFrame = surface.acquireNextFrame();
+    final gpu.GpuImageSurfaceFrame nextFrame = surface.acquireNextFrame();
     expect(surface.debugBackingTextureCount, 1);
     expect(nextFrame.colorTexture.isValid, isTrue);
 
     nextFrame.discard();
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test('GpuSurface keeps current image out of the next acquired frame', () async {
-    final gpu.GpuSurface surface = gpu.gpuContext.createSurface(17, 19);
-    final gpu.SurfaceFrame frame = surface.acquireNextFrame();
+  test('GpuImageSurface keeps current image out of the next acquired frame', () async {
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
+    final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
     final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
-    final ui.Image image = frame.present(commandBuffer);
+    frame.present(commandBuffer);
     commandBuffer.submit();
-    expect(image.width, 17);
+    expect(surface.currentImage!.width, 17);
     expect(surface.debugBackingTextureCount, 1);
 
-    final gpu.SurfaceFrame nextFrame = surface.acquireNextFrame();
+    final gpu.GpuImageSurfaceFrame nextFrame = surface.acquireNextFrame();
     expect(surface.debugBackingTextureCount, 2);
 
     nextFrame.discard();
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test('GpuSurface resize affects future acquired frames', () async {
-    final gpu.GpuSurface surface = gpu.gpuContext.createSurface(17, 19);
-    final gpu.SurfaceFrame frame = surface.acquireNextFrame();
+  test('GpuImageSurface resize affects future acquired frames', () async {
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(17, 19);
+    final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
 
     expect(
       () => surface.resize(23, 29),
@@ -673,15 +676,15 @@ void main() async {
     expect(surface.height, 29);
     expect(surface.debugBackingTextureCount, 0);
 
-    final gpu.SurfaceFrame resizedFrame = surface.acquireNextFrame();
+    final gpu.GpuImageSurfaceFrame resizedFrame = surface.acquireNextFrame();
     expect(resizedFrame.colorTexture.width, 23);
     expect(resizedFrame.colorTexture.height, 29);
     resizedFrame.discard();
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
-  test('GpuSurface can render clear color into presented image', () async {
-    final gpu.GpuSurface surface = gpu.gpuContext.createSurface(100, 100);
-    final gpu.SurfaceFrame frame = surface.acquireNextFrame();
+  test('GpuImageSurface can render clear color into presented image', () async {
+    final gpu.GpuImageSurface surface = gpu.gpuContext.createImageSurface(100, 100);
+    final gpu.GpuImageSurfaceFrame frame = surface.acquireNextFrame();
     final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
 
     commandBuffer.createRenderPass(
@@ -690,9 +693,9 @@ void main() async {
       ),
     );
 
-    final ui.Image image = frame.present(commandBuffer);
+    frame.present(commandBuffer);
     commandBuffer.submit();
-    await comparer.addGoldenImage(image, 'flutter_gpu_test_clear_color.png');
+    await comparer.addGoldenImage(surface.currentImage!, 'flutter_gpu_test_clear_color.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('RenderPass.setStencilReference doesnt throw for valid values', () async {
