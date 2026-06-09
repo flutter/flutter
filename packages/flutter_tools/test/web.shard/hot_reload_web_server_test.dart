@@ -5,14 +5,18 @@
 @Tags(<String>['flutter-test-driver'])
 library;
 
-import 'package:file/file.dart';
+import 'dart:io' as io;
 
+import 'package:file/file.dart';
+import 'package:flutter_tools/src/web/chrome.dart' show kChromeEnvironment;
+import 'package:path/path.dart';
+import 'package:platform/platform.dart';
 import '../integration.shard/test_data/hot_reload_project.dart';
 import '../integration.shard/test_driver.dart';
 import '../integration.shard/test_utils.dart';
 import '../src/common.dart';
 
-import 'test_data/web_server_test_common.dart';
+// import 'test_data/web_server_test_common.dart';
 
 void main() {
   group('hot reload on web server device', () {
@@ -34,46 +38,85 @@ void main() {
     testWithoutContext('works before connecting a browser, '
         'with a connected chrome browser '
         'and after disconnecting the browser.', () async {
+      final String? chromeExecutable = const LocalPlatform().environment[kChromeEnvironment];
+      if (chromeExecutable == null) {
+        throw StateError('Chrome executable not found in environment ($kChromeEnvironment).');
+      }
+      io.ProcessResult result = io.Process.runSync(chromeExecutable, <String>['--version']);
+
+      var message =
+          '\n'
+          'kChromeEnvironment\n'
+          'Executable: $chromeExecutable\n'
+          '$chromeExecutable --version:\n${result.stdout}\n'
+          '=========================================================\n';
+
+      final String chromedriverPath = join(
+        dirname(dirname(chromeExecutable)),
+        'driver',
+        'chromedriver',
+      );
+      result = io.Process.runSync(chromedriverPath, <String>['--version']);
+      message +=
+          'chromedriver next to chrome from CIPD\n'
+          'Executable: $chromedriverPath\n'
+          '$chromedriverPath --version: ${result.stdout}\n'
+          '=========================================================\n';
+
+      result = io.Process.runSync('which', <String>['chromedriver']);
+      final String whichChromeDriverStdout = result.stdout.toString().trim();
+      result = io.Process.runSync(whichChromeDriverStdout, <String>['--version']);
+      message +=
+          'which chromedriver: $whichChromeDriverStdout\n'
+          '$whichChromeDriverStdout --version: ${result.stdout}'
+          '=========================================================\n';
+
+      final String? pathEnv = const LocalPlatform().environment['PATH'];
+      message +=
+          'PATH:\n'
+          '$pathEnv\n'
+          '=========================================================\n';
+      throw Exception(message);
       // These could all be individual test cases but are combined here to share
       // the overhead of flutter run with can take 20 seconds or more on CI.
-      final testRunner = WebServerDeviceTestRunner(flutter);
-      try {
-        final String appUrl = await testRunner.runWebServerDevice();
-        // Request a hot reload without any edits or connected browsers.
-        await expectLater(testRunner.hotReload(), completes);
-        // Request a hot reload after an edit without any connected browsers.
-        project.uncommentHotReloadPrint();
-        await expectLater(testRunner.hotReload(), completes);
-        // Restore the previous edit.
-        project.commentHotReloadPrint();
-        await expectLater(testRunner.hotReload(), completes);
-        // Connect a chrome browser to load the application.
-        await testRunner.connectWithChrome(appUrl);
-        // Wait for a logged message from the Flutter app to confirm it has started.
-        await expectLater(
-          testRunner.findNextInBrowserLog('((((TICK 1))))', appStartTimeout),
-          completes,
-        );
-        // Request a hot reload after an edit.
-        project.uncommentHotReloadPrint();
-        await expectLater(testRunner.hotReload(), completes);
-        // Confirm build counter was incremented.
-        await expectLater(
-          testRunner.findNextInBrowserLog('((((TICK 2))))', defaultTimeout),
-          completes,
-        );
-        // Confirm the new code ran in the browser.
-        await expectLater(
-          testRunner.findNextInBrowserLog('(((((RELOAD WORKED)))))', defaultTimeout),
-          completes,
-        );
-        // Close the browser.
-        await expectLater(testRunner.quitBrowser(), completes);
-        // Request a hot reload without any edits or connected browsers.
-        await expectLater(testRunner.hotReload(), completes);
-      } finally {
-        await testRunner.cleanup();
-      }
+      // final testRunner = WebServerDeviceTestRunner(flutter);
+      // try {
+      //   final String appUrl = await testRunner.runWebServerDevice();
+      //   // Request a hot reload without any edits or connected browsers.
+      //   await expectLater(testRunner.hotReload(), completes);
+      //   // Request a hot reload after an edit without any connected browsers.
+      //   project.uncommentHotReloadPrint();
+      //   await expectLater(testRunner.hotReload(), completes);
+      //   // Restore the previous edit.
+      //   project.commentHotReloadPrint();
+      //   await expectLater(testRunner.hotReload(), completes);
+      //   // Connect a chrome browser to load the application.
+      //   await testRunner.connectWithChrome(appUrl);
+      //   // Wait for a logged message from the Flutter app to confirm it has started.
+      //   await expectLater(
+      //     testRunner.findNextInBrowserLog('((((TICK 1))))', appStartTimeout),
+      //     completes,
+      //   );
+      //   // Request a hot reload after an edit.
+      //   project.uncommentHotReloadPrint();
+      //   await expectLater(testRunner.hotReload(), completes);
+      //   // Confirm build counter was incremented.
+      //   await expectLater(
+      //     testRunner.findNextInBrowserLog('((((TICK 2))))', defaultTimeout),
+      //     completes,
+      //   );
+      //   // Confirm the new code ran in the browser.
+      //   await expectLater(
+      //     testRunner.findNextInBrowserLog('(((((RELOAD WORKED)))))', defaultTimeout),
+      //     completes,
+      //   );
+      //   // Close the browser.
+      //   await expectLater(testRunner.quitBrowser(), completes);
+      //   // Request a hot reload without any edits or connected browsers.
+      //   await expectLater(testRunner.hotReload(), completes);
+      // } finally {
+      //   await testRunner.cleanup();
+      // }
     });
   });
 }
