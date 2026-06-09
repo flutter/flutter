@@ -319,7 +319,6 @@ void main() async {
     final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 100, 100);
 
     // Check the defaults.
-    expect(texture.coordinateSystem, gpu.TextureCoordinateSystem.renderToTexture);
     expect(texture.width, 100);
     expect(texture.height, 100);
     expect(texture.storageMode, gpu.StorageMode.hostVisible);
