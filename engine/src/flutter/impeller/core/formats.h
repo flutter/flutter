@@ -511,17 +511,6 @@ constexpr const char* TextureUsageToString(TextureUsage usage) {
 
 std::string TextureUsageMaskToString(TextureUsageMask mask);
 
-// Texture coordinate system.
-enum class TextureCoordinateSystem {
-  // Alternative coordinate system used when uploading texture data from the
-  // host.
-  // (0, 0) is the bottom-left of the image with +Y going up.
-  kUploadFromHost,
-  // Default coordinate system.
-  // (0, 0) is the top-left of the image with +Y going down.
-  kRenderToTexture,
-};
-
 enum class CullMode {
   kNone,
   kFrontFace,

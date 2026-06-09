@@ -160,8 +160,6 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     int height, {
     PixelFormat format = PixelFormat.r8g8b8a8UNormInt,
     sampleCount = 1,
-    TextureCoordinateSystem coordinateSystem =
-        TextureCoordinateSystem.renderToTexture,
 
     /// The type of texture to create.
     ///
@@ -212,7 +210,6 @@ base class GpuContext extends NativeFieldWrapperClass1 {
       width,
       height,
       sampleCount,
-      coordinateSystem,
       resolvedTextureType,
       enableRenderTargetUsage,
       enableShaderReadUsage,
