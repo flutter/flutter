@@ -4,7 +4,6 @@
 
 #include "impeller/renderer/backend/gles/sampler_gles.h"
 
-#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
@@ -70,13 +69,6 @@ static GLint ToAddressMode(SamplerAddressMode mode,
 
 bool SamplerGLES::ConfigureBoundTexture(const TextureGLES& texture,
                                         const ProcTableGLES& gl) const {
-  if (texture.NeedsMipmapGeneration()) {
-    VALIDATION_LOG
-        << "Texture mip count is > 1, but the mipmap has not been generated. "
-           "Texture can not be sampled safely.";
-    return false;
-  }
-
   auto target = ToTextureTarget(texture.GetTextureDescriptor().type);
 
   if (!target.has_value()) {
