@@ -193,7 +193,9 @@ Dart_Handle Surface::PresentFrame(size_t texture_index,
   record->acquired = false;
   current_index_ = texture_index;
   PruneTextureRecords();
-  return CreateImage(record->image);
+  // The presented image is read separately via GetCurrentImage, so avoid
+  // allocating an image wrapper here on every presented frame.
+  return Dart_Null();
 }
 
 void Surface::DiscardFrame(size_t texture_index) {
