@@ -219,7 +219,7 @@ PlaygroundImplGLES::CreateGLProcAddressResolver() const {
     void* angle_glesv2 = dlopen("libGLESv2.dylib", RTLD_LAZY);
     symbol = dlsym(angle_glesv2, name);
 #endif
-    FML_CHECK(symbol);
+    FML_CHECK(symbol) << " attempting to load '" << name << "'";
     return symbol;
   }
   : [](const char* name) -> void* {
