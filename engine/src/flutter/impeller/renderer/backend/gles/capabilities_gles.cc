@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 
+#include <algorithm>
+
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
@@ -54,6 +56,10 @@ static const constexpr char* kTextureCompressionAstcHdrExt =
 // https://registry.khronos.org/OpenGL/extensions/APPLE/APPLE_texture_max_level.txt
 static const constexpr char* kAppleTextureMaxLevelExt =
     "GL_APPLE_texture_max_level";
+
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_filter_anisotropic.txt
+static const constexpr char* kTextureFilterAnisotropicExt =
+    "GL_EXT_texture_filter_anisotropic";
 
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
@@ -200,6 +206,17 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   supports_texture_max_level_ = !desc->IsES() ||
                                 desc->GetGlVersion().major_version >= 3 ||
                                 desc->HasExtension(kAppleTextureMaxLevelExt);
+
+  // Anisotropic filtering is not part of any core GL or GLES version; it is
+  // always gated on GL_EXT_texture_filter_anisotropic. The query and the
+  // texture parameter are applied with core ES 2.0 entry points (GetFloatv
+  // and TexParameterfv), so only the extension check is needed here.
+  if (desc->HasExtension(kTextureFilterAnisotropicExt)) {
+    GLfloat value = 1.0f;
+    gl.GetFloatv(IMPELLER_GL_MAX_TEXTURE_MAX_ANISOTROPY, &value);
+    // The extension guarantees a maximum of at least 2.
+    max_sampler_anisotropy_ = std::max(value, 2.0f);
+  }
 }
 
 bool CapabilitiesGLES::IsES() const {
@@ -333,6 +350,10 @@ PixelFormat CapabilitiesGLES::GetDefaultGlyphAtlasFormat() const {
 
 ISize CapabilitiesGLES::GetMaximumRenderPassAttachmentSize() const {
   return max_texture_size;
+}
+
+float CapabilitiesGLES::GetMaxSamplerAnisotropy() const {
+  return max_sampler_anisotropy_;
 }
 
 size_t CapabilitiesGLES::GetMinimumUniformAlignment() const {
