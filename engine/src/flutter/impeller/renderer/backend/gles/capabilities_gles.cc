@@ -196,6 +196,16 @@ bool CapabilitiesGLES::IsES() const {
   return is_es_;
 }
 
+bool CapabilitiesGLES::SupportsFramebufferRenderMipmap() const {
+  // Rendering into a non-zero mip level is not yet supported on the GLES
+  // backend. The texture storage path allocates levels with mutable, lazily
+  // allocated glTexImage2D storage, which yields an incomplete framebuffer
+  // when a non-base mip level is attached. Until that is reworked, do not
+  // advertise the capability so callers fall back instead of failing to
+  // create the framebuffer. Rendering into a cube map face is unaffected.
+  return false;
+}
+
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
   switch (stage) {
     case ShaderStage::kVertex:

@@ -1148,5 +1148,31 @@ TEST_P(AiksTest, TextGammaCorrectionGoldenTest) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(AiksTest, TextWithShadowAndPosition) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.Clear(DlColor::kWhite());
+
+  auto frame = MakeDefaultTextFrame("Hello", 25.0f);
+  auto text = DlTextImpeller::Make(frame);
+  DlPaint paint = DlPaint().setColor(DlColor::kMagenta());
+  DlPaint shadow_paint_ctm = DlPaint().setMaskFilter(
+      DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 5.0f, true));
+  DlPaint shadow_paint_no_ctm = DlPaint().setMaskFilter(
+      DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 5.0f, false));
+
+  builder.Translate(100, 100);
+  builder.Scale(4, 4);
+  for (int x = 10; x <= 100; x += 30) {
+    builder.DrawText(text, x, 20, shadow_paint_ctm);
+    builder.DrawText(text, x, 20, paint);
+
+    builder.DrawText(text, x, 50, shadow_paint_no_ctm);
+    builder.DrawText(text, x, 50, paint);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
