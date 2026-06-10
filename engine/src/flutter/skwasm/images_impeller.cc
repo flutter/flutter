@@ -96,10 +96,6 @@ class DlWimpImageFromTexture : public DlWimpImageBase {
 
     auto texture = impeller::TextureGLES::WrapTexture(
         gles_context->GetReactor(), desc, std::move(external_handle));
-    if (texture) {
-      texture->SetCoordinateSystem(
-          impeller::TextureCoordinateSystem::kUploadFromHost);
-    }
     return texture;
   }
 

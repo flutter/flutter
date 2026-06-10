@@ -246,27 +246,6 @@ constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
   }
 }
 
-enum class FlutterGPUTextureCoordinateSystem {
-  kUploadFromHost,
-  kRenderToTexture,
-};
-
-constexpr impeller::TextureCoordinateSystem ToImpellerTextureCoordinateSystem(
-    FlutterGPUTextureCoordinateSystem value) {
-  switch (value) {
-    case FlutterGPUTextureCoordinateSystem::kUploadFromHost:
-      return impeller::TextureCoordinateSystem::kUploadFromHost;
-    case FlutterGPUTextureCoordinateSystem::kRenderToTexture:
-      return impeller::TextureCoordinateSystem::kRenderToTexture;
-  }
-}
-
-constexpr impeller::TextureCoordinateSystem ToImpellerTextureCoordinateSystem(
-    int value) {
-  return ToImpellerTextureCoordinateSystem(
-      static_cast<FlutterGPUTextureCoordinateSystem>(value));
-}
-
 enum class FlutterGPUBlendFactor {
   kZero,
   kOne,
