@@ -848,6 +848,14 @@ class NavigationIndicator extends StatelessWidget {
                 CurveTween(curve: Curves.easeInOutCubicEmphasized).transform(animation.value),
               );
 
+        // The indicator is drawn by the Ink widget below, which paints on the
+        // nearest ancestor Material rather than locally. When the animation
+        // ticks without an accompanying pointer interaction (for example, the
+        // selected index was changed programmatically), that Material is not
+        // otherwise notified and would keep showing the indicator's previous
+        // frame. See https://github.com/flutter/flutter/issues/180359.
+        Material.of(context).markNeedsPaint();
+
         return Transform(
           alignment: Alignment.center,
           // Scale in the X direction only.
