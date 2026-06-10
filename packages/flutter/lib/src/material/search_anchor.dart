@@ -1276,6 +1276,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
          viewOnClose: onClose,
          viewOnOpen: onOpen,
          builder: (BuildContext context, SearchController controller) {
+           final SearchBarThemeData searchBarTheme = SearchBarTheme.of(context);
            return SearchBar(
              constraints: constraints,
              controller: controller,
@@ -1295,8 +1296,8 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
              overlayColor: barOverlayColor,
              side: barSide,
              shape: barShape,
-             padding:
-                 barPadding ??
+             padding: barPadding ??
+                 searchBarTheme.padding ??
                  const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
              leading: barLeading ?? const Icon(Icons.search),
              trailing: barTrailing,

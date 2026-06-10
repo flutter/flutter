@@ -701,6 +701,69 @@ void main() {
     expect(trailingRect.right, barRect.right - 16.0);
   });
 
+  testWidgets('SearchAnchor.bar respects SearchBarThemeData.padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchBarTheme(
+              data: const SearchBarThemeData(
+                padding: MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(30.0)),
+              ),
+              child: SearchAnchor.bar(
+                suggestionsBuilder: (BuildContext context, SearchController controller) {
+                  return <Widget>[];
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Rect barRect = tester.getRect(find.byType(SearchBar));
+    final Rect leadingRect = tester.getRect(find.byIcon(Icons.search));
+    final Rect textFieldRect = tester.getRect(find.byType(TextField));
+
+    // outer padding (30) separates bar edge from leading icon
+    expect(barRect.left, leadingRect.left - 30.0);
+    // inner padding (30) separates leading icon from text field
+    expect(leadingRect.right, textFieldRect.left - 30.0);
+    // right side: outer (30) + inner (30) = 60 between text field right and bar right
+    expect(barRect.right, textFieldRect.right + 60.0);
+  });
+
+  testWidgets('SearchAnchor.bar.barPadding overrides SearchBarThemeData.padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Material(
+            child: SearchBarTheme(
+              data: const SearchBarThemeData(
+                padding: MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(30.0)),
+              ),
+              child: SearchAnchor.bar(
+                barPadding: const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(10.0)),
+                suggestionsBuilder: (BuildContext context, SearchController controller) {
+                  return <Widget>[];
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Rect barRect = tester.getRect(find.byType(SearchBar));
+    final Rect leadingRect = tester.getRect(find.byIcon(Icons.search));
+    final Rect textFieldRect = tester.getRect(find.byType(TextField));
+
+    expect(barRect.left, leadingRect.left - 10.0);
+    expect(leadingRect.right, textFieldRect.left - 10.0);
+    // right side: outer (10) + inner (10) = 20
+    expect(barRect.right, textFieldRect.right + 20.0);
+  });
+
   testWidgets('SearchBar respects hintStyle property', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
