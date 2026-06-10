@@ -980,9 +980,9 @@ void main() {
 
     testWidgets('FocusableActionDetector passes skipTraversal to Focus', (WidgetTester tester) async {
       await tester.pumpWidget(
-        TestWidgetsApp(
+        const TestWidgetsApp(
           home: FocusableActionDetector(
-            child: const Text('child'),
+            child: Text('child'),
           ),
         ),
       );
@@ -997,10 +997,10 @@ void main() {
 
       // When skipTraversal is set to true, it is forwarded to the Focus widget.
       await tester.pumpWidget(
-        TestWidgetsApp(
+        const TestWidgetsApp(
           home: FocusableActionDetector(
             skipTraversal: true,
-            child: const Text('child'),
+            child: Text('child'),
           ),
         ),
       );
@@ -1260,9 +1260,9 @@ void main() {
 
       // Invoke a bunch of times and verify it still produces the same result.
       final randomContexts = <BuildContext>[
-        invokingContext!,
+        invokingContext,
         invokingContext2,
-        invokingContext!,
+        invokingContext,
         invokingContext3,
         invokingContext3,
         invokingContext3,
@@ -2081,7 +2081,7 @@ class DefaultToKeyEventResultIntent extends Intent {
 }
 
 class DefaultToKeyEventResultAction extends Action<DefaultToKeyEventResultIntent> {
-  DefaultToKeyEventResultAction({required bool consumesKey}) : _consumesKey = consumesKey;
+  DefaultToKeyEventResultAction({required this._consumesKey});
 
   final bool _consumesKey;
 
