@@ -239,7 +239,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -307,7 +307,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'reload-barred',
-            targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -360,7 +360,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: false,
@@ -578,10 +578,7 @@ void main() {
       final Event event = fakeAnalytics.sentEvents.first;
       expect(event.eventName.label, 'hot_runner_info');
       expect(event.eventData['label'], 'reload');
-      expect(
-        event.eventData['targetPlatform'],
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-      );
+      expect(event.eventData['targetPlatform'], TargetPlatform.android_arm.getName());
     }),
   );
 
@@ -727,10 +724,7 @@ void main() {
       expect(hotRunnerInfoEvents, hasLength(1));
       final Event newEvent = hotRunnerInfoEvents.first;
       expect(newEvent.eventData['label'], 'restart');
-      expect(
-        newEvent.eventData['targetPlatform'],
-        getNameForTargetPlatform(TargetPlatform.android_arm),
-      );
+      expect(newEvent.eventData['targetPlatform'], TargetPlatform.android_arm.getName());
     }),
   );
 
@@ -948,7 +942,7 @@ void main() {
         contains(
           Event.hotRunnerInfo(
             label: 'exception',
-            targetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+            targetPlatform: TargetPlatform.android_arm.getName(),
             sdkName: 'Android',
             emulator: false,
             fullRestart: true,
@@ -2071,6 +2065,63 @@ flutter:
   );
 
   testUsingContext(
+    'HotRunner reinitializes Flutter GPU shader libraries for changed .shaderbundle assets',
+    () => testbed.run(() async {
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listViews, setAssetBundlePath, reinitializeShaderLibrary],
+      );
+      residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
+        analytics: fakeAnalytics,
+      );
+
+      // A `.shaderbundle` asset reloads the compiled Flutter GPU ShaderLibrary
+      // instead of going through the generic asset eviction.
+      (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'foo.shaderbundle'};
+
+      await (residentRunner as HotRunner).evictDirtyAssets();
+      expect(fakeVmServiceHost!.hasRemainingExpectations, false);
+    }),
+  );
+
+  testUsingContext(
+    'HotRunner evicts a changed .shaderbundle asset generically on web',
+    () => testbed.run(() async {
+      final webFlutterDevice = FakeFlutterDevice()
+        ..vmServiceHost = (() => fakeVmServiceHost)
+        ..fakeDevFS = devFS
+        ..targetPlatform = TargetPlatform.web_javascript;
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          listViews,
+          setAssetBundlePath,
+          const FakeVmServiceRequest(
+            method: 'ext.flutter.evict',
+            args: <String, Object>{'value': 'foo.shaderbundle', 'isolateId': '1'},
+          ),
+        ],
+      );
+      residentRunner = HotRunner(
+        <FlutterDevice>[webFlutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
+        analytics: fakeAnalytics,
+      );
+
+      // The Flutter GPU reload extension is unavailable on web, so the bundle
+      // falls back to the generic asset eviction.
+      (webFlutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'foo.shaderbundle'};
+
+      await (residentRunner as HotRunner).evictDirtyAssets();
+      expect(fakeVmServiceHost!.hasRemainingExpectations, false);
+    }),
+  );
+
+  testUsingContext(
     'HotRunner does not sets asset directory when no assets to evict',
     () => testbed.run(() async {
       fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
@@ -2107,6 +2158,48 @@ flutter:
       await (residentRunner as HotRunner).evictDirtyAssets();
       expect(flutterDevice.devFS!.hasSetAssetDirectory, true);
       expect(fakeVmServiceHost!.hasRemainingExpectations, false);
+    }),
+  );
+
+  testUsingContext(
+    'HotRunner evictDirtyAssets correctly finds UI isolate and view ID when multiple views are present and the first view has no isolate',
+    () => testbed.run(() async {
+      final viewWithoutIsolate = FlutterView(id: 'view_empty', uiIsolate: null);
+      final viewWithIsolate = FlutterView(id: 'view_active', uiIsolate: fakeUnpausedIsolate);
+
+      final listMultipleViews = FakeVmServiceRequest(
+        method: kListViewsMethod,
+        jsonResponse: <String, Object>{
+          'views': <Object>[viewWithoutIsolate.toJson(), viewWithIsolate.toJson()],
+        },
+      );
+
+      const setAssetBundlePathForActiveView = FakeVmServiceRequest(
+        method: '_flutter.setAssetBundlePath',
+        args: <String, Object>{
+          'viewId': 'view_active',
+          'assetDirectory': 'build/flutter_assets',
+          'isolateId': '1',
+        },
+      );
+
+      fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[listMultipleViews, setAssetBundlePathForActiveView, evict],
+      );
+      residentRunner = HotRunner(
+        <FlutterDevice>[flutterDevice],
+        stayResident: false,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        target: 'main.dart',
+        analytics: fakeAnalytics,
+      );
+
+      (flutterDevice.devFS! as FakeDevFS).assetPathsToEvict = <String>{'asset'};
+
+      expect(flutterDevice.devFS!.hasSetAssetDirectory, isFalse);
+      await (residentRunner as HotRunner).evictDirtyAssets();
+      expect(flutterDevice.devFS!.hasSetAssetDirectory, isTrue);
+      expect(fakeVmServiceHost!.hasRemainingExpectations, isFalse);
     }),
   );
 

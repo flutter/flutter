@@ -50,16 +50,6 @@ class Texture {
 
   const TextureDescriptor& GetTextureDescriptor() const;
 
-  /// Update the coordinate system used by the texture.
-  ///
-  /// The setting is used to conditionally invert the coordinates to
-  /// account for the different origin of GLES textures.
-  void SetCoordinateSystem(TextureCoordinateSystem coordinate_system);
-
-  TextureCoordinateSystem GetCoordinateSystem() const;
-
-  virtual Scalar GetYCoordScale() const;
-
   /// Returns true if mipmaps have never been generated.
   /// The contents of the mipmap may be out of date if the root texture has been
   /// modified and the mipmaps hasn't been regenerated.
@@ -79,8 +69,6 @@ class Texture {
   bool mipmap_generated_ = false;
 
  private:
-  TextureCoordinateSystem coordinate_system_ =
-      TextureCoordinateSystem::kRenderToTexture;
   const TextureDescriptor desc_;
   bool is_opaque_ = false;
 
