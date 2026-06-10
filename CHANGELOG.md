@@ -35,9 +35,9 @@ docs/releases/Hotfix-Documentation-Best-Practices.md
 ### [3.44.2](https://github.com/flutter/flutter/releases/tag/3.44.2)
 - [flutter/186161](https://github.com/flutter/flutter/issues/186161) Update the MacOS/iOS infrastructure to support the 2026-2027 code signing certificate.
 - [flutter/187322](https://github.com/flutter/flutter/issues/187322) When DTD connection is lost or fails at startup during widget-preview on all platforms, the tool crashes with unhandled exceptions instead of exiting gracefully.
-- [flutter/186723] When Android apps try to switch from any `SystemUiMode` to edge-to-edge, the system bars incorrectly remain invisible.
-- [flutter/186054] When building an iOS or macOS app with Swift Package Manager enabled, remote package dependencies may fail to download.
-- [flutter/185775] When building for non-iOS or macOS apps, Swift Package Manager warnings may appear.
+- [flutter/186723](https://github.com/flutter/flutter/issues/186723) When Android apps try to switch from any `SystemUiMode` to edge-to-edge, the system bars incorrectly remain invisible.
+- [flutter/186054](https://github.com/flutter/flutter/issues/186054) When building an iOS or macOS app with Swift Package Manager enabled, remote package dependencies may fail to download.
+- [flutter/185775](https://github.com/flutter/flutter/issues/185775) When building for non-iOS or macOS apps, Swift Package Manager warnings may appear.
 
 ### [3.44.1](https://github.com/flutter/flutter/releases/tag/3.44.1)
 - [flutter/186962](https://github.com/flutter/flutter/issues/186962) When the analysis server exits unexpectedly, the `flutter` tool can crash instead of outputting a descriptive error message.
