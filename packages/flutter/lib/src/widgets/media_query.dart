@@ -614,7 +614,7 @@ class MediaQueryData {
   /// color inversion at the screen level. It does not mean the Flutter framework
   /// will automatically invert its own layout painting.
   ///
-  /// Instead, this flag allows the application to react to the inversion. for
+  /// Instead, this flag allows the application to react to the inversion. For
   /// example, by selectively re-inverting images, maps, or video playback so that
   /// they display with natural colors instead of looking like a film negative.
   ///
