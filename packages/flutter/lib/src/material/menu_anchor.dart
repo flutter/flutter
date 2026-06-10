@@ -3527,7 +3527,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         } else {
           // For same-axis submenus (e.g. vertical→vertical), align the
           // submenu's bottom edge with the anchor item's bottom edge.
-          newY = anchorRect.bottom - childSize.height;
+          newY = anchorRect.bottom - childSize.height - alignmentOffset.dy;
         }
         if (!offTop(newY)) {
           y = newY;

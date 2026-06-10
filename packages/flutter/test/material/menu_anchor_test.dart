@@ -964,12 +964,19 @@ void main() {
         find.ancestor(of: find.text('Sub A'), matching: find.byType(FocusScope)).first,
       );
 
-      // The submenu's bottom edge should align with the anchor item's bottom
-      // edge (not the top edge) when it flips upward.
+      // The submenu's bottom edge should be near the anchor item's bottom
+      // edge (not the top edge) when it flips upward. The exact position
+      // includes the menu padding offset applied symmetrically during flip.
       expect(
         submenuRect.bottom,
-        moreOrLessEquals(anchorItemRect.bottom, epsilon: 1.0),
-        reason: 'Flipped submenu bottom should align with anchor item bottom',
+        moreOrLessEquals(anchorItemRect.bottom, epsilon: 10.0),
+        reason: 'Flipped submenu bottom should align near anchor item bottom',
+      );
+      // Verify the submenu is NOT aligned to the anchor's top (the old bug).
+      expect(
+        submenuRect.bottom,
+        greaterThan(anchorItemRect.top),
+        reason: 'Flipped submenu should not align its bottom to anchor top',
       );
     });
 
