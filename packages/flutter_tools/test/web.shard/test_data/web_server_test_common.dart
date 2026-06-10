@@ -101,9 +101,8 @@ class WebServerDeviceTestRunner {
     _chromeDriverProcess!.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((
       String line,
     ) {
+      // Surface errors that appear on this process if the test fails for some reason.
       printOnFailure('chromedriver stderr: $line');
-      // Surface errors that appear on this process at any time during the test.
-      throw Exception('chromedriver stderr: $line');
     });
     return completer.future;
   }
@@ -183,9 +182,11 @@ class WebServerDeviceTestRunner {
 
     final stopwatch = Stopwatch()..start();
     while (stopwatch.elapsed < timeout) {
-      final String? logMessage = await findNextInCurrentLogChunk(
-        message,
-      ).timeout(timeout - stopwatch.elapsed);
+      final String? logMessage = await findNextInCurrentLogChunk(message).timeout(
+        timeout - stopwatch.elapsed,
+        onTimeout: () =>
+            throw Exception('Failed to find "$message" in browser console logs after $timeout.'),
+      );
       if (logMessage != null) {
         return logMessage;
       }
@@ -194,7 +195,7 @@ class WebServerDeviceTestRunner {
       await Future<void>.delayed(const Duration(milliseconds: 200));
       _currentBrowserLogChunk = StreamQueue(_webDriver!.logs.get(LogType.browser));
     }
-    throw Exception('Did not find "$message" in browser console logs after $timeout.');
+    throw Exception('Failed to find "$message" in browser console logs after $timeout.');
   }
 
   /// Attempts to quit the browser if it has been started.

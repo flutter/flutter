@@ -45,7 +45,7 @@ void main() {
         project.uncommentHotReloadPrint();
         await expectLater(testRunner.hotRestart(), completes);
         // Restore the previous edit.
-        project.commentHotReloadPrint();
+        project.restoreOriginalMain();
         await expectLater(testRunner.hotRestart(), completes);
         // Connect a chrome browser to load the application.
         await testRunner.connectWithChrome(appUrl);
