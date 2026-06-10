@@ -244,6 +244,112 @@ void main() {
       expect(renderSliver.getClip()!.top, 50.0);
     });
 
+    testWidgets('changing clipBehavior or clipOverlap invalidates the cached clip', (
+      WidgetTester tester,
+    ) async {
+      final controller = ScrollController();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              const SliverPersistentHeader(
+                delegate: _SliverPersistentHeaderDelegate(),
+                pinned: true,
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 100.0)), // Spacer
+              SliverClipRRect(
+                sliver: SliverToBoxAdapter(
+                  child: Container(height: 100.0, color: const Color(0xFF2196F3)),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 1000.0)),
+            ],
+          ),
+        ),
+      );
+
+      final RenderSliverClipRRect renderSliver = tester.renderObject(find.byType(SliverClipRRect));
+
+      // Scroll to create overlap so clipOverlap takes effect.
+      controller.jumpTo(150.0);
+      await tester.pump();
+
+      expect(renderSliver.constraints.overlap, 50.0);
+      expect(renderSliver.clipOverlap, ClipOverlapBehavior.followEdge);
+      expect(renderSliver.clipBehavior, Clip.antiAlias);
+
+      // getClip() should be cached and have top = 50.0.
+      RRect clip = renderSliver.getClip()!;
+      expect(clip.top, 50.0);
+
+      // Mutate clipOverlap -> should call _markNeedsClip() and invalidate cache.
+      renderSliver.clipOverlap = ClipOverlapBehavior.none;
+      clip = renderSliver.getClip()!;
+      expect(clip.top, 0.0); // should not be truncated by overlap anymore
+
+      // Mutate clipBehavior to Clip.none -> getClip() should return null.
+      renderSliver.clipBehavior = Clip.none;
+      expect(renderSliver.getClip(), isNull);
+
+      // Mutate clipBehavior back to non-none and check that clip is rebuilt.
+      renderSliver.clipBehavior = Clip.antiAlias;
+      clip = renderSliver.getClip()!;
+      expect(clip.top, 0.0);
+    });
+
+    testWidgets('custom clipper boundaries are not incorrectly expanded during overlap', (
+      WidgetTester tester,
+    ) async {
+      final controller = ScrollController();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            controller: controller,
+            slivers: <Widget>[
+              const SliverPersistentHeader(
+                delegate: _SliverPersistentHeaderDelegate(),
+                pinned: true,
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 50.0)), // Spacer
+              SliverClipRRect(
+                clipper: const _CustomClipperRRect30(),
+                sliver: SliverToBoxAdapter(
+                  child: Container(height: 200.0, color: const Color(0xFF2196F3)),
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 1000.0)),
+            ],
+          ),
+        ),
+      );
+
+      final RenderSliverClipRRect renderSliver = tester.renderObject(find.byType(SliverClipRRect));
+
+      // Spacer is 50px. ClipRect starts at y=50.
+      // Scroll by 60.0 -> ClipRect layoutOffset is 150 - 60 = 90.0.
+      // Header covers 0..100. So overlap is 10.0.
+      controller.jumpTo(60.0);
+      await tester.pump();
+
+      expect(renderSliver.constraints.overlap, 10.0);
+      // Top inset from custom clipper is 30.0. Since overlap (10.0) is less than 30.0,
+      // the clip top should still be 30.0 (and not 10.0 which would expand the clip boundary).
+      expect(renderSliver.getClip()!.top, 30.0);
+
+      // Now scroll more to create an overlap of 50px (jumpTo 100.0):
+      // ClipRect layoutOffset is 150 - 100 = 50.0.
+      // Header covers 0..100. So overlap is 50.0.
+      // Since 50.0 > 30.0, the top of the clip should be 50.0.
+      controller.jumpTo(100.0);
+      await tester.pump();
+
+      expect(renderSliver.constraints.overlap, 50.0);
+      expect(renderSliver.getClip()!.top, 50.0);
+    });
+
     // ---- Overlap hit testing: (clipOverlap × axis × reverse) matrix ----
 
     group('overlap hit testing', () {
@@ -589,4 +695,12 @@ class _SliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
+}
+
+class _CustomClipperRRect30 extends CustomClipper<RRect> {
+  const _CustomClipperRRect30();
+  @override
+  RRect getClip(Size size) => RRect.fromLTRBAndCorners(0.0, 30.0, size.width, size.height);
+  @override
+  bool shouldReclip(covariant CustomClipper<RRect> oldClipper) => false;
 }
