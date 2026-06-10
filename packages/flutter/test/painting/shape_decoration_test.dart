@@ -99,7 +99,7 @@ void main() {
     expect(b.hitTest(size, const Offset(20.0, 50.0)), isTrue);
   });
 
-  test('ShapeDecoration.lerp between gradient and color does not throw', () {
+  test('ShapeDecoration.lerp between gradient and color is smooth and does not throw', () {
     // Regression test for https://github.com/flutter/flutter/issues/93953
     const colorR = Color(0xffff0000);
     const colorG = Color(0xff00ff00);
@@ -114,25 +114,32 @@ void main() {
     expect(ShapeDecoration.lerp(colorDecoration, gradientDecoration, 0.0), colorDecoration);
     expect(ShapeDecoration.lerp(colorDecoration, gradientDecoration, 1.0), gradientDecoration);
 
-    // color and gradient are mutually exclusive, so only one of them is set at
-    // any point during the interpolation: the source's fill type is used before
-    // the half-way point and the target's after it.
-    final ShapeDecoration beforeMid =
-        ShapeDecoration.lerp(colorDecoration, gradientDecoration, 0.49)!;
-    expect(beforeMid.color, isNotNull);
-    expect(beforeMid.gradient, isNull);
-
-    final ShapeDecoration afterMid =
-        ShapeDecoration.lerp(colorDecoration, gradientDecoration, 0.5)!;
-    expect(afterMid.color, isNull);
-    expect(afterMid.gradient, isNotNull);
-
-    // Interpolating across the full range never violates the color/gradient
-    // invariant (which would otherwise throw an assertion).
+    // In between, the color is represented as a uniform-color gradient, so the
+    // result is always a gradient (and never both a color and a gradient, which
+    // would otherwise throw the constructor's assertion). This yields a smooth
+    // transition rather than a sudden jump at the half-way point.
     for (final t in <double>[0.1, 0.25, 0.49, 0.5, 0.51, 0.75, 0.9]) {
-      expect(ShapeDecoration.lerp(colorDecoration, gradientDecoration, t), isNotNull);
-      // Also exercise the reverse direction (gradient -> color).
-      expect(ShapeDecoration.lerp(gradientDecoration, colorDecoration, t), isNotNull);
+      final ShapeDecoration forward =
+          ShapeDecoration.lerp(colorDecoration, gradientDecoration, t)!;
+      expect(forward.color, isNull);
+      expect(forward.gradient, isA<LinearGradient>());
+
+      // The reverse direction (gradient -> color) behaves the same way.
+      final ShapeDecoration reverse =
+          ShapeDecoration.lerp(gradientDecoration, colorDecoration, t)!;
+      expect(reverse.color, isNull);
+      expect(reverse.gradient, isA<LinearGradient>());
+    }
+
+    // Close to the color end, the interpolated gradient is (almost) the uniform
+    // start color.
+    final gradientNearColor =
+        ShapeDecoration.lerp(colorDecoration, gradientDecoration, 0.001)!.gradient! as LinearGradient;
+    expect(gradientNearColor.colors, hasLength(2));
+    for (final Color color in gradientNearColor.colors) {
+      expect(color.r, closeTo(colorR.r, 0.05));
+      expect(color.g, closeTo(colorR.g, 0.05));
+      expect(color.b, closeTo(colorR.b, 0.05));
     }
   });
 
