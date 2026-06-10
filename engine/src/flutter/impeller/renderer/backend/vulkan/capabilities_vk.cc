@@ -881,6 +881,10 @@ bool CapabilitiesVK::SupportsExtendedRangeFormats() const {
   return false;
 }
 
+bool CapabilitiesVK::SupportsFramebufferRenderMipmap() const {
+  return true;
+}
+
 bool CapabilitiesVK::SupportsTextureCompression(
     CompressedTextureFamily family) const {
   switch (family) {

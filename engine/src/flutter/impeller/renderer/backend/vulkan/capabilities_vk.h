@@ -280,6 +280,9 @@ class CapabilitiesVK final : public Capabilities,
       CompressedTextureFamily family) const override;
 
   // |Capabilities|
+  bool SupportsFramebufferRenderMipmap() const override;
+
+  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
 
   // |Capabilities|
