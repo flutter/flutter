@@ -232,7 +232,8 @@ They are usually used to add or remove gclient dependencies.
 
 ```json
 "gclient_variables": {
-   "download_android_deps": false
+   "download_android_deps": false,
+   "download_fuchsia_deps": false
 }
 ```
 

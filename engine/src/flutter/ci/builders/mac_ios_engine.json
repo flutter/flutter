@@ -19,6 +19,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_fuchsia_deps": false,
                 "download_jdk": false,
                 "use_rbe": true
             },
@@ -66,6 +67,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_fuchsia_deps": false,
                 "download_jdk": false,
                 "use_rbe": true
             },
@@ -115,6 +117,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_fuchsia_deps": false,
                 "download_jdk": false,
                 "use_rbe": true
             },
@@ -162,6 +165,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_fuchsia_deps": false,
                 "download_jdk": false,
                 "use_rbe": true
             },
@@ -209,6 +213,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_fuchsia_deps": false,
                 "download_jdk": false,
                 "use_rbe": true
             },
@@ -256,6 +261,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_fuchsia_deps": false,
                 "download_jdk": false,
                 "use_rbe": true
             },
@@ -305,6 +311,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_fuchsia_deps": false,
                 "download_jdk": false,
                 "use_rbe": true
             },
@@ -356,6 +363,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_fuchsia_deps": false,
                 "download_jdk": false,
                 "use_rbe": true
             },
@@ -405,6 +413,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_fuchsia_deps": false,
                 "download_jdk": false,
                 "use_rbe": true
             },
@@ -454,6 +463,7 @@
             ],
             "gclient_variables": {
                 "download_android_deps": false,
+                "download_fuchsia_deps": false,
                 "download_jdk": false,
                 "use_rbe": true
             },
