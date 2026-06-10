@@ -187,13 +187,13 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
     // If any of the encoding structure or length is changed, those locations
     // must be updated (at a minimum).
     std::vector<uint8_t> buffer(num_bytes);
+    std::vector<std::string> strings;
+    std::vector<std::vector<uint8_t>> string_attribute_args;
 
     if (!buffer.empty()) {
       int32_t* buffer_int32 = reinterpret_cast<int32_t*>(buffer.data());
       float* buffer_float32 = reinterpret_cast<float*>(buffer.data());
 
-      std::vector<std::string> strings;
-      std::vector<std::vector<uint8_t>> string_attribute_args;
       size_t position = 0;
       for (const auto& value : update) {
         // If you edit this code, make sure you update kBytesPerNode
