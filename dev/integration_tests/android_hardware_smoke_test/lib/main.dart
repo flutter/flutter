@@ -32,20 +32,21 @@ class MyApp extends StatelessWidget {
   static Future<ui.Image> _defaultImageLoader() async {
     final ByteData data = await rootBundle.load('assets/test_image.png');
     final ui.Codec codec = await ui.instantiateImageCodec(
-      data.buffer.asUint8List(),
+      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
     );
-    final ui.FrameInfo fi = await codec.getNextFrame();
-    codec.dispose();
-    return fi.image;
+    try {
+      final ui.FrameInfo fi = await codec.getNextFrame();
+      return fi.image;
+    } finally {
+      codec.dispose();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter android hardware smoke test',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
       home: MyWidget(imageLoader: imageLoader),
     );
   }
@@ -90,8 +91,7 @@ class _MyState extends State<MyWidget> {
     // Widget tests pass captureScreenshot: false.
     // Image.toByteData runs async on a native thread, which results in an unresolvable deadlock in the widget test's FakeAsync zone.
     // Comparing pixels is not a responsibility of widget tests anyway, that should be reserved for the integration tests.
-    final bool captureScreenshot =
-        messageMap?['captureScreenshot'] as bool? ?? true;
+    final bool captureScreenshot = messageMap?['captureScreenshot'] as bool? ?? true;
 
     // Lazily load the image asset only when requested. This avoids loading it
     // unnecessarily, blocks rendering until fully loaded, and catches load
@@ -112,9 +112,7 @@ class _MyState extends State<MyWidget> {
           _loadedImage = img;
         });
       } catch (e, stackTrace) {
-        return <String, Object?>{
-          'message': 'Failed to load image asset: $e\n$stackTrace',
-        };
+        return <String, Object?>{'message': 'Failed to load image asset: $e\n$stackTrace'};
       }
     }
 
@@ -134,10 +132,7 @@ class _MyState extends State<MyWidget> {
           _goldenVariantFuture,
         );
       } else {
-        completer.complete(<String, Object?>{
-          'message': 'Rendered $testName',
-          'imageBytes': null,
-        });
+        completer.complete(<String, Object?>{'message': 'Rendered $testName', 'imageBytes': null});
       }
     }, debugLabel: 'Rendered $testName');
 
@@ -148,9 +143,7 @@ class _MyState extends State<MyWidget> {
   void initState() {
     super.initState();
 
-    _goldenVariantFuture = _nativeChannel.invokeMethod<String>(
-      'impeller_backend',
-    );
+    _goldenVariantFuture = _nativeChannel.invokeMethod<String>('impeller_backend');
     _testChannel.setMessageHandler(_handler);
   }
 
@@ -167,10 +160,7 @@ class _MyState extends State<MyWidget> {
     if (_message == 'backdropFilterBlurTest') {
       testContent = const BackdropFilterBlur();
     } else {
-      testContent = VectorDrawingsCanvas(
-        message: _message,
-        loadedImage: _loadedImage,
-      );
+      testContent = VectorDrawingsCanvas(message: _message, loadedImage: _loadedImage);
     }
 
     return SafeArea(

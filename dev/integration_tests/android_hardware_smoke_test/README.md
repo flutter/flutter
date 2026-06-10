@@ -200,7 +200,7 @@ The suite is composed of targeted visual regression test cases designed to exerc
 | Test Case | Rendering Pipeline | Impeller/Hardware Mechanism Exercised | Reference/Source |
 | :--- | :--- | :--- | :--- |
 | **`blueRectangleTest`** | **Solid Vector Fills** | Standard vector rasterization and layout transformation. | Simple `canvas.drawRect` |
-| **`trianglePathTest`** | **Complex Paths** | Path triangulation, rasterization, and hardware anti-aliasing (MSAA). | Simple canvas.drawPath` |
+| **`trianglePathTest`** | **Complex Paths** | Path triangulation, rasterization, and hardware anti-aliasing (MSAA). | Simple `canvas.drawPath` |
 | **`textTest`** | **Font Rendering** | Text layout (`TextPainter`), glyph caching, shaping, and font atlas rendering. | Simple `TextPainter.paint` |
 | **`imageTest`** | **Texture Sampling** | Image decoding, GPU texture uploading, and texture sampler rendering. Uses a 32x32 4-color checkerboard PNG to verify RGB color channel correctness. | Simple `canvas.drawImage` |
 | **`advancedBlendTest`** | **Advanced Blending** | Fragment shader blending and framebuffer fetch tile-memory optimizations (e.g. Vulkan subpass inputs, `EXT_shader_framebuffer_fetch` in GLES). Uses `BlendMode.difference`. | Mirrors [animated_advanced_blend.dart](/dev/benchmarks/macrobenchmarks/lib/src/animated_advanced_blend.dart). |
