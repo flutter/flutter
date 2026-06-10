@@ -580,7 +580,6 @@ std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
 
   return std::shared_ptr<CommandBufferVK>(new CommandBufferVK(
       shared_from_this(),         //
-      GetDeviceHolder(),          //
       std::move(tracked_objects)  //
       ));
 }
