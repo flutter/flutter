@@ -708,7 +708,7 @@ void main() {
           child: Material(
             child: SearchBarTheme(
               data: const SearchBarThemeData(
-                padding: MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(30.0)),
+                padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(30.0)),
               ),
               child: SearchAnchor.bar(
                 suggestionsBuilder: (BuildContext context, SearchController controller) {
@@ -740,10 +740,10 @@ void main() {
           child: Material(
             child: SearchBarTheme(
               data: const SearchBarThemeData(
-                padding: MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(30.0)),
+                padding: WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(30.0)),
               ),
               child: SearchAnchor.bar(
-                barPadding: const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.all(10.0)),
+                barPadding: const WidgetStatePropertyAll<EdgeInsets>(EdgeInsets.all(10.0)),
                 suggestionsBuilder: (BuildContext context, SearchController controller) {
                   return <Widget>[];
                 },
