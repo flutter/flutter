@@ -1041,6 +1041,11 @@ void main() async {
   // magnified, so the shader samples the base level and the golden is the four
   // colored quadrants of mip 0.
   test('Can sample a manually-mipped texture', () async {
+    // Both backends this test runs on (Metal and ANGLE GLES 3) support
+    // sampling hand-uploaded mip chains. This is the capability an app should
+    // check before relying on them.
+    expect(gpu.gpuContext.doesSupportManuallyMippedTextures, true);
+
     final gpu.Texture texture = gpu.gpuContext.createTexture(
       gpu.StorageMode.hostVisible,
       8,

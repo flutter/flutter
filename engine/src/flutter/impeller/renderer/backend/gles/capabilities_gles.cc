@@ -301,6 +301,13 @@ bool CapabilitiesGLES::Supports32BitPrimitiveIndices() const {
   return supports_32bit_primitive_indices_;
 }
 
+bool CapabilitiesGLES::SupportsManuallyMippedTextures() const {
+  // Without GL_TEXTURE_MAX_LEVEL the sampled mip range cannot be bounded to
+  // the levels the texture declares, so a hand-uploaded chain is mipmap
+  // incomplete and samples as black.
+  return supports_texture_max_level_;
+}
+
 bool CapabilitiesGLES::SupportsExtendedRangeFormats() const {
   return false;
 }
