@@ -111,7 +111,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/widgets/page_transitions_test.dart',
     'packages/flutter/test/widgets/routes_test.dart',
     'packages/flutter/test/widgets/app_test.dart',
-    'packages/flutter/test/widgets/implicit_animations_test.dart',
     'packages/flutter/test/widgets/routes_transition_test.dart',
     'packages/flutter/test/widgets/editable_text_test.dart',
     'packages/flutter/test/widgets/scrollbar_test.dart',
@@ -157,7 +156,6 @@ class TestsCrossImportChecker {
     'packages/flutter/test/rendering/box_test.dart',
     'packages/flutter/test/rendering/pipeline_owner_tree_test.dart',
     'packages/flutter/test/rendering/proxy_getters_and_setters_test.dart',
-    'packages/flutter/test/rendering/view_chrome_style_test.dart',
     'packages/flutter/test/rendering/proxy_box_test.dart',
     'packages/flutter/test/rendering/object_test.dart',
   };
