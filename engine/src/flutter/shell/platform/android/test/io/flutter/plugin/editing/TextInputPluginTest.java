@@ -124,6 +124,50 @@ public class TextInputPluginTest {
         (ByteBuffer) encodedMethodCall.flip(), mock(BinaryMessenger.BinaryReply.class));
   }
 
+  private static TextInputChannel.Configuration configurationForType(
+      TextInputChannel.TextInputType type) {
+    return new TextInputChannel.Configuration(
+        false,
+        false,
+        true,
+        true,
+        false,
+        TextInputChannel.TextCapitalization.NONE,
+        new TextInputChannel.InputType(type, false, false),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
+  }
+
+  private static TextInputChannel.Configuration configurationWithoutInputType() {
+    return new TextInputChannel.Configuration(
+        false,
+        false,
+        true,
+        true,
+        false,
+        TextInputChannel.TextCapitalization.NONE,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
+  }
+
+  private TextInputPlugin createTextInputPlugin(View view) {
+    return new TextInputPlugin(
+        view,
+        new TextInputChannel(mock(DartExecutor.class)),
+        new ScribeChannel(mock(DartExecutor.class)),
+        mock(PlatformViewsController.class),
+        mock(PlatformViewsController2.class));
+  }
+
   @SuppressWarnings("deprecation")
   // DartExecutor.send is deprecated.
   @Test
@@ -152,6 +196,28 @@ public class TextInputPluginTest {
     verify(dartExecutor, times(1)).send(channelCaptor.capture(), bufferCaptor.capture(), isNull());
     assertEquals("flutter/textinput", channelCaptor.getValue());
     verifyMethodCall(bufferCaptor.getValue(), "TextInputClient.requestExistingInputState", null);
+  }
+
+  @Test
+  public void isTextInputClientActive_tracksFrameworkTextInputClient() {
+    View testView = new View(ctx);
+    TextInputPlugin textInputPlugin = createTextInputPlugin(testView);
+
+    assertFalse(textInputPlugin.isTextInputClientActive());
+
+    textInputPlugin.setTextInputClient(
+        1, configurationForType(TextInputChannel.TextInputType.TEXT));
+    assertTrue(textInputPlugin.isTextInputClientActive());
+
+    textInputPlugin.clearTextInputClient();
+    assertFalse(textInputPlugin.isTextInputClientActive());
+
+    textInputPlugin.setTextInputClient(
+        2, configurationForType(TextInputChannel.TextInputType.NONE));
+    assertFalse(textInputPlugin.isTextInputClientActive());
+
+    textInputPlugin.setTextInputClient(3, configurationWithoutInputType());
+    assertFalse(textInputPlugin.isTextInputClientActive());
   }
 
   @Test

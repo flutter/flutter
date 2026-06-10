@@ -132,6 +132,8 @@ public class FlutterView extends FrameLayout
 
   // Connections to a Flutter execution context.
   @Nullable private FlutterEngine flutterEngine;
+  private boolean restoreTextInputFocusOnVisibilityChange;
+  private boolean isImeVisible;
 
   @NonNull
   private final Set<FlutterEngineAttachmentListener> flutterEngineAttachmentListeners =
@@ -760,6 +762,7 @@ public class FlutterView extends FrameLayout
       viewportMetrics.viewInsetRight = imeInsets.right;
       viewportMetrics.viewInsetBottom = imeInsets.bottom; // Typically, only bottom is non-zero
       viewportMetrics.viewInsetLeft = imeInsets.left;
+      isImeVisible = insets.isVisible(android.view.WindowInsets.Type.ime());
 
       Insets systemGestureInsets =
           insets.getInsets(android.view.WindowInsets.Type.systemGestures());
@@ -820,6 +823,7 @@ public class FlutterView extends FrameLayout
       viewportMetrics.viewInsetRight = 0;
       viewportMetrics.viewInsetBottom = guessBottomKeyboardInset(insets);
       viewportMetrics.viewInsetLeft = 0;
+      isImeVisible = viewportMetrics.viewInsetBottom > 0;
     }
 
     // Data from the DisplayCutout bounds. Cutouts for cameras and other sensors are
@@ -911,6 +915,13 @@ public class FlutterView extends FrameLayout
     }
 
     return textInputPlugin.createInputConnection(this, keyboardManager, outAttrs);
+  }
+
+  // FlutterView owns the Android input connection while the actual editor lives in the Flutter
+  // tree. Android checks this signal when applying the window's soft input visibility policy.
+  @Override
+  public boolean onCheckIsTextEditor() {
+    return hasActiveFrameworkTextInputClient();
   }
 
   /**
@@ -1603,6 +1614,13 @@ public class FlutterView extends FrameLayout
 
   @Override
   public void setVisibility(int visibility) {
+    final boolean shouldRestoreTextInputFocus =
+        visibility == View.VISIBLE && restoreTextInputFocusOnVisibilityChange;
+    if (visibility != View.VISIBLE && hasFocus() && hasActiveFrameworkTextInputClient()) {
+      // Preserve Android's IME state: only restore focus if the IME was visible before hiding.
+      restoreTextInputFocusOnVisibilityChange = isImeVisible();
+    }
+
     super.setVisibility(visibility);
     // For `FlutterSurfaceView`, setting visibility to the current `FlutterView` will not take
     // effect since it is not in the view tree. So override this method and set the surfaceView.
@@ -1610,6 +1628,23 @@ public class FlutterView extends FrameLayout
     if (renderSurface instanceof FlutterSurfaceView) {
       ((FlutterSurfaceView) renderSurface).setVisibility(visibility);
     }
+    if (shouldRestoreTextInputFocus) {
+      restoreTextInputFocusOnVisibilityChange = false;
+      // The text input client may have changed while FlutterView was hidden.
+      if (hasActiveFrameworkTextInputClient() && !hasFocus()) {
+        requestFocus();
+      }
+    }
+  }
+
+  private boolean hasActiveFrameworkTextInputClient() {
+    return isAttachedToFlutterEngine()
+        && textInputPlugin != null
+        && textInputPlugin.isTextInputClientActive();
+  }
+
+  private boolean isImeVisible() {
+    return isImeVisible;
   }
 
   /**
