@@ -3,39 +3,38 @@
 // found in the LICENSE file.
 
 import InternalFlutterSwift
-import XCTest
+import Testing
 
-class TaskRunnerTests: XCTestCase {
+@MainActor
+@Suite struct TaskRunnerTests {
 
-  func testPostTask() {
+  @Test func postTask() async {
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
-    let expectation = self.expectation(description: "Task should be executed")
-    taskRunner.postTask {
-      expectation.fulfill()
+    await withCheckedContinuation { continuation in
+      taskRunner.postTask {
+        continuation.resume()
+      }
     }
-
-    waitForExpectations(timeout: 5.0, handler: nil)
   }
 
-  func testPostDelayedTask() {
+  @Test func postDelayedTask() async {
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
-    let expectation = self.expectation(description: "Delayed task should be executed")
     let startTime = CACurrentMediaTime()
-    taskRunner.postTask(delay: 0.1) {
-      let endTime = CACurrentMediaTime()
-      let epsilon = 0.001
-      XCTAssertGreaterThanOrEqual(endTime - startTime, 0.1 - epsilon)
-      expectation.fulfill()
+    await withCheckedContinuation { continuation in
+      taskRunner.postTask(delay: 0.1) {
+        let endTime = CACurrentMediaTime()
+        let epsilon = 0.001
+        #expect(endTime - startTime >= 0.1 - epsilon)
+        continuation.resume()
+      }
     }
-
-    waitForExpectations(timeout: 5.0, handler: nil)
   }
 
-  func testRunsTasksOnCurrentThread() {
+  @Test func runsTasksOnCurrentThread() {
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
-    XCTAssertTrue(taskRunner.runsTasksOnCurrentThread())
+    #expect(taskRunner.runsTasksOnCurrentThread())
   }
 }

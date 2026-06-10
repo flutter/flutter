@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import UIKit
-import XCTest
+import Testing
 
 @testable import InternalFlutterSwift
 
@@ -31,66 +31,65 @@ final class MockBundle: Bundle, @unchecked Sendable {
   }
 }
 
-class SplashScreenManagerTests: XCTestCase {
+@Suite @MainActor
+struct SplashScreenManagerTests {
 
   /// Verifies `loadDefaultSplashScreenView` fails when the `UILaunchStoryboardName` key is missing.
-  func testLoadDefaultSplashScreenViewFailsWhenNoPlistKey() {
+  @Test func loadDefaultSplashScreenViewFailsWhenNoPlistKey() {
     let mockBundle = MockBundle(path: "")
     let manager = SplashScreenManager(bundle: mockBundle)
 
-    XCTAssertFalse(manager.loadDefaultSplashScreenView())
+    #expect(!manager.loadDefaultSplashScreenView())
   }
 
   /// Verifies `loadDefaultSplashScreenView` fails when the storyboard file is not in the bundle.
-  func testLoadDefaultSplashScreenViewFailsWhenStoryboardNotFound() {
+  @Test func loadDefaultSplashScreenViewFailsWhenStoryboardNotFound() {
     let mockBundle = MockBundle(path: "")
     mockBundle.mockInfoDictionary = ["UILaunchStoryboardName": "LaunchScreen"]
     let manager = SplashScreenManager(bundle: mockBundle)
 
-    XCTAssertFalse(manager.loadDefaultSplashScreenView())
+    #expect(!manager.loadDefaultSplashScreenView())
   }
 
   /// Verifies `setSplashScreenView` sets the view and applies autoresizing masks.
-  func testSetSplashScreenView() {
+  @Test func setSplashScreenView() {
     let manager = SplashScreenManager()
     let view = UIView()
 
     manager.splashScreenView = view
 
-    XCTAssertEqual(manager.splashScreenView, view)
-    XCTAssertEqual(view.autoresizingMask, [.flexibleWidth, .flexibleHeight])
+    #expect(manager.splashScreenView == view)
+    #expect(view.autoresizingMask == [.flexibleWidth, .flexibleHeight])
   }
 
   /// Verifies setting `splashScreenView` to nil triggers its removal.
-  func testSetSplashScreenViewToNilRemovesIt() {
+  @Test func setSplashScreenViewToNilRemovesIt() {
     let manager = SplashScreenManager()
     let view = UIView()
 
     manager.splashScreenView = view
-    XCTAssertEqual(manager.splashScreenView, view)
+    #expect(manager.splashScreenView == view)
 
     manager.splashScreenView = nil
-    XCTAssertNil(manager.splashScreenView)
+    #expect(manager.splashScreenView == nil)
   }
 
   /// Verifies `removeSplashScreen` calls the completion block after fading out.
-  func testRemoveSplashScreenCallsCompletion() {
+  @Test func removeSplashScreenCallsCompletion() async {
     let manager = SplashScreenManager()
     let view = UIView()
     manager.splashScreenView = view
 
-    let expectation = self.expectation(description: "Completion called")
-
-    manager.removeSplashScreen {
-      expectation.fulfill()
+    await withCheckedContinuation { continuation in
+      manager.removeSplashScreen {
+        continuation.resume()
+      }
     }
-
-    waitForExpectations(timeout: 1.0, handler: nil)
-    XCTAssertNil(manager.splashScreenView)
+    #expect(manager.splashScreenView == nil)
   }
 
   /// Verifies `installSplashScreenView` adds the view to the parent view parent bounds as frame.
-  func testInstallSplashScreenView() {
+  @Test func installSplashScreenView() {
     let manager = SplashScreenManager()
     let view = UIView()
     manager.splashScreenView = view
@@ -99,7 +98,7 @@ class SplashScreenManagerTests: XCTestCase {
 
     manager.installSplashScreenView(asSubviewOf: parentView)
 
-    XCTAssertEqual(view.superview, parentView)
-    XCTAssertEqual(view.frame, parentView.bounds)
+    #expect(view.superview == parentView)
+    #expect(view.frame == parentView.bounds)
   }
 }
