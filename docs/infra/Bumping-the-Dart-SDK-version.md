@@ -46,11 +46,6 @@ When a Dart SDK bump introduces new language features, they should not be adopte
 1. **Style Guide Updates:** The new features should be evaluated and documented in the [Style guide for Flutter repo](../contributing/Style-guide-for-Flutter-repo.md) to define standard patterns and decide if any usage should be restricted or preferred.
 2. **Organized Migration:** To maintain consistency and avoid fragmented code styles, migrations to adopt new features are usually organized as a coordinated effort. This typically involves opening a tracking issue (such as [issue #172188](https://github.com/flutter/flutter/issues/172188)) to manage and review the migration systematically.
 
-### New Language Features and Style Guide Updates
-
-When a Dart SDK bump introduces new language features, they should not be adopted ad-hoc across the codebase. Instead:
-1. **Style Guide Updates:** The new features should be evaluated and documented in the [Style guide for Flutter repo](../contributing/Style-guide-for-Flutter-repo.md) to define standard patterns and decide if any usage should be restricted or preferred.
-2. **Organized Migration:** To maintain consistency and avoid fragmented code styles, migrations to adopt new features are usually organized as a coordinated effort. This typically involves opening a tracking issue (such as [issue #172188](https://github.com/flutter/flutter/issues/172188)) to manage and review the migration systematically.
 ---
 
 ## How to Bump the Dart SDK Constraint
