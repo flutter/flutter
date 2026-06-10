@@ -189,8 +189,8 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
     std::vector<uint8_t> buffer(num_bytes);
 
     if (!buffer.empty()) {
-      int32_t* buffer_int32 = reinterpret_cast<int32_t*>(&buffer[0]);
-      float* buffer_float32 = reinterpret_cast<float*>(&buffer[0]);
+      int32_t* buffer_int32 = reinterpret_cast<int32_t*>(buffer.data());
+      float* buffer_float32 = reinterpret_cast<float*>(buffer.data());
 
       std::vector<std::string> strings;
       std::vector<std::vector<uint8_t>> string_attribute_args;
@@ -275,8 +275,6 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
           buffer_int32[position++] = child;
         }
       }
-      jni_facade_->FlutterViewUpdateSemantics(buffer, strings,
-                                              string_attribute_args);
     }
 
     // custom accessibility actions.
@@ -285,7 +283,7 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
 
     if (!actions_buffer.empty()) {
       int32_t* actions_buffer_int32 =
-          reinterpret_cast<int32_t*>(&actions_buffer[0]);
+          reinterpret_cast<int32_t*>(actions_buffer.data());
 
       std::vector<std::string> action_strings;
       size_t actions_position = 0;
@@ -305,6 +303,11 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       // zero will cause a JNI crash.
       jni_facade_->FlutterViewUpdateCustomAccessibilityActions(actions_buffer,
                                                                action_strings);
+    }
+
+    if (!buffer.empty()) {
+      jni_facade_->FlutterViewUpdateSemantics(buffer, strings,
+                                              string_attribute_args);
     }
   }
 }
