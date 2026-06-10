@@ -1366,6 +1366,53 @@ dev_dependencies:
     },
   );
 
+  testUsingContext(
+    // Regression test for https://github.com/flutter/flutter/issues/187725.
+    // DevFSFileContent.isModifiedAfter() used to return true whenever _fileStat
+    // was null (i.e. markClean() had never been called), causing _needsRebuild()
+    // to always return true and rewrite the asset directory on every run — even
+    // when nothing had changed.
+    'Does not rebuild the asset bundle when nothing has changed',
+    () async {
+      final testRunner = FakeFlutterTestRunner(0);
+      fs.file('asset.txt').writeAsStringSync('original');
+      fs.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+flutter:
+  assets:
+    - asset.txt
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter''');
+      final testCommand = TestCommand(testRunner: testRunner);
+      final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
+
+      await commandRunner.run(const <String>['test', '--no-pub']);
+
+      // Inject a sentinel directly into the output file. If the second run
+      // erroneously rebuilds the bundle it will overwrite this with 'original'.
+      final File builtAsset = fs.file(
+        globals.fs.path.join('build', 'unit_test_assets', 'asset.txt'),
+      );
+      builtAsset.writeAsStringSync('sentinel');
+
+      await commandRunner.run(const <String>['test', '--no-pub']);
+
+      expect(
+        builtAsset.readAsStringSync(),
+        'sentinel',
+        reason: 'asset bundle must not be rebuilt when nothing has changed',
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.empty(),
+      DeviceManager: () => _FakeDeviceManager(<Device>[]),
+    },
+  );
+
   group('Fatal Logs', () {
     testUsingContext(
       "doesn't fail when --fatal-warnings is set and no warning output",
