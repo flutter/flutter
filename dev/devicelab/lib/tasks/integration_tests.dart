@@ -65,13 +65,6 @@ TaskFunction createPlatformChannelSwiftSampleTest() {
   ).call;
 }
 
-TaskFunction createEmbeddedAndroidViewsIntegrationTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/android_views',
-    'lib/main.dart',
-  ).call;
-}
-
 TaskFunction createHybridAndroidViewsIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/hybrid_android_views',

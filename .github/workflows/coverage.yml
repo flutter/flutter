@@ -20,9 +20,12 @@ jobs:
     if: ${{ github.repository == 'flutter/flutter' }}
     steps:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+      - name: bootstrap Flutter tool
+        run: ./bin/flutter --version
       - name: ./bin/flutter test --coverage
         run: pushd packages/flutter;../../bin/flutter test --coverage -j 1;popd
       - name: upload coverage
+        if: ${{ always() }}
         uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2
         with:
           files: packages/flutter/coverage/lcov.info
