@@ -2,17 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@file:Suppress("PackageName")
+
 package com.example.android_hardware_smoke_test
 
+import android.graphics.Bitmap
+import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.ByteArrayOutputStream
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -44,10 +50,11 @@ class FlutterActivityTest {
             assertEquals(Lifecycle.State.RESUMED, activity.lifecycle.currentState)
 
             try {
+                val isPlatformView = testName == "platformViewTest"
                 val message =
                     JSONObject().apply {
                         put("testName", testName)
-                        put("performAppSideGoldenCompare", true)
+                        put("performAppSideGoldenCompare", !isPlatformView)
                     }
 
                 Log.d(TAG, "Sending '$message' on message channel")
@@ -55,7 +62,59 @@ class FlutterActivityTest {
                 activity.messageChannel?.send(message) { reply ->
                     try {
                         val replyJson = reply as JSONObject
-                        future.complete(replyJson.getString("message"))
+                        val replyMessage = replyJson.getString("message")
+
+                        if (isPlatformView && replyMessage == "Rendered platformViewTest") {
+                            val x = replyJson.getInt("x")
+                            val y = replyJson.getInt("y")
+                            val width = replyJson.getInt("width")
+                            val height = replyJson.getInt("height")
+
+                            // Capture the screenshot on a background thread with a short delay. We must NOT sleep or capture
+                            // on the Main UI Thread to avoid blocking frame rendering or causing an ANR.
+                            val screenshotExecutor = Executors.newSingleThreadScheduledExecutor()
+                            screenshotExecutor.schedule({
+                                try {
+                                    // Capture the true screen output using UiAutomation from this privileged instrumentation runner process.
+                                    val instrumentation = InstrumentationRegistry.getInstrumentation()
+                                    val screenshot = instrumentation.uiAutomation.takeScreenshot()
+
+                                    // Crop the full-screen screenshot to the exact widget bounds.
+                                    val cropped = Bitmap.createBitmap(screenshot, x, y, width, height)
+
+                                    val stream = ByteArrayOutputStream()
+                                    cropped.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                                    val croppedBytes = stream.toByteArray()
+                                    val base64Image = Base64.encodeToString(croppedBytes, Base64.NO_WRAP)
+
+                                    val compareMsg =
+                                        JSONObject().apply {
+                                            put("command", "compare_golden")
+                                            put("testName", testName)
+                                            put("imageBytes", base64Image)
+                                        }
+
+                                    Log.d(TAG, "Sending compare_golden request to Dart app")
+                                    // Send the cropped PNG bytes back to Dart so all golden comparisons are resolved via Dart's matchesGoldenFile.
+                                    rule.scenario.onActivity { mainActivity ->
+                                        mainActivity.messageChannel?.send(compareMsg) { compareReply ->
+                                            try {
+                                                val compareReplyJson = compareReply as JSONObject
+                                                future.complete(compareReplyJson.getString("message"))
+                                            } catch (e: Exception) {
+                                                future.completeExceptionally(e)
+                                            }
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    future.completeExceptionally(e)
+                                } finally {
+                                    screenshotExecutor.shutdown()
+                                }
+                            }, 200, TimeUnit.MILLISECONDS)
+                        } else {
+                            future.complete(replyMessage)
+                        }
                     } catch (e: Exception) {
                         future.completeExceptionally(e)
                     }
@@ -92,7 +151,11 @@ class FlutterActivityTest {
         }
 
         Log.d(TAG, "Received $reply on message channel")
-        assertEquals("Rendered $testName", reply)
+        if (testName == "platformViewTest") {
+            assertEquals("Comparison Success", reply)
+        } else {
+            assertEquals("Rendered $testName", reply)
+        }
     }
 
     @Test
@@ -123,5 +186,10 @@ class FlutterActivityTest {
     @Test
     fun backdropFilterBlurTest() {
         templateTest("backdropFilterBlurTest")
+    }
+
+    @Test
+    fun platformViewTest() {
+        templateTest("platformViewTest")
     }
 }

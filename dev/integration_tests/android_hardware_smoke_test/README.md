@@ -205,3 +205,36 @@ The suite is composed of targeted visual regression test cases designed to exerc
 | **`imageTest`** | **Texture Sampling** | Image decoding, GPU texture uploading, and texture sampler rendering. Uses a 32x32 4-color checkerboard PNG to verify RGB color channel correctness. | Simple `canvas.drawImage` |
 | **`advancedBlendTest`** | **Advanced Blending** | Fragment shader blending and framebuffer fetch tile-memory optimizations (e.g. Vulkan subpass inputs, `EXT_shader_framebuffer_fetch` in GLES). Uses `BlendMode.difference`. | Mirrors [animated_advanced_blend.dart](/dev/benchmarks/macrobenchmarks/lib/src/animated_advanced_blend.dart). |
 | **`backdropFilterBlurTest`** | **Compositing & Blur** | Offscreen texture allocation, layer downscale/upscale passes, and multi-pass Gaussian blur filter execution. Uses `ImageFilter.blur(sigmaX: 5, sigmaY: 5)`. | Mirrors [backdrop_filter.dart](/dev/benchmarks/macrobenchmarks/lib/src/backdrop_filter.dart). |
+| **`platformViewTest`** | **Platform Views** | Embedded native Android views composition, texture layer allocation, platform/raster thread synchronization, and system compositor screenshot capture. Uses `AndroidViewSurface` under Hybrid Composition. | Mirrors [hybrid_android_views](/dev/integration_tests/hybrid_android_views) and [android_views](/dev/integration_tests/android_views) layout structures. |
+
+---
+
+## 6. Platform View Screenshot Strategy
+
+Testing platform views requires capturing a screenshot of the physical screen layout that contains both the Flutter-rendered UI and native Android views (e.g., a native `TextView` wrapped under hybrid composition).
+
+Because these two contexts are rendered on separate hardware surface layers, standard in-process widget screenshot methods (like `RenderRepaintBoundary.toImage()`) cannot see or capture the native platform view pixels.
+
+To address this, the test suite implements a **No-Compositing System Screenshot Strategy**:
+
+1. **Wait for Render & Settle:** The Dart app renders the platform view, waits for native creation to complete, and delays execution to allow the native graphics frames to settle/rasterize on the GPU.
+2. **Retrieve Bounds:** The Dart app computes the exact global bounding box (`x`, `y`, `width`, `height`) of the target widget in physical pixels and returns these coordinates.
+3. **Capture via System APIs:**
+   * **Host-Driven Mode:** The host runner takes a full-screen screenshot of the physical device using ADB (`adb shell screencap` wrapped inside `NativeDriver.screenshot()`).
+   * **On-Device Instrumented Mode:** The JUnit runner takes a full-screen screenshot using the privileged `UiAutomation.takeScreenshot()` API.
+4. **Crop to Bounds:** Both test modes crop the resulting full-screen image using the coordinates returned by Dart:
+   * The host runner crops the image using the Dart `image` package.
+   * The on-device JUnit test crops the bitmap natively using `Bitmap.createBitmap`.
+5. **Exact Pixel Comparison:** The cropped screenshot is passed back to Dart's standard `matchesGoldenFile` which uses `PixelExactLocalFileComparator` to decode the PNGs and perform a pixel-for-pixel exact RGBA buffer comparison, completely bypassing file-level PNG compression variations.
+
+### Why the `PixelCopy` approach was not desirable
+
+An alternative approach using `PixelCopy` was considered:
+* **How it worked:** The app targeted the `FlutterSurfaceView` directly using `PixelCopy.request(surfaceView, ...)` and then manually traversed the Android sibling view hierarchy, drawing the visible native platform view boundaries on top of the captured bitmap using a Kotlin `Canvas`.
+
+While plausible and functioning, it was **not desirable** for several reasons:
+1. **Manual Compositing Replicas:** Drawing views manually onto a canvas (`child.draw(canvas)`) relies on replicating the composition steps. If the operating system or graphics drivers apply specific shader effects, blending, custom overlays, or subpixel anti-aliasing during hardware composition, the manual Kotlin reconstruction might not match what the user actually sees.
+2. **Missing Real Composition Bugs:** The primary goal of this smoke test is to catch platform-specific integration and composition rendering errors in GPU drivers. If we manually draw the sibling views ourselves, we bypass the OS hardware compositor (SurfaceFlinger) entirely for the screenshot, defeating the purpose of testing the system's actual composition pipeline.
+3. **Fragility:** Manually translating coordinate spaces, handling layouts, view visibility states, and Z-orders in Kotlin is highly fragile and prone to emulation/rendering bugs.
+
+By capturing the entire screen using native system compositor APIs (`adb` / `UiAutomation`) and cropping, the test asserts on the **true, final composited image** rendered by the device's GPU and system composer.

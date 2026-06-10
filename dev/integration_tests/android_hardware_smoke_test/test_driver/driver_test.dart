@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:android_driver_extensions/native_driver.dart';
 import 'package:android_driver_extensions/skia_gold.dart';
 import 'package:flutter_driver/flutter_driver.dart';
+import 'package:image/image.dart' as img;
 import 'package:test/test.dart';
 
 /// Whether the current environment is LUCI.
@@ -16,10 +17,13 @@ bool get isLuci => io.Platform.environment['LUCI_CI'] == 'True';
 
 void main() async {
   late final FlutterDriver flutterDriver;
+  late final NativeDriver nativeDriver;
   late final String activeGoldenVariant;
 
   setUpAll(() async {
     flutterDriver = await FlutterDriver.connect();
+    nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
+    await nativeDriver.configureForScreenshotTesting();
 
     final String response = await flutterDriver.requestData(
       json.encode(<String, Object?>{'command': 'get_golden_variant'}),
@@ -40,6 +44,7 @@ void main() async {
   });
 
   tearDownAll(() async {
+    await nativeDriver.close();
     await flutterDriver.close();
   });
 
@@ -58,9 +63,36 @@ void main() async {
             .cast<String, Object?>();
     expect(reply['message'], equals('Rendered $testName'));
 
+    final Uint8List imageBytes;
+    if (testName == 'platformViewTest') {
+      final int x = reply['x']! as int;
+      final int y = reply['y']! as int;
+      final int w = reply['width']! as int;
+      final int h = reply['height']! as int;
+
+      final NativeScreenshot fullScreenshot = await nativeDriver.screenshot();
+      final Uint8List fullBytes = await fullScreenshot.readAsBytes();
+
+      final img.Image? decoded = img.decodePng(fullBytes);
+      if (decoded == null) {
+        throw StateError(
+          'Failed to decode full screen screenshot for $testName',
+        );
+      }
+      final img.Image cropped = img.copyCrop(
+        decoded,
+        x: x,
+        y: y,
+        width: w,
+        height: h,
+      );
+      imageBytes = Uint8List.fromList(img.encodePng(cropped));
+    } else {
+      final imageBase64 = reply['imageBytes']! as String;
+      imageBytes = base64.decode(imageBase64);
+    }
+
     // Compare the bytes to a golden file on the host filesystem using the cached variant
-    final imageBase64 = reply['imageBytes']! as String;
-    final Uint8List imageBytes = base64.decode(imageBase64);
     await expectLater(
       imageBytes,
       matchesGoldenFile('goldens/$testName$activeGoldenVariant.png'),
@@ -89,5 +121,9 @@ void main() async {
 
   test('should render and match backdropFilterBlurTest golden', () async {
     await templateTest('backdropFilterBlurTest');
+  }, timeout: Timeout.none);
+
+  test('should render and match platformViewTest golden', () async {
+    await templateTest('platformViewTest');
   }, timeout: Timeout.none);
 }

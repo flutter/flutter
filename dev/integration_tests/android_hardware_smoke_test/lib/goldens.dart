@@ -14,6 +14,9 @@ import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
+import 'main.dart' show platformViewCreatedCompleter;
+import 'pixel_exact_local_file_comparator.dart';
+
 /// Captures the image bytes of the widget associated with [targetKey] and either compares it to a golden file or returns the bytes to the test driver for host-side comparison, depending on the value of [performAppSideGoldenCompare].
 Future<void> handleGoldenRequest(
   String testName,
@@ -24,10 +27,52 @@ Future<void> handleGoldenRequest(
 ) async {
   try {
     final String? goldenVariantValue = await goldenVariant;
+
+    if (testName == 'platformViewTest') {
+      // Platform views cannot be captured using RepaintBoundary.toImage() since they reside in separate
+      // native surface layers. Instead, we wait for layout to settle, calculate the widget's physical
+      // coordinates on screen, and return them so the runner can perform a compositor-level capture.
+      await platformViewCreatedCompleter.future;
+      await WidgetsBinding.instance.endOfFrame;
+      await WidgetsBinding.instance.endOfFrame;
+      await WidgetsBinding.instance.endOfFrame;
+
+      final BuildContext? context = targetKey.currentContext;
+      if (context == null || !context.mounted) {
+        throw StateError(
+          'Failed to capture coordinates for $testName: targetKey is not mounted in the widget tree.',
+        );
+      }
+      final RenderObject? renderObject = context.findRenderObject();
+      if (renderObject is! RenderBox) {
+        throw StateError(
+          'Failed to capture coordinates for $testName: the associated RenderObject is not a RenderBox.',
+        );
+      }
+
+      final Offset position = renderObject.localToGlobal(Offset.zero);
+      final Size size = renderObject.size;
+      final double devicePixelRatio = ui.PlatformDispatcher.instance.implicitView!.devicePixelRatio;
+
+      final int x = (position.dx * devicePixelRatio).round();
+      final int y = (position.dy * devicePixelRatio).round();
+      final int w = (size.width * devicePixelRatio).round();
+      final int h = (size.height * devicePixelRatio).round();
+
+      completer.complete(<String, Object?>{
+        'message': 'Rendered $testName',
+        'x': x,
+        'y': y,
+        'width': w,
+        'height': h,
+      });
+      return;
+    }
+
     final Uint8List resultImageBytes = await _capturePng(testName, targetKey);
 
     if (performAppSideGoldenCompare) {
-      final String? failureMessage = await _compareGoldenOnDevice(
+      final String? failureMessage = await compareGoldenOnDevice(
         testName,
         resultImageBytes,
         goldenVariantValue,
@@ -47,11 +92,13 @@ Future<void> handleGoldenRequest(
   }
 }
 
-Future<String?> _compareGoldenOnDevice(
+Future<String?> compareGoldenOnDevice(
   String testName,
   Uint8List resultImageBytes,
   String? goldenVariant,
 ) async {
+  goldenFileComparator = const PixelExactLocalFileComparator();
+
   final io.Directory tempDir = await getTemporaryDirectory();
   final variantSuffix = (goldenVariant != null && goldenVariant.isNotEmpty)
       ? '.$goldenVariant'
@@ -108,6 +155,12 @@ Future<Uint8List> _capturePng(String testName, GlobalKey targetKey) async {
   }
 
   final RenderObject? renderObject = context.findRenderObject();
+  if (renderObject == null) {
+    throw StateError(
+      'Failed to capture screenshot for $testName: the associated RenderObject is null.',
+    );
+  }
+
   if (renderObject is! RenderRepaintBoundary) {
     throw StateError(
       'Failed to capture screenshot for $testName: the associated RenderObject is not a RenderRepaintBoundary.',
