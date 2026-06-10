@@ -34,6 +34,27 @@ flutter::Size ClampToVirtualScreen(flutter::Size size) {
 
 void EnableTransparentWindowBackground(HWND hwnd,
                                        flutter::WindowsProcTable const& win32) {
+  // The transparent/glass window background below relies on compositing
+  // features that only behave correctly on Windows 11. In particular,
+  // DWMWA_SYSTEMBACKDROP_TYPE was introduced in Windows 11 (build 22000). On
+  // Windows 10, extending the frame fully into the client area without a
+  // supported system backdrop leaves the window transparent and prevents the
+  // Flutter content from being composited, resulting in a blank window that
+  // can't be captured by screen recorders.
+  // See: https://github.com/flutter/flutter/issues/186522
+  //
+  // For now, Windows 10 host windows fall back to an opaque background, which
+  // matches the classic single-window runner and renders correctly. This is
+  // safe because the windowing API does not yet expose a way to request a
+  // transparent window. Supporting true per-pixel transparency on Windows 10
+  // (e.g. via layered windows or DirectComposition) is tracked as follow-up
+  // work and should be validated on Windows 10 hardware.
+  // TODO(mattkae): Support transparent window backgrounds on Windows 10.
+  // https://github.com/flutter/flutter/issues/186522
+  if (!win32.IsWindows11OrGreater()) {
+    return;
+  }
+
   enum ACCENT_STATE { ACCENT_DISABLED = 0 };
 
   struct ACCENT_POLICY {
