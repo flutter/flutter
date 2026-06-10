@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-
 import 'package:package_config/package_config_types.dart';
 
 import '../base/file_system.dart';
@@ -240,13 +239,9 @@ class TestCompiler {
           // set (stable for one `flutter test` run) and the entrypoint's
           // language version, so we can skip this work when the language
           // version matches the previous compilation.
-          final String mainUriString =
-              buildInfo.packageConfig.toPackageUri(request.mainUri)?.toString() ??
-              request.mainUri.toString();
           await generateMainDartWithPluginRegistrant(
             flutterProject!,
             buildInfo.packageConfig,
-            mainUriString,
             mainFile,
           );
           invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);

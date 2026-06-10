@@ -70,6 +70,7 @@ List<String> binariesWithEntitlements(String flutterRoot) {
     'artifacts/engine/darwin-x64-release/gen_snapshot_arm64',
     'artifacts/engine/darwin-x64-release/gen_snapshot_x64',
     'artifacts/engine/darwin-x64/flutter_tester',
+    'artifacts/engine/darwin-x64/frontend_server_aot.dart.snapshot',
     'artifacts/engine/darwin-x64/gen_snapshot',
     'artifacts/engine/darwin-x64/gen_snapshot_arm64',
     'artifacts/engine/darwin-x64/gen_snapshot_x64',
@@ -79,6 +80,17 @@ List<String> binariesWithEntitlements(String flutterRoot) {
     'dart-sdk/bin/dart',
     'dart-sdk/bin/dartaotruntime',
     'dart-sdk/bin/dartvm',
+    'dart-sdk/bin/snapshots/analysis_server_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/dart2bytecode.dart.snapshot',
+    'dart-sdk/bin/snapshots/dart2js_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/dart2wasm_product.snapshot',
+    'dart-sdk/bin/snapshots/dart_tooling_daemon_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/dartdev_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/dartdevc_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/dds_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/frontend_server_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/gen_kernel_aot.dart.snapshot',
+    'dart-sdk/bin/snapshots/kernel_worker_aot.dart.snapshot',
     'dart-sdk/bin/utils/gen_snapshot',
     'dart-sdk/bin/utils/wasm-opt',
   ].map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
@@ -433,7 +445,8 @@ Future<bool> isBinary(
     '-b', // is binary
     filePath,
   ]);
-  return (result.stdout as String).contains('application/x-mach-binary');
+  final output = result.stdout as String;
+  return output.contains('application/x-mach-binary') || output.contains('application/x-sharedlib');
 }
 
 /// Check if the binary has the expected entitlements.
