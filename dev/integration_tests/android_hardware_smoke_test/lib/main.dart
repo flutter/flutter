@@ -10,14 +10,12 @@ import 'package:flutter/services.dart';
 
 import 'backdrop_filter_blur.dart';
 import 'goldens.dart';
+import 'image_drawing_canvas.dart';
 import 'text_drawing_canvas.dart';
 import 'vector_drawings_canvas.dart';
 
 /// The global key identifying the target [RepaintBoundary] for golden screenshot capturing.
 final GlobalKey targetKey = GlobalKey();
-
-// ImageLoader supports injecting mock assets in headless widget tests.
-typedef ImageLoader = Future<ui.Image> Function();
 
 void main() async {
   runApp(const MyApp());
@@ -25,29 +23,18 @@ void main() async {
 
 /// The root application widget for the Android hardware smoke test.
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, this.imageLoader = _defaultImageLoader});
+  const MyApp({super.key, this.imageLoader = defaultImageLoader});
 
   /// The callback used to lazily fetch image texture assets during test runs.
   final ImageLoader imageLoader;
-
-  static Future<ui.Image> _defaultImageLoader() async {
-    final ByteData data = await rootBundle.load('assets/test_image.png');
-    final ui.Codec codec = await ui.instantiateImageCodec(
-      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
-    );
-    try {
-      final ui.FrameInfo fi = await codec.getNextFrame();
-      return fi.image;
-    } finally {
-      codec.dispose();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter android hardware smoke test',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
       home: MyWidget(imageLoader: imageLoader),
     );
   }
@@ -92,7 +79,8 @@ class _MyState extends State<MyWidget> {
     // Widget tests pass captureScreenshot: false.
     // Image.toByteData runs async on a native thread, which results in an unresolvable deadlock in the widget test's FakeAsync zone.
     // Comparing pixels is not a responsibility of widget tests anyway, that should be reserved for the integration tests.
-    final bool captureScreenshot = messageMap?['captureScreenshot'] as bool? ?? true;
+    final bool captureScreenshot =
+        messageMap?['captureScreenshot'] as bool? ?? true;
 
     // Lazily load the image asset only when requested. This avoids loading it
     // unnecessarily, blocks rendering until fully loaded, and catches load
@@ -113,7 +101,9 @@ class _MyState extends State<MyWidget> {
           _loadedImage = img;
         });
       } catch (e, stackTrace) {
-        return <String, Object?>{'message': 'Failed to load image asset: $e\n$stackTrace'};
+        return <String, Object?>{
+          'message': 'Failed to load image asset: $e\n$stackTrace',
+        };
       }
     }
 
@@ -133,7 +123,10 @@ class _MyState extends State<MyWidget> {
           _goldenVariantFuture,
         );
       } else {
-        completer.complete(<String, Object?>{'message': 'Rendered $testName', 'imageBytes': null});
+        completer.complete(<String, Object?>{
+          'message': 'Rendered $testName',
+          'imageBytes': null,
+        });
       }
     }, debugLabel: 'Rendered $testName');
 
@@ -144,7 +137,9 @@ class _MyState extends State<MyWidget> {
   void initState() {
     super.initState();
 
-    _goldenVariantFuture = _nativeChannel.invokeMethod<String>('impeller_backend');
+    _goldenVariantFuture = _nativeChannel.invokeMethod<String>(
+      'impeller_backend',
+    );
     _testChannel.setMessageHandler(_handler);
   }
 
@@ -162,8 +157,10 @@ class _MyState extends State<MyWidget> {
       testContent = const BackdropFilterBlur();
     } else if (_message == 'textTest') {
       testContent = const TextDrawingCanvas();
+    } else if (_message == 'imageTest') {
+      testContent = ImageDrawingCanvas(image: _loadedImage);
     } else {
-      testContent = VectorDrawingsCanvas(message: _message, loadedImage: _loadedImage);
+      testContent = VectorDrawingsCanvas(message: _message);
     }
 
     return SafeArea(

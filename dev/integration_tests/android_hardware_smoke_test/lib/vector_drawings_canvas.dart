@@ -2,44 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 /// A custom widget wrapping a CustomPaint canvas to render different vector
-/// drawings (rectangles, paths, image textures, and blends) based on
-/// the active test scenario command.
+/// drawings (rectangles, paths, and blends) based on the active test scenario command.
 class VectorDrawingsCanvas extends StatelessWidget {
-  const VectorDrawingsCanvas({
-    super.key,
-    required this.message,
-    this.loadedImage,
-  });
+  const VectorDrawingsCanvas({super.key, required this.message});
 
   /// The active test scenario command identifier (e.g., 'blueRectangleTest').
   final String message;
 
-  /// An optional pre-loaded image texture used for texture sampling verification.
-  final ui.Image? loadedImage;
-
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _VectorDrawingsPainter(
-        message: message,
-        loadedImage: loadedImage,
-      ),
-    );
+    return CustomPaint(painter: _VectorDrawingsPainter(message: message));
   }
 }
 
 class _VectorDrawingsPainter extends CustomPainter {
-  _VectorDrawingsPainter({required String message, ui.Image? loadedImage})
+  _VectorDrawingsPainter({required String message})
     : _message = message,
-      _loadedImage = loadedImage,
       assert(message.isNotEmpty);
 
   final String _message;
-  final ui.Image? _loadedImage;
 
   void _renderBlueRectangleTest(Canvas canvas, Size size) {
     final paint = Paint()
@@ -58,13 +42,6 @@ class _VectorDrawingsPainter extends CustomPainter {
     path.lineTo(10, size.height - 10);
     path.close();
     canvas.drawPath(path, paint);
-  }
-
-  void _renderImageTest(Canvas canvas, Size size) {
-    final ui.Image? image = _loadedImage;
-    if (image != null) {
-      canvas.drawImage(image, Offset.zero, Paint());
-    }
   }
 
   void _renderAdvancedBlendTest(Canvas canvas, Size size) {
@@ -107,9 +84,6 @@ class _VectorDrawingsPainter extends CustomPainter {
       case 'trianglePathTest':
         _renderTrianglePathTest(canvas, size);
         return;
-      case 'imageTest':
-        _renderImageTest(canvas, size);
-        return;
       case 'advancedBlendTest':
         _renderAdvancedBlendTest(canvas, size);
         return;
@@ -120,7 +94,6 @@ class _VectorDrawingsPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _VectorDrawingsPainter oldDelegate) {
-    return _message != oldDelegate._message ||
-        _loadedImage != oldDelegate._loadedImage;
+    return _message != oldDelegate._message;
   }
 }
