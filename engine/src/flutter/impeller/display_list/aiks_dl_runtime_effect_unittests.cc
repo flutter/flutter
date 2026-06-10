@@ -126,6 +126,51 @@ TEST_P(AiksTest, CanRenderRuntimeEffectFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/167795.
+// The input of a runtime effect image filter is sampled at arbitrary,
+// shader-computed coordinates, so it must be sampled with linear filtering.
+// With nearest-neighbor sampling, the warped stripes below collapse into
+// unevenly spaced solid bands that jump in whole-pixel steps as the warp
+// changes (visible as glyph jitter during the Android stretch overscroll
+// effect).
+TEST_P(AiksTest, RuntimeEffectImageFilterSamplesInputLinearly) {
+  auto runtime_stages_result =
+      OpenAssetAsRuntimeStage("runtime_stage_filter_warp.frag.iplr");
+  ABSL_ASSERT_OK(runtime_stages_result);
+  std::shared_ptr<RuntimeStage> runtime_stage =
+      runtime_stages_result.value()[GetRuntimeStageBackend()];
+  ASSERT_TRUE(runtime_stage);
+  ASSERT_TRUE(runtime_stage->IsDirty());
+
+  std::vector<std::shared_ptr<DlColorSource>> sampler_inputs = {
+      nullptr,
+  };
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+  uniform_data->resize(sizeof(Vector2));
+
+  DlPaint layer_paint;
+  layer_paint.setImageFilter(DlImageFilter::MakeRuntimeEffect(
+      DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
+      uniform_data));
+
+  DisplayListBuilder builder;
+  DlPaint background;
+  background.setColor(DlColor::kBlack());
+  builder.DrawPaint(background);
+
+  // Single pixel wide stripes, the content most sensitive to the sampler
+  // filter used for the warped lookup.
+  builder.SaveLayer(std::nullopt, &layer_paint);
+  DlPaint white;
+  white.setColor(DlColor::kWhite());
+  for (int y = 0; y < 400; y += 2) {
+    builder.DrawRect(DlRect::MakeXYWH(0, y, 400, 1), white);
+  }
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, RuntimeEffectWithInvalidSamplerDoesNotCrash) {
   ScopedValidationDisable disable_validation;
 

@@ -18,7 +18,6 @@ void main() {
   // shader is available, therefore the tests must be different depending
   // on shader support.
   final bool shaderSupported = ui.ImageFilter.isShaderFilterSupported;
-  final bool shaderStretchEnabled = StretchEffect.useShaderStretchEffect;
 
   Widget buildTest(
     GlobalKey box1Key,
@@ -238,8 +237,8 @@ void main() {
       expect(box2.localToGlobal(Offset.zero).dy, 100.0);
       expect(box3.localToGlobal(Offset.zero).dy, 350.0);
     },
-    // Skips this test when fragment shaders are used for stretch.
-    skip: shaderSupported && shaderStretchEnabled,
+    // Skips this test when fragment shaders are used.
+    skip: shaderSupported,
   );
 
   testWidgets(
@@ -279,7 +278,7 @@ void main() {
       );
     },
     // Skips this test when fragment shaders are used.
-    skip: shaderSupported && shaderStretchEnabled,
+    skip: shaderSupported,
   );
 
   testWidgets(
@@ -321,7 +320,7 @@ void main() {
       );
     },
     // Skips this test when fragment shaders are used.
-    skip: shaderSupported && shaderStretchEnabled,
+    skip: shaderSupported,
   );
 
   testWidgets(
@@ -416,7 +415,7 @@ void main() {
       expect(box3.localToGlobal(Offset.zero).dx, 500.0);
     },
     // Skips this test when fragment shaders are used.
-    skip: shaderSupported && shaderStretchEnabled,
+    skip: shaderSupported,
   );
 
   testWidgets(
@@ -502,7 +501,7 @@ void main() {
       expect(box3.localToGlobal(Offset.zero).dx, 500.0);
     },
     // Skips this test when fragment shaders are used.
-    skip: shaderSupported && shaderStretchEnabled,
+    skip: shaderSupported,
   );
 
   testWidgets(
@@ -551,7 +550,7 @@ void main() {
       );
     },
     // Skips this test when fragment shaders are used.
-    skip: shaderSupported && shaderStretchEnabled,
+    skip: shaderSupported,
   );
 
   testWidgets('Disallow stretching overscroll', (WidgetTester tester) async {
@@ -826,7 +825,7 @@ void main() {
       await tester.pumpAndSettle();
     },
     // Skips this test when fragment shaders are used.
-    skip: shaderSupported && shaderStretchEnabled,
+    skip: shaderSupported,
   );
 
   testWidgets(
@@ -909,7 +908,7 @@ void main() {
       await tester.pumpAndSettle();
     },
     // Skips this test when fragment shaders are used.
-    skip: shaderSupported && shaderStretchEnabled,
+    skip: shaderSupported,
   );
 
   testWidgets(
@@ -987,7 +986,7 @@ void main() {
       expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 200.0));
     },
     // Skips this test when fragment shaders are used.
-    skip: shaderSupported && shaderStretchEnabled,
+    skip: shaderSupported,
   );
 
   testWidgets(
@@ -1066,7 +1065,7 @@ void main() {
       expect(box3.localToGlobal(Offset.zero), const Offset(200.0, 0.0));
     },
     // Skips this test when fragment shaders are used.
-    skip: shaderSupported && shaderStretchEnabled,
+    skip: shaderSupported,
   );
 
   testWidgets(
@@ -1111,7 +1110,7 @@ void main() {
       expect(box3.localToGlobal(Offset.zero).dy, 350.0);
     },
     // Skips this test when fragment shaders are used.
-    skip: shaderSupported && shaderStretchEnabled,
+    skip: shaderSupported,
   );
 
   testWidgets(
@@ -1168,7 +1167,7 @@ void main() {
       expect(box3.localToGlobal(Offset.zero).dy, 500.0);
     },
     // Skips this test when fragment shaders are used.
-    skip: shaderSupported && shaderStretchEnabled,
+    skip: shaderSupported,
   );
 
   testWidgets(
@@ -1231,7 +1230,7 @@ void main() {
       expect(box3.localToGlobal(Offset.zero).dy, 410.0);
     },
     // Skips this test when fragment shaders are used.
-    skip: shaderSupported && shaderStretchEnabled,
+    skip: shaderSupported,
   );
 
   testWidgets('Stretch overscroll only uses image filter during stretch effect', (
@@ -1257,32 +1256,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.layers, contains(isA<ImageFilterLayer>()));
-  }, skip: !shaderSupported || !shaderStretchEnabled);
-
-  testWidgets('Stretch overscroll uses translation when shader stretch is disabled', (
-    WidgetTester tester,
-  ) async {
-    final GlobalKey box1Key = GlobalKey();
-    final GlobalKey box2Key = GlobalKey();
-    final GlobalKey box3Key = GlobalKey();
-    final controller = ScrollController();
-    addTearDown(controller.dispose);
-
-    await tester.pumpWidget(
-      buildTest(box1Key, box2Key, box3Key, controller, axis: Axis.horizontal),
-    );
-
-    expect(find.byType(ImageFiltered), findsNothing);
-
-    final TestGesture gesture = await tester.startGesture(
-      tester.getCenter(find.byType(CustomScrollView)),
-    );
-    await gesture.moveBy(const Offset(200.0, 0.0));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(Transform), findsWidgets);
-    expect(find.byType(ImageFiltered), findsNothing);
-  }, skip: shaderStretchEnabled);
+  });
 
   testWidgets(
     'Stretching animation completes after fling under scroll physics with high friction',
