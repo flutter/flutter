@@ -563,6 +563,9 @@ class TextSelectionOverlay {
           defaultTargetPlatform == TargetPlatform.iOS;
       final TextDirection startHandleDirection;
       final TextDirection endHandleDirection;
+      // A non-collapsed selection may still yield a single endpoint when
+      // getBoxesForSelection returns no visible boxes (e.g. the selection is
+      // scrolled or clipped out of view). Fall back to the field's textDirection.
       if (preferRenderObjectDirectionForSelectionHandles || endpoints.length < 2) {
         startHandleDirection = textDirection;
         endHandleDirection = textDirection;
