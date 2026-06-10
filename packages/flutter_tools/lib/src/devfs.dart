@@ -136,7 +136,10 @@ class DevFSFileContent extends DevFSContent {
     // cached stat (e.g. `_fileStat == null`) would report a freshly created
     // DevFSFileContent as modified even when its file is older than [time].
     final (FileStat? currentStat, _) = _statFile();
-    return currentStat != null && currentStat.modified.isAfter(time);
+    if (currentStat == null) {
+      return true;
+    }
+    return currentStat.modified.isAfter(time);
   }
 
   @override

@@ -1394,7 +1394,7 @@ dev_dependencies:
       // Inject a sentinel directly into the output file. If the second run
       // erroneously rebuilds the bundle it will overwrite this with 'original'.
       final File builtAsset = fs.file(
-        globals.fs.path.join('build', 'unit_test_assets', 'asset.txt'),
+        fs.path.join('build', 'unit_test_assets', 'asset.txt'),
       );
       builtAsset.writeAsStringSync('sentinel');
 

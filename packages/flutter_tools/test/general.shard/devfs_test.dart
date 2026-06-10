@@ -128,7 +128,7 @@ void main() {
       expect(content.isModifiedAfter(modified.subtract(const Duration(seconds: 5))), isTrue);
 
       file.deleteSync();
-      expect(content.isModifiedAfter(modified.subtract(const Duration(seconds: 5))), isFalse);
+      expect(content.isModifiedAfter(modified.subtract(const Duration(seconds: 5))), isTrue);
     },
   );
 
