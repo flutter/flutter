@@ -104,6 +104,9 @@ class StandardCapabilities final : public Capabilities {
   }
 
   // |Capabilities|
+  bool SupportsFramebufferRenderMipmap() const override { return true; }
+
+  // |Capabilities|
   bool SupportsTextureCompression(
       CompressedTextureFamily family) const override {
     switch (family) {
