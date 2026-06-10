@@ -51,9 +51,6 @@ static const constexpr char* kTextureCompressionAstcOesExt =
 static const constexpr char* kTextureCompressionAstcHdrExt =
     "GL_KHR_texture_compression_astc_hdr";
 
-// https://registry.khronos.org/OpenGL/extensions/OES/OES_fbo_render_mipmap.txt
-static const constexpr char* kFboRenderMipmapExt = "GL_OES_fbo_render_mipmap";
-
 // https://registry.khronos.org/OpenGL/extensions/APPLE/APPLE_texture_max_level.txt
 static const constexpr char* kAppleTextureMaxLevelExt =
     "GL_APPLE_texture_max_level";
@@ -198,12 +195,6 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   supports_texture_compression_etc2_ =
       desc->IsES() && desc->GetGlVersion().major_version >= 3;
 
-  // Non-zero mip levels are renderable on desktop GL, ES 3.0+, or ES 2.0 with
-  // GL_OES_fbo_render_mipmap.
-  supports_fbo_render_mipmap_ = !desc->IsES() ||
-                                desc->GetGlVersion().major_version >= 3 ||
-                                desc->HasExtension(kFboRenderMipmapExt);
-
   // GL_TEXTURE_MAX_LEVEL is core on desktop GL and ES 3.0+, and available on
   // ES 2.0 through GL_APPLE_texture_max_level.
   supports_texture_max_level_ = !desc->IsES() ||
@@ -216,7 +207,13 @@ bool CapabilitiesGLES::IsES() const {
 }
 
 bool CapabilitiesGLES::SupportsFramebufferRenderMipmap() const {
-  return supports_fbo_render_mipmap_;
+  // Rendering into a non-zero mip level is not yet supported on the GLES
+  // backend. The texture storage path allocates levels with mutable, lazily
+  // allocated glTexImage2D storage, which yields an incomplete framebuffer
+  // when a non-base mip level is attached. Until that is reworked, do not
+  // advertise the capability so callers fall back instead of failing to
+  // create the framebuffer. Rendering into a cube map face is unaffected.
+  return false;
 }
 
 bool CapabilitiesGLES::SupportsTextureMaxLevel() const {
