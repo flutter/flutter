@@ -20,7 +20,12 @@ Future<ui.Image> defaultImageLoader() async {
   canvas.drawRect(const Rect.fromLTWH(0, 16, 16, 16), Paint()..color = Colors.blue);
   canvas.drawRect(const Rect.fromLTWH(16, 16, 16, 16), Paint()..color = Colors.yellow);
 
-  return recorder.endRecording().toImage(32, 32);
+  final ui.Picture picture = recorder.endRecording();
+  try {
+    return await picture.toImage(32, 32);
+  } finally {
+    picture.dispose();
+  }
 }
 
 /// Dedicated canvas widget to render pre-loaded image textures for 'imageTest'.

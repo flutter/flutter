@@ -32,9 +32,7 @@ Future<void> handleGoldenRequest(
         resultImageBytes,
         goldenVariantValue,
       );
-      completer.complete(<String, Object?>{
-        'message': failureMessage ?? 'Rendered $testName',
-      });
+      completer.complete(<String, Object?>{'message': failureMessage ?? 'Rendered $testName'});
     } else {
       completer.complete(<String, Object?>{
         'message': 'Rendered $testName',
@@ -44,8 +42,7 @@ Future<void> handleGoldenRequest(
   } catch (e, stackTrace) {
     // Guarantee that the completer completes even under unhandled exceptions
     completer.complete(<String, Object?>{
-      'message':
-          'Error occurred during golden request handling: $e\n$stackTrace',
+      'message': 'Error occurred during golden request handling: $e\n$stackTrace',
     });
   }
 }
@@ -86,10 +83,7 @@ Future<void> _writeBytesToFile(String filePath, Uint8List bytes) async {
   await file.writeAsBytes(bytes);
 }
 
-Future<void> _copyGoldenAssetToTemp(
-  String goldenAssetPath,
-  String tempGoldenPath,
-) async {
+Future<void> _copyGoldenAssetToTemp(String goldenAssetPath, String tempGoldenPath) async {
   try {
     final ByteData byteData = await rootBundle.load(goldenAssetPath);
     final Uint8List bytes = byteData.buffer.asUint8List(
@@ -121,24 +115,25 @@ Future<Uint8List> _capturePng(String testName, GlobalKey targetKey) async {
   }
   final RenderRepaintBoundary boundary = renderObject;
   final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-  final ByteData? byteData = await image.toByteData(
-    format: ui.ImageByteFormat.png,
-  );
-  if (byteData == null) {
-    throw StateError(
-      'Failed to capture screenshot for $testName: ui.Image.toByteData returned null.',
-    );
-  }
+  try {
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData == null) {
+      throw StateError(
+        'Failed to capture screenshot for $testName: ui.Image.toByteData returned null.',
+      );
+    }
 
-  final Uint8List pngBytes = byteData.buffer.asUint8List(
-    byteData.offsetInBytes,
-    byteData.lengthInBytes,
-  );
-  image.dispose();
-  if (pngBytes.isEmpty) {
-    throw StateError(
-      'Failed to capture screenshot for $testName: pngBytes from RenderRepaintBoundary.toImage was empty.',
+    final Uint8List pngBytes = byteData.buffer.asUint8List(
+      byteData.offsetInBytes,
+      byteData.lengthInBytes,
     );
+    if (pngBytes.isEmpty) {
+      throw StateError(
+        'Failed to capture screenshot for $testName: pngBytes from RenderRepaintBoundary.toImage was empty.',
+      );
+    }
+    return pngBytes;
+  } finally {
+    image.dispose();
   }
-  return pngBytes;
 }
