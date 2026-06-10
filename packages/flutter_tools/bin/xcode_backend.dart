@@ -46,6 +46,16 @@ class Context {
     final String subCommand = validateCommand(arguments[0]);
     final String? platformName = arguments.length < 2 ? null : arguments[1];
     final TargetPlatform platform = parsePlatform(platformName);
+    const commandsRequiringGeneratedSettings = <String>{
+      'build',
+      'prepare',
+      'embed',
+      'embed_and_thin',
+    };
+    // "build-add-to-app" uses its own xcconfig
+    if (commandsRequiringGeneratedSettings.contains(subCommand)) {
+      validateGeneratedBuildSettings(platform);
+    }
     switch (subCommand) {
       case 'build':
         buildApp(platform, 'build');
@@ -64,6 +74,52 @@ class Context {
         // Exposed for integration testing only.
         addVmServiceBonjourService();
     }
+  }
+
+  /// If any of these are missing from the environment, the Xcode project's
+  /// build configurations are not correctly including the generated xcconfig,
+  /// and the build would otherwise continue in a broken state (no app version,
+  /// dropped dart-defines, wrong target, etc).
+  ///
+  /// Keep this list consistent with the settings generated in
+  /// packages/flutter_tools/lib/src/ios/xcode_build_settings.dart.
+  static const List<String> requiredGeneratedBuildSettings = <String>[
+    'FLUTTER_ROOT',
+    'FLUTTER_BUILD_DIR',
+    'FLUTTER_BUILD_NAME',
+    'FLUTTER_BUILD_NUMBER',
+  ];
+
+  void validateGeneratedBuildSettings(TargetPlatform platform) {
+    final List<String> missingSettings = requiredGeneratedBuildSettings
+        .where((String setting) => environment[setting] == null)
+        .toList();
+    if (missingSettings.isEmpty) {
+      return;
+    }
+    final String generatedXcconfig;
+    final String includeInstructions;
+    if (platform == TargetPlatform.macos) {
+      generatedXcconfig = 'macos/Flutter/ephemeral/Flutter-Generated.xcconfig';
+      includeInstructions =
+          'macos/Flutter/Flutter-Debug.xcconfig and macos/Flutter/Flutter-Release.xcconfig contain #include "ephemeral/Flutter-Generated.xcconfig"';
+    } else {
+      generatedXcconfig = 'ios/Flutter/Generated.xcconfig';
+      includeInstructions =
+          'ios/Flutter/Debug.xcconfig and ios/Flutter/Release.xcconfig contain #include "Generated.xcconfig"';
+    }
+    echoXcodeError(
+      'Missing Flutter build settings: ${missingSettings.join(', ')}. '
+      'These build settings are set by the Flutter tool in $generatedXcconfig, '
+      'which is not being included by this build configuration. In Xcode, view '
+      'the configurations of the project: each configuration must use a base '
+      'configuration that includes the Flutter-generated xcconfig. For the '
+      'default Flutter project, $includeInstructions. Do not set the base '
+      'configuration directly to a CocoaPods Pods-Runner xcconfig. See '
+      'https://docs.flutter.dev/deployment/flavors-ios#configure-xcode-schemes '
+      'for an example of correctly configured build configurations.',
+    );
+    exitApp(-1);
   }
 
   /// Validates the command argument matches one of the possible commands.
