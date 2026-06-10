@@ -30,7 +30,7 @@ Scalar ToShaderType(UberSDFParameters::Type type) {
       return 2.0f;
     case UberSDFParameters::Type::kRoundedRect:
       return 3.0f;
-    case UberSDFParameters::Type::kRoundSuperellipse:
+    case UberSDFParameters::Type::kRoundedSuperellipseSymmetric:
       return 4.0f;
   }
 }
@@ -73,17 +73,19 @@ bool UberSDFContents::Render(const ContentContext& renderer,
       params_.color.WithAlpha(params_.color.alpha * GetOpacityFactor());
   frag_info.center = params_.center;
   frag_info.size = params_.size;
-  frag_info.radii =
-      Vector4(params_.radii.bottom_right.width, params_.radii.top_right.width,
-              params_.radii.bottom_left.width, params_.radii.top_left.width);
   frag_info.stroked = params_.stroke ? 1.0f : 0.0f;
   frag_info.stroke_width = params_.stroke ? params_.stroke->width : 0.0f;
   frag_info.stroke_join =
       params_.stroke ? ToShaderStrokeJoin(params_.stroke->join) : 0.0f;
   frag_info.aa_pixels = UberSDFParameters::kAntialiasPixels;
   frag_info.superellipse_degree = params_.superellipse_degree;
-  frag_info.corner_angle_span = params_.corner_angle_span;
-  frag_info.corner_circle_center = params_.corner_circle_center;
+  frag_info.superellipse_semi_axis = params_.superellipse_semi_axis;
+  frag_info.angle_span = params_.angle_span;
+  frag_info.octant_offset_c = params_.octant_offset_c;
+  frag_info.circle_center_top = params_.circle_center_top;
+  frag_info.circle_center_right = params_.circle_center_right;
+  frag_info.superellipse_scale = params_.superellipse_scale;
+  frag_info.radii = params_.radii;
 
   auto geometry_result =
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);
@@ -126,6 +128,22 @@ bool UberSDFContents::ApplyColorFilter(
     const ColorFilterProc& color_filter_proc) {
   params_.color = color_filter_proc(params_.color);
   return true;
+}
+
+std::optional<Color> UberSDFContents::AsBackgroundColor(
+    const Entity& entity,
+    ISize target_size) const {
+  if (params_.type != UberSDFParameters::Type::kRect) {
+    return std::nullopt;
+  }
+  const Geometry* geometry = GetGeometry();
+  if (geometry == nullptr) {
+    return std::nullopt;
+  }
+  IRect target_rect = IRect::MakeSize(target_size);
+  return geometry->CoversArea(entity.GetTransform(), target_rect)
+             ? GetColor()
+             : std::optional<Color>();
 }
 
 }  // namespace impeller

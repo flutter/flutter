@@ -219,10 +219,10 @@ Future<DateTime?> showDatePicker({
   String? fieldLabelText,
   TextInputType? keyboardType,
   Offset? anchorPoint,
-  final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange,
-  final Icon? switchToInputEntryModeIcon,
-  final Icon? switchToCalendarEntryModeIcon,
-  final CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
+  ValueChanged<DatePickerEntryMode>? onDatePickerModeChange,
+  Icon? switchToInputEntryModeIcon,
+  Icon? switchToCalendarEntryModeIcon,
+  CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
 }) async {
   initialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate);
   firstDate = calendarDelegate.dateOnly(firstDate);
@@ -1190,8 +1190,8 @@ Future<DateTimeRange?> showDateRangePicker({
   TransitionBuilder? builder,
   Offset? anchorPoint,
   TextInputType keyboardType = TextInputType.datetime,
-  final Icon? switchToInputEntryModeIcon,
-  final Icon? switchToCalendarEntryModeIcon,
+  Icon? switchToInputEntryModeIcon,
+  Icon? switchToCalendarEntryModeIcon,
   SelectableDayForRangePredicate? selectableDayPredicate,
   CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
 }) async {

@@ -579,6 +579,21 @@ class MediaQueryData {
   /// - On iOS this flag is set to true when the user setting called "24-Hour
   ///   Time" is set or the system-wide locale's default uses 24-hour
   ///   formatting.
+  /// - On macOS this flag reflects the current system locale's time format,
+  ///   which incorporates the "24-Hour Time" preference in System Settings.
+  ///   As on iOS, this only takes effect for the system locale; a custom
+  ///   locale passed to the application will ignore the 24-hour preference.
+  /// - On Windows this flag is derived from the user's "Short time" format
+  ///   in the Region settings; it is true when the configured format uses a
+  ///   24-hour pattern.
+  /// - On Linux this flag reflects the desktop environment's clock-format
+  ///   setting where available (for example,
+  ///   `org.gnome.desktop.interface.clock-format` on GNOME). On desktops
+  ///   that do not expose such a setting, it defaults to true (24-hour).
+  /// - On Web this flag is always false. The Flutter web engine does not
+  ///   currently populate it from the browser's locale settings, even though
+  ///   the browser exposes a preferred hour cycle via
+  ///   `Intl.DateTimeFormat.resolvedOptions().hourCycle`.
   final bool alwaysUse24HourFormat;
 
   /// Whether the user is using an accessibility service like TalkBack or
@@ -606,7 +621,7 @@ class MediaQueryData {
   /// content on iOS, via Settings -> Accessibility -> Increase Contrast.
   ///
   /// This flag is currently only updated on iOS devices that are running iOS 13
-  /// or above.
+  /// or above and Android devices that are running Android API 34 or above.
   final bool highContrast;
 
   /// Whether the user requested to show on/off labels inside switches on iOS,
@@ -707,7 +722,7 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
-  ///  [TextStyle.height] and [StrutStyle.height] are overriden by
+  ///  [TextStyle.height] and [StrutStyle.height] are overridden by
   ///  [lineHeightScaleFactorOverride].
   final double? lineHeightScaleFactorOverride;
 
@@ -722,7 +737,7 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
-  ///  [TextStyle.letterSpacing] is overriden by [letterSpacingOverride].
+  ///  [TextStyle.letterSpacing] is overridden by [letterSpacingOverride].
   final double? letterSpacingOverride;
 
   /// Overrides the amount of space (in logical pixels) to add at each
@@ -736,7 +751,7 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
-  ///  [TextStyle.wordSpacing] is overriden by [wordSpacingOverride].
+  ///  [TextStyle.wordSpacing] is overridden by [wordSpacingOverride].
   final double? wordSpacingOverride;
 
   /// The amount of space (in logical pixels) to add following each paragraph

@@ -224,7 +224,7 @@ class UpgradeCommandRunner {
     }
     // If there are uncommitted changes we might be on the right commit but
     // we should still warn.
-    if (!force && await hasUncommittedChanges()) {
+    if (!force && await hasUncommittedChanges(flutterVersion)) {
       throwToolExit(
         'Your flutter checkout has local changes that would be erased by '
         'upgrading. If you want to keep these changes, it is recommended that '
@@ -306,14 +306,40 @@ class UpgradeCommandRunner {
   }
 
   @protected
-  Future<bool> hasUncommittedChanges() async {
+  @visibleForTesting
+  Future<bool> hasUncommittedChanges(FlutterVersion version) async {
     try {
       final RunResult result = await globals.git.run(
         ['status', '-s'],
         throwOnError: true,
         workingDirectory: workingDirectory,
       );
-      return result.stdout.trim().isNotEmpty;
+      final String output = result.stdout.trim();
+      if (output.isEmpty) {
+        return false;
+      }
+
+      // On non-stable channels, we ignore changes to pubspec.lock files.
+      if (version.channel != 'stable') {
+        final List<String> lines = output.split('\n');
+        var hasOtherChanges = false;
+        for (final line in lines) {
+          final String trimmed = line.trim();
+          if (trimmed.isEmpty) {
+            continue;
+          }
+          // Check if the file is pubspec.lock. We check for a leading space or
+          // directory separator to avoid matching files like 'another_pubspec.lock'.
+          if (trimmed.endsWith(' pubspec.lock') || trimmed.endsWith('/pubspec.lock')) {
+            continue;
+          }
+          hasOtherChanges = true;
+          break;
+        }
+        return hasOtherChanges;
+      }
+
+      return true;
     } on ProcessException catch (error) {
       throwToolExit(
         'The tool could not verify the status of the current flutter checkout. '
