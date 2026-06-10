@@ -12,25 +12,13 @@ typedef ImageLoader = Future<ui.Image> Function();
 /// Generates a standard 32x32 4-color checkerboard image texture in memory
 /// using an offscreen canvas recording pass.
 Future<ui.Image> defaultImageLoader() async {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(recorder);
 
-  canvas.drawRect(
-    const Rect.fromLTWH(0, 0, 16, 16),
-    Paint()..color = Colors.red,
-  );
-  canvas.drawRect(
-    const Rect.fromLTWH(16, 0, 16, 16),
-    Paint()..color = Colors.green,
-  );
-  canvas.drawRect(
-    const Rect.fromLTWH(0, 16, 16, 16),
-    Paint()..color = Colors.blue,
-  );
-  canvas.drawRect(
-    const Rect.fromLTWH(16, 16, 16, 16),
-    Paint()..color = Colors.yellow,
-  );
+  canvas.drawRect(const Rect.fromLTWH(0, 0, 16, 16), Paint()..color = Colors.red);
+  canvas.drawRect(const Rect.fromLTWH(16, 0, 16, 16), Paint()..color = Colors.green);
+  canvas.drawRect(const Rect.fromLTWH(0, 16, 16, 16), Paint()..color = Colors.blue);
+  canvas.drawRect(const Rect.fromLTWH(16, 16, 16, 16), Paint()..color = Colors.yellow);
 
   return recorder.endRecording().toImage(32, 32);
 }
