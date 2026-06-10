@@ -18,7 +18,7 @@ dependencies:
   code_builder: 4.11.1
   collection: 1.19.1
   completion: 1.0.2
-  coverage: 1.15.0
+  coverage: 1.15.1
   crypto: 3.0.7
   ffi: 2.2.0
   file: 7.0.1
@@ -26,7 +26,7 @@ dependencies:
   html: 0.15.6
   http: 1.6.0
   intl: 0.20.2
-  meta: 1.18.2
+  meta: 1.18.3
   multicast_dns: 0.3.3
   mustache_template: 2.0.4
   package_config: 2.2.0
@@ -127,4 +127,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: kdlk3e
+# PUBSPEC CHECKSUM: 4aafc0

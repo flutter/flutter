@@ -21,10 +21,8 @@ namespace impeller {
 
 CommandBufferVK::CommandBufferVK(
     std::weak_ptr<const Context> context,
-    std::weak_ptr<const DeviceHolderVK> device_holder,
     std::shared_ptr<TrackedObjectsVK> tracked_objects)
     : CommandBuffer(std::move(context)),
-      device_holder_(std::move(device_holder)),
       tracked_objects_(std::move(tracked_objects)) {}
 
 CommandBufferVK::~CommandBufferVK() = default;
