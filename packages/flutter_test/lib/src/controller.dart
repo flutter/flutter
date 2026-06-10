@@ -2451,9 +2451,10 @@ abstract class WidgetController {
   ///
   /// The `moveStep` is the offset by which the virtual finger moves on the
   /// virtual screen between drags. Following the standard touch-input
-  /// convention, a negative `dy` swipes up (which scrolls the content down to
-  /// reveal items below), a positive `dy` swipes down, a positive `dx` swipes
-  /// right, and a negative `dx` swipes left.
+  /// convention, a negative [Offset.dy] swipes up (revealing items below), a
+  /// positive [Offset.dy] swipes down (revealing items above), a positive
+  /// [Offset.dx] swipes right (revealing items to the left), and a negative
+  /// [Offset.dx] swipes left (revealing items to the right).
   ///
   /// Between each drag, advances the clock by `duration`.
   ///
