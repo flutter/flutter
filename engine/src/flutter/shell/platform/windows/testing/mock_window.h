@@ -44,7 +44,6 @@ class MockWindow : public FlutterWindow {
                double,
                FlutterPointerDeviceKind,
                int32_t,
-               uint64_t,
                uint32_t,
                uint32_t,
                int),
@@ -55,13 +54,13 @@ class MockWindow : public FlutterWindow {
                double,
                FlutterPointerDeviceKind,
                int32_t,
-               uint64_t,
+               UINT,
                uint32_t,
                uint32_t),
               (override));
   MOCK_METHOD(void,
               OnPointerUp,
-              (double, double, FlutterPointerDeviceKind, int32_t, uint64_t),
+              (double, double, FlutterPointerDeviceKind, int32_t, UINT),
               (override));
   MOCK_METHOD(void,
               OnPointerLeave,
