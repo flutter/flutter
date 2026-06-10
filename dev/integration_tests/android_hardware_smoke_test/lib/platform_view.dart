@@ -53,16 +53,17 @@ class AndroidPlatformView extends StatelessWidget {
         ),
         Center(
           child: Container(
-            width: 65,
-            height: 65,
+            width: 90,
+            height: 90,
             decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.8), // Semi-transparent overlay
+              color: Colors.red.withValues(alpha: 0.7), // Semi-transparent overlay
               shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 2.0),
             ),
             alignment: Alignment.center,
             child: const Text(
               'Flutter',
-              style: TextStyle(color: Colors.white, fontSize: 10.0, fontWeight: FontWeight.bold),
+              style: TextStyle(color: Colors.white, fontSize: 14.0, fontWeight: FontWeight.bold),
             ),
           ),
         ),

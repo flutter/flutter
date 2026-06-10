@@ -4,6 +4,7 @@ package com.example.android_hardware_smoke_test
 
 import android.content.Context
 import android.graphics.Color
+import android.view.Gravity
 import android.view.View
 import android.widget.TextView
 import io.flutter.plugin.common.StandardMessageCodec
@@ -28,7 +29,8 @@ class NativeTextView(
 ) : PlatformView {
     private val textView: TextView =
         TextView(context).apply {
-            textSize = 18f
+            textSize = 20f
+            gravity = Gravity.CENTER
             setBackgroundColor(Color.rgb(100, 200, 255)) // Light blue background
             text = creationParams?.get("text") as String? ?: "Default Native Text"
             setTextColor(Color.BLACK)
