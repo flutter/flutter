@@ -129,25 +129,19 @@ class Focus extends StatefulWidget {
     this.parentNode,
     this.autofocus = false,
     this.onFocusChange,
-    FocusOnKeyEventCallback? onKeyEvent,
+    this._onKeyEvent,
     @Deprecated(
       'Use onKeyEvent instead. '
       'This feature was deprecated after v3.18.0-2.0.pre.',
     )
-    FocusOnKeyCallback? onKey,
-    bool? canRequestFocus,
-    bool? skipTraversal,
-    bool? descendantsAreFocusable,
-    bool? descendantsAreTraversable,
+    this._onKey,
+    this._canRequestFocus,
+    this._skipTraversal,
+    this._descendantsAreFocusable,
+    this._descendantsAreTraversable,
     this.includeSemantics = true,
-    String? debugLabel,
-  }) : _onKeyEvent = onKeyEvent,
-       _onKey = onKey,
-       _canRequestFocus = canRequestFocus,
-       _skipTraversal = skipTraversal,
-       _descendantsAreFocusable = descendantsAreFocusable,
-       _descendantsAreTraversable = descendantsAreTraversable,
-       _debugLabel = debugLabel;
+    this._debugLabel,
+  });
 
   /// Creates a Focus widget that uses the given [focusNode] as the source of
   /// truth for attributes on the node, rather than the attributes of this widget.
