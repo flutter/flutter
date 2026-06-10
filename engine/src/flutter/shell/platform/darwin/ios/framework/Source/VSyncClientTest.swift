@@ -158,36 +158,40 @@ import Testing
     #expect(link.isPaused)
   }
 
-  @Test func releasesLinkOnInvalidation() {
+  @Test func releasesLinkOnInvalidation() async {
     let threadTaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "FlutterVSyncClientTest")
     weak var weakClient: VSyncClient?
 
-    let semaphore = DispatchSemaphore(value: 0)
+    var client: VSyncClient?
+
+    await withCheckedContinuation { continuation in
+      autoreleasepool {
+        client = VSyncClient(
+          taskRunner: threadTaskRunner,
+          isVariableRefreshRateEnabled: false,
+          maxRefreshRate: 60.0
+        ) { _, _ in
+          continuation.resume()
+        }
+        weakClient = client
+
+        threadTaskRunner.postTask {
+          client?.await()
+        }
+      }
+    }
+
     autoreleasepool {
-      let client = VSyncClient(
-        taskRunner: threadTaskRunner,
-        isVariableRefreshRateEnabled: false,
-        maxRefreshRate: 60.0
-      ) { _, _ in
-        semaphore.signal()
-      }
-      weakClient = client
+      client?.invalidate()
+      client = nil
+    }
 
+    await withCheckedContinuation { continuation in
       threadTaskRunner.postTask {
-        client.await()
+        continuation.resume()
       }
-
-      _ = semaphore.wait(timeout: .now() + 1.0)
-
-      client.invalidate()
     }
 
-    let flushSemaphore = DispatchSemaphore(value: 0)
-    threadTaskRunner.postTask {
-      flushSemaphore.signal()
-    }
-
-    _ = flushSemaphore.wait(timeout: .now() + 1.0)
     #expect(weakClient == nil)
   }
 
@@ -214,44 +218,44 @@ import Testing
   /// from `deinit` violates Apple's thread-affinity contract (invalidation must happen on the
   /// registering thread). If this fails, the run loop will strongly retain and leak both the
   /// display link and the relay.
-  @Test func displayLinkIsDeallocatedOnTaskRunnerThread() {
+  @MainActor
+  @Test func displayLinkIsDeallocatedOnTaskRunnerThread() async {
     let threadTaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "VSyncClientTest")
     weak var weakClient: VSyncClient?
     weak var weakDisplayLink: CADisplayLink?
 
-    // Scope the lifetime of VSyncClient using an autorelease pool.
-    //
-    // When this block exits, the client will be released on the main (test) thread. Since deinit
-    // runs on the main thread but the display link was registered on the task runner's thread, the
-    // client must post the invalidation task to the task runner to execute it safely.
-    let registerSemaphore = DispatchSemaphore(value: 0)
+    var client: VSyncClient?
     autoreleasepool {
-      let client = VSyncClient(
+      client = VSyncClient(
         taskRunner: threadTaskRunner,
         isVariableRefreshRateEnabled: false,
         maxRefreshRate: 60.0
       ) { _, _ in }
 
       weakClient = client
-      weakDisplayLink = client.displayLink
+      weakDisplayLink = client?.displayLink
+    }
 
-      // Ensure the display link is added to the run loop on the task runner thread.
+    // Ensure the display link is added to the run loop on the task runner thread.
+    await withCheckedContinuation { continuation in
       threadTaskRunner.postTask {
-        registerSemaphore.signal()
+        continuation.resume()
       }
-      _ = registerSemaphore.wait(timeout: .now() + 1.0)
     }
 
     // Deallocate on the main (test) thread. deinit calls invalidate(), which must post the
     // invalidation task to the task runner.
+    autoreleasepool {
+      client = nil
+    }
     #expect(weakClient == nil)
 
     // Flush the task runner queue to ensure invalidation executes on the task runner thread.
-    let flushSemaphore = DispatchSemaphore(value: 0)
-    threadTaskRunner.postTask {
-      flushSemaphore.signal()
+    await withCheckedContinuation { continuation in
+      threadTaskRunner.postTask {
+        continuation.resume()
+      }
     }
-    _ = flushSemaphore.wait(timeout: .now() + 1.0)
 
     // If the invalidation succeeded on the correct thread, the run loop dropped its strong
     // reference, and the display link must have been deallocated.
