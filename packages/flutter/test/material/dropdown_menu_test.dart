@@ -4894,6 +4894,50 @@ void main() {
       },
     );
 
+    testWidgets(
+      'leadingIcon is applied as prefixIcon when decorationBuilder does not set one',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/185416
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                leadingIcon: const Icon(Icons.search),
+                dropdownMenuEntries: menuChildren,
+                decorationBuilder: buildDecoration,
+              ),
+            ),
+          ),
+        );
+
+        final TextField textField = tester.widget(find.byType(TextField));
+        expect(textField.decoration?.prefixIcon, isNotNull);
+      },
+    );
+
+    testWidgets(
+      'decorationBuilder prefixIcon takes precedence over leadingIcon',
+      (WidgetTester tester) async {
+        final Key customIconKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: DropdownMenu<TestMenu>(
+                leadingIcon: const Icon(Icons.abc),
+                dropdownMenuEntries: menuChildren,
+                decorationBuilder: (BuildContext context, MenuController controller) {
+                  return InputDecoration(prefixIcon: Icon(Icons.search, key: customIconKey));
+                },
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byKey(customIconKey), findsOneWidget);
+        expect(find.byIcon(Icons.abc), findsNothing);
+      },
+    );
+
     testWidgets('Passing label and decorationBuilder throws', (WidgetTester tester) async {
       final menuController = MenuController();
       await expectLater(() async {

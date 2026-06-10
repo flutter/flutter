@@ -175,6 +175,35 @@ void main() {
     expect(dropdownMenu.leadingIcon, leadingIcon);
   });
 
+  testWidgets('leadingIcon is applied to the InputDecoration', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/185416
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries),
+        ),
+      ),
+    );
+
+    TextField textField = tester.widget(find.byType(TextField));
+    expect(textField.decoration?.prefixIcon, isNull);
+
+    const Widget leadingIcon = Icon(Icons.abc);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            leadingIcon: leadingIcon,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    textField = tester.widget(find.byType(TextField));
+    expect(textField.decoration?.prefixIcon, isNotNull);
+  });
+
   testWidgets('Passes trailingIcon to underlying DropdownMenu', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
