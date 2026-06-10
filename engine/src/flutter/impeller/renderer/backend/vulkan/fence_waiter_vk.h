@@ -30,12 +30,13 @@ class FenceWaiterVK {
 
   void Terminate();
 
-  /// @brief Invokes the [submit_callback] and adds the fence to the wait set
-  ///        if it succeeds.  The [completion_callback] will be called when
-  ///        the submitted command completes and the fence is signaled.
+  /// @brief Invokes the [submit_callback] synchronously and adds the fence to
+  ///        the wait set if it succeeds.  The [completion_callback] will be
+  ///        called when the submitted command completes and the fence is
+  ///        signaled.
   fml::Status AddFence(vk::UniqueFence fence,
                        std::function<fml::Status(vk::Fence)> submit_callback,
-                       const fml::closure& completion_callback);
+                       fml::closure completion_callback);
 
  private:
   friend class ContextVK;

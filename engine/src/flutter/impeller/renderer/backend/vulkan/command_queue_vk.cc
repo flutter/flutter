@@ -60,7 +60,8 @@ fml::Status CommandQueueVK::Submit(
     return fml::Status(fml::StatusCode::kCancelled, "Failed to create fence.");
   }
 
-  auto submit_callback = [&](vk::Fence submit_fence) {
+  // This will be called immediately by FenceWaiterVK::AddFence.
+  auto submit_callback = [&context, &vk_buffers](vk::Fence submit_fence) {
     vk::SubmitInfo submit_info;
     submit_info.setCommandBuffers(vk_buffers);
     auto status =
@@ -74,19 +75,23 @@ fml::Status CommandQueueVK::Submit(
     return fml::Status();
   };
 
+  // This will be called later when the command completes.
+  auto fence_complete_callback = [completion_callback,
+                                  tracked_objects =
+                                      std::move(tracked_objects)]() mutable {
+    // Ensure tracked objects are destructed before calling any final
+    // callbacks.
+    tracked_objects.clear();
+    if (completion_callback) {
+      completion_callback(CommandBuffer::Status::kCompleted);
+    }
+  };
+
   // Submit will proceed, call callback with true when it is done and do not
   // call when `reset` is collected.
   auto fence_status = context->GetFenceWaiter()->AddFence(
-      std::move(fence), submit_callback,
-      [completion_callback,
-       tracked_objects = std::move(tracked_objects)]() mutable {
-        // Ensure tracked objects are destructed before calling any final
-        // callbacks.
-        tracked_objects.clear();
-        if (completion_callback) {
-          completion_callback(CommandBuffer::Status::kCompleted);
-        }
-      });
+      std::move(fence), std::move(submit_callback),
+      std::move(fence_complete_callback));
   if (!fence_status.ok()) {
     return fence_status;
   }

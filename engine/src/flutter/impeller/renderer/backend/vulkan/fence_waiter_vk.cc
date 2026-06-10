@@ -64,7 +64,7 @@ FenceWaiterVK::~FenceWaiterVK() {
 fml::Status FenceWaiterVK::AddFence(
     vk::UniqueFence fence,
     std::function<fml::Status(vk::Fence)> submit_callback,
-    const fml::closure& completion_callback) {
+    fml::closure completion_callback) {
   if (!fence || !submit_callback || !completion_callback) {
     return fml::Status(fml::StatusCode::kInvalidArgument, "Invalid arguments");
   }
@@ -80,7 +80,7 @@ fml::Status FenceWaiterVK::AddFence(
       return submit_status;
     }
     wait_set_.emplace_back(
-        WaitSetEntry::Create(std::move(fence), completion_callback));
+        WaitSetEntry::Create(std::move(fence), std::move(completion_callback)));
   }
   wait_set_cv_.notify_one();
   return fml::Status();

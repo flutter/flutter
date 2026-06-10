@@ -13,6 +13,17 @@
 namespace impeller {
 namespace testing {
 
+TEST(CommandQueueVKTest, QueueSubmit) {
+  const auto context = MockVulkanContextBuilder().Build();
+  auto buffer = context->CreateCommandBuffer();
+  auto status = context->GetCommandQueue()->Submit({buffer});
+  EXPECT_TRUE(status.ok());
+
+  const auto called = GetMockVulkanFunctions(context->GetDevice());
+  EXPECT_NE(std::find(called->begin(), called->end(), "vkQueueSubmit"),
+            called->end());
+}
+
 TEST(CommandQueueVKTest, SubmitAfterFenceWaiterTerminated) {
   const auto context = MockVulkanContextBuilder().Build();
   auto buffer = context->CreateCommandBuffer();

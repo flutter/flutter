@@ -10,14 +10,16 @@
 namespace impeller {
 namespace testing {
 
-const auto default_submit_callback = [](vk::Fence) { return fml::Status(); };
+namespace {
+auto default_submit_callback = [](vk::Fence) { return fml::Status(); };
+}  // namespace
 
 TEST(FenceWaiterVKTest, IgnoresNullFence) {
   auto const context = MockVulkanContextBuilder().Build();
   auto const waiter = context->GetFenceWaiter();
   const auto add_status =
       waiter->AddFence(vk::UniqueFence(), default_submit_callback, []() {});
-  EXPECT_FALSE(add_status.ok());
+  EXPECT_EQ(add_status.code(), fml::StatusCode::kInvalidArgument);
 }
 
 TEST(FenceWaiterVKTest, IgnoresNullCallback) {
@@ -28,7 +30,7 @@ TEST(FenceWaiterVKTest, IgnoresNullCallback) {
   auto fence = device.createFenceUnique({}).value;
   const auto add_status =
       waiter->AddFence(std::move(fence), default_submit_callback, nullptr);
-  EXPECT_FALSE(add_status.ok());
+  EXPECT_EQ(add_status.code(), fml::StatusCode::kInvalidArgument);
 }
 
 TEST(FenceWaiterVKTest, ReturnsSubmitError) {
