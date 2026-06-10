@@ -197,10 +197,14 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
         constraints.axisDirection,
         constraints.growthDirection,
       )) {
-        AxisDirection.down => copyNewClipWith(top: clipOrigin),
-        AxisDirection.up => copyNewClipWith(bottom: geometry!.paintExtent - clipOrigin),
-        AxisDirection.right => copyNewClipWith(left: clipOrigin),
-        AxisDirection.left => copyNewClipWith(right: geometry!.paintExtent - clipOrigin),
+        AxisDirection.down => copyNewClipWith(top: math.max(newClip.top, clipOrigin)),
+        AxisDirection.up => copyNewClipWith(
+          bottom: math.min(newClip.bottom, geometry!.paintExtent - clipOrigin),
+        ),
+        AxisDirection.right => copyNewClipWith(left: math.max(newClip.left, clipOrigin)),
+        AxisDirection.left => copyNewClipWith(
+          right: math.min(newClip.right, geometry!.paintExtent - clipOrigin),
+        ),
       };
     }
     return newClip;
@@ -492,10 +496,14 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
         constraints.axisDirection,
         constraints.growthDirection,
       )) {
-        AxisDirection.down => copyNewClipWith(top: clipOrigin),
-        AxisDirection.up => copyNewClipWith(bottom: geometry!.paintExtent - clipOrigin),
-        AxisDirection.right => copyNewClipWith(left: clipOrigin),
-        AxisDirection.left => copyNewClipWith(right: geometry!.paintExtent - clipOrigin),
+        AxisDirection.down => copyNewClipWith(top: math.max(newClip.top, clipOrigin)),
+        AxisDirection.up => copyNewClipWith(
+          bottom: math.min(newClip.bottom, geometry!.paintExtent - clipOrigin),
+        ),
+        AxisDirection.right => copyNewClipWith(left: math.max(newClip.left, clipOrigin)),
+        AxisDirection.left => copyNewClipWith(
+          right: math.min(newClip.right, geometry!.paintExtent - clipOrigin),
+        ),
       };
     }
 
@@ -591,7 +599,7 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
       return;
     }
     _clipBehavior = value;
-    markNeedsPaint();
+    _markNeedsClip();
   }
 
   /// Whether to clip starting from the overlap area.
@@ -602,7 +610,7 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
       return;
     }
     _clipOverlap = value;
-    markNeedsPaint();
+    _markNeedsClip();
   }
 
   T? _clip;
