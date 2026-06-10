@@ -274,6 +274,9 @@ class FlutterPlugin : Plugin<Project> {
     }
 
     private fun addTaskForLockfileGeneration(rootProject: Project) {
+        if (rootProject.tasks.findByName("generateLockfiles") != null) {
+            return
+        }
         rootProject.tasks.register("generateLockfiles") {
             doLast {
                 rootProject.subprojects.forEach { subproject ->
