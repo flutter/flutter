@@ -18,7 +18,6 @@ import 'vector_drawings_canvas.dart';
 
 /// The global key identifying the target [RepaintBoundary] for golden screenshot capturing.
 final GlobalKey targetKey = GlobalKey();
-final Completer<void> platformViewCreatedCompleter = Completer<void>();
 
 void main() async {
   runApp(const MyApp());
@@ -65,6 +64,7 @@ class _MyState extends State<MyWidget> {
   String _message = 'Waiting for message...';
   late Future<String?> _goldenVariantFuture;
   ui.Image? _loadedImage;
+  Completer<void>? _platformViewCreatedCompleter;
 
   Future<ui.Image> _loadImage() async {
     return widget.imageLoader();
@@ -125,6 +125,12 @@ class _MyState extends State<MyWidget> {
 
     final completer = Completer<Map<String, Object?>>();
 
+    if (testName == 'platformViewTest') {
+      _platformViewCreatedCompleter = Completer<void>();
+    } else {
+      _platformViewCreatedCompleter = null;
+    }
+
     setState(() {
       _message = testName ?? 'Empty message';
     });
@@ -137,6 +143,7 @@ class _MyState extends State<MyWidget> {
           performAppSideGoldenCompare,
           targetKey,
           _goldenVariantFuture,
+          settleFuture: _platformViewCreatedCompleter?.future,
         );
       } else {
         completer.complete(<String, Object?>{'message': 'Rendered $testName', 'imageBytes': null});
@@ -169,8 +176,8 @@ class _MyState extends State<MyWidget> {
     } else if (_message == 'platformViewTest') {
       testContent = AndroidPlatformView(
         onCreated: () {
-          if (!platformViewCreatedCompleter.isCompleted) {
-            platformViewCreatedCompleter.complete();
+          if (_platformViewCreatedCompleter?.isCompleted == false) {
+            _platformViewCreatedCompleter?.complete();
           }
         },
       );

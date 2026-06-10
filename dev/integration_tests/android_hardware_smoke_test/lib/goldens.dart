@@ -14,17 +14,22 @@ import 'package:flutter/widgets.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-import 'main.dart' show platformViewCreatedCompleter;
 import 'pixel_exact_local_file_comparator.dart';
 
 /// Captures the image bytes of the widget associated with [targetKey] and either compares it to a golden file or returns the bytes to the test driver for host-side comparison, depending on the value of [performAppSideGoldenCompare].
+///
+/// The optional [settleFuture] parameter allows injecting an asynchronous
+/// initialization or layout completion signal (such as a platform view creation
+/// event). If provided, execution will await [settleFuture] before capturing
+/// physical screen coordinates.
 Future<void> handleGoldenRequest(
   String testName,
   Completer<Map<String, Object?>> completer,
   bool performAppSideGoldenCompare,
   GlobalKey targetKey,
-  Future<String?> goldenVariant,
-) async {
+  Future<String?> goldenVariant, {
+  Future<void>? settleFuture,
+}) async {
   try {
     final String? goldenVariantValue = await goldenVariant;
 
@@ -32,7 +37,9 @@ Future<void> handleGoldenRequest(
       // Platform views cannot be captured using RepaintBoundary.toImage() since they reside in separate
       // native surface layers. Instead, we wait for layout to settle, calculate the widget's physical
       // coordinates on screen, and return them so the runner can perform a compositor-level capture.
-      await platformViewCreatedCompleter.future;
+      if (settleFuture != null) {
+        await settleFuture;
+      }
       await WidgetsBinding.instance.endOfFrame;
       await WidgetsBinding.instance.endOfFrame;
       await WidgetsBinding.instance.endOfFrame;
