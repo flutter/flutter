@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 
 import 'backdrop_filter_blur.dart';
 import 'goldens.dart';
+import 'text_drawing_canvas.dart';
 import 'vector_drawings_canvas.dart';
 
 /// The global key identifying the target [RepaintBoundary] for golden screenshot capturing.
@@ -159,6 +160,8 @@ class _MyState extends State<MyWidget> {
     final Widget testContent;
     if (_message == 'backdropFilterBlurTest') {
       testContent = const BackdropFilterBlur();
+    } else if (_message == 'textTest') {
+      testContent = const TextDrawingCanvas();
     } else {
       testContent = VectorDrawingsCanvas(message: _message, loadedImage: _loadedImage);
     }
