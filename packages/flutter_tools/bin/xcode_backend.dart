@@ -36,6 +36,15 @@ class Context {
       'Your Xcode project is incompatible with this version of Flutter. '
       'Run "rm -rf ios/Runner.xcodeproj" and "flutter create ." to regenerate.\n';
 
+
+  // "build-add-to-app" uses its own xcconfig
+  static const Set<String> _commandsRequiringGeneratedSettings = <String>{
+    'build',
+    'prepare',
+    'embed',
+    'embed_and_thin',
+  };
+
   void run() {
     if (arguments.isEmpty) {
       // Named entry points were introduced in Flutter v0.0.7.
@@ -46,14 +55,7 @@ class Context {
     final String subCommand = validateCommand(arguments[0]);
     final String? platformName = arguments.length < 2 ? null : arguments[1];
     final TargetPlatform platform = parsePlatform(platformName);
-    const commandsRequiringGeneratedSettings = <String>{
-      'build',
-      'prepare',
-      'embed',
-      'embed_and_thin',
-    };
-    // "build-add-to-app" uses its own xcconfig
-    if (commandsRequiringGeneratedSettings.contains(subCommand)) {
+    if (_commandsRequiringGeneratedSettings.contains(subCommand)) {
       validateGeneratedBuildSettings(platform);
     }
     switch (subCommand) {
