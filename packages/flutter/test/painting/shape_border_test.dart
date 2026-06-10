@@ -37,38 +37,28 @@ void main() {
   });
 
   test('ShapeBorder.lerp tries equivalent reverse interpolation', () {
-    final ShapeBorder reverseLerpToResult = ShapeBorder.lerp(
-      const _LerpShapeBorder(),
-      const _ReverseLerpToShapeBorder(),
-      0.25,
-    )!;
-    expect(reverseLerpToResult, const _LerpShapeBorder(0.75));
-
-    final ShapeBorder reverseLerpFromResult = ShapeBorder.lerp(
-      const _ReverseLerpFromShapeBorder(),
-      const _LerpShapeBorder(),
-      0.25,
-    )!;
-    expect(reverseLerpFromResult, const _LerpShapeBorder(0.75));
+    expect(
+      ShapeBorder.lerp(const _LerpBorder(), const _ReverseLerpToBorder(), 0.25),
+      const _LerpBorder(0.75),
+    );
+    expect(
+      ShapeBorder.lerp(const _ReverseLerpFromBorder(), const _LerpBorder(), 0.25),
+      const _LerpBorder(0.75),
+    );
   });
 
   test('OutlinedBorder.lerp tries equivalent reverse interpolation', () {
-    final OutlinedBorder reverseLerpToResult = OutlinedBorder.lerp(
-      const _LerpOutlinedBorder(),
-      const _ReverseLerpToOutlinedBorder(),
-      0.25,
-    )!;
-    expect(reverseLerpToResult, const _LerpOutlinedBorder(0.75));
-
-    final OutlinedBorder reverseLerpFromResult = OutlinedBorder.lerp(
-      const _ReverseLerpFromOutlinedBorder(),
-      const _LerpOutlinedBorder(),
-      0.25,
-    )!;
-    expect(reverseLerpFromResult, const _LerpOutlinedBorder(0.75));
+    expect(
+      OutlinedBorder.lerp(const _LerpBorder(), const _ReverseLerpToBorder(), 0.25),
+      const _LerpBorder(0.75),
+    );
+    expect(
+      OutlinedBorder.lerp(const _ReverseLerpFromBorder(), const _LerpBorder(), 0.25),
+      const _LerpBorder(0.75),
+    );
   });
 
-  test('Outlined shape borders interpolate symmetrically through ShapeBorder.lerp', () {
+  test('Outlined shape borders interpolate symmetrically', () {
     const borders = <OutlinedBorder>[
       RoundedRectangleBorder(),
       StadiumBorder(),
@@ -79,9 +69,16 @@ void main() {
 
     for (final a in borders) {
       for (final b in borders) {
-        final ShapeBorder forward = ShapeBorder.lerp(a, b, 0.25)!;
-        final ShapeBorder reverse = ShapeBorder.lerp(b, a, 0.75)!;
-        expect(forward.runtimeType, reverse.runtimeType, reason: 'ShapeBorder.lerp($a, $b, 0.25)');
+        expect(
+          ShapeBorder.lerp(a, b, 0.25).runtimeType,
+          ShapeBorder.lerp(b, a, 0.75).runtimeType,
+          reason: 'ShapeBorder.lerp($a, $b, 0.25)',
+        );
+        expect(
+          OutlinedBorder.lerp(a, b, 0.25).runtimeType,
+          OutlinedBorder.lerp(b, a, 0.75).runtimeType,
+          reason: 'OutlinedBorder.lerp($a, $b, 0.25)',
+        );
       }
     }
   });
@@ -223,13 +220,16 @@ void main() {
   });
 }
 
-class _LerpShapeBorder extends ShapeBorder {
-  const _LerpShapeBorder([this.t]);
+// A border that does not know how to interpolate with any other class, used
+// both as the lerp partner of the borders below and as their result, recording
+// through value equality the `t` value that the lerp method received.
+class _LerpBorder extends OutlinedBorder {
+  const _LerpBorder([this.t, BorderSide side = BorderSide.none]) : super(side: side);
 
   final double? t;
 
   @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+  _LerpBorder copyWith({BorderSide? side}) => _LerpBorder(t, side ?? this.side);
 
   @override
   Path getInnerPath(Rect rect, {TextDirection? textDirection}) => Path()..addRect(rect);
@@ -241,63 +241,11 @@ class _LerpShapeBorder extends ShapeBorder {
   void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
 
   @override
-  ShapeBorder scale(double t) => _LerpShapeBorder(t);
+  ShapeBorder scale(double t) => _LerpBorder(t, side.scale(t));
 
   @override
   bool operator ==(Object other) {
-    return other is _LerpShapeBorder && other.runtimeType == runtimeType && other.t == t;
-  }
-
-  @override
-  int get hashCode => Object.hash(runtimeType, t);
-
-  @override
-  String toString() => '_LerpShapeBorder(t: $t)';
-}
-
-class _ReverseLerpToShapeBorder extends _LerpShapeBorder {
-  const _ReverseLerpToShapeBorder();
-
-  @override
-  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    return b is _LerpShapeBorder ? _LerpShapeBorder(t) : super.lerpTo(b, t);
-  }
-}
-
-class _ReverseLerpFromShapeBorder extends _LerpShapeBorder {
-  const _ReverseLerpFromShapeBorder();
-
-  @override
-  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    return a is _LerpShapeBorder ? _LerpShapeBorder(t) : super.lerpFrom(a, t);
-  }
-}
-
-class _LerpOutlinedBorder extends OutlinedBorder {
-  const _LerpOutlinedBorder([this.t, BorderSide side = BorderSide.none]) : super(side: side);
-
-  final double? t;
-
-  @override
-  _LerpOutlinedBorder copyWith({BorderSide? side}) {
-    return _LerpOutlinedBorder(t, side ?? this.side);
-  }
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) => Path()..addRect(rect);
-
-  @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) => Path()..addRect(rect);
-
-  @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
-
-  @override
-  ShapeBorder scale(double t) => _LerpOutlinedBorder(t, side.scale(t));
-
-  @override
-  bool operator ==(Object other) {
-    return other is _LerpOutlinedBorder &&
+    return other is _LerpBorder &&
         other.runtimeType == runtimeType &&
         other.t == t &&
         other.side == side;
@@ -307,23 +255,28 @@ class _LerpOutlinedBorder extends OutlinedBorder {
   int get hashCode => Object.hash(runtimeType, t, side);
 
   @override
-  String toString() => '_LerpOutlinedBorder(t: $t, side: $side)';
+  String toString() => '_LerpBorder(t: $t)';
 }
 
-class _ReverseLerpToOutlinedBorder extends _LerpOutlinedBorder {
-  const _ReverseLerpToOutlinedBorder();
+// A border that can interpolate with [_LerpBorder] only through its own
+// [lerpTo], so that lerping it with a [_LerpBorder] succeeds only through the
+// reversed `b.lerpTo(a, 1.0 - t)` call.
+class _ReverseLerpToBorder extends _LerpBorder {
+  const _ReverseLerpToBorder();
 
   @override
   ShapeBorder? lerpTo(ShapeBorder? b, double t) {
-    return b is _LerpOutlinedBorder ? _LerpOutlinedBorder(t) : super.lerpTo(b, t);
+    return b is _LerpBorder ? _LerpBorder(t) : super.lerpTo(b, t);
   }
 }
 
-class _ReverseLerpFromOutlinedBorder extends _LerpOutlinedBorder {
-  const _ReverseLerpFromOutlinedBorder();
+// Same as [_ReverseLerpToBorder], but exercising the reversed
+// `a.lerpFrom(b, 1.0 - t)` call instead.
+class _ReverseLerpFromBorder extends _LerpBorder {
+  const _ReverseLerpFromBorder();
 
   @override
   ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
-    return a is _LerpOutlinedBorder ? _LerpOutlinedBorder(t) : super.lerpFrom(a, t);
+    return a is _LerpBorder ? _LerpBorder(t) : super.lerpFrom(a, t);
   }
 }
