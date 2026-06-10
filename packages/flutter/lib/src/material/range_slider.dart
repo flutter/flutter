@@ -879,9 +879,10 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     final Map<ShortcutActivator, Intent> shortcutMap = switch (MediaQuery.navigationModeOf(
       context,
     )) {
-      NavigationMode.directional => _isEditingInDirectionalMode
-          ? _directionalNavEditingShortcutMap
-          : _directionalNavShortcutMap,
+      NavigationMode.directional =>
+        _isEditingInDirectionalMode
+            ? _directionalNavEditingShortcutMap
+            : _directionalNavShortcutMap,
       NavigationMode.traditional => _traditionalNavShortcutMap,
     };
 
