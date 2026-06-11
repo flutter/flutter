@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <mutex>
+#include <vector>
 
 #include "flutter/generated_plugin_registrant.h"
 
@@ -9,8 +10,8 @@ class MyTexture {
  public:
   MyTexture(size_t width, size_t height, uint8_t r, uint8_t g, uint8_t b)
       : width_(width), height_(height) {
-    buffer_ = static_cast<uint8_t*>(malloc(width * height * 4));
-    pixel_buffer_.buffer = buffer_;
+    buffer_.resize(width * height * 4);
+    pixel_buffer_.buffer = buffer_.data();
     pixel_buffer_.width = width;
     pixel_buffer_.height = height;
     pixel_buffer_.release_callback = nullptr;
@@ -18,9 +19,7 @@ class MyTexture {
     SetColor(r, g, b);
   }
 
-  ~MyTexture() {
-    free(buffer_);
-  }
+  ~MyTexture() = default;
 
   void SetColor(uint8_t r, uint8_t g, uint8_t b) {
     for (size_t y = 0; y < height_; ++y) {
@@ -41,7 +40,7 @@ class MyTexture {
  private:
   size_t width_;
   size_t height_;
-  uint8_t* buffer_;
+  std::vector<uint8_t> buffer_;
   FlutterDesktopPixelBuffer pixel_buffer_;
 };
 
