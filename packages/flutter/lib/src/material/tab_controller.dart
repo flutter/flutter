@@ -117,6 +117,7 @@ class TabController extends ChangeNotifier {
        _index = initialIndex,
        _previousIndex = initialIndex,
        _animationDuration = animationDuration ?? kTabScrollDuration,
+       _currentAnimationDuration = animationDuration ?? kTabScrollDuration,
        _animationController = AnimationController.unbounded(
          value: initialIndex.toDouble(),
          vsync: vsync,
@@ -137,7 +138,8 @@ class TabController extends ChangeNotifier {
   }) : _index = index,
        _previousIndex = previousIndex,
        _animationController = animationController,
-       _animationDuration = animationDuration {
+       _animationDuration = animationDuration,
+       _currentAnimationDuration = animationDuration {
     if (kFlutterMemoryAllocationsEnabled) {
       ChangeNotifier.maybeDispatchObjectCreation(this);
     }
@@ -191,6 +193,13 @@ class TabController extends ChangeNotifier {
   /// Defaults to kTabScrollDuration.
   Duration get animationDuration => _animationDuration;
   final Duration _animationDuration;
+
+  /// The effective animation duration of the most recently initiated animation.
+  ///
+  /// Reflects the [duration] argument passed to [animateTo], if provided.
+  /// Falls back to [animationDuration] when no explicit duration was given.
+  Duration get currentAnimationDuration => _currentAnimationDuration;
+  Duration _currentAnimationDuration;
 
   /// The total number of tabs.
   ///
@@ -263,7 +272,8 @@ class TabController extends ChangeNotifier {
   /// While the animation is running [indexIsChanging] is true. When the
   /// animation completes [offset] will be 0.0.
   void animateTo(int value, {Duration? duration, Curve curve = Curves.ease}) {
-    _changeIndex(value, duration: duration ?? _animationDuration, curve: curve);
+    _currentAnimationDuration = duration ?? _animationDuration;
+    _changeIndex(value, duration: _currentAnimationDuration, curve: curve);
   }
 
   /// The difference between the [animation]'s value and [index].

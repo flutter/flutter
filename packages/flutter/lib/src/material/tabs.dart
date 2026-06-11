@@ -2396,9 +2396,9 @@ class _TabBarViewState extends State<TabBarView> {
 
     final adjacentDestination = (_currentIndex! - _controller!.previousIndex).abs() == 1;
     if (adjacentDestination) {
-      _warpToAdjacentTab(_controller!.animationDuration);
+      _warpToAdjacentTab(_controller!.currentAnimationDuration);
     } else {
-      _warpToNonAdjacentTab(_controller!.animationDuration);
+      _warpToNonAdjacentTab(_controller!.currentAnimationDuration);
     }
   }
 

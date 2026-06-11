@@ -1733,6 +1733,65 @@ void main() {
     expect(position.pixels, 800);
   });
 
+  testWidgets('TabBarView uses explicit duration passed to animateTo', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/187373.
+    // TabBarView must use the duration from animateTo(), not the controller's
+    // default animationDuration, when the two differ.
+    const Duration defaultDuration = Duration(milliseconds: 100);
+    const Duration customDuration = Duration(milliseconds: 500);
+    final List<String> tabs = <String>['A', 'B', 'C'];
+
+    final TabController tabController = createTabController(
+      vsync: const TestVSync(),
+      initialIndex: 0,
+      length: tabs.length,
+      animationDuration: defaultDuration,
+    );
+    await tester.pumpWidget(
+      boilerplate(
+        child: Column(
+          children: <Widget>[
+            TabBar(
+              tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+              controller: tabController,
+            ),
+            SizedBox.square(
+              dimension: 400.0,
+              child: TabBarView(
+                controller: tabController,
+                children: const <Widget>[
+                  Center(child: Text('0')),
+                  Center(child: Text('1')),
+                  Center(child: Text('2')),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller!;
+    final ScrollPosition position = pageController.position;
+
+    // Page 0 is at offset 0.0, page 1 at 400.0, page 2 at 800.0.
+    expect(position.pixels, 0.0);
+
+    tabController.animateTo(1, duration: customDuration);
+    await tester.pump();
+
+    // After the default duration the scroll must NOT be complete — it should
+    // still be mid-animation because the custom duration is 5× longer.
+    await tester.pump(defaultDuration);
+    expect(position.pixels, greaterThan(0.0));
+    expect(position.pixels, lessThan(400.0));
+
+    // After the full custom duration the animation is complete.
+    await tester.pump(customDuration);
+    expect(position.pixels, 400.0);
+  });
+
   testWidgets('TabBarView animation can be interrupted', (WidgetTester tester) async {
     const animationDuration = Duration(seconds: 2);
     final tabs = <String>['A', 'B', 'C'];
