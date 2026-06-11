@@ -432,8 +432,9 @@ TEST_F(FlutterWindowsEngineTest, RunWithImpellerEnablesSDFs) {
       UpdateLocales, ([](auto engine, const FlutterLocale** locales,
                          size_t locales_count) { return kSuccess; }));
 
-  modifier.embedder_api().SendPlatformMessage = MOCK_ENGINE_PROC(
-      SendPlatformMessage, ([](auto engine, auto message) { return kSuccess; }));
+  modifier.embedder_api().SendPlatformMessage =
+      MOCK_ENGINE_PROC(SendPlatformMessage,
+                       ([](auto engine, auto message) { return kSuccess; }));
 
   bool run_called = false;
   modifier.embedder_api().Run = MOCK_ENGINE_PROC(
@@ -446,7 +447,8 @@ TEST_F(FlutterWindowsEngineTest, RunWithImpellerEnablesSDFs) {
 
         bool has_sdf_switch = false;
         for (int i = 0; i < args->command_line_argc; ++i) {
-          if (strcmp(args->command_line_argv[i], "--impeller-use-sdfs=true") == 0) {
+          if (strcmp(args->command_line_argv[i], "--impeller-use-sdfs=true") ==
+              0) {
             has_sdf_switch = true;
             break;
           }
