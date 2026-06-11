@@ -492,7 +492,10 @@ def run_cc_tests(
         # The accessibility library only supports Mac and Windows.
         make_test('accessibility_unittests'),
         make_test('client_wrapper_windows_unittests'),
-        make_test('flutter_windows_unittests'),
+        # The windows unittests are run serially because they create a bunch of desktop
+        # objects, which may exhaust the desktop heap in certain scenarios (e.g. on machines
+        # with a small heap and many desktop resources being allocated simultaneously).
+        make_test('flutter_windows_unittests', flags=repeat_flags + ['--workers=1']),
     ]
 
   # These unit-tests are Objective-C and can only run on Darwin.
