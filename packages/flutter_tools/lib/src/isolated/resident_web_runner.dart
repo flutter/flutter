@@ -428,24 +428,20 @@ class ResidentWebRunner extends ResidentRunner {
   @visibleForTesting
   List<WebCompilerConfig> get debugCompilerConfigs => _compilerConfigs;
 
-  List<WebCompilerConfig> get _compilerConfigs {
-    final jsConfig = JsCompilerConfig.run(
+  List<WebCompilerConfig> get _compilerConfigs => <WebCompilerConfig>[
+    // When --wasm is set, emit a Wasm config plus the JS fallback below so the
+    // loader can fall back to JS on browsers without WasmGC support.
+    if (debuggingOptions.webUseWasm)
+      WasmCompilerConfig(
+        optimizationLevel: 0,
+        stripWasm: false,
+        renderer: debuggingOptions.webRenderer,
+      ),
+    JsCompilerConfig.run(
       nativeNullAssertions: debuggingOptions.nativeNullAssertions,
       renderer: debuggingOptions.webRenderer,
-    );
-    if (debuggingOptions.webUseWasm) {
-      return <WebCompilerConfig>[
-        WasmCompilerConfig(
-          optimizationLevel: 0,
-          stripWasm: false,
-          renderer: debuggingOptions.webRenderer,
-        ),
-        // JS fallback for browsers that don't support WasmGC.
-        jsConfig,
-      ];
-    }
-    return <WebCompilerConfig>[jsConfig];
-  }
+    ),
+  ];
 
   /// Handles the no clients available scenario gracefully.
   OperationResult _handleNoClientsAvailable(Status status) {
