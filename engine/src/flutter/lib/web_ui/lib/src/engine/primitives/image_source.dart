@@ -50,6 +50,9 @@ sealed class ImageSource {
   /// closed and freed.
   void release() {
     assert(_refCount > 0, 'Cannot release an image source that has not been retained.');
+    if (_refCount <= 0) {
+      return;
+    }
     _refCount--;
     if (_refCount == 0) {
       _doClose();
