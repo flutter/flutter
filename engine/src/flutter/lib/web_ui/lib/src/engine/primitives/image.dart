@@ -89,7 +89,6 @@ class EngineImage implements ui.Image, StackTraceDebugger {
 
   @override
   void dispose() {
-    // Assert in debug mode to notify the developer about improper lifecycle management.
     assert(!_disposed, 'Cannot dispose an image that has already been disposed.');
 
     // Protect against double disposal in release mode by returning early.
@@ -97,11 +96,7 @@ class EngineImage implements ui.Image, StackTraceDebugger {
       return;
     }
     _disposed = true;
-
-    // Decrement reference count on the shared C++ backend image container.
     box.unref(this);
-
-    // Release the retained reference on the image source.
     imageSource?.release();
   }
 
@@ -112,7 +107,6 @@ class EngineImage implements ui.Image, StackTraceDebugger {
       result = _disposed;
       return true;
     }());
-    // Return the result directly when promoted by compiler/analyzer.
     if (result != null) {
       return result!;
     }
@@ -121,14 +115,12 @@ class EngineImage implements ui.Image, StackTraceDebugger {
 
   @override
   EngineImage clone() {
-    // Ensure that clone is not called on an already disposed image.
     assert(_debugCheckIsNotDisposed());
     return EngineImage.cloneOf(box, width, height, imageSource: imageSource);
   }
 
   @override
   bool isCloneOf(ui.Image other) {
-    // Ensure that isCloneOf is not called on an already disposed image.
     assert(_debugCheckIsNotDisposed());
     return other is EngineImage && other.backendImage.isCloneOf(backendImage);
   }
@@ -141,12 +133,11 @@ class EngineImage implements ui.Image, StackTraceDebugger {
 
   @override
   Future<ByteData?> toByteData({ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba}) async {
-    // Loudly assert that the image has not been disposed to catch bugs early in development.
     assert(!_disposed, 'Cannot call toByteData on a disposed image.');
 
     // Clone the image to prevent use-after-free vulnerabilities.
     // If the image is disposed by the user during asynchronous bounds of this method,
-    // cloneImage holds a separate reference on the underling box, keeping the backend
+    // cloneImage holds a separate reference on the underlying box, keeping the backend
     // pointers fully alive and valid until this method completes.
     final EngineImage cloneImage = clone();
     try {
@@ -186,17 +177,12 @@ class EngineImage implements ui.Image, StackTraceDebugger {
               videoFrame.format != 'I444') {
             return await readPixelsFromVideoFrame(videoFrame, format);
           }
-        // Explicit break with explanatory comment for planar YUV video frames.
-        // Planar video frames are handled by standard surface rasterization fallback.
         case null:
           break;
       }
 
       // Asynchronous, non-blocking PNG encoding fallback using OffscreenCanvas.
-      // This retrieves the raw pixels from the image and performs encoding using
-      // browser background APIs to maintain a smooth 60fps frame rate.
       if (format == ui.ImageByteFormat.png) {
-        // Request the raw RGBA pixel data asynchronously.
         final ByteData? rawData = await renderer.pictureToImageSurface.rasterizeImage(
           cloneImage,
           ui.ImageByteFormat.rawStraightRgba,
@@ -205,14 +191,12 @@ class EngineImage implements ui.Image, StackTraceDebugger {
           return null;
         }
 
-        // Create an offscreen canvas with the correct image dimensions.
         final DomOffscreenCanvas offscreenCanvas = createDomOffscreenCanvas(
           cloneImage.width,
           cloneImage.height,
         );
         final context = offscreenCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
 
-        // Populate a DomImageData object using a view of the raw bytes.
         final clampedBytes = Uint8ClampedList.view(
           rawData.buffer,
           rawData.offsetInBytes,
@@ -238,8 +222,6 @@ class EngineImage implements ui.Image, StackTraceDebugger {
       // Fall back to standard backend-specific surface rasterization.
       return await renderer.pictureToImageSurface.rasterizeImage(cloneImage, format);
     } finally {
-      // Safely release the cloned image reference, allowing resources to be cleaned up
-      // if the original image has already been disposed.
       cloneImage.dispose();
     }
   }
