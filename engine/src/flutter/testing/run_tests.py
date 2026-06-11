@@ -446,13 +446,14 @@ def run_cc_tests(
   def make_test(
       name: str,
       flags: typing.Optional[typing.List[str]] = None,
-      extra_env: typing.Optional[typing.Dict[str, str]] = None
-  ) -> typing.Tuple[str, typing.List[str], typing.Dict[str, str]]:
+      extra_env: typing.Optional[typing.Dict[str, str]] = None,
+      gtest: bool = True
+  ) -> typing.Tuple[str, typing.List[str], typing.Dict[str, str], bool]:
     if flags is None:
       flags = repeat_flags
     if extra_env is None:
       extra_env = {}
-    return (name, flags, extra_env)
+    return (name, flags, extra_env, gtest)
 
   unittests = [
       make_test('assets_unittests'),
@@ -492,10 +493,16 @@ def run_cc_tests(
         # The accessibility library only supports Mac and Windows.
         make_test('accessibility_unittests'),
         make_test('client_wrapper_windows_unittests'),
-        # The windows unittests are run serially because they create a bunch of desktop
-        # objects, which may exhaust the desktop heap in certain scenarios (e.g. on machines
-        # with a small heap and many desktop resources being allocated simultaneously).
-        make_test('flutter_windows_unittests', flags=repeat_flags + ['--workers=1']),
+        # The windows unittests are run without gtest-parallel because it
+        # launches a separate process per test case, which exhausts the Windows
+        # desktop heap and causes STATUS_DLL_INIT_FAILED (0xC0000142) crashes.
+        # Running the whole suite in a single process avoids those per-process
+        # startup failures.
+        make_test(
+            'flutter_windows_unittests',
+            flags=['--gtest_repeat=2'],
+            gtest=False,
+        ),
     ]
 
   # These unit-tests are Objective-C and can only run on Darwin.
@@ -532,7 +539,7 @@ def run_cc_tests(
   try:
     if is_linux():
       xvfb.start_virtual_x(build_name, build_dir)
-    for test, flags, extra_env in unittests:
+    for test, flags, extra_env, gtest in unittests:
       run_engine_executable(
           build_dir,
           test,
@@ -540,7 +547,7 @@ def run_cc_tests(
           flags,
           coverage=coverage,
           extra_env=extra_env,
-          gtest=True
+          gtest=gtest
       )
   finally:
     if is_linux():
