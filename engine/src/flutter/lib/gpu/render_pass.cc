@@ -94,10 +94,12 @@ void RenderPass::ClearBindings() {
   vertex_texture_bindings.clear();
   fragment_uniform_bindings.clear();
   fragment_texture_bindings.clear();
-  vertex_buffer = {};
+  for (auto& buffer : vertex_buffers) {
+    buffer = {};
+  }
+  vertex_buffer_count = 0;
   index_buffer = {};
   index_buffer_type = impeller::IndexType::kNone;
-  element_count = 0;
 }
 
 std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
@@ -150,10 +152,11 @@ RenderPass::GetOrCreatePipeline() {
 
   if (context.GetBackendType() == impeller::Context::BackendType::kOpenGLES &&
       !context.GetPipelineLibrary()->HasPipeline(pipeline_desc)) {
-    // For GLES, new pipeline creation must be done on the reactor (raster)
-    // thread. We're about the draw, so we need to synchronize with a raster
-    // task in order to get the new pipeline. Depending on how busy the raster
-    // thread is, this could hang the UI thread long enough to miss a frame.
+    // New pipeline creation for this backend must be done on the reactor
+    // (raster) thread. We're about the draw, so we need to synchronize with a
+    // raster task in order to get the new pipeline. Depending on how busy the
+    // raster thread is, this could hang the UI thread long enough to miss a
+    // frame.
 
     // Note that this branch is only called if a new pipeline actually needs to
     // be built.
@@ -179,7 +182,18 @@ RenderPass::GetOrCreatePipeline() {
   return pipeline;
 }
 
-bool RenderPass::Draw() {
+bool RenderPass::Draw(size_t element_count,
+                      size_t instance_count,
+                      bool indexed) {
+  if (element_count == 0u || instance_count == 0u) {
+    return true;
+  }
+
+  if (indexed && index_buffer_type == impeller::IndexType::kNone) {
+    // drawIndexed was called without an index buffer bound.
+    return false;
+  }
+
   render_pass_->SetPipeline(impeller::PipelineRef(GetOrCreatePipeline()));
 
   for (const auto& [_, buffer] : vertex_uniform_bindings) {
@@ -213,9 +227,15 @@ bool RenderPass::Draw() {
         texture.texture.resource, texture.sampler);
   }
 
-  render_pass_->SetVertexBuffer(vertex_buffer);
-  render_pass_->SetIndexBuffer(index_buffer, index_buffer_type);
+  render_pass_->SetVertexBuffer(vertex_buffers.data(), vertex_buffer_count);
+  if (indexed) {
+    render_pass_->SetIndexBuffer(index_buffer, index_buffer_type);
+  } else {
+    render_pass_->SetIndexBuffer(impeller::BufferView{},
+                                 impeller::IndexType::kNone);
+  }
   render_pass_->SetElementCount(element_count);
+  render_pass_->SetInstanceCount(instance_count);
 
   render_pass_->SetStencilReference(stencil_reference);
 
@@ -255,13 +275,17 @@ Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
     float clear_color_b,
     float clear_color_a,
     flutter::gpu::Texture* texture,
-    Dart_Handle resolve_texture_wrapper) {
+    Dart_Handle resolve_texture_wrapper,
+    int mip_level,
+    int slice) {
   impeller::ColorAttachment desc;
   desc.load_action = flutter::gpu::ToImpellerLoadAction(load_action);
   desc.store_action = flutter::gpu::ToImpellerStoreAction(store_action);
   desc.clear_color = impeller::Color(clear_color_r, clear_color_g,
                                      clear_color_b, clear_color_a);
   desc.texture = texture->GetTexture();
+  desc.mip_level = mip_level;
+  desc.slice = slice;
   if (!Dart_IsNull(resolve_texture_wrapper)) {
     flutter::gpu::Texture* resolve_texture =
         tonic::DartConverter<flutter::gpu::Texture*>::FromDart(
@@ -288,13 +312,17 @@ Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
     int stencil_load_action,
     int stencil_store_action,
     int stencil_clear_value,
-    flutter::gpu::Texture* texture) {
+    flutter::gpu::Texture* texture,
+    int mip_level,
+    int slice) {
   {
     impeller::DepthAttachment desc;
     desc.load_action = flutter::gpu::ToImpellerLoadAction(depth_load_action);
     desc.store_action = flutter::gpu::ToImpellerStoreAction(depth_store_action);
     desc.clear_depth = depth_clear_value;
     desc.texture = texture->GetTexture();
+    desc.mip_level = mip_level;
+    desc.slice = slice;
     wrapper->GetRenderTarget().SetDepthAttachment(desc);
   }
   {
@@ -304,6 +332,8 @@ Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
         flutter::gpu::ToImpellerStoreAction(stencil_store_action);
     desc.clear_stencil = stencil_clear_value;
     desc.texture = texture->GetTexture();
+    desc.mip_level = mip_level;
+    desc.slice = slice;
     wrapper->GetRenderTarget().SetStencilAttachment(desc);
   }
 
@@ -331,20 +361,15 @@ static void BindVertexBuffer(
     const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
     int offset_in_bytes,
     int length_in_bytes,
-    int vertex_count) {
-  wrapper->vertex_buffer = impeller::BufferView(
+    int slot) {
+  if (slot < 0 || static_cast<size_t>(slot) >=
+                      flutter::gpu::RenderPass::kMaxVertexBufferSlots) {
+    return;
+  }
+  wrapper->vertex_buffers[slot] = impeller::BufferView(
       buffer, impeller::Range(offset_in_bytes, length_in_bytes));
-
-  // If the index type is set, then the `vertex_count` becomes the index
-  // count... So don't overwrite the count if it's already been set when binding
-  // the index buffer.
-  // TODO(bdero): Consider just doing a more traditional API with
-  //              draw(vertexCount) and drawIndexed(indexCount). This is fine,
-  //              but overall it would be a bit more explicit and we wouldn't
-  //              have to document this behavior where the presence of the index
-  //              buffer always takes precedent.
-  if (!wrapper->has_index_buffer) {
-    wrapper->element_count = vertex_count;
+  if (static_cast<size_t>(slot) >= wrapper->vertex_buffer_count) {
+    wrapper->vertex_buffer_count = static_cast<size_t>(slot) + 1;
   }
 }
 
@@ -353,9 +378,9 @@ void InternalFlutterGpu_RenderPass_BindVertexBufferDevice(
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes,
-    int vertex_count) {
+    int slot) {
   BindVertexBuffer(wrapper, device_buffer->GetBuffer(), offset_in_bytes,
-                   length_in_bytes, vertex_count);
+                   length_in_bytes, slot);
 }
 
 static void BindIndexBuffer(
@@ -363,18 +388,10 @@ static void BindIndexBuffer(
     const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
     int offset_in_bytes,
     int length_in_bytes,
-    int index_type,
-    int index_count) {
-  impeller::IndexType type = flutter::gpu::ToImpellerIndexType(index_type);
+    int index_type) {
   wrapper->index_buffer = impeller::BufferView(
       buffer, impeller::Range(offset_in_bytes, length_in_bytes));
-  wrapper->index_buffer_type = type;
-
-  bool setting_index_buffer = type != impeller::IndexType::kNone;
-  if (setting_index_buffer) {
-    wrapper->element_count = index_count;
-  }
-  wrapper->has_index_buffer = setting_index_buffer;
+  wrapper->index_buffer_type = flutter::gpu::ToImpellerIndexType(index_type);
 }
 
 void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
@@ -382,10 +399,9 @@ void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes,
-    int index_type,
-    int index_count) {
+    int index_type) {
   BindIndexBuffer(wrapper, device_buffer->GetBuffer(), offset_in_bytes,
-                  length_in_bytes, index_type, index_count);
+                  length_in_bytes, index_type);
 }
 
 static bool BindUniform(
@@ -650,6 +666,19 @@ void InternalFlutterGpu_RenderPass_SetPolygonMode(
       flutter::gpu::ToImpellerPolygonMode(polygon_mode));
 }
 
-bool InternalFlutterGpu_RenderPass_Draw(flutter::gpu::RenderPass* wrapper) {
-  return wrapper->Draw();
+bool InternalFlutterGpu_RenderPass_Draw(flutter::gpu::RenderPass* wrapper,
+                                        int vertex_count,
+                                        int instance_count) {
+  // Guard the casts to size_t; a negative value would wrap.
+  return vertex_count >= 0 && instance_count >= 0 &&
+         wrapper->Draw(vertex_count, instance_count, /*indexed=*/false);
+}
+
+bool InternalFlutterGpu_RenderPass_DrawIndexed(
+    flutter::gpu::RenderPass* wrapper,
+    int index_count,
+    int instance_count) {
+  // Guard the casts to size_t; a negative value would wrap.
+  return index_count >= 0 && instance_count >= 0 &&
+         wrapper->Draw(index_count, instance_count, /*indexed=*/true);
 }

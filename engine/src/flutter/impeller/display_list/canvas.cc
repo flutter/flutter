@@ -18,6 +18,7 @@
 #include "display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/color_filter.h"
@@ -29,6 +30,7 @@
 #include "impeller/entity/contents/circle_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
 #include "impeller/entity/contents/color_source_contents.h"
+#include "impeller/entity/contents/complex_rse_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
@@ -189,13 +191,6 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
       renderer.GetDeviceCapabilities().SupportsReadFromResolve(),       //
       renderer.GetDeviceCapabilities().SupportsImplicitResolvingMSAA()  //
   );
-}
-
-bool AreCornersCircular(const RoundingRadii& radii) {
-  return ScalarNearlyEqual(radii.top_left.width, radii.top_left.height) &&
-         ScalarNearlyEqual(radii.top_right.width, radii.top_right.height) &&
-         ScalarNearlyEqual(radii.bottom_left.width, radii.bottom_left.height) &&
-         ScalarNearlyEqual(radii.bottom_right.width, radii.bottom_right.height);
 }
 
 }  // namespace
@@ -976,7 +971,7 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
   const RoundingRadii& radii = round_rect.GetRadii();
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      IsCompatibleWithSDFRendering(paint) && AreCornersCircular(radii)) {
+      IsCompatibleWithSDFRendering(paint) && radii.AreAllCornersCircular()) {
     auto params = UberSDFParameters::MakeRoundedRect(
         /*color=*/paint.color,
         /*rect=*/round_rect.GetBounds(),
@@ -1042,31 +1037,52 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& round_superellipse,
   entity.SetBlendMode(paint.blend_mode);
 
   if (renderer_.GetContext()->GetFlags().use_sdfs &&
-      !paint.mask_blur_descriptor.has_value() &&
-      // TODO(https://github.com/flutter/flutter/issues/185421): SDF
-      // RoundSuperellipse (RSE) only works for square-like RSEs with circular
-      // corners.
-      round_superellipse.GetBounds().IsSquare() &&
-      round_superellipse.GetRadii().AreAllCornersSame() &&
-      AreCornersCircular(round_superellipse.GetRadii())) {
-    auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadius(
-        round_superellipse.GetBounds(),
-        round_superellipse.GetRadii().bottom_left.height);
+      IsCompatibleWithSDFRendering(paint)) {
+    auto round_superellipse_params = RoundSuperellipseParam::MakeBoundsRadii(
+        round_superellipse.GetBounds(), round_superellipse.GetRadii());
 
-    RoundSuperellipseParam::Octant octant =
-        round_superellipse_params.top_right.top;
+    if (round_superellipse_params.all_corners_same) {
+      auto params = UberSDFParameters::MakeRoundedSuperellipse(
+          /*color=*/paint.color,
+          /*bounds=*/round_superellipse.GetBounds(),
+          /*round_superellipse_params=*/round_superellipse_params,
+          /*stroke=*/paint.GetStroke());
 
-    auto adjusted_radii = RoundingRadii::MakeRadius(octant.circle_radius);
+      AddRenderSDFEntityToCurrentPass(paint, params);
+      return;
+    } else {
+      auto contents = ComplexRoundedSuperellipseContents::Make(
+          /*color=*/paint.color_source ? Color::White() : paint.color,
+          /*bounds=*/round_superellipse.GetBounds(),
+          /*round_superellipse_params=*/round_superellipse_params,
+          /*stroke=*/paint.GetStroke());
 
-    auto params = UberSDFParameters::MakeRoundedSuperellipse(
-        paint.color, round_superellipse.GetBounds(), octant.se_n,
-        adjusted_radii, octant.circle_max_angle.radians, octant.circle_center,
-        paint.GetStroke());
+      const Geometry* geom = contents->GetGeometry();
 
-    AddRenderSDFEntityToCurrentPass(paint, params);
+      if (paint.color_source) {
+        std::shared_ptr<Contents> color_source_contents =
+            paint.CreateContents(renderer_, geom);
+        std::shared_ptr<Contents> final_contents =
+            ColorFilterContents::MakeBlend(
+                BlendMode::kSrcIn, {FilterInput::Make(std::move(contents)),
+                                    FilterInput::Make(color_source_contents)});
 
-    return;
+        Paint new_paint = paint;
+        new_paint.color_source = nullptr;
+        AddRenderEntityWithFiltersToCurrentPass(entity, geom, new_paint,
+                                                /*reuse_depth=*/false,
+                                                /*override_contents=*/
+                                                std::move(final_contents));
+      } else {
+        AddRenderEntityWithFiltersToCurrentPass(entity, geom, paint,
+                                                /*reuse_depth=*/false,
+                                                /*override_contents=*/
+                                                std::move(contents));
+      }
+      return;
+    }
   }
+
   if (paint.style == Paint::Style::kFill) {
     RoundSuperellipseGeometry geom(round_superellipse.GetBounds(),
                                    round_superellipse.GetRadii());
@@ -1982,7 +1998,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   text_contents->SetColor(paint.color);
   text_contents->SetTextProperties(paint.color, paint.GetStroke());
 
-  entity.SetTransform(GetCurrentTransform());
+  entity.SetTransform(GetCurrentTransform().Translate(position));
 
   if (AttemptBlurredTextOptimization(text_frame, text_contents, entity,
                                      paint)) {
@@ -2451,6 +2467,9 @@ void Canvas::EndReplay() {
 }
 
 bool Canvas::IsCompatibleWithSDFRendering(const Paint& paint) {
+  if (!paint.anti_alias) {
+    return false;
+  }
   if (paint.mask_blur_descriptor.has_value()) {
     return false;
   }

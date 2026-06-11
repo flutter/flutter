@@ -87,8 +87,8 @@ source_set("flutter_linux_sources") {
              "fl_engine_private.h",
              "fl_key_channel_responder.h",
              "fl_key_embedder_responder.h",
-             "fl_key_embedder_responder_private.h",
              "fl_key_event.h",
+             "fl_key_mapping.h",
              "fl_keyboard_handler.h",
              "fl_keyboard_manager.h",
              "fl_method_call_private.h",
@@ -101,7 +101,6 @@ source_set("flutter_linux_sources") {
              "fl_view_private.h",
              "fl_window_monitor.h",
              "fl_window_state_monitor.h",
-             "key_mapping.h",
            ]
 
   configs += [ "//flutter/shell/platform/linux/config:gtk" ]
@@ -133,6 +132,7 @@ source_set("flutter_linux_sources") {
     "fl_key_embedder_responder.cc",
     "fl_key_event.cc",
     "fl_key_event_channel.cc",
+    "fl_key_mapping.g.cc",
     "fl_keyboard_channel.cc",
     "fl_keyboard_handler.cc",
     "fl_keyboard_layout.cc",
@@ -174,7 +174,6 @@ source_set("flutter_linux_sources") {
     "fl_view_monitor.cc",
     "fl_window_monitor.cc",
     "fl_window_state_monitor.cc",
-    "key_mapping.g.cc",
   ]
 
   # Set flag to stop headers being directly included (library users should not do this)
@@ -243,6 +242,7 @@ executable("flutter_linux_unittests") {
     "fl_json_method_codec_test.cc",
     "fl_key_channel_responder_test.cc",
     "fl_key_embedder_responder_test.cc",
+    "fl_key_mapping_test.cc",
     "fl_keyboard_handler_test.cc",
     "fl_keyboard_layout_test.cc",
     "fl_keyboard_manager_test.cc",
@@ -269,7 +269,6 @@ executable("flutter_linux_unittests") {
     "fl_view_accessible_test.cc",
     "fl_view_test.cc",
     "fl_window_state_monitor_test.cc",
-    "key_mapping_test.cc",
     "testing/fl_mock_binary_messenger.cc",
     "testing/fl_test.cc",
     "testing/fl_test_gtk_logs.cc",

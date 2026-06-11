@@ -146,12 +146,9 @@ template("flutter_snapshot") {
         isolate_snapshot_instructions,
       ]
       args += [
-        "--snapshot_kind=app-jit",
-        "--load_vm_snapshot_data=" + rebase_path(vm_snapshot_data),
-        "--load_isolate_snapshot_data=" + rebase_path(snapshot_data),
-        "--isolate_snapshot_data=" + rebase_path(isolate_snapshot_data),
-        "--isolate_snapshot_instructions=" +
-            rebase_path(isolate_snapshot_instructions),
+        "--snapshot_kind=app",
+        "--snapshot_data=" + rebase_path(isolate_snapshot_data),
+        "--snapshot_text=" + rebase_path(isolate_snapshot_instructions),
       ]
     }
 

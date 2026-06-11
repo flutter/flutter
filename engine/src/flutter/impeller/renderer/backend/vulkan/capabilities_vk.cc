@@ -225,6 +225,8 @@ static const char* GetExtensionName(OptionalDeviceExtensionVK ext) {
       return "VK_KHR_portability_subset";
     case OptionalDeviceExtensionVK::kEXTImageCompressionControl:
       return VK_EXT_IMAGE_COMPRESSION_CONTROL_EXTENSION_NAME;
+    case OptionalDeviceExtensionVK::kEXTTextureCompressionAstcHdr:
+      return VK_EXT_TEXTURE_COMPRESSION_ASTC_HDR_EXTENSION_NAME;
     case OptionalDeviceExtensionVK::kLast:
       return "Unknown";
   }
@@ -430,6 +432,12 @@ CapabilitiesVK::GetEnabledDeviceFeatures(
     supported_chain
         .unlink<vk::PhysicalDeviceImageCompressionControlFeaturesEXT>();
   }
+  if (!IsExtensionInList(
+          enabled_extensions.value(),
+          OptionalDeviceExtensionVK::kEXTTextureCompressionAstcHdr)) {
+    supported_chain
+        .unlink<vk::PhysicalDeviceTextureCompressionASTCHDRFeatures>();
+  }
 
   device.getFeatures2(&supported_chain.get());
 
@@ -473,6 +481,23 @@ CapabilitiesVK::GetEnabledDeviceFeatures(
   } else {
     required_chain
         .unlink<vk::PhysicalDeviceImageCompressionControlFeaturesEXT>();
+  }
+
+  // VK_EXT_texture_compression_astc_hdr
+  if (IsExtensionInList(
+          enabled_extensions.value(),
+          OptionalDeviceExtensionVK::kEXTTextureCompressionAstcHdr)) {
+    auto& required =
+        required_chain
+            .get<vk::PhysicalDeviceTextureCompressionASTCHDRFeatures>();
+    const auto& supported =
+        supported_chain
+            .get<vk::PhysicalDeviceTextureCompressionASTCHDRFeatures>();
+
+    required.textureCompressionASTC_HDR = supported.textureCompressionASTC_HDR;
+  } else {
+    required_chain
+        .unlink<vk::PhysicalDeviceTextureCompressionASTCHDRFeatures>();
   }
 
   // Vulkan 1.1
@@ -630,6 +655,20 @@ bool CapabilitiesVK::SetPhysicalDevice(
       enabled_features
           .get<vk::PhysicalDeviceImageCompressionControlFeaturesEXT>()
           .imageCompressionControl;
+
+  {
+    const auto& features = enabled_features.get().features;
+    supports_texture_compression_bc_ = features.textureCompressionBC;
+    supports_texture_compression_etc2_ = features.textureCompressionETC2;
+    supports_texture_compression_astc_ = features.textureCompressionASTC_LDR;
+  }
+
+  supports_texture_compression_astc_hdr_ =
+      enabled_features
+          .isLinked<vk::PhysicalDeviceTextureCompressionASTCHDRFeatures>() &&
+      enabled_features
+          .get<vk::PhysicalDeviceTextureCompressionASTCHDRFeatures>()
+          .textureCompressionASTC_HDR;
 
   max_render_pass_attachment_size_ =
       ISize{device_properties_.limits.maxFramebufferWidth,
@@ -839,6 +878,25 @@ bool CapabilitiesVK::SupportsExternalSemaphoreExtensions() const {
 }
 
 bool CapabilitiesVK::SupportsExtendedRangeFormats() const {
+  return false;
+}
+
+bool CapabilitiesVK::SupportsFramebufferRenderMipmap() const {
+  return true;
+}
+
+bool CapabilitiesVK::SupportsTextureCompression(
+    CompressedTextureFamily family) const {
+  switch (family) {
+    case CompressedTextureFamily::kBC:
+      return supports_texture_compression_bc_;
+    case CompressedTextureFamily::kETC2:
+      return supports_texture_compression_etc2_;
+    case CompressedTextureFamily::kASTC:
+      return supports_texture_compression_astc_;
+    case CompressedTextureFamily::kASTCHDR:
+      return supports_texture_compression_astc_hdr_;
+  }
   return false;
 }
 

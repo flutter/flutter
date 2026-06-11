@@ -72,6 +72,12 @@
     - any-glob-to-any-file:
       - engine/src/flutter/impeller/**/*
 
+flutter-gpu:
+  - changed-files:
+    - any-glob-to-any-file:
+      - engine/src/flutter/lib/gpu/**/*
+      - engine/src/flutter/testing/dart/gpu_test*
+
 engine:
   - changed-files:
     - any-glob-to-any-file:
@@ -228,6 +234,13 @@ team-engine:
     - any-glob-to-any-file:
       - docs/engine/**/*
 
+team-fluttergpu:
+  - changed-files:
+    - any-glob-to-any-file:
+      - engine/src/flutter/lib/gpu/**/*
+      - engine/src/flutter/testing/dart/gpu_test*
+      - docs/fluttergpu/**/*
+
 team-infra:
   - changed-files:
     - any-glob-to-any-file:
@@ -291,7 +304,11 @@ team-tool:
 team-web:
   - changed-files:
     - any-glob-to-any-file:
+      - dev/**/*web*
+      - dev/**/*web*/**/*
       - docs/platforms/web/**/*
+      - engine/src/flutter/lib/web_ui/**/*
+      - engine/src/flutter/web_sdk/**/*
 
 tool:
   - changed-files:

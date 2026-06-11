@@ -386,11 +386,10 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    final String linuxArch = cache.getHostPlatformArchName();
     return <List<String>>[
       if (cache.includeAllPlatforms) ...<List<String>>[
         ..._osxBinaryDirs,
-        ..._linuxBinaryDirs(linuxArch),
+        ..._linuxBinaryDirs,
         ..._windowsBinaryDirs,
         ..._dartSdks,
       ] else if (_platform.isWindows)
@@ -398,7 +397,7 @@ class AndroidGenSnapshotArtifacts extends EngineCachedArtifact {
       else if (_platform.isMacOS)
         ..._osxBinaryDirs
       else if (_platform.isLinux)
-        ..._linuxBinaryDirs(linuxArch),
+        ..._linuxBinaryDirs,
     ];
   }
 
@@ -865,7 +864,7 @@ class IosUsbArtifacts extends CachedArtifact {
   @visibleForTesting
   Uri get archiveUri => Uri.parse(
     '${cache.realmlessStorageBaseUrl}/flutter_infra_release/'
-    'ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}'
+    'ios-usb-dependencies/arm64_x86_64${cache.useUnsignedMacBinaries ? '/unsigned' : ''}'
     '/$name/$version/$name.zip',
   );
 }
@@ -903,13 +902,13 @@ const _osxBinaryDirs = <List<String>>[
   <String>['android-x64-release/darwin-x64', 'android-x64-release/darwin-x64.zip'],
 ];
 
-List<List<String>> _linuxBinaryDirs(String arch) => <List<String>>[
-  <String>['android-arm-profile/linux-$arch', 'android-arm-profile/linux-$arch.zip'],
-  <String>['android-arm-release/linux-$arch', 'android-arm-release/linux-$arch.zip'],
-  <String>['android-arm64-profile/linux-$arch', 'android-arm64-profile/linux-$arch.zip'],
-  <String>['android-arm64-release/linux-$arch', 'android-arm64-release/linux-$arch.zip'],
-  <String>['android-x64-profile/linux-$arch', 'android-x64-profile/linux-$arch.zip'],
-  <String>['android-x64-release/linux-$arch', 'android-x64-release/linux-$arch.zip'],
+const _linuxBinaryDirs = <List<String>>[
+  <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
+  <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
+  <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
+  <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
+  <String>['android-x64-profile/linux-x64', 'android-x64-profile/linux-x64.zip'],
+  <String>['android-x64-release/linux-x64', 'android-x64-release/linux-x64.zip'],
 ];
 
 const _windowsBinaryDirs = <List<String>>[

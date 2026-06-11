@@ -30,11 +30,6 @@
 
 FLUTTER_ASSERT_ARC
 
-@interface VSyncClient (Testing)
-- (CADisplayLink*)getDisplayLink;
-- (void)onDisplayLink:(CADisplayLink*)link;
-@end
-
 using namespace flutter::testing;
 
 @interface FlutterKeyboardInsetManager (Test)
@@ -43,7 +38,7 @@ using namespace flutter::testing;
 @property(nonatomic, assign, readwrite) CGFloat targetViewInsetBottom;
 @property(nonatomic, assign) BOOL keyboardAnimationIsShowing;
 @property(nonatomic, weak) id<FlutterKeyboardInsetManagerDelegate> delegate;
-@property(nonatomic, strong) VSyncClient* keyboardAnimationVSyncClient;
+@property(nonatomic, strong) FlutterVSyncClient* keyboardAnimationVSyncClient;
 @property(nonatomic, assign) BOOL isKeyboardInOrTransitioningFromBackground;
 - (void)handleKeyboardNotification:(NSNotification*)notification;
 - (BOOL)isKeyboardNotificationForDifferentView:(NSNotification*)notification;
@@ -118,6 +113,7 @@ using namespace flutter::testing;
 @property(nonatomic, weak) FlutterViewController* viewController;
 @property(nonatomic, strong) FlutterTextInputPlugin* textInputPlugin;
 @property(nonatomic, assign) BOOL didCallNotifyLowMemory;
+@property(nonatomic, strong) FlutterFMLTaskRunner* uiTaskRunner;
 
 - (FlutterTextInputPlugin*)textInputPlugin;
 
@@ -125,7 +121,7 @@ using namespace flutter::testing;
             callback:(nullable FlutterKeyEventCallback)callback
             userData:(nullable void*)userData;
 
-- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner;
+- (nullable FlutterFMLTaskRunner*)uiTaskRunner;
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint;
 - (void)attachView;
 @end
@@ -142,9 +138,17 @@ using namespace flutter::testing;
   _didCallNotifyLowMemory = YES;
 }
 
-- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner {
-  fml::MessageLoop::EnsureInitializedForCurrentThread();
-  return fml::MessageLoop::GetCurrent().GetTaskRunner();
+- (instancetype)init {
+  if (self = [super init]) {
+    fml::MessageLoop::EnsureInitializedForCurrentThread();
+    _uiTaskRunner = [[FlutterFMLTaskRunner alloc]
+        initWithTaskRunner:fml::MessageLoop::GetCurrent().GetTaskRunner()];
+  }
+  return self;
+}
+
+- (nullable FlutterFMLTaskRunner*)uiTaskRunner {
+  return _uiTaskRunner;
 }
 
 - (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint {
@@ -224,8 +228,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 @property(nonatomic, assign) double targetViewInsetBottom;
 @property(nonatomic, assign) BOOL keyboardAnimationIsShowing;
-@property(nonatomic, strong) VSyncClient* keyboardAnimationVSyncClient;
-@property(nonatomic, strong) VSyncClient* touchRateCorrectionVSyncClient;
+@property(nonatomic, strong) FlutterVSyncClient* keyboardAnimationVSyncClient;
+@property(nonatomic, strong) FlutterVSyncClient* touchRateCorrectionVSyncClient;
 @property(nonatomic, assign) BOOL awokenFromNib;
 
 - (void)createTouchRateCorrectionVSyncClientIfNeeded;
@@ -616,11 +620,69 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [engine destroyContext];
 }
 
+- (void)testKeyboardAnimationFirstVsyncCallbackCalculatesSafeInset {
+  FlutterEnginePartialMock* engine = [[FlutterEnginePartialMock alloc] init];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
+                                                                                nibName:nil
+                                                                                 bundle:nil];
+  FlutterViewController* viewControllerMock = OCMPartialMock(viewController);
+  OCMStub([viewControllerMock isViewLoaded]).andReturn(YES);
+  [viewControllerMock view];
+  viewController.keyboardInsetManager.delegate =
+      (id<FlutterKeyboardInsetManagerDelegate>)viewControllerMock;
+
+  engine.viewController = viewControllerMock;
+
+  XCTestExpectation* expectation = [self expectationWithDescription:@"metrics updated"];
+  // Stub updateViewportMetricsWithInset: to capture the inset value passed.
+  __block CGFloat capturedInset = -1.0;
+  __block BOOL fulfilled = NO;
+  OCMStub([viewControllerMock updateViewportMetricsWithInset:0])
+      .ignoringNonObjectArgs()
+      .andDo(^(NSInvocation* invocation) {
+        [invocation getArgument:&capturedInset atIndex:2];
+        if (!fulfilled) {
+          fulfilled = YES;
+          // Prevent the instant UIView animation completion block from overriding the captured
+          // vsync inset.
+          [viewController.keyboardInsetManager invalidateKeyboardAnimationVSyncClient];
+          [expectation fulfill];
+        }
+      });
+
+  // Configure keyboard spring animation.
+  CASpringAnimation* springAnimation = [CASpringAnimation animation];
+  springAnimation.mass = 1.0;
+  springAnimation.stiffness = 100.0;
+  springAnimation.damping = 10.0;
+  springAnimation.keyPath = @"position";
+
+  viewController.keyboardInsetManager.targetViewInsetBottom = 300.0;
+
+  // Start the keyboard animation.
+  [viewController.keyboardInsetManager startKeyBoardAnimation:0.25];
+  [viewController.keyboardInsetManager setUpKeyboardSpringAnimationIfNeeded:springAnimation];
+
+  // Simulate the first vsync callback passing the initial CADisplayLink directly.
+  FlutterVSyncClient* client = viewController.keyboardInsetManager.keyboardAnimationVSyncClient;
+  [client onDisplayLink:client.displayLink];
+
+  // Wait for task runner to execute callback on main queue.
+  [self waitForExpectationsWithTimeout:5.0 handler:nil];
+
+  // The captured inset must be a finite, non-NaN, non-negative value (close to start of animation).
+  XCTAssertFalse(isnan(capturedInset));
+  XCTAssertFalse(isinf(capturedInset));
+  XCTAssertGreaterThanOrEqual(capturedInset, 0.0);
+  XCTAssertLessThan(capturedInset, 300.0);
+}
+
 - (void)testKeyboardAnimationWillWaitUIThreadVsync {
   // We need to make sure the new viewport metrics get sent after the
   // begin frame event has processed. And this test is to expect that the callback
   // will sync with UI thread. So just simulate a lot of works on UI thread and
-  // test the keyboard animation callback will execute until UI task completed.
+  // test the keyboard animation callback will not execute until UI task completed.
   // Related issue: https://github.com/flutter/flutter/issues/120555.
 
   FlutterEngine* engine = [[FlutterEngine alloc] init];
@@ -630,28 +692,32 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                  bundle:nil];
   // Post a task to UI thread to block the thread.
   const int delayTime = 1;
-  [engine uiTaskRunner]->PostTask([] { sleep(delayTime); });
-  XCTestExpectation* expectation = [self expectationWithDescription:@"keyboard animation callback"];
+  [[engine uiTaskRunner] postTask:^{
+    sleep(delayTime);
+  }];
 
   id mockCADisplayLink = OCMClassMock([CADisplayLink class]);
   OCMStub(
       ClassMethod([mockCADisplayLink displayLinkWithTarget:[OCMArg any]
                                                   selector:sel_registerName("onDisplayLink:")]));
 
-  __block CFTimeInterval fulfillTime;
-  FlutterKeyboardAnimationCallback callback = ^(NSTimeInterval targetTime) {
-    fulfillTime = CACurrentMediaTime();
-    [expectation fulfill];
-  };
+  XCTestExpectation* expectation = [self expectationWithDescription:@"keyboard animation callback"];
+  __block CFTimeInterval fulfillTime = 0;
   CFTimeInterval startTime = CACurrentMediaTime();
-  [viewController.keyboardInsetManager setUpKeyboardAnimationVsyncClient:callback];
+  [viewController.keyboardInsetManager
+      setUpKeyboardAnimationVsyncClient:^(NSTimeInterval targetTime) {
+        fulfillTime = CACurrentMediaTime();
+        [expectation fulfill];
+      }];
 
-  VSyncClient* client = viewController.keyboardInsetManager.keyboardAnimationVSyncClient;
-  [client onDisplayLink:[client getDisplayLink]];
+  FlutterVSyncClient* client = viewController.keyboardInsetManager.keyboardAnimationVSyncClient;
+  [client onDisplayLink:client.displayLink];
 
   [self waitForExpectationsWithTimeout:5.0 handler:nil];
-  XCTAssertTrue(fulfillTime - startTime > delayTime);
+  NSTimeInterval epsilon = 0.005;
+  XCTAssertGreaterThanOrEqual(fulfillTime - startTime, delayTime - epsilon);
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  [mockCADisplayLink stopMocking];
 }
 
 - (void)testCalculateKeyboardAttachMode {
@@ -2428,11 +2494,11 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)testSetupKeyboardAnimationVsyncClientWillCreateNewVsyncClientForFlutterViewController {
   id bundleMock = OCMPartialMock([NSBundle mainBundle]);
-  OCMStub([bundleMock objectForInfoDictionaryKey:kCADisableMinimumFrameDurationOnPhoneKey])
+  OCMStub([bundleMock objectForInfoDictionaryKey:@"CADisableMinimumFrameDurationOnPhone"])
       .andReturn(@YES);
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[DisplayLinkManager class]];
+  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -2443,7 +2509,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [viewController.keyboardInsetManager setUpKeyboardAnimationVsyncClient:callback];
   XCTAssertNotNil(viewController.keyboardInsetManager.keyboardAnimationVSyncClient);
   CADisplayLink* link =
-      [viewController.keyboardInsetManager.keyboardAnimationVSyncClient getDisplayLink];
+      viewController.keyboardInsetManager.keyboardAnimationVSyncClient.displayLink;
   XCTAssertNotNil(link);
   CADisplayLink* linkMock = OCMPartialMock(link);
   if (@available(iOS 15.0, *)) {
@@ -2462,9 +2528,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
 - (void)
     testCreateTouchRateCorrectionVSyncClientWillCreateVsyncClientWhenRefreshRateIsLargerThan60HZ {
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[DisplayLinkManager class]];
+  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -2475,9 +2541,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateNewVSyncClientWhenClientAlreadyExists {
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[DisplayLinkManager class]];
+  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
 
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
@@ -2485,20 +2551,20 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
                                                                                 nibName:nil
                                                                                  bundle:nil];
   [viewController createTouchRateCorrectionVSyncClientIfNeeded];
-  VSyncClient* clientBefore = viewController.touchRateCorrectionVSyncClient;
+  FlutterVSyncClient* clientBefore = viewController.touchRateCorrectionVSyncClient;
   XCTAssertNotNil(clientBefore);
 
   [viewController createTouchRateCorrectionVSyncClientIfNeeded];
-  VSyncClient* clientAfter = viewController.touchRateCorrectionVSyncClient;
+  FlutterVSyncClient* clientAfter = viewController.touchRateCorrectionVSyncClient;
   XCTAssertNotNil(clientAfter);
 
   XCTAssertTrue(clientBefore == clientAfter);
 }
 
 - (void)testCreateTouchRateCorrectionVSyncClientWillNotCreateVsyncClientWhenRefreshRateIs60HZ {
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[DisplayLinkManager class]];
+  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 60;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -2509,9 +2575,9 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testTriggerTouchRateCorrectionVSyncClientCorrectly {
-  id mockDisplayLinkManager = [OCMockObject mockForClass:[DisplayLinkManager class]];
+  id mockDisplayLinkManager = [OCMockObject mockForClass:[FlutterDisplayLinkManager class]];
   double maxFrameRate = 120;
-  [[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
+  (void)[[[mockDisplayLinkManager stub] andReturnValue:@(maxFrameRate)] displayRefreshRate];
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
@@ -2520,8 +2586,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
   [viewController loadView];
   [viewController viewDidLoad];
 
-  VSyncClient* client = viewController.touchRateCorrectionVSyncClient;
-  CADisplayLink* link = [client getDisplayLink];
+  FlutterVSyncClient* client = viewController.touchRateCorrectionVSyncClient;
+  CADisplayLink* link = client.displayLink;
 
   UITouch* fakeTouchBegan = [[UITouch alloc] init];
   fakeTouchBegan.phase = UITouchPhaseBegan;
@@ -2585,6 +2651,7 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 
   XCTAssertNotNil(manager.keyboardAnimationVSyncClient);
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  [manager invalidate];
   [mockDisplayLink stopMocking];
 }
 
