@@ -116,13 +116,9 @@ import Testing
     ) { _, _ in }
     let link = vsyncClient.displayLink!
 
-    if #available(iOS 15.0, *) {
-      #expect(abs(Double(link.preferredFrameRateRange.maximum) - maxFrameRate) < 0.1)
-      #expect(abs(Double(link.preferredFrameRateRange.preferred ?? 0) - maxFrameRate) < 0.1)
-      #expect(abs(Double(link.preferredFrameRateRange.minimum) - maxFrameRate / 2) < 0.1)
-    } else {
-      #expect(abs(Double(link.preferredFramesPerSecond) - maxFrameRate) < 0.1)
-    }
+    #expect(abs(Double(link.preferredFrameRateRange.maximum) - maxFrameRate) < 0.1)
+    #expect(abs(Double(link.preferredFrameRateRange.preferred ?? 0) - maxFrameRate) < 0.1)
+    #expect(abs(Double(link.preferredFrameRateRange.minimum) - maxFrameRate / 2) < 0.1)
   }
 
   @Test func doNotSetVariableRefreshRatesIfCADisableMinimumFrameDurationOnPhoneIsNotOn() {
@@ -134,13 +130,9 @@ import Testing
     ) { _, _ in }
     let link = vsyncClient.displayLink!
 
-    if #available(iOS 15.0, *) {
-      #expect(abs(Double(link.preferredFrameRateRange.maximum)) < 0.1)
-      #expect(abs(Double(link.preferredFrameRateRange.preferred ?? 0)) < 0.1)
-      #expect(abs(Double(link.preferredFrameRateRange.minimum)) < 0.1)
-    } else {
-      #expect(abs(Double(link.preferredFramesPerSecond)) < 0.1)
-    }
+    #expect(abs(Double(link.preferredFrameRateRange.maximum)) < 0.1)
+    #expect(abs(Double(link.preferredFrameRateRange.preferred ?? 0)) < 0.1)
+    #expect(abs(Double(link.preferredFrameRateRange.minimum)) < 0.1)
   }
 
   @Test func awaitAndPauseWillWorkCorrectly() {
