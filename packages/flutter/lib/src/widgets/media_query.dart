@@ -4,6 +4,7 @@
 
 /// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/semantics.dart';
 /// @docImport 'package:flutter/services.dart';
 ///
 /// @docImport 'app.dart';
@@ -579,6 +580,21 @@ class MediaQueryData {
   /// - On iOS this flag is set to true when the user setting called "24-Hour
   ///   Time" is set or the system-wide locale's default uses 24-hour
   ///   formatting.
+  /// - On macOS this flag reflects the current system locale's time format,
+  ///   which incorporates the "24-Hour Time" preference in System Settings.
+  ///   As on iOS, this only takes effect for the system locale; a custom
+  ///   locale passed to the application will ignore the 24-hour preference.
+  /// - On Windows this flag is derived from the user's "Short time" format
+  ///   in the Region settings; it is true when the configured format uses a
+  ///   24-hour pattern.
+  /// - On Linux this flag reflects the desktop environment's clock-format
+  ///   setting where available (for example,
+  ///   `org.gnome.desktop.interface.clock-format` on GNOME). On desktops
+  ///   that do not expose such a setting, it defaults to true (24-hour).
+  /// - On Web this flag is always false. The Flutter web engine does not
+  ///   currently populate it from the browser's locale settings, even though
+  ///   the browser exposes a preferred hour cycle via
+  ///   `Intl.DateTimeFormat.resolvedOptions().hourCycle`.
   final bool alwaysUse24HourFormat;
 
   /// Whether the user is using an accessibility service like TalkBack or
@@ -592,7 +608,15 @@ class MediaQueryData {
   ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting originates.
   final bool accessibleNavigation;
 
-  /// Whether the device is inverting the colors of the platform.
+  /// Whether the operating system is currently inverting the colors of the platform.
+  ///
+  /// This flag indicates that the underlying OS is already performing a global
+  /// color inversion at the screen level. It does not mean the Flutter framework
+  /// will automatically invert its own layout painting.
+  ///
+  /// Instead, this flag allows the application to react to the inversion. For
+  /// example, by selectively re-inverting images, maps, or video playback so that
+  /// they display with natural colors instead of looking like a film negative.
   ///
   /// This flag is currently only updated on iOS devices.
   ///
@@ -602,11 +626,25 @@ class MediaQueryData {
   ///    originates.
   final bool invertColors;
 
-  /// Whether the user requested a high contrast between foreground and background
-  /// content on iOS, via Settings -> Accessibility -> Increase Contrast.
+  /// Whether the platform is requesting a high contrast between foreground and
+  /// background content.
   ///
-  /// This flag is currently only updated on iOS devices that are running iOS 13
-  /// or above and Android devices that are running Android API 34 or above.
+  /// On iOS, this corresponds to the "Increase Contrast" setting in
+  /// Settings -> Accessibility. On Android, this corresponds to the "High
+  /// contrast text" or similar accessibility settings.
+  ///
+  /// This flag indicates that the operating system is already performing
+  /// high-contrast adjustments or expects the application to adjust its
+  /// color palette to meet higher accessibility standards.
+  ///
+  /// Changing this value manually in a [MediaQuery] override will not
+  /// automatically trigger a theme change in [MaterialApp]. Instead, [MaterialApp]
+  /// uses this value to decide whether to use [MaterialApp.highContrastTheme]
+  /// or [MaterialApp.highContrastDarkTheme].
+
+  ///
+  /// This flag is currently only updated on iOS devices running iOS 13+
+  /// and Android devices running API 34+.
   final bool highContrast;
 
   /// Whether the user requested to show on/off labels inside switches on iOS,
@@ -621,8 +659,31 @@ class MediaQueryData {
   /// Whether the platform is requesting that animations be disabled or reduced
   /// as much as possible.
   ///
+  /// This corresponds to Android's "Remove animations" accessibility setting.
+  ///
+  /// On iOS, reduced motion is exposed separately via
+  /// [dart:ui.AccessibilityFeatures.reduceMotion] and does not set this flag.
+  ///
+  /// This value is read directly from the engine via
+  /// [SemanticsBinding.disableAnimations]. As a result, it is used by
+  /// framework-level animation APIs such as [AnimationController] and cannot be
+  /// overridden using [MediaQuery].
+  ///
+  /// Manually overriding this value in a [MediaQuery] widget will not affect
+  /// framework animations (for example those driven by [AnimationController]).
+  /// However, it can still be useful for testing or for custom widgets that
+  /// explicitly read [MediaQueryData.disableAnimations].
+  ///
+  /// When implementing custom explicit animations, you should check this
+  /// property and adjust behavior accordingly (for example, by reducing
+  /// duration or skipping non-essential animations when it is true).
+  ///
   /// See also:
   ///
+  ///  * [AnimationController], which adjusts its playback behavior based on this setting.
+  ///  * [AnimationBehavior], which defines how animations behave when this setting is active.
+  ///  * [dart:ui.AccessibilityFeatures.disableAnimations], the underlying primitive
+  ///    flag provided by the platform.
   ///  * [dart:ui.PlatformDispatcher.accessibilityFeatures], where the setting
   ///    originates.
   final bool disableAnimations;
@@ -707,7 +768,7 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
-  ///  [TextStyle.height] and [StrutStyle.height] are overriden by
+  ///  [TextStyle.height] and [StrutStyle.height] are overridden by
   ///  [lineHeightScaleFactorOverride].
   final double? lineHeightScaleFactorOverride;
 
@@ -722,7 +783,7 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
-  ///  [TextStyle.letterSpacing] is overriden by [letterSpacingOverride].
+  ///  [TextStyle.letterSpacing] is overridden by [letterSpacingOverride].
   final double? letterSpacingOverride;
 
   /// Overrides the amount of space (in logical pixels) to add at each
@@ -736,7 +797,7 @@ class MediaQueryData {
   /// See also:
   ///
   ///  * [Text], [SelectableText], and [EditableText], all of whose
-  ///  [TextStyle.wordSpacing] is overriden by [wordSpacingOverride].
+  ///  [TextStyle.wordSpacing] is overridden by [wordSpacingOverride].
   final double? wordSpacingOverride;
 
   /// The amount of space (in logical pixels) to add following each paragraph

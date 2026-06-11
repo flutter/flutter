@@ -20,7 +20,7 @@ class MetalScreenshotter : public Screenshotter {
   explicit MetalScreenshotter(const PlaygroundSwitches& switches);
 
   std::unique_ptr<Screenshot> MakeScreenshot(
-      AiksContext& aiks_context,
+      const AiksContext& aiks_context,
       const std::shared_ptr<Texture> texture) override;
 
   PlaygroundImpl& GetPlayground() override { return *playground_; }

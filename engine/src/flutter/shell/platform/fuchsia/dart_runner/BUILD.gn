@@ -139,7 +139,6 @@ runner("dart_aot_runner_bin") {
   extra_deps = [
     "$dart_src/runtime:libdart_aotruntime",
     "$dart_src/runtime/platform:libdart_platform_aotruntime",
-    "embedder:dart_aot_snapshot_cc",
   ]
 }
 
@@ -153,7 +152,6 @@ runner("dart_aot_product_runner_bin") {
   extra_deps = [
     "$dart_src/runtime:libdart_aotruntime",
     "$dart_src/runtime/platform:libdart_platform_aotruntime",
-    "embedder:dart_aot_product_snapshot_cc",
   ]
 }
 
@@ -274,20 +272,6 @@ jit_runner_package("dart_jit_runner") {
 
 jit_runner_package("dart_jit_product_runner") {
   product = true
-}
-
-# "OOT" copy of the runner used by tests, to avoid conflicting with the runner
-# in the base fuchsia image.
-# TODO(fxbug.dev/106575): Fix this with subpackages.
-aot_runner_package("oot_dart_aot_runner") {
-  product = false
-}
-
-# "OOT" copy of the runner used by tests, to avoid conflicting with the runner
-# in the base fuchsia image.
-# TODO(fxbug.dev/106575): Fix this with subpackages.
-jit_runner_package("oot_dart_jit_runner") {
-  product = false
 }
 
 if (enable_unittests) {
