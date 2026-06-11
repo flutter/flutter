@@ -35,10 +35,10 @@ enum ClipOverlapBehavior {
 
   /// The entire shape of the clip shifts inwards to preserve its form.
   ///
-  /// Instead of simply slicing off the overlapped portion, the clip
-  /// area is shrunk while preserving features like rounded corners. As the
-  /// item scrolls underneath the overlap, the corners will visibly slide down
-  /// so they are never hidden or prematurely sheared by the overlap boundary.
+  /// Instead of slicing off the overlapped portion, the clip area is shrunk
+  /// while preserving features like rounded corners. As the item scrolls
+  /// underneath the overlap, the corners will visibly slide down so they are
+  /// never hidden or prematurely sheared by the overlap boundary.
   preserveShape,
 }
 

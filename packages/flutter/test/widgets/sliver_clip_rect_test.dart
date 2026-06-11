@@ -146,6 +146,8 @@ void main() {
       WidgetTester tester,
     ) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -191,6 +193,8 @@ void main() {
       WidgetTester tester,
     ) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -246,6 +250,8 @@ void main() {
       WidgetTester tester,
     ) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -345,6 +351,8 @@ void main() {
       for (final testCase in overlapTestCases) {
         testWidgets(testCase.name, (WidgetTester tester) async {
           final controller = ScrollController();
+          addTearDown(controller.dispose);
+
           await tester.pumpWidget(
             _buildOverlapScenario(
               controller: controller,
@@ -390,6 +398,8 @@ void main() {
 
     testWidgets('clipBehavior of Clip.none allows overlap hits', (WidgetTester tester) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         _buildOverlapScenario(controller: controller, clipBehavior: Clip.none),
       );
@@ -495,6 +505,8 @@ void main() {
       WidgetTester tester,
     ) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(_buildOverlapScenario(controller: controller));
       await tester.pumpWidget(
         _buildOverlapScenario(controller: controller, clipBehavior: Clip.none),
