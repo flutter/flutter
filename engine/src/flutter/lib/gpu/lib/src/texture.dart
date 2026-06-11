@@ -40,14 +40,12 @@ base class Texture extends NativeFieldWrapperClass1 {
     this.width,
     this.height,
     this.sampleCount,
-    TextureCoordinateSystem coordinateSystem,
     this.textureType,
     this.enableRenderTargetUsage,
     this.enableShaderReadUsage,
     this.enableShaderWriteUsage,
     this.mipLevelCount,
-  ) : _gpuContext = gpuContext,
-      _coordinateSystem = coordinateSystem {
+  ) : _gpuContext = gpuContext {
     if (sampleCount != 1 && sampleCount != 4) {
       throw Exception("Only a sample count of 1 or 4 is currently supported");
     }
@@ -58,7 +56,6 @@ base class Texture extends NativeFieldWrapperClass1 {
       width,
       height,
       sampleCount,
-      coordinateSystem.index,
       textureType.index,
       enableRenderTargetUsage,
       enableShaderReadUsage,
@@ -103,16 +100,6 @@ base class Texture extends NativeFieldWrapperClass1 {
   /// 1 for 2D and external textures, 6 for cubemap textures.
   int get sliceCount => textureType == TextureType.textureCube ? 6 : 1;
 
-  TextureCoordinateSystem _coordinateSystem;
-  TextureCoordinateSystem get coordinateSystem {
-    return _coordinateSystem;
-  }
-
-  set coordinateSystem(TextureCoordinateSystem value) {
-    value;
-    _setCoordinateSystem(value.index);
-  }
-
   /// Returns the size in bytes of the [mipLevel] mip level (one slice). Mip
   /// dimensions are clamped at 1, matching standard mip chain semantics. For
   /// block-compressed formats the dimensions are rounded up to whole blocks.
@@ -154,13 +141,13 @@ base class Texture extends NativeFieldWrapperClass1 {
   void overwrite(ByteData sourceBytes, {int mipLevel = 0, int slice = 0}) {
     if (mipLevel < 0 || mipLevel >= mipLevelCount) {
       throw Exception(
-        'mipLevel ($mipLevel) must be in the range [0, $mipLevelCount) for this texture',
+        'mipLevel ($mipLevel) must be in the range [0, ${mipLevelCount - 1}] for this texture',
       );
     }
     final int slices = sliceCount;
     if (slice < 0 || slice >= slices) {
       throw Exception(
-        'slice ($slice) must be in the range [0, $slices) for textures of type $textureType',
+        'slice ($slice) must be in the range [0, ${slices - 1}] for textures of type $textureType',
       );
     }
     final int expectedSize = getMipLevelSizeInBytes(mipLevel);
@@ -195,7 +182,6 @@ base class Texture extends NativeFieldWrapperClass1 {
       Int,
       Int,
       Int,
-      Int,
       Bool,
       Bool,
       Bool,
@@ -209,18 +195,12 @@ base class Texture extends NativeFieldWrapperClass1 {
     int width,
     int height,
     int sampleCount,
-    int coordinateSystem,
     int textureType,
     bool enableRenderTargetUsage,
     bool enableShaderReadUsage,
     bool enableShaderWriteUsage,
     int mipLevelCount,
   );
-
-  @Native<Void Function(Handle, Int)>(
-    symbol: 'InternalFlutterGpu_Texture_SetCoordinateSystem',
-  )
-  external void _setCoordinateSystem(int coordinateSystem);
 
   @Native<Bool Function(Pointer<Void>, Pointer<Void>, Handle, Int, Int)>(
     symbol: 'InternalFlutterGpu_Texture_Overwrite',

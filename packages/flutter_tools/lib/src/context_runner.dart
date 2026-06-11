@@ -303,6 +303,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ProcessManager: () => ErrorHandlingProcessManager(
         delegate: const LocalProcessManager(),
         platform: globals.platform,
+        analytics: () => globals.analytics,
       ),
       ProcessUtils: () =>
           ProcessUtils(processManager: globals.processManager, logger: globals.logger),
