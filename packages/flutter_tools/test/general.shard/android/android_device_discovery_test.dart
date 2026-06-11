@@ -280,6 +280,65 @@ adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp    device product:vantage_ge mod
     },
   );
 
+  testWithoutContext(
+    'AndroidDevices does not mistake a state keyword inside a serial for the device state',
+    () async {
+      final androidDevices = AndroidDevices(
+        userMessages: UserMessages(),
+        androidWorkflow: androidWorkflow,
+        androidSdk: FakeAndroidSdk(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['adb', 'devices', '-l'],
+            stdout: '''
+List of devices attached
+adb-pixel host (2)._adb-tls-connect._tcp    device product:husky model:Pixel_8_Pro device:husky
+
+''',
+          ),
+        ]),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+      );
+
+      final List<Device> devices = await androidDevices.pollingGetDevices();
+
+      expect(devices, hasLength(1));
+      expect(devices.first.id, 'adb-pixel host (2)._adb-tls-connect._tcp');
+      expect(devices.first.name, 'Pixel 8 Pro');
+    },
+  );
+
+  testWithoutContext(
+    'AndroidDevices still parses a no permissions line with trailing explanation',
+    () async {
+      final androidDevices = AndroidDevices(
+        userMessages: UserMessages(),
+        androidWorkflow: androidWorkflow,
+        androidSdk: FakeAndroidSdk(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['adb', 'devices', '-l'],
+            stdout: '''
+List of devices attached
+0123456789ABCDEF       no permissions (user in plugdev group; are your udev rules wrong?); see [http://developer.android.com/tools/device.html] usb:1-4 transport_id:5
+
+''',
+          ),
+        ]),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+      );
+
+      final List<Device> devices = await androidDevices.pollingGetDevices();
+
+      expect(devices, hasLength(1));
+      expect(devices.first.id, '0123456789ABCDEF');
+    },
+  );
+
   testWithoutContext('AndroidDevices provides adb error message as diagnostics', () async {
     final androidDevices = AndroidDevices(
       userMessages: UserMessages(),

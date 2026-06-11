@@ -115,9 +115,16 @@ class AndroidDevices extends PollingDeviceDiscovery {
   // The serial portion is matched lazily so wireless serials that contain a space
   // (for example, an mDNS name-conflict suffix like ` (2)._adb-tls-connect._tcp`) are
   // captured in full instead of being truncated at the first whitespace. The state
-  // portion is anchored to the set of states `adb devices -l` may emit.
+  // portion is anchored to the set of states `adb devices -l` may emit, and must be
+  // followed by a `key:value` property list or the end of the line so that a serial
+  // which itself contains a state keyword as a standalone word cannot terminate the
+  // match early. `no permissions` is the exception: adb appends an explanation to it
+  // (for example `no permissions (user in plugdev group); see [url]`), so it is only
+  // required to end at a word boundary.
   static final _kDeviceRegex = RegExp(
-    r'^(.*?)\s+(device|offline|unauthorized|no permissions|bootloader|recovery|sideload|connecting|host)(.*)',
+    r'^(.*?)\s+'
+    r'(no permissions(?![a-z])|(?:device|offline|unauthorized|bootloader|recovery|sideload|connecting|host)(?=\s+[a-z_]+:|\s*$))'
+    r'(.*)',
   );
 
   /// Parse the given `adb devices` output in [text], and fill out the given list
