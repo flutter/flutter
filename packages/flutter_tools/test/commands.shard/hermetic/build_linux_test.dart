@@ -482,7 +482,7 @@ void main() {
       // (Dart error, compile error, link error), edited down for compactness.
       const stdout = r'''
 ninja: Entering directory `/build/linux/x64/release'
-[1/6] Generating /foo/linux/flutter/ephemeral/libflutter_linux_gtk.so, /foo/linux/flutter/ephemeral/flutter_linux/flutter_linux.h, _phony
+[1/7] Generating /foo/linux/flutter/ephemeral/libflutter_linux_gtk.so, /foo/linux/flutter/ephemeral/libflutter_linux_gtk4.so, /foo/linux/flutter/ephemeral/flutter_linux/flutter_linux.h, _phony
 lib/main.dart:4:3: Error: Method not found: 'foo'.
 [2/6] Building CXX object CMakeFiles/foo.dir/main.cc.o
 /foo/linux/main.cc:6:2: error: expected ';' after class

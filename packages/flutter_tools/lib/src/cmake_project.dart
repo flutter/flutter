@@ -96,10 +96,12 @@ class WindowsProject extends FlutterProjectPlatform implements CmakeBasedProject
 
 /// The Linux sub project.
 class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
-  LinuxProject.fromFlutter(this.parent);
+  LinuxProject.fromFlutter(this.parent, {Directory? linuxDirectoryOverride})
+    : _editableDirectoryOverride = linuxDirectoryOverride;
 
   @override
   final FlutterProject parent;
+  final Directory? _editableDirectoryOverride;
 
   @override
   String get pluginConfigKey => LinuxPlugin.kConfigKey;
@@ -108,7 +110,8 @@ class LinuxProject extends FlutterProjectPlatform implements CmakeBasedProject {
     r'''^\s*set\s*\(\s*APPLICATION_ID\s*"(.*)"\s*\)\s*$''',
   );
 
-  Directory get _editableDirectory => parent.directory.childDirectory('linux');
+  Directory get _editableDirectory =>
+      _editableDirectoryOverride ?? parent.directory.childDirectory('linux');
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project

@@ -61,6 +61,13 @@ class ConfigCommand extends FlutterCommand {
       help: 'The relative path to override a projects build directory.',
       valueHelp: 'out/',
     );
+    argParser.addOption(
+      'linux-gtk-default',
+      allowed: <String>['gtk3', 'gtk4'],
+      help:
+          'Set the global default GTK variant for Linux projects that do not '
+          'declare one in pubspec.yaml.',
+    );
     addMachineOutputFlag(verboseHelp: verboseHelp);
     for (final Feature feature in featureFlags.allFeatures) {
       final String? configSetting = feature.configSetting;
@@ -186,6 +193,10 @@ class ConfigCommand extends FlutterCommand {
         throwToolExit('build-dir should be a relative path');
       }
       _updateConfig('build-dir', buildDir);
+    }
+
+    if (argResults!.wasParsed('linux-gtk-default')) {
+      _updateConfig('linux-gtk-default', stringArg('linux-gtk-default')!);
     }
 
     for (final Feature feature in featureFlags.allFeatures) {

@@ -438,6 +438,37 @@ class FlutterManifest {
 
   String? get defaultFlavor => _flutterDescriptor['default-flavor'] as String?;
 
+  /// The default GTK variant for Linux projects, if declared.
+  String? get linuxGtkDefault {
+    final Object? configSection = _flutterDescriptor['config'];
+    if (configSection == null) {
+      return null;
+    }
+    if (configSection is! YamlMap) {
+      throw Exception(
+        'The "config" property under "flutter" in pubspec.yaml must be a map, '
+        'but got $configSection (${configSection.runtimeType})',
+      );
+    }
+    final Object? value = configSection['linux-gtk-default'];
+    if (value == null) {
+      return null;
+    }
+    if (value is! String) {
+      throw Exception(
+        'The "linux-gtk-default" property in "flutter: config:" in pubspec.yaml '
+        'must be a string, but got $value (${value.runtimeType})',
+      );
+    }
+    if (value != 'gtk3' && value != 'gtk4') {
+      throw Exception(
+        'The "linux-gtk-default" property in "flutter: config:" in pubspec.yaml '
+        'must be either "gtk3" or "gtk4", but got "$value".',
+      );
+    }
+    return value;
+  }
+
   YamlMap toYaml() {
     return YamlMap.wrap(_descriptor);
   }
@@ -596,7 +627,24 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
       case 'generate':
         break;
       case 'config':
-        // Futher validation is defined in FlutterFeaturesConfig.
+        if (yamlValue is! YamlMap) {
+          errors.add(
+            'Expected "$yamlKey" to be an object, but got $yamlValue (${yamlValue.runtimeType}).',
+          );
+          break;
+        }
+        if (yamlValue['linux-gtk-default'] != null && yamlValue['linux-gtk-default'] is! String) {
+          errors.add(
+            'The "linux-gtk-default" value under "flutter: config:" must be a string if set.',
+          );
+        }
+        if (yamlValue['linux-gtk-default'] is String &&
+            yamlValue['linux-gtk-default'] != 'gtk3' &&
+            yamlValue['linux-gtk-default'] != 'gtk4') {
+          errors.add(
+            'The "linux-gtk-default" value under "flutter: config:" must be either "gtk3" or "gtk4".',
+          );
+        }
         break;
       case 'deferred-components':
         _validateDeferredComponents(kvp, errors);
