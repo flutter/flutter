@@ -7,7 +7,7 @@ on:
     branches: [master]
 
 jobs:
-  Tree analyze:
+  Tree_analyze:
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -24,37 +24,33 @@ jobs:
       - name: Check Engine Changes
         id: check_engine
         run: |
-          # 1. Determine commit range
+          # 1. Determine local base tracking ref
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            BASE_REF="origin/${{ github.event.pull_request.base.ref }}"
           elif [ "${{ github.event_name }}" = "merge_group" ]; then
-            BASE_SHA="${{ github.event.merge_group.base_sha }}"
-            HEAD_SHA="${{ github.event.merge_group.head_sha }}"
+            # Strip refs/heads/ if present
+            BASE_REF_NAME="${{ github.event.merge_group.base_ref }}"
+            BASE_REF_NAME="${BASE_REF_NAME#refs/heads/}"
+            BASE_REF="origin/$BASE_REF_NAME"
           else
-            BASE_SHA=""
-            HEAD_SHA="HEAD"
+            BASE_REF="origin/master"
           fi
 
-          echo "BASE_SHA: $BASE_SHA"
-          echo "HEAD_SHA: $HEAD_SHA"
+          echo "Comparing against base ref: $BASE_REF"
 
-          # Fetch base SHA if not present
-          if [ -n "$BASE_SHA" ]; then
-            git fetch origin "$BASE_SHA" --depth=1 || true
-            CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" 2>/dev/null || true)
-          fi
+          # 2. Get changed files using local git diff against tracking branch
+          CHANGED_FILES=$(git diff --name-only "$BASE_REF" HEAD 2>/dev/null || true)
 
-          # Fallback if CHANGED_FILES is empty or BASE_SHA was empty
+          # Fallback if git diff fails or is empty
           if [ -z "$CHANGED_FILES" ]; then
-            echo "Falling back to git diff-tree or HEAD~1"
-            CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r "$HEAD_SHA" 2>/dev/null || git diff --name-only HEAD~1 HEAD 2>/dev/null || true)
+            echo "Falling back to git diff HEAD~1 HEAD"
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || true)
           fi
 
           echo "Changed files:"
           echo "$CHANGED_FILES"
 
-          # 2. Check if any file matches engine pattern:
+          # 3. Check if any file matches engine pattern:
           # ^(DEPS|engine/.*|bin/internal/content_aware_hash\.(ps1|sh))$
           ENGINE_CHANGED=false
           while IFS= read -r file; do
