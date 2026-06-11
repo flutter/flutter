@@ -4,6 +4,10 @@
 
 #include "fl_compositor_software.h"
 
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_gtk.h"
+#endif
+
 struct _FlCompositorSoftware {
   FlCompositor parent_instance;
 
@@ -128,6 +132,56 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
   return TRUE;
 }
 
+#if FLUTTER_LINUX_GTK4
+static GdkTexture* fl_compositor_software_acquire_texture(
+    FlCompositor* compositor,
+    FlGdkSurface* surface,
+    GdkGLContext* context,
+    gboolean wait_for_frame) {
+  (void)context;
+  FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
+
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
+
+  if (self->surface == nullptr) {
+    return nullptr;
+  }
+
+  gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
+  if (wait_for_frame) {
+    gint64 expiry_time =
+        g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
+    while (true) {
+      size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
+      size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
+      if (self->width == width && self->height == height) {
+        break;
+      }
+
+      if (g_get_monotonic_time() > expiry_time) {
+        g_warning(
+            "Timed out waiting for software frame of size %zdx%zd (have "
+            "%zdx%zd)",
+            width, height, self->width, self->height);
+        break;
+      }
+
+      g_mutex_unlock(&self->frame_mutex);
+      fl_task_runner_wait(self->task_runner, expiry_time);
+      g_mutex_lock(&self->frame_mutex);
+    }
+  }
+
+  const int width = cairo_image_surface_get_width(self->surface);
+  const int height = cairo_image_surface_get_height(self->surface);
+  const int stride = cairo_image_surface_get_stride(self->surface);
+  g_autoptr(GBytes) bytes =
+      g_bytes_new(cairo_image_surface_get_data(self->surface), stride * height);
+  return gdk_memory_texture_new(width, height, GDK_MEMORY_DEFAULT, bytes,
+                                stride);
+}
+#endif
+
 static void fl_compositor_software_dispose(GObject* object) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(object);
 
@@ -148,6 +202,10 @@ static void fl_compositor_software_class_init(
   FL_COMPOSITOR_CLASS(klass)->get_frame_size =
       fl_compositor_software_get_frame_size;
   FL_COMPOSITOR_CLASS(klass)->render = fl_compositor_software_render;
+#if FLUTTER_LINUX_GTK4
+  FL_COMPOSITOR_CLASS(klass)->acquire_texture =
+      fl_compositor_software_acquire_texture;
+#endif
 
   G_OBJECT_CLASS(klass)->dispose = fl_compositor_software_dispose;
 }

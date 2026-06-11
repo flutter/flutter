@@ -24,7 +24,7 @@ struct _FlView {
   GtkWidget* event_box;
   GtkGesture* zoom_gesture;
   GtkGesture* rotate_gesture;
-  GtkDrawingArea* render_area;
+  GtkWidget* render_area;
   GdkGLContext* render_context;
   FlEngine* engine;
   FlCompositor* compositor;
@@ -42,6 +42,10 @@ struct _FlView {
 #endif
   guint cursor_changed_cb_id;
   gboolean sized_to_content;
+#if FLUTTER_LINUX_GTK4
+  gboolean native_texture_ready;
+  guint native_texture_retry_source_id;
+#endif
   GCancellable* cancellable;
 };
 

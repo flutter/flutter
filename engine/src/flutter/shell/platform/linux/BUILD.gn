@@ -281,6 +281,7 @@ source_set("flutter_linux_sources_gtk4") {
     "fl_plugin_registrar.cc",
     "fl_plugin_registry.cc",
     "fl_pointer_manager.cc",
+    "fl_render_texture_gtk4.cc",
     "fl_renderable.cc",
     "fl_scrolling_manager.cc",
     "fl_settings.cc",

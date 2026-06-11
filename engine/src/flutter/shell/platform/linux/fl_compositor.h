@@ -33,6 +33,13 @@ struct _FlCompositorClass {
                      cairo_t* cr,
                      FlGdkSurface* surface,
                      gboolean wait_for_frame);
+
+#if FLUTTER_LINUX_GTK4
+  GdkTexture* (*acquire_texture)(FlCompositor* compositor,
+                                 FlGdkSurface* surface,
+                                 GdkGLContext* context,
+                                 gboolean wait_for_frame);
+#endif
 };
 
 /**
@@ -83,6 +90,26 @@ gboolean fl_compositor_render(FlCompositor* compositor,
                               cairo_t* cr,
                               FlGdkSurface* surface,
                               gboolean wait_for_frame);
+
+#if FLUTTER_LINUX_GTK4
+/**
+ * fl_compositor_acquire_texture:
+ * @compositor: an #FlCompositor.
+ * @surface: surface being rendered into.
+ * @context: (nullable): GTK render context owning the resulting texture.
+ * @wait_for_frame: if the available frame is not the size of the window block
+ * until a new frame is received.
+ *
+ * Acquires the current frame as a GTK texture for native GTK4 presentation.
+ * Called from the GTK thread.
+ *
+ * Returns: (transfer full): a #GdkTexture or %NULL if unavailable.
+ */
+GdkTexture* fl_compositor_acquire_texture(FlCompositor* compositor,
+                                          FlGdkSurface* surface,
+                                          GdkGLContext* context,
+                                          gboolean wait_for_frame);
+#endif
 
 G_END_DECLS
 

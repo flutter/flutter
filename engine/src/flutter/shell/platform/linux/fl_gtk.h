@@ -135,10 +135,4 @@ static inline GdkGLContext* fl_gtk_surface_create_gl_context(
 }
 #endif  // FLUTTER_LINUX_GTK4
 
-// Returns TRUE if the GTK4 native texture compositor path should be used.
-// Returns FALSE if FLUTTER_GTK4_FORCE_LEGACY_COMPOSITOR is set to "1" or
-// "true", forcing the legacy Cairo draw callback path.
-// Available in both GTK3 and GTK4 builds (GTK3 always returns TRUE).
-gboolean fl_view_gtk4_native_compositor_enabled(void);
-
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_GTK_H_
