@@ -288,8 +288,6 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/protobuf/protobuf
   pub_semver:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/pub_semver
-  record_use:
-    path: ./third_party/dart/pkg/record_use
   shelf:
     path: ./third_party/dart/third_party/pkg/shelf/pkgs/shelf
   shelf_packages_handler:
