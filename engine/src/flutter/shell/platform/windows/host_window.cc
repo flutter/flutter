@@ -208,10 +208,13 @@ std::unique_ptr<HostWindow> HostWindow::CreateRegularWindow(
     FlutterWindowsEngine* engine,
     const WindowSizeRequest& preferred_size,
     const WindowConstraints& preferred_constraints,
-    LPCWSTR title) {
-  return std::unique_ptr<HostWindow>(new HostWindowRegular(
-      window_manager, engine, preferred_size,
-      FromWindowConstraints(preferred_constraints), title));
+    LPCWSTR title,
+    bool sized_to_content,
+    bool resizable) {
+  return std::unique_ptr<HostWindow>(
+      new HostWindowRegular(window_manager, engine, preferred_size,
+                            FromWindowConstraints(preferred_constraints), title,
+                            sized_to_content, resizable));
 }
 
 std::unique_ptr<HostWindow> HostWindow::CreateDialogWindow(
@@ -220,11 +223,13 @@ std::unique_ptr<HostWindow> HostWindow::CreateDialogWindow(
     const WindowSizeRequest& preferred_size,
     const WindowConstraints& preferred_constraints,
     LPCWSTR title,
-    HWND parent) {
-  return std::unique_ptr<HostWindow>(
-      new HostWindowDialog(window_manager, engine, preferred_size,
-                           FromWindowConstraints(preferred_constraints), title,
-                           parent ? parent : std::optional<HWND>()));
+    HWND parent,
+    bool sized_to_content,
+    bool resizable) {
+  return std::unique_ptr<HostWindow>(new HostWindowDialog(
+      window_manager, engine, preferred_size,
+      FromWindowConstraints(preferred_constraints), title,
+      parent ? parent : std::optional<HWND>(), sized_to_content, resizable));
 }
 
 std::unique_ptr<HostWindow> HostWindow::CreateTooltipWindow(
