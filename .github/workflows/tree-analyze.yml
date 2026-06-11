@@ -7,7 +7,7 @@ on:
     branches: [master]
 
 jobs:
-  Linux_analyze:
+  Tree analyze:
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -77,6 +77,7 @@ jobs:
           check-name: 'Linux linux_host_engine'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 30 # seconds
+          checks-discovery-timeout: 3600 # Wait up to 1 hour for LUCI to register the check
           allowed-conclusions: success,neutral
           verbose: false
 
