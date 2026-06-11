@@ -1135,7 +1135,7 @@ name: my_app
       expect(debugConnectionInfo, isNotNull);
 
       final OperationResult result = await residentWebRunner.restart();
-      expect(logger.statusText, contains(kNoClientConnectedMessage));
+      expect(logger.statusText, contains('Reloaded application in'));
       expect(result.code, 0);
     },
     overrides: <Type, Generator>{
