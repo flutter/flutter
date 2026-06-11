@@ -113,28 +113,20 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
     int height, {
     ui.TargetPixelFormat targetFormat = ui.TargetPixelFormat.dontCare,
   }) {
-    // Ensure the picture is not disposed before rendering.
     assert(debugCheckNotDisposed('Cannot convert picture to image.'));
 
-    // Retrieve the cached/reusable surface dedicated to picture-to-image conversions.
     final CkSurface surface = CanvasKitRenderer.instance.pictureToImageSurface;
-    // Resize the temporary surface to match the requested image dimensions.
     surface.setSize(BitmapSize(width, height));
     final SkSurface skiaSurface = surface.skSurface!;
 
-    // Wrap the Skia canvas in a CkCanvas to perform standard operations.
     final ckCanvas = CkCanvas.fromSkCanvas(skiaSurface.getCanvas());
-    // Clear any previous frames from the scratch surface with full transparency.
     ckCanvas.clear(const ui.Color(0x00000000));
-    // Draw this picture into the scratch surface.
     ckCanvas.drawPicture(this);
-    // Take a snapshot of the current state of the scratch surface.
     final SkImage skImage = skiaSurface.makeImageSnapshot();
 
     // TODO(hterkelsen): This is a hack to get the pixels from the SkImage.
     // We should be able to do this without creating a new image. This is
     // a workaround for a bug in CanvasKit.
-    // Configure the metadata describing the expected layout of pixel data.
     final imageInfo = SkImageInfo(
       alphaType: canvasKit.AlphaType.Premul,
       colorType: canvasKit.ColorType.RGBA_8888,
@@ -142,19 +134,15 @@ class CkPicture implements LayerPicture, StackTraceDebugger {
       width: width.toDouble(),
       height: height.toDouble(),
     );
-    // Read the snapshot's raw pixel bytes back into the CPU memory.
     final Uint8List? pixels = skImage.readPixels(0, 0, imageInfo);
-    // Immediately delete the snapshot to free up GPU memory.
     skImage.delete();
     if (pixels == null) {
       throw StateError('Unable to convert read pixels from SkImage.');
     }
-    // Re-create a CPU-backed raster SkImage from the loaded pixel bytes.
     final SkImage? rasterImage = canvasKit.MakeImage(imageInfo, pixels, 4 * width);
     if (rasterImage == null) {
       throw StateError('Unable to convert image pixels into SkImage.');
     }
-    // Return the rasterized image wrapped as a Flutter EngineImage.
     return EngineImage(
       CkImageDelegate(rasterImage),
       rasterImage.width().toInt(),
