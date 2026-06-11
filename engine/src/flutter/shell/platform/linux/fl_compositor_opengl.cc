@@ -203,6 +203,54 @@ static void composite_layer(FlCompositorOpenGL* self,
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+static void draw_texture_to_cairo(cairo_t* cr,
+                                  FlGdkSurface* surface,
+                                  GLuint texture_id,
+                                  gint scale_factor,
+                                  size_t width,
+                                  size_t height) {
+#if FLUTTER_LINUX_GTK4
+  G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
+  gdk_cairo_draw_from_gl(cr, surface, texture_id, GL_TEXTURE, scale_factor, 0,
+                         0, width, height);
+#if FLUTTER_LINUX_GTK4
+  G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
+}
+
+static void paint_shareable_framebuffer(FlFramebuffer* framebuffer,
+                                        cairo_t* cr,
+                                        FlGdkSurface* surface,
+                                        gint scale_factor,
+                                        size_t width,
+                                        size_t height) {
+  g_autoptr(FlFramebuffer) sibling = fl_framebuffer_create_sibling(framebuffer);
+  draw_texture_to_cairo(cr, surface, fl_framebuffer_get_texture_id(sibling),
+                        scale_factor, width, height);
+}
+
+static void paint_readback_framebuffer(FlCompositorOpenGL* self,
+                                       cairo_t* cr,
+                                       FlGdkSurface* surface,
+                                       gint scale_factor,
+                                       size_t width,
+                                       size_t height) {
+  GLint saved_texture_binding;
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
+
+  GLuint texture_id;
+  glGenTextures(1, &texture_id);
+  glBindTexture(GL_TEXTURE_2D, texture_id);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+               GL_UNSIGNED_BYTE, self->pixels);
+
+  draw_texture_to_cairo(cr, surface, texture_id, scale_factor, width, height);
+
+  glDeleteTextures(1, &texture_id);
+  glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
+}
+
 static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
                                                     const FlutterLayer** layers,
                                                     size_t layers_count) {
@@ -424,46 +472,10 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   }
 
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
-    g_autoptr(FlFramebuffer) sibling =
-        fl_framebuffer_create_sibling(self->framebuffer);
-#if FLUTTER_LINUX_GTK4
-    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-#endif
-    gdk_cairo_draw_from_gl(cr, surface, fl_framebuffer_get_texture_id(sibling),
-                           GL_TEXTURE, scale_factor, 0, 0, width, height);
-#if FLUTTER_LINUX_GTK4
-    G_GNUC_END_IGNORE_DEPRECATIONS
-#endif
+    paint_shareable_framebuffer(self->framebuffer, cr, surface, scale_factor,
+                                width, height);
   } else {
-    GLint saved_texture_binding;
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
-
-    GLuint texture_id;
-    glGenTextures(1, &texture_id);
-    glBindTexture(GL_TEXTURE_2D, texture_id);
-    GLsizei fb_width = 0;
-    GLsizei fb_height = 0;
-    if (self->framebuffer != nullptr) {
-      fb_width =
-          static_cast<GLsizei>(fl_framebuffer_get_width(self->framebuffer));
-      fb_height =
-          static_cast<GLsizei>(fl_framebuffer_get_height(self->framebuffer));
-    }
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fb_width, fb_height, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, self->pixels);
-
-#if FLUTTER_LINUX_GTK4
-    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-#endif
-    gdk_cairo_draw_from_gl(cr, surface, texture_id, GL_TEXTURE, scale_factor, 0,
-                           0, width, height);
-#if FLUTTER_LINUX_GTK4
-    G_GNUC_END_IGNORE_DEPRECATIONS
-#endif
-
-    glDeleteTextures(1, &texture_id);
-
-    glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
+    paint_readback_framebuffer(self, cr, surface, scale_factor, width, height);
   }
 
   glFlush();
