@@ -19,7 +19,7 @@ This is an internal helper skill that handles the core cherry-pick (CP) process 
 ### Phase 2: Run Cherry-Pick Orchestrator
 1. Run the helper script to start the process:
    ```bash
-   bin/dart .agents/skills/flutter-cp-common/scripts/flutter_cp.dart --pr <ORIGINAL_PR> --channel <CHANNEL> --action start
+    <DART_EXECUTABLE> .agents/skills/flutter-cp-common/scripts/flutter_cp.dart --pr <ORIGINAL_PR> --channel <CHANNEL> --action start
    ```
 2. **Evaluate Script Output:**
    * **Exit Code 0 (Success):**
@@ -47,7 +47,7 @@ This is an internal helper skill that handles the core cherry-pick (CP) process 
    - Once all conflicts are resolved (either by you or the user), run `git add <resolved-files>` to stage them.
    - Resume the orchestrator script:
      ```bash
-     bin/dart .agents/skills/flutter-cp-common/scripts/flutter_cp.dart --pr <ORIGINAL_PR> --channel <CHANNEL> --action continue
+      <DART_EXECUTABLE> .agents/skills/flutter-cp-common/scripts/flutter_cp.dart --pr <ORIGINAL_PR> --channel <CHANNEL> --action continue
      ```
    - The script will run `git cherry-pick --continue`, push, create the PR, and print `SUCCESS:MANUAL:<CP_PR>`.
    - Extract the `<CP_PR>` number and proceed to **Phase 4: Fill Template**.
@@ -55,7 +55,7 @@ This is an internal helper skill that handles the core cherry-pick (CP) process 
 ### Phase 4: Fill Template
 1. **Dynamically Retrieve Template:**
    - Read the local cherry-pick template:
-     Use `view_file` on `file:///usr/local/google/home/bkonyi/flutter/.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md`
+     Use `view_file` on the local cherry-pick template (located at `../../../.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md` relative to this skill)
    - If the file does not exist locally, fallback to fetching it via `read_url_content` from:
      `https://raw.githubusercontent.com/flutter/flutter/master/.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md`
 2. **Gather Context:**
