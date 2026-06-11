@@ -52,7 +52,11 @@ void fl_scrolling_manager_set_last_mouse_position(FlScrollingManager* manager,
  * Inform the scrolling manager of a scroll event.
  */
 void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* manager,
+#if FLUTTER_LINUX_GTK4
+                                              GdkEvent* event,
+#else
                                               GdkEventScroll* event,
+#endif
                                               gint scale_factor);
 
 /**

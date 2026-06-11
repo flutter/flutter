@@ -9,6 +9,7 @@
 #include <gdk/gdk.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/fl_gtk.h"
 
 G_BEGIN_DECLS
 
@@ -30,7 +31,7 @@ struct _FlCompositorClass {
 
   gboolean (*render)(FlCompositor* compositor,
                      cairo_t* cr,
-                     GdkWindow* window,
+                     FlGdkSurface* surface,
                      gboolean wait_for_frame);
 };
 
@@ -80,7 +81,7 @@ void fl_compositor_get_frame_size(FlCompositor* compositor,
  */
 gboolean fl_compositor_render(FlCompositor* compositor,
                               cairo_t* cr,
-                              GdkWindow* window,
+                              FlGdkSurface* surface,
                               gboolean wait_for_frame);
 
 G_END_DECLS

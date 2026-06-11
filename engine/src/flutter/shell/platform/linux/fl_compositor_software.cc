@@ -85,7 +85,7 @@ static void fl_compositor_software_get_frame_size(FlCompositor* compositor,
 
 static gboolean fl_compositor_software_render(FlCompositor* compositor,
                                               cairo_t* cr,
-                                              GdkWindow* window,
+                                              FlGdkSurface* surface,
                                               gboolean wait_for_frame) {
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
 
@@ -96,13 +96,13 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
   }
 
   // If frame not ready, then wait for it.
-  gint scale_factor = gdk_window_get_scale_factor(window);
+  gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
   if (wait_for_frame) {
     gint64 expiry_time =
         g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
     while (true) {
-      size_t width = gdk_window_get_width(window) * scale_factor;
-      size_t height = gdk_window_get_height(window) * scale_factor;
+      size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
+      size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
       if (self->width == width && self->height == height) {
         break;
       }

@@ -383,7 +383,7 @@ static void fl_compositor_opengl_get_frame_size(FlCompositor* compositor,
 
 static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
                                             cairo_t* cr,
-                                            GdkWindow* window,
+                                            FlGdkSurface* surface,
                                             gboolean wait_for_frame) {
   FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
 
@@ -394,13 +394,13 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   }
 
   // If frame not ready, then wait for it.
-  gint scale_factor = gdk_window_get_scale_factor(window);
+  gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
   size_t width, height;
   gint64 expiry_time =
       g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
   while (true) {
-    width = gdk_window_get_width(window) * scale_factor;
-    height = gdk_window_get_height(window) * scale_factor;
+    width = fl_gtk_surface_get_width(surface) * scale_factor;
+    height = fl_gtk_surface_get_height(surface) * scale_factor;
     if (!wait_for_frame) {
       break;
     }
@@ -426,8 +426,14 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
   if (fl_framebuffer_get_shareable(self->framebuffer)) {
     g_autoptr(FlFramebuffer) sibling =
         fl_framebuffer_create_sibling(self->framebuffer);
-    gdk_cairo_draw_from_gl(cr, window, fl_framebuffer_get_texture_id(sibling),
+#if FLUTTER_LINUX_GTK4
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
+    gdk_cairo_draw_from_gl(cr, surface, fl_framebuffer_get_texture_id(sibling),
                            GL_TEXTURE, scale_factor, 0, 0, width, height);
+#if FLUTTER_LINUX_GTK4
+    G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
   } else {
     GLint saved_texture_binding;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &saved_texture_binding);
@@ -446,8 +452,14 @@ static gboolean fl_compositor_opengl_render(FlCompositor* compositor,
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fb_width, fb_height, 0, GL_RGBA,
                  GL_UNSIGNED_BYTE, self->pixels);
 
-    gdk_cairo_draw_from_gl(cr, window, texture_id, GL_TEXTURE, scale_factor, 0,
+#if FLUTTER_LINUX_GTK4
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+#endif
+    gdk_cairo_draw_from_gl(cr, surface, texture_id, GL_TEXTURE, scale_factor, 0,
                            0, width, height);
+#if FLUTTER_LINUX_GTK4
+    G_GNUC_END_IGNORE_DEPRECATIONS
+#endif
 
     glDeleteTextures(1, &texture_id);
 
