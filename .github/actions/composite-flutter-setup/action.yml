@@ -90,6 +90,30 @@ runs:
           echo "/opt/android/sdk/cmdline-tools/${{ inputs.ANDROID_TOOLS_VERSION }}/bin" >> "$GITHUB_PATH"
           echo "/opt/android/sdk/platform-tools" >> "$GITHUB_PATH"
 
+      # ktlint is needed by tree analyze
+      - name: ktlint cache
+        id: ktlint-cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        with:
+          # Cache ONLY the ktlint binary to avoid interfering with Flutter's bin folder
+          path: ${{ github.workspace }}/bin/ktlint
+          # Hardcode the version in the key since it's hardcoded in the URL
+          key: ${{ runner.os }}-ktlint-1.5.0
+
+      - name: Download and Install ktlint 1.5.0
+        # Only run the download if the cache was NOT found
+        if: steps.ktlint-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          # Ensure the bin directory exists
+          mkdir -p bin
+
+          # 1. Download directly into the bin directory
+          curl -sSL -o bin/ktlint https://github.com/ktlint/ktlint/releases/download/1.5.0/ktlint
+
+          # 2. Make the binary executable
+          chmod a+x bin/ktlint
+
       - name: Add `flutter` to the PATH
         shell: bash
         run: |

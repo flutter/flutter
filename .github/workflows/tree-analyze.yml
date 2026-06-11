@@ -1,4 +1,4 @@
-name: Linux Analyze
+name: Tree Analyze
 
 on:
   pull_request:
@@ -75,6 +75,10 @@ jobs:
           checks-discovery-timeout: 3600 # Wait up to 1 hour for LUCI to register the check
           allowed-conclusions: success,neutral
           verbose: false
+
+      - name: Redirect engine.version
+        if: steps.check_engine.outputs.changed == 'true'
+        run: echo "flutter_archives_v2" > bin/internal/engine.version
 
       - uses: ./.github/actions/composite-flutter-setup
 
