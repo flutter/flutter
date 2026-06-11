@@ -84,8 +84,7 @@ base class Texture extends NativeFieldWrapperClass1 {
       enableRenderTargetUsage = true,
       enableShaderReadUsage = true,
       enableShaderWriteUsage = false,
-      mipLevelCount = 1,
-      _coordinateSystem = TextureCoordinateSystem.renderToTexture;
+      mipLevelCount = 1;
 
   GpuContext _gpuContext;
 

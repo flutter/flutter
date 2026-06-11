@@ -65,8 +65,6 @@ std::shared_ptr<Surface::TextureRecord> Surface::CreateTextureRecord() const {
     FML_LOG(ERROR) << "Failed to create Flutter GPU surface texture.";
     return nullptr;
   }
-  texture->SetCoordinateSystem(
-      impeller::TextureCoordinateSystem::kRenderToTexture);
 
   auto image = impeller::DlImageImpeller::Make(texture);
   if (!image) {
