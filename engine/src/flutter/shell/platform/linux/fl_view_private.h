@@ -55,6 +55,7 @@ struct _FlView {
  * Returns: an #FlViewAccessible.
  */
 FlViewAccessible* fl_view_get_accessible(FlView* view);
+void fl_view_gtk3_setup(FlView* view);
 #else
 GtkWidget* fl_view_gtk4_get_toplevel_window(FlView* view);
 void fl_view_gtk4_set_cursor(FlView* view, const gchar* cursor_name);

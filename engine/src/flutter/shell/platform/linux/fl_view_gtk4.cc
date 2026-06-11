@@ -4,8 +4,8 @@
 
 #include "flutter/shell/platform/linux/fl_view_private.h"
 
-#include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
@@ -40,7 +40,8 @@ static void gesture_rotation_begin_cb(FlView* view) {
 static void gesture_rotation_update_cb(FlView* view,
                                        gdouble rotation,
                                        gdouble delta) {
-  fl_scrolling_manager_handle_rotation_update(view->scrolling_manager, rotation);
+  fl_scrolling_manager_handle_rotation_update(view->scrolling_manager,
+                                              rotation);
 }
 
 static void gesture_rotation_end_cb(FlView* view) {
@@ -87,9 +88,8 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
       gdouble x = 0.0, y = 0.0;
       gdk_event_get_position(event, &x, &y);
 
-      fl_scrolling_manager_set_last_mouse_position(view->scrolling_manager,
-                                                   x * scale_factor,
-                                                   y * scale_factor);
+      fl_scrolling_manager_set_last_mouse_position(
+          view->scrolling_manager, x * scale_factor, y * scale_factor);
       fl_keyboard_manager_sync_modifier_if_needed(
           fl_engine_get_keyboard_manager(view->engine),
           gdk_event_get_modifier_state(event), gdk_event_get_time(event));
