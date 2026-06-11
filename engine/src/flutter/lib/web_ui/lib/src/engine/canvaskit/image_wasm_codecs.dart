@@ -120,7 +120,6 @@ class CkAnimatedImage implements ui.Codec {
 
   @override
   Future<ui.FrameInfo> getNextFrame() {
-    // Verify that the animated image codec hasn't been disposed.
     assert(_debugCheckIsNotDisposed());
     final SkAnimatedImage animatedImage = _ref.nativeObject;
 
@@ -133,22 +132,16 @@ class CkAnimatedImage implements ui.Codec {
     // current Skia frame, then advance SkAnimatedImage to the next frame, and
     // return the current frame.
 
-    // Obtain the duration of the current frame in milliseconds.
     final int frameDurationMs = animatedImage.currentFrameDuration().toInt();
-
-    // Create an SkImage for the current frame.
     final SkImage skImage = animatedImage.makeImageAtCurrentFrame();
 
-    // Build the FrameInfo object containing the current frame's image and its duration.
     final ui.FrameInfo currentFrame = AnimatedImageFrameInfo(
       Duration(milliseconds: frameDurationMs),
       EngineImage(CkImageDelegate(skImage), skImage.width().toInt(), skImage.height().toInt()),
     );
 
-    // Advance the internal SkAnimatedImage state to point to the next frame.
     animatedImage.decodeNextFrame();
 
-    // Return the current frame wrapped in a resolved Future.
     return Future<ui.FrameInfo>.value(currentFrame);
   }
 }

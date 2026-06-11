@@ -323,7 +323,7 @@ EngineImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
 
   final paint = CkPaint();
   final EngineImage temporaryImage = EngineImage(CkImageDelegate(image), width, height);
-  
+
   try {
     canvas.drawImageRect(
       temporaryImage,
@@ -419,7 +419,7 @@ Future<Uint8List> readChunked(
   return result.toDart;
 }
 
-/// A [ui.Image] backed by an `SkImage` from Skia.
+/// A [BackendImage] backed by an `SkImage` from Skia.
 class CkImageDelegate implements BackendImage {
   CkImageDelegate(this.skImage);
 

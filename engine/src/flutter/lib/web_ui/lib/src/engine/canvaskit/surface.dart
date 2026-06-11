@@ -378,7 +378,7 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
 
   @override
   bool get isConnected =>
-      (canvas as JSAny?).instanceOfString('HTMLCanvasElement') &&
+      (canvas as JSAny?).isA<DomHTMLCanvasElement>() &&
       (canvas as DomHTMLCanvasElement).isConnected!;
 
   @override
