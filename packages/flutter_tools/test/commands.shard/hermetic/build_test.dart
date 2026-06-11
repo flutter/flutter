@@ -122,7 +122,7 @@ flutter:
   final MemoryFileSystem globalConfigFileSystem = MemoryFileSystem.test();
   final Config globalConfig = Config.test(
     name: Config.kFlutterSettings,
-    fileSystem: globalConfigFileSystem,
+    directory: globalConfigFileSystem.directory('/'),
   );
   globalConfigFileSystem.file('/package/pubspec.yaml').createSync(recursive: true);
   globalConfigFileSystem.file('/package/pubspec.yaml').writeAsStringSync('''

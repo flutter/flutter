@@ -117,10 +117,11 @@ void main() {
       expect(fakeAnalytics.sentEvents, isEmpty);
     }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
+    final Config config = Config.test(name: Config.kFlutterSettings);
+
     testUsingContext(
       'Can set linux-gtk-default',
       () async {
-        final config = Config.test(name: Config.kFlutterSettings);
         final configCommand = ConfigCommand();
         final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
