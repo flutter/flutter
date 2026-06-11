@@ -66,31 +66,32 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
       return null;
     }
 
+    final ApkManifestData? data;
     try {
-      final ApkManifestData? data = ApkManifestData.parseFromXmlDump(apptStdout, logger);
-
-      if (data == null) {
-        logger.printError('Unable to read manifest info from ${apk.path}.');
-        return null;
-      }
-
-      final String? packageName = data.packageName;
-      if (packageName == null || data.launchableActivityName == null) {
-        logger.printError('Unable to read manifest info from ${apk.path}.');
-        return null;
-      }
-
-      return AndroidApk(
-        id: packageName,
-        applicationPackage: apk,
-        versionCode: data.versionCode == null ? null : int.tryParse(data.versionCode!),
-        launchActivity: '${data.packageName}/${data.launchableActivityName}',
-      );
+      data = ApkManifestData.parseFromXmlDump(apptStdout, logger);
       // ignore: avoid_catches_without_on_clauses
     } catch (error, stackTrace) {
       logger.printError('Failed to parse manifest from APK: $error', stackTrace: stackTrace);
       return null;
     }
+
+    if (data == null) {
+      logger.printError('Unable to read manifest info from ${apk.path}.');
+      return null;
+    }
+
+    final String? packageName = data.packageName;
+    if (packageName == null || data.launchableActivityName == null) {
+      logger.printError('Unable to read manifest info from ${apk.path}.');
+      return null;
+    }
+
+    return AndroidApk(
+      id: packageName,
+      applicationPackage: apk,
+      versionCode: data.versionCode == null ? null : int.tryParse(data.versionCode!),
+      launchActivity: '${data.packageName}/${data.launchableActivityName}',
+    );
   }
 
   @override
