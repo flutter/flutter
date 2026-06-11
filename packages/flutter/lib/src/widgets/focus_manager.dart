@@ -1189,6 +1189,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       return;
     }
     _setAsFocusedChildForScope();
+    _maybeInvalidatePolicyData();
     if (hasPrimaryFocus &&
         (_manager!._markedForFocus == null || _manager!._markedForFocus == this)) {
       return;
@@ -1237,6 +1238,21 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       // end of the list represents the currently focused child.
       ancestor._focusedChildren.add(scopeFocus);
       scopeFocus = ancestor;
+    }
+  }
+
+  void _maybeInvalidatePolicyData() {
+    FocusNode? current = this;
+    while (current != null) {
+      final FocusTraversalPolicy? policy = FocusTraversalGroup.maybeOfNode(current);
+      if (policy != null && !FocusTraversalGroup.underTraversal(current)) {
+        FocusScopeNode? scope = current.nearestScope;
+        while (scope != null) {
+          policy.invalidateScopeData(scope);
+          scope = scope.enclosingScope;
+        }
+      }
+      current = current.parent;
     }
   }
 
