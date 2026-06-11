@@ -215,15 +215,24 @@ class CanvasKitRenderer extends Renderer {
   @override
   ui.Image createImageFromImageBitmap(DomImageBitmap imageBitmap) {
     SkImage? skImage;
+    // For software rendering, instantiate an SkImage immediately from the canvas source.
     if (isSoftware) {
       skImage = canvasKit.MakeImageFromCanvasImageSource(imageBitmap);
     } else {
+      // For GPU-accelerated CanvasKit, create a lazy image from the ImageBitmap, which
+      // defers uploading the image texture to the WebGL context until render time.
       skImage = canvasKit.MakeLazyImageFromImageBitmap(imageBitmap, true);
     }
     if (skImage == null) {
       throw Exception('Failed to convert image bitmap to an SkImage.');
     }
-    return CkImage(skImage, imageSource: ImageBitmapImageSource(imageBitmap));
+    // Wrap the SkImage into an EngineImage with the matching ImageBitmapImageSource.
+    return EngineImage(
+      CkImageDelegate(skImage),
+      skImage.width().toInt(),
+      skImage.height().toInt(),
+      imageSource: ImageBitmapImageSource(imageBitmap),
+    );
   }
 
   @override
@@ -271,7 +280,7 @@ class CanvasKitRenderer extends Renderer {
     if (skImage == null) {
       throw Exception('Failed to convert image bitmap to an SkImage.');
     }
-    return CkImage(skImage);
+    return EngineImage(CkImageDelegate(skImage), skImage.width().toInt(), skImage.height().toInt());
   }
 
   @override
