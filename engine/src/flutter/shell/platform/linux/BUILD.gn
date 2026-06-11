@@ -332,7 +332,7 @@ zip_bundle("flutter_gtk") {
     ":publish_headers_linux",
     "$dart_src/runtime/bin:gen_snapshot",
   ]
-  if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
+  if (flutter_runtime_mode == "profile") {
     deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
   }
 
@@ -356,7 +356,7 @@ zip_bundle("flutter_gtk") {
       destination = "gen_snapshot"
     },
   ]
-  if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
+  if (flutter_runtime_mode == "profile") {
     tmp_files += [
       {
         source = "$root_build_dir/libvmservice_snapshot.so"

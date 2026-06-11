@@ -271,9 +271,7 @@ if (use_swiftshader) {
       "//flutter/fml",
     ]
 
-    if (is_clang) {
-      configs -= [ "//build/config/clang:extra_warnings" ]
-    }
+    configs -= [ "//build/config/clang:extra_warnings" ]
     configs += [ "//flutter/third_party/angle:gl_prototypes" ]
   }
 }

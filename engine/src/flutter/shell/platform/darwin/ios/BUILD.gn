@@ -401,6 +401,15 @@ copy("copy_dylib") {
   deps = [ ":create_flutter_framework_dylib" ]
 }
 
+if (flutter_runtime_mode == "profile") {
+  copy("copy_vmservice_snapshot_dylib") {
+    visibility = [ ":*" ]
+    sources = [ "$root_out_dir/libvmservice_snapshot.dylib" ]
+    outputs = [ "$_flutter_framework_dir/Frameworks/libvmservice_snapshot.dylib" ]
+    deps = [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+  }
+}
+
 copy("copy_asan_runtime_dylib") {
   visibility = [ ":*" ]
 
@@ -515,6 +524,10 @@ group("universal_flutter_framework") {
 
   if (is_asan) {
     deps += [ ":copy_asan_runtime_dylib" ]
+  }
+
+  if (flutter_runtime_mode == "profile") {
+    deps += [ ":copy_vmservice_snapshot_dylib" ]
   }
 }
 

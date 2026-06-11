@@ -190,6 +190,10 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/core/pkgs/crypto
   dart_mcp:
     path: ./third_party/dart/third_party/pkg/ai/pkgs/dart_mcp
+  dart_runtime_service:
+    path: ./third_party/dart/pkg/dart_runtime_service
+  dart_runtime_service_vm:
+    path: ./third_party/dart/pkg/dart_runtime_service_vm
   equatable:
     path: ./third_party/pkg/equatable
   expect:
