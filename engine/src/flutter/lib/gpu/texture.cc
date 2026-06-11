@@ -39,11 +39,6 @@ std::shared_ptr<impeller::Texture> Texture::GetTexture() {
   return texture_;
 }
 
-void Texture::SetCoordinateSystem(
-    impeller::TextureCoordinateSystem coordinate_system) {
-  texture_->SetCoordinateSystem(coordinate_system);
-}
-
 // Returns the size in pixels of the given dimension at `mip_level`, clamped
 // at 1, matching standard mip-chain semantics. The Dart-side helper
 // `Texture.getMipLevelSizeInBytes` uses the same `max(1, dim >> level)`
@@ -145,11 +140,6 @@ bool Texture::Overwrite(Context& gpu_context,
   return true;
 }
 
-size_t Texture::GetBytesPerTexel() {
-  return impeller::BytesPerPixelForPixelFormat(
-      texture_->GetTextureDescriptor().format);
-}
-
 Dart_Handle Texture::AsImage() const {
   // DlImageImpeller isn't compiled in builds with Impeller disabled. If
   // Impeller is disabled, it's impossible to get here anyhow, so just ifdef it
@@ -179,7 +169,6 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
                                            int width,
                                            int height,
                                            int sample_count,
-                                           int coordinate_system,
                                            int texture_type,
                                            bool enable_render_target_usage,
                                            bool enable_shader_read_usage,
@@ -227,20 +216,10 @@ bool InternalFlutterGpu_Texture_Initialize(Dart_Handle wrapper,
     return false;
   }
 
-  texture->SetCoordinateSystem(
-      flutter::gpu::ToImpellerTextureCoordinateSystem(coordinate_system));
-
   auto res = fml::MakeRefCounted<flutter::gpu::Texture>(std::move(texture));
   res->AssociateWithDartWrapper(wrapper);
 
   return true;
-}
-
-void InternalFlutterGpu_Texture_SetCoordinateSystem(
-    flutter::gpu::Texture* wrapper,
-    int coordinate_system) {
-  return wrapper->SetCoordinateSystem(
-      flutter::gpu::ToImpellerTextureCoordinateSystem(coordinate_system));
 }
 
 bool InternalFlutterGpu_Texture_Overwrite(flutter::gpu::Texture* texture,
@@ -254,11 +233,6 @@ bool InternalFlutterGpu_Texture_Overwrite(flutter::gpu::Texture* texture,
   return texture->Overwrite(*gpu_context, tonic::DartByteData(source_byte_data),
                             static_cast<uint32_t>(mip_level),
                             static_cast<uint32_t>(slice));
-}
-
-extern int InternalFlutterGpu_Texture_BytesPerTexel(
-    flutter::gpu::Texture* wrapper) {
-  return wrapper->GetBytesPerTexel();
 }
 
 Dart_Handle InternalFlutterGpu_Texture_AsImage(flutter::gpu::Texture* wrapper) {
