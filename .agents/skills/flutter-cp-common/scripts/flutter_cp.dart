@@ -70,7 +70,15 @@ class CherryPickHelper {
   /// Adds the cherry-pick label (`cp: stable` or `cp: beta`) to the original PR.
   Future<void> addLabel() async {
     print('Adding "cp: $channel" label to PR #$pr...');
-    await runCmd(['gh', 'pr', 'edit', pr.toString(), '--add-label', 'cp:$channel']);
+    await runCmd([
+      'gh',
+      'api',
+      '-X',
+      'POST',
+      'repos/flutter/flutter/issues/$pr/labels',
+      '-F',
+      'labels[]=cp:$channel',
+    ]);
   }
 
   /// Dynamically retrieves the release candidate branch name for the target channel.
@@ -314,7 +322,15 @@ class CherryPickHelper {
     print('Created PR #$prNumber: $prUrl');
 
     print('Adding "cp: review" label to PR #$prNumber...');
-    await runCmd(['gh', 'pr', 'edit', prNumber.toString(), '--add-label', 'cp: review']);
+    await runCmd([
+      'gh',
+      'api',
+      '-X',
+      'POST',
+      'repos/flutter/flutter/issues/$prNumber/labels',
+      '-F',
+      'labels[]=cp: review',
+    ]);
 
     return prNumber;
   }
