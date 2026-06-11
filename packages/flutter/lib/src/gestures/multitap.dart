@@ -100,8 +100,9 @@ class _TapTracker {
   }
 
   bool isWithinGlobalTolerance(PointerEvent event, double tolerance) {
+    assert(tolerance >= 0.0);
     final Offset offset = event.position - _initialGlobalPosition;
-    return offset.distance <= tolerance;
+    return offset.distanceSquared <= tolerance * tolerance;
   }
 
   bool hasElapsedMinTime() {

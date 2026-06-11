@@ -15,6 +15,7 @@ dependencies:
     path: ../test_apps/stocks
 
   args: any
+  vector_math: any
 
 flutter:
   uses-material-design: true
