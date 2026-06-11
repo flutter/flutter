@@ -226,7 +226,6 @@ class CanvasKitRenderer extends Renderer {
     if (skImage == null) {
       throw Exception('Failed to convert image bitmap to an SkImage.');
     }
-    // Wrap the SkImage into an EngineImage with the matching ImageBitmapImageSource.
     return EngineImage(
       CkImageDelegate(skImage),
       skImage.width().toInt(),

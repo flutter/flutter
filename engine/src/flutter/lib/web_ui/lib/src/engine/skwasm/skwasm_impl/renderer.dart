@@ -446,15 +446,12 @@ class SkwasmRenderer extends Renderer {
     final int width = imageSource.width;
     final int height = imageSource.height;
 
-    // Construct a native WASM image from the given DomImageBitmap texture,
-    // using the primary pictureToImageSurface for the rendering/WebGL context.
     final ImageHandle handle = imageCreateFromTextureSource(
       imageSource,
       width,
       height,
       (pictureToImageSurface as SkwasmSurface).handle,
     );
-    // Wrap the resulting image handle in an EngineImage and supply the source metadata.
     return EngineImage(
       SkwasmImage(handle),
       width,
@@ -481,14 +478,12 @@ class SkwasmRenderer extends Renderer {
         height: height,
       ))).toJSAnyShallow;
     }
-    // Bind the WebGL texture from the source object to a native Skwasm image.
     final ImageHandle handle = imageCreateFromTextureSource(
       textureSource as JSObject,
       width,
       height,
       (pictureToImageSurface as SkwasmSurface).handle,
     );
-    // Return a wrapped EngineImage containing the newly created SkwasmImage.
     return EngineImage(SkwasmImage(handle), width, height);
   }
 

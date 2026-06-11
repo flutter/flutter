@@ -22,14 +22,11 @@ class SkwasmImage implements BackendImage {
 
   @override
   void dispose() {
-    // Dispose of the native image reference to prevent memory leaks in WASM memory.
     imageDispose(handle);
   }
 
-  /// Retrieve the image width from the native handle.
   int get width => imageGetWidth(handle);
 
-  /// Retrieve the image height from the native handle.
   int get height => imageGetHeight(handle);
 
   @override
@@ -52,15 +49,12 @@ EngineImage createSkwasmImageFromPixels(
   ui.PixelFormat format, {
   int? rowBytes,
 }) {
-  // Allocate a native buffer in WebAssembly memory to copy the pixel bytes into.
   final SkDataHandle dataHandle = skDataCreate(pixels.length);
   final int dataAddress = skDataGetPointer(dataHandle).cast<Uint8>().address;
 
-  // Efficiently transfer the pixel data from the Dart TypedData array to the native buffer.
   final wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
   wasmMemory.set(pixels.toJS, dataAddress);
 
-  // Construct the native image using the loaded pixel buffer.
   final ImageHandle imageHandle = imageCreateFromPixels(
     dataHandle,
     width,
@@ -69,10 +63,7 @@ EngineImage createSkwasmImageFromPixels(
     rowBytes ?? 4 * width,
   );
 
-  // Clean up the temporary native data handle because the image constructor has taken
-  // a reference/copied the buffer.
   skDataDispose(dataHandle);
 
-  // Wrap the native image in a SkwasmImage and return the final EngineImage.
   return EngineImage(SkwasmImage(imageHandle), width, height);
 }
