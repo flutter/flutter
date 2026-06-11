@@ -673,23 +673,11 @@ class TextSpan extends ParagraphSpan {
     if (intersect.isEmpty) {
       return ui.Rect.zero;
     }
-    // This `selection` is relative to the span, but blocks should be positioned relative to the line.
-    final ui.Rect beforeSelection = _metrics.getSelection(
-      block.textRange.start - start,
-      intersect.start - start,
-    );
     final ui.Rect intersectSelection = _metrics.getSelection(
       intersect.start - start,
       intersect.end - start,
     );
-
-    // We need 2 selections to calculate the distance between the beginning of the line block and the intersection
-    return ui.Rect.fromLTWH(
-      block.shiftFromLineStart + intersectSelection.left - beforeSelection.left,
-      intersectSelection.top,
-      intersectSelection.width,
-      intersectSelection.height,
-    );
+    return intersectSelection.shift(ui.Offset(block.spanShiftFromLineStart, 0));
   }
 
   ui.Rect getBlockBounds(TextBlock block) {
@@ -905,7 +893,7 @@ class WebParagraph implements ui.Paragraph {
       boxWidthStyle,
     );
     WebParagraphDebug.apiTrace(
-      'getBoxesForRange("$text", $start, $end, $boxHeightStyle, $boxWidthStyle): $result ($longestLine, $maxLineWidthWithTrailingSpaces)',
+      'getBoxesForRange("$text", $start, $end, $boxHeightStyle, $boxWidthStyle): ${result.map((r) => r.toString()).toList()}',
     );
     return result;
   }
@@ -922,7 +910,7 @@ class WebParagraph implements ui.Paragraph {
   @override
   ui.GlyphInfo? getClosestGlyphInfoForOffset(ui.Offset offset) {
     final ui.TextPosition position = getPositionForOffset(offset);
-    assert(position.offset < text.length || text.isEmpty);
+    //assert(position.offset < text.length || text.isEmpty);
     final ui.GlyphInfo? result = getGlyphInfoAt(position.offset);
     if (result == null) {
       WebParagraphDebug.apiTrace(
@@ -946,6 +934,7 @@ class WebParagraph implements ui.Paragraph {
   @override
   ui.GlyphInfo? getGlyphInfoAt(int codeUnitOffset) {
     if (codeUnitOffset < 0 || codeUnitOffset >= text.length) {
+      WebParagraphDebug.apiTrace('getGlyphInfoAt("$text", $codeUnitOffset): null');
       return null;
     }
     final ui.GlyphInfo? result = _layout.getGlyphInfoAt(codeUnitOffset);
@@ -983,6 +972,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
+    WebParagraphDebug.apiTrace('paint("$text", $offset)');
     _painter.paint(canvas, offset);
   }
 

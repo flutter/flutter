@@ -756,13 +756,17 @@ class TextLayout {
             WebParagraphDebug.log('test cluster: $left:$right vs $offset');
           }
           if (left <= offset.dx && right > offset.dx) {
+            ui.TextPosition position;
             if (offset.dx - left <= right - offset.dx) {
-              return ui.TextPosition(offset: cluster.start);
-            } else if (cluster.end == paragraph.text.length) {
-              return ui.TextPosition(offset: cluster.end - 1);
+              position = block.isLtr
+                  ? ui.TextPosition(offset: cluster.start)
+                  : ui.TextPosition(offset: cluster.end, affinity: ui.TextAffinity.upstream);
             } else {
-              return ui.TextPosition(offset: cluster.end, affinity: ui.TextAffinity.upstream);
+              position = block.isLtr
+                  ? ui.TextPosition(offset: cluster.end, affinity: ui.TextAffinity.upstream)
+                  : ui.TextPosition(offset: cluster.start);
             }
+            return position;
           }
         }
         // We found the block but not the cluster? How could that happen
