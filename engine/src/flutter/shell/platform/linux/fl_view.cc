@@ -39,71 +39,6 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 
-struct _FlView {
-  GtkBox parent_instance;
-
-  // Event box the render area goes inside.
-  GtkWidget* event_box;
-
-  // Handle zoom gestures.
-  GtkGesture* zoom_gesture;
-
-  // Handle rotation gestures.
-  GtkGesture* rotate_gesture;
-
-  // The widget rendering the Flutter view.
-  GtkDrawingArea* render_area;
-
-  // Rendering context when using OpenGL.
-  GdkGLContext* render_context;
-
-  // Engine this view is showing.
-  FlEngine* engine;
-
-  // Combines layers into frame.
-  FlCompositor* compositor;
-
-  // Signal subscription for engine restart signal.
-  guint on_pre_engine_restart_cb_id;
-
-  // Signal subscription for updating semantics signal.
-  guint update_semantics_cb_id;
-
-  // ID for this view.
-  FlutterViewId view_id;
-
-  // Background color.
-  GdkRGBA* background_color;
-
-  // TRUE if have got the first frame to render.
-  gboolean have_first_frame;
-
-  // Monitor to track window state.
-  FlWindowStateMonitor* window_state_monitor;
-
-  // Manages scrolling events.
-  FlScrollingManager* scrolling_manager;
-
-  // Manages pointer events.
-  FlPointerManager* pointer_manager;
-
-  // Manages touch events.
-  FlTouchManager* touch_manager;
-
-#if !FLUTTER_LINUX_GTK4
-  // Accessible tree from Flutter, exposed as an AtkPlug.
-  FlViewAccessible* view_accessible;
-#endif
-
-  // Signal subscripton for cursor changes.
-  guint cursor_changed_cb_id;
-
-  // TRUE if the view size should be controlled by Flutter.
-  gboolean sized_to_content;
-
-  GCancellable* cancellable;
-};
-
 enum { SIGNAL_FIRST_FRAME, LAST_SIGNAL };
 
 static guint fl_view_signals[LAST_SIGNAL];
@@ -146,9 +81,8 @@ static gboolean redraw_cb(gpointer user_data) {
                                 frame_width / scale_factor,
                                 frame_height / scale_factor);
 #if FLUTTER_LINUX_GTK4
-    GtkWidget* toplevel_window =
-        GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(self->render_area)));
-    if (GTK_IS_WINDOW(toplevel_window)) {
+    GtkWidget* toplevel_window = fl_view_gtk4_get_toplevel_window(self);
+    if (toplevel_window != nullptr) {
       gtk_widget_queue_resize(toplevel_window);
     }
 #else
@@ -186,6 +120,7 @@ static void init_touch(FlView* self) {
   self->touch_manager = fl_touch_manager_new(self->engine, self->view_id);
 }
 
+#if !FLUTTER_LINUX_GTK4
 static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
 #if FLUTTER_LINUX_GTK4
   GdkDevice* device = gdk_event_get_device(event);
@@ -228,10 +163,13 @@ static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
 #endif
   return kFlutterPointerDeviceKindMouse;
 }
+#endif
 
+#if !FLUTTER_LINUX_GTK4
 static FlutterPointerDeviceKind get_pointer_device_kind(GdkEvent* event) {
   return get_device_kind(event);
 }
+#endif
 
 // Called when the mouse cursor changes.
 static void cursor_changed_cb(FlView* self) {
@@ -239,12 +177,7 @@ static void cursor_changed_cb(FlView* self) {
       fl_engine_get_mouse_cursor_handler(self->engine);
   const gchar* cursor_name = fl_mouse_cursor_handler_get_cursor_name(handler);
 #if FLUTTER_LINUX_GTK4
-  FlGdkSurface* surface = fl_gtk_widget_get_surface(GTK_WIDGET(self));
-  if (surface == nullptr) {
-    return;
-  }
-  g_autoptr(GdkCursor) cursor = gdk_cursor_new_from_name(cursor_name, nullptr);
-  fl_gtk_surface_set_cursor(surface, cursor);
+  fl_view_gtk4_set_cursor(self, cursor_name);
 #else
   GdkWindow* window =
       gtk_widget_get_window(gtk_widget_get_toplevel(GTK_WIDGET(self)));
@@ -378,6 +311,7 @@ static void fl_view_plugin_registry_iface_init(
   iface->get_registrar_for_plugin = fl_view_get_registrar_for_plugin;
 }
 
+#if !FLUTTER_LINUX_GTK4
 static void sync_modifier_if_needed(FlView* self, GdkEvent* event) {
   guint event_time = gdk_event_get_time(event);
 #if FLUTTER_LINUX_GTK4
@@ -395,77 +329,9 @@ static void set_scrolling_position(FlView* self, gdouble x, gdouble y) {
   fl_scrolling_manager_set_last_mouse_position(
       self->scrolling_manager, x * scale_factor, y * scale_factor);
 }
+#endif
 
-// Signal handler for GtkWidget event handling on GTK4.
-#if FLUTTER_LINUX_GTK4
-static gboolean legacy_event_cb(FlView* self, GdkEvent* event) {
-  GdkEventType event_type = gdk_event_get_event_type(event);
-  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
-
-  switch (event_type) {
-    case GDK_BUTTON_PRESS:
-    case GDK_BUTTON_RELEASE: {
-      guint button = gdk_button_event_get_button(event);
-
-      gdouble x = 0.0, y = 0.0;
-      gdk_event_get_position(event, &x, &y);
-
-      set_scrolling_position(self, x, y);
-      sync_modifier_if_needed(self, event);
-
-      if (event_type == GDK_BUTTON_PRESS) {
-        return fl_pointer_manager_handle_button_press(
-            self->pointer_manager, gdk_event_get_time(event),
-            get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
-            button);
-      }
-      return fl_pointer_manager_handle_button_release(
-          self->pointer_manager, gdk_event_get_time(event),
-          get_pointer_device_kind(event), x * scale_factor, y * scale_factor,
-          button);
-    }
-    case GDK_SCROLL:
-      fl_scrolling_manager_handle_scroll_event(self->scrolling_manager, event,
-                                               scale_factor);
-      return TRUE;
-    case GDK_MOTION_NOTIFY: {
-      sync_modifier_if_needed(self, event);
-      gdouble x = 0.0, y = 0.0;
-      gdk_event_get_position(event, &x, &y);
-      return fl_pointer_manager_handle_motion(
-          self->pointer_manager, gdk_event_get_time(event),
-          get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
-    }
-    case GDK_ENTER_NOTIFY:
-    case GDK_LEAVE_NOTIFY: {
-      if (event_type == GDK_LEAVE_NOTIFY &&
-          gdk_crossing_event_get_mode(event) != GDK_CROSSING_NORMAL) {
-        return FALSE;
-      }
-
-      gdouble x = 0.0, y = 0.0;
-      gdk_event_get_position(event, &x, &y);
-      if (event_type == GDK_ENTER_NOTIFY) {
-        return fl_pointer_manager_handle_enter(
-            self->pointer_manager, gdk_event_get_time(event),
-            get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
-      }
-      return fl_pointer_manager_handle_leave(
-          self->pointer_manager, gdk_event_get_time(event),
-          get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
-    }
-    case GDK_TOUCH_BEGIN:
-    case GDK_TOUCH_UPDATE:
-    case GDK_TOUCH_END:
-    case GDK_TOUCH_CANCEL:
-      fl_touch_manager_handle_touch_event(self->touch_manager, event,
-                                          scale_factor);
-      return TRUE;
-    default:
-      return FALSE;
-  }
-}
-#else
+#if !FLUTTER_LINUX_GTK4
 // Signal handler for GtkWidget::button-press-event
 static gboolean button_press_event_cb(FlView* self,
                                       GdkEventButton* button_event) {
@@ -582,7 +448,7 @@ static gboolean leave_notify_event_cb(FlView* self,
       get_pointer_device_kind(event), x * scale_factor, y * scale_factor);
 }
 #endif
-
+#if !FLUTTER_LINUX_GTK4
 static void gesture_rotation_begin_cb(FlView* self) {
   fl_scrolling_manager_handle_rotation_begin(self->scrolling_manager);
 }
@@ -609,6 +475,7 @@ static void gesture_zoom_update_cb(FlView* self, gdouble scale) {
 static void gesture_zoom_end_cb(FlView* self) {
   fl_scrolling_manager_handle_zoom_end(self->scrolling_manager);
 }
+#endif
 
 static void setup_opengl(FlView* self) {
   g_autoptr(GError) error = nullptr;
@@ -662,8 +529,7 @@ static void realize_cb(FlView* self) {
   }
 
 #if FLUTTER_LINUX_GTK4
-  GtkWidget* toplevel_window =
-      GTK_WIDGET(gtk_widget_get_root(GTK_WIDGET(self)));
+  GtkWidget* toplevel_window = fl_view_gtk4_get_toplevel_window(self);
 #else
   GtkWidget* toplevel_window = gtk_widget_get_toplevel(GTK_WIDGET(self));
 #endif
@@ -744,9 +610,22 @@ static void fl_view_dispose(GObject* object) {
 
   g_cancellable_cancel(self->cancellable);
 
+#if FLUTTER_LINUX_GTK4
+  if (self->render_area != nullptr) {
+    if (self->zoom_gesture != nullptr) {
+      gtk_widget_remove_controller(GTK_WIDGET(self->render_area),
+                                   GTK_EVENT_CONTROLLER(self->zoom_gesture));
+    }
+    if (self->rotate_gesture != nullptr) {
+      gtk_widget_remove_controller(GTK_WIDGET(self->render_area),
+                                   GTK_EVENT_CONTROLLER(self->rotate_gesture));
+    }
+  }
+#endif
   g_clear_object(&self->zoom_gesture);
   g_clear_object(&self->rotate_gesture);
-  if (self->engine != nullptr) {
+  if (self->engine != nullptr &&
+      self->view_id != flutter::kFlutterImplicitViewId) {
     FlMouseCursorHandler* handler =
         fl_engine_get_mouse_cursor_handler(self->engine);
     if (self->cursor_changed_cb_id != 0) {
@@ -914,31 +793,7 @@ static void fl_view_init(FlView* self) {
   gtk_widget_set_hexpand(GTK_WIDGET(self->render_area), TRUE);
   gtk_widget_set_vexpand(GTK_WIDGET(self->render_area), TRUE);
 #if FLUTTER_LINUX_GTK4
-  gtk_box_append(GTK_BOX(self), GTK_WIDGET(self->render_area));
-
-  GtkEventController* legacy = gtk_event_controller_legacy_new();
-  g_signal_connect_swapped(legacy, "event", G_CALLBACK(legacy_event_cb), self);
-  gtk_widget_add_controller(GTK_WIDGET(self->render_area), legacy);
-
-  self->zoom_gesture = gtk_gesture_zoom_new();
-  g_signal_connect_swapped(self->zoom_gesture, "begin",
-                           G_CALLBACK(gesture_zoom_begin_cb), self);
-  g_signal_connect_swapped(self->zoom_gesture, "scale-changed",
-                           G_CALLBACK(gesture_zoom_update_cb), self);
-  g_signal_connect_swapped(self->zoom_gesture, "end",
-                           G_CALLBACK(gesture_zoom_end_cb), self);
-  gtk_widget_add_controller(GTK_WIDGET(self->render_area),
-                            GTK_EVENT_CONTROLLER(self->zoom_gesture));
-
-  self->rotate_gesture = gtk_gesture_rotate_new();
-  g_signal_connect_swapped(self->rotate_gesture, "begin",
-                           G_CALLBACK(gesture_rotation_begin_cb), self);
-  g_signal_connect_swapped(self->rotate_gesture, "angle-changed",
-                           G_CALLBACK(gesture_rotation_update_cb), self);
-  g_signal_connect_swapped(self->rotate_gesture, "end",
-                           G_CALLBACK(gesture_rotation_end_cb), self);
-  gtk_widget_add_controller(GTK_WIDGET(self->render_area),
-                            GTK_EVENT_CONTROLLER(self->rotate_gesture));
+  fl_view_gtk4_setup(self);
 #else
   self->event_box = gtk_event_box_new();
   gtk_widget_set_hexpand(self->event_box, TRUE);
