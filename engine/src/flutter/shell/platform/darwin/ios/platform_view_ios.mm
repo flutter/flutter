@@ -246,10 +246,7 @@ void PlatformViewIOS::UpdateAccessibilityBridgeViewController() {
     return;
   }
   FlutterPlatformViewsController* platform_views_controller =
-      owner_controller_ ? owner_controller_.platformViewsController : nil;
-  if (!platform_views_controller) {
-    platform_views_controller = platform_views_controller_;
-  }
+      owner_controller_.platformViewsController ?: platform_views_controller_;
   if (accessibility_bridge_) {
     accessibility_bridge_->SetViewController(owner_controller_, platform_views_controller);
     return;
