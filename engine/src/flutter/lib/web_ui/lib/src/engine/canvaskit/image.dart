@@ -312,34 +312,34 @@ bool validUpscale(
 /// will be treated as if it is null.
 EngineImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
   assert(targetWidth != null || targetHeight != null);
+  final int width = image.width().toInt();
+  final int height = image.height().toInt();
+
   if (targetWidth != null && targetWidth <= 0) {
     targetWidth = null;
   }
   if (targetHeight != null && targetHeight <= 0) {
     targetHeight = null;
   }
-  if (targetWidth == null && targetHeight != null) {
-    targetWidth = (targetHeight * (image.width() / image.height())).round();
-  } else if (targetHeight == null && targetWidth != null) {
-    targetHeight = targetWidth ~/ (image.width() / image.height());
-  }
 
-  assert(targetWidth != null);
-  assert(targetHeight != null);
+  final int finalTargetWidth = targetWidth ?? (targetHeight! * (width / height)).round();
+  final int finalTargetHeight = targetHeight ?? (targetWidth! ~/ (width / height));
 
   final recorder = CkPictureRecorder();
   final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
 
   final paint = CkPaint();
+  final EngineImage temporaryImage = EngineImage(CkImageDelegate(image), width, height);
   canvas.drawImageRect(
-    EngineImage(CkImageDelegate(image), image.width().toInt(), image.height().toInt()),
-    ui.Rect.fromLTWH(0, 0, image.width(), image.height()),
-    ui.Rect.fromLTWH(0, 0, targetWidth!.toDouble(), targetHeight!.toDouble()),
+    temporaryImage,
+    ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+    ui.Rect.fromLTWH(0, 0, finalTargetWidth.toDouble(), finalTargetHeight.toDouble()),
     paint,
   );
+  temporaryImage.dispose();
 
   final CkPicture picture = recorder.endRecording();
-  final ui.Image finalImage = picture.toImageSync(targetWidth, targetHeight);
+  final ui.Image finalImage = picture.toImageSync(finalTargetWidth, finalTargetHeight);
 
   final ckImage = finalImage as EngineImage;
   return ckImage;
