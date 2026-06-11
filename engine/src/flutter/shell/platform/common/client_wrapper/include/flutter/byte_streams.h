@@ -26,9 +26,6 @@ class ByteStreamReader {
   // the start of the stream, unless it is already aligned.
   virtual void ReadAlignment(uint8_t alignment) = 0;
 
-  // Returns the number of bytes remaining in the stream.
-  virtual size_t GetRemaining() const { return 0; }
-
   // Reads and returns the next 32-bit integer from the stream.
   int32_t ReadInt32() {
     int32_t value = 0;

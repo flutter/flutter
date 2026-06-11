@@ -185,9 +185,6 @@ EncodableValue StandardCodecSerializer::ReadValueOfType(
     case EncodedType::kLargeInt:
     case EncodedType::kString: {
       size_t size = ReadSize(stream);
-      if (size > stream->GetRemaining()) {
-        return EncodableValue();
-      }
       std::string string_value;
       string_value.resize(size);
       stream->ReadBytes(reinterpret_cast<uint8_t*>(&string_value[0]), size);
@@ -203,9 +200,6 @@ EncodableValue StandardCodecSerializer::ReadValueOfType(
       return ReadVector<double>(stream);
     case EncodedType::kList: {
       size_t length = ReadSize(stream);
-      if (length > stream->GetRemaining()) {
-        return EncodableValue();
-      }
       EncodableList list_value;
       list_value.reserve(length);
       for (size_t i = 0; i < length; ++i) {
@@ -215,9 +209,6 @@ EncodableValue StandardCodecSerializer::ReadValueOfType(
     }
     case EncodedType::kMap: {
       size_t length = ReadSize(stream);
-      if (length > stream->GetRemaining()) {
-        return EncodableValue();
-      }
       EncodableMap map_value;
       for (size_t i = 0; i < length; ++i) {
         EncodableValue key = ReadValue(stream);
@@ -269,13 +260,6 @@ template <typename T>
 EncodableValue StandardCodecSerializer::ReadVector(
     ByteStreamReader* stream) const {
   size_t count = ReadSize(stream);
-  size_t byte_count = count * sizeof(T);
-  if (count != 0 && byte_count / sizeof(T) != count) {
-    return EncodableValue();
-  }
-  if (byte_count > stream->GetRemaining()) {
-    return EncodableValue();
-  }
   std::vector<T> vector;
   vector.resize(count);
   uint8_t type_size = static_cast<uint8_t>(sizeof(T));
