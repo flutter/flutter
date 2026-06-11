@@ -44,13 +44,7 @@ void EnableTransparentWindowBackground(HWND hwnd,
   // See: https://github.com/flutter/flutter/issues/186522
   //
   // For now, Windows 10 host windows fall back to an opaque background, which
-  // matches the classic single-window runner and renders correctly. This is
-  // safe because the windowing API does not yet expose a way to request a
-  // transparent window. Supporting true per-pixel transparency on Windows 10
-  // (e.g. via layered windows or DirectComposition) is tracked as follow-up
-  // work and should be validated on Windows 10 hardware.
-  // TODO(mattkae): Support transparent window backgrounds on Windows 10.
-  // https://github.com/flutter/flutter/issues/186522
+  // matches the classic single-window runner and renders correctly.
   if (!win32.IsWindows11OrGreater()) {
     return;
   }
