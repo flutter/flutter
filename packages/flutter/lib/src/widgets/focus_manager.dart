@@ -1241,6 +1241,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
+  /// Invalidates cached traversal policy data across all enclosing scopes if
+  /// focus shifted outside of an active traversal action.
+  ///
+  /// For instance, if focus moves via a direct tap, then stale traversal
+  /// history is cleared.
   void _maybeInvalidatePolicyData() {
     FocusNode? current = this;
     while (current != null) {
