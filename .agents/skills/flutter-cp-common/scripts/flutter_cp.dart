@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 // ignore_for_file: avoid_print, prefer_final_locals, omit_obvious_local_variable_types, specify_nonobvious_local_variable_types, unnecessary_await_in_return, always_put_control_body_on_new_line, prefer_foreach, inference_failure_on_instance_creation, sort_constructors_first
 
 import 'dart:convert';
