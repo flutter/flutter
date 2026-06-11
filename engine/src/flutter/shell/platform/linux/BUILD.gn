@@ -274,6 +274,7 @@ source_set("flutter_linux_sources_gtk4") {
     "fl_pixel_buffer_texture.cc",
     "fl_platform_channel.cc",
     "fl_platform_handler.cc",
+    "fl_platform_handler_gtk4.cc",
     "fl_plugin_registrar.cc",
     "fl_plugin_registry.cc",
     "fl_pointer_manager.cc",
