@@ -1,7 +1,3 @@
-// Copyright 2013 The Flutter Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 #include <impeller/types.glsl>
 
 uniform FrameInfo {
@@ -10,10 +6,11 @@ uniform FrameInfo {
 frame_info;
 
 in vec2 position;
+in float sdf;
 
-out vec2 v_position;
+out float v_sdf;
 
 void main() {
   gl_Position = frame_info.mvp * vec4(position, 0.0, 1.0);
-  v_position = position.xy;
+  v_sdf = sdf;
 }

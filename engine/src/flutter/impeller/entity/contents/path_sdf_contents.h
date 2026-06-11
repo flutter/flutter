@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/impeller/entity/contents/color_source_contents.h"
 #include "flutter/impeller/entity/contents/contents.h"
 #include "impeller/entity/geometry/geometry.h"
@@ -14,8 +15,11 @@
 namespace impeller {
 class PathSdfContents : public ColorSourceContents {
  public:
-  static std::unique_ptr<PathSdfContents>
-  Make(std::unique_ptr<Geometry> geometry, Color color);
+  static std::unique_ptr<PathSdfContents> Make(
+      const flutter::DlPath& path,
+      std::unique_ptr<Geometry> geometry,
+      Color color,
+      Scalar stroke_width);
 
   bool Render(const ContentContext& renderer,
               const Entity& entity,
@@ -26,11 +30,15 @@ class PathSdfContents : public ColorSourceContents {
   const Geometry* GetGeometry() const override;
 
  private:
-  explicit PathSdfContents(std::unique_ptr<Geometry> geometry,
-                           Color color);
+  explicit PathSdfContents(const flutter::DlPath& path,
+                           std::unique_ptr<Geometry> geometry,
+                           Color color,
+                           Scalar stroke_width);
 
+  const flutter::DlPath path_;
   std::unique_ptr<Geometry> geometry_;
   Color color_;
+  Scalar stroke_width_;
 };
 }  // namespace impeller
 
