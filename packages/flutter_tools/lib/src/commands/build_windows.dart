@@ -67,7 +67,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     final defaultTargetPlatform = (_operatingSystemUtils.hostPlatform == HostPlatform.windows_arm64)
         ? 'windows-arm64'
         : 'windows-x64';
-    final TargetPlatform targetPlatform = getTargetPlatformForName(defaultTargetPlatform);
+    final targetPlatform = TargetPlatform.fromName(defaultTargetPlatform);
 
     await buildWindows(
       project.windows,

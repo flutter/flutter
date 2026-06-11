@@ -8,13 +8,12 @@ import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
+import '../renderer.dart';
 import '../text/paragraph.dart';
 import '../util.dart';
 import '../view_embedder/style_manager.dart';
 import 'debug.dart';
 import 'layout.dart';
-import 'paint.dart';
-import 'paint_paragraph.dart';
 import 'painter.dart';
 
 @visibleForTesting
@@ -693,6 +692,19 @@ class TextSpan extends ParagraphSpan {
     );
   }
 
+  ui.Rect getBlockBounds(TextBlock block) {
+    final ui.Rect bounds = _metrics.getBounds(
+      block.textRange.start - start,
+      block.textRange.end - start,
+    );
+    return ui.Rect.fromLTWH(
+      bounds.left + block.spanShiftFromLineStart,
+      bounds.top,
+      bounds.width,
+      bounds.height,
+    );
+  }
+
   ui.Rect getBlockSelection(LineBlock block) {
     // This `selection` is relative to the span, but blocks should be positioned relative to the line.
     final ui.Rect selection = _metrics.getSelection(
@@ -873,6 +885,9 @@ class WebParagraph implements ui.Paragraph {
 
   List<TextLine> get lines => _layout.lines;
 
+  /// The actual paint bounds of the paragraph.
+  late ui.Rect paintBounds;
+
   @override
   List<ui.TextBox> getBoxesForPlaceholders() => _layout.getBoxesForPlaceholders();
 
@@ -968,7 +983,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   void paint(ui.Canvas canvas, ui.Offset offset) {
-    _paint.paint(canvas, _layout, _painter, offset.dx, offset.dy);
+    _painter.paint(canvas, offset);
   }
 
   @override
@@ -1041,11 +1056,16 @@ class WebParagraph implements ui.Paragraph {
     return null;
   }
 
+  void clearPaintCache() {
+    _painter.clearCache();
+  }
+
   bool _disposed = false;
 
   @override
   void dispose() {
     assert(!_disposed, 'Paragraph has been disposed.');
+    clearPaintCache();
     _disposed = true;
   }
 
@@ -1078,8 +1098,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   late final TextLayout _layout = TextLayout(this);
-  late final TextPaint _paint = PaintParagraph(this);
-  late final Painter _painter = CanvasKitPainter();
+  late final WebParagraphPainter _painter = renderer.createWebParagraphPainter(this);
 }
 
 class WebLineMetrics implements ui.LineMetrics {
