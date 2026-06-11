@@ -544,21 +544,14 @@ object FlutterPluginUtils {
         val isBuiltInKotlinEnabled =
             properties.getProperty("android.builtInKotlin").toBoolean()
 
-        val subprojectPluginStates = mutableMapOf<Project, SubprojectPluginState?>()
-
-        fun getPluginStateWithCaching(subproject: Project): SubprojectPluginState? =
-            subprojectPluginStates.getOrPut(subproject) {
-                getSubprojectPluginState(subproject)
-            }
-
         if (isBuiltInKotlinEnabled) {
             val allSubprojectsDoNotApplyKgp =
                 project.rootProject.subprojects.all { subproject ->
-                    val pluginState = getPluginStateWithCaching(subproject)
-                    if (pluginState == null || (!pluginState.hasAppPlugin && !pluginState.hasLibPlugin)) {
+                    val subprojectPluginState = getSubprojectPluginState(subproject)
+                    if (subprojectPluginState == null || (!subprojectPluginState.hasAppPlugin && !subprojectPluginState.hasLibPlugin)) {
                         true
                     } else {
-                        !pluginState.hasKgpPlugin
+                        !subprojectPluginState.hasKgpPlugin
                     }
                 }
             if (allSubprojectsDoNotApplyKgp) {
@@ -570,7 +563,7 @@ object FlutterPluginUtils {
 
         var shouldLogForApp = false
         project.rootProject.subprojects {
-            val pluginState = getPluginStateWithCaching(this) ?: return@subprojects
+            val pluginState = getSubprojectPluginState(this) ?: return@subprojects
 
             // Ensures applying AGP exists in the build file configuration.
             if (!pluginState.hasAppPlugin && !pluginState.hasLibPlugin) return@subprojects
