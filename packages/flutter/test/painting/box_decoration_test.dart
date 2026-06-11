@@ -104,6 +104,16 @@ void main() {
     expect(clipPath, isLookLikeExpectedPath);
   });
 
+  test('BoxDecoration.hitTest with shape BoxShape.circle', () {
+    const decoration = BoxDecoration(shape: BoxShape.circle);
+    const size = Size(100.0, 20.0);
+
+    expect(decoration.hitTest(size, const Offset(50.0, 0.0)), isTrue);
+    expect(decoration.hitTest(size, const Offset(40.0, 10.0)), isTrue);
+    expect(decoration.hitTest(size, const Offset(40.0, 0.0)), isFalse);
+    expect(decoration.hitTest(size, const Offset(10.0, 10.0)), isFalse);
+  });
+
   test('BoxDecorations with different blendModes are not equal', () {
     // Regression test for https://github.com/flutter/flutter/issues/100754.
     const one = BoxDecoration(color: Color(0x00000000), backgroundBlendMode: BlendMode.color);
