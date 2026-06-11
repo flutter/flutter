@@ -52,7 +52,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   /// Whether this route introduces a route scope in the semantics tree.
   ///
   /// Defaults to true. When true, screen readers can treat pushes and pops of
-  /// this route as navigation to a new screen.
+  /// this route as navigation to a new screen and announce the change to the users.
   ///
   /// Set this to false for routes that update only part of the screen, such as
   /// tab or shell content in a nested navigator. This prevents screen readers
