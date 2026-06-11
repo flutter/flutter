@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 /// Parses INI file lines into a Map of key-value pairs.
+///
+/// INI is a configuration file format that consists of key-value pairs
+/// separated by an equals sign (=). Comments start with a hash (#) or
+/// semicolon (;) and are ignored.
 Map<String, String> parseIniLines(List<String> contents) {
   final results = <String, String>{};
 

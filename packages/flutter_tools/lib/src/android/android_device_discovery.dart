@@ -82,13 +82,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
     }
     final devices = <AndroidDevice>[];
     _parseADBDeviceOutput(text, devices: devices);
-    await Future.wait(
-      devices.map((AndroidDevice device) async {
-        if (device.id.startsWith('emulator-')) {
-          await device.resolveEmulatorName();
-        }
-      }),
-    );
+    await Future.wait(devices.map((AndroidDevice device) => device.resolveEmulatorName()));
     return devices;
   }
 
