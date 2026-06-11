@@ -475,7 +475,8 @@ TEST(TypographerTest, RectanglePackerFillsRows) {
 }
 
 TEST_P(TypographerTest, GlyphAtlasTextureWillGrowTilMaxTextureSize) {
-  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP() << "Atlas growth isn't supported for OpenGLES currently.";
   }
 

@@ -134,6 +134,17 @@ class MockVulkanContextBuilder {
     return *this;
   }
 
+  /// Make the next `count` calls to vkCreateImage for a fixed-rate-compressed
+  /// image (one carrying a VkImageCompressionControlEXT in its pNext chain)
+  /// fail with VK_ERROR_COMPRESSION_EXHAUSTED_EXT. Also advertises the
+  /// VK_EXT_image_compression_control feature/format support so the
+  /// fixed-rate-compression path is exercised.
+  MockVulkanContextBuilder& SetCompressionExhaustedCreateImageFailures(
+      int count) {
+    compression_exhausted_create_image_failures_ = count;
+    return *this;
+  }
+
  private:
   std::function<void(ContextVK::Settings&)> settings_callback_;
   std::vector<std::string> instance_extensions_;
@@ -151,6 +162,7 @@ class MockVulkanContextBuilder {
       acquire_next_image_callback_;
   std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
       wait_for_fences_callback_;
+  int compression_exhausted_create_image_failures_ = 0;
 };
 
 /// @brief Override the image size returned by all swapchain images.
@@ -158,6 +170,10 @@ void SetSwapchainImageSize(ISize size);
 
 std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
     VkCommandBuffer buffer);
+
+/// @brief Returns the viewports passed to `vkCmdSetViewport` calls on the
+///        given command buffer, in call order.
+const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer);
 
 }  // namespace testing
 }  // namespace impeller

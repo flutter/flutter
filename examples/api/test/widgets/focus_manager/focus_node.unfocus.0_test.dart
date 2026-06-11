@@ -19,7 +19,7 @@ void main() {
       await tester.pump();
 
       // Changes the focus to the unfocus button.
-      for (int i = 0; i < 6; i++) {
+      for (int i = 0; i < 5; i++) {
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.pump();
       }
@@ -43,22 +43,15 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(const example.UnfocusExampleApp());
 
-      // Focuses the first text field.
-      await tester.tap(find.byType(TextField).first);
+      // Focuses the first 2nd radio button.
+      await tester.tap(find.byType(Radio<UnfocusDisposition>).last);
       await tester.pump();
 
-      // Changes the focus to the second radio button.
+      // Changes the focus to the unfocus button.
       for (int i = 0; i < 5; i++) {
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.pump();
       }
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.space);
-      await tester.pumpAndSettle();
-
-      // Changes the focus to the unfocus button.
-      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-      await tester.pump();
 
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       await tester.pumpAndSettle();
