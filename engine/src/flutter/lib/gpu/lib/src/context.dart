@@ -67,6 +67,17 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getSupportsFramebufferRenderMipmap();
   }
 
+  /// Whether a texture whose mip levels were uploaded by hand with
+  /// [Texture.overwrite] (rather than generated with
+  /// [CommandBuffer.generateMipmap]) samples with correct per-level selection.
+  /// True on Metal and Vulkan; on OpenGL ES 2.0 devices without the
+  /// GL_APPLE_texture_max_level extension this is false, and sampling such a
+  /// texture reads as black. Check this before relying on hand-built mip
+  /// chains (for example, prefiltered environment maps).
+  bool get doesSupportManuallyMippedTextures {
+    return _getSupportsManuallyMippedTextures();
+  }
+
   /// Whether this device supports the given family of block-compressed
   /// texture formats. Hardware support is granted on a per-family basis.
   ///
@@ -160,8 +171,6 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     int height, {
     PixelFormat format = PixelFormat.r8g8b8a8UNormInt,
     sampleCount = 1,
-    TextureCoordinateSystem coordinateSystem =
-        TextureCoordinateSystem.renderToTexture,
 
     /// The type of texture to create.
     ///
@@ -212,7 +221,6 @@ base class GpuContext extends NativeFieldWrapperClass1 {
       width,
       height,
       sampleCount,
-      coordinateSystem,
       resolvedTextureType,
       enableRenderTargetUsage,
       enableShaderReadUsage,
@@ -276,6 +284,11 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetSupportsFramebufferRenderMipmap',
   )
   external bool _getSupportsFramebufferRenderMipmap();
+
+  @Native<Bool Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetSupportsManuallyMippedTextures',
+  )
+  external bool _getSupportsManuallyMippedTextures();
 
   @Native<Bool Function(Pointer<Void>, Int)>(
     symbol: 'InternalFlutterGpu_Context_SupportsTextureCompression',
