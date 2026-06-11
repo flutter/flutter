@@ -1,0 +1,87 @@
+name: Linux Analyze
+
+on:
+  pull_request:
+    branches: [master]
+  merge_group:
+    branches: [master]
+
+jobs:
+  Linux_analyze:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 130
+
+    steps:
+      # Note: we must check out the tree for the composite action to be available
+      - name: Checkout code
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Check Engine Changes
+        id: check_engine
+        run: |
+          # 1. Determine commit range
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          elif [ "${{ github.event_name }}" = "merge_group" ]; then
+            BASE_SHA="${{ github.event.merge_group.base_sha }}"
+            HEAD_SHA="${{ github.event.merge_group.head_sha }}"
+          else
+            BASE_SHA=""
+            HEAD_SHA="HEAD"
+          fi
+
+          echo "BASE_SHA: $BASE_SHA"
+          echo "HEAD_SHA: $HEAD_SHA"
+
+          # Fetch base SHA if not present
+          if [ -n "$BASE_SHA" ]; then
+            git fetch origin "$BASE_SHA" --depth=1 || true
+            CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" 2>/dev/null || true)
+          fi
+
+          # Fallback if CHANGED_FILES is empty or BASE_SHA was empty
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "Falling back to git diff-tree or HEAD~1"
+            CHANGED_FILES=$(git diff-tree --no-commit-id --name-only -r "$HEAD_SHA" 2>/dev/null || git diff --name-only HEAD~1 HEAD 2>/dev/null || true)
+          fi
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # 2. Check if any file matches engine pattern:
+          # ^(DEPS|engine/.*|bin/internal/content_aware_hash\.(ps1|sh))$
+          ENGINE_CHANGED=false
+          while IFS= read -r file; do
+            if [[ -z "$file" ]]; then
+              continue
+            fi
+            if [[ "$file" =~ ^DEPS$ ]] || [[ "$file" =~ ^engine/ ]] || [[ "$file" =~ ^bin/internal/content_aware_hash\.(ps1|sh)$ ]]; then
+              echo "Engine file changed: $file"
+              ENGINE_CHANGED=true
+            fi
+          done <<< "$CHANGED_FILES"
+
+          echo "changed=$ENGINE_CHANGED" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for test check-in
+        if: steps.check_engine.outputs.changed == 'true'
+        uses: lewagon/wait-on-check-action@9312864dfbc9fd208e9c0417843430751c042800
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          check-name: 'Linux linux_host_engine'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 30 # seconds
+          allowed-conclusions: success,neutral
+          verbose: false
+
+      - uses: ./.github/actions/composite-flutter-setup
+
+      - name: Run Analyze
+        run: |
+          SHARD=analyze SHARED=analyze LUCI_CI=true dart --enable-asserts dev/bots/test.dart
