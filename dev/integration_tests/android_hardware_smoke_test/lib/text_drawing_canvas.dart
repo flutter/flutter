@@ -21,7 +21,7 @@ class _TextDrawingCanvasState extends State<TextDrawingCanvas> {
     super.initState();
     _textPainter = TextPainter(
       text: const TextSpan(
-        text: 'Flutter Text Rendering Test',
+        text: 'Flutter Text Rendering Test 🐦🙂',
         style: TextStyle(
           color: Colors.red,
           fontSize: 14.0,
@@ -30,7 +30,6 @@ class _TextDrawingCanvasState extends State<TextDrawingCanvas> {
       ),
       textDirection: TextDirection.ltr,
     );
-    _textPainter.layout();
   }
 
   @override
@@ -53,6 +52,7 @@ class _TextDrawingPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    _textPainter.layout(maxWidth: size.width - 20.0);
     _textPainter.paint(canvas, const Offset(10.0, 50.0));
   }
 
