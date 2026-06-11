@@ -8,7 +8,7 @@ import '../framework/talkback.dart' hide adbPath;
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-TaskFunction createChannelsIdentegrationTest() {
+TaskFunction createChannelsIntegrationTest() {
   return IntegrationTest(
     '${flutterDirectory.path}/dev/integration_tests/channels',
     'integration_test/main_test.dart',
