@@ -18,6 +18,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+{{#linuxGtkDefault}}
+  config:
+    linux-gtk-default: {{linuxGtkDefault}}
+{{/linuxGtkDefault}}
 {{/withEmptyMain}}
 {{^withEmptyMain}}
 # The following line prevents the package from being accidentally published to
@@ -92,6 +96,10 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+{{#linuxGtkDefault}}
+  config:
+    linux-gtk-default: {{linuxGtkDefault}}
+{{/linuxGtkDefault}}
 
   # To add assets to your application, add an assets section, like this:
   # assets:

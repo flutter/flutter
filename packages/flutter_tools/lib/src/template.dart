@@ -228,17 +228,46 @@ class Template {
     ///
     /// Returns null if the given raw destination path has been filtered.
     String? renderPath(String relativeDestinationPath) {
-      final Match? match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
-      if (match != null) {
-        final String platform = match.group(1)!;
-        final language = context['${platform}Language'] as String?;
-        if (language != match.group(2)) {
+      final bool linux = (context['linux'] as bool?) ?? false;
+      final String linuxGtkVersion = (context['linuxGtkVersion'] as String?) ?? 'gtk3';
+      final linuxDir = context['linuxDir'] as String?;
+      final bool linuxGtk3Template = relativeDestinationPath.startsWith('linux-gtk3.tmpl');
+      final bool linuxGtk4Template = relativeDestinationPath.startsWith('linux-gtk4.tmpl');
+      final bool linuxGtkUnifiedTemplate = relativeDestinationPath.startsWith(
+        'linux-gtk-unified.tmpl',
+      );
+      if (linuxGtk3Template || linuxGtk4Template || linuxGtkUnifiedTemplate) {
+        if (!linux) {
           return null;
         }
-        relativeDestinationPath = relativeDestinationPath.replaceAll(
-          '$platform-$language.tmpl',
-          platform,
+        if (linuxGtk3Template && linuxGtkVersion != 'gtk3') {
+          return null;
+        }
+        if (linuxGtk4Template && linuxGtkVersion != 'gtk4') {
+          return null;
+        }
+        if (linuxGtkUnifiedTemplate && linuxGtkVersion != 'linux-gtk-unified') {
+          return null;
+        }
+        final String linuxTargetDir =
+            (linuxDir == null || linuxDir.isEmpty) ? 'linux' : linuxDir;
+        relativeDestinationPath = relativeDestinationPath.replaceFirst(
+          RegExp(r'^linux-gtk(?:[34]|-unified)\.tmpl'),
+          linuxTargetDir,
         );
+      } else {
+        final Match? match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
+        if (match != null) {
+          final String platform = match.group(1)!;
+          final language = context['${platform}Language'] as String?;
+          if (language != match.group(2)) {
+            return null;
+          }
+          relativeDestinationPath = relativeDestinationPath.replaceAll(
+            '$platform-$language.tmpl',
+            platform,
+          );
+        }
       }
 
       final bool android = (context['android'] as bool?) ?? false;
@@ -257,7 +286,6 @@ class Template {
         return null;
       }
       // Only build a Linux project if explicitly asked.
-      final bool linux = (context['linux'] as bool?) ?? false;
       if (relativeDestinationPath.startsWith('linux.tmpl') && !linux) {
         return null;
       }
