@@ -4,9 +4,7 @@
 
 #include "fl_compositor_software.h"
 
-#if FLUTTER_LINUX_GTK4
 #include "flutter/shell/platform/linux/fl_gtk.h"
-#endif
 
 struct _FlCompositorSoftware {
   FlCompositor parent_instance;
@@ -100,13 +98,25 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
   }
 
   // If frame not ready, then wait for it.
-  gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
+  const double scale = fl_gtk_surface_get_scale(surface);
   if (wait_for_frame) {
     gint64 expiry_time =
         g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
     while (true) {
-      size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
-      size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
+#if FLUTTER_LINUX_GTK4
+      double x1 = 0.0, y1 = 0.0, x2 = 0.0, y2 = 0.0;
+      cairo_clip_extents(cr, &x1, &y1, &x2, &y2);
+      size_t width = fl_gtk_size_to_pixels(x2 - x1, scale);
+      size_t height = fl_gtk_size_to_pixels(y2 - y1, scale);
+      if (width == 0 || height == 0) {
+        width = fl_gtk_surface_get_width(surface);
+        height = fl_gtk_surface_get_height(surface);
+      }
+#else
+      const gint buffer_scale = fl_gtk_surface_get_scale_factor(surface);
+      size_t width = fl_gtk_surface_get_width(surface) * buffer_scale;
+      size_t height = fl_gtk_surface_get_height(surface) * buffer_scale;
+#endif
       if (self->width == width && self->height == height) {
         break;
       }
@@ -125,7 +135,7 @@ static gboolean fl_compositor_software_render(FlCompositor* compositor,
     }
   }
 
-  cairo_surface_set_device_scale(self->surface, scale_factor, scale_factor);
+  cairo_surface_set_device_scale(self->surface, scale, scale);
   cairo_set_source_surface(cr, self->surface, 0.0, 0.0);
   cairo_paint(cr);
 
@@ -138,47 +148,27 @@ static GdkTexture* fl_compositor_software_acquire_texture(
     FlGdkSurface* surface,
     GdkGLContext* context,
     gboolean wait_for_frame) {
+  (void)surface;
   (void)context;
+  (void)wait_for_frame;
+
   FlCompositorSoftware* self = FL_COMPOSITOR_SOFTWARE(compositor);
 
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->frame_mutex);
 
-  if (self->surface == nullptr) {
+  if (self->surface == nullptr || self->width == 0 || self->height == 0) {
     return nullptr;
   }
 
-  gint scale_factor = fl_gtk_surface_get_scale_factor(surface);
-  if (wait_for_frame) {
-    gint64 expiry_time =
-        g_get_monotonic_time() + kCompositorRenderTimeoutMicroseconds;
-    while (true) {
-      size_t width = fl_gtk_surface_get_width(surface) * scale_factor;
-      size_t height = fl_gtk_surface_get_height(surface) * scale_factor;
-      if (self->width == width && self->height == height) {
-        break;
-      }
-
-      if (g_get_monotonic_time() > expiry_time) {
-        g_warning(
-            "Timed out waiting for software frame of size %zdx%zd (have "
-            "%zdx%zd)",
-            width, height, self->width, self->height);
-        break;
-      }
-
-      g_mutex_unlock(&self->frame_mutex);
-      fl_task_runner_wait(self->task_runner, expiry_time);
-      g_mutex_lock(&self->frame_mutex);
-    }
-  }
-
-  const int width = cairo_image_surface_get_width(self->surface);
-  const int height = cairo_image_surface_get_height(self->surface);
-  const int stride = cairo_image_surface_get_stride(self->surface);
+  cairo_surface_flush(self->surface);
+  const gsize stride = cairo_image_surface_get_stride(self->surface);
+  const gsize length = stride * self->height;
   g_autoptr(GBytes) bytes =
-      g_bytes_new(cairo_image_surface_get_data(self->surface), stride * height);
-  return gdk_memory_texture_new(width, height, GDK_MEMORY_DEFAULT, bytes,
-                                stride);
+      g_bytes_new(cairo_image_surface_get_data(self->surface), length);
+
+  return gdk_memory_texture_new(static_cast<int>(self->width),
+                                static_cast<int>(self->height),
+                                GDK_MEMORY_DEFAULT, bytes, stride);
 }
 #endif
 
