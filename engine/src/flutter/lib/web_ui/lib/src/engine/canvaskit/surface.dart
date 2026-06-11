@@ -233,14 +233,82 @@ abstract class CkSurface extends Surface {
 
   @override
   Future<ByteData?> rasterizeImage(ui.Image image, ui.ImageByteFormat format) async {
+    // Wait for the graphics context to finish initializing.
     await _initialized.future;
-    final ckImage = image as CkImage;
+
+    // Cast to EngineImage and assert that the underlying backend is CanvasKit.
+    final engineImage = image as EngineImage;
+    assert(
+      engineImage.backendImage is CkImageDelegate,
+      'The image being rasterized must be a CanvasKit image.',
+    );
+    final SkImage skImage = (engineImage.backendImage as CkImageDelegate).skImage;
+
+    // Select the appropriate alpha type based on straight or raw RGBA.
+    final SkAlphaType alphaType = format == ui.ImageByteFormat.rawStraightRgba
+        ? canvasKit.AlphaType.Unpremul
+        : canvasKit.AlphaType.Premul;
+
+    Uint8List? bytes;
+    // Extract pixel bytes directly if raw RGBA format is requested.
+    if (format == ui.ImageByteFormat.rawRgba || format == ui.ImageByteFormat.rawStraightRgba) {
+      final imageInfo = SkImageInfo(
+        alphaType: alphaType,
+        colorType: canvasKit.ColorType.RGBA_8888,
+        colorSpace: SkColorSpaceSRGB,
+        width: skImage.width(),
+        height: skImage.height(),
+      );
+      bytes = skImage.readPixels(0, 0, imageInfo);
+    } else {
+      // Otherwise, fallback to the default PNG encoder.
+      bytes = skImage.encodeToBytes(); // defaults to PNG 100%
+    }
+
+    // Return the extracted byte data if the direct extraction succeeded.
+    if (bytes != null) {
+      return bytes.buffer.asByteData();
+    }
+
+    // Fallback path: Draw the image onto a temporary surface and take a snapshot.
+    // This is required when direct pixel/byte extraction from the original SkImage fails,
+    // which can happen for GPU-resident textures that are not readable on the host CPU.
+    setSize(BitmapSize(engineImage.width, engineImage.height));
     final SkSurface skSurface = _skSurface!;
     final canvas = CkCanvas.fromSkCanvas(skSurface.getCanvas());
-    canvas.drawImage(ckImage, ui.Offset.zero, ui.Paint());
+
+    // Clear the temporary surface to prevent blending with previous contents.
+    canvas.clear(const ui.Color(0x00000000));
+    final paint = CkPaint();
+
+    // Paint the image onto our surface canvas.
+    canvas.drawImage(engineImage, ui.Offset.zero, paint);
+    // Capture the rasterized surface contents as a temporary snapshot SkImage.
     final SkImage snapshot = skSurface.makeImageSnapshot();
-    final Uint8List? bytes = snapshot.encodeToBytes();
-    snapshot.delete();
+
+    try {
+      // Extract pixels from the snapshot in the requested format.
+      if (format == ui.ImageByteFormat.rawRgba || format == ui.ImageByteFormat.rawStraightRgba) {
+        // Create matching image info specifications for reading raw pixel buffers.
+        final imageInfo = SkImageInfo(
+          alphaType: alphaType,
+          colorType: canvasKit.ColorType.RGBA_8888,
+          colorSpace: SkColorSpaceSRGB,
+          width: engineImage.width.toDouble(),
+          height: engineImage.height.toDouble(),
+        );
+        // Copy the raw pixel bytes from the snapshot GPU buffer to CPU memory.
+        bytes = snapshot.readPixels(0, 0, imageInfo);
+      } else {
+        // Encode the snapshot to an image file format byte array (typically PNG).
+        bytes = snapshot.encodeToBytes();
+      }
+    } finally {
+      // Delete the temporary snapshot resources to prevent GPU resource leaks.
+      snapshot.delete();
+    }
+
+    // Convert the extracted byte array to a ByteData wrapper and return it.
     return bytes?.buffer.asByteData();
   }
 
@@ -328,7 +396,7 @@ class CkOnscreenSurface extends CkSurface implements OnscreenSurface {
 
   @override
   bool get isConnected =>
-      ((canvas as JSAny?).isA<DomHTMLCanvasElement>()) &&
+      (canvas as JSAny?).instanceOfString('HTMLCanvasElement') &&
       (canvas as DomHTMLCanvasElement).isConnected!;
 
   @override

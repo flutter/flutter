@@ -227,22 +227,34 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
+    // Ensure that the image being drawn is backed by a SkwasmImage.
+    assert(
+      image is EngineImage && image.backendImage is SkwasmImage,
+      'The image being drawn must be a Skwasm image.',
+    );
+    // Convert the paint object into its raw paint representation with default clamp tile mode.
     final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
       defaultBlurTileMode: ui.TileMode.clamp,
     );
+    // Draw the image onto the canvas using the native WASM canvasDrawImage routine.
     canvasDrawImage(
       _handle,
-      (image as SkwasmImage).handle,
+      ((image as EngineImage).backendImage as SkwasmImage).handle,
       offset.dx,
       offset.dy,
       paintHandle,
       paint.filterQuality.index,
     );
+    // Dispose the raw paint handle after drawing is complete to avoid leaks.
     paintDispose(paintHandle);
   }
 
   @override
   void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {
+    assert(
+      image is EngineImage && image.backendImage is SkwasmImage,
+      'The image being drawn must be a Skwasm image.',
+    );
     withStackScope((StackScope scope) {
       final Pointer<Float> sourceRect = scope.convertRectToNative(src);
       final Pointer<Float> destRect = scope.convertRectToNative(dst);
@@ -251,7 +263,7 @@ class SkwasmCanvas implements LayerCanvas {
       );
       canvasDrawImageRect(
         _handle,
-        (image as SkwasmImage).handle,
+        ((image as EngineImage).backendImage as SkwasmImage).handle,
         sourceRect,
         destRect,
         paintHandle,
@@ -263,6 +275,10 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawImageNine(ui.Image image, ui.Rect center, ui.Rect dst, ui.Paint paint) {
+    assert(
+      image is EngineImage && image.backendImage is SkwasmImage,
+      'The image being drawn must be a Skwasm image.',
+    );
     withStackScope((StackScope scope) {
       final Pointer<Int32> centerRect = scope.convertIRectToNative(center);
       final Pointer<Float> destRect = scope.convertRectToNative(dst);
@@ -271,7 +287,7 @@ class SkwasmCanvas implements LayerCanvas {
       );
       canvasDrawImageNine(
         _handle,
-        (image as SkwasmImage).handle,
+        ((image as EngineImage).backendImage as SkwasmImage).handle,
         centerRect,
         destRect,
         paintHandle,
@@ -325,29 +341,44 @@ class SkwasmCanvas implements LayerCanvas {
     ui.BlendMode? blendMode,
     ui.Rect? cullRect,
     ui.Paint paint,
-  ) => withStackScope((StackScope scope) {
-    final RawRSTransformArray rawTransforms = scope.convertRSTransformsToNative(transforms);
-    final RawRect rawRects = scope.convertRectsToNative(rects);
-    final RawColorArray rawColors = colors != null
-        ? scope.convertColorArrayToNative(colors)
-        : nullptr;
-    final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
-      defaultBlurTileMode: ui.TileMode.clamp,
+  ) {
+    // Verify that the atlas image is backed by SkwasmImage.
+    assert(
+      atlas is EngineImage && atlas.backendImage is SkwasmImage,
+      'The atlas image must be a Skwasm image.',
     );
-    canvasDrawAtlas(
-      _handle,
-      (atlas as SkwasmImage).handle,
-      rawTransforms,
-      rawRects,
-      rawColors,
-      transforms.length,
-      (blendMode ?? ui.BlendMode.src).index,
-      rawCullRect,
-      paintHandle,
-    );
-    paintDispose(paintHandle);
-  });
+    // Use StackScope to handle temporary native memory allocations.
+    withStackScope((StackScope scope) {
+      // Allocate and convert transforms, source rects, colors, and cullRect to their native WASM structures.
+      final RawRSTransformArray rawTransforms = scope.convertRSTransformsToNative(transforms);
+      final RawRect rawRects = scope.convertRectsToNative(rects);
+      final RawColorArray rawColors = colors != null
+          ? scope.convertColorArrayToNative(colors)
+          : nullptr;
+      final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
+
+      // Convert Paint into its raw native representation with clamp tile mode.
+      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+        defaultBlurTileMode: ui.TileMode.clamp,
+      );
+
+      // Call the WASM canvasDrawAtlas method to batch draw the sprites.
+      canvasDrawAtlas(
+        _handle,
+        ((atlas as EngineImage).backendImage as SkwasmImage).handle,
+        rawTransforms,
+        rawRects,
+        rawColors,
+        transforms.length,
+        (blendMode ?? ui.BlendMode.src).index,
+        rawCullRect,
+        paintHandle,
+      );
+
+      // Dispose the native paint representation to prevent leaks.
+      paintDispose(paintHandle);
+    });
+  }
 
   @override
   void drawRawAtlas(
@@ -358,29 +389,44 @@ class SkwasmCanvas implements LayerCanvas {
     ui.BlendMode? blendMode,
     ui.Rect? cullRect,
     ui.Paint paint,
-  ) => withStackScope((StackScope scope) {
-    final RawRSTransformArray rawTransforms = scope.convertDoublesToNative(rstTransforms);
-    final RawRect rawRects = scope.convertDoublesToNative(rects);
-    final RawColorArray rawColors = colors != null
-        ? scope.convertIntsToUint32Native(colors)
-        : nullptr;
-    final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
-    final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
-      defaultBlurTileMode: ui.TileMode.clamp,
+  ) {
+    // Assert that the image container is backed by SkwasmImage.
+    assert(
+      atlas is EngineImage && atlas.backendImage is SkwasmImage,
+      'The atlas image must be a Skwasm image.',
     );
-    canvasDrawAtlas(
-      _handle,
-      (atlas as SkwasmImage).handle,
-      rawTransforms,
-      rawRects,
-      rawColors,
-      rstTransforms.length ~/ 4,
-      (blendMode ?? ui.BlendMode.src).index,
-      rawCullRect,
-      paintHandle,
-    );
-    paintDispose(paintHandle);
-  });
+    // Allocate native memory within a temporary StackScope.
+    withStackScope((StackScope scope) {
+      // Convert typed lists of float/int parameters directly into raw native pointer representations.
+      final RawRSTransformArray rawTransforms = scope.convertDoublesToNative(rstTransforms);
+      final RawRect rawRects = scope.convertDoublesToNative(rects);
+      final RawColorArray rawColors = colors != null
+          ? scope.convertIntsToUint32Native(colors)
+          : nullptr;
+      final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
+
+      // Construct raw native representation of Paint.
+      final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
+        defaultBlurTileMode: ui.TileMode.clamp,
+      );
+
+      // Call the raw canvasDrawAtlas WASM endpoint, specifying the length in terms of transform entries.
+      canvasDrawAtlas(
+        _handle,
+        ((atlas as EngineImage).backendImage as SkwasmImage).handle,
+        rawTransforms,
+        rawRects,
+        rawColors,
+        rstTransforms.length ~/ 4,
+        (blendMode ?? ui.BlendMode.src).index,
+        rawCullRect,
+        paintHandle,
+      );
+
+      // Free the allocated native paint handle.
+      paintDispose(paintHandle);
+    });
+  }
 
   @override
   void drawShadow(ui.Path path, ui.Color color, double elevation, bool transparentOccluder) {

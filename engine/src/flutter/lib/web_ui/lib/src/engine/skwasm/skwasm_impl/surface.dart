@@ -146,21 +146,44 @@ class SkwasmSurface implements OffscreenSurface {
 
   @override
   Future<ByteData> rasterizeImage(ui.Image image, ui.ImageByteFormat format) async {
+    // Wait until the underlying WebGL context and WASM surface are fully initialized.
     await initialized;
-    // Cast [image] to [SkwasmImage].
-    image as SkwasmImage;
-    await setSize(BitmapSize(image.width, image.height));
-    final int callbackId = surfaceRasterizeImage(handle, image.handle, format.index);
+
+    // Cast [image] to [SkwasmImage] and verify its type.
+    final engineImage = image as EngineImage;
+    assert(
+      engineImage.backendImage is SkwasmImage,
+      'The image being rasterized must be a Skwasm image.',
+    );
+    final skwasmImage = engineImage.backendImage as SkwasmImage;
+
+    // Resize the rendering surface to match the dimensions of the target image.
+    await setSize(BitmapSize(engineImage.width, engineImage.height));
+
+    // Initiate the native rasterization call. This schedules the rasterization on the C++
+    // side and returns a callback ID that will resolve when the image bytes are ready.
+    final int callbackId = surfaceRasterizeImage(handle, skwasmImage.handle, format.index);
+
+    // Wait for the native rasterization callback to trigger. This returns the native address
+    // pointer of the SkData object containing the formatted image data.
     final int context =
         (await SkwasmCallbackHandler.instance.registerCallback(callbackId) as JSNumber).toDartInt;
+
+    // Reconstruct the native SkData handle from its memory address.
     final SkDataHandle dataHandle = SkDataHandle.fromAddress(context);
     final int byteCount = skDataGetSize(dataHandle);
     final Pointer<Uint8> dataPointer = skDataGetConstPointer(dataHandle).cast<Uint8>();
+
+    // Copy the native rasterized bytes into a managed Dart Uint8List.
     final output = Uint8List(byteCount);
     for (var i = 0; i < byteCount; i++) {
       output[i] = dataPointer[i];
     }
+
+    // Free the native SkData allocation to avoid WebAssembly memory leaks.
     skDataDispose(dataHandle);
+
+    // Return a ByteData view of the managed memory.
     return ByteData.sublistView(output);
   }
 
