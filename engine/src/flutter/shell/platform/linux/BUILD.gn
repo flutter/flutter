@@ -240,6 +240,7 @@ source_set("flutter_linux_sources_gtk4") {
     "fl_accessibility_handler.cc",
     "fl_accessibility_semantics_store.cc",
     "fl_application.cc",
+    "fl_application_gtk4.cc",
     "fl_basic_message_channel.cc",
     "fl_binary_codec.cc",
     "fl_binary_messenger.cc",

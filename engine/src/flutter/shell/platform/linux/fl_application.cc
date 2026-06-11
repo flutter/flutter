@@ -16,6 +16,11 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
+#if FLUTTER_LINUX_GTK4
+GtkWindow* fl_application_gtk4_create_window(FlApplication* self, FlView* view);
+void fl_application_gtk4_first_frame_cb(FlApplication* self, FlView* view);
+#endif
+
 struct FlApplicationPrivate {
   // Arguments to pass to Dart.
   gchar** dart_entrypoint_arguments;
@@ -37,16 +42,14 @@ G_DEFINE_TYPE_WITH_CODE(FlApplication,
 // Called when the first frame is received.
 static void first_frame_cb(FlApplication* self, FlView* view) {
 #if FLUTTER_LINUX_GTK4
-  GtkRoot* root = gtk_widget_get_root(GTK_WIDGET(view));
-  GtkWidget* window = root != nullptr ? GTK_WIDGET(root) : nullptr;
+  fl_application_gtk4_first_frame_cb(self, view);
 #else
   GtkWidget* window = gtk_widget_get_toplevel(GTK_WIDGET(view));
-#endif
-
   // Show the main window.
   if (window != nullptr && GTK_IS_WINDOW(window)) {
     gtk_window_present(GTK_WINDOW(window));
   }
+#endif
 }
 
 // Default implementation of FlApplication::register_plugins
@@ -56,6 +59,9 @@ static void fl_application_register_plugins(FlApplication* self,
 // Default implementation of FlApplication::create_window
 static GtkWindow* fl_application_create_window(FlApplication* self,
                                                FlView* view) {
+#if FLUTTER_LINUX_GTK4
+  return fl_application_gtk4_create_window(self, view);
+#else
   GtkApplicationWindow* window =
       GTK_APPLICATION_WINDOW(gtk_application_window_new(GTK_APPLICATION(self)));
 
@@ -96,6 +102,7 @@ static GtkWindow* fl_application_create_window(FlApplication* self,
 #endif
 
   return GTK_WINDOW(window);
+#endif
 }
 
 // Implements GApplication::activate.
