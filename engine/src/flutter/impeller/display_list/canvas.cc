@@ -121,15 +121,24 @@ static void ApplyFramebufferBlend(Entity& entity) {
 
 /// @brief Create the subpass restore contents, appling any filters or opacity
 ///        from the provided paint object.
+static ISize RoundUpToMultiple(ISize size, int multiple) {
+  if (multiple <= 1) {
+    return size;
+  }
+  return ISize(((size.width + multiple - 1) / multiple) * multiple,
+               ((size.height + multiple - 1) / multiple) * multiple);
+}
+
 static std::shared_ptr<Contents> CreateContentsForSubpassTarget(
     const ContentContext& renderer,
     const Paint& paint,
     const std::shared_ptr<Texture>& target,
+    ISize logical_size,
     const Matrix& effect_transform) {
-  auto contents = TextureContents::MakeRect(Rect::MakeSize(target->GetSize()));
+  auto contents = TextureContents::MakeRect(Rect::MakeSize(logical_size));
   contents->SetTexture(target);
   contents->SetLabel("Subpass");
-  contents->SetSourceRect(Rect::MakeSize(target->GetSize()));
+  contents->SetSourceRect(Rect::MakeSize(logical_size));
   contents->SetOpacity(paint.color.alpha);
   contents->SetDeferApplyingOpacity(true);
 
@@ -1738,14 +1747,21 @@ void Canvas::SaveLayer(const Paint& paint,
   paint_copy.color.alpha *= transform_stack_.back().distributed_opacity;
   transform_stack_.back().distributed_opacity = 1.0;
 
+  ISize physical_subpass_size = RoundUpToMultiple(subpass_size, 64);
+  physical_subpass_size =
+      physical_subpass_size.Min(renderer_.GetContext()
+                                    ->GetCapabilities()
+                                    ->GetMaximumRenderPassAttachmentSize());
+
   render_passes_.push_back(
       LazyRenderingConfig(renderer_,                                    //
                           CreateRenderTarget(renderer_,                 //
-                                             subpass_size,              //
+                                             physical_subpass_size,     //
                                              Color::BlackTransparent()  //
                                              )));
   save_layer_state_.push_back(SaveLayerState{
-      paint_copy, subpass_coverage.Shift(-coverage_origin_adjustment)});
+      paint_copy, subpass_coverage.Shift(-coverage_origin_adjustment),
+      subpass_size});
 
   CanvasStackEntry entry;
   entry.transform = transform_stack_.back().transform;
@@ -1822,6 +1838,7 @@ bool Canvas::Restore() {
     std::shared_ptr<Contents> contents = CreateContentsForSubpassTarget(
         renderer_, save_layer_state.paint,                         //
         lazy_render_pass.GetInlinePassContext()->GetTexture(),     //
+        save_layer_state.size,                                     //
         Matrix::MakeTranslation(Vector3{-global_pass_position}) *  //
             transform_stack_.back().transform                      //
     );

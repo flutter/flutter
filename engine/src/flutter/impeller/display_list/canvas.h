@@ -259,6 +259,7 @@ class Canvas {
   struct SaveLayerState {
     Paint paint;
     Rect coverage;
+    ISize size;
   };
 
   // Visible for testing.
