@@ -176,28 +176,56 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/core/pkgs/async
   async_helper:
     path: ./third_party/dart/pkg/async_helper
+  bazel_worker:
+    path: ./third_party/dart/third_party/pkg/tools/pkgs/bazel_worker
   boolean_selector:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/boolean_selector
+  build_integration:
+    path: ./third_party/dart/pkg/build_integration
   cli_config:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/cli_config
   collection:
     path: ./third_party/dart/third_party/pkg/core/pkgs/collection
+  compiler:
+    path: ./third_party/dart/pkg/compiler
   convert:
     path: ./third_party/dart/third_party/pkg/core/pkgs/convert
   coverage:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/coverage
   crypto:
     path: ./third_party/dart/third_party/pkg/core/pkgs/crypto
+  dart2js_info:
+    path: ./third_party/dart/pkg/dart2js_info
+  dart2wasm:
+    path: ./third_party/dart/pkg/dart2wasm
   dart_mcp:
     path: ./third_party/ai/pkgs/dart_mcp
   dart_runtime_service:
     path: ./third_party/dart/pkg/dart_runtime_service
   dart_runtime_service_vm:
     path: ./third_party/dart/pkg/dart_runtime_service_vm
+  frontend_server:
+    path: ./third_party/dart/pkg/frontend_server
+  vm:
+    path: ./third_party/dart/pkg/vm
+  dev_compiler:
+    path: ./third_party/dart/pkg/dev_compiler
+  shell_arg_splitter:
+    path: ./third_party/dart/pkg/shell_arg_splitter
+  js_shared:
+    path: ./third_party/dart/pkg/js_shared
+  _js_interop_checks:
+    path: ./third_party/dart/pkg/_js_interop_checks
+  js_runtime:
+    path: ./third_party/dart/pkg/js_runtime
+  js_ast:
+    path: ./third_party/dart/pkg/js_ast
   equatable:
     path: ./third_party/pkg/equatable
   expect:
     path: ./third_party/dart/pkg/expect
+  front_end:
+    path: ./third_party/dart/pkg/front_end
   file:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/file
   ffi:
@@ -228,6 +256,8 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/json_rpc_2
   kernel:
     path: ./third_party/dart/pkg/kernel
+  linter:
+    path: ./third_party/dart/pkg/linter
   logging:
     path: ./third_party/dart/third_party/pkg/core/pkgs/logging
   matcher:
@@ -238,6 +268,8 @@ dependency_overrides:
     path: ./third_party/pkg/flutter_packages/packages/metrics_center
   mime:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/mime
+  mmap:
+    path: ./third_party/dart/pkg/mmap
   node_preamble:
     path: ./third_party/pkg/node_preamble
   package_config:
@@ -256,6 +288,8 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/protobuf/protobuf
   pub_semver:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/pub_semver
+  record_use:
+    path: ./third_party/dart/pkg/record_use
   shelf:
     path: ./third_party/dart/third_party/pkg/shelf/pkgs/shelf
   shelf_packages_handler:
@@ -298,6 +332,10 @@ dependency_overrides:
     path: ./third_party/dart/pkg/vm_service
   vm_service_protos:
     path: ./third_party/dart/pkg/vm_service_protos
+  vm_snapshot_analysis:
+    path: ./third_party/dart/pkg/vm_snapshot_analysis
+  wasm_builder:
+    path: ./third_party/dart/pkg/wasm_builder
   watcher:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/watcher
   web:
