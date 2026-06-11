@@ -65,13 +65,6 @@ TaskFunction createPlatformChannelSwiftSampleTest() {
   ).call;
 }
 
-TaskFunction createEmbeddedAndroidViewsIntegrationTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/android_views',
-    'lib/main.dart',
-  ).call;
-}
-
 TaskFunction createHybridAndroidViewsIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/hybrid_android_views',
@@ -135,6 +128,14 @@ TaskFunction createSolidColorTest({required bool enableImpeller}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/ui',
     'lib/solid_color.dart',
+    extraOptions: <String>[if (enableImpeller) '--enable-impeller'],
+  ).call;
+}
+
+TaskFunction createTextureTest({required bool enableImpeller}) {
+  return DriverTest(
+    '${flutterDirectory.path}/examples/texture',
+    'test_driver/texture_test.dart',
     extraOptions: <String>[if (enableImpeller) '--enable-impeller'],
   ).call;
 }
