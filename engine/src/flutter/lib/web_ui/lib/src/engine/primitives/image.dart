@@ -227,12 +227,12 @@ class EngineImage implements ui.Image, StackTraceDebugger {
 
         // Convert the canvas contents to a PNG blob asynchronously.
         final DomBlob blob = await offscreenCanvas.convertToBlob();
-        final JSAny? arrayBuffer = await blob.arrayBuffer().toDart;
+        final JSArrayBuffer arrayBuffer = (await blob.arrayBuffer().toDart)! as JSArrayBuffer;
 
         // Reclaim browser resources eagerly by zeroing the offscreen canvas.
         offscreenCanvas.width = 0;
         offscreenCanvas.height = 0;
-        return ByteData.view((arrayBuffer as JSArrayBuffer?)!.toDart);
+        return ByteData.view(arrayBuffer.toDart);
       }
 
       // Fall back to standard backend-specific surface rasterization.

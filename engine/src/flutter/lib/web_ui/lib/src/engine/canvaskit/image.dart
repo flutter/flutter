@@ -322,21 +322,25 @@ EngineImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
     targetHeight = null;
   }
 
-  final int finalTargetWidth = targetWidth ?? (targetHeight! * (width / height)).round();
-  final int finalTargetHeight = targetHeight ?? (targetWidth! ~/ (width / height));
+  final int finalTargetWidth = targetWidth ?? (targetHeight! * width ~/ height);
+  final int finalTargetHeight = targetHeight ?? (targetWidth! * height ~/ width);
 
   final recorder = CkPictureRecorder();
   final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
 
   final paint = CkPaint();
   final EngineImage temporaryImage = EngineImage(CkImageDelegate(image), width, height);
-  canvas.drawImageRect(
-    temporaryImage,
-    ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
-    ui.Rect.fromLTWH(0, 0, finalTargetWidth.toDouble(), finalTargetHeight.toDouble()),
-    paint,
-  );
-  temporaryImage.dispose();
+  
+  try {
+    canvas.drawImageRect(
+      temporaryImage,
+      ui.Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+      ui.Rect.fromLTWH(0, 0, finalTargetWidth.toDouble(), finalTargetHeight.toDouble()),
+      paint,
+    );
+  } finally {
+    temporaryImage.dispose();
+  }
 
   final CkPicture picture = recorder.endRecording();
   final ui.Image finalImage = picture.toImageSync(finalTargetWidth, finalTargetHeight);
