@@ -26,10 +26,13 @@ WindowsProcTable::WindowsProcTable() {
   adjust_window_rect_ext_for_dpi_ =
       user32_->ResolveFunction<AdjustWindowRectExForDpi_*>(
           "AdjustWindowRectExForDpi");
+  ntdll_ = fml::NativeLibrary::Create("ntdll.dll");
+  rtl_get_version_ = ntdll_->ResolveFunction<RtlGetVersion_*>("RtlGetVersion");
 }
 
 WindowsProcTable::~WindowsProcTable() {
   user32_ = nullptr;
+  ntdll_ = nullptr;
 }
 
 BOOL WindowsProcTable::GetPointerType(UINT32 pointer_id,
@@ -145,6 +148,25 @@ BOOL WindowsProcTable::AdjustWindowRectExForDpi(LPRECT lpRect,
 
 int WindowsProcTable::GetSystemMetrics(int nIndex) const {
   return ::GetSystemMetrics(nIndex);
+}
+
+bool WindowsProcTable::IsWindows11OrGreater() const {
+  // Windows 11 reports a major version of 10 with a build number of 22000 or
+  // greater.
+  constexpr DWORD kWindows11BuildNumber = 22000;
+  if (!rtl_get_version_.has_value()) {
+    return false;
+  }
+  OSVERSIONINFOW version_info = {};
+  version_info.dwOSVersionInfoSize = sizeof(version_info);
+  // RtlGetVersion returns STATUS_SUCCESS (0) and never fails for a valid
+  // structure.
+  if (rtl_get_version_.value()(&version_info) != 0) {
+    return false;
+  }
+  return version_info.dwMajorVersion > 10 ||
+         (version_info.dwMajorVersion == 10 &&
+          version_info.dwBuildNumber >= kWindows11BuildNumber);
 }
 
 BOOL WindowsProcTable::EnumDisplayDevices(LPCWSTR lpDevice,

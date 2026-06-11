@@ -141,6 +141,15 @@ class WindowsProcTable {
   // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-getsystemmetrics
   virtual int GetSystemMetrics(int nIndex) const;
 
+  // Whether the operating system is Windows 11 (build 22000) or newer.
+  //
+  // Used to gate desktop compositing features (such as
+  // |DWMWA_SYSTEMBACKDROP_TYPE| and full-glass frame extension) that are only
+  // supported on Windows 11. Determined via |RtlGetVersion|, which (unlike the
+  // deprecated and manifest-gated |GetVersion|/|GetVersionEx|) reports the real
+  // OS version regardless of the application's compatibility manifest.
+  virtual bool IsWindows11OrGreater() const;
+
   // Enumerate display devices.
   //
   // See:
@@ -189,8 +198,13 @@ class WindowsProcTable {
                                                    DWORD dwExStyle,
                                                    UINT dpi);
 
+  using RtlGetVersion_ = LONG __stdcall(POSVERSIONINFOW lpVersionInformation);
+
   // The User32.dll library, used to resolve functions at runtime.
   fml::RefPtr<fml::NativeLibrary> user32_;
+
+  // The Ntdll.dll library, used to resolve functions at runtime.
+  fml::RefPtr<fml::NativeLibrary> ntdll_;
 
   std::optional<GetPointerType_*> get_pointer_type_;
   std::optional<GetPointerInfo_*> get_pointer_info_;
@@ -199,6 +213,7 @@ class WindowsProcTable {
   std::optional<SetWindowCompositionAttribute_*>
       set_window_composition_attribute_;
   std::optional<AdjustWindowRectExForDpi_*> adjust_window_rect_ext_for_dpi_;
+  std::optional<RtlGetVersion_*> rtl_get_version_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(WindowsProcTable);
 };
