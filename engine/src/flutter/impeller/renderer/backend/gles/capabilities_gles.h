@@ -81,6 +81,11 @@ class CapabilitiesGLES final
   bool IsES() const;
 
   // |Capabilities|
+  /// Always false. Rendering into a non-zero mip level is not yet implemented
+  /// on the GLES backend; see SupportsFramebufferRenderMipmap in the .cc file.
+  bool SupportsFramebufferRenderMipmap() const override;
+
+  // |Capabilities|
   bool SupportsOffscreenMSAA() const override;
 
   // |Capabilities|
