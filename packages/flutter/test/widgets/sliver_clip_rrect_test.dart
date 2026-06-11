@@ -203,6 +203,8 @@ void main() {
       WidgetTester tester,
     ) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -248,6 +250,8 @@ void main() {
       WidgetTester tester,
     ) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -303,6 +307,8 @@ void main() {
       WidgetTester tester,
     ) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -417,6 +423,8 @@ void main() {
       for (final testCase in overlapTestCases) {
         testWidgets(testCase.name, (WidgetTester tester) async {
           final controller = ScrollController();
+          addTearDown(controller.dispose);
+
           await tester.pumpWidget(
             _buildOverlapScenario(
               controller: controller,
@@ -462,6 +470,8 @@ void main() {
 
     testWidgets('clipBehavior of Clip.none allows overlap hits', (WidgetTester tester) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         _buildOverlapScenario(controller: controller, clipBehavior: Clip.none),
       );
@@ -487,6 +497,8 @@ void main() {
 
     testWidgets('creates a straight cut at overlap', (WidgetTester tester) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         _buildOverlapScenario(
           controller: controller,
@@ -511,6 +523,8 @@ void main() {
 
     testWidgets('uses complete extent for hit test clipping', (WidgetTester tester) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(_buildOverlapScenario(controller: controller, borderRadius: 40.0));
 
       final RenderSliverClipRRect renderSliver = tester.renderObject(find.byType(SliverClipRRect));
@@ -539,6 +553,8 @@ void main() {
 
     testWidgets('calculates correct clip rectangle origin', (WidgetTester tester) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(_buildOverlapScenario(controller: controller, borderRadius: 40.0));
 
       controller.jumpTo(50.0);
@@ -550,6 +566,8 @@ void main() {
 
     testWidgets('preserves visual content integrity at overlap cut', (WidgetTester tester) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(_buildOverlapScenario(controller: controller, borderRadius: 40.0));
 
       controller.jumpTo(20.0);
@@ -565,6 +583,8 @@ void main() {
 
     testWidgets('handles overlap calculation with reverse scrolling', (WidgetTester tester) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(
         _buildOverlapScenario(controller: controller, borderRadius: 40.0, reverse: true),
       );
@@ -584,6 +604,8 @@ void main() {
         WidgetTester tester,
       ) async {
         final controller = ScrollController();
+        addTearDown(controller.dispose);
+
         await tester.pumpWidget(
           _buildOverlapScenario(
             controller: controller,
@@ -615,6 +637,8 @@ void main() {
 
       testWidgets('shifts clip origin (horizontal)', (WidgetTester tester) async {
         final controller = ScrollController();
+        addTearDown(controller.dispose);
+
         await tester.pumpWidget(
           _buildOverlapScenario(
             controller: controller,
@@ -639,6 +663,8 @@ void main() {
 
       testWidgets('shifts clip origin (vertical reverse)', (WidgetTester tester) async {
         final controller = ScrollController();
+        addTearDown(controller.dispose);
+
         await tester.pumpWidget(
           _buildOverlapScenario(
             controller: controller,
@@ -669,6 +695,8 @@ void main() {
       WidgetTester tester,
     ) async {
       final controller = ScrollController();
+      addTearDown(controller.dispose);
+
       await tester.pumpWidget(_buildOverlapScenario(controller: controller));
       await tester.pumpWidget(
         _buildOverlapScenario(controller: controller, clipBehavior: Clip.none),
