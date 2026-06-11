@@ -103,11 +103,8 @@ class CkResizingCodec extends ResizingCodec {
     final int scaledWidth = scaledSize.width;
     final int scaledHeight = scaledSize.height;
 
-    // Set up an offscreen canvas of the target dimensions.
     final DomOffscreenCanvas offscreenCanvas = createDomOffscreenCanvas(scaledWidth, scaledHeight);
     final ctx = offscreenCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
-    // Draw the source image onto the offscreen canvas, letting the browser
-    // natively scale the image using its internal 2D rendering pipeline.
     ctx.drawImage(
       image.imageSource!.canvasImageSource,
       0,
@@ -119,10 +116,8 @@ class CkResizingCodec extends ResizingCodec {
       scaledWidth,
       scaledHeight,
     );
-    // Grab the scaled image representation as an ImageBitmap.
     final DomImageBitmap bitmap = offscreenCanvas.transferToImageBitmap();
     SkImage? skImage;
-    // Instantiate a CanvasKit SkImage from the scaled ImageBitmap.
     if (CanvasKitRenderer.instance.isSoftware) {
       skImage = canvasKit.MakeImageFromCanvasImageSource(bitmap);
     } else {
@@ -139,7 +134,6 @@ class CkResizingCodec extends ResizingCodec {
       return image;
     }
 
-    // Dispose of the original image delegates now that we have scaled it.
     image.dispose();
     return EngineImage(
       CkImageDelegate(skImage),
@@ -177,7 +171,6 @@ ui.Image createCkImageFromImageElement(
     throw ImageCodecException('Failed to create image from Image.decode');
   }
 
-  // Wrap the created SkImage inside an EngineImage with the image element as its source.
   return EngineImage(
     CkImageDelegate(skImage),
     skImage.width().toInt(),

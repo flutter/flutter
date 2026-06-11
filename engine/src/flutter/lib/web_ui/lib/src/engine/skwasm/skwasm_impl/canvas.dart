@@ -227,16 +227,13 @@ class SkwasmCanvas implements LayerCanvas {
 
   @override
   void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
-    // Ensure that the image being drawn is backed by a SkwasmImage.
     assert(
       image is EngineImage && image.backendImage is SkwasmImage,
       'The image being drawn must be a Skwasm image.',
     );
-    // Convert the paint object into its raw paint representation with default clamp tile mode.
     final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
       defaultBlurTileMode: ui.TileMode.clamp,
     );
-    // Draw the image onto the canvas using the native WASM canvasDrawImage routine.
     canvasDrawImage(
       _handle,
       ((image as EngineImage).backendImage as SkwasmImage).handle,
@@ -245,7 +242,6 @@ class SkwasmCanvas implements LayerCanvas {
       paintHandle,
       paint.filterQuality.index,
     );
-    // Dispose the raw paint handle after drawing is complete to avoid leaks.
     paintDispose(paintHandle);
   }
 
@@ -342,14 +338,11 @@ class SkwasmCanvas implements LayerCanvas {
     ui.Rect? cullRect,
     ui.Paint paint,
   ) {
-    // Verify that the atlas image is backed by SkwasmImage.
     assert(
       atlas is EngineImage && atlas.backendImage is SkwasmImage,
       'The atlas image must be a Skwasm image.',
     );
-    // Use StackScope to handle temporary native memory allocations.
     withStackScope((StackScope scope) {
-      // Allocate and convert transforms, source rects, colors, and cullRect to their native WASM structures.
       final RawRSTransformArray rawTransforms = scope.convertRSTransformsToNative(transforms);
       final RawRect rawRects = scope.convertRectsToNative(rects);
       final RawColorArray rawColors = colors != null
@@ -357,12 +350,10 @@ class SkwasmCanvas implements LayerCanvas {
           : nullptr;
       final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
 
-      // Convert Paint into its raw native representation with clamp tile mode.
       final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
         defaultBlurTileMode: ui.TileMode.clamp,
       );
 
-      // Call the WASM canvasDrawAtlas method to batch draw the sprites.
       canvasDrawAtlas(
         _handle,
         ((atlas as EngineImage).backendImage as SkwasmImage).handle,
@@ -375,7 +366,6 @@ class SkwasmCanvas implements LayerCanvas {
         paintHandle,
       );
 
-      // Dispose the native paint representation to prevent leaks.
       paintDispose(paintHandle);
     });
   }
@@ -390,14 +380,11 @@ class SkwasmCanvas implements LayerCanvas {
     ui.Rect? cullRect,
     ui.Paint paint,
   ) {
-    // Assert that the image container is backed by SkwasmImage.
     assert(
       atlas is EngineImage && atlas.backendImage is SkwasmImage,
       'The atlas image must be a Skwasm image.',
     );
-    // Allocate native memory within a temporary StackScope.
     withStackScope((StackScope scope) {
-      // Convert typed lists of float/int parameters directly into raw native pointer representations.
       final RawRSTransformArray rawTransforms = scope.convertDoublesToNative(rstTransforms);
       final RawRect rawRects = scope.convertDoublesToNative(rects);
       final RawColorArray rawColors = colors != null
@@ -405,12 +392,10 @@ class SkwasmCanvas implements LayerCanvas {
           : nullptr;
       final RawRect rawCullRect = cullRect != null ? scope.convertRectToNative(cullRect) : nullptr;
 
-      // Construct raw native representation of Paint.
       final PaintHandle paintHandle = (paint as SkwasmPaint).toRawPaint(
         defaultBlurTileMode: ui.TileMode.clamp,
       );
 
-      // Call the raw canvasDrawAtlas WASM endpoint, specifying the length in terms of transform entries.
       canvasDrawAtlas(
         _handle,
         ((atlas as EngineImage).backendImage as SkwasmImage).handle,
@@ -423,7 +408,6 @@ class SkwasmCanvas implements LayerCanvas {
         paintHandle,
       );
 
-      // Free the allocated native paint handle.
       paintDispose(paintHandle);
     });
   }
