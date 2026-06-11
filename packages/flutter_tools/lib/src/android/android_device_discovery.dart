@@ -111,7 +111,14 @@ class AndroidDevices extends PollingDeviceDiscovery {
   }
 
   // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
-  static final _kDeviceRegex = RegExp(r'^(\S+)\s+(\S+)(.*)');
+  //
+  // The serial portion is matched lazily so wireless serials that contain a space
+  // (for example, an mDNS name-conflict suffix like ` (2)._adb-tls-connect._tcp`) are
+  // captured in full instead of being truncated at the first whitespace. The state
+  // portion is anchored to the set of states `adb devices -l` may emit.
+  static final _kDeviceRegex = RegExp(
+    r'^(.*?)\s+(device|offline|unauthorized|no permissions|bootloader|recovery|sideload|connecting|host)(.*)',
+  );
 
   /// Parse the given `adb devices` output in [text], and fill out the given list
   /// of devices and possible device issue diagnostics. Either argument can be null,

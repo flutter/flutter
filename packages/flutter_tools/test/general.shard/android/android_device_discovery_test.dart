@@ -249,6 +249,37 @@ ZX1G22JJWR             device usb:3-3 product:shamu model:Nexus_6 device:shamu f
     expect(devices.first.name, 'Nexus 6');
   });
 
+  testWithoutContext(
+    'AndroidDevices preserves wireless serial containing space from mDNS name conflict',
+    () async {
+      final androidDevices = AndroidDevices(
+        userMessages: UserMessages(),
+        androidWorkflow: androidWorkflow,
+        androidSdk: FakeAndroidSdk(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['adb', 'devices', '-l'],
+            stdout: '''
+List of devices attached
+adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp    device product:vantage_ge model:Moto_Edge device:vantage_ge
+
+''',
+          ),
+        ]),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+      );
+
+      final List<Device> devices = await androidDevices.pollingGetDevices();
+
+      expect(devices, hasLength(1));
+      expect(devices.first.id, 'adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp');
+      expect(devices.first.name, 'Moto Edge');
+      expect(devices.first.connectionInterface, DeviceConnectionInterface.wireless);
+    },
+  );
+
   testWithoutContext('AndroidDevices provides adb error message as diagnostics', () async {
     final androidDevices = AndroidDevices(
       userMessages: UserMessages(),
