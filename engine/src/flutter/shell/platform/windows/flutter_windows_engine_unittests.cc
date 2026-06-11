@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <atomic>
+#include <chrono>
 #include <thread>
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 
@@ -298,27 +300,91 @@ TEST_F(FlutterWindowsEngineTest, ConfiguresFrameVsync) {
   FlutterWindowsEngineBuilder builder{GetContext()};
   std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
   EngineModifier modifier(engine.get());
-  bool on_vsync_called = false;
+  fml::AutoResetWaitableEvent latch;
 
-  modifier.embedder_api().GetCurrentTime =
-      MOCK_ENGINE_PROC(GetCurrentTime, ([]() -> uint64_t { return 1; }));
   modifier.embedder_api().OnVsync = MOCK_ENGINE_PROC(
       OnVsync,
-      ([&on_vsync_called, engine_instance = engine.get()](
+      ([&latch, engine_instance = engine.get()](
            FLUTTER_API_SYMBOL(FlutterEngine) engine, intptr_t baton,
            uint64_t frame_start_time_nanos, uint64_t frame_target_time_nanos) {
         EXPECT_EQ(baton, 1);
-        EXPECT_EQ(frame_start_time_nanos, 16600000);
-        EXPECT_EQ(frame_target_time_nanos, 33200000);
-        on_vsync_called = true;
+        EXPECT_EQ(frame_target_time_nanos - frame_start_time_nanos, 16600000u);
+        latch.Signal();
         return kSuccess;
       }));
-  modifier.SetStartTime(0);
   modifier.SetFrameInterval(16600000);
 
   engine->OnVsync(1);
 
-  EXPECT_TRUE(on_vsync_called);
+  while (!latch.WaitWithTimeout(fml::TimeDelta::FromMilliseconds(1))) {
+    engine->task_runner()->PollOnce(std::chrono::milliseconds(1));
+  }
+}
+
+TEST_F(FlutterWindowsEngineTest, VsyncFallsBackWithoutFramePacingWindow) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+  EngineModifier modifier(engine.get());
+  modifier.SetFrameInterval(16600000);
+  modifier.SetViewById(reinterpret_cast<FlutterWindowsView*>(1),
+                       kImplicitViewId);
+
+  bool called = false;
+  modifier.embedder_api().OnVsync = MOCK_ENGINE_PROC(
+      OnVsync, ([&called](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                          intptr_t baton, uint64_t frame_start_time_nanos,
+                          uint64_t frame_target_time_nanos) {
+        EXPECT_EQ(baton, 7);
+        EXPECT_EQ(frame_target_time_nanos - frame_start_time_nanos, 16600000u);
+        called = true;
+        return kSuccess;
+      }));
+
+  engine->OnVsync(7);
+  auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(1);
+  while (!called && std::chrono::steady_clock::now() < deadline) {
+    engine->task_runner()->PollOnce(std::chrono::milliseconds(1));
+  }
+  EXPECT_TRUE(called);
+}
+
+TEST_F(FlutterWindowsEngineTest,
+       UnregisteringActiveFramePacingWindowUsesAnotherView) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+  EngineModifier modifier(engine.get());
+  modifier.SetFrameInterval(16600000);
+  modifier.SetViewById(reinterpret_cast<FlutterWindowsView*>(1), 1);
+
+  std::atomic<HWND> waited_hwnd = nullptr;
+  modifier.SetFrameClockForTesting([&waited_hwnd](HWND hwnd) {
+    waited_hwnd = hwnd;
+    return true;
+  });
+
+  HWND first_window = reinterpret_cast<HWND>(1);
+  HWND second_window = reinterpret_cast<HWND>(2);
+  engine->RegisterFramePacingWindow(1, first_window);
+  engine->RegisterFramePacingWindow(2, second_window);
+  engine->UnregisterFramePacingWindow(2);
+
+  bool called = false;
+  modifier.embedder_api().OnVsync = MOCK_ENGINE_PROC(
+      OnVsync, ([&called](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                          intptr_t baton, uint64_t frame_start_time_nanos,
+                          uint64_t frame_target_time_nanos) {
+        EXPECT_EQ(baton, 11);
+        called = true;
+        return kSuccess;
+      }));
+
+  engine->OnVsync(11);
+  auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(1);
+  while (!called && std::chrono::steady_clock::now() < deadline) {
+    engine->task_runner()->PollOnce(std::chrono::milliseconds(1));
+  }
+  EXPECT_TRUE(called);
+  EXPECT_EQ(waited_hwnd.load(), first_window);
 }
 
 TEST_F(FlutterWindowsEngineTest, RunWithoutANGLEUsesSoftware) {

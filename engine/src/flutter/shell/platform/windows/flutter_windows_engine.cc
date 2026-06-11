@@ -24,6 +24,7 @@
 #include "flutter/shell/platform/windows/display_manager.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 #include "flutter/shell/platform/windows/keyboard_key_channel_handler.h"
+#include "flutter/shell/platform/windows/presentation_surface.h"
 #include "flutter/shell/platform/windows/system_utils.h"
 #include "flutter/shell/platform/windows/task_runner.h"
 #include "flutter/shell/platform/windows/window_manager.h"
@@ -38,17 +39,6 @@ static constexpr char kAccessibilityChannelName[] = "flutter/accessibility";
 namespace flutter {
 
 namespace {
-
-// Lifted from vsync_waiter_fallback.cc
-static std::chrono::nanoseconds SnapToNextTick(
-    std::chrono::nanoseconds value,
-    std::chrono::nanoseconds tick_phase,
-    std::chrono::nanoseconds tick_interval) {
-  std::chrono::nanoseconds offset = (tick_phase - value) % tick_interval;
-  if (offset != std::chrono::nanoseconds::zero())
-    offset = offset + tick_interval;
-  return value + offset;
-}
 
 // Creates and returns a FlutterRendererConfig that renders to the view (if any)
 // of a FlutterWindowsEngine, using OpenGL (via ANGLE).
@@ -176,6 +166,13 @@ FlutterWindowsEngine::FlutterWindowsEngine(
               FML_LOG(ERROR) << "Failed to post an engine task.";
             }
           });
+  frame_clock_ = std::make_unique<WindowsFrameClock>(
+      task_runner_.get(), embedder_api_.GetCurrentTime,
+      [this](HWND hwnd) { return FrameInterval(hwnd); });
+  presentation_surface_factory_ = [](HWND hwnd, size_t width, size_t height,
+                                     egl::Manager* egl_manager) {
+    return PresentationSurface::Create(hwnd, width, height, egl_manager);
+  };
 
   // Set up the legacy structs backing the API handles.
   messenger_ =
@@ -669,19 +666,71 @@ void FlutterWindowsEngine::RemoveView(FlutterViewId view_id) {
 }
 
 void FlutterWindowsEngine::OnVsync(intptr_t baton) {
-  std::chrono::nanoseconds current_time =
-      std::chrono::nanoseconds(embedder_api_.GetCurrentTime());
-  std::chrono::nanoseconds frame_interval = FrameInterval();
-  auto next = SnapToNextTick(current_time, start_time_, frame_interval);
-  embedder_api_.OnVsync(engine_, baton, next.count(),
-                        (next + frame_interval).count());
+  {
+    std::shared_lock read_lock(views_mutex_);
+    if (views_.empty()) {
+      const uint64_t frame_start_time_nanos = embedder_api_.GetCurrentTime();
+      const uint64_t frame_target_time_nanos =
+          frame_start_time_nanos + FrameInterval().count();
+      task_runner_->PostTask(
+          [this, baton, frame_start_time_nanos, frame_target_time_nanos]() {
+            embedder_api_.OnVsync(engine_, baton, frame_start_time_nanos,
+                                  frame_target_time_nanos);
+          });
+      return;
+    }
+  }
+
+  frame_clock_->AwaitVsync(
+      baton, [this](intptr_t baton, uint64_t frame_start_time_nanos,
+                    uint64_t frame_target_time_nanos) {
+        embedder_api_.OnVsync(engine_, baton, frame_start_time_nanos,
+                              frame_target_time_nanos);
+      });
+}
+
+void FlutterWindowsEngine::RegisterFramePacingWindow(FlutterViewId view_id,
+                                                     HWND hwnd) {
+  if (!hwnd) {
+    UnregisterFramePacingWindow(view_id);
+    return;
+  }
+  frame_pacing_windows_[view_id] = hwnd;
+  frame_clock_->SetFramePacingWindow(hwnd);
+}
+
+void FlutterWindowsEngine::UnregisterFramePacingWindow(FlutterViewId view_id) {
+  frame_pacing_windows_.erase(view_id);
+  if (frame_pacing_windows_.empty()) {
+    frame_clock_->SetFramePacingWindow(nullptr);
+    return;
+  }
+
+  frame_clock_->SetFramePacingWindow(frame_pacing_windows_.rbegin()->second);
+}
+
+std::unique_ptr<PresentationSurface>
+FlutterWindowsEngine::CreatePresentationSurface(HWND hwnd,
+                                                size_t width,
+                                                size_t height,
+                                                egl::Manager* egl_manager) {
+  return presentation_surface_factory_(hwnd, width, height, egl_manager);
+}
+
+void FlutterWindowsEngine::SetPresentationSurfaceFactoryForTesting(
+    PresentationSurfaceFactory presentation_surface_factory) {
+  presentation_surface_factory_ = std::move(presentation_surface_factory);
 }
 
 std::chrono::nanoseconds FlutterWindowsEngine::FrameInterval() {
+  return FrameInterval(nullptr);
+}
+
+std::chrono::nanoseconds FlutterWindowsEngine::FrameInterval(HWND hwnd) {
   if (frame_interval_override_.has_value()) {
     return frame_interval_override_.value();
   }
-  uint64_t interval = 16600000;
+  uint64_t interval = 16666667;
 
   DWM_TIMING_INFO timing_info = {};
   timing_info.cbSize = sizeof(timing_info);
@@ -691,6 +740,23 @@ std::chrono::nanoseconds FlutterWindowsEngine::FrameInterval() {
     interval = static_cast<double>(timing_info.rateRefresh.uiDenominator *
                                    1000000000.0) /
                static_cast<double>(timing_info.rateRefresh.uiNumerator);
+    return std::chrono::nanoseconds(interval);
+  }
+
+  if (hwnd) {
+    HMONITOR monitor = ::MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+    MONITORINFOEXW monitor_info = {};
+    monitor_info.cbSize = sizeof(monitor_info);
+    DEVMODEW display_mode = {};
+    display_mode.dmSize = sizeof(display_mode);
+    if (monitor && ::GetMonitorInfoW(monitor, &monitor_info) &&
+        ::EnumDisplaySettingsW(monitor_info.szDevice, ENUM_CURRENT_SETTINGS,
+                               &display_mode) &&
+        display_mode.dmDisplayFrequency > 1) {
+      interval = static_cast<uint64_t>(
+          1000000000.0 / static_cast<double>(display_mode.dmDisplayFrequency));
+      return std::chrono::nanoseconds(interval);
+    }
   }
 
   return std::chrono::nanoseconds(interval);
@@ -1060,17 +1126,6 @@ void FlutterWindowsEngine::OnQuit(std::optional<HWND> hwnd,
                                   std::optional<LPARAM> lparam,
                                   UINT exit_code) {
   lifecycle_manager_->Quit(hwnd, wparam, lparam, exit_code);
-}
-
-void FlutterWindowsEngine::OnDwmCompositionChanged() {
-  if (display_manager_) {
-    display_manager_->UpdateDisplays();
-  }
-
-  std::shared_lock read_lock(views_mutex_);
-  for (auto iterator = views_.begin(); iterator != views_.end(); iterator++) {
-    iterator->second->OnDwmCompositionChanged();
-  }
 }
 
 void FlutterWindowsEngine::OnWindowStateEvent(HWND hwnd,

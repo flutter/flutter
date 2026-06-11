@@ -30,15 +30,9 @@ namespace testing {
 
 namespace {
 
-// An EGL manager that initializes EGL but fails to create surfaces.
-class HalfBrokenEGLManager : public egl::Manager {
+class TestEGLManager : public egl::Manager {
  public:
-  HalfBrokenEGLManager() : egl::Manager(egl::GpuPreference::NoPreference) {}
-
-  std::unique_ptr<egl::WindowSurface>
-  CreateWindowSurface(HWND hwnd, size_t width, size_t height) override {
-    return nullptr;
-  }
+  TestEGLManager() : egl::Manager(egl::GpuPreference::NoPreference) {}
 };
 
 class MockWindowsLifecycleManager : public WindowsLifecycleManager {
@@ -603,10 +597,14 @@ TEST_F(WindowsTest, SurfaceOptional) {
   auto& context = GetContext();
   WindowsConfigBuilder builder(context);
   EnginePtr engine{builder.InitializeEngine()};
-  EngineModifier modifier{
-      reinterpret_cast<FlutterWindowsEngine*>(engine.get())};
+  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+  EngineModifier modifier{windows_engine};
+  windows_engine->SetPresentationSurfaceFactoryForTesting(
+      [](HWND hwnd, size_t width, size_t height, egl::Manager* egl_manager) {
+        return nullptr;
+      });
 
-  auto egl_manager = std::make_unique<HalfBrokenEGLManager>();
+  auto egl_manager = std::make_unique<TestEGLManager>();
   ASSERT_TRUE(egl_manager->IsValid());
   modifier.SetEGLManager(std::move(egl_manager));
 

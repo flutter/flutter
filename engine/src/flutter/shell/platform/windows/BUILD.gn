@@ -66,8 +66,6 @@ source_set("flutter_windows_source") {
     "egl/proc_table.h",
     "egl/surface.cc",
     "egl/surface.h",
-    "egl/window_surface.cc",
-    "egl/window_surface.h",
     "event_watcher.cc",
     "event_watcher.h",
     "external_texture.h",
@@ -118,6 +116,8 @@ source_set("flutter_windows_source") {
     "platform_view_manager.h",
     "platform_view_plugin.cc",
     "platform_view_plugin.h",
+    "presentation_surface.cc",
+    "presentation_surface.h",
     "rect_helper.h",
     "sequential_id_generator.cc",
     "sequential_id_generator.h",
@@ -142,6 +142,8 @@ source_set("flutter_windows_source") {
     "window_proc_delegate_manager.cc",
     "window_proc_delegate_manager.h",
     "window_state.h",
+    "windows_frame_clock.cc",
+    "windows_frame_clock.h",
     "windows_lifecycle_manager.cc",
     "windows_lifecycle_manager.h",
     "windows_proc_table.cc",
@@ -150,7 +152,10 @@ source_set("flutter_windows_source") {
   ]
 
   libs = [
+    "dcomp.lib",
+    "d3d11.lib",
     "dwmapi.lib",
+    "dxgi.lib",
     "imm32.lib",
   ]
 
@@ -245,7 +250,6 @@ executable("flutter_windows_unittests") {
     "testing/egl/mock_context.h",
     "testing/egl/mock_manager.h",
     "testing/egl/mock_proc_table.h",
-    "testing/egl/mock_window_surface.h",
     "testing/engine_modifier.h",
     "testing/flutter_windows_engine_builder.cc",
     "testing/flutter_windows_engine_builder.h",
@@ -261,7 +265,7 @@ executable("flutter_windows_unittests") {
     "testing/test_keyboard.cc",
     "testing/test_keyboard.h",
     "testing/test_keyboard_unittests.cc",
-    "testing/view_modifier.h",
+    "testing/test_presentation_surface.h",
     "testing/windows_test.cc",
     "testing/windows_test.h",
     "testing/windows_test_config_builder.cc",
@@ -274,6 +278,7 @@ executable("flutter_windows_unittests") {
     "window_manager_unittests.cc",
     "window_proc_delegate_manager_unittests.cc",
     "window_unittests.cc",
+    "windows_frame_clock_unittests.cc",
     "windows_lifecycle_manager_unittests.cc",
   ]
 

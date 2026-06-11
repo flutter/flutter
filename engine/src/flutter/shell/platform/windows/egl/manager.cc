@@ -280,36 +280,6 @@ bool Manager::IsValid() const {
   return is_valid_;
 }
 
-std::unique_ptr<WindowSurface> Manager::CreateWindowSurface(HWND hwnd,
-                                                            size_t width,
-                                                            size_t height) {
-  if (!hwnd || !is_valid_) {
-    return nullptr;
-  }
-
-  // Disable ANGLE's automatic surface resizing and provide an explicit size.
-  // The surface will need to be destroyed and re-created if the HWND is
-  // resized.
-  const EGLint surface_attributes[] = {EGL_FIXED_SIZE_ANGLE,
-                                       EGL_TRUE,
-                                       EGL_WIDTH,
-                                       static_cast<EGLint>(width),
-                                       EGL_HEIGHT,
-                                       static_cast<EGLint>(height),
-                                       EGL_NONE};
-
-  auto const surface = ::eglCreateWindowSurface(
-      display_, config_, static_cast<EGLNativeWindowType>(hwnd),
-      surface_attributes);
-  if (surface == EGL_NO_SURFACE) {
-    LogEGLError("Surface creation failed.");
-    return nullptr;
-  }
-
-  return std::make_unique<WindowSurface>(display_, render_context_->GetHandle(),
-                                         surface, width, height);
-}
-
 bool Manager::HasContextCurrent() {
   return ::eglGetCurrentContext() != EGL_NO_CONTEXT;
 }

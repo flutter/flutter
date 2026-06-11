@@ -18,11 +18,6 @@ class MockManager : public flutter::egl::Manager {
  public:
   MockManager() : Manager(flutter::egl::GpuPreference::NoPreference) {}
 
-  MOCK_METHOD(std::unique_ptr<flutter::egl::WindowSurface>,
-              CreateWindowSurface,
-              (HWND, size_t, size_t),
-              (override));
-
   MOCK_METHOD(flutter::egl::Context*, render_context, (), (const, override));
   MOCK_METHOD(flutter::egl::Context*, resource_context, (), (const, override));
 

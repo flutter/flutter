@@ -75,10 +75,7 @@ bool WindowsLifecycleManager::WindowProc(HWND hwnd,
     case WM_CLOSE:
       return HandleCloseMessage(hwnd, wpar, lpar);
 
-    // DWM composition can be disabled on Windows 7.
-    // Notify the engine as this can result in screen tearing.
     case WM_DWMCOMPOSITIONCHANGED:
-      engine_->OnDwmCompositionChanged();
       break;
 
     case WM_SIZE:
