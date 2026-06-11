@@ -24,21 +24,18 @@ jobs:
       - name: Check Engine Changes
         id: check_engine
         run: |
-          # 1. Determine local base tracking ref
+          # 1. Determine local base tracking SHA
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE_REF="origin/${{ github.event.pull_request.base.ref }}"
+            BASE_REF="${{ github.event.pull_request.base.sha }}"
           elif [ "${{ github.event_name }}" = "merge_group" ]; then
-            # Strip refs/heads/ if present
-            BASE_REF_NAME="${{ github.event.merge_group.base_ref }}"
-            BASE_REF_NAME="${BASE_REF_NAME#refs/heads/}"
-            BASE_REF="origin/$BASE_REF_NAME"
+            BASE_REF="${{ github.event.merge_group.base_sha }}"
           else
             BASE_REF="origin/master"
           fi
 
-          echo "Comparing against base ref: $BASE_REF"
+          echo "Comparing against base commit SHA: $BASE_REF"
 
-          # 2. Get changed files using local git diff against tracking branch
+          # 2. Get changed files using local git diff against exact base SHA
           CHANGED_FILES=$(git diff --name-only "$BASE_REF" HEAD 2>/dev/null || true)
 
           # Fallback if git diff fails or is empty
