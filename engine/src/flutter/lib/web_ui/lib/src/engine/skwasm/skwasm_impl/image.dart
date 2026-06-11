@@ -10,14 +10,14 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
 
-// A WebAssembly-backed implementation of [BackendImage] using Skwasm.
-//
-// This class wraps a native C/C++ image reference ([ImageHandle]) allocated
-// inside the Skwasm WebAssembly module.
+/// A WebAssembly-backed implementation of [BackendImage] using Skwasm.
+///
+/// This class wraps a native C/C++ image reference ([ImageHandle]) allocated
+/// inside the Skwasm WebAssembly module.
 class SkwasmImage implements BackendImage {
   SkwasmImage(this.handle);
 
-  // The native pointer/handle to the image inside the Skwasm instance.
+  /// The native pointer/handle to the image inside the Skwasm instance.
   final ImageHandle handle;
 
   @override
@@ -26,10 +26,10 @@ class SkwasmImage implements BackendImage {
     imageDispose(handle);
   }
 
-  // Retrieve the image width from the native handle.
+  /// Retrieve the image width from the native handle.
   int get width => imageGetWidth(handle);
 
-  // Retrieve the image height from the native handle.
+  /// Retrieve the image height from the native handle.
   int get height => imageGetHeight(handle);
 
   @override
@@ -39,12 +39,12 @@ class SkwasmImage implements BackendImage {
   }
 }
 
-// Creates a new [EngineImage] backed by a Skwasm image from a raw pixel buffer.
-//
-// The [pixels] argument contains the raw image bytes.
-// The [width] and [height] are the dimensions of the image.
-// The [format] specifies the layout of color channels in the buffer.
-// The optional [rowBytes] defines the step length between two scan lines.
+/// Creates a new [EngineImage] backed by a Skwasm image from a raw pixel buffer.
+///
+/// The [pixels] argument contains the raw image bytes.
+/// The [width] and [height] are the dimensions of the image.
+/// The [format] specifies the layout of color channels in the buffer.
+/// The optional [rowBytes] defines the step length between two scan lines.
 EngineImage createSkwasmImageFromPixels(
   Uint8List pixels,
   int width,
