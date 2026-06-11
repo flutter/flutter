@@ -4,6 +4,9 @@
 
 #include "flutter/shell/platform/linux/fl_accessibility_handler.h"
 
+#if FLUTTER_LINUX_GTK4
+#include "flutter/shell/platform/linux/fl_accessibility_bridge_gtk4.h"  // nogncheck
+#endif
 #include "flutter/shell/platform/linux/fl_accessibility_channel.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
@@ -38,9 +41,15 @@ static void send_announcement(int64_t view_id,
   }
 
   FlView* view = FL_VIEW(renderable);
+#if FLUTTER_LINUX_GTK4
+  FlAccessibilityBridgeGtk4* bridge = fl_view_get_accessibility_bridge(view);
+  fl_accessibility_bridge_gtk4_send_announcement(bridge, message,
+                                                 text_direction, assertiveness);
+#else
   FlViewAccessible* accessible = fl_view_get_accessible(view);
   fl_view_accessible_send_announcement(
       accessible, message, assertiveness == FL_ASSERTIVENESS_ASSERTIVE);
+#endif
 }
 
 static void fl_accessibility_handler_dispose(GObject* object) {

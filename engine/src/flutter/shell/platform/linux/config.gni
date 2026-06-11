@@ -1,0 +1,10 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+declare_args() {
+  # Legacy flag kept for backward compatibility.
+  # The engine now builds both GTK3 and GTK4 libraries unconditionally.
+  # This flag is no longer used to select the library.
+  use_gtk4 = false
+}
