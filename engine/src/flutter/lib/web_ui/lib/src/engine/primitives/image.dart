@@ -213,8 +213,11 @@ class EngineImage implements ui.Image, StackTraceDebugger {
         final context = offscreenCanvas.getContext('2d')! as DomCanvasRenderingContext2D;
 
         // Populate a DomImageData object using a view of the raw bytes.
-        final Uint8List bytes = rawData.buffer.asUint8List();
-        final clampedBytes = Uint8ClampedList.view(bytes.buffer, bytes.offsetInBytes, bytes.length);
+        final clampedBytes = Uint8ClampedList.view(
+          rawData.buffer,
+          rawData.offsetInBytes,
+          rawData.lengthInBytes,
+        );
         final DomImageData imageData = createDomImageData(
           clampedBytes,
           cloneImage.width,
