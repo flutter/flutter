@@ -63,39 +63,19 @@ void main() {
       final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
         // During _checkForSupportedAdbVersion:
         const FakeCommand(
-          command: <String>[
-            'adb',
-            'version',
-          ],
+          command: <String>['adb', 'version'],
           stdout: 'Android Debug Bridge version 1.0.41',
         ),
         // During _checkForSupportedAndroidVersion:
-        const FakeCommand(
-          command: <String>[
-            'adb',
-            'start-server',
-          ],
-        ),
+        const FakeCommand(command: <String>['adb', 'start-server']),
         // During _properties initialization (triggered by gradle_utils.minSdkVersion check or sdkVersion check):
         const FakeCommand(
-          command: <String>[
-            'adb',
-            '-s',
-            '1234',
-            'shell',
-            'getprop',
-          ],
+          command: <String>['adb', '-s', '1234', 'shell', 'getprop'],
           stdout: '[ro.build.version.sdk]: [30]',
         ),
         // During uninstallApp:
         FakeCommand(
-          command: const <String>[
-            'adb',
-            '-s',
-            '1234',
-            'uninstall',
-            'com.example.test',
-          ],
+          command: const <String>['adb', '-s', '1234', 'uninstall', 'com.example.test'],
           completer: completer,
         ),
       ]);
@@ -122,9 +102,7 @@ void main() {
   });
 }
 
-AndroidDevice setUpAndroidDevice({
-  required ProcessManager processManager,
-}) {
+AndroidDevice setUpAndroidDevice({required ProcessManager processManager}) {
   return AndroidDevice(
     '1234',
     modelID: 'TestModel',
