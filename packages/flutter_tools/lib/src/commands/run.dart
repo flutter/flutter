@@ -229,7 +229,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         'ios-profile-debugger',
         negatable: false,
         help:
-            'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device.',
+            'Whether to attach the LLDB debugger when running in profile mode on a physical iOS device. Only available with Xcode 26.',
       );
     usesWebOptions(verboseHelp: verboseHelp);
     usesTargetOption();
