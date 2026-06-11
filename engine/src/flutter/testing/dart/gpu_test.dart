@@ -51,6 +51,16 @@ gpu.RenderPipeline createUnlitRenderPipeline() {
   return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
 }
 
+gpu.RenderPipeline createTextureRenderPipeline() {
+  final gpu.ShaderLibrary? library = gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+  assert(library != null);
+  final gpu.Shader? vertex = library!['TextureVertex'];
+  assert(vertex != null);
+  final gpu.Shader? fragment = library['TextureFragment'];
+  assert(fragment != null);
+  return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
+}
+
 class RenderPassState {
   RenderPassState(this.renderTexture, this.commandBuffer, this.renderPass);
 
@@ -1023,6 +1033,90 @@ void main() async {
 
     final ui.Image image = state.renderTexture.asImage();
     await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  // Samples a texture whose mip chain was uploaded by hand with
+  // Texture.overwrite(mipLevel:) rather than generated, exercising the
+  // manually-mipped sampling path end to end through Flutter GPU. The quad is
+  // magnified, so the shader samples the base level and the golden is the four
+  // colored quadrants of mip 0.
+  test('Can sample a manually-mipped texture', () async {
+    // Both backends this test runs on (Metal and ANGLE GLES 3) support
+    // sampling hand-uploaded mip chains. This is the capability an app should
+    // check before relying on them.
+    expect(gpu.gpuContext.doesSupportManuallyMippedTextures, true);
+
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      8,
+      8,
+      mipLevelCount: 2,
+    );
+
+    // Mip 0 is an 8x8, 2x2 grid of red/green/blue/white quadrants.
+    final mip0 = Uint8List(8 * 8 * 4);
+    for (var y = 0; y < 8; y++) {
+      for (var x = 0; x < 8; x++) {
+        final int i = (y * 8 + x) * 4;
+        final bool right = x >= 4;
+        final bool bottom = y >= 4;
+        var r = 0, g = 0, b = 0;
+        if (!right && !bottom) {
+          r = 0xFF; // Top-left red.
+        } else if (right && !bottom) {
+          g = 0xFF; // Top-right green.
+        } else if (!right && bottom) {
+          b = 0xFF; // Bottom-left blue.
+        } else {
+          r = g = b = 0xFF; // Bottom-right white.
+        }
+        mip0[i] = r;
+        mip0[i + 1] = g;
+        mip0[i + 2] = b;
+        mip0[i + 3] = 0xFF;
+      }
+    }
+    texture.overwrite(mip0.buffer.asByteData());
+
+    // Mip 1 is a 4x4 of solid orange. Uploading it keeps the declared chain
+    // complete so the texture samples on backends that require every level.
+    final mip1 = Uint8List(4 * 4 * 4);
+    for (var i = 0; i < mip1.length; i += 4) {
+      mip1[i] = 0xFF; // r
+      mip1[i + 1] = 0x80; // g
+      mip1[i + 2] = 0x00; // b
+      mip1[i + 3] = 0xFF; // a
+    }
+    texture.overwrite(mip1.buffer.asByteData(), mipLevel: 1);
+
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = createTextureRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    // A fullscreen quad. Each vertex is position (vec3), texture_coords (vec2),
+    // and a white color (vec4) so the sampled texel passes through unmodified.
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(
+      float32(<double>[
+        -1, -1, 0, 0, 0, 1, 1, 1, 1, //
+        1, -1, 0, 1, 0, 1, 1, 1, 1, //
+        1, 1, 0, 1, 1, 1, 1, 1, 1, //
+        -1, -1, 0, 0, 0, 1, 1, 1, 1, //
+        1, 1, 0, 1, 1, 1, 1, 1, 1, //
+        -1, 1, 0, 0, 1, 1, 1, 1, 1, //
+      ]),
+    );
+    state.renderPass.bindVertexBuffer(vertices);
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(mvpUBO(Matrix4.identity())),
+    );
+    state.renderPass.bindTexture(pipeline.fragmentShader.getUniformSlot('tex'), texture);
+    state.renderPass.draw(6);
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_manually_mipped_texture.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('drawIndexed throws when no index buffer is bound', () async {
