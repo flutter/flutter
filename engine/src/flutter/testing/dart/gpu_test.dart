@@ -51,8 +51,8 @@ gpu.RenderPipeline createUnlitRenderPipeline() {
   return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
 }
 
-Future<gpu.RenderPipeline> createTextureRenderPipeline() async {
-  final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+gpu.RenderPipeline createTextureRenderPipeline() {
+  final gpu.ShaderLibrary? library = gpu.ShaderLibrary.fromAsset('test.shaderbundle');
   assert(library != null);
   final gpu.Shader? vertex = library!['TextureVertex'];
   assert(vertex != null);
@@ -1057,10 +1057,10 @@ void main() async {
     final mip0 = Uint8List(8 * 8 * 4);
     for (var y = 0; y < 8; y++) {
       for (var x = 0; x < 8; x++) {
-        final i = (y * 8 + x) * 4;
-        final right = x >= 4;
-        final bottom = y >= 4;
-        int r = 0, g = 0, b = 0;
+        final int i = (y * 8 + x) * 4;
+        final bool right = x >= 4;
+        final bool bottom = y >= 4;
+        var r = 0, g = 0, b = 0;
         if (!right && !bottom) {
           r = 0xFF; // Top-left red.
         } else if (right && !bottom) {
@@ -1090,7 +1090,7 @@ void main() async {
     texture.overwrite(mip1.buffer.asByteData(), mipLevel: 1);
 
     final RenderPassState state = createSimpleRenderPass();
-    final gpu.RenderPipeline pipeline = await createTextureRenderPipeline();
+    final gpu.RenderPipeline pipeline = createTextureRenderPipeline();
     state.renderPass.bindPipeline(pipeline);
 
     // A fullscreen quad. Each vertex is position (vec3), texture_coords (vec2),
