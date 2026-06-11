@@ -2134,6 +2134,38 @@ void main() {
     expect(closed, equals(<Tag>[Tag.a]));
   });
 
+  testWidgets('Ancestor scroll listener is removed on dispose', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/187853.
+    final scrollController = SpyScrollController();
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: RawMenuAnchor(
+            controller: MenuController(),
+            overlayBuilder: (context, info) => const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    final notifier = scrollController.position.isScrollingNotifier as TrackingNotifier;
+
+    expect(notifier.listenerCount, equals(1));
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(controller: scrollController, child: const SizedBox()),
+      ),
+    );
+
+    expect(notifier.listenerCount, equals(0));
+  });
+
   // Copied from [MenuAnchor] tests.
   //
   // Regression test for https://github.com/flutter/flutter/issues/157606.
@@ -3707,5 +3739,42 @@ class _AppState extends State<App> {
       textDirection: widget.textDirection ?? _directionality ?? TextDirection.ltr,
       child: Align(alignment: widget.alignment, child: widget.child),
     );
+  }
+}
+
+class TrackingNotifier extends ValueNotifier<bool> {
+  TrackingNotifier(super.value);
+  int listenerCount = 0;
+
+  @override
+  void addListener(VoidCallback listener) {
+    listenerCount++;
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    listenerCount--;
+    super.removeListener(listener);
+  }
+}
+
+class SpyScrollPosition extends ScrollPositionWithSingleContext {
+  SpyScrollPosition({required super.physics, required super.context, super.oldPosition});
+
+  final TrackingNotifier _isScrollingNotifier = TrackingNotifier(false);
+
+  @override
+  ValueNotifier<bool> get isScrollingNotifier => _isScrollingNotifier;
+}
+
+class SpyScrollController extends ScrollController {
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return SpyScrollPosition(physics: physics, context: context, oldPosition: oldPosition);
   }
 }
