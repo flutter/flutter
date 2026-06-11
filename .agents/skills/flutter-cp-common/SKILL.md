@@ -2,6 +2,7 @@
 name: flutter-cp-common
 description: Internal common helper for cherry-picking. Do NOT invoke this skill directly. It is used as a base for flutter-cp-stable and flutter-cp-beta.
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # Flutter Cherry-Pick Common Workflow
