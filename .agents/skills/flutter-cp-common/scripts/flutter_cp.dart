@@ -77,16 +77,60 @@ class CherryPickHelper {
   ///
   /// Reads the version file `bin/internal/release-candidate-branch.version` from
   /// the remote branch (or falls back to local branch).
+  /// Parses the owner from a GitHub git/https URL.
+  String? parseOwner(String url) {
+    final RegExp regExp = RegExp(r'(?:github\.com[:/])([^/]+)/');
+    final Match? match = regExp.firstMatch(url);
+    return match?.group(1);
+  }
+
+  /// Detects the upstream and fork remotes, and the fork owner.
+  Future<Map<String, String>> detectRemotes() async {
+    final result = await runCmd(['git', 'remote', '-v']);
+    final String output = result.stdout as String;
+
+    String? upstream;
+    String? fork;
+    String? forkOwner;
+
+    for (final String line in output.split('\n')) {
+      if (line.trim().isEmpty) continue;
+      final List<String> parts = line.split('\t');
+      if (parts.length < 2) continue;
+      final String name = parts[0];
+      final String urlAndType = parts[1];
+      final String url = urlAndType.split(' ')[0];
+
+      if (url.contains('flutter/flutter')) {
+        upstream = name;
+      } else {
+        fork = name;
+        forkOwner = parseOwner(url);
+      }
+    }
+
+    upstream ??= 'origin';
+    fork ??= 'origin';
+
+    return {'upstream': upstream, 'fork': fork, 'forkOwner': forkOwner ?? ''};
+  }
+
+  /// Dynamically retrieves the release candidate branch name for the target channel.
+  ///
+  /// Reads the version file `bin/internal/release-candidate-branch.version` from
+  /// the remote branch (or falls back to local branch).
   Future<String> getCandidateBranch() async {
-    print('Locating candidate branch for $channel...');
+    final remotes = await detectRemotes();
+    final String upstream = remotes['upstream']!;
+    print('Locating candidate branch for $channel using remote $upstream...');
     var result = await runCmd([
       'git',
       'show',
-      'origin/$channel:bin/internal/release-candidate-branch.version',
+      '$upstream/$channel:bin/internal/release-candidate-branch.version',
     ], allowFailure: true);
     if (result.exitCode != 0) {
       print(
-        'Warning: Could not read candidate branch from origin/$channel. Trying to read locally...',
+        'Warning: Could not read candidate branch from $upstream/$channel. Trying to read locally...',
       );
       result = await runCmd([
         'git',
@@ -147,12 +191,14 @@ class CherryPickHelper {
   /// attempts to cherry-pick the original merge commit. If conflicts occur,
   /// it prints the conflicted files and exits with code 2.
   Future<int> startManualCp(String candidateBranch) async {
+    final remotes = await detectRemotes();
+    final String upstream = remotes['upstream']!;
     print('Starting manual cherry-pick fallback...');
-    await runCmd(['git', 'fetch', 'origin', candidateBranch]);
+    await runCmd(['git', 'fetch', upstream, candidateBranch]);
 
     final String branchName = 'cherry-pick-$pr-to-$channel';
-    print('Creating local branch $branchName from origin/$candidateBranch...');
-    await runCmd(['git', 'checkout', '-B', branchName, 'origin/$candidateBranch']);
+    print('Creating local branch $branchName from $upstream/$candidateBranch...');
+    await runCmd(['git', 'checkout', '-B', branchName, '$upstream/$candidateBranch']);
 
     final String sha = switch (originalPrData) {
       {'mergeCommit': {'oid': String oid}} => oid,
@@ -174,26 +220,11 @@ class CherryPickHelper {
       final List<String> conflictedFiles = <String>[];
 
       for (final String line in statusOutput.split('\n')) {
-        if (line.trim().isEmpty) continue;
-        // Identify conflicted files in porcelain output
-        if (line.startsWith('UU') ||
-            line.startsWith('AA') ||
-            line.startsWith('U') ||
-            line.contains('UU')) {
-          if (line.length > 3) {
+        if (line.length > 3) {
+          final String status = line.substring(0, 2);
+          final bool isConflicted = status.contains('U') || status == 'AA' || status == 'DD';
+          if (isConflicted) {
             conflictedFiles.add(line.substring(3).trim());
-          }
-        }
-      }
-
-      // Fallback parser if the above didn't catch it
-      if (conflictedFiles.isEmpty) {
-        for (final String line in statusOutput.split('\n')) {
-          if (line.trim().isEmpty) continue;
-          if (line.startsWith('U') || line.startsWith(' D') || line.startsWith('D ')) {
-            if (line.length > 3) {
-              conflictedFiles.add(line.substring(3).trim());
-            }
           }
         }
       }
@@ -241,15 +272,21 @@ class CherryPickHelper {
 
   /// Pushes the local cherry-pick branch and creates a pull request targeting [candidateBranch].
   Future<int> pushAndCreatePr(String candidateBranch) async {
+    final remotes = await detectRemotes();
+    final String fork = remotes['fork']!;
+    final String forkOwner = remotes['forkOwner']!;
+    final String upstream = remotes['upstream']!;
+
     final String branchName = 'cherry-pick-$pr-to-$channel';
-    print('Pushing branch $branchName to origin...');
-    await runCmd(['git', 'push', '-u', 'origin', 'HEAD', '--force']);
+    print('Pushing branch $branchName to $fork...');
+    await runCmd(['git', 'push', '-u', fork, 'HEAD', '--force']);
 
     final String originalTitle = originalPrData?['title'] as String? ?? '';
     final String title = '[$channel] $originalTitle';
     final String body = 'Cherry-pick of #$pr to $channel';
     print('Creating pull request: $title...');
-    final result = await runCmd([
+
+    final List<String> createCmd = [
       'gh',
       'pr',
       'create',
@@ -259,7 +296,13 @@ class CherryPickHelper {
       title,
       '--body',
       body,
-    ]);
+    ];
+
+    if (forkOwner.isNotEmpty && fork != upstream) {
+      createCmd.addAll(['--head', '$forkOwner:$branchName']);
+    }
+
+    final result = await runCmd(createCmd);
 
     final String prUrl = (result.stdout as String).trim();
     final String prNumberStr = prUrl.split('/').last;
