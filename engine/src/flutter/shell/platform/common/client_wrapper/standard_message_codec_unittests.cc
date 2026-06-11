@@ -262,4 +262,22 @@ TEST(StandardMessageCodec, CanEncodeAndDecodeVariableLengthCustomType) {
                     some_data_comparator);
 }
 
+TEST(StandardMessageCodec, DepthLimitPreventsStackOverflow) {
+  // Construct a message with 200 nested lists, exceeding the depth limit.
+  // Each nesting level is encoded as: 0x0c (kList) + 0x01 (length = 1).
+  const int kNestingDepth = 200;
+  std::vector<uint8_t> bytes;
+  for (int i = 0; i < kNestingDepth; ++i) {
+    bytes.push_back(0x0c);  // kList
+    bytes.push_back(0x01);  // length = 1
+  }
+  bytes.push_back(0x00);  // kNull at the innermost level
+
+  const StandardMessageCodec& codec = StandardMessageCodec::GetInstance();
+  // Must not crash. The depth limit truncates deserialization instead of
+  // overflowing the call stack.
+  auto decoded = codec.DecodeMessage(bytes);
+  ASSERT_NE(decoded, nullptr);
+}
+
 }  // namespace flutter
