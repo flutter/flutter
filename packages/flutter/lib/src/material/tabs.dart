@@ -1827,7 +1827,11 @@ class _TabBarState extends State<TabBar> {
   void _scrollToCurrentIndex() {
     final double offset = _tabCenteredScrollOffset(_currentIndex!);
 
-    _effectiveScrollController.animateTo(offset, duration: kTabScrollDuration, curve: Curves.ease);
+    _effectiveScrollController.animateTo(
+      offset,
+      duration: _controller!.currentAnimationDuration,
+      curve: Curves.ease,
+    );
   }
 
   void _scrollToControllerValue() {
