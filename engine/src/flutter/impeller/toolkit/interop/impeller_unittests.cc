@@ -47,7 +47,8 @@ TEST_P(InteropPlaygroundTest, CanCreateDisplayListBuilder) {
 }
 
 TEST_P(InteropPlaygroundTest, CanCreateSurface) {
-  if (GetBackend() != PlaygroundBackend::kOpenGLES) {
+  if (GetBackend() != PlaygroundBackend::kOpenGLES &&
+      GetBackend() != PlaygroundBackend::kOpenGLESSDF) {
     GTEST_SKIP()
         << "This test checks wrapping FBOs which is an OpenGL ES only call.";
     return;

@@ -53,7 +53,47 @@ enum class FlutterGPUPixelFormat {
   kS8UInt,
   kD24UnormS8Uint,
   kD32FloatS8UInt,
+  // Block-compressed formats. Sample-only; support is per-family.
+  kBC1RGBAUNormInt,
+  kBC1RGBAUNormIntSRGB,
+  kBC3RGBAUNormInt,
+  kBC3RGBAUNormIntSRGB,
+  kBC5RGUNormInt,
+  kBC7RGBAUNormInt,
+  kBC7RGBAUNormIntSRGB,
+  kETC2RGB8UNormInt,
+  kETC2RGB8UNormIntSRGB,
+  kETC2RGBA8UNormInt,
+  kETC2RGBA8UNormIntSRGB,
+  kASTC4x4LDR,
+  kASTC4x4LDRSRGB,
+  kASTC8x8LDR,
+  kASTC8x8LDRSRGB,
 };
+
+enum class FlutterGPUTextureCompressionFamily {
+  kBC,
+  kETC2,
+  kASTC,
+};
+
+constexpr impeller::CompressedTextureFamily ToImpellerCompressedTextureFamily(
+    FlutterGPUTextureCompressionFamily value) {
+  switch (value) {
+    case FlutterGPUTextureCompressionFamily::kBC:
+      return impeller::CompressedTextureFamily::kBC;
+    case FlutterGPUTextureCompressionFamily::kETC2:
+      return impeller::CompressedTextureFamily::kETC2;
+    case FlutterGPUTextureCompressionFamily::kASTC:
+      return impeller::CompressedTextureFamily::kASTC;
+  }
+}
+
+constexpr impeller::CompressedTextureFamily ToImpellerCompressedTextureFamily(
+    int value) {
+  return ToImpellerCompressedTextureFamily(
+      static_cast<FlutterGPUTextureCompressionFamily>(value));
+}
 
 constexpr impeller::PixelFormat ToImpellerPixelFormat(
     FlutterGPUPixelFormat value) {
@@ -86,6 +126,36 @@ constexpr impeller::PixelFormat ToImpellerPixelFormat(
       return impeller::PixelFormat::kD24UnormS8Uint;
     case FlutterGPUPixelFormat::kD32FloatS8UInt:
       return impeller::PixelFormat::kD32FloatS8UInt;
+    case FlutterGPUPixelFormat::kBC1RGBAUNormInt:
+      return impeller::PixelFormat::kBC1RGBAUNormInt;
+    case FlutterGPUPixelFormat::kBC1RGBAUNormIntSRGB:
+      return impeller::PixelFormat::kBC1RGBAUNormIntSRGB;
+    case FlutterGPUPixelFormat::kBC3RGBAUNormInt:
+      return impeller::PixelFormat::kBC3RGBAUNormInt;
+    case FlutterGPUPixelFormat::kBC3RGBAUNormIntSRGB:
+      return impeller::PixelFormat::kBC3RGBAUNormIntSRGB;
+    case FlutterGPUPixelFormat::kBC5RGUNormInt:
+      return impeller::PixelFormat::kBC5RGUNormInt;
+    case FlutterGPUPixelFormat::kBC7RGBAUNormInt:
+      return impeller::PixelFormat::kBC7RGBAUNormInt;
+    case FlutterGPUPixelFormat::kBC7RGBAUNormIntSRGB:
+      return impeller::PixelFormat::kBC7RGBAUNormIntSRGB;
+    case FlutterGPUPixelFormat::kETC2RGB8UNormInt:
+      return impeller::PixelFormat::kETC2RGB8UNormInt;
+    case FlutterGPUPixelFormat::kETC2RGB8UNormIntSRGB:
+      return impeller::PixelFormat::kETC2RGB8UNormIntSRGB;
+    case FlutterGPUPixelFormat::kETC2RGBA8UNormInt:
+      return impeller::PixelFormat::kETC2RGBA8UNormInt;
+    case FlutterGPUPixelFormat::kETC2RGBA8UNormIntSRGB:
+      return impeller::PixelFormat::kETC2RGBA8UNormIntSRGB;
+    case FlutterGPUPixelFormat::kASTC4x4LDR:
+      return impeller::PixelFormat::kASTC4x4LDR;
+    case FlutterGPUPixelFormat::kASTC4x4LDRSRGB:
+      return impeller::PixelFormat::kASTC4x4LDRSRGB;
+    case FlutterGPUPixelFormat::kASTC8x8LDR:
+      return impeller::PixelFormat::kASTC8x8LDR;
+    case FlutterGPUPixelFormat::kASTC8x8LDRSRGB:
+      return impeller::PixelFormat::kASTC8x8LDRSRGB;
   }
 }
 
@@ -129,47 +199,41 @@ constexpr FlutterGPUPixelFormat FromImpellerPixelFormat(
       return FlutterGPUPixelFormat::kD24UnormS8Uint;
     case impeller::PixelFormat::kD32FloatS8UInt:
       return FlutterGPUPixelFormat::kD32FloatS8UInt;
-    // Block-compressed formats are not yet exposed by the Flutter GPU API.
     case impeller::PixelFormat::kBC1RGBAUNormInt:
+      return FlutterGPUPixelFormat::kBC1RGBAUNormInt;
     case impeller::PixelFormat::kBC1RGBAUNormIntSRGB:
+      return FlutterGPUPixelFormat::kBC1RGBAUNormIntSRGB;
     case impeller::PixelFormat::kBC3RGBAUNormInt:
+      return FlutterGPUPixelFormat::kBC3RGBAUNormInt;
     case impeller::PixelFormat::kBC3RGBAUNormIntSRGB:
+      return FlutterGPUPixelFormat::kBC3RGBAUNormIntSRGB;
     case impeller::PixelFormat::kBC5RGUNormInt:
+      return FlutterGPUPixelFormat::kBC5RGUNormInt;
     case impeller::PixelFormat::kBC7RGBAUNormInt:
+      return FlutterGPUPixelFormat::kBC7RGBAUNormInt;
     case impeller::PixelFormat::kBC7RGBAUNormIntSRGB:
+      return FlutterGPUPixelFormat::kBC7RGBAUNormIntSRGB;
     case impeller::PixelFormat::kETC2RGB8UNormInt:
+      return FlutterGPUPixelFormat::kETC2RGB8UNormInt;
     case impeller::PixelFormat::kETC2RGB8UNormIntSRGB:
+      return FlutterGPUPixelFormat::kETC2RGB8UNormIntSRGB;
     case impeller::PixelFormat::kETC2RGBA8UNormInt:
+      return FlutterGPUPixelFormat::kETC2RGBA8UNormInt;
     case impeller::PixelFormat::kETC2RGBA8UNormIntSRGB:
+      return FlutterGPUPixelFormat::kETC2RGBA8UNormIntSRGB;
     case impeller::PixelFormat::kASTC4x4LDR:
+      return FlutterGPUPixelFormat::kASTC4x4LDR;
     case impeller::PixelFormat::kASTC4x4LDRSRGB:
+      return FlutterGPUPixelFormat::kASTC4x4LDRSRGB;
     case impeller::PixelFormat::kASTC8x8LDR:
+      return FlutterGPUPixelFormat::kASTC8x8LDR;
     case impeller::PixelFormat::kASTC8x8LDRSRGB:
+      return FlutterGPUPixelFormat::kASTC8x8LDRSRGB;
     case impeller::PixelFormat::kASTC4x4HDR:
     case impeller::PixelFormat::kASTC8x8HDR:
+      // HDR variants are not yet exposed by the Flutter GPU API.
       return FlutterGPUPixelFormat::kUnknown;
   }
-}
-
-enum class FlutterGPUTextureCoordinateSystem {
-  kUploadFromHost,
-  kRenderToTexture,
-};
-
-constexpr impeller::TextureCoordinateSystem ToImpellerTextureCoordinateSystem(
-    FlutterGPUTextureCoordinateSystem value) {
-  switch (value) {
-    case FlutterGPUTextureCoordinateSystem::kUploadFromHost:
-      return impeller::TextureCoordinateSystem::kUploadFromHost;
-    case FlutterGPUTextureCoordinateSystem::kRenderToTexture:
-      return impeller::TextureCoordinateSystem::kRenderToTexture;
-  }
-}
-
-constexpr impeller::TextureCoordinateSystem ToImpellerTextureCoordinateSystem(
-    int value) {
-  return ToImpellerTextureCoordinateSystem(
-      static_cast<FlutterGPUTextureCoordinateSystem>(value));
 }
 
 enum class FlutterGPUBlendFactor {
