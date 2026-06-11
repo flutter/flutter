@@ -25,8 +25,8 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
-import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.GradleException
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
@@ -35,7 +35,6 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.PluginManager
-import kotlin.test.assertTrue
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
@@ -47,6 +46,7 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class FlutterPluginUtilsTest {
     companion object {

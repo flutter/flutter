@@ -683,7 +683,7 @@ object FlutterPluginUtils {
         val gradleProjectAndroidExtension = getLegacyAndroidExtension(gradleProject)
         val forcingNotRequired: Boolean =
             gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null ||
-            gradleProjectAndroidExtension.externalNativeBuild.ndkBuild.path != null
+                gradleProjectAndroidExtension.externalNativeBuild.ndkBuild.path != null
         if (forcingNotRequired) {
             return
         }
