@@ -37,32 +37,17 @@ jobs:
 
           # 2. Get the changed files using triple-dot syntax
           # This automatically finds the common ancestor and ignores unrelated changes on the base branch
-          CHANGED_FILES=$(git diff --name-only "$BASE_REF"...HEAD 2>/dev/null || true)
-
-          # Fallback if git diff fails or is empty
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "Falling back to git diff HEAD~1 HEAD"
-            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || true)
-          fi
-
+          CHANGED_FILES=$(git diff --name-only "$BASE_REF"...HEAD)
           echo "Changed files in this branch:"
           echo "$CHANGED_FILES"
 
           # 3. Check if any file matches engine pattern:
-          # ^(DEPS|engine/.*|bin/internal/content_aware_hash\.(ps1|sh))$
-          ENGINE_CHANGED=false
-          while IFS= read -r file; do
-            if [[ -z "$file" ]]; then
-              continue
-            fi
-            if [[ "$file" =~ ^DEPS$ ]] || [[ "$file" =~ ^engine/ ]] || [[ "$file" =~ ^bin/internal/content_aware_hash\.(ps1|sh)$ ]]; then
-              echo "Engine file changed: $file"
-              ENGINE_CHANGED=true
-              break # Exits the loop early once a match is found for efficiency
-            fi
-          done <<< "$CHANGED_FILES"
-
-          echo "changed=$ENGINE_CHANGED" >> "$GITHUB_OUTPUT"
+          if echo "$CHANGED_FILES" | grep -qE "^(DEPS|engine/.*|bin/internal/content_aware_hash\.(ps1|sh))$"; then
+            echo "Engine file changed - forced to wait for Linux linux_host_engine"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Wait for test check-in
         if: steps.check_engine.outputs.changed == 'true'
@@ -78,7 +63,7 @@ jobs:
 
       - name: Redirect engine.version
         if: steps.check_engine.outputs.changed == 'true'
-        run: echo "flutter_archives_v2" > bin/internal/engine.version
+        run: echo "flutter_archives_v2" > bin/cache/engine.realm
 
       - uses: ./.github/actions/composite-flutter-setup
 
