@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
+
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 
 struct _FlDisplayMonitor {
@@ -31,7 +32,8 @@ static void notify_display_update(FlDisplayMonitor* self) {
   }
 
 #if FLUTTER_LINUX_GTK4
-  GListModel* monitors = gdk_display_get_monitors(self->display);
+  g_autoptr(GListModel) monitors =
+      fl_display_monitor_gtk4_get_monitors(self->display);
   guint n_monitors = g_list_model_get_n_items(monitors);
 #else
   int n_monitors = gdk_display_get_n_monitors(self->display);
