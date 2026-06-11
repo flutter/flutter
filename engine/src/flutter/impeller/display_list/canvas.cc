@@ -1836,9 +1836,11 @@ bool Canvas::Restore() {
     auto global_pass_position = GetGlobalPassPosition();
 
     std::shared_ptr<Contents> contents = CreateContentsForSubpassTarget(
-        renderer_, save_layer_state.paint,                         //
-        lazy_render_pass.GetInlinePassContext()->GetTexture(),     //
-        save_layer_state.size,                                     //
+        /*renderer=*/renderer_,                                            //
+        /*paint=*/save_layer_state.paint,                                  //
+        /*target=*/lazy_render_pass.GetInlinePassContext()->GetTexture(),  //
+        /*logical_size=*/save_layer_state.size,                            //
+        /*effect_transform=*/
         Matrix::MakeTranslation(Vector3{-global_pass_position}) *  //
             transform_stack_.back().transform                      //
     );
