@@ -290,6 +290,7 @@ source_set("flutter_linux_sources_gtk4") {
     "fl_task_runner.cc",
     "fl_text_input_channel.cc",
     "fl_text_input_handler.cc",
+    "fl_text_input_handler_gtk4.cc",
     "fl_texture.cc",
     "fl_texture_gl.cc",
     "fl_texture_registrar.cc",

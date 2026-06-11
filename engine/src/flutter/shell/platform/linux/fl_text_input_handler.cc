@@ -9,53 +9,13 @@
 #include "flutter/shell/platform/common/text_editing_delta.h"
 #include "flutter/shell/platform/common/text_input_model.h"
 #include "flutter/shell/platform/linux/fl_text_input_channel.h"
+#include "flutter/shell/platform/linux/fl_text_input_handler_private.h"
 
 static constexpr char kNewlineInputAction[] = "TextInputAction.newline";
 static constexpr char kInputPurposeImProperty[] = "input-purpose";
 static constexpr char kInputHintsImProperty[] = "input-hints";
 
 static constexpr int64_t kClientIdUnset = -1;
-
-struct _FlTextInputHandler {
-  GObject parent_instance;
-
-  FlTextInputChannel* channel;
-
-  // The widget with input focus.
-  GtkWidget* widget;
-
-  // Client ID provided by Flutter to report events with.
-  int64_t client_id;
-
-  // Input action to perform when enter pressed.
-  gchar* input_action;
-
-  // The type of the input method.
-  FlTextInputType input_type;
-
-  // Whether to enable that the engine sends text input updates to the framework
-  // as TextEditingDeltas or as one TextEditingValue.
-  // For more information on the delta model, see:
-  // https://master-api.flutter.dev/flutter/services/TextInputConfiguration/enableDeltaModel.html
-  gboolean enable_delta_model;
-
-  // Input method.
-  GtkIMContext* im_context;
-
-  flutter::TextInputModel* text_model;
-
-  // A 4x4 matrix that maps from `EditableText` local coordinates to the
-  // coordinate system of `PipelineOwner.rootNode`.
-  double editabletext_transform[4][4];
-
-  // The smallest rect, in local coordinates, of the text in the composing
-  // range, or of the caret in the case where there is no current composing
-  // range. This value is updated via `TextInput.setMarkedTextRect` messages
-  // over the text input channel.
-  GdkRectangle composing_rect;
-
-  GCancellable* cancellable;
-};
 
 G_DEFINE_TYPE(FlTextInputHandler, fl_text_input_handler, G_TYPE_OBJECT)
 
@@ -337,42 +297,6 @@ static void clear_client(gpointer user_data) {
 // local coordinates to Flutter root coordinates. This function is called
 // after each of these updates. It transforms the composing rect to GDK window
 // coordinates and notifies GTK of the updated cursor position.
-static void update_im_cursor_position(FlTextInputHandler* self) {
-  // Skip update if not composing to avoid setting to position 0.
-  if (!self->text_model->composing()) {
-    return;
-  }
-
-  // Transform the x, y positions of the cursor from local coordinates to
-  // Flutter view coordinates.
-  double x = self->composing_rect.x * self->editabletext_transform[0][0] +
-             self->composing_rect.y * self->editabletext_transform[1][0] +
-             self->editabletext_transform[3][0] + self->composing_rect.width;
-  double y = self->composing_rect.x * self->editabletext_transform[0][1] +
-             self->composing_rect.y * self->editabletext_transform[1][1] +
-             self->editabletext_transform[3][1] + self->composing_rect.height;
-
-  // Transform from Flutter view coordinates to GTK window coordinates.
-  GdkRectangle preedit_rect = {};
-#if FLUTTER_LINUX_GTK4
-  GtkWidget* toplevel = GTK_WIDGET(gtk_widget_get_root(self->widget));
-  double dest_x = 0.0;
-  double dest_y = 0.0;
-  gtk_widget_translate_coordinates(self->widget, toplevel, x, y, &dest_x,
-                                   &dest_y);
-  preedit_rect.x = static_cast<int>(dest_x);
-  preedit_rect.y = static_cast<int>(dest_y);
-#else
-  gtk_widget_translate_coordinates(
-      self->widget, gtk_widget_get_toplevel(self->widget), static_cast<gint>(x),
-      static_cast<gint>(y), &preedit_rect.x, &preedit_rect.y);
-#endif
-
-  // Set the cursor location in window coordinates so that GTK can position
-  // any system input method windows.
-  gtk_im_context_set_cursor_location(self->im_context, &preedit_rect);
-}
-
 // Handles updates to the EditableText size and position from the framework.
 //
 // On changes to the size or position of the RenderObject underlying the
@@ -386,7 +310,9 @@ static void set_editable_size_and_transform(double* transform,
   for (size_t i = 0; i < 16; i++) {
     self->editabletext_transform[i / 4][i % 4] = transform[i];
   }
-  update_im_cursor_position(self);
+#if FLUTTER_LINUX_GTK4
+  fl_text_input_handler_gtk4_update_im_cursor_position(self);
+#endif
 }
 
 // Handles updates to the composing rect from the framework.
@@ -406,7 +332,9 @@ static void set_marked_text_rect(double x,
   self->composing_rect.y = y;
   self->composing_rect.width = width;
   self->composing_rect.height = height;
-  update_im_cursor_position(self);
+#if FLUTTER_LINUX_GTK4
+  fl_text_input_handler_gtk4_update_im_cursor_position(self);
+#endif
 }
 
 // Disposes of an FlTextInputHandler.
@@ -496,10 +424,10 @@ GtkIMContext* fl_text_input_handler_get_im_context(FlTextInputHandler* self) {
 void fl_text_input_handler_set_widget(FlTextInputHandler* self,
                                       GtkWidget* widget) {
   g_return_if_fail(FL_IS_TEXT_INPUT_HANDLER(self));
-  self->widget = widget;
 #if FLUTTER_LINUX_GTK4
-  gtk_im_context_set_client_widget(self->im_context, widget);
+  fl_text_input_handler_gtk4_set_widget(self, widget);
 #else
+  self->widget = widget;
   gtk_im_context_set_client_window(self->im_context,
                                    gtk_widget_get_window(self->widget));
 #endif
