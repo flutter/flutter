@@ -33,10 +33,11 @@ jobs:
             BASE_REF="origin/master"
           fi
 
-          echo "Comparing against base commit SHA: $BASE_REF"
+          echo "Comparing against base SHA: $BASE_REF"
 
-          # 2. Get changed files using local git diff against exact base SHA
-          CHANGED_FILES=$(git diff --name-only "$BASE_REF" HEAD 2>/dev/null || true)
+          # 2. Get the changed files using triple-dot syntax
+          # This automatically finds the common ancestor and ignores unrelated changes on the base branch
+          CHANGED_FILES=$(git diff --name-only "$BASE_REF"...HEAD 2>/dev/null || true)
 
           # Fallback if git diff fails or is empty
           if [ -z "$CHANGED_FILES" ]; then
@@ -44,7 +45,7 @@ jobs:
             CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || true)
           fi
 
-          echo "Changed files:"
+          echo "Changed files in this branch:"
           echo "$CHANGED_FILES"
 
           # 3. Check if any file matches engine pattern:
@@ -57,6 +58,7 @@ jobs:
             if [[ "$file" =~ ^DEPS$ ]] || [[ "$file" =~ ^engine/ ]] || [[ "$file" =~ ^bin/internal/content_aware_hash\.(ps1|sh)$ ]]; then
               echo "Engine file changed: $file"
               ENGINE_CHANGED=true
+              break # Exits the loop early once a match is found for efficiency
             fi
           done <<< "$CHANGED_FILES"
 
