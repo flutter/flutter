@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:process/process.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -20,8 +19,8 @@ import '../../src/fake_process_manager.dart';
 void main() {
   testWithoutContext('stopApp times out and does not hang forever', () {
     fakeAsync((FakeAsync async) {
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>[
             'adb',
@@ -37,7 +36,7 @@ void main() {
       ]);
 
       final AndroidDevice device = setUpAndroidDevice(processManager: processManager);
-      final FakeApplicationPackage app = FakeApplicationPackage();
+      final app = FakeApplicationPackage();
 
       bool? stopAppResult;
       device.stopApp(app).then((bool result) {
@@ -59,8 +58,8 @@ void main() {
 
   testWithoutContext('uninstallApp times out and does not hang forever', () {
     fakeAsync((FakeAsync async) {
-      final Completer<void> completer = Completer<void>();
-      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
         // During _checkForSupportedAdbVersion:
         const FakeCommand(
           command: <String>['adb', 'version'],
@@ -81,7 +80,7 @@ void main() {
       ]);
 
       final AndroidDevice device = setUpAndroidDevice(processManager: processManager);
-      final FakeApplicationPackage app = FakeApplicationPackage();
+      final app = FakeApplicationPackage();
 
       bool? uninstallResult;
       device.uninstallApp(app).then((bool result) {
