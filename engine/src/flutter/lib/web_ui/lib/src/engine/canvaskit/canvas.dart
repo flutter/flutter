@@ -124,13 +124,9 @@ class CkCanvas implements LayerCanvas {
       image is EngineImage && image.backendImage is CkImageDelegate,
       'The image being drawn must be a CanvasKit image.',
     );
-    // Determine the filter quality to use for drawing the image.
     final ui.FilterQuality filterQuality = paint.filterQuality;
-    // Convert the paint object to a CanvasKit SkPaint object, specifying clamp tiling.
     final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
 
-    // High quality filtering uses cubic scaling (Mitchell-Netravali coefficients).
-    // Lower qualities use standard filter/mipmap options mapping to filterQuality.
     if (filterQuality == ui.FilterQuality.high) {
       skCanvas.drawImageCubic(
         ((image as EngineImage).backendImage as CkImageDelegate).skImage,
@@ -150,7 +146,6 @@ class CkCanvas implements LayerCanvas {
         skPaint,
       );
     }
-    // Delete the allocated native SkPaint to prevent memory leaks.
     skPaint.delete();
   }
 
@@ -163,13 +158,9 @@ class CkCanvas implements LayerCanvas {
       'The image being drawn must be a CanvasKit image.',
     );
 
-    // Determine the filter quality to use for drawing the sub-rectangle of the image.
     final ui.FilterQuality filterQuality = paint.filterQuality;
-    // Convert the paint object to a CanvasKit SkPaint object.
     final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
 
-    // High quality uses cubic scaling (with Mitchell-Netravali coefficients) over the destination.
-    // Lower qualities map directly to native Skia filter and mipmap modes.
     if (filterQuality == ui.FilterQuality.high) {
       skCanvas.drawImageRectCubic(
         ((image as EngineImage).backendImage as CkImageDelegate).skImage,
@@ -189,7 +180,6 @@ class CkCanvas implements LayerCanvas {
         skPaint,
       );
     }
-    // Clean up the allocated native SkPaint to avoid memory leaks.
     skPaint.delete();
   }
 
@@ -201,10 +191,7 @@ class CkCanvas implements LayerCanvas {
       image is EngineImage && image.backendImage is CkImageDelegate,
       'The image being drawn must be a CanvasKit image.',
     );
-    // Convert the paint object to a CanvasKit SkPaint object.
     final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
-    // Call drawImageNine on SkCanvas, which stretches the center rectangle
-    // to fit the destination while keeping the corners non-deformed.
     skCanvas.drawImageNine(
       ((image as EngineImage).backendImage as CkImageDelegate).skImage,
       toSkRect(center),
@@ -212,7 +199,6 @@ class CkCanvas implements LayerCanvas {
       toSkFilterMode(paint.filterQuality),
       skPaint,
     );
-    // Clean up the allocated native SkPaint to avoid memory leaks.
     skPaint.delete();
   }
 
