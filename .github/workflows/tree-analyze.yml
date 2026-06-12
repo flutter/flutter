@@ -61,11 +61,11 @@ jobs:
           verbose: false
 
       - name: Redirect engine.version
-        if: steps.check_engine.outputs.changed == 'true'
-        run: echo "flutter_archives_v2" > bin/cache/engine.realm
+        if: steps.check_engine.outputs.changed == 'true' && github.event_name == 'pull_request'
+        run: echo "FLUTTER_REALM=flutter_archives_v2" >> $GITHUB_ENV
 
       - uses: ./.github/actions/composite-flutter-setup
 
       - name: Run Analyze
         run: |
-          SHARD=analyze SHARED=analyze LUCI_CI=true dart --enable-asserts dev/bots/test.dart
+          SHARD=analyze LUCI_CI=true dart --enable-asserts dev/bots/test.dart
