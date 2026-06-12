@@ -25,6 +25,23 @@ template("flutter_snapshot") {
   is_aot =
       flutter_runtime_mode == "profile" || flutter_runtime_mode == "release"
 
+  if (defined(invoker.output_aot_lib)) {
+    _unused_output_aot_lib = invoker.output_aot_lib
+    assert(_unused_output_aot_lib != "")
+  }
+
+  if (is_aot && (is_ios || is_mac || is_win)) {
+    compile_target = "_${target_name}_compile"
+    if (is_ios) {
+      snapshot_dir = "$target_gen_dir/ios"
+    } else if (is_mac) {
+      snapshot_dir = "$target_gen_dir/mac"
+    } else if (is_win) {
+      snapshot_dir = "$target_gen_dir/win"
+    }
+    snapshot_assembly = "$snapshot_dir/snapshot_assembly.S"
+  }
+
   kernel_output = "$target_gen_dir/kernel_blob.bin"
 
   extra_frontend_server_args = []
@@ -94,8 +111,7 @@ template("flutter_snapshot") {
 
     if (is_aot) {
       args += [ "--deterministic" ]
-      if (is_ios) {
-        snapshot_assembly = "$target_gen_dir/ios/snapshot_assembly.S"
+      if (is_ios || is_mac || is_win) {
         outputs += [ snapshot_assembly ]
         args += [
           "--snapshot_kind=app-aot-assembly",
@@ -155,10 +171,25 @@ template("flutter_snapshot") {
     args += [ rebase_path(kernel_output) ]
   }
 
+  if (is_aot && (is_ios || is_mac || is_win)) {
+    shared_library(compile_target) {
+      deps = [ ":$snapshot_target" ]
+      sources = [ snapshot_assembly ]
+      output_name = "vmservice_snapshot"
+      if (is_win) {
+        ldflags = [ "/NOENTRY" ]
+      }
+    }
+  }
+
   group(target_name) {
     public_deps = [
       ":$kernel_target",
-      ":$snapshot_target",
     ]
+    if (is_aot && (is_ios || is_mac || is_win)) {
+      public_deps += [ ":$compile_target" ]
+    } else {
+      public_deps += [ ":$snapshot_target" ]
+    }
   }
 }
