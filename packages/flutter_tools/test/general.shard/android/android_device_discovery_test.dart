@@ -193,6 +193,195 @@ List of devices attached
     expect(devices.first.connectionInterface, DeviceConnectionInterface.wireless);
   });
 
+  testWithoutContext(
+    'AndroidDevices can parse output for wireless devices with mDNS conflict (space in serial)',
+    () async {
+      final androidDevices = AndroidDevices(
+        userMessages: UserMessages(),
+        androidWorkflow: androidWorkflow,
+        androidSdk: FakeAndroidSdk(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>['adb', 'devices', '-l'],
+            stdout: '''
+List of devices attached
+adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp    device product:vantage_ge model:Vantage_G device:vantage_g
+''',
+          ),
+        ]),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+      );
+
+      final List<Device> devices = await androidDevices.pollingGetDevices();
+
+      expect(devices, hasLength(1));
+      expect(devices.first.id, 'adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp');
+      expect(devices.first.name, 'Vantage G');
+      expect(devices.first.category, Category.mobile);
+      expect(devices.first.connectionInterface, DeviceConnectionInterface.wireless);
+    },
+  );
+
+  testWithoutContext('AndroidDevices can parse various adb device outputs exhaustively', () async {
+    final testCases = <Map<String, String>>[
+      // Standard cases
+      <String, String>{
+        'input':
+            '015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper',
+        'expectedId': '015d172c98400a03',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': '127.0.0.1:5555         device',
+        'expectedId': '127.0.0.1:5555',
+        'expectedStatus': 'success',
+      },
+      // States that should go to diagnostics
+      <String, String>{
+        'input': '015d172c98400a03       offline',
+        'expectedId': '015d172c98400a03',
+        'expectedStatus': 'offline',
+      },
+      <String, String>{
+        'input': '015d172c98400a03       unauthorized',
+        'expectedId': '015d172c98400a03',
+        'expectedStatus': 'unauthorized',
+      },
+      // Other states (currently go to default -> success in implementation, but good to test parsing)
+      <String, String>{
+        'input': '015d172c98400a03       no permissions',
+        'expectedId': '015d172c98400a03',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': '015d172c98400a03       bootloader',
+        'expectedId': '015d172c98400a03',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': '015d172c98400a03       recovery',
+        'expectedId': '015d172c98400a03',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': '015d172c98400a03       sideload',
+        'expectedId': '015d172c98400a03',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': '015d172c98400a03       connecting',
+        'expectedId': '015d172c98400a03',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': '015d172c98400a03       host',
+        'expectedId': '015d172c98400a03',
+        'expectedStatus': 'success',
+      },
+      // Serials with spaces (mDNS conflict)
+      <String, String>{
+        'input': 'adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp    device product:vantage_ge',
+        'expectedId': 'adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': 'adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp    offline',
+        'expectedId': 'adb-ZY22MGW35T-Z3uXXq (2)._adb-tls-connect._tcp',
+        'expectedStatus': 'offline',
+      },
+      // Serials containing state keywords
+      <String, String>{
+        'input': 'my-device-name    device',
+        'expectedId': 'my-device-name',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': 'device-at-start    device',
+        'expectedId': 'device-at-start',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': 'offline-device    device',
+        'expectedId': 'offline-device',
+        'expectedStatus': 'success',
+      },
+      // Tricky case: serial with space AND state keyword
+      <String, String>{
+        'input': 'my offline device    device product:model',
+        'expectedId': 'my offline device',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': 'device (2)    device',
+        'expectedId': 'device (2)',
+        'expectedStatus': 'success',
+      },
+      <String, String>{
+        'input': 'offline (3)    offline',
+        'expectedId': 'offline (3)',
+        'expectedStatus': 'offline',
+      },
+    ];
+
+    for (final testCase in testCases) {
+      final String input = testCase['input']!;
+      final String expectedId = testCase['expectedId']!;
+      final String expectedStatus = testCase['expectedStatus']!;
+
+      final fakeCommands = <FakeCommand>[
+        FakeCommand(
+          command: const <String>['adb', 'devices', '-l'],
+          stdout: 'List of devices attached\n$input\n',
+        ),
+      ];
+      if (expectedStatus != 'success') {
+        fakeCommands.add(
+          FakeCommand(
+            command: const <String>['adb', 'devices', '-l'],
+            stdout: 'List of devices attached\n$input\n',
+          ),
+        );
+      }
+
+      final androidDevices = AndroidDevices(
+        userMessages: UserMessages(),
+        androidWorkflow: androidWorkflow,
+        androidSdk: FakeAndroidSdk(),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.list(fakeCommands),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+      );
+
+      if (expectedStatus == 'success') {
+        final List<Device> devices = await androidDevices.pollingGetDevices();
+        expect(devices, hasLength(1), reason: 'Failed for input: $input');
+        expect(devices.first.id, expectedId, reason: 'Failed for input: $input');
+      } else {
+        final List<Device> devices = await androidDevices.pollingGetDevices();
+        expect(devices, isEmpty, reason: 'Should not have found device for input: $input');
+
+        final List<String> diagnostics = await androidDevices.getDiagnostics();
+        expect(diagnostics, hasLength(1), reason: 'Failed diagnostics for input: $input');
+        if (expectedStatus == 'offline') {
+          expect(
+            diagnostics.first,
+            contains('is offline'),
+            reason: 'Failed diagnostics for input: $input',
+          );
+        } else if (expectedStatus == 'unauthorized') {
+          expect(
+            diagnostics.first,
+            contains('is not authorized'),
+            reason: 'Failed diagnostics for input: $input',
+          );
+        }
+      }
+    }
+  });
+
   testWithoutContext('AndroidDevices can parse output for emulators and short listings', () async {
     final androidDevices = AndroidDevices(
       userMessages: UserMessages(),
