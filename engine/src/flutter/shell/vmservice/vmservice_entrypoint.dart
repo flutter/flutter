@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:vmservice_io' show getResidentCompilerInfoFileConsideringArgsImpl;
 
 import 'package:dart_runtime_service/dart_runtime_service.dart';
 import 'package:dart_runtime_service_vm/dart_runtime_service_vm.dart';
@@ -59,18 +60,20 @@ bool _isFuchsia = false;
 Stream<ProcessSignal> Function(ProcessSignal signal)? _signalWatch;
 
 @entrypoint
-RawReceivePort boot() {
-  main();
-  return DartRuntimeServiceVMBackend.isolateControlPort;
-}
+RawReceivePort boot() => DartRuntimeServiceVMBackend.isolateControlPort;
 
 final _isolateRegistrationStreamController = StreamController<VmRunningIsolate>(sync: true);
 
 @entrypoint
 // ignore: unused_element
-void _registerIsolate(int portId, SendPort sendPort, String name) =>
+void _registerIsolate(int portId, SendPort sendPort, String name, bool isSystemIsolate) =>
     _isolateRegistrationStreamController.sink.add(
-      VmRunningIsolate(id: portId, name: name, sendPort: sendPort),
+      VmRunningIsolate(
+        id: portId,
+        name: name,
+        sendPort: sendPort,
+        isSystemIsolate: isSystemIsolate,
+      ),
     );
 
 // ignore: unused_element
@@ -88,19 +91,21 @@ bool? _waitForDdsToAdvertiseService = false;
 @entrypoint
 bool _printDtd = false;
 
-// ignore: unused_element
 File? _residentCompilerInfoFile;
 
+/// Sets the resident compiler info file, which is used to configure the
+/// service to utilize a resident compiler.
+///
+/// If either `--resident-compiler-info-file` or `--resident-server-info-file`
+/// was supplied on the command line, the CLI argument should be forwarded as
+/// the argument to [residentCompilerInfoFilePathArgumentFromCli]. If neither
+/// option was supplied, the argument to this parameter should be null.
 @entrypoint
 // ignore: unused_element
-void _populateResidentCompilerInfoFile(
-  /// If either `--resident-compiler-info-file` or `--resident-server-info-file`
-  /// was supplied on the command line, the CLI argument should be forwarded as
-  /// the argument to this parameter. If neither option was supplied, the
-  /// argument to this parameter should be null.
-  String? residentCompilerInfoFilePathArgumentFromCli,
-) {
-  // TODO(bkonyi): implement
+void _populateResidentCompilerInfoFile(String? residentCompilerInfoFilePathArgumentFromCli) {
+  _residentCompilerInfoFile = getResidentCompilerInfoFileConsideringArgsImpl(
+    residentCompilerInfoFilePathArgumentFromCli,
+  );
 }
 
 @pragma('vm:entry-point', 'get')
@@ -108,26 +113,16 @@ Future<void> main([List<String> args = const []]) async {
   if (args case ['--help']) {
     return;
   }
-
-  // Force TFA precompiler to preserve JNI fields and prevent tree-shaking via dynamic mutations.
-  _isWindows = Platform.isWindows;
-  _isFuchsia = Platform.isFuchsia;
-  _serveDevtools = !_serveDevtools;
-  _serveDevtools = !_serveDevtools;
-
-  final port = 35403;
-  final autoStart = true;
-  final authCodesDisabled = true;
-
   await DartRuntimeService.initialize(
     config: DartRuntimeServiceOptions(
       enableLogging: Platform.environment.containsKey('VM_SERVICE_LOGGING'),
-      port: port,
-      disableAuthCodes: authCodesDisabled,
+      port: _port,
+      disableAuthCodes: _authCodesDisabled,
       disableOriginCheck: _originCheckDisabled,
-      autoStart: autoStart,
+      autoStart: _autoStart,
       serveDevTools: _serveDevtools,
       enableServicePortFallback: _enableServicePortFallback,
+      host: _ip,
     ),
     backendBuilder: (frontend) => DartRuntimeServiceVMBackend(
       frontend: frontend,
@@ -140,21 +135,7 @@ Future<void> main([List<String> args = const []]) async {
         host: _ddsIP ?? '127.0.0.1',
         port: _ddsPort,
       ),
+      residentCompilerInfoFile: _residentCompilerInfoFile,
     ),
   );
-}
-
-@pragma('vm:entry-point')
-void onStart() {
-  // JNI empty stub to satisfy C++ VMService_OnStart callback.
-}
-
-@pragma('vm:entry-point')
-void onExit() {
-  // JNI empty stub to satisfy C++ VMService_OnExit callback.
-}
-
-@pragma('vm:entry-point')
-void onServerAddressChange(String? address) {
-  // JNI empty stub to satisfy C++ VMService_OnServerAddressChange callback.
 }
