@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -638,7 +640,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       final String filename = apkFile.basename;
       _logger.printTrace('Calculate SHA1: $apkDirectory/$filename');
       final File apkShaFile = apkDirectory.childFile('$filename.sha1');
-      apkShaFile.writeAsStringSync(_calculateSha(apkFile));
+      apkShaFile.writeAsStringSync(calculateSha(apkFile));
 
       final appSize = (buildInfo.mode == BuildMode.debug)
           ? '' // Don't display the size when building a debug variant.
@@ -1048,17 +1050,26 @@ void printHowToConsumeAar({
   logger.printStatus('To learn more, visit https://flutter.dev/to/integrate-android-archive');
 }
 
-String _hex(List<int> bytes) {
-  final result = StringBuffer();
-  for (final part in bytes) {
-    result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
+/// Calculates the SHA-1 hash of the given [file] using chunked reading.
+@visibleForTesting
+String calculateSha(File file) {
+  final RandomAccessFile openedFile = file.openSync();
+  try {
+    final sink = AccumulatorSink<Digest>();
+    final ByteConversionSink sha1Sink = sha1.startChunkedConversion(sink);
+    final buffer = Uint8List(64 * 1024);
+    while (true) {
+      final int bytesRead = openedFile.readIntoSync(buffer);
+      if (bytesRead == 0) {
+        break;
+      }
+      sha1Sink.add(Uint8List.sublistView(buffer, 0, bytesRead));
+    }
+    sha1Sink.close();
+    return sink.events.single.toString();
+  } finally {
+    openedFile.closeSync();
   }
-  return result.toString();
-}
-
-String _calculateSha(File file) {
-  final List<int> bytes = file.readAsBytesSync();
-  return _hex(sha1.convert(bytes).bytes);
 }
 
 void _exitWithUnsupportedProjectMessage(Terminal terminal, Analytics analytics) {
