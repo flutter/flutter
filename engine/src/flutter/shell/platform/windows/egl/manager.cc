@@ -374,21 +374,47 @@ std::optional<LUID> Manager::GetGpuLuidByPreference(
     return std::nullopt;
   }
 
+  // Enumerate adapters in the order preferred for |preference| and select the
+  // first hardware adapter. Software adapters (e.g. the Microsoft Basic Render
+  // Driver) are skipped because ANGLE's D3D11 backend will not render on them,
+  // so requesting their LUID would never match the adapter ANGLE actually
+  // binds.
+  std::optional<LUID> selected_luid = std::nullopt;
   Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter;
-  hr = factory6->EnumAdapterByGpuPreference(0, preference,
-                                            IID_PPV_ARGS(&adapter));
-  if (FAILED(hr) || !adapter) {
-    return std::nullopt;
+  for (UINT i = 0;; ++i) {
+    hr = factory6->EnumAdapterByGpuPreference(i, preference,
+                                              IID_PPV_ARGS(&adapter));
+    if (FAILED(hr)) {
+      // DXGI_ERROR_NOT_FOUND signals the end of the adapter list; any other
+      // failure means we should stop enumerating as well.
+      break;
+    }
+
+    DXGI_ADAPTER_DESC1 desc;
+    hr = adapter->GetDesc1(&desc);
+    adapter.Reset();
+    if (FAILED(hr)) {
+      continue;
+    }
+
+    bool is_software = (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) != 0;
+    FML_LOG(ERROR) << "DXGI adapter [" << i << "] LUID "
+                   << desc.AdapterLuid.HighPart << ":"
+                   << desc.AdapterLuid.LowPart << " vendor 0x" << std::hex
+                   << desc.VendorId << " device 0x" << desc.DeviceId << std::dec
+                   << (is_software ? " (software)" : " (hardware)") << ".";
+
+    if (!selected_luid && !is_software) {
+      selected_luid = desc.AdapterLuid;
+    }
   }
 
-  // Get the LUID of the adapter.
-  DXGI_ADAPTER_DESC desc;
-  hr = adapter->GetDesc(&desc);
-  if (FAILED(hr)) {
-    return std::nullopt;
+  if (!selected_luid) {
+    FML_LOG(ERROR) << "No hardware DXGI adapter found for the requested GPU "
+                      "preference; falling back to ANGLE's default selection.";
   }
 
-  return desc.AdapterLuid;
+  return selected_luid;
 }
 
 std::optional<LUID> Manager::GetLowPowerGpuLuid() {
