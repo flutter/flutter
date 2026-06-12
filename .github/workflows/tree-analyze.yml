@@ -35,14 +35,13 @@ jobs:
 
           echo "Comparing against base SHA: $BASE_REF"
 
-          # 2. Get the changed files using triple-dot syntax
-          # This automatically finds the common ancestor and ignores unrelated changes on the base branch
-          CHANGED_FILES=$(git diff --name-only "$BASE_REF"...HEAD)
+          # 2. Get the changed files using the helper script
+          CHANGED_FILES=$(.github/scripts/git_files_changed.sh "$BASE_REF")
           echo "Changed files in this branch:"
           echo "$CHANGED_FILES"
 
-          # 3. Check if any file matches engine pattern:
-          if echo "$CHANGED_FILES" | grep -qE "^(DEPS|engine/.*|bin/internal/content_aware_hash\.(ps1|sh))$"; then
+          # 3. Check if any file matches engine pattern using the helper script:
+          if [ "$(echo "$CHANGED_FILES" | .github/scripts/did_engine_change.sh)" = "true" ]; then
             echo "Engine file changed - forced to wait for Linux linux_host_engine"
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
