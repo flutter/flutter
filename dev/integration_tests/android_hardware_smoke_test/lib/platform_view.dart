@@ -18,20 +18,24 @@ class AndroidPlatformView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const viewType = 'com.example.android_hardware_smoke_test/native_text_view';
-    const creationParams = <String, dynamic>{'text': 'Native View Content'};
+    const creationParams = <String, dynamic>{
+      'text': 'Native\n🐞 View 🪲\nContent ',
+    };
 
     return Stack(
       children: <Widget>[
         Positioned.fill(
           child: PlatformViewLink(
             viewType: viewType,
-            surfaceFactory: (BuildContext context, PlatformViewController controller) {
-              return AndroidViewSurface(
-                controller: controller as AndroidViewController,
-                gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-                hitTestBehavior: PlatformViewHitTestBehavior.opaque,
-              );
-            },
+            surfaceFactory:
+                (BuildContext context, PlatformViewController controller) {
+                  return AndroidViewSurface(
+                    controller: controller as AndroidViewController,
+                    gestureRecognizers:
+                        const <Factory<OneSequenceGestureRecognizer>>{},
+                    hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+                  );
+                },
             onCreatePlatformView: (PlatformViewCreationParams params) {
               return PlatformViewsService.initAndroidView(
                   id: params.id,
@@ -51,17 +55,25 @@ class AndroidPlatformView extends StatelessWidget {
         ),
         Center(
           child: Container(
-            width: 90,
+            width: 120,
             height: 90,
             decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.7), // Semi-transparent overlay
+              color: Colors.red.withValues(
+                alpha: 0.6,
+              ), // Semi-transparent overlay
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2.0),
+              border: Border.all(color: Colors.white, width: 3.0),
             ),
             alignment: Alignment.center,
             child: const Text(
-              'Flutter',
-              style: TextStyle(color: Colors.white, fontSize: 14.0, fontWeight: FontWeight.bold),
+              'Flutter\n🐦🐦🐦',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14.0,
+                fontWeight: FontWeight.bold,
+                decoration: TextDecoration.none,
+              ),
             ),
           ),
         ),

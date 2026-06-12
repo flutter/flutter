@@ -29,7 +29,7 @@ class NativeTextView(
 ) : PlatformView {
     private val textView: TextView =
         TextView(context).apply {
-            textSize = 20f
+            textSize = 22f
             gravity = Gravity.CENTER
             setBackgroundColor(Color.rgb(100, 200, 255)) // Light blue background
             text = creationParams?.get("text") as String? ?: "Default Native Text"
