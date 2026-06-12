@@ -45,11 +45,12 @@ class ConnectionResult {
   final vm_service.VmService vmService;
 }
 
-typedef VmServiceFactory = Future<vm_service.VmService> Function(
-  Uri, {
-  CompressionOptions compression,
-  required Logger logger,
-});
+typedef VmServiceFactory =
+    Future<vm_service.VmService> Function(
+      Uri, {
+      CompressionOptions compression,
+      required Logger logger,
+    });
 
 /// The web specific DevFS implementation.
 class WebDevFS implements DevFS {
@@ -380,10 +381,12 @@ class WebDevFS implements DevFS {
           assetPathsToEvict: _assetPathsToEvict,
           shaderPathsToEvict: _shaderPathsToEvict,
           bundleFirstUpload: bundleFirstUpload,
+          invalidatedFiles: invalidatedFiles,
           syncAllAssetsOnFirstUpload: true,
           onFontManifestUpdated: () => didUpdateFontManifest = true,
         );
         syncedBytes += bundleSyncedBytes;
+        _assetTransformer.pruneDependencies(bundle.entries.keys.toSet());
       } on Exception catch (err, stackTrace) {
         logger.printError('Error updating bundle: $err');
         logger.printTrace('$stackTrace');
@@ -430,7 +433,10 @@ class WebDevFS implements DevFS {
     // Only update the last compiled time if we successfully compiled.
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
-    sources = compilerOutput.sources;
+    sources = <Uri>{
+      ...compilerOutput.sources,
+      ..._assetTransformer.dependencies.values.expand((Set<Uri> uris) => uris),
+    }.toList();
     late File codeFile;
     File manifestFile;
     File sourcemapFile;

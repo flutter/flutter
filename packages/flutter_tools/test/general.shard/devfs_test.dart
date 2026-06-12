@@ -781,12 +781,14 @@ void main() {
             'increment',
             '--input=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput0.txt',
             '--output=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput1.txt',
+            RegExp(r'--depfile=.*'),
           ],
           onRun: (List<String> command) {
             final ArgResults argParseResults =
                 (ArgParser()
                       ..addOption('input', mandatory: true)
-                      ..addOption('output', mandatory: true))
+                      ..addOption('output', mandatory: true)
+                      ..addOption('depfile'))
                     .parse(command);
 
             final File inputFile = fileSystem.file(argParseResults['input']);
@@ -876,6 +878,7 @@ void main() {
             'increment',
             '--input=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput0.txt',
             '--output=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput1.txt',
+            RegExp(r'--depfile=.*'),
           ],
           exitCode: 1,
         ),
@@ -945,14 +948,16 @@ void main() {
       );
       expect(
         logger.errorText,
-        'Transformer process terminated with non-zero exit code: 1\n'
-        'Transformer package: increment\n'
-        'Full command: Artifact.engineDartBinary run increment --input=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput0.txt --output=/.tmp_rand0/rand0/retransformerInput-asset.txt-transformOutput1.txt\n'
-        'stdout:\n'
-        '\n'
-        'stderr:\n'
-        '\n'
-        'Error updating bundle: AssetTransformationException: Failed to transform asset (Asset: asset.txt)\n',
+        matches(
+          'Transformer process terminated with non-zero exit code: 1\n'
+          'Transformer package: increment\n'
+          'Full command: Artifact.engineDartBinary run increment --input=/\\.tmp_rand0/rand0/retransformerInput-asset\\.txt-transformOutput0\\.txt --output=/\\.tmp_rand0/rand0/retransformerInput-asset\\.txt-transformOutput1\\.txt --depfile=/\\.tmp_rand0/rand[0-9]+/depfile\n'
+          'stdout:\n'
+          '\n'
+          'stderr:\n'
+          '\n'
+          'Error updating bundle: AssetTransformationException: Failed to transform asset \\(Asset: asset\\.txt\\)\n',
+        ),
       );
     });
 
@@ -993,6 +998,7 @@ void main() {
           assetPathsToEvict: <String>{},
           shaderPathsToEvict: <String>{},
           bundleFirstUpload: true,
+          invalidatedFiles: const <Uri>[],
           syncAllAssetsOnFirstUpload: true,
         );
 
@@ -1046,6 +1052,7 @@ void main() {
           assetPathsToEvict: <String>{},
           shaderPathsToEvict: <String>{},
           bundleFirstUpload: true,
+          invalidatedFiles: const <Uri>[],
         );
 
         expect(firstUploadSyncedBytes, 0);
@@ -1064,10 +1071,174 @@ void main() {
           assetPathsToEvict: <String>{},
           shaderPathsToEvict: <String>{},
           bundleFirstUpload: false,
+          invalidatedFiles: const <Uri>[],
         );
 
         expect(secondUploadSyncedBytes, 0);
         expect(dirtyEntries, isEmpty);
+      },
+    );
+
+    testWithoutContext(
+      'DevFS.updateBundle tracks asset transformer dependencies and triggers re-transform when they change',
+      () async {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final artifacts = Artifacts.test();
+        final dirtyEntries = <Uri, DevFSContent>{};
+        final assetBundle = FakeBundle();
+
+        final File assetFile = fileSystem.file('asset.txt')
+          ..createSync()
+          ..writeAsStringSync('primary');
+        final File dependencyFile = fileSystem.file('dependency.txt')
+          ..createSync()
+          ..writeAsStringSync('dep');
+
+        assetBundle.entries['asset.txt'] = AssetBundleEntry(
+          DevFSFileContent(assetFile),
+          kind: AssetKind.regular,
+          transformers: const <AssetTransformerEntry>[
+            AssetTransformerEntry(package: 'my_transformer', args: <String>[]),
+          ],
+        );
+
+        final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          // First run: first upload
+          FakeCommand(
+            command: <Pattern>[
+              dartBinaryPath,
+              'run',
+              'my_transformer',
+              RegExp(r'--input=.*'),
+              RegExp(r'--output=.*'),
+              RegExp(r'--depfile=.*'),
+            ],
+            onRun: (List<String> args) {
+              final String inputArg = args.firstWhere((String arg) => arg.startsWith('--input='));
+              final String outputArg = args.firstWhere((String arg) => arg.startsWith('--output='));
+              final String depfileArg = args.firstWhere(
+                (String arg) => arg.startsWith('--depfile='),
+              );
+
+              final String inputPath = inputArg.substring('--input='.length);
+              final String outputPath = outputArg.substring('--output='.length);
+              final String depfilePath = depfileArg.substring('--depfile='.length);
+
+              fileSystem.file(inputPath).copySync(outputPath);
+              fileSystem
+                  .file(depfilePath)
+                  .writeAsStringSync(
+                    '${fileSystem.file(outputPath).absolute.path}: '
+                    '${fileSystem.file(inputPath).absolute.path} '
+                    '${dependencyFile.absolute.path}',
+                  );
+            },
+          ),
+          // Second run: triggered by dependency change
+          FakeCommand(
+            command: <Pattern>[
+              dartBinaryPath,
+              'run',
+              'my_transformer',
+              RegExp(r'--input=.*'),
+              RegExp(r'--output=.*'),
+              RegExp(r'--depfile=.*'),
+            ],
+            onRun: (List<String> args) {
+              final String inputArg = args.firstWhere((String arg) => arg.startsWith('--input='));
+              final String outputArg = args.firstWhere((String arg) => arg.startsWith('--output='));
+              final String depfileArg = args.firstWhere(
+                (String arg) => arg.startsWith('--depfile='),
+              );
+
+              final String inputPath = inputArg.substring('--input='.length);
+              final String outputPath = outputArg.substring('--output='.length);
+              final String depfilePath = depfileArg.substring('--depfile='.length);
+
+              fileSystem.file(inputPath).copySync(outputPath);
+              fileSystem
+                  .file(depfilePath)
+                  .writeAsStringSync(
+                    '${fileSystem.file(outputPath).absolute.path}: '
+                    '${fileSystem.file(inputPath).absolute.path} '
+                    '${dependencyFile.absolute.path}',
+                  );
+            },
+          ),
+        ]);
+
+        final assetTransformer = DevelopmentAssetTransformer(
+          fileSystem: fileSystem,
+          transformer: AssetTransformer(
+            processManager: processManager,
+            fileSystem: fileSystem,
+            dartBinaryPath: dartBinaryPath,
+            buildMode: BuildMode.debug,
+          ),
+          logger: logger,
+        );
+
+        const shaderCompiler = FakeShaderCompiler();
+
+        // 1. First upload.
+        await DevFS.updateBundle(
+          bundle: assetBundle,
+          dirtyEntries: dirtyEntries,
+          assetDirectory: 'assets',
+          assetTransformer: assetTransformer,
+          shaderCompiler: shaderCompiler,
+          fileSystem: fileSystem,
+          rootDirectoryPath: '/',
+          assetPathsToEvict: <String>{},
+          shaderPathsToEvict: <String>{},
+          bundleFirstUpload: true,
+          invalidatedFiles: <Uri>[],
+        );
+
+        expect(dirtyEntries, isEmpty);
+
+        // Verify dependencies were tracked.
+        expect(assetTransformer.dependencies['asset.txt'], contains(dependencyFile.absolute.uri));
+        // The temp input file should have been filtered out, only dependencyFile should be there.
+        expect(assetTransformer.dependencies['asset.txt'], hasLength(1));
+
+        // 2. Subsequent upload, nothing changed.
+        await DevFS.updateBundle(
+          bundle: assetBundle,
+          dirtyEntries: dirtyEntries,
+          assetDirectory: 'assets',
+          assetTransformer: assetTransformer,
+          shaderCompiler: shaderCompiler,
+          fileSystem: fileSystem,
+          rootDirectoryPath: '/',
+          assetPathsToEvict: <String>{},
+          shaderPathsToEvict: <String>{},
+          bundleFirstUpload: false,
+          invalidatedFiles: <Uri>[],
+        );
+
+        expect(dirtyEntries, isEmpty); // Nothing synced.
+
+        // 3. Subsequent upload, dependency changed.
+        // We simulate this by passing the dependency file in `invalidatedFiles`.
+        await DevFS.updateBundle(
+          bundle: assetBundle,
+          dirtyEntries: dirtyEntries,
+          assetDirectory: 'assets',
+          assetTransformer: assetTransformer,
+          shaderCompiler: shaderCompiler,
+          fileSystem: fileSystem,
+          rootDirectoryPath: '/',
+          assetPathsToEvict: <String>{},
+          shaderPathsToEvict: <String>{},
+          bundleFirstUpload: false,
+          invalidatedFiles: <Uri>[dependencyFile.absolute.uri],
+        );
+
+        expect(dirtyEntries, hasLength(1)); // Asset was re-transformed and synced.
+        expect(processManager, hasNoRemainingExpectations);
       },
     );
   });
