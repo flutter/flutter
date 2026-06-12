@@ -245,8 +245,8 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line,
       FlagForSwitch(Switch::DisableVMServicePublication));
 
   // Enable Experimental VM Service
-  settings.enable_experimental_vm_service = command_line.HasOption(
-      FlagForSwitch(Switch::ExperimentalVMService));
+  settings.enable_experimental_vm_service =
+      command_line.HasOption(FlagForSwitch(Switch::ExperimentalVMService));
 
   // Set VM Service Host
   if (command_line.HasOption(FlagForSwitch(Switch::DeviceVMServiceHost))) {

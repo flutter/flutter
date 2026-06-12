@@ -415,7 +415,8 @@ if (flutter_runtime_mode == "profile") {
   copy("copy_vmservice_snapshot_dylib") {
     visibility = [ ":*" ]
     sources = [ "$root_out_dir/libvmservice_snapshot.dylib" ]
-    outputs = [ "$_flutter_framework_dir/Frameworks/libvmservice_snapshot.dylib" ]
+    outputs =
+        [ "$_flutter_framework_dir/Frameworks/libvmservice_snapshot.dylib" ]
     deps = [ "//flutter/shell/vmservice:vmservice_snapshot" ]
   }
 }

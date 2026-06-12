@@ -176,8 +176,10 @@ template("flutter_snapshot") {
     if (is_win) {
       compile_asm_target = "_${target_name}_compile_asm"
       obj_output = "$target_gen_dir/${target_name}.obj"
-      
-      clang_cl = rebase_path("//flutter/buildtools/windows-x64/clang/bin/clang-cl.exe", root_build_dir)
+
+      clang_cl =
+          rebase_path("//flutter/buildtools/windows-x64/clang/bin/clang-cl.exe",
+                      root_build_dir)
       if (target_cpu == "x64") {
         target_arch = "x86_64-pc-windows-msvc"
       } else if (target_cpu == "arm64") {
@@ -189,14 +191,14 @@ template("flutter_snapshot") {
       } else {
         assert(false, "Unsupported Windows CPU: $target_cpu")
       }
-      
+
       action(compile_asm_target) {
         deps = [ ":$snapshot_target" ]
         script = "//flutter/build/raw_command.py"
-        
+
         inputs = [ snapshot_assembly ]
         outputs = [ obj_output ]
-        
+
         args = [
           clang_cl,
           "--target=$target_arch",
@@ -205,7 +207,7 @@ template("flutter_snapshot") {
           rebase_path(snapshot_assembly, root_build_dir),
         ]
       }
-      
+
       shared_library(compile_target) {
         public_deps = [ ":$compile_asm_target" ]
         sources = [ obj_output ]
@@ -222,9 +224,7 @@ template("flutter_snapshot") {
   }
 
   group(target_name) {
-    public_deps = [
-      ":$kernel_target",
-    ]
+    public_deps = [ ":$kernel_target" ]
     if (is_aot && (is_ios || is_mac || is_win)) {
       public_deps += [ ":$compile_target" ]
     } else {

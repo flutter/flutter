@@ -186,12 +186,12 @@ def zip_archive(dst, args):
       'Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
   ]
-  
+
   # Check if VM service snapshot exists and add it to be signed.
   vmservice_dylib_device = 'Flutter.xcframework/ios-arm64/Flutter.framework/Frameworks/libvmservice_snapshot.dylib'
   if os.path.exists(os.path.join(dst, vmservice_dylib_device)):
     without_entitlements.append(vmservice_dylib_device)
-    
+
   vmservice_dylib_sim = 'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Frameworks/libvmservice_snapshot.dylib'
   if os.path.exists(os.path.join(dst, vmservice_dylib_sim)):
     without_entitlements.append(vmservice_dylib_sim)
@@ -204,7 +204,7 @@ def zip_archive(dst, args):
     vmservice_dylib_device_ext = 'extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Frameworks/libvmservice_snapshot.dylib'
     if os.path.exists(os.path.join(dst, vmservice_dylib_device_ext)):
       without_entitlements.append(vmservice_dylib_device_ext)
-      
+
     vmservice_dylib_sim_ext = 'extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Frameworks/libvmservice_snapshot.dylib'
     if os.path.exists(os.path.join(dst, vmservice_dylib_sim_ext)):
       without_entitlements.append(vmservice_dylib_sim_ext)

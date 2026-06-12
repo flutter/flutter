@@ -74,10 +74,11 @@ DEF_SWITCH(DeviceVMServicePort,
            "vm-service-port",
            "A custom Dart VM Service port. The default is to pick a randomly "
            "available open port.")
-DEF_SWITCH(DisableVMService,
-           "disable-vm-service",
-           "Disable the Dart VM Service. The Dart VM Service is never available "
-           "in release mode.")
+DEF_SWITCH(
+    DisableVMService,
+    "disable-vm-service",
+    "Disable the Dart VM Service. The Dart VM Service is never available "
+    "in release mode.")
 DEF_SWITCH(ExperimentalVMService,
            "experimental-vm-service",
            "Enable the experimental new VM Service.")
