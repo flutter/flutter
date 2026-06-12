@@ -124,8 +124,7 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
   std::optional<Range> dirty;
   {
     Lock lock(dirty_range_mutex_);
-    dirty = dirty_range_;
-    dirty_range_ = std::nullopt;
+    std::swap(dirty_range_, dirty);
   }
   if (dirty.has_value()) {
     gl.BufferSubData(target_type, dirty->offset, dirty->length,
