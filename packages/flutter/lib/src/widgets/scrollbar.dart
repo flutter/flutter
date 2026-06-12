@@ -1389,7 +1389,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   late AnimationController _fadeoutAnimationController;
   late CurvedAnimation _fadeoutOpacityAnimation;
   final GlobalKey _scrollbarPainterKey = GlobalKey();
-  bool _pointerIsOverScrollbar = false;
+  bool _hoverIsActive = false;
   bool _dragIsActive = false;
   MouseCursor _effectiveMouseCursor = MouseCursor.defer;
   Drag? _thumbDrag;
@@ -2167,18 +2167,18 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   void handleHover(PointerHoverEvent event) {
     // Check if the position of the pointer falls over the painted scrollbar
     if (isPointerOverScrollbar(event.position, event.kind, forHover: true)) {
-      final bool wasPointerOverScrollbar = _pointerIsOverScrollbar;
-      _pointerIsOverScrollbar = true;
+      final bool wasHoverActive = _hoverIsActive;
+      _hoverIsActive = true;
       // Bring the scrollbar back into view if it has faded or started to fade
       // away.
       _fadeoutAnimationController.forward();
       _fadeoutTimer?.cancel();
-      if (!wasPointerOverScrollbar) {
+      if (!wasHoverActive) {
         updateMouseCursor();
       }
-    } else if (_pointerIsOverScrollbar) {
+    } else if (_hoverIsActive) {
       // Pointer is not over painted scrollbar.
-      _pointerIsOverScrollbar = false;
+      _hoverIsActive = false;
       _maybeStartFadeoutTimer();
       updateMouseCursor();
     }
@@ -2190,7 +2190,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @protected
   @mustCallSuper
   void handleHoverExit(PointerExitEvent event) {
-    _pointerIsOverScrollbar = false;
+    _hoverIsActive = false;
     _maybeStartFadeoutTimer();
     updateMouseCursor();
   }
@@ -2202,9 +2202,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   Set<WidgetState> get cursorStates => <WidgetState>{if (_dragIsActive) WidgetState.dragged};
 
   /// Recomputes the cursor applied by the [MouseRegion] wrapping the
-  /// scrollbar. The cursor is only overridden while the pointer is over the
-  /// painted scrollbar; otherwise [MouseCursor.defer] is used so that
-  /// ancestor cursors (such as a [TextField]'s I-beam) are preserved.
+  /// scrollbar. The wrapping [MouseRegion] also covers the scrollable content,
+  /// so [_hoverIsActive] gates the override to the painted scrollbar's hit
+  /// test area; otherwise [MouseCursor.defer] is used so that ancestor cursors
+  /// (such as a [TextField]'s I-beam) are preserved.
   ///
   /// Subclasses should call this after changes to state that affect cursor
   /// resolution (for example, when entering or leaving a drag).
@@ -2212,7 +2213,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   @mustCallSuper
   void updateMouseCursor() {
     final MouseCursor? resolved = widget.mouseCursor?.resolve(cursorStates);
-    final MouseCursor desired = ((_pointerIsOverScrollbar || _dragIsActive) && resolved != null)
+    final MouseCursor desired = ((_hoverIsActive || _dragIsActive) && resolved != null)
         ? resolved
         : MouseCursor.defer;
     if (desired != _effectiveMouseCursor) {
