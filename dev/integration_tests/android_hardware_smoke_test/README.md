@@ -92,12 +92,12 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
   ```
 
 * **Command to capture/update reference golden baselines**:
-  Running with `UPDATE_GOLDENS=1` writes or overwrites the local PNG baselines under `integration_test/goldens/` on the host.
+  Running with `UPDATE_GOLDENS=true` writes or overwrites the local PNG baselines under `test_driver/goldens/` on the host.
 
   Because the statically compiled `AndroidManifest.xml` is the single source of truth, the app will automatically self-report its active backend variant. To capture or update the baseline for a specific graphics variant, simply edit `android/app/src/main/AndroidManifest.xml` to set the desired `io.flutter.embedding.android.ImpellerBackend` value, then execute:
 
   ```sh
-  UPDATE_GOLDENS=1 flutter drive -v \
+  UPDATE_GOLDENS=true flutter drive -v \
     --driver=test_driver/driver_test.dart \
     --target=integration_test/integration_test_wrapper.dart \
     --no-dds
@@ -109,7 +109,7 @@ This mode is used to execute visual assertions locally on your PC or in CI pipel
 
 > [!IMPORTANT]
 > **Asset Bundling Precondition**:
-> Because instrumented tests run completely standalone on the device, they compare pixels against baseline images bundled as read-only assets inside the APK. You **must** first generate the local baselines under `integration_test/goldens/` using the **Host-Driven Driver Mode (with `UPDATE_GOLDENS=1`)** before compiling and building the instrumented APK.
+> Because instrumented tests run completely standalone on the device, they compare pixels against baseline images bundled as read-only assets inside the APK. You **must** first generate the local baselines under `test_driver/goldens/` using the **Host-Driven Driver Mode (with `UPDATE_GOLDENS=true`)** before compiling and building the instrumented APK.
 
 * **Command to compile and run the native JUnit suite**:
   ```sh
@@ -190,3 +190,18 @@ SHARD=android_hardware_smoke_vulkan_tests bin/cache/dart-sdk/bin/dart dev/bots/t
 # Run the OpenGLES graphics backend shard locally
 SHARD=android_hardware_smoke_opengles_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 ```
+
+---
+
+## 5. Test Suite Coverage & Technical Rationales
+
+The suite is composed of targeted visual regression test cases designed to exercise distinct GPU graphics pipelines and verify compatibility with driver and hardware configurations:
+
+| Test Case | Rendering Pipeline | Impeller/Hardware Mechanism Exercised | Reference/Source |
+| :--- | :--- | :--- | :--- |
+| **`blueRectangleTest`** | **Solid Vector Fills** | Standard vector rasterization and layout transformation. | Simple `canvas.drawRect` |
+| **`trianglePathTest`** | **Complex Paths** | Path triangulation, rasterization, and hardware anti-aliasing (MSAA). | Simple `canvas.drawPath` |
+| **`textTest`** | **Font Rendering** | Text layout (`TextPainter`), glyph caching, shaping, and font atlas rendering. | Simple `TextPainter.paint` |
+| **`imageTest`** | **Texture Sampling** | Image decoding, GPU texture uploading, and texture sampler rendering. Uses a 32x32 4-color checkerboard PNG to verify RGB color channel correctness. | Simple `canvas.drawImage` |
+| **`advancedBlendTest`** | **Advanced Blending** | Fragment shader blending and framebuffer fetch tile-memory optimizations (e.g. Vulkan subpass inputs, `EXT_shader_framebuffer_fetch` in GLES). Uses `BlendMode.difference`. | Mirrors [animated_advanced_blend.dart](/dev/benchmarks/macrobenchmarks/lib/src/animated_advanced_blend.dart). |
+| **`backdropFilterBlurTest`** | **Compositing & Blur** | Offscreen texture allocation, layer downscale/upscale passes, and multi-pass Gaussian blur filter execution. Uses `ImageFilter.blur(sigmaX: 5, sigmaY: 5)`. | Mirrors [backdrop_filter.dart](/dev/benchmarks/macrobenchmarks/lib/src/backdrop_filter.dart). |
