@@ -63,6 +63,7 @@ std::optional<GLuint> DeviceBufferGLES::GetHandle() const {
 }
 
 void DeviceBufferGLES::Flush(std::optional<Range> range) const {
+  Lock lock(dirty_range_mutex_);
   if (!range.has_value()) {
     dirty_range_ = Range{
         0, static_cast<size_t>(backing_store_->GetLength().GetByteSize())};
@@ -116,11 +117,19 @@ bool DeviceBufferGLES::BindAndUploadDataIfNecessary(BindingType type) const {
     initialized_ = true;
   }
 
-  if (dirty_range_.has_value()) {
-    auto range = dirty_range_.value();
-    gl.BufferSubData(target_type, range.offset, range.length,
-                     backing_store_->GetBuffer() + range.offset);
+  // Take and clear the dirty range BEFORE uploading. A Flush() from another
+  // thread during the upload then merges into a fresh dirty range that the
+  // next bind uploads, instead of being silently discarded by a clear that
+  // runs after the upload.
+  std::optional<Range> dirty;
+  {
+    Lock lock(dirty_range_mutex_);
+    dirty = dirty_range_;
     dirty_range_ = std::nullopt;
+  }
+  if (dirty.has_value()) {
+    gl.BufferSubData(target_type, dirty->offset, dirty->length,
+                     backing_store_->GetBuffer() + dirty->offset);
   }
 
   return true;
