@@ -603,6 +603,97 @@ void main() {
             expect(logger.errorText, contains('Could not find SDK Platform Version'));
           });
         });
+
+        group('getSimulatorPath', () {
+          late MemoryFileSystem fileSystem;
+
+          setUp(() {
+            fileSystem = MemoryFileSystem.test();
+          });
+
+          testWithoutContext('returns Simulator.app path on Xcode < 27', () {
+            const xcodePath = '/Applications/Xcode.app/Contents/Developer';
+            fakeProcessManager.addCommand(
+              const FakeCommand(
+                command: <String>['/usr/bin/xcode-select', '--print-path'],
+                stdout: xcodePath,
+              ),
+            );
+            xcodeProjectInterpreter.version = Version(26, 0, 0);
+            final xcodeWithFs = Xcode.test(
+              processManager: fakeProcessManager,
+              xcodeProjectInterpreter: xcodeProjectInterpreter,
+              fileSystem: fileSystem,
+            );
+            fileSystem
+                .directory('$xcodePath/Applications/Simulator.app')
+                .createSync(recursive: true);
+
+            expect(
+              xcodeWithFs.getSimulatorPath(),
+              '$xcodePath/Applications/Simulator.app',
+            );
+          });
+
+          testWithoutContext('returns DeviceHub.app path on Xcode >= 27', () {
+            const xcodePath = '/Applications/Xcode.app/Contents/Developer';
+            fakeProcessManager.addCommand(
+              const FakeCommand(
+                command: <String>['/usr/bin/xcode-select', '--print-path'],
+                stdout: xcodePath,
+              ),
+            );
+            xcodeProjectInterpreter.version = Version(27, 0, 0);
+            final xcodeWithFs = Xcode.test(
+              processManager: fakeProcessManager,
+              xcodeProjectInterpreter: xcodeProjectInterpreter,
+              fileSystem: fileSystem,
+            );
+            fileSystem
+                .directory('$xcodePath/Applications/DeviceHub.app')
+                .createSync(recursive: true);
+
+            expect(
+              xcodeWithFs.getSimulatorPath(),
+              '$xcodePath/Applications/DeviceHub.app',
+            );
+          });
+
+          testWithoutContext('returns null when app directory does not exist', () {
+            const xcodePath = '/Applications/Xcode.app/Contents/Developer';
+            fakeProcessManager.addCommand(
+              const FakeCommand(
+                command: <String>['/usr/bin/xcode-select', '--print-path'],
+                stdout: xcodePath,
+              ),
+            );
+            xcodeProjectInterpreter.version = Version(15, 0, 0);
+            final xcodeWithFs = Xcode.test(
+              processManager: fakeProcessManager,
+              xcodeProjectInterpreter: xcodeProjectInterpreter,
+              fileSystem: fileSystem,
+            );
+
+            expect(xcodeWithFs.getSimulatorPath(), isNull);
+          });
+
+          testWithoutContext('returns null when xcode-select path is unavailable', () {
+            fakeProcessManager.addCommand(
+              const FakeCommand(
+                command: <String>['/usr/bin/xcode-select', '--print-path'],
+                exception: ProcessException('/usr/bin/xcode-select', <String>['--print-path']),
+              ),
+            );
+            xcodeProjectInterpreter.version = Version(27, 0, 0);
+            final xcodeWithFs = Xcode.test(
+              processManager: fakeProcessManager,
+              xcodeProjectInterpreter: xcodeProjectInterpreter,
+              fileSystem: fileSystem,
+            );
+
+            expect(xcodeWithFs.getSimulatorPath(), isNull);
+          });
+        });
       });
     });
 
