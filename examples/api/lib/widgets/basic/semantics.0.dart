@@ -8,9 +8,9 @@ import 'package:flutter/services.dart';
 /// Flutter code sample for a custom button that uses [Semantics].
 ///
 /// This sample shows how to expose a custom interactive control as a button to
-/// assistive technologies. [Semantics] supplies the button role, enabled state,
-/// and tap action, while [FocusableActionDetector] and [GestureDetector] handle
-/// keyboard focus, hover, shortcuts, and pointer taps.
+/// assistive technologies. [Semantics] supplies the button role and enabled
+/// state, while [FocusableActionDetector] and [GestureDetector] handle keyboard
+/// focus, hover, shortcuts, and taps.
 
 void main() => runApp(const SemanticsExampleApp());
 
@@ -109,7 +109,6 @@ class _AccessibleButtonState extends State<AccessibleButton> {
       button: true,
       container: true,
       enabled: _enabled,
-      onTap: _enabled ? _activate : null,
       child: FocusableActionDetector(
         enabled: _enabled,
         actions: <Type, Action<Intent>>{
@@ -130,9 +129,6 @@ class _AccessibleButtonState extends State<AccessibleButton> {
         onShowFocusHighlight: _handleFocusHighlight,
         onShowHoverHighlight: _handleHoverHighlight,
         child: GestureDetector(
-          // The enclosing Semantics widget supplies the button role and semantic
-          // tap action, so this detector only handles pointer input.
-          excludeFromSemantics: true,
           onTap: _enabled ? _activate : null,
           child: DecoratedBox(
             decoration: BoxDecoration(
