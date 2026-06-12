@@ -175,7 +175,7 @@ template("flutter_snapshot") {
     shared_library(compile_target) {
       deps = [ ":$snapshot_target" ]
       sources = [ snapshot_assembly ]
-      output_name = "vmservice_snapshot"
+      output_name = target_name
       if (is_win) {
         ldflags = [ "/NOENTRY" ]
       }
