@@ -5619,6 +5619,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
   }
 
+  /// Resumes a [popUntil] or [popUntilWithResult] operation after a deferred
+  /// page-based pop completes.
+  ///
+  /// When a page-based route defers its removal, the current route remains at
+  /// the top of the present history until [stalledRoute.popped] completes.
+  /// This helper waits for that completion before continuing to pop routes
+  /// until [predicate] succeeds.
   void _continuePopUntilAfterDeferredPop<T extends Object?>(
     RoutePredicate predicate, {
     required Route<dynamic> stalledRoute,
