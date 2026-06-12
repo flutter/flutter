@@ -66,7 +66,7 @@ Trigger this skill by providing a merged PR number or URL and optionally the tar
    - Read the local cherry-pick template:
      Use `view_file` on the local cherry-pick template (located at `../../../.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md` relative to this skill)
    - If the file does not exist locally, fallback to fetching it via `read_url_content` from:
-     `https://raw.githubusercontent.com/flutter/flutter/master/.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md`
+     `https://raw.githubusercontent.com/flutter/flutter/main/.github/PR_TEMPLATE/PULL_REQUEST_CP_TEMPLATE.md`
 2. **Gather Context:**
    - Parse the original PR description for linked issues (e.g., "Fixes #187322", "Closes #123").
    - If found, fetch the issue details: `gh issue view <ISSUE_NUMBER> --json title,body`.
