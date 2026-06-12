@@ -535,28 +535,66 @@ object FlutterPluginUtils {
         }
     }
 
+    /**
+     * Checks if all subprojects within the root Android project have migrated away from the legacy
+     * Kotlin Gradle Plugin (KGP) to Built-in Kotlin.
+     */
+    @JvmStatic
+    @JvmName("hasNoSubprojectsApplyingKgp")
+    internal fun hasNoSubprojectsApplyingKgp(project: Project): Boolean {
+        return project.rootProject.subprojects.all { subproject ->
+            val subprojectPluginState = getSubprojectPluginState(subproject)
+
+            // Non-Android subprojects (those not applying com.android.application or com.android.library)
+            // are ignored as they do not affect the Android Kotlin build configuration.
+            // For Android subprojects, we verify they do not apply the legacy KGP.
+            if (subprojectPluginState == null || (!subprojectPluginState.hasAppPlugin && !subprojectPluginState.hasLibPlugin)) {
+                true
+            } else {
+                !subprojectPluginState.hasKgpPlugin
+            }
+        }
+    }
+
+    /**
+     * Safely retrieves the AGP version currently loaded in the classpath at runtime.
+     * Bypasses the Gradle lifecycle, making it available immediately during the apply phase.
+     */
+    internal fun getRuntimeAGPVersion(): Version? {
+        val versionString = try {
+            val versionClass = Class.forName("com.android.builder.model.Version")
+            val versionField = versionClass.getField("ANDROID_GRADLE_PLUGIN_VERSION")
+            versionField.get(null) as? String
+        } catch (e: Exception) {
+            try {
+                val versionClass = Class.forName("com.android.Version")
+                val versionField = versionClass.getField("ANDROID_GRADLE_PLUGIN_VERSION")
+                versionField.get(null) as? String
+            } catch (e2: Exception) {
+                null
+            }
+        }
+        return versionString?.let { Version.fromString(it) }
+    }
+
     /** Prints error message for usage of KGP. */
     @JvmStatic
     @JvmName("detectApplyingKotlinGradlePlugin")
     internal fun detectApplyingKotlinGradlePlugin(project: Project) {
-        val gradlePropertiesFile = project.rootProject.file("gradle.properties")
-        val properties = readPropertiesIfExist(gradlePropertiesFile)
-        val isBuiltInKotlinEnabled =
-            properties.getProperty("android.builtInKotlin").toBoolean()
+        val agpVersion = getRuntimeAGPVersion()
 
-        if (isBuiltInKotlinEnabled) {
-            val allSubprojectsDoNotApplyKgp =
-                project.rootProject.subprojects.all { subproject ->
-                    val subprojectPluginState = getSubprojectPluginState(subproject)
-                    if (subprojectPluginState == null || (!subprojectPluginState.hasAppPlugin && !subprojectPluginState.hasLibPlugin)) {
-                        true
-                    } else {
-                        !subprojectPluginState.hasKgpPlugin
-                    }
-                }
-            if (allSubprojectsDoNotApplyKgp) {
-                return
-            }
+        if (agpVersion != null && agpVersion.major != 9) {
+            return
+        }
+
+        // Supports global configuration via root project 'gradle.properties' or command line
+        // (e.g., -Pandroid.builtInKotlin=false). Built-in Kotlin is enabled by default in AGP 9.0+,
+        // so defaults to true if the property is not explicitly set.
+        val isBuiltInKotlinEnabledGlobally =
+            project.rootProject.findProperty("android.builtInKotlin")?.toString()?.toBoolean() ?: true
+
+        if (isBuiltInKotlinEnabledGlobally && hasNoSubprojectsApplyingKgp(project)) {
+            return
         }
 
         val pluginsWithKGPAppliedList = mutableListOf<String>()
@@ -623,6 +661,10 @@ object FlutterPluginUtils {
     /**
      * Represents whether Kotlin Gradle Plugin, Android Gradle Plugin (for applications), and the
      * Android Gradle Plugin (for libraries) are declared in a subproject's build script.
+     *
+     * @property hasKgpPlugin `true` if the Kotlin Gradle Plugin (KGP) is declared in the subproject's build script.
+     * @property hasAppPlugin `true` if the Android Gradle Plugin (AGP) for applications is declared in the subproject's build script.
+     * @property hasLibPlugin `true` if the Android Gradle Plugin (AGP) for libraries is declared in the subproject's build script.
      */
     private data class SubprojectPluginState(
         val hasKgpPlugin: Boolean,

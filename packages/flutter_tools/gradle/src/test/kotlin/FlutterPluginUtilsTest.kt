@@ -22,6 +22,7 @@ import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
@@ -35,6 +36,8 @@ import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.Logger
 import org.gradle.api.plugins.PluginManager
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
@@ -944,6 +947,36 @@ class FlutterPluginUtilsTest {
             private val mockGradle = mockk<Gradle>()
             private val mockLogger = mockk<Logger>(relaxed = true)
 
+            @BeforeEach
+            fun setUp() {
+                mockkObject(FlutterPluginUtils)
+                every { FlutterPluginUtils.getRuntimeAGPVersion() } returns Version(9, 0, 0)
+            }
+
+            @AfterEach
+            fun tearDown() {
+                unmockkObject(FlutterPluginUtils)
+            }
+
+            @Test
+            fun `exits early when AGP major version is not 9`(
+                @TempDir tempDir: Path
+            ) {
+                every { FlutterPluginUtils.getRuntimeAGPVersion() } returns Version(8, 0, 0)
+
+                val testProject =
+                    setupTest(
+                        tempDir = tempDir,
+                        builtInKotlin = "false",
+                        captureActions = false
+                    )
+
+                detectApplyingKotlinGradlePlugin(testProject.appProject)
+
+                verify(exactly = 0) { rootProject.subprojects(any<Action<Project>>()) }
+                verify(exactly = 0) { mockGradle.projectsEvaluated(any<Action<Gradle>>()) }
+            }
+
             private fun writeGradleProperties(
                 rootDir: File,
                 content: String
@@ -1029,6 +1062,7 @@ class FlutterPluginUtilsTest {
 
                 val allProjects = setOf(appProject) + pluginProjects
                 every { rootProject.subprojects } returns allProjects
+                every { rootProject.findProperty("android.builtInKotlin") } returns builtInKotlin
 
                 val testProject = TestEnvironment(appProject, pluginProjects)
 
@@ -1081,6 +1115,24 @@ class FlutterPluginUtilsTest {
                         setupTest(
                             tempDir = tempDir,
                             builtInKotlin = "TRUE",
+                            captureActions = false
+                        )
+
+                    detectApplyingKotlinGradlePlugin(testProject.appProject)
+
+                    verify(exactly = 0) { rootProject.subprojects(any<Action<Project>>()) }
+                    verify(exactly = 0) { testProject.appPluginManager.apply("kotlin-android") }
+                    verify(exactly = 0) { testProject.plugin1Manager.apply("kotlin-android") }
+                }
+
+                @Test
+                fun `exits early when property is not explicitly set (defaults to true)`(
+                    @TempDir tempDir: Path
+                ) {
+                    val testProject =
+                        setupTest(
+                            tempDir = tempDir,
+                            builtInKotlin = null,
                             captureActions = false
                         )
 
