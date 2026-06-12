@@ -698,11 +698,13 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
       _sliverAnimatedMultiBoxKey.currentState!.insertItem(index, duration: duration);
     } else {
       final int itemIndex = _computeItemIndex(index);
+      final int visibleItemsCount = _visibleItemsCount;
+      final int separatedItemsCount = visibleItemsCount - visibleItemsCount ~/ 2;
+      final isNewLastIndex = index == separatedItemsCount;
       _sliverAnimatedMultiBoxKey.currentState!.insertItem(itemIndex, duration: duration);
-      if (_visibleItemsCount > 1) {
-        // Because `insertItem` moves the items after the index, we need to insert the separator
-        // at the same index as the item. If there is only one item, we don't need to insert a separator.
-        _sliverAnimatedMultiBoxKey.currentState!.insertItem(itemIndex, duration: duration);
+      if (visibleItemsCount > 0) {
+        final int separatorIndex = isNewLastIndex ? itemIndex : itemIndex + 1;
+        _sliverAnimatedMultiBoxKey.currentState!.insertItem(separatorIndex, duration: duration);
       }
     }
   }
@@ -813,14 +815,15 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
     // with the corresponding builders.
     final int visibleItemsCount = _visibleItemsCount;
     for (int index = visibleItemsCount - 1; index >= 0; index--) {
-      if (index.isEven) {
+      final int itemIndex = _sliverAnimatedMultiBoxKey.currentState!._indexToItemIndex(index);
+      if (itemIndex.isEven) {
         _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
       } else {
         // The index of the separator's corresponding item
-        final int itemIndex = index ~/ 2;
+        final int separatorIndex = itemIndex ~/ 2;
         _sliverAnimatedMultiBoxKey.currentState!.removeItem(
           index,
-          _toRemovedItemBuilder(removedSeparatorBuilder, itemIndex),
+          _toRemovedItemBuilder(removedSeparatorBuilder, separatorIndex),
           duration: duration,
         );
       }
