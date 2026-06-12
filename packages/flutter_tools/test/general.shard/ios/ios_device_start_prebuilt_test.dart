@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -113,7 +114,7 @@ FakeCommand attachDebuggerCommand({
 }
 
 void main() {
-  testWithoutContext('disposing device disposes the portForwarder and logReader', () async {
+  testUsingContext('disposing device disposes the portForwarder and logReader', () async {
     final IOSDevice device = setUpIOSDevice();
     final devicePortForwarder = FakeDevicePortForwarder();
     final deviceLogReader = FakeDeviceLogReader();
@@ -132,7 +133,7 @@ void main() {
     expect(devicePortForwarder.disposed, true);
   });
 
-  testWithoutContext(
+  testUsingContext(
     'IOSDevice.startApp attaches in debug mode via log reading on iOS 13+',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -246,7 +247,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     'IOSDevice.startApp launches in debug mode via log reading on <iOS 13',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -295,7 +296,7 @@ void main() {
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     'IOSDevice.startApp prints warning message if discovery takes longer than configured timeout for wired device',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -577,7 +578,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('IOSDevice.startApp forwards all supported debugging options', () async {
+  testUsingContext('IOSDevice.startApp forwards all supported debugging options', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeAnalytics = FakeAnalytics();
     final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -691,7 +692,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('startApp using route', () async {
+  testUsingContext('startApp using route', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeAnalytics = FakeAnalytics();
     final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -767,7 +768,7 @@ void main() {
     ]);
   });
 
-  testWithoutContext('startApp using trace-startup', () async {
+  testUsingContext('startApp using trace-startup', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final fakeAnalytics = FakeAnalytics();
     final processManager = FakeProcessManager.list(<FakeCommand>[
@@ -1293,7 +1294,7 @@ void main() {
       );
 
       group('IOSDevice warnIfSlowWirelessDebugging', () {
-        testWithoutContext('prints warning for slow wireless debugging on iOS 26+', () async {
+        testUsingContext('prints warning for slow wireless debugging on iOS 26+', () async {
           final logger = BufferLogger.test();
           final IOSDevice device = setUpIOSDevice(
             sdkVersion: '26.0.0',
@@ -1324,7 +1325,7 @@ void main() {
             }),
           );
         });
-        testWithoutContext(
+        testUsingContext(
           'does not print slow wireless debugging warning on iOS less than 26',
           () async {
             final logger = BufferLogger.test();
@@ -1341,7 +1342,7 @@ void main() {
           },
         );
 
-        testWithoutContext(
+        testUsingContext(
           'does not print slow wireless debugging warning for wired device',
           () async {
             final logger = BufferLogger.test();
@@ -1354,7 +1355,7 @@ void main() {
           },
         );
 
-        testWithoutContext(
+        testUsingContext(
           'does not print slow wireless debugging warning for release mode',
           () async {
             final logger = BufferLogger.test();
@@ -1687,6 +1688,7 @@ IOSDevice setUpIOSDevice({
   Analytics? analytics,
   FakeXcodeDebug? xcodeDebug,
   FakePlatform? platform,
+  Xcode? xcode,
 }) {
   final artifacts = Artifacts.test();
   final FakePlatform macPlatform =
@@ -1698,6 +1700,7 @@ IOSDevice setUpIOSDevice({
     processManager: FakeProcessManager.any(),
   );
   logger ??= BufferLogger.test();
+  xcode ??= context.get<Xcode>();
   return IOSDevice(
     '123',
     name: 'iPhone 1',
@@ -1731,6 +1734,7 @@ IOSDevice setUpIOSDevice({
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
+    xcode: xcode,
   );
 }
 

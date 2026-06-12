@@ -8,6 +8,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -1467,6 +1468,7 @@ IOSDevice setUpIOSDevice({
   FakeXcodeDebug? xcodeDebug,
   DarwinArch cpuArchitecture = DarwinArch.arm64,
   FakeExactAnalytics? analytics,
+  Xcode? xcode,
 }) {
   artifacts ??= Artifacts.test();
   final cache = Cache.test(
@@ -1475,6 +1477,7 @@ IOSDevice setUpIOSDevice({
   );
 
   logger ??= BufferLogger.test();
+  xcode ??= context.get<Xcode>();
   return IOSDevice(
     '123',
     name: 'iPhone 1',
@@ -1506,6 +1509,7 @@ IOSDevice setUpIOSDevice({
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
+    xcode: xcode,
   );
 }
 

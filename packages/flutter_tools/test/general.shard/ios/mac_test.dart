@@ -819,7 +819,7 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
             platform: FlutterDarwinPlatform.ios,
             project: project,
             device: fakeDevice,
-            xcode: FakeXcode(),
+            xcode: FakeXcode(currentVersion: const Version.withText(26, 0, 0, '26.0.0')),
           );
           expect(
             logger.errorText,

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -17,6 +18,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -220,7 +222,12 @@ void main() {
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('ios').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
+          final project = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: context.get<Xcode>(),
+          );
           expect(project.ios.usesSwiftPackageManager, isTrue);
         },
         overrides: <Type, Generator>{
@@ -235,7 +242,12 @@ void main() {
           final fs = MemoryFileSystem.test();
           final Directory projectDirectory = fs.directory('path');
           final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
+          final project = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: context.get<Xcode>(),
+          );
           expect(project.ios.usesSwiftPackageManager, isFalse);
         },
         overrides: <Type, Generator>{
@@ -251,7 +263,12 @@ void main() {
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('ios').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
+          final project = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: context.get<Xcode>(),
+          );
           expect(project.ios.usesSwiftPackageManager, isFalse);
         },
         overrides: <Type, Generator>{
@@ -267,7 +284,12 @@ void main() {
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('ios').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
+          final project = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: context.get<Xcode>(),
+          );
           expect(project.ios.usesSwiftPackageManager, isFalse);
         },
         overrides: <Type, Generator>{
@@ -283,7 +305,12 @@ void main() {
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('ios').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
-          final project = FlutterProject(projectDirectory, manifest, manifest);
+          final project = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: context.get<Xcode>(),
+          );
           expect(project.ios.usesSwiftPackageManager, isFalse);
         },
         overrides: <Type, Generator>{
@@ -396,7 +423,12 @@ void main() {
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('ios').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest();
-          final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
+          final flutterProject = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: context.get<Xcode>(),
+          );
           final project = IosProject.fromFlutter(flutterProject);
           expect(project.lldbInitFile, isNot(exists));
           expect(project.lldbHelperPythonFile, isNot(exists));
@@ -412,7 +444,12 @@ void main() {
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('ios').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest();
-          final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
+          final flutterProject = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: context.get<Xcode>(),
+          );
           final project = IosProject.fromFlutter(flutterProject);
           project.lldbInitFile.createSync(recursive: true);
           project.lldbInitFile.writeAsStringSync('old');
@@ -491,7 +528,12 @@ void main() {
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('macos').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
+          final project = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: context.get<Xcode>(),
+          );
           expect(project.macos.usesSwiftPackageManager, isTrue);
         },
         overrides: <Type, Generator>{
@@ -506,7 +548,12 @@ void main() {
           final fs = MemoryFileSystem.test();
           final Directory projectDirectory = fs.directory('path');
           final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
+          final project = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: context.get<Xcode>(),
+          );
           expect(project.ios.usesSwiftPackageManager, isFalse);
           expect(project.macos.usesSwiftPackageManager, isFalse);
         },
@@ -523,7 +570,12 @@ void main() {
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('macos').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
+          final project = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: context.get<Xcode>(),
+          );
           expect(project.macos.usesSwiftPackageManager, isFalse);
         },
         overrides: <Type, Generator>{
@@ -539,7 +591,12 @@ void main() {
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('macos').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest();
-          final project = FlutterProject(projectDirectory, manifest, manifest);
+          final project = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: context.get<Xcode>(),
+          );
           expect(project.macos.usesSwiftPackageManager, isFalse);
         },
         overrides: <Type, Generator>{
@@ -555,7 +612,12 @@ void main() {
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('macos').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest(isModule: true);
-          final project = FlutterProject(projectDirectory, manifest, manifest);
+          final project = FlutterProject(
+            projectDirectory,
+            manifest,
+            manifest,
+            xcode: context.get<Xcode>(),
+          );
           expect(project.macos.usesSwiftPackageManager, isFalse);
         },
         overrides: <Type, Generator>{
@@ -595,7 +657,6 @@ Creating working copy of package ‘swift-algorithms’
 Checking out 1.2.2 of package ‘swift-algorithms’
 
 Checking out 1.1.1 of package ‘swift-numerics’
-
 
 Resolved source packages:
   swift-numerics: https://github.com/apple/swift-numerics.git @ 1.1.1

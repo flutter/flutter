@@ -10,6 +10,7 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -52,18 +53,15 @@ class XcodeProjectInterpreter {
     required Logger logger,
     required FileSystem fileSystem,
     required Analytics analytics,
+    OperatingSystemUtils? operatingSystemUtils,
     Version? version,
     String? build,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _logger = logger,
+       _processManager = processManager,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _operatingSystemUtils = OperatingSystemUtils(
-         fileSystem: fileSystem,
-         logger: logger,
-         platform: platform,
-         processManager: processManager,
-       ),
+       _operatingSystemUtilsOverride = operatingSystemUtils,
        _version = version,
        _build = build,
        _versionText = version?.toString(),
@@ -99,7 +97,30 @@ class XcodeProjectInterpreter {
   final Platform _platform;
   final FileSystem _fileSystem;
   final ProcessUtils _processUtils;
-  final OperatingSystemUtils _operatingSystemUtils;
+  final ProcessManager _processManager;
+  final OperatingSystemUtils? _operatingSystemUtilsOverride;
+  OperatingSystemUtils? _lazyOperatingSystemUtils;
+
+  OperatingSystemUtils get _operatingSystemUtils {
+    if (_operatingSystemUtilsOverride != null) {
+      return _operatingSystemUtilsOverride;
+    }
+    try {
+      final OperatingSystemUtils? os = context.get<OperatingSystemUtils>();
+      if (os != null) {
+        return os;
+      }
+    } on UnsupportedError {
+      // No context active.
+    }
+    return _lazyOperatingSystemUtils ??= OperatingSystemUtils(
+      fileSystem: _fileSystem,
+      logger: _logger,
+      platform: _platform,
+      processManager: _processManager,
+    );
+  }
+
   final Logger _logger;
   final Analytics _analytics;
   static final _versionRegex = RegExp(r'Xcode ([0-9.]+).*Build version (\w+)');

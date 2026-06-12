@@ -86,7 +86,7 @@ void main() {
     );
   });
 
-  testWithoutContext('iOS AOT targets has analyticsName', () {
+  testUsingContext('iOS AOT targets has analyticsName', () {
     expect(const AotAssemblyRelease().analyticsName, 'ios_aot');
     expect(const AotAssemblyProfile().analyticsName, 'ios_aot');
   });
@@ -912,7 +912,7 @@ void main() {
       );
     });
 
-    testWithoutContext('iphonesimulator', () async {
+    testUsingContext('iphonesimulator', () async {
       final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
@@ -951,7 +951,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('fails when frameworks missing', () async {
+    testUsingContext('fails when frameworks missing', () async {
       final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
@@ -974,7 +974,7 @@ void main() {
       );
     });
 
-    testWithoutContext('fails when framework dSYM copy fails', () async {
+    testUsingContext('fails when framework dSYM copy fails', () async {
       binary.createSync(recursive: true);
       final Directory dSYM = fileSystem.directory(
         artifacts.getArtifactPath(
@@ -1011,7 +1011,7 @@ void main() {
       );
     });
 
-    testWithoutContext('fails when requested archs missing from framework', () async {
+    testUsingContext('fails when requested archs missing from framework', () async {
       binary.createSync(recursive: true);
 
       final environment = Environment.test(
@@ -1051,7 +1051,7 @@ void main() {
       );
     });
 
-    testWithoutContext('fails when lipo extract fails', () async {
+    testUsingContext('fails when lipo extract fails', () async {
       binary.createSync(recursive: true);
 
       final environment = Environment.test(
@@ -1105,7 +1105,7 @@ void main() {
     });
 
     group('CheckForLaunchRootViewControllerAccessDeprecation', () {
-      testWithoutContext('Swift Positive', () async {
+      testUsingContext('Swift Positive', () async {
         final File file = fileSystem.file('AppDelegate.swift');
         file.writeAsStringSync('''
 @objc class AppDelegate: FlutterAppDelegate {
@@ -1126,7 +1126,7 @@ void main() {
         );
       });
 
-      testWithoutContext('Swift Negative', () async {
+      testUsingContext('Swift Negative', () async {
         final File file = fileSystem.file('AppDelegate.swift');
         file.writeAsStringSync('''
 @objc class AppDelegate: FlutterAppDelegate {
@@ -1144,7 +1144,7 @@ void main() {
         expect(logger.warningText, equals(''));
       });
 
-      testWithoutContext('Objc Positive', () async {
+      testUsingContext('Objc Positive', () async {
         final File file = fileSystem.file('AppDelegate.m');
         file.writeAsStringSync('''
 @implementation AppDelegate
@@ -1164,7 +1164,7 @@ void main() {
         );
       });
 
-      testWithoutContext('Objc Negative', () async {
+      testUsingContext('Objc Negative', () async {
         final File file = fileSystem.file('AppDelegate.m');
         file.writeAsStringSync('''
 @implementation AppDelegate
@@ -1185,7 +1185,7 @@ void main() {
       });
     });
 
-    testWithoutContext('skips thin framework', () async {
+    testUsingContext('skips thin framework', () async {
       binary.createSync(recursive: true);
 
       final environment = Environment.test(
@@ -1215,7 +1215,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('thins fat framework', () async {
+    testUsingContext('thins fat framework', () async {
       binary.createSync(recursive: true);
 
       final environment = Environment.test(
@@ -1255,7 +1255,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('strips framework', () async {
+    testUsingContext('strips framework', () async {
       binary.createSync(recursive: true);
 
       final environment = Environment.test(
@@ -1280,7 +1280,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('fails when codesign fails', () async {
+    testUsingContext('fails when codesign fails', () async {
       binary.createSync(recursive: true);
 
       final environment = Environment.test(
@@ -1333,7 +1333,7 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
 
-    testWithoutContext('codesigns framework', () async {
+    testUsingContext('codesigns framework', () async {
       binary.createSync(recursive: true);
       final Directory dSYM = fileSystem.directory(
         artifacts.getArtifactPath(

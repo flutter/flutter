@@ -920,7 +920,15 @@ class FakeProcessUtils extends Fake implements ProcessUtils {}
 
 class FakeTemplateRenderer extends Fake implements TemplateRenderer {}
 
-class FakeXcode extends Fake implements Xcode {}
+class FakeXcode extends Fake implements Xcode {
+  FakeXcode({this.currentVersion = const Version.withText(15, 0, 0, '15.0.0')});
+
+  @override
+  final Version? currentVersion;
+
+  @override
+  List<String> xcrunCommand() => <String>['xcrun'];
+}
 
 class FakeArtifacts extends Fake implements Artifacts {}
 

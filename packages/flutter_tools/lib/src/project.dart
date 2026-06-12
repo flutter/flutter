@@ -13,6 +13,7 @@ import 'package:yaml/yaml.dart';
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
+import 'base/context.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -114,6 +115,13 @@ class FlutterProject {
   static FlutterProject fromDirectoryTest(Directory directory, [Logger? logger, Xcode? xcode]) {
     final FileSystem fileSystem = directory.fileSystem;
     logger ??= BufferLogger.test();
+    Xcode? contextXcode;
+    try {
+      contextXcode = context.get<Xcode>();
+    } on UnsupportedError {
+      // No context active.
+    }
+    xcode ??= contextXcode;
     final FlutterManifest manifest = FlutterProject._readManifest(
       directory.childFile(bundle.defaultManifestPath).path,
       logger: logger,

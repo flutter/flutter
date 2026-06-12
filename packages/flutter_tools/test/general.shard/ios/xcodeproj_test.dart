@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -24,6 +25,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
 const xcodebuild = '/usr/bin/xcodebuild';
@@ -270,8 +272,6 @@ void main() {
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        kWhichSysctlCommand,
-        const FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1),
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -316,8 +316,6 @@ void main() {
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -362,8 +360,6 @@ void main() {
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -408,8 +404,6 @@ void main() {
         'FLUTTER_XCODE_ARCHS': 'arm64',
       };
       fakeProcessManager.addCommands(<FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -454,8 +448,6 @@ void main() {
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -498,8 +490,6 @@ void main() {
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
         kResolvePackagesCommand,
         FakeCommand(
           command: <String>[
@@ -542,8 +532,6 @@ void main() {
       platform.environment = const <String, String>{};
 
       fakeProcessManager.addCommands(<FakeCommand>[
-        kWhichSysctlCommand,
-        kx64CheckCommand,
         const FakeCommand(
           command: <String>[
             'xcrun',
@@ -1465,8 +1453,6 @@ Information about project "Runner":
           final String buildDirectory = fs.path.absolute('build', 'ios');
 
           fakeProcessManager.addCommands(<FakeCommand>[
-            kWhichSysctlCommand,
-            kARMCheckCommand,
             FakeCommand(
               command: <String>[
                 '/usr/bin/arch',
@@ -1553,6 +1539,8 @@ PODS:
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
           Xcode: () => xcode,
           Logger: () => logger,
+          OperatingSystemUtils: () =>
+              FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         },
       );
 
@@ -1576,8 +1564,6 @@ PODS:
           final String buildDirectory = fs.path.absolute('build', 'ios');
 
           fakeProcessManager.addCommands(<FakeCommand>[
-            kWhichSysctlCommand,
-            kARMCheckCommand,
             FakeCommand(
               command: <String>[
                 '/usr/bin/arch',
@@ -1619,6 +1605,8 @@ Build settings for action build and target good_plugin:
           ProcessManager: () => fakeProcessManager,
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
           Xcode: () => xcode,
+          OperatingSystemUtils: () =>
+              FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         },
       );
 
@@ -1644,8 +1632,6 @@ Build settings for action build and target good_plugin:
           final String buildDirectory = fs.path.absolute('build', 'ios');
 
           fakeProcessManager.addCommands(<FakeCommand>[
-            kWhichSysctlCommand,
-            kARMCheckCommand,
             FakeCommand(
               command: <String>[
                 '/usr/bin/arch',
@@ -1693,6 +1679,8 @@ Build settings for action build and target good_plugin:
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
           Xcode: () => xcode,
           Logger: () => BufferLogger.test(),
+          OperatingSystemUtils: () =>
+              FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         },
       );
 
@@ -1718,8 +1706,6 @@ Build settings for action build and target good_plugin:
           final String buildDirectory = fs.path.absolute('build', 'ios');
 
           fakeProcessManager.addCommands(<FakeCommand>[
-            kWhichSysctlCommand,
-            kARMCheckCommand,
             FakeCommand(
               command: <String>[
                 '/usr/bin/arch',
@@ -1769,6 +1755,8 @@ Build settings for action build and target bad_plugin:
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
           Xcode: () => xcode,
           Logger: () => logger,
+          OperatingSystemUtils: () =>
+              FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         },
       );
 
@@ -1802,8 +1790,6 @@ Build settings for action build and target bad_plugin:
           final String buildDirectory = fs.path.absolute('build', 'ios');
 
           fakeProcessManager.addCommands(<FakeCommand>[
-            kWhichSysctlCommand,
-            kARMCheckCommand,
             FakeCommand(
               command: <String>[
                 '/usr/bin/arch',
@@ -1878,6 +1864,8 @@ PODS:
           ProcessManager: () => fakeProcessManager,
           XcodeProjectInterpreter: () => xcodeProjectInterpreter,
           Xcode: () => xcode,
+          OperatingSystemUtils: () =>
+              FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         },
       );
     });
