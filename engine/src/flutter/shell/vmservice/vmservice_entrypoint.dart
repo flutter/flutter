@@ -135,7 +135,7 @@ Future<void> main([List<String> args = const []]) async {
       runningIsolatesStream: _isolateRegistrationStreamController.stream,
       ddsManager: DartDevelopmentServiceManager(
         frontend: frontend,
-        launchOnStart: _waitForDdsToAdvertiseService,
+        launchOnStart: false,
         printDtd: _printDtd,
         host: _ddsIP ?? '127.0.0.1',
         port: _ddsPort,
