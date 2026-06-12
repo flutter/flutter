@@ -61,6 +61,9 @@ void main() {
 
     expect(content.bytes, orderedEquals(<int>[4, 5, 6]));
     expect(content.isModified, isTrue);
+    expect(content.isModified, isTrue);
+    content.markClean();
+    expect(content.isModified, isFalse);
     expect(content.isModified, isFalse);
   });
 
@@ -70,6 +73,9 @@ void main() {
     expect(content.string, 'some string');
     expect(content.bytes, orderedEquals(utf8.encode('some string')));
     expect(content.isModified, isTrue);
+    expect(content.isModified, isTrue);
+    content.markClean();
+    expect(content.isModified, isFalse);
     expect(content.isModified, isFalse);
   });
 
@@ -77,6 +83,7 @@ void main() {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final File file = fileSystem.file('foo.txt');
     final content = DevFSFileContent(file);
+    content.markClean();
     expect(content.isModified, isFalse);
     expect(content.isModified, isFalse);
 
@@ -90,6 +97,8 @@ void main() {
     file.writeAsBytesSync(<int>[2, 3, 4], flush: true);
 
     expect(content.isModified, isTrue);
+    expect(content.isModified, isTrue);
+    content.markClean();
     expect(content.isModified, isFalse);
     expect(await content.contentsAsBytes(), <int>[2, 3, 4]);
 
@@ -98,6 +107,8 @@ void main() {
 
     file.deleteSync();
     expect(content.isModified, isTrue);
+    expect(content.isModified, isTrue);
+    content.markClean();
     expect(content.isModified, isFalse);
     expect(content.isModified, isFalse);
   });
@@ -108,6 +119,9 @@ void main() {
     expect(content.equals('uncompressed string'), isTrue);
     expect(content.bytes, isNotNull);
     expect(content.isModified, isTrue);
+    expect(content.isModified, isTrue);
+    content.markClean();
+    expect(content.isModified, isFalse);
     expect(content.isModified, isFalse);
   });
 
@@ -992,6 +1006,68 @@ void main() {
         // In the broken code, this could fail if updateBundle returned before the .then callback finished.
         expect(dirtyEntries, hasLength(1));
         expect(await dirtyEntries.values.first.contentsAsBytes(), utf8.encode('compiled'));
+      },
+    );
+
+    testWithoutContext(
+      'DevFS.updateBundle initializes isModified state of assets during first upload when sync is skipped',
+      () async {
+        final FileSystem fileSystem = MemoryFileSystem.test();
+        final dirtyEntries = <Uri, DevFSContent>{};
+        final assetBundle = FakeBundle();
+        final assetContent = DevFSByteContent(<int>[1, 2, 3, 4]);
+        assetBundle.entries['asset.txt'] = AssetBundleEntry(
+          assetContent,
+          kind: AssetKind.regular,
+          transformers: const [],
+        );
+
+        const shaderCompiler = FakeShaderCompiler();
+        final assetTransformer = DevelopmentAssetTransformer(
+          fileSystem: fileSystem,
+          transformer: AssetTransformer(
+            processManager: FakeProcessManager.any(),
+            fileSystem: fileSystem,
+            dartBinaryPath: 'dart',
+            buildMode: BuildMode.debug,
+          ),
+          logger: BufferLogger.test(),
+        );
+
+        // Perform the first upload with sync skipped.
+        final int firstUploadSyncedBytes = await DevFS.updateBundle(
+          bundle: assetBundle,
+          dirtyEntries: dirtyEntries,
+          assetDirectory: 'assets',
+          assetTransformer: assetTransformer,
+          shaderCompiler: shaderCompiler,
+          fileSystem: fileSystem,
+          rootDirectoryPath: '/',
+          assetPathsToEvict: <String>{},
+          shaderPathsToEvict: <String>{},
+          bundleFirstUpload: true,
+        );
+
+        expect(firstUploadSyncedBytes, 0);
+        expect(dirtyEntries, isEmpty);
+
+        // Perform a subsequent hot restart update (where bundleFirstUpload is false).
+        // Since the asset has not been modified since the first upload, it should not be synced.
+        final int secondUploadSyncedBytes = await DevFS.updateBundle(
+          bundle: assetBundle,
+          dirtyEntries: dirtyEntries,
+          assetDirectory: 'assets',
+          assetTransformer: assetTransformer,
+          shaderCompiler: shaderCompiler,
+          fileSystem: fileSystem,
+          rootDirectoryPath: '/',
+          assetPathsToEvict: <String>{},
+          shaderPathsToEvict: <String>{},
+          bundleFirstUpload: false,
+        );
+
+        expect(secondUploadSyncedBytes, 0);
+        expect(dirtyEntries, isEmpty);
       },
     );
   });

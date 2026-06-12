@@ -106,6 +106,7 @@ std::string PlaygroundTest::GetWindowTitle() const {
     case PlaygroundBackend::kMetalSDF:
       break;
     case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
       if (switches_.use_angle) {
         stream << " (Angle) ";
       }
