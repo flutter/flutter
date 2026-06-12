@@ -2814,6 +2814,9 @@ class Navigator extends StatefulWidget {
   /// The predicate may be applied to the same route more than once if
   /// [Route.willHandlePopInternally] is true.
   ///
+  /// If a pop attempt defers removal of the current route, the remaining pops
+  /// are resumed after that route finishes popping.
+  ///
   /// To pop until a route with a certain name, use the [RoutePredicate]
   /// returned from [ModalRoute.withName].
   ///
@@ -5616,6 +5619,26 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }
   }
 
+  void _continuePopUntilAfterDeferredPop<T extends Object?>(
+    RoutePredicate predicate, {
+    required Route<dynamic> stalledRoute,
+    T? result,
+    required bool withResult,
+  }) {
+    unawaited(
+      stalledRoute.popped.then<void>((Object? _) {
+        if (!mounted) {
+          return;
+        }
+        if (withResult) {
+          popUntilWithResult<T>(predicate, result);
+        } else {
+          popUntil(predicate);
+        }
+      }),
+    );
+  }
+
   /// Pop the top-most route off the navigator.
   ///
   /// {@macro flutter.widgets.navigator.pop}
@@ -5696,8 +5719,18 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       if (predicate(candidate.route)) {
         return;
       }
+      final _RouteEntry previousCandidate = candidate;
       pop();
-      candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+      final _RouteEntry? newCandidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+      if (newCandidate == previousCandidate && !previousCandidate.route.willHandlePopInternally) {
+        _continuePopUntilAfterDeferredPop<void>(
+          predicate,
+          stalledRoute: previousCandidate.route,
+          withResult: false,
+        );
+        return;
+      }
+      candidate = newCandidate;
     }
   }
 
@@ -5724,7 +5757,18 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
         pop();
       }
 
-      candidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+      final _RouteEntry previousCandidate = candidate;
+      final _RouteEntry? newCandidate = _lastRouteEntryWhereOrNull(_RouteEntry.isPresentPredicate);
+      if (newCandidate == previousCandidate && !previousCandidate.route.willHandlePopInternally) {
+        _continuePopUntilAfterDeferredPop<T>(
+          predicate,
+          stalledRoute: previousCandidate.route,
+          result: result,
+          withResult: true,
+        );
+        return;
+      }
+      candidate = newCandidate;
     }
   }
 

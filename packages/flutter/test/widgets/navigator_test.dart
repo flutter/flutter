@@ -1272,6 +1272,102 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('popUntil continues after a deferred page-based pop', (WidgetTester tester) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    final pages = <Page<void>>[
+      const MaterialPage<void>(child: Text('Page 1')),
+      const MaterialPage<void>(child: Text('Page 2')),
+    ];
+    late StateSetter setState;
+
+    await tester.pumpWidget(
+      TestDependencies(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return Navigator(
+              key: navigatorKey,
+              pages: List<Page<void>>.of(pages),
+              onPopPage: (Route<dynamic> route, dynamic result) {
+                Future<void>.microtask(() {
+                  pages.removeLast();
+                  setState(() {});
+                });
+                return false;
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    navigatorKey.currentState!.push(
+      MaterialPageRoute<void>(builder: (BuildContext context) => const Text('Page 3')),
+    );
+    await tester.pumpAndSettle();
+
+    navigatorKey.currentState!.popUntil((Route<dynamic> route) => route.isFirst);
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+    expect(find.text('Page 3'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('popUntilWithResult continues after a deferred page-based pop', (
+    WidgetTester tester,
+  ) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    final pages = <Page<void>>[
+      const MaterialPage<void>(child: Text('Page 1')),
+      const MaterialPage<void>(child: Text('Page 2')),
+    ];
+    late StateSetter setState;
+    Object? poppedResult;
+
+    await tester.pumpWidget(
+      TestDependencies(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return Navigator(
+              key: navigatorKey,
+              pages: List<Page<void>>.of(pages),
+              onPopPage: (Route<dynamic> route, dynamic result) {
+                poppedResult = result;
+                Future<void>.microtask(() {
+                  pages.removeLast();
+                  setState(() {});
+                });
+                return false;
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    navigatorKey.currentState!.push(
+      MaterialPageRoute<void>(builder: (BuildContext context) => const Text('Page 3')),
+    );
+    await tester.pumpAndSettle();
+
+    navigatorKey.currentState!.popUntilWithResult<bool>(
+      (Route<dynamic> route) => route.isFirst,
+      true,
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 1'), findsOneWidget);
+    expect(find.text('Page 2'), findsNothing);
+    expect(find.text('Page 3'), findsNothing);
+    expect(poppedResult, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('popUntilWithResult return value to the last popped route', (
     WidgetTester tester,
   ) async {
