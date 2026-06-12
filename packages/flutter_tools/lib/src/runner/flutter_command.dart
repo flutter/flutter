@@ -1375,6 +1375,10 @@ abstract class FlutterCommand extends Command<void> {
         ? stringArg('build-number')
         : null;
 
+    final String? buildName = argParser.options.containsKey('build-name')
+        ? stringArg('build-name')
+        : null;
+
     final File packageConfigFile = globals.fs.file(packageConfigPath());
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -1505,6 +1509,23 @@ abstract class FlutterCommand extends Command<void> {
     if (flavor != null) {
       dartDefines.add('$kAppFlavor=$flavor');
     }
+    for (final (String define, String? value) in <(String, String?)>[
+      (kAppBuildName, buildName ?? project.manifest.buildName),
+      (kAppBuildNumber, buildNumber ?? project.manifest.buildNumber),
+    ]) {
+      if (globals.platform.environment[define] != null) {
+        throwToolExit('$define is used by the framework and cannot be set in the environment.');
+      }
+      if (dartDefines.any((String d) => d.startsWith(define))) {
+        throwToolExit(
+          '$define is used by the framework and cannot be '
+          'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
+        );
+      }
+      if (value != null) {
+        dartDefines.add('$define=$value');
+      }
+    }
     _addFlutterVersionToDartDefines(globals.flutterVersion, dartDefines);
     _addFeatureFlagsToDartDefines(dartDefines);
 
@@ -1521,7 +1542,7 @@ abstract class FlutterCommand extends Command<void> {
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme: fileSystemScheme,
       buildNumber: buildNumber,
-      buildName: argParser.options.containsKey('build-name') ? stringArg('build-name') : null,
+      buildName: buildName,
       treeShakeIcons: treeShakeIcons,
       splitDebugInfoPath: splitDebugInfoPath,
       dartObfuscation: dartObfuscation,
