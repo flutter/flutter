@@ -356,7 +356,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
           ),
         ]);
 
-        final Emulator emulator = IOSEmulator('ios');
+        final Emulator emulator = IOSEmulator('ios', xcode: xcode);
         await emulator.launch();
         expect(fakeProcessManager, hasNoRemainingExpectations);
       },

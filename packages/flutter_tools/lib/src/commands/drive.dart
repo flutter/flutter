@@ -26,13 +26,13 @@ import '../drive/drive_service.dart';
 import '../drive/web_driver_service.dart' show Browser;
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
+import '../macos/xcode.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart'
     show FlutterCommandCategory, FlutterCommandResult, FlutterOptions;
 import '../web/devfs_config.dart';
 import '../web/web_device.dart';
 import 'run.dart';
-import '../macos/xcode.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
 ///
@@ -66,7 +66,7 @@ class DriveCommand extends RunCommandBase {
     required Terminal terminal,
     required OutputPreferences outputPreferences,
     required this.signals,
-    Xcode? xcode,
+    super.xcode,
   }) : _flutterDriverFactory = flutterDriverFactory,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -75,7 +75,7 @@ class DriveCommand extends RunCommandBase {
        _outputPreferences = outputPreferences,
        _fsUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _xcode = xcode,
-       super(verboseHelp: verboseHelp, xcode: xcode) {
+       super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     addEnableExperimentation(hide: !verboseHelp);
 

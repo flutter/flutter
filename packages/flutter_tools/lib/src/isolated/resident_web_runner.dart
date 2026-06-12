@@ -111,7 +111,7 @@ class ResidentWebRunner extends ResidentRunner {
     required OutputPreferences outputPreferences,
     required SystemClock systemClock,
     required Analytics analytics,
-    Xcode? xcode,
+    super.xcode,
     UrlTunneller? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
   }) : _fileSystem = fileSystem,
@@ -131,7 +131,6 @@ class ResidentWebRunner extends ResidentRunner {
            outputPreferences: outputPreferences,
          ),
          dartBuilder: hookRunner,
-         xcode: xcode,
        );
 
   final FileSystem _fileSystem;

@@ -77,21 +77,6 @@ abstract class DoctorValidatorsProvider {
     );
   }
 
-  static DoctorValidatorsProvider? _defaultInstance;
-  static DoctorValidatorsProvider get defaultInstance =>
-      _defaultInstance ??= _DefaultDoctorValidatorsProvider(
-        platform: globals.platform,
-        featureFlags: featureFlags,
-        xcode:
-            context.get<Xcode>() ??
-            // ignore: invalid_use_of_visible_for_testing_member
-            Xcode.test(
-              processManager: context.get<ProcessManager>() ?? const LocalProcessManager(),
-              fileSystem: context.get<FileSystem>(),
-              logger: context.get<Logger>(),
-            ),
-      );
-
   /// The singleton instance, pulled from the [AppContext].
   static DoctorValidatorsProvider get _instance => context.get<DoctorValidatorsProvider>()!;
 

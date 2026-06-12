@@ -27,12 +27,12 @@ import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'macos/xcode.dart';
 import 'package_graph.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
 import 'template.dart';
 import 'xcode_project.dart';
-import 'macos/xcode.dart';
 
 export 'cmake_project.dart';
 export 'xcode_project.dart';

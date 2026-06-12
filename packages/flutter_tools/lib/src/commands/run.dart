@@ -18,6 +18,7 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -29,7 +30,6 @@ import '../web/compile.dart';
 import '../web/devfs_config.dart';
 import '../web/web_constants.dart';
 import '../web/web_runner.dart';
-import '../macos/xcode.dart';
 import 'daemon.dart';
 
 /// Shared logic between `flutter run` and `flutter drive` commands.
@@ -435,8 +435,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 }
 
 class RunCommand extends RunCommandBase {
-  RunCommand({Xcode? xcode, bool verboseHelp = false})
-    : super(verboseHelp: verboseHelp, xcode: xcode) {
+  RunCommand({super.xcode, bool verboseHelp = false}) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);

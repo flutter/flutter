@@ -33,8 +33,8 @@ import 'build.dart';
 /// Builds an .app for an iOS app to be used for local testing on an iOS device
 /// or simulator. Can only be run on a macOS host.
 class BuildIOSCommand extends _BuildIOSSubCommand {
-  BuildIOSCommand({required super.logger, required bool verboseHelp, Xcode? xcode})
-    : super(verboseHelp: verboseHelp, xcode: xcode) {
+  BuildIOSCommand({required super.logger, required bool verboseHelp, super.xcode})
+    : super(verboseHelp: verboseHelp) {
     addPublishPort(verboseHelp: verboseHelp);
     argParser
       ..addFlag(
@@ -109,8 +109,7 @@ class _ImageAssetFileKey {
 ///
 /// Can only be run on a macOS host.
 class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
-  BuildIOSArchiveCommand({required super.logger, required super.verboseHelp, Xcode? xcode})
-    : super(xcode: xcode) {
+  BuildIOSArchiveCommand({required super.logger, required super.verboseHelp, super.xcode}) {
     argParser.addOption(
       'export-method',
       defaultsTo: 'app-store',

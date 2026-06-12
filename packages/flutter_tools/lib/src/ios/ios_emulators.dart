@@ -29,7 +29,7 @@ class IOSEmulators extends EmulatorDiscovery {
 }
 
 class IOSEmulator extends Emulator {
-  IOSEmulator(String id, {Xcode? xcode}) : _xcode = xcode, super(id, true);
+  const IOSEmulator(String id, {Xcode? xcode}) : _xcode = xcode, super(id, true);
 
   final Xcode? _xcode;
 

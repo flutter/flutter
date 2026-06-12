@@ -11,7 +11,6 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
-import '../macos/xcode.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -20,6 +19,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../macos/xcode.dart';
 import 'depfile.dart';
 import 'exceptions.dart';
 import 'file_store.dart';

@@ -47,13 +47,13 @@ import 'src/commands/widget_preview.dart';
 import 'src/devtools_launcher.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
-import 'src/macos/xcode.dart';
 // Files in `isolated` are intentionally excluded from google3 tooling.
 import 'src/hook_runner.dart' show FlutterHookRunner;
 import 'src/isolated/build_targets.dart';
 import 'src/isolated/mustache_template.dart';
 import 'src/isolated/native_assets/test/native_assets.dart';
 import 'src/isolated/resident_web_runner.dart';
+import 'src/macos/xcode.dart';
 import 'src/native_assets.dart';
 import 'src/pre_run_validator.dart';
 import 'src/project_validator.dart';

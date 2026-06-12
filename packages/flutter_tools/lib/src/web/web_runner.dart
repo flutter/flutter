@@ -12,9 +12,9 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
 import '../device.dart';
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../resident_runner.dart';
-import '../macos/xcode.dart';
 
 WebRunnerFactory? get webRunnerFactory => context.get<WebRunnerFactory>();
 

@@ -21,10 +21,10 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../web/web_runner.dart';
-import '../macos/xcode.dart';
 import 'drive_service.dart';
 
 /// An implementation of the driver service for web debug and release applications.

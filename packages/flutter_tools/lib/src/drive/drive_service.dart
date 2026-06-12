@@ -18,10 +18,10 @@ import '../base/process.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../device.dart';
+import '../macos/xcode.dart';
 import '../resident_runner.dart';
 import '../vmservice.dart';
 import 'web_driver_service.dart';
-import '../macos/xcode.dart';
 
 class FlutterDriverFactory {
   FlutterDriverFactory({

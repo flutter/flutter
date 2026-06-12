@@ -23,13 +23,13 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../vmservice.dart';
 import 'custom_device_config.dart';
 import 'custom_device_workflow.dart';
 import 'custom_devices_config.dart';
-import '../macos/xcode.dart';
 
 /// Replace all occurrences of `${someName}` with the value found for that
 /// name inside replacementValues or additionalReplacementValues.

@@ -20,9 +20,9 @@ import '../convert.dart';
 import '../custom_devices/custom_device.dart';
 import '../custom_devices/custom_device_config.dart';
 import '../custom_devices/custom_devices_config.dart';
-import '../macos/xcode.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
+import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 

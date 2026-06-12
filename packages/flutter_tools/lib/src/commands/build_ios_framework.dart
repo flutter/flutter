@@ -23,10 +23,10 @@ import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/cocoapod_utils.dart';
+import '../macos/xcode.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../version.dart';
-import '../macos/xcode.dart';
 import 'build.dart';
 import 'darwin_add_to_app.dart';
 
