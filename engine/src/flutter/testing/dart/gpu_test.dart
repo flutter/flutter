@@ -7,6 +7,7 @@
 
 // ignore_for_file: avoid_relative_lib_imports
 
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -41,12 +42,43 @@ ByteData mvpUBO(Matrix4 mvp) {
   ]);
 }
 
+Future<void> submitAndWait(gpu.CommandBuffer commandBuffer) {
+  final completer = Completer<void>();
+  commandBuffer.submit(
+    completionCallback: (bool success) {
+      if (success) {
+        completer.complete();
+      } else {
+        completer.completeError(Exception('CommandBuffer submit failed'));
+      }
+    },
+  );
+  return completer.future;
+}
+
+Future<ByteData> readTextureBytes(gpu.Texture texture) async {
+  final ui.Image image = texture.asImage();
+  final ByteData? bytes = await image.toByteData();
+  expect(bytes, isNotNull);
+  return bytes!;
+}
+
 gpu.RenderPipeline createUnlitRenderPipeline() {
   final gpu.ShaderLibrary? library = gpu.ShaderLibrary.fromAsset('test.shaderbundle');
   assert(library != null);
   final gpu.Shader? vertex = library!['UnlitVertex'];
   assert(vertex != null);
   final gpu.Shader? fragment = library['UnlitFragment'];
+  assert(fragment != null);
+  return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
+}
+
+gpu.RenderPipeline createTextureRenderPipeline() {
+  final gpu.ShaderLibrary? library = gpu.ShaderLibrary.fromAsset('test.shaderbundle');
+  assert(library != null);
+  final gpu.Shader? vertex = library!['TextureVertex'];
+  assert(vertex != null);
+  final gpu.Shader? fragment = library['TextureFragment'];
   assert(fragment != null);
   return gpu.gpuContext.createRenderPipeline(vertex!, fragment!);
 }
@@ -374,6 +406,21 @@ void main() async {
     expect(gpu.PixelFormat.astc8x8LDR.blockWidth, 8);
     expect(gpu.PixelFormat.astc8x8LDR.blockHeight, 8);
     expect(gpu.PixelFormat.astc8x8LDR.bytesPerBlock, 16);
+
+    // All ASTC LDR variants map to the astc family.
+    expect(gpu.PixelFormat.astc4x4LDRSRGB.compressionFamily, gpu.TextureCompressionFamily.astc);
+    expect(gpu.PixelFormat.astc8x8LDR.compressionFamily, gpu.TextureCompressionFamily.astc);
+    expect(gpu.PixelFormat.astc8x8LDRSRGB.compressionFamily, gpu.TextureCompressionFamily.astc);
+
+    // ASTC HDR shares geometry with ASTC LDR but is its own family.
+    expect(gpu.PixelFormat.astc4x4HDR.blockWidth, 4);
+    expect(gpu.PixelFormat.astc4x4HDR.blockHeight, 4);
+    expect(gpu.PixelFormat.astc4x4HDR.bytesPerBlock, 16);
+    expect(gpu.PixelFormat.astc4x4HDR.compressionFamily, gpu.TextureCompressionFamily.astcHdr);
+    expect(gpu.PixelFormat.astc8x8HDR.blockWidth, 8);
+    expect(gpu.PixelFormat.astc8x8HDR.blockHeight, 8);
+    expect(gpu.PixelFormat.astc8x8HDR.bytesPerBlock, 16);
+    expect(gpu.PixelFormat.astc8x8HDR.compressionFamily, gpu.TextureCompressionFamily.astcHdr);
   });
 
   test('GpuContext.supportsTextureCompression returns a bool per family', () async {
@@ -385,6 +432,10 @@ void main() async {
     );
     expect(
       gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.astc),
+      isA<bool>(),
+    );
+    expect(
+      gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.astcHdr),
       isA<bool>(),
     );
   }, skip: !(impellerEnabled && flutterGpuEnabled));
@@ -618,6 +669,129 @@ void main() async {
     texture.overwrite(
       Int32List.fromList(<int>[red.value, green.value, green.value, red.value]).buffer.asByteData(),
     );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('CommandBuffer.copyBufferToTexture writes tightly packed texture regions', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);
+    final ByteData pixels = Uint8List.fromList(<int>[
+      0xFF, 0x00, 0x00, 0xFF, // red
+      0x00, 0xFF, 0x00, 0xFF, // green
+      0x00, 0x00, 0xFF, 0xFF, // blue
+      0xFF, 0xFF, 0x00, 0xFF, // yellow
+    ]).buffer.asByteData();
+    final gpu.DeviceBuffer source = gpu.gpuContext.createDeviceBufferWithCopy(pixels);
+
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    commandBuffer.copyBufferToTexture(
+      gpu.BufferView(source, offsetInBytes: 0, lengthInBytes: 4),
+      gpu.TextureRegion(texture, width: 1, height: 1),
+    );
+    commandBuffer.copyBufferToTexture(
+      gpu.BufferView(source, offsetInBytes: 4, lengthInBytes: 4),
+      gpu.TextureRegion(texture, x: 1, width: 1, height: 1),
+    );
+    commandBuffer.copyBufferToTexture(
+      gpu.BufferView(source, offsetInBytes: 8, lengthInBytes: 8),
+      gpu.TextureRegion(texture, y: 1, width: 2, height: 1),
+    );
+    await submitAndWait(commandBuffer);
+
+    final ByteData bytes = await readTextureBytes(texture);
+    expect(bytes.getUint8(0), 0xFF);
+    expect(bytes.getUint8(1), 0x00);
+    expect(bytes.getUint8(2), 0x00);
+    expect(bytes.getUint8(3), 0xFF);
+    final int bottomRightOffset = (1 + 1 * texture.width) * 4;
+    expect(bytes.getUint8(bottomRightOffset), 0xFF);
+    expect(bytes.getUint8(bottomRightOffset + 1), 0xFF);
+    expect(bytes.getUint8(bottomRightOffset + 2), 0x00);
+    expect(bytes.getUint8(bottomRightOffset + 3), 0xFF);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('CommandBuffer.copyTextureToTexture copies a texture region', () async {
+    final gpu.Texture sourceTexture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      2,
+      2,
+    );
+    final gpu.Texture destinationTexture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      2,
+      2,
+    );
+    final ByteData pixels = Uint8List.fromList(<int>[
+      0x00,
+      0x00,
+      0x00,
+      0xFF,
+      0x11,
+      0x22,
+      0x33,
+      0xFF,
+      0x44,
+      0x55,
+      0x66,
+      0xFF,
+      0xAA,
+      0xBB,
+      0xCC,
+      0xFF,
+    ]).buffer.asByteData();
+    sourceTexture.overwrite(pixels);
+
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    commandBuffer.copyTextureToTexture(
+      gpu.TextureRegion(sourceTexture, x: 1, y: 1, width: 1, height: 1),
+      gpu.TextureDestinationRegion(destinationTexture),
+    );
+    await submitAndWait(commandBuffer);
+
+    final ByteData bytes = await readTextureBytes(destinationTexture);
+    expect(bytes.getUint8(0), 0xAA);
+    expect(bytes.getUint8(1), 0xBB);
+    expect(bytes.getUint8(2), 0xCC);
+    expect(bytes.getUint8(3), 0xFF);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('CommandBuffer.copyTextureToBuffer appends successfully', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 4, 4);
+    final ByteData pixels = Uint8List.fromList(
+      List<int>.filled(4 * 4 * 4, 0xFF),
+    ).buffer.asByteData();
+    texture.overwrite(pixels);
+
+    final gpu.DeviceBuffer destination = gpu.gpuContext.createDeviceBuffer(
+      gpu.StorageMode.hostVisible,
+      2 * 2 * texture.format.bytesPerBlock,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    commandBuffer.copyTextureToBuffer(
+      gpu.TextureRegion(texture, width: 2, height: 2),
+      gpu.BufferView(
+        destination,
+        offsetInBytes: 0,
+        lengthInBytes: 2 * 2 * texture.format.bytesPerBlock,
+      ),
+    );
+    await submitAndWait(commandBuffer);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('CommandBuffer.copyBufferToTexture validates copy size', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 2, 2);
+    final gpu.DeviceBuffer source = gpu.gpuContext.createDeviceBufferWithCopy(
+      Uint8List.fromList(<int>[0xFF, 0x00, 0x00, 0xFF]).buffer.asByteData(),
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+
+    try {
+      commandBuffer.copyBufferToTexture(
+        gpu.BufferView(source, offsetInBytes: 0, lengthInBytes: 4),
+        gpu.TextureRegion(texture),
+      );
+      fail('Exception not thrown for wrong copy size.');
+    } catch (e) {
+      expect(e.toString(), contains('must match the destination texture region size'));
+    }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Texture.overwrite throws for wrong buffer size', () async {
@@ -1023,6 +1197,90 @@ void main() async {
 
     final ui.Image image = state.renderTexture.asImage();
     await comparer.addGoldenImage(image, 'flutter_gpu_test_triangle.png');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  // Samples a texture whose mip chain was uploaded by hand with
+  // Texture.overwrite(mipLevel:) rather than generated, exercising the
+  // manually-mipped sampling path end to end through Flutter GPU. The quad is
+  // magnified, so the shader samples the base level and the golden is the four
+  // colored quadrants of mip 0.
+  test('Can sample a manually-mipped texture', () async {
+    // Both backends this test runs on (Metal and ANGLE GLES 3) support
+    // sampling hand-uploaded mip chains. This is the capability an app should
+    // check before relying on them.
+    expect(gpu.gpuContext.doesSupportManuallyMippedTextures, true);
+
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      8,
+      8,
+      mipLevelCount: 2,
+    );
+
+    // Mip 0 is an 8x8, 2x2 grid of red/green/blue/white quadrants.
+    final mip0 = Uint8List(8 * 8 * 4);
+    for (var y = 0; y < 8; y++) {
+      for (var x = 0; x < 8; x++) {
+        final int i = (y * 8 + x) * 4;
+        final bool right = x >= 4;
+        final bool bottom = y >= 4;
+        var r = 0, g = 0, b = 0;
+        if (!right && !bottom) {
+          r = 0xFF; // Top-left red.
+        } else if (right && !bottom) {
+          g = 0xFF; // Top-right green.
+        } else if (!right && bottom) {
+          b = 0xFF; // Bottom-left blue.
+        } else {
+          r = g = b = 0xFF; // Bottom-right white.
+        }
+        mip0[i] = r;
+        mip0[i + 1] = g;
+        mip0[i + 2] = b;
+        mip0[i + 3] = 0xFF;
+      }
+    }
+    texture.overwrite(mip0.buffer.asByteData());
+
+    // Mip 1 is a 4x4 of solid orange. Uploading it keeps the declared chain
+    // complete so the texture samples on backends that require every level.
+    final mip1 = Uint8List(4 * 4 * 4);
+    for (var i = 0; i < mip1.length; i += 4) {
+      mip1[i] = 0xFF; // r
+      mip1[i + 1] = 0x80; // g
+      mip1[i + 2] = 0x00; // b
+      mip1[i + 3] = 0xFF; // a
+    }
+    texture.overwrite(mip1.buffer.asByteData(), mipLevel: 1);
+
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = createTextureRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+
+    // A fullscreen quad. Each vertex is position (vec3), texture_coords (vec2),
+    // and a white color (vec4) so the sampled texel passes through unmodified.
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BufferView vertices = transients.emplace(
+      float32(<double>[
+        -1, -1, 0, 0, 0, 1, 1, 1, 1, //
+        1, -1, 0, 1, 0, 1, 1, 1, 1, //
+        1, 1, 0, 1, 1, 1, 1, 1, 1, //
+        -1, -1, 0, 0, 0, 1, 1, 1, 1, //
+        1, 1, 0, 1, 1, 1, 1, 1, 1, //
+        -1, 1, 0, 0, 1, 1, 1, 1, 1, //
+      ]),
+    );
+    state.renderPass.bindVertexBuffer(vertices);
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(mvpUBO(Matrix4.identity())),
+    );
+    state.renderPass.bindTexture(pipeline.fragmentShader.getUniformSlot('tex'), texture);
+    state.renderPass.draw(6);
+    state.commandBuffer.submit();
+
+    final ui.Image image = state.renderTexture.asImage();
+    await comparer.addGoldenImage(image, 'flutter_gpu_test_manually_mipped_texture.png');
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('drawIndexed throws when no index buffer is bound', () async {
