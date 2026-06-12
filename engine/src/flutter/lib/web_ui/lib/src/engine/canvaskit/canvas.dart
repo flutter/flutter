@@ -12,11 +12,6 @@ import 'package:ui/ui.dart' as ui;
 /// every time we need it.
 final SkClipOp _clipOpIntersect = canvasKit.ClipOp.Intersect;
 
-SkPaint? _sharedDownscalingPaint;
-SkPaint _getDownscalingPaint() {
-  return _sharedDownscalingPaint ??= CkPaint().toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
-}
-
 /// A Dart wrapper around Skia's [SkCanvas].
 ///
 /// This is intentionally not memory-managing the underlying [SkCanvas]. See
@@ -50,7 +45,7 @@ class CkCanvas implements LayerCanvas {
   @override
   void clipPath(ui.Path path, {bool doAntiAlias = true}) {
     skCanvas.clipPath(
-      ((path as LazyPath).builtPath as CkPath).skiaObject,
+      ((path as EnginePath).backendPath as CkPath).skiaObject,
       _clipOpIntersect,
       doAntiAlias,
     );
@@ -67,7 +62,7 @@ class CkCanvas implements LayerCanvas {
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
     translate(offset.dx, offset.dy);
     skCanvas.clipPath(
-      ((path as LazyPath).builtPath as CkPath).skiaObject,
+      ((path as EnginePath).backendPath as CkPath).skiaObject,
       _clipOpIntersect,
       doAntiAlias,
     );
@@ -154,46 +149,6 @@ class CkCanvas implements LayerCanvas {
     assert(rectIsValid(src));
     assert(rectIsValid(dst));
 
-    if (shouldIterativelyDownscale(src, dst, paint)) {
-      // Use iterative downscaling to avoid aliasing artifacts when downscaling
-      // by a large factor (scale < 0.5). This is a workaround for a Skia bug
-      // where mipmaps are not used for downscaling on the web.
-      // See: https://g-issues.skia.org/issues/500117356
-      final int targetWidth = dst.width.toInt();
-      final int targetHeight = dst.height.toInt();
-
-      final ui.Image downscaledImage = getOrCreateDownscaledImage(
-        box: (image as CkImage).box,
-        originalImage: image,
-        src: src,
-        targetWidth: targetWidth,
-        targetHeight: targetHeight,
-        rawDraw: (ui.Canvas canvas, ui.Image img, ui.Rect s, ui.Rect d) {
-          final SkCanvas tempSkCanvas = (canvas as CkCanvas).skCanvas;
-          tempSkCanvas.drawImageRectOptions(
-            (img as CkImage).skImage,
-            toSkRect(s),
-            toSkRect(d),
-            canvasKit.FilterMode.Linear,
-            canvasKit.MipmapMode.None,
-            _getDownscalingPaint(),
-          );
-        },
-      );
-
-      final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
-      skCanvas.drawImageRectOptions(
-        (downscaledImage as CkImage).skImage,
-        toSkRect(ui.Rect.fromLTWH(0, 0, targetWidth.toDouble(), targetHeight.toDouble())),
-        toSkRect(dst),
-        toSkFilterMode(paint.filterQuality),
-        toSkMipmapMode(paint.filterQuality),
-        skPaint,
-      );
-      skPaint.delete();
-      return;
-    }
-
     final ui.FilterQuality filterQuality = paint.filterQuality;
     final SkPaint skPaint = (paint as CkPaint).toSkPaint(defaultBlurTileMode: ui.TileMode.clamp);
     if (filterQuality == ui.FilterQuality.high) {
@@ -272,7 +227,7 @@ class CkCanvas implements LayerCanvas {
   @override
   void drawPath(ui.Path path, ui.Paint paint) {
     final SkPaint skPaint = (paint as CkPaint).toSkPaint();
-    skCanvas.drawPath(((path as LazyPath).builtPath as CkPath).skiaObject, skPaint);
+    skCanvas.drawPath(((path as EnginePath).backendPath as CkPath).skiaObject, skPaint);
     skPaint.delete();
   }
 
@@ -314,7 +269,7 @@ class CkCanvas implements LayerCanvas {
     final SkPaint skPaint = (paint as CkPaint).toSkPaint();
     final (ui.Path path, ui.Offset offset) = rsuperellipse.toPathOffset();
     translate(offset.dx, offset.dy);
-    skCanvas.drawPath(((path as LazyPath).builtPath as CkPath).skiaObject, skPaint);
+    skCanvas.drawPath(((path as EnginePath).backendPath as CkPath).skiaObject, skPaint);
     translate(-offset.dx, -offset.dy);
     skPaint.delete();
   }
@@ -331,7 +286,7 @@ class CkCanvas implements LayerCanvas {
   void drawShadow(ui.Path path, ui.Color color, double elevation, bool transparentOccluder) {
     drawSkShadow(
       skCanvas,
-      ((path as LazyPath).builtPath as CkPath).skiaObject,
+      ((path as EnginePath).backendPath as CkPath).skiaObject,
       color,
       elevation,
       transparentOccluder,
