@@ -1083,6 +1083,9 @@ class DelayedFakeShaderCompiler implements DevelopmentShaderCompiler {
 
   @override
   Future<DevFSContent> recompileShader(DevFSContent inputShader) => future;
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
@@ -1245,4 +1248,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   Future<DevFSContent> recompileShader(DevFSContent inputShader) async {
     return DevFSByteContent(await inputShader.contentsAsBytes());
   }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

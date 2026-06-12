@@ -18,21 +18,30 @@ import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
 import '../build_system.dart';
+import '../depfile.dart';
 
 /// A wrapper around [ShaderCompiler] to support hot reload of shader sources.
 class DevelopmentShaderCompiler {
   DevelopmentShaderCompiler({
     required ShaderCompiler shaderCompiler,
     required FileSystem fileSystem,
+    required Logger logger,
     @visibleForTesting math.Random? random,
   }) : _shaderCompiler = shaderCompiler,
        _fileSystem = fileSystem,
+       _logger = logger,
+       _depfileService = DepfileService(fileSystem: fileSystem, logger: logger),
        _random = random ?? math.Random();
 
   final ShaderCompiler _shaderCompiler;
   final FileSystem _fileSystem;
+  final Logger _logger;
+  final DepfileService _depfileService;
   final _compilationPool = Pool(4);
   final math.Random _random;
+
+  final _dependencies = <String, List<File>>{};
+  final _lastCompiledTime = <String, DateTime>{};
 
   late TargetPlatform _targetPlatform;
   var _debugConfigured = false;
@@ -52,6 +61,8 @@ class DevelopmentShaderCompiler {
   Future<DevFSContent?> recompileShader(DevFSContent inputShader) async {
     assert(_debugConfigured);
     final File output = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.temp');
+    final File depfile = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.d');
+    final startTime = DateTime.now();
     late File inputFile;
     var cleanupInput = false;
     Uint8List result;
@@ -70,19 +81,56 @@ class DevelopmentShaderCompiler {
         outputPath: output.path,
         targetPlatform: _targetPlatform,
         fatal: false,
+        depfilePath: depfile.path,
       );
       if (!success) {
         return null;
       }
       result = output.readAsBytesSync();
+
+      if (inputShader is DevFSFileContent) {
+        try {
+          if (depfile.existsSync()) {
+            final Depfile parsedDepfile = _depfileService.parse(depfile);
+            _dependencies[inputShader.file.path] = parsedDepfile.inputs;
+            _lastCompiledTime[inputShader.file.path] = startTime;
+          }
+        } on Exception catch (e) {
+          _logger.printTrace('Error parsing depfile: $e');
+        }
+      }
     } finally {
       resource?.release();
       ErrorHandlingFileSystem.deleteIfExists(output);
+      ErrorHandlingFileSystem.deleteIfExists(depfile);
       if (cleanupInput) {
         ErrorHandlingFileSystem.deleteIfExists(inputFile);
       }
     }
     return DevFSByteContent(result);
+  }
+
+  /// Returns true if any of the tracker dependencies of the [shaderContent]
+  /// have been modified since it was last compiled.
+  bool areDependenciesModified(DevFSContent shaderContent) {
+    if (shaderContent is! DevFSFileContent) {
+      return false;
+    }
+    final String path = shaderContent.file.path;
+    final List<File>? deps = _dependencies[path];
+    final DateTime? lastCompiled = _lastCompiledTime[path];
+    if (deps == null || lastCompiled == null) {
+      return false;
+    }
+    for (final File dep in deps) {
+      if (!dep.existsSync()) {
+        return true;
+      }
+      if (dep.statSync().modified.isAfter(lastCompiled)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
@@ -163,6 +211,7 @@ class ShaderCompiler {
     required String outputPath,
     required TargetPlatform targetPlatform,
     bool fatal = true,
+    String? depfilePath,
   }) async {
     final File impellerc = _fs.file(_artifacts.getHostArtifact(HostArtifact.impellerc));
     if (!impellerc.existsSync()) {
@@ -184,6 +233,7 @@ class ShaderCompiler {
       '--input-type=frag',
       '--include=${input.parent.path}',
       '--include=$shaderLibPath',
+      if (depfilePath != null) '--depfile=$depfilePath',
     ];
 
     var failure = false;

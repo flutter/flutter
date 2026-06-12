@@ -732,7 +732,11 @@ class DevFS {
 
     final syncedEntries = <AssetBundleEntry>[];
     bundle.entries.forEach((String archivePath, AssetBundleEntry entry) {
-      if (!bundleFirstUpload && !entry.content.isModified) {
+      final isShader = entry.kind == AssetKind.shader;
+      final bool isModified =
+          entry.content.isModified ||
+          (isShader && shaderCompiler.areDependenciesModified(entry.content));
+      if (!bundleFirstUpload && !isModified) {
         return;
       }
       syncedEntries.add(entry);
