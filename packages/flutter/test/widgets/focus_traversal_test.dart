@@ -1923,9 +1923,9 @@ void main() {
     });
 
     testWidgets('Directional focus history is cleared on tap', (WidgetTester tester) async {
-      var focus = List<bool?>.generate(3, (int _) => null);
+      var focus = List<bool?>.generate(5, (int _) => null);
       final nodes = List<FocusNode>.generate(
-        3,
+        5,
         (int index) => FocusNode(debugLabel: 'Node $index'),
       );
       addTearDown(() {
@@ -1950,7 +1950,15 @@ void main() {
             policy: WidgetOrderTraversalPolicy(),
             child: FocusScope(
               debugLabel: 'Scope',
-              child: Column(children: <Widget>[makeFocus(0), makeFocus(1), makeFocus(2)]),
+              child: Column(
+                children: <Widget>[
+                  makeFocus(0),
+                  makeFocus(1),
+                  makeFocus(2),
+                  makeFocus(3),
+                  makeFocus(4),
+                ],
+              ),
             ),
           ),
         ),
@@ -1968,22 +1976,39 @@ void main() {
       // Move down twice.
       expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
-      expect(focus, orderedEquals(<bool?>[false, true, null]));
+      expect(focus, orderedEquals(<bool?>[false, true, null, null, null]));
       clear();
 
       expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
-      expect(focus, orderedEquals(<bool?>[null, false, true]));
+      expect(focus, orderedEquals(<bool?>[null, false, true, null, null]));
       clear();
 
-      // Shift focus externally back to [0].
-      nodes[0].requestFocus();
+      expect(scope.focusInDirection(TraversalDirection.down), isTrue);
       await tester.pump();
-      expect(focus, orderedEquals(<bool?>[true, null, false]));
+      expect(focus, orderedEquals(<bool?>[null, null, false, true, null]));
       clear();
 
-      // Pressing UP from [0] should return false (at top edge), NOT pop history to [1].
-      expect(scope.focusInDirection(TraversalDirection.up), isFalse);
+      // Shift focus externally back to [1].
+      nodes[1].requestFocus();
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, true, null, false, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.down), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, false, true, null, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.up), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, true, false, null, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.up), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[true, false, null, null, null]));
+      clear();
     });
 
     testWidgets('Directional prefers the closest node even on irregular grids', (
