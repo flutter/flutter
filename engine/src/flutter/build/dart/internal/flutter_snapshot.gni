@@ -31,6 +31,7 @@ template("flutter_snapshot") {
   }
 
   if (is_aot && (is_ios || is_mac || is_win)) {
+    invoker_target_name = target_name
     compile_target = "_${target_name}_compile"
     if (is_ios) {
       snapshot_dir = "$target_gen_dir/ios"
@@ -206,16 +207,16 @@ template("flutter_snapshot") {
       }
       
       shared_library(compile_target) {
-        deps = [ ":$compile_asm_target" ]
+        public_deps = [ ":$compile_asm_target" ]
         sources = [ obj_output ]
-        output_name = target_name
+        output_name = invoker_target_name
         ldflags = [ "/NOENTRY" ]
       }
     } else {
       shared_library(compile_target) {
-        deps = [ ":$snapshot_target" ]
+        public_deps = [ ":$snapshot_target" ]
         sources = [ snapshot_assembly ]
-        output_name = target_name
+        output_name = invoker_target_name
       }
     }
   }
