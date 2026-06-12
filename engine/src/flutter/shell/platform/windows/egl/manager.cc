@@ -132,6 +132,11 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
       EGL_NONE,
   };
 
+  if (luid) {
+    FML_LOG(INFO) << "Requesting EGL display for GPU with LUID "
+                  << luid->HighPart << ":" << luid->LowPart << ".";
+  }
+
   std::vector<const EGLint*> display_attributes_configs;
 
   if (luid) {
@@ -154,6 +159,8 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
   // Level 9_3 and finally D3D11 WARP.
   for (auto config : display_attributes_configs) {
     bool is_last = (config == display_attributes_configs.back());
+    bool is_luid_config =
+        luid && (config == d3d11_display_attributes_with_luid);
 
     display_ = egl_get_platform_display_EXT(EGL_PLATFORM_ANGLE_ANGLE,
                                             EGL_DEFAULT_DISPLAY, config);
@@ -176,6 +183,14 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
 
       // Try the next config.
       continue;
+    }
+
+    if (luid && !is_luid_config) {
+      FML_LOG(WARNING) << "A GPU with LUID " << luid->HighPart << ":"
+                       << luid->LowPart
+                       << " was requested, but the LUID-specific EGL display "
+                          "could not be initialized; falling back to ANGLE's "
+                          "default adapter selection.";
     }
 
     return true;
