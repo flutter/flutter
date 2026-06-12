@@ -101,12 +101,7 @@ Future<void> pollForServiceExtensionValue<T>({
 }
 
 abstract final class AppleTestUtils {
-  static const requiredSymbols = <String>[
-    '_kDartIsolateSnapshotData',
-    '_kDartIsolateSnapshotInstructions',
-    '_kDartVmSnapshotData',
-    '_kDartVmSnapshotInstructions',
-  ];
+  static const requiredSymbols = <String>['_kDartSnapshotData', '_kDartSnapshotText'];
 
   static List<String> getExportedSymbols(String dwarfPath) {
     final ProcessResult nm = processManager.runSync(<String>[
