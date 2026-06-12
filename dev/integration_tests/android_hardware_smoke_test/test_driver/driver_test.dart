@@ -79,6 +79,16 @@ void main() async {
           'Failed to decode full screen screenshot for $testName',
         );
       }
+      if (x < 0 ||
+          y < 0 ||
+          w <= 0 ||
+          h <= 0 ||
+          x + w > decoded.width ||
+          y + h > decoded.height) {
+        throw StateError(
+          'Crop bounds out of range for $testName: x=$x, y=$y, w=$w, h=$h, image.width=${decoded.width}, image.height=${decoded.height}',
+        );
+      }
       final img.Image cropped = img.copyCrop(
         decoded,
         x: x,

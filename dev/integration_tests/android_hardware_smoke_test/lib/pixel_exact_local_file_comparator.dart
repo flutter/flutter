@@ -6,7 +6,7 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:android_driver_extensions/native_driver.dart';
+import 'package:android_driver_extensions/native_driver.dart' show GoldenFileComparator;
 
 /// We use a raw pixel-exact comparator on-device because comparing compressed PNG files byte-for-byte
 /// is flaky. Android's native zlib compressor (libpng) and Dart's pure-Dart 'image' encoder use

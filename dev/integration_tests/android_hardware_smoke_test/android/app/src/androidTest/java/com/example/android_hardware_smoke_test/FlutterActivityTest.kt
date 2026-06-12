@@ -77,7 +77,21 @@ class FlutterActivityTest {
                                 try {
                                     // Capture the true screen output using UiAutomation from this privileged instrumentation runner process.
                                     val instrumentation = InstrumentationRegistry.getInstrumentation()
-                                    val screenshot = instrumentation.uiAutomation.takeScreenshot()
+                                    val screenshot =
+                                        instrumentation.uiAutomation.takeScreenshot()
+                                            ?: throw IllegalStateException("UiAutomation.takeScreenshot() returned null")
+
+                                    if (x < 0 ||
+                                        y < 0 ||
+                                        width <= 0 ||
+                                        height <= 0 ||
+                                        x + width > screenshot.width ||
+                                        y + height > screenshot.height
+                                    ) {
+                                        throw IllegalArgumentException(
+                                            "Crop bounds out of range: x=$x, y=$y, width=$width, height=$height, screenshot.width=${screenshot.width}, screenshot.height=${screenshot.height}"
+                                        )
+                                    }
 
                                     // Crop the full-screen screenshot to the exact widget bounds.
                                     val cropped = Bitmap.createBitmap(screenshot, x, y, width, height)
