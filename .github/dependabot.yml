@@ -15,6 +15,7 @@ updates:
         patterns: [ "*" ]
     reviewers:
       - "jmagman"
+      - "jtmcdole"
     labels:
       - "team-infra"
       - "autosubmit"
