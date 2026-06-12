@@ -6,14 +6,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('debugDefaultTargetPlatformOverride can be reset with addTearDown', (
+  testWidgets('foundation debug variables can be reset with addTearDown', (
     WidgetTester tester,
   ) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    debugDoublePrecision = 3;
     addTearDown(() {
       debugDefaultTargetPlatformOverride = null;
+      debugDoublePrecision = null;
     });
 
     expect(defaultTargetPlatform, TargetPlatform.macOS);
+    expect(debugDoublePrecision, 3);
   });
 }

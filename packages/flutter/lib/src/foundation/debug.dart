@@ -31,19 +31,15 @@ export 'print.dart' show DebugPrintCallback;
 /// override [debugPrint] themselves and want to check that their own custom
 /// value wasn't overridden by a test.
 ///
-/// The `debugDefaultTargetPlatformOverrideValue` argument can be specified
-/// to indicate the expected value of [debugDefaultTargetPlatformOverride].
-///
 /// See [the foundation library](foundation/foundation-library.html)
 /// for a complete list.
 bool debugAssertAllFoundationVarsUnset(
   String reason, {
   DebugPrintCallback debugPrintOverride = debugPrintThrottled,
-  TargetPlatform? debugDefaultTargetPlatformOverrideValue,
 }) {
   assert(() {
     if (debugPrint != debugPrintOverride ||
-        debugDefaultTargetPlatformOverride != debugDefaultTargetPlatformOverrideValue ||
+        debugDefaultTargetPlatformOverride != null ||
         debugDoublePrecision != null ||
         debugBrightnessOverride != null) {
       throw FlutterError(reason);
