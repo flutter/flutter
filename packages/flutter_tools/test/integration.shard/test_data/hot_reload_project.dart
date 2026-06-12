@@ -108,4 +108,12 @@ class HotReloadProject extends Project {
       writeFutureModifiedDate: true,
     );
   }
+
+  void restoreOriginalMain() {
+    writeFile(
+      fileSystem.path.join(dir.path, 'lib', 'main.dart'),
+      main,
+      writeFutureModifiedDate: true,
+    );
+  }
 }
