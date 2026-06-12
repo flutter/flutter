@@ -100,8 +100,9 @@ source_set("skia") {
 }
 
 dart_snapshot_kernel("vmservice_kernel") {
-  dart_main = "//flutter/third_party/dart/pkg/dart_runtime_service_vm/bin/vm_service_entrypoint.dart"
+  dart_main = "//flutter/shell/vmservice/vmservice_entrypoint.dart"
   dart_kernel = "$target_gen_dir/assets/vmservice_kernel.bin"
+  package_config = "//flutter/third_party/dart/.dart_tool/package_config.json"
 }
 
 dart_snapshot_aot("vmservice_snapshot") {

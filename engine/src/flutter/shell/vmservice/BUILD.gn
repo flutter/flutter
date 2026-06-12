@@ -13,7 +13,7 @@ if (is_mac || is_ios) {
 }
 
 flutter_snapshot("vmservice_snapshot") {
-  main_dart = "//flutter/third_party/dart/pkg/dart_runtime_service_vm/bin/vm_service_entrypoint.dart"
+  main_dart = "vmservice_entrypoint.dart"
   output_aot_lib = "libvmservice_snapshot.$ext"
   package_config = "//flutter/third_party/dart/.dart_tool/package_config.json"
 }
