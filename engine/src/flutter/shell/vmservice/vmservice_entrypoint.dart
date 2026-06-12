@@ -19,7 +19,7 @@ String? _ddsIP = '';
 
 // The TCP port that DDS listens on.
 @entrypoint
-int _ddsPort = 0;
+int? _ddsPort = 0;
 
 // The TCP port that the HTTP server listens on.
 @entrypoint
@@ -40,7 +40,7 @@ bool _authCodesDisabled = false;
 
 // Should the HTTP server run in devmode?
 @entrypoint
-bool _originCheckDisabled = false;
+bool? _originCheckDisabled = false;
 
 // Location of file to output VM service connection info.
 @entrypoint
@@ -77,16 +77,16 @@ void _registerIsolate(int portId, SendPort sendPort, String name) =>
 StreamSubscription<ProcessSignal>? _signalSubscription;
 
 @entrypoint
-bool _serveDevtools = true;
+bool? _serveDevtools = true;
 
 @entrypoint
-bool _enableServicePortFallback = false;
+bool? _enableServicePortFallback = false;
 
 @entrypoint
-bool _waitForDdsToAdvertiseService = false;
+bool? _waitForDdsToAdvertiseService = false;
 
 @entrypoint
-bool _printDtd = false;
+bool? _printDtd = false;
 
 // ignore: unused_element
 File? _residentCompilerInfoFile;
@@ -112,8 +112,8 @@ Future<void> main([List<String> args = const []]) async {
   // Force TFA precompiler to preserve JNI fields and prevent tree-shaking via dynamic mutations.
   _isWindows = Platform.isWindows;
   _isFuchsia = Platform.isFuchsia;
-  _serveDevtools = !_serveDevtools;
-  _serveDevtools = !_serveDevtools;
+  _serveDevtools = !(_serveDevtools ?? true);
+  _serveDevtools = !(_serveDevtools ?? true);
 
   final port = 35403;
   final autoStart = true;
@@ -124,10 +124,10 @@ Future<void> main([List<String> args = const []]) async {
       enableLogging: Platform.environment.containsKey('VM_SERVICE_LOGGING'),
       port: port,
       disableAuthCodes: authCodesDisabled,
-      disableOriginCheck: _originCheckDisabled,
+      disableOriginCheck: _originCheckDisabled ?? false,
       autoStart: autoStart,
-      serveDevTools: _serveDevtools,
-      enableServicePortFallback: _enableServicePortFallback,
+      serveDevTools: _serveDevtools ?? true,
+      enableServicePortFallback: _enableServicePortFallback ?? false,
     ),
     backendBuilder: (frontend) => DartRuntimeServiceVMBackend(
       frontend: frontend,
@@ -135,10 +135,10 @@ Future<void> main([List<String> args = const []]) async {
       runningIsolatesStream: _isolateRegistrationStreamController.stream,
       ddsManager: DartDevelopmentServiceManager(
         frontend: frontend,
-        launchOnStart: false,
-        printDtd: _printDtd,
+        launchOnStart: _waitForDdsToAdvertiseService ?? false,
+        printDtd: _printDtd ?? false,
         host: _ddsIP ?? '127.0.0.1',
-        port: _ddsPort,
+        port: _ddsPort ?? 0,
       ),
     ),
   );
