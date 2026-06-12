@@ -816,6 +816,11 @@ void main() {
             '$build/app.dill',
           ],
         ),
+        const FakeCommand(command: <String>['which', 'sysctl']),
+        const FakeCommand(
+          command: <String>['sysctl', 'hw.optional.arm64'],
+          exitCode: 1,
+        ),
         FakeCommand(
           command: <String>[
             'xcrun',

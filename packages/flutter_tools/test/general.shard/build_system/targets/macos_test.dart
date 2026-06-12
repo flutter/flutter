@@ -719,6 +719,11 @@ void main() {
     'DebugMacOSFramework creates expected binary with arm64 only arch',
     () async {
       environment.defines[kDarwinArchs] = 'arm64';
+      processManager.addCommand(const FakeCommand(command: <String>['which', 'sysctl']));
+      processManager.addCommand(const FakeCommand(
+        command: <String>['sysctl', 'hw.optional.arm64'],
+        exitCode: 1,
+      ));
       processManager.addCommand(
         FakeCommand(
           command: <String>[
@@ -760,6 +765,11 @@ void main() {
     'DebugMacOSFramework creates universal binary',
     () async {
       environment.defines[kDarwinArchs] = 'arm64 x86_64';
+      processManager.addCommand(const FakeCommand(command: <String>['which', 'sysctl']));
+      processManager.addCommand(const FakeCommand(
+        command: <String>['sysctl', 'hw.optional.arm64'],
+        exitCode: 1,
+      ));
       processManager.addCommand(
         FakeCommand(
           command: <String>[
@@ -839,6 +849,11 @@ void main() {
             '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
           ],
+        ),
+        const FakeCommand(command: <String>['which', 'sysctl']),
+        const FakeCommand(
+          command: <String>['sysctl', 'hw.optional.arm64'],
+          exitCode: 1,
         ),
         FakeCommand(
           command: <String>[
