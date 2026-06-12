@@ -6,3 +6,5 @@
 
 # Flutter has no wayland third-party dir
 wayland_gn_dir = ""
+wayland_dir = ""
+

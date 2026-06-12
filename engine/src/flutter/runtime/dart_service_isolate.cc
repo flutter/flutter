@@ -8,9 +8,9 @@
 #include <cstring>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/mapping.h"
 #include "flutter/fml/posix_wrappers.h"
 #include "flutter/runtime/embedder_resources.h"
-#include "flutter/fml/mapping.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_library_natives.h"
@@ -133,7 +133,7 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
                                  bool disable_origin_check,
                                  bool disable_service_auth_codes,
                                  bool enable_service_port_fallback,
-                                 bool enable_experimental_vm_service,
+                                 bool is_custom_vmservice,
                                  char** error) {
   Dart_Isolate isolate = Dart_CurrentIsolate();
   FML_CHECK(isolate);
@@ -152,9 +152,6 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
   }
 
   Dart_Handle library = Dart_RootLibrary();
-  bool is_custom_vmservice = !(Dart_IsError(library) || library == Dart_Null());
-
-
 
   if (!is_custom_vmservice) {
     Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_io");
@@ -164,7 +161,8 @@ bool DartServiceIsolate::Startup(const std::string& server_ip,
     SHUTDOWN_ON_ERROR(result);
   }
 
-  Dart_Handle result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
+  Dart_Handle result =
+      Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
   SHUTDOWN_ON_ERROR(result);
 
   if (is_custom_vmservice) {

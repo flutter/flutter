@@ -234,7 +234,7 @@ if (!is_ios) {
   }
 }
 
-if (current_toolchain == host_toolchain) {
+if (enable_unittests && current_toolchain == host_toolchain) {
   source_set("test_swangle_utils") {
     sources = [
       "test_swangle_utils.cc",
