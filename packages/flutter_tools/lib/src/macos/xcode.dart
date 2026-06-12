@@ -272,7 +272,11 @@ class Xcode {
     if (selectPath == null) {
       return null;
     }
-    final String appPath = _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
+    final Version? version = currentVersion;
+    // TODO(flutter): Remove version check once minimum supported Xcode version reaches 27.
+    final String appName =
+        (version != null && version.major >= 27) ? 'DeviceHub.app' : 'Simulator.app';
+    final String appPath = _fileSystem.path.join(selectPath, 'Applications', appName);
     return _fileSystem.directory(appPath).existsSync() ? appPath : null;
   }
 
