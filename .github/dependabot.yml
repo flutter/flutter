@@ -9,6 +9,7 @@ updates:
       interval: "weekly"
     allow:
       - dependency-name: "actions/*"
+      - dependency-name: "google-github-actions/*"
     groups:
       all-github-actions:
         patterns: [ "*" ]
