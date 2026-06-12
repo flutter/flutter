@@ -133,10 +133,8 @@ TEST(APNGImageGeneratorTest, FdATWithShortDataLengthDoesNotCrash) {
 }
 
 TEST(APNGImageGeneratorTest, FdATWithOverflowDataLengthIsRejected) {
-  std::vector<uint8_t> apng;
-  // PNG signature
-  const uint8_t sig[] = {137, 80, 78, 71, 13, 10, 26, 10};
-  apng.insert(apng.end(), sig, sig + 8);
+  std::vector<uint8_t> apng(APNGImageGenerator::kPngSignature.begin(),
+                            APNGImageGenerator::kPngSignature.end());
 
   // IHDR
   {
