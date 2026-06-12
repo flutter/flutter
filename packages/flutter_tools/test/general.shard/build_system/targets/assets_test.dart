@@ -987,10 +987,10 @@ flutter:
         userMessages: UserMessages(),
       );
 
-      final FakeProcessManager processManager = FakeProcessManager.list(
+      final processManager = FakeProcessManager.list(
         List<FakeCommand>.filled(assetsToTransform, transformerCommand, growable: true),
       );
-      final Environment environment = Environment.test(
+      final environment = Environment.test(
         fileSystem.currentDirectory,
         processManager: processManager,
         artifacts: Artifacts.test(),
