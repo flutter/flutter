@@ -110,7 +110,7 @@ class SliverClipRect extends SingleChildRenderObjectWidget {
     super.key,
     required Widget sliver,
     this.clipper,
-    this.clipBehavior = Clip.hardEdge,
+    this.clipBehavior = .hardEdge,
     this.clipOverlap = true,
   }) : super(child: sliver);
 
@@ -144,7 +144,7 @@ class SliverClipRect extends SingleChildRenderObjectWidget {
     renderObject
       ..clipper = clipper
       ..clipBehavior = clipBehavior
-      ..clipOverlap = clipOverlap ? ClipOverlapBehavior.followEdge : ClipOverlapBehavior.none;
+      ..clipOverlap = clipOverlap ? .followEdge : .none;
   }
 
   @override
@@ -170,8 +170,8 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
   /// the child.
   ///
   /// If [clipBehavior] is [Clip.none], no clipping will be applied.
-  RenderSliverClipRect({super.clipper, super.clipBehavior = Clip.hardEdge, bool clipOverlap = true})
-    : super(clipOverlap: clipOverlap ? ClipOverlapBehavior.followEdge : ClipOverlapBehavior.none);
+  RenderSliverClipRect({super.clipper, super.clipBehavior = .hardEdge, bool clipOverlap = true})
+    : super(clipOverlap: clipOverlap ? .followEdge : .none);
 
   @override
   Rect buildClip() {
@@ -191,7 +191,7 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
           bottom ?? newClip.bottom,
         );
 
-    if (clipOverlap != ClipOverlapBehavior.none && constraints.overlap > 0) {
+    if (clipOverlap != ClipOverlapBehavior.none && constraints.overlap > 0.0) {
       final double clipOrigin = getClipOriginForOverlap(clipExtent);
       newClip = switch (applyGrowthDirectionToAxisDirection(
         constraints.axisDirection,
@@ -289,7 +289,7 @@ class RenderSliverClipRect extends _RenderSliverCustomClip<Rect> {
 ///       ),
 ///     ),
 ///     SliverClipRRect(
-///       borderRadius: BorderRadius.circular(16.0),
+///       borderRadius: .circular(16.0),
 ///       sliver: SliverList(
 ///         delegate: SliverChildBuilderDelegate(
 ///           (BuildContext context, int index) {
@@ -329,10 +329,10 @@ class SliverClipRRect extends SingleChildRenderObjectWidget {
   const SliverClipRRect({
     super.key,
     required Widget sliver,
-    this.borderRadius = BorderRadius.zero,
+    this.borderRadius = .zero,
     this.clipper,
-    this.clipBehavior = Clip.antiAlias,
-    this.clipOverlap = ClipOverlapBehavior.followEdge,
+    this.clipBehavior = .antiAlias,
+    this.clipOverlap = .followEdge,
   }) : super(child: sliver);
 
   /// The border radius of the rounded corners.
@@ -428,10 +428,10 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
   ///
   /// If [clipBehavior] is [Clip.none], no clipping will be applied.
   RenderSliverClipRRect({
-    BorderRadiusGeometry borderRadius = BorderRadius.zero,
+    BorderRadiusGeometry borderRadius = .zero,
     super.clipper,
-    super.clipBehavior = Clip.antiAlias,
-    super.clipOverlap = ClipOverlapBehavior.followEdge,
+    super.clipBehavior = .antiAlias,
+    super.clipOverlap = .followEdge,
     TextDirection? textDirection,
   }) : _borderRadius = borderRadius,
        _textDirection = textDirection;
@@ -471,7 +471,7 @@ class RenderSliverClipRRect extends _RenderSliverCustomClip<RRect> {
         clipper?.getClip(maxPaintRect.size) ??
         borderRadius.resolve(textDirection).toRRect(maxPaintRect);
 
-    if (clipOverlap != ClipOverlapBehavior.none && constraints.overlap > 0) {
+    if (clipOverlap != ClipOverlapBehavior.none && constraints.overlap > 0.0) {
       final double insideClipExtent = switch ((constraints.axis, clipOverlap)) {
         (Axis.horizontal, ClipOverlapBehavior.preserveShape) => newClip.middleRect.width,
         (Axis.vertical, ClipOverlapBehavior.preserveShape) => newClip.middleRect.height,
@@ -562,8 +562,8 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
   _RenderSliverCustomClip({
     RenderSliver? sliver,
     CustomClipper<T>? clipper,
-    Clip clipBehavior = Clip.antiAlias,
-    ClipOverlapBehavior clipOverlap = ClipOverlapBehavior.followEdge,
+    Clip clipBehavior = .antiAlias,
+    ClipOverlapBehavior clipOverlap = .followEdge,
   }) : _clipper = clipper,
        _clipBehavior = clipBehavior,
        _clipOverlap = clipOverlap,
@@ -666,13 +666,11 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
     required double mainAxisPosition,
     required double crossAxisPosition,
   }) {
-    if (clipBehavior != Clip.none &&
-        clipOverlap != ClipOverlapBehavior.none &&
-        mainAxisPosition < constraints.overlap) {
+    if (clipBehavior != .none && clipOverlap != .none && mainAxisPosition < constraints.overlap) {
       return false;
     }
 
-    if (clipBehavior != Clip.none) {
+    if (clipBehavior != .none) {
       final Offset hitOffset = switch (applyGrowthDirectionToAxisDirection(
         constraints.axisDirection,
         constraints.growthDirection,
@@ -699,8 +697,8 @@ abstract class _RenderSliverCustomClip<T> extends RenderProxySliver {
   @override
   Rect? describeApproximatePaintClip(RenderObject child) {
     return switch (clipBehavior) {
-      Clip.none => null,
-      Clip.hardEdge || Clip.antiAlias || Clip.antiAliasWithSaveLayer =>
+      .none => null,
+      .hardEdge || .antiAlias || .antiAliasWithSaveLayer =>
         _clipper?.getApproximateClipRect(paintBounds.size) ?? Offset.zero & paintBounds.size,
     };
   }
