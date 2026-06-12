@@ -164,11 +164,6 @@ Future<DTDResponse> getPreviews(DartToolingDaemon dtdConnection) async {
 
 /// Polls DTD for widget previews until the [predicate] is met, or [timeout] is reached.
 ///
-/// This is useful in integration tests to wait for the background analysis server
-/// to finish analyzing changes and updating the semantic model.
-///
-/// Polls DTD for widget previews until the [predicate] is met, or [timeout] is reached.
-///
 /// If [predicate] is null, it defaults to waiting until the previews list is not empty.
 ///
 /// This is useful in integration tests to wait for the background analysis server
