@@ -10,6 +10,7 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/commands/widget_preview.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/widget_preview/dtd_types.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
@@ -159,4 +160,42 @@ Future<DTDResponse> getPreviews(DartToolingDaemon dtdConnection) async {
     await Future<void>.delayed(const Duration(seconds: 2));
   }
   return dtdConnection.call('Lsp', 'dart/workspace/getFlutterWidgetPreviews');
+}
+
+Future<FlutterWidgetPreviews> waitForPreviews(
+  DartToolingDaemon dtdConnection,
+  bool Function(FlutterWidgetPreviews) predicate, {
+  Duration timeout = const Duration(seconds: 10),
+  Duration pollInterval = const Duration(milliseconds: 200),
+}) async {
+  final stopwatch = Stopwatch()..start();
+  late FlutterWidgetPreviews previews;
+  while (stopwatch.elapsed < timeout) {
+    try {
+      final DTDResponse result = await dtdConnection.call(
+        'Lsp',
+        'dart/workspace/getFlutterWidgetPreviews',
+      );
+      previews = FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
+      if (predicate(previews)) {
+        return previews;
+      }
+    } on Object {
+      // Ignore DTD errors or JSON parsing errors during polling, as they might be temporary
+      // while the analysis server is restarting or re-analyzing.
+    }
+    await Future<void>.delayed(pollInterval);
+  }
+  // Try one last time without catching errors to propagate them if it still fails
+  final DTDResponse result = await dtdConnection.call(
+    'Lsp',
+    'dart/workspace/getFlutterWidgetPreviews',
+  );
+  previews = FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
+  if (predicate(previews)) {
+    return previews;
+  }
+  throw StateError(
+    'Timed out waiting for previews condition. Last value had ${previews.previews.length} previews.',
+  );
 }
