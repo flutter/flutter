@@ -181,6 +181,10 @@ template("flutter_snapshot") {
         target_arch = "x86_64-pc-windows-msvc"
       } else if (target_cpu == "arm64") {
         target_arch = "aarch64-pc-windows-msvc"
+      } else if (target_cpu == "x86") {
+        target_arch = "i686-pc-windows-msvc"
+      } else if (target_cpu == "arm") {
+        target_arch = "arm-pc-windows-msvc"
       } else {
         assert(false, "Unsupported Windows CPU: $target_cpu")
       }
