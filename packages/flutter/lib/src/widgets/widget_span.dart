@@ -166,10 +166,9 @@ class WidgetSpan extends PlaceholderSpan {
     assert(debugAssertIsValid());
     assert(
       dimensions != null,
-      'WidgetSpan requires PlaceholderDimensions to be set on the TextPainter. '
+      'PlaceholderSpan requires PlaceholderDimensions to be set on the TextPainter. '
       'Call TextPainter.setPlaceholderDimensions with the dimensions of each '
-      'WidgetSpan before calling TextPainter.layout, or use Text.rich, RichText, '
-      'or EditableText to lay out and paint the inline widgets automatically.',
+      'PlaceholderSpan before calling TextPainter.layout.',
     );
     final hasStyle = style != null;
     if (hasStyle) {
@@ -177,8 +176,8 @@ class WidgetSpan extends PlaceholderSpan {
     }
     assert(
       builder.placeholderCount < dimensions!.length,
-      'WidgetSpan requires a PlaceholderDimensions entry for each WidgetSpan. '
-      'The dimensions list has fewer entries than the number of WidgetSpans in '
+      'PlaceholderSpan requires a PlaceholderDimensions entry for each PlaceholderSpan. '
+      'The dimensions list has fewer entries than the number of PlaceholderSpans in '
       'the InlineSpan tree.',
     );
     final PlaceholderDimensions currentDimensions = dimensions![builder.placeholderCount];

@@ -1054,19 +1054,10 @@ class TextPainter {
 
   /// Sets the dimensions of each placeholder in [text].
   ///
-  /// The number of [PlaceholderDimensions] provided should be the same as the
-  /// number of [PlaceholderSpan]s in [text]. The dimensions correspond to the
-  /// [PlaceholderSpan]s in the order they appear during a preorder traversal of
-  /// the [InlineSpan] tree.
-  ///
-  /// Call this before [layout] when [text] contains [PlaceholderSpan]s and the
-  /// [TextPainter] needs to reserve space for them, such as when directly
-  /// measuring or painting a paragraph that contains placeholders. After
-  /// layout, [inlinePlaceholderBoxes] reports the text-space boxes reserved for
-  /// those placeholders, which can be used to position separately painted
-  /// children. This is usually unnecessary when using [Text], [RichText], or
-  /// [EditableText] because those widgets lay out their embedded widgets and set
-  /// the placeholder dimensions automatically.
+  /// Call this before [layout] when [text] contains [PlaceholderSpan]s to
+  /// reserve space for them. After layout, [inlinePlaceholderBoxes] reports the
+  /// text-space boxes reserved for those placeholders, which should be used to
+  /// position the [PlaceholderSpan]s.
   ///
   /// Passing in an empty or null `value` will do nothing.
   ///
