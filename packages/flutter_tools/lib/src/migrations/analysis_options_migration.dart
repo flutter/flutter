@@ -36,7 +36,7 @@ class AnalysisOptionsMigration extends ProjectMigrator {
       return;
     }
 
-    final excludesToExclude = [
+    const excludesToExclude = <String>[
       'build/**',
       'android/**',
       'ios/**',
@@ -82,13 +82,11 @@ class AnalysisOptionsMigration extends ProjectMigrator {
         if (exclude is! YamlList) {
           editor.update(<String>['analyzer', 'exclude'], excludesToExclude);
         } else {
-          final List<String> currentExcludes = exclude.map((dynamic e) => e.toString()).toList();
           for (final requiredExclude in excludesToExclude) {
-            if (!currentExcludes.contains(requiredExclude)) {
-              currentExcludes.add(requiredExclude);
+            if (!exclude.contains(requiredExclude)) {
+              editor.appendToList(<String>['analyzer', 'exclude'], requiredExclude);
             }
           }
-          editor.update(<String>['analyzer', 'exclude'], currentExcludes);
         }
       }
       _analysisOptionsFile.writeAsStringSync(editor.toString());

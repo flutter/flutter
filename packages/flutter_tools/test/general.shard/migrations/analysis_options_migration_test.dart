@@ -169,6 +169,25 @@ analyzer:
       expect(migratedContents, contains('- macos/**'));
       expect(migratedContents, contains('- linux/**'));
     });
+
+    testWithoutContext('migrates and preserves comments inside exclude list', () async {
+      const analysisOptionsContents = '''
+analyzer:
+  exclude:
+    # Some important comment about why we exclude this
+    - foo/**
+''';
+
+      analysisOptionsFile.writeAsStringSync(analysisOptionsContents);
+
+      final migration = AnalysisOptionsMigration(mockProject, testLogger);
+      await migration.migrate();
+
+      final String migratedContents = analysisOptionsFile.readAsStringSync();
+      expect(migratedContents, contains('# Some important comment about why we exclude this'));
+      expect(migratedContents, contains('- foo/**'));
+      expect(migratedContents, contains('- build/**'));
+    });
   });
 }
 
