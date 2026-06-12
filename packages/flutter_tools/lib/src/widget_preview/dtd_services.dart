@@ -171,8 +171,7 @@ class WidgetPreviewDtdServices {
   Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async {
     await _waitForLspService();
     const maxAttempts = 50;
-    var attempts = 0;
-    while (attempts < maxAttempts) {
+    for (var attempts = 0; attempts < maxAttempts; attempts++) {
       try {
         final DTDResponse result = await _dtd!.call(
           'Lsp',
@@ -182,21 +181,19 @@ class WidgetPreviewDtdServices {
       } on RpcException catch (e) {
         if (e.code == -32601 && attempts < maxAttempts - 1) {
           // Method not found
-          attempts++;
           await Future<void>.delayed(const Duration(milliseconds: 200));
           continue;
         }
         rethrow;
       }
     }
-    throw StateError('Failed to call getFlutterWidgetPreviews after $attempts attempts.');
+    throw StateError('Failed to call getFlutterWidgetPreviews after $maxAttempts attempts.');
   }
 
   Future<FlutterWidgetPreviews> getFlutterWidgetPreviewsForFile({required String filePath}) async {
     await _waitForLspService();
     const maxAttempts = 50;
-    var attempts = 0;
-    while (attempts < maxAttempts) {
+    for (var attempts = 0; attempts < maxAttempts; attempts++) {
       try {
         final DTDResponse result = await _dtd!.call(
           'Lsp',
@@ -207,14 +204,13 @@ class WidgetPreviewDtdServices {
       } on RpcException catch (e) {
         if (e.code == -32601 && attempts < maxAttempts - 1) {
           // Method not found
-          attempts++;
           await Future<void>.delayed(const Duration(milliseconds: 200));
           continue;
         }
         rethrow;
       }
     }
-    throw StateError('Failed to call getFlutterWidgetPreviewsForFile after $attempts attempts.');
+    throw StateError('Failed to call getFlutterWidgetPreviewsForFile after $maxAttempts attempts.');
   }
 
   Future<void> _waitForLspService() async {
