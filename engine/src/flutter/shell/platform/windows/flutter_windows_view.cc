@@ -208,6 +208,9 @@ void FlutterWindowsView::ForceRedraw() {
 bool FlutterWindowsView::OnWindowSizeChanged(size_t width, size_t height) {
   if (IsSizedToContent()) {
     // No resize synchronization needed for views sized to content.
+    // Still send metrics so the engine renders at the correct viewport size
+    // (e.g. after the child window is resized to the host's client area).
+    SendWindowMetrics(width, height, binding_handler_->GetDpiScale());
     return true;
   }
 
@@ -264,42 +267,43 @@ void FlutterWindowsView::OnPointerMove(double x,
                                        double y,
                                        FlutterPointerDeviceKind device_kind,
                                        int32_t device_id,
+                                       uint64_t buttons,
                                        uint32_t rotation,
                                        uint32_t pressure,
                                        int modifiers_state) {
   engine_->keyboard_key_handler()->SyncModifiersIfNeeded(modifiers_state);
   auto state = GetOrCreatePointerState(device_kind, device_id);
+  state->buttons = buttons;
   state->rotation = rotation;
   state->pressure = pressure;
   SendPointerMove(x, y, state);
 }
 
-void FlutterWindowsView::OnPointerDown(
-    double x,
-    double y,
-    FlutterPointerDeviceKind device_kind,
-    int32_t device_id,
-    FlutterPointerMouseButtons flutter_button,
-    uint32_t rotation,
-    uint32_t pressure) {
-  if (flutter_button != 0) {
+void FlutterWindowsView::OnPointerDown(double x,
+                                       double y,
+                                       FlutterPointerDeviceKind device_kind,
+                                       int32_t device_id,
+                                       uint64_t buttons,
+                                       uint32_t rotation,
+                                       uint32_t pressure) {
+  if (buttons != 0) {
     auto state = GetOrCreatePointerState(device_kind, device_id);
-    state->buttons |= flutter_button;
+    state->buttons |= buttons;
     state->rotation = rotation;
     state->pressure = pressure;
     SendPointerDown(x, y, state);
   }
 }
 
-void FlutterWindowsView::OnPointerUp(
-    double x,
-    double y,
-    FlutterPointerDeviceKind device_kind,
-    int32_t device_id,
-    FlutterPointerMouseButtons flutter_button) {
-  if (flutter_button != 0) {
-    auto state = GetOrCreatePointerState(device_kind, device_id);
-    state->buttons &= ~flutter_button;
+void FlutterWindowsView::OnPointerUp(double x,
+                                     double y,
+                                     FlutterPointerDeviceKind device_kind,
+                                     int32_t device_id,
+                                     uint64_t buttons) {
+  auto state = GetOrCreatePointerState(device_kind, device_id);
+  const uint64_t released_buttons = buttons == 0 ? state->buttons : buttons;
+  if (released_buttons != 0) {
+    state->buttons &= ~released_buttons;
     SendPointerUp(x, y, state);
   }
 }
@@ -932,6 +936,11 @@ bool FlutterWindowsView::NeedsVsync() const {
 
 bool FlutterWindowsView::IsSizedToContent() const {
   return is_sized_to_content_;
+}
+
+void FlutterWindowsView::SetSizedToContent(bool sized_to_content) {
+  is_sized_to_content_ = sized_to_content;
+  engine_->SendWindowMetricsEvent(CreateWindowMetricsEvent());
 }
 
 BoxConstraints FlutterWindowsView::GetConstraints() const {
