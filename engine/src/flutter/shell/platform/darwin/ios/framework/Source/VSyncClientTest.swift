@@ -150,7 +150,8 @@ import Testing
     #expect(link.isPaused)
   }
 
-  @Test func releasesLinkOnInvalidation() async {
+  @Test(.timeLimit(.seconds(1)))
+  func releasesLinkOnInvalidation() async {
     let threadTaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "FlutterVSyncClientTest")
     weak var weakClient: VSyncClient?
 
@@ -211,7 +212,8 @@ import Testing
   /// registering thread). If this fails, the run loop will strongly retain and leak both the
   /// display link and the relay.
   @MainActor
-  @Test func displayLinkIsDeallocatedOnTaskRunnerThread() async {
+  @Test(.timeLimit(.seconds(1)))
+  func displayLinkIsDeallocatedOnTaskRunnerThread() async {
     let threadTaskRunner = TaskRunnerTestHelper.makeTaskRunner(withLabel: "VSyncClientTest")
     weak var weakClient: VSyncClient?
     weak var weakDisplayLink: CADisplayLink?

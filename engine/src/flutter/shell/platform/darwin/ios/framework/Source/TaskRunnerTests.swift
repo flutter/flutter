@@ -8,7 +8,8 @@ import Testing
 @MainActor
 @Suite struct TaskRunnerTests {
 
-  @Test func postTask() async {
+  @Test(.timeLimit(.seconds(5)))
+  func postTask() async {
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
     await withCheckedContinuation { continuation in
@@ -18,7 +19,8 @@ import Testing
     }
   }
 
-  @Test func postDelayedTask() async {
+  @Test(.timeLimit(.seconds(5)))
+  func postDelayedTask() async {
     let taskRunner = TaskRunnerTestHelper.makeCurrentThreadTaskRunner()
 
     let startTime = CACurrentMediaTime()
