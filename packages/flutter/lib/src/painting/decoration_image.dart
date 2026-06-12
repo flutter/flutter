@@ -70,9 +70,9 @@ class DecorationImage {
   /// application) or a [NetworkImage] (for an image obtained from the network).
   final ImageProvider image;
 
-  /// The image's placeholder.
+  /// A placeholder image to display while the target [image] is loading.
   ///
-  /// This should be an [AssetImage] when image is Network image.
+  /// This is typically an [AssetImage] when the target [image] is a [NetworkImage].
   final ImageProvider? placeholder;
 
   /// An optional error callback for errors emitted when loading [image].
@@ -386,8 +386,13 @@ class _DecorationImagePainter implements DecorationImagePainter {
       }
     }
 
-    if (_details.placeholder != null) {
-      ImageStream placeholderStream = _details.placeholder!.resolve(configuration);
+    if (_image != null) {
+      _placeholderStream?.removeListener(_placeholderListener);
+      _placeholderStream = null;
+      _placeholderImage?.dispose();
+      _placeholderImage = null;
+    } else if (_details.placeholder != null) {
+      final ImageStream placeholderStream = _details.placeholder!.resolve(configuration);
       if (placeholderStream.key != _placeholderStream?.key) {
         _placeholderStream?.removeListener(_placeholderListener);
         _placeholderStream = placeholderStream;
@@ -451,6 +456,10 @@ class _DecorationImagePainter implements DecorationImagePainter {
   }
 
   void _handlePlaceholder(ImageInfo value, bool synchronousCall) {
+    if (_image != null) {
+      value.dispose();
+      return;
+    }
     if (_placeholderImage == value) {
       return;
     }
