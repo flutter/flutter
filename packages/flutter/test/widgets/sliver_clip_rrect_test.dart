@@ -12,14 +12,14 @@ import 'widgets_app_tester.dart';
 /// [SliverClipRRect] and filler content. Suitable for all overlap-clipping tests.
 Widget _buildOverlapScenario({
   required ScrollController controller,
-  ClipOverlapBehavior clipOverlap = ClipOverlapBehavior.followEdge,
+  ClipOverlapBehavior clipOverlap = .followEdge,
   double borderRadius = 20.0,
-  Axis scrollDirection = Axis.vertical,
+  Axis scrollDirection = .vertical,
   bool reverse = false,
   double childExtent = 100.0,
-  Clip clipBehavior = Clip.antiAlias,
+  Clip clipBehavior = .antiAlias,
 }) {
-  final isHorizontal = scrollDirection == Axis.horizontal;
+  final isHorizontal = scrollDirection == .horizontal;
 
   return TestWidgetsApp(
     home: CustomScrollView(
@@ -30,7 +30,7 @@ Widget _buildOverlapScenario({
         const SliverPersistentHeader(delegate: _SliverPersistentHeaderDelegate(), pinned: true),
         SliverClipRRect(
           clipOverlap: clipOverlap,
-          borderRadius: BorderRadius.all(Radius.circular(borderRadius)),
+          borderRadius: .all(Radius.circular(borderRadius)),
           clipBehavior: clipBehavior,
           sliver: SliverToBoxAdapter(
             child: RepaintBoundary(
@@ -162,7 +162,7 @@ void main() {
           home: CustomScrollView(
             slivers: <Widget>[
               SliverClipRRect(
-                borderRadius: BorderRadiusDirectional.only(topStart: Radius.circular(10.0)),
+                borderRadius: BorderRadiusDirectional.only(topStart: .circular(10.0)),
                 sliver: SliverToBoxAdapter(child: SizedBox(height: 100.0)),
               ),
             ],
@@ -178,15 +178,13 @@ void main() {
       expect(clip.trRadius, Radius.zero);
 
       // Change borderRadius and check if getClip() returns the updated clip geometry.
-      renderObject.borderRadius = const BorderRadius.only(topRight: Radius.circular(20.0));
+      renderObject.borderRadius = const BorderRadius.only(topRight: .circular(20.0));
       clip = renderObject.getClip()!;
       expect(clip.tlRadius, Radius.zero);
       expect(clip.trRadius, const Radius.circular(20.0));
 
       // Revert to directional border radius to test textDirection.
-      renderObject.borderRadius = const BorderRadiusDirectional.only(
-        topStart: Radius.circular(10.0),
-      );
+      renderObject.borderRadius = const BorderRadiusDirectional.only(topStart: .circular(10.0));
       clip = renderObject.getClip()!;
       expect(clip.tlRadius, const Radius.circular(10.0));
       expect(clip.trRadius, Radius.zero);
@@ -207,7 +205,7 @@ void main() {
 
       await tester.pumpWidget(
         Directionality(
-          textDirection: TextDirection.ltr,
+          textDirection: .ltr,
           child: CustomScrollView(
             controller: controller,
             slivers: <Widget>[
@@ -254,7 +252,7 @@ void main() {
 
       await tester.pumpWidget(
         Directionality(
-          textDirection: TextDirection.ltr,
+          textDirection: .ltr,
           child: CustomScrollView(
             controller: controller,
             slivers: <Widget>[
@@ -289,16 +287,16 @@ void main() {
       expect(clip.top, 50.0);
 
       // Mutate clipOverlap -> should call _markNeedsClip() and invalidate cache.
-      renderSliver.clipOverlap = ClipOverlapBehavior.none;
+      renderSliver.clipOverlap = .none;
       clip = renderSliver.getClip()!;
       expect(clip.top, 0.0); // should not be truncated by overlap anymore
 
       // Mutate clipBehavior to Clip.none -> getClip() should return null.
-      renderSliver.clipBehavior = Clip.none;
+      renderSliver.clipBehavior = .none;
       expect(renderSliver.getClip(), isNull);
 
       // Mutate clipBehavior back to non-none and check that clip is rebuilt.
-      renderSliver.clipBehavior = Clip.antiAlias;
+      renderSliver.clipBehavior = .antiAlias;
       clip = renderSliver.getClip()!;
       expect(clip.top, 0.0);
     });
@@ -311,7 +309,7 @@ void main() {
 
       await tester.pumpWidget(
         Directionality(
-          textDirection: TextDirection.ltr,
+          textDirection: .ltr,
           child: CustomScrollView(
             controller: controller,
             slivers: <Widget>[
@@ -371,50 +369,50 @@ void main() {
           >[
             (
               name: 'followEdge blocks overlap hits (vertical)',
-              clipOverlap: ClipOverlapBehavior.followEdge,
-              axis: Axis.vertical,
+              clipOverlap: .followEdge,
+              axis: .vertical,
               reverse: false,
               expectHitInOverlap: false,
             ),
             (
               name: 'none allows overlap hits (vertical)',
-              clipOverlap: ClipOverlapBehavior.none,
-              axis: Axis.vertical,
+              clipOverlap: .none,
+              axis: .vertical,
               reverse: false,
               expectHitInOverlap: true,
             ),
             (
               name: 'preserveShape blocks overlap hits (vertical)',
-              clipOverlap: ClipOverlapBehavior.preserveShape,
-              axis: Axis.vertical,
+              clipOverlap: .preserveShape,
+              axis: .vertical,
               reverse: false,
               expectHitInOverlap: false,
             ),
             (
               name: 'followEdge blocks overlap hits (horizontal)',
-              clipOverlap: ClipOverlapBehavior.followEdge,
-              axis: Axis.horizontal,
+              clipOverlap: .followEdge,
+              axis: .horizontal,
               reverse: false,
               expectHitInOverlap: false,
             ),
             (
               name: 'none allows overlap hits (horizontal)',
-              clipOverlap: ClipOverlapBehavior.none,
-              axis: Axis.horizontal,
+              clipOverlap: .none,
+              axis: .horizontal,
               reverse: false,
               expectHitInOverlap: true,
             ),
             (
               name: 'none allows overlap hits (vertical reverse)',
-              clipOverlap: ClipOverlapBehavior.none,
-              axis: Axis.vertical,
+              clipOverlap: .none,
+              axis: .vertical,
               reverse: true,
               expectHitInOverlap: true,
             ),
             (
               name: 'followEdge blocks overlap hits (horizontal reverse)',
-              clipOverlap: ClipOverlapBehavior.followEdge,
-              axis: Axis.horizontal,
+              clipOverlap: .followEdge,
+              axis: .horizontal,
               reverse: true,
               expectHitInOverlap: false,
             ),
@@ -442,7 +440,7 @@ void main() {
           );
           expect(renderSliver.constraints.overlap, 50.0);
 
-          final crossAxis = testCase.axis == Axis.horizontal ? 50.0 : 100.0;
+          final crossAxis = testCase.axis == .horizontal ? 50.0 : 100.0;
 
           expect(
             renderSliver.hitTest(
@@ -472,9 +470,7 @@ void main() {
       final controller = ScrollController();
       addTearDown(controller.dispose);
 
-      await tester.pumpWidget(
-        _buildOverlapScenario(controller: controller, clipBehavior: Clip.none),
-      );
+      await tester.pumpWidget(_buildOverlapScenario(controller: controller, clipBehavior: .none));
 
       controller.jumpTo(50.0);
       await tester.pump();
@@ -502,7 +498,7 @@ void main() {
       await tester.pumpWidget(
         _buildOverlapScenario(
           controller: controller,
-          clipOverlap: ClipOverlapBehavior.none,
+          clipOverlap: .none,
           borderRadius: 50.0,
           childExtent: 200.0,
         ),
@@ -609,7 +605,7 @@ void main() {
         await tester.pumpWidget(
           _buildOverlapScenario(
             controller: controller,
-            clipOverlap: ClipOverlapBehavior.preserveShape,
+            clipOverlap: .preserveShape,
             borderRadius: 40.0,
           ),
         );
@@ -642,9 +638,9 @@ void main() {
         await tester.pumpWidget(
           _buildOverlapScenario(
             controller: controller,
-            clipOverlap: ClipOverlapBehavior.preserveShape,
+            clipOverlap: .preserveShape,
             borderRadius: 40.0,
-            scrollDirection: Axis.horizontal,
+            scrollDirection: .horizontal,
           ),
         );
 
@@ -668,7 +664,7 @@ void main() {
         await tester.pumpWidget(
           _buildOverlapScenario(
             controller: controller,
-            clipOverlap: ClipOverlapBehavior.preserveShape,
+            clipOverlap: .preserveShape,
             borderRadius: 40.0,
             reverse: true,
           ),
@@ -698,9 +694,7 @@ void main() {
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(_buildOverlapScenario(controller: controller));
-      await tester.pumpWidget(
-        _buildOverlapScenario(controller: controller, clipBehavior: Clip.none),
-      );
+      await tester.pumpWidget(_buildOverlapScenario(controller: controller, clipBehavior: .none));
 
       final RenderSliverClipRRect renderSliver = tester.renderObject(find.byType(SliverClipRRect));
 
