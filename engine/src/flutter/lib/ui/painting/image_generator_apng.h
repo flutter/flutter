@@ -56,7 +56,7 @@ class APNGImageGenerator : public ImageGenerator {
   /// Computes the CRC of the data in a PNG chunk.
   static uint32_t ComputeCrc32(const uint8_t* data, size_t length);
 
-  // Signature at the start of a PNG file.
+  /// Signature at the start of a PNG file.
   static constexpr std::array<uint8_t, 8> kPngSignature = {137, 80, 78, 71,
                                                            13,  10, 26, 10};
 
