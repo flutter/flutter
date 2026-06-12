@@ -734,7 +734,7 @@ abstract final class KeyEventSimulator {
   /// The `platform` value selects the platform key map used to synthesize the
   /// event. Not every [LogicalKeyboardKey] or [PhysicalKeyboardKey] is
   /// available on every platform; simulating a key that is not in the selected
-  /// platform's key map can throw.
+  /// platform's key map throws an assertion error.
   /// {@endtemplate}
   ///
   /// Keys that are down when the test completes are cleared after each test.
