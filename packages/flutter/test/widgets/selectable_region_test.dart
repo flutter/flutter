@@ -6573,38 +6573,6 @@ void main() {
     );
 
     testWidgets(
-      'web can rebuild SelectableRegion after disabling the browser context menu',
-      (WidgetTester tester) async {
-        debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-        try {
-          await BrowserContextMenu.enableContextMenu();
-
-          late StateSetter rebuild;
-          await tester.pumpWidget(
-            TestWidgetsApp(
-              home: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  rebuild = setState;
-                  return _selectableRegion(child: const Text('How are you?'));
-                },
-              ),
-            ),
-          );
-
-          await BrowserContextMenu.disableContextMenu();
-          rebuild(() {});
-          await tester.pump();
-
-          final Object? exception = tester.takeException();
-          expect(exception, isNull, reason: exception?.toString());
-        } finally {
-          debugDefaultTargetPlatformOverride = null;
-        }
-      },
-      skip: !kIsWeb, // [intended] This test verifies web desktop behavior.
-    );
-
-    testWidgets(
       'uses contextMenuBuilder by default on Android and iOS web',
       (WidgetTester tester) async {
         final contextMenu = UniqueKey();

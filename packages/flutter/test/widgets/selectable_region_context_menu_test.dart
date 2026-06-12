@@ -41,11 +41,23 @@ void main() {
     fakePlatformViewRegistry = FakePlatformViewRegistry();
     PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory =
         fakePlatformViewRegistry.registerViewFactory;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.contextMenu,
+      (MethodCall call) {
+        // Just complete successfully, so that BrowserContextMenu thinks that
+        // the engine successfully received its call.
+        return Future<void>.value();
+      },
+    );
   });
 
   tearDown(() {
     PlatformSelectableRegionContextMenu.debugOverrideRegisterViewFactory = null;
     PlatformSelectableRegionContextMenu.debugResetRegistry();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.contextMenu,
+      null,
+    );
   });
 
   testWidgets('DOM element is set up correctly', (WidgetTester tester) async {
@@ -166,6 +178,39 @@ void main() {
       element.dispatchEvent(event);
       expect(event.defaultPrevented, isTrue);
     }
+  }, variant: _browserContextMenuEnabledVariants);
+
+  testWidgets('can rebuild SelectableRegion as browser context menu toggles', (
+    WidgetTester tester,
+  ) async {
+    await BrowserContextMenu.enableContextMenu();
+    addTearDown(BrowserContextMenu.enableContextMenu);
+
+    late StateSetter rebuild;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            rebuild = setState;
+            return SelectableRegion(
+              selectionControls: EmptyTextSelectionControls(),
+              child: const Text('How are you?'),
+            );
+          },
+        ),
+      ),
+    );
+
+    Future<void> updateContextMenu(Future<void> update) async {
+      await update;
+      rebuild(() {});
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    }
+
+    await updateContextMenu(BrowserContextMenu.disableContextMenu());
+    await updateContextMenu(BrowserContextMenu.enableContextMenu());
+    await updateContextMenu(BrowserContextMenu.disableContextMenu());
   }, variant: _browserContextMenuEnabledVariants);
 }
 
