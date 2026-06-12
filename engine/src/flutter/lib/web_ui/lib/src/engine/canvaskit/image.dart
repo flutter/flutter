@@ -322,7 +322,7 @@ EngineImage scaleImage(SkImage image, int? targetWidth, int? targetHeight) {
   final CkCanvas canvas = recorder.beginRecording(ui.Rect.largest);
 
   final paint = CkPaint();
-  final EngineImage temporaryImage = EngineImage(CkImageDelegate(image), width, height);
+  final temporaryImage = EngineImage(CkImageDelegate(image), width, height);
 
   try {
     canvas.drawImageRect(
