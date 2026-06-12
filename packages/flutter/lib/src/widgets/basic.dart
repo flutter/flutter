@@ -2678,14 +2678,10 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 
 /// A box with a specified size.
 ///
-/// If given a child, this widget forces it to have a specific width and/or height.
-/// These values will be ignored if this widget's parent does not permit them.
-/// For example, this happens if the parent is the screen (forces the child to
-/// be the same size as the parent), or another [SizedBox] (forces its child to
-/// have a specific width and/or height). This can be remedied by wrapping the
-/// child [SizedBox] in a widget that does permit it to be any size up to the
-/// size of the parent, such as [Center] or [Align].
+/// {@youtube 560 315 https://www.youtube.com/watch?v=EHPu_DzRfqA}
 ///
+/// If given a child, this widget will try to size its child as close to the
+/// specified [height] and [width] as possible given the parent's constraints.
 /// If either the width or height is null, this widget will try to size itself to
 /// match the child's size in that dimension. If the child's size depends on the
 /// size of its parent, the height and width must be provided.
@@ -2697,8 +2693,6 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// The [SizedBox.expand] constructor can be used to make a [SizedBox] that
 /// sizes itself to fit the parent. It is equivalent to setting [width] and
 /// [height] to [double.infinity].
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=EHPu_DzRfqA}
 ///
 /// {@tool snippet}
 ///
@@ -2713,6 +2707,36 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// )
 /// ```
 /// {@end-tool}
+///
+/// ## Troubleshooting
+///
+/// ### Why is my [SizedBox] ignored?
+///
+/// In Flutter's layout protocol constraints go down, and sizes go up.
+/// A widget must respect the constraints passed by its parent. This can cause a
+/// [SizedBox]'s values to be ignored:
+///
+/// {@tool snippet}
+///
+/// This snippet makes the [ColoredBox] size 200x200. The 100x100 size is
+/// ignored because it is incompatible with its parent constraints of exactly
+/// 200x200:
+///
+/// ```dart
+/// const SizedBox(
+///   width: 200.0,
+///   height: 200.0,
+///   child: SizedBox( // Ignored!
+///     width: 100.0,
+///     height: 100.0,
+///     child: ColoredBox(color: Colors.green),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// This can be fixed by wrapping the child [SizedBox] in a widget that lets
+/// it be any size up to the size of the parent, such as [Center] or [Align].
 ///
 /// See also:
 ///
@@ -4761,6 +4785,10 @@ class Stack extends MultiChildRenderObjectWidget {
   /// To clip children whose geometry does not overflow the stack, consider
   /// using a [ClipRect] widget.
   ///
+  /// Even when this is set to [Clip.none], the stack itself does not extend its
+  /// hit-test region: pointer events that fall outside the stack's own bounds
+  /// will not reach a child even if that child is painted in that area.
+  ///
   /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
@@ -6405,9 +6433,14 @@ class Flow extends MultiChildRenderObjectWidget {
 /// subtree of a [SelectionArea] or [SelectableRegion] and a
 /// [SelectionRegistrar] needs to be assigned to the
 /// [RichText.selectionRegistrar]. One can use
-/// [SelectionContainer.maybeOf] to get the [SelectionRegistrar] from a
-/// context. This enables users to select the text in [RichText]s with mice or
-/// touch events.
+/// [SelectionContainer.maybeOf] to get the [SelectionRegistrar] from a context
+/// that is below the [SelectionArea] or [SelectableRegion] in the widget tree.
+/// This enables users to select the text in [RichText]s with mice or touch
+/// events.
+///
+/// If the same build method creates both the [SelectionArea] and the
+/// [RichText], use a [Builder] so that [SelectionContainer.maybeOf] is called
+/// with a [BuildContext] below the [SelectionArea] in the widget tree.
 ///
 /// The [selectionColor] also needs to be set if the selection is enabled to
 /// draw the selection highlights.
@@ -6420,10 +6453,16 @@ class Flow extends MultiChildRenderObjectWidget {
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
 ///
 /// ```dart
-/// RichText(
-///   text: const TextSpan(text: 'Hello'),
-///   selectionRegistrar: SelectionContainer.maybeOf(context),
-///   selectionColor: const Color(0xAF6694e8),
+/// SelectionArea(
+///   child: Builder(
+///     builder: (BuildContext context) {
+///       return RichText(
+///         text: const TextSpan(text: 'Hello'),
+///         selectionRegistrar: SelectionContainer.maybeOf(context),
+///         selectionColor: const Color(0xAF6694e8),
+///       );
+///     },
+///   ),
 /// )
 /// ```
 /// {@end-tool}
