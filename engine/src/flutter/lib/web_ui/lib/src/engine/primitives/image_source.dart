@@ -54,10 +54,8 @@ sealed class ImageSource {
       return;
     }
     _refCount--;
-    if (_refCount == 0) {
-      _doClose();
-      debugIsClosed = true;
-    }
+    // Close the image if [refCount] fell to 0.
+    close();
   }
 
   /// Closes the image source manually if the current [refCount] is 0.
