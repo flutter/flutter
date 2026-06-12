@@ -119,8 +119,6 @@ static void ApplyFramebufferBlend(Entity& entity) {
   entity.SetBlendMode(BlendMode::kSrc);
 }
 
-/// @brief Create the subpass restore contents, appling any filters or opacity
-///        from the provided paint object.
 static ISize RoundUpToMultiple(ISize size, int multiple) {
   if (multiple <= 1) {
     return size;
@@ -129,6 +127,8 @@ static ISize RoundUpToMultiple(ISize size, int multiple) {
                ((size.height + multiple - 1) / multiple) * multiple);
 }
 
+/// @brief Create the subpass restore contents, appling any filters or opacity
+///        from the provided paint object.
 static std::shared_ptr<Contents> CreateContentsForSubpassTarget(
     const ContentContext& renderer,
     const Paint& paint,
