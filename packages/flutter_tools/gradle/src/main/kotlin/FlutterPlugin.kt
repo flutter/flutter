@@ -309,11 +309,13 @@ class FlutterPlugin : Plugin<Project> {
         val androidExtension = FlutterPluginUtils.getLegacyAndroidExtension(projectToAddTasksTo)
         androidExtension.sourceSets.all {
             val sourceSet = this
-            val jniLibsDir =
-                projectToAddTasksTo.layout.buildDirectory.dir(
-                    "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${sourceSet.name}/jniLibs"
-                )
-            sourceSet.jniLibs.srcDir(jniLibsDir.get().asFile)
+            projectToAddTasksTo.rootProject.afterEvaluate {
+                val jniLibsDir =
+                    projectToAddTasksTo.layout.buildDirectory.dir(
+                        "${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${sourceSet.name}/jniLibs"
+                    )
+                sourceSet.jniLibs.srcDir(jniLibsDir.get().asFile)
+            }
         }
 
         val flutterPlugin = this
@@ -721,7 +723,7 @@ class FlutterPlugin : Plugin<Project> {
                     Sync::class.java
                 ) {
                     dependsOn(flutterCompileTask)
-                    into(jniLibsDir)
+                    into(jniLibsDir.get().asFile)
                     targetPlatforms.forEach { targetPlatform ->
                         val abi: String? = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
                         from("${flutterCompileTask.intermediateDir}/$abi") {
