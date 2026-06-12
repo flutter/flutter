@@ -203,26 +203,29 @@ void main() {
     expect(command.positionalArguments[0], equals(image208x142));
   });
 
-  test('centerSlice does not throw when the destination rect is smaller than the slice borders', () async {
-    // Regression test for https://github.com/flutter/flutter/issues/27827.
-    // With a 100x46 rect and a 208x142 image at scale 3, subtracting the
-    // slice borders from `outputSize` makes it non-positive. `applyBoxFit`
-    // then degenerates to `Size.zero` and the legacy strict-equality
-    // assertion fired against the inner-input size for that unrelated reason.
-    final canvas = TestCanvas();
-    paintImage(
-      canvas: canvas,
-      rect: const Rect.fromLTWH(0.0, 0.0, 100.0, 46.0),
-      image: image208x142,
-      scale: 3.0,
-      centerSlice: const Rect.fromLTRB(15.5, 15.5, 16.5, 16.5),
-    );
+  test(
+    'centerSlice does not throw when the destination rect is smaller than the slice borders',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/27827.
+      // With a 100x46 rect and a 208x142 image at scale 3, subtracting the
+      // slice borders from `outputSize` makes it non-positive. `applyBoxFit`
+      // then degenerates to `Size.zero` and the legacy strict-equality
+      // assertion fired against the inner-input size for that unrelated reason.
+      final canvas = TestCanvas();
+      paintImage(
+        canvas: canvas,
+        rect: const Rect.fromLTWH(0.0, 0.0, 100.0, 46.0),
+        image: image208x142,
+        scale: 3.0,
+        centerSlice: const Rect.fromLTRB(15.5, 15.5, 16.5, 16.5),
+      );
 
-    final Invocation command = canvas.invocations.firstWhere((Invocation invocation) {
-      return invocation.memberName == #drawImageNine;
-    });
-    expect(command.positionalArguments[0], equals(image208x142));
-  });
+      final Invocation command = canvas.invocations.firstWhere((Invocation invocation) {
+        return invocation.memberName == #drawImageNine;
+      });
+      expect(command.positionalArguments[0], equals(image208x142));
+    },
+  );
 
   testWidgets('Reports Image painting', (WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
