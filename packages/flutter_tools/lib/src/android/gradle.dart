@@ -300,16 +300,6 @@ class AndroidGradleBuilder implements AndroidBuilder {
           settings: 'androidGradlePluginVersion: $agpVersion',
         ),
       );
-
-      _logger.printStatus(
-        "${_logger.terminal.warningMark} Your app isn't using AndroidX.",
-        emphasis: true,
-      );
-      _logger.printStatus(
-        'To avoid potential build failures, you can quickly migrate your app '
-        'by following the steps on https://docs.flutter.dev/release/breaking-changes/androidx-migration .',
-        indent: 4,
-      );
     }
 
     GradleHandledError? detectedGradleError;
@@ -384,7 +374,10 @@ class AndroidGradleBuilder implements AndroidBuilder {
           case GradleBuildStatus.retry:
             // Use binary exponential backoff before retriggering the build.
             // The expected wait times are: 100ms, 200ms, 400ms, and so on...
-            final int waitTime = min(pow(2, retry).toInt() * 100, kMaxRetryTime.inMicroseconds);
+            final int waitTime = min(
+              pow(2, min(retry, 7)).toInt() * 100,
+              kMaxRetryTime.inMilliseconds,
+            );
             retry += 1;
             _logger.printStatus('Retrying Gradle Build: #$retry, wait time: ${waitTime}ms');
             await Future<void>.delayed(Duration(milliseconds: waitTime));

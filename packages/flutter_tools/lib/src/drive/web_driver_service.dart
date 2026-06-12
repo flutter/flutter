@@ -100,6 +100,7 @@ class WebDriverService extends DriverService {
               webRenderer: debuggingOptions.webRenderer,
               webUseWasm: debuggingOptions.webUseWasm,
             ),
+      platformArgs: platformArgs,
       stayResident: true,
       flutterProject: FlutterProject.current(),
       fileSystem: globals.fs,

@@ -99,8 +99,30 @@ class StandardCapabilities final : public Capabilities {
   bool Supports32BitPrimitiveIndices() const override { return true; }
 
   // |Capabilities|
+  bool SupportsManuallyMippedTextures() const override { return true; }
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override {
     return supports_extended_range_formats_;
+  }
+
+  // |Capabilities|
+  bool SupportsFramebufferRenderMipmap() const override { return true; }
+
+  // |Capabilities|
+  bool SupportsTextureCompression(
+      CompressedTextureFamily family) const override {
+    switch (family) {
+      case CompressedTextureFamily::kBC:
+        return supports_texture_compression_bc_;
+      case CompressedTextureFamily::kETC2:
+        return supports_texture_compression_etc2_;
+      case CompressedTextureFamily::kASTC:
+        return supports_texture_compression_astc_;
+      case CompressedTextureFamily::kASTCHDR:
+        return supports_texture_compression_astc_hdr_;
+    }
+    return false;
   }
 
   // |Capabilities|
@@ -131,7 +153,11 @@ class StandardCapabilities final : public Capabilities {
                        PixelFormat default_glyph_atlas_format,
                        ISize default_maximum_render_pass_attachment_size,
                        size_t minimum_uniform_alignment,
-                       bool needs_partitioned_host_buffer)
+                       bool needs_partitioned_host_buffer,
+                       bool supports_texture_compression_bc,
+                       bool supports_texture_compression_etc2,
+                       bool supports_texture_compression_astc,
+                       bool supports_texture_compression_astc_hdr)
       : supports_offscreen_msaa_(supports_offscreen_msaa),
         supports_ssbo_(supports_ssbo),
         supports_texture_to_texture_blits_(supports_texture_to_texture_blits),
@@ -151,7 +177,12 @@ class StandardCapabilities final : public Capabilities {
         default_glyph_atlas_format_(default_glyph_atlas_format),
         default_maximum_render_pass_attachment_size_(
             default_maximum_render_pass_attachment_size),
-        minimum_uniform_alignment_(minimum_uniform_alignment) {}
+        minimum_uniform_alignment_(minimum_uniform_alignment),
+        supports_texture_compression_bc_(supports_texture_compression_bc),
+        supports_texture_compression_etc2_(supports_texture_compression_etc2),
+        supports_texture_compression_astc_(supports_texture_compression_astc),
+        supports_texture_compression_astc_hdr_(
+            supports_texture_compression_astc_hdr) {}
 
   friend class CapabilitiesBuilder;
 
@@ -173,6 +204,10 @@ class StandardCapabilities final : public Capabilities {
   PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
   ISize default_maximum_render_pass_attachment_size_ = ISize(1, 1);
   size_t minimum_uniform_alignment_ = 256;
+  bool supports_texture_compression_bc_ = false;
+  bool supports_texture_compression_etc2_ = false;
+  bool supports_texture_compression_astc_ = false;
+  bool supports_texture_compression_astc_hdr_ = false;
 
   StandardCapabilities(const StandardCapabilities&) = delete;
 
@@ -275,6 +310,26 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsExtendedRangeFormats(
   return *this;
 }
 
+CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsTextureCompression(
+    CompressedTextureFamily family,
+    bool value) {
+  switch (family) {
+    case CompressedTextureFamily::kBC:
+      supports_texture_compression_bc_ = value;
+      break;
+    case CompressedTextureFamily::kETC2:
+      supports_texture_compression_etc2_ = value;
+      break;
+    case CompressedTextureFamily::kASTC:
+      supports_texture_compression_astc_ = value;
+      break;
+    case CompressedTextureFamily::kASTCHDR:
+      supports_texture_compression_astc_hdr_ = value;
+      break;
+  }
+  return *this;
+}
+
 CapabilitiesBuilder& CapabilitiesBuilder::SetMinimumUniformAlignment(
     size_t value) {
   minimum_uniform_alignment_ = value;
@@ -307,7 +362,11 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       default_glyph_atlas_format_.value_or(PixelFormat::kUnknown),         //
       default_maximum_render_pass_attachment_size_.value_or(ISize{1, 1}),  //
       minimum_uniform_alignment_,                                          //
-      needs_partitioned_host_buffer_                                       //
+      needs_partitioned_host_buffer_,                                      //
+      supports_texture_compression_bc_,                                    //
+      supports_texture_compression_etc2_,                                  //
+      supports_texture_compression_astc_,                                  //
+      supports_texture_compression_astc_hdr_                               //
       ));
 }
 

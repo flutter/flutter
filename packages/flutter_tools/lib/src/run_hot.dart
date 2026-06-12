@@ -1109,67 +1109,33 @@ class HotRunner extends ResidentRunner {
     );
   }
 
-  @visibleForTesting
-  Future<void> evictDirtyAssets() async {
-    final futures = <Future<void>>[];
-    for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS!.assetPathsToEvict.isEmpty && device.devFS!.shaderPathsToEvict.isEmpty) {
-        continue;
-      }
-      final List<FlutterView> views = await device.vmService!.getFlutterViews();
-
-      // If this is the first time we update the assets, make sure to call the setAssetDirectory
-      if (!device.devFS!.hasSetAssetDirectory) {
-        final Uri deviceAssetsDirectoryUri = device.devFS!.baseUri!.resolveUri(
-          globals.fs.path.toUri(getAssetBuildDirectory()),
-        );
-        await Future.wait<void>(
-          views.map<Future<void>>(
-            (FlutterView view) => device.vmService!.setAssetDirectory(
-              assetsDirectory: deviceAssetsDirectoryUri,
-              uiIsolateId: view.uiIsolate!.id,
-              viewId: view.id,
-              windows:
-                  (device.targetPlatform == TargetPlatform.tester && globals.platform.isWindows) ||
-                  device.targetPlatform == TargetPlatform.windows_x64 ||
-                  device.targetPlatform == TargetPlatform.windows_arm64,
-            ),
+  @override
+  Future<void> confirmAssetDirectory(FlutterDevice device, List<FlutterView> views) async {
+    if (!device.devFS!.hasSetAssetDirectory) {
+      final Uri deviceAssetsDirectoryUri = device.devFS!.baseUri!.resolveUri(
+        globals.fs.path.toUri(getAssetBuildDirectory()),
+      );
+      final List<FlutterView> activeViews = views
+          .where((FlutterView view) => view.uiIsolate != null)
+          .toList();
+      await Future.wait<void>(
+        activeViews.map<Future<void>>(
+          (FlutterView view) => device.vmService!.setAssetDirectory(
+            assetsDirectory: deviceAssetsDirectoryUri,
+            uiIsolateId: view.uiIsolate!.id,
+            viewId: view.id,
+            windows:
+                (device.targetPlatform == TargetPlatform.tester && globals.platform.isWindows) ||
+                device.targetPlatform == TargetPlatform.windows_x64 ||
+                device.targetPlatform == TargetPlatform.windows_arm64,
           ),
-        );
-        for (final view in views) {
-          globals.printTrace('Set asset directory in $view.');
-        }
-        device.devFS!.hasSetAssetDirectory = true;
+        ),
+      );
+      for (final view in activeViews) {
+        globals.printTrace('Set asset directory in $view.');
       }
-
-      if (views.first.uiIsolate == null) {
-        globals.printError('Application isolate not found for $device');
-        continue;
-      }
-
-      if (device.devFS!.didUpdateFontManifest) {
-        futures.add(
-          device.vmService!.reloadAssetFonts(
-            isolateId: views.first.uiIsolate!.id!,
-            viewId: views.first.id,
-          ),
-        );
-      }
-
-      for (final String assetPath in device.devFS!.assetPathsToEvict) {
-        futures.add(
-          device.vmService!.flutterEvictAsset(assetPath, isolateId: views.first.uiIsolate!.id!),
-        );
-      }
-      for (final String assetPath in device.devFS!.shaderPathsToEvict) {
-        futures.add(
-          device.vmService!.flutterEvictShader(assetPath, isolateId: views.first.uiIsolate!.id!),
-        );
-      }
-      device.devFS!.assetPathsToEvict.clear();
-      device.devFS!.shaderPathsToEvict.clear();
+      device.devFS!.hasSetAssetDirectory = true;
     }
-    await Future.wait<void>(futures);
   }
 
   @override

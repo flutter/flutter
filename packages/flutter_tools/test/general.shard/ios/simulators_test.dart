@@ -33,6 +33,13 @@ final Platform macosPlatform = FakePlatform(
 
 void main() {
   late Xcode xcode;
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
   late FakePlatform osx;
   late FileSystemUtils fsUtils;
   late MemoryFileSystem fileSystem;
@@ -941,11 +948,8 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
       xcode = Xcode.test(processManager: FakeProcessManager.any());
 
       final fakeProcessManagerBadSimctl = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(
-          command: <String>['sysctl', 'hw.optional.arm64'],
-          stdout: 'hw.optional.arm64: 0',
-        ),
+        kWhichSysctlCommand,
+        kx64CheckCommand,
         const FakeCommand(
           command: <String>['xcrun', 'simctl', 'list', 'devices', 'booted'],
           stderr: 'failed to run',
