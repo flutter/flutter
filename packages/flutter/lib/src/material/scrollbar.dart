@@ -166,11 +166,12 @@ class Scrollbar extends StatelessWidget {
         thickness: resolvedThickness ?? CupertinoScrollbar.defaultThickness,
         thicknessWhileDragging:
             resolvedThicknessWhileDragging ?? CupertinoScrollbar.defaultThicknessWhileDragging,
-        thumbColor: scrollbarTheme.thumbColor?.resolve(states),
+        thumbColor: _resolveThumbColor(scrollbarTheme),
         radius: resolvedRadius ?? CupertinoScrollbar.defaultRadius,
         radiusWhileDragging: resolvedRadius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
         controller: controller,
         notificationPredicate: notificationPredicate,
+        interactive: interactive ?? scrollbarTheme.interactive,
         scrollbarOrientation: scrollbarOrientation,
         child: child,
       );
@@ -186,6 +187,12 @@ class Scrollbar extends StatelessWidget {
       scrollbarOrientation: scrollbarOrientation,
       child: child,
     );
+  }
+
+  /// Resolves [ScrollbarThemeData.thumbColor] as a [WidgetStateProperty]
+  /// for use on the iOS [CupertinoScrollbar] path.
+  static Color? _resolveThumbColor(ScrollbarThemeData scrollbarTheme) {
+    return scrollbarTheme.thumbColor?.resolve(const <WidgetState>{});
   }
 }
 

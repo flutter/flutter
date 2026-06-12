@@ -86,6 +86,7 @@ class CupertinoScrollbar extends RawScrollbar {
     ScrollNotificationPredicate? notificationPredicate,
     super.scrollbarOrientation,
     super.mainAxisMargin = _kScrollbarMainAxisMargin,
+    super.interactive,
   }) : assert(thickness < double.infinity),
        assert(thicknessWhileDragging < double.infinity),
        super(

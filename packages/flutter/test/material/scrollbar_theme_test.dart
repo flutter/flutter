@@ -236,6 +236,7 @@ void main() {
             thickness: WidgetStateProperty.all(12.0),
             thumbColor: WidgetStateProperty.all(Colors.blue),
             radius: const Radius.circular(8.0),
+            interactive: false,
           ),
         ),
         home: ScrollConfiguration(
@@ -260,6 +261,7 @@ void main() {
     expect(scrollbar.thumbColor, Colors.blue);
     expect(scrollbar.radius, const Radius.circular(8.0));
     expect(scrollbar.radiusWhileDragging, const Radius.circular(8.0));
+    expect(scrollbar.interactive, false);
   });
 
   testWidgets('Scrollbar uses values from ScrollbarTheme if exists instead of values from Theme', (
