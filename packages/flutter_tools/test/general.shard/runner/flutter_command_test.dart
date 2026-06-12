@@ -1458,6 +1458,34 @@ name: test
           ProcessManager: FakeProcessManager.empty,
         },
       );
+
+      testUsingContext(
+        'user defines sharing a prefix with a reserved key are allowed',
+        () async {
+          final CommandRunner<void> runner = createTestCommandRunner(
+            _TestRunCommandThatOnlyValidates(),
+          );
+          await runner.run(<String>[
+            'run',
+            '--dart-define=${kAppFlavor}_CUSTOM=foo',
+            '--dart-define=${kAppBuildName}SPACE=bar',
+            '--dart-define=${kAppBuildNumber}_OFFSET=7',
+            '--no-pub',
+            '--no-hot',
+          ]);
+        },
+        overrides: <Type, Generator>{
+          DeviceManager: () =>
+              FakeDeviceManager()..attachedDevices = <Device>[FakeDevice('name', 'id')],
+          FileSystem: () {
+            final fileSystem = MemoryFileSystem.test();
+            fileSystem.file('lib/main.dart').createSync(recursive: true);
+            fileSystem.file('pubspec.yaml').createSync();
+            return fileSystem;
+          },
+          ProcessManager: FakeProcessManager.empty,
+        },
+      );
     });
 
     group('Flutter version', () {

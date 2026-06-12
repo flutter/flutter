@@ -1500,7 +1500,9 @@ abstract class FlutterCommand extends Command<void> {
     if (globals.platform.environment[kAppFlavor] != null) {
       throwToolExit('$kAppFlavor is used by the framework and cannot be set in the environment.');
     }
-    if (dartDefines.any((String define) => define.startsWith(kAppFlavor))) {
+    if (dartDefines.any(
+      (String define) => define == kAppFlavor || define.startsWith('$kAppFlavor='),
+    )) {
       throwToolExit(
         '$kAppFlavor is used by the framework and cannot be '
         'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
@@ -1516,7 +1518,7 @@ abstract class FlutterCommand extends Command<void> {
       if (globals.platform.environment[define] != null) {
         throwToolExit('$define is used by the framework and cannot be set in the environment.');
       }
-      if (dartDefines.any((String d) => d.startsWith(define))) {
+      if (dartDefines.any((String d) => d == define || d.startsWith('$define='))) {
         throwToolExit(
           '$define is used by the framework and cannot be '
           'set using --${FlutterOptions.kDartDefinesOption} or --${FlutterOptions.kDartDefineFromFileOption}',
