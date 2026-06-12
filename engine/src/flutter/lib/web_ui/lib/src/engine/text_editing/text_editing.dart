@@ -200,6 +200,8 @@ class EngineAutofillForm {
 
   final Map<String, String> _lastSentAutofillText = <String, String>{};
 
+  final Map<String, String> _lastFrameworkText = <String, String>{};
+
   final Map<String, FieldItem> items;
 
   /// Identifier for the form.
@@ -320,6 +322,14 @@ class EngineAutofillForm {
         // If the form already has a dormant DOM element, let's use it instead of creating a new one.
         formElement = existingForm.formElement;
         elements.addAll(existingForm.elements);
+        // Carry over the per-field tracking so the reused form remembers the
+        // last framework value and the last value forwarded for each field.
+        // Each text input connection builds a new form instance, so without
+        // this the tracking would reset on every focus change and the form
+        // could not tell a programmatic framework update apart from a browser
+        // autofill.
+        _lastFrameworkText.addAll(existingForm._lastFrameworkText);
+        _lastSentAutofillText.addAll(existingForm._lastSentAutofillText);
       } else {
         formElement = _createFormElementAndFields(focusedElement, focusedAutofill);
         _insertEditingElementInView(formElement!, viewId);
@@ -418,19 +428,33 @@ class EngineAutofillForm {
       final AutofillInfo autofill = items[key]!.autofillInfo;
       // Focused elements are updated directly through `setEditingState`.
       if (key != focusedElementId) {
-        // If the browser autofilled a non-focused field while this form was
-        // dormant, the DOM can have the new text before the framework state
-        // does. Forward that value and leave it in place instead of overwriting
-        // it with stale autofill state.
+        // A non-focused field's DOM value and the framework's stored value can
+        // diverge in two ways. When the browser autofills the field while the
+        // form is dormant, the DOM holds a value the framework has not seen yet,
+        // so it must be forwarded and kept. Otherwise the framework is the source
+        // of truth, either it just changed (a programmatic update) or it is
+        // already in sync. The last framework value per field tells them apart:
+        // an autofill is an unchanged framework value next to a changed DOM value.
         final domEditingState = EditingState.fromDomElement(element);
-        if (domEditingState.text.isNotEmpty && domEditingState.text != autofill.editingState.text) {
+        final String frameworkText = autofill.editingState.text;
+        final String lastFrameworkText =
+            _lastFrameworkText[autofill.uniqueIdentifier] ?? frameworkText;
+        _lastFrameworkText[autofill.uniqueIdentifier] = frameworkText;
+
+        final frameworkUnchanged = frameworkText == lastFrameworkText;
+        if (frameworkUnchanged &&
+            domEditingState.text.isNotEmpty &&
+            domEditingState.text != frameworkText) {
+          // The browser autofilled this field. Forward the new value and keep it
+          // instead of clearing it.
           if (domEditingState.text != _lastSentAutofillText[autofill.uniqueIdentifier]) {
             _sendAutofillEditingState(autofill.uniqueIdentifier, domEditingState);
           }
           continue;
         }
-        // Non-focused elements do not have selection, and applying selection on them may cause them
-        // to gain focus unexpectedly.
+        // The framework wins: it changed (a programmatic update) or is in sync.
+        // Non-focused elements do not have selection, and applying selection on
+        // them may cause them to gain focus unexpectedly.
         autofill.editingState.applyTextToDomElement(element);
       }
     }

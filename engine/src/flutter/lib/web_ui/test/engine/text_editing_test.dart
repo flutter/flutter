@@ -3257,6 +3257,80 @@ Future<void> testMain() async {
   });
 
   group('EngineAutofillForm', () {
+    test('applies a programmatic change to a non-focused field instead of reverting it', () {
+      // A programmatic framework update to a non-focused autofill field must win
+      // over the stale DOM value, and must not be mistaken for a browser
+      // autofill. See the review on https://github.com/flutter/flutter/pull/187459.
+      Map<String, Object?> field(String hint, String id, String text) => <String, Object?>{
+        'inputType': <String, Object?>{
+          'name': 'TextInputType.text',
+          'signed': null,
+          'decimal': null,
+        },
+        'textCapitalization': 'TextCapitalization.none',
+        'autofill': <String, dynamic>{
+          'uniqueIdentifier': id,
+          'hints': <String>[hint],
+          'editingValue': <String, dynamic>{
+            'text': text,
+            'selectionBase': 0,
+            'selectionExtent': 0,
+            'selectionAffinity': 'TextAffinity.downstream',
+            'selectionIsDirectional': false,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+        },
+      };
+
+      final spy = PlatformMessagesSpy();
+      spy.setUp();
+      try {
+        // Form 1: the non-focused password field holds 'pw-v1'.
+        final fields1 = <Map<String, Object?>>[
+          field('username', 'field1', 'user'),
+          field('password', 'field2', 'pw-v1'),
+        ];
+        final focusedMap1 = fields1.first['autofill']! as Map<String, Object?>;
+        final EngineAutofillForm form1 = EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          focusedMap1,
+          fields1,
+        )!;
+        form1.wakeUp(createDomHTMLInputElement(), AutofillInfo.fromFrameworkMessage(focusedMap1));
+        final passwordElement = form1.elements['field2']! as DomHTMLInputElement;
+        expect(passwordElement.value, 'pw-v1');
+        form1.goDormant();
+
+        // The app programmatically changes the password to 'pw-v2'. A new config
+        // arrives as a new form that reuses the dormant one.
+        final fields2 = <Map<String, Object?>>[
+          field('username', 'field1', 'user'),
+          field('password', 'field2', 'pw-v2'),
+        ];
+        final focusedMap2 = fields2.first['autofill']! as Map<String, Object?>;
+        final EngineAutofillForm form2 = EngineAutofillForm.fromFrameworkMessage(
+          kImplicitViewId,
+          focusedMap2,
+          fields2,
+        )!;
+        spy.messages.clear();
+        form2.wakeUp(createDomHTMLInputElement(), AutofillInfo.fromFrameworkMessage(focusedMap2));
+
+        // The DOM must reflect the app's new value, not revert to 'pw-v1', and we
+        // must not forward the stale value as if the browser had autofilled it.
+        final reusedPassword = form2.elements['field2']! as DomHTMLInputElement;
+        expect(reusedPassword.value, 'pw-v2');
+        expect(
+          spy.messages.where((m) => m.methodName == 'TextInputClient.updateEditingStateWithTag'),
+          isEmpty,
+        );
+      } finally {
+        spy.tearDown();
+        clearForms();
+      }
+    });
+
     test('validate multi element form', () {
       final List<Map<String, Object?>> fields = createFieldValues(
         <String>['username', 'password', 'newPassword'],
