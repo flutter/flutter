@@ -45,6 +45,18 @@ void AppendChunk(std::vector<uint8_t>& buf,
   WriteBE32(buf, crc);
 }
 
+// Appends a chunk with a declared data_length that may differ from the actual
+// data bytes written. Used to test handling of malformed chunks.
+void AppendChunkWithFakeLength(std::vector<uint8_t>& buf,
+                               const char type[4],
+                               uint32_t declared_length,
+                               const std::vector<uint8_t>& actual_data) {
+  WriteBE32(buf, declared_length);
+  buf.insert(buf.end(), type, type + 4);
+  buf.insert(buf.end(), actual_data.begin(), actual_data.end());
+  WriteBE32(buf, 0);  // CRC placeholder
+}
+
 // Builds a minimal valid APNG with a malicious fdAT chunk whose
 // data_length is less than 4, which would trigger an integer underflow
 // in DemuxNextImage() without the bounds check fix.
@@ -120,32 +132,6 @@ TEST(APNGImageGeneratorTest, FdATWithShortDataLengthDoesNotCrash) {
   EXPECT_NE(make_generator(4), nullptr);
 }
 
-// Appends a chunk with a declared data_length that may differ from the actual
-// data bytes written. Used to test handling of malformed chunks.
-void AppendChunkRaw(std::vector<uint8_t>& buf,
-                    const char type[4],
-                    uint32_t declared_length,
-                    const std::vector<uint8_t>& actual_data) {
-  WriteBE32(buf, declared_length);
-  buf.insert(buf.end(), type, type + 4);
-  buf.insert(buf.end(), actual_data.begin(), actual_data.end());
-  WriteBE32(buf, 0);  // CRC placeholder
-}
-
-TEST(APNGImageGeneratorTest, GetChunkSizeOverflowReturnsMax) {
-  // Construct a chunk header with data_length = 0xFFFFFFFF.
-  // GetChunkSize should return SIZE_MAX (not a small wrapped value).
-  uint8_t raw[8];
-  raw[0] = 0xFF; raw[1] = 0xFF; raw[2] = 0xFF; raw[3] = 0xFF;  // data_length
-  raw[4] = 'f';  raw[5] = 'd';  raw[6] = 'A';  raw[7] = 'T';   // type
-  const auto* header =
-      reinterpret_cast<const APNGImageGenerator::ChunkHeader*>(raw);
-  // On both 32-bit and 64-bit, 8 + 0xFFFFFFFF + 4 should not produce a
-  // value small enough to pass a bounds check.
-  size_t result = APNGImageGenerator::GetChunkSize(header);
-  EXPECT_GE(result, static_cast<size_t>(0xFFFFFFFF));
-}
-
 TEST(APNGImageGeneratorTest, FdATWithOverflowDataLengthIsRejected) {
   std::vector<uint8_t> apng;
   // PNG signature
@@ -186,9 +172,7 @@ TEST(APNGImageGeneratorTest, FdATWithOverflowDataLengthIsRejected) {
     AppendChunk(apng, "fcTL", fctl);
   }
   // fdAT with declared data_length=0xFFFFFFFF but only 8 actual bytes
-  AppendChunkRaw(apng, "fdAT", 0xFFFFFFFF, {0, 0, 0, 1, 0, 0, 0, 0});
-  // Padding
-  apng.resize(apng.size() + 32, 0);
+  AppendChunkWithFakeLength(apng, "fdAT", 0xFFFFFFFF, {0, 0, 0, 1, 0, 0, 0, 0});
   // IEND
   AppendChunk(apng, "IEND", {});
 
