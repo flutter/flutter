@@ -1996,8 +1996,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
       _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
       _verifyShouldPropagateDevicePointerEventsUnset(shouldPropagateDevicePointerEventsBeforeTest);
-      _verifyInvariants(allowDebugDefaultTargetPlatformOverride: true);
-      _verifyInvariantsAfterTestTearDown = true;
+      if (_verifyInvariantsAfterTestTearDown) {
+        _pendingInvariantVerification = true;
+      } else {
+        _verifyInvariants();
+      }
     }
 
     assert(inTest);
@@ -2007,8 +2010,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   late bool _beforeTestCheckIntrinsicSizes;
 
   bool _verifyInvariantsAfterTestTearDown = false;
+  bool _pendingInvariantVerification = false;
 
-  void _verifyInvariants({bool allowDebugDefaultTargetPlatformOverride = false}) {
+  /// Defers invariant verification until [verifyInvariantsAfterTestTearDown].
+  @protected
+  void deferInvariantsUntilAfterTestTearDown() {
+    _verifyInvariantsAfterTestTearDown = true;
+  }
+
+  void _verifyInvariants() {
     assert(
       debugAssertNoTransientCallbacks(
         'An animation is still running even after the widget tree was disposed.',
@@ -2024,9 +2034,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       debugAssertAllFoundationVarsUnset(
         'The value of a foundation debug variable was changed by the test.',
         debugPrintOverride: debugPrintOverride,
-        debugDefaultTargetPlatformOverrideValue: allowDebugDefaultTargetPlatformOverride
-            ? debugDefaultTargetPlatformOverride
-            : null,
       ),
     );
     assert(
@@ -2066,16 +2073,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Called after user-registered `addTearDown` callbacks have run.
   @protected
   void verifyInvariantsAfterTestTearDown() {
-    if (!_verifyInvariantsAfterTestTearDown) {
+    final bool shouldVerifyInvariants = _pendingInvariantVerification;
+    _verifyInvariantsAfterTestTearDown = false;
+    _pendingInvariantVerification = false;
+    if (!shouldVerifyInvariants) {
       return;
     }
-    _verifyInvariantsAfterTestTearDown = false;
-    assert(
-      debugAssertAllFoundationVarsUnset(
-        'The value of a foundation debug variable was changed by the test.',
-        debugPrintOverride: debugPrintOverride,
-      ),
-    );
+    _verifyInvariants();
   }
 
   void _verifyAutoUpdateGoldensUnset(bool valueBeforeTest) {
@@ -2567,10 +2571,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  void _verifyInvariants({bool allowDebugDefaultTargetPlatformOverride = false}) {
-    super._verifyInvariants(
-      allowDebugDefaultTargetPlatformOverride: allowDebugDefaultTargetPlatformOverride,
-    );
+  void _verifyInvariants() {
+    super._verifyInvariants();
 
     assert(inTest);
 

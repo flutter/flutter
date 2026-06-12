@@ -180,8 +180,10 @@ void testWidgets(
         if (semanticsEnabled) {
           semanticsHandle = tester.ensureSemantics();
         }
+        // Invariant verification must run after user addTearDown callbacks and before postTest.
+        // ignore: invalid_use_of_protected_member
+        binding.deferInvariantsUntilAfterTestTearDown();
         test_package.addTearDown(binding.postTest);
-        // This internal hook must run after user addTearDown callbacks and before postTest.
         // ignore: invalid_use_of_protected_member
         test_package.addTearDown(binding.verifyInvariantsAfterTestTearDown);
         return binding.runTest(
