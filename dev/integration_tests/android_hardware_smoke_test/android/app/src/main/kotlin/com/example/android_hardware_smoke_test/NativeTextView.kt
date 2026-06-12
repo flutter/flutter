@@ -17,7 +17,7 @@ class NativeTextViewFactory : PlatformViewFactory(StandardMessageCodec.INSTANCE)
         viewId: Int,
         args: Any?
     ): PlatformView {
-        val creationParams = args as Map<String, Any?>?
+        val creationParams = args as? Map<String, Any?>
         return NativeTextView(context, viewId, creationParams)
     }
 }

@@ -95,9 +95,16 @@ class FlutterActivityTest {
 
                                     // Crop the full-screen screenshot to the exact widget bounds.
                                     val cropped = Bitmap.createBitmap(screenshot, x, y, width, height)
+                                    if (cropped != screenshot) {
+                                        screenshot.recycle()
+                                    }
 
                                     val stream = ByteArrayOutputStream()
-                                    cropped.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                                    try {
+                                        cropped.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                                    } finally {
+                                        cropped.recycle()
+                                    }
                                     val croppedBytes = stream.toByteArray()
                                     val base64Image = Base64.encodeToString(croppedBytes, Base64.NO_WRAP)
 
