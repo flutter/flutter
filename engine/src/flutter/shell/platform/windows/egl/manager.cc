@@ -133,8 +133,11 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
   };
 
   if (luid) {
-    FML_LOG(INFO) << "Requesting EGL display for GPU with LUID "
-                  << luid->HighPart << ":" << luid->LowPart << ".";
+    FML_LOG(ERROR) << "Requesting EGL display for GPU with LUID "
+                   << luid->HighPart << ":" << luid->LowPart << ".";
+  } else {
+    FML_LOG(ERROR) << "No GPU LUID requested; using ANGLE's default adapter "
+                      "selection.";
   }
 
   std::vector<const EGLint*> display_attributes_configs;
@@ -186,11 +189,11 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference) {
     }
 
     if (luid && !is_luid_config) {
-      FML_LOG(WARNING) << "A GPU with LUID " << luid->HighPart << ":"
-                       << luid->LowPart
-                       << " was requested, but the LUID-specific EGL display "
-                          "could not be initialized; falling back to ANGLE's "
-                          "default adapter selection.";
+      FML_LOG(ERROR) << "A GPU with LUID " << luid->HighPart << ":"
+                     << luid->LowPart
+                     << " was requested, but the LUID-specific EGL display "
+                        "could not be initialized; falling back to ANGLE's "
+                        "default adapter selection.";
     }
 
     return true;
