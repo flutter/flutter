@@ -1922,6 +1922,70 @@ void main() {
       clear();
     });
 
+    testWidgets('Directional focus history is cleared on tap', (WidgetTester tester) async {
+      var focus = List<bool?>.generate(3, (int _) => null);
+      final nodes = List<FocusNode>.generate(
+        3,
+        (int index) => FocusNode(debugLabel: 'Node $index'),
+      );
+      addTearDown(() {
+        for (final node in nodes) {
+          node.dispose();
+        }
+      });
+
+      Widget makeFocus(int index) {
+        return Focus(
+          debugLabel: '[$index]',
+          focusNode: nodes[index],
+          onFocusChange: (bool isFocused) => focus[index] = isFocused,
+          child: const SizedBox(width: 100, height: 100),
+        );
+      }
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusTraversalGroup(
+            policy: WidgetOrderTraversalPolicy(),
+            child: FocusScope(
+              debugLabel: 'Scope',
+              child: Column(children: <Widget>[makeFocus(0), makeFocus(1), makeFocus(2)]),
+            ),
+          ),
+        ),
+      );
+
+      void clear() {
+        focus = List<bool?>.generate(focus.length, (int _) => null);
+      }
+
+      final FocusNode scope = nodes[0].enclosingScope!;
+      nodes[0].requestFocus();
+      await tester.pump();
+      clear();
+
+      // Move down twice.
+      expect(scope.focusInDirection(TraversalDirection.down), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[false, true, null]));
+      clear();
+
+      expect(scope.focusInDirection(TraversalDirection.down), isTrue);
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[null, false, true]));
+      clear();
+
+      // Shift focus externally back to [0].
+      nodes[0].requestFocus();
+      await tester.pump();
+      expect(focus, orderedEquals(<bool?>[true, null, false]));
+      clear();
+
+      // Pressing UP from [0] should return false (at top edge), NOT pop history to [1].
+      expect(scope.focusInDirection(TraversalDirection.up), isFalse);
+    });
+
     testWidgets('Directional prefers the closest node even on irregular grids', (
       WidgetTester tester,
     ) async {
@@ -3014,169 +3078,165 @@ void main() {
       variant: KeySimulatorTransitModeVariant.all(),
     );
 
-    testWidgets(
-      'Arrow focus traversal actions can be re-enabled for text fields.',
-      (WidgetTester tester) async {
-        final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
-        final GlobalKey upperRightKey = GlobalKey(debugLabel: 'upperRightKey');
-        final GlobalKey lowerLeftKey = GlobalKey(debugLabel: 'lowerLeftKey');
-        final GlobalKey lowerRightKey = GlobalKey(debugLabel: 'lowerRightKey');
+    testWidgets('Arrow focus traversal actions can be re-enabled for text fields.', (
+      WidgetTester tester,
+    ) async {
+      final GlobalKey upperLeftKey = GlobalKey(debugLabel: 'upperLeftKey');
+      final GlobalKey upperRightKey = GlobalKey(debugLabel: 'upperRightKey');
+      final GlobalKey lowerLeftKey = GlobalKey(debugLabel: 'lowerLeftKey');
+      final GlobalKey lowerRightKey = GlobalKey(debugLabel: 'lowerRightKey');
 
-        final controller1 = TextEditingController();
-        addTearDown(controller1.dispose);
-        final controller2 = TextEditingController();
-        addTearDown(controller2.dispose);
-        final controller3 = TextEditingController();
-        addTearDown(controller3.dispose);
-        final controller4 = TextEditingController();
-        addTearDown(controller4.dispose);
+      final controller1 = TextEditingController();
+      addTearDown(controller1.dispose);
+      final controller2 = TextEditingController();
+      addTearDown(controller2.dispose);
+      final controller3 = TextEditingController();
+      addTearDown(controller3.dispose);
+      final controller4 = TextEditingController();
+      addTearDown(controller4.dispose);
 
-        final focusNodeUpperLeft = FocusNode(debugLabel: 'upperLeft');
-        addTearDown(focusNodeUpperLeft.dispose);
-        final focusNodeUpperRight = FocusNode(debugLabel: 'upperRight');
-        addTearDown(focusNodeUpperRight.dispose);
-        final focusNodeLowerLeft = FocusNode(debugLabel: 'lowerLeft');
-        addTearDown(focusNodeLowerLeft.dispose);
-        final focusNodeLowerRight = FocusNode(debugLabel: 'lowerRight');
-        addTearDown(focusNodeLowerRight.dispose);
+      final focusNodeUpperLeft = FocusNode(debugLabel: 'upperLeft');
+      addTearDown(focusNodeUpperLeft.dispose);
+      final focusNodeUpperRight = FocusNode(debugLabel: 'upperRight');
+      addTearDown(focusNodeUpperRight.dispose);
+      final focusNodeLowerLeft = FocusNode(debugLabel: 'lowerLeft');
+      addTearDown(focusNodeLowerLeft.dispose);
+      final focusNodeLowerRight = FocusNode(debugLabel: 'lowerRight');
+      addTearDown(focusNodeLowerRight.dispose);
 
-        Widget generateTestWidgets(bool ignoreTextFields) {
-          final shortcuts = <ShortcutActivator, Intent>{
-            const SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(
-              TraversalDirection.left,
-              ignoreTextFields: ignoreTextFields,
-            ),
-            const SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(
-              TraversalDirection.right,
-              ignoreTextFields: ignoreTextFields,
-            ),
-            const SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(
-              TraversalDirection.down,
-              ignoreTextFields: ignoreTextFields,
-            ),
-            const SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(
-              TraversalDirection.up,
-              ignoreTextFields: ignoreTextFields,
-            ),
-          };
+      Widget generateTestWidgets(bool ignoreTextFields) {
+        final shortcuts = <ShortcutActivator, Intent>{
+          const SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(
+            TraversalDirection.left,
+            ignoreTextFields: ignoreTextFields,
+          ),
+          const SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(
+            TraversalDirection.right,
+            ignoreTextFields: ignoreTextFields,
+          ),
+          const SingleActivator(LogicalKeyboardKey.arrowDown): DirectionalFocusIntent(
+            TraversalDirection.down,
+            ignoreTextFields: ignoreTextFields,
+          ),
+          const SingleActivator(LogicalKeyboardKey.arrowUp): DirectionalFocusIntent(
+            TraversalDirection.up,
+            ignoreTextFields: ignoreTextFields,
+          ),
+        };
 
-          return TestWidgetsApp(
-            home: Shortcuts(
-              shortcuts: shortcuts,
-              child: FocusScope(
-                debugLabel: 'scope',
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        SizedBox.square(
-                          dimension: 100.0,
-                          child: EditableText(
-                            autofocus: true,
-                            key: upperLeftKey,
-                            controller: controller1,
-                            focusNode: focusNodeUpperLeft,
-                            cursorColor: const Color(0xffffffff),
-                            backgroundCursorColor: const Color(0xff808080),
-                            style: const TextStyle(),
-                          ),
+        return TestWidgetsApp(
+          home: Shortcuts(
+            shortcuts: shortcuts,
+            child: FocusScope(
+              debugLabel: 'scope',
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      SizedBox.square(
+                        dimension: 100.0,
+                        child: EditableText(
+                          autofocus: true,
+                          key: upperLeftKey,
+                          controller: controller1,
+                          focusNode: focusNodeUpperLeft,
+                          cursorColor: const Color(0xffffffff),
+                          backgroundCursorColor: const Color(0xff808080),
+                          style: const TextStyle(),
                         ),
-                        SizedBox.square(
-                          dimension: 100.0,
-                          child: EditableText(
-                            key: upperRightKey,
-                            controller: controller2,
-                            focusNode: focusNodeUpperRight,
-                            cursorColor: const Color(0xffffffff),
-                            backgroundCursorColor: const Color(0xff808080),
-                            style: const TextStyle(),
-                          ),
+                      ),
+                      SizedBox.square(
+                        dimension: 100.0,
+                        child: EditableText(
+                          key: upperRightKey,
+                          controller: controller2,
+                          focusNode: focusNodeUpperRight,
+                          cursorColor: const Color(0xffffffff),
+                          backgroundCursorColor: const Color(0xff808080),
+                          style: const TextStyle(),
                         ),
-                      ],
-                    ),
-                    Row(
-                      children: <Widget>[
-                        SizedBox.square(
-                          dimension: 100.0,
-                          child: EditableText(
-                            key: lowerLeftKey,
-                            controller: controller3,
-                            focusNode: focusNodeLowerLeft,
-                            cursorColor: const Color(0xffffffff),
-                            backgroundCursorColor: const Color(0xff808080),
-                            style: const TextStyle(),
-                          ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      SizedBox.square(
+                        dimension: 100.0,
+                        child: EditableText(
+                          key: lowerLeftKey,
+                          controller: controller3,
+                          focusNode: focusNodeLowerLeft,
+                          cursorColor: const Color(0xffffffff),
+                          backgroundCursorColor: const Color(0xff808080),
+                          style: const TextStyle(),
                         ),
-                        SizedBox.square(
-                          dimension: 100.0,
-                          child: EditableText(
-                            key: lowerRightKey,
-                            controller: controller4,
-                            focusNode: focusNodeLowerRight,
-                            cursorColor: const Color(0xffffffff),
-                            backgroundCursorColor: const Color(0xff808080),
-                            style: const TextStyle(),
-                          ),
+                      ),
+                      SizedBox.square(
+                        dimension: 100.0,
+                        child: EditableText(
+                          key: lowerRightKey,
+                          controller: controller4,
+                          focusNode: focusNodeLowerRight,
+                          cursorColor: const Color(0xffffffff),
+                          backgroundCursorColor: const Color(0xff808080),
+                          style: const TextStyle(),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          );
-        }
+          ),
+        );
+      }
 
-        await tester.pumpWidget(generateTestWidgets(false));
+      await tester.pumpWidget(generateTestWidgets(false));
 
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-        expect(focusNodeUpperRight.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-        expect(focusNodeLowerRight.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-        expect(focusNodeLowerLeft.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      expect(focusNodeUpperRight.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusNodeLowerRight.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      expect(focusNodeLowerLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
 
-        await tester.pumpWidget(generateTestWidgets(true));
+      await tester.pumpWidget(generateTestWidgets(true));
 
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-        expect(focusNodeUpperRight.hasPrimaryFocus, isFalse);
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-        expect(focusNodeLowerRight.hasPrimaryFocus, isFalse);
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-        expect(focusNodeLowerLeft.hasPrimaryFocus, isFalse);
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-        expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
-      },
-      variant: KeySimulatorTransitModeVariant.all(),
-    );
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      expect(focusNodeUpperRight.hasPrimaryFocus, isFalse);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      expect(focusNodeLowerRight.hasPrimaryFocus, isFalse);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+      expect(focusNodeLowerLeft.hasPrimaryFocus, isFalse);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      expect(focusNodeUpperLeft.hasPrimaryFocus, isTrue);
+    }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets(
-      'Focus traversal does not break when no focusable is available on a WidgetsApp',
-      (WidgetTester tester) async {
-        final events = <Object>[];
+    testWidgets('Focus traversal does not break when no focusable is available on a WidgetsApp', (
+      WidgetTester tester,
+    ) async {
+      final events = <Object>[];
 
-        await tester.pumpWidget(TestWidgetsApp(home: Container()));
+      await tester.pumpWidget(TestWidgetsApp(home: Container()));
 
-        HardwareKeyboard.instance.addHandler((KeyEvent event) {
-          events.add(event);
-          return true;
-        });
+      HardwareKeyboard.instance.addHandler((KeyEvent event) {
+        events.add(event);
+        return true;
+      });
 
-        await tester.idle();
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-        await tester.idle();
+      await tester.idle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.idle();
 
-        expect(events.length, 2);
-      },
-      variant: KeySimulatorTransitModeVariant.all(),
-    );
+      expect(events.length, 2);
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Focus traversal does not throw when no focusable is available in a group', (
       WidgetTester tester,
@@ -3192,26 +3252,24 @@ void main() {
       expect(primaryFocus, equals(initialFocus));
     });
 
-    testWidgets(
-      'Focus traversal does not break when no focusable is available on a WidgetsApp',
-      (WidgetTester tester) async {
-        final events = <KeyEvent>[];
+    testWidgets('Focus traversal does not break when no focusable is available on a WidgetsApp', (
+      WidgetTester tester,
+    ) async {
+      final events = <KeyEvent>[];
 
-        await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
+      await tester.pumpWidget(const TestWidgetsApp(home: Placeholder()));
 
-        HardwareKeyboard.instance.addHandler((KeyEvent event) {
-          events.add(event);
-          return true;
-        });
+      HardwareKeyboard.instance.addHandler((KeyEvent event) {
+        events.add(event);
+        return true;
+      });
 
-        await tester.idle();
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-        await tester.idle();
+      await tester.idle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await tester.idle();
 
-        expect(events.length, 2);
-      },
-      variant: KeySimulatorTransitModeVariant.all(),
-    );
+      expect(events.length, 2);
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Custom requestFocusCallback gets called on focusInDirection up/down/left/right.', (
       WidgetTester tester,
