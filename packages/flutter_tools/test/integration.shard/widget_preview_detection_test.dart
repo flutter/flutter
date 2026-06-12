@@ -77,7 +77,7 @@ Widget myNewPreview() => Container();
       );
       await reloadSub.cancel();
 
-      await waitForPreviews(dtdConnection, (FlutterWidgetPreviews p) => p.previews.isNotEmpty);
+      await waitForPreviews(dtdConnection);
     });
 
     testUsingContext('Removed previews are detected (LSP)', () async {
@@ -119,7 +119,7 @@ Widget myRemovePreview() => Container();
       );
       await initReloadSub.cancel();
 
-      await waitForPreviews(dtdConnection, (FlutterWidgetPreviews p) => p.previews.isNotEmpty);
+      await waitForPreviews(dtdConnection);
 
       removeFile.deleteSync();
 
@@ -136,7 +136,16 @@ Widget myRemovePreview() => Container();
       );
       await deleteReloadSub.cancel();
 
-      await waitForPreviews(dtdConnection, (FlutterWidgetPreviews p) => p.previews.isEmpty);
+      // We can safely check for the empty state immediately here because we
+      // already waited for the reload trigger above. The tool only triggers
+      // the reload after it has successfully processed the deletion, waited
+      // for the Analysis Server, and verified the empty state in DTD.
+      // This guarantees that DTD is in its final empty state and won't
+      // succeed prematurely.
+      await waitForPreviews(
+        dtdConnection,
+        predicate: (FlutterWidgetPreviews p) => p.previews.isEmpty,
+      );
     });
 
     testUsingContext('Modified previews are detected (LSP)', () async {
@@ -178,7 +187,7 @@ Widget myModifyPreview() => Container();
       );
       await initReloadSub.cancel();
 
-      await waitForPreviews(dtdConnection, (FlutterWidgetPreviews p) => p.previews.isNotEmpty);
+      await waitForPreviews(dtdConnection);
 
       modifyFile.writeAsStringSync('''
 import 'package:flutter/material.dart';
@@ -203,7 +212,7 @@ Widget myModifyPreview() => Container();
 
       await waitForPreviews(
         dtdConnection,
-        (FlutterWidgetPreviews p) =>
+        predicate: (FlutterWidgetPreviews p) =>
             p.previews.isNotEmpty && p.previews.first.previewAnnotation.contains("'Updated'"),
       );
     });
@@ -258,10 +267,7 @@ Widget myPartPreview() => Container();
       );
       await reloadSub.cancel();
 
-      final FlutterWidgetPreviews previews = await waitForPreviews(
-        dtdConnection,
-        (FlutterWidgetPreviews p) => p.previews.isNotEmpty,
-      );
+      final FlutterWidgetPreviews previews = await waitForPreviews(dtdConnection);
 
       final FlutterWidgetPreviewDetails preview = previews.previews.first;
       if (preview.functionName != 'myPartPreview') {
