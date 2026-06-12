@@ -406,6 +406,21 @@ void main() async {
     expect(gpu.PixelFormat.astc8x8LDR.blockWidth, 8);
     expect(gpu.PixelFormat.astc8x8LDR.blockHeight, 8);
     expect(gpu.PixelFormat.astc8x8LDR.bytesPerBlock, 16);
+
+    // All ASTC LDR variants map to the astc family.
+    expect(gpu.PixelFormat.astc4x4LDRSRGB.compressionFamily, gpu.TextureCompressionFamily.astc);
+    expect(gpu.PixelFormat.astc8x8LDR.compressionFamily, gpu.TextureCompressionFamily.astc);
+    expect(gpu.PixelFormat.astc8x8LDRSRGB.compressionFamily, gpu.TextureCompressionFamily.astc);
+
+    // ASTC HDR shares geometry with ASTC LDR but is its own family.
+    expect(gpu.PixelFormat.astc4x4HDR.blockWidth, 4);
+    expect(gpu.PixelFormat.astc4x4HDR.blockHeight, 4);
+    expect(gpu.PixelFormat.astc4x4HDR.bytesPerBlock, 16);
+    expect(gpu.PixelFormat.astc4x4HDR.compressionFamily, gpu.TextureCompressionFamily.astcHdr);
+    expect(gpu.PixelFormat.astc8x8HDR.blockWidth, 8);
+    expect(gpu.PixelFormat.astc8x8HDR.blockHeight, 8);
+    expect(gpu.PixelFormat.astc8x8HDR.bytesPerBlock, 16);
+    expect(gpu.PixelFormat.astc8x8HDR.compressionFamily, gpu.TextureCompressionFamily.astcHdr);
   });
 
   test('GpuContext.supportsTextureCompression returns a bool per family', () async {
@@ -417,6 +432,10 @@ void main() async {
     );
     expect(
       gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.astc),
+      isA<bool>(),
+    );
+    expect(
+      gpu.gpuContext.supportsTextureCompression(gpu.TextureCompressionFamily.astcHdr),
       isA<bool>(),
     );
   }, skip: !(impellerEnabled && flutterGpuEnabled));
