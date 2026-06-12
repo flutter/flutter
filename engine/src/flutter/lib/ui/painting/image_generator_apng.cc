@@ -332,15 +332,21 @@ bool APNGImageGenerator::IsValidChunkHeader(const void* buffer,
     return false;
   }
 
-  // Ensure that the buffer has enough space for the chunk data.  Do not use
-  // the chunk data length in pointer arithmetic until it is known to be valid.
+  // Ensure that the buffer has enough space for the chunk header before using
+  // any fields in the header.
   size_t buffer_bytes_remaining = size - (chunk_ptr - buffer_ptr);
-  if (chunk->get_data_length() > buffer_bytes_remaining) {
+  if (buffer_bytes_remaining < sizeof(ChunkHeader)) {
     return false;
   }
-  // Ensure that the buffer also has enough space for the chunk header and CRC.
-  if (buffer_bytes_remaining - chunk->get_data_length() <
-      sizeof(ChunkHeader) + kChunkCrcSize) {
+  // Ensure that the buffer has enough space for the chunk data and CRC.
+  // Do not use the chunk data length in pointer arithmetic until it is known to
+  // be valid.
+  size_t data_length = chunk->get_data_length();
+  if (buffer_bytes_remaining - sizeof(ChunkHeader) < data_length) {
+    return false;
+  }
+  if (buffer_bytes_remaining - sizeof(ChunkHeader) - data_length <
+      kChunkCrcSize) {
     return false;
   }
 
