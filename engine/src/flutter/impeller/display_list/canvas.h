@@ -14,6 +14,7 @@
 
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/geometry/dl_path.h"
+#include "fml/macros.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
@@ -115,6 +116,11 @@ class LazyRenderingConfig {
   std::unique_ptr<EntityPassTarget> entity_pass_target_;
   std::unique_ptr<InlinePassContext> inline_pass_context_;
 };
+
+namespace testing {
+FML_TEST_CLASS(AiksTest,
+               SaveLayerUsesRoundedUpRenderTargetButLogicalRestoreSize);
+}  // namespace testing
 
 class Canvas {
  public:
@@ -285,6 +291,11 @@ class Canvas {
   static bool IsCompatibleWithSDFRendering(const Paint& paint);
 
  private:
+  FML_FRIEND_TEST(testing::AiksTest,
+                  SaveLayerUsesRoundedUpRenderTargetButLogicalRestoreSize);
+
+  RenderPass& GetCurrentRenderPass() const;
+
   class BlurShape {
    public:
     virtual ~BlurShape() = default;
@@ -426,8 +437,6 @@ class Canvas {
       const std::shared_ptr<TextContents>& text_contents,
       Entity& entity,
       const Paint& paint);
-
-  RenderPass& GetCurrentRenderPass() const;
 
   Canvas(const Canvas&) = delete;
 

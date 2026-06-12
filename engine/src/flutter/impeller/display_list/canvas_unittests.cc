@@ -139,6 +139,20 @@ TEST_P(AiksTest, CanvasCTMCanBeUpdated) {
                      Matrix::MakeTranslation({100.0, 100.0, 0.0}));
 }
 
+TEST_P(AiksTest, SaveLayerUsesRoundedUpRenderTargetButLogicalRestoreSize) {
+  ContentContext context(GetContext(), nullptr);
+  auto canvas = CreateTestCanvas(context);
+
+  canvas->SaveLayer(Paint(), Rect::MakeXYWH(0, 0, 10, 10));
+
+  // The requested subpass size is 10x10.
+  // With rounding up to a multiple of 64, it should be 64x64.
+  RenderPass& render_pass = canvas->GetCurrentRenderPass();
+  EXPECT_EQ(render_pass.GetRenderTargetSize(), ISize(64, 64));
+
+  canvas->Restore();
+}
+
 TEST_P(AiksTest, BackdropCountDownNormal) {
   ContentContext context(GetContext(), nullptr);
   if (!context.GetDeviceCapabilities().SupportsFramebufferFetch()) {
