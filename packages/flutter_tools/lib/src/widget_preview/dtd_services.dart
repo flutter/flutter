@@ -170,8 +170,9 @@ class WidgetPreviewDtdServices {
 
   Future<FlutterWidgetPreviews> getFlutterWidgetPreviews() async {
     await _waitForLspService();
+    const maxAttempts = 50;
     var attempts = 0;
-    while (attempts < 5) {
+    while (attempts < maxAttempts) {
       try {
         final DTDResponse result = await _dtd!.call(
           'Lsp',
@@ -179,7 +180,7 @@ class WidgetPreviewDtdServices {
         );
         return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
       } on RpcException catch (e) {
-        if (e.code == -32601 && attempts < 4) {
+        if (e.code == -32601 && attempts < maxAttempts - 1) {
           // Method not found
           attempts++;
           await Future<void>.delayed(const Duration(milliseconds: 200));
@@ -193,8 +194,9 @@ class WidgetPreviewDtdServices {
 
   Future<FlutterWidgetPreviews> getFlutterWidgetPreviewsForFile({required String filePath}) async {
     await _waitForLspService();
+    const maxAttempts = 50;
     var attempts = 0;
-    while (attempts < 5) {
+    while (attempts < maxAttempts) {
       try {
         final DTDResponse result = await _dtd!.call(
           'Lsp',
@@ -203,7 +205,7 @@ class WidgetPreviewDtdServices {
         );
         return FlutterWidgetPreviews.fromJson(result.result['result']! as Map<String, Object?>);
       } on RpcException catch (e) {
-        if (e.code == -32601 && attempts < 4) {
+        if (e.code == -32601 && attempts < maxAttempts - 1) {
           // Method not found
           attempts++;
           await Future<void>.delayed(const Duration(milliseconds: 200));
