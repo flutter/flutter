@@ -30,6 +30,7 @@ final class AssetTransformer {
        _buildMode = buildMode;
 
   static const buildModeEnvVar = 'FLUTTER_BUILD_MODE';
+  static const depfileEnvVar = 'FLUTTER_ASSET_TRANSFORMER_DEPFILE';
 
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
@@ -119,14 +120,15 @@ final class AssetTransformer {
     required String workingDirectory,
     required Logger logger,
   }) async {
-    final Directory depfileDirectory = _fileSystem.systemTempDirectory.createTempSync();
+    final Directory depfileDirectory = _fileSystem.systemTempDirectory.createTempSync(
+      'flutter_tools_asset_transformer_depfile.',
+    );
     try {
       final File depfile = depfileDirectory.childFile('depfile');
 
       final transformerArguments = <String>[
         '--input=${asset.absolute.path}',
         '--output=${output.absolute.path}',
-        '--depfile=${depfile.absolute.path}',
         ...transformer.args,
       ];
 
@@ -146,7 +148,10 @@ final class AssetTransformer {
       final ProcessResult result = await _processManager.run(
         command,
         workingDirectory: workingDirectory,
-        environment: <String, String>{AssetTransformer.buildModeEnvVar: _buildMode.cliName},
+        environment: <String, String>{
+          AssetTransformer.buildModeEnvVar: _buildMode.cliName,
+          AssetTransformer.depfileEnvVar: depfile.absolute.path,
+        },
       );
       final stdout = result.stdout as String;
       final stderr = result.stderr as String;

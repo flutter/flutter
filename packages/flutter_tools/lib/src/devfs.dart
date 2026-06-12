@@ -721,7 +721,7 @@ class DevFS {
     required Set<String> assetPathsToEvict,
     required Set<String> shaderPathsToEvict,
     required bool bundleFirstUpload,
-    required List<Uri> invalidatedFiles,
+    List<Uri> invalidatedFiles = const <Uri>[],
     bool syncAllAssetsOnFirstUpload = false,
     void Function()? onFontManifestUpdated,
   }) async {

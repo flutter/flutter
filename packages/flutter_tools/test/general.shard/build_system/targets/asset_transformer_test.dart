@@ -34,7 +34,6 @@ void main() {
           'my_copy_transformer',
           '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
           '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
-          RegExp(r'--depfile=.*'),
           '-f',
           '--my_option',
           'my_option_value',
@@ -44,7 +43,6 @@ void main() {
               (ArgParser()
                     ..addOption('input')
                     ..addOption('output')
-                    ..addOption('depfile')
                     ..addFlag('foo', abbr: 'f')
                     ..addOption('my_option'))
                   .parse(args);
@@ -102,14 +100,12 @@ void main() {
             'my_copy_transformer',
             '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
             '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
-            RegExp(r'--depfile=.*'),
           ],
           onRun: (List<String> args) {
             final ArgResults parsedArgs =
                 (ArgParser()
                       ..addOption('input')
-                      ..addOption('output')
-                      ..addOption('depfile'))
+                      ..addOption('output'))
                     .parse(args);
             fileSystem.file(parsedArgs['input']).copySync(parsedArgs['output'] as String);
           },
@@ -144,7 +140,7 @@ void main() {
         matches(
           'Transformer process terminated with non-zero exit code: 1\n'
           'Transformer package: my_copy_transformer\n'
-          'Full command: $dartBinaryPath run my_copy_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt --depfile=/.tmp_rand0/rand[0-9]+/depfile\n'
+          'Full command: $dartBinaryPath run my_copy_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt\n'
           'stdout:\n'
           'Beginning transformation\n'
           'stderr:\n'
@@ -177,7 +173,6 @@ void main() {
             'my_transformer',
             '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
             '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
-            RegExp(r'--depfile=.*'),
           ],
           onRun: (_) {
             // Do nothing.
@@ -211,7 +206,7 @@ void main() {
           'Asset transformer my_transformer did not produce an output file.\n'
           'Input file provided to transformer: "/.tmp_rand0/rand0/asset.txt-transformOutput0.txt"\n'
           'Expected output file at: "/.tmp_rand0/rand0/asset.txt-transformOutput1.txt"\n'
-          'Full command: $dartBinaryPath run my_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt --depfile=/.tmp_rand0/rand[0-9]+/depfile\n'
+          'Full command: $dartBinaryPath run my_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt\n'
           'stdout:\n'
           '\n'
           'stderr:\n'
@@ -244,14 +239,12 @@ void main() {
           'my_lowercase_transformer',
           '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
           '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
-          RegExp(r'--depfile=.*'),
         ],
         onRun: (List<String> args) {
           final ArgResults parsedArgs =
               (ArgParser()
                     ..addOption('input')
-                    ..addOption('output')
-                    ..addOption('depfile'))
+                    ..addOption('output'))
                   .parse(args);
 
           final String inputFileContents = fileSystem.file(parsedArgs['input']).readAsStringSync();
@@ -267,14 +260,12 @@ void main() {
           'my_distance_from_ascii_a_transformer',
           '--input=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
           '--output=/.tmp_rand0/rand0/asset.txt-transformOutput2.txt',
-          RegExp(r'--depfile=.*'),
         ],
         onRun: (List<String> args) {
           final ArgResults parsedArgs =
               (ArgParser()
                     ..addOption('input')
-                    ..addOption('output')
-                    ..addOption('depfile'))
+                    ..addOption('output'))
                   .parse(args);
 
           final String inputFileContents = fileSystem.file(parsedArgs['input']).readAsStringSync();
@@ -342,14 +333,12 @@ void main() {
             'my_lowercase_transformer',
             '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
             '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
-            RegExp(r'--depfile=.*'),
           ],
           onRun: (List<String> args) {
             final ArgResults parsedArgs =
                 (ArgParser()
                       ..addOption('input')
-                      ..addOption('output')
-                      ..addOption('depfile'))
+                      ..addOption('output'))
                     .parse(args);
 
             final String inputFileContents = fileSystem
@@ -367,13 +356,16 @@ void main() {
             'my_distance_from_ascii_a_transformer',
             '--input=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
             '--output=/.tmp_rand0/rand0/asset.txt-transformOutput2.txt',
-            RegExp(r'--depfile=.*'),
           ],
           onRun: (List<String> args) {
             // Do nothing.
           },
           stderr: 'Transformation failed, but I forgot to exit with a non-zero code.',
-          environment: const <String, String>{'FLUTTER_BUILD_MODE': 'debug'},
+          environment: const <String, String>{
+            'FLUTTER_BUILD_MODE': 'debug',
+            'FLUTTER_ASSET_TRANSFORMER_DEPFILE':
+                '/.tmp_rand0/flutter_tools_asset_transformer_depfile.rand0/depfile',
+          },
         ),
       ]);
 
@@ -405,7 +397,7 @@ void main() {
           'Asset transformer my_distance_from_ascii_a_transformer did not produce an output file.\n'
           'Input file provided to transformer: "/.tmp_rand0/rand0/asset.txt-transformOutput1.txt"\n'
           'Expected output file at: "/.tmp_rand0/rand0/asset.txt-transformOutput2.txt"\n'
-          'Full command: Artifact.engineDartBinary run my_distance_from_ascii_a_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput2.txt --depfile=/.tmp_rand0/rand[0-9]+/depfile\n'
+          'Full command: Artifact.engineDartBinary run my_distance_from_ascii_a_transformer --input=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt --output=/.tmp_rand0/rand0/asset.txt-transformOutput2.txt\n'
           'stdout:\n'
           '\n'
           'stderr:\n'
@@ -442,25 +434,30 @@ void main() {
           'my_transformer',
           RegExp(r'--input=.*'),
           RegExp(r'--output=.*'),
-          RegExp(r'--depfile=.*'),
         ],
         onRun: (List<String> args) {
           final String inputArg = args.firstWhere((String arg) => arg.startsWith('--input='));
           final String outputArg = args.firstWhere((String arg) => arg.startsWith('--output='));
-          final String depfileArg = args.firstWhere((String arg) => arg.startsWith('--depfile='));
 
           final String inputPath = inputArg.substring('--input='.length);
           final String outputPath = outputArg.substring('--output='.length);
-          final String depfilePath = depfileArg.substring('--depfile='.length);
+
+          // Find the depfile in the temp directory.
+          final Directory tempDir = fileSystem.systemTempDirectory
+              .listSync()
+              .whereType<Directory>()
+              .firstWhere(
+                (Directory dir) =>
+                    dir.basename.startsWith('flutter_tools_asset_transformer_depfile.'),
+              );
+          final File depfile = tempDir.childFile('depfile');
 
           fileSystem.file(inputPath).copySync(outputPath);
-          fileSystem
-              .file(depfilePath)
-              .writeAsStringSync(
-                '${fileSystem.file(outputPath).absolute.path}: '
-                '${fileSystem.file(inputPath).absolute.path} '
-                '${depfileInput.absolute.path}',
-              );
+          depfile.writeAsStringSync(
+            '${fileSystem.file(outputPath).absolute.path}: '
+            '${fileSystem.file(inputPath).absolute.path} '
+            '${depfileInput.absolute.path}',
+          );
         },
       ),
     ]);
