@@ -77,8 +77,8 @@ class _MyState extends State<MyWidget> {
     if (messageMap?['command'] == 'compare_golden') {
       // Handle the out-of-band comparison request. This is triggered by the on-device test runner
       // once it has captured and cropped the platform view screenshot using UiAutomation.
-      final String testName = (messageMap!['testName'] as String?)!;
-      final String imageBase64 = (messageMap['imageBytes'] as String?)!;
+      final testName = messageMap!['testName']! as String;
+      final imageBase64 = messageMap['imageBytes']! as String;
       final Uint8List imageBytes = base64.decode(imageBase64);
       final String? goldenVariantValue = await _goldenVariantFuture;
 
@@ -170,24 +170,19 @@ class _MyState extends State<MyWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget testContent;
-    if (_message == 'backdropFilterBlurTest') {
-      testContent = const BackdropFilterBlur();
-    } else if (_message == 'platformViewTest') {
-      testContent = AndroidPlatformView(
+    final Widget testContent = switch (_message) {
+      'backdropFilterBlurTest' => const BackdropFilterBlur(),
+      'platformViewTest' => AndroidPlatformView(
         onCreated: () {
           if (_platformViewCreatedCompleter?.isCompleted == false) {
             _platformViewCreatedCompleter?.complete();
           }
         },
-      );
-    } else if (_message == 'textTest') {
-      testContent = const TextDrawingCanvas();
-    } else if (_message == 'imageTest') {
-      testContent = ImageDrawingCanvas(image: _loadedImage);
-    } else {
-      testContent = VectorDrawingsCanvas(message: _message);
-    }
+      ),
+      'textTest' => const TextDrawingCanvas(),
+      'imageTest' => ImageDrawingCanvas(image: _loadedImage),
+      _ => VectorDrawingsCanvas(message: _message),
+    };
 
     return SafeArea(
       child: Stack(

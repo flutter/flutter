@@ -43,9 +43,7 @@ class AndroidPlatformView extends StatelessWidget {
                 )
                 ..addOnPlatformViewCreatedListener((int id) {
                   params.onPlatformViewCreated(id);
-                  if (onCreated != null) {
-                    onCreated!();
-                  }
+                  onCreated?.call();
                 })
                 ..create();
             },
