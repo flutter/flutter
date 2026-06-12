@@ -477,6 +477,7 @@ flutter:
             'my_capitalizer_transformer',
             RegExp('--input=.*'),
             RegExp('--output=.*'),
+            RegExp('--depfile=.*'),
             '-a',
             '-b',
             '--color',
@@ -487,6 +488,7 @@ flutter:
                 (ArgParser()
                       ..addOption('input')
                       ..addOption('output')
+                      ..addOption('depfile')
                       ..addOption('color')
                       ..addFlag('aaa', abbr: 'a')
                       ..addFlag('bbb', abbr: 'b'))
@@ -573,12 +575,14 @@ flutter:
               'my_capitalizer_transformer',
               RegExp('--input=.*'),
               RegExp('--output=.*'),
+              RegExp('--depfile=.*'),
             ],
             onRun: (List<String> args) {
               final ArgResults parsedArgs =
                   (ArgParser()
                         ..addOption('input')
-                        ..addOption('output'))
+                        ..addOption('output')
+                        ..addOption('depfile'))
                       .parse(args);
 
               final File input = fileSystem.file(parsedArgs['input'] as String);
@@ -680,6 +684,7 @@ flutter:
             'my_transformer',
             RegExp('--input=.*'),
             RegExp('--output=.*'),
+            RegExp('--depfile=.*'),
             '-a',
             '-b',
             '--color',
@@ -704,12 +709,14 @@ flutter:
           'my_capitalizer_transformer',
           RegExp('--input=.*'),
           RegExp('--output=.*'),
+          RegExp('--depfile=.*'),
         ],
         onRun: (List<String> args) {
           final ArgResults parsedArgs =
               (ArgParser()
                     ..addOption('input')
-                    ..addOption('output'))
+                    ..addOption('output')
+                    ..addOption('depfile'))
                   .parse(args);
 
           final input = parsedArgs['input'] as String;
@@ -950,13 +957,15 @@ flutter:
           'my_capitalizer_transformer',
           RegExp('--input=.*'),
           RegExp('--output=.*'),
+          RegExp('--depfile=.*'),
         ],
         onRun: (List<String> args) {
           totalTransformsRunning++;
           final ArgResults parsedArgs =
               (ArgParser()
                     ..addOption('input')
-                    ..addOption('output'))
+                    ..addOption('output')
+                    ..addOption('depfile'))
                   .parse(args);
 
           final input = parsedArgs['input'] as String;
@@ -978,11 +987,12 @@ flutter:
         userMessages: UserMessages(),
       );
 
-      final environment = Environment.test(
+      final FakeProcessManager processManager = FakeProcessManager.list(
+        List<FakeCommand>.filled(assetsToTransform, transformerCommand, growable: true),
+      );
+      final Environment environment = Environment.test(
         fileSystem.currentDirectory,
-        processManager: FakeProcessManager.list(
-          List<FakeCommand>.filled(assetsToTransform, transformerCommand, growable: true),
-        ),
+        processManager: processManager,
         artifacts: Artifacts.test(),
         fileSystem: fileSystem,
         logger: logger,
@@ -1023,8 +1033,9 @@ flutter:
       markTransformDone.complete();
       await waitFor;
 
-      expect(inputFilePaths.toSet(), hasLength(4));
-      expect(outputFilePaths.toSet(), hasLength(4));
+      expect(inputFilePaths.toSet(), hasLength(5));
+      expect(outputFilePaths.toSet(), hasLength(5));
+      expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
       Platform: () => FakePlatform(numberOfProcessors: 4),
