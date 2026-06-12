@@ -137,7 +137,8 @@ class AndroidDevices extends PollingDeviceDiscovery {
       return;
     }
 
-    for (final String line in text.trim().split('\n')) {
+    for (final String rawLine in text.trim().split('\n')) {
+      final String line = rawLine.trim();
       // Skip lines like: * daemon started successfully *
       if (line.startsWith('* daemon ')) {
         continue;
