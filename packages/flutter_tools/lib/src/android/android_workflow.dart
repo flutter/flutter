@@ -89,9 +89,9 @@ Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager process
     } else {
       return null;
     }
-  } on Exception {
+  } on Exception catch (_) {
     return null;
-  } on Error {
+  } on Error catch (_) {
     return null;
   }
 }
