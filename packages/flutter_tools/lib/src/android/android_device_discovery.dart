@@ -110,7 +110,17 @@ class AndroidDevices extends PollingDeviceDiscovery {
         !_processManager.canRun(_androidSdk.adbPath);
   }
 
-  // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
+  // Parses the output of `adb devices -l`.
+  //
+  // The regex is structured as:
+  // 1. Group 1 (Serial): Lazily matched to allow spaces in the serial (which
+  //    can happen during wireless ADB mDNS name conflicts, e.g., "device (2)").
+  // 2. Group 2 (State): Matches "no permissions" explicitly (as it is the only
+  //    known state containing a space) or any other non-whitespace word (\S+).
+  // 3. Group 3 (Extra Info): Anchors the state match by requiring it to be
+  //    followed by either a space and a key:value pair (e.g., "usb:123") or the
+  //    end of the line. This prevents false positives if the serial contains
+  //    state keywords.
   static final _kDeviceRegex = RegExp(r'^(.*?)\s+(no permissions|\S+)(?:\s+(\w+:.*)|$)');
 
   /// Parse the given `adb devices` output in [text], and fill out the given list
