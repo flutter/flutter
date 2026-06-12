@@ -81,12 +81,14 @@ void main() {
             'increment',
             '--input=/.tmp_rand0/rand0/my-asset.txt-transformOutput0.txt',
             '--output=/.tmp_rand0/rand0/my-asset.txt-transformOutput1.txt',
+            RegExp(r'--depfile=.*'),
           ],
           onRun: (List<String> command) {
             final ArgResults argParseResults =
                 (ArgParser()
                       ..addOption('input', mandatory: true)
-                      ..addOption('output', mandatory: true))
+                      ..addOption('output', mandatory: true)
+                      ..addOption('depfile'))
                     .parse(command);
 
             final File inputFile = fileSystem.file(argParseResults['input']);
