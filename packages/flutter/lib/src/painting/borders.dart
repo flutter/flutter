@@ -562,6 +562,24 @@ abstract class ShapeBorder {
   ///  * [Path.contains], which can tell if an [Offset] is within a [Path].
   Path getInnerPath(Rect rect, {TextDirection? textDirection});
 
+  /// Tests whether the outer boundary of this border contains [position].
+  ///
+  /// The [position] must be in the same coordinate space as [rect]. The default
+  /// implementation checks [position] against the path returned by
+  /// [getOuterPath].
+  ///
+  /// The `textDirection` argument must be provided and non-null if the border
+  /// has a text direction dependency. It may be null if the border will not need
+  /// the text direction to describe its geometry.
+  ///
+  /// See also:
+  ///
+  ///  * [getOuterPath], which creates the path for the outer edge.
+  ///  * [ShapeDecoration.hitTest], which delegates to this method.
+  bool hitTest(Rect rect, Offset position, {TextDirection? textDirection}) {
+    return getOuterPath(rect, textDirection: textDirection).contains(position);
+  }
+
   /// Paint a canvas with the appropriate shape.
   ///
   /// On [ShapeBorder] subclasses whose [preferPaintInterior] method returns

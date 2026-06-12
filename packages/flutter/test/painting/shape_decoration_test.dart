@@ -99,6 +99,81 @@ void main() {
     expect(b.hitTest(size, const Offset(20.0, 50.0)), isTrue);
   });
 
+  test('ShapeBorder.hitTest defaults to getOuterPath', () {
+    _outerPathCount = 0;
+    const ShapeBorder border = _PathHitTestBorder();
+    const rect = Rect.fromLTWH(10.0, 20.0, 100.0, 50.0);
+
+    expect(border.hitTest(rect, const Offset(20.0, 30.0)), isTrue);
+    expect(border.hitTest(rect, Offset.zero), isFalse);
+    expect(_outerPathCount, 2);
+  });
+
+  test('ShapeDecoration.hitTest delegates to ShapeBorder.hitTest', () {
+    _hitTestCount = 0;
+    const decoration = ShapeDecoration(shape: _HitTestBorder());
+
+    expect(decoration.hitTest(const Size(100.0, 100.0), const Offset(50.0, 50.0)), isFalse);
+    expect(_hitTestCount, 1);
+  });
+
+  test('ShapeBorder.hitTest matches getOuterPath for primitive shapes', () {
+    const rect = Rect.fromLTWH(0.0, 0.0, 120.0, 80.0);
+    const positions = <Offset>[
+      Offset(1.0, 1.0),
+      Offset(8.5, 40.0),
+      Offset(24.0, 12.0),
+      Offset(40.0, 40.0),
+      Offset(60.0, 2.5),
+      Offset(60.0, 40.0),
+      Offset(96.0, 68.0),
+      Offset(112.0, 40.0),
+      Offset(130.0, 40.0),
+    ];
+    final borders = <ShapeBorder>[
+      Border.all(),
+      const CircleBorder(),
+      const CircleBorder(eccentricity: 0.5),
+      const OvalBorder(),
+      const RoundedRectangleBorder(),
+      const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(18.0))),
+      const RoundedRectangleBorder(
+        borderRadius: BorderRadiusDirectional.only(topStart: Radius.circular(18.0)),
+      ),
+      const RoundedSuperellipseBorder(),
+      const RoundedSuperellipseBorder(borderRadius: BorderRadius.all(Radius.circular(18.0))),
+      const StadiumBorder(),
+      ShapeBorder.lerp(
+        const CircleBorder(),
+        const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(18.0))),
+        0.5,
+      )!,
+      ShapeBorder.lerp(
+        const CircleBorder(),
+        const RoundedSuperellipseBorder(borderRadius: BorderRadius.all(Radius.circular(18.0))),
+        0.5,
+      )!,
+      ShapeBorder.lerp(const StadiumBorder(), const CircleBorder(), 0.5)!,
+      ShapeBorder.lerp(
+        const StadiumBorder(),
+        const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(18.0))),
+        0.5,
+      )!,
+    ];
+
+    for (final border in borders) {
+      for (final TextDirection textDirection in TextDirection.values) {
+        for (final position in positions) {
+          expect(
+            border.hitTest(rect, position, textDirection: textDirection),
+            border.getOuterPath(rect, textDirection: textDirection).contains(position),
+            reason: '$border at $position in $textDirection',
+          );
+        }
+      }
+    }
+  });
+
   test('ShapeDecoration.lerp between gradient and color is smooth and does not throw', () {
     // Regression test for https://github.com/flutter/flutter/issues/93953
     const colorR = Color(0xffff0000);
@@ -223,4 +298,61 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   ImageStreamCompleter loadImage(TestImageProvider key, ImageDecoderCallback decode) {
     return OneFrameImageStreamCompleter(SynchronousFuture<ImageInfo>(ImageInfo(image: image)));
   }
+}
+
+int _outerPathCount = 0;
+
+class _PathHitTestBorder extends ShapeBorder {
+  const _PathHitTestBorder();
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  ShapeBorder scale(double t) => this;
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    throw StateError('ShapeBorder.hitTest should not call getInnerPath.');
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    _outerPathCount += 1;
+    return Path()..addRect(rect);
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
+}
+
+int _hitTestCount = 0;
+
+class _HitTestBorder extends ShapeBorder {
+  const _HitTestBorder();
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+
+  @override
+  ShapeBorder scale(double t) => this;
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    throw StateError('ShapeDecoration.hitTest should not call getInnerPath.');
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    throw StateError('ShapeDecoration.hitTest should not call getOuterPath directly.');
+  }
+
+  @override
+  bool hitTest(Rect rect, Offset position, {TextDirection? textDirection}) {
+    _hitTestCount += 1;
+    return false;
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
 }

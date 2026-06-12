@@ -236,6 +236,11 @@ abstract class BoxBorder extends ShapeBorder {
   }
 
   @override
+  bool hitTest(Rect rect, Offset position, {TextDirection? textDirection}) {
+    return rect.contains(position);
+  }
+
+  @override
   void paintInterior(Canvas canvas, Rect rect, Paint paint, {TextDirection? textDirection}) {
     // For `ShapeDecoration(shape: Border.all())`, a rectangle with sharp edges
     // is always painted. There is no borderRadius parameter for
