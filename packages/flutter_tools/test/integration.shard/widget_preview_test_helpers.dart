@@ -162,6 +162,14 @@ Future<DTDResponse> getPreviews(DartToolingDaemon dtdConnection) async {
   return dtdConnection.call('Lsp', 'dart/workspace/getFlutterWidgetPreviews');
 }
 
+/// Polls DTD for widget previews until the [predicate] is met, or [timeout] is reached.
+///
+/// This is useful in integration tests to wait for the background analysis server
+/// to finish analyzing changes and updating the semantic model.
+///
+/// Gracefully ignores [Exception]s (such as DTD connection issues or RPC errors)
+/// during polling, as these are often temporary while the server is re-analyzing.
+/// Programming [Error]s will still propagate and fail the test immediately.
 Future<FlutterWidgetPreviews> waitForPreviews(
   DartToolingDaemon dtdConnection,
   bool Function(FlutterWidgetPreviews) predicate, {
@@ -180,7 +188,7 @@ Future<FlutterWidgetPreviews> waitForPreviews(
       if (predicate(previews)) {
         return previews;
       }
-    } on Object {
+    } on Exception {
       // Ignore DTD errors or JSON parsing errors during polling, as they might be temporary
       // while the analysis server is restarting or re-analyzing.
     }
