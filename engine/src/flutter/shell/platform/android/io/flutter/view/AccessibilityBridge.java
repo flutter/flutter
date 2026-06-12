@@ -274,11 +274,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   // TODO(mattcarroll): why do we need previousRouteId if we have flutterNavigationStack
   private int previousRouteId = ROOT_NODE_ID;
 
-  // Tracks the left system inset of the screen because Flutter needs to manually adjust
-  // accessibility positioning when in reverse-landscape. This is an Android bug that Flutter
-  // is solving for itself.
-  @NonNull private Integer lastLeftFrameInset = 0;
-
   @Nullable private OnAccessibilityChangeListener onAccessibilityChangeListener;
 
   // Whether the users are using assistive technologies to interact with the devices.
@@ -907,7 +902,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         // Account for the fact that Flutter is counting Unicode scalar values and Android
         // is counting UTF16 words.
         final int length = semanticsNode.value == null ? 0 : semanticsNode.value.length();
-        int a = length - semanticsNode.currentValueLength + semanticsNode.maxValueLength;
         result.setMaxTextLength(
             length - semanticsNode.currentValueLength + semanticsNode.maxValueLength);
       }
