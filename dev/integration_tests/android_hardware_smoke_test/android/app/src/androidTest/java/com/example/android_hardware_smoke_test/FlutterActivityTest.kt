@@ -104,4 +104,24 @@ class FlutterActivityTest {
     fun trianglePathTest() {
         templateTest("trianglePathTest")
     }
+
+    @Test
+    fun textTest() {
+        templateTest("textTest")
+    }
+
+    @Test
+    fun imageTest() {
+        templateTest("imageTest")
+    }
+
+    @Test
+    fun advancedBlendTest() {
+        templateTest("advancedBlendTest")
+    }
+
+    @Test
+    fun backdropFilterBlurTest() {
+        templateTest("backdropFilterBlurTest")
+    }
 }
