@@ -151,7 +151,9 @@ class FadeInImage extends StatefulWidget {
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
-  }) : fadeOutDuration = const Duration(milliseconds: 300),
+  }) : // The placeholder is not faded out in this mode, so there is no
+       // fade-out animation.
+       fadeOutDuration = Duration.zero,
        fadeOutCurve = Curves.easeOut,
        _transition = _FadeInImageTransition.fadeInOver;
 
@@ -325,9 +327,16 @@ class FadeInImage extends StatefulWidget {
   final ImageErrorWidgetBuilder? imageErrorBuilder;
 
   /// The duration of the fade-out animation for the [placeholder].
+  ///
+  /// This is ignored when using the [FadeInImage.fadeInOver] constructor, since
+  /// the [placeholder] is not faded out in that mode; it is [Duration.zero] in
+  /// that case.
   final Duration fadeOutDuration;
 
   /// The curve of the fade-out animation for the [placeholder].
+  ///
+  /// This is ignored when using the [FadeInImage.fadeInOver] constructor, since
+  /// the [placeholder] is not faded out in that mode.
   final Curve fadeOutCurve;
 
   /// The duration of the fade-in animation for the [image].

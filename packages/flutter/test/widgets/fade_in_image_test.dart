@@ -772,7 +772,7 @@ void main() {
         expect(find.byType(Image), findsOneWidget);
       });
 
-      testWidgets('total animation duration equals only fadeInDuration', (
+      testWidgets('image fades in within fadeInDuration without an added fade-out', (
         WidgetTester tester,
       ) async {
         final placeholderProvider = TestImageProvider(placeholderImage);
@@ -792,11 +792,17 @@ void main() {
         imageProvider.complete();
         await tester.pump();
 
-        // After exactly one fadeInDuration the image should be fully opaque
-        // and the placeholder removed from the tree.
-        await tester.pump(animationDuration);
-        await tester.pumpAndSettle();
-        expect(find.byType(Image), findsOneWidget);
+        // Halfway through fadeInDuration the image is halfway faded in. In
+        // sequential mode the target would still be at 0 during this window,
+        // so this confirms the fade-in starts immediately (no fade-out phase).
+        await tester.pump(animationDuration ~/ 2);
+        expect(findFadeInOverImages(tester).target.opacity, moreOrLessEquals(0.5));
+
+        // After the full fadeInDuration the image is completely faded in. If
+        // fadeOutDuration were (incorrectly) added to the total, the image
+        // would not yet be fully opaque here.
+        await tester.pump(animationDuration ~/ 2);
+        expect(findFadeInImage(tester).target.opacity, 1.0);
       });
 
       testWidgets('shows a cached image immediately when synchronously loaded', (
