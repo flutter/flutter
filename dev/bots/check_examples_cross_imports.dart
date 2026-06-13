@@ -1183,46 +1183,50 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
         .relative(directory.absolute.path, from: flutterRoot.absolute.path)
         .replaceAll(Platform.pathSeparator, '/');
 
-    const genericExamples = {
-      'examples',
-      'examples/api',
-      'examples/api/lib/animation',
-      'examples/api/lib/foundation',
-      'examples/api/lib/gestures',
-      'examples/api/lib/painting',
-      'examples/api/lib/rendering',
-      'examples/api/lib/services',
-      'examples/api/lib/ui',
-      'examples/api/lib/widgets',
-      'examples/api/test/animation',
-      'examples/api/test/foundation',
-      'examples/api/test/gestures',
-      'examples/api/test/painting',
-      'examples/api/test/rendering',
-      'examples/api/test/services',
-      'examples/api/test/ui',
-      'examples/api/test/widgets',
-      'examples/flutter_view',
-      'examples/hello_world',
-      'examples/image_list',
-      'examples/layers',
-      'examples/multiple_windows',
-      'examples/platform_channel',
-      'examples/platform_channel_swift',
-      'examples/platform_view',
-      'examples/splash',
-      'examples/texture',
-    };
-
-    if (genericExamples.contains(relativePath)) {
-      return _ApiExampleLibrary(relativePath);
-    }
-
     return switch (relativePath) {
-      'examples/api/lib/cupertino' ||
-      'examples/api/test/cupertino' => _CupertinoApiExampleLibrary(relativePath),
-      'examples/api/lib/material' ||
-      'examples/api/test/material' => _MaterialApiExampleLibrary(relativePath),
+      _
+          when relativePath.startsWith('examples/api/lib/cupertino') ||
+              relativePath.startsWith('examples/api/test/cupertino') =>
+        _CupertinoApiExampleLibrary(relativePath),
+
+      _
+          when relativePath.startsWith('examples/api/lib/material') ||
+              relativePath.startsWith('examples/api/test/material') =>
+        _MaterialApiExampleLibrary(relativePath),
+      _
+          when relativePath.startsWith('examples/api/lib/animation') ||
+              relativePath.startsWith('examples/api/lib/foundation') ||
+              relativePath.startsWith('examples/api/lib/gestures') ||
+              relativePath.startsWith('examples/api/lib/painting') ||
+              relativePath.startsWith('examples/api/lib/rendering') ||
+              relativePath.startsWith('examples/api/lib/services') ||
+              relativePath.startsWith('examples/api/lib/ui') ||
+              relativePath.startsWith('examples/api/lib/widgets') =>
+        _ApiExampleLibrary(relativePath),
+      _
+          when relativePath.startsWith('examples/api/test/animation') ||
+              relativePath.startsWith('examples/api/test/foundation') ||
+              relativePath.startsWith('examples/api/test/gestures') ||
+              relativePath.startsWith('examples/api/test/painting') ||
+              relativePath.startsWith('examples/api/test/rendering') ||
+              relativePath.startsWith('examples/api/test/services') ||
+              relativePath.startsWith('examples/api/test/ui') ||
+              relativePath.startsWith('examples/api/test/widgets') =>
+        _ApiExampleLibrary(relativePath),
+      _
+          when relativePath.startsWith('examples/flutter_view') ||
+              relativePath.startsWith('examples/hello_world') ||
+              relativePath.startsWith('examples/image_list') ||
+              relativePath.startsWith('examples/layers') ||
+              relativePath.startsWith('examples/multiple_windows') ||
+              relativePath.startsWith('examples/platform_channel') ||
+              relativePath.startsWith('examples/platform_channel_swift') ||
+              relativePath.startsWith('examples/platform_view') ||
+              relativePath.startsWith('examples/splash') ||
+              relativePath.startsWith('examples/texture') =>
+        _ApiExampleLibrary(relativePath),
+      _ when relativePath.startsWith('examples/api') || relativePath.startsWith('examples') =>
+        _ApiExampleLibrary(relativePath),
       _ => throw UnimplementedError('Unknown library: $relativePath'),
     };
   }
@@ -1294,31 +1298,68 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
   /// This is used for reporting mismatched cross imports.
   String get crossImportsListSymbolName {
     return switch (libraryName) {
-      'examples' => 'knownExamplesCrossImports',
-      'examples/api' => 'knownExamplesSlashApiCrossImports',
-      // dart format off
-      'examples/api/lib/animation' || 'examples/api/test/animation' => 'knownExamplesSlashApiAnimationCrossImports',
-      'examples/api/lib/cupertino' || 'examples/api/test/cupertino' => 'knownExamplesSlashApiCupertinoCrossImports',
-      'examples/api/lib/foundation' || 'examples/api/test/foundation' => 'knownExamplesSlashApiFoundationCrossImports',
-      'examples/api/lib/gestures' || 'examples/api/test/gestures' => 'knownExamplesSlashApiGesturesCrossImports',
-      'examples/api/lib/material' || 'examples/api/test/material' => 'knownExamplesSlashApiMaterialCrossImports',
-      'examples/api/lib/painting' || 'examples/api/test/painting' => 'knownExamplesSlashApiPaintingCrossImports',
-      'examples/api/lib/rendering' || 'examples/api/test/rendering' => 'knownExamplesSlashApiRenderingCrossImports',
-      'examples/api/lib/sample_templates' || 'examples/api/test/sample_templates' => 'knownExamplesSlashApiSampleTemplatesCrossImports',
-      'examples/api/lib/services' || 'examples/api/test/services' => 'knownExamplesSlashApiServicesCrossImports',
-      'examples/api/lib/ui' || 'examples/api/test/ui' => 'knownExamplesSlashApiUICrossImports',
-      'examples/api/lib/widgets' || 'examples/api/test/widgets' => 'knownExamplesSlashApiWidgetsCrossImports',
-      // dart format on
-      'examples/flutter_view' => 'knownExamplesFlutterViewCrossImports',
-      'examples/hello_world' => 'knownExamplesHelloWorldCrossImports',
-      'examples/image_list' => 'knownExamplesImageListCrossImports',
-      'examples/layers' => 'knownExamplesLayersCrossImports',
-      'examples/multiple_windows' => 'knownExamplesMultipleWindowsCrossImports',
-      'examples/platform_channel' => 'knownExamplesPlatformChannelCrossImports',
-      'examples/platform_channel_swift' => 'knownExamplesPlatformChannelSwiftCrossImports',
-      'examples/platform_view' => 'knownExamplesPlatformViewCrossImports',
-      'examples/splash' => 'knownExamplesSplashCrossImports',
-      'examples/texture' => 'knownExamplesTextureCrossImports',
+      _
+          when libraryName.startsWith('examples/api/lib/animation') ||
+              libraryName.startsWith('examples/api/test/animation') =>
+        'knownExamplesSlashApiAnimationCrossImports',
+      _
+          when libraryName.startsWith('examples/api/lib/cupertino') ||
+              libraryName.startsWith('examples/api/test/cupertino') =>
+        'knownExamplesSlashApiCupertinoCrossImports',
+      _
+          when libraryName.startsWith('examples/api/lib/foundation') ||
+              libraryName.startsWith('examples/api/test/foundation') =>
+        'knownExamplesSlashApiFoundationCrossImports',
+      _
+          when libraryName.startsWith('examples/api/lib/gestures') ||
+              libraryName.startsWith('examples/api/test/gestures') =>
+        'knownExamplesSlashApiGesturesCrossImports',
+      _
+          when libraryName.startsWith('examples/api/lib/material') ||
+              libraryName.startsWith('examples/api/test/material') =>
+        'knownExamplesSlashApiMaterialCrossImports',
+      _
+          when libraryName.startsWith('examples/api/lib/painting') ||
+              libraryName.startsWith('examples/api/test/painting') =>
+        'knownExamplesSlashApiPaintingCrossImports',
+      _
+          when libraryName.startsWith('examples/api/lib/rendering') ||
+              libraryName.startsWith('examples/api/test/rendering') =>
+        'knownExamplesSlashApiRenderingCrossImports',
+      _
+          when libraryName.startsWith('examples/api/lib/services') ||
+              libraryName.startsWith('examples/api/test/services') =>
+        'knownExamplesSlashApiServicesCrossImports',
+      _
+          when libraryName.startsWith('examples/api/lib/ui') ||
+              libraryName.startsWith('examples/api/test/ui') =>
+        'knownExamplesSlashApiUICrossImports',
+      _
+          when libraryName.startsWith('examples/api/lib/widgets') ||
+              libraryName.startsWith('examples/api/test/widgets') =>
+        'knownExamplesSlashApiWidgetsCrossImports',
+      _
+          when libraryName.startsWith('examples/api/lib/sample_templates') ||
+              libraryName.startsWith('examples/api/test/sample_templates') =>
+        'knownExamplesSlashApiSampleTemplatesCrossImports',
+      _ when libraryName.startsWith('examples/flutter_view') =>
+        'knownExamplesFlutterViewCrossImports',
+      _ when libraryName.startsWith('examples/hello_world') =>
+        'knownExamplesHelloWorldCrossImports',
+      _ when libraryName.startsWith('examples/image_list') => 'knownExamplesImageListCrossImports',
+      _ when libraryName.startsWith('examples/layers') => 'knownExamplesLayersCrossImports',
+      _ when libraryName.startsWith('examples/multiple_windows') =>
+        'knownExamplesMultipleWindowsCrossImports',
+      _ when libraryName.startsWith('examples/platform_channel_swift') =>
+        'knownExamplesPlatformChannelSwiftCrossImports',
+      _ when libraryName.startsWith('examples/platform_channel') =>
+        'knownExamplesPlatformChannelCrossImports',
+      _ when libraryName.startsWith('examples/platform_view') =>
+        'knownExamplesPlatformViewCrossImports',
+      _ when libraryName.startsWith('examples/splash') => 'knownExamplesSplashCrossImports',
+      _ when libraryName.startsWith('examples/texture') => 'knownExamplesTextureCrossImports',
+      _ when libraryName.startsWith('examples/api') => 'knownExamplesSlashApiCrossImports',
+      _ when libraryName.startsWith('examples') => 'knownExamplesCrossImports',
       _ => throw UnimplementedError('Unknown library: $libraryName'),
     };
   }
