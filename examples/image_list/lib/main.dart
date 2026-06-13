@@ -12,7 +12,7 @@ import 'package:flutter/services.dart';
 /// image, creates single flutter widget with five copies of requested
 /// image and prints how long the loading took.
 ///
-/// This is used in [$FH/flutter/devicelab/bin/tasks/image_list_reported_duration.dart] test.
+/// This is used in the `dev/devicelab/bin/tasks/image_list_reported_duration.dart` test.
 ///
 ///
 /// To generate new certificate:
