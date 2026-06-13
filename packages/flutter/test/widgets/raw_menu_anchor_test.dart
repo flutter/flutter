@@ -2136,7 +2136,7 @@ void main() {
 
   testWidgets('Ancestor scroll listener is removed on dispose', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/187853.
-    final scrollController = SpyScrollController();
+    final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
     await tester.pumpWidget(
@@ -2152,9 +2152,10 @@ void main() {
       ),
     );
 
-    final notifier = scrollController.position.isScrollingNotifier as TrackingNotifier;
+    final ValueNotifier<bool> notifier = scrollController.position.isScrollingNotifier;
 
-    expect(notifier.listenerCount, equals(1));
+    // ignore: invalid_use_of_protected_member
+    expect(notifier.hasListeners, isTrue);
 
     await tester.pumpWidget(
       Directionality(
@@ -2163,7 +2164,8 @@ void main() {
       ),
     );
 
-    expect(notifier.listenerCount, equals(0));
+    // ignore: invalid_use_of_protected_member
+    expect(notifier.hasListeners, isFalse);
   });
 
   // Copied from [MenuAnchor] tests.
