@@ -297,7 +297,7 @@ void main() {
   testWidgets('default text selection width style', (WidgetTester tester) async {
     const blue = Color(0xFF2196F3);
     const grey = Color(0xFF9E9E9E);
-    const selectionColor = Color(0x667C4DFF);
+    const selectionColor = Color(0xFFFFFF00);
     controller.text = 'a b c\na b c d e f g';
 
     await tester.pumpWidget(
