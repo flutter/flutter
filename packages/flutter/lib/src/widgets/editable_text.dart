@@ -2094,7 +2094,7 @@ class EditableText extends StatefulWidget {
   /// The default value for [selectionWidthStyle].
   ///
   /// Returns [ui.BoxWidthStyle.tight] on all platforms.
-  static const ui.BoxWidthStyle defaultSelectionWidthStyle = ui.BoxWidthStyle.tight;
+  static ui.BoxWidthStyle get defaultSelectionWidthStyle => ui.BoxWidthStyle.tight;
 
   /// The default value for [stylusHandwritingEnabled].
   static const bool defaultStylusHandwritingEnabled = true;
