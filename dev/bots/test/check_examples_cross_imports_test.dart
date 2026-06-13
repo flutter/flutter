@@ -507,7 +507,7 @@ void main() {
       ].join('\n');
       expect(result, equals('$lines\n'));
       expect(success, isFalse);
-    });
+    }, skip: isExamplesRoot(libraryName)); // [intended]: The root directory should not have examples
   }
 
   for (final (String libraryName, String knownCrossImportsListName, Set<String> knownCrossImports)
@@ -853,6 +853,12 @@ bool isMaterialExample(String libraryName) {
 bool isCupertinoExample(String libraryName) {
   return libraryName == 'examples/api/lib/cupertino' ||
       libraryName == 'examples/api/test/cupertino';
+}
+
+/// Returns whether the given [libraryName] matches the root `examples` or `examples/api` directories,
+/// which contain subdirectories with examples, but should themselves be void of examples.
+bool isExamplesRoot(String libraryName) {
+  return libraryName == 'examples' || libraryName == 'examples/api';
 }
 
 // A utility that keeps track of the directories under test,
