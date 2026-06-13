@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 MaterialApp _buildAppWithDialog(
@@ -3465,6 +3466,46 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('showDialog supports barrierBuilder', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return ElevatedButton(
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  barrierBuilder:
+                      (BuildContext innerContext, Animation<double> animation, Widget barrier) {
+                        return Padding(padding: const EdgeInsets.all(56.7), child: barrier);
+                      },
+                  builder: (BuildContext innerContext) {
+                    return const SizedBox();
+                  },
+                );
+              },
+              child: const Text('Show Dialog'),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Open the dialog.
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pump();
+    expect(find.byType(ModalBarrier), findsNWidgets(2));
+
+    // Check if Padding with 56.7 exists
+    final Finder paddingFinder = find.ancestor(
+      of: find.byWidget(find.byType(ModalBarrier).evaluate().last.widget),
+      matching: find.byType(Padding),
+    );
+    expect(paddingFinder, findsOneWidget);
+    final Padding padding = tester.widget(paddingFinder);
+    expect(padding.padding, const EdgeInsets.all(56.7));
+  });
 }
 
 @pragma('vm:entry-point')
@@ -3515,12 +3556,11 @@ class _ClosureNavigatorObserver extends NavigatorObserver {
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(route);
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(previousRoute!);
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(previousRoute);
 
   @override
-  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) =>
-      onDidChange(previousRoute!);
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => onDidChange(previousRoute);
 
   @override
-  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => onDidChange(newRoute!);
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) => onDidChange(newRoute);
 }

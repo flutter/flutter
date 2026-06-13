@@ -2599,6 +2599,7 @@ class RawDialogRoute<T> extends PopupRoute<T> {
     String? barrierLabel,
     Duration transitionDuration = const Duration(milliseconds: 200),
     RouteTransitionsBuilder? transitionBuilder,
+    this.barrierBuilder,
     super.settings,
     super.requestFocus,
     this.anchorPoint,
@@ -2631,6 +2632,11 @@ class RawDialogRoute<T> extends PopupRoute<T> {
   final Duration _transitionDuration;
 
   final RouteTransitionsBuilder? _transitionBuilder;
+
+  /// The [barrierBuilder] argument is used to define how the route's modal
+  /// barrier is built. If not null, this builder is used to wrap or replace
+  /// the default [ModalBarrier].
+  final RouteBarrierBuilder? barrierBuilder;
 
   /// {@macro flutter.widgets.DisplayFeatureSubScreen.anchorPoint}
   final Offset? anchorPoint;
@@ -2674,6 +2680,17 @@ class RawDialogRoute<T> extends PopupRoute<T> {
       return FadeTransition(opacity: animation, child: child);
     }
     return _transitionBuilder(context, animation, secondaryAnimation, child);
+  }
+
+  @override
+  Widget buildModalBarrier() {
+    final Widget barrier = super.buildModalBarrier();
+    if (barrierBuilder != null) {
+      return Builder(
+        builder: (BuildContext context) => barrierBuilder!(context, animation!, barrier),
+      );
+    }
+    return barrier;
   }
 }
 
@@ -2720,6 +2737,10 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// and leaves off the screen. By default, the transition is a linear fade of
 /// the page's contents.
 ///
+/// The `barrierBuilder` argument is used to define how the route's modal
+/// barrier is built. If not null, this builder is used to wrap or replace
+/// the default [ModalBarrier].
+///
 /// The `routeSettings` will be used in the construction of the dialog's route.
 /// See [RouteSettings] for more details.
 ///
@@ -2765,6 +2786,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   Color barrierColor = const Color(0x80000000),
   Duration transitionDuration = const Duration(milliseconds: 200),
   RouteTransitionsBuilder? transitionBuilder,
+  RouteBarrierBuilder? barrierBuilder,
   bool useRootNavigator = true,
   bool fullscreenDialog = false,
   RouteSettings? routeSettings,
@@ -2780,6 +2802,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
       barrierColor: barrierColor,
       transitionDuration: transitionDuration,
       transitionBuilder: transitionBuilder,
+      barrierBuilder: barrierBuilder,
       settings: routeSettings,
       anchorPoint: anchorPoint,
       requestFocus: requestFocus,
@@ -2821,6 +2844,13 @@ typedef RouteTransitionsBuilder =
       Animation<double> secondaryAnimation,
       Widget child,
     );
+
+/// Signature for the function that builds a route's modal barrier.
+/// Used in [RawDialogRoute] and [showGeneralDialog].
+///
+/// The `barrier` argument is the default [ModalBarrier] built by the route.
+typedef RouteBarrierBuilder =
+    Widget Function(BuildContext context, Animation<double> animation, Widget barrier);
 
 /// A callback type for informing that a navigation pop has been invoked,
 /// whether or not it was handled successfully.

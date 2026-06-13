@@ -1633,6 +1633,7 @@ Future<T?> showDialog<T>({
   bool fullscreenDialog = false,
   bool? requestFocus,
   AnimationStyle? animationStyle,
+  RouteBarrierBuilder? barrierBuilder,
 }) {
   assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1667,6 +1668,7 @@ Future<T?> showDialog<T>({
         requestFocus: requestFocus,
         animationStyle: animationStyle,
         fullscreenDialog: fullscreenDialog,
+        barrierBuilder: barrierBuilder,
       );
     },
     builder: (BuildContext routeContext) {
@@ -1832,6 +1834,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     super.traversalEdgeBehavior,
     super.fullscreenDialog,
     AnimationStyle? animationStyle,
+    super.barrierBuilder,
   }) : _animationStyle = animationStyle,
        super(
          pageBuilder:
