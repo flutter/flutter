@@ -971,25 +971,26 @@ class ExamplesCrossImportChecker {
     }
 
     final files = <File>{};
+    final queue = <Directory>[directory];
 
-    for (final FileSystemEntity fileSystemEntity in directory.listSync()) {
-      if (fileSystemEntity is File && fileSystemEntity.absolute.path.contains(dartFilePattern)) {
-        files.add(fileSystemEntity);
+    while (queue.isNotEmpty) {
+      final Directory current = queue.removeAt(0);
 
-        continue;
-      }
+      for (final FileSystemEntity fileSystemEntity in current.listSync()) {
+        if (fileSystemEntity is File && fileSystemEntity.absolute.path.contains(dartFilePattern)) {
+          files.add(fileSystemEntity);
 
-      if (fileSystemEntity is Directory) {
-        final String directoryName = path.basename(fileSystemEntity.absolute.path);
-
-        if (directoryName == 'build' || directoryName == '.dart_tool') {
           continue;
         }
 
-        for (final File file in fileSystemEntity.listSync().whereType<File>()) {
-          if (file.absolute.path.contains(dartFilePattern)) {
-            files.add(file);
+        if (fileSystemEntity is Directory) {
+          final String directoryName = path.basename(fileSystemEntity.absolute.path);
+
+          if (directoryName == 'build' || directoryName == '.dart_tool') {
+            continue;
           }
+
+          queue.add(fileSystemEntity);
         }
       }
     }
