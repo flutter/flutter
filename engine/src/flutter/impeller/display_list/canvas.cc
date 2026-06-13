@@ -142,6 +142,10 @@ static std::shared_ptr<Contents> CreateContentsForSubpassTarget(
   contents->SetOpacity(paint.color.alpha);
   contents->SetDeferApplyingOpacity(true);
 
+  if (target && target->GetSize() != logical_size) {
+    contents->SetStrictSourceRect(true);
+  }
+
   return paint.WithFiltersForSubpassTarget(renderer, std::move(contents),
                                            effect_transform);
 }
@@ -1747,11 +1751,14 @@ void Canvas::SaveLayer(const Paint& paint,
   paint_copy.color.alpha *= transform_stack_.back().distributed_opacity;
   transform_stack_.back().distributed_opacity = 1.0;
 
-  ISize physical_subpass_size = RoundUpToMultiple(subpass_size, 64);
-  physical_subpass_size =
-      physical_subpass_size.Min(renderer_.GetContext()
-                                    ->GetCapabilities()
-                                    ->GetMaximumRenderPassAttachmentSize());
+  ISize physical_subpass_size = subpass_size;
+  if (!paint.image_filter && !backdrop_filter) {
+    physical_subpass_size = RoundUpToMultiple(subpass_size, 64);
+    physical_subpass_size =
+        physical_subpass_size.Min(renderer_.GetContext()
+                                      ->GetCapabilities()
+                                      ->GetMaximumRenderPassAttachmentSize());
+  }
 
   render_passes_.push_back(
       LazyRenderingConfig(renderer_,                                    //
