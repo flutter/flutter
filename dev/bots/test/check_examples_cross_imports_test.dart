@@ -112,11 +112,37 @@ void main() {
     expect(checker.check(), isTrue);
   });
 
+  test('non-Dart files are ignored in nested directories', () async {
+    buildKnownCrossImportExamplesFiles();
+
+    checker.examplesDirectory
+        .childDirectory('layers')
+        .childDirectory('rendering')
+        .childFile('README.md')
+      ..createSync(recursive: true)
+      ..writeAsStringSync("import 'package:flutter/material.dart';");
+
+    expect(checker.check(), isTrue);
+  });
+
   test('non-Dart files with .dart in the filename are ignored', () async {
     buildKnownCrossImportExamplesFiles();
 
     checker.examplesDirectory.childFile('foo.dart.md')
       ..createSync()
+      ..writeAsStringSync("import 'package:flutter/material.dart';");
+
+    expect(checker.check(), isTrue);
+  });
+
+  test('non-Dart files with .dart in the filename are ignored in nested directories', () async {
+    buildKnownCrossImportExamplesFiles();
+
+    checker.examplesDirectory
+        .childDirectory('layers')
+        .childDirectory('rendering')
+        .childFile('foo.dart.md')
+      ..createSync(recursive: true)
       ..writeAsStringSync("import 'package:flutter/material.dart';");
 
     expect(checker.check(), isTrue);
@@ -479,6 +505,33 @@ void main() {
 
       expect(checker.check(), isTrue);
     });
+
+    test('files in $libraryName subdirectories are checked', () async {
+      buildKnownCrossImportExamplesFiles();
+
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      examplesFilesDirectory.childDirectory('baz').childDirectory('bar').childFile('foo.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync("import 'package:flutter/material.dart';");
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the Material examples.',
+        '║   $libraryName/baz/bar/foo.dart',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
   }
 
   for (final (String libraryName, String knownCrossImportsListName, Set<String> knownCrossImports)
@@ -504,7 +557,7 @@ void main() {
       expect(checker.check(), isTrue);
     });
 
-    test('non-Dart files with .dart in the filename are ignored $libraryName', () async {
+    test('non-Dart files are ignored in $libraryName subdirectories', () async {
       buildKnownCrossImportExamplesFiles();
 
       final Directory directory = getDirectoryForExamplesSlashApiLibrary(
@@ -512,12 +565,30 @@ void main() {
         flutterRoot: checker.flutterRoot,
       );
 
-      directory.childFile('foo.dart.md')
-        ..createSync()
+      directory.childDirectory('layers').childDirectory('rendering').childFile('README.md')
+        ..createSync(recursive: true)
         ..writeAsStringSync("import 'package:flutter/material.dart';");
 
       expect(checker.check(), isTrue);
     });
+
+    test(
+      'non-Dart files with .dart in the filename are ignored $libraryName subdirectories',
+      () async {
+        buildKnownCrossImportExamplesFiles();
+
+        final Directory directory = getDirectoryForExamplesSlashApiLibrary(
+          libraryName,
+          flutterRoot: checker.flutterRoot,
+        );
+
+        directory.childDirectory('layers').childDirectory('rendering').childFile('foo.dart.md')
+          ..createSync(recursive: true)
+          ..writeAsStringSync("import 'package:flutter/material.dart';");
+
+        expect(checker.check(), isTrue);
+      },
+    );
 
     test(
       'when not all $libraryName knowns have cross imports',
@@ -709,6 +780,32 @@ void main() {
       expect(result, equals('$lines\n'));
       expect(success, isFalse);
     }, skip: isCupertinoExample(libraryName)); // [intended]: Cupertino examples can import Cupertino
+
+    test('files in $libraryName subdirectories are checked', () async {
+      final dartFile = '$libraryName/baz/bar/foo.dart';
+
+      final Directory examplesFilesDirectory = getDirectoryForExamplesSlashApiLibrary(
+        libraryName,
+        flutterRoot: checker.flutterRoot,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles({dartFile}, inDirectory: examplesFilesDirectory);
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the Material examples.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
   }
 }
 
