@@ -12,11 +12,12 @@ import '../check_examples_cross_imports.dart';
 import 'common.dart';
 import 'cross_imports_checker_test_utils.dart';
 
+// A pattern that matches `examples/api/lib/**` and `examples/api/test/**`, for use in tests.
+final _kExamplesSlashApiLibraryPattern = RegExp(r'^examples/api/(lib|test)/[a-z_]+');
+
 void main() {
   late ExamplesCrossImportChecker checker;
   late _CrossImportsExamplesDirectories checkerDirectories;
-
-  final examplesSlashApiLibraryPattern = RegExp(r'^examples/api/(lib|test)/[a-z_]+');
 
   void buildKnownCrossImportExamplesFiles({Set<String> excludes = const <String>{}}) {
     final Map<Directory, Set<String>> knownFiles = checkerDirectories.getKnownFiles(
@@ -24,50 +25,21 @@ void main() {
     );
 
     for (final Set<String> files in knownFiles.values) {
-      for (final filepath in files) {
-        if (excludes.contains(filepath)) {
+      for (final filePath in files) {
+        if (excludes.contains(filePath)) {
           continue;
         }
 
         final File file = checker.filesystem.file(
           path.join(
             checker.flutterRoot.absolute.path,
-            filepath.replaceAll('/', Platform.pathSeparator),
+            filePath.replaceAll('/', Platform.pathSeparator),
           ),
         );
 
         writeImport(file);
       }
     }
-  }
-
-  /// Get the directory for the given `examples/api` [libraryName].
-  ///
-  /// The library name can only contain lowercase a-z and underscores
-  /// and must start with either `examples/api/lib` or `examples/api/test`.
-  Directory getDirectoryForExamplesSlashApiLibrary(
-    String libraryName, {
-    required Directory flutterRoot,
-  }) {
-    if (!examplesSlashApiLibraryPattern.hasMatch(libraryName)) {
-      throw ArgumentError('Invalid library name: $libraryName', 'libraryName');
-    }
-
-    return flutterRoot.childDirectory(libraryName);
-  }
-
-  /// Get the first known cross import for the given [libraryName].
-  ///
-  /// Throws a [StateError] if there are no known cross imports for the given library.
-  String getFirstCrossImportForLibrary(String libraryName, Set<String> knownCrossImports) {
-    // Use the first entry that belongs to this library, since known imports sets
-    // are shared between lib/ and test/ directories and may contain paths for both.
-    return knownCrossImports.firstWhere((String p) => p.startsWith('$libraryName/'));
-  }
-
-  /// Returns whether there are no known cross imports for the given [libraryName].
-  bool hasNoKnownCrossImports(String libraryName, Set<String> knownCrossImports) {
-    return !knownCrossImports.any((String entry) => entry.startsWith('$libraryName/'));
   }
 
   setUp(() {
@@ -807,6 +779,35 @@ void main() {
       expect(success, isFalse);
     });
   }
+}
+
+/// Get the directory for the given `examples/api` [libraryName].
+///
+/// The library name can only contain lowercase a-z and underscores
+/// and must start with either `examples/api/lib` or `examples/api/test`.
+Directory getDirectoryForExamplesSlashApiLibrary(
+  String libraryName, {
+  required Directory flutterRoot,
+}) {
+  if (!_kExamplesSlashApiLibraryPattern.hasMatch(libraryName)) {
+    throw ArgumentError('Invalid library name: $libraryName', 'libraryName');
+  }
+
+  return flutterRoot.childDirectory(libraryName);
+}
+
+/// Get the first known cross import for the given [libraryName].
+///
+/// Throws a [StateError] if there are no known cross imports for the given library.
+String getFirstCrossImportForLibrary(String libraryName, Set<String> knownCrossImports) {
+  // Use the first entry that belongs to this library, since known imports sets
+  // are shared between lib/ and test/ directories and may contain paths for both.
+  return knownCrossImports.firstWhere((String p) => p.startsWith('$libraryName/'));
+}
+
+/// Returns whether there are no known cross imports for the given [libraryName].
+bool hasNoKnownCrossImports(String libraryName, Set<String> knownCrossImports) {
+  return !knownCrossImports.any((String entry) => entry.startsWith('$libraryName/'));
 }
 
 /// Returns whether the given [libraryName] matches the Material examples under `examples/api`.
