@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 
 import '../check_examples_cross_imports.dart';
+import '../cross_imports_checker_utils.dart';
 import 'common.dart';
 import 'cross_imports_checker_test_utils.dart';
 
@@ -37,7 +38,10 @@ void main() {
           ),
         );
 
-        writeImport(file);
+        final LibraryCrossImportStatementType importStatement =
+            getCrossImportStatementForExamplesLibraryFile(filePath);
+
+        writeImport(file, importStatement.importString);
       }
     }
   }
@@ -761,8 +765,16 @@ void main() {
         flutterRoot: checker.flutterRoot,
       );
 
+      final LibraryCrossImportStatementType importStatement =
+          getCrossImportStatementForExamplesLibraryFile(dartFile);
+      final String disallowedImportName = importStatement.readableName;
+
       buildKnownCrossImportExamplesFiles();
-      writeImportInFiles({dartFile}, inDirectory: examplesFilesDirectory);
+      writeImportInFiles(
+        {dartFile},
+        inDirectory: examplesFilesDirectory,
+        importString: importStatement.importString,
+      );
 
       bool? success;
       final String result = await capture(() async {
@@ -771,7 +783,7 @@ void main() {
 
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the Material examples.',
+        '║ The following file in $libraryName has a disallowed import of $disallowedImportName. Refactor it or move it to the $disallowedImportName examples.',
         '║   $dartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');
@@ -779,6 +791,28 @@ void main() {
       expect(success, isFalse);
     });
   }
+}
+
+/// Get a [LibraryCrossImportStatementType], for the file at the given [filePath],
+/// that will result in the [ExamplesCrossImportChecker] flagging the file as having disallowed cross imports.
+///
+/// Returns [LibraryCrossImportStatementType.cupertino] if the file is in the Material examples,
+/// and [LibraryCrossImportStatementType.material] if the file is in the Cupertino examples.
+///
+/// Returns [LibraryCrossImportStatementType.material] for any other library,
+/// such as `examples/layers/rendering/spinning_square.dart`.
+LibraryCrossImportStatementType getCrossImportStatementForExamplesLibraryFile(String filePath) {
+  if (filePath.startsWith('examples/api/lib/material/') ||
+      filePath.startsWith('examples/api/test/material/')) {
+    return LibraryCrossImportStatementType.cupertino;
+  }
+
+  if (filePath.startsWith('examples/api/lib/cupertino/') ||
+      filePath.startsWith('examples/api/test/cupertino/')) {
+    return LibraryCrossImportStatementType.material;
+  }
+
+  return LibraryCrossImportStatementType.material;
 }
 
 /// Get the directory for the given `examples/api` [libraryName].
