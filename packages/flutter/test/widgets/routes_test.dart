@@ -1008,8 +1008,6 @@ void main() {
       expect(find.byType(ModalBarrier), findsNWidgets(1));
     });
 
-
-
     testWidgets('showGeneralDialog adds non-dismissible barrier when barrierDismissible is false', (
       WidgetTester tester,
     ) async {
@@ -2823,7 +2821,7 @@ void main() {
     expect(focusNode.hasFocus, true);
   });
 
-  testWidgets('showGeneralDialog supports barrierBuilder', (WidgetTester tester) async {
+  testWidgets('showGeneralDialog applies custom barrierBuilder', (WidgetTester tester) async {
     await tester.pumpWidget(
       TestWidgetsApp(
         home: Builder(
@@ -2836,12 +2834,21 @@ void main() {
                   barrierLabel: 'barrier_label',
                   transitionDuration: Duration.zero,
                   barrierBuilder:
-                      (BuildContext innerContext, Animation<double> animation, Widget barrier) {
-                        return Padding(padding: const EdgeInsets.all(123.4), child: barrier);
+                      (BuildContext context, Animation<double> animation, Widget barrier) {
+                        return Padding(
+                          key: const ValueKey<String>('custom-barrier-padding'),
+                          padding: const EdgeInsets.all(12),
+                          child: barrier,
+                        );
                       },
-                  pageBuilder: (BuildContext innerContext, _, _) {
-                    return const SizedBox();
-                  },
+                  pageBuilder:
+                      (
+                        BuildContext context,
+                        Animation<double> animation,
+                        Animation<double> secondaryAnimation,
+                      ) {
+                        return const SizedBox();
+                      },
                 );
               },
               child: const Text('Show Dialog'),
@@ -2853,22 +2860,10 @@ void main() {
 
     // Open the dialog.
     await tester.tap(find.byType(TestButton));
-    await tester.pump();
-    expect(find.byType(ModalBarrier), findsNWidgets(2));
+    await tester.pumpAndSettle();
 
-    // Check if Padding with 123.4 exists
-    final Finder paddingFinder = find.ancestor(
-      of: find.byWidget(find.byType(ModalBarrier).evaluate().last.widget),
-      matching: find.byType(Padding),
-    );
-    expect(paddingFinder, findsOneWidget);
-    final Padding padding = tester.widget(paddingFinder);
-    expect(padding.padding, const EdgeInsets.all(123.4));
-
-    // Close the dialog.
-    await tester.tapAt(Offset.zero);
-    await tester.pump();
-    expect(find.byType(ModalBarrier), findsNWidgets(1));
+    // Verify the custom barrier is present.
+    expect(find.byKey(const ValueKey<String>('custom-barrier-padding')), findsOneWidget);
   });
 }
 

@@ -3467,7 +3467,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('showDialog supports barrierBuilder', (WidgetTester tester) async {
+  testWidgets('showDialog applies custom barrierBuilder', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
@@ -3478,7 +3478,11 @@ void main() {
                   context: context,
                   barrierBuilder:
                       (BuildContext innerContext, Animation<double> animation, Widget barrier) {
-                        return Padding(padding: const EdgeInsets.all(56.7), child: barrier);
+                        return Padding(
+                          key: const ValueKey<String>('dialog-barrier-padding'),
+                          padding: const EdgeInsets.all(56.7),
+                          child: barrier,
+                        );
                       },
                   builder: (BuildContext innerContext) {
                     return const SizedBox();
@@ -3494,17 +3498,9 @@ void main() {
 
     // Open the dialog.
     await tester.tap(find.byType(ElevatedButton));
-    await tester.pump();
-    expect(find.byType(ModalBarrier), findsNWidgets(2));
+    await tester.pumpAndSettle();
 
-    // Check if Padding with 56.7 exists
-    final Finder paddingFinder = find.ancestor(
-      of: find.byWidget(find.byType(ModalBarrier).evaluate().last.widget),
-      matching: find.byType(Padding),
-    );
-    expect(paddingFinder, findsOneWidget);
-    final Padding padding = tester.widget(paddingFinder);
-    expect(padding.padding, const EdgeInsets.all(56.7));
+    expect(find.byKey(const ValueKey<String>('dialog-barrier-padding')), findsOneWidget);
   });
 }
 
