@@ -2940,11 +2940,12 @@ class DialogObserver extends NavigatorObserver {
 
 class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   _TestDialogRouteWithCustomBarrierCurve({
-    required this._child,
+    required Widget child,
     this.barrierLabel,
     this.barrierColor = _black,
-    this._barrierCurve,
-  });
+    Curve? barrierCurve,
+  }) : _barrierCurve = barrierCurve,
+       _child = child;
 
   final Widget _child;
 
