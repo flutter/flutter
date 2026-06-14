@@ -290,6 +290,14 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   std::string executable_name = GetExecutableName();
   std::vector<const char*> argv = {executable_name.c_str()};
   std::vector<std::string> switches = project_->GetSwitches();
+  if (enable_impeller_) {
+    if (std::find(switches.begin(), switches.end(),
+                  "--impeller-use-sdfs=true") == switches.end() &&
+        std::find(switches.begin(), switches.end(),
+                  "--impeller-use-sdfs=false") == switches.end()) {
+      switches.push_back("--impeller-use-sdfs=true");
+    }
+  }
   std::transform(
       switches.begin(), switches.end(), std::back_inserter(argv),
       [](const std::string& arg) -> const char* { return arg.c_str(); });
