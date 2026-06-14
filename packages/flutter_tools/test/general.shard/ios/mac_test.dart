@@ -1231,7 +1231,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
 =======
   Future<XcodeProjectInfo?> getInfo(
-    String projectPath, {
+    XcodeBasedProject xcodeProject, {
     String? projectFilename,
     required Directory buildDirectory,
   }) async {
@@ -1248,7 +1248,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
-    String projectPath,
+    XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
     bool skipPackageUpdatesAndValidation = true,
   }) async {
