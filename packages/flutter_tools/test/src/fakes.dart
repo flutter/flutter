@@ -9,18 +9,23 @@ import 'package:dds/dds_launcher.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/java.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/template.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -412,6 +417,12 @@ class FakeFlutterVersion implements FlutterVersion {
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
   var _didFetchTagsAndUpdate = false;
 
+  bool get didEnsureVersionFile => _didEnsureVersionFile;
+  var _didEnsureVersionFile = false;
+
+  bool get didDeleteVersionFile => _didDeleteVersionFile;
+  var _didDeleteVersionFile = false;
+
   /// Will be returned by [fetchTagsAndGetVersion] if not null.
   final FlutterVersion? nextFlutterVersion;
 
@@ -483,7 +494,14 @@ class FakeFlutterVersion implements FlutterVersion {
   }
 
   @override
-  Future<void> ensureVersionFile() async {}
+  Future<void> ensureVersionFile() async {
+    _didEnsureVersionFile = true;
+  }
+
+  @override
+  void deleteVersionFile() {
+    _didDeleteVersionFile = true;
+  }
 
   @override
   String getBranchName({bool redactUnknownBranches = false}) {
@@ -530,8 +548,10 @@ class TestFeatureFlags implements FeatureFlags {
     this.isSwiftPackageManagerEnabled = false,
     this.isOmitLegacyVersionFileEnabled = false,
     this.isWindowingEnabled = false,
+    this.isAccessibilityEvaluationsEnabled = false,
     this.isLLDBDebuggingEnabled = false,
     this.isUISceneMigrationEnabled = false,
+    this.isRiscv64SupportEnabled = false,
   });
 
   @override
@@ -577,10 +597,16 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isWindowingEnabled;
 
   @override
+  final bool isAccessibilityEvaluationsEnabled;
+
+  @override
   final bool isLLDBDebuggingEnabled;
 
   @override
   final bool isUISceneMigrationEnabled;
+
+  @override
+  final bool isRiscv64SupportEnabled;
 
   @override
   bool isEnabled(Feature feature) {
@@ -598,8 +624,10 @@ class TestFeatureFlags implements FeatureFlags {
       swiftPackageManager => isSwiftPackageManagerEnabled,
       omitLegacyVersionFile => isOmitLegacyVersionFileEnabled,
       windowingFeature => isWindowingEnabled,
+      accessibilityEvaluationsFeature => isAccessibilityEvaluationsEnabled,
       lldbDebugging => isLLDBDebuggingEnabled,
       uiSceneMigration => isUISceneMigrationEnabled,
+      riscv64 => isRiscv64SupportEnabled,
       _ => false,
     };
   }
@@ -620,8 +648,10 @@ class TestFeatureFlags implements FeatureFlags {
     swiftPackageManager,
     omitLegacyVersionFile,
     windowingFeature,
+    accessibilityEvaluationsFeature,
     lldbDebugging,
     uiSceneMigration,
+    riscv64,
   ];
 
   @override
@@ -873,3 +903,19 @@ class ClosedStdinController extends Fake implements StreamSink<List<int>> {
     return null;
   }
 }
+
+class FakeConfig extends Fake implements Config {}
+
+class FakeFileSystemUtils extends Fake implements FileSystemUtils {}
+
+class FakeTerminal extends Fake implements Terminal {}
+
+class FakeProcessUtils extends Fake implements ProcessUtils {}
+
+class FakeTemplateRenderer extends Fake implements TemplateRenderer {}
+
+class FakeXcode extends Fake implements Xcode {}
+
+class FakeArtifacts extends Fake implements Artifacts {}
+
+class FakeCache extends Fake implements Cache {}

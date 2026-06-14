@@ -6,6 +6,7 @@ import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/utils.dart';
 
 /// Constant for 'pluginClass' key in plugin maps.
 const kPluginClass = 'pluginClass';
@@ -327,6 +328,7 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
       'name': name,
       'prefix': classPrefix,
       'class': ?pluginClass,
+      if (pluginClass != null) 'classVar': camelCase(snakeCase('$classPrefix$pluginClass')),
       kDartPluginClass: ?dartPluginClass,
       kDartFileName: ?dartFileName,
       if (ffiPlugin) kFfiPlugin: true,

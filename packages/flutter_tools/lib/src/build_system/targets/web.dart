@@ -578,6 +578,7 @@ class WebReleaseBundle extends Target {
   @override
   List<Source> get inputs => <Source>[
     const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    const Source.pattern('{BUILD_DIR}/${DartBuild.dartHookResultFilename}'),
     ...buildPatternStems.map((String file) => Source.pattern('{BUILD_DIR}/$file')),
   ];
 
@@ -704,7 +705,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         environment.serviceWorkerStrategy == ServiceWorkerStrategy.offlineFirst;
     final File inputFlutterBootstrapJs = webResources.childFile('flutter_bootstrap.js');
     final String inputBootstrapContent;
-    if (await inputFlutterBootstrapJs.exists()) {
+    if (inputFlutterBootstrapJs.existsSync()) {
       inputBootstrapContent = await inputFlutterBootstrapJs.readAsString();
     } else {
       inputBootstrapContent = generateDefaultFlutterBootstrapScript(

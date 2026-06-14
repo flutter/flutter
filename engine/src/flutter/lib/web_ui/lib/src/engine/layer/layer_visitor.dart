@@ -627,7 +627,7 @@ class PaintVisitor extends LayerVisitor<void> {
     nWayCanvas.clipRect(offsetPaintBounds, ui.ClipOp.intersect, false);
     final paint = ui.Paint();
     paint.imageFilter = imageFilter.filter;
-    nWayCanvas.saveLayer(offsetPaintBounds, paint);
+    nWayCanvas.saveLayer(null, paint);
     paintChildren(imageFilter);
     nWayCanvas.restore();
     nWayCanvas.restore();

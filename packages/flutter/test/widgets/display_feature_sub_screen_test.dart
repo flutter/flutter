@@ -223,4 +223,16 @@ void main() {
       expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(0, 300)));
     });
   });
+
+  testWidgets('DisplayFeatureSubScreen does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: DisplayFeatureSubScreen(child: Text('X'))),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(DisplayFeatureSubScreen)), Size.zero);
+  });
 }

@@ -224,6 +224,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.cursorHeight,
     this.restorationId,
     this.menuController,
+    this.scrollPadding = const EdgeInsets.all(20.0),
   }) : assert(filterCallback == null || enableFilter),
        assert(
          inputDecorationTheme == null ||
@@ -686,6 +687,9 @@ class DropdownMenu<T> extends StatefulWidget {
   /// other widgets.
   final MenuController? menuController;
 
+  /// {@macro flutter.widgets.editableText.scrollPadding}
+  final EdgeInsets scrollPadding;
+
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
 }
@@ -726,7 +730,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   TextEditingController? _localTextEditingController;
   TextEditingController get _effectiveTextEditingController =>
       widget.controller ?? (_localTextEditingController ??= TextEditingController());
-  final FocusNode _internalFocudeNode = FocusNode();
+  final FocusNode _internalFocusNode = FocusNode();
   WidgetStatesController? _highlightedItemStatesController;
 
   FocusNode? _localTrailingIconButtonFocusNode;
@@ -757,7 +761,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   void dispose() {
     _localTextEditingController?.dispose();
     _localTextEditingController = null;
-    _internalFocudeNode.dispose();
+    _internalFocusNode.dispose();
     _localTrailingIconButtonFocusNode?.dispose();
     _localTrailingIconButtonFocusNode = null;
     _highlightedItemStatesController?.dispose();
@@ -1103,7 +1107,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       }
       controller.open();
       if (focusForKeyboard) {
-        _internalFocudeNode.requestFocus();
+        _internalFocusNode.requestFocus();
       }
     }
     setState(() {});
@@ -1307,6 +1311,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               inputFormatters: widget.inputFormatters,
               decoration: textFieldDecoration,
               restorationId: widget.restorationId,
+              scrollPadding: widget.scrollPadding,
             ),
           ),
         );
@@ -1405,7 +1410,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
               SingleActivator(LogicalKeyboardKey.escape): DismissIntent(),
             },
             child: Focus(
-              focusNode: _internalFocudeNode,
+              focusNode: _internalFocusNode,
               skipTraversal: true,
               child: const SizedBox.shrink(),
             ),

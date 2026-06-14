@@ -64,8 +64,13 @@ jobs:
 
       - name: Configure Git
         run: |
+<<<<<<< HEAD
           git config user.name "[bot] Cut Release Branch"
           git config user.email "<>"
+=======
+          git config user.name "flutteractionsbot"
+          git config user.email "<flutter-actions-bot@google.com>"
+>>>>>>> 924134a44c189315be2148659913dda1671cbe99
 
       - name: Create Branch and Version File
         run: |
@@ -83,3 +88,9 @@ jobs:
       - name: Push new branch
         run: |
           git push origin ${{ env.BRANCH_NAME }}
+<<<<<<< HEAD
+=======
+          echo "## Release Branch \`${{ env.BRANCH_NAME }}\` Cut Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **View Branch** https://github.com/$GITHUB_REPOSITORY/tree/${{ env.BRANCH_NAME }}" >> $GITHUB_STEP_SUMMARY
+>>>>>>> 924134a44c189315be2148659913dda1671cbe99

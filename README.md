@@ -12,6 +12,7 @@
 [![Twitter handle][]][Twitter badge]
 [![BlueSky badge][]][BlueSky handle]
 [![codecov](https://codecov.io/gh/flutter/flutter/branch/master/graph/badge.svg?token=11yDrJU2M2)](https://codecov.io/gh/flutter/flutter)
+[![LFX Health Score](https://insights.linuxfoundation.org/api/badge/health-score?project=flutter)](https://insights.linuxfoundation.org/project/flutter)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5631/badge)](https://bestpractices.coreinfrastructure.org/projects/5631)
 [![SLSA 1](https://slsa.dev/images/gh-badge-level1.svg)](https://slsa.dev)
 

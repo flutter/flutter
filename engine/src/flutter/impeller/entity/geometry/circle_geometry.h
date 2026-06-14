@@ -46,6 +46,11 @@ class CircleGeometry final : public Geometry {
   // SDF-based antialiasing
   void SetAntialiasPadding(Scalar extra_pixels);
 
+<<<<<<< HEAD
+=======
+  Scalar GetAntialiasPadding() const;
+
+>>>>>>> 924134a44c189315be2148659913dda1671cbe99
  private:
   Point center_;
   Scalar radius_;

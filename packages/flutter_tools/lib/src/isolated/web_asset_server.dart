@@ -80,8 +80,13 @@ class WebAssetServer implements AssetReader {
     required this.useLocalCanvasKit,
     required this.fileSystem,
     required this.logger,
+<<<<<<< HEAD
+=======
+    String? baseHref,
+>>>>>>> 924134a44c189315be2148659913dda1671cbe99
     Map<String, String> webDefines = const <String, String>{},
   }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)),
+       _baseHref = baseHref,
        _webDefines = webDefines {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
@@ -114,15 +119,17 @@ class WebAssetServer implements AssetReader {
     }
   }
 
-  static const _reloadedSourcesFileName = 'reloaded_sources.json';
+  // Use relative path for the URI so the app can still find it even if it's in
+  // a different domain than the server.
+  @visibleForTesting
+  static Uri reloadedSourcesUri = Uri.parse('reloaded_sources.json');
 
-  /// Given a list of [modules] that need to be reloaded during a hot restart or
-  /// hot reload, writes a file that contains a list of objects each with three
-  /// fields:
+  /// Given a list of [modulePaths] that need to be reloaded during a hot
+  /// restart or hot reload, writes a file that contains a list of objects each
+  /// with three fields:
   ///
-  /// `src`: A string that corresponds to the file path containing a DDC library
-  /// bundle. To support embedded libraries, the path should include the
-  /// `baseUri` of the web server.
+  /// `src`: A string that corresponds to the file path relative to the app base
+  /// URL root that contains the DDC library bundle.
   /// `module`: The name of the library bundle in `src`.
   /// `libraries`: An array of strings containing the libraries that were
   /// compiled in `src`.
@@ -131,7 +138,7 @@ class WebAssetServer implements AssetReader {
   /// ```json
   /// [
   ///   {
-  ///     "src": "<baseUri>/<file_name>",
+  ///     "src": "/<file_name>",
   ///     "module": "<module_name>",
   ///     "libraries": ["<lib1>", "<lib2>"],
   ///   },
@@ -140,22 +147,28 @@ class WebAssetServer implements AssetReader {
   ///
   /// The path of the output file should stay consistent across the lifetime of
   /// the app.
-  void writeReloadedSources(List<String> modules) {
+  void writeReloadedSources(List<String> modulePaths) {
     final moduleToLibrary = <Map<String, Object>>[];
-    for (final module in modules) {
+    for (final relativeModulePath in modulePaths) {
       final metadata = ModuleMetadata.fromJson(
-        json.decode(utf8.decode(_webMemoryFS.metadataFiles['$module.metadata']!.toList()))
+        json.decode(
+              utf8.decode(_webMemoryFS.metadataFiles['$relativeModulePath.metadata']!.toList()),
+            )
             as Map<String, dynamic>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
-      final moduleUri = '$baseUri/$module';
       moduleToLibrary.add(<String, Object>{
-        'src': moduleUri,
+        // Use only the path for the module so the app can still find it even if
+        // it's in a different domain than the server.
+        // TODO(srujzs): We use a `/` prefix to match the path that DWDS gets
+        // when parsing the parsed URL. It may be cleaner to just remove the `/`
+        // in DWDS rather than add it here.
+        'src': '/$relativeModulePath',
         'module': metadata.name,
         'libraries': libraries,
       });
     }
-    writeFile(_reloadedSourcesFileName, json.encode(moduleToLibrary));
+    writeFile(reloadedSourcesUri.path, json.encode(moduleToLibrary));
   }
 
   @visibleForTesting
@@ -268,8 +281,15 @@ class WebAssetServer implements AssetReader {
       useLocalCanvasKit: useLocalCanvasKit,
       fileSystem: fileSystem,
       logger: logger,
+<<<<<<< HEAD
+=======
+      baseHref: webDevServerConfig.baseHref,
+>>>>>>> 924134a44c189315be2148659913dda1671cbe99
       webDefines: webDefines,
     );
+    if (webDevServerConfig.baseHref case final String baseHref?) {
+      server.basePath = stripLeadingSlash(baseHref.substring(0, baseHref.length - 1));
+    }
     final int selectedPort = server.selectedPort;
 
     final cleanHost = hostname == webDevAnyHostDefault ? 'localhost' : hostname;
@@ -352,10 +372,7 @@ class WebAssetServer implements AssetReader {
                   canaryFeatures: canaryFeatures,
                 ),
                 packageConfigPath: buildInfo.packageConfigPath,
-                reloadedSourcesUri: server._baseUri.replace(
-                  pathSegments: List<String>.from(server._baseUri.pathSegments)
-                    ..add(_reloadedSourcesFileName),
-                ),
+                reloadedSourcesUri: reloadedSourcesUri,
               ).strategy
             : FrontendServerRequireStrategyProvider(
                 ReloadConfiguration.none,
@@ -407,6 +424,7 @@ class WebAssetServer implements AssetReader {
   final bool _ddcModuleSystem;
   final bool _canaryFeatures;
   final Map<String, String> _webDefines;
+  final String? _baseHref;
   final HttpServer _httpServer;
   final _webMemoryFS = WebMemoryFS();
   final PackageConfig _packages;
@@ -633,7 +651,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
       generateDefaultFlutterBootstrapScript(includeServiceWorkerSettings: false),
     );
     return bootstrapTemplate.withSubstitutions(
-      baseHref: '/',
+      baseHref: _baseHref ?? '/',
       serviceWorkerVersion: null,
       buildConfig: _buildConfigString,
       flutterJsFile: _flutterJsFile,
@@ -653,8 +671,7 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
     final WebTemplate indexHtml = getWebTemplate(fileSystem, 'index.html', _kDefaultIndex);
     return shelf.Response.ok(
       indexHtml.withSubstitutions(
-        // Currently, we don't support --base-href for the "run" command.
-        baseHref: '/',
+        baseHref: _baseHref ?? '/',
         // Currently, we don't support --static-assets-url for the "run" command.
         staticAssetsUrl: '/',
         serviceWorkerVersion: null,

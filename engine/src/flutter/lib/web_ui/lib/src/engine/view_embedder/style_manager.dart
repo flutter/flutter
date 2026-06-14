@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
+
 import 'package:meta/meta.dart';
 
 import '../browser_detection.dart';
@@ -165,19 +167,23 @@ void applyGlobalCssRulesToSheet(
         '  display: none;'
         '}',
       );
-    } on DomException catch (e) {
-      // Browsers that don't understand ::-ms-reveal throw a DOMException
-      // of type SyntaxError.
-      domWindow.console.warn(e);
-      // Add a fake rule if our code failed because we're under testing
-      assert(() {
-        styleElement.appendText(
-          '$cssSelectorPrefix input.fallback-for-fakey-browser-in-ci {'
-          '  display: none;'
-          '}',
-        );
-        return true;
-      }());
+    } catch (e) {
+      if (e.isA<DomException>()) {
+        // Browsers that don't understand ::-ms-reveal throw a DOMException
+        // of type SyntaxError.
+        domWindow.console.warn(e);
+        // Add a fake rule if our code failed because we're under testing
+        assert(() {
+          styleElement.appendText(
+            '$cssSelectorPrefix input.fallback-for-fakey-browser-in-ci {'
+            '  display: none;'
+            '}',
+          );
+          return true;
+        }());
+      } else {
+        rethrow;
+      }
     }
   }
 }

@@ -391,6 +391,10 @@ KHRSwapchainImplVK::AcquireResult KHRSwapchainImplVK::AcquireNextDrawable() {
       // A recoverable error. Just say we are out of date.
       return AcquireResult{true /* out of date */};
       break;
+    case vk::Result::eErrorSurfaceLostKHR:
+      // This error code is returned by Android for some situations that are
+      // recoverable but do not require recreating the swapchain.
+      return AcquireResult{false /* out of date */};
     default:
       // An unrecoverable error.
       VALIDATION_LOG << "Could not acquire next swapchain image: "

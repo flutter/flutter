@@ -174,10 +174,10 @@ class ProxiedDevice extends Device {
     String id, {
     bool deltaFileTransfer = true,
     bool enableDdsProxy = false,
-    required Category? category,
-    required PlatformType? platformType,
+    required super.category,
+    required super.platformType,
     required TargetPlatform targetPlatform,
-    required bool ephemeral,
+    required super.ephemeral,
     required this.isConnected,
     required this.connectionInterface,
     required this.name,
@@ -200,7 +200,7 @@ class ProxiedDevice extends Device {
        _targetPlatform = targetPlatform,
        _logger = logger,
        _fileTransfer = fileTransfer,
-       super(id, category: category, platformType: platformType, ephemeral: ephemeral);
+       super(id);
 
   /// [DaemonConnection] used to communicate with the daemon.
   final DaemonConnection connection;
@@ -852,6 +852,7 @@ class ProxiedDartDevelopmentService
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    String? appName,
     FlutterDevice? device,
     int? ddsPort,
     bool? ipv6,
@@ -872,6 +873,7 @@ class ProxiedDartDevelopmentService
       _ddsStartedLocally = true;
       await _localDds.startDartDevelopmentService(
         vmServiceUri,
+        appName: appName,
         ddsPort: ddsPort,
         ipv6: ipv6,
         disableServiceAuthCodes: disableServiceAuthCodes,

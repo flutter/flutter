@@ -62,6 +62,15 @@ void main() {
       );
     });
 
+    testWithoutContext('flutterFrameworkSwiftPackageDirectory', () {
+      final fs = MemoryFileSystem.test();
+      final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
+      expect(
+        project.flutterFrameworkSwiftPackageDirectory.path,
+        'app_name/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework',
+      );
+    });
+
     testWithoutContext('flutterPluginSwiftPackageDirectory', () {
       final fs = MemoryFileSystem.test();
       final project = IosProject.fromFlutter(FakeFlutterProject(fileSystem: fs));
@@ -608,7 +617,11 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   List<String> schemes;
 
   @override
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async {
     return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
   }
 }

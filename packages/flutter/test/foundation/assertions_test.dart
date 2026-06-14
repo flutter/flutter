@@ -12,6 +12,7 @@ void main() {
     final List<String> log = captureOutput(() {
       debugPrintStack(label: 'Example label', maxFrames: 7);
     });
+    expect(log, hasLength(greaterThanOrEqualTo(2)));
     expect(log[0], contains('Example label'));
     expect(log[1], contains('debugPrintStack'));
   });
@@ -38,6 +39,7 @@ void main() {
       FlutterError.dumpErrorToConsole(details);
     });
 
+    expect(log, hasLength(greaterThan(3)));
     expect(log[0], contains('EXAMPLE LIBRARY'));
     expect(log[1], contains('Example context'));
     expect(log[2], contains('Example exception'));

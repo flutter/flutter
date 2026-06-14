@@ -26,6 +26,7 @@ import android.view.DisplayCutout;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
+import android.view.RoundedCorner;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -77,7 +78,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Displays a Flutter UI on an Android device.
@@ -113,11 +113,6 @@ public class FlutterView extends FrameLayout
     implements MouseCursorPlugin.MouseCursorViewDelegate, KeyboardManager.ViewDelegate {
   private static final String TAG = "FlutterView";
   private static final String GBOARD_PACKAGE_NAME = "com.google.android.inputmethod.latin";
-
-  // Boolean that gates if view port metrics should be sent.  When the
-  // engine informs the embedder of a resize, it is not necessary to send
-  // the viewport metrics back to the engine.
-  private AtomicBoolean shouldSendViewportMetrics = new AtomicBoolean(true);
 
   // Maximum size allowed for a content sized view.
   @VisibleForTesting static final int CONTENT_SIZING_MAX = 2 << 12;
@@ -209,7 +204,6 @@ public class FlutterView extends FrameLayout
               surfaceParams.width = width;
             }
             if (changed) {
-              shouldSendViewportMetrics.set(false);
               flutterEngineView.setLayoutParams(surfaceParams);
             }
           } else {
@@ -542,13 +536,7 @@ public class FlutterView extends FrameLayout
       viewportMetrics.maxWidth = viewportMetrics.width;
     }
 
-    if (shouldSendViewportMetrics.compareAndSet(false, true)) {
-      Log.d(
-          TAG,
-          "Resize was in response to the engine resizing the view. Not sending viewport metrics.");
-    } else {
-      sendViewportMetricsToFlutter();
-    }
+    sendViewportMetricsToFlutter();
   }
 
   @VisibleForTesting()
@@ -855,6 +843,20 @@ public class FlutterView extends FrameLayout
     // existing Insets-based method calls above.
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_35) {
       delegate.growViewportMetricsToCaptionBar(getContext(), viewportMetrics);
+    }
+
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
+      RoundedCorner topLeft = insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT);
+      RoundedCorner topRight = insets.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT);
+      RoundedCorner bottomRight = insets.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_RIGHT);
+      RoundedCorner bottomLeft = insets.getRoundedCorner(RoundedCorner.POSITION_BOTTOM_LEFT);
+
+      viewportMetrics.displayCornerRadiusTopLeft = topLeft != null ? topLeft.getRadius() : 0;
+      viewportMetrics.displayCornerRadiusTopRight = topRight != null ? topRight.getRadius() : 0;
+      viewportMetrics.displayCornerRadiusBottomRight =
+          bottomRight != null ? bottomRight.getRadius() : 0;
+      viewportMetrics.displayCornerRadiusBottomLeft =
+          bottomLeft != null ? bottomLeft.getRadius() : 0;
     }
 
     Log.v(
@@ -1583,12 +1585,20 @@ public class FlutterView extends FrameLayout
   @Override
   public void onProvideAutofillVirtualStructure(@NonNull ViewStructure structure, int flags) {
     super.onProvideAutofillVirtualStructure(structure, flags);
-    textInputPlugin.onProvideAutofillVirtualStructure(structure, flags);
+    // Defensive null check to prevent NPE when textInputPlugin is not yet initialized
+    // (e.g., when attachToEngineAutomatically is false).
+    if (textInputPlugin != null) {
+      textInputPlugin.onProvideAutofillVirtualStructure(structure, flags);
+    }
   }
 
   @Override
   public void autofill(@NonNull SparseArray<AutofillValue> values) {
-    textInputPlugin.autofill(values);
+    // Defensive null check to prevent NPE when textInputPlugin is not yet initialized
+    // (e.g., when attachToEngineAutomatically is false).
+    if (textInputPlugin != null) {
+      textInputPlugin.autofill(values);
+    }
   }
 
   @Override

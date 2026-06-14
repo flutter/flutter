@@ -53,6 +53,44 @@ void main() {
     expect(controller.position.pixels, 100.0);
   });
 
+  testWidgets('keyboardDismissBehavior.OnDrag with drawer tests', (WidgetTester tester) async {
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          drawer: Container(),
+          body: Column(
+            children: <Widget>[
+              const TextField(),
+              Expanded(
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: Container(height: 1000),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    final Finder finder = find.byType(TextField).first;
+    await tester.tap(finder);
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+  });
+
   testWidgets('Scaffold drawer callback test', (WidgetTester tester) async {
     var isDrawerOpen = false;
     var isEndDrawerOpen = false;
@@ -122,6 +160,51 @@ void main() {
     await tester.flingFrom(Offset(width - 1, 0.0), const Offset(-10.0, 0.0), 10.0);
     await tester.pumpAndSettle();
     expect(onEndDrawerChangedCalled, false);
+  });
+
+  testWidgets('ListView dismiss keyboard onDrag and keep dismissed on drawer opened test', (
+    WidgetTester tester,
+  ) async {
+    final list = List<int>.generate(50, (int i) => i);
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: Scaffold(
+            key: scaffoldKey,
+            drawer: Container(),
+            body: Column(
+              children: <Widget>[
+                const TextField(),
+                Expanded(
+                  child: ListView(
+                    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                    children: list.map((int i) {
+                      return Container(height: 50);
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    final Finder finder = find.byType(EditableText).first;
+    await tester.tap(finder);
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.drag(find.byType(ListView).first, const Offset(0.0, -40.0));
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+    scaffoldKey.currentState!.openDrawer();
+    await tester.pumpAndSettle();
+
+    expect(tester.testTextInput.isVisible, isFalse);
   });
 
   testWidgets('Scaffold control test', (WidgetTester tester) async {
@@ -3599,6 +3682,55 @@ void main() {
     await tester.pump();
     // FAB is not visible.
     expect(find.byType(FloatingActionButton), findsNothing);
+  });
+
+  testWidgets('Scaffold FAB animates without rebuilding', (WidgetTester tester) async {
+    bool? dirty;
+    bool? checkDirty() {
+      final Finder finder = find.descendant(
+        of: find.byType(ScrollNotificationObserver),
+        matching: find.ancestor(
+          of: find.byType(CustomMultiChildLayout),
+          matching: find.byWidgetPredicate((widget) {
+            return widget is AnimatedBuilder || widget is Builder;
+          }),
+        ),
+      );
+      return finder.tryEvaluate() ? tester.element(finder).dirty : null;
+    }
+
+    final fabLocation = ValueNotifier<FloatingActionButtonLocation>(.centerDocked);
+    const builderKey = Key('Builder');
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ValueListenableBuilder(
+          key: builderKey,
+          valueListenable: fabLocation,
+          builder: (context, location, child) {
+            dirty = checkDirty();
+
+            return Scaffold(
+              body: const SizedBox.expand(),
+              floatingActionButton: FloatingActionButton(onPressed: () {}),
+              floatingActionButtonLocation: location,
+            );
+          },
+        ),
+      ),
+    );
+
+    // Switch the FAB location to trigger the animation.
+    fabLocation.value = .endFloat;
+    await tester.pump(Durations.short1);
+
+    // Trigger a rebuild to update the "dirty" value.
+    tester.element(find.byKey(builderKey)).markNeedsBuild();
+    await tester.pump(Durations.short1);
+
+    // The element that builds the Scaffold's CustomMultiChildLayout should not be dirty.
+    expect(dirty, isFalse);
+
+    fabLocation.dispose();
   });
 
   testWidgets('Scaffold background color defaults to ColorScheme.surface', (

@@ -372,6 +372,7 @@
                     "language": "python3",
                     "name": "Host Tests for host_debug_unopt_arm64",
                     "script": "flutter/testing/run_tests.py",
+                    "test_timeout_secs": 3600,
                     "parameters": [
                         "--variant",
                         "ci/host_debug_unopt_arm64",

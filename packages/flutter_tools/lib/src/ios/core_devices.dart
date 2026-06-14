@@ -122,12 +122,18 @@ class IOSCoreDeviceLauncher {
     }
 
     // Find the process that was launched using the installationURL.
+    // Filter out app extension processes (.appex) to avoid attaching the
+    // debugger to a widget extension or other extension instead of the
+    // main app process.
+    // See https://github.com/flutter/flutter/issues/183263.
     final List<IOSCoreDeviceRunningProcess> processes = await _coreDeviceControl
         .getRunningProcesses(deviceId: deviceId);
     final IOSCoreDeviceRunningProcess? launchedProcess = processes
         .where(
           (IOSCoreDeviceRunningProcess process) =>
-              process.executable != null && process.executable!.contains(installationURL),
+              process.executable != null &&
+              process.executable!.contains(installationURL) &&
+              !process.executable!.contains('.appex'),
         )
         .firstOrNull;
 
@@ -330,7 +336,7 @@ class IOSCoreDeviceControl {
     //   * Don't ignore flutter logs:
     //     2025-09-16 12:50:07.953318-0500 Runner[1279:149305] flutter: ...
     RegExp(
-      r'^\S* \S* \S*\[[0-9:]*] ((?!(\[INFO|\[WARNING|\[ERROR|\[IMPORTANT|\[FATAL):))(?!(flutter:)).*',
+      r'^\S* \S* \S*\[[0-9:]*] ((?!(\[INFO|\[WARNING|\[ERROR|\[IMPORTANT|\[FATAL):))(?!(flutter:))(?!(\[UIKit App Config\] `UIScene` lifecycle)).*',
     ),
     // Ignore iOS execution mode and potential error. This is not meaningful to the developer.
     // Example:

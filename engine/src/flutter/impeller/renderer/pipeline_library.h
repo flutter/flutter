@@ -12,6 +12,7 @@
 #include "impeller/base/thread.h"
 #include "impeller/base/thread_safety.h"
 #include "impeller/renderer/pipeline.h"
+#include "impeller/renderer/pipeline_compile_queue.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 
 namespace impeller {
@@ -85,6 +86,14 @@ class PipelineLibrary : public std::enable_shared_from_this<PipelineLibrary> {
                      ComparableHash<PipelineDescriptor>,
                      ComparableEqual<PipelineDescriptor>>
   GetPipelineUseCounts() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      If this library has a configurable compile queue, return a
+  ///             pointer to it.
+  ///
+  /// @return     The pipeline compile queue if one is present.
+  ///
+  virtual PipelineCompileQueue* GetPipelineCompileQueue() const;
 
  protected:
   PipelineLibrary();

@@ -191,7 +191,8 @@ TEST_F(PersistentCacheTest, PurgeAllowsFutureSkSLCache) {
   std::promise<bool> io_flushed;
   shell->GetTaskRunners().GetIOTaskRunner()->PostTask(
       [&io_flushed]() { io_flushed.set_value(true); });
-  io_flushed.get_future().get();  // Wait for the IO thread to flush the file.
+  // Wait for the IO thread to flush the file.
+  EXPECT_TRUE(io_flushed.get_future().get());
   ASSERT_GT(persistent_cache->LoadSkSLs().size(), 0u);
 
   // Cleanup

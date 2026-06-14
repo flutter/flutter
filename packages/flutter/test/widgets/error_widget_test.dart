@@ -81,6 +81,16 @@ void main() {
       expect(find.byKey(container), findsOneWidget);
     },
   );
+
+  testWidgets('ErrorWidget does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: SizedBox.shrink(child: ErrorWidget('Exception'))),
+      ),
+    );
+    expect(tester.getSize(find.byType(ErrorWidget)), Size.zero);
+  });
 }
 
 // This widget throws during its regular build and then again when the

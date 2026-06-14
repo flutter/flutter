@@ -357,13 +357,13 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   bool get isInstalled => true;
 
   @override
-  String get versionText => 'Xcode 14';
+  String get versionText => 'Xcode 15';
 
   @override
-  Version get version => Version(14, null, null);
+  Version get version => Version(15, 0, 0);
 
   @override
-  String get build => '14A309';
+  String get build => '15A240D';
 
   @override
   Future<Map<String, String>> getBuildSettings(
@@ -383,10 +383,19 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  Future<void> cleanWorkspace(String workspacePath, String scheme, {bool verbose = false}) async {}
+  Future<void> cleanWorkspace(
+    String workspacePath,
+    String scheme, {
+    required Directory buildDirectory,
+    bool verbose = false,
+  }) async {}
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(
+    String projectPath, {
+    String? projectFilename,
+    required Directory buildDirectory,
+  }) async {
     return XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>[
       'Runner',
     ], BufferLogger.test());
@@ -394,6 +403,23 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   List<String> xcrunCommand() => <String>['xcrun'];
+
+  @override
+  Future<void> prefetchSwiftPackages(
+    String projectPath, {
+    required Directory buildDirectory,
+    bool quiet = true,
+    bool waitForCompletion = true,
+  }) async {}
+
+  @override
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    String projectPath,
+    Directory buildDirectory, {
+    bool skipPackageUpdatesAndValidation = true,
+  }) async {
+    return <String>['xcrun', 'xcodebuild'];
+  }
 }
 
 /// Prevent test crashes from being reported to the crash backend.

@@ -8,12 +8,12 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/gestures/monodrag.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'editable_text_tester.dart';
 import 'two_dimensional_utils.dart';
 
 Widget? _testChildBuilder(BuildContext context, ChildVicinity vicinity) {
-  return SizedBox(
-    height: 200,
-    width: 200,
+  return SizedBox.square(
+    dimension: 200.0,
     child: Center(child: Text('C${vicinity.xIndex}:R${vicinity.yIndex}')),
   );
 }
@@ -958,7 +958,7 @@ void main() {
             drawer: Container(),
             body: Column(
               children: <Widget>[
-                const TextField(),
+                const TestTextField(),
                 Expanded(
                   child: SimpleBuilderTableView(
                     keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -978,7 +978,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.testTextInput.isVisible, isFalse);
-      final Finder finder = find.byType(TextField).first;
+      final Finder finder = find.byType(TestTextField).first;
       await tester.tap(finder);
       expect(tester.testTextInput.isVisible, isTrue);
 

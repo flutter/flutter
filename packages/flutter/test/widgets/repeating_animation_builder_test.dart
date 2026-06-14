@@ -191,5 +191,22 @@ void main() {
       await tester.pump(const Duration(milliseconds: 10));
       expect(values.last, lessThan(0.2));
     });
+
+    testWidgets('RepeatingAnimationBuilder does not crash at zero area', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox.shrink(
+            child: RepeatingAnimationBuilder<double>(
+              animatable: CurveTween(curve: Curves.easeIn),
+              duration: const Duration(milliseconds: 100),
+              builder: (_, _, _) => const Placeholder(),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(RepeatingAnimationBuilder<double>)), Size.zero);
+    });
   });
 }

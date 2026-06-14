@@ -109,6 +109,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       commandHasTerminal: hasTerminal,
       buildAppBundleTargetPlatform: stringsArg('target-platform').join(','),
       buildAppBundleBuildMode: buildMode,
+      buildBundleEnableHcpp: FlutterProject.current().android.computeHcppEnabled(),
     );
   }
 
@@ -172,6 +173,10 @@ class BuildAppBundleCommand extends BuildSubCommand {
       validateDeferredComponents: boolArg('validate-deferred-components'),
       deferredComponentsEnabled: boolArg('deferred-components') && !boolArg('debug'),
     );
+
+    final bool impellerEnabled = project.android.computeImpellerEnabled();
+    final buildLabel = impellerEnabled ? 'manifest-impeller-enabled' : 'manifest-impeller-disabled';
+    globals.analytics.send(Event.flutterBuildInfo(label: buildLabel, buildType: 'android'));
     return FlutterCommandResult.success();
   }
 }

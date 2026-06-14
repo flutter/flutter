@@ -13,6 +13,7 @@
 #include "impeller/renderer/compute_pipeline_descriptor.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline_builder.h"
+#include "impeller/renderer/pipeline_compile_queue.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/shader_stage_compatibility_checker.h"
 
@@ -125,12 +126,16 @@ class GenericRenderPipelineHandle {
 
   virtual ~GenericRenderPipelineHandle() = default;
 
-  std::shared_ptr<Pipeline<PipelineDescriptor>> WaitAndGet() {
+  std::shared_ptr<Pipeline<PipelineDescriptor>> WaitAndGet(
+      PipelineCompileQueue* queue) {
     if (did_wait_) {
       return pipeline_;
     }
     did_wait_ = true;
     if (pipeline_future_.IsValid()) {
+      if (queue != nullptr && pipeline_future_.descriptor.has_value()) {
+        queue->PerformJobEagerly(pipeline_future_.descriptor.value());
+      }
       pipeline_ = pipeline_future_.Get();
     }
     return pipeline_;

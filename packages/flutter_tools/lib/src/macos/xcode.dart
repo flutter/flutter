@@ -20,11 +20,11 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../ios/xcodeproj.dart';
 
-Version get xcodeRequiredVersion => Version(14, null, null);
+Version get xcodeRequiredVersion => Version(15, null, null);
 
 /// Diverging this number from the minimum required version will provide a doctor
 /// warning, not error, that users should upgrade Xcode.
-Version get xcodeRecommendedVersion => Version(15, null, null);
+Version get xcodeRecommendedVersion => Version(16, null, null);
 
 /// SDK name passed to `xcrun --sdk`.
 ///
@@ -231,6 +231,16 @@ class Xcode {
   /// See [XcodeProjectInterpreter.xcrunCommand].
   List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
 
+  Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
+    String projectPath,
+    Directory buildDirectory, {
+    bool skipPackageUpdatesAndValidation = true,
+  }) async => _xcodeProjectInterpreter.fetchDependenciesAndGenerateXcodebuildArgs(
+    projectPath,
+    buildDirectory,
+    skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
+  );
+
   Future<RunResult> cc(List<String> args) => _run('cc', args);
 
   Future<RunResult> clang(List<String> args) => _run('clang', args);
@@ -283,6 +293,9 @@ class Xcode {
 }
 
 EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
+  // NOTE: If you modify this function, you should likely also update the equivalent implementation in
+  // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterToolHelper.swift.tmpl
+
   // iPhoneSimulator.sdk or iPhoneOS.sdk
   final String sdkName = fileSystem.path.basename(sdkroot).toLowerCase();
   if (sdkName.contains('iphone')) {

@@ -248,8 +248,8 @@ class CalcKey extends StatelessWidget {
 }
 
 class NumberKey extends CalcKey {
-  NumberKey(int value, CalculatorState? calcState, {Key? key})
+  NumberKey(int value, CalculatorState? calcState, {super.key})
     : super('$value', () {
         calcState!.handleNumberTap(value);
-      }, key: key);
+      });
 }

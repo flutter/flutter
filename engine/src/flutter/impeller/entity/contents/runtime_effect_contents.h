@@ -17,6 +17,9 @@ namespace impeller {
 
 class RuntimeEffectContents final : public ColorSourceContents {
  public:
+  explicit RuntimeEffectContents(const Geometry* geometry);
+
+  ~RuntimeEffectContents() override;
   struct TextureInput {
     SamplerDescriptor sampler_descriptor;
     std::shared_ptr<Texture> texture;
@@ -28,6 +31,8 @@ class RuntimeEffectContents final : public ColorSourceContents {
 
   void SetTextureInputs(std::vector<TextureInput> texture_inputs);
 
+  const Geometry* GetGeometry() const override;
+
   // |Contents|
   bool Render(const ContentContext& renderer,
               const Entity& entity,
@@ -37,11 +42,17 @@ class RuntimeEffectContents final : public ColorSourceContents {
   bool BootstrapShader(const ContentContext& renderer) const;
 
   // Visible for testing
-  static BufferView EmplaceVulkanUniform(
-      const std::shared_ptr<const std::vector<uint8_t>>& input_data,
-      HostBuffer& host_buffer,
-      const RuntimeUniformDescription& uniform,
-      size_t minimum_uniform_alignment);
+  /// Copies the uniform data into the host buffer.
+  ///
+  /// If the `uniform` has a `padding_layout`, it is used to repack the data.
+  ///
+  /// @param source_data The pointer to the start of the uniform data in the
+  ///        source.
+  /// @param host_buffer The host buffer to emplace the uniform data into.
+  /// @param uniform The description of the uniform being emplaced.
+  static BufferView EmplaceUniform(const uint8_t* source_data,
+                                   HostBuffer& host_buffer,
+                                   const RuntimeUniformDescription& uniform);
 
  private:
   bool RegisterShader(const ContentContext& renderer) const;
@@ -53,6 +64,7 @@ class RuntimeEffectContents final : public ColorSourceContents {
       ContentContextOptions options,
       bool async) const;
 
+  const Geometry* geometry_ = nullptr;
   std::shared_ptr<RuntimeStage> runtime_stage_;
   std::shared_ptr<std::vector<uint8_t>> uniform_data_;
   std::vector<TextureInput> texture_inputs_;

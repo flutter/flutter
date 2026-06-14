@@ -99,7 +99,7 @@ class _SaveableFormState extends State<_SaveableForm> {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
         children: <Widget>[
           const Text(
             'If the field below is unsaved, a confirmation dialog will be shown on back.',
@@ -117,12 +117,12 @@ class _SaveableFormState extends State<_SaveableForm> {
                 // invoking the SystemNavigator. If this wasn't the root route,
                 // then Navigator.maybePop could be used instead.
                 // See https://github.com/flutter/flutter/issues/11490
-                SystemNavigator.pop();
+                await SystemNavigator.pop();
               }
             },
-            autovalidateMode: AutovalidateMode.always,
+            autovalidateMode: .always,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: <Widget>[
                 TextFormField(
                   controller: _controller,
@@ -156,7 +156,7 @@ class _SaveableFormState extends State<_SaveableForm> {
               // invoking the SystemNavigator. If this wasn't the root route,
               // then Navigator.maybePop could be used instead.
               // See https://github.com/flutter/flutter/issues/11490
-              SystemNavigator.pop();
+              await SystemNavigator.pop();
             },
             child: const Text('Go back'),
           ),

@@ -46,10 +46,13 @@ var _kDefaultTargets = <Target>[
   // Linux targets
   const DebugBundleLinuxAssets(TargetPlatform.linux_x64),
   const DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
+  const DebugBundleLinuxAssets(TargetPlatform.linux_riscv64),
   const ProfileBundleLinuxAssets(TargetPlatform.linux_x64),
   const ProfileBundleLinuxAssets(TargetPlatform.linux_arm64),
+  const ProfileBundleLinuxAssets(TargetPlatform.linux_riscv64),
   const ReleaseBundleLinuxAssets(TargetPlatform.linux_x64),
   const ReleaseBundleLinuxAssets(TargetPlatform.linux_arm64),
+  const ReleaseBundleLinuxAssets(TargetPlatform.linux_riscv64),
   const ReleaseAndroidApplication(),
   // This is a one-off rule for bundle and aot compat.
   const CopyFlutterBundle(),
@@ -94,6 +97,7 @@ class AssembleCommand extends FlutterCommand {
   AssembleCommand({bool verboseHelp = false, required BuildSystem buildSystem})
     : _verboseHelp = verboseHelp,
       _buildSystem = buildSystem {
+    requiresPubspecYaml();
     argParser.addMultiOption(
       'define',
       abbr: 'd',
@@ -257,8 +261,8 @@ class AssembleCommand extends FlutterCommand {
       }, 'dart-define');
     } on FormatException {
       throwToolExit(
-        'Error parsing assemble command: your generated configuration may be out of date. '
-        "Try re-running 'flutter build ios' or the appropriate build command.",
+        'Error parsing assemble command: The -Pdart-defines argument contains non-base64 encoded data. '
+        'Check your build command and try again.',
       );
     }
 

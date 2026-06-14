@@ -356,7 +356,11 @@ static void SetViewportMetrics(JNIEnv* env,
                                jint physicalMinWidth,
                                jint physicalMaxWidth,
                                jint physicalMinHeight,
-                               jint physicalMaxHeight) {
+                               jint physicalMaxHeight,
+                               jint physicalDisplayCornerRadiusTopLeft,
+                               jint physicalDisplayCornerRadiusTopRight,
+                               jint physicalDisplayCornerRadiusBottomRight,
+                               jint physicalDisplayCornerRadiusBottomLeft) {
   // Convert java->c++. javaDisplayFeaturesBounds, javaDisplayFeaturesType and
   // javaDisplayFeaturesState cannot be null
   jsize rectSize = env->GetArrayLength(javaDisplayFeaturesBounds);
@@ -375,7 +379,6 @@ static void SetViewportMetrics(JNIEnv* env,
   env->GetIntArrayRegion(javaDisplayFeaturesState, 0, stateSize,
                          &displayFeaturesState[0]);
 
-  // TODO(boetger): update for https://github.com/flutter/flutter/issues/149033
   const flutter::ViewportMetrics metrics{
       static_cast<double>(devicePixelRatio),  // p_device_pixel_ratio
       static_cast<double>(physicalWidth),     // p_physical_width
@@ -408,7 +411,15 @@ static void SetViewportMetrics(JNIEnv* env,
       displayFeaturesBounds,  // p_physical_display_features_bounds
       displayFeaturesType,    // p_physical_display_features_type
       displayFeaturesState,   // p_physical_display_features_state
-      0,                      // p_display_id
+      0,                      // p_display_id,
+      static_cast<double>(
+          physicalDisplayCornerRadiusTopLeft),  // p_physical_display_corner_radius_top_left
+      static_cast<double>(
+          physicalDisplayCornerRadiusTopRight),  // p_physical_display_corner_radius_top_right
+      static_cast<double>(
+          physicalDisplayCornerRadiusBottomRight),  // p_physical_display_corner_radius_bottom_right
+      static_cast<double>(
+          physicalDisplayCornerRadiusBottomLeft),  // p_physical_display_corner_radius_bottom_left
   };
 
   ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(
@@ -805,7 +816,7 @@ bool RegisterApi(JNIEnv* env) {
       },
       {
           .name = "nativeSetViewportMetrics",
-          .signature = "(JFIIIIIIIIIIIIIII[I[I[IIIII)V",
+          .signature = "(JFIIIIIIIIIIIIIII[I[I[IIIIIIIII)V",
           .fnPtr = reinterpret_cast<void*>(&SetViewportMetrics),
       },
       {

@@ -693,6 +693,39 @@ name: my_app
   );
 
   testUsingContext(
+    'Outputs DTD URI when --print-dtd is provided',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/182052
+      final ResidentRunner residentWebRunner = setUpResidentRunner(
+        flutterDevice,
+        logger: testLogger,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, printDtd: true),
+      );
+      fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+
+      setupMocks();
+      final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+      unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+      await connectionInfoCompleter.future;
+
+      expect(
+        testLogger.statusText,
+        'Launching lib/main.dart on FakeDevice in debug mode...\n'
+        'Waiting for connection from debug service on FakeDevice...\n'
+        'Debug service listening on ws://127.0.0.1/abcd/\n'
+        'A Dart VM Service on FakeDevice is available at: http://127.0.0.1/abcd/\n'
+        'The Dart Tooling Daemon is available at: ws://127.0.0.1/efgh/\n'
+        'The Flutter DevTools debugger and profiler on FakeDevice is available at: http://127.0.0.1/abcd/\n',
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
     'Does not run main with --start-paused',
     () async {
       final ResidentRunner residentWebRunner = ResidentWebRunner(
@@ -1922,6 +1955,33 @@ flutter:
 
       await expectLater(residentWebRunner.run, throwsStateError);
       expect(fakeVmServiceHost.hasRemainingExpectations, false);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'ResidentWebRunner throws ToolExit when DWDS debug connection times out',
+    () async {
+      final logger = BufferLogger.test();
+      final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice, logger: logger);
+      fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+      setupMocks();
+      webDevFS.exception = TimeoutException('Connection timed out');
+
+      await expectLater(
+        residentWebRunner.run,
+        throwsToolExit(message: 'Failed to connect to the web debug service.'),
+      );
+      expect(
+        logger.errorText,
+        contains(
+          'Failed to establish connection with the web debug service: TimeoutException: Connection timed out',
+        ),
+      );
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

@@ -83,8 +83,6 @@ class AnalyzeOnce extends AnalyzeBase {
       );
 
       void handleAnalysisErrors(FileAnalysisErrors fileErrors) {
-        fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
-
         errors.addAll(fileErrors.errors);
       }
 
@@ -97,8 +95,9 @@ class AnalyzeOnce extends AnalyzeBase {
           if (!analysisCompleter.isCompleted) {
             analysisCompleter.completeError(
               // Include the last 20 lines of server output in exception message
-              Exception(
+              _AnalysisServerExitException(
                 'analysis server exited with code $exitCode and output:\n${server.getLogs(20)}',
+                exitCode,
               ),
             );
           }
@@ -114,7 +113,11 @@ class AnalyzeOnce extends AnalyzeBase {
           ? logger.startProgress('Analyzing $message...')
           : null;
 
-      await analysisCompleter.future;
+      try {
+        await analysisCompleter.future;
+      } on _AnalysisServerExitException catch (error) {
+        throwToolExit(error.message, exitCode: error.exitCode);
+      }
     } finally {
       await server.dispose();
       progress?.cancel();
@@ -174,4 +177,10 @@ class AnalyzeOnce extends AnalyzeBase {
     }
     return false;
   }
+}
+
+class _AnalysisServerExitException implements Exception {
+  _AnalysisServerExitException(this.message, this.exitCode);
+  final String message;
+  final int? exitCode;
 }

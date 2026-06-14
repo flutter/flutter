@@ -228,6 +228,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
@@ -551,6 +552,7 @@ class AndroidDevice extends Device {
       case TargetPlatform.fuchsia_x64:
       case TargetPlatform.ios:
       case TargetPlatform.linux_arm64:
+      case TargetPlatform.linux_riscv64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
@@ -667,6 +669,11 @@ class AndroidDevice extends Device {
       if (debuggingOptions.enableVulkanValidation) ...<String>[
         '--ez',
         'enable-vulkan-validation',
+        'true',
+      ],
+      if (debuggingOptions.enableHcpp) ...<String>[
+        '--ez',
+        'enable-hcpp-and-surface-control',
         'true',
       ],
       if (debuggingOptions.debuggingEnabled) ...<String>[

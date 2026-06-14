@@ -26,8 +26,8 @@ void main() {
     const double endWidthFactor = 0.25;
     const double beginHeightFactor = 0.25;
     const double endHeightFactor = 0.75;
-    const Alignment beginAlignment = Alignment.bottomRight;
-    const Alignment endAlignment = Alignment.topLeft;
+    const Alignment beginAlignment = .bottomRight;
+    const Alignment endAlignment = .topLeft;
 
     FractionallySizedBox fractionallySizedBox = tester.widget(
       fractionallySizedBoxFinder,

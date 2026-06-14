@@ -269,19 +269,19 @@ void main() {
     testWidgets('SearchBar properties overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(useSearchBarProperties: true));
       await tester.pumpAndSettle(); // allow the animations to finish
-      checkSearchBar(tester);
+      await checkSearchBar(tester);
     });
 
     testWidgets('SearchBar theme data overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(searchBarThemeData: searchBarTheme));
       await tester.pumpAndSettle();
-      checkSearchBar(tester);
+      await checkSearchBar(tester);
     });
 
     testWidgets('Overall Theme SearchBar theme overrides defaults', (WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchBarTheme));
       await tester.pumpAndSettle();
-      checkSearchBar(tester);
+      await checkSearchBar(tester);
     });
 
     // Same as the previous tests with empty SearchBarThemeData's instead of null.
@@ -297,7 +297,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle(); // allow the animations to finish
-      checkSearchBar(tester);
+      await checkSearchBar(tester);
     });
 
     testWidgets('SearchBar theme overrides defaults and overall theme', (
@@ -307,7 +307,7 @@ void main() {
         buildFrame(searchBarThemeData: searchBarTheme, overallTheme: const SearchBarThemeData()),
       );
       await tester.pumpAndSettle(); // allow the animations to finish
-      checkSearchBar(tester);
+      await checkSearchBar(tester);
     });
 
     testWidgets('Overall Theme SearchBar theme overrides defaults and null theme', (
@@ -315,7 +315,7 @@ void main() {
     ) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchBarTheme));
       await tester.pumpAndSettle(); // allow the animations to finish
-      checkSearchBar(tester);
+      await checkSearchBar(tester);
     });
   });
 }

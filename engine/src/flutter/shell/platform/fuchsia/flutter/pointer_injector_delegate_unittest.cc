@@ -13,9 +13,9 @@
 
 #include <lib/fidl/cpp/binding_set.h>
 
-#include "pointer_injector_delegate.h"
-#include "tests/fakes/mock_injector_registry.h"
-#include "tests/fakes/platform_message.h"
+#include "flutter/shell/platform/fuchsia/flutter/pointer_injector_delegate.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/mock_injector_registry.h"
+#include "flutter/shell/platform/fuchsia/flutter/tests/fakes/platform_message.h"
 
 namespace flutter_runner::testing {
 
@@ -35,14 +35,14 @@ namespace {
   };
 // clang-format on
 
-rapidjson::Value ParsePlatformMessage(std::string json) {
+rapidjson::Document ParsePlatformMessage(std::string json) {
   rapidjson::Document document;
   document.Parse(json);
   if (document.HasParseError() || !document.IsObject()) {
     FML_LOG(ERROR) << "Could not parse document";
-    return rapidjson::Value();
+    return rapidjson::Document();
   }
-  return document.GetObject();
+  return document;
 }
 
 zx_koid_t ExtractKoid(const zx::object_base& object) {
@@ -106,7 +106,7 @@ class PlatformMessageBuilder {
     return *this;
   }
 
-  rapidjson::Value Build() {
+  rapidjson::Document Build() {
     std::ostringstream message;
     message << "{" << "    \"method\":\""
             << PointerInjectorDelegate::kPointerInjectorMethodPrefix << "\","
