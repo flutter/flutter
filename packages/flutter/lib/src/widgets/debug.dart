@@ -7,6 +7,7 @@
 /// @docImport 'package:flutter/scheduler.dart';
 ///
 /// @docImport 'binding.dart';
+/// @docImport 'focus_manager.dart';
 /// @docImport 'widget_inspector.dart';
 library;
 
@@ -174,6 +175,26 @@ bool debugEnhanceBuildTimelineArguments = false;
 
 /// Show banners for deprecated widgets.
 bool debugHighlightDeprecatedWidgets = false;
+
+/// Causes each [Focus] widget to paint a box around its bounds.
+///
+/// Different colors indicate different focus states:
+///
+///  * Green: the node has primary focus.
+///  * Blue: the node is in the focus chain but does not
+///    have primary focus (i.e., it is an ancestor of the primary focus).
+///  * Cyan: the node is focusable and participates in focus traversal.
+///  * Yellow: the node skips focus traversal ([FocusNode.skipTraversal] is true)
+///    but can still receive focus directly.
+///  * Red: the node cannot receive focus ([FocusNode.canRequestFocus] is false).
+///
+/// This has no effect in release builds.
+///
+/// See also:
+///
+///  * [FocusNode], which manages focus for a widget subtree.
+///  * [debugFocusChanges], which logs to the console when focus changes occur.
+bool debugPaintFocusBoxes = false;
 
 Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
@@ -543,7 +564,8 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
         debugPrintGlobalKeyedWidgetLifecycle ||
         debugProfileBuildsEnabled ||
         debugHighlightDeprecatedWidgets ||
-        debugProfileBuildsEnabledUserWidgets) {
+        debugProfileBuildsEnabledUserWidgets ||
+        debugPaintFocusBoxes) {
       throw FlutterError(reason);
     }
     return true;

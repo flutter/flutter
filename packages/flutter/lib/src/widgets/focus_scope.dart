@@ -16,9 +16,12 @@ library;
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
+import 'container.dart';
+import 'debug.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
+import 'transitions.dart';
 
 /// A widget that manages a [FocusNode] to allow keyboard focus to be given
 /// to this widget and its descendants.
@@ -728,6 +731,12 @@ class _FocusState extends State<Focus> {
         child: widget.child,
       );
     }
+    assert(() {
+      if (debugPaintFocusBoxes) {
+        child = _DebugFocusBorder(node: focusNode, child: child);
+      }
+      return true;
+    }());
     return _FocusInheritedScope(node: focusNode, child: child);
   }
 }
@@ -893,6 +902,43 @@ class _FocusScopeState extends _FocusState {
       result = Semantics(explicitChildNodes: true, child: result);
     }
     return result;
+  }
+}
+
+/// Wraps a child with a colored border indicating the focus state of the node.
+/// Only used when [debugPaintFocusBoxes] is true.
+class _DebugFocusBorder extends StatelessWidget {
+  const _DebugFocusBorder({required this.node, required this.child});
+
+  final FocusNode node;
+  final Widget child;
+
+  Color get _borderColor {
+    if (node.hasPrimaryFocus) {
+      return const Color(0xFF00FF00);
+    } else if (node.hasFocus) {
+      return const Color(0xFF0000FF);
+    } else if (!node.canRequestFocus) {
+      return const Color(0xFFFF0000);
+    } else if (node.skipTraversal) {
+      return const Color(0xFFFFFF00);
+    } else {
+      return const Color(0xFF00FFFF);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: node,
+      builder: (BuildContext context, _) {
+        return DecoratedBox(
+          decoration: BoxDecoration(border: Border.all(color: _borderColor, width: 2.0)),
+          position: DecorationPosition.foreground,
+          child: child,
+        );
+      },
+    );
   }
 }
 
