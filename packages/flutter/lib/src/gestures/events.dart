@@ -586,22 +586,6 @@ abstract class PointerEvent with Diagnosticable {
     return Offset(transformed3.x, transformed3.y);
   }
 
-  /// Transforms `delta` into the coordinate system described by `transform`.
-  ///
-  /// The difference from `transformPosition` is that the `delta` should not
-  /// be affected by the translation component of the `transform`.
-  ///
-  /// If `transform` is null, `delta` is returned as-is.
-  static Offset transformDelta(Matrix4? transform, Offset delta) {
-    if (transform == null) {
-      return delta;
-    }
-
-    final Offset transformed = transformPosition(transform, delta);
-    final Vector3 translation = transform.getTranslation();
-    return Offset(transformed.dx - translation.x, transformed.dy - translation.y);
-  }
-
   /// Transforms `untransformedDelta` into the coordinate system described by
   /// `transform`.
   ///
@@ -2357,13 +2341,21 @@ class _TransformedPointerPanZoomUpdateEvent extends _TransformedPointerEvent
   Offset get pan => original.pan;
 
   @override
-  late final Offset localPan = PointerEvent.transformDelta(transform, pan);
+  late final Offset localPan = PointerEvent.transformDeltaViaPositions(
+    transform: transform,
+    untransformedDelta: pan,
+    untransformedEndPosition: pan,
+  );
 
   @override
   Offset get panDelta => original.panDelta;
 
   @override
-  late final Offset localPanDelta = PointerEvent.transformDelta(transform, panDelta);
+  late final Offset localPanDelta = PointerEvent.transformDeltaViaPositions(
+    transform: transform,
+    untransformedDelta: panDelta,
+    untransformedEndPosition: panDelta,
+  );
 
   @override
   double get scale => original.scale;
