@@ -211,6 +211,7 @@ TargetPlatform? _mapTargetPlatform(TargetPlatform? targetPlatform) {
     case TargetPlatform.ios:
     case TargetPlatform.darwin:
     case TargetPlatform.linux_x64:
+    case TargetPlatform.linux_arm:
     case TargetPlatform.linux_arm64:
     case TargetPlatform.linux_riscv64:
     case TargetPlatform.windows_x64:
@@ -433,6 +434,7 @@ class CachedArtifacts implements Artifacts {
         return _getIosArtifactPath(artifact, platform!, mode, environmentType);
       case TargetPlatform.darwin:
       case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.linux_riscv64:
       case TargetPlatform.windows_x64:
@@ -787,6 +789,7 @@ class CachedArtifacts implements Artifacts {
     final String platformName = _enginePlatformDirectoryName(platform);
     switch (platform) {
       case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm:
       case TargetPlatform.linux_arm64:
       case TargetPlatform.linux_riscv64:
       case TargetPlatform.darwin:
@@ -1581,6 +1584,7 @@ String _getPrebuiltTarget(Platform platform, OperatingSystemUtils operatingSyste
       return 'macos-x64';
     case TargetPlatform.linux_riscv64:
       return 'linux-riscv64';
+    case TargetPlatform.linux_arm:
     case TargetPlatform.linux_arm64:
       return 'linux-arm64';
     case TargetPlatform.linux_x64:
