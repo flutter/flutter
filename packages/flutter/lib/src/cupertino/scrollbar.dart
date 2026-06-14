@@ -161,7 +161,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   @override
   void updateScrollbarPainter() {
     scrollbarPainter
-      ..color = widget.thumbColor ?? CupertinoDynamicColor.resolve(_kScrollbarColor, context)
+      ..color = CupertinoDynamicColor.resolve(widget.thumbColor ?? _kScrollbarColor, context)
       ..textDirection = Directionality.of(context)
       ..thickness = _thickness
       ..mainAxisMargin = widget.mainAxisMargin

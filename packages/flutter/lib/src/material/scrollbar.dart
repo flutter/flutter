@@ -160,13 +160,18 @@ class Scrollbar extends StatelessWidget {
       final double? resolvedThicknessWhileDragging =
           thickness ?? scrollbarTheme.thickness?.resolve(draggedStates);
       final Radius? resolvedRadius = radius ?? scrollbarTheme.radius;
+      // CupertinoScrollbar paints a single thumb color, so only the resting
+      // state is resolved here; there is no dragged-color counterpart to
+      // thicknessWhileDragging. CupertinoScrollbar resolves any
+      // CupertinoDynamicColor against its own context.
+      final Color? resolvedThumbColor = scrollbarTheme.thumbColor?.resolve(states);
       return CupertinoScrollbar(
         thumbVisibility:
             thumbVisibility ?? scrollbarTheme.thumbVisibility?.resolve(states) ?? false,
         thickness: resolvedThickness ?? CupertinoScrollbar.defaultThickness,
         thicknessWhileDragging:
             resolvedThicknessWhileDragging ?? CupertinoScrollbar.defaultThicknessWhileDragging,
-        thumbColor: _resolveThumbColor(scrollbarTheme),
+        thumbColor: resolvedThumbColor,
         radius: resolvedRadius ?? CupertinoScrollbar.defaultRadius,
         radiusWhileDragging: resolvedRadius ?? CupertinoScrollbar.defaultRadiusWhileDragging,
         controller: controller,
@@ -187,12 +192,6 @@ class Scrollbar extends StatelessWidget {
       scrollbarOrientation: scrollbarOrientation,
       child: child,
     );
-  }
-
-  /// Resolves [ScrollbarThemeData.thumbColor] as a [WidgetStateProperty]
-  /// for use on the iOS [CupertinoScrollbar] path.
-  static Color? _resolveThumbColor(ScrollbarThemeData scrollbarTheme) {
-    return scrollbarTheme.thumbColor?.resolve(const <WidgetState>{});
   }
 }
 

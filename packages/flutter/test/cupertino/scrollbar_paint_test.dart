@@ -80,6 +80,37 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect(color: thumbColor));
   });
 
+  testWidgets('Resolves a CupertinoDynamicColor thumb color against the context', (
+    WidgetTester tester,
+  ) async {
+    const thumbColor = CupertinoDynamicColor.withBrightness(
+      color: Color(0xff0000ff),
+      darkColor: Color(0xff00ff00),
+    );
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(platformBrightness: Brightness.dark),
+          child: CupertinoScrollbar(
+            thumbColor: thumbColor,
+            child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(SingleChildScrollView)),
+    );
+    await gesture.moveBy(_kGestureOffset);
+    await gesture.moveBy(Offset.zero.translate(-_kGestureOffset.dx, -_kGestureOffset.dy));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byType(CupertinoScrollbar), paints..rrect(color: thumbColor.darkColor));
+  });
+
   testWidgets('Paints iOS spec with nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
