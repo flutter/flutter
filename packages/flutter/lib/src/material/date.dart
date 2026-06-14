@@ -4,6 +4,7 @@
 
 /// @docImport 'calendar_date_picker.dart';
 /// @docImport 'date_picker.dart';
+/// @docImport 'input_date_picker_form_field.dart';
 /// @docImport 'text_field.dart';
 library;
 
@@ -11,8 +12,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'date_picker.dart';
-import 'input_date_picker_form_field.dart';
 import 'material_localizations.dart';
 
 /// Controls the calendar system used in the date picker.
