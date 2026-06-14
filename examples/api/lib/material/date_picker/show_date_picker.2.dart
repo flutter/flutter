@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// Flutter code sample showing how to use [showDatePicker] with a custom
-/// [CalendarDelegate] and [InputDatePickerFormField.inputFormatters] to
+/// [CalendarDelegate] and its [keyboardInputFormatters] to
 /// synchronize input masking with date parsing and validation.
 
 void main() => runApp(const DatePickerSampleApp());
@@ -44,7 +44,6 @@ class _DatePickerSampleState extends State<DatePickerSample> {
       lastDate: DateTime(2999, 7, 25),
       initialEntryMode: DatePickerEntryMode.input,
       calendarDelegate: customDateInputDelegate,
-      inputFormatters: customDateInputDelegate.inputFormatters,
     );
 
     if (result != null) {
@@ -274,10 +273,15 @@ final class CustomDateInputDelegate extends GregorianCalendarDelegate {
   DateInputFormatter get _formatter =>
       DateInputFormatter(formatType: formatType, separator: separator.value);
 
-  List<TextInputFormatter> get inputFormatters => <TextInputFormatter>[
-    FilteringTextInputFormatter.digitsOnly,
-    _formatter,
-  ];
+  @override
+  List<TextInputFormatter>? keyboardInputFormatters(
+    MaterialLocalizations localizations,
+  ) {
+    return <TextInputFormatter>[
+      FilteringTextInputFormatter.digitsOnly,
+      _formatter,
+    ];
+  }
 
   @override
   String dateHelpText(MaterialLocalizations localizations) =>

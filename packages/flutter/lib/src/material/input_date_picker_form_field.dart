@@ -6,7 +6,6 @@
 /// @docImport 'text_field.dart';
 library;
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'date.dart';
@@ -64,7 +63,6 @@ class InputDatePickerFormField extends StatefulWidget {
     this.acceptEmptyDate = false,
     this.focusNode,
     this.calendarDelegate = const GregorianCalendarDelegate(),
-    this.inputFormatters,
   }) : initialDate = initialDate != null ? calendarDelegate.dateOnly(initialDate) : null,
        firstDate = calendarDelegate.dateOnly(firstDate),
        lastDate = calendarDelegate.dateOnly(lastDate) {
@@ -151,27 +149,6 @@ class InputDatePickerFormField extends StatefulWidget {
 
   /// {@macro flutter.material.calendar_date_picker.calendarDelegate}
   final CalendarDelegate<DateTime> calendarDelegate;
-
-  /// {@template flutter.material.input_date_picker_form_field.inputFormatters}
-  /// Optional list of [TextInputFormatter]s applied to the date input field.
-  ///
-  /// These formatters control and restrict how the user enters text, such as
-  /// enforcing a specific date mask (e.g., `MM/dd/yyyy`), limiting allowed
-  /// characters, or automatically inserting date separators.
-  ///
-  /// The functionality of date input and validation relies on consistency between these formatters and the [CalendarDelegate] methods: [CalendarDelegate.dateHelpText],
-  /// [CalendarDelegate.formatCompactDate], and [CalendarDelegate.parseCompactDate].
-  ///
-  /// Input formatters only affect the visual entry of text and do not perform
-  /// validation or parsing. The conversion of user-entered text depends
-  /// entirely on [CalendarDelegate.parseCompactDate]. If the formatters
-  /// impose a structure that is incompatible with the delegate's parsing
-  /// logic, the input field may fail validation even if the user follows
-  /// the provided mask.
-  ///
-  /// If null, no input formatting is applied.
-  /// {@endtemplate}
-  final List<TextInputFormatter>? inputFormatters;
 
   @override
   State<InputDatePickerFormField> createState() => _InputDatePickerFormFieldState();
@@ -308,7 +285,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
         autofocus: widget.autofocus,
         controller: _controller,
         focusNode: widget.focusNode,
-        inputFormatters: widget.inputFormatters,
+        inputFormatters: widget.calendarDelegate.keyboardInputFormatters(localizations),
       ),
     );
   }
