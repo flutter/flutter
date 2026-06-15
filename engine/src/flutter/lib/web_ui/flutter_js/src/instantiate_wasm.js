@@ -17,7 +17,7 @@ export const createWasmInstantiator = (url, filename) => {
     hash = wasmHashes?.[basename];
   }
 
-  const supportsCrossOriginStorage = 'crossOriginStorage' in navigator && 'requestFileHandles' in navigator.crossOriginStorage;
+  const supportsCrossOriginStorage = 'crossOriginStorage' in navigator && 'requestFileHandle' in navigator.crossOriginStorage;
   if (supportsCrossOriginStorage) {
     console.log('Cross-Origin Storage is supported. See https://wicg.github.io/cross-origin-storage/ for more details.');
   }
@@ -32,7 +32,7 @@ export const createWasmInstantiator = (url, filename) => {
   const tryGettingResponseFromCrossOriginStorage = async (hash) => {
     const cosHash = { algorithm: 'SHA-256', value: hash };
     try {
-      const [handle] = await navigator.crossOriginStorage.requestFileHandles([cosHash]);
+      const handle = await navigator.crossOriginStorage.requestFileHandle(cosHash);
       const fileBlob = await handle.getFile();
       return new Response(fileBlob, {
         headers: { 'Content-Type': 'application/wasm' },
@@ -62,7 +62,7 @@ export const createWasmInstantiator = (url, filename) => {
       (async () => {
         try {
           const blob = await clonedResponse.blob();
-          const [handle] = await navigator.crossOriginStorage.requestFileHandles([cosHash], { create: true });
+          const handle = await navigator.crossOriginStorage.requestFileHandle(cosHash, { create: true });
           const writableStream = await handle.createWritable();
           await writableStream.write(blob);
           await writableStream.close();
