@@ -343,6 +343,65 @@ TEST_F(FlAccessibleNodeTest, GetRole) {
   flags6.is_obscured = true;
   fl_accessible_node_set_flags(node, &flags6);
   EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_PASSWORD_TEXT);
+
+  FlutterSemanticsFlags flags7 = {};
+  flags7.is_header = true;
+  fl_accessible_node_set_flags(node, &flags7);
+  EXPECT_EQ(atk_object_get_role(ATK_OBJECT(node)), ATK_ROLE_HEADING);
+}
+
+// Checks the node's name is exposed through the AtkText interface so that
+// screen readers can read the text content of objects such as headings.
+TEST_F(FlAccessibleNodeTest, ExposesTextViaAtkText) {
+  g_autoptr(FlAccessibleNode) node = fl_accessible_node_new(engine, 123, 0);
+  fl_accessible_node_set_name(node, "Section One");
+
+  EXPECT_EQ(atk_text_get_character_count(ATK_TEXT(node)), 11);
+
+  g_autofree gchar* text = atk_text_get_text(ATK_TEXT(node), 0, -1);
+  EXPECT_STREQ(text, "Section One");
+
+  g_autofree gchar* substring = atk_text_get_text(ATK_TEXT(node), 0, 7);
+  EXPECT_STREQ(substring, "Section");
+
+  EXPECT_EQ(atk_text_get_character_at_offset(ATK_TEXT(node), 0),
+            gunichar('S'));
+
+  EXPECT_EQ(atk_text_get_caret_offset(ATK_TEXT(node)), -1);
+  EXPECT_EQ(atk_text_get_n_selections(ATK_TEXT(node)), 0);
+
+  gint start_offset = -1;
+  gint end_offset = -1;
+  g_autofree gchar* selection =
+      atk_text_get_selection(ATK_TEXT(node), 0, &start_offset, &end_offset);
+  EXPECT_EQ(selection, nullptr);
+  EXPECT_EQ(start_offset, 0);
+  EXPECT_EQ(end_offset, 0);
+
+  start_offset = -1;
+  end_offset = -1;
+  g_autofree gchar* text_at_offset = atk_text_get_text_at_offset(
+      ATK_TEXT(node), 0, ATK_TEXT_BOUNDARY_CHAR, &start_offset, &end_offset);
+  EXPECT_STREQ(text_at_offset, "S");
+  EXPECT_EQ(start_offset, 0);
+  EXPECT_EQ(end_offset, 1);
+
+  start_offset = -1;
+  end_offset = -1;
+  g_autofree gchar* text_at_line_offset = atk_text_get_text_at_offset(
+      ATK_TEXT(node), 0, ATK_TEXT_BOUNDARY_LINE_START, &start_offset,
+      &end_offset);
+  EXPECT_STREQ(text_at_line_offset, "Section One");
+  EXPECT_EQ(start_offset, 0);
+  EXPECT_EQ(end_offset, 11);
+
+  start_offset = -1;
+  end_offset = -1;
+  g_autofree gchar* text_out_of_bounds = atk_text_get_text_at_offset(
+      ATK_TEXT(node), 100, ATK_TEXT_BOUNDARY_CHAR, &start_offset, &end_offset);
+  EXPECT_EQ(text_out_of_bounds, nullptr);
+  EXPECT_EQ(start_offset, 0);
+  EXPECT_EQ(end_offset, 0);
 }
 
 // Checks Flutter actions are mapped to the appropriate ATK actions.

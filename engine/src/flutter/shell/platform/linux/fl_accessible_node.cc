@@ -72,6 +72,7 @@ enum { PROP_0, PROP_ENGINE, PROP_VIEW_ID, PROP_ID, PROP_LAST };
 static void fl_accessible_node_component_interface_init(
     AtkComponentIface* iface);
 static void fl_accessible_node_action_interface_init(AtkActionIface* iface);
+static void fl_accessible_node_text_interface_init(AtkTextIface* iface);
 
 G_DEFINE_TYPE_WITH_CODE(
     FlAccessibleNode,
@@ -81,7 +82,9 @@ G_DEFINE_TYPE_WITH_CODE(
         G_IMPLEMENT_INTERFACE(ATK_TYPE_COMPONENT,
                               fl_accessible_node_component_interface_init)
             G_IMPLEMENT_INTERFACE(ATK_TYPE_ACTION,
-                                  fl_accessible_node_action_interface_init))
+                                  fl_accessible_node_action_interface_init)
+                G_IMPLEMENT_INTERFACE(ATK_TYPE_TEXT,
+                                      fl_accessible_node_text_interface_init))
 
 // Returns TRUE if [flags] indicate this element is checkable.
 static gboolean is_checkable(FlutterSemanticsFlags flags) {
@@ -250,7 +253,7 @@ static AtkRole fl_accessible_node_get_role(AtkObject* accessible) {
     return ATK_ROLE_TEXT;
   }
   if (priv->flags.is_header) {
-    return ATK_ROLE_HEADER;
+    return ATK_ROLE_HEADING;
   }
   if (priv->flags.is_link) {
     return ATK_ROLE_LINK;
@@ -549,6 +552,131 @@ static void fl_accessible_node_action_interface_init(AtkActionIface* iface) {
   iface->do_action = fl_accessible_node_do_action;
   iface->get_n_actions = fl_accessible_node_get_n_actions;
   iface->get_name = fl_accessible_node_get_name;
+}
+
+// Returns the number of UTF-8 characters in this node's text content. A
+// Flutter semantics node's text content is its accessibility name.
+static gint fl_accessible_node_get_text_length(FlAccessibleNodePrivate* priv) {
+  return priv->name != nullptr
+             ? static_cast<gint>(g_utf8_strlen(priv->name, -1))
+             : 0;
+}
+
+// Implements AtkText::get_character_count.
+static gint fl_accessible_node_get_character_count(AtkText* text) {
+  FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(text);
+  return fl_accessible_node_get_text_length(priv);
+}
+
+// Implements AtkText::get_text.
+static gchar* fl_accessible_node_get_text(AtkText* text,
+                                          gint start_offset,
+                                          gint end_offset) {
+  FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(text);
+  if (priv->name == nullptr) {
+    return g_strdup("");
+  }
+
+  gint count = fl_accessible_node_get_text_length(priv);
+  start_offset = CLAMP(start_offset, 0, count);
+  if (end_offset < 0) {
+    end_offset = count;
+  }
+  end_offset = CLAMP(end_offset, start_offset, count);
+
+  return g_utf8_substring(priv->name, start_offset, end_offset);
+}
+
+// Implements AtkText::get_character_at_offset.
+static gunichar fl_accessible_node_get_character_at_offset(AtkText* text,
+                                                           gint offset) {
+  FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(text);
+  if (priv->name == nullptr || offset < 0 ||
+      offset >= fl_accessible_node_get_text_length(priv)) {
+    return 0;
+  }
+
+  return g_utf8_get_char(g_utf8_offset_to_pointer(priv->name, offset));
+}
+
+// Implements AtkText::get_caret_offset.
+// Static text such as a heading has no caret.
+static gint fl_accessible_node_get_caret_offset(AtkText* text) {
+  (void)text;
+  return -1;
+}
+
+// Implements AtkText::get_n_selections.
+// Static text such as a heading cannot be selected, so report no selections.
+static gint fl_accessible_node_get_n_selections(AtkText* text) {
+  (void)text;
+  return 0;
+}
+
+// Implements AtkText::get_selection.
+static gchar* fl_accessible_node_get_selection(AtkText* text,
+                                               gint selection_num,
+                                               gint* start_offset,
+                                               gint* end_offset) {
+  (void)text;
+  (void)selection_num;
+  if (start_offset != nullptr) {
+    *start_offset = 0;
+  }
+  if (end_offset != nullptr) {
+    *end_offset = 0;
+  }
+  return nullptr;
+}
+
+// Implements AtkText::get_text_at_offset (deprecated, but still used by some
+// ATK clients to read the text content of non-editable objects such as
+// headings).
+static gchar* fl_accessible_node_get_text_at_offset(
+    AtkText* text,
+    gint offset,
+    AtkTextBoundary boundary_type,
+    gint* start_offset,
+    gint* end_offset) {
+  FlAccessibleNodePrivate* priv = FL_ACCESSIBLE_NODE_GET_PRIVATE(text);
+  gint count = fl_accessible_node_get_text_length(priv);
+  if (offset < 0 || offset >= count) {
+    if (start_offset != nullptr) {
+      *start_offset = 0;
+    }
+    if (end_offset != nullptr) {
+      *end_offset = 0;
+    }
+    return nullptr;
+  }
+
+  if (boundary_type == ATK_TEXT_BOUNDARY_CHAR) {
+    if (start_offset != nullptr) {
+      *start_offset = offset;
+    }
+    if (end_offset != nullptr) {
+      *end_offset = offset + 1;
+    }
+    return g_utf8_substring(priv->name, offset, offset + 1);
+  }
+
+  if (start_offset != nullptr) {
+    *start_offset = 0;
+  }
+  if (end_offset != nullptr) {
+    *end_offset = count;
+  }
+  return g_strdup(priv->name != nullptr ? priv->name : "");
+}
+
+static void fl_accessible_node_text_interface_init(AtkTextIface* iface) {
+  iface->get_character_count = fl_accessible_node_get_character_count;
+  iface->get_text = fl_accessible_node_get_text;
+  iface->get_character_at_offset = fl_accessible_node_get_character_at_offset;
+  iface->get_caret_offset = fl_accessible_node_get_caret_offset;
+  iface->get_n_selections = fl_accessible_node_get_n_selections;
+  iface->get_selection = fl_accessible_node_get_selection;
+  iface->get_text_at_offset = fl_accessible_node_get_text_at_offset;
 }
 
 static void fl_accessible_node_init(FlAccessibleNode* self) {
