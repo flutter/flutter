@@ -2702,6 +2702,11 @@ extension JSArrayExtension on JSArray<JSAny?> {
   external int get length;
 }
 
+@JS('window.TextCluster')
+external JSAny? get _textClusterConstructor;
+
+bool browserSupportsTextCluster = _textClusterConstructor != null;
+
 @JS('TextCluster')
 extension type DomTextCluster._(JSObject _) implements JSObject {
   @JS('begin')
