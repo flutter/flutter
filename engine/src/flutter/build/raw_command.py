@@ -5,6 +5,7 @@
 import sys
 import subprocess
 
+
 def main():
   if len(sys.argv) < 2:
     print("Usage: python3 raw_command.py <command> [args...]")
