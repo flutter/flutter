@@ -260,6 +260,8 @@ dependency_overrides:
     path: ./third_party/pkg/flutter_packages/packages/metrics_center
   mime:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/mime
+  mmap:
+    path: ./third_party/dart/pkg/mmap
   node_preamble:
     path: ./third_party/pkg/node_preamble
   package_config:
@@ -279,7 +281,7 @@ dependency_overrides:
   pub_semver:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/pub_semver
   record_use:
-    path: ./third_party/dart/pkg/record_use
+    path: ./third_party/dart/third_party/pkg/native/pkgs/record_use
   shelf:
     path: ./third_party/dart/third_party/pkg/shelf/pkgs/shelf
   shelf_packages_handler:
