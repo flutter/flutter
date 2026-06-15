@@ -20,34 +20,29 @@ import java.util.List;
  * (Role.NONE).
  */
 public class BaseRoleConfigurator implements AccessibilityNodeConfigurator {
-  private static final AccessibilityNodeConfigurator[] commonConfigurators =
-      new AccessibilityNodeConfigurator[] {
-        new FocusableConfigurator(),
-        new ClipboardConfigurator(),
-        new DismissableConfigurator(),
-        new TappableConfigurator(),
-        new LiveRegionConfigurator(),
-        new SelectableConfigurator(),
-        new HeadingConfigurator(),
-        new CustomActionsConfigurator(),
-        new TextFieldConfigurator(),
-        new ButtonConfigurator(),
-        new ImageConfigurator(),
-        new SliderConfigurator(),
-        new ScrollableConfigurator(),
-        new CollectionConfigurator(),
-        new CollectionItemConfigurator(),
-        new LabelAndValueConfigurator(),
-        new CheckableConfigurator(),
-        new ExpandedConfigurator()
-      };
+  private static final String TAG = "BaseRoleConfigurator";
 
   @Override
   public final void configure(
       AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
-    for (AccessibilityNodeConfigurator configurator : commonConfigurators) {
-      configurator.configure(result, node);
-    }
+    configureFocusable(result, node);
+    configureClipboard(result, node);
+    configureDismissable(result, node);
+    configureTappable(result, node);
+    configureLiveRegion(result, node);
+    configureSelectable(result, node);
+    configureHeading(result, node);
+    configureCustomActions(result, node);
+    configureTextField(result, node);
+    configureButton(result, node);
+    configureImage(result, node);
+    configureSlider(result, node);
+    configureScrollable(result, node);
+    configureCollection(result, node);
+    configureCollectionItem(result, node);
+    configureLabelAndValue(result, node);
+    configureCheckable(result, node);
+    configureExpanded(result, node);
     configureRole(result, node);
   }
 
@@ -59,15 +54,9 @@ public class BaseRoleConfigurator implements AccessibilityNodeConfigurator {
       AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     // Default implementation is a no-op.
   }
-}
 
-// =============================================================================
-// CONSOLIDATED BEHAVIOR CONFIGURATORS (PACKAGE-PRIVATE)
-// =============================================================================
-
-class FocusableConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureFocusable(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     result.setFocusable(node.isFocusable());
     if (node.accessibilityBridge.inputFocusedSemanticsNode != null) {
       result.setFocused(node.accessibilityBridge.inputFocusedSemanticsNode.id == node.id);
@@ -83,11 +72,9 @@ class FocusableConfigurator implements AccessibilityNodeConfigurator {
       result.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
     }
   }
-}
 
-class ClipboardConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureClipboard(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.hasAction(AccessibilityBridge.Action.SET_SELECTION)) {
       result.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
     }
@@ -104,21 +91,17 @@ class ClipboardConfigurator implements AccessibilityNodeConfigurator {
       result.addAction(AccessibilityNodeInfo.ACTION_SET_TEXT);
     }
   }
-}
 
-class DismissableConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureDismissable(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.hasAction(AccessibilityBridge.Action.DISMISS)) {
       result.setDismissable(true);
       result.addAction(AccessibilityNodeInfo.ACTION_DISMISS);
     }
   }
-}
 
-class TappableConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureTappable(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.hasAction(AccessibilityBridge.Action.TAP)) {
       if (node.onTapOverride != null) {
         result.addAction(
@@ -142,36 +125,28 @@ class TappableConfigurator implements AccessibilityNodeConfigurator {
       }
     }
   }
-}
 
-class LiveRegionConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureLiveRegion(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.hasFlag(AccessibilityBridge.Flag.IS_LIVE_REGION)) {
       result.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
     }
   }
-}
 
-class SelectableConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureSelectable(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     result.setSelected(node.hasFlag(AccessibilityBridge.Flag.IS_SELECTED));
   }
-}
 
-class HeadingConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureHeading(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
       result.setHeading(node.headingLevel > 0);
     }
   }
-}
 
-class CustomActionsConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureCustomActions(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.customAccessibilityActions != null) {
       for (AccessibilityBridge.CustomAccessibilityAction action : node.customAccessibilityActions) {
         result.addAction(
@@ -179,11 +154,9 @@ class CustomActionsConfigurator implements AccessibilityNodeConfigurator {
       }
     }
   }
-}
 
-class TextFieldConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureTextField(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.hasFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD)) {
       result.setPassword(node.hasFlag(AccessibilityBridge.Flag.IS_OBSCURED));
       if (!node.hasFlag(AccessibilityBridge.Flag.IS_READ_ONLY)) {
@@ -222,29 +195,23 @@ class TextFieldConfigurator implements AccessibilityNodeConfigurator {
       }
     }
   }
-}
 
-class ButtonConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureButton(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.shouldBeTreatedAsButton()) {
       result.setClassName("android.widget.Button");
     }
   }
-}
 
-class ImageConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureImage(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.hasFlag(AccessibilityBridge.Flag.IS_IMAGE)) {
       result.setClassName("android.widget.ImageView");
     }
   }
-}
 
-class SliderConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureSlider(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (!node.hasAction(AccessibilityBridge.Action.TAP)
         && node.hasFlag(AccessibilityBridge.Flag.IS_SLIDER)) {
       result.addAction(AccessibilityNodeInfo.ACTION_CLICK);
@@ -262,11 +229,9 @@ class SliderConfigurator implements AccessibilityNodeConfigurator {
       }
     }
   }
-}
 
-class ScrollableConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureScrollable(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.hasAction(AccessibilityBridge.Action.SCROLL_LEFT)
         || node.hasAction(AccessibilityBridge.Action.SCROLL_UP)
         || node.hasAction(AccessibilityBridge.Action.SCROLL_RIGHT)
@@ -291,11 +256,9 @@ class ScrollableConfigurator implements AccessibilityNodeConfigurator {
       result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
     }
   }
-}
 
-class CollectionConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureCollection(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.accessibilityBridge.shouldSetCollectionInfo(node)) {
       if (node.hasAction(AccessibilityBridge.Action.SCROLL_LEFT)
           || node.hasAction(AccessibilityBridge.Action.SCROLL_RIGHT)) {
@@ -333,11 +296,9 @@ class CollectionConfigurator implements AccessibilityNodeConfigurator {
       }
     }
   }
-}
 
-class CollectionItemConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureCollectionItem(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.accessibilityBridge.shouldSetCollectionItemInfo(node)) {
       AccessibilityBridge.SemanticsNode parent = node.parent;
       List<AccessibilityBridge.SemanticsNode> scrollChildren = parent.childrenInTraversalOrder;
@@ -388,11 +349,9 @@ class CollectionItemConfigurator implements AccessibilityNodeConfigurator {
       }
     }
   }
-}
 
-class LabelAndValueConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureLabelAndValue(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (node.hasFlag(AccessibilityBridge.Flag.IS_TEXT_FIELD)) {
       result.setText(node.getValue());
       if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
@@ -420,13 +379,9 @@ class LabelAndValueConfigurator implements AccessibilityNodeConfigurator {
       }
     }
   }
-}
 
-class CheckableConfigurator implements AccessibilityNodeConfigurator {
-  private static final String TAG = "CheckableConfigurator";
-
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureCheckable(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     boolean hasCheckedState = node.hasFlag(AccessibilityBridge.Flag.HAS_CHECKED_STATE);
     boolean hasToggledState = node.hasFlag(AccessibilityBridge.Flag.HAS_TOGGLED_STATE);
     if (BuildConfig.DEBUG && (hasCheckedState && hasToggledState)) {
@@ -461,11 +416,9 @@ class CheckableConfigurator implements AccessibilityNodeConfigurator {
       result.setChecked(isChecked);
     }
   }
-}
 
-class ExpandedConfigurator implements AccessibilityNodeConfigurator {
-  @Override
-  public void configure(AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
+  private void configureExpanded(
+      AccessibilityNodeInfo result, AccessibilityBridge.SemanticsNode node) {
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
       if (node.hasFlag(AccessibilityBridge.Flag.HAS_EXPANDED_STATE)) {
         final boolean isExpanded = node.hasFlag(AccessibilityBridge.Flag.IS_EXPANDED);
