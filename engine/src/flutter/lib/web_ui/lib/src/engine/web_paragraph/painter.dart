@@ -3,14 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
-
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
-
-import '../dom.dart';
-import '../util.dart';
-import 'decorations.dart';
-import 'layout.dart';
-import 'paragraph.dart';
 
 final DomHTMLCanvasElement _paintCanvas = createDomCanvasElement(width: 0, height: 0);
 final _paintContext =
@@ -31,10 +25,14 @@ void _resizePaintCanvas(double devicePixelRatio, ui.Rect rect) {
 }
 
 /// Calculates the source (on Canvas2D) and target (on the output canvas) rectangles for a text block.
-(ui.Rect sourceRect, ui.Rect targetRect) _calculateBlock(TextBlock block, ui.Offset offset) {
+(ui.Rect sourceRect, ui.Rect targetRect) _calculateBlock(
+  ui.Rect lineAdvance,
+  TextBlock block,
+  ui.Offset offset,
+) {
   final double dpr = ui.window.devicePixelRatio;
-  final ui.Rect advance = block.advance;
-
+  // Make sure we do not take in account whitespaces that are outside of the line advance (e.g. when text is aligned to the end of the line and we have trailing whitespaces)
+  final ui.Rect advance = block.advance.intersect(lineAdvance);
   // Define the text clusters rect (using advances, not selected rects)
   // Source rect must take in account the scaling
   final sourceRect = ui.Rect.fromLTWH(0, 0, advance.width * dpr, advance.height * dpr);
@@ -94,6 +92,7 @@ abstract class WebParagraphPainter {
 
         // Let's calculate the sizes
         final (ui.Rect sourceRect, ui.Rect targetRect) = _calculateBlock(
+          line.advance,
           block as TextBlock,
           offset.translate(
             line.advance.left + line.formattingShift + block.shiftFromLineStart,
@@ -114,6 +113,13 @@ abstract class WebParagraphPainter {
             );
             _paintBlockBackground(canvas, correctedTargetRect, block.style.background!);
           case StyleElements.decorations:
+            final correctedTargetRect = ui.Rect.fromLTWH(
+              targetRect.left,
+              targetRect.top,
+              targetRect.width,
+              block.multipliedHeight,
+            );
+            DomCanvasDecorationPainter.paintBlockDecorations(canvas, correctedTargetRect, block);
           case StyleElements.shadows:
           case StyleElements.text:
             throw Exception('Only the background is drawn directly on the output canvas');
@@ -152,9 +158,10 @@ abstract class WebParagraphPainter {
       ui.window.devicePixelRatio,
     );
 
-    // Draw background blocks directly on the output canvas
+    // Draw background and decorations blocks directly on the output canvas
     // so it will be cached together with the text blocks on Canvas2D canvas
     _paintAllBlocks(StyleElements.background, canvas, offset);
+    _paintAllBlocks(StyleElements.decorations, canvas, offset);
 
     paintParagraphText(
       canvas,
@@ -169,7 +176,6 @@ abstract class WebParagraphPainter {
         // Fill out all the blocks on Canvas2D canvas
         DomCanvasParagraphPainter._fillAllBlocks(StyleElements.shadows, layout);
         DomCanvasParagraphPainter._fillAllBlocks(StyleElements.text, layout);
-        DomCanvasParagraphPainter._fillAllBlocks(StyleElements.decorations, layout);
 
         final DomImageData imageData = _paintContext.getImageData(
           0,
@@ -218,15 +224,9 @@ class DomCanvasParagraphPainter {
             _paintContext.translate(block.spanShiftFromLineStart, 0);
             _fillBlockText(layout, block as TextBlock);
           case StyleElements.decorations:
-            // For decorations we need to shift to the start of the block
-            _paintContext.translate(block.shiftFromLineStart, -line.fontBoundingBoxAscent);
-            // Let's calculate the sizes
-            final (ui.Rect sourceRect, ui.Rect targetRect) = _calculateBlock(
-              block as TextBlock,
-              ui.Offset(line.advance.left + line.formattingShift, line.advance.top),
+            throw Exception(
+              'Decorations are drawn directly on the output canvas, not on the canvas2D',
             );
-            // TODO(jlavrova): Implement decorations entirely on ui.Canvas
-            DomCanvasDecorationPainter.fillDecorations(_paintContext, block, sourceRect);
           case StyleElements.background:
             throw Exception(
               'Background is drawn directly on the output canvas, not on the canvas2D',

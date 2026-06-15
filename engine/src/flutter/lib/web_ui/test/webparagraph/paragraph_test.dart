@@ -429,7 +429,6 @@ Future<void> testMain() async {
     const redColor = Color(0xFFFF0000);
     const blueColor = Color(0xFF0000FF);
     const greenColor = Color(0xFF00FF00);
-    const grayColor = Color(0xFF888888);
 
     final paragraphStyle = WebParagraphStyle(
       fontFamily: 'Roboto',
@@ -472,7 +471,25 @@ Future<void> testMain() async {
       decoration: TextDecoration.underline,
       decorationThickness: 1,
       decorationStyle: TextDecorationStyle.wavy,
-      decorationColor: grayColor,
+      decorationColor: blackPaint.color,
+    );
+
+    final dotted = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      decoration: TextDecoration.underline,
+      decorationThickness: 1,
+      decorationStyle: TextDecorationStyle.dotted,
+      decorationColor: blackPaint.color,
+    );
+
+    final dashed = WebTextStyle(
+      fontFamily: 'Roboto',
+      fontSize: 40,
+      decoration: TextDecoration.underline,
+      decorationThickness: 1,
+      decorationStyle: TextDecorationStyle.dashed,
+      decorationColor: blackPaint.color,
     );
 
     final builder = WebParagraphBuilder(paragraphStyle);
@@ -491,11 +508,19 @@ Future<void> testMain() async {
     builder.pop();
 
     builder.pushStyle(wavy);
-    builder.addText('Underlined wavy gray decoration. ');
+    builder.addText('Underlined wavy black decoration. ');
+    builder.pop();
+
+    builder.pushStyle(dotted);
+    builder.addText('Underlined dotted black decoration. ');
+    builder.pop();
+
+    builder.pushStyle(dashed);
+    builder.addText('Underlined dashed black decoration. ');
     builder.pop();
 
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 400));
+    paragraph.layout(const ParagraphConstraints(width: 500));
     paragraph.paint(canvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph.multidecoration.png', region: region);

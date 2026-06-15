@@ -2,19 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:ui/ui.dart' as ui;
-
-import '../dom.dart';
-import '../util.dart';
-import 'layout.dart';
-import 'paragraph.dart';
+import '../../engine.dart';
 
 class DomCanvasDecorationPainter {
   /// Calculates the thickness of the decoration line
-  static double _calculateThickness(WebTextStyle textStyle) {
-    return (textStyle.fontSize! / 14.0) * (textStyle.decorationThickness ?? 1.0);
+  static double _calculateThickness(double fontSize, double? thickness) {
+    return (fontSize / 14.0) * (thickness ?? 1.0);
   }
 
   /// Calculates the position of the decoration line
@@ -35,55 +29,90 @@ class DomCanvasDecorationPainter {
     return 0;
   }
 
-  static void _paintWaves(
-    DomCanvasRenderingContext2D paintContext,
+  static void _drawDashedOrDottedLine(
+    LazyPath pathBuilder,
     double x,
     double y,
-    WebTextStyle textStyle,
-    ui.Rect textBounds,
+    double textWidth,
+    double dashWidth,
+    double dashSpace,
+  ) {
+    var currentX = x;
+    final double endX = x + textWidth;
+
+    while (currentX < endX) {
+      // Calculate where the current dash ends, clamping it so it doesn't overshoot the text
+      final double nextX = (currentX + dashWidth).clamp(x, endX);
+
+      // Draw the dash (or dot)
+      pathBuilder.moveTo(currentX, y);
+      pathBuilder.lineTo(nextX, y);
+
+      // Jump forward by the dash width PLUS the empty space to start the next dash
+      currentX += dashWidth + dashSpace;
+    }
+  }
+
+  /// Calculates and the position of the decoration line and paints it on Canvas2D
+  static void _drawWaves(
+    LazyPath pathBuilder,
+    double x,
+    double y,
+    double textWidth,
     double thickness,
   ) {
     final quarterWave = thickness;
 
     var waveCount = 0;
-    double xStart = 0;
+    // Initialize xStart with the actual starting x offset
+    var xStart = x;
     final double yStart = y + quarterWave;
 
-    paintContext.beginPath();
-    paintContext.moveTo(x, yStart);
-    while (xStart + quarterWave * 2 < textBounds.width) {
-      final x1 = xStart;
-      final double y1 = yStart + quarterWave * (waveCount.isEven ? 1 : -1);
+    pathBuilder.moveTo(xStart, yStart);
+
+    // Calculate width limit relative to the starting x
+    while ((xStart - x) + quarterWave * 2 < textWidth) {
+      // Control point x1 must be halfway between start and end
+      final double x1 = xStart + quarterWave;
+      final double y1 = yStart + quarterWave * (waveCount.isOdd ? 1 : -1);
       final double x2 = xStart + quarterWave * 2;
       final y2 = yStart;
-      paintContext.quadraticCurveTo(x1, y1, x2, y2);
+
+      pathBuilder.quadraticBezierTo(x1, y1, x2, y2);
       xStart += quarterWave * 2;
       ++waveCount;
     }
 
     // The rest of the wave
-    final double remaining = textBounds.width - xStart;
+    final double remaining = textWidth - (xStart - x);
     if (remaining > 0) {
-      final x1 = xStart;
-      final double y1 = yStart + quarterWave * (waveCount.isEven ? 1 : -1);
+      // Control point in the middle of the remaining distance
+      final double x1 = xStart + (remaining / 2);
+      final double y1 = yStart + quarterWave * (waveCount.isOdd ? 1 : -1);
       final double x2 = xStart + remaining;
       final y2 = yStart;
-      paintContext.quadraticCurveTo(x1, y1, x2, y2);
+
+      pathBuilder.quadraticBezierTo(x1, y1, x2, y2);
     }
-    paintContext.stroke();
   }
 
-  static void fillDecorations(
-    DomCanvasRenderingContext2D paintContext,
-    TextBlock block,
-    ui.Rect rect,
-  ) {
-    if (!block.style.hasElement(StyleElements.decorations) || block.style.decoration == null) {
+  /// Paints the decorations of a [TextBlock] on a [ui.Canvas].
+  static void paintBlockDecorations(ui.Canvas canvas, ui.Rect rect, TextBlock block) {
+    if (block.style.decoration == null || block.style.decorationStyle == null) {
       return;
     }
-    paintContext.fillStyle = block.style.getForegroundColor().toCssString();
 
-    final double thickness = _calculateThickness(block.style);
+    final snappedRect = ui.Rect.fromLTRB(
+      rect.left.roundToDouble(),
+      rect.top.roundToDouble(),
+      rect.right.roundToDouble(),
+      rect.bottom.roundToDouble(),
+    );
+
+    final double thickness = _calculateThickness(
+      block.style.fontSize!,
+      block.style.decorationThickness,
+    );
 
     const DoubleDecorationSpacing = 3.0;
 
@@ -96,52 +125,51 @@ class DomCanvasDecorationPainter {
         continue;
       }
 
-      final double height = block.multipliedHeight;
+      final double height =
+          block.multipliedFontBoundingBoxAscent + block.multipliedFontBoundingBoxDescent;
       final double ascent = block.multipliedFontBoundingBoxAscent;
       final double position = _calculatePosition(decoration, thickness, height, ascent);
 
-      final double width = rect.width;
-      final double x = rect.left;
-      final double y = rect.top + position;
+      final double width = snappedRect.width;
+      final double x = snappedRect.left;
+      final double y = snappedRect.top + position;
 
-      paintContext.save();
-      paintContext.lineWidth = thickness;
-      paintContext.strokeStyle = block.style.decorationColor!.toCssString();
-
+      final strokePaint = CkPaint()
+        ..style = ui.PaintingStyle.stroke
+        ..strokeWidth = 1.0
+        ..color = block.style.decorationColor ?? block.style.getForegroundColor();
+      final pathBuilder = LazyPath(renderer.pathConstructors);
       switch (block.style.decorationStyle!) {
         case ui.TextDecorationStyle.wavy:
-          _paintWaves(paintContext, x, y, block.style, rect, thickness);
+          _drawWaves(pathBuilder, x, y, snappedRect.width, thickness);
 
         case ui.TextDecorationStyle.double:
           final double bottom = y + DoubleDecorationSpacing + thickness;
-          paintContext.beginPath();
-          paintContext.moveTo(x, y);
-          paintContext.lineTo(x + width, y);
-          paintContext.moveTo(x, bottom);
-          paintContext.lineTo(x + width, bottom);
-          paintContext.stroke();
+          pathBuilder.moveTo(x, y);
+          pathBuilder.lineTo(x + width, y);
+          pathBuilder.moveTo(x, bottom);
+          pathBuilder.lineTo(x + width, bottom);
 
         case ui.TextDecorationStyle.dashed:
-        case ui.TextDecorationStyle.dotted:
-          final dashes = Float32List(2)
-            ..[0] =
-                thickness * (block.style.decorationStyle! == ui.TextDecorationStyle.dotted ? 1 : 4)
-            ..[1] = thickness;
+          _drawDashedOrDottedLine(
+            pathBuilder,
+            x,
+            y,
+            snappedRect.width,
+            thickness * 4,
+            thickness * 2,
+          );
 
-          paintContext.setLineDash(dashes);
-          paintContext.beginPath();
-          paintContext.moveTo(x, y);
-          paintContext.lineTo(x + width, y);
-          paintContext.stroke();
+        case ui.TextDecorationStyle.dotted:
+          _drawDashedOrDottedLine(pathBuilder, x, y, snappedRect.width, thickness, thickness * 2);
 
         case ui.TextDecorationStyle.solid:
-          paintContext.beginPath();
-          paintContext.moveTo(x, y);
-          paintContext.lineTo(x + width, y);
-          paintContext.stroke();
+          pathBuilder.moveTo(x, y);
+          pathBuilder.lineTo(x + width, y);
       }
 
-      paintContext.restore();
+      final ckCanvas = canvas as CkCanvas;
+      ckCanvas.drawPath(pathBuilder, strokePaint);
     }
   }
 }
