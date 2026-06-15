@@ -391,6 +391,71 @@ TEST_F(WindowManagerTest, CreateModalDialogWindow) {
             parent_window_handle);
 }
 
+TEST_F(WindowManagerTest, DeactivatedRegularWindowDoesNotReactivateItself) {
+  IsolateScope isolate_scope(isolate());
+
+  // Two independent top-level regular windows (regular windows have no Win32
+  // owner). |window_handle| is deactivated while |active_window_handle| holds
+  // activation.
+  const int64_t window_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), window_view_id);
+
+  const int64_t active_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND active_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), active_view_id);
+
+  SetActiveWindow(active_window_handle);
+  ASSERT_EQ(GetActiveWindow(), active_window_handle);
+
+  // A window receiving WM_ACTIVATE with WA_INACTIVE must not focus its own
+  // content: SetFocus activates the parent of the focused window (the window
+  // itself), which would reactivate the deactivated window, pull it back to the
+  // top of the z-order, and take activation away from the active window.
+  SendMessage(window_handle, WM_ACTIVATE, MAKEWPARAM(WA_INACTIVE, 0), 0);
+
+  EXPECT_EQ(GetActiveWindow(), active_window_handle);
+}
+
+TEST_F(WindowManagerTest, FocusingViewInInactiveWindowDoesNotRaiseIt) {
+  IsolateScope isolate_scope(isolate());
+
+  // Two independent top-level regular windows. The framework may request focus
+  // for a view whose window is not the active one (e.g. multi-view focus
+  // bookkeeping after the user selects another window). Honoring that request
+  // by moving native focus would activate the inactive window and pull it to
+  // the top of the z-order; a view focus request must not change z-order.
+  const int64_t inactive_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+
+  const int64_t active_view_id =
+      InternalFlutterWindows_WindowManager_CreateRegularWindow(
+          engine_id(), regular_creation_request());
+  const HWND active_window_handle =
+      InternalFlutterWindows_WindowManager_GetTopLevelWindowHandle(
+          engine_id(), active_view_id);
+
+  SetActiveWindow(active_window_handle);
+  ASSERT_EQ(GetActiveWindow(), active_window_handle);
+
+  FlutterViewFocusChangeRequest request = {};
+  request.struct_size = sizeof(FlutterViewFocusChangeRequest);
+  request.view_id = inactive_view_id;
+  request.state = kFocused;
+
+  EngineModifier modifier(engine());
+  modifier.OnViewFocusChangeRequest(&request);
+
+  EXPECT_EQ(GetActiveWindow(), active_window_handle);
+}
+
 TEST_F(WindowManagerTest, DialogCanNeverBeFullscreen) {
   IsolateScope isolate_scope(isolate());
 

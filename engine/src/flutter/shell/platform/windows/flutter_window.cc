@@ -215,6 +215,16 @@ bool FlutterWindow::Focus() {
     return false;
   }
 
+  // A view focus request must not change the window z-order. On Win32, calling
+  // SetFocus activates the focused window's top-level window, which would pull
+  // a background window to the top of the z-order. Only move focus when this
+  // view's top-level window is already the active window; otherwise the focus
+  // is applied when the window is next activated (see HostWindow's WM_ACTIVATE
+  // handling).
+  if (GetAncestor(hwnd, GA_ROOT) != GetActiveWindow()) {
+    return false;
+  }
+
   HWND prevFocus = ::SetFocus(hwnd);
   if (prevFocus == nullptr) {
     return false;
