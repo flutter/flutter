@@ -28,6 +28,9 @@ class FlutterActivityTest {
     companion object {
         private const val TAG = "FlutterActivityTest"
         private const val PLATFORM_VIEW_TEST_NAME = "platformViewTest"
+        private const val SCREENSHOT_CAPTURE_DELAY_MS = 200L
+        private const val DIAGNOSTIC_WARNING_DELAY_SEC = 5L
+        private const val TEST_TIMEOUT_SEC = 60L
     }
 
     @get:Rule val rule = ActivityScenarioRule(MainActivity::class.java)
@@ -62,7 +65,9 @@ class FlutterActivityTest {
 
                 activity.messageChannel?.send(message) { reply ->
                     try {
-                        val replyJson = reply as JSONObject
+                        val replyJson =
+                            reply as? JSONObject
+                                ?: throw IllegalStateException("Expected JSONObject reply from Dart, but received: $reply")
                         val replyMessage = replyJson.getString("message")
 
                         if (isPlatformView && replyMessage == "Rendered $PLATFORM_VIEW_TEST_NAME") {
@@ -91,18 +96,18 @@ class FlutterActivityTest {
                 if (!future.isDone) {
                     Log.w(
                         TAG,
-                        "Rendering '$testName' is taking longer than expected (exceeded 5 seconds)..."
+                        "Rendering '$testName' is taking longer than expected (exceeded $DIAGNOSTIC_WARNING_DELAY_SEC seconds)..."
                     )
                 }
             },
-            5,
+            DIAGNOSTIC_WARNING_DELAY_SEC,
             TimeUnit.SECONDS
         )
 
         val reply: String
         try {
-            // Wait with a very generous 60-second timeout to catch true deadlocks/crashes
-            reply = future.get(60, TimeUnit.SECONDS)
+            // Wait with a very generous timeout to catch true deadlocks/crashes
+            reply = future.get(TEST_TIMEOUT_SEC, TimeUnit.SECONDS)
         } catch (e: Exception) {
             Log.e(TAG, "$testName Failed to receive result on message channel: ${e.message}")
             throw RuntimeException(e)
@@ -176,7 +181,11 @@ class FlutterActivityTest {
                 rule.scenario.onActivity { mainActivity ->
                     mainActivity.messageChannel?.send(compareMsg) { compareReply ->
                         try {
-                            val compareReplyJson = compareReply as JSONObject
+                            val compareReplyJson =
+                                compareReply as? JSONObject
+                                    ?: throw IllegalStateException(
+                                        "Expected JSONObject reply from compare_golden request, but received: $compareReply"
+                                    )
                             future.complete(compareReplyJson.getString("message"))
                         } catch (e: Exception) {
                             future.completeExceptionally(e)
@@ -188,7 +197,7 @@ class FlutterActivityTest {
             } finally {
                 screenshotExecutor.shutdown()
             }
-        }, 200, TimeUnit.MILLISECONDS)
+        }, SCREENSHOT_CAPTURE_DELAY_MS, TimeUnit.MILLISECONDS)
     }
 
     @Test
