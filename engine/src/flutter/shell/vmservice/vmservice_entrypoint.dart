@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
+// ignore: uri_does_not_exist
 import 'dart:vmservice_io' show getResidentCompilerInfoFileConsideringArgsImpl;
 
 import 'package:dart_runtime_service/dart_runtime_service.dart';
@@ -46,7 +47,7 @@ bool _originCheckDisabled = false;
 // Location of file to output VM service connection info.
 @entrypoint
 // ignore: unused_element
-String? _serviceInfoFilename;
+late String? _serviceInfoFilename;
 
 @entrypoint
 // ignore: unused_element
@@ -77,7 +78,7 @@ void _registerIsolate(int portId, SendPort sendPort, String name, bool isSystemI
     );
 
 // ignore: unused_element
-StreamSubscription<ProcessSignal>? _signalSubscription;
+late StreamSubscription<ProcessSignal>? _signalSubscription;
 
 @entrypoint
 bool _serveDevtools = true;
@@ -126,7 +127,7 @@ Future<void> main([List<String> args = const []]) async {
     ),
     backendBuilder: (frontend) => DartRuntimeServiceVMBackend(
       frontend: frontend,
-      signalWatch: _signalWatch ?? (sig) => Stream.empty(),
+      signalWatch: _signalWatch ?? (sig) => const Stream.empty(),
       runningIsolatesStream: _isolateRegistrationStreamController.stream,
       ddsManager: DartDevelopmentServiceManager(
         frontend: frontend,
