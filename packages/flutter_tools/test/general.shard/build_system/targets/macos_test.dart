@@ -7,6 +7,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -719,11 +720,7 @@ void main() {
     'DebugMacOSFramework creates expected binary with arm64 only arch',
     () async {
       environment.defines[kDarwinArchs] = 'arm64';
-      processManager.addCommand(const FakeCommand(command: <String>['which', 'sysctl']));
-      processManager.addCommand(const FakeCommand(
-        command: <String>['sysctl', 'hw.optional.arm64'],
-        exitCode: 1,
-      ));
+
       processManager.addCommand(
         FakeCommand(
           command: <String>[
@@ -758,6 +755,7 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
 
@@ -765,11 +763,7 @@ void main() {
     'DebugMacOSFramework creates universal binary',
     () async {
       environment.defines[kDarwinArchs] = 'arm64 x86_64';
-      processManager.addCommand(const FakeCommand(command: <String>['which', 'sysctl']));
-      processManager.addCommand(const FakeCommand(
-        command: <String>['sysctl', 'hw.optional.arm64'],
-        exitCode: 1,
-      ));
+
       processManager.addCommand(
         FakeCommand(
           command: <String>[
@@ -806,6 +800,7 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
 
@@ -850,11 +845,7 @@ void main() {
             environment.buildDir.childFile('app.dill').path,
           ],
         ),
-        const FakeCommand(command: <String>['which', 'sysctl']),
-        const FakeCommand(
-          command: <String>['sysctl', 'hw.optional.arm64'],
-          exitCode: 1,
-        ),
+
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -925,6 +916,7 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
     },
   );
 
