@@ -173,6 +173,10 @@ class SkwasmSurface implements OffscreenSurface {
       output[i] = dataPointer[i];
     }
 
+    if (format == ui.ImageByteFormat.rawStraightRgba) {
+      unpremultiplyRawRgba(output);
+    }
+
     skDataDispose(dataHandle);
 
     return ByteData.sublistView(output);
