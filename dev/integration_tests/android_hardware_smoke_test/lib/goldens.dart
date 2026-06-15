@@ -40,9 +40,9 @@ Future<void> handleGoldenRequest(
       if (settleFuture != null) {
         await settleFuture;
       }
-      await WidgetsBinding.instance.endOfFrame;
-      await WidgetsBinding.instance.endOfFrame;
-      await WidgetsBinding.instance.endOfFrame;
+      for (int i = 0; i < 3; i++) {
+        await WidgetsBinding.instance.endOfFrame;
+      }
 
       final BuildContext? context = targetKey.currentContext;
       if (context == null || !context.mounted) {

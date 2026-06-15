@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit
 class FlutterActivityTest {
     companion object {
         private const val TAG = "FlutterActivityTest"
+        private const val PLATFORM_VIEW_TEST_NAME = "platformViewTest"
     }
 
     @get:Rule val rule = ActivityScenarioRule(MainActivity::class.java)
@@ -50,7 +51,7 @@ class FlutterActivityTest {
             assertEquals(Lifecycle.State.RESUMED, activity.lifecycle.currentState)
 
             try {
-                val isPlatformView = testName == "platformViewTest"
+                val isPlatformView = testName == PLATFORM_VIEW_TEST_NAME
                 val message =
                     JSONObject().apply {
                         put("testName", testName)
@@ -64,75 +65,13 @@ class FlutterActivityTest {
                         val replyJson = reply as JSONObject
                         val replyMessage = replyJson.getString("message")
 
-                        if (isPlatformView && replyMessage == "Rendered platformViewTest") {
+                        if (isPlatformView && replyMessage == "Rendered $PLATFORM_VIEW_TEST_NAME") {
                             val x = replyJson.getInt("x")
                             val y = replyJson.getInt("y")
                             val width = replyJson.getInt("width")
                             val height = replyJson.getInt("height")
 
-                            // Capture the screenshot on a background thread with a short delay. We must NOT sleep or capture
-                            // on the Main UI Thread to avoid blocking frame rendering or causing an ANR.
-                            val screenshotExecutor = Executors.newSingleThreadScheduledExecutor()
-                            screenshotExecutor.schedule({
-                                try {
-                                    // Capture the true screen output using UiAutomation from this privileged instrumentation runner process.
-                                    val instrumentation = InstrumentationRegistry.getInstrumentation()
-                                    val screenshot =
-                                        instrumentation.uiAutomation.takeScreenshot()
-                                            ?: throw IllegalStateException("UiAutomation.takeScreenshot() returned null")
-
-                                    if (x < 0 ||
-                                        y < 0 ||
-                                        width <= 0 ||
-                                        height <= 0 ||
-                                        x + width > screenshot.width ||
-                                        y + height > screenshot.height
-                                    ) {
-                                        throw IllegalArgumentException(
-                                            "Crop bounds out of range: x=$x, y=$y, width=$width, height=$height, screenshot.width=${screenshot.width}, screenshot.height=${screenshot.height}"
-                                        )
-                                    }
-
-                                    // Crop the full-screen screenshot to the exact widget bounds.
-                                    val cropped = Bitmap.createBitmap(screenshot, x, y, width, height)
-                                    if (cropped != screenshot) {
-                                        screenshot.recycle()
-                                    }
-
-                                    val stream = ByteArrayOutputStream()
-                                    try {
-                                        cropped.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                                    } finally {
-                                        cropped.recycle()
-                                    }
-                                    val croppedBytes = stream.toByteArray()
-                                    val base64Image = Base64.encodeToString(croppedBytes, Base64.NO_WRAP)
-
-                                    val compareMsg =
-                                        JSONObject().apply {
-                                            put("command", "compare_golden")
-                                            put("testName", testName)
-                                            put("imageBytes", base64Image)
-                                        }
-
-                                    Log.d(TAG, "Sending compare_golden request to Dart app")
-                                    // Send the cropped PNG bytes back to Dart so all golden comparisons are resolved via Dart's matchesGoldenFile.
-                                    rule.scenario.onActivity { mainActivity ->
-                                        mainActivity.messageChannel?.send(compareMsg) { compareReply ->
-                                            try {
-                                                val compareReplyJson = compareReply as JSONObject
-                                                future.complete(compareReplyJson.getString("message"))
-                                            } catch (e: Exception) {
-                                                future.completeExceptionally(e)
-                                            }
-                                        }
-                                    }
-                                } catch (e: Exception) {
-                                    future.completeExceptionally(e)
-                                } finally {
-                                    screenshotExecutor.shutdown()
-                                }
-                            }, 200, TimeUnit.MILLISECONDS)
+                            captureAndSendScreenshot(x, y, width, height, testName, future)
                         } else {
                             future.complete(replyMessage)
                         }
@@ -172,11 +111,84 @@ class FlutterActivityTest {
         }
 
         Log.d(TAG, "Received $reply on message channel")
-        if (testName == "platformViewTest") {
+        if (testName == PLATFORM_VIEW_TEST_NAME) {
             assertEquals("Comparison Success", reply)
         } else {
             assertEquals("Rendered $testName", reply)
         }
+    }
+
+    private fun captureAndSendScreenshot(
+        x: Int,
+        y: Int,
+        width: Int,
+        height: Int,
+        testName: String,
+        future: CompletableFuture<String>
+    ) {
+        // Capture the screenshot on a background thread with a short delay. We must NOT sleep or capture
+        // on the Main UI Thread to avoid blocking frame rendering or causing an ANR.
+        val screenshotExecutor = Executors.newSingleThreadScheduledExecutor()
+        screenshotExecutor.schedule({
+            try {
+                // Capture the true screen output using UiAutomation from this privileged instrumentation runner process.
+                val instrumentation = InstrumentationRegistry.getInstrumentation()
+                val screenshot =
+                    instrumentation.uiAutomation.takeScreenshot()
+                        ?: throw IllegalStateException("UiAutomation.takeScreenshot() returned null")
+
+                if (x < 0 ||
+                    y < 0 ||
+                    width <= 0 ||
+                    height <= 0 ||
+                    x + width > screenshot.width ||
+                    y + height > screenshot.height
+                ) {
+                    throw IllegalArgumentException(
+                        "Crop bounds out of range: x=$x, y=$y, width=$width, height=$height, screenshot.width=${screenshot.width}, screenshot.height=${screenshot.height}"
+                    )
+                }
+
+                // Crop the full-screen screenshot to the exact widget bounds.
+                val cropped = Bitmap.createBitmap(screenshot, x, y, width, height)
+                if (cropped != screenshot) {
+                    screenshot.recycle()
+                }
+
+                val stream = ByteArrayOutputStream()
+                try {
+                    cropped.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                } finally {
+                    cropped.recycle()
+                }
+                val croppedBytes = stream.toByteArray()
+                val base64Image = Base64.encodeToString(croppedBytes, Base64.NO_WRAP)
+
+                val compareMsg =
+                    JSONObject().apply {
+                        put("command", "compare_golden")
+                        put("testName", testName)
+                        put("imageBytes", base64Image)
+                    }
+
+                Log.d(TAG, "Sending compare_golden request to Dart app")
+                // Send the cropped PNG bytes back to Dart so all golden comparisons are resolved via Dart's matchesGoldenFile.
+                rule.scenario.onActivity { mainActivity ->
+                    mainActivity.messageChannel?.send(compareMsg) { compareReply ->
+                        try {
+                            val compareReplyJson = compareReply as JSONObject
+                            future.complete(compareReplyJson.getString("message"))
+                        } catch (e: Exception) {
+                            future.completeExceptionally(e)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                future.completeExceptionally(e)
+            } finally {
+                screenshotExecutor.shutdown()
+            }
+        }, 200, TimeUnit.MILLISECONDS)
     }
 
     @Test
@@ -211,6 +223,6 @@ class FlutterActivityTest {
 
     @Test
     fun platformViewTest() {
-        templateTest("platformViewTest")
+        templateTest(PLATFORM_VIEW_TEST_NAME)
     }
 }

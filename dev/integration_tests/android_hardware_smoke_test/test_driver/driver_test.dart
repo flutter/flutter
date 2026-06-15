@@ -15,6 +15,8 @@ import 'package:test/test.dart';
 /// Whether the current environment is LUCI.
 bool get isLuci => io.Platform.environment['LUCI_CI'] == 'True';
 
+const String platformViewTestName = 'platformViewTest';
+
 void main() async {
   late final FlutterDriver flutterDriver;
   late final NativeDriver nativeDriver;
@@ -64,7 +66,7 @@ void main() async {
     expect(reply['message'], equals('Rendered $testName'));
 
     final Uint8List imageBytes;
-    if (testName == 'platformViewTest') {
+    if (testName == platformViewTestName) {
       final int x = reply['x']! as int;
       final int y = reply['y']! as int;
       final int w = reply['width']! as int;
@@ -133,7 +135,7 @@ void main() async {
     await templateTest('backdropFilterBlurTest');
   }, timeout: Timeout.none);
 
-  test('should render and match platformViewTest golden', () async {
-    await templateTest('platformViewTest');
+  test('should render and match $platformViewTestName golden', () async {
+    await templateTest(platformViewTestName);
   }, timeout: Timeout.none);
 }
