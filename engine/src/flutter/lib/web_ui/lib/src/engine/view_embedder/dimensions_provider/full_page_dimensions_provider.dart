@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
+import 'package:ui/src/engine/address_bar_controller.dart';
 import 'package:ui/src/engine/display.dart';
 import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/window.dart';
@@ -70,22 +72,19 @@ class FullPageDimensionsProvider extends DimensionsProvider {
 
     if (viewport != null) {
       if (ui_web.browser.operatingSystem == ui_web.OperatingSystem.iOs) {
-        // Chrome on iOS reports incorrect viewport.width when the app starts
-        // in portrait and is rotated to landscape.  clientWidth is reliable.
-        // See: https://github.com/flutter/flutter/issues/81430
+        // Chrome on iOS reports an incorrect viewport.width when the app
+        // starts in portrait orientation and the phone is rotated to
+        // landscape, so the width is read from documentElement's clientWidth.
         windowInnerWidth = domDocument.documentElement!.clientWidth * devicePixelRatio;
       } else {
         windowInnerWidth = viewport.width! * devicePixelRatio;
       }
 
-      if (ui_web.browser.isMobile) {
-        // innerHeight tracks address bar collapse without firing
-        // intermediate values during the animation, unlike viewport.height.
-        // See: https://github.com/flutter/flutter/issues/69529
-        windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
-      } else {
-        windowInnerHeight = viewport.height! * devicePixelRatio;
-      }
+      windowInnerHeight = _physicalInnerHeight(
+        viewport,
+        devicePixelRatio,
+        preferInnerHeight: AddressBarController.isSupportedOperatingSystem,
+      );
     } else {
       windowInnerWidth = domWindow.innerWidth! * devicePixelRatio;
       windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
@@ -100,17 +99,37 @@ class FullPageDimensionsProvider extends DimensionsProvider {
     late double windowInnerHeight;
 
     if (viewport != null) {
-      if (ui_web.browser.isMobile && !isEditingOnMobile) {
-        // Match computePhysicalSize() which uses innerHeight on mobile.
-        windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
-      } else {
-        windowInnerHeight = viewport.height! * devicePixelRatio;
-      }
+      // Match computePhysicalSize; while editing, the visual viewport shrinks
+      // for the keyboard, so its height is used instead of innerHeight.
+      windowInnerHeight = _physicalInnerHeight(
+        viewport,
+        devicePixelRatio,
+        preferInnerHeight: AddressBarController.isSupportedOperatingSystem && !isEditingOnMobile,
+      );
     } else {
       windowInnerHeight = domWindow.innerHeight! * devicePixelRatio;
     }
-    final double bottomPadding = physicalHeight - windowInnerHeight;
+    // The address bar can collapse while editing, growing the viewport past
+    // the preserved physical height.
+    final double bottomPadding = math.max(0.0, physicalHeight - windowInnerHeight);
 
     return ViewPadding(bottom: bottomPadding, left: 0, right: 0, top: 0);
+  }
+
+  /// The physical height of the view, read from either `window.innerHeight` or
+  /// the visual viewport.
+  ///
+  /// On mobile, `innerHeight` tracks the address bar collapse without firing the
+  /// intermediate values that `visualViewport.height` produces during the
+  /// animation, so it is preferred when [preferInnerHeight] is true. The visual
+  /// viewport height is used otherwise (e.g. while editing, when it shrinks for
+  /// the on-screen keyboard).
+  double _physicalInnerHeight(
+    DomVisualViewport viewport,
+    double devicePixelRatio, {
+    required bool preferInnerHeight,
+  }) {
+    final double height = preferInnerHeight ? domWindow.innerHeight! : viewport.height!;
+    return height * devicePixelRatio;
   }
 }
