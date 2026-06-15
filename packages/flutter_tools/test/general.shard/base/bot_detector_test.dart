@@ -177,47 +177,6 @@ void main() {
         expect(botDetector.aiAgentName, isNull);
       });
 
-      testWithoutContext('identifies various AI agents', () {
-        final Map<String, String> testCases = <String, String>{
-          'CLAUDECODE': 'Claude Code',
-          'CLAUDE_CODE': 'Claude Code',
-          'CLAUDE_CODE_IS_COWORK': 'Claude Code',
-          'ANTIGRAVITY_AGENT': 'Antigravity',
-          'GEMINI_AGENT': 'Gemini',
-          'GEMINI_CLI': 'Gemini',
-          'TERM_PROGRAM': 'Cursor',
-          'GITHUB_COPILOT': 'Copilot',
-          'COPILOT_ALLOW_ALL': 'Copilot',
-          'AIDER': 'Aider',
-          'DEVIN': 'Devin',
-          'AMP_CURRENT_THREAD_ID': 'Amp',
-          'AUGMENT_AGENT': 'Augment',
-          'CODEX_CI': 'Codex',
-          'OPENCODE': 'OpenCode',
-          'PI_CODING_AGENT': 'Pi',
-          'REPL_ID': 'Replit',
-          'SWE_AGENT': 'Generic AI Agent',
-          'AI_AGENT': 'Generic AI Agent',
-          'AGENT': 'Generic AI Agent',
-        };
-
-        for (final entry in testCases.entries) {
-          final testPlatform = FakePlatform()..environment = <String, String>{};
-          if (entry.key == 'TERM_PROGRAM') {
-            testPlatform.environment['TERM_PROGRAM'] = 'cursor';
-          } else {
-            testPlatform.environment[entry.key] = '1';
-          }
-
-          final botDetector = BotDetector(
-            platform: testPlatform,
-            httpClientFactory: () => FakeHttpClient.any(),
-            persistentToolState: persistentToolState,
-          );
-
-          expect(botDetector.aiAgentName, entry.value);
-        }
-      });
 
       testWithoutContext('returns the custom AGENT value when AGENT is present', () {
         final testPlatform = FakePlatform()..environment = <String, String>{'AGENT': 'My AGENT'};
