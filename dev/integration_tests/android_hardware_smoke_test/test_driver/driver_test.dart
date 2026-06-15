@@ -74,4 +74,20 @@ void main() async {
   test('should render and match trianglePathTest golden', () async {
     await templateTest('trianglePathTest');
   }, timeout: Timeout.none);
+
+  test('should render and match textTest golden', () async {
+    await templateTest('textTest');
+  }, timeout: Timeout.none);
+
+  test('should render and match imageTest golden', () async {
+    await templateTest('imageTest');
+  }, timeout: Timeout.none);
+
+  test('should render and match advancedBlendTest golden', () async {
+    await templateTest('advancedBlendTest');
+  }, timeout: Timeout.none);
+
+  test('should render and match backdropFilterBlurTest golden', () async {
+    await templateTest('backdropFilterBlurTest');
+  }, timeout: Timeout.none);
 }
