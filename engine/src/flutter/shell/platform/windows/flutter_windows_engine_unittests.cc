@@ -468,6 +468,67 @@ TEST_F(FlutterWindowsEngineTest, RunWithImpellerEnablesSDFs) {
   modifier.ReleaseEGLManager();
 }
 
+TEST_F(FlutterWindowsEngineTest, RunWithProjectFlagEnableImpeller) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  builder.SetEnableImpeller(true);
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+  EngineModifier modifier(engine.get());
+
+  modifier.embedder_api().NotifyDisplayUpdate =
+      MOCK_ENGINE_PROC(NotifyDisplayUpdate,
+                       ([](FLUTTER_API_SYMBOL(FlutterEngine) raw_engine,
+                           const FlutterEngineDisplaysUpdateType update_type,
+                           const FlutterEngineDisplay* embedder_displays,
+                           size_t display_count) { return kSuccess; }));
+
+  modifier.embedder_api().UpdateAccessibilityFeatures = MOCK_ENGINE_PROC(
+      UpdateAccessibilityFeatures,
+      [](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+         FlutterAccessibilityFeature flags) { return kSuccess; });
+
+  modifier.embedder_api().UpdateLocales = MOCK_ENGINE_PROC(
+      UpdateLocales, ([](auto engine, const FlutterLocale** locales,
+                         size_t locales_count) { return kSuccess; }));
+
+  modifier.embedder_api().SendPlatformMessage =
+      MOCK_ENGINE_PROC(SendPlatformMessage,
+                       ([](auto engine, auto message) { return kSuccess; }));
+
+  bool run_called = false;
+  modifier.embedder_api().Run = MOCK_ENGINE_PROC(
+      Run, ([&run_called](size_t version, const FlutterRendererConfig* config,
+                          const FlutterProjectArgs* args, void* user_data,
+                          FLUTTER_API_SYMBOL(FlutterEngine) * engine_out) {
+        run_called = true;
+        *engine_out = reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(1);
+
+        bool has_impeller_switch = false;
+        bool has_sdf_switch = false;
+        for (int i = 0; i < args->command_line_argc; ++i) {
+          if (strcmp(args->command_line_argv[i], "--enable-impeller") == 0) {
+            has_impeller_switch = true;
+          }
+          if (strcmp(args->command_line_argv[i], "--impeller-use-sdfs=true") ==
+              0) {
+            has_sdf_switch = true;
+          }
+        }
+        EXPECT_TRUE(has_impeller_switch);
+        EXPECT_TRUE(has_sdf_switch);
+        return kSuccess;
+      }));
+
+  // Set the EGL manager to !nullptr to test ANGLE rendering.
+  modifier.SetEGLManager(std::make_unique<egl::MockManager>());
+
+  engine->Run();
+
+  EXPECT_TRUE(run_called);
+
+  modifier.embedder_api().Shutdown = [](auto engine) { return kSuccess; };
+  modifier.ReleaseEGLManager();
+}
+
 TEST_F(FlutterWindowsEngineTest, SendPlatformMessageWithoutResponse) {
   FlutterWindowsEngineBuilder builder{GetContext()};
   std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();

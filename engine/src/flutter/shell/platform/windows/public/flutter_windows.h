@@ -113,6 +113,9 @@ typedef struct {
   // The accessibility mode.
   // This can be used to enable the experimental IAccessibleEx implementation.
   FlutterDesktopAccessibilityMode accessibility_mode;
+
+  // Whether to enable the Impeller renderer.
+  bool enable_impeller;
 } FlutterDesktopEngineProperties;
 
 // ========== View Controller ==========

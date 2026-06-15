@@ -88,6 +88,9 @@ class FlutterProjectBundle {
     return accessibility_mode_;
   }
 
+  // Returns whether to enable the Impeller renderer.
+  bool enable_impeller() const { return enable_impeller_; }
+
  private:
   std::filesystem::path assets_path_;
   std::filesystem::path icu_path_;
@@ -112,6 +115,9 @@ class FlutterProjectBundle {
 
   // The current accessibility mode.
   FlutterAccessibilityMode accessibility_mode_;
+
+  // Whether to enable the Impeller renderer.
+  bool enable_impeller_ = false;
 };
 
 }  // namespace flutter

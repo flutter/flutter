@@ -39,6 +39,8 @@ FlutterProjectBundle::FlutterProjectBundle(
   accessibility_mode_ =
       static_cast<FlutterAccessibilityMode>(properties.accessibility_mode);
 
+  enable_impeller_ = properties.enable_impeller;
+
   // Resolve any relative paths.
   if (assets_path_.is_relative() || icu_path_.is_relative() ||
       (!aot_library_path_.empty() && aot_library_path_.is_relative())) {

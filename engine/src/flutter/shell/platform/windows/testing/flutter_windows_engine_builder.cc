@@ -69,6 +69,10 @@ void FlutterWindowsEngineBuilder::SetSwitches(
   switches_ = std::move(switches);
 }
 
+void FlutterWindowsEngineBuilder::SetEnableImpeller(bool enable_impeller) {
+  properties_.enable_impeller = enable_impeller;
+}
+
 void FlutterWindowsEngineBuilder::SetCreateKeyboardHandlerCallbacks(
     KeyboardKeyEmbedderHandler::GetKeyStateHandler get_key_state,
     KeyboardKeyEmbedderHandler::MapVirtualKeyToScanCode map_vk_to_scan) {

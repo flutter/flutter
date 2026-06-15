@@ -134,6 +134,14 @@ class DartProject {
   // Defaults to AccessibilityMode::Defaults.
   AccessibilityMode accessibility_mode() const { return accessibility_mode_; }
 
+  // Sets whether to enable the Impeller renderer.
+  void set_enable_impeller(bool enable_impeller) {
+    enable_impeller_ = enable_impeller;
+  }
+
+  // Returns whether to enable the Impeller renderer.
+  bool enable_impeller() const { return enable_impeller_; }
+
  private:
   // Accessors for internals are private, so that they can be changed if more
   // flexible options for project structures are needed later without it
@@ -164,6 +172,8 @@ class DartProject {
   UIThreadPolicy ui_thread_policy_ = UIThreadPolicy::Default;
   // The accessibility implementation used by Flutter.
   AccessibilityMode accessibility_mode_ = AccessibilityMode::Default;
+  // Whether to enable the Impeller renderer.
+  bool enable_impeller_ = false;
 };
 
 }  // namespace flutter

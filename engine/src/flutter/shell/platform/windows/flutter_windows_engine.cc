@@ -194,8 +194,16 @@ FlutterWindowsEngine::FlutterWindowsEngine(
 
   // Check for impeller support.
   auto& switches = project_->GetSwitches();
-  enable_impeller_ = std::find(switches.begin(), switches.end(),
-                               "--enable-impeller=true") != switches.end();
+  bool enable_impeller = project_->enable_impeller();
+  for (const auto& env_switch : switches) {
+    if (env_switch == "--enable-impeller" ||
+        env_switch == "--enable-impeller=true") {
+      enable_impeller = true;
+    } else if (env_switch == "--enable-impeller=false") {
+      enable_impeller = false;
+    }
+  }
+  enable_impeller_ = enable_impeller;
 
   egl_manager_ = egl::Manager::Create(
       static_cast<egl::GpuPreference>(project_->gpu_preference()));
@@ -296,6 +304,14 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
         std::find(switches.begin(), switches.end(),
                   "--impeller-use-sdfs=false") == switches.end()) {
       switches.push_back("--impeller-use-sdfs=true");
+    }
+    if (std::find(switches.begin(), switches.end(), "--enable-impeller") ==
+            switches.end() &&
+        std::find(switches.begin(), switches.end(), "--enable-impeller=true") ==
+            switches.end()) {
+      // Impeller was enabled programmatically, so forward the switch to the
+      // engine.
+      switches.push_back("--enable-impeller");
     }
   }
   std::transform(

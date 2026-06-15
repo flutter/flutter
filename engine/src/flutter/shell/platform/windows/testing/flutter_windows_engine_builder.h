@@ -31,6 +31,8 @@ class FlutterWindowsEngineBuilder {
 
   void SetSwitches(std::vector<std::string> switches);
 
+  void SetEnableImpeller(bool enable_impeller);
+
   void SetWindowsProcTable(
       std::shared_ptr<WindowsProcTable> windows_proc_table);
 
