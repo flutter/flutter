@@ -19,7 +19,7 @@ void testMain() {
 
     test('canvases for multiple views have correct sizes', () async {
       // Create two views with different sizes.
-      final host1 = createDomElement('view-1');
+      final DomElement host1 = createDomElement('view-1');
       host1.style
         ..width = '100px'
         ..height = '100px'
@@ -28,7 +28,7 @@ void testMain() {
       final view1 = EngineFlutterView(EnginePlatformDispatcher.instance, host1);
       EnginePlatformDispatcher.instance.viewManager.registerView(view1);
 
-      final host2 = createDomElement('view-2');
+      final DomElement host2 = createDomElement('view-2');
       host2.style
         ..width = '200px'
         ..height = '200px'
@@ -42,14 +42,14 @@ void testMain() {
         final recorder = ui.PictureRecorder();
         final canvas = ui.Canvas(recorder, ui.Offset.zero & size);
         canvas.drawRect(ui.Offset.zero & size, ui.Paint()..color = color);
-        final picture = recorder.endRecording();
+        final ui.Picture picture = recorder.endRecording();
         final sb = ui.SceneBuilder();
         sb.addPicture(ui.Offset.zero, picture);
         return sb.build();
       }
 
-      final scene1 = createScene(const ui.Color(0xFFFF0000), const ui.Size(100, 100));
-      final scene2 = createScene(const ui.Color(0xFF00FF00), const ui.Size(200, 200));
+      final ui.Scene scene1 = createScene(const ui.Color(0xFFFF0000), const ui.Size(100, 100));
+      final ui.Scene scene2 = createScene(const ui.Color(0xFF00FF00), const ui.Size(200, 200));
 
       // Render both scenes.
       // We render them in the same turn to increase chance of interference if there's no locking.
@@ -59,17 +59,17 @@ void testMain() {
 
       // Verify canvas sizes.
       DomHTMLCanvasElement getCanvas(EngineFlutterView view) {
-        final canvas = view.dom.renderingHost.querySelector('canvas');
+        final DomElement? canvas = view.dom.renderingHost.querySelector('canvas');
         if (canvas == null) {
           throw Exception('Canvas not found for view ${view.viewId}');
         }
         return canvas as DomHTMLCanvasElement;
       }
 
-      final canvas1 = getCanvas(view1);
-      final canvas2 = getCanvas(view2);
+      final DomHTMLCanvasElement canvas1 = getCanvas(view1);
+      final DomHTMLCanvasElement canvas2 = getCanvas(view2);
 
-      final dpr = EngineFlutterDisplay.instance.devicePixelRatio;
+      final double dpr = EngineFlutterDisplay.instance.devicePixelRatio;
       expect(canvas1.width, 100 * dpr);
       expect(canvas1.height, 100 * dpr);
       expect(canvas2.width, 200 * dpr);

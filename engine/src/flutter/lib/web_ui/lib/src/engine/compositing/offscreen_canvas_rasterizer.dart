@@ -38,7 +38,7 @@ class OffscreenCanvasRasterizer extends Rasterizer {
 
   Future<T> synchronized<T>(Future<T> Function() computation) async {
     final Future<void> oldLock = _lock;
-    final Completer<void> completer = Completer<void>();
+    final completer = Completer<void>();
     _lock = completer.future;
     await oldLock;
     try {
