@@ -318,6 +318,8 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/core/pkgs/typed_data
   vector_math:
     path: ./third_party/pkg/vector_math
+  vm:
+    path: ./third_party/dart/pkg/vm
   vm_service:
     path: ./third_party/dart/pkg/vm_service
   vm_service_protos:
