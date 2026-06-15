@@ -178,6 +178,8 @@ dependency_overrides:
     path: ./third_party/dart/third_party/pkg/core/pkgs/async
   async_helper:
     path: ./third_party/dart/pkg/async_helper
+  bazel_worker:
+    path: ./third_party/dart/third_party/pkg/tools/pkgs/bazel_worker
   boolean_selector:
     path: ./third_party/dart/third_party/pkg/tools/pkgs/boolean_selector
   build_integration:
